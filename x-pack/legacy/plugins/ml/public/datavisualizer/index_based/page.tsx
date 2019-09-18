@@ -35,7 +35,6 @@ import { useKibanaContext, SavedSearchQuery } from '../../contexts/kibana';
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
 // @ts-ignore
 import { timeBasedIndexCheck } from '../../util/index_utils';
-// @ts-ignore
 import { MlTimeBuckets } from '../../util/ml_time_buckets';
 import { FieldRequestConfig, FieldVisConfig } from './common';
 import { ActionsPanel } from './components/actions_panel';

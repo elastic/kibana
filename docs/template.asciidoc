@@ -1,0 +1,95 @@
+[[page-title]]
+= Page title
+
+////
+To make it easier to scan the TOC, include critical information first. For example, instead of `Backing up your data with snapshot and restore`, use `Snapshot and restore`.
+////
+
+Include a short description. The short description should always include 
+the value prop, answer why users want to use the feature, and how the 
+feature benefits them. 
+
+[partintro]
+--
+
+For easy navigation, include the links to the key sections in a bulleted 
+list. This way, users can click exactly where they want to go instead of 
+scrolling down the page:
+
+* <<task-section-description, Task section title>>
+* <<section2-description, Task section title>>
+* <<section3-description, Task section title>>
+
+TIP: Keep lists to 5-7 items, plus or minus 2 when absolutely necessary.
+
+Provide a screenshot or video.
+//Screenshots must be 16:9 ratio.
+
+TIP: Need introduction inspiration? Here are some good examples:
+* <<snapshot-repositories, Snapshot and Restore>>
+* <<dashboard, Dashboard>>
+* <<canvas, Canvas>>
+
+[float]
+[[concept-section-description]]
+== Concept section title
+
+Include content that further describes the feature and its capabilities.
+
+TIP: Need concept inspiration? Here are some good examples:
+* <<elasticsearch-version, Elasticsearch version>>
+* <<getting-started, Sample data>>
+
+--
+
+[[task-section-description]]
+== Task section title
+
+////
+For task section titles, do not use gerunds. For example, instead of `Creating a Canvas workpad`, use `Create a Canvas workpad`.
+////
+
+Provide an example or walkthrough of how to use the feature. Whenever possible, 
+use the <<add-sample-data, sample data>>.
+
+[float]
+[[section2-description]]
+=== Task section title
+
+Add an optional short description for what this task accomplishes. For example, why would someone want to do this task and how does it benefit them? 
+
+When you create task sections, you only need to explain the details that users can't see on the screen. Avoid giving a tour of the UI or providing instructions on how to use every action on the screen. Delete and save are common actions that users can typically figure out themselves.
+
+To provide steps, use the following:
+
+. Step 1.
+. Step 2.
++
+When necessary, include explanatory text for the task step.
+. Step 3.
+. Step 4.
++
+[role="screenshot"]
+image:images/example_screenshot.png[Helpful image]
+
+. Step 5.
+
+////
+When you develop your task content, use the following guidelines:
+* Match your text to the UI.
+* For clickable items, use *bold*.
+* When you refer to a UI button, use `click`. For example, `Click *New*.`
+* When you refer to a UI checkbox or path, use `select`. For example, `Select all index checkboxes` and `Select *Manage index* > *Add lifecycle policy*.`
+* Avoid using `button` and similar words. For example, use `Click *Save*.` instead of `Click on the *Save* button.` 
+////
+
+[float]
+[[section3-description]]
+=== Task section title
+
+An optional short description.
+
+. Step 1.
+. Step 2.
+. Step 3.
+. Step 4

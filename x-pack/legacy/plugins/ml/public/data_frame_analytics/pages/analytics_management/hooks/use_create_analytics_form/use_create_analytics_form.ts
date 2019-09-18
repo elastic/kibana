@@ -14,7 +14,7 @@ import { useKibanaContext } from '../../../../../contexts/kibana';
 import {
   useRefreshAnalyticsList,
   DataFrameAnalyticsId,
-  DataFrameAnalyticsOutlierConfig,
+  DataFrameAnalyticsConfig,
 } from '../../../../common';
 
 import { ActionDispatchers, ACTION } from './actions';
@@ -105,7 +105,7 @@ export const useCreateAnalyticsForm = () => {
         message: i18n.translate(
           'xpack.ml.dataframe.stepCreateForm.createDataFrameAnalyticsSuccessMessage',
           {
-            defaultMessage: 'Analytics job {jobId} created.',
+            defaultMessage: 'Request to create data frame analytics {jobId} acknowledged.',
             values: { jobId },
           }
         ),
@@ -134,7 +134,7 @@ export const useCreateAnalyticsForm = () => {
     const indexPatternName = destinationIndex;
 
     try {
-      const newIndexPattern = await kibanaContext.indexPatterns.get();
+      const newIndexPattern = await kibanaContext.indexPatterns.make();
 
       Object.assign(newIndexPattern, {
         id: '',
@@ -198,7 +198,7 @@ export const useCreateAnalyticsForm = () => {
     try {
       setJobIds(
         (await ml.dataFrameAnalytics.getDataFrameAnalytics()).data_frame_analytics.map(
-          (job: DataFrameAnalyticsOutlierConfig) => job.id
+          (job: DataFrameAnalyticsConfig) => job.id
         )
       );
     } catch (e) {
@@ -235,17 +235,19 @@ export const useCreateAnalyticsForm = () => {
       // able to identify outliers if there are no numeric fields present.
       const ids = await kibanaContext.indexPatterns.getIds(true);
       const indexPatternsWithNumericFields: IndexPatternTitle[] = [];
-      ids.forEach(async id => {
-        const indexPattern = await kibanaContext.indexPatterns.get(id);
-        if (
-          indexPattern.fields
-            .filter(f => !OMIT_FIELDS.includes(f.name))
-            .map(f => f.type)
-            .includes('number')
-        ) {
-          indexPatternsWithNumericFields.push(indexPattern.title);
-        }
-      });
+      ids
+        .filter(f => !!f)
+        .forEach(async id => {
+          const indexPattern = await kibanaContext.indexPatterns.get(id!);
+          if (
+            indexPattern.fields
+              .filter(f => !OMIT_FIELDS.includes(f.name))
+              .map(f => f.type)
+              .includes('number')
+          ) {
+            indexPatternsWithNumericFields.push(indexPattern.title);
+          }
+        });
       setIndexPatternTitles({ indexPatternTitles, indexPatternsWithNumericFields });
     } catch (e) {
       addRequestMessage({
@@ -273,7 +275,7 @@ export const useCreateAnalyticsForm = () => {
         message: i18n.translate(
           'xpack.ml.dataframe.analytics.create.startDataFrameAnalyticsSuccessMessage',
           {
-            defaultMessage: 'Analytics job {jobId} started.',
+            defaultMessage: 'Request to start data frame analytics {jobId} acknowledged.',
             values: { jobId },
           }
         ),
@@ -285,9 +287,9 @@ export const useCreateAnalyticsForm = () => {
       addRequestMessage({
         error: getErrorMessage(e),
         message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.errorCreatingDataFrameAnalyticsJob',
+          'xpack.ml.dataframe.analytics.create.errorStartingDataFrameAnalyticsJob',
           {
-            defaultMessage: 'An error occurred creating the data frame analytics job:',
+            defaultMessage: 'An error occurred starting the data frame analytics job:',
           }
         ),
       });

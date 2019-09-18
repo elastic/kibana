@@ -21,7 +21,7 @@ import {
   takeLatest,
 } from 'redux-saga/effects';
 
-import { Repository, RepositoryUri, WorkerReservedProgress } from '../../model';
+import { Repository, RepositoryUri, WorkerReservedProgress, RepoState } from '../../model';
 import * as ROUTES from '../components/routes';
 import { allStatusSelector, repoUriSelector, routeSelector } from '../selectors';
 import {
@@ -42,7 +42,6 @@ import {
   pollRepoDeleteStatusStop,
   pollRepoIndexStatusStop,
   importRepoSuccess,
-  RepoState,
 } from '../actions';
 import {
   cloneCompletedPattern,

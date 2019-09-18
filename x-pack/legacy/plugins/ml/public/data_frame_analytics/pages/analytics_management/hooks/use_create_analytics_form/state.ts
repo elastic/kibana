@@ -7,7 +7,7 @@
 import { DeepPartial } from '../../../../../../common/types/common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 
-import { DataFrameAnalyticsId, DataFrameAnalyticsOutlierConfig } from '../../../../common';
+import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
 
 const ANALYTICS_DETAULT_MODEL_MEMORY_LIMIT = '50mb';
 
@@ -32,9 +32,9 @@ export interface State {
     jobId: DataFrameAnalyticsId;
     jobIdExists: boolean;
     jobIdEmpty: boolean;
+    jobIdInvalidMaxLength?: boolean;
     jobIdValid: boolean;
     sourceIndex: EsIndexName;
-    sourceIndexNameExists: boolean;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
   };
@@ -48,7 +48,7 @@ export interface State {
   isModalButtonDisabled: boolean;
   isModalVisible: boolean;
   isValid: boolean;
-  jobConfig: DeepPartial<DataFrameAnalyticsOutlierConfig>;
+  jobConfig: DeepPartial<DataFrameAnalyticsConfig>;
   jobIds: DataFrameAnalyticsId[];
   requestMessages: FormMessage[];
 }
@@ -68,7 +68,6 @@ export const getInitialState = (): State => ({
     jobIdEmpty: true,
     jobIdValid: false,
     sourceIndex: '',
-    sourceIndexNameExists: false,
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
   },
@@ -91,13 +90,21 @@ export const getInitialState = (): State => ({
 
 export const getJobConfigFromFormState = (
   formState: State['form']
-): DeepPartial<DataFrameAnalyticsOutlierConfig> => {
+): DeepPartial<DataFrameAnalyticsConfig> => {
   return {
     source: {
-      index: formState.sourceIndex,
+      // If a Kibana index patterns includes commas, we need to split
+      // the into an array of indices to be in the correct format for
+      // the data frame analytics API.
+      index: formState.sourceIndex.includes(',')
+        ? formState.sourceIndex.split(',').map(d => d.trim())
+        : formState.sourceIndex,
     },
     dest: {
       index: formState.destinationIndex,
+    },
+    analyzed_fields: {
+      excludes: [],
     },
     analysis: {
       outlier_detection: {},

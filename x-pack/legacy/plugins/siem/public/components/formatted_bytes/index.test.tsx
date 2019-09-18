@@ -34,7 +34,7 @@ describe('formatted_bytes', () => {
       test('it renders bytes to hardcoded format when no configuration exists', () => {
         mockUseKibanaUiSetting.mockImplementation(() => [null]);
         const wrapper = mount(<PreferenceFormattedBytes value={bytes} />);
-        expect(wrapper.text()).toEqual('2.676MB');
+        expect(wrapper.text()).toEqual('2.7MB');
       });
 
       test('it renders bytes according to the default format', () => {
@@ -42,7 +42,7 @@ describe('formatted_bytes', () => {
           getMockKibanaUiSetting(mockFrameworks.default_browser)
         );
         const wrapper = mount(<PreferenceFormattedBytes value={bytes} />);
-        expect(wrapper.text()).toEqual('2.676MB');
+        expect(wrapper.text()).toEqual('2.7MB');
       });
 
       test('it renders bytes supplied as a number according to the default format', () => {
@@ -50,7 +50,7 @@ describe('formatted_bytes', () => {
           getMockKibanaUiSetting(mockFrameworks.default_browser)
         );
         const wrapper = mount(<PreferenceFormattedBytes value={+bytes} />);
-        expect(wrapper.text()).toEqual('2.676MB');
+        expect(wrapper.text()).toEqual('2.7MB');
       });
 
       test('it renders bytes according to new format', () => {

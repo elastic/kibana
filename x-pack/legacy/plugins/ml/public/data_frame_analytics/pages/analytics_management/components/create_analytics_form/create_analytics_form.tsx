@@ -7,7 +7,6 @@
 import React, { Fragment, FC } from 'react';
 
 import {
-  EuiButtonEmpty,
   EuiCallOut,
   EuiComboBox,
   EuiForm,
@@ -20,10 +19,18 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { metadata } from 'ui/metadata';
+import { INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_patterns';
 
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
+import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
+
+// based on code used by `ui/index_patterns` internally
+// remove the space character from the list of illegal characters
+INDEX_PATTERN_ILLEGAL_CHARACTERS.pop();
+const characterList = INDEX_PATTERN_ILLEGAL_CHARACTERS.join(', ');
 
 export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
   const { setFormState } = actions;
@@ -47,14 +54,14 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     jobIdEmpty,
     jobIdExists,
     jobIdValid,
+    jobIdInvalidMaxLength,
     sourceIndex,
     sourceIndexNameEmpty,
-    sourceIndexNameExists,
     sourceIndexNameValid,
   } = form;
 
   return (
-    <EuiForm>
+    <EuiForm className="mlDataFrameAnalyticsCreateForm">
       {requestMessages.map((requestMessage, i) => (
         <Fragment key={i}>
           <EuiCallOut
@@ -71,10 +78,37 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       {!isJobCreated && (
         <Fragment>
           <EuiFormRow
-            label={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdLabel', {
-              defaultMessage: 'Analytics job ID',
+            label={i18n.translate('xpack.ml.dataframe.analytics.create.jobTypeLabel', {
+              defaultMessage: 'Job type',
             })}
-            isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists}
+            helpText={
+              <FormattedMessage
+                id="xpack.ml.dataframe.analytics.create.jobTypeHelpText"
+                defaultMessage="Outlier detection jobs require a source index that is mapped as a table-like data structure and will only analyze numeric and boolean fields. Please use the {advancedEditorButton} to apply custom options such as the model memory limit and analysis type. You cannot switch back to this form from the advanced editor."
+                values={{
+                  advancedEditorButton: (
+                    <EuiLink onClick={actions.switchToAdvancedEditor}>
+                      <FormattedMessage
+                        id="xpack.ml.dataframe.analytics.create.switchToAdvancedEditorButton"
+                        defaultMessage="advanced editor"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            }
+          >
+            <EuiText>
+              {i18n.translate('xpack.ml.dataframe.analytics.create.outlierDetectionText', {
+                defaultMessage: 'Outlier detection',
+              })}
+            </EuiText>
+          </EuiFormRow>
+          <EuiFormRow
+            label={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdLabel', {
+              defaultMessage: 'Job ID',
+            })}
+            isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists || jobIdInvalidMaxLength}
             error={[
               ...(!jobIdEmpty && !jobIdValid
                 ? [
@@ -91,11 +125,27 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                     }),
                   ]
                 : []),
+              ...(jobIdInvalidMaxLength
+                ? [
+                    i18n.translate(
+                      'xpack.ml.dataframe.analytics.create.jobIdInvalidMaxLengthErrorMessage',
+                      {
+                        defaultMessage:
+                          'Job ID must be no more than {maxLength, plural, one {# character} other {# characters}} long.',
+                        values: {
+                          maxLength: JOB_ID_MAX_LENGTH,
+                        },
+                      }
+                    ),
+                  ]
+                : []),
             ]}
           >
             <EuiFieldText
               disabled={isJobCreated}
-              placeholder="analytics job ID"
+              placeholder={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdPlaceholder', {
+                defaultMessage: 'Job ID',
+              })}
               value={jobId}
               onChange={e => setFormState({ jobId: e.target.value })}
               aria-label={i18n.translate(
@@ -114,44 +164,23 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
             helpText={
               !sourceIndexNameEmpty &&
               !indexPatternsWithNumericFields.includes(sourceIndex) &&
-              i18n.translate('xpack.ml.dataframe.stepDetailsForm.sourceIndexHelpText', {
+              i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexHelpText', {
                 defaultMessage:
                   'This index pattern does not contain any numeric type fields. The analytics job may not be able to come up with any outliers.',
               })
             }
-            isInvalid={!sourceIndexNameEmpty && (!sourceIndexNameValid || !sourceIndexNameExists)}
+            isInvalid={!sourceIndexNameEmpty && !sourceIndexNameValid}
             error={
-              (!sourceIndexNameEmpty &&
-                !sourceIndexNameValid && [
-                  <Fragment>
-                    {i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexInvalidError', {
-                      defaultMessage: 'Invalid source index name.',
-                    })}
-                    <br />
-                    <EuiLink
-                      href={`https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/indices-create-index.html#indices-create-index`}
-                      target="_blank"
-                    >
-                      {i18n.translate(
-                        'xpack.ml.dataframe.stepDetailsForm.sourceIndexInvalidErrorLink',
-                        {
-                          defaultMessage: 'Learn more about index name limitations.',
-                        }
-                      )}
-                    </EuiLink>
-                  </Fragment>,
-                ]) ||
-              (!sourceIndexNameEmpty &&
-                !sourceIndexNameExists && [
-                  <Fragment>
-                    {i18n.translate(
-                      'xpack.ml.dataframe.analytics.create.sourceIndexDoesNotExistError',
-                      {
-                        defaultMessage: 'An index with this name does not exist.',
-                      }
-                    )}
-                  </Fragment>,
-                ])
+              !sourceIndexNameEmpty &&
+              !sourceIndexNameValid && [
+                <Fragment>
+                  {i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexInvalidError', {
+                    defaultMessage:
+                      'Invalid source index name, it cannot contain spaces or the characters: {characterList}',
+                    values: { characterList },
+                  })}
+                </Fragment>,
+              ]
             }
           >
             <Fragment>
@@ -259,17 +288,6 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
             />
           </EuiFormRow>
-          <EuiButtonEmpty onClick={actions.switchToAdvancedEditor} size="s" flush="left">
-            {i18n.translate('xpack.ml.dataframe.analytics.create.switchToAdvancedEditorButton', {
-              defaultMessage: 'Switch to advanced editor',
-            })}
-          </EuiButtonEmpty>
-          <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.ml.dataframe.analytics.create.switchToAdvancedEditorHelpText', {
-              defaultMessage:
-                'Note you cannot switch back to this form once the advanced editor is enabled.',
-            })}
-          </EuiText>
         </Fragment>
       )}
     </EuiForm>

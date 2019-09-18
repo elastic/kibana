@@ -31,7 +31,8 @@
 import angular from 'angular';
 import _ from 'lodash';
 
-import { InvalidJSONProperty, SavedObjectNotFound } from '../errors';
+
+import { InvalidJSONProperty, SavedObjectNotFound } from '../../../../plugins/kibana_utils/public';
 import { expandShorthand } from '../utils/mapping_setup';
 
 import { SearchSourceProvider } from '../courier/search_source';
@@ -321,7 +322,10 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
       if (this.searchSource) {
         let searchSourceFields = _.omit(this.searchSource.getFields(), ['sort', 'size']);
         if (searchSourceFields.index) {
-          const { id: indexId } = searchSourceFields.index;
+          // searchSourceFields.index will normally be an IndexPattern, but can be a string in two scenarios:
+          // (1) `init()` (and by extension `hydrateIndexPattern()`) hasn't been called on this Saved Object
+          // (2) The IndexPattern doesn't exist, so we fail to resolve it in `hydrateIndexPattern()`
+          const indexId = typeof (searchSourceFields.index) === 'string' ? searchSourceFields.index : searchSourceFields.index.id;
           const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
           references.push({
             name: refName,

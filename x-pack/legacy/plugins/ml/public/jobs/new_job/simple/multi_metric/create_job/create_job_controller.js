@@ -47,7 +47,7 @@ import template from './create_job.html';
 import { timefilter } from 'ui/timefilter';
 
 uiRoutes
-  .when('/jobs/new_job/simple/multi_metric', {
+  .when('/jobs/new_job_old/multi_metric', {
     template,
     k7Breadcrumbs: getCreateMultiMetricJobBreadcrumbs,
     resolve: {
@@ -139,7 +139,7 @@ module
       bucketSpanValid: true,
       bucketSpanEstimator: { status: 0, message: '' },
       cardinalityValidator: { status: 0, message: '' },
-      aggTypeOptions: filterAggTypes(aggTypes.byType[METRIC_AGG_TYPE]),
+      aggTypeOptions: filterAggTypes(aggTypes[METRIC_AGG_TYPE]),
       fields: [],
       splitFields: [],
       timeFields: [],

@@ -59,7 +59,7 @@ describe('AggConfig Filters', function () {
           ]
         });
 
-        agg = vis.aggs[0];
+        agg = vis.aggs.aggs[0];
         bucketKey = _.sample(aggResp.aggregations['1'].buckets).key;
         bucketStart = moment(bucketKey);
 

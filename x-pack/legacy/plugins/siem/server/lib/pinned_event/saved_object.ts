@@ -11,6 +11,9 @@ import { getOr } from 'lodash/fp';
 
 import { SavedObjectsFindOptions } from 'src/core/server';
 
+import { pipe } from 'fp-ts/lib/pipeable';
+import { map, fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 import { Pick3 } from '../../../common/utility_types';
 import { FrameworkRequest, internalFrameworkRequest } from '../framework';
 import {
@@ -113,7 +116,7 @@ export class PinnedEvent {
                       pickSavedTimeline(null, {}, request[internalFrameworkRequest].auth || null)
                     )
                 );
-                timelineId = timelineResult.savedObjectId;
+                timelineId = timelineResult.savedObjectId; // eslint-disable-line no-param-reassign
                 return timelineResult.version;
               })()
             : null;
@@ -203,16 +206,18 @@ const convertSavedObjectToSavedPinnedEvent = (
   savedObject: unknown,
   timelineVersion?: string | undefined | null
 ): PinnedEventSavedObject =>
-  PinnedEventSavedObjectRuntimeType.decode(savedObject)
-    .map(savedPinnedEvent => ({
+  pipe(
+    PinnedEventSavedObjectRuntimeType.decode(savedObject),
+    map(savedPinnedEvent => ({
       pinnedEventId: savedPinnedEvent.id,
       version: savedPinnedEvent.version,
       timelineVersion,
       ...savedPinnedEvent.attributes,
-    }))
-    .getOrElseL(errors => {
+    })),
+    fold(errors => {
       throw new Error(failure(errors).join('\n'));
-    });
+    }, identity)
+  );
 
 // we have to use any here because the SavedObjectAttributes interface is like below
 // export interface SavedObjectAttributes {

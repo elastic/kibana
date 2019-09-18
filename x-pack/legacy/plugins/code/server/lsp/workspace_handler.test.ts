@@ -103,8 +103,8 @@ test('should support spaces in workspace dir', async () => {
 });
 
 // FLAKY: https://github.com/elastic/kibana/issues/43655
-test.skip('should support case-insensitive workspace dir', async () => {
-  const workspaceCaseInsensitive = path.join(baseDir, 'WorkSpace');
+test('should support case-insensitive workspace dir', async () => {
+  const workspaceCaseInsensitive = path.join(baseDir, 'CamelCaseWorkSpace');
   // test only if it's case-insensitive
   const workspaceHandler = new WorkspaceHandler(
     gitOps,
@@ -114,7 +114,9 @@ test.skip('should support case-insensitive workspace dir', async () => {
     new ConsoleLoggerFactory()
   );
   const { repo, revision, file, uri } = makeAFile(workspaceCaseInsensitive);
-  if (fs.existsSync(workspaceCaseInsensitive.toLocaleLowerCase())) {
+  // normally this test won't run on linux since its filesystem are case sensitive
+  // So there is no 'CAMELCASEWORKSPACE' folder.
+  if (fs.existsSync(workspaceCaseInsensitive.toUpperCase())) {
     const converted = handleResponseUri(workspaceHandler, uri.toLocaleLowerCase());
     // workspace dir should  be stripped
     expect(converted).toBe(

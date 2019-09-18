@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { REPO_ROOT } from '@kbn/dev-utils';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { load as repoLoad, unload as repoUnload } from './repo_archiver';
 
 export default function exploreRepositoryFunctionalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  // const esArchiver = getService('esArchiver');
+  const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -24,65 +26,40 @@ export default function exploreRepositoryFunctionalTests({
 
   const FIND_TIME = config.get('timeouts.find');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/43557
+  // FLAKY: https://github.com/elastic/kibana/issues/42111
   describe.skip('Explore Repository', function() {
     this.tags('smoke');
     describe('Explore a repository', () => {
-      const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
+      const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
 
       before(async () => {
-        // Navigate to the code app.
-        await PageObjects.common.navigateToApp('code');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
-        // Prepare a git repository for the test
-        await PageObjects.code.fillImportRepositoryUrlInputBox(
-          'https://github.com/elastic/TypeScript-Node-Starter'
+        await repoLoad(
+          'github.com/elastic/TypeScript-Node-Starter',
+          'typescript_node_starter',
+          config.get('kbnTestServer.installDir') || REPO_ROOT
         );
-        // Click the import repository button.
-        await PageObjects.code.clickImportRepositoryButton();
-
-        await retry.tryForTime(10000, async () => {
-          const repositoryItems = await testSubjects.findAll(repositoryListSelector);
-          expect(repositoryItems).to.have.length(1);
-          expect(await repositoryItems[0].getVisibleText()).to.equal(
-            'elastic/TypeScript-Node-Starter'
-          );
-        });
-
-        // Wait for the index to start.
-        await retry.try(async () => {
-          expect(await exists('repositoryIndexOngoing')).to.be(true);
-        });
-        // Wait for the index to end.
-        await retry.try(async () => {
-          expect(await exists('repositoryIndexDone')).to.be(true);
-        });
+        await esArchiver.load('code/repositories/typescript_node_starter');
       });
 
       after(async () => {
+        await PageObjects.security.logout();
+        await esArchiver.unload('code/repositories/typescript_node_starter');
+        await repoUnload(
+          'github.com/elastic/TypeScript-Node-Starter',
+          config.get('kbnTestServer.installDir') || REPO_ROOT
+        );
+      });
+
+      beforeEach(async () => {
         // Navigate to the code app.
         await PageObjects.common.navigateToApp('code');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        // Clean up the imported repository
-        await PageObjects.code.clickDeleteRepositoryButton();
-
-        await retry.try(async () => {
-          expect(await exists('confirmModalConfirmButton')).to.be(true);
-        });
-
-        await testSubjects.click('confirmModalConfirmButton');
-
-        await retry.tryForTime(300000, async () => {
-          const repositoryItems = await testSubjects.findAll(repositoryListSelector);
-          expect(repositoryItems).to.have.length(0);
-        });
-
-        await PageObjects.security.logout();
+        // Enter the first repository from the admin page.
+        await testSubjects.click(repositoryListSelector);
       });
 
-      beforeEach(async () => {
+      afterEach(async () => {
         // Navigate to the code app.
         await PageObjects.common.navigateToApp('code');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -95,6 +72,8 @@ export default function exploreRepositoryFunctionalTests({
         // open a file that does not exists
         const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/elastic/TypeScript-Node-Starter/tree/master/I_DO_NOT_EXIST`;
         await browser.get(url);
+        await PageObjects.header.awaitKibanaChrome();
+
         await retry.try(async () => {
           const currentUrl: string = await browser.getCurrentUrl();
           expect(
@@ -222,6 +201,8 @@ export default function exploreRepositoryFunctionalTests({
         log.debug('it goes to a deep node of file tree');
         const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/elastic/TypeScript-Node-Starter/blob/master/src/models/User.ts`;
         await browser.get(url);
+        await PageObjects.header.awaitKibanaChrome();
+
         // Click breadcrumb does not affect file tree
         await retry.try(async () => {
           expect(await exists('codeFileBreadcrumb-src')).ok();
@@ -305,6 +286,8 @@ export default function exploreRepositoryFunctionalTests({
         const notExistRepoUri = 'github.com/I_DO_NOT_EXIST/I_DO_NOT_EXIST';
         const url = `${PageObjects.common.getHostPort()}/app/code#/${notExistRepoUri}`;
         await browser.get(url);
+        await PageObjects.header.awaitKibanaChrome();
+
         await retry.try(async () => {
           const currentUrl: string = await browser.getCurrentUrl();
           // should redirect to main page

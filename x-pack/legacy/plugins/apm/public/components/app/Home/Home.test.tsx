@@ -13,7 +13,11 @@ jest.mock('ui/index_patterns');
 jest.mock('ui/new_platform');
 
 describe('Home component', () => {
-  it('should render', () => {
-    expect(shallow(<Home />)).toMatchSnapshot();
+  it('should render services', () => {
+    expect(shallow(<Home tab="services" />)).toMatchSnapshot();
+  });
+
+  it('should render traces', () => {
+    expect(shallow(<Home tab="traces" />)).toMatchSnapshot();
   });
 });

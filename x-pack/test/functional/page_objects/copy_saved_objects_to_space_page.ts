@@ -31,6 +31,9 @@ export function CopySavedObjectsToSpacePageProvider({ getService }: FtrProviderC
         'table.euiTable tbody tr.euiTableRow td.euiTableRowCell:last-child .euiButtonIcon'
       );
 
+      // Wait for context menu to render
+      await find.existsByCssSelector('.euiContextMenuPanel');
+
       const actions = await find.allByCssSelector('.euiContextMenuItem');
 
       for (const action of actions) {

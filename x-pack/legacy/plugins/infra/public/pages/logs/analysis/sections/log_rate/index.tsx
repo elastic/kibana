@@ -19,13 +19,18 @@ import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/
 import { ChartView } from './chart';
 import { isValidLogRateView, LogRateView, LogRateViewSwitcher } from './log_rate_view_switcher';
 import { TableView } from './table';
+import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 
 export const LogRateResults = ({
   isLoading,
   results,
+  setTimeRange,
+  timeRange,
 }: {
   isLoading: boolean;
   results: GetLogEntryRateSuccessResponsePayload['data'] | null;
+  setTimeRange: (timeRange: TimeRange) => void;
+  timeRange: TimeRange;
 }) => {
   const title = i18n.translate('xpack.infra.logs.analysis.logRateSectionTitle', {
     defaultMessage: 'Log rate',
@@ -63,8 +68,7 @@ export const LogRateResults = ({
           body={
             <p>
               {i18n.translate('xpack.infra.logs.analysis.logRateSectionNoDataBody', {
-                defaultMessage:
-                  'Please allow a few minutes for our machine learning robots to begin collecting data. If you expect data to be here already, you may want to adjust your time range.',
+                defaultMessage: 'You may want to adjust your time range.',
               })}
             </p>
           }
@@ -80,7 +84,11 @@ export const LogRateResults = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="l" />
-          {viewMode === 'chart' ? <ChartView data={results} /> : <TableView data={results} />}
+          {viewMode === 'chart' ? (
+            <ChartView data={results} setTimeRange={setTimeRange} timeRange={timeRange} />
+          ) : (
+            <TableView data={results} />
+          )}
         </>
       )}
     </>

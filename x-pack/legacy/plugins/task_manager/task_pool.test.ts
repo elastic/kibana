@@ -71,11 +71,13 @@ describe('TaskPool', () => {
     const firstRun = sinon.spy(async () => {
       await sleep(0);
       firstWork.resolve();
+      return { state: {} };
     });
     const secondWork = resolvable();
     const secondRun = sinon.spy(async () => {
       await sleep(0);
       secondWork.resolve();
+      return { state: {} };
     });
 
     const result = await pool.run([
@@ -192,7 +194,10 @@ describe('TaskPool', () => {
   });
 
   function mockRun() {
-    return sinon.spy(async () => sleep(0));
+    return sinon.spy(async () => {
+      await sleep(0);
+      return { state: {} };
+    });
   }
 
   function mockTask() {

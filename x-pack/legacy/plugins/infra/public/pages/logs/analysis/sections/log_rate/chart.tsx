@@ -6,7 +6,6 @@
 
 import React, { useMemo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { first, last } from 'lodash';
 import moment from 'moment';
 import {
   Axis,
@@ -24,28 +23,26 @@ import { getColorsMap, isDarkMode, getChartTheme } from '../../chart_helpers';
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
 import { useLogEntryRateGraphData } from '../../../../../containers/logs/log_analysis/log_analysis_graph_data/log_entry_rate';
 import { useKibanaUiSetting } from '../../../../../utils/use_kibana_ui_setting';
+import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 
 const areaSeriesColour = 'rgb(224, 237, 255)';
 const lineSeriesColour = 'rgb(49, 133, 252)';
 
 interface Props {
   data: GetLogEntryRateSuccessResponsePayload['data'] | null;
+  setTimeRange: (timeRange: TimeRange) => void;
+  timeRange: TimeRange;
 }
 
-export const ChartView = ({ data }: Props) => {
-  const showModelBoundsLabel = i18n.translate(
-    'xpack.infra.logs.analysis.logRateSectionModelBoundsCheckboxLabel',
-    { defaultMessage: 'Show model bounds' }
-  );
-
+export const ChartView = ({ data, setTimeRange, timeRange }: Props) => {
   const { areaSeries, lineSeries, anomalySeries } = useLogEntryRateGraphData({ data });
 
   const dateFormatter = useMemo(
     () =>
       lineSeries.length > 0
-        ? niceTimeFormatter([first(lineSeries)[0], last(lineSeries)[0]])
+        ? niceTimeFormatter([timeRange.startTime, timeRange.endTime])
         : (value: number) => `${value}`,
-    [lineSeries]
+    [lineSeries, timeRange]
   );
 
   const areaSpecId = getSpecId('modelBounds');
@@ -54,15 +51,25 @@ export const ChartView = ({ data }: Props) => {
 
   const [dateFormat] = useKibanaUiSetting('dateFormat');
 
-  const tooltipProps = {
-    headerFormatter: useCallback(
-      (tooltipData: TooltipValue) =>
+  const tooltipProps = useMemo(
+    () => ({
+      headerFormatter: (tooltipData: TooltipValue) =>
         moment(tooltipData.value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
-      [dateFormat]
-    ),
-  };
+    }),
+    [dateFormat]
+  );
 
   const [isShowingModelBounds, setIsShowingModelBounds] = useState<boolean>(true);
+
+  const handleBrushEnd = useCallback(
+    (startTime: number, endTime: number) => {
+      setTimeRange({
+        endTime,
+        startTime,
+      });
+    },
+    [setTimeRange]
+  );
 
   return (
     <>
@@ -93,7 +100,7 @@ export const ChartView = ({ data }: Props) => {
           <Axis
             id={getAxisId('values')}
             title={i18n.translate('xpack.infra.logs.analysis.logRateSectionYaxisTitle', {
-              defaultMessage: 'Log entries per minute',
+              defaultMessage: 'Log entries per 15 minutes',
             })}
             position="left"
             tickFormat={value => Number(value).toFixed(0)}
@@ -128,7 +135,7 @@ export const ChartView = ({ data }: Props) => {
           <LineSeries
             id={lineSpecId}
             name={i18n.translate('xpack.infra.logs.analysis.logRateSectionLineSeriesName', {
-              defaultMessage: 'Log entries (avg)',
+              defaultMessage: 'Log entries per 15 minutes (avg)',
             })}
             xScaleType="time"
             yScaleType="linear"
@@ -171,9 +178,19 @@ export const ChartView = ({ data }: Props) => {
             }
             customSeriesColors={!isDarkMode() ? getColorsMap('red', anomalySpecId) : undefined}
           />
-          <Settings tooltip={tooltipProps} theme={getChartTheme()} />
+          <Settings
+            onBrushEnd={handleBrushEnd}
+            tooltip={tooltipProps}
+            theme={getChartTheme()}
+            xDomain={{ min: timeRange.startTime, max: timeRange.endTime }}
+          />
         </Chart>
       </div>
     </>
   );
 };
+
+const showModelBoundsLabel = i18n.translate(
+  'xpack.infra.logs.analysis.logRateSectionModelBoundsCheckboxLabel',
+  { defaultMessage: 'Show model bounds' }
+);

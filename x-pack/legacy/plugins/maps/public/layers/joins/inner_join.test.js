@@ -58,7 +58,7 @@ describe('joinPropertiesToFeature', () => {
       properties: {
         iso2: 'CN',
         [COUNT_PROPERTY_NAME]: 61,
-        [`__kbn__scaled(${COUNT_PROPERTY_NAME})`]: 1,
+        [`__kbn__dynamic__${COUNT_PROPERTY_NAME}__fillColor`]: 1,
       }
     };
     const propertiesMap = new Map();

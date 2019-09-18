@@ -18,7 +18,7 @@ import {
 } from '@elastic/charts';
 import { EuiPageContentBody, EuiTitle } from '@elastic/eui';
 import { InfraMetricLayoutSection } from '../../../pages/metrics/layouts/types';
-import { InfraMetricData, InfraTimerangeInput } from '../../../graphql/types';
+import { InfraMetricData } from '../../../graphql/types';
 import { getChartTheme } from '../../metrics_explorer/helpers/get_chart_theme';
 import { InfraFormatterType } from '../../../lib/lib';
 import { SeriesChart } from './series_chart';
@@ -32,11 +32,12 @@ import {
 } from './helpers';
 import { ErrorMessage } from './error_message';
 import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
+import { MetricsTimeInput } from '../../../containers/metrics/with_metrics_time';
 
 interface Props {
   section: InfraMetricLayoutSection;
   metric: InfraMetricData;
-  onChangeRangeTime?: (time: InfraTimerangeInput) => void;
+  onChangeRangeTime?: (time: MetricsTimeInput) => void;
   isLiveStreaming?: boolean;
   stopLiveStreaming?: () => void;
   intl: InjectedIntl;
@@ -60,8 +61,8 @@ export const ChartSection = injectI18n(
             stopLiveStreaming();
           }
           onChangeRangeTime({
-            from,
-            to,
+            from: moment(from).toISOString(),
+            to: moment(to).toISOString(),
             interval: '>=1m',
           });
         }
@@ -111,7 +112,7 @@ export const ChartSection = injectI18n(
         <EuiTitle size="xs">
           <h3 id={section.id}>{section.label}</h3>
         </EuiTitle>
-        <div style={{ height: 200 }}>
+        <div style={{ height: 250, marginBottom: 16 }}>
           <Chart>
             <Axis
               id={getAxisId('timestamp')}
@@ -136,6 +137,8 @@ export const ChartSection = injectI18n(
               tooltip={tooltipProps}
               onBrushEnd={handleTimeChange}
               theme={getChartTheme()}
+              showLegend={true}
+              legendPosition="right"
             />
           </Chart>
         </div>

@@ -42,14 +42,13 @@ class VisController {
       this.controls = [];
       this.controls = await this.initControls();
       this.drawVis();
-      return;
     }
-    return;
   }
 
   destroy() {
     this.updateSubsciption.unsubscribe();
     unmountComponentAtNode(this.el);
+    this.controls.forEach(control => control.destroy());
   }
 
   drawVis = () => {

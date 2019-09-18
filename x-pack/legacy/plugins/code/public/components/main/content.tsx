@@ -38,9 +38,10 @@ import {
   SearchScope,
   WorkerReservedProgress,
   Repository,
+  RepoState,
 } from '../../../model';
 import { CommitInfo, ReferenceInfo } from '../../../model/commit';
-import { changeSearchScope, FetchFileResponse, RepoState, RepoStatus } from '../../actions';
+import { changeSearchScope, FetchFileResponse, RepoStatus } from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
 import {
@@ -97,6 +98,7 @@ class CodeContent extends React.PureComponent<Props, State> {
     if (!props.fileLoading) {
       return { fileLoading: props.fileLoading };
     }
+    return null;
   }
   state = {
     fileLoading: this.props.fileLoading,

@@ -5,12 +5,12 @@
  */
 
 export {
-  isAnalyticsIdValid,
-  moveToAnalyticsWizard,
+  getAnalysisType,
+  isOutlierAnalysis,
   refreshAnalyticsList$,
   useRefreshAnalyticsList,
   DataFrameAnalyticsId,
-  DataFrameAnalyticsOutlierConfig,
+  DataFrameAnalyticsConfig,
   IndexName,
   IndexPattern,
   REFRESH_ANALYTICS_LIST_STATE,
