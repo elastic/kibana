@@ -5,6 +5,8 @@
  */
 import React, { Fragment, useState, useEffect } from 'react';
 import {
+  EuiFacetButton,
+  EuiFacetGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -19,54 +21,44 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { PLUGIN } from '../../common/constants';
-import { IntegrationList } from '../../common/types';
+import { CategorySummaryItem, CategorySummaryList, IntegrationList } from '../../common/types';
 import { IntegrationListGrid } from '../components/integration_list_grid';
-import { getIntegrations } from '../data';
+import { getCategories, getIntegrations } from '../data';
 import { useBreadcrumbs, useCore, useLinks } from '../hooks';
+
+const FullBleedPage = styled(EuiPage)`
+  padding: 0;
+`;
 
 export function Home() {
   const { toListView } = useLinks();
   useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }]);
 
   const [list, setList] = useState<IntegrationList>([]);
-
+  const [selectedCategory, setSelectedCategory] = useState('');
   useEffect(() => {
-    getIntegrations().then(setList);
-  }, []);
+    getIntegrations({ category: selectedCategory }).then(setList);
+  }, [selectedCategory]);
 
-  return <HomeLayout list={list} restrictWidth={1200} />;
-}
-
-type LayoutProps = {
-  list: IntegrationList;
-} & EuiPageWidthProps;
-function HomeLayout(props: LayoutProps) {
-  const { list, restrictWidth } = props;
   if (!list) return null;
 
-  const FullBleedPage = styled(EuiPage)`
-    padding: 0;
-  `;
-
-  const availableTitle = 'Available Integrations';
-  const installedTitle = 'Your Integrations';
-  const installedIntegrations = list.filter(({ status }) => status === 'installed');
-
+  const maxContentWidth = 1200;
   return (
     <Fragment>
-      <FullBleedPage>
-        <EuiPageBody restrictWidth={restrictWidth}>
-          <Header />
-        </EuiPageBody>
-      </FullBleedPage>
+      <Header restrictWidth={maxContentWidth} />
       <EuiHorizontalRule margin="none" />
       <FullBleedPage>
-        <EuiPageBody restrictWidth={restrictWidth}>
+        <EuiPageBody restrictWidth={maxContentWidth}>
           <Fragment>
             <EuiSpacer size="l" />
-            <IntegrationListGrid title={installedTitle} list={installedIntegrations} />
+            <InstalledListGrid list={list} />
             <EuiHorizontalRule margin="l" />
-            <IntegrationListGrid title={availableTitle} list={list} />
+            <AvailableListGrid
+              list={list}
+              onCategoryChange={category => {
+                setSelectedCategory(category.id);
+              }}
+            />
           </Fragment>
         </EuiPageBody>
       </FullBleedPage>
@@ -74,16 +66,20 @@ function HomeLayout(props: LayoutProps) {
   );
 }
 
-function Header() {
+function Header({ restrictWidth }: EuiPageWidthProps) {
   return (
-    <EuiFlexGroup gutterSize="none">
-      <EuiFlexItem grow={1}>
-        <HeroCopy />
-      </EuiFlexItem>
-      <EuiFlexItem grow={1}>
-        <HeroImage />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <FullBleedPage>
+      <EuiPageBody restrictWidth={restrictWidth}>
+        <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem grow={1}>
+            <HeroCopy />
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <HeroImage />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPageBody>
+    </FullBleedPage>
   );
 }
 
@@ -118,5 +114,60 @@ function HeroImage() {
         url={toAssets('illustration_kibana_getting_started@2x.png')}
       />
     </FlexGroup>
+  );
+}
+
+interface AvailableListGridProps {
+  list: IntegrationList;
+  onCategoryChange: (item: CategorySummaryItem) => any;
+}
+
+function AvailableListGrid({ list, onCategoryChange }: AvailableListGridProps) {
+  const [categories, setCategories] = useState<CategorySummaryList>([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
+
+  useEffect(() => {
+    getCategories().then(setCategories);
+  }, []);
+
+  const noFilter: CategorySummaryItem = {
+    id: '',
+    title: 'All',
+    count: list.length,
+  };
+
+  const availableTitle = 'Available Integrations';
+  const controls = (
+    <EuiFacetGroup>
+      {[noFilter, ...categories].map(category => (
+        <EuiFacetButton
+          isSelected={category.id === selectedCategory}
+          key={category.id}
+          id={category.id}
+          quantity={category.count}
+          onClick={() => {
+            onCategoryChange(category);
+            setSelectedCategory(category.id);
+          }}
+        >
+          {category.title}
+        </EuiFacetButton>
+      ))}
+    </EuiFacetGroup>
+  );
+
+  return <IntegrationListGrid title={availableTitle} controls={controls} list={list} />;
+}
+
+interface InstalledListGridProps {
+  list: IntegrationList;
+}
+
+function InstalledListGrid({ list }: InstalledListGridProps) {
+  const installedTitle = 'Your Integrations';
+  const installedIntegrations = list.filter(({ status }) => status === 'installed');
+
+  return (
+    <IntegrationListGrid title={installedTitle} list={installedIntegrations} controls={<div />} />
   );
 }
