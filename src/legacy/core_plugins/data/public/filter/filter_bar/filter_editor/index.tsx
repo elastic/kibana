@@ -37,6 +37,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React, { Component } from 'react';
 import { UiSettingsClientContract } from 'src/core/public';
+import { reverse } from 'dns';
 import { Field, IndexPattern } from '../../../index_patterns';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {
@@ -74,6 +75,7 @@ interface State {
   customLabel: string | null;
   queryDsl: string;
   isCustomEditorOpen: boolean;
+  isNewFilter: boolean;
 }
 
 class FilterEditorUI extends Component<Props, State> {
@@ -88,6 +90,7 @@ class FilterEditorUI extends Component<Props, State> {
       customLabel: props.filter.meta.alias,
       queryDsl: JSON.stringify(getQueryDslFromFilter(props.filter), null, 2),
       isCustomEditorOpen: this.isUnknownFilterType(),
+      isNewFilter: !props.filter.meta.type,
     };
   }
 
@@ -97,31 +100,72 @@ class FilterEditorUI extends Component<Props, State> {
         <EuiPopoverTitle>
           <EuiFlexGroup alignItems="baseline" responsive={false}>
             <EuiFlexItem>
-              <FormattedMessage
-                id="data.filter.filterEditor.editFilterPopupTitle"
-                defaultMessage="Edit filter"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="xs" onClick={this.toggleCustomEditor}>
-                {this.state.isCustomEditorOpen ? (
-                  <FormattedMessage
-                    id="data.filter.filterEditor.editFilterValuesButtonLabel"
-                    defaultMessage="Edit filter values"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="data.filter.filterEditor.editQueryDslButtonLabel"
-                    defaultMessage="Edit as Query DSL"
-                  />
-                )}
-              </EuiButtonEmpty>
+              {/* Toggles between add and edit depending on if we have a filter or not */}
+              {this.state.isNewFilter ? (
+                <FormattedMessage
+                  id="data.filter.filterEditor.addFilterPopupTitle"
+                  defaultMessage="Add a filter"
+                />
+              ) : (
+                <FormattedMessage
+                  id="data.filter.filterEditor.editFilterPopupTitle"
+                  defaultMessage="Edit filter"
+                />
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopoverTitle>
 
         <div className="globalFilterItem__editorForm">
           <EuiForm>
+            <EuiFlexGroup alignItems="baseline" responsive={false}>
+              <EuiFlexItem>
+                {/* This will be a tabs switching between Create and Use saved query */}
+                {this.state.isNewFilter ? (
+                  <FormattedMessage
+                    id="data.filter.filterEditor.tabCreateFilterPopupTitle"
+                    defaultMessage="Create"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="data.filter.filterEditor.tabEditFilterPopupTitle"
+                    defaultMessage="Edit"
+                  />
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {this.state.isNewFilter ? (
+                  <FormattedMessage
+                    id="data.filter.filterEditor.tabUseSavedQueryFilterPopupTitle"
+                    defaultMessage="Use saved query"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="data.filter.filterEditor.tabChangeSavedQueryFilterPopupTitle"
+                    defaultMessage="Change saved query"
+                  />
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiFlexGroup direction={'rowReverse'}>
+              <EuiFlexItem grow={false}>
+                {/* just the top right of the form */}
+                <EuiButtonEmpty size="xs" onClick={this.toggleCustomEditor}>
+                  {this.state.isCustomEditorOpen ? (
+                    <FormattedMessage
+                      id="data.filter.filterEditor.editFilterValuesButtonLabel"
+                      defaultMessage="Edit filter values"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="data.filter.filterEditor.editQueryDslButtonLabel"
+                      defaultMessage="Edit as Query DSL"
+                    />
+                  )}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
             {this.renderIndexPatternInput()}
 
             {this.state.isCustomEditorOpen ? this.renderCustomEditor() : this.renderRegularEditor()}
