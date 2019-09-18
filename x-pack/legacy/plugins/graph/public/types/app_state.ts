@@ -9,6 +9,7 @@ import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { Workspace } from './workspace_state';
 import { FontawesomeIcon } from '../helpers/style_choices';
 import { OutlinkEncoder } from '../helpers/outlink_encoders';
+import { ActionCreator } from 'typescript-fsa';
 
 export interface UrlTemplate {
   url: string;
@@ -51,3 +52,5 @@ export interface AppState {
   selectedFields: WorkspaceField[];
   selectedIndex: IndexPatternSavedObject;
 }
+
+export type InferActionType<X> = X extends ActionCreator<infer T> ? T : never;

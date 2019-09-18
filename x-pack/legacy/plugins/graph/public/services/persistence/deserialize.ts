@@ -190,7 +190,7 @@ export function savedWorkspaceToAppState(
   workspaceInstance: Workspace
 ): Pick<
   AppState,
-  'urlTemplates' | 'advancedSettings' | 'workspace' | 'allFields' | 'selectedFields'
+  'urlTemplates' | 'advancedSettings' | 'allFields' | 'selectedFields'
 > {
   const persistedWorkspaceState: SerializedWorkspaceState = JSON.parse(savedWorkspace.wsState);
 
@@ -205,6 +205,7 @@ export function savedWorkspaceToAppState(
     persistedWorkspaceState.selectedFields
   );
   const selectedFields = allFields.filter(field => field.selected);
+  workspaceInstance.options.vertex_fields = selectedFields;
 
   // ================== advanced settings =============================
   const advancedSettings = Object.assign(
@@ -220,6 +221,9 @@ export function savedWorkspaceToAppState(
     );
   }
 
+
+  workspaceInstance.options.exploreControls = advancedSettings;
+
   // ================== nodes and edges =============================
   const graph = getNodesAndEdges(persistedWorkspaceState, allFields);
   workspaceInstance.mergeGraph(graph);
@@ -232,7 +236,6 @@ export function savedWorkspaceToAppState(
   return {
     urlTemplates,
     advancedSettings,
-    workspace: workspaceInstance,
     allFields,
     selectedFields,
   };

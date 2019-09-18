@@ -4,83 +4,66 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import actionCreatorFactory, { Action } from 'typescript-fsa';
-import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
-import { takeLatest, put, call } from 'redux-saga/effects';
-import { GraphState } from './store';
-import { reset } from './global';
-import { loadFields } from './fields';
-import { mapFields } from '../services/persistence';
-import { IndexPatternProvider, Workspace } from '../types';
+import { takeLatest, select } from 'redux-saga/effects';
+import { Action } from 'typescript-fsa';
+import { GraphStoreDependencies } from './store';
+import { loadFields, selectedFieldsSelector, updateFieldProperties } from './fields';
+import { InferActionType } from '../types';
 
-const actionCreator = actionCreatorFactory('x-pack/graph/workspace');
-
-export interface NoDatasource {
-  type: 'none';
-}
-export interface IndexpatternDatasource {
-  type: 'indexpattern';
-  id: string;
-  title: string;
-}
-
-export type DatasourceState = { current: NoDatasource | IndexpatternDatasource, loading: boolean;  };
-
-export const setDatasource = actionCreator<NoDatasource | IndexpatternDatasource>('SET_DATASOURCE_REQUEST');
-export const datasourceLoaded = actionCreator<void>('SET_DATASOURCE_SUCCESS');
-
-const initialDatasource: DatasourceState = {
-  current: { type: 'none' },
-  loading: false
-};
-
-export const datasourceReducer = reducerWithInitialState<DatasourceState>(initialDatasource)
-  .case(reset, () => initialDatasource)
-  .case(setDatasource, (_oldDatasource, newDatasource) => ({
-    current: newDatasource,
-    loading: newDatasource.type !== 'none'
-  }))
-  .build();
-
-export const datasourceSelector = (state: GraphState) => state.datasource;
-
-export const workspaceSaga = ({ setWorkspace, getWorkspace }: { setWorkspace: (ws: Workspace) => void; getWorkspace: () => Workspace }) =>
+/**
+ * Saga making sure the fields in the store are always synced with the fields
+ * known to the workspace.
+ * 
+ * Won't be necessary once the workspace is moved to redux
+ */
+export const syncFieldsSaga = ({ getWorkspace }: Pick<GraphStoreDependencies, 'getWorkspace'>) =>
   function*() {
-    function* loadSavedWorkspace(action: Action<SavedWorkspace>) {
-      // TODO this saga should
-    if ($scope.workspace) {
-      return;
-    }
-    const options = {
-      indexName: $scope.selectedIndex.attributes.title,
-      vertex_fields: $scope.selectedFields,
-      // Here we have the opportunity to look up labels for nodes...
-      nodeLabeller: function () {
-        //   console.log(newNodes);
-      },
-      changeHandler: function () {
-        //Allows DOM to update with graph layout changes.
-        $scope.$apply();
-      },
-      graphExploreProxy: callNodeProxy,
-      searchProxy: callSearchNodeProxy,
-      exploreControls: $scope.exploreControls
-    };
-    $scope.workspace = gws.createWorkspace(options);
-      initWorkspaceIfRequired();
-      const {
-        urlTemplates,
-        advancedSettings,
-        allFields,
-      } = savedWorkspaceToAppState($scope.savedWorkspace, indexPattern, $scope.workspace);
+    function* syncFields() {
+      const workspace = getWorkspace();
+      if (!workspace) {
+        return;
+      }
 
-      // wire up stuff to angular
-      store.dispatch(loadFields(allFields));
-      $scope.exploreControls = advancedSettings;
-      $scope.workspace.options.exploreControls = advancedSettings;
-      $scope.urlTemplates = urlTemplates;
-      $scope.workspace.runLayout();
+      const selectedFields = selectedFieldsSelector(yield select());
+      workspace.options.vertex_fields = selectedFields;
     }
 
-    yield takeLatest(loadSavedWorkspace.type, fetchIndexPattern);
+    yield takeLatest(loadFields.match, syncFields);
+  };
+
+/**
+ * Saga making sure the field styles (icons and colors) are applied to nodes currently active
+ * in the workspace.
+ * 
+ * Won't be necessary once the workspace is moved to redux
+ */
+export const syncNodeStyleSaga = ({ getWorkspace }: Pick<GraphStoreDependencies, 'getWorkspace'>) =>
+  function*() {
+    function* syncNodeStyle(action: Action<InferActionType<typeof updateFieldProperties>>) {
+      const workspace = getWorkspace();
+      if (!workspace) {
+        return;
+      }
+      const newColor = action.payload.fieldProperties.color;
+      if (newColor) {
+        workspace.nodes.forEach(function(node) {
+          if (node.data.field === action.payload.fieldName) {
+            node.color = newColor;
+          }
+        });
+      }
+      const newIcon = action.payload.fieldProperties.icon;
+
+      if (newIcon) {
+        workspace.nodes.forEach(function(node) {
+          if (node.data.field === action.payload.fieldName) {
+            node.icon = newIcon;
+          }
+        });
+      }
+      const selectedFields = selectedFieldsSelector(yield select());
+      workspace.options.vertex_fields = selectedFields;
+    }
+
+    yield takeLatest(updateFieldProperties.match, syncNodeStyle);
   };

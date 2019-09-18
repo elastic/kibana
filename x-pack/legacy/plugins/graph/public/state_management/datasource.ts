@@ -7,7 +7,8 @@
 import actionCreatorFactory, { Action } from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { takeLatest, put, call } from 'redux-saga/effects';
-import { GraphState } from './store';
+import { i18n } from '@kbn/i18n';
+import { GraphState, GraphStoreDependencies } from './store';
 import { reset } from './global';
 import { loadFields } from './fields';
 import { mapFields } from '../services/persistence';
@@ -24,33 +25,58 @@ export interface IndexpatternDatasource {
   title: string;
 }
 
-export type DatasourceState = { current: NoDatasource | IndexpatternDatasource, loading: boolean;  };
+export interface DatasourceState {
+  current: NoDatasource | IndexpatternDatasource;
+  loading: boolean;
+}
 
-export const setDatasource = actionCreator<NoDatasource | IndexpatternDatasource>('SET_DATASOURCE_REQUEST');
+/**
+ * Sets the current datasource. This will not trigger a load of fields
+ */
+export const setDatasource = actionCreator<NoDatasource | IndexpatternDatasource>('SET_DATASOURCE');
+
+/**
+ * Sets the current datasource. This will trigger a load of fields and overwrite the current
+ * fields configuration
+ */
+export const requestDatasource = actionCreator<IndexpatternDatasource>('SET_DATASOURCE_REQUEST');
 export const datasourceLoaded = actionCreator<void>('SET_DATASOURCE_SUCCESS');
 
 const initialDatasource: DatasourceState = {
   current: { type: 'none' },
-  loading: false
+  loading: false,
 };
 
 export const datasourceReducer = reducerWithInitialState<DatasourceState>(initialDatasource)
   .case(reset, () => initialDatasource)
   .case(setDatasource, (_oldDatasource, newDatasource) => ({
     current: newDatasource,
-    loading: newDatasource.type !== 'none'
+    loading: false,
+  }))
+  .case(requestDatasource, (_oldDatasource, newDatasource) => ({
+    current: newDatasource,
+    loading: true,
+  }))
+  .case(datasourceLoaded, datasource => ({
+    ...datasource,
+    loading: false,
   }))
   .build();
 
 export const datasourceSelector = (state: GraphState) => state.datasource;
 
-export const datasourceSaga = (indexPatternProvider: IndexPatternProvider) =>
+/**
+ * Saga loading field information when the datasource is switched. This will overwrite current settings
+ * in fields.
+ * 
+ * TODO: Carry over fields than can be carried over because they also exist in the target index pattern
+ */
+export const datasourceSaga = ({
+  indexPatternProvider,
+  notifications,
+}: Pick<GraphStoreDependencies, 'notifications' | 'indexPatternProvider'>) =>
   function*() {
-    function* fetchIndexPattern(action: Action<NoDatasource | IndexpatternDatasource>) {
-      if (action.payload.type === 'none') {
-        return;
-      }
-
+    function* fetchFields(action: Action<IndexpatternDatasource>) {
       try {
         const indexPattern = yield call(indexPatternProvider.get, action.payload.id);
         yield put(loadFields(mapFields(indexPattern)));
@@ -58,9 +84,13 @@ export const datasourceSaga = (indexPatternProvider: IndexPatternProvider) =>
       } catch (e) {
         // in case of errors, reset the datasource and show notification
         yield put(setDatasource({ type: 'none' }));
-        // TOOD show notification
+        notifications.toasts.addDanger(
+          i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
+            defaultMessage: 'Index pattern not found',
+          })
+        );
       }
     }
 
-    yield takeLatest(setDatasource.type, fetchIndexPattern);
+    yield takeLatest(requestDatasource.match, fetchFields);
   };
