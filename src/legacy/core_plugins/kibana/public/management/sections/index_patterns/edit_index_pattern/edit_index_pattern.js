@@ -201,7 +201,9 @@ uiModules
       $scope.indexPattern,
       $scope.indexPattern.id === config.get('defaultIndex')
     );
-    $scope.getFieldInfo = managementSetup.indexPattern.list.getFieldInfo;
+    $scope.getFieldInfo = managementSetup.indexPattern.list.getFieldInfo.bind(
+      managementSetup.indexPattern.list
+    );
     docTitle.change($scope.indexPattern.title);
 
     const otherPatterns = _.filter($route.current.locals.indexPatterns, pattern => {
