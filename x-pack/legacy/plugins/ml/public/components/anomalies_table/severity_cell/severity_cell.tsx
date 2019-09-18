@@ -30,8 +30,8 @@ export const SeverityCell: FC<SeverityCellProps> = memo(({ score, multiBucketImp
   const color = getSeverityColor(score);
   const isMultiBucket = multiBucketImpact >= MULTI_BUCKET_IMPACT.MEDIUM;
   return isMultiBucket ? (
-    <EuiFlexGroup>
-      <EuiFlexItem>
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
         <svg width="16" height="16" viewBox="-2 -2 20 20" fill={color}>
           <path
             d="M-6.708203932499369,-2.23606797749979H-2.23606797749979V-6.708203932499369H2.23606797749979V-2.23606797749979H6.708203932499369V2.23606797749979H2.23606797749979V6.708203932499369H-2.23606797749979V2.23606797749979H-6.708203932499369Z"
@@ -39,7 +39,7 @@ export const SeverityCell: FC<SeverityCellProps> = memo(({ score, multiBucketImp
           ></path>
         </svg>
       </EuiFlexItem>
-      <EuiFlexItem>{severity}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{severity}</EuiFlexItem>
     </EuiFlexGroup>
   ) : (
     <EuiHealth color={color}>{severity}</EuiHealth>
