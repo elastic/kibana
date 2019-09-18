@@ -18,11 +18,12 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { ReactWrapper, mount } from 'enzyme';
+import { I18nProvider } from '@kbn/i18n/react';
 import * as sinon from 'sinon';
+
 import { EditorContextProvider } from '../../context';
 import { AppContextProvider } from '../../../../context';
-
 import { Editor } from './editor';
 
 jest.mock('../../../../components/editor_example.tsx', () => {});
@@ -50,6 +51,7 @@ import * as consoleMenuActions from '../console_menu_actions';
 
 describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
   let mockedAppContextValue: any;
+  let editor: ReactWrapper;
 
   beforeEach(() => {
     document.queryCommandSupported = sinon.fake(() => true);
@@ -66,19 +68,21 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
       },
       docLinkVersion: 'NA',
     };
-  });
-
-  it('calls send current request to ES', () => {
-    const stub = sinon.stub(sendRequestModule, 'sendCurrentRequestToES');
-    try {
-      const wrapped = mount(
+    editor = mount(
+      <I18nProvider>
         <AppContextProvider value={mockedAppContextValue}>
           <EditorContextProvider settings={{} as any}>
             <Editor />
           </EditorContextProvider>
         </AppContextProvider>
-      );
-      wrapped.find('[data-test-subj~="send-request-button"]').simulate('click');
+      </I18nProvider>
+    );
+  });
+
+  it('calls send current request to ES', () => {
+    const stub = sinon.stub(sendRequestModule, 'sendCurrentRequestToES');
+    try {
+      editor.find('[data-test-subj~="sendRequestButton"]').simulate('click');
       expect(stub.called).toBe(true);
       expect(stub.callCount).toBe(1);
     } finally {
@@ -89,17 +93,10 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
   it('opens docs', () => {
     const stub = sinon.stub(consoleMenuActions, 'getDocumentation');
     try {
-      const wrapped = mount(
-        <AppContextProvider value={mockedAppContextValue}>
-          <EditorContextProvider settings={{} as any}>
-            <Editor />
-          </EditorContextProvider>
-        </AppContextProvider>
-      );
-      const consoleMenuToggle = wrapped.find('[data-test-subj~="toggleConsoleMenu"]').last();
+      const consoleMenuToggle = editor.find('[data-test-subj~="toggleConsoleMenu"]').last();
       consoleMenuToggle.simulate('click');
 
-      const docsButton = wrapped.find('[data-test-subj~="consoleMenuOpenDocs"]').last();
+      const docsButton = editor.find('[data-test-subj~="consoleMenuOpenDocs"]').last();
       docsButton.simulate('click');
 
       expect(stub.called).toBe(true);
@@ -112,17 +109,10 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
   it('prompts auto-indent', () => {
     const stub = sinon.stub(consoleMenuActions, 'autoIndent');
     try {
-      const wrapped = mount(
-        <AppContextProvider value={mockedAppContextValue}>
-          <EditorContextProvider settings={{} as any}>
-            <Editor />
-          </EditorContextProvider>
-        </AppContextProvider>
-      );
-      const consoleMenuToggle = wrapped.find('[data-test-subj~="toggleConsoleMenu"]').last();
+      const consoleMenuToggle = editor.find('[data-test-subj~="toggleConsoleMenu"]').last();
       consoleMenuToggle.simulate('click');
 
-      const autoIndentButton = wrapped.find('[data-test-subj~="consoleMenuAutoIndent"]').last();
+      const autoIndentButton = editor.find('[data-test-subj~="consoleMenuAutoIndent"]').last();
       autoIndentButton.simulate('click');
 
       expect(stub.called).toBe(true);
