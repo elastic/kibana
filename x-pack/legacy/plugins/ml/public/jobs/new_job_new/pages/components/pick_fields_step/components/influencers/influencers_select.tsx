@@ -35,6 +35,7 @@ export const InfluencersSelect: FC<Props> = ({ fields, changeHandler, selectedIn
       selectedOptions={selection}
       onChange={onChange}
       isClearable={false}
+      data-test-subj="influencerSelect"
     />
   );
 };

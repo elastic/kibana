@@ -5,7 +5,6 @@
  */
 
 import {
-  EventsData,
   LastEventIndexKey,
   LastEventTimeData,
   LastTimeDetails,
@@ -17,7 +16,6 @@ import { FrameworkRequest, RequestOptions, RequestOptionsPaginated } from '../fr
 import { SearchHit } from '../types';
 
 export interface EventsAdapter {
-  getEvents(req: FrameworkRequest, options: RequestOptionsPaginated): Promise<EventsData>;
   getTimelineData(req: FrameworkRequest, options: TimelineRequestOptions): Promise<TimelineData>;
   getTimelineDetails(
     req: FrameworkRequest,

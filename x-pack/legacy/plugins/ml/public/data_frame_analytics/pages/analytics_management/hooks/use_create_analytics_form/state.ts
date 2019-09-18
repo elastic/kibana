@@ -32,6 +32,7 @@ export interface State {
     jobId: DataFrameAnalyticsId;
     jobIdExists: boolean;
     jobIdEmpty: boolean;
+    jobIdInvalidMaxLength?: boolean;
     jobIdValid: boolean;
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
