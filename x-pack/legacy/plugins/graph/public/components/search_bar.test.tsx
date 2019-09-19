@@ -8,12 +8,10 @@ import { SearchBar } from './search_bar';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React, { ReactElement } from 'react';
 import { CoreStart } from 'src/core/public';
-import { IndexPatternSavedObject } from '../types';
 import { act } from 'react-dom/test-utils';
 import { IndexPattern, QueryBarInput } from 'src/legacy/core_plugins/data/public';
 
 jest.mock('ui/new_platform');
-import { EuiFieldText } from '@elastic/eui';
 import { openSourceModal } from '../services/source_modal';
 
 jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
