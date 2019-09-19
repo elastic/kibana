@@ -1,9 +1,7 @@
 [role="xpack"]
 [[xpack-graph]]
-= Graph data connections
+== Graph data connections
 
-[partintro]
---
 The {graph-features} enable you to discover how items in an
 Elasticsearch index are related. You can explore the connections between
 indexed terms and see which connections are the most meaningful. This can be
@@ -64,8 +62,6 @@ multi-node clusters and scales with your Elasticsearch deployment.
 Advanced options let you control how your data is sampled and summarized.
 You can also set timeouts to prevent graph queries from adversely
 affecting the cluster.
-
---
 
 include::getting-started.asciidoc[]
 
