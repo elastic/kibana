@@ -24,20 +24,25 @@ export const npSetup = {
     chrome: {}
   },
   plugins: {
+    expressions: {
+      registerFunction: sinon.fake(),
+      registerRenderer: sinon.fake(),
+      registerType: sinon.fake(),
+    },
     data: {
-      expressions: {
-        registerFunction: sinon.fake(),
-        registerRenderer: sinon.fake(),
-        registerType: sinon.fake(),
-      },
     },
     inspector: {
       registerView: () => undefined,
-      __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
+      __LEGACY: {
         views: {
           register: () => undefined,
         },
       },
+    },
+    uiActions: {
+      attachAction: sinon.fake(),
+      registerAction: sinon.fake(),
+      registerTrigger: sinon.fake(),
     },
   },
 };
@@ -47,6 +52,11 @@ export const npStart = {
     chrome: {}
   },
   plugins: {
+    expressions: {
+      registerFunction: sinon.fake(),
+      registerRenderer: sinon.fake(),
+      registerType: sinon.fake(),
+    },
     data: {},
     inspector: {
       isAvailable: () => false,
@@ -54,6 +64,16 @@ export const npStart = {
         onClose: Promise.resolve(undefined),
         close: () => Promise.resolve(undefined),
       }),
+    },
+    uiActions: {
+      attachAction: sinon.fake(),
+      registerAction: sinon.fake(),
+      registerTrigger: sinon.fake(),
+      detachAction: sinon.fake(),
+      executeTriggerActions: sinon.fake(),
+      getTrigger: sinon.fake(),
+      getTriggerActions: sinon.fake(),
+      getTriggerCompatibleActions: sinon.fake(),
     },
   },
 };

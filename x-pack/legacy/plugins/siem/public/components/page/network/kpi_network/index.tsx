@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 
-import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexItem, EuiLoadingSpinner, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
-import { EuiSpacer } from '@elastic/eui';
 import { chunk as _chunk } from 'lodash/fp';
 import {
   StatItemsComponent,

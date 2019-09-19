@@ -3,13 +3,14 @@
 exports[`Should render icon select when symbolized as Icon 1`] = `
 <EuiFormRow
   describedByIds={Array []}
+  display="rowCompressed"
   fullWidth={false}
   hasEmptyLabelSpace={false}
   label="Symbol type"
   labelType="label"
 >
   <EuiSelect
-    compressed={false}
+    compressed={true}
     fullWidth={false}
     hasNoInitialSelection={false}
     isLoading={false}
@@ -32,7 +33,7 @@ exports[`Should render icon select when symbolized as Icon 1`] = `
     size="s"
   />
   <EuiComboBox
-    compressed={false}
+    compressed={true}
     fullWidth={false}
     isClearable={false}
     onChange={[Function]}
@@ -65,13 +66,14 @@ exports[`Should render icon select when symbolized as Icon 1`] = `
 exports[`Should render symbol select when symbolized as Circle 1`] = `
 <EuiFormRow
   describedByIds={Array []}
+  display="rowCompressed"
   fullWidth={false}
   hasEmptyLabelSpace={false}
   label="Symbol type"
   labelType="label"
 >
   <EuiSelect
-    compressed={false}
+    compressed={true}
     fullWidth={false}
     hasNoInitialSelection={false}
     isLoading={false}

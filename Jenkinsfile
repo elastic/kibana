@@ -1,17 +1,13 @@
 #!/bin/groovy
 
-properties([
-  durabilityHint('PERFORMANCE_OPTIMIZED'),
-])
-
 stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a little bit
   timeout(time: 180, unit: 'MINUTES') {
     timestamps {
       ansiColor('xterm') {
         catchError {
           parallel([
-            'kibana-intake-agent': legacyJobRunner('kibana-intake'),
-            'x-pack-intake-agent': legacyJobRunner('x-pack-intake'),
+            'intake-agent': legacyJobRunner('intake'),
+            'firefox-smoke-agent': legacyJobRunner('firefoxSmoke'),
             'kibana-oss-agent': withWorkers('kibana-oss-tests', { buildOss() }, [
               'oss-ciGroup1': getOssCiGroupWorker(1),
               'oss-ciGroup2': getOssCiGroupWorker(2),
@@ -19,14 +15,14 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               'oss-ciGroup4': getOssCiGroupWorker(4),
               'oss-ciGroup5': getOssCiGroupWorker(5),
               'oss-ciGroup6': getOssCiGroupWorker(6),
-              'oss-ciGroup7': getOssCiGroupWorker(7),
-              'oss-ciGroup8': getOssCiGroupWorker(8),
-              'oss-ciGroup9': getOssCiGroupWorker(9),
-              'oss-ciGroup10': getOssCiGroupWorker(10),
-              'oss-ciGroup11': getOssCiGroupWorker(11),
-              'oss-ciGroup12': getOssCiGroupWorker(12),
-              'oss-visualRegression': getPostBuildWorker('visualRegression', { runbld './test/scripts/jenkins_visual_regression.sh' }),
-              'oss-firefoxSmoke': getPostBuildWorker('firefoxSmoke', { runbld './test/scripts/jenkins_firefox_smoke.sh' }),
+              // 'oss-ciGroup7': getOssCiGroupWorker(7),
+              // 'oss-ciGroup8': getOssCiGroupWorker(8),
+              // 'oss-ciGroup9': getOssCiGroupWorker(9),
+              // 'oss-ciGroup10': getOssCiGroupWorker(10),
+              // 'oss-ciGroup11': getOssCiGroupWorker(11),
+              // 'oss-ciGroup12': getOssCiGroupWorker(12),
+              // 'oss-visualRegression': getPostBuildWorker('visualRegression', { runbld './test/scripts/jenkins_visual_regression.sh' }),
+              // 'oss-firefoxSmoke': getPostBuildWorker('firefoxSmoke', { runbld './test/scripts/jenkins_firefox_smoke.sh' }),
             ]),
             'kibana-xpack-agent': withWorkers('kibana-xpack-tests', { buildXpack() }, [
               'xpack-ciGroup1': getXpackCiGroupWorker(1),
@@ -34,17 +30,21 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               'xpack-ciGroup3': getXpackCiGroupWorker(3),
               'xpack-ciGroup4': getXpackCiGroupWorker(4),
               'xpack-ciGroup5': getXpackCiGroupWorker(5),
-              'xpack-ciGroup6': getXpackCiGroupWorker(6),
-              'xpack-ciGroup7': getXpackCiGroupWorker(7),
-              'xpack-ciGroup8': getXpackCiGroupWorker(8),
-              'xpack-ciGroup9': getXpackCiGroupWorker(9),
-              'xpack-ciGroup10': getXpackCiGroupWorker(10),
-              'xpack-firefoxSmoke': getPostBuildWorker('xpack-firefoxSmoke', { runbld './test/scripts/jenkins_xpack_firefox_smoke.sh' }),
-              'xpack-visualRegression': getPostBuildWorker('xpack-visualRegression', { runbld './test/scripts/jenkins_xpack_visual_regression.sh' }),
+              // 'xpack-ciGroup6': getXpackCiGroupWorker(6),
+              // 'xpack-ciGroup7': getXpackCiGroupWorker(7),
+              // 'xpack-ciGroup8': getXpackCiGroupWorker(8),
+              // 'xpack-ciGroup9': getXpackCiGroupWorker(9),
+              // 'xpack-ciGroup10': getXpackCiGroupWorker(10),
+              // 'xpack-firefoxSmoke': getPostBuildWorker('xpack-firefoxSmoke', { runbld './test/scripts/jenkins_xpack_firefox_smoke.sh' }),
+              // 'xpack-visualRegression': getPostBuildWorker('xpack-visualRegression', { runbld './test/scripts/jenkins_xpack_visual_regression.sh' }),
             ]),
           ])
         }
         node('flyweight') {
+          // If the build doesn't have a result set by this point, there haven't been any errors and it can be marked as a success
+          // The e-mail plugin for the infra e-mail depends upon this being set
+          currentBuild.result = currentBuild.result ?: 'SUCCESS'
+
           sendMail()
         }
       }
@@ -81,7 +81,15 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
         }
 
         catchError {
+          runbldJunit()
+        }
+
+        catchError {
           publishJunit()
+        }
+
+        catchError {
+          runErrorReporter()
         }
       }
     }
@@ -101,7 +109,6 @@ def getPostBuildWorker(name, closure) {
       "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
       "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
       "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
-      "IS_PIPELINE_JOB=1",
     ]) {
       closure()
     }
@@ -139,13 +146,16 @@ def legacyJobRunner(name) {
         ]) {
           jobRunner('linux && immutable') {
             try {
-              runbld '.ci/run.sh'
+              runbld('.ci/run.sh', true)
             } finally {
               catchError {
                 uploadAllGcsArtifacts(name)
               }
               catchError {
                 publishJunit()
+              }
+              catchError {
+                runErrorReporter()
               }
             }
           }
@@ -161,10 +171,11 @@ def jobRunner(label, closure) {
 
     withEnv([
       "CI=true",
+      "IS_PIPELINE_JOB=1",
       "HOME=${env.JENKINS_HOME}",
-      "PR_SOURCE_BRANCH=${env.ghprbSourceBranch}",
-      "PR_TARGET_BRANCH=${env.ghprbTargetBranch}",
-      "PR_AUTHOR=${env.ghprbPullAuthorLogin}",
+      "PR_SOURCE_BRANCH=${env.ghprbSourceBranch ?: ''}",
+      "PR_TARGET_BRANCH=${env.ghprbTargetBranch ?: ''}",
+      "PR_AUTHOR=${env.ghprbPullAuthorLogin ?: ''}",
       "TEST_BROWSER_HEADLESS=1",
       "GIT_BRANCH=${scmVars.GIT_BRANCH}",
     ]) {
@@ -237,9 +248,8 @@ def sendKibanaMail() {
   catchError {
     if(params.NOTIFY_ON_FAILURE && currentBuild.result != 'SUCCESS' && currentBuild.result != 'ABORTED') {
       emailext(
-        // to: 'build-kibana@elastic.co',
-        to: 'brian.seeders@elastic.co', // TODO switch this out after testing
-        subject: "${env.PROJECT_NAME} - Build # ${env.BUILD_NUMBER} - ${currentBuild.result}",
+        to: 'build-kibana@elastic.co',
+        subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${currentBuild.result}",
         body: '${SCRIPT,template="groovy-html.template"}',
         mimeType: 'text/html',
       )
@@ -247,12 +257,18 @@ def sendKibanaMail() {
   }
 }
 
-def runbld(script) {
-  sh '#!/usr/local/bin/runbld\n' + script
+def runbld(script, enableJunitProcessing = false) {
+  def extraConfig = enableJunitProcessing ? "" : "--config ${env.WORKSPACE}/kibana/.ci/runbld_no_junit.yml"
+
+  sh "/usr/local/bin/runbld -d '${pwd()}' ${extraConfig} ${script}"
+}
+
+def runbldJunit() {
+  sh "/usr/local/bin/runbld -d '${pwd()}' ${env.WORKSPACE}/kibana/test/scripts/jenkins_runbld_junit.sh"
 }
 
 def bash(script) {
-  sh "#!/bin/bash -x\n${script}"
+  sh "#!/bin/bash\n${script}"
 }
 
 def doSetup() {
@@ -265,4 +281,11 @@ def buildOss() {
 
 def buildXpack() {
   runbld "./test/scripts/jenkins_xpack_build_kibana.sh"
+}
+
+def runErrorReporter() {
+  bash """
+    source src/dev/ci_setup/setup_env.sh
+    node src/dev/failed_tests/cli
+  """
 }
