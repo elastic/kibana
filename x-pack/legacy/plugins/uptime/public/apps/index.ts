@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose } from '../lib/compose/kibana_compose';
-import { startApp } from './start_app';
+import chrome from 'ui/chrome';
+import { npStart } from 'ui/new_platform';
+import { Plugin } from './plugin';
 
-startApp(compose());
+new Plugin(npStart, chrome).start();
