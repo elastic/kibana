@@ -21,10 +21,6 @@ interface TimelineRefetchDispatch {
     loading: boolean;
     refetch: inputsModel.Refetch | inputsModel.RefetchKql | null;
   }>;
-  deleteEventQuery: ActionCreator<{
-    id: string;
-    inputId: InputsModelId;
-  }>;
 }
 
 export interface TimelineRefetchProps {
@@ -38,14 +34,9 @@ export interface TimelineRefetchProps {
 type OwnProps = TimelineRefetchProps & TimelineRefetchDispatch;
 
 const TimelineRefetchComponent = memo<OwnProps>(
-  ({ deleteEventQuery, id, inputId, inspect, loading, refetch, setTimelineQuery }) => {
+  ({ id, inputId, inspect, loading, refetch, setTimelineQuery }) => {
     useEffect(() => {
       setTimelineQuery({ id, inputId, inspect, loading, refetch });
-      if (inputId === 'global') {
-        return () => {
-          deleteEventQuery({ id, inputId });
-        };
-      }
     }, [id, inputId, loading, refetch, inspect]);
 
     return null;
@@ -57,7 +48,6 @@ export const TimelineRefetch = compose<React.ComponentClass<TimelineRefetchProps
     null,
     {
       setTimelineQuery: inputsActions.setQuery,
-      deleteEventQuery: inputsActions.deleteOneQuery,
     }
   )
 )(TimelineRefetchComponent);

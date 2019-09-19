@@ -78,6 +78,7 @@ exports[`renders ControlsTab 1`] = `
       <EuiFlexItem>
         <EuiFormRow
           describedByIds={Array []}
+          display="row"
           fullWidth={false}
           hasEmptyLabelSpace={false}
           id="selectControlType"
@@ -112,6 +113,7 @@ exports[`renders ControlsTab 1`] = `
       >
         <EuiFormRow
           describedByIds={Array []}
+          display="row"
           fullWidth={false}
           hasEmptyLabelSpace={false}
           id="addControl"

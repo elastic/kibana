@@ -14,6 +14,7 @@ import { TimelineResult, GetOneTimeline, NoteResult } from '../../graphql/types'
 import { addNotes as dispatchAddNotes } from '../../store/app/actions';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../store/inputs/actions';
 import {
+  setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   addTimeline as dispatchAddTimeline,
 } from '../../store/timeline/actions';
@@ -125,15 +126,10 @@ export const defaultTimelineToTimelineModel = (
     savedObjectId: duplicate ? null : timeline.savedObjectId,
     version: duplicate ? null : timeline.version,
     title: duplicate ? '' : timeline.title || '',
-  }).reduce(
-    (acc: TimelineModel, [key, value]) => {
-      if (value != null) {
-        acc = set(key, value, acc);
-      }
-      return acc;
-    },
-    { ...timelineDefaults, id: '' }
-  );
+  }).reduce((acc: TimelineModel, [key, value]) => (value != null ? set(key, value, acc) : acc), {
+    ...timelineDefaults,
+    id: '',
+  });
 };
 
 export const formatTimelineResultToModel = (
@@ -210,6 +206,15 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
     timeline.kqlQuery.filterQuery.kuery != null &&
     timeline.kqlQuery.filterQuery.kuery.expression !== ''
   ) {
+    dispatch(
+      dispatchSetKqlFilterQueryDraft({
+        id,
+        filterQueryDraft: {
+          kind: 'kuery',
+          expression: timeline.kqlQuery.filterQuery.kuery.expression || '',
+        },
+      })
+    );
     dispatch(
       dispatchApplyKqlFilterQuery({
         id,
