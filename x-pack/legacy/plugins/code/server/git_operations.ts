@@ -112,8 +112,11 @@ export class GitOperations {
     const gitdir = this.repoDir(uri);
     const commit: CommitInfo = await this.getCommitOr404(uri, revision);
     const git = simplegit(gitdir);
-    try {
-      const buffer: Buffer = await git.binaryCatFile(['blob', `${commit.id}:${path}`]);
+    const p = `${commit.id}:${path}`;
+
+    const type = await git.catFile(['-t', p]);
+    if (type.trim() === 'blob') {
+      const buffer: Buffer = await git.binaryCatFile(['blob', p]);
       return {
         content(): Buffer {
           return buffer;
@@ -125,7 +128,7 @@ export class GitOperations {
           return isBinaryFileSync(buffer);
         },
       } as BlobDescription;
-    } catch (e) {
+    } else {
       throw Boom.unsupportedMediaType(`${uri}/${path} is not a file.`);
     }
   }
