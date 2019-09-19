@@ -91,6 +91,11 @@ kibana_vars=(
     apm_oss.transactionIndices
     apm_oss.metricsIndices
     xpack.canvas.enabled
+    xpack.code.ui.enabled
+    xpack.code.indexRepoFrequencyMs
+    xpack.code.updateRepoFrequencyMs
+    xpack.code.lsp.verbose
+    xpack.code.verbose
     xpack.graph.enabled
     xpack.grokdebugger.enabled
     xpack.infra.enabled
