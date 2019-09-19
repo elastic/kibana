@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { fill } from 'lodash';
-import { of, from } from 'rxjs';
-import { mergeAll } from 'rxjs/operators';
+import { of, from, throwError } from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
 import { takeWithBackpressure, TAKE_RESULT } from './take_with_backpressure';
 
 async function acceptAnyValue(_: any) {
@@ -20,15 +20,15 @@ function acceptTheValue(expectedValue: any) {
 async function acceptOddNumbers(value: number) {
   return value % 2 === 1;
 }
+async function acceptEvenNumbers(value: number) {
+  return !(await acceptOddNumbers(value));
+}
 
 describe('takeWithBackpressure', () => {
   describe('take operation', () => {
     test('it should act as an operation on an observable stream', done => {
       of(1)
-        .pipe(
-          takeWithBackpressure(acceptAnyValue, 1),
-          mergeAll()
-        )
+        .pipe(takeWithBackpressure(acceptAnyValue, 1))
         .subscribe(([_, x]) => {
           expect(x).toEqual(1);
           done();
@@ -37,10 +37,7 @@ describe('takeWithBackpressure', () => {
 
     test('it should return a result that indicates whether the value coule be `taken` from the stream', done => {
       of(1)
-        .pipe(
-          takeWithBackpressure(acceptTheValue(1), 1),
-          mergeAll()
-        )
+        .pipe(takeWithBackpressure(acceptTheValue(1), 1))
         .subscribe(([result, x]: [TAKE_RESULT, number]) => {
           expect(x).toEqual(1);
           expect(result).toEqual(TAKE_RESULT.TAKEN);
@@ -50,10 +47,7 @@ describe('takeWithBackpressure', () => {
 
     test('it should return a result that indicates when a value coule not be `taken` from the stream', done => {
       of(1)
-        .pipe(
-          takeWithBackpressure(rejectAnyValue, 1),
-          mergeAll()
-        )
+        .pipe(takeWithBackpressure(rejectAnyValue, 1))
         .subscribe(([result, x]: [TAKE_RESULT, number]) => {
           expect(x).toEqual(1);
           expect(result).toEqual(TAKE_RESULT.TAKE_REJECTED);
@@ -63,10 +57,7 @@ describe('takeWithBackpressure', () => {
 
     test('it should return results for a stream of `taken` subjects', done => {
       of(1, 2, 3)
-        .pipe(
-          takeWithBackpressure(acceptTheValue(2), 3),
-          mergeAll()
-        )
+        .pipe(takeWithBackpressure(acceptTheValue(2), 3))
         .subscribe(
           ([result, x]: [TAKE_RESULT, number]) => {
             switch (x) {
@@ -90,10 +81,7 @@ describe('takeWithBackpressure', () => {
   describe('maintaining backpressure', () => {
     test('it should take only as many subjects as it has capacity for', done => {
       of(1, 2, 3)
-        .pipe(
-          takeWithBackpressure(acceptAnyValue, 2),
-          mergeAll()
-        )
+        .pipe(takeWithBackpressure(acceptAnyValue, 2))
         .subscribe(
           ([result, x]: [TAKE_RESULT, number]) => {
             switch (x) {
@@ -116,10 +104,7 @@ describe('takeWithBackpressure', () => {
     test('it should not count subjects which it has failed to take as part of its used capacity', done => {
       expect.assertions(3);
       of(1, 2, 3)
-        .pipe(
-          takeWithBackpressure(acceptOddNumbers, 2),
-          mergeAll()
-        )
+        .pipe(takeWithBackpressure(acceptOddNumbers, 2))
         .subscribe(
           ([result, x]: [TAKE_RESULT, number]) => {
             switch (x) {
@@ -139,7 +124,7 @@ describe('takeWithBackpressure', () => {
         );
     });
 
-    test('it should keep consuming values until it reaches its target capacity of takable subjects', done => {
+    test('it should keep consuming values until it reaches its target capacity of subjects to take', done => {
       const validSubject = () => ({ valid: true });
       const invalidSubject = () => ({ valid: false });
       const manyInvalidSubjets = Math.round(Math.random() * 100);
@@ -152,10 +137,7 @@ describe('takeWithBackpressure', () => {
 
       const results: Array<[TAKE_RESULT, { valid: boolean }]> = [];
       from(subjects)
-        .pipe(
-          takeWithBackpressure(async (subject: { valid: boolean }) => subject.valid, 2),
-          mergeAll()
-        )
+        .pipe(takeWithBackpressure(async (subject: { valid: boolean }) => subject.valid, 2))
         .subscribe(
           (result: [TAKE_RESULT, { valid: boolean }]) => {
             results.push(result);
@@ -170,16 +152,13 @@ describe('takeWithBackpressure', () => {
         );
     });
 
-    test('it should skip all valid subjects once it has reached its capacity', done => {
+    test('it should complete the subscription once it has reached its capacity and drained its queue', done => {
       expect.assertions(5);
       of(1, 2, 3, 4, 5)
-        .pipe(
-          takeWithBackpressure(acceptOddNumbers, 2),
-          mergeAll()
-        )
+        .pipe(takeWithBackpressure(acceptOddNumbers, 2))
         .subscribe(
-          ([result, x]: [TAKE_RESULT, number]) => {
-            switch (x) {
+          ([result, subject]: [TAKE_RESULT, number]) => {
+            switch (subject) {
               case 1:
                 expect(result).toEqual(TAKE_RESULT.TAKEN);
                 break;
@@ -202,7 +181,7 @@ describe('takeWithBackpressure', () => {
         );
     });
 
-    test('it should not execute the takeValidator for any subjects it doesnt have capacity for', done => {
+    test(`it should not execute the takeValidator for any subjects it doesn't have capacity for`, done => {
       expect.assertions(3);
       const subjects = [
         {
@@ -236,14 +215,14 @@ describe('takeWithBackpressure', () => {
           takeWithBackpressure(async subject => {
             expect(subject.isValidated).toEqual(true);
             return subject.isValid;
-          }, 2),
-          mergeAll()
+          }, 2)
         )
         .subscribe(() => {}, () => {}, done);
     });
   });
   describe('failure', () => {
     test('it should short circuit once an error occurs in the takeValidator', done => {
+      expect.assertions(6);
       of(
         { id: 1, throws: false },
         { id: 2, throws: false },
@@ -258,8 +237,7 @@ describe('takeWithBackpressure', () => {
               throw new Error('invalid!');
             }
             return true;
-          }, 3),
-          mergeAll()
+          }, 3)
         )
         .subscribe(
           ([result, subject]: [TAKE_RESULT, { id: number; throws: boolean }]) => {
@@ -284,8 +262,11 @@ describe('takeWithBackpressure', () => {
                 break;
             }
           },
-          () => {},
-          done
+          () => done(),
+          () => {
+            // observable should have ended with an error!
+            done.fail();
+          }
         );
     });
   });

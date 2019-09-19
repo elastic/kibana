@@ -10,7 +10,7 @@
  */
 
 import { from } from 'rxjs';
-import { mergeAll, map, filter, tap } from 'rxjs/operators';
+import { map, filter, tap } from 'rxjs/operators';
 import { takeWithBackpressure, TAKE_RESULT } from './lib/take_with_backpressure';
 import { Logger } from './types';
 import { TaskRunner } from './task_runner';
@@ -80,11 +80,10 @@ export class TaskPool {
       from(tasks)
         .pipe(
           takeWithBackpressure(task => task.claimOwnership(), this.availableWorkers),
-          mergeAll(),
           tap(ifTaskManagerHasRanOutOfWorkerCapacity(() => resolve(false))),
           tap(ifClaimingOwnershipThrewAnError(() => reject(false))),
           filter(taskManagerHasClaimedOwnership),
-          map(([_, task]) => task)
+          map(([, task]) => task)
         )
         .subscribe(
           task => {
@@ -138,6 +137,6 @@ function ifClaimingOwnershipThrewAnError(callback: () => void) {
   };
 }
 
-function taskManagerHasClaimedOwnership([result, _]: [TAKE_RESULT, TaskRunner]) {
+function taskManagerHasClaimedOwnership([result]: [TAKE_RESULT, TaskRunner]) {
   return result === TAKE_RESULT.TAKEN;
 }
