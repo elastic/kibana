@@ -48,7 +48,7 @@ export class ApplySiemFilterAction implements IAction<ActionContext> {
 
   public async execute({ embeddable, filters }: ActionContext) {
     if (!filters) {
-      throw new Error('Applying a filter requires a filter as context');
+      throw new TypeError('Applying a filter requires a filter as context');
     }
 
     // Parse queryExpression from queryDSL and apply to SIEM global KQL Bar via redux
