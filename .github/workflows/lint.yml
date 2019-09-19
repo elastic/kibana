@@ -19,5 +19,11 @@ jobs:
     name: ESLint
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10.15.2
       - name: ESLint checks
         uses: spalger/kibana-eslint-action@1.1
