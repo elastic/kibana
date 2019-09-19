@@ -19,9 +19,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
+import {
+  IAction,
+  createAction,
+  IncompatibleActionError,
+} from '../../../../../../../../plugins/ui_actions/public';
 import { IEmbeddable, EmbeddableInput } from '../embeddables';
-import { Action } from './action';
-import { IncompatibleActionError } from '../errors';
 
 export const APPLY_FILTER_ACTION = 'APPLY_FILTER_ACTION';
 
@@ -31,40 +34,38 @@ interface ActionContext {
   filters: Filter[];
 }
 
-export class ApplyFilterAction extends Action<ActionContext> {
-  public readonly type = APPLY_FILTER_ACTION;
-
-  constructor() {
-    super(APPLY_FILTER_ACTION);
+async function isCompatible(context: ActionContext) {
+  if (context.embeddable === undefined) {
+    return false;
   }
+  const root = context.embeddable.getRoot() as RootEmbeddable;
+  return Boolean(root.getInput().filters !== undefined && context.filters !== undefined);
+}
 
-  public getDisplayName() {
-    return i18n.translate('embeddableApi.actions.applyFilterActionTitle', {
-      defaultMessage: 'Apply filter to current view',
-    });
-  }
+export function createFilterAction(): IAction<ActionContext> {
+  return createAction<ActionContext>({
+    type: APPLY_FILTER_ACTION,
+    id: APPLY_FILTER_ACTION,
+    getDisplayName: () => {
+      return i18n.translate('embeddableApi.actions.applyFilterActionTitle', {
+        defaultMessage: 'Apply filter to current view',
+      });
+    },
+    isCompatible,
+    execute: async ({ embeddable, filters }) => {
+      if (!filters || !embeddable) {
+        throw new Error('Applying a filter requires a filter and embeddable as context');
+      }
 
-  public async isCompatible(context: ActionContext) {
-    if (context.embeddable === undefined) {
-      return false;
-    }
-    const root = context.embeddable.getRoot() as RootEmbeddable;
-    return Boolean(root.getInput().filters !== undefined && context.filters !== undefined);
-  }
+      if (!(await isCompatible({ embeddable, filters }))) {
+        throw new IncompatibleActionError();
+      }
 
-  public async execute({ embeddable, filters }: ActionContext) {
-    if (!filters || !embeddable) {
-      throw new Error('Applying a filter requires a filter and embeddable as context');
-    }
+      const root = embeddable.getRoot() as RootEmbeddable;
 
-    if (!(await this.isCompatible({ embeddable, filters }))) {
-      throw new IncompatibleActionError();
-    }
-
-    const root = embeddable.getRoot() as RootEmbeddable;
-
-    root.updateInput({
-      filters,
-    });
-  }
+      root.updateInput({
+        filters,
+      });
+    },
+  });
 }

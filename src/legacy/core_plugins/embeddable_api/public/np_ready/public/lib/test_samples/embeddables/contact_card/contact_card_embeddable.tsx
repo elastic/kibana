@@ -19,11 +19,11 @@
 import React from 'react';
 import ReactDom from 'react-dom';
 import { Subscription } from 'rxjs';
+import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
 import { Container } from '../../../containers';
 import { EmbeddableOutput, Embeddable, EmbeddableInput } from '../../../embeddables';
 import { CONTACT_CARD_EMBEDDABLE } from './contact_card_embeddable_factory';
 import { ContactCardEmbeddableComponent } from './contact_card';
-import { ExecuteTriggerActions } from '../../../types';
 
 export interface ContactCardEmbeddableInput extends EmbeddableInput {
   firstName: string;
@@ -37,7 +37,7 @@ export interface ContactCardEmbeddableOutput extends EmbeddableOutput {
 }
 
 export interface ContactCardEmbeddableOptions {
-  execAction: ExecuteTriggerActions;
+  execAction: TExecuteTriggerActions;
 }
 
 function getFullName(input: ContactCardEmbeddableInput) {

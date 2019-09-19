@@ -17,21 +17,5 @@
  * under the License.
  */
 
-import { EmbeddableApiPure } from './types';
-
-export const attachAction: EmbeddableApiPure['attachAction'] = ({ triggers }) => (
-  triggerId,
-  actionId
-) => {
-  const trigger = triggers.get(triggerId);
-
-  if (!trigger) {
-    throw new Error(
-      `No trigger [triggerId = ${triggerId}] exists, for attaching action [actionId = ${actionId}].`
-    );
-  }
-
-  if (!trigger.actionIds.find(id => id === actionId)) {
-    trigger.actionIds.push(actionId);
-  }
-};
+export { IAction } from './i_action';
+export { createAction } from './create_action';

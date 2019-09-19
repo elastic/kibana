@@ -17,16 +17,12 @@
  * under the License.
  */
 
-import { EmbeddableApiPure } from './types';
-import { Action } from '../lib';
+import { IUiActionsApiPure } from '../types';
 
-export const getTriggerCompatibleActions: EmbeddableApiPure['getTriggerCompatibleActions'] = ({
-  api,
-}) => async (triggerId, context) => {
-  const actions = api.getTriggerActions!(triggerId);
-  const isCompatibles = await Promise.all(actions.map(action => action.isCompatible(context)));
-  return actions.reduce<Action[]>(
-    (acc, action, i) => (isCompatibles[i] ? [...acc, action] : acc),
-    []
-  );
+export const registerTrigger: IUiActionsApiPure['registerTrigger'] = ({ triggers }) => trigger => {
+  if (triggers.has(trigger.id)) {
+    throw new Error(`Trigger [trigger.id = ${trigger.id}] already registered.`);
+  }
+
+  triggers.set(trigger.id, trigger);
 };
