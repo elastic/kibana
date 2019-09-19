@@ -4,54 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  // @ts-ignore
-  EuiHighlight,
-} from '@elastic/eui';
+import { rgba } from 'polished';
 import * as React from 'react';
 import { pure } from 'recompose';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-const FieldBadgeFlexGroup = styled(EuiFlexGroup)`
-  height: 38px;
+const Field = styled.div<{ fieldWidth?: string }>`
+  ${({ fieldWidth, theme }) => css`
+    background-color: ${theme.eui.euiColorEmptyShade};
+    border: ${theme.eui.euiBorderThin};
+    box-shadow: 0 2px 2px -1px ${rgba(theme.eui.euiColorMediumShade, 0.3)},
+      0 1px 5px -2px ${rgba(theme.eui.euiColorMediumShade, 0.3)};
+    font-size: ${theme.eui.euiFontSizeXS};
+    font-weight: ${theme.eui.euiFontWeightSemiBold};
+    line-height: ${theme.eui.euiLineHeight};
+    padding: ${theme.eui.paddingSizes.xs};
+    width: ${fieldWidth};
+  `}
 `;
-
-FieldBadgeFlexGroup.displayName = 'FieldBadgeFlexGroup';
-
-const FieldBadgeFlexItem = styled(EuiFlexItem)`
-  font-weight: bold;
-`;
-
-FieldBadgeFlexItem.displayName = 'FieldBadgeFlexItem';
-
-/**
- * The name of a (draggable) field
- */
-export const FieldNameContainer = styled.div`
-  padding: 5px;
-  &:hover {
-    transition: background-color 0.7s ease;
-    background-color: #000;
-    color: #fff;
-  }
-`;
-
-FieldNameContainer.displayName = 'FieldNameContainer';
+Field.displayName = 'Field';
 
 /**
  * Renders a field (e.g. `event.action`) as a draggable badge
  */
-export const DraggableFieldBadge = pure<{ fieldId: string }>(({ fieldId }) => (
-  <EuiBadge color="#000">
-    <FieldBadgeFlexGroup alignItems="center" justifyContent="center" gutterSize="none">
-      <FieldBadgeFlexItem data-test-subj="field" grow={false}>
-        {fieldId}
-      </FieldBadgeFlexItem>
-    </FieldBadgeFlexGroup>
-  </EuiBadge>
-));
-
+export const DraggableFieldBadge = pure<{ fieldId: string; fieldWidth?: string }>(
+  ({ fieldId, fieldWidth }) => (
+    <Field data-test-subj="field" fieldWidth={fieldWidth}>
+      {fieldId}
+    </Field>
+  )
+);
 DraggableFieldBadge.displayName = 'DraggableFieldBadge';

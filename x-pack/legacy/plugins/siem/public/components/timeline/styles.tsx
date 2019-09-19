@@ -104,7 +104,7 @@ EventsTh.displayName = 'EventsTh';
 export const EventsThContent = styled.div.attrs({
   className: 'siemEventsTable__thContent',
 })<{ textAlign?: string }>`
-  ${({ theme }) => css`
+  ${({ textAlign, theme }) => css`
     flex: 1;
     font-size: ${theme.eui.euiFontSizeXS};
     font-weight: ${theme.eui.euiFontWeightSemiBold};
@@ -112,7 +112,7 @@ export const EventsThContent = styled.div.attrs({
     max-width: 100%;
     min-width: 0;
     padding: ${theme.eui.paddingSizes.xs};
-    text-align: ${({ textAlign }) => textAlign};
+    text-align: ${textAlign};
   `}
 `;
 EventsThContent.displayName = 'EventsThContent';
@@ -223,14 +223,14 @@ EventsTd.displayName = 'EventsTd';
 export const EventsTdContent = styled.div.attrs({
   className: 'siemEventsTable__tdContent',
 })<{ textAlign?: string }>`
-  ${({ theme }) => css`
+  ${({ textAlign, theme }) => css`
     flex: 1;
     font-size: ${theme.eui.euiFontSizeXS};
     line-height: ${theme.eui.euiLineHeight};
     max-width: 100%;
     min-width: 0;
     padding: ${theme.eui.paddingSizes.xs};
-    text-align: ${({ textAlign }) => textAlign};
+    text-align: ${textAlign};
   `}
 `;
 EventsTdContent.displayName = 'EventsTdContent';

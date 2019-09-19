@@ -111,7 +111,6 @@ export const ColumnHeaders = React.memo<Props>(
 
           <DroppableWrapper
             droppableId={`${droppableTimelineColumnsPrefix}${timelineId}`}
-            // height={COLUMN_HEADERS_HEIGHT}
             isDropDisabled={false}
             type={DRAG_TYPE_FIELD}
           >
@@ -129,36 +128,37 @@ export const ColumnHeaders = React.memo<Props>(
                   type={DRAG_TYPE_FIELD}
                 >
                   {(provided, snapshot) => (
-                    <>
+                    <EventsTh
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      colWidth={header.width + 'px'}
+                      data-test-subj="draggable-header"
+                      innerRef={provided.innerRef}
+                      isDragging={snapshot.isDragging}
+                      position="relative"
+                    >
                       {!snapshot.isDragging ? (
-                        <EventsTh
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          colWidth={header.width + 'px'}
-                          data-test-subj="draggable-header"
-                          innerRef={provided.innerRef}
-                          isDragging={snapshot.isDragging}
-                          position="relative"
-                        >
-                          <EventsThContent>
-                            <Header
-                              timelineId={timelineId}
-                              header={header}
-                              onColumnRemoved={onColumnRemoved}
-                              onColumnResized={onColumnResized}
-                              onColumnSorted={onColumnSorted}
-                              onFilterChange={onFilterChange}
-                              setIsResizing={setIsResizing}
-                              sort={sort}
-                            />
-                          </EventsThContent>
-                        </EventsTh>
+                        <EventsThContent>
+                          <Header
+                            timelineId={timelineId}
+                            header={header}
+                            onColumnRemoved={onColumnRemoved}
+                            onColumnResized={onColumnResized}
+                            onColumnSorted={onColumnSorted}
+                            onFilterChange={onFilterChange}
+                            setIsResizing={setIsResizing}
+                            sort={sort}
+                          />
+                        </EventsThContent>
                       ) : (
                         <DragEffects>
-                          <DraggableFieldBadge fieldId={header.id} />
+                          <DraggableFieldBadge
+                            fieldId={header.id}
+                            fieldWidth={header.width + 'px'}
+                          />
                         </DragEffects>
                       )}
-                    </>
+                    </EventsTh>
                   )}
                 </Draggable>
               ))}
