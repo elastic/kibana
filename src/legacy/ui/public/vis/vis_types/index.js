@@ -18,7 +18,6 @@
  */
 
 import { BaseVisType } from './base_vis_type';
-import { VislibVisTypeProvider } from './vislib_vis_type';
 import { ReactVisType } from './react_vis_type';
 
-export { BaseVisType, VislibVisTypeProvider, ReactVisType };
+export { BaseVisType, ReactVisType };
