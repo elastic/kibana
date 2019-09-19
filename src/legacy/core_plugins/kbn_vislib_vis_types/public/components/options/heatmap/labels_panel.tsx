@@ -111,11 +111,15 @@ function LabelsPanel({ valueAxis, setValue }: LabelsPanelProps) {
       />
 
       <EuiFormRow
+        display="rowCompressed"
+        fullWidth
         label={i18n.translate('kbnVislibVisTypes.controls.heatmapOptions.colorLabel', {
           defaultMessage: 'Color',
         })}
       >
         <EuiColorPicker
+          compressed
+          fullWidth
           disabled={!valueAxis.labels.show || !valueAxis.labels.overwriteColor}
           color={valueAxis.labels.color}
           onChange={setColor}
