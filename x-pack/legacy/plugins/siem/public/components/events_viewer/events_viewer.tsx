@@ -10,11 +10,12 @@ import React from 'react';
 import styled from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { AutoSizer } from '../auto_sizer';
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
 import { KqlMode } from '../../store/timeline/model';
+import { AutoSizer } from '../auto_sizer';
+import { HeaderPanel } from '../header_panel';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 import { Sort } from '../timeline/body/sort';
@@ -23,11 +24,9 @@ import { DataProvider } from '../timeline/data_providers/data_provider';
 import { OnChangeItemsPerPage } from '../timeline/events';
 import { Footer, footerHeight } from '../timeline/footer';
 import { combineQueries } from '../timeline/helpers';
+import { TimelineRefetch } from '../timeline/refetch_timeline';
 import { isCompactFooter } from '../timeline/timeline';
 import { ManageTimelineContext } from '../timeline/timeline_context';
-import { HeaderPanel } from '../header_panel';
-
-import { TimelineRefetch } from '../timeline/refetch_timeline';
 import * as i18n from './translations';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;
@@ -200,5 +199,4 @@ export const EventsViewer = React.memo<Props>(
     prevProps.start === nextProps.start &&
     prevProps.sort === nextProps.sort
 );
-
 EventsViewer.displayName = 'EventsViewer';
