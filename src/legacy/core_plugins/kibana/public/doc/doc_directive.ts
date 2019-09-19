@@ -16,5 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { wrapInI18nContext } from 'ui/i18n';
+// @ts-ignore
+import { uiModules } from 'ui/modules';
+import { Doc } from './doc';
 
-import './controllers/doc';
+uiModules.get('apps/discover').directive('discoverDoc', function(reactDirective: any) {
+  return reactDirective(
+    wrapInI18nContext(Doc),
+    [
+      ['id', { watchDepth: 'value' }],
+      ['index', { watchDepth: 'value' }],
+      ['indexPatternId', { watchDepth: 'reference' }],
+      ['indexPatternService', { watchDepth: 'reference' }],
+      ['esClient', { watchDepth: 'reference' }],
+    ],
+    { restrict: 'E' }
+  );
+});
