@@ -26,6 +26,9 @@ const actionCreator = actionCreatorFactory('x-pack/graph');
 export const loadSavedWorkspace = actionCreator<GraphWorkspaceSavedObject>('LOAD_WORKSPACE');
 export const saveWorkspace = actionCreator<void>('SAVE_WORKSPACE');
 
+
+// TODO add error handling for things that could throw
+
 /**
  * Saga handling loading of a saved workspace.
  *

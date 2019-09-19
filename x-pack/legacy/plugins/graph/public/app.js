@@ -193,6 +193,7 @@ app.controller('graphuiPlugin', function (
     return checkLicense(Promise, kbnBaseUrl)
       .then(() => data);
   }
+  // TODO check license once and disable UI if it is not met
 
   function handleError(err) {
     return checkLicense(Promise, kbnBaseUrl)
