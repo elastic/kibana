@@ -77,8 +77,12 @@ export const ColumnHeaders = React.memo<Props>(
     minWidth,
   }) => {
     const { isResizing, setIsResizing } = isContainerResizing();
+
+    // Passing the styles directly to the component because the width is
+    // being calculated and is recommended by Styled Components for performance
+    // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
     return (
-      <EventsThead data-test-subj="column-headers" minWidth={minWidth}>
+      <EventsThead data-test-subj="column-headers" style={{ minWidth }}>
         <EventsTrHeader>
           <EventsThGroupActions
             actionsColumnWidth={actionsColumnWidth}
@@ -131,11 +135,11 @@ export const ColumnHeaders = React.memo<Props>(
                     <EventsTh
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
-                      colWidth={header.width + 'px'}
                       data-test-subj="draggable-header"
                       innerRef={provided.innerRef}
                       isDragging={snapshot.isDragging}
                       position="relative"
+                      style={{ flexBasis: header.width + 'px' }}
                     >
                       {!snapshot.isDragging ? (
                         <EventsThContent>

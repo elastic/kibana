@@ -18,7 +18,7 @@ export const DEFAULT_ACTIONS_COLUMN_WIDTH = 115; // px;
  * The (fixed) width of the Actions column when the timeline body is used as
  * an events viewer, which has fewer actions than a regular events viewer
  */
-export const EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH = 25; // px;
+export const EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH = 32; // px;
 /** The default minimum width of a column (when a width for the column type is not specified) */
 export const DEFAULT_COLUMN_MIN_WIDTH = 180; // px
 /** The default minimum width of a column of type `date` */

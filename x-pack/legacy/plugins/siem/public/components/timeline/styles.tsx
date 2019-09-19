@@ -41,11 +41,10 @@ EventsTable.displayName = 'EventsTable';
 export const EventsThead = styled.div.attrs({
   className: 'siemEventsTable__thead',
   role: 'rowgroup',
-})<{ minWidth: number }>`
+})`
   ${({ theme }) => css`
     background-color: ${theme.eui.euiColorEmptyShade}
     border-bottom: ${theme.eui.euiBorderWidthThick} solid ${theme.eui.euiColorLightShade};
-    min-width: ${({ minWidth }) => `${minWidth}px`};
     position: sticky;
     top: 0;
     z-index: ${theme.eui.euiZLevel1};
@@ -81,17 +80,12 @@ EventsThGroupData.displayName = 'EventsThGroupData';
 export const EventsTh = styled.div.attrs({
   className: 'siemEventsTable__th',
   role: 'columnheader',
-})<{ isDragging?: boolean; position?: string; colWidth?: string }>`
+})<{ isDragging?: boolean; position?: string }>`
   align-items: center;
   display: flex;
+  flex-shrink: 0;
   min-width: 0;
   position: ${({ position }) => position};
-
-  ${({ colWidth }) =>
-    colWidth &&
-    css`
-      flex: 0 0 ${colWidth};
-    `}
 
   .siemEventsTable__thGroupActions &:first-child:last-child {
     flex: 1;
@@ -122,8 +116,7 @@ EventsThContent.displayName = 'EventsThContent';
 export const EventsTbody = styled.div.attrs({
   className: 'siemEventsTable__tbody',
   role: 'rowgroup',
-})<{ minWidth: number }>`
-  min-width: ${({ minWidth }) => minWidth + 'px'};
+})`
   overflow-x: hidden;
 `;
 EventsTbody.displayName = 'EventsTbody';
@@ -180,16 +173,11 @@ EventsTdGroupData.displayName = 'EventsTdGroupData';
 export const EventsTd = styled.div.attrs({
   className: 'siemEventsTable__td',
   role: 'cell',
-})<{ colWidth?: string }>`
+})`
   align-items: center;
   display: flex;
+  flex-shrink: 0;
   min-width: 0;
-
-  ${({ colWidth }) =>
-    colWidth &&
-    css`
-      flex: 0 0 ${colWidth};
-    `}
 
   .siemEventsTable__tdGroupActions &:first-child:last-child {
     flex: 1;

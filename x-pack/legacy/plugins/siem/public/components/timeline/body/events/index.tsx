@@ -40,6 +40,9 @@ interface Props {
   updateNote: UpdateNote;
 }
 
+// Passing the styles directly to the component because the width is
+// being calculated and is recommended by Styled Components for performance
+// https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
 export const Events = React.memo<Props>(
   ({
     actionsColumnWidth,
@@ -62,7 +65,7 @@ export const Events = React.memo<Props>(
     toggleColumn,
     updateNote,
   }) => (
-    <EventsTbody data-test-subj="events" minWidth={minWidth}>
+    <EventsTbody data-test-subj="events" style={{ minWidth }}>
       {data.map((event, i) => (
         <StatefulEvent
           actionsColumnWidth={actionsColumnWidth}

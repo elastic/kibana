@@ -26,10 +26,13 @@ export class DataDrivenColumns extends React.PureComponent<Props> {
   public render() {
     const { _id, columnHeaders, columnRenderers, data, timelineId } = this.props;
 
+    // Passing the styles directly to the component because the width is
+    // being calculated and is recommended by Styled Components for performance
+    // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
     return (
       <EventsTdGroupData data-test-subj="data-driven-columns">
         {columnHeaders.map((header, index) => (
-          <EventsTd colWidth={`${header.width}px`} key={header.id}>
+          <EventsTd key={header.id} style={{ flexBasis: header.width + 'px' }}>
             <EventsTdContent data-test-subj="cell-container">
               {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
                 columnName: header.id,
