@@ -27,7 +27,7 @@ import {
   Schemas,
 } from './build_pipeline';
 import { Vis, VisState } from 'ui/vis';
-import { AggConfig } from 'ui/vis/agg_config';
+import { AggConfig } from 'ui/agg_types/agg_config';
 import { SearchSource } from 'ui/courier';
 
 jest.mock('ui/new_platform');

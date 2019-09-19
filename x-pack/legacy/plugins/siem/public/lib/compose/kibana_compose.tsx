@@ -10,8 +10,6 @@ import ApolloClient from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
 import 'ui/autoload/all';
 // @ts-ignore: path dynamic for kibana
-import chrome from 'ui/chrome';
-// @ts-ignore: path dynamic for kibana
 import { uiModules } from 'ui/modules';
 
 import introspectionQueryResultData from '../../graphql/introspection.json';
