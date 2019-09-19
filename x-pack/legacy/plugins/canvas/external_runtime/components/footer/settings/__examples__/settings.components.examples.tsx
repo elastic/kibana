@@ -8,8 +8,8 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
-import { AutoplaySettings } from '../footer/settings/autoplay_settings';
-import { ToolbarSettings } from '../footer/settings/toolbar_settings';
+import { AutoplaySettings } from '../autoplay_settings';
+import { ToolbarSettings } from '../toolbar_settings';
 
 storiesOf('runtime/Settings/components', module)
   .add('AutoplaySettings, autoplay disabled', () => (

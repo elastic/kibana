@@ -11,17 +11,18 @@ export type onSetAutohideProp = (isAutohide: boolean) => void;
 
 interface Props {
   isAutohide: boolean;
-  onSetAutohide?: onSetAutohideProp;
+  onSetAutohide: onSetAutohideProp;
 }
 
 /**
  * The settings panel for the Toolbar of an Embedded Workpad.
  */
-export const ToolbarSettings = ({ isAutohide, onSetAutohide = () => {} }: Props) => {
+export const ToolbarSettings = ({ isAutohide, onSetAutohide }: Props) => {
   return (
     <div style={{ padding: 16 }}>
       <EuiFormRow helpText="Hide the toolbar when the mouse is not within the Canvas?">
         <EuiSwitch
+          data-test-subj="hideToolbarSwitch"
           name="toolbarHide"
           id="toolbarHide"
           label="Hide Toolbar"

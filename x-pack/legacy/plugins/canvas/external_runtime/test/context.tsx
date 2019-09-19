@@ -4,18 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties, RefObject } from 'react';
 import {
   initialExternalEmbedState,
   ExternalEmbedStateProvider,
   useExternalEmbedState,
-} from '../index';
-import { renderers as renderFunctions } from './renderers';
-import { ExternalEmbedState } from '../../types';
-import json from '../../test/hello.json';
-import { RendererSpec } from '../../../types';
+} from '../context/index';
+import { renderFunctions } from '../supported_renderers';
+import { ExternalEmbedState } from '../types';
+import { RendererSpec } from '../../types';
+import { snapshots, SnapshotNames } from '.';
 
-const Container = ({ children, height, width, style }: Props) => {
+jest.mock('../supported_renderers');
+
+const Container = ({
+  children,
+  height,
+  width,
+  style,
+}: Pick<Props, 'children' | 'height' | 'width' | 'style'>) => {
   const [{ refs }] = useExternalEmbedState();
   return (
     <div
@@ -30,12 +37,27 @@ const Container = ({ children, height, width, style }: Props) => {
 
 interface Props {
   children: any;
+  source?: SnapshotNames;
   height?: number;
   width?: number;
   isScrubberVisible?: boolean;
   style?: CSSProperties;
+  stageRef?: RefObject<HTMLDivElement>;
+  toolbar?: boolean;
+  autoplay?: boolean;
 }
-export const Context = ({ children, height, width, isScrubberVisible, style }: Props) => {
+
+export const TestingContext = ({
+  children,
+  height,
+  width,
+  isScrubberVisible,
+  style,
+  stageRef,
+  source = 'hello',
+  toolbar,
+  autoplay,
+}: Props) => {
   const renderers: { [key: string]: RendererSpec } = {};
 
   renderFunctions.forEach(rendererFn => {
@@ -43,7 +65,8 @@ export const Context = ({ children, height, width, isScrubberVisible, style }: P
     renderers[renderer.name] = renderer;
   });
 
-  const { footer } = initialExternalEmbedState;
+  const { footer, settings } = initialExternalEmbedState;
+  const { toolbar: toolbarSettings, autoplay: autoplaySettings } = settings;
 
   const initialState: ExternalEmbedState = {
     ...initialExternalEmbedState,
@@ -51,15 +74,26 @@ export const Context = ({ children, height, width, isScrubberVisible, style }: P
       ...footer,
       isScrubberVisible: isScrubberVisible || footer.isScrubberVisible,
     },
+    settings: {
+      ...settings,
+      toolbar: {
+        ...toolbarSettings,
+        isAutohide: !!toolbar,
+      },
+      autoplay: {
+        ...autoplaySettings,
+        isEnabled: !!autoplay,
+      },
+    },
     stage: {
       height: 400,
       page: 0,
       width: 600,
     },
     renderers,
-    workpad: json,
+    workpad: snapshots[source],
     refs: {
-      stage: React.createRef(),
+      stage: stageRef || React.createRef(),
     },
   };
 

@@ -8,8 +8,8 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
-import { Title } from '../footer/title';
-import { PageControls } from '../footer/page_controls';
+import { Title } from '../title';
+import { PageControls } from '../page_controls';
 
 storiesOf('runtime/Footer/components', module)
   .add('Title', () => (

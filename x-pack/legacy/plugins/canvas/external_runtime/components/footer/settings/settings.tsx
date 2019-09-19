@@ -20,6 +20,7 @@ import { AutoplaySettings } from './autoplay_settings.container';
 interface Props {
   refs: Refs;
 }
+
 /**
  * The Settings Popover for External Workpads.
  */

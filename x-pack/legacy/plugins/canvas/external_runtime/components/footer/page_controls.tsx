@@ -28,6 +28,7 @@ export const PageControls = ({ onSetPageNumber, page, totalPages, onToggleScrubb
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           color="ghost"
+          data-test-subj="pageControlsPrevPage"
           onClick={() => onSetPageNumber(page - 1)}
           iconType="arrowLeft"
           disabled={currentPage <= 1}
@@ -35,7 +36,12 @@ export const PageControls = ({ onSetPageNumber, page, totalPages, onToggleScrubb
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty color="ghost" size="s" onClick={onToggleScrubber}>
+        <EuiButtonEmpty
+          color="ghost"
+          size="s"
+          onClick={onToggleScrubber}
+          data-test-subj="pageControlsCurrentPage"
+        >
           <EuiText color="ghost" size="s">
             Page {currentPage}
             {totalPages > 1 ? ` of ${totalPages}` : null}
@@ -45,6 +51,7 @@ export const PageControls = ({ onSetPageNumber, page, totalPages, onToggleScrubb
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           color="ghost"
+          data-test-subj="pageControlsNextPage"
           onClick={() => onSetPageNumber(page + 1)}
           iconType="arrowRight"
           disabled={currentPage >= totalPages}

@@ -87,7 +87,6 @@ export interface Settings {
 export interface AutoplaySettings {
   isEnabled: boolean;
   interval: string;
-  isAnimated: boolean;
 }
 
 export interface ToolbarSettings {

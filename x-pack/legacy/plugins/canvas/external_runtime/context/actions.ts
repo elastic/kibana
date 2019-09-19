@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CanvasRenderedWorkpad } from '../types';
-
 /**
  * This enumeration applies a strong type to all of the actions that can be
  * triggered from the interface.
@@ -15,7 +13,6 @@ export enum ExternalEmbedActions {
   SET_PAGE = 'SET_PAGE',
   SET_SCRUBBER_VISIBLE = 'SET_SCRUBBER_VISIBLE',
   SET_AUTOPLAY = 'SET_AUTOPLAY',
-  SET_AUTOPLAY_ANIMATE = 'SET_AUTOPLAY_ANIMATE',
   SET_AUTOPLAY_INTERVAL = 'SET_AUTOPLAY_INTERVAL',
   SET_TOOLBAR_AUTOHIDE = 'SET_TOOLBAR_AUTOHIDE',
 }
@@ -32,13 +29,6 @@ const createAction = <T extends ExternalEmbedActions, P>(
   type,
   payload,
 });
-
-/**
- * Set the current `CanvasRenderedWorkpad`.
- * @param workpad A `CanvasRenderedWorkpad` to display.
- */
-export const setWorkpadAction = (workpad: CanvasRenderedWorkpad) =>
-  createAction(ExternalEmbedActions.SET_WORKPAD, { workpad });
 
 /**
  * Set the current page to display
@@ -63,13 +53,6 @@ export const setAutoplayAction = (isEnabled: boolean) =>
   createAction(ExternalEmbedActions.SET_AUTOPLAY, { isEnabled });
 
 /**
- * Set whether the slides should animate when advanced.
- * @param animate True if it should animate when advanced, false otherwise.
- */
-export const setAutoplayAnimateAction = (isAnimated: boolean) =>
-  createAction(ExternalEmbedActions.SET_AUTOPLAY_ANIMATE, { isAnimated });
-
-/**
  * Set the interval in which slide will advance.  This is a `string` identical to
  * that used in Canvas proper: `1m`, `2s`, etc.
  * @param autoplay The interval in which slides should advance.
@@ -86,11 +69,9 @@ export const setToolbarAutohideAction = (isAutohide: boolean) =>
   createAction(ExternalEmbedActions.SET_TOOLBAR_AUTOHIDE, { isAutohide });
 
 const actions = {
-  setWorkpadAction,
   setPageAction,
   setScrubberVisibleAction,
   setAutoplayAction,
-  setAutoplayAnimateAction,
   setAutoplayIntervalAction,
   setToolbarAutohideAction,
 };

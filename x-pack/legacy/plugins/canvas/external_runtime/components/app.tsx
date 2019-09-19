@@ -5,12 +5,11 @@
  */
 
 import React from 'react';
-import { Canvas } from './canvas.container';
-import { initialExternalEmbedState, ExternalEmbedStateProvider } from '../context';
-// @ts-ignore Untyped local
-import { renderFunctions } from '../../canvas_plugin_src/renderers';
 import { CanvasRenderedWorkpad, ExternalEmbedState, Stage } from '../types';
-import { RendererFactory, RendererSpec } from '../../types';
+import { RendererSpec } from '../../types';
+import { initialExternalEmbedState, ExternalEmbedStateProvider } from '../context';
+import { Canvas } from './canvas.container';
+import { renderFunctions } from '../supported_renderers';
 
 interface Props {
   stage: Stage;
@@ -24,11 +23,10 @@ export const App = (props: Props) => {
   const { workpad, stage } = props;
 
   const renderers: { [key: string]: RendererSpec } = {};
-  renderFunctions.forEach((fn: RendererFactory | undefined) => {
-    if (fn) {
-      const func = fn();
-      renderers[func.name] = func;
-    }
+
+  renderFunctions.forEach(fn => {
+    const func = fn();
+    renderers[func.name] = func;
   });
 
   const initialState: ExternalEmbedState = {

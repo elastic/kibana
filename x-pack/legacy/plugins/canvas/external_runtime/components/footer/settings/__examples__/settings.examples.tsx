@@ -5,25 +5,25 @@
  */
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { Context } from '../../context/mock';
+import { TestingContext } from '../../../../test';
 
-import { AutoplaySettings } from '../footer/settings/autoplay_settings.container';
-import { Settings } from '../footer/settings/settings.container';
-import { ToolbarSettings } from '../footer/settings/toolbar_settings.container';
+import { AutoplaySettings } from '../autoplay_settings.container';
+import { Settings } from '../settings.container';
+import { ToolbarSettings } from '../toolbar_settings.container';
 
 storiesOf('runtime/Settings', module)
   .add('Settings', () => (
-    <Context style={{ background: '#333', padding: 10 }}>
+    <TestingContext style={{ background: '#333', padding: 10 }}>
       <Settings />
-    </Context>
+    </TestingContext>
   ))
   .add('AutoplaySettings', () => (
-    <Context width={250} style={{ background: '#fff' }}>
+    <TestingContext width={250} style={{ background: '#fff' }}>
       <AutoplaySettings />
-    </Context>
+    </TestingContext>
   ))
   .add('ToolbarSettings', () => (
-    <Context width={250} style={{ background: '#fff' }}>
+    <TestingContext width={250} style={{ background: '#fff' }}>
       <ToolbarSettings />
-    </Context>
+    </TestingContext>
   ));

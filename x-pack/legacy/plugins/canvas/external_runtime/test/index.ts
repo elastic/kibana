@@ -4,4 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import hello from './hello.json';
+import austin from './austin.json';
+import test from './test.json';
+
+export * from './utils';
 export * from './context';
+
+export type SnapshotNames = 'hello' | 'austin' | 'test';
+export const snapshots = { hello, austin, test };

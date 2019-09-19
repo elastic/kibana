@@ -26,7 +26,6 @@ export const initialExternalEmbedState: ExternalEmbedState = {
     autoplay: {
       isEnabled: false,
       interval: '5s',
-      isAnimated: false,
     },
     toolbar: {
       isAutohide: false,
