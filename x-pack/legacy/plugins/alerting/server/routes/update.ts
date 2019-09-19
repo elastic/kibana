@@ -21,52 +21,50 @@ interface UpdateRequest extends Hapi.Request {
   };
 }
 
-export function updateAlertRoute(server: Hapi.Server) {
-  server.route({
-    method: 'PUT',
-    path: '/api/alert/{id}',
-    options: {
-      tags: ['access:alerting-all'],
-      validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: Joi.object()
-          .keys({
-            interval: Joi.alternatives()
-              .try(
-                Joi.string()
-                  .regex(SECONDS_REGEX, 'seconds')
-                  .required(),
-                Joi.string()
-                  .regex(MINUTES_REGEX, 'minutes')
-                  .required(),
-                Joi.string()
-                  .regex(HOURS_REGEX, 'hours')
-                  .required(),
-                Joi.string()
-                  .regex(DAYS_REGEX, 'days')
-                  .required()
-              )
-              .required(),
-            alertTypeParams: Joi.object().required(),
-            actions: Joi.array()
-              .items(
-                Joi.object().keys({
-                  group: Joi.string().required(),
-                  id: Joi.string().required(),
-                  params: Joi.object().required(),
-                })
-              )
-              .required(),
-          })
-          .required(),
+export const updateAlertRoute = {
+  method: 'PUT',
+  path: '/api/alert/{id}',
+  config: {
+    tags: ['access:alerting-all'],
+    validate: {
+      options: {
+        abortEarly: false,
       },
+      payload: Joi.object()
+        .keys({
+          interval: Joi.alternatives()
+            .try(
+              Joi.string()
+                .regex(SECONDS_REGEX, 'seconds')
+                .required(),
+              Joi.string()
+                .regex(MINUTES_REGEX, 'minutes')
+                .required(),
+              Joi.string()
+                .regex(HOURS_REGEX, 'hours')
+                .required(),
+              Joi.string()
+                .regex(DAYS_REGEX, 'days')
+                .required()
+            )
+            .required(),
+          alertTypeParams: Joi.object().required(),
+          actions: Joi.array()
+            .items(
+              Joi.object().keys({
+                group: Joi.string().required(),
+                id: Joi.string().required(),
+                params: Joi.object().required(),
+              })
+            )
+            .required(),
+        })
+        .required(),
     },
-    async handler(request: UpdateRequest) {
-      const { id } = request.params;
-      const alertsClient = request.getAlertsClient!();
-      return await alertsClient.update({ id, data: request.payload });
-    },
-  });
-}
+  },
+  async handler(request: UpdateRequest) {
+    const { id } = request.params;
+    const alertsClient = request.getAlertsClient!();
+    return await alertsClient.update({ id, data: request.payload });
+  },
+};

@@ -8,7 +8,7 @@ import { createMockServer } from './_mock_server';
 import { createAlertRoute } from './create';
 
 const { server, alertsClient } = createMockServer();
-createAlertRoute(server);
+server.route(createAlertRoute);
 
 const mockedAlert = {
   alertTypeId: '1',

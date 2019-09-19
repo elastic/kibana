@@ -21,8 +21,8 @@ import { createOptionalPlugin } from '../../../server/lib/optional_plugin';
 import {
   createAlertRoute,
   deleteAlertRoute,
-  findRoute,
-  getRoute,
+  findAlertRoute,
+  getAlertRoute,
   listAlertTypesRoute,
   updateAlertRoute,
   enableAlertRoute,
@@ -117,14 +117,14 @@ export function init(server: Server) {
   });
 
   // Register routes
-  createAlertRoute(server);
-  deleteAlertRoute(server);
-  findRoute(server);
-  getRoute(server);
-  listAlertTypesRoute(server);
-  updateAlertRoute(server);
-  enableAlertRoute(server);
-  disableAlertRoute(server);
+  server.route(createAlertRoute);
+  server.route(deleteAlertRoute);
+  server.route(findAlertRoute);
+  server.route(getAlertRoute);
+  server.route(listAlertTypesRoute);
+  server.route(updateAlertRoute);
+  server.route(enableAlertRoute);
+  server.route(disableAlertRoute);
 
   // Expose functions
   server.decorate('request', 'getAlertsClient', function() {
