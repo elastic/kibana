@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -17,26 +17,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { WaffleViewState } from '../../containers/waffle/with_waffle_view_state';
-import { initialWaffleOptionsState } from '../../store/local/waffle_options';
-import { initialWaffleTimeState } from '../../store/local/waffle_time';
+import { WaffleViewState, SavedView } from '../../containers/waffle/with_waffle_view_state';
 
-interface View extends WaffleViewState {
-  name: string;
-  id: string;
-  isDefault?: boolean;
-}
 interface Props {
-  close(): void;
-  views: View[];
+  views: SavedView[];
   loading: boolean;
+  close(): void;
   loadView(vs: WaffleViewState): void;
   deleteView(id: string): void;
 }
 
 export const SavedViewListFlyout = ({ close, views, loadView, deleteView, loading }: Props) => {
-  const removeView = useCallback(e => deleteView(e.id), []);
-
   const columns = [
     {
       field: 'name',
@@ -68,28 +59,14 @@ export const SavedViewListFlyout = ({ close, views, loadView, deleteView, loadin
           description: i18n.translate('xpack.infra.openView.actionDescription.delete', {
             defaultMessage: 'Delete a view',
           }),
-          available: (item: View) => !item.isDefault,
           icon: 'trash',
           color: 'danger',
-          onClick: removeView,
+          available: (item: SavedView) => !item.isDefault,
+          onClick: useCallback(e => deleteView(e.id), []),
         },
       ],
     },
   ];
-
-  const viewsWithDefault = useMemo(() => {
-    views.unshift({
-      name: i18n.translate('xpack.infra.openView.defaultViewName', {
-        defaultMessage: 'Default View',
-      }),
-      id: '0',
-      isDefault: true,
-      filterQuery: null,
-      ...initialWaffleOptionsState,
-      ...initialWaffleTimeState,
-    });
-    return views;
-  }, [views]);
 
   return (
     <EuiFlyout onClose={close}>
@@ -103,7 +80,7 @@ export const SavedViewListFlyout = ({ close, views, loadView, deleteView, loadin
 
       <EuiFlyoutBody>
         <EuiInMemoryTable
-          items={viewsWithDefault}
+          items={views}
           columns={columns}
           loading={loading}
           search={true}

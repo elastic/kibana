@@ -121,10 +121,12 @@ export const SnapshotToolbar = injectI18n(({ intl }) => (
                       jumpToTime,
                       startAutoReload,
                       stopAutoReload,
-                      viewState,
                       applyFilterQuery,
+                      viewState,
+                      defaultViewState,
                     }) => (
                       <SavedViewsToolbarControls
+                        defaultViewState={defaultViewState}
                         viewState={viewState}
                         changeMetric={changeMetric}
                         changeGroupBy={changeGroupBy}

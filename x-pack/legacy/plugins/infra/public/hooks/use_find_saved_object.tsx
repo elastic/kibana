@@ -10,20 +10,20 @@ import { npStart } from 'ui/new_platform';
 import { SavedObjectsBatchResponse } from 'src/core/public';
 import { SavedObjectAttributes } from 'src/core/server';
 
-export const useFindSavedObject = (type: string) => {
-  const [data, setData] = useState<SavedObjectsBatchResponse<SavedObjectAttributes> | null>(null);
+export const useFindSavedObject = <SavedObjectType extends SavedObjectAttributes>(type: string) => {
+  const [data, setData] = useState<SavedObjectsBatchResponse<SavedObjectType> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
   const find = useCallback(
-    (query?: string) => {
+    (query?: string, searchFields: string[] = []) => {
       setLoading(true);
       const fetchData = async () => {
         try {
-          const d = await npStart.core.savedObjects.client.find({
+          const d = await npStart.core.savedObjects.client.find<SavedObjectType>({
             type,
             search: query,
-            searchFields: ['data.name'],
+            searchFields,
           });
           setLoading(false);
           setData(d);

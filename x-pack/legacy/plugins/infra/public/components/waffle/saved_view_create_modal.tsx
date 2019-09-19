@@ -20,10 +20,11 @@ import {
   EuiCheckbox,
   EuiSpacer,
 } from '@elastic/eui';
+import { SavedViewSavedObject } from './saved_views_toolbar_items';
 
 interface Props {
   close(): void;
-  save(view: { type: string; data: { [p: string]: string } }): void;
+  save(view: SavedViewSavedObject, shouldIncludeTime: boolean): void;
 }
 
 export const SavedViewCreateModal = ({ close, save }: Props) => {
@@ -34,16 +35,17 @@ export const SavedViewCreateModal = ({ close, save }: Props) => {
   }, []);
 
   const saveView = useCallback(() => {
-    save({
-      type: 'SAVED_VIEW',
-      data: { name: viewName },
-    });
+    save(
+      {
+        type: 'SAVED_VIEW',
+        data: { name: viewName },
+      },
+      includeTime
+    );
     close();
   }, [viewName]);
 
-  const handleCheckboxChange = useCallback(e => {
-    setIncludeTime(e.target.checked);
-  }, []);
+  const onCheckChange = useCallback(e => setIncludeTime(e.target.checked), []);
 
   return (
     <EuiOverlayMask>
@@ -76,7 +78,7 @@ export const SavedViewCreateModal = ({ close, save }: Props) => {
               />
             }
             checked={includeTime}
-            onChange={handleCheckboxChange}
+            onChange={onCheckChange}
           />
         </EuiModalBody>
 

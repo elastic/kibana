@@ -14,6 +14,7 @@ import {
   waffleTimeActions,
   waffleFilterActions,
   waffleFilterSelectors,
+  initialState,
 } from '../../store';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
@@ -63,6 +64,7 @@ interface Props {
 export const withWaffleViewState = connect(
   (state: State) => ({
     viewState: selectViewState(state),
+    defaultViewState: selectViewState(initialState),
   }),
   (dispatch, ownProps: Props) =>
     bindPlainActionCreators({
@@ -103,4 +105,10 @@ export interface WaffleViewState {
   time?: ReturnType<typeof waffleTimeSelectors.selectCurrentTime>;
   autoReload?: ReturnType<typeof waffleTimeSelectors.selectIsAutoReloading>;
   filterQuery?: ReturnType<typeof waffleFilterSelectors.selectWaffleFilterQuery>;
+}
+
+export interface SavedView extends WaffleViewState {
+  name: string;
+  id: string;
+  isDefault?: boolean;
 }
