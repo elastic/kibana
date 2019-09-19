@@ -76,6 +76,7 @@ export interface LegacyPluginOptions {
     interpreter?: string[];
     uiSettingDefaults?: Record<string, any>;
   }>;
+  // TODO: Revise the field when Timelion plugin is moved from legacy to plugins.
   uiCapabilities?: Capabilities | (() => Partial<Capabilities>);
   publicDir: any;
   configPrefix: any;
