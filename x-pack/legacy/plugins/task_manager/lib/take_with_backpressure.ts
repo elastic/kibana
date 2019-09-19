@@ -24,8 +24,8 @@ interface BackpressuredTakeState<T> {
 
 interface BackpressuredTakeSubject {
   attemptToTake: () => Promise<boolean>;
-  skip: () => void;
-  fail: () => void;
+  skip: () => Promise<void>;
+  fail: () => Promise<void>;
 }
 
 function drainQueue(
@@ -51,11 +51,11 @@ function createQueuePoller<T>(
   return async function poll() {
     if (!isThereAnyWorkToBeDone(state)) {
       observer.complete();
-    } else {
+    } else if (state.queue.length) {
       if (state.taken === capacity) {
         await drainQueue(state.queue, subjectToSkip => subjectToSkip.skip());
         poll();
-      } else if (state.queue.length && state.taken + state.pending < capacity) {
+      } else if (state.taken + state.pending < capacity) {
         const subject = state.queue.shift()!;
         try {
           state.pending++;
@@ -94,12 +94,10 @@ function pushIntoQueue<T>(
         }
       },
       skip() {
-        resolve([TAKE_RESULT.RAN_OUT_OF_CAPACITY, subject]);
-        return Promise.resolve();
+        return Promise.resolve(resolve([TAKE_RESULT.RAN_OUT_OF_CAPACITY, subject]));
       },
       fail() {
-        resolve([TAKE_RESULT.TAKE_FAILURE, subject]);
-        return Promise.resolve();
+        return Promise.resolve(resolve([TAKE_RESULT.TAKE_FAILURE, subject]));
       },
     });
     poll();
