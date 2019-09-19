@@ -85,7 +85,7 @@ export default function({ getService }: FtrProviderContext) {
     });
     */
 
-    describe.skip('job creation', function() {
+    describe('job creation', function() {
       it('loads the job management page', async () => {
         await ml.navigation.navigateToMl();
         await ml.navigation.navigateToJobManagement();
