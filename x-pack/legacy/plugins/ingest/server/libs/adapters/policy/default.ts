@@ -5,9 +5,10 @@
  */
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
+import { isRight } from 'fp-ts/lib/Either';
+import { SavedObjectsBulkGetObject } from 'src/core/server';
 import { SODatabaseAdapter } from '../so_database/default';
 import { RuntimePolicyFile, NewPolicyFile } from './adapter_types';
-
 import { PolicyFile, DatasourceInput, BackupPolicyFile } from './adapter_types';
 
 export class PolicyAdapter {
@@ -39,8 +40,8 @@ export class PolicyAdapter {
 
     const decoded = RuntimePolicyFile.decode(policy);
 
-    if (decoded.isRight()) {
-      return policy as PolicyFile;
+    if (isRight(decoded)) {
+      return decoded.right;
     } else {
       throw new Error(
         `Invalid PolicyFile data. == ${JSON.stringify(policy)} -- ${PathReporter.report(decoded)}`
@@ -65,8 +66,8 @@ export class PolicyAdapter {
         };
         const decoded = RuntimePolicyFile.decode(policy);
 
-        if (decoded.isRight()) {
-          return policy;
+        if (isRight(decoded)) {
+          return decoded.right;
         } else {
           throw new Error(
             `Invalid PolicyFile data. == ${JSON.stringify(policy)}  -- ${PathReporter.report(
@@ -118,8 +119,9 @@ export class PolicyAdapter {
         id: policySO.id,
         ...policySO.attributes,
       };
-      if (RuntimePolicyFile.decode(policy).isRight()) {
-        return policy;
+      const decoded = RuntimePolicyFile.decode(policy);
+      if (isRight(decoded)) {
+        return decoded.right;
       } else {
         throw new Error(`Invalid PolicyFile data. == ${policy}`);
       }
@@ -164,7 +166,7 @@ export class PolicyAdapter {
     if (!policy.attributes) {
       throw new Error(`No backup policy found with ID of ${id}`);
     }
-    if (RuntimePolicyFile.decode(policy.attributes).isRight()) {
+    if (isRight(RuntimePolicyFile.decode(policy.attributes))) {
       return policy.attributes as BackupPolicyFile;
     } else {
       throw new Error(`Invalid BackupPolicyFile data. == ${policy.attributes}`);
@@ -174,23 +176,15 @@ export class PolicyAdapter {
   /**
    * Inputs sub-domain type
    */
-  public async getInputsById(
-    ids: string[],
-    page: number = 1,
-    perPage: number = 25
-  ): Promise<DatasourceInput[]> {
-    const inputs = await this.so.find({
-      type: 'policies',
-      search: ids.reduce((query, id, i) => {
-        if (i === ids.length - 1) {
-          return `${query} ${id}`;
-        }
-        return `${query} ${id} |`;
-      }, ''),
-      searchFields: ['id'],
-      perPage,
-      page,
-    });
+  public async getInputsById(ids: string[]): Promise<DatasourceInput[]> {
+    const inputs = await this.so.bulkGet(
+      ids.map(
+        (id): SavedObjectsBulkGetObject => ({
+          id,
+          type: 'inputs',
+        })
+      )
+    );
 
     return inputs.saved_objects.map(input => input.attributes);
   }
@@ -201,7 +195,7 @@ export class PolicyAdapter {
     perPage: number = 25
   ): Promise<DatasourceInput[]> {
     const inputs = await this.so.find({
-      type: 'policies',
+      type: 'inputs',
       search: policyId,
       searchFields: ['policy_id'],
       perPage,
@@ -216,7 +210,6 @@ export class PolicyAdapter {
     for (const input of inputs) {
       newInputs.push(await this.so.create<DatasourceInput>('inputs', input));
     }
-
     return newInputs.map(input => input.id);
   }
 

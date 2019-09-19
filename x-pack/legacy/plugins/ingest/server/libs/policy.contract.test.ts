@@ -11,6 +11,11 @@ import * as elasticsearch from 'elasticsearch';
 import { FrameworkAuthenticatedUser } from './adapters/framework/adapter_types';
 import { INDEX_NAMES } from '../../common/constants/index_names';
 
+jest.mock('uuid/v4', () => {
+  let uuid = 1;
+  return () => `uuid-${uuid++}`;
+});
+
 describe('Policies Lib', () => {
   let servers: any;
   let libs: ServerLibs;
@@ -183,7 +188,7 @@ describe('Policies Lib', () => {
     });
   });
 
-  describe.skip('createNewPolicyFrom', () => {
+  describe('createNewPolicyFrom', () => {
     it('Should duplicate policy but with a new shared_id', async () => {
       const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
 
@@ -195,8 +200,6 @@ describe('Policies Lib', () => {
       expect(gottenPolicies.find(c => c.name === 'foo')!.shared_id).not.toBe(
         gottenPolicies.find(c => c.name === 'test')!.shared_id
       );
-
-      // TODO test data sources/inputs are copied
     });
   });
   describe.skip('rollForward', () => {});
@@ -209,8 +212,8 @@ describe('Policies Lib', () => {
         ref_source: undefined,
         ref: undefined,
         output: '43hi34hi5y3i53o4',
-        queue: {},
         inputs: [{}, {}],
+        queue: undefined,
       });
       const fullPolicy = await libs.policy.get(updatedPolicyInfo.id);
       expect(fullPolicy.name).toBe('test');
@@ -228,8 +231,8 @@ describe('Policies Lib', () => {
         ref_source: undefined,
         ref: undefined,
         output: '43hi34hi5y3i53o4',
-        queue: {},
         inputs: [{}, {}],
+        queue: undefined,
       });
       const fullPolicy = await libs.policy.get(updatedPolicyInfo.id);
       expect(fullPolicy.data_sources.length).toBe(1);
@@ -254,8 +257,8 @@ describe('Policies Lib', () => {
         ref_source: undefined,
         ref: undefined,
         output: '43hi34hi5y3i53o4',
-        queue: {},
         inputs: [{ foo: 'bar' }],
+        queue: undefined,
       });
       const fullPolicy = await libs.policy.getFull(updatedPolicyInfo.id);
 
@@ -268,8 +271,6 @@ describe('Policies Lib', () => {
       expect(fullPolicy.data_sources[0].inputs[0].foo).toBe('bar');
     });
   });
-
-  describe.skip('listDataSources', () => {});
 
   describe.skip('update / change hooks', () => {});
 });

@@ -75,20 +75,11 @@ export class PolicyLib {
   public async getFull(id: string): Promise<FullPolicyFile> {
     const policy = await this.adapter.get(id);
     for (let i = 0; i < policy.data_sources.length; i++) {
-      // TODO page through vs one large query as this will break if there are more then 10k inputs
-      // a likely case for uptime
-      // const fullInputs = await this.adapter.getInputsById(policy.data_sources[i].inputs, 1, 10000);
-
       if (policy.data_sources[i]) {
-        // hard coded to mock data for now
-        (policy.data_sources[i] as any).inputs = [
-          {
-            id: uuidv4(),
-            data_source_id: policy.data_sources[i].uuid,
-            meta: {},
-            foo: 'bar', // JSON from the `other` field, gets flattened to top level when returned via REST API
-          },
-        ];
+        const fullInputs = await this.adapter.getInputsById(policy.data_sources[i].inputs);
+        (policy.data_sources[i] as any).inputs = fullInputs.map(input => {
+          return JSON.parse(((input as unknown) as { other: string }).other);
+        });
       }
     }
 
@@ -166,9 +157,7 @@ export class PolicyLib {
 
     const newDSs: PolicyFile['data_sources'] = [];
     for (const ds of dataSources) {
-      // TODO page through vs one large query as this will break if there are more then 10k inputs
-      // a likely case for uptime
-      const oldInputs = await this.adapter.getInputsById(ds.inputs, 1, 10000);
+      const oldInputs = await this.adapter.getInputsById(ds.inputs);
       const newInputs = await this.adapter.addInputs(
         oldInputs.map(input => ({
           ...input,

@@ -145,18 +145,14 @@ export class MemorizedPolicyAdapter {
   /**
    * Inputs sub-domain type
    */
-  public async getInputsById(
-    ids: string[],
-    page: number = 1,
-    perPage: number = 25
-  ): Promise<DatasourceInput[]> {
+  public async getInputsById(ids: string[]): Promise<DatasourceInput[]> {
     return await memorize(
-      `getInputsById - ${JSON.stringify({ ids, page, perPage })}`,
+      `getInputsById - ${JSON.stringify({ ids })}`,
       async () => {
         if (!this.adapter) {
           throw new Error('An adapter must be provided when running tests online');
         }
-        return await this.adapter.getInputsById(ids, page, perPage);
+        return await this.adapter.getInputsById(ids);
       },
       {
         pure: false,
@@ -185,7 +181,7 @@ export class MemorizedPolicyAdapter {
 
   public async addInputs(inputs: DatasourceInput[]): Promise<string[]> {
     return await memorize(
-      `addInputs - ${JSON.stringify(inputs)}`,
+      `addInputs - ${JSON.stringify(inputs.map(i => i.id))}`,
       async () => {
         if (!this.adapter) {
           throw new Error('An adapter must be provided when running tests online');
