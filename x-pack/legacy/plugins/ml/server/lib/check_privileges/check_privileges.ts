@@ -134,7 +134,7 @@ function setFullGettingPrivileges(
     forceTrue ||
     (cluster['cluster:monitor/data_frame/get'] && cluster['cluster:monitor/data_frame/stats/get'])
   ) {
-    privileges.canGetDataFrame = true;
+    privileges.canGetTransform = true;
   }
 
   // Data Frame Analytics
@@ -236,15 +236,15 @@ function setFullActionPrivileges(
 
   // Data Frame Transforms
   if (forceTrue || cluster['cluster:admin/data_frame/put']) {
-    privileges.canCreateDataFrame = true;
+    privileges.canCreateTransform = true;
   }
 
   if (forceTrue || cluster['cluster:admin/data_frame/delete']) {
-    privileges.canDeleteDataFrame = true;
+    privileges.canDeleteTransform = true;
   }
 
   if (forceTrue || cluster['cluster:admin/data_frame/preview']) {
-    privileges.canPreviewDataFrame = true;
+    privileges.canPreviewTransform = true;
   }
 
   if (
@@ -253,7 +253,7 @@ function setFullActionPrivileges(
       cluster['cluster:admin/data_frame/start_task'] &&
       cluster['cluster:admin/data_frame/stop'])
   ) {
-    privileges.canStartStopDataFrame = true;
+    privileges.canStartStopTransform = true;
   }
 
   // Data Frame Analytics
@@ -299,7 +299,7 @@ function setBasicGettingPrivileges(
     forceTrue ||
     (cluster['cluster:monitor/data_frame/get'] && cluster['cluster:monitor/data_frame/stats/get'])
   ) {
-    privileges.canGetDataFrame = true;
+    privileges.canGetTransform = true;
   }
 }
 
@@ -310,15 +310,15 @@ function setBasicActionPrivileges(
 ) {
   // Data Frame Transforms
   if (forceTrue || cluster['cluster:admin/data_frame/put']) {
-    privileges.canCreateDataFrame = true;
+    privileges.canCreateTransform = true;
   }
 
   if (forceTrue || cluster['cluster:admin/data_frame/delete']) {
-    privileges.canDeleteDataFrame = true;
+    privileges.canDeleteTransform = true;
   }
 
   if (forceTrue || cluster['cluster:admin/data_frame/preview']) {
-    privileges.canPreviewDataFrame = true;
+    privileges.canPreviewTransform = true;
   }
 
   if (
@@ -327,6 +327,6 @@ function setBasicActionPrivileges(
       cluster['cluster:admin/data_frame/start_task'] &&
       cluster['cluster:admin/data_frame/stop'])
   ) {
-    privileges.canStartStopDataFrame = true;
+    privileges.canStartStopTransform = true;
   }
 }
