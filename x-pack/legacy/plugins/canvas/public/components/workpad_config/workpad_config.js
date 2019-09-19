@@ -74,6 +74,8 @@ export class WorkpadConfig extends PureComponent {
           <EuiFieldText value={name} onChange={e => setName(e.target.value)} />
         </EuiFormRow>
 
+        <EuiSpacer size="s" />
+
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem>
             <EuiFormRow label="Width" compressed>

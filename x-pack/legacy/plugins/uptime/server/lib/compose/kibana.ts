@@ -19,19 +19,21 @@ export function compose(server: KibanaCore): UMServerLibs {
   const framework = new UMKibanaBackendFrameworkAdapter(server);
   const database = new UMKibanaDatabaseAdapter(server.elasticsearch);
 
-  const pingsDomain = new UMPingsDomain(new ElasticsearchPingsAdapter(database), {});
   const authDomain = new UMAuthDomain(new UMXPackAuthAdapter(server.xpack), {});
   const monitorsDomain = new UMMonitorsDomain(new ElasticsearchMonitorsAdapter(database), {});
   const monitorStatesDomain = new UMMonitorStatesDomain(
     new ElasticsearchMonitorStatesAdapter(database),
     {}
   );
+  const pingsDomain = new UMPingsDomain(new ElasticsearchPingsAdapter(database), {});
+  const savedObjectsDomain = new UMSavedObjectsDomain(savedObjects, {});
 
   const domainLibs: UMDomainLibs = {
     auth: authDomain,
     monitors: monitorsDomain,
     monitorStates: monitorStatesDomain,
     pings: pingsDomain,
+    savedObjects: savedObjectsDomain,
   };
 
   return {
