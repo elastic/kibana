@@ -2588,7 +2588,6 @@
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.showLabel": "显示",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.titleLabel": "标题",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.yAxisTitle": "Y 轴",
-    "kbnVislibVisTypes.editors.heatmap.highlightLabel": "高亮显示",
     "kbnVislibVisTypes.editors.pie.donutLabel": "圆环图",
     "kbnVislibVisTypes.editors.pointSeries.currentTimeMarkerLabel": "当前时间标记",
     "kbnVislibVisTypes.editors.pointSeries.orderBucketsBySumLabel": "按总计值排序存储桶",

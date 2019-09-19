@@ -77,11 +77,14 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
 
         <SwitchOption
           label={i18n.translate('kbnVislibVisTypes.editors.heatmap.highlightLabel', {
-            defaultMessage: 'Highlight',
+            defaultMessage: 'Highlight in the legend',
           })}
           paramName="enableHover"
           value={stateParams.enableHover}
           setValue={setValue}
+          tooltip={i18n.translate('kbnVislibVisTypes.editors.heatmap.highlightLabelTooltip', {
+            defaultMessage: 'Highlight hovered value in the legend.',
+          })}
         />
       </EuiPanel>
 
@@ -127,33 +130,30 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
           setValue={setValueAxisScale}
         />
 
-        {!stateParams.setColorRange && (
-          <>
-            <SwitchOption
-              label={i18n.translate(
-                'kbnVislibVisTypes.controls.heatmapOptions.percentageModeLabel',
-                { defaultMessage: 'Percentage mode' }
-              )}
-              paramName="percentageMode"
-              value={stateParams.percentageMode}
-              setValue={setValue}
-            />
-            <EuiSpacer size="s" />
+        <SwitchOption
+          disabled={stateParams.setColorRange}
+          label={i18n.translate('kbnVislibVisTypes.controls.heatmapOptions.percentageModeLabel', {
+            defaultMessage: 'Percentage mode',
+          })}
+          paramName="percentageMode"
+          value={stateParams.percentageMode}
+          setValue={setValue}
+        />
+        <EuiSpacer size="s" />
 
-            <NumberInputOption
-              data-test-subj="heatmapColorsNumber"
-              isInvalid={isColorsNumberInvalid}
-              label={i18n.translate('kbnVislibVisTypes.controls.heatmapOptions.colorsNumberLabel', {
-                defaultMessage: 'Number of colors',
-              })}
-              max={10}
-              min={2}
-              paramName="colorsNumber"
-              value={stateParams.colorsNumber}
-              setValue={setValue}
-            />
-          </>
-        )}
+        <NumberInputOption
+          data-test-subj="heatmapColorsNumber"
+          disabled={stateParams.setColorRange}
+          isInvalid={isColorsNumberInvalid}
+          label={i18n.translate('kbnVislibVisTypes.controls.heatmapOptions.colorsNumberLabel', {
+            defaultMessage: 'Number of colors',
+          })}
+          max={10}
+          min={2}
+          paramName="colorsNumber"
+          value={stateParams.colorsNumber}
+          setValue={setValue}
+        />
 
         <SwitchOption
           dataTestSubj="heatmapUseCustomRanges"

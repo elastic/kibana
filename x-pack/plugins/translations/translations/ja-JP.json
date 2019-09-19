@@ -2587,7 +2587,6 @@
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.showLabel": "表示",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.titleLabel": "タイトル",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.yAxisTitle": "Y 軸",
-    "kbnVislibVisTypes.editors.heatmap.highlightLabel": "ハイライト",
     "kbnVislibVisTypes.editors.pie.donutLabel": "ドーナッツ",
     "kbnVislibVisTypes.editors.pointSeries.currentTimeMarkerLabel": "現在時刻マーカー",
     "kbnVislibVisTypes.editors.pointSeries.orderBucketsBySumLabel": "バケットを合計で並べ替え",

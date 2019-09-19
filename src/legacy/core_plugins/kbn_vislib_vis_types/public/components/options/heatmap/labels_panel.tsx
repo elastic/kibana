@@ -17,15 +17,22 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import {
+  EuiColorPicker,
+  EuiFormRow,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  isValidHex,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { ValueAxis } from '../../../types';
 import { HeatmapVisParams } from '../../../heatmap';
-import { SwitchOption, TextInputOption } from '../../common';
+import { SwitchOption } from '../../common';
 
 const VERTICAL_ROTATION = 270;
 
@@ -56,6 +63,8 @@ function LabelsPanel({ valueAxis, setValue }: LabelsPanelProps) {
       setValueAxisLabels(paramName, value ? VERTICAL_ROTATION : 0),
     [setValueAxisLabels]
   );
+
+  const setColor = useCallback(value => setValueAxisLabels('color', value), [setValueAxisLabels]);
 
   return (
     <EuiPanel paddingSize="s">
@@ -101,15 +110,17 @@ function LabelsPanel({ valueAxis, setValue }: LabelsPanelProps) {
         setValue={setValueAxisLabels}
       />
 
-      <TextInputOption
-        disabled={!valueAxis.labels.show || !valueAxis.labels.overwriteColor}
+      <EuiFormRow
         label={i18n.translate('kbnVislibVisTypes.controls.heatmapOptions.colorLabel', {
           defaultMessage: 'Color',
         })}
-        paramName="color"
-        value={valueAxis.labels.color}
-        setValue={setValueAxisLabels}
-      />
+      >
+        <EuiColorPicker
+          disabled={!valueAxis.labels.show || !valueAxis.labels.overwriteColor}
+          color={valueAxis.labels.color}
+          onChange={setColor}
+        />
+      </EuiFormRow>
     </EuiPanel>
   );
 }
