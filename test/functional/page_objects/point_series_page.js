@@ -24,11 +24,11 @@ export function PointSeriesPageProvider({ getService }) {
 
   class PointSeriesVis {
     async clickOptions() {
-      return await find.clickByPartialLinkText('Panel Settings');
+      return await find.clickByPartialLinkText('Panel settings');
     }
 
     async clickAxisOptions() {
-      return await find.clickByPartialLinkText('Metrics & Axes');
+      return await find.clickByPartialLinkText('Metrics & axes');
     }
 
     async clickAddAxis() {
@@ -36,17 +36,7 @@ export function PointSeriesPageProvider({ getService }) {
     }
 
     async setAxisTitle(title, { index = 0 } = {}) {
-      return await find.setValue(`#valueAxisTitle${index}`, title);
-    }
-
-    async getValueAxesCount() {
-      const axes = await find.allByCssSelector('.visEditorSidebar__section:contains("Value Axes") > .visEditorSidebar__section');
-      return axes.length;
-    }
-
-    async getSeriesCount() {
-      const series = await find.allByCssSelector('.visEditorSidebar__section:contains("Series") > .visEditorSidebar__section');
-      return series.length;
+      return await testSubjects.setValue(`valueAxisTitle${index}`, title);
     }
 
     async getRightValueAxes() {
@@ -82,40 +72,12 @@ export function PointSeriesPageProvider({ getService }) {
       return await find.clickByCssSelector(`select#gridAxis option[value="${axis}"]`);
     }
 
-    async toggleCollapsibleTitle(title) {
-      const sidebarTitles = await find.allByCssSelector('.visEditorSidebar__collapsibleTitle .visEditorSidebar__collapsibleTitleText');
-      log.debug('found sidebar titles ' + sidebarTitles.length);
-
-      return Promise.all(sidebarTitles.map(async (titleDiv) => {
-        const titleString = await titleDiv.getVisibleText();
-        log.debug('sidebar title ' + titleString);
-
-        if (titleString === title) {
-          log.debug('clicking sidebar title ' + titleString);
-          return titleDiv.click();
-        }
-      }));
-    }
-
-    async setValue(newValue) {
-      await find.clickByCssSelector('button[ng-click="numberListCntr.add()"]');
-      await find.setValue('input[ng-model="numberListCntr.getList()[$index]"]', newValue);
-    }
-
-    async setValueAxisPosition(axis, position) {
-      await find.clickByCssSelector(`select#valueAxisPosition${axis} option[label="${position}"]`);
-    }
-
-    async setCategoryAxisPosition(newValue) {
-      await find.clickByCssSelector(`select#categoryAxisPosition option[label="${newValue}"]`);
-    }
-
     async setSeriesAxis(series, axis) {
       await find.clickByCssSelector(`select#seriesValueAxis${series} option[value="${axis}"]`);
     }
 
     async setSeriesType(series, type) {
-      await find.clickByCssSelector(`select#seriesType${series} option[label="${type}"]`);
+      await find.clickByCssSelector(`select#seriesType${series} option[value="${type}"]`);
     }
   }
 

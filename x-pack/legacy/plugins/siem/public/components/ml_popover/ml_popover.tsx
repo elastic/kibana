@@ -164,6 +164,7 @@ export const MlPopover = React.memo(() => {
   // Install Config Templates as effect of opening popover
   useEffect(() => {
     if (
+      isPopoverOpen &&
       jobSummaryData != null &&
       configuredIndexPatternTitles.length > 0 &&
       configTemplatesToInstall.length > 0

@@ -24,5 +24,8 @@ The index must contain at least one field mapped as {ref}/geo-point.html[geo_poi
 
 *EMS Boundaries*:: Administrative boundaries from https://www.elastic.co/elastic-maps-service[Elastic Maps Service].
 
+*Point to point*:: Aggregated data paths between the source and destination.
+The index must contain at least 2 fields mapped as {ref}/geo-point.html[geo_point], source and destination.
+
 include::vector-style.asciidoc[]
 include::vector-style-properties.asciidoc[]

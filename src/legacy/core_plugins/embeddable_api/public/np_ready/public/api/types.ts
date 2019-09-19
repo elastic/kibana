@@ -17,34 +17,18 @@
  * under the License.
  */
 
-import { TriggerRegistry, ActionRegistry, EmbeddableFactoryRegistry } from '../types';
-import {
-  Trigger,
-  Action,
-  EmbeddableFactory,
-  ExecuteTriggerActions,
-  GetEmbeddableFactories,
-} from '../lib';
+import { EmbeddableFactoryRegistry } from '../types';
+import { EmbeddableFactory, GetEmbeddableFactories } from '../lib';
 
 export interface EmbeddableApi {
-  attachAction: (triggerId: string, actionId: string) => void;
-  detachAction: (triggerId: string, actionId: string) => void;
-  executeTriggerActions: ExecuteTriggerActions;
   getEmbeddableFactory: (embeddableFactoryId: string) => EmbeddableFactory;
   getEmbeddableFactories: GetEmbeddableFactories;
-  getTrigger: (id: string) => Trigger;
-  getTriggerActions: (id: string) => Action[];
-  getTriggerCompatibleActions: <C>(triggerId: string, context: C) => Promise<Array<Action<C>>>;
-  registerAction: (action: Action) => void;
   // TODO: Make `registerEmbeddableFactory` receive only `factory` argument.
   registerEmbeddableFactory: (id: string, factory: EmbeddableFactory) => void;
-  registerTrigger: (trigger: Trigger) => void;
 }
 
 export interface EmbeddableDependencies {
-  actions: ActionRegistry;
   embeddableFactories: EmbeddableFactoryRegistry;
-  triggers: TriggerRegistry;
 }
 
 export interface EmbeddableDependenciesInternal extends EmbeddableDependencies {

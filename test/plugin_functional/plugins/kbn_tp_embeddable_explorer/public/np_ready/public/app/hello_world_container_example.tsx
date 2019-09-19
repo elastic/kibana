@@ -20,11 +20,11 @@
 import React from 'react';
 import { Subscription } from 'rxjs';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { TGetActionsCompatibleWithTrigger } from '../../../../../../../../src/plugins/ui_actions/public';
 import { CoreStart } from '../../../../../../../../src/core/public';
 import {
   EmbeddablePanel,
   GetEmbeddableFactory,
-  GetActionsCompatibleWithTrigger,
   GetEmbeddableFactories,
 } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { HelloWorldContainer } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/embeddables/hello_world_container';
@@ -33,7 +33,7 @@ import { HELLO_WORLD_EMBEDDABLE_TYPE } from '../../../../../../../../src/legacy/
 import { Start as InspectorStartContract } from '../../../../../../../../src/plugins/inspector/public';
 
 interface Props {
-  getActions: GetActionsCompatibleWithTrigger;
+  getActions: TGetActionsCompatibleWithTrigger;
   getEmbeddableFactory: GetEmbeddableFactory;
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];

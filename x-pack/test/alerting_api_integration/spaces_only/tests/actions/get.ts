@@ -45,5 +45,31 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           },
         });
     });
+
+    it(`action should't be acessible from another space`, async () => {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          description: 'My action',
+          actionTypeId: 'test.index-record',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+        })
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+
+      await supertest
+        .get(`${getUrlPrefix(Spaces.other.id)}/api/action/${createdAction.id}`)
+        .expect(404, {
+          statusCode: 404,
+          error: 'Not Found',
+          message: `Saved object [action/${createdAction.id}] not found`,
+        });
+    });
   });
 }

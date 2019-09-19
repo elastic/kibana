@@ -597,6 +597,7 @@ exports[`Flyout should render import step 1`] = `
     <EuiForm>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={
@@ -623,6 +624,7 @@ exports[`Flyout should render import step 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         labelType="label"

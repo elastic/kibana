@@ -5,6 +5,7 @@
  */
 
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import DateMath from '@elastic/datemath';
 import React, { useState, Fragment } from 'react';
 import { useUrlParams, UptimeUrlParamsHook } from '../use_url_params';
 import { RouteComponentProps } from 'react-router';
@@ -38,6 +39,8 @@ const UseUrlParamsTestComponent = ({ hook }: MockUrlParamsComponentProps) => {
 };
 
 describe('useUrlParams', () => {
+  let dateMathSpy: any;
+  const MOCK_DATE_VALUE = 20;
   beforeEach(() => {
     mockRouter = {
       // @ts-ignore other properties aren't needed for this test
@@ -57,6 +60,8 @@ describe('useUrlParams', () => {
         url: 'http://elastic.co',
       },
     };
+    dateMathSpy = jest.spyOn(DateMath, 'parse');
+    dateMathSpy.mockReturnValue(MOCK_DATE_VALUE);
   });
 
   it('accepts router props, updates URL params, and returns the current params', () => {
