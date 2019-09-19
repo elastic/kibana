@@ -139,7 +139,7 @@ export const ColumnHeaders = React.memo<Props>(
                       innerRef={provided.innerRef}
                       isDragging={snapshot.isDragging}
                       position="relative"
-                      style={{ flexBasis: header.width + 'px' }}
+                      style={{ flexBasis: header.width + 'px', ...provided.draggableProps.style }}
                     >
                       {!snapshot.isDragging ? (
                         <EventsThContent>
