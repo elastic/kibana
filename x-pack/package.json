@@ -233,7 +233,7 @@
     "dataloader": "^1.4.0",
     "dedent": "^0.7.0",
     "dragselect": "1.13.1",
-    "elasticsearch": "^16.2.0",
+    "elasticsearch": "^16.4.0",
     "extract-zip": "1.6.7",
     "file-saver": "^1.3.8",
     "file-type": "^10.9.0",
