@@ -20,7 +20,7 @@
 import { has } from 'lodash';
 import { Legacy } from 'kibana';
 import { FieldFormatsService } from './field_formats_service';
-import { FieldFormat } from '../field_format';
+import { FieldFormat } from '../../../../plugins/data/common/field_formats';
 
 export function fieldFormatsMixin(kbnServer: any, server: Legacy.Server) {
   const fieldFormatClasses: FieldFormat[] = [];

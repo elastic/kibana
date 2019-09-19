@@ -5,6 +5,7 @@
  */
 
 import uuid from 'uuid';
+import { npStart } from 'ui/new_platform';
 import { ActionToaster, AppToast } from '../toasters';
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import {
@@ -61,18 +62,18 @@ export const setupEmbeddablesAPI = (
   applyFilterQueryFromKueryExpression: (expression: string) => void
 ) => {
   try {
-    const actions = start.getTriggerActions(APPLY_FILTER_TRIGGER);
+    const actions = npStart.plugins.uiActions.getTriggerActions(APPLY_FILTER_TRIGGER);
     const actionLoaded = actions.some(a => a.id === APPLY_SIEM_FILTER_ACTION_ID);
     if (!actionLoaded) {
       const siemFilterAction = new ApplySiemFilterAction({
         applyFilterQueryFromKueryExpression,
       });
-      start.registerAction(siemFilterAction);
-      start.attachAction(APPLY_FILTER_TRIGGER, siemFilterAction.id);
+      npStart.plugins.uiActions.registerAction(siemFilterAction);
+      npStart.plugins.uiActions.attachAction(APPLY_FILTER_TRIGGER, siemFilterAction.id);
 
-      start.detachAction(CONTEXT_MENU_TRIGGER, 'CUSTOM_TIME_RANGE');
-      start.detachAction(PANEL_BADGE_TRIGGER, 'CUSTOM_TIME_RANGE_BADGE');
-      start.detachAction(APPLY_FILTER_TRIGGER, APPLY_FILTER_ACTION);
+      npStart.plugins.uiActions.detachAction(CONTEXT_MENU_TRIGGER, 'CUSTOM_TIME_RANGE');
+      npStart.plugins.uiActions.detachAction(PANEL_BADGE_TRIGGER, 'CUSTOM_TIME_RANGE_BADGE');
+      npStart.plugins.uiActions.detachAction(APPLY_FILTER_TRIGGER, APPLY_FILTER_ACTION);
     }
   } catch (e) {
     throw e;
