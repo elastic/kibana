@@ -153,6 +153,7 @@ export class GisMap extends Component {
       isFullScreen,
       exitFullScreen,
       mapInitError,
+      renderTooltipContent,
     } = this.props;
 
     const { domId } = this.state;
@@ -209,6 +210,7 @@ export class GisMap extends Component {
           <MBMapContainer
             addFilters={addFilters}
             geoFields={this.state.geoFields}
+            renderTooltipContent={renderTooltipContent}
           />
           <ToolbarOverlay
             addFilters={addFilters}

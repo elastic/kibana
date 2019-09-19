@@ -14,7 +14,7 @@ import {
 import { FeatureTooltip } from '../../feature_tooltip';
 import { EuiPopover, EuiText } from '@elastic/eui';
 
-const TOOLTIP_TYPE = {
+export const TOOLTIP_TYPE = {
   HOVER: 'HOVER',
   LOCKED: 'LOCKED'
 };
@@ -263,14 +263,37 @@ export class TooltipControl extends React.Component {
     });
   };
 
+  _renderTooltipContent = () => {
+    const publicProps = {
+      addFilters: this.props.addFilters,
+      closeTooltip: this.props.clearTooltipState,
+      features: this.props.tooltipState.features,
+      isLocked: this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED,
+      loadFeatureProperties: this._loadFeatureProperties,
+    };
+
+    if (this.props.renderTooltipContent) {
+      return this.props.renderTooltipContent(publicProps);
+    }
+
+    return (
+      <EuiText size="xs">
+        <FeatureTooltip
+          {...publicProps}
+          anchorLocation={this.props.tooltipState.location}
+          findLayerById={this._findLayerById}
+          geoFields={this.props.geoFields}
+        />
+      </EuiText>
+    );
+  }
+
   render() {
     if (!this.props.tooltipState) {
       return null;
     }
 
     const tooltipAnchor = <div style={{ height: '26px', width: '26px', background: 'transparent' }}/>;
-    const isLocked = this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED;
-
     return (
       <EuiPopover
         id="mapTooltip"
@@ -284,19 +307,7 @@ export class TooltipControl extends React.Component {
           transform: `translate(${this.state.x - 13}px, ${this.state.y - 13}px)`
         }}
       >
-        <EuiText size="xs">
-          <FeatureTooltip
-            features={this.props.tooltipState.features}
-            anchorLocation={this.props.tooltipState.location}
-            loadFeatureProperties={this._loadFeatureProperties}
-            findLayerById={this._findLayerById}
-            closeTooltip={this.props.clearTooltipState}
-            showFilterButtons={!!this.props.addFilters && isLocked}
-            isLocked={isLocked}
-            addFilters={this.props.addFilters}
-            geoFields={this.props.geoFields}
-          />
-        </EuiText>
+        {this._renderTooltipContent()}
       </EuiPopover>
     );
   }

@@ -36,3 +36,23 @@ const input = {
 }
 const mapEmbeddable = await factory.createFromState(state, input, parent);
 ```
+
+#### Customize tooltip
+```
+/**
+ * Render custom tooltip content
+ *
+ * @param {function} addFilters
+ * @param {function} closeTooltip
+ * @param {Array} features - Vector features at tooltip location.
+ * @param {boolean} isLocked
+ * @param {function} loadFeatureProperties - Loads feature properties. Call with { layerId, featureId }. Returns Promise.
+ *
+ * @return {Component} A React Component.
+ */
+const renderTooltipContent = ({ addFilters, closeTooltip, features, isLocked, loadFeatureProperties}) => {
+  return <div>Custom tooltip content</div>;
+}
+
+const mapEmbeddable = await factory.createFromState(state, input, parent, renderTooltipContent);
+```
