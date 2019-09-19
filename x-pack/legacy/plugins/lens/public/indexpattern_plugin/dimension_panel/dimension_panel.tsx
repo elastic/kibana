@@ -27,7 +27,7 @@ import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../o
 import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, deleteColumn } from '../state_helpers';
-import { isDraggedField, hasField } from '../utils';
+import { isDraggedField } from '../utils';
 import { FieldBasedIndexPatternColumn } from '../operations/definitions/column_types';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
@@ -50,8 +50,8 @@ export interface OperationFieldSupportMatrix {
 export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPanel(
   props: IndexPatternDimensionPanelProps
 ) {
-  const layerId = props.layerId;
-  const currentIndexPattern = props.state.indexPatterns[props.state.layers[layerId].indexPatternId];
+  const layer = props.state.layers[props.layerId];
+  const currentIndexPattern = props.state.indexPatterns[layer.indexPatternId];
 
   const operationFieldSupportMatrix = useMemo(() => {
     const filteredOperationsByMetadata = getAvailableOperationsByMetadata(
@@ -87,8 +87,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
     };
   }, [currentIndexPattern, props.filterOperations]);
 
-  const selectedColumn: IndexPatternColumn | null =
-    props.state.layers[layerId].columns[props.columnId] || null;
+  const selectedColumn: IndexPatternColumn | null = layer.columns[props.columnId] || null;
 
   function hasOperationForField(field: IndexPatternField) {
     return Boolean(operationFieldSupportMatrix.operationByField[field.name]);
@@ -96,7 +95,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
 
   function canHandleDrop() {
     const { dragging } = props.dragDropContext;
-    const layerIndexPatternId = props.state.layers[props.layerId].indexPatternId;
+    const layerIndexPatternId = layer.indexPatternId;
 
     return (
       isDraggedField(dragging) &&
@@ -142,9 +141,8 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
           // index pattern and on the same operations (therefore checking if the new field supports
           // our previous operation)
           const hasFieldChanged =
-            selectedColumn &&
-            hasField(selectedColumn) &&
-            selectedColumn.sourceField !== droppedItem.field.name &&
+            field &&
+            field.name !== droppedItem.field.name &&
             operationsForNewField &&
             operationsForNewField.includes(selectedColumn.operationType);
 
@@ -153,9 +151,9 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
           const newColumn = hasFieldChanged
             ? changeField(selectedColumn, currentIndexPattern, droppedItem.field)
             : buildColumn({
-                columns: props.state.layers[props.layerId].columns,
+                columns: layer.columns,
                 indexPattern: currentIndexPattern,
-                layerId,
+                layerId: props.layerId,
                 suggestedPriority: props.suggestedPriority,
                 field: droppedItem.field,
               });
@@ -167,7 +165,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
           props.setState(currentState => {
             const withChangedColumn = changeColumn({
               state: currentState,
-              layerId,
+              layerId: props.layerId,
               columnId: props.columnId,
               newColumn,
               // If the field has changed, the onFieldChange method needs to take care of everything including moving
@@ -207,15 +205,15 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
               defaultMessage: 'Remove configuration',
             })}
             onClick={() => {
-              props.setState(
+              props.setState(s =>
                 deleteColumn({
-                  state: props.state,
-                  layerId,
+                  state: s,
+                  layerId: props.layerId,
                   columnId: props.columnId,
                 })
               );
               if (props.onRemove) {
-                props.onRemove({ layerId, columnId: props.columnId });
+                props.onRemove({ layerId: props.layerId, columnId: props.columnId });
               }
             }}
           />

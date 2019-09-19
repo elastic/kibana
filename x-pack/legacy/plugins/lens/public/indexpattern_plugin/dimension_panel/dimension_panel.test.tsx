@@ -880,7 +880,9 @@ describe('IndexPatternDimensionPanel', () => {
       clearButton.simulate('click');
     });
 
-    expect(setState).toHaveBeenCalledWith({
+    const setterFn = setState.mock.calls[0][0] as SetState;
+
+    expect(setterFn(defaultProps.state)).toMatchObject({
       ...state,
       layers: {
         first: {
