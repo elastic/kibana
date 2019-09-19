@@ -32,6 +32,7 @@ import { UiSettingsClientContract } from 'src/core/public';
 import { IndexPattern } from '../../index_patterns';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
+import { SavedQueryService } from '../../search/search_bar/lib/saved_query_service';
 
 interface Props {
   id: string;
@@ -42,6 +43,7 @@ interface Props {
   onRemove: () => void;
   intl: InjectedIntl;
   uiSettings: UiSettingsClientContract;
+  savedQueryService: SavedQueryService;
 }
 
 interface State {

@@ -31,11 +31,12 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import { UiSettingsClientContract } from 'src/core/public';
+import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
 import { IndexPattern } from '../../index_patterns';
 import { FilterEditor } from './filter_editor';
 import { FilterItem } from './filter_item';
 import { FilterOptions } from './filter_options';
+import { createSavedQueryService } from '../../search/search_bar/lib/saved_query_service';
 
 interface Props {
   filters: Filter[];
@@ -44,6 +45,7 @@ interface Props {
   indexPatterns: IndexPattern[];
   intl: InjectedIntl;
   uiSettings: UiSettingsClientContract;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 interface State {
@@ -106,6 +108,7 @@ class FilterBarUI extends Component<Props, State> {
           onRemove={() => this.onRemove(i)}
           indexPatterns={this.props.indexPatterns}
           uiSettings={this.props.uiSettings}
+          savedQueryService={createSavedQueryService(this.props.savedObjectsClient)}
         />
       </EuiFlexItem>
     ));
@@ -148,6 +151,7 @@ class FilterBarUI extends Component<Props, State> {
                 onCancel={this.onCloseAddFilterPopover}
                 key={JSON.stringify(newFilter)}
                 uiSettings={this.props.uiSettings}
+                savedQueryService={createSavedQueryService(this.props.savedObjectsClient)}
               />
             </div>
           </EuiFlexItem>

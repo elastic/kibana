@@ -57,6 +57,7 @@ import { Operator } from './lib/filter_operators';
 import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
+import { SavedQueryService } from '../../../search/search_bar/lib/saved_query_service';
 
 interface Props {
   filter: Filter;
@@ -65,6 +66,7 @@ interface Props {
   onCancel: () => void;
   intl: InjectedIntl;
   uiSettings: UiSettingsClientContract;
+  savedQueryService: SavedQueryService;
 }
 
 interface State {
@@ -440,13 +442,15 @@ class FilterEditorUI extends Component<Props, State> {
     );
   }
   private renderSavedQueryEditor() {
+    // pass along the index pattern, uiSettings, savedQueryService and any other items we need for the params
+    // pass along the onChange handler
+    // pass along the value (this is where we compile the filter params object)
+    // return the selectable component
     return (
       <div>
         <EuiFlexGroup responsive={false} gutterSize="s">
           <EuiFlexItem style={{ maxWidth: '188px' }}>{this.renderSavedQueryList()}</EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <div data-test-subj="filterParams">{this.renderParamsEditor()}</div>
       </div>
     );
   }
@@ -460,6 +464,9 @@ class FilterEditorUI extends Component<Props, State> {
     // close the saved query editor if it is open
     if (this.state.isSavedQueryEditorOpen) {
       this.toggleSavedQueryEditor();
+    }
+    if (this.state.isCustomEditorOpen) {
+      this.toggleCustomEditor();
     }
     const isRegularEditorOpen = !this.state.isRegularEditorOpen;
     this.setState({ isRegularEditorOpen });
