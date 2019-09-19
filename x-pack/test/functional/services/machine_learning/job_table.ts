@@ -10,6 +10,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export function MachineLearningJobTableProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const find = getService('find');
+  const log = getService('log');
 
   return new (class MlJobTable {
     public async parseJobTable() {
@@ -209,6 +211,50 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       delete modelSizeStats.model_bytes;
 
       expect(modelSizeStats).to.eql(expectedModelSizeStats);
+    }
+
+    public async clickActionsMenu(jobId: string) {
+      const jobRow = await testSubjects.find(this.rowSelector(jobId));
+      const actionsCell = await jobRow.findByCssSelector(`[id=${jobId}-actions]`);
+      const actionsMenuButton = await actionsCell.findByTagName('button');
+
+      log.debug(`Clicking actions menu button for job id ${jobId}`);
+      await actionsMenuButton.click();
+      if (!(await find.existsByDisplayedByCssSelector('[class~=euiContextMenuPanel]'))) {
+        throw new Error(`expected euiContextMenuPanel to exist`);
+      }
+    }
+
+    public async clickActionsMenuEntry(jobId: string, entryText: string) {
+      await this.clickActionsMenu(jobId);
+      const actionsMenuPanel = await find.byCssSelector('[class~=euiContextMenuPanel]');
+      const actionButtons = await actionsMenuPanel.findAllByTagName('button');
+
+      const filteredButtons = [];
+      for (const button of actionButtons) {
+        if ((await button.getVisibleText()) === entryText) {
+          filteredButtons.push(button);
+        }
+      }
+
+      if (!(filteredButtons.length === 1)) {
+        throw new Error(
+          `expected action button ${entryText} to exist exactly once, but found ${filteredButtons.length} matching buttons`
+        );
+      }
+      log.debug(`Clicking action button ${entryText} for job id ${jobId}`);
+      // await filteredButtons[0].clickMouseButton();
+      await this.delay(10000);
+      await filteredButtons[0].click();
+      await this.delay(10000);
+    }
+
+    public delay(ms: number) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    public async clickCloneJobAction(jobId: string) {
+      await this.clickActionsMenuEntry(jobId, 'Clone job');
     }
   })();
 }
