@@ -3,9 +3,14 @@
 
 [partintro]
 --
-Some {kib} features are provided via a REST API, which is ideal for creating an integration with {kib}, or automating
-certain aspects of configuring and deploying {kib}.
+Some {kib} features are provided via a REST API, which is ideal for creating an 
+integration with {kib}, or automating certain aspects of configuring and 
+deploying {kib}.
 
+Each API is experimental and can include breaking changes in any version of 
+{kib}, or might have been entirely removed from {kib}.
+
+////
 Each API has one of the following labels:
 
 * *Stable* APIs should be safe to use extensively in production. Any breaking
@@ -22,6 +27,7 @@ have breaking changes in any version of {kib}, or it might even be removed
 entirely.
 
 If a label is missing from an API, it is considered `experimental`.
+////
 
 NOTE: You cannot access the APIs via the Console in {kib}.
 

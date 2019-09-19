@@ -21,20 +21,20 @@ export class Events {
     req: FrameworkRequest,
     options: TimelineRequestOptions
   ): Promise<TimelineData> {
-    return await this.adapter.getTimelineData(req, options);
+    return this.adapter.getTimelineData(req, options);
   }
 
   public async getTimelineDetails(
     req: FrameworkRequest,
     options: RequestDetailsOptions
   ): Promise<TimelineDetailsData> {
-    return await this.adapter.getTimelineDetails(req, options);
+    return this.adapter.getTimelineDetails(req, options);
   }
 
   public async getLastEventTimeData(
     req: FrameworkRequest,
     options: LastEventTimeRequestOptions
   ): Promise<LastEventTimeData> {
-    return await this.adapter.getLastEventTimeData(req, options);
+    return this.adapter.getLastEventTimeData(req, options);
   }
 }
