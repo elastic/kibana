@@ -54,6 +54,7 @@ import { initLocalService } from './init_local';
 import { initQueue } from './init_queue';
 import { initWorkers } from './init_workers';
 import { ClusterNodeAdapter } from './distributed/cluster/cluster_node_adapter';
+import { initCodeUsageCollector } from './usage_collector';
 
 export class CodePlugin {
   private isCodeNode = false;
@@ -226,6 +227,10 @@ export class CodePlugin {
     await tryMigrateIndices(esClient, this.log);
 
     this.initRoutes(server, codeServices, repoIndexInitializerFactory, repoConfigController);
+
+    // TODO: extend the usage collection to cluster mode.
+    initCodeUsageCollector(server, esClient, lspService);
+
     return codeServices;
   }
 
