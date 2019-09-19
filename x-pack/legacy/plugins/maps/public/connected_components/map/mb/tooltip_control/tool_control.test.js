@@ -9,6 +9,11 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { TooltipControl, TOOLTIP_TYPE } from './tooltip_control';
 
+// mutable map state
+let featuresAtLocation;
+let mapCenter;
+let mockMbMapBounds;
+
 const layerId = 'tfi3f';
 const mbLayerId = 'tfi3f_circle';
 const mockLayer = {
@@ -16,19 +21,15 @@ const mockLayer = {
   getId: () => { return layerId; },
   canShowTooltip: () => { return true; },
 };
-let featuresAtLocation = [];
-const mockMbMapBounds = {
-  west: -180,
-  east: 180,
-  north: 90,
-  south: -90
-};
+
 const mockMbMapHandlers = {};
 const mockMBMap = {
   project: (lonLatArray) => {
+    const lonDistanceFromCenter = Math.abs(lonLatArray[0] - mapCenter[0]);
+    const latDistanceFromCenter = Math.abs(lonLatArray[1] - mapCenter[1]);
     return {
-      x: lonLatArray[0] * 100,
-      y: lonLatArray[1] * 100
+      x: lonDistanceFromCenter * 100,
+      y: latDistanceFromCenter * 100,
     };
   },
   on: (eventName, callback) => {
@@ -84,6 +85,17 @@ const lockedTooltipState = {
 };
 
 describe('TooltipControl', () => {
+
+  beforeEach(() => {
+    featuresAtLocation = [];
+    mapCenter = [0, 0];
+    mockMbMapBounds = {
+      west: -180,
+      east: 180,
+      north: 90,
+      south: -90
+    };
+  });
 
   describe('render', () => {
     describe('tooltipState is not provided', () => {
@@ -238,5 +250,85 @@ describe('TooltipControl', () => {
         type: 'LOCKED'
       });
     });
+  });
+
+  describe('on map move', () => {
+    const clearTooltipStateStub = sinon.stub();
+
+    beforeEach(() => {
+      clearTooltipStateStub.reset();
+    });
+
+    test('should safely handle map move when there is no tooltip location', () => {
+      mount(
+        <TooltipControl
+          {...defaultProps}
+          clearTooltipState={clearTooltipStateStub}
+        />
+      );
+
+      mockMbMapHandlers.move();
+
+      sinon.assert.notCalled(clearTooltipStateStub);
+    });
+
+    test('should update popover location', () => {
+      const component = mount(
+        <TooltipControl
+          {...defaultProps}
+          tooltipState={hoverTooltipState}
+          clearTooltipState={clearTooltipStateStub}
+        />
+      );
+
+      // ensure x and y set from original tooltipState.location
+      expect(component.state('x')).toBe(12000);
+      expect(component.state('y')).toBe(3000);
+
+      mapCenter = [25, -15];
+      mockMbMapHandlers.move();
+      component.update();
+
+      // ensure x and y updated from new map center with same tooltipState.location
+      expect(component.state('x')).toBe(14500);
+      expect(component.state('y')).toBe(4500);
+
+      sinon.assert.notCalled(clearTooltipStateStub);
+    });
+
+    test('should clear tooltip state if tooltip location is outside map bounds', () => {
+      const component = mount(
+        <TooltipControl
+          {...defaultProps}
+          tooltipState={hoverTooltipState}
+          clearTooltipState={clearTooltipStateStub}
+        />
+      );
+
+      // move map bounds outside of hoverTooltipState.location, which is [-120, 30]
+      mockMbMapBounds = {
+        west: -180,
+        east: -170,
+        north: 90,
+        south: 80
+      };
+      mockMbMapHandlers.move();
+      component.update();
+
+      sinon.assert.calledOnce(clearTooltipStateStub);
+    });
+  });
+
+  test('should un-register all map callbacks on unmount', () => {
+    const component = mount(
+      <TooltipControl
+        {...defaultProps}
+      />
+    );
+
+    expect(Object.keys(mockMbMapHandlers).length).toBe(4);
+
+    component.unmount();
+    expect(Object.keys(mockMbMapHandlers).length).toBe(0);
   });
 });

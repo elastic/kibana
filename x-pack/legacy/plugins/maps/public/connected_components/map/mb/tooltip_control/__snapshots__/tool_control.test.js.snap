@@ -26,7 +26,7 @@ exports[`TooltipControl render tooltipState is provided should render tooltip po
   style={
     Object {
       "pointerEvents": "none",
-      "transform": "translate(-12013px, 2987px)",
+      "transform": "translate(11987px, 2987px)",
     }
   }
 >
@@ -74,7 +74,7 @@ exports[`TooltipControl render tooltipState is provided should render tooltip po
   style={
     Object {
       "pointerEvents": "none",
-      "transform": "translate(-12013px, 2987px)",
+      "transform": "translate(11987px, 2987px)",
     }
   }
 >
