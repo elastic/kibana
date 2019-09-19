@@ -4,13 +4,10 @@
 
 ## HttpServerSetup.basePath property
 
+[BasePath](./kibana-plugin-server.basepath.md)
+
 <b>Signature:</b>
 
 ```typescript
-basePath: {
-        get: (request: KibanaRequest | LegacyRequest) => string;
-        set: (request: KibanaRequest | LegacyRequest, basePath: string) => void;
-        prepend: (url: string) => string;
-        remove: (url: string) => string;
-    };
+basePath: BasePath;
 ```

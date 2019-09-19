@@ -77,6 +77,7 @@ export {
   AuthResultParams,
   AuthStatus,
   AuthToolkit,
+  BasePath,
   CustomHttpResponseOptions,
   GetAuthHeaders,
   GetAuthState,

@@ -54,6 +54,17 @@ export interface AuthToolkit {
     authenticated: (data?: AuthResultParams) => AuthResult;
 }
 
+// @public
+export class BasePath {
+    // @internal
+    constructor(serverBasePath?: string);
+    get: (request: KibanaRequest<unknown, unknown, unknown> | LegacyRequest) => string;
+    prepend: (path: string) => string;
+    remove: (path: string) => string;
+    readonly serverBasePath: string;
+    set: (request: KibanaRequest<unknown, unknown, unknown> | LegacyRequest, requestSpecificBasePath: string) => void;
+}
+
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
 // 
 // @internal (undocumented)
@@ -230,12 +241,7 @@ export interface HttpServerSetup {
         getAuthHeaders: GetAuthHeaders;
     };
     // (undocumented)
-    basePath: {
-        get: (request: KibanaRequest | LegacyRequest) => string;
-        set: (request: KibanaRequest | LegacyRequest, basePath: string) => void;
-        prepend: (url: string) => string;
-        remove: (url: string) => string;
-    };
+    basePath: BasePath;
     createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;
     isTlsEnabled: boolean;
     registerAuth: (handler: AuthenticationHandler) => void;
