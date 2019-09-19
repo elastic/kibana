@@ -16,6 +16,7 @@ import {
   Revwalk,
 } from '@elastic/nodegit';
 import { LsTreeSummary, simplegit } from '@elastic/simple-git/dist/';
+import { SimpleGit } from '@elastic/simple-git/dist/promise';
 import Boom from 'boom';
 import LruCache from 'lru-cache';
 import * as Path from 'path';
@@ -36,7 +37,6 @@ import {
 } from './utils/git_prime';
 
 export const HEAD = 'HEAD';
-const REFS_HEADS = 'refs/heads/';
 export const DEFAULT_TREE_CHILDREN_LIMIT = 50;
 
 /**
@@ -75,7 +75,6 @@ function entry2Tree(entry: TreeEntry, prefixPath: string = ''): FileTree {
 
 interface Tree {
   entries: TreeEntry[];
-  gitdir: string;
   oid: string;
 }
 export class GitOperations {
@@ -109,9 +108,8 @@ export class GitOperations {
   }
 
   public async fileContent(uri: RepositoryUri, path: string, revision: string = 'master') {
-    const gitdir = this.repoDir(uri);
+    const git = await this.openGit(uri);
     const commit: CommitInfo = await this.getCommitOr404(uri, revision);
-    const git = simplegit(gitdir);
     const p = `${commit.id}:${path}`;
 
     const type = await git.catFile(['-t', p]);
@@ -143,17 +141,17 @@ export class GitOperations {
   }
 
   public async getDefaultBranch(uri: RepositoryUri): Promise<string> {
-    const gitdir = this.repoDir(uri);
-    const ref = await GitPrime.resolveRef({ gitdir, ref: HEAD, depth: 2 });
-    if (ref.startsWith(REFS_HEADS)) {
-      return ref.substr(REFS_HEADS.length);
-    }
-    return ref;
+    const git = await this.openGit(uri);
+    return (await git.raw(['symbolic-ref', HEAD, '--short'])).trim();
   }
 
   public async getHeadRevision(uri: RepositoryUri): Promise<string> {
-    const gitdir = this.repoDir(uri);
-    return await GitPrime.resolveRef({ gitdir, ref: HEAD, depth: 10 });
+    return await this.getRevision(uri, HEAD);
+  }
+
+  public async getRevision(uri: RepositoryUri, ref: string): Promise<string> {
+    const git = await this.openGit(uri);
+    return await git.revparse([ref]);
   }
 
   public async blame(uri: RepositoryUri, revision: string, path: string): Promise<GitBlame[]> {
@@ -186,6 +184,17 @@ export class GitOperations {
     return results;
   }
 
+  public async openGit(uri: RepositoryUri, check: boolean = true): Promise<SimpleGit> {
+    const repoDir = this.repoDir(uri);
+    const git = simplegit(repoDir);
+    if (!check) return git;
+    if (await git.checkIsRepo()) {
+      return git;
+    } else {
+      throw Boom.notFound(`repo ${uri} not found`);
+    }
+  }
+
   public async openRepo(uri: RepositoryUri): Promise<Repository> {
     if (this.repoCache.has(uri)) {
       const repo = this.repoCache.get(uri) as Repository;
@@ -214,21 +223,18 @@ export class GitOperations {
   }
 
   public async countRepoFiles(uri: RepositoryUri, revision: string): Promise<number> {
-    const gitdir = this.repoDir(uri);
-    const git = simplegit(gitdir, false);
+    const git = await this.openGit(uri);
     const ls = new LsTreeSummary(git, revision, '.', { recursive: true });
     return (await ls.allFiles()).length;
   }
 
-  public iterateRepo(uri: RepositoryUri, revision: string) {
-    const gitdir = this.repoDir(uri);
-    const git = simplegit(gitdir, false);
+  public async iterateRepo(uri: RepositoryUri, revision: string) {
+    const git = await this.openGit(uri);
     const ls = new LsTreeSummary(git, revision, '.', { showSize: true, recursive: true });
     return ls.iterator();
   }
 
-  private static async readTree(gitdir: string, oid: string, path: string = '.'): Promise<Tree> {
-    const git = simplegit(gitdir);
+  public async readTree(git: SimpleGit, oid: string, path: string = '.'): Promise<Tree> {
     const lsTree = new LsTreeSummary(git, oid, path, {});
     const entries = await lsTree.allFiles();
     return {
@@ -238,7 +244,6 @@ export class GitOperations {
         oid: f.id,
         path: f.path,
       })),
-      gitdir,
       oid,
     } as Tree;
   }
@@ -318,7 +323,7 @@ export class GitOperations {
     flatten: boolean = false
   ): Promise<FileTree> {
     const commit = await this.getCommitOr404(uri, revision);
-    const gitdir = this.repoDir(uri);
+    const git = await this.openGit(uri);
     if (path.startsWith('/')) {
       path = path.slice(1);
     }
@@ -345,15 +350,15 @@ export class GitOperations {
         path: '',
         type: FileTreeItemType.Directory,
       };
-      const tree = await GitOperations.readTree(gitdir, commit.treeId);
-      await this.fillChildren(root, tree, { skip, limit, flatten });
+      const tree = await this.readTree(git, commit.treeId);
+      await this.fillChildren(git, root, tree, { skip, limit, flatten });
       if (path) {
-        await this.resolvePath(root, tree, path.split('/'), { skip, limit, flatten });
+        await this.resolvePath(git, root, tree, path.split('/'), { skip, limit, flatten });
       }
       return root;
     } else {
       if (path) {
-        const file = (await GitOperations.readTree(gitdir, commit.id, path)).entries[0];
+        const file = (await this.readTree(git, commit.id, path)).entries[0];
         const result: FileTree = {
           name: path.split('/').pop() || '',
           path,
@@ -361,7 +366,7 @@ export class GitOperations {
           sha1: file.oid,
         };
         if (file.type === 'tree') {
-          await this.fillChildren(result, await GitOperations.readTree(gitdir, file.oid), {
+          await this.fillChildren(git, result, await this.readTree(git, file.oid), {
             skip,
             limit,
             flatten,
@@ -374,16 +379,17 @@ export class GitOperations {
           path: '',
           type: FileTreeItemType.Directory,
         };
-        const tree = await GitOperations.readTree(gitdir, commit.id, '.');
-        await this.fillChildren(root, tree, { skip, limit, flatten });
+        const tree = await this.readTree(git, commit.id, '.');
+        await this.fillChildren(git, root, tree, { skip, limit, flatten });
         return root;
       }
     }
   }
 
   private async fillChildren(
+    git: SimpleGit,
     result: FileTree,
-    { entries, gitdir }: Tree,
+    { entries }: Tree,
     { skip, limit, flatten }: { skip: number; limit: number; flatten: boolean }
   ) {
     result.childrenCount = entries.length;
@@ -392,15 +398,16 @@ export class GitOperations {
       const child = entry2Tree(e, result.path);
       result.children.push(child);
       if (flatten && child.type === FileTreeItemType.Directory) {
-        const tree = await GitOperations.readTree(gitdir, e.oid);
+        const tree = await this.readTree(git, e.oid);
         if (tree.entries.length === 1) {
-          await this.fillChildren(child, tree, { skip, limit, flatten });
+          await this.fillChildren(git, child, tree, { skip, limit, flatten });
         }
       }
     }
   }
 
   private async resolvePath(
+    git: SimpleGit,
     result: FileTree,
     tree: Tree,
     paths: string[],
@@ -420,10 +427,10 @@ export class GitOperations {
           result.children[idx] = child;
         }
         if (entry.type === 'tree') {
-          const subTree = await GitOperations.readTree(tree.gitdir, entry.oid);
-          await this.fillChildren(child, subTree, opt);
+          const subTree = await this.readTree(git, entry.oid);
+          await this.fillChildren(git, child, subTree, opt);
           if (rest.length > 0) {
-            await this.resolvePath(child, subTree, rest, opt);
+            await this.resolvePath(git, child, subTree, rest, opt);
           }
         }
       }
@@ -633,8 +640,7 @@ export class GitOperations {
     count: number,
     path?: string
   ): Promise<CommitInfo[]> {
-    const gitdir = this.repoDir(repoUri);
-    const git = simplegit(gitdir);
+    const git = await this.openGit(repoUri);
     const options: any = {
       n: count,
       format: {

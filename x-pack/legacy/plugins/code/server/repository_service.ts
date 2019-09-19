@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Progress, simplegit } from '@elastic/simple-git/dist';
+import { Progress } from '@elastic/simple-git/dist';
 import del from 'del';
 import fs from 'fs';
 import { promisify } from 'util';
@@ -15,6 +15,7 @@ import { SimpleGit } from '@elastic/simple-git/dist/promise';
 import { RepositoryUtils } from '../common/repository_utils';
 import { CloneProgress, CloneWorkerResult, DeleteWorkerResult, Repository } from '../model';
 import { Logger } from './log';
+import { GitOperations } from './git_operations';
 
 // Return false to stop the clone progress. Return true to keep going;
 export type CloneProgressHandler = (
@@ -41,11 +42,14 @@ function isCancelled(error: any) {
 
 // This is the service for any kind of repository handling, e.g. clone, update, delete, etc.
 export class RepositoryService {
+  private readonly gitOps: GitOperations;
   constructor(
     private readonly repoVolPath: string,
     private readonly credsPath: string,
     private readonly log: Logger
-  ) {}
+  ) {
+    this.gitOps = new GitOperations(repoVolPath);
+  }
 
   public async clone(repo: Repository, handler?: CloneProgressHandler): Promise<CloneWorkerResult> {
     if (!repo) {
@@ -68,7 +72,7 @@ export class RepositoryService {
         await mkdirAsync(parentDir, { recursive: true });
       }
       // Go head with the actual clone.
-      const git = simplegit(localPath);
+      const git = await this.gitOps.openGit(repo.uri, false);
       await git.init(true);
       await git.addRemote('origin', repo.url);
       if (repo.protocol === 'ssh') {
@@ -95,8 +99,7 @@ export class RepositoryService {
     }
   }
   public async update(repo: Repository, handler?: UpdateProgressHandler) {
-    const localPath = RepositoryUtils.repositoryLocalPath(this.repoVolPath, repo.uri);
-    const git = simplegit(localPath);
+    const git = await this.gitOps.openGit(repo.uri);
     if (repo.protocol === 'ssh') {
       return await this.tryWithKeys(git, () => this.doFetch(git, repo, handler));
     } else {
