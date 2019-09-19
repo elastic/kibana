@@ -24,7 +24,14 @@ import { FieldSelect } from './field_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
-import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFormLabel } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFormLabel,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ES_TYPES } from '../../../common/es_types';
 import { METRIC_TYPES } from '../../../common/metric_types';
@@ -51,8 +58,12 @@ export function StandardAgg(props) {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
-            <FormattedMessage id="visTypeTimeseries.stdAgg.aggregationLabel" defaultMessage="Aggregation" />
+            <FormattedMessage
+              id="visTypeTimeseries.stdAgg.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
           </EuiFormLabel>
+          <EuiSpacer size="xs" />
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -68,7 +79,9 @@ export function StandardAgg(props) {
           <EuiFlexItem>
             <EuiFormRow
               id={htmlId('field')}
-              label={<FormattedMessage id="visTypeTimeseries.stdAgg.fieldLabel" defaultMessage="Field" />}
+              label={
+                <FormattedMessage id="visTypeTimeseries.stdAgg.fieldLabel" defaultMessage="Field" />
+              }
               fullWidth
             >
               <FieldSelect

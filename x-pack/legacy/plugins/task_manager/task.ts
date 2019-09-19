@@ -111,23 +111,10 @@ export interface TaskDefinition {
   getRetry?: (attempts: number, error: object) => boolean | Date;
 
   /**
-   * The numer of workers / slots a running instance of this task occupies.
-   * This defaults to 1.
-   */
-  numWorkers?: number;
-
-  /**
    * Creates an object that has a run function which performs the task's work,
    * and an optional cancel function which cancels the task.
    */
   createTaskRunner: TaskRunCreatorFunction;
-}
-
-/**
- * A task definition with all of its properties set to a valid value.
- */
-export interface SanitizedTaskDefinition extends TaskDefinition {
-  numWorkers: number;
 }
 
 export const validateTaskDefinition = Joi.object({
@@ -138,9 +125,6 @@ export const validateTaskDefinition = Joi.object({
   maxAttempts: Joi.number()
     .min(1)
     .optional(),
-  numWorkers: Joi.number()
-    .min(1)
-    .default(1),
   createTaskRunner: Joi.func().required(),
   getRetry: Joi.func().optional(),
 }).default();

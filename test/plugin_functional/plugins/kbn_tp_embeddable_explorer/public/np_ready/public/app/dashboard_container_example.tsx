@@ -29,7 +29,6 @@ import {
   ViewMode,
   isErrorEmbeddable,
   EmbeddablePanel,
-  GetActionsCompatibleWithTrigger,
   GetEmbeddableFactory,
   GetEmbeddableFactories,
 } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
@@ -37,9 +36,10 @@ import {
 import { CoreStart } from '../../../../../../../../src/core/public';
 import { dashboardInput } from './dashboard_input';
 import { Start as InspectorStartContract } from '../../../../../../../../src/plugins/inspector/public';
+import { TGetActionsCompatibleWithTrigger } from '../../../../../../../../src/plugins/ui_actions/public';
 
 interface Props {
-  getActions: GetActionsCompatibleWithTrigger;
+  getActions: TGetActionsCompatibleWithTrigger;
   getEmbeddableFactory: GetEmbeddableFactory;
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];

@@ -131,7 +131,10 @@ class MarkdownPanelConfigUi extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage id="visTypeTimeseries.markdown.optionsTab.dataLabel" defaultMessage="Data" />
+                <FormattedMessage
+                  id="visTypeTimeseries.markdown.optionsTab.dataLabel"
+                  defaultMessage="Data"
+                />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
@@ -175,7 +178,7 @@ class MarkdownPanelConfigUi extends Component {
                     defaultMessage="Ignore global filter?"
                   />
                 </EuiFormLabel>
-                <EuiSpacer size="s" />
+                <EuiSpacer size="m" />
                 <YesNo
                   value={model.ignore_global_filter}
                   name="ignore_global_filter"
@@ -190,14 +193,17 @@ class MarkdownPanelConfigUi extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage id="visTypeTimeseries.markdown.optionsTab.styleLabel" defaultMessage="Style" />
+                <FormattedMessage
+                  id="visTypeTimeseries.markdown.optionsTab.styleLabel"
+                  defaultMessage="Style"
+                />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
 
             <EuiFlexGroup responsive={false} wrap={true} alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiFormLabel style={{ marginBottom: 0 }}>
+                <EuiFormLabel>
                   <FormattedMessage
                     id="visTypeTimeseries.markdown.optionsTab.backgroundColorLabel"
                     defaultMessage="Background color:"
@@ -212,7 +218,7 @@ class MarkdownPanelConfigUi extends Component {
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel style={{ marginBottom: 0 }}>
+                <EuiFormLabel>
                   <FormattedMessage
                     id="visTypeTimeseries.markdown.optionsTab.showScrollbarsLabel"
                     defaultMessage="Show scrollbars?"
@@ -228,7 +234,7 @@ class MarkdownPanelConfigUi extends Component {
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiFormLabel style={{ marginBottom: 0 }}>
+                <EuiFormLabel>
                   <FormattedMessage
                     id="visTypeTimeseries.markdown.optionsTab.openLinksInNewTab"
                     defaultMessage="Open links in new tab?"
@@ -243,7 +249,7 @@ class MarkdownPanelConfigUi extends Component {
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel style={{ marginBottom: 0 }} htmlFor={htmlId('valign')}>
+                <EuiFormLabel htmlFor={htmlId('valign')}>
                   <FormattedMessage
                     id="visTypeTimeseries.markdown.optionsTab.verticalAlignmentLabel"
                     defaultMessage="Vertical alignment:"
@@ -302,7 +308,10 @@ class MarkdownPanelConfigUi extends Component {
             isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
           >
-            <FormattedMessage id="visTypeTimeseries.markdown.dataTab.dataButtonLabel" defaultMessage="Data" />
+            <FormattedMessage
+              id="visTypeTimeseries.markdown.dataTab.dataButtonLabel"
+              defaultMessage="Data"
+            />
           </EuiTab>
           <EuiTab
             isSelected={selectedTab === 'options'}

@@ -86,6 +86,7 @@ function FiltersParamEditor({ agg, value = [], setValue }: AggParamEditorProps<F
 
   return (
     <>
+      <EuiSpacer size="m" />
       {filters.map(({ input, label, id }, arrayIndex) => (
         <FilterRow
           key={id}

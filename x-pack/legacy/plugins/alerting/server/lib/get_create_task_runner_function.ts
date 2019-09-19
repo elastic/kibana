@@ -96,6 +96,7 @@ export function getCreateTaskRunnerFunction({
         });
 
         const executionHandler = createExecutionHandler({
+          alertId,
           executeAction,
           apiKey,
           actions: actionsWithIds,
@@ -134,7 +135,7 @@ export function getCreateTaskRunnerFunction({
             const { actionGroup, context, state } = alertInstance.getSechduledActionOptions()!;
             alertInstance.replaceMeta({ lastFired: Date.now() });
             alertInstance.unscheduleActions();
-            return executionHandler(actionGroup, context, state);
+            return executionHandler({ actionGroup, context, state, alertInstanceId });
           })
         );
 

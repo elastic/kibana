@@ -13,6 +13,9 @@ import { DisabledPanel } from './disabled_panel';
 import { PDFPanel } from './pdf_panel';
 import { ExternalEmbedFlyout } from './flyout/external_embed_flyout';
 
+import { ComponentStrings } from '../../../../i18n';
+const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
+
 type ClosePopoverFn = () => void;
 
 type CopyTypes = 'pdf' | 'reportingConfig' | 'embed';
@@ -88,10 +91,10 @@ export const WorkpadExport: FunctionComponent<Props> = ({
 
   const getPanelTree = (closePopover: ClosePopoverFn) => ({
     id: 0,
-    title: 'Share this workpad',
+    title: strings.getShareWorkpadMessage(),
     items: [
       {
-        name: 'Download as JSON',
+        name: strings.getShareDownloadJSONTitle(),
         icon: <EuiIcon type="exportAction" size="m" />,
         onClick: () => {
           onExport('json');
@@ -99,11 +102,11 @@ export const WorkpadExport: FunctionComponent<Props> = ({
         },
       },
       {
-        name: 'PDF reports',
+        name: strings.getShareDownloadPDFTitle(),
         icon: 'document',
         panel: {
           id: 1,
-          title: 'PDF reports',
+          title: strings.getShareDownloadPDFTitle(),
           content: enabled ? (
             getPDFPanel(closePopover)
           ) : (
@@ -128,7 +131,11 @@ export const WorkpadExport: FunctionComponent<Props> = ({
   });
 
   const exportControl = (togglePopover: () => void) => (
-    <EuiButtonIcon iconType="share" aria-label="Share this workpad" onClick={togglePopover} />
+    <EuiButtonIcon
+      iconType="share"
+      aria-label={strings.getShareWorkpadMessage()}
+      onClick={togglePopover}
+    />
   );
 
   const flyout = showFlyout ? (
@@ -136,22 +143,17 @@ export const WorkpadExport: FunctionComponent<Props> = ({
   ) : null;
 
   return (
-    <div>
-      <Popover
-        button={exportControl}
-        panelPaddingSize="none"
-        tooltip="Share workpad"
-        tooltipPosition="bottom"
-      >
-        {({ closePopover }: { closePopover: ClosePopoverFn }) => (
-          <EuiContextMenu
-            initialPanelId={0}
-            panels={flattenPanelTree(getPanelTree(closePopover))}
-          />
-        )}
-      </Popover>
+    <Popover
+      button={exportControl}
+      panelPaddingSize="none"
+      tooltip={strings.getShareWorkpadMessage()}
+      tooltipPosition="bottom"
+    >
+      {({ closePopover }: { closePopover: ClosePopoverFn }) => (
+        <EuiContextMenu initialPanelId={0} panels={flattenPanelTree(getPanelTree(closePopover))} />
+      )}
       {flyout}
-    </div>
+    </Popover>
   );
 };
 

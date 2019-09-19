@@ -25,13 +25,16 @@ import {
 } from '../../../lib/download_workpad';
 import { WorkpadExport as Component, Props as ComponentProps } from './workpad_export';
 import { getPdfUrl, createPdf } from './utils';
-import { CanvasWorkpad } from '../../../../types';
+import { State, CanvasWorkpad } from '../../../../types';
 import { CanvasRenderedWorkpad } from '../../../../external_runtime/types';
 // @ts-ignore Untyped local.
 import { fetch, arrayBufferFetch } from '../../../../common/lib/fetch';
 import { API_ROUTE_SNAPSHOT_ZIP } from '../../../../common/lib/constants';
 
-const mapStateToProps = (state: any) => ({
+import { ComponentStrings } from '../../../../i18n';
+const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
+
+const mapStateToProps = (state: State) => ({
   workpad: getWorkpad(state),
   renderedWorkpad: getRenderedWorkpad(state),
   pageCount: getPages(state).length,
@@ -66,21 +69,21 @@ export const WorkpadExport = compose<ComponentProps, {}>(
           return getAbsoluteUrl(getPdfUrl(workpad, { pageCount }));
         }
 
-        throw new Error(`Unknown export type: ${type}`);
+        throw new Error(strings.getUnknownExportErrorMessage(type));
       },
       onCopy: type => {
         switch (type) {
           case 'pdf':
-            notify.info('The PDF generation URL was copied to your clipboard.');
+            notify.info(strings.getCopyPDFMessage());
             break;
           case 'reportingConfig':
-            notify.info(`Copied reporting configuration to clipboard`);
+            notify.info(strings.getCopyReportingConfigMessage());
             break;
           case 'embed':
             notify.info(`Copied embed code to clipboard`);
             break;
           default:
-            throw new Error(`Unknown copy type: ${type}`);
+            throw new Error(strings.getUnknownExportErrorMessage(type));
         }
       },
       onExport: type => {
@@ -88,15 +91,15 @@ export const WorkpadExport = compose<ComponentProps, {}>(
           case 'pdf':
             return createPdf(workpad, { pageCount })
               .then(({ data }: { data: { job: { id: string } } }) => {
-                notify.info('Exporting PDF. You can track the progress in Management.', {
-                  title: `PDF export of workpad '${workpad.name}'`,
+                notify.info(strings.getExportPDFMessage(), {
+                  title: strings.getExportPDFTitle(workpad.name),
                 });
 
                 // register the job so a completion notification shows up when it's ready
                 jobCompletionNotifications.add(data.job.id);
               })
               .catch((err: Error) => {
-                notify.error(err, { title: `Failed to create PDF for '${workpad.name}'` });
+                notify.error(err, { title: strings.getExportPDFErrorTitle(workpad.name) });
               });
           case 'json':
             downloadWorkpad(workpad.id);
@@ -114,7 +117,7 @@ export const WorkpadExport = compose<ComponentProps, {}>(
               .then(blob => downloadZippedEmbed(blob.data));
             return;
           default:
-            throw new Error(`Unknown export type: ${type}`);
+            throw new Error(strings.getUnknownExportErrorMessage(type));
         }
       },
     })

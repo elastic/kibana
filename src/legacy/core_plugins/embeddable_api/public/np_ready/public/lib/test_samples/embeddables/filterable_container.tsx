@@ -54,6 +54,7 @@ export class FilterableContainer extends Container<
   public getInheritedInput() {
     return {
       filters: this.input.filters,
+      viewMode: this.input.viewMode,
     };
   }
 
