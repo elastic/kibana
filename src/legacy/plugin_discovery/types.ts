@@ -76,7 +76,10 @@ export interface LegacyPluginOptions {
     interpreter?: string[];
     uiSettingDefaults?: Record<string, any>;
   }>;
-  // TODO: Revise the field when Timelion plugin is moved from legacy to plugins.
+  /**
+   * TODO: Revise the field when Timelion plugin is moved from legacy to plugins.
+   * https://github.com/elastic/kibana/pull/44039#discussion_r326105564
+   */
   uiCapabilities?: Capabilities | (() => Partial<Capabilities>);
   publicDir: any;
   configPrefix: any;
