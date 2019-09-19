@@ -46,7 +46,6 @@ import {
   SOURCE_PACKETS_FIELD_NAME,
 } from '../../../../source_destination/source_destination_arrows';
 import { RowRenderer, RowRendererContainer } from '../row_renderer';
-import { Row } from '../helpers';
 import {
   NETWORK_BYTES_FIELD_NAME,
   NETWORK_COMMUNITY_ID_FIELD_NAME,

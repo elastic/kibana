@@ -10,7 +10,6 @@ import React from 'react';
 
 import * as i18n from './translations';
 import { RowRenderer, RowRendererContainer } from '../row_renderer';
-import { Row } from '../helpers';
 import { AuditdGenericDetails } from './generic_details';
 import { AuditdGenericFileDetails } from './generic_file_details';
 
