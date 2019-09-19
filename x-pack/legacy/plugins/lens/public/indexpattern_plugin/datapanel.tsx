@@ -25,7 +25,7 @@ import {
   EuiText,
   EuiFormControlLayout,
   EuiSwitch,
-  EuiIcon,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -419,8 +419,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                       setLocalState(s => ({ ...localState, isTypeFilterOpen: false }))
                     }
                     button={
-                      <EuiButtonEmpty
-                        size="s"
+                      <EuiButtonIcon
+                        iconType="filter"
                         onClick={() => {
                           setLocalState(s => ({
                             ...s,
@@ -429,17 +429,15 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                         }}
                         data-test-subj="lnsIndexPatternFiltersToggle"
                         title={i18n.translate('xpack.lens.indexPatterns.toggleFiltersPopover', {
-                          defaultMessage: 'Toggle filters for index pattern',
+                          defaultMessage: 'Filters for index pattern',
                         })}
                         aria-label={i18n.translate(
                           'xpack.lens.indexPatterns.toggleFiltersPopover',
                           {
-                            defaultMessage: 'Toggle filters for index pattern',
+                            defaultMessage: 'Filters for index pattern',
                           }
                         )}
-                      >
-                        <EuiIcon type="filter" size="m" />
-                      </EuiButtonEmpty>
+                      />
                     }
                   >
                     <EuiPopoverTitle>
