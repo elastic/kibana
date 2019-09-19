@@ -114,31 +114,11 @@ export const SnapshotToolbar = injectI18n(({ intl }) => (
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <WithWaffleViewState indexPattern={createDerivedIndexPattern('metrics')}>
-                    {({
-                      changeView,
-                      changeBoundsOverride,
-                      changeAutoBounds,
-                      jumpToTime,
-                      startAutoReload,
-                      stopAutoReload,
-                      applyFilterQuery,
-                      viewState,
-                      defaultViewState,
-                    }) => (
+                    {({ defaultViewState, viewState, onViewChange }) => (
                       <SavedViewsToolbarControls
                         defaultViewState={defaultViewState}
                         viewState={viewState}
-                        changeMetric={changeMetric}
-                        changeGroupBy={changeGroupBy}
-                        changeNodeType={changeNodeType}
-                        changeView={changeView}
-                        changeCustomOptions={changeCustomOptions}
-                        changeBoundsOverride={changeBoundsOverride}
-                        changeAutoBounds={changeAutoBounds}
-                        jumpToTime={jumpToTime}
-                        startAutoReload={startAutoReload}
-                        stopAutoReload={stopAutoReload}
-                        applyFilterQuery={applyFilterQuery}
+                        onViewChange={onViewChange}
                       />
                     )}
                   </WithWaffleViewState>

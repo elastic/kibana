@@ -17,9 +17,7 @@ import {
   initialState,
 } from '../../store';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
-import { bindPlainActionCreators } from '../../utils/typed_redux';
 import { convertKueryToElasticSearchQuery } from '../../utils/kuery';
-import { FilterQuery } from '../../store/local/waffle_filter';
 
 const selectViewState = createSelector(
   waffleOptionsSelectors.selectMetric,
@@ -66,27 +64,52 @@ export const withWaffleViewState = connect(
     viewState: selectViewState(state),
     defaultViewState: selectViewState(initialState),
   }),
-  (dispatch, ownProps: Props) =>
-    bindPlainActionCreators({
-      changeMetric: waffleOptionsActions.changeMetric,
-      changeGroupBy: waffleOptionsActions.changeGroupBy,
-      changeNodeType: waffleOptionsActions.changeNodeType,
-      changeView: waffleOptionsActions.changeView,
-      changeCustomOptions: waffleOptionsActions.changeCustomOptions,
-      changeBoundsOverride: waffleOptionsActions.changeBoundsOverride,
-      changeAutoBounds: waffleOptionsActions.changeAutoBounds,
-      jumpToTime: waffleTimeActions.jumpToTime,
-      startAutoReload: waffleTimeActions.startAutoReload,
-      stopAutoReload: waffleTimeActions.stopAutoReload,
-      applyFilterQuery: (query: FilterQuery) =>
-        waffleFilterActions.applyWaffleFilterQuery({
-          query,
-          serializedQuery: convertKueryToElasticSearchQuery(
-            query.expression,
-            ownProps.indexPattern
-          ),
-        }),
-    })
+  (dispatch, ownProps: Props) => {
+    return {
+      onViewChange: (viewState: WaffleViewState) => {
+        if (viewState.time) {
+          dispatch(waffleTimeActions.jumpToTime(viewState.time));
+        }
+        if (viewState.autoReload) {
+          dispatch(waffleTimeActions.startAutoReload());
+        } else if (typeof viewState.autoReload !== 'undefined' && !viewState.autoReload) {
+          dispatch(waffleTimeActions.stopAutoReload());
+        }
+        if (viewState.metric) {
+          dispatch(waffleOptionsActions.changeMetric(viewState.metric));
+        }
+        if (viewState.groupBy) {
+          dispatch(waffleOptionsActions.changeGroupBy(viewState.groupBy));
+        }
+        if (viewState.nodeType) {
+          dispatch(waffleOptionsActions.changeNodeType(viewState.nodeType));
+        }
+        if (viewState.view) {
+          dispatch(waffleOptionsActions.changeView(viewState.view));
+        }
+        if (viewState.customOptions) {
+          dispatch(waffleOptionsActions.changeCustomOptions(viewState.customOptions));
+        }
+        if (viewState.bounds) {
+          dispatch(waffleOptionsActions.changeBoundsOverride(viewState.bounds));
+        }
+        if (viewState.auto) {
+          dispatch(waffleOptionsActions.changeAutoBounds(viewState.auto));
+        }
+        if (viewState.filterQuery) {
+          dispatch(
+            waffleFilterActions.applyWaffleFilterQuery({
+              query: viewState.filterQuery,
+              serializedQuery: convertKueryToElasticSearchQuery(
+                viewState.filterQuery.expression,
+                ownProps.indexPattern
+              ),
+            })
+          );
+        }
+      },
+    };
+  }
 );
 
 export const WithWaffleViewState = asChildFunctionRenderer(withWaffleViewState);
