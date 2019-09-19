@@ -123,37 +123,59 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       statusMaxCount: 0,
     };
 
+    /**
+     * The following section of code enables us to provide buckets per location
+     * that have a `null` value if there is no data at the given timestamp.
+     *
+     * We maintain two `Set`s. One is per bucket, the other is persisted for the
+     * entire collection. At the end of a bucket's evaluation, if there was no object
+     * parsed for a given location line that was already started, we insert an element
+     * to the given line with a null value. Without this, our charts on the client will
+     * display a continuous line for each of the points they are provided.
+     */
+
+    // a set of all the locations found for this result
     const resultLocations = new Set<string>();
     const linesByLocation: { [key: string]: LocationDurationLine } = {};
     dateHistogramBuckets.forEach(dateHistogramBucket => {
       const x = get(dateHistogramBucket, 'key');
       const docCount = get(dateHistogramBucket, 'doc_count', 0);
+      // a set of all the locations for the current bucket
       const bucketLocations = new Set<string>();
 
       dateHistogramBucket.location.buckets.forEach(
         (locationBucket: { key: string; duration: { avg: number } }) => {
           const locationName = locationBucket.key;
+          // store the location name in each set
           bucketLocations.add(locationName);
           resultLocations.add(locationName);
 
+          // create a new line for this location if it doesn't exist
           let currentLine: LocationDurationLine = get(linesByLocation, locationName);
           if (!currentLine) {
             currentLine = { name: locationName, line: [] };
             linesByLocation[locationName] = currentLine;
             monitorChartsData.locationDurationLines.push(currentLine);
           }
+          // add the entry for the current location's duration average
           currentLine.line.push({ x, y: get(locationBucket, 'duration.avg', null) });
         }
       );
 
+      // if there are more lines in the result than are represented in the current bucket,
+      // we must add null entries
       if (dateHistogramBucket.location.buckets.length < resultLocations.size) {
         resultLocations.forEach(resultLocation => {
+          // the current bucket has a value for this location, do nothing
           if (location && location !== resultLocation) return;
+          // the current bucket had no value for this location, insert a null value
           if (!bucketLocations.has(resultLocation)) {
             const locationLine = monitorChartsData.locationDurationLines.find(
               ({ name }) => name === resultLocation
             );
+            // in practice, there should always be a line present, but `find` can return `undefined`
             if (locationLine) {
+              // this will create a gap in the line like we desire
               locationLine.line.push({ x, y: null });
             }
           }
