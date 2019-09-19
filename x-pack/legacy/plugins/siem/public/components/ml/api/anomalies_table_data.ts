@@ -25,7 +25,8 @@ export interface Body {
 
 export const anomaliesTableData = async (
   body: Body,
-  headers: Record<string, string | undefined>
+  headers: Record<string, string | undefined>,
+  signal: AbortSignal
 ): Promise<Anomalies> => {
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(`${chrome.getBasePath()}/api/ml/results/anomalies_table_data`, {
@@ -38,7 +39,8 @@ export const anomaliesTableData = async (
       'kbn-xsrf': kbnVersion,
       ...headers,
     },
+    signal,
   });
   await throwIfNotOk(response);
-  return await response.json();
+  return response.json();
 };

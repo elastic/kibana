@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visFactory } from '../../../ui/public/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggGroupNames } from 'ui/vis/editors/default';
@@ -32,20 +32,20 @@ import {
   ThresholdLineStyles,
   getConfigCollections,
 } from './utils/collections';
-import { getAreaOptionTabs, getCountLabel } from './utils/common_config';
+import { getAreaOptionTabs, countLabel } from './utils/common_config';
 import { palettes } from '@elastic/eui/lib/services';
+import { vislibVisController } from './controller';
 
-export default function PointSeriesVisType(Private) {
-  const VisFactory = Private(VisFactoryProvider);
-  const countLabel = getCountLabel();
+export default function PointSeriesVisType() {
 
-  return VisFactory.createVislibVisualization({
+  return visFactory.createBaseVisualization({
     name: 'histogram',
     title: i18n.translate('kbnVislibVisTypes.histogram.histogramTitle', { defaultMessage: 'Vertical Bar' }),
     icon: 'visBarVertical',
     description: i18n.translate('kbnVislibVisTypes.histogram.histogramDescription',
       { defaultMessage: 'Assign a continuous variable to each axis' }
     ),
+    visualization: vislibVisController,
     visConfig: {
       defaults: {
         type: 'histogram',
@@ -124,6 +124,9 @@ export default function PointSeriesVisType(Private) {
           color: palettes.euiPaletteColorBlind.colors[9]
         }
       },
+    },
+    events: {
+      brush: { disabled: false },
     },
     editorConfig: {
       collections: getConfigCollections(),

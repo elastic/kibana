@@ -107,7 +107,13 @@ const Space2: Space = {
   disabledFeatures: [],
 };
 
-export const Spaces: Space[] = [Space1, Space2];
+const OtherSpace: Space = {
+  id: 'other',
+  name: 'Other',
+  disabledFeatures: [],
+};
+
+export const Spaces: Space[] = [Space1, Space2, OtherSpace];
 
 // For all scenarios, we define both an instance in addition
 // to a "type" definition so that we can use the exhaustive switch in

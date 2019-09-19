@@ -28,22 +28,20 @@ export class UMMonitorsDomain {
     );
   }
 
-  public async getMonitors(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    filters?: string | null
-  ): Promise<any> {
-    return this.adapter.getMonitors(request, dateRangeStart, dateRangeEnd, filters);
-  }
-
   public async getSnapshotCount(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string | null
+    filters?: string | null,
+    statusFilter?: string | null
   ): Promise<any> {
-    return this.adapter.getSnapshotCount(request, dateRangeStart, dateRangeEnd, filters);
+    return this.adapter.getSnapshotCount(
+      request,
+      dateRangeStart,
+      dateRangeEnd,
+      filters,
+      statusFilter
+    );
   }
 
   public async getFilterBar(
@@ -52,15 +50,6 @@ export class UMMonitorsDomain {
     dateRangeEnd: string
   ): Promise<any> {
     return this.adapter.getFilterBar(request, dateRangeStart, dateRangeEnd);
-  }
-
-  public async getErrorsList(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    filters?: string | null
-  ): Promise<any> {
-    return this.adapter.getErrorsList(request, dateRangeStart, dateRangeEnd, filters);
   }
 
   public async getMonitorPageTitle(

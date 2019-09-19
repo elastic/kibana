@@ -186,7 +186,7 @@ export class AnnotationsEditor extends Component {
                     defaultMessage="Ignore global filters?"
                   />
                 </EuiFormLabel>
-                <EuiSpacer size="s" />
+                <EuiSpacer size="m" />
                 <YesNo
                   value={model.ignore_global_filters}
                   name="ignore_global_filters"
@@ -200,7 +200,7 @@ export class AnnotationsEditor extends Component {
                     defaultMessage="Ignore panel filters?"
                   />
                 </EuiFormLabel>
-                <EuiSpacer size="s" />
+                <EuiSpacer size="xs" />
                 <YesNo
                   value={model.ignore_panel_filters}
                   name="ignore_panel_filters"
