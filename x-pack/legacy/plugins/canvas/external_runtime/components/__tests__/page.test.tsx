@@ -6,21 +6,10 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { TestingContext } from '../../../test';
-import { Title } from '../title.container';
+import { Page } from '../page.container';
 
-describe('<Title />', () => {
+describe('<Page />', () => {
   test('null workpad renders nothing', () => {
-    expect(mount(<Title />).isEmptyRender());
-  });
-
-  const wrapper = mount(
-    <TestingContext>
-      <Title />
-    </TestingContext>
-  );
-
-  test('renders as expected', () => {
-    expect(wrapper.text()).toEqual('My Canvas Workpad');
+    expect(mount(<Page index={0} />).isEmptyRender());
   });
 });

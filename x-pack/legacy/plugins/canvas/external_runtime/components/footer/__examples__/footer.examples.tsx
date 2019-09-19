@@ -5,7 +5,7 @@
  */
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { Context } from '../../../context/mock';
+import { TestingContext } from '../../../test';
 
 import { Footer } from '../footer.container';
 import { Title } from '../title.container';
@@ -15,27 +15,27 @@ import { Scrubber } from '../scrubber.container';
 
 storiesOf('runtime/Footer', module)
   .add('Footer', () => (
-    <Context height={172}>
+    <TestingContext height={172}>
       <Footer />
-    </Context>
+    </TestingContext>
   ))
   .add('Title', () => (
-    <Context style={{ background: '#333', padding: 10 }}>
+    <TestingContext style={{ background: '#333', padding: 10 }}>
       <Title />
-    </Context>
+    </TestingContext>
   ))
   .add('Scrubber', () => (
-    <Context height={172} isScrubberVisible={true}>
+    <TestingContext height={172} isScrubberVisible={true}>
       <Scrubber />
-    </Context>
+    </TestingContext>
   ))
   .add('PageControls', () => (
-    <Context style={{ background: '#333', padding: 10 }}>
+    <TestingContext style={{ background: '#333', padding: 10 }}>
       <PageControls />
-    </Context>
+    </TestingContext>
   ))
   .add('PagePreview', () => (
-    <Context>
+    <TestingContext>
       <PagePreview height={172} index={0} />
-    </Context>
+    </TestingContext>
   ));

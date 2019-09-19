@@ -6,8 +6,12 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { Context } from '../../../context/mock';
+import { TestingContext } from '../../../test';
 import { Scrubber } from '../scrubber.container';
+import {
+  getScrubberSlideContainer as container,
+  getRenderedElement as element,
+} from '../../../test/selectors';
 
 describe('<Scrubber />', () => {
   test('null workpad renders nothing', () => {
@@ -15,16 +19,13 @@ describe('<Scrubber />', () => {
   });
 
   const wrapper = mount(
-    <Context>
+    <TestingContext>
       <Scrubber />
-    </Context>
+    </TestingContext>
   );
 
-  const container = () => wrapper.find('.slideContainer');
-  const markdown = () => wrapper.find('.render');
-
   test('renders as expected', () => {
-    expect(container().children().length === 1);
-    expect(markdown().text()).toEqual('markdown mock');
+    expect(container(wrapper).children().length === 1);
+    expect(element(wrapper).text()).toEqual('markdown mock');
   });
 });

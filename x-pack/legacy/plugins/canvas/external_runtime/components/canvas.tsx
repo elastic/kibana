@@ -30,8 +30,8 @@ interface Props {
  * The "stage" for a workpad, which composes the toolbar and other components.
  */
 export const Canvas = ({
-  onSetPage = () => {},
-  onSetScrubberVisible = () => {},
+  onSetPage,
+  onSetScrubberVisible,
   refs,
   settings,
   stage,

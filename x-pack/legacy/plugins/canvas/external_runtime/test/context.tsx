@@ -9,13 +9,13 @@ import {
   initialExternalEmbedState,
   ExternalEmbedStateProvider,
   useExternalEmbedState,
-} from '../index';
-import { renderFunctions } from '../../supported_renderers';
-import { ExternalEmbedState } from '../../types';
-import { RendererSpec } from '../../../types';
-import { snapshots, SnapshotNames } from '../../test';
+} from '../context/index';
+import { renderFunctions } from '../supported_renderers';
+import { ExternalEmbedState } from '../types';
+import { RendererSpec } from '../../types';
+import { snapshots, SnapshotNames } from '.';
 
-jest.mock('../../supported_renderers');
+jest.mock('../supported_renderers');
 
 const Container = ({
   children,
@@ -43,9 +43,11 @@ interface Props {
   isScrubberVisible?: boolean;
   style?: CSSProperties;
   stageRef?: RefObject<HTMLDivElement>;
+  toolbar?: boolean;
+  autoplay?: boolean;
 }
 
-export const Context = ({
+export const TestingContext = ({
   children,
   height,
   width,
@@ -53,6 +55,8 @@ export const Context = ({
   style,
   stageRef,
   source = 'hello',
+  toolbar,
+  autoplay,
 }: Props) => {
   const renderers: { [key: string]: RendererSpec } = {};
 
@@ -61,13 +65,25 @@ export const Context = ({
     renderers[renderer.name] = renderer;
   });
 
-  const { footer } = initialExternalEmbedState;
+  const { footer, settings } = initialExternalEmbedState;
+  const { toolbar: toolbarSettings, autoplay: autoplaySettings } = settings;
 
   const initialState: ExternalEmbedState = {
     ...initialExternalEmbedState,
     footer: {
       ...footer,
       isScrubberVisible: isScrubberVisible || footer.isScrubberVisible,
+    },
+    settings: {
+      ...settings,
+      toolbar: {
+        ...toolbarSettings,
+        isAutohide: !!toolbar,
+      },
+      autoplay: {
+        ...autoplaySettings,
+        isEnabled: !!autoplay,
+      },
     },
     stage: {
       height: 400,

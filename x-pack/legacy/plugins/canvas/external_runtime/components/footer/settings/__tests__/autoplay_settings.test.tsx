@@ -6,40 +6,41 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { Context } from '../../../../context/mock';
+import { TestingContext } from '../../../../test';
+import {
+  getAutoplayTextField as input,
+  getAutoplayCheckbox as checkbox,
+  getAutoplaySubmit as submit,
+} from '../../../../test/selectors';
 import { AutoplaySettings } from '../autoplay_settings.container';
 
 describe('<AutoplaySettings />', () => {
   const wrapper = mount(
-    <Context>
+    <TestingContext>
       <AutoplaySettings />
-    </Context>
+    </TestingContext>
   );
 
-  const checkbox = () => wrapper.find('EuiSwitch').find('input[type="checkbox"]');
-  const input = () => wrapper.find('EuiFieldText').find('input[type="text"]');
-  const submit = () => wrapper.find('EuiButton');
-
   test('renders as expected', () => {
-    expect(checkbox().props().checked).toBeFalsy();
-    expect(input().props().value).toBe('5s');
+    expect(checkbox(wrapper).props().checked).toEqual(false);
+    expect(input(wrapper).props().value).toBe('5s');
   });
 
   test('activates and deactivates', () => {
-    checkbox().simulate('change');
-    expect(checkbox().props().checked).toBeTruthy();
-    checkbox().simulate('change');
-    expect(checkbox().props().checked).toBeFalsy();
+    checkbox(wrapper).simulate('change');
+    expect(checkbox(wrapper).props().checked).toEqual(true);
+    checkbox(wrapper).simulate('change');
+    expect(checkbox(wrapper).props().checked).toEqual(false);
   });
 
   test('changes properly with input', () => {
-    input().simulate('change', { target: { value: '2asd' } });
-    expect(submit().props().disabled).toBeTruthy();
-    input().simulate('change', { target: { value: '2s' } });
-    expect(submit().props().disabled).toBeFalsy();
-    expect(input().props().value === '2s');
-    submit().simulate('submit');
-    expect(input().props().value === '2s');
-    expect(submit().props().disabled).toBeFalsy();
+    input(wrapper).simulate('change', { target: { value: '2asd' } });
+    expect(submit(wrapper).props().disabled).toEqual(true);
+    input(wrapper).simulate('change', { target: { value: '2s' } });
+    expect(submit(wrapper).props().disabled).toEqual(false);
+    expect(input(wrapper).props().value === '2s');
+    submit(wrapper).simulate('submit');
+    expect(input(wrapper).props().value === '2s');
+    expect(submit(wrapper).props().disabled).toEqual(false);
   });
 });

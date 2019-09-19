@@ -6,7 +6,7 @@
 
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
-import { Context } from '../../../context/mock';
+import { TestingContext } from '../../../test';
 import { PageControls } from '../page_controls.container';
 
 export const previousPage = (wrapper: ReactWrapper) =>
@@ -22,25 +22,25 @@ describe('<PageControls />', () => {
   });
 
   const hello = mount(
-    <Context source="hello">
+    <TestingContext source="hello">
       <PageControls />
-    </Context>
+    </TestingContext>
   );
   const austin = mount(
-    <Context source="austin">
+    <TestingContext source="austin">
       <PageControls />
-    </Context>
+    </TestingContext>
   );
 
   test('hello: renders as expected', () => {
-    expect(previousPage(hello).props().disabled).toBeTruthy();
-    expect(nextPage(hello).props().disabled).toBeTruthy();
+    expect(previousPage(hello).props().disabled).toEqual(true);
+    expect(nextPage(hello).props().disabled).toEqual(true);
     expect(currentPage(hello).text()).toEqual('Page 1');
   });
 
   test('austin: renders as expected', () => {
-    expect(previousPage(austin).props().disabled).toBeTruthy();
-    expect(nextPage(austin).props().disabled).toBeFalsy();
+    expect(previousPage(austin).props().disabled).toEqual(true);
+    expect(nextPage(austin).props().disabled).toEqual(false);
     expect(currentPage(austin).text()).toEqual('Page 1 of 28');
   });
 

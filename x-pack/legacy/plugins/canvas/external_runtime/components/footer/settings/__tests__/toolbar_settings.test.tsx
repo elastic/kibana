@@ -6,26 +6,25 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { Context } from '../../../../context/mock';
+import { TestingContext } from '../../../../test';
+import { getToolbarCheckbox as checkbox } from '../../../../test/selectors';
 import { ToolbarSettings } from '../toolbar_settings.container';
 
 describe('<ToolbarSettings />', () => {
   const wrapper = mount(
-    <Context>
+    <TestingContext>
       <ToolbarSettings />
-    </Context>
+    </TestingContext>
   );
 
-  const checkbox = () => wrapper.find('input[name="toolbarHide"].euiSwitch__input');
-
   test('renders as expected', () => {
-    expect(checkbox().props().checked).toBeFalsy();
+    expect(checkbox(wrapper).props().checked).toEqual(false);
   });
 
   test('activates and deactivates', () => {
-    checkbox().simulate('change');
-    expect(checkbox().props().checked).toBeTruthy();
-    checkbox().simulate('change');
-    expect(checkbox().props().checked).toBeFalsy();
+    checkbox(wrapper).simulate('change');
+    expect(checkbox(wrapper).props().checked).toEqual(true);
+    checkbox(wrapper).simulate('change');
+    expect(checkbox(wrapper).props().checked).toEqual(false);
   });
 });

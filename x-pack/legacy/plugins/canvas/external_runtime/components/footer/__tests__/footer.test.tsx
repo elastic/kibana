@@ -6,7 +6,8 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { Context } from '../../../context/mock';
+import { TestingContext } from '../../../test';
+import { getScrubber as scrubber, getPageControlsCenter as center } from '../../../test/selectors';
 import { Footer } from '../footer.container';
 
 describe('<Footer />', () => {
@@ -15,17 +16,14 @@ describe('<Footer />', () => {
   });
 
   const wrapper = mount(
-    <Context>
+    <TestingContext>
       <Footer />
-    </Context>
+    </TestingContext>
   );
 
-  const scrubber = () => wrapper.find('Scrubber').slice(1, 2);
-  const center = () => wrapper.find('EuiButtonEmpty[data-test-subj="pageControlsCurrentPage"]');
-
   test('scrubber functions properly', () => {
-    expect(scrubber().prop('isScrubberVisible')).toBeFalsy();
-    center().simulate('click');
-    expect(scrubber().prop('isScrubberVisible')).toBeTruthy();
+    expect(scrubber(wrapper).prop('isScrubberVisible')).toEqual(false);
+    center(wrapper).simulate('click');
+    expect(scrubber(wrapper).prop('isScrubberVisible')).toEqual(true);
   });
 });

@@ -4,4 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './context';
+import { mount } from 'enzyme';
+import React from 'react';
+import { Canvas } from '../canvas.container';
+
+describe('<Canvas />', () => {
+  test('null workpad renders nothing', () => {
+    expect(mount(<Canvas />).isEmptyRender());
+  });
+});

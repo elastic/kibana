@@ -6,80 +6,80 @@
 
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
-import { Context } from '../../../../context/mock';
+import { TestingContext, takeMountedSnapshot, tick } from '../../../../test';
+import {
+  getSettingsTrigger as trigger,
+  getPopover as popover,
+  getPortal as portal,
+  getContextMenuItems as menuItems,
+} from '../../../../test/selectors';
 import { Settings } from '../settings.container';
-import { takeMountedSnapshot, tick } from '../../../../test';
 
 jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
 
 describe('<Settings />', () => {
   let wrapper: ReactWrapper;
 
-  const settings = () => wrapper.find('EuiButtonIcon');
-  const popover = () => wrapper.find('EuiPopover');
-  const portal = () => wrapper.find('EuiPortal');
-  const menuItems = () => wrapper.find('EuiContextMenuItem');
-
   beforeEach(() => {
     const ref = React.createRef<HTMLDivElement>();
     wrapper = mount(
-      <Context stageRef={ref}>
+      <TestingContext stageRef={ref}>
         <div ref={ref}>
           <Settings />
         </div>
-      </Context>
+      </TestingContext>
     );
   });
 
   test('renders as expected', () => {
-    expect(settings().exists()).toBeTruthy();
-    expect(portal().exists()).toBeFalsy();
+    expect(trigger(wrapper).exists()).toEqual(true);
+    expect(portal(wrapper).exists()).toEqual(false);
   });
 
   test('clicking settings opens and closes the menu', () => {
-    settings().simulate('click');
-    expect(portal().exists()).toBeTruthy();
-    expect(popover().prop('isOpen')).toBeTruthy();
-    expect(menuItems().length).toEqual(2);
-    expect(portal().text()).toEqual('SettingsAuto PlayToolbar');
-    settings().simulate('click');
-    expect(popover().prop('isOpen')).toBeFalsy();
+    trigger(wrapper).simulate('click');
+    expect(portal(wrapper).exists()).toEqual(true);
+    expect(popover(wrapper).prop('isOpen')).toEqual(true);
+    expect(menuItems(wrapper).length).toEqual(2);
+    expect(portal(wrapper).text()).toEqual('SettingsAuto PlayToolbar');
+    trigger(wrapper).simulate('click');
+    expect(popover(wrapper).prop('isOpen')).toEqual(false);
   });
 
   test('can navigate Autoplay Settings', async () => {
-    settings().simulate('click');
-    expect(takeMountedSnapshot(portal())).toMatchSnapshot();
+    trigger(wrapper).simulate('click');
+    expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
     await tick(20);
-    menuItems()
-      .slice(0, 1)
+    menuItems(wrapper)
+      .at(0)
       .simulate('click');
     await tick(20);
-    expect(takeMountedSnapshot(portal())).toMatchSnapshot();
+    expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
   });
 
   test('can navigate Toolbar Settings, closes when activated', async () => {
-    settings().simulate('click');
-    expect(takeMountedSnapshot(portal())).toMatchSnapshot();
-    menuItems()
-      .slice(1, 2)
+    trigger(wrapper).simulate('click');
+    expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
+    menuItems(wrapper)
+      .at(1)
       .simulate('click');
 
     // Wait for the animation and DOM update
     await tick(20);
-    portal().update();
-    expect(portal().html()).toMatchSnapshot();
+    portal(wrapper).update();
+    expect(portal(wrapper).html()).toMatchSnapshot();
 
     // Click the Hide Toolbar switch
-    portal()
+    portal(wrapper)
       .find('input[data-test-subj="hideToolbarSwitch"]')
       .simulate('change');
 
     // Wait for the animation and DOM update
     await tick(20);
-    portal().update();
+    portal(wrapper).update();
 
     // The Portal should not be open.
-    expect(popover().prop('isOpen')).toBeFalsy();
-    expect(portal().html()).toMatchSnapshot();
+    expect(popover(wrapper).prop('isOpen')).toEqual(false);
+    expect(portal(wrapper).html()).toMatchSnapshot();
   });
 });

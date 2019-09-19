@@ -6,8 +6,9 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { Context } from '../../../context/mock';
+import { TestingContext } from '../../../test';
 import { PagePreview } from '../page_preview.container';
+import { getRenderedElement as element } from '../../../test/selectors';
 
 describe('<PagePreview />', () => {
   test('null workpad renders nothing', () => {
@@ -15,14 +16,12 @@ describe('<PagePreview />', () => {
   });
 
   const wrapper = mount(
-    <Context>
+    <TestingContext>
       <PagePreview height={100} index={0} />
-    </Context>
+    </TestingContext>
   );
 
-  const markdown = () => wrapper.find('.render');
-
   test('renders as expected', () => {
-    expect(markdown().text()).toEqual('markdown mock');
+    expect(element(wrapper).text()).toEqual('markdown mock');
   });
 });
