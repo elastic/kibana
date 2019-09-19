@@ -35,6 +35,7 @@ import { npStart } from 'ui/new_platform';
 import { Storage } from 'ui/storage';
 import { CoreStartContextProvider } from '../contexts/query_input_bar_context';
 const localStorage = new Storage(window.localStorage);
+import { timefilter } from 'ui/timefilter';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 const APP_NAME = 'VisEditor';
@@ -51,7 +52,7 @@ export class VisEditor extends Component {
       visFields: props.visFields,
       extractedIndexPatterns: [''],
     };
-    this.onBrush = createBrushHandler(props.vis.API.timeFilter);
+    this.onBrush = createBrushHandler(timefilter);
     this.visDataSubject = new Rx.BehaviorSubject(this.props.visData);
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
 

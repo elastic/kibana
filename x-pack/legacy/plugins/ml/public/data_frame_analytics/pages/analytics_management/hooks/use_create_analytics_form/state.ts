@@ -32,6 +32,7 @@ export interface State {
     jobId: DataFrameAnalyticsId;
     jobIdExists: boolean;
     jobIdEmpty: boolean;
+    jobIdInvalidMaxLength: boolean;
     jobIdValid: boolean;
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
@@ -65,6 +66,7 @@ export const getInitialState = (): State => ({
     jobId: '',
     jobIdExists: false,
     jobIdEmpty: true,
+    jobIdInvalidMaxLength: false,
     jobIdValid: false,
     sourceIndex: '',
     sourceIndexNameEmpty: true,

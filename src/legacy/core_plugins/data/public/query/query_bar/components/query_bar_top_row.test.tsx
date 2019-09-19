@@ -100,6 +100,7 @@ describe('QueryBarTopRowTopRow', () => {
       <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
@@ -122,6 +123,7 @@ describe('QueryBarTopRowTopRow', () => {
       <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
@@ -144,6 +146,7 @@ describe('QueryBarTopRowTopRow', () => {
       <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
@@ -163,6 +166,7 @@ describe('QueryBarTopRowTopRow', () => {
       <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
@@ -183,6 +187,7 @@ describe('QueryBarTopRowTopRow', () => {
       <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
@@ -206,6 +211,7 @@ describe('QueryBarTopRowTopRow', () => {
       <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         query={kqlQuery}
         onSubmit={noop}
         onChange={noop}
@@ -229,6 +235,7 @@ describe('QueryBarTopRowTopRow', () => {
       <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         query={kqlQuery}
         onSubmit={noop}
         onChange={noop}
@@ -253,6 +260,7 @@ describe('QueryBarTopRowTopRow', () => {
       <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
