@@ -159,6 +159,8 @@ export interface InfraIndexField {
   searchable: boolean;
   /** Whether the field's values can be aggregated */
   aggregatable: boolean;
+  /** Whether the field should be displayed based on event.module and a ECS allowed list */
+  displayable: boolean;
 }
 /** A consecutive sequence of log entries */
 export interface InfraLogEntryInterval {
@@ -1124,6 +1126,8 @@ export namespace InfraIndexFieldResolvers {
     searchable?: SearchableResolver<boolean, TypeParent, Context>;
     /** Whether the field's values can be aggregated */
     aggregatable?: AggregatableResolver<boolean, TypeParent, Context>;
+    /** Whether the field should be displayed based on event.module and a ECS allowed list */
+    displayable?: DisplayableResolver<boolean, TypeParent, Context>;
   }
 
   export type NameResolver<R = string, Parent = InfraIndexField, Context = InfraContext> = Resolver<
@@ -1142,6 +1146,11 @@ export namespace InfraIndexFieldResolvers {
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
   export type AggregatableResolver<
+    R = boolean,
+    Parent = InfraIndexField,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type DisplayableResolver<
     R = boolean,
     Parent = InfraIndexField,
     Context = InfraContext

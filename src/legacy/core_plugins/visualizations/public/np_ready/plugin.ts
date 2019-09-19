@@ -19,7 +19,7 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 
 import { FiltersService, FiltersSetup } from './filters';
-import { TypesService, TypesSetup } from './types';
+import { TypesService, TypesSetup, TypesStart } from './types';
 
 /**
  * Interface for any dependencies on other plugins' contracts.
@@ -37,8 +37,12 @@ interface VisualizationsPluginSetupDependencies {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface VisualizationsPluginStartDependencies {}
+interface VisualizationsPluginStartDependencies {
+  __LEGACY: {
+    VisTypesRegistryProvider: any;
+    chrome: any;
+  };
+}
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -51,7 +55,9 @@ export interface VisualizationsSetup {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface VisualizationsStart {}
+export interface VisualizationsStart {
+  types: TypesStart;
+}
 
 /**
  * Visualizations Plugin - public
@@ -92,8 +98,13 @@ export class VisualizationsPlugin
     };
   }
 
-  public start(core: CoreStart, plugins: VisualizationsPluginStartDependencies) {
-    return {};
+  public async start(core: CoreStart, { __LEGACY }: VisualizationsPluginStartDependencies) {
+    const { chrome, VisTypesRegistryProvider } = __LEGACY;
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const Private: any = $injector.get('Private');
+    return {
+      types: this.types.start({ VisTypesRegistryProvider, Private }),
+    };
   }
 
   public stop() {

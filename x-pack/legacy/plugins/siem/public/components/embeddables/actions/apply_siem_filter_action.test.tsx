@@ -13,7 +13,6 @@ import {
 } from './apply_siem_filter_action';
 // @ts-ignore Missing type defs as maps moves to Typescript
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../maps/common/constants';
-import { Action } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/actions';
 import { expectError } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/tests/helpers';
 import {
   EmbeddableInput,
@@ -34,11 +33,6 @@ describe('ApplySiemFilterAction', () => {
 
   beforeEach(() => {
     applyFilterQueryFromKueryExpression = jest.fn(expression => {});
-  });
-
-  test('it is an instance of Action', () => {
-    const action = new ApplySiemFilterAction({ applyFilterQueryFromKueryExpression });
-    expect(action).toBeInstanceOf(Action);
   });
 
   test('it has APPLY_SIEM_FILTER_ACTION_ID type and id', () => {

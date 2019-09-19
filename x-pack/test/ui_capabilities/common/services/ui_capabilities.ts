@@ -17,7 +17,7 @@ export interface BasicCredentials {
 }
 
 export enum GetUICapabilitiesFailureReason {
-  RedirectedToRoot = 'Redirected to Root',
+  RedirectedToSpaceSelector = 'Redirected to Space Selector',
   NotFound = 'Not Found',
 }
 
@@ -61,10 +61,10 @@ export class UICapabilitiesService {
       headers: requestHeaders,
     });
 
-    if (response.status === 302 && response.headers.location === '/') {
+    if (response.status === 302 && response.headers.location === '/spaces/space_selector') {
       return {
         success: false,
-        failureReason: GetUICapabilitiesFailureReason.RedirectedToRoot,
+        failureReason: GetUICapabilitiesFailureReason.RedirectedToSpaceSelector,
       };
     }
 
