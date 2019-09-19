@@ -22,12 +22,12 @@ export default function exploreRepositoryFunctionalTests({
   const config = getService('config');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  const exists = async (selector: string) => testSubjects.exists(selector, { allowHidden: true });
+  const exists = async (selector: string) =>
+    await testSubjects.exists(selector, { allowHidden: true });
 
   const FIND_TIME = config.get('timeouts.find');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/42111
-  describe.skip('Explore Repository', function() {
+  describe('Explore Repository', function() {
     this.tags('smoke');
     describe('Explore a repository', () => {
       const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
@@ -42,7 +42,7 @@ export default function exploreRepositoryFunctionalTests({
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await esArchiver.unload('code/repositories/typescript_node_starter');
         await repoUnload(
           'github.com/elastic/TypeScript-Node-Starter',
@@ -167,7 +167,7 @@ export default function exploreRepositoryFunctionalTests({
         log.info('src folder closed');
       });
 
-      it('highlight only one symbol', async () => {
+      it.skip('highlight only one symbol', async () => {
         await retry.try(async () => {
           expect(await exists('codeFileTreeNode-Directory-src')).ok();
         });
@@ -242,7 +242,7 @@ export default function exploreRepositoryFunctionalTests({
         });
       });
 
-      it('Navigate source file via structure tree', async () => {
+      it.skip('Navigate source file via structure tree', async () => {
         log.debug('Navigate source file via structure tree');
         // Wait the file tree to be rendered and click the 'src' folder on the file tree.
         await retry.try(async () => {
@@ -268,7 +268,7 @@ export default function exploreRepositoryFunctionalTests({
         });
 
         // Click the structure tree tab
-        await testSubjects.click('codeStructureTreeTab');
+        await testSubjects.clickWhenNotDisabled('codeStructureTreeTab');
         await retry.tryForTime(300000, async () => {
           expect(await exists('codeStructureTreeNode-User')).to.be(true);
 
