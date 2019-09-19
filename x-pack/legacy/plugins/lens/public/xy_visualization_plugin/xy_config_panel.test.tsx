@@ -9,7 +9,7 @@ import { ReactWrapper } from 'enzyme';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { EuiButtonGroupProps } from '@elastic/eui';
 import { XYConfigPanel } from './xy_config_panel';
-import { DatasourceDimensionPanelProps, Operation, FramePublicAPI } from '../types';
+import { DatasourceDimensionPanelProps, Operation, FramePublicAPI, ColumnRemover } from '../types';
 import { State, XYState } from './types';
 import { Position } from '@elastic/charts';
 import { NativeRendererProps } from '../native_renderer';
@@ -213,9 +213,9 @@ describe('XYConfigPanel', () => {
     const onRemove = component
       .find('[data-test-subj="lensXY_yDimensionPanel"]')
       .first()
-      .prop('onRemove') as (accessor: string) => {};
+      .prop('onRemove') as ColumnRemover;
 
-    onRemove('b');
+    onRemove({ layerId: 'first', columnId: 'b' });
 
     expect(setState).toHaveBeenCalledTimes(1);
     expect(setState.mock.calls[0][0]).toMatchObject({

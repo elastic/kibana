@@ -6,14 +6,14 @@
 
 import React, { useEffect } from 'react';
 import { NativeRenderer } from '../native_renderer';
-import { DatasourcePublicAPI, OperationMetadata } from '../types';
+import { DatasourcePublicAPI, OperationMetadata, ColumnRemover } from '../types';
 import { DragContextState } from '../drag_drop';
 
 interface Props {
   accessors: string[];
   datasource: DatasourcePublicAPI;
   dragDropContext: DragContextState;
-  onRemove: (accessor: string) => void;
+  onRemove: ColumnRemover;
   onAdd: () => void;
   filterOperations: (op: OperationMetadata) => boolean;
   suggestedPriority?: 0 | 1 | 2 | undefined;

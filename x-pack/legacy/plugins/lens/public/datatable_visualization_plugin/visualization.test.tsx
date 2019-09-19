@@ -12,7 +12,7 @@ import {
   DataTableLayer,
 } from './visualization';
 import { mount } from 'enzyme';
-import { Operation, DataType, FramePublicAPI } from '../types';
+import { Operation, DataType, FramePublicAPI, ColumnRemover } from '../types';
 import { generateId } from '../id_generator';
 
 jest.mock('../id_generator');
@@ -128,9 +128,9 @@ describe('Datatable Visualization', () => {
       const onRemove = component
         .find('[data-test-subj="datatable_multicolumnEditor"]')
         .first()
-        .prop('onRemove') as (k: string) => {};
+        .prop('onRemove') as ColumnRemover;
 
-      onRemove('b');
+      onRemove({ layerId: 'a', columnId: 'b' });
 
       expect(setState).toHaveBeenCalledWith({
         layers: [

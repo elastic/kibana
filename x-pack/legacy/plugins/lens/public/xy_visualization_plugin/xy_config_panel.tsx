@@ -33,13 +33,10 @@ const isBucketed = (op: OperationMetadata) => op.isBucketed;
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
-function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: number): State {
-  const newLayers = [...state.layers];
-  newLayers[index] = layer;
-
+function updateLayer(state: State, layer: UnwrapArray<State['layers']>): State {
   return {
     ...state,
-    layers: newLayers,
+    layers: state.layers.map(l => (l.layerId === layer.layerId ? layer : l)),
   };
 }
 
@@ -173,9 +170,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
             <EuiFlexItem grow={false}>
               <LayerSettings
                 layer={layer}
-                setSeriesType={seriesType =>
-                  setState(updateLayer(state, { ...layer, seriesType }, index))
-                }
+                setSeriesType={seriesType => setState(updateLayer(state, { ...layer, seriesType }))}
                 removeLayer={() => {
                   frame.removeLayers([layer.layerId]);
                   setState({ ...state, layers: state.layers.filter(l => l !== layer) });
@@ -225,28 +220,26 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
               dragDropContext={props.dragDropContext}
               onAdd={() =>
                 setState(
-                  updateLayer(
-                    state,
-                    {
-                      ...layer,
-                      accessors: [...layer.accessors, generateId()],
-                    },
-                    index
-                  )
+                  updateLayer(state, {
+                    ...layer,
+                    accessors: [...layer.accessors, generateId()],
+                  })
                 )
               }
-              onRemove={accessor =>
+              onRemove={({ layerId, columnId }) => {
+                const targetLayer = state.layers.find(l => l.layerId === layerId);
+
+                if (!targetLayer) {
+                  return;
+                }
+
                 setState(
-                  updateLayer(
-                    state,
-                    {
-                      ...layer,
-                      accessors: layer.accessors.filter(col => col !== accessor),
-                    },
-                    index
-                  )
-                )
-              }
+                  updateLayer(state, {
+                    ...targetLayer,
+                    accessors: targetLayer.accessors.filter(col => col !== columnId),
+                  })
+                );
+              }}
               filterOperations={isNumericMetric}
               data-test-subj="lensXY_yDimensionPanel"
               testSubj="lensXY_yDimensionPanel"

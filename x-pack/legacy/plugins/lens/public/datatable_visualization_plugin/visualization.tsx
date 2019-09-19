@@ -76,9 +76,19 @@ export function DataTableLayer({
           filterOperations={allOperations}
           layerId={layer.layerId}
           onAdd={() => setState(updateColumns(state, layer, columns => [...columns, generateId()]))}
-          onRemove={column =>
-            setState(updateColumns(state, layer, columns => columns.filter(c => c !== column)))
-          }
+          onRemove={column => {
+            const targetLayer = state.layers.find(l => l.layerId === column.layerId);
+
+            if (!targetLayer) {
+              return;
+            }
+
+            setState(
+              updateColumns(state, targetLayer, columns =>
+                columns.filter(c => c !== column.columnId)
+              )
+            );
+          }}
           testSubj="datatable_columns"
           data-test-subj="datatable_multicolumnEditor"
         />

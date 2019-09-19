@@ -8,7 +8,7 @@ import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox, EuiSideNav, EuiPopover } from '@elastic/eui';
-import { IndexPatternPrivateState } from '../indexpattern';
+import { IndexPatternPrivateState, IndexPatternColumn } from '../indexpattern';
 import { changeColumn } from '../state_helpers';
 import { IndexPatternDimensionPanel, IndexPatternDimensionPanelProps } from './dimension_panel';
 import { DropHandler, DragContextState } from '../../drag_drop';
@@ -31,6 +31,18 @@ jest.mock('ui/chrome');
 // Contains old and new platform data plugins, used for interpreter and filter ratio
 jest.mock('ui/new_platform');
 jest.mock('plugins/data/setup', () => ({ data: { query: { ui: {} } } }));
+
+type SetState = (state: IndexPatternPrivateState) => IndexPatternPrivateState;
+
+function numColumn(name: string = 'bytes'): IndexPatternColumn {
+  return {
+    label: `Max of ${name}`,
+    dataType: 'number',
+    isBucketed: false,
+    operationType: 'max',
+    sourceField: 'bytes',
+  };
+}
 
 const expectedIndexPatterns = {
   1: {
@@ -210,15 +222,7 @@ describe('IndexPatternDimensionPanel', () => {
               ...state.layers.first,
               columns: {
                 ...state.layers.first.columns,
-                col1: {
-                  label: 'Max of bytes',
-                  dataType: 'number',
-                  isBucketed: false,
-
-                  // Private
-                  operationType: 'max',
-                  sourceField: 'bytes',
-                },
+                col1: numColumn(),
               },
             },
           },
@@ -251,15 +255,7 @@ describe('IndexPatternDimensionPanel', () => {
               ...state.layers.first,
               columns: {
                 ...state.layers.first.columns,
-                col1: {
-                  label: 'Max of bytes',
-                  dataType: 'number',
-                  isBucketed: false,
-
-                  // Private
-                  operationType: 'max',
-                  sourceField: 'bytes',
-                },
+                col1: numColumn(),
               },
             },
           },
@@ -292,15 +288,7 @@ describe('IndexPatternDimensionPanel', () => {
           ...state.layers.first,
           columns: {
             ...state.layers.first.columns,
-            col1: {
-              label: 'Max of bytes',
-              dataType: 'number',
-              isBucketed: false,
-
-              // Private
-              operationType: 'max',
-              sourceField: 'bytes',
-            },
+            col1: numColumn(),
           },
         },
       },
@@ -376,15 +364,7 @@ describe('IndexPatternDimensionPanel', () => {
               ...state.layers.first,
               columns: {
                 ...state.layers.first.columns,
-                col1: {
-                  label: 'Max of bytes',
-                  dataType: 'number',
-                  isBucketed: false,
-
-                  // Private
-                  operationType: 'max',
-                  sourceField: 'bytes',
-                },
+                col1: numColumn(),
               },
             },
           },
@@ -862,15 +842,7 @@ describe('IndexPatternDimensionPanel', () => {
           ...state.layers.first,
           columns: {
             ...state.layers.first.columns,
-            col1: {
-              label: 'Max of bytes',
-              dataType: 'number',
-              isBucketed: false,
-
-              // Private
-              operationType: 'max',
-              sourceField: 'bytes',
-            },
+            col1: numColumn(),
           },
         },
       },
@@ -1067,6 +1039,53 @@ describe('IndexPatternDimensionPanel', () => {
       ).toBeTruthy();
     });
 
+    it('is not droppable to itself', () => {
+      wrapper = shallow(
+        <IndexPatternDimensionPanel
+          {...defaultProps}
+          dragDropContext={{
+            ...dragDropContext,
+            dragging: {
+              field: { type: 'date', name: 'timestamp' },
+              indexPatternId: '1',
+              movedColumn: {
+                layerId: 'first',
+                columnId: 'col1',
+              },
+            },
+          }}
+          state={dragDropState()}
+          filterOperations={op => op.dataType === 'number'}
+          layerId="myLayer"
+        />
+      );
+
+      expect(
+        wrapper
+          .find('[data-test-subj="indexPattern-dropTarget"]')
+          .first()
+          .prop('droppable')
+      ).toBeFalsy();
+    });
+
+    it('is draggable if the operation is a field operation', () => {
+      wrapper = shallow(<IndexPatternDimensionPanel {...defaultProps} layerId="first" />);
+
+      const dragDropEl = wrapper.find('[data-test-subj="indexPattern-dropTarget"]').first();
+
+      expect(dragDropEl.prop('draggable')).toBeTruthy();
+      expect(dragDropEl.prop('value')).toMatchObject({
+        field: {
+          name: 'timestamp',
+        },
+        indexPatternId: '1',
+        movedColumn: {
+          layerId: 'first',
+          columnId: 'col1',
+        },
+      });
+    });
+
     it('is notdroppable if the field belongs to another index pattern', () => {
       wrapper = shallow(
         <IndexPatternDimensionPanel
@@ -1090,6 +1109,107 @@ describe('IndexPatternDimensionPanel', () => {
           .first()
           .prop('droppable')
       ).toBeFalsy();
+    });
+
+    it('calls onRemove if the dropped item is a moved column', () => {
+      const dragging = {
+        field: { type: 'number', name: 'bar', aggregatable: true },
+        indexPatternId: 'foo',
+        movedColumn: {
+          layerId: 'second',
+          columnId: 'baz',
+        },
+      };
+      const onRemove = jest.fn();
+      const testState = dragDropState();
+      wrapper = shallow(
+        <IndexPatternDimensionPanel
+          {...defaultProps}
+          dragDropContext={{
+            ...dragDropContext,
+            dragging,
+          }}
+          onRemove={onRemove}
+          state={testState}
+          columnId={'col2'}
+          filterOperations={op => op.dataType === 'number'}
+          layerId="myLayer"
+        />
+      );
+
+      act(() => {
+        const onDrop = wrapper
+          .find('[data-test-subj="indexPattern-dropTarget"]')
+          .first()
+          .prop('onDrop') as DropHandler;
+
+        onDrop(dragging);
+      });
+
+      expect(onRemove).toHaveBeenCalledWith({
+        layerId: 'second',
+        columnId: 'baz',
+      });
+    });
+
+    it('deletes the original column if dropped item is a moved column', () => {
+      const dragging = {
+        field: { type: 'number', name: 'bar', aggregatable: true },
+        indexPatternId: '1',
+        movedColumn: {
+          layerId: 'testRemove',
+          columnId: 'bar',
+        },
+      };
+      const testState = dragDropState();
+      const initialState: IndexPatternPrivateState = {
+        ...testState,
+        layers: {
+          ...testState.layers,
+          testRemove: {
+            columnOrder: ['foo', 'bar'],
+            columns: {
+              foo: numColumn('some_num'),
+              bar: numColumn('yum_num'),
+            },
+            indexPatternId: '1',
+          },
+        },
+      };
+      wrapper = shallow(
+        <IndexPatternDimensionPanel
+          {...defaultProps}
+          dragDropContext={{
+            ...dragDropContext,
+            dragging,
+          }}
+          state={initialState}
+          columnId={'col1'}
+          filterOperations={op => op.dataType === 'number'}
+          layerId="myLayer"
+        />
+      );
+
+      act(() => {
+        const onDrop = wrapper
+          .find('[data-test-subj="indexPattern-dropTarget"]')
+          .first()
+          .prop('onDrop') as DropHandler;
+
+        onDrop(dragging);
+      });
+
+      const setterFn = setState.mock.calls[0][0] as SetState;
+      const updatedState = setterFn(initialState);
+
+      expect(updatedState.layers.myLayer.columns.col1).toMatchObject({
+        label: 'Average of bar',
+        operationType: 'avg',
+        sourceField: 'bar',
+      });
+
+      expect(updatedState.layers.testRemove.columnOrder).toEqual(['foo']);
+      expect(updatedState.layers.testRemove.columns.bar).toBeUndefined();
     });
 
     it('appends the dropped column when a field is dropped', () => {
@@ -1122,7 +1242,10 @@ describe('IndexPatternDimensionPanel', () => {
       });
 
       expect(setState).toBeCalledTimes(1);
-      expect(setState).toHaveBeenCalledWith({
+
+      const setterFn = setState.mock.calls[0][0] as SetState;
+
+      expect(setterFn(testState)).toMatchObject({
         ...testState,
         layers: {
           myLayer: {
@@ -1169,7 +1292,9 @@ describe('IndexPatternDimensionPanel', () => {
       });
 
       expect(setState).toBeCalledTimes(1);
-      expect(setState).toHaveBeenCalledWith({
+      const setterFn = setState.mock.calls[0][0] as SetState;
+
+      expect(setterFn(testState)).toMatchObject({
         ...testState,
         layers: {
           myLayer: expect.objectContaining({

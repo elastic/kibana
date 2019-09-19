@@ -20,6 +20,7 @@ import {
   IndexPatternPrivateState,
   IndexPatternField,
   OperationType,
+  DraggedField,
 } from '../indexpattern';
 
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
@@ -27,6 +28,7 @@ import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, deleteColumn } from '../state_helpers';
 import { isDraggedField, hasField } from '../utils';
+import { FieldBasedIndexPatternColumn } from '../operations/definitions/column_types';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
@@ -103,14 +105,32 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
     );
   }
 
+  const fieldName = selectedColumn && (selectedColumn as FieldBasedIndexPatternColumn).sourceField;
+  const field = fieldName && currentIndexPattern.fields.find(f => f.name === fieldName);
+
   return (
     <ChildDragDropProvider {...props.dragDropContext}>
       <DragDrop
+        draggable={!!field}
+        value={
+          field &&
+          ({
+            field,
+            indexPatternId: currentIndexPattern.id,
+            movedColumn: { layerId: props.layerId, columnId: props.columnId },
+          } as DraggedField)
+        }
         className="lnsConfigPanel__summary"
         data-test-subj="indexPattern-dropTarget"
         droppable={canHandleDrop()}
         onDrop={droppedItem => {
-          if (!isDraggedField(droppedItem) || !hasOperationForField(droppedItem.field)) {
+          if (
+            !isDraggedField(droppedItem) ||
+            !hasOperationForField(droppedItem.field) ||
+            (droppedItem.movedColumn &&
+              droppedItem.movedColumn.columnId === props.columnId &&
+              droppedItem.movedColumn.layerId === props.layerId)
+          ) {
             // TODO: What do we do if we couldn't find a column?
             return;
           }
@@ -140,17 +160,31 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
                 field: droppedItem.field,
               });
 
-          props.setState(
-            changeColumn({
-              state: props.state,
+          if (droppedItem.movedColumn && props.onRemove) {
+            props.onRemove(droppedItem.movedColumn);
+          }
+
+          props.setState(currentState => {
+            const withChangedColumn = changeColumn({
+              state: currentState,
               layerId,
               columnId: props.columnId,
               newColumn,
               // If the field has changed, the onFieldChange method needs to take care of everything including moving
               // over params. If we create a new column above we want changeColumn to move over params.
               keepParams: !hasFieldChanged,
-            })
-          );
+            });
+
+            if (!droppedItem.movedColumn) {
+              return withChangedColumn;
+            }
+
+            return deleteColumn({
+              state: withChangedColumn,
+              columnId: droppedItem.movedColumn.columnId,
+              layerId: droppedItem.movedColumn.layerId,
+            });
+          });
         }}
       >
         <PopoverEditor
@@ -181,7 +215,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
                 })
               );
               if (props.onRemove) {
-                props.onRemove(props.columnId);
+                props.onRemove({ layerId, columnId: props.columnId });
               }
             }}
           />

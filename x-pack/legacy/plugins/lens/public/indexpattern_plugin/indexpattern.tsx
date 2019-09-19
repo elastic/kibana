@@ -79,6 +79,7 @@ export interface IndexPatternField {
 export interface DraggedField {
   field: IndexPatternField;
   indexPatternId: string;
+  movedColumn?: { layerId: string; columnId: string };
 }
 
 export interface IndexPatternLayer {

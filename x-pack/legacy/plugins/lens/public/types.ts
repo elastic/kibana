@@ -167,6 +167,8 @@ export interface DatasourceDataPanelProps<T = unknown> {
   dateRange: FramePublicAPI['dateRange'];
 }
 
+export type ColumnRemover = (column: { layerId: string; columnId: string }) => void;
+
 // The only way a visualization has to restrict the query building
 export interface DatasourceDimensionPanelProps {
   layerId: string;
@@ -180,7 +182,7 @@ export interface DatasourceDimensionPanelProps {
   // Visualizations can hint at the role this dimension would play, which
   // affects the default ordering of the query
   suggestedPriority?: DimensionPriority;
-  onRemove?: (accessor: string) => void;
+  onRemove?: ColumnRemover;
 }
 
 export interface DatasourceLayerPanelProps {
