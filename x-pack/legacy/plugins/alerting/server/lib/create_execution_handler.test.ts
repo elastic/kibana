@@ -126,7 +126,12 @@ test('state attribute gets parameterized', async () => {
 
 test(`logs an error when action group isn't part of actionGroups available for the alertType`, async () => {
   const executionHandler = createExecutionHandler(createExecutionHandlerParams);
-  const result = await executionHandler('invalid-group', {}, {});
+  const result = await executionHandler({
+    actionGroup: 'invalid-group',
+    context: {},
+    state: {},
+    alertInstanceId: '2',
+  });
   expect(result).toBeUndefined();
   expect(createExecutionHandlerParams.log).toHaveBeenCalledWith(
     ['error', 'alerting'],

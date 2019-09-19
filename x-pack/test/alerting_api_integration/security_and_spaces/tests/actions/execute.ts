@@ -138,7 +138,7 @@ export default function({ getService }: FtrProviderContext) {
             .send({
               params: {
                 reference,
-                index: esTestIndexName,
+                index: ES_TEST_INDEX_NAME,
                 message: 'Testing 123',
               },
             });
