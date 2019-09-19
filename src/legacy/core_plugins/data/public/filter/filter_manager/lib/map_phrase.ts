@@ -19,7 +19,6 @@
 
 import { get, has } from 'lodash';
 import { PhrasesFilter } from '@kbn/es-query';
-
 import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
 import { IndexPatterns, IndexPattern } from '../../../index_patterns';
 
@@ -38,7 +37,6 @@ const getFormattedValue = (value: any, key: string, indexPattern?: IndexPattern)
 const getParams = (filter: PhrasesFilter, indexPattern?: IndexPattern) => {
   const scriptedPhraseValue = getScriptedPhraseValue(filter);
   const isScriptedPhraseFilter = Boolean(scriptedPhraseValue);
-
   const key = isScriptedPhraseFilter ? filter.meta.field || '' : Object.keys(filter.query.match)[0];
   const query = scriptedPhraseValue || get(filter, ['query', 'match', key, 'query']);
   const params = { query };

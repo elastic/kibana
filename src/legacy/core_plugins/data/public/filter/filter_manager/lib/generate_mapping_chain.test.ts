@@ -46,6 +46,7 @@ describe('Filter Bar Directive', () => {
 
     test('should create a chaining function which DOES NOT call the next function if the result is resolved', async () => {
       const filter: Filter = buildEmptyFilter(true);
+
       mapping.resolves('good');
       next.resolves('bad');
 
@@ -70,6 +71,7 @@ describe('Filter Bar Directive', () => {
     test('should call the mapping function with the argument to the chain', async () => {
       // @ts-ignore
       const filter: Filter = { test: 'example' };
+
       mapping.resolves({ key: 'test', value: 'example' });
 
       const chain = generateMappingChain(mapping, next);
@@ -101,6 +103,7 @@ describe('Filter Bar Directive', () => {
       mapping.rejects(filter);
 
       const chain = generateMappingChain(mapping);
+
       chain(filter).catch(err => {
         expect(err).toBeInstanceOf(Error);
         expect(err.message).toBe('No mappings have been found for filter.');

@@ -40,7 +40,6 @@ function getParams(filter: RangeFilter, indexPattern?: IndexPattern) {
   const params: any = isScriptedRangeFilter
     ? get(filter, 'script.script.params')
     : getRangeByKey(filter, key);
-
   const left = params.gte || params.gt || -Infinity;
   const right = params.lte || params.lt || Infinity;
 

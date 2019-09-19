@@ -65,7 +65,6 @@ describe('Filter Bar Directive', () => {
           },
         },
       };
-
       const result = await mapGeoPolygonFn(filter);
 
       expect(result).toHaveProperty('key', 'point');

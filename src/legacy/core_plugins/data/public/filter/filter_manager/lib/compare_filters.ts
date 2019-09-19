@@ -22,9 +22,11 @@ import { defaults, isEqual, omit } from 'lodash';
 
 /**
  * Compare two filters to see if they match
+ *
  * @param {object} first The first filter to compare
  * @param {object} second The second filter to compare
  * @param {object} comparatorOptions Parameters to use for comparison
+ *
  * @returns {bool} Filters are the same
  */
 export const compareFilters = (first: Filter, second: Filter, comparatorOptions: any = {}) => {

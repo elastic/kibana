@@ -37,7 +37,6 @@ describe('Filter Bar Directive', () => {
         meta: { index: 'logstash-*' },
         query: { match: { _type: { query: 'apache' } } },
       };
-
       const after = await mapFilter(indexPatterns, before as Filter);
 
       expect(after).toHaveProperty('meta');
@@ -49,7 +48,6 @@ describe('Filter Bar Directive', () => {
 
     test('should map exists filters', async () => {
       const before: any = { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } };
-
       const after = await mapFilter(indexPatterns, before as Filter);
 
       expect(after).toHaveProperty('meta');
@@ -61,7 +59,6 @@ describe('Filter Bar Directive', () => {
 
     test('should map missing filters', async () => {
       const before: any = { meta: { index: 'logstash-*' }, missing: { field: '@timestamp' } };
-
       const after = await mapFilter(indexPatterns, before as Filter);
 
       expect(after).toHaveProperty('meta');
@@ -73,7 +70,6 @@ describe('Filter Bar Directive', () => {
 
     test('should map json filter', async () => {
       const before: any = { meta: { index: 'logstash-*' }, query: { match_all: {} } };
-
       const after = await mapFilter(indexPatterns, before as Filter);
 
       expect(after).toHaveProperty('meta');

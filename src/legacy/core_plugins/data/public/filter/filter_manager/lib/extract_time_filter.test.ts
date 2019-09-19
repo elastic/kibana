@@ -39,7 +39,6 @@ describe('Filter Bar Directive', () => {
         buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'logstash-*'),
         buildRangeFilter({ name: 'time' }, { gt: 1388559600000, lt: 1388646000000 }, 'logstash-*'),
       ];
-
       const result = await extractTimeFilter(indexPatterns, filters);
 
       expect(result).toEqual(filters[1]);
@@ -50,7 +49,6 @@ describe('Filter Bar Directive', () => {
         buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'logstash-*'),
         buildRangeFilter({ name: '@timestamp' }, { from: 1, to: 2 }, 'logstash-*'),
       ];
-
       const result = await extractTimeFilter(indexPatterns, filters);
 
       expect(result).toBeUndefined();

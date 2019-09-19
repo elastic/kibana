@@ -74,7 +74,6 @@ export async function mapFilter(indexPatterns: IndexPatterns, filter: Filter) {
     (memo, map) => generateMappingChain(map, memo),
     noop
   );
-
   const mapped = await mapFn(filter);
 
   // Map the filter into an object with the key and value exposed so it's

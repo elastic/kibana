@@ -31,7 +31,6 @@ export const extractTimeFilter = async (indexPatterns: IndexPatterns, filters: F
   }
 
   const indexPattern = await indexPatterns.get(id);
-
   const rangeFilter = find(filters, (obj: RangeFilter) => {
     const key = keys(obj.range)[0];
 

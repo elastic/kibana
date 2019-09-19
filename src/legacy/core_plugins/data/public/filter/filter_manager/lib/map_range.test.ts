@@ -33,7 +33,6 @@ describe('Filter Bar Directive', () => {
 
     test('should return the key and value for matching filters with gt/lt', async () => {
       const filter = { meta: { index: 'logstash-*' }, range: { bytes: { lt: 2048, gt: 1024 } } };
-
       const result = await mapRangeFn(filter);
 
       expect(result).toHaveProperty('key', 'bytes');

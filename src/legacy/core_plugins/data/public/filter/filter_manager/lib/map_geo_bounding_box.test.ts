@@ -69,7 +69,6 @@ describe('Filter Bar Directive', () => {
           },
         },
       };
-
       const result = await mapGeoBoundingBoxFn(filter);
 
       expect(result).toHaveProperty('key', 'point');
