@@ -11,13 +11,13 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { Embeddable, APPLY_FILTER_TRIGGER } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { start } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { onlyDisabledFiltersChanged } from '../../../../../../src/legacy/core_plugins/data/public';
 
 import { I18nContext } from 'ui/i18n';
 
 import { GisMap } from '../connected_components/gis_map';
 import { createMapStore } from '../reducers/store';
+import { npStart } from 'ui/new_platform';
 import {
   setGotoWithCenter,
   replaceLayerList,
@@ -136,7 +136,7 @@ export class MapEmbeddable extends Embeddable {
   }
 
   addFilters = filters => {
-    start.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+    npStart.plugins.uiActions.executeTriggerActions(APPLY_FILTER_TRIGGER, {
       embeddable: this,
       filters,
     });

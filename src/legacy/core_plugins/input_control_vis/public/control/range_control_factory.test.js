@@ -19,21 +19,6 @@
 
 import { rangeControlFactory } from './range_control_factory';
 
-const mockField = {
-  name: 'myField',
-  format: {
-    convert: (val) => { return val; }
-  }
-};
-
-const mockIndexPattern = {
-  fields: {
-    byName: {
-      myNumberField: mockField,
-    }
-  }
-};
-
 let esSearchResponse;
 class MockSearchSource {
   setParent() {}
@@ -43,20 +28,33 @@ class MockSearchSource {
   }
 }
 
-const mockKbnApi = {
-  indexPatterns: {
-    get: async () => {
-      return mockIndexPattern;
-    }
-  },
-  queryFilter: {
-    getAppFilters: () => {
-      return [];
+jest.mock('ui/timefilter', () => ({
+  createFilter: jest.fn(),
+}));
+
+jest.mock('../../../../core_plugins/data/public/legacy', () => ({
+  setup: {
+    indexPatterns: {
+      indexPatterns: {
+        get: () => ({
+          fields: { byName: { myNumberField: { name: 'myNumberField' } } }
+        }),
+      }
     },
-    getGlobalFilters: () => {
-      return [];
+    filter: {
+      filterManager: {
+        fieldName: 'myNumberField',
+        getIndexPattern: () => ({
+          fields: { byName: { myNumberField: { name: 'myNumberField' } } }
+        }),
+        getAppFilters: jest.fn().mockImplementation(() => ([])),
+        getGlobalFilters: jest.fn().mockImplementation(() => ([])),
+      }
     }
-  },
+  }
+}));
+
+const mockKbnApi = {
   SearchSource: MockSearchSource,
 };
 

@@ -41,5 +41,5 @@ export const getMlCapabilities = async (
     signal,
   });
   await throwIfNotOk(response);
-  return await response.json();
+  return response.json();
 };

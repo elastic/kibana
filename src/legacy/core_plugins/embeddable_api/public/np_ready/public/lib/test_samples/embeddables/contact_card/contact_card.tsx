@@ -28,12 +28,12 @@ import {
 import { Subscription } from 'rxjs';
 import { EuiButton } from '@elastic/eui';
 import * as Rx from 'rxjs';
+import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
 import { ContactCardEmbeddable, CONTACT_USER_TRIGGER } from './contact_card_embeddable';
-import { ExecuteTriggerActions } from '../../../types';
 
 interface Props {
   embeddable: ContactCardEmbeddable;
-  execTrigger: ExecuteTriggerActions;
+  execTrigger: TExecuteTriggerActions;
 }
 
 interface State {
