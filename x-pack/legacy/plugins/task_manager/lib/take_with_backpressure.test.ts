@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { fill } from 'lodash';
-import { of, from } from 'rxjs';
+import { of, from, throwError } from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
 import { takeWithBackpressure, TAKE_RESULT } from './take_with_backpressure';
 
 async function acceptAnyValue(_: any) {
@@ -257,6 +258,34 @@ describe('takeWithBackpressure', () => {
                 expect(result).toEqual(TAKE_RESULT.TAKE_FAILURE);
                 break;
             }
+          },
+          () => done(),
+          () => {
+            // observable should have ended with an error!
+            done.fail();
+          }
+        );
+    });
+
+    test('it should short circuit once an error occurs in the source observable', done => {
+      of(
+        { id: 1, throws: false },
+        { id: 2, throws: false },
+        { id: 3, throws: true },
+        { id: 4, throws: false },
+        { id: 5, throws: false },
+        { id: 6, throws: false }
+      )
+        .pipe(
+          mergeMap(subject => (subject.throws ? throwError(new Error('invalid!')) : of(subject))),
+          takeWithBackpressure(async subject => true, 3)
+        )
+        .subscribe(
+          () => {
+            // ideally we would drain the running queue, but as we're currently
+            // dealing with an observable over a bounded synchronous array, we'll
+            // defer dealign with this t oa later point
+            done.fail();
           },
           () => done(),
           () => {

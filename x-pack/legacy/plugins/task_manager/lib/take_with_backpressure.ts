@@ -35,6 +35,10 @@ function drainQueue(
   return Promise.all(queue.splice(0, queue.length).map(apply));
 }
 
+function drainQueueAsFailure(queue: BackpressuredTakeSubject[]): Promise<void | void[]> {
+  return drainQueue(queue, subjectToAbort => subjectToAbort.fail());
+}
+
 function isThereAnyWorkToBeDone<T>(state: BackpressuredTakeState<T>): boolean {
   return state.pending > 0 || !state.sourceCompleted || state.queue.length > 0;
 }
@@ -45,25 +49,27 @@ function createQueuePoller<T>(
   capacity: number
 ): () => void {
   return async function poll() {
-    if (state.taken === capacity || !isThereAnyWorkToBeDone(state)) {
-      drainQueue(state.queue, subjectToSkip => subjectToSkip.skip()).then(() => {
-        observer.complete();
-      });
-    } else if (state.queue.length && state.taken + state.pending < capacity) {
-      const subject = state.queue.shift()!;
-      state.pending++;
-      try {
-        if (await subject.attemptToTake()) {
-          state.taken++;
-        }
-      } catch (err) {
-        subject.fail();
-        await drainQueue(state.queue, subjectToAbort => subjectToAbort.fail()).then(() => {
-          observer.error(err);
+    if (!isThereAnyWorkToBeDone(state)) {
+      observer.complete();
+    } else {
+      if (state.taken === capacity) {
+        await drainQueue(state.queue, subjectToSkip => subjectToSkip.skip());
+        poll();
+      } else if (state.queue.length && state.taken + state.pending < capacity) {
+        const subject = state.queue.shift()!;
+        try {
+          state.pending++;
+          if (await subject.attemptToTake()) {
+            state.taken++;
+          }
           state.pending--;
-        });
-      } finally {
-        state.pending--;
+        } catch (err) {
+          subject.fail();
+          await drainQueueAsFailure(state.queue).then(() => {
+            observer.error(err);
+            state.pending--;
+          });
+        }
         poll();
       }
     }
@@ -100,12 +106,6 @@ function pushIntoQueue<T>(
   });
 }
 
-function handleSubjectAfterCapacityIsReached<T>(
-  subject: T
-): Promise<TakeWithBackpressureResult<T>> {
-  return Promise.resolve([TAKE_RESULT.RAN_OUT_OF_CAPACITY, subject]);
-}
-
 export function takeWithBackpressure<T>(
   takeValidator: (subject: T) => Promise<boolean>,
   capacity: number
@@ -120,16 +120,15 @@ export function takeWithBackpressure<T>(
     return new Observable<TakeWithBackpressureResult<T>>(observer => {
       const poll = createQueuePoller(state, observer, capacity);
       return source
-        .pipe(
-          mergeMap(nextSubject => {
-            return observer.closed
-              ? handleSubjectAfterCapacityIsReached<T>(nextSubject)
-              : pushIntoQueue<T>(nextSubject, state, takeValidator, poll);
-          })
-        )
+        .pipe(mergeMap(nextSubject => pushIntoQueue<T>(nextSubject, state, takeValidator, poll)))
         .subscribe({
           next(nextSubject: TakeWithBackpressureResult<T>) {
             observer.next(nextSubject);
+          },
+          error(err) {
+            drainQueueAsFailure(state.queue).then(() => {
+              observer.error(err);
+            });
           },
           complete() {
             state.sourceCompleted = true;
