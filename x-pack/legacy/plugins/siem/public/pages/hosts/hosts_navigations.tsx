@@ -27,7 +27,6 @@ import { StatefulEventsViewer } from '../../components/events_viewer';
 import { NavTab } from '../../components/navigation/types';
 import { EventsOverTimeQuery } from '../../containers/events/events_over_time';
 import { EventsOverTimeHistogram } from '../../components/page/hosts/events_over_time';
-import { getFilterQuery } from './details/utils';
 import { UpdateDateRange } from '../../components/charts/common';
 
 const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/hosts/${tabName}`;
@@ -347,15 +346,11 @@ export const EventsTabBody = ({
   kqlQueryExpression,
   startDate,
   setQuery,
-  filterQueryExpression,
-  hostName,
-  indexPattern,
+  filterQuery,
   updateDateRange = () => {},
 }: HostsComponentsQueryProps) => {
   const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
-  const filterQuery = filterQueryExpression
-    ? getFilterQuery(hostName || null, filterQueryExpression, indexPattern)
-    : '';
+
   return (
     <>
       <EventsOverTimeQuery
