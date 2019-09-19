@@ -50,6 +50,11 @@ export const multiSelectComponent: Record<string, SerializerFunc<string[]>> = {
   },
 };
 
+interface StripEmptyFieldsOptions {
+  types?: Array<'string' | 'object'>;
+  recursive?: boolean;
+}
+
 /**
  * Strip empty fields from a data object.
  * Empty fields can either be an empty string (one or several blank spaces) or an empty object (no keys)
@@ -60,10 +65,11 @@ export const multiSelectComponent: Record<string, SerializerFunc<string[]>> = {
  */
 export const stripEmptyFields = (
   object: { [key: string]: any },
-  types: Array<'string' | 'object'> | undefined = ['string', 'object'],
-  options: { recursive?: boolean } | undefined = { recursive: true }
-): { [key: string]: any } =>
-  Object.entries(object).reduce(
+  options?: StripEmptyFieldsOptions
+): { [key: string]: any } => {
+  const { types = ['string', 'object'], recursive = false } = options || {};
+
+  return Object.entries(object).reduce(
     (acc, [key, value]) => {
       const type = typeof value;
       const shouldStrip = types.includes(type as 'string');
@@ -73,8 +79,8 @@ export const stripEmptyFields = (
       } else if (type === 'object' && !Array.isArray(value) && value !== null) {
         if (Object.keys(value).length === 0 && shouldStrip) {
           return acc;
-        } else if (options.recursive) {
-          value = stripEmptyFields({ ...value }, types, options);
+        } else if (recursive) {
+          value = stripEmptyFields({ ...value }, options);
         }
       }
 
@@ -83,3 +89,4 @@ export const stripEmptyFields = (
     },
     {} as { [key: string]: any }
   );
+};

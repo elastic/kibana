@@ -54,9 +54,7 @@ const getDescriptionText = (data: any) => {
 export const StepReview: React.FunctionComponent<StepProps> = ({ template, updateCurrentStep }) => {
   const { name, indexPatterns, version, order } = template;
 
-  const serializedTemplate = serializeTemplate(stripEmptyFields(template, ['string', 'object'], {
-    recursive: false,
-  }) as Template);
+  const serializedTemplate = serializeTemplate(stripEmptyFields(template) as Template);
   // Name not included in ES request body
   delete serializedTemplate.name;
   const {

@@ -42,6 +42,18 @@ describe('Serializers', () => {
       };
     });
 
+    test('should not remove empty string or empty object in child objects (not recursively = default)', () => {
+      const expected = {
+        c: object.c,
+        d: object.d,
+        e: object.e,
+        f: object.f,
+        g: object.g,
+        i: object.i, // not mutaded
+      };
+      expect(stripEmptyFields(object)).toEqual(expected);
+    });
+
     test('should remove all empty string and empty object (recursively)', () => {
       const expected = {
         c: object.c,
@@ -54,7 +66,7 @@ describe('Serializers', () => {
           d: object.i.d,
         },
       };
-      expect(stripEmptyFields(object)).toEqual(expected);
+      expect(stripEmptyFields(object, { recursive: true })).toEqual(expected);
     });
 
     test('should only remove empty string (recursively)', () => {
@@ -72,7 +84,7 @@ describe('Serializers', () => {
           d: object.i.d,
         },
       };
-      expect(stripEmptyFields(object, ['object'])).toEqual(expected);
+      expect(stripEmptyFields(object, { recursive: true, types: ['object'] })).toEqual(expected);
     });
 
     test('should only remove empty objects (recursively)', () => {
@@ -89,21 +101,7 @@ describe('Serializers', () => {
           d: object.i.d,
         },
       };
-      expect(stripEmptyFields(object, ['string'])).toEqual(expected);
-    });
-
-    test('should not remove empty string or empty object in child objects (not recursively)', () => {
-      const expected = {
-        c: object.c,
-        d: object.d,
-        e: object.e,
-        f: object.f,
-        g: object.g,
-        i: object.i, // not mutaded
-      };
-      expect(stripEmptyFields(object, ['string', 'object'], { recursive: false })).toEqual(
-        expected
-      );
+      expect(stripEmptyFields(object, { recursive: true, types: ['string'] })).toEqual(expected);
     });
   });
 });
