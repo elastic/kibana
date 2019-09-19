@@ -72,7 +72,7 @@ describe('search_bar', () => {
     });
   });
 
-  it('should render index pattern picker', () => {
+  it('should open index pattern picker', () => {
     const indexPatternSelected = jest.fn();
     const instance = shallowWithIntl(
       <SearchBar
@@ -83,13 +83,13 @@ describe('search_bar', () => {
         uiSettings={{} as CoreStart['uiSettings']}
         http={{} as CoreStart['http']}
         overlays={{} as CoreStart['overlays']}
-        currentIndexPattern={{ attributes: { title: 'Testpattern' } } as IndexPatternSavedObject}
+        currentIndexPattern={{ title: 'Testpattern' } as IndexPattern}
       />
     );
 
     // pick the button component out of the tree because
     // it's part of a popover and thus not covered by enzyme
-    (instance.find(EuiFieldText).prop('prepend') as ReactElement).props.children.props.onClick();
+    (instance.find(QueryBarInput).prop('prepend') as ReactElement).props.children.props.onClick();
 
     expect(openSourceModal).toHaveBeenCalled();
   });
