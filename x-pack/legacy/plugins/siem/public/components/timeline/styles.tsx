@@ -130,9 +130,7 @@ export const EventsTrGroup = styled.div.attrs({
   className: 'siemEventsTable__trGroup',
 })<{ className?: string }>`
   ${({ theme }) => css`
-    & + & {
-      border-top: ${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiColorLightShade};
-    }
+    border-bottom: ${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiColorLightShade};
 
     &:hover {
       background-color: ${theme.eui.euiTableHoverColor};

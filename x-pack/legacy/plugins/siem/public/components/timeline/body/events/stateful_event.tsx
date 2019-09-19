@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import VisibilitySensor from 'react-visibility-sensor';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import uuid from 'uuid';
 
 import { BrowserFields } from '../../../../containers/source';
@@ -62,15 +62,7 @@ const emptyDetails: DetailItem[] = [];
  * This is the default row height whenever it is a plain row renderer and not a custom row height.
  * We use this value when we do not know the height of a particular row.
  */
-const DEFAULT_ROW_HEIGHT = '27px';
-
-/**
- * This is the default margin size from the EmptyRow below and is the top and bottom
- * margin added together.
- * If you change margin: 5px 0 5px 0; within EmptyRow styled component, then please
- * update this value
- */
-const EMPTY_ROW_MARGIN_TOP_BOTTOM = 10;
+const DEFAULT_ROW_HEIGHT = '32px';
 
 /**
  * This is the top offset in pixels of the top part of the timeline. The UI area where you do your
@@ -91,6 +83,33 @@ const TOP_OFFSET = 50;
  */
 const BOTTOM_OFFSET = -500;
 
+const SkeletonRow = styled.div`
+  display: flex;
+  height: 12px;
+`;
+
+const SkeletonCell = styled.div`
+  ${({ theme }) => css`
+    background-color: ${theme.eui.euiColorLightestShade};
+    border-radius: 2px;
+    flex: 1;
+
+    & + & {
+      margin-left: 8px;
+    }
+  `}
+`;
+
+const LoadingCols = ({ cols = 4 }) => {
+  const colElements = [];
+
+  for (let i = 0; i < cols; i++) {
+    colElements.push(<SkeletonCell key={i}></SkeletonCell>);
+  }
+
+  return <SkeletonRow>{colElements}</SkeletonRow>;
+};
+
 /**
  * This is missing the height props intentionally for performance reasons that
  * you can see here:
@@ -99,11 +118,12 @@ const BOTTOM_OFFSET = -500;
  * We inline the height style for performance reasons directly on the component.
  */
 export const EmptyRow = styled.div`
-  background-color: ${props => props.theme.eui.euiColorLightestShade};
-  width: 100%;
-  border: ${props => `1px solid ${props.theme.eui.euiColorLightShade}`};
-  border-radius: 5px;
-  margin: 5px 0 5px 0;
+  ${({ theme }) => css`
+    // background-color: ${theme.eui.euiColorLightestShade};
+    border-bottom: ${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiColorLightShade};
+
+    padding: 10px 4px;
+  `}
 `;
 
 export class StatefulEvent extends React.Component<Props, State> {
@@ -169,7 +189,11 @@ export class StatefulEvent extends React.Component<Props, State> {
       // height is being inlined directly in here because of performance with StyledComponents
       // involving quick and constant changes to the DOM.
       // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-      return <EmptyRow style={{ height: DEFAULT_ROW_HEIGHT }}></EmptyRow>;
+      return (
+        <EmptyRow style={{ height: DEFAULT_ROW_HEIGHT }}>
+          <LoadingCols cols={9} />
+        </EmptyRow>
+      );
     }
 
     return (
@@ -191,7 +215,7 @@ export class StatefulEvent extends React.Component<Props, State> {
                   <EventsTrGroup
                     className={STATEFUL_EVENT_CSS_CLASS_NAME}
                     data-test-subj="event"
-                    ref={divElement => {
+                    innerRef={divElement => {
                       if (divElement != null) {
                         this.divElement = divElement;
                       }
@@ -247,14 +271,16 @@ export class StatefulEvent extends React.Component<Props, State> {
           } else {
             // Height place holder for visibility detection as well as re-rendering sections.
             const height =
-              this.divElement != null
-                ? `${this.divElement.clientHeight - EMPTY_ROW_MARGIN_TOP_BOTTOM}px`
-                : DEFAULT_ROW_HEIGHT;
+              this.divElement != null ? this.divElement.clientHeight + 'px' : DEFAULT_ROW_HEIGHT;
 
             // height is being inlined directly in here because of performance with StyledComponents
             // involving quick and constant changes to the DOM.
             // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-            return <EmptyRow style={{ height }}></EmptyRow>;
+            return (
+              <EmptyRow style={{ height }}>
+                <LoadingCols cols={9} />
+              </EmptyRow>
+            );
           }
         }}
       </VisibilitySensor>
