@@ -9,11 +9,12 @@ import { getState, getValue } from '../../../public/lib/resolved_arg';
 import { legendOptions } from '../../../public/lib/legend_options';
 import { ViewStrings } from '../../strings';
 
+const { Plot: strings } = ViewStrings;
 const styleProps = ['lines', 'bars', 'points', 'fill', 'stack'];
 
 export const plot = () => ({
   name: 'plot',
-  displayName: ViewStrings.Plot.getDisplayName(),
+  displayName: strings.getDisplayName(),
   modelArgs: ['x', 'y', 'color', 'size', 'text'],
   args: [
     {
@@ -22,8 +23,8 @@ export const plot = () => ({
     },
     {
       name: 'legend',
-      displayName: ViewStrings.Plot.args.legend.getDisplayName(),
-      help: ViewStrings.Plot.args.legend.getHelp(),
+      displayName: strings.getLegendDisplayName(),
+      help: strings.getLegendHelp(),
       argType: 'select',
       default: 'ne',
       options: {
@@ -32,15 +33,15 @@ export const plot = () => ({
     },
     {
       name: 'xaxis',
-      displayName: ViewStrings.Plot.args.xaxis.getDisplayName(),
-      help: ViewStrings.Plot.args.xaxis.getHelp(),
+      displayName: strings.getXaxisDisplayName(),
+      help: strings.getXaxisHelp(),
       argType: 'axisConfig',
       default: true,
     },
     {
       name: 'yaxis',
-      displayName: ViewStrings.Plot.args.yaxis.getDisplayName(),
-      help: ViewStrings.Plot.args.yaxis.getHelp(),
+      displayName: strings.getYaxisDisplayName(),
+      help: strings.getYaxisHelp(),
       argType: 'axisConfig',
       default: true,
     },
@@ -50,8 +51,8 @@ export const plot = () => ({
     },
     {
       name: 'defaultStyle',
-      displayName: ViewStrings.Plot.args.defaultStyle.getDisplayName(),
-      help: ViewStrings.Plot.args.defaultStyle.getHelp(),
+      displayName: strings.getDefaultStyleDisplayName(),
+      help: strings.getDefaultStyleHelp(),
       argType: 'seriesStyle',
       default: '{seriesStyle points=5}',
       options: {

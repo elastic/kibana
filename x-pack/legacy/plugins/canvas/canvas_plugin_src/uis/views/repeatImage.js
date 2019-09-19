@@ -5,35 +5,36 @@
  */
 import { ViewStrings } from '../../strings';
 
+const { RepeatImage: strings } = ViewStrings;
+
 export const repeatImage = () => ({
   name: 'repeatImage',
-  displayName: ViewStrings.RepeatImage.getDisplayName(),
-  help: ViewStrings.RepeatImage.getHelp(),
+  displayName: strings.getDisplayName(),
   modelArgs: [['_', { label: 'Value' }]],
   args: [
     {
       name: 'image',
-      displayName: ViewStrings.RepeatImage.args.Image.getDisplayName(),
-      help: ViewStrings.RepeatImage.args.Image.getHelp(),
+      displayName: strings.getImageDisplayName(),
+      help: strings.getImageHelp(),
       argType: 'imageUpload',
     },
     {
       name: 'emptyImage',
-      displayName: ViewStrings.RepeatImage.args.EmptyImage.getDisplayName(),
-      help: ViewStrings.RepeatImage.args.EmptyImage.getHelp(),
+      displayName: strings.getEmptyImageDisplayName(),
+      help: strings.getEmptyImageHelp(),
       argType: 'imageUpload',
     },
     {
       name: 'size',
-      displayName: ViewStrings.RepeatImage.args.Size.getDisplayName(),
-      help: ViewStrings.RepeatImage.args.Size.getHelp(),
+      displayName: strings.getSizeDisplayName(),
+      help: strings.getSizeHelp(),
       argType: 'number',
       default: '100',
     },
     {
       name: 'max',
-      displayName: ViewStrings.RepeatImage.args.Max.getDisplayName(),
-      help: ViewStrings.RepeatImage.args.Max.getHelp(),
+      displayName: strings.getMaxDisplayName(),
+      help: strings.getMaxHelp(),
       argType: 'number',
       default: '1000',
     },

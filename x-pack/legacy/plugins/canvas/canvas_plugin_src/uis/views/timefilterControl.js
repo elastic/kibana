@@ -5,24 +5,26 @@
  */
 import { ViewStrings } from '../../strings';
 
+const { Timefilter: strings } = ViewStrings;
+
 export const timefilterControl = () => ({
   name: 'timefilterControl',
-  displayName: ViewStrings.Timefilter.getDisplayName(),
+  displayName: strings.getDisplayName(),
   modelArgs: [],
   args: [
     {
       name: 'column',
-      displayName: ViewStrings.Timefilter.args.Column.getDisplayName(),
-      help: ViewStrings.Timefilter.args.Column.getHelp(),
+      displayName: strings.getColumnDisplayName(),
+      help: strings.getColumnHelp(),
       argType: 'string',
       options: {
-        confirm: ViewStrings.Timefilter.args.Column.getConfirm(),
+        confirm: strings.getColumnConfirm(),
       },
     },
     {
       name: 'filterGroup',
-      displayName: ViewStrings.Timefilter.args.FilterGroup.getDisplayName(),
-      help: ViewStrings.Timefilter.args.FilterGroup.getHelp(),
+      displayName: strings.getFilterGroupDisplayName(),
+      help: strings.getFilterGroupHelp(),
       argType: 'filterGroup',
     },
   ],

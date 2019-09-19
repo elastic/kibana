@@ -8,9 +8,11 @@ import { elasticLogo } from '../../lib/elastic_logo';
 import { resolveFromArgs } from '../../../common/lib/resolve_dataurl';
 import { ViewStrings } from '../../strings';
 
+const { Image: strings } = ViewStrings;
+
 export const image = () => ({
   name: 'image',
-  displayName: ViewStrings.Image.getDisplayName(),
+  displayName: strings.getDisplayName(),
   modelArgs: [],
   requiresContext: false,
   args: [
@@ -23,14 +25,14 @@ export const image = () => ({
     },
     {
       name: 'mode',
-      displayName: ViewStrings.Image.args.mode.getDisplayName(),
-      help: ViewStrings.Image.args.mode.getHelp(),
+      displayName: strings.getModeDisplayName(),
+      help: strings.getModeHelp(),
       argType: 'select',
       options: {
         choices: [
-          { value: 'contain', name: ViewStrings.Image.args.mode.options.contain() },
-          { value: 'cover', name: ViewStrings.Image.args.mode.options.cover() },
-          { value: 'stretch', name: ViewStrings.Image.args.mode.options.stretch() },
+          { value: 'contain', name: strings.getContainMode() },
+          { value: 'cover', name: strings.getCoverMode() },
+          { value: 'stretch', name: strings.getStretchMode() },
         ],
       },
     },

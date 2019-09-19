@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ViewStrings } from '../../strings';
+const { DropdownControl: strings } = ViewStrings;
 
 export const dropdownControl = () => ({
   name: 'dropdownControl',
-  displayName: ViewStrings.DropdownControl.getDisplayName(),
+  displayName: strings.getDisplayName(),
   modelArgs: [],
   args: [
     {
       name: 'valueColumn',
-      displayName: ViewStrings.DropdownControl.args.valueColumn.getDisplayName(),
-      help: ViewStrings.DropdownControl.args.valueColumn.getHelp(),
+      displayName: strings.getValueDisplayName(),
+      help: strings.getValueHelp(),
       argType: 'string',
       options: {
         confirm: 'Set',
@@ -21,8 +22,8 @@ export const dropdownControl = () => ({
     },
     {
       name: 'filterColumn',
-      displayName: ViewStrings.DropdownControl.args.filterColumn.getDisplayName(),
-      help: ViewStrings.DropdownControl.args.filterColumn.getHelp(),
+      displayName: strings.getFilterDisplayName(),
+      help: strings.getFilterHelp(),
       argType: 'string',
       options: {
         confirm: 'Set',
@@ -30,8 +31,8 @@ export const dropdownControl = () => ({
     },
     {
       name: 'filterGroup',
-      displayName: ViewStrings.DropdownControl.args.filterGroup.getDisplayName(),
-      help: ViewStrings.DropdownControl.args.filterGroup.getHelp(),
+      displayName: strings.getFilterGroupDisplayName(),
+      help: strings.getFilterGroupHelp(),
       argType: 'filterGroup',
     },
   ],

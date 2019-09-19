@@ -6,10 +6,12 @@
 
 import { ViewStrings } from '../../strings';
 
+const { GetCell: strings } = ViewStrings;
+
 export const getCell = () => ({
   name: 'getCell',
-  displayName: ViewStrings.GetCell.getDisplayName(),
-  help: ViewStrings.GetCell.getHelp(),
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   modelArgs: ['size'],
   requiresContext: true,
   args: [],

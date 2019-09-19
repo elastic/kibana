@@ -5,17 +5,19 @@
  */
 import { ViewStrings } from '../../strings';
 
+const { Markdown: strings } = ViewStrings;
+
 export const markdown = () => ({
   name: 'markdown',
-  displayName: ViewStrings.Markdown.getDisplayName(),
-  help: ViewStrings.Markdown.getHelp(),
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   modelArgs: [],
   requiresContext: false,
   args: [
     {
       name: '_',
-      displayName: ViewStrings.Markdown.args.content.getDisplayName(),
-      help: ViewStrings.Markdown.args.content.getHelp(),
+      displayName: strings.getContentDisplayName(),
+      help: strings.getContentHelp(),
       argType: 'textarea',
       default: '""',
       options: {

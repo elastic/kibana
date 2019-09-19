@@ -8,16 +8,18 @@ import { openSans } from '../../../common/lib/fonts';
 import { shapes } from '../../renderers/progress/shapes';
 import { ViewStrings } from '../../strings';
 
+const { Progress: strings } = ViewStrings;
+
 export const progress = () => ({
   name: 'progress',
-  displayName: ViewStrings.Progress.getDisplayName(),
+  displayName: strings.getDisplayName(),
   modelArgs: [['_', { label: 'Value' }]],
   requiresContext: false,
   args: [
     {
       name: 'shape',
-      displayName: ViewStrings.Progress.args.Shape.getDisplayName(),
-      help: ViewStrings.Progress.args.Shape.getHelp(),
+      displayName: strings.getShapeDisplayName(),
+      help: strings.getShapeHelp(),
       argType: 'select',
       options: {
         choices: Object.keys(shapes).map(key => ({
@@ -29,50 +31,50 @@ export const progress = () => ({
     },
     {
       name: 'max',
-      displayName: ViewStrings.Progress.args.Max.getDisplayName(),
-      help: ViewStrings.Progress.args.Max.getHelp(),
+      displayName: strings.getMaxDisplayName(),
+      help: strings.getMaxHelp(),
       argType: 'number',
       default: '1',
     },
     {
       name: 'valueColor',
-      displayName: ViewStrings.Progress.args.ValueColor.getDisplayName(),
-      help: ViewStrings.Progress.args.ValueColor.getHelp(),
+      displayName: strings.getValueColorDisplayName(),
+      help: strings.getValueColorHelp(),
       argType: 'color',
       default: `#1785b0`,
     },
     {
       name: 'valueWeight',
-      displayName: ViewStrings.Progress.args.ValueWeight.getDisplayName(),
-      help: ViewStrings.Progress.args.ValueWeight.getHelp(),
+      displayName: strings.getValueWeightDisplayName(),
+      help: strings.getValueWeightHelp(),
       argType: 'number',
       default: '20',
     },
     {
       name: 'barColor',
-      displayName: ViewStrings.Progress.args.BarColor.getDisplayName(),
-      help: ViewStrings.Progress.args.BarColor.getHelp(),
+      displayName: strings.getBarColorDisplayName(),
+      help: strings.getBarColorHelp(),
       argType: 'color',
       default: `#f0f0f0`,
     },
     {
       name: 'barWeight',
-      displayName: ViewStrings.Progress.args.BarWeight.getDisplayName(),
-      help: ViewStrings.Progress.args.BarWeight.getHelp(),
+      displayName: strings.getBarWeightDisplayName(),
+      help: strings.getBarWeightHelp(),
       argType: 'number',
       default: '20',
     },
     {
       name: 'label',
-      displayName: ViewStrings.Progress.args.Label.getDisplayName(),
-      help: ViewStrings.Progress.args.Label.getHelp(),
+      displayName: strings.getLabelDisplayName(),
+      help: strings.getLabelHelp(),
       argType: 'toggle',
       default: 'true',
     },
     {
       name: 'font',
-      displayName: ViewStrings.Progress.args.Font.getDisplayName(),
-      help: ViewStrings.Progress.args.Font.getHelp(),
+      displayName: strings.getFontDisplayName(),
+      help: strings.getFontHelp(),
       argType: 'font',
       default: `{font size=24 family="${openSans.value}" color="#000000" align=center}`,
     },

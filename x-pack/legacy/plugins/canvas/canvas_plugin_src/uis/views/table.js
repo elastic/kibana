@@ -5,10 +5,12 @@
  */
 import { ViewStrings } from '../../strings';
 
+const { Table: strings } = ViewStrings;
+
 export const table = () => ({
   name: 'table',
-  displayName: ViewStrings.Table.getDisplayName(),
-  help: ViewStrings.Table.getHelp(),
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   modelArgs: [],
   args: [
     {
@@ -17,8 +19,8 @@ export const table = () => ({
     },
     {
       name: 'perPage',
-      displayName: ViewStrings.Table.args.PerPage.getDisplayName(),
-      help: ViewStrings.Table.args.PerPage.getHelp(),
+      displayName: strings.getPerPageDisplayName(),
+      help: strings.getPerPageHelp(),
       argType: 'select',
       default: 10,
       options: {
@@ -27,15 +29,15 @@ export const table = () => ({
     },
     {
       name: 'paginate',
-      displayName: ViewStrings.Table.args.Paginate.getDisplayName(),
-      help: ViewStrings.Table.args.Paginate.getHelp(),
+      displayName: strings.getPaginateDisplayName(),
+      help: strings.getPaginateHelp(),
       argType: 'toggle',
       default: true,
     },
     {
       name: 'showHeader',
-      displayName: ViewStrings.Table.args.ShowHeader.getDisplayName(),
-      help: ViewStrings.Table.args.ShowHeader.getHelp(),
+      displayName: strings.getShowHeaderDisplayName(),
+      help: strings.getShowHeaderHelp(),
       argType: 'toggle',
       default: true,
     },

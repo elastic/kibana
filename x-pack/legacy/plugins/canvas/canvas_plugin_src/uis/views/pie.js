@@ -9,9 +9,11 @@ import { legendOptions } from '../../../public/lib/legend_options';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
 import { ViewStrings } from '../../strings';
 
+const { Pie: strings } = ViewStrings;
+
 export const pie = () => ({
   name: 'pie',
-  displayName: ViewStrings.Pie.getDisplayName(),
+  displayName: strings.getDisplayName(),
   modelArgs: [['color', { label: 'Slice Labels' }], ['size', { label: 'Slice Angles' }]],
   args: [
     {
@@ -20,8 +22,8 @@ export const pie = () => ({
     },
     {
       name: 'hole',
-      displayName: ViewStrings.Pie.args.hole.getDisplayName(),
-      help: ViewStrings.Pie.args.hole.getHelp(),
+      displayName: strings.getHoleDisplayName(),
+      help: strings.getHoleHelp(),
       argType: 'range',
       default: 50,
       options: {
@@ -31,15 +33,15 @@ export const pie = () => ({
     },
     {
       name: 'labels',
-      displayName: ViewStrings.Pie.args.labels.getDisplayName(),
-      help: ViewStrings.Pie.args.labels.getHelp(),
+      displayName: strings.getLabelsDisplayName(),
+      help: strings.getLabelsHelp(),
       argType: 'toggle',
       default: true,
     },
     {
       name: 'labelRadius',
-      displayName: ViewStrings.Pie.args.labelRadius.getDisplayName(),
-      help: ViewStrings.Pie.args.labelRadius.getHelp(),
+      displayName: strings.getLabelRadiusDisplayName(),
+      help: strings.getLabelRadiusHelp(),
       argType: 'range',
       default: 100,
       options: {
@@ -49,8 +51,8 @@ export const pie = () => ({
     },
     {
       name: 'legend',
-      displayName: ViewStrings.Pie.args.legend.getDisplayName(),
-      help: ViewStrings.Pie.args.legend.getHelp(),
+      displayName: strings.getLegendDisplayName(),
+      help: strings.getLegendHelp(),
       argType: 'select',
       default: 'ne',
       options: {
@@ -59,8 +61,8 @@ export const pie = () => ({
     },
     {
       name: 'radius',
-      displayName: ViewStrings.Pie.args.radius.getDisplayName(),
-      help: ViewStrings.Pie.args.radius.getHelp(),
+      displayName: strings.getRadiusDisplayName(),
+      help: strings.getRadiusHelp(),
       argType: 'percentage',
       default: 1,
     },
@@ -75,8 +77,8 @@ export const pie = () => ({
     },
     {
       name: 'tilt',
-      displayName: ViewStrings.Pie.args.tilt.getDisplayName(),
-      help: ViewStrings.Pie.args.tilt.getHelp(),
+      displayName: strings.getTiltDisplayName(),
+      help: strings.getTiltHelp(),
       argType: 'percentage',
       default: 1,
     },

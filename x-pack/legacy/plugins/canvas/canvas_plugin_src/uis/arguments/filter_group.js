@@ -18,6 +18,8 @@ import {
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../strings';
 
+const { FilterGroup: strings } = ArgumentStrings;
+
 const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
   const [inputValue, setInputValue] = useState('');
   const [addMode, setAddMode] = useState(false);
@@ -81,7 +83,7 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
       />
       <EuiSpacer size="s" />
       <EuiButtonEmpty size="xs" onClick={() => setAddMode(!addMode)} flush="left">
-        {ArgumentStrings.FilterGroup.getCreateNewGroup()}
+        {strings.getCreateNewGroup()}
       </EuiButtonEmpty>
     </Fragment>
   );
@@ -100,7 +102,7 @@ FilterGroupInput.propTypes = {
 
 export const filterGroup = () => ({
   name: 'filterGroup',
-  displayName: ArgumentStrings.FilterGroup.getDisplayName(),
-  help: ArgumentStrings.FilterGroup.getHelp(),
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   simpleTemplate: templateFromReactComponent(FilterGroupInput),
 });

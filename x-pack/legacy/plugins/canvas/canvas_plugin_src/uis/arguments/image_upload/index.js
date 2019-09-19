@@ -18,6 +18,8 @@ import { VALID_IMAGE_TYPES } from '../../../../common/lib/constants';
 import { ArgumentStrings } from '../../../strings';
 import { FileForm, LinkForm } from './forms';
 
+const { ImageUpload: strings } = ArgumentStrings;
+
 class ImageUpload extends React.Component {
   static propTypes = {
     onAssetAdd: PropTypes.func.isRequired,
@@ -109,13 +111,13 @@ class ImageUpload extends React.Component {
     let selectedAsset = {};
 
     const urlTypeOptions = [
-      { id: 'file', label: ArgumentStrings.ImageUpload.urlTypes.getFile() },
-      { id: 'link', label: ArgumentStrings.ImageUpload.urlTypes.getLink() },
+      { id: 'file', label: strings.getFileUrlType() },
+      { id: 'link', label: strings.getLinkUrlType() },
     ];
     if (assets.length) {
       urlTypeOptions.unshift({
         id: 'asset',
-        label: ArgumentStrings.ImageUpload.urlTypes.getAsset(),
+        label: strings.getAssetUrlType(),
       });
       selectedAsset = assets.find(({ value }) => value === url) || {};
     }
@@ -161,8 +163,8 @@ class ImageUpload extends React.Component {
 
 export const imageUpload = () => ({
   name: 'imageUpload',
-  displayName: ArgumentStrings.ImageUpload.getDisplayName(),
-  help: ArgumentStrings.ImageUpload.getHelp(),
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   resolveArgValue: true,
   template: templateFromReactComponent(ImageUpload),
   resolve({ args }) {

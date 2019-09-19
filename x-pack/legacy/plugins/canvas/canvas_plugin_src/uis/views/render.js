@@ -8,10 +8,12 @@ import { DEFAULT_ELEMENT_CSS } from '../../../common/lib/constants';
 import { CSS } from '../../../i18n/constants';
 import { ViewStrings } from '../../strings';
 
+const { Render: strings } = ViewStrings;
+
 export const render = () => ({
   name: 'render',
-  displayName: ViewStrings.Render.getDisplayName(),
-  help: ViewStrings.Render.getHelp(),
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   modelArgs: [],
   requiresContext: false,
   args: [
@@ -22,11 +24,11 @@ export const render = () => ({
     {
       name: 'css',
       displayName: CSS,
-      help: ViewStrings.Render.args.CSS.getHelp(),
+      help: strings.getCssHelp(),
       argType: 'textarea',
       default: `"${DEFAULT_ELEMENT_CSS}"`,
       options: {
-        confirm: ViewStrings.Render.args.CSS.getApply(),
+        confirm: strings.getCssApply(),
       },
     },
   ],

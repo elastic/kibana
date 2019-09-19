@@ -7,15 +7,17 @@
 import { shapes } from '../../renderers/shape/shapes';
 import { ViewStrings } from '../../strings';
 
+const { Shape: strings } = ViewStrings;
+
 export const shape = () => ({
   name: 'shape',
-  displayName: ViewStrings.Shape.getDisplayName(),
+  displayName: strings.getDisplayName(),
   modelArgs: [],
   requiresContext: false,
   args: [
     {
       name: '_',
-      displayName: ViewStrings.Shape.args.Shape.getDisplayName(),
+      displayName: strings.getShapeDisplayName(),
       argType: 'shape',
       options: {
         shapes,
@@ -23,27 +25,27 @@ export const shape = () => ({
     },
     {
       name: 'fill',
-      displayName: ViewStrings.Shape.args.Fill.getDisplayName(),
+      displayName: strings.getFillDisplayName(),
       argType: 'color',
-      help: ViewStrings.Shape.args.Fill.getHelp(),
+      help: strings.getFillHelp(),
     },
     {
       name: 'border',
-      displayName: ViewStrings.Shape.args.Border.getDisplayName(),
+      displayName: strings.getBorderDisplayName(),
       argType: 'color',
-      help: ViewStrings.Shape.args.Border.getHelp(),
+      help: strings.getBorderHelp(),
     },
     {
       name: 'borderWidth',
-      displayName: ViewStrings.Shape.args.BorderWidth.getDisplayName(),
+      displayName: strings.getBorderWidthDisplayName(),
       argType: 'number',
-      help: ViewStrings.Shape.args.BorderWidth.getHelp(),
+      help: strings.getBorderWidthHelp(),
     },
     {
       name: 'maintainAspect',
-      displayName: ViewStrings.Shape.args.MaintainAspect.getDisplayName(),
+      displayName: strings.getMaintainAspectDisplayName(),
       argType: 'toggle',
-      help: ViewStrings.Shape.args.MaintainAspect.getHelp(),
+      help: strings.getMaintainAspectHelp(),
     },
   ],
 });

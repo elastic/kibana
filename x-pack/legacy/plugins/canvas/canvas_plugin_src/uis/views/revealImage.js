@@ -5,35 +5,36 @@
  */
 import { ViewStrings } from '../../strings';
 
+const { RevealImage: strings } = ViewStrings;
+
 export const revealImage = () => ({
   name: 'revealImage',
-  displayName: ViewStrings.RevealImage.getDisplayName(),
-  help: ViewStrings.RevealImage.getHelp(),
+  displayName: strings.getDisplayName(),
   modelArgs: [['_', { label: 'Value' }]],
   args: [
     {
       name: 'image',
-      displayName: ViewStrings.RevealImage.args.Image.getDisplayName(),
-      help: ViewStrings.RevealImage.args.Image.getHelp(),
+      displayName: strings.getImageDisplayName(),
+      help: strings.getImageHelp(),
       argType: 'imageUpload',
     },
     {
       name: 'emptyImage',
-      displayName: ViewStrings.RevealImage.args.EmptyImage.getDisplayName(),
-      help: ViewStrings.RevealImage.args.EmptyImage.getHelp(),
+      displayName: strings.getEmptyImageDisplayName(),
+      help: strings.getEmptyImageHelp(),
       argType: 'imageUpload',
     },
     {
       name: 'origin',
-      displayName: ViewStrings.RevealImage.args.Origin.getDisplayName(),
-      help: ViewStrings.RevealImage.args.Origin.getHelp(),
+      displayName: strings.getOriginDisplayName(),
+      help: strings.getOriginHelp(),
       argType: 'select',
       options: {
         choices: [
-          { value: 'top', name: ViewStrings.RevealImage.args.Origin.getOptionTop() },
-          { value: 'left', name: ViewStrings.RevealImage.args.Origin.getOptionLeft() },
-          { value: 'bottom', name: ViewStrings.RevealImage.args.Origin.getOptionBottom() },
-          { value: 'right', name: ViewStrings.RevealImage.args.Origin.getOptionRight() },
+          { value: 'top', name: strings.getOriginTop() },
+          { value: 'left', name: strings.getOriginLeft() },
+          { value: 'bottom', name: strings.getOriginBottom() },
+          { value: 'right', name: strings.getOriginRight() },
         ],
       },
     },
