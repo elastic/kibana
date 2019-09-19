@@ -1265,22 +1265,4 @@ describe('updateApiKey()', () => {
       { references: [] }
     );
   });
-
-  test(`throws error when alert is disabled`, async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        interval: '10s',
-        alertTypeId: '2',
-        enabled: false,
-      },
-      references: [],
-    });
-
-    await expect(alertsClient.updateApiKey({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Can't update API key on a disabled alert"`
-    );
-  });
 });

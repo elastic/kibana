@@ -217,14 +217,7 @@ export class AlertsClient {
   }
 
   public async updateApiKey({ id }: { id: string }) {
-    const {
-      references,
-      attributes: { enabled },
-    } = await this.savedObjectsClient.get('alert', id);
-
-    if (enabled === false) {
-      throw Boom.badRequest(`Can't update API key on a disabled alert`);
-    }
+    const { references } = await this.savedObjectsClient.get('alert', id);
 
     const apiKey = await this.createAPIKey();
     const username = await this.getUserName();
