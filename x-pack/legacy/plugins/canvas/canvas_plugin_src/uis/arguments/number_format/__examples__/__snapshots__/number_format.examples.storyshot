@@ -13,7 +13,7 @@ Array [
         id="NumberFormatExample3"
         onChange={[Function]}
         onMouseUp={[Function]}
-        value=""
+        value="custom"
       >
         <option
           value="0.0[000]"
@@ -41,7 +41,7 @@ Array [
           Bytes
         </option>
         <option
-          value=""
+          value="custom"
         >
           Custom
         </option>
@@ -100,7 +100,7 @@ Array [
         id="NumberFormatExample1"
         onChange={[Function]}
         onMouseUp={[Function]}
-        value=""
+        value="custom"
       >
         <option
           value="0.0[000]"
@@ -128,7 +128,7 @@ Array [
           Bytes
         </option>
         <option
-          value=""
+          value="custom"
         >
           Custom
         </option>
@@ -214,7 +214,7 @@ exports[`Storyshots arguments/NumberFormat with preset format 1`] = `
         Bytes
       </option>
       <option
-        value=""
+        value="custom"
       >
         Custom
       </option>

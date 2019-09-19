@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  PROCESSOR_EVENT,
-  SERVICE_NAME
-} from '../../../common/elasticsearch_fieldnames';
 import { Setup } from '../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../helpers/metrics';
-import { rangeFilter } from '../helpers/range_filter';
 import { ChartBase } from './types';
 import { transformDataToMetricsChart } from './transform_metrics_chart';
+import { getMetricsProjection } from '../../../common/projections/metrics';
+import { mergeProjection } from '../../../common/projections/util/merge_projection';
 
 interface Aggs {
   [key: string]: {
@@ -45,23 +42,16 @@ export async function fetchAndTransformMetrics<T extends Aggs>({
   aggs: T;
   additionalFilters?: Filter[];
 }) {
-  const { start, end, uiFiltersES, client, config } = setup;
+  const { start, end, client } = setup;
 
-  const params = {
-    index: config.get<string>('apm_oss.metricsIndices'),
+  const projection = getMetricsProjection({ setup, serviceName });
+
+  const params = mergeProjection(projection, {
     body: {
       size: 0,
       query: {
         bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [PROCESSOR_EVENT]: 'metric' } },
-            {
-              range: rangeFilter(start, end)
-            },
-            ...additionalFilters,
-            ...uiFiltersES
-          ]
+          filter: [...projection.body.query.bool.filter, ...additionalFilters]
         }
       },
       aggs: {
@@ -72,7 +62,7 @@ export async function fetchAndTransformMetrics<T extends Aggs>({
         ...aggs
       }
     }
-  };
+  });
 
   const response = await client.search(params);
 

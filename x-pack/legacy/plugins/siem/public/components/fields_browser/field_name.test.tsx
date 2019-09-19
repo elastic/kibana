@@ -27,7 +27,6 @@ describe('FieldName', () => {
             category: categoryId,
           })}
           fieldId={timestampFieldId}
-          isLoading={false}
           onUpdateColumns={jest.fn()}
         />
       </TestProviders>
@@ -51,7 +50,6 @@ describe('FieldName', () => {
             category: categoryId,
           })}
           fieldId={timestampFieldId}
-          isLoading={false}
           onUpdateColumns={jest.fn()}
         />
       </TestProviders>
@@ -72,7 +70,6 @@ describe('FieldName', () => {
             category: categoryId,
           })}
           fieldId={timestampFieldId}
-          isLoading={false}
           onUpdateColumns={jest.fn()}
         />
       </TestProviders>
@@ -95,7 +92,6 @@ describe('FieldName', () => {
             category: categoryId,
           })}
           fieldId={timestampFieldId}
-          isLoading={false}
           onUpdateColumns={onUpdateColumns}
         />
       </TestProviders>
@@ -118,7 +114,7 @@ describe('FieldName', () => {
         example: '2016-05-23T08:05:34.853Z',
         id: '@timestamp',
         type: 'date',
-        width: 240,
+        width: 190,
       },
     ]);
   });
@@ -136,7 +132,6 @@ describe('FieldName', () => {
           })}
           fieldId={timestampFieldId}
           highlight={highlight}
-          isLoading={false}
           onUpdateColumns={jest.fn()}
         />
       </TestProviders>

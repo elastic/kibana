@@ -19,7 +19,7 @@
 
 import globby from 'globby';
 
-import { run } from './run';
+import { run } from '@kbn/dev-utils';
 import { File } from './file';
 import { REPO_ROOT } from './constants';
 import { checkFileCasing } from './precommit_hook/check_file_casing';

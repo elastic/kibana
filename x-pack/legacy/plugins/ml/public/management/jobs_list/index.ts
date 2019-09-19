@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore no declaration module
-import { ReactDOM, render, unmountComponentAtNode } from 'react-dom';
+import ReactDOM, { render, unmountComponentAtNode } from 'react-dom';
+import React from 'react';
 import routes from 'ui/routes';
 import { canGetManagementMlJobs } from '../../privilege/check_privilege';
 import { JOBS_LIST_PATH, ACCESS_DENIED_PATH } from '../management_urls';
@@ -22,14 +22,19 @@ routes.when(JOBS_LIST_PATH, {
   resolve: {
     checkPrivilege: canGetManagementMlJobs,
   },
-  controller($scope) {
+  controller($scope, checkPrivilege) {
+    const { mlFeatureEnabledInSpace } = checkPrivilege;
+
     $scope.$on('$destroy', () => {
       const elem = document.getElementById('kibanaManagementMLSection');
       if (elem) unmountComponentAtNode(elem);
     });
     $scope.$$postDigest(() => {
       const element = document.getElementById('kibanaManagementMLSection');
-      render(JobsListPage(), element);
+      ReactDOM.render(
+        React.createElement(JobsListPage, { isMlEnabledInSpace: mlFeatureEnabledInSpace }),
+        element
+      );
     });
   },
 });

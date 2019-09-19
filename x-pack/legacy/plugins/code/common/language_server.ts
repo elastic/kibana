@@ -11,6 +11,7 @@ export enum LanguageServerStatus {
   INSTALLING,
   READY, // installed but not running
   RUNNING,
+  LAUNCH_FAILED,
 }
 
 export interface LanguageServer {
@@ -48,8 +49,6 @@ export const CTAGS_SUPPORT_LANGS = [
   'sql',
   'tcl',
   'typescript',
-  'xml',
-  'yaml',
   'java',
   'javascript',
 ];

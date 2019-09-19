@@ -40,14 +40,12 @@ beforeEach(() => {
   appendChildSpy = jest.spyOn(document.body, 'appendChild').mockReturnValue({} as any);
 
   // Mock global fields needed for loading modules.
-  coreWindow.__kbnNonce__ = 'asdf';
   coreWindow.__kbnBundles__ = {};
 });
 
 afterEach(() => {
   appendChildSpy.mockRestore();
   createElementSpy.mockRestore();
-  delete coreWindow.__kbnNonce__;
   delete coreWindow.__kbnBundles__;
 });
 
@@ -64,7 +62,6 @@ test('`loadPluginBundles` creates a script tag and loads initializer', async () 
     '/bundles/plugin/plugin-a.bundle.js'
   );
   expect(fakeScriptTag.setAttribute).toHaveBeenCalledWith('id', 'kbn-plugin-plugin-a');
-  expect(fakeScriptTag.setAttribute).toHaveBeenCalledWith('nonce', 'asdf');
   expect(fakeScriptTag.onload).toBeInstanceOf(Function);
   expect(fakeScriptTag.onerror).toBeInstanceOf(Function);
   expect(appendChildSpy).toHaveBeenCalledWith(fakeScriptTag);

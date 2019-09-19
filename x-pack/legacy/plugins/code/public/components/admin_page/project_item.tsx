@@ -24,12 +24,13 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { Repository, WorkerReservedProgress } from '../../../model';
+import { Repository, RepoState, WorkerReservedProgress } from '../../../model';
 import { deleteRepo, indexRepo, initRepoCommand } from '../../actions';
-import { RepoState, RepoStatus } from '../../actions/status';
+import { RepoStatus } from '../../actions/status';
 
 const stateColor = {
   [RepoState.CLONING]: 'secondary',
+  [RepoState.UPDATING]: 'secondary',
   [RepoState.DELETING]: 'accent',
   [RepoState.INDEXING]: 'primary',
 };
@@ -124,6 +125,12 @@ class CodeProjectItem extends React.PureComponent<
       footer = (
         <div className="codeFooter">
           <FormattedMessage id="xpack.code.repoItem.cloningText" defaultMessage="CLONING..." />
+        </div>
+      );
+    } else if (status.state === RepoState.UPDATING) {
+      footer = (
+        <div className="codeFooter">
+          <FormattedMessage id="xpack.code.repoItem.updatingText" defaultMessage="UPDATING..." />
         </div>
       );
     } else if (status.state === RepoState.DELETE_ERROR) {

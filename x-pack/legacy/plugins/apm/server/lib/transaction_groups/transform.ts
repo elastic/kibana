@@ -28,7 +28,7 @@ function calculateRelativeImpacts(transactionGroups: ITransactionGroup[]) {
 
 export type ITransactionGroup = ReturnType<typeof getTransactionGroup>;
 function getTransactionGroup(
-  bucket: ESResponse['aggregations']['transactions']['buckets'][0],
+  bucket: Required<ESResponse>['aggregations']['transactions']['buckets'][0],
   minutes: number
 ) {
   const averageResponseTime = bucket.avg.value;

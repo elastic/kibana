@@ -9,7 +9,7 @@ import { get } from 'lodash';
 import { fromExpression } from '@kbn/interpreter/common';
 import { collectFns } from './collector_helpers';
 import { TelemetryCollector } from '../../types';
-import { AST, TelemetryCustomElement, TelemetryCustomElementDocument } from '../../types';
+import { ExpressionAST, TelemetryCustomElement, TelemetryCustomElementDocument } from '../../types';
 
 const CUSTOM_ELEMENT_TYPE = 'canvas-element';
 interface CustomElementSearch {
@@ -48,7 +48,6 @@ function parseJsonOrNull(maybeJson: string) {
 
 /**
   Calculate statistics about a collection of CustomElement Documents
-
   @param customElements - Array of CustomElement documents
   @returns Statistics about how Custom Elements are being used
 */
@@ -76,7 +75,7 @@ export function summarizeCustomElements(
 
   parsedContents.map(contents => {
     contents.selectedNodes.map(node => {
-      const ast: AST = fromExpression(node.expression) as AST; // TODO: Remove once fromExpression is properly typed
+      const ast: ExpressionAST = fromExpression(node.expression) as ExpressionAST; // TODO: Remove once fromExpression is properly typed
       collectFns(ast, (cFunction: string) => {
         functionSet.add(cFunction);
       });

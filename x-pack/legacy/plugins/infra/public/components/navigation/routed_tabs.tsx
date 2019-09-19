@@ -10,7 +10,7 @@ import { Route } from 'react-router-dom';
 import euiStyled from '../../../../../common/eui_styled_components';
 
 interface TabConfiguration {
-  title: string;
+  title: string | React.ReactNode;
   path: string;
 }
 
@@ -33,6 +33,7 @@ export class RoutedTabs extends React.Component<RoutedTabsProps> {
           path={tab.path}
           children={({ match, history }) => (
             <TabContainer className="euiTab">
+              {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiLink
                 href={`#${tab.path}`}
                 onClick={e => {

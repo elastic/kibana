@@ -131,3 +131,58 @@ export const setIsInspected = ({
     },
   };
 };
+
+export const removeGlobalLink = (state: InputsModel): InputsModel => ({
+  ...state,
+  global: {
+    ...state.global,
+    linkTo: [],
+  },
+});
+
+export const addGlobalLink = (linkToId: InputsModelId, state: InputsModel): InputsModel => ({
+  ...state,
+  global: {
+    ...state.global,
+    linkTo: [linkToId],
+  },
+});
+
+export const removeTimelineLink = (state: InputsModel): InputsModel => ({
+  ...state,
+  timeline: {
+    ...state.timeline,
+    linkTo: [],
+  },
+});
+
+export const addTimelineLink = (linkToId: InputsModelId, state: InputsModel): InputsModel => ({
+  ...state,
+  timeline: {
+    ...state.timeline,
+    linkTo: [linkToId],
+  },
+});
+
+export interface DeleteOneQueryParams {
+  id: string;
+  inputId: InputsModelId;
+  state: InputsModel;
+}
+
+export const deleteOneQuery = ({ inputId, id, state }: DeleteOneQueryParams): InputsModel => {
+  const queryIndex = state[inputId].query.findIndex(q => q.id === id);
+  return {
+    ...state,
+    [inputId]: {
+      ...get(inputId, state),
+      query:
+        queryIndex > -1
+          ? [
+              ...state[inputId].query.slice(0, queryIndex),
+              ...state[inputId].query.slice(queryIndex + 1),
+            ]
+          : [...state[inputId].query],
+    },
+  };
+};

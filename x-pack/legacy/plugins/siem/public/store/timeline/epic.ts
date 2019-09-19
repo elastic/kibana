@@ -66,22 +66,13 @@ import { isNotNull } from './helpers';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { refetchQueries } from './refetch_queries';
 import { myEpicTimelineId } from './my_epic_timeline_id';
-import { TimelineById } from './types';
+import { ActionTimeline, TimelineById } from './types';
 
 interface TimelineEpicDependencies<State> {
   timelineByIdSelector: (state: State) => TimelineById;
   timelineTimeRangeSelector: (state: State) => TimeRange;
   selectNotesByIdSelector: (state: State) => NotesById;
   apolloClient$: Observable<AppApolloClient>;
-}
-
-export interface ActionTimeline {
-  type: string;
-  payload: {
-    id: string;
-    eventId: string;
-    noteId: string;
-  };
 }
 
 const timelineActionsType = [
@@ -102,6 +93,9 @@ const timelineActionsType = [
   updateRange.type,
   upsertColumn.type,
 ];
+
+const isItAtimelineAction = (timelineId: string | undefined) =>
+  timelineId && timelineId.toLowerCase().startsWith('timeline');
 
 export const createTimelineEpic = <State>(): Epic<
   Action,
@@ -132,18 +126,24 @@ export const createTimelineEpic = <State>(): Epic<
     action$.pipe(
       withLatestFrom(timeline$),
       filter(([action, timeline]) => {
-        const timelineId: TimelineModel = timeline[get('payload.id', action)];
+        const timelineId: string = get('payload.id', action);
+        const timelineObj: TimelineModel = timeline[timelineId];
         if (action.type === addError.type) {
           return true;
         }
-        if (action.type === createTimeline.type) {
+        if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
           myEpicTimelineId.setTimelineId(null);
           myEpicTimelineId.setTimelineVersion(null);
-        } else if (action.type === addTimeline.type) {
+        } else if (action.type === addTimeline.type && isItAtimelineAction(timelineId)) {
           const addNewTimeline: TimelineModel = get('payload.timeline', action);
           myEpicTimelineId.setTimelineId(addNewTimeline.savedObjectId);
           myEpicTimelineId.setTimelineVersion(addNewTimeline.version);
-        } else if (timelineActionsType.includes(action.type) && !timelineId.isLoading) {
+          return true;
+        } else if (
+          timelineActionsType.includes(action.type) &&
+          !timelineObj.isLoading &&
+          isItAtimelineAction(timelineId)
+        ) {
           return true;
         }
         return false;
@@ -158,7 +158,7 @@ export const createTimelineEpic = <State>(): Epic<
       delay(500),
       withLatestFrom(timeline$, apolloClient$, notes$, timelineTimeRange$),
       concatMap(([objAction, timeline, apolloClient, notes, timelineTimeRange]) => {
-        const action: Action = get('action', objAction);
+        const action: ActionTimeline = get('action', objAction);
         const timelineId = myEpicTimelineId.getTimelineId();
         const version = myEpicTimelineId.getTimelineVersion();
 
@@ -179,28 +179,25 @@ export const createTimelineEpic = <State>(): Epic<
               variables: {
                 timelineId,
                 version,
-                timeline: convertTimelineAsInput(
-                  timeline[get('payload.id', action)],
-                  timelineTimeRange
-                ),
+                timeline: convertTimelineAsInput(timeline[action.payload.id], timelineTimeRange),
               },
               refetchQueries,
             })
           ).pipe(
             withLatestFrom(timeline$),
             mergeMap(([result, recentTimeline]) => {
-              const savedTimeline = recentTimeline[get('payload.id', action)];
+              const savedTimeline = recentTimeline[action.payload.id];
               const response: ResponseTimeline = get('data.persistTimeline', result);
               const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
               return [
                 response.code === 409
                   ? updateAutoSaveMsg({
-                      timelineId: get('payload.id', action),
+                      timelineId: action.payload.id,
                       newTimelineModel: omitTypenameInTimeline(savedTimeline, response.timeline),
                     })
                   : updateTimeline({
-                      id: get('payload.id', action),
+                      id: action.payload.id,
                       timeline: {
                         ...savedTimeline,
                         savedObjectId: response.timeline.savedObjectId,
@@ -210,11 +207,11 @@ export const createTimelineEpic = <State>(): Epic<
                     }),
                 ...callOutMsg,
                 endTimelineSaving({
-                  id: get('payload.id', action),
+                  id: action.payload.id,
                 }),
               ];
             }),
-            startWith(startTimelineSaving({ id: get('payload.id', action) })),
+            startWith(startTimelineSaving({ id: action.payload.id })),
             takeUntil(
               action$.pipe(
                 withLatestFrom(timeline$),

@@ -5,9 +5,13 @@
  */
 
 import { Annotation } from '../../../common/types/annotations';
-import { DslName, AggFieldNamePair } from '../../../common/types/fields';
+import { AggFieldNamePair } from '../../../common/types/fields';
 import { ExistingJobsAndGroups } from '../job_service';
 import { PrivilegesResponse } from '../../../common/types/privileges';
+import {
+  DataFrameTransformEndpointRequest,
+  DataFrameTransformEndpointResult,
+} from '../../data_frame/pages/transform_management/components/transform_list/common';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -47,14 +51,16 @@ declare interface Ml {
     getDataFrameTransforms(jobId?: string): Promise<any>;
     getDataFrameTransformsStats(jobId?: string): Promise<any>;
     createDataFrameTransform(jobId: string, jobConfig: any): Promise<any>;
-    deleteDataFrameTransform(jobId: string): Promise<any>;
+    deleteDataFrameTransforms(
+      jobsData: DataFrameTransformEndpointRequest[]
+    ): Promise<DataFrameTransformEndpointResult>;
     getDataFrameTransformsPreview(payload: any): Promise<any>;
-    startDataFrameTransform(jobId: string, force?: boolean): Promise<any>;
-    stopDataFrameTransform(
-      jobId: string,
-      force?: boolean,
-      waitForCompletion?: boolean
-    ): Promise<any>;
+    startDataFrameTransforms(
+      jobsData: DataFrameTransformEndpointRequest[]
+    ): Promise<DataFrameTransformEndpointResult>;
+    stopDataFrameTransforms(
+      jobsData: DataFrameTransformEndpointRequest[]
+    ): Promise<DataFrameTransformEndpointResult>;
     getTransformAuditMessages(transformId: string): Promise<any>;
   };
 
@@ -119,8 +125,12 @@ declare interface Ml {
       jobId: string,
       start: number,
       end: number
-    ): Promise<{ progress: number; isRunning: boolean }>;
+    ): Promise<{ progress: number; isRunning: boolean; isJobClosed: boolean }>;
   };
+
+  estimateBucketSpan(
+    data: object
+  ): Promise<{ name: string; ms: number; error?: boolean; message?: { msg: string } | string }>;
 }
 
 declare const ml: Ml;

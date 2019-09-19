@@ -4,14 +4,18 @@
 [partintro]
 --
 
-beta[] Interaction with source code is pervasive and essential for any technology company. Speed of innovation is limited by how easy it is to search, navigate, and gain insight into your source code. Elastic *Code* provides an easy-to-use code search solution that scales with your organization. *Code* empowers your team to ship awesome products and provide the best services. *Code* offers the following functions:
+beta[]
 
-* Jump to definition and find references for a symbol
+Interaction with source code is pervasive and essential for any technology company. Speed of innovation is limited by how easy it is to search, navigate, and gain insight into your source code.
+Elastic *Code* provides an easy-to-use code search solution that scales with your organization and empowers your team to understand your codebase faster than ever before.
+*Code* offers the following functions:
+
+* Find references and definitions for any object or symbol
 * Typeahead search for symbol definition, file, and repo
 * Symbol table
-* Full text search with repo and language filters
+* Full-text search with repo and language filters
 
-<<code-getting-started, Get Started>> with *Code* by importing your first repo.
+<<code-import-first-repo, Get Started>> with *Code* by importing your first repo.
 --
 
-include::code-getting-started.asciidoc[]
+include::code-import-first-repo.asciidoc[]

@@ -12,25 +12,27 @@ import { mockBrowserFields } from '../../containers/source/mock';
 
 import { CATEGORY_PANE_WIDTH, getFieldCount } from './helpers';
 import { CategoriesPane } from './categories_pane';
+import { ThemeProvider } from 'styled-components';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 
 const timelineId = 'test';
+const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
 describe('getCategoryColumns', () => {
   Object.keys(mockBrowserFields).forEach(categoryId => {
     test(`it renders the ${categoryId} category name (from filteredBrowserFields)`, () => {
       const wrapper = mount(
-        <div>
+        <ThemeProvider theme={theme}>
           <CategoriesPane
             browserFields={mockBrowserFields}
             filteredBrowserFields={mockBrowserFields}
             width={CATEGORY_PANE_WIDTH}
-            isLoading={false}
             onCategorySelected={jest.fn()}
             onUpdateColumns={jest.fn()}
             selectedCategoryId={''}
             timelineId={timelineId}
           />
-        </div>
+        </ThemeProvider>
       );
 
       expect(
@@ -45,18 +47,17 @@ describe('getCategoryColumns', () => {
   Object.keys(mockBrowserFields).forEach(categoryId => {
     test(`it renders the correct field count for the ${categoryId} category (from filteredBrowserFields)`, () => {
       const wrapper = mount(
-        <div>
+        <ThemeProvider theme={theme}>
           <CategoriesPane
             browserFields={mockBrowserFields}
             filteredBrowserFields={mockBrowserFields}
             width={CATEGORY_PANE_WIDTH}
-            isLoading={false}
             onCategorySelected={jest.fn()}
             onUpdateColumns={jest.fn()}
             selectedCategoryId={''}
             timelineId={timelineId}
           />
-        </div>
+        </ThemeProvider>
       );
 
       expect(
@@ -70,20 +71,18 @@ describe('getCategoryColumns', () => {
 
   test('it renders a hover actions panel for the category name', () => {
     const wrapper = mount(
-      <div>
+      <ThemeProvider theme={theme}>
         <CategoriesPane
           browserFields={mockBrowserFields}
           filteredBrowserFields={mockBrowserFields}
           width={CATEGORY_PANE_WIDTH}
-          isLoading={false}
           onCategorySelected={jest.fn()}
           onUpdateColumns={jest.fn()}
           selectedCategoryId={''}
           timelineId={timelineId}
         />
-      </div>
+      </ThemeProvider>
     );
-
     expect(
       wrapper
         .find('[data-test-subj="category-link"]')
@@ -98,18 +97,17 @@ describe('getCategoryColumns', () => {
     const selectedCategoryId = 'auditd';
 
     const wrapper = mount(
-      <div>
+      <ThemeProvider theme={theme}>
         <CategoriesPane
           browserFields={mockBrowserFields}
           filteredBrowserFields={mockBrowserFields}
           width={CATEGORY_PANE_WIDTH}
-          isLoading={false}
           onCategorySelected={jest.fn()}
           onUpdateColumns={jest.fn()}
           selectedCategoryId={selectedCategoryId}
           timelineId={timelineId}
         />
-      </div>
+      </ThemeProvider>
     );
 
     expect(
@@ -122,18 +120,17 @@ describe('getCategoryColumns', () => {
     const notTheSelectedCategoryId = 'base';
 
     const wrapper = mount(
-      <div>
+      <ThemeProvider theme={theme}>
         <CategoriesPane
           browserFields={mockBrowserFields}
           filteredBrowserFields={mockBrowserFields}
           width={CATEGORY_PANE_WIDTH}
-          isLoading={false}
           onCategorySelected={jest.fn()}
           onUpdateColumns={jest.fn()}
           selectedCategoryId={selectedCategoryId}
           timelineId={timelineId}
         />
-      </div>
+      </ThemeProvider>
     );
 
     expect(
@@ -148,18 +145,17 @@ describe('getCategoryColumns', () => {
     const onCategorySelected = jest.fn();
 
     const wrapper = mount(
-      <div>
+      <ThemeProvider theme={theme}>
         <CategoriesPane
           browserFields={mockBrowserFields}
           filteredBrowserFields={mockBrowserFields}
           width={CATEGORY_PANE_WIDTH}
-          isLoading={false}
           onCategorySelected={onCategorySelected}
           onUpdateColumns={jest.fn()}
           selectedCategoryId={selectedCategoryId}
           timelineId={timelineId}
         />
-      </div>
+      </ThemeProvider>
     );
 
     wrapper

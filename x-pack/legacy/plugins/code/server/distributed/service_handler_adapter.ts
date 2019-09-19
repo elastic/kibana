@@ -23,4 +23,6 @@ export interface ServiceHandlerAdapter {
     serviceHandler: ServiceHandlerFor<DEF> | null,
     options: ServiceRegisterOptions
   ): ServiceMethodMap<DEF>;
+  start(): Promise<void>;
+  stop(): Promise<void>;
 }

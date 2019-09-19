@@ -17,19 +17,20 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visFactory } from '../../../ui/public/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { PieOptions } from './editors/pie';
+import { PieOptions } from './components/options';
+import { vislibVisController } from './controller';
 
-export default function HistogramVisType(Private) {
-  const VisFactory = Private(VisFactoryProvider);
+export default function HistogramVisType() {
 
-  return VisFactory.createVislibVisualization({
+  return visFactory.createBaseVisualization({
     name: 'pie',
     title: i18n.translate('kbnVislibVisTypes.pie.pieTitle', { defaultMessage: 'Pie' }),
     icon: 'visPie',
     description: i18n.translate('kbnVislibVisTypes.pie.pieDescription', { defaultMessage: 'Compare parts of a whole' }),
+    visualization: vislibVisController,
     visConfig: {
       defaults: {
         type: 'pie',
@@ -44,9 +45,6 @@ export default function HistogramVisType(Private) {
           truncate: 100
         }
       },
-    },
-    events: {
-      brush: { disabled: true },
     },
     editorConfig: {
       collections: {

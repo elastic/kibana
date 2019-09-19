@@ -13,7 +13,6 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import {
   apolloClientObservable,
-  mockFrameworks,
   mockIndexPattern,
   mockGlobalState,
   TestProviders,
@@ -22,7 +21,7 @@ import { createStore, hostsModel, State } from '../../../../store';
 
 import { HostsTable } from './index';
 import { mockData } from './mock';
-import { KibanaConfigContext } from '../../../../lib/adapters/framework/kibana_framework_adapter';
+import { HostsTableType } from '../../../../store/hosts/model';
 
 describe('Hosts Table', () => {
   const loadPage = jest.fn();
@@ -38,23 +37,18 @@ describe('Hosts Table', () => {
     test('it renders the default Hosts table', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <KibanaConfigContext.Provider value={mockFrameworks.default_UTC}>
-            <HostsTable
-              data={mockData.Hosts.edges}
-              id="hostsQuery"
-              indexPattern={mockIndexPattern}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
-              loading={false}
-              loadPage={loadPage}
-              showMorePagesIndicator={getOr(
-                false,
-                'showMorePagesIndicator',
-                mockData.Hosts.pageInfo
-              )}
-              totalCount={mockData.Hosts.totalCount}
-              type={hostsModel.HostsType.page}
-            />
-          </KibanaConfigContext.Provider>
+          <HostsTable
+            data={mockData.Hosts.edges}
+            id="hostsQuery"
+            isInspect={false}
+            indexPattern={mockIndexPattern}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.Hosts.pageInfo)}
+            totalCount={mockData.Hosts.totalCount}
+            type={hostsModel.HostsType.page}
+          />
         </ReduxStoreProvider>
       );
 
@@ -67,6 +61,7 @@ describe('Hosts Table', () => {
           <TestProviders store={store}>
             <HostsTable
               id="hostsQuery"
+              isInspect={false}
               indexPattern={mockIndexPattern}
               loading={false}
               data={mockData.Hosts.edges}
@@ -91,6 +86,7 @@ describe('Hosts Table', () => {
               <HostsTable
                 id="hostsQuery"
                 indexPattern={mockIndexPattern}
+                isInspect={false}
                 loading={false}
                 data={mockData.Hosts.edges}
                 totalCount={mockData.Hosts.totalCount}
@@ -108,7 +104,7 @@ describe('Hosts Table', () => {
         );
       });
       test('Initial value of the store', () => {
-        expect(store.getState().hosts.page.queries.hosts).toEqual({
+        expect(store.getState().hosts.page.queries[HostsTableType.hosts]).toEqual({
           activePage: 0,
           direction: 'desc',
           sortField: 'lastSeen',
@@ -136,7 +132,7 @@ describe('Hosts Table', () => {
 
         wrapper.update();
 
-        expect(store.getState().hosts.page.queries.hosts).toEqual({
+        expect(store.getState().hosts.page.queries[HostsTableType.hosts]).toEqual({
           activePage: 0,
           direction: 'asc',
           sortField: 'hostName',

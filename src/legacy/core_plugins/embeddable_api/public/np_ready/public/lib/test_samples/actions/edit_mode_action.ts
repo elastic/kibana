@@ -17,27 +17,21 @@
  * under the License.
  */
 
+import { createAction } from '../../../../../../../../../plugins/ui_actions/public';
 import { ViewMode } from '../../types';
-import { Action, ActionContext } from '../../actions';
+import { IEmbeddable } from '../../embeddables';
 
 export const EDIT_MODE_ACTION = 'EDIT_MODE_ACTION';
 
-export class EditModeAction extends Action {
-  public readonly type = EDIT_MODE_ACTION;
+interface ActionContext {
+  embeddable: IEmbeddable;
+}
 
-  constructor() {
-    super(EDIT_MODE_ACTION);
-  }
-
-  getDisplayName() {
-    return `I should only show up in edit mode`;
-  }
-
-  async isCompatible(context: ActionContext) {
-    return context.embeddable.getInput().viewMode === ViewMode.EDIT;
-  }
-
-  execute() {
-    return;
-  }
+export function createEditModeAction() {
+  return createAction<ActionContext>({
+    type: EDIT_MODE_ACTION,
+    getDisplayName: () => 'I only show up in edit mode',
+    isCompatible: async context => context.embeddable.getInput().viewMode === ViewMode.EDIT,
+    execute: async () => {},
+  });
 }

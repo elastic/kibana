@@ -11,8 +11,8 @@ jest.mock('ui/vis/editors/default/schemas', () => ({
   Schemas: function () {}
 }));
 jest.mock('../../kibana_services', () => {});
-jest.mock('ui/vis/agg_configs', () => {});
-jest.mock('ui/timefilter/timefilter', () => {});
+jest.mock('ui/agg_types', () => {});
+jest.mock('ui/timefilter', () => {});
 
 const indexPatternTitle = 'myIndex';
 const termFieldName = 'myTermField';

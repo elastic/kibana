@@ -18,6 +18,7 @@ export function getRoute(server: Hapi.Server) {
     method: 'GET',
     path: `/api/alert/{id}`,
     options: {
+      tags: ['access:alerting-read'],
       validate: {
         params: Joi.object()
           .keys({

@@ -61,7 +61,6 @@ export const getFieldItems = ({
   categoryId,
   columnHeaders,
   highlight = '',
-  isLoading,
   onUpdateColumns,
   timelineId,
   toggleColumn,
@@ -71,7 +70,6 @@ export const getFieldItems = ({
   categoryId: string;
   columnHeaders: ColumnHeader[];
   highlight?: string;
-  isLoading: boolean;
   timelineId: string;
   toggleColumn: (column: ColumnHeader) => void;
   onUpdateColumns: OnUpdateColumns;
@@ -87,15 +85,15 @@ export const getFieldItems = ({
     field: (
       <DroppableWrapper
         droppableId={getDroppableId(
-          `field-browser-field-${categoryId}-${field.name}-${timelineId}`
+          `field-browser-field-items-field-droppable-wrapper-${timelineId}-${categoryId}-${field.name}`
         )}
-        key={`${categoryId}-${field.name}-${timelineId}`}
+        key={`field-browser-field-items-field-droppable-wrapper-${timelineId}-${categoryId}-${field.name}`}
         isDropDisabled={true}
         type={DRAG_TYPE_FIELD}
       >
         <Draggable
           draggableId={getDraggableFieldId({
-            contextId: `field-browser-category-${categoryId}-field-${field.name}-${timelineId}`,
+            contextId: `field-browser-field-items-field-draggable-${timelineId}-${categoryId}-${field.name}`,
             fieldId: field.name || '',
           })}
           index={0}
@@ -148,7 +146,6 @@ export const getFieldItems = ({
                       })}
                       fieldId={field.name || ''}
                       highlight={highlight}
-                      isLoading={isLoading}
                       onUpdateColumns={onUpdateColumns}
                     />
                   </EuiFlexItem>
@@ -183,7 +180,7 @@ export const getFieldColumns = () => [
     name: i18n.DESCRIPTION,
     render: (description: string) => (
       <EuiToolTip position="top" content={description}>
-        <TruncatableText size="s" width="390px">
+        <TruncatableText size="xs" width="390px">
           {description}
         </TruncatableText>
       </EuiToolTip>

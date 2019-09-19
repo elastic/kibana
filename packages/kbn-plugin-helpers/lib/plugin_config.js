@@ -39,8 +39,9 @@ module.exports = function(root) {
   const kibanaExtraDir = resolve(root, '../../kibana');
   const kibanaPluginsDir = resolve(root, '../../');
   const isPluginOnKibanaExtra = pluginPackageJsonPath.includes(kibanaExtraDir);
+  const isPluginXpack = pkg.name === 'x-pack';
 
-  if (isPluginOnKibanaExtra) {
+  if (isPluginOnKibanaExtra && !isPluginXpack) {
     console.warn(
       `In the future we will disable ../kibana-extra/{pluginName}. You should move your plugin ${pkg.name} as soon as possible to ./plugins/{pluginName}`
     );
@@ -51,7 +52,7 @@ module.exports = function(root) {
   return Object.assign(
     {
       root: root,
-      kibanaRoot: pkg.name === 'x-pack' ? resolve(root, '..') : kibanaRootWhenNotXpackPlugin,
+      kibanaRoot: isPluginXpack ? resolve(root, '..') : kibanaRootWhenNotXpackPlugin,
       serverTestPatterns: ['server/**/__tests__/**/*.js'],
       buildSourcePatterns: buildSourcePatterns,
       skipInstallDependencies: false,

@@ -18,4 +18,8 @@ export class CodeNodeResourceLocator implements ResourceLocator {
   isResourceLocal(resource: string): Promise<boolean> {
     return Promise.resolve(false);
   }
+
+  allocate(req: Request, resource: string): Promise<Endpoint | undefined> {
+    return this.locate(req, resource);
+  }
 }

@@ -21,15 +21,12 @@ import React from 'react';
 import { EuiLink, EuiSpacer, EuiText, EuiScreenReaderOnly } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { TextInputOption } from '../../../kbn_vislib_vis_types/public/controls/text_input';
-import { TileMapVisParams } from '../types';
+import { TextInputOption } from '../../../kbn_vislib_vis_types/public/components';
+import { WMSOptions } from '../types';
 
 interface WmsInternalOptions {
-  wms: TileMapVisParams['wms'];
-  setValue: <T extends keyof TileMapVisParams['wms']>(
-    paramName: T,
-    value: TileMapVisParams['wms'][T]
-  ) => void;
+  wms: WMSOptions;
+  setValue: <T extends keyof WMSOptions>(paramName: T, value: WMSOptions[T]) => void;
 }
 
 function WmsInternalOptions({ wms, setValue }: WmsInternalOptions) {
@@ -53,9 +50,9 @@ function WmsInternalOptions({ wms, setValue }: WmsInternalOptions) {
     </EuiScreenReaderOnly>
   );
 
-  const setOptions = <T extends keyof TileMapVisParams['wms']['options']>(
+  const setOptions = <T extends keyof WMSOptions['options']>(
     paramName: T,
-    value: TileMapVisParams['wms']['options'][T]
+    value: WMSOptions['options'][T]
   ) =>
     setValue('options', {
       ...wms.options,

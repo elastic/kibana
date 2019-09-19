@@ -35,6 +35,10 @@ export class QueryService {
     };
   }
 
+  public start() {
+    // nothing to do here yet
+  }
+
   public stop() {
     // nothing to do here yet
   }
@@ -43,4 +47,4 @@ export class QueryService {
 /** @public */
 export type QuerySetup = ReturnType<QueryService['setup']>;
 
-export { Query, QueryBar, QueryBarInput } from './query_bar';
+export * from './query_bar';

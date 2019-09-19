@@ -26,7 +26,8 @@ interface Response {
 export function privilegesProvider(
   callWithRequest: callWithRequestType,
   xpackMainPlugin: XPackMainPlugin,
-  isMlEnabledInSpace: () => Promise<boolean>
+  isMlEnabledInSpace: () => Promise<boolean>,
+  ignoreSpaces: boolean = false
 ) {
   const { isUpgradeInProgress } = upgradeCheckProvider(callWithRequest);
   async function getPrivileges(): Promise<Response> {
@@ -47,7 +48,7 @@ export function privilegesProvider(
       ? setFullActionPrivileges
       : setBasicActionPrivileges;
 
-    if (mlFeatureEnabledInSpace === false) {
+    if (mlFeatureEnabledInSpace === false && ignoreSpaces === false) {
       // if ML isn't enabled in the current space,
       // return with the default privileges (all false)
       return {

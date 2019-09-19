@@ -13,7 +13,9 @@ type DistributionBucketResponse = PromiseReturnType<typeof bucketFetcher>;
 
 export type IBucket = ReturnType<typeof getBucket>;
 function getBucket(
-  bucket: DistributionBucketResponse['aggregations']['distribution']['buckets'][0]
+  bucket: Required<
+    DistributionBucketResponse
+  >['aggregations']['distribution']['buckets'][0]
 ) {
   const sampleSource = idx(bucket, _ => _.sample.hits.hits[0]._source) as
     | Transaction
@@ -32,7 +34,9 @@ function getBucket(
 }
 
 export function bucketTransformer(response: DistributionBucketResponse) {
-  const buckets = response.aggregations.distribution.buckets.map(getBucket);
+  const buckets = (
+    idx(response.aggregations, _ => _.distribution.buckets) || []
+  ).map(getBucket);
 
   return {
     totalHits: response.hits.total,

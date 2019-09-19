@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment, FC } from 'react';
-import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { AggFieldPair, SplitField } from '../../../../../../../../common/types/fields';
 import { ChartSettings } from '../../../charts/common/settings';
@@ -29,6 +29,7 @@ interface ChartGridProps {
   deleteDetector?: (index: number) => void;
   jobType: JOB_TYPE;
   fieldValuesPerDetector: DetectorFieldValues;
+  loading?: boolean;
 }
 
 export const ChartGrid: FC<ChartGridProps> = ({
@@ -41,47 +42,47 @@ export const ChartGrid: FC<ChartGridProps> = ({
   deleteDetector,
   jobType,
   fieldValuesPerDetector,
+  loading = false,
 }) => {
   const animateSplit = useAnimateSplit();
 
   return (
     <EuiFlexGrid columns={chartSettings.cols}>
       {aggFieldPairList.map((af, i) => (
-        <EuiFlexItem key={i}>
-          {lineChartsData[i] !== undefined && (
-            <Fragment>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <DetectorTitle
-                    index={i}
-                    agg={aggFieldPairList[i].agg}
-                    field={aggFieldPairList[i].field}
-                    splitField={splitField}
-                    deleteDetector={deleteDetector}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
+        <EuiFlexItem key={i} data-test-subj={`detector ${i}`}>
+          <Fragment>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <DetectorTitle
+                  index={i}
+                  agg={aggFieldPairList[i].agg}
+                  field={aggFieldPairList[i].field}
+                  byField={aggFieldPairList[i].by}
+                  deleteDetector={deleteDetector}
+                >
                   {deleteDetector !== undefined && <ByFieldSelector detectorIndex={i} />}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <SplitCards
-                fieldValues={fieldValuesPerDetector[i] || []}
-                splitField={splitField}
-                numberOfDetectors={aggFieldPairList.length}
-                jobType={jobType}
-                animate={animateSplit}
-              >
-                <AnomalyChart
-                  chartType={CHART_TYPE.SCATTER}
-                  chartData={lineChartsData[i]}
-                  modelData={modelData[i]}
-                  anomalyData={anomalyData[i]}
-                  height={chartSettings.height}
-                  width={chartSettings.width}
-                />
-              </SplitCards>
-            </Fragment>
-          )}
+                </DetectorTitle>
+                {jobType === JOB_TYPE.POPULATION && <EuiSpacer size="s" />}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <SplitCards
+              fieldValues={fieldValuesPerDetector[i] || []}
+              splitField={splitField}
+              numberOfDetectors={aggFieldPairList.length}
+              jobType={jobType}
+              animate={animateSplit}
+            >
+              <AnomalyChart
+                chartType={CHART_TYPE.SCATTER}
+                chartData={lineChartsData[i]}
+                modelData={modelData[i]}
+                anomalyData={anomalyData[i]}
+                height={chartSettings.height}
+                width={chartSettings.width}
+                loading={loading}
+              />
+            </SplitCards>
+          </Fragment>
         </EuiFlexItem>
       ))}
     </EuiFlexGrid>

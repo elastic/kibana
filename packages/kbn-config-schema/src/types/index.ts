@@ -26,7 +26,6 @@ export { ConditionalType, ConditionalTypeValue } from './conditional_type';
 export { DurationOptions, DurationType } from './duration_type';
 export { LiteralType } from './literal_type';
 export { MaybeType } from './maybe_type';
-export { NullableType } from './nullable_type';
 export { MapOfOptions, MapOfType } from './map_type';
 export { NumberOptions, NumberType } from './number_type';
 export { ObjectType, ObjectTypeOptions, Props, TypeOf } from './object_type';

@@ -5,10 +5,10 @@
  */
 
 import { useMemo } from 'react';
-import { getWaterfall } from '../components/app/TransactionDetails/Transaction/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
-import { loadTrace } from '../services/rest/apm/traces';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
+import { callApmApi } from '../services/rest/callApmApi';
+import { getWaterfall } from '../components/app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
 const INITIAL_DATA = {
   root: undefined,
@@ -20,7 +20,16 @@ export function useWaterfall(urlParams: IUrlParams) {
   const { traceId, start, end, transactionId } = urlParams;
   const { data = INITIAL_DATA, status, error } = useFetcher(() => {
     if (traceId && start && end) {
-      return loadTrace({ traceId, start, end });
+      return callApmApi({
+        pathname: '/api/apm/traces/{traceId}',
+        params: {
+          path: { traceId },
+          query: {
+            start,
+            end
+          }
+        }
+      });
     }
   }, [traceId, start, end]);
 
@@ -29,5 +38,5 @@ export function useWaterfall(urlParams: IUrlParams) {
     transactionId
   ]);
 
-  return { data: waterfall, status, error, exceedsMax: data.trace.exceedsMax };
+  return { waterfall, status, error, exceedsMax: data.trace.exceedsMax };
 }

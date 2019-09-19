@@ -9,7 +9,6 @@ import {
   EuiFacetGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiTitle,
   EuiToken,
 } from '@elastic/eui';
@@ -18,7 +17,6 @@ import React from 'react';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { SearchScope } from '../../../model';
-import { ScopeTabs } from './scope_tabs';
 
 interface Props {
   query: string;
@@ -32,87 +30,51 @@ interface Props {
 }
 
 export class SideBar extends React.PureComponent<Props> {
+  voidFunc = () => void 0;
+
+  renderLangFacets = () => {
+    return this.props.langFacets.map((item, index) => {
+      const isSelected = this.props.languages && this.props.languages.has(item.name);
+      return (
+        <EuiFacetButton
+          className="codeFilter__item"
+          key={`langstats${index}`}
+          onClick={this.props.onLanguageFilterToggled(item.name)}
+          quantity={item.value}
+          isSelected={isSelected}
+          data-test-subj="codeSearchLanguageFilterItem"
+          buttonRef={this.voidFunc}
+        >
+          {item.name}
+        </EuiFacetButton>
+      );
+    });
+  };
+
+  renderRepoFacets = () => {
+    return this.props.repoFacets.map((item, index) => {
+      const isSelected = !!this.props.repositories && this.props.repositories.has(item.name);
+      return (
+        <EuiFacetButton
+          className="codeFilter__item"
+          key={`repostats${index}`}
+          onClick={this.props.onRepositoryFilterToggled(item.name)}
+          quantity={item.value}
+          isSelected={isSelected}
+          buttonRef={this.voidFunc}
+        >
+          {RepositoryUtils.repoNameFromUri(item.name)}
+        </EuiFacetButton>
+      );
+    });
+  };
+
   public render() {
-    const { languages, langFacets, repoFacets, repositories } = this.props;
-    const repoStatsComp = repoFacets.map((item, index) => {
-      if (!!repositories && repositories.has(item.name)) {
-        return (
-          <EuiFacetButton
-            className="codeFilter__item"
-            key={`repostats${index}`}
-            onClick={this.props.onRepositoryFilterToggled(item.name)}
-            quantity={item.value}
-            isSelected={true}
-            buttonRef={() => {
-              /* nothing */
-            }}
-          >
-            {RepositoryUtils.repoNameFromUri(item.name)}
-          </EuiFacetButton>
-        );
-      } else {
-        return (
-          <EuiFacetButton
-            className="codeFilter__item"
-            key={`repostats${index}`}
-            onClick={this.props.onRepositoryFilterToggled(item.name)}
-            quantity={item.value}
-            buttonRef={() => {
-              /* nothing */
-            }}
-          >
-            {RepositoryUtils.repoNameFromUri(item.name)}
-          </EuiFacetButton>
-        );
-      }
-    });
-
-    const langStatsComp = langFacets.map((item, index) => {
-      if (languages && languages.has(item.name)) {
-        return (
-          <EuiFacetButton
-            className="codeFilter__item"
-            key={`langstats${index}`}
-            onClick={this.props.onLanguageFilterToggled(item.name)}
-            quantity={item.value}
-            isSelected={true}
-            data-test-subj="codeSearchLanguageFilterItem"
-            buttonRef={() => {
-              /* nothing */
-            }}
-          >
-            {item.name}
-          </EuiFacetButton>
-        );
-      } else {
-        return (
-          <EuiFacetButton
-            className="codeFilter__item"
-            key={`langstats${index}`}
-            onClick={this.props.onLanguageFilterToggled(item.name)}
-            quantity={item.value}
-            data-test-subj="codeSearchLanguageFilterItem"
-            buttonRef={() => {
-              /* nothing */
-            }}
-          >
-            {item.name}
-          </EuiFacetButton>
-        );
-      }
-    });
-
     return (
       <div className="codeSidebar__container">
-        <ScopeTabs query={this.props.query} scope={this.props.scope} />
-        <div className="codeFilter__group">
-          <EuiFlexGroup
-            className="codeFilter__title"
-            gutterSize="s"
-            alignItems="center"
-            style={{ marginBottom: '.5rem' }}
-          >
-            <EuiFlexItem grow={false}>
+        <div className="codeFilter__groups">
+          <EuiFlexGroup className="codeFilter__group" gutterSize="none" alignItems="center">
+            <EuiFlexItem grow={false} className="codeFilter__group-icon">
               <EuiToken iconType="tokenRepo" />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -126,15 +88,9 @@ export class SideBar extends React.PureComponent<Props> {
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiFacetGroup>{repoStatsComp}</EuiFacetGroup>
-          <EuiSpacer />
-          <EuiFlexGroup
-            className="codeFilter__title"
-            gutterSize="s"
-            alignItems="center"
-            style={{ marginBottom: '.5rem' }}
-          >
-            <EuiFlexItem grow={false}>
+          <EuiFacetGroup className="codeFilter__group">{this.renderRepoFacets()}</EuiFacetGroup>
+          <EuiFlexGroup className="codeFilter__group" gutterSize="none" alignItems="center">
+            <EuiFlexItem grow={false} className="codeFilter__group-icon">
               <EuiToken
                 iconType="tokenElement"
                 displayOptions={{ color: 'tokenTint07', shape: 'rectangle', fill: true }}
@@ -151,8 +107,11 @@ export class SideBar extends React.PureComponent<Props> {
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiFacetGroup data-test-subj="codeSearchLanguageFilterList">
-            {langStatsComp}
+          <EuiFacetGroup
+            className="codeFilter__group"
+            data-test-subj="codeSearchLanguageFilterList"
+          >
+            {this.renderLangFacets()}
           </EuiFacetGroup>
         </div>
       </div>

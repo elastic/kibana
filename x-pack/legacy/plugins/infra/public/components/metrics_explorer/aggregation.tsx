@@ -45,7 +45,7 @@ export const MetricsExplorerAggregationPicker = injectI18n(({ intl, options, onC
     }),
     [MetricsExplorerAggregation.count]: intl.formatMessage({
       id: 'xpack.infra.metricsExplorer.aggregationLables.count',
-      defaultMessage: 'Document Count',
+      defaultMessage: 'Document count',
     }),
   };
 

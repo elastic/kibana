@@ -17,6 +17,8 @@ import { createStore, networkModel, State } from '../../../../store';
 import { NetworkDnsTable } from '.';
 import { mockData } from './mock';
 
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+
 describe('NetworkTopNFlow Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
@@ -35,6 +37,7 @@ describe('NetworkTopNFlow Table Component', () => {
             data={mockData.NetworkDns.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkDns.pageInfo)}
             id="dns"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -61,6 +64,7 @@ describe('NetworkTopNFlow Table Component', () => {
               data={mockData.NetworkDns.edges}
               fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkDns.pageInfo)}
               id="dns"
+              isInspect={false}
               loading={false}
               loadPage={loadPage}
               showMorePagesIndicator={getOr(

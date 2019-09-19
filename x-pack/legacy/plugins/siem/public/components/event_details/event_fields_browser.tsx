@@ -5,12 +5,8 @@
  */
 
 import { sortBy } from 'lodash';
-import {
-  // @ts-ignore
-  EuiInMemoryTable,
-} from '@elastic/eui';
+import { EuiInMemoryTable } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { BrowserFields, getAllFieldsByName } from '../../containers/source';
@@ -25,47 +21,38 @@ interface Props {
   columnHeaders: ColumnHeader[];
   data: DetailItem[];
   eventId: string;
-  isLoading: boolean;
   onUpdateColumns: OnUpdateColumns;
   timelineId: string;
   toggleColumn: (column: ColumnHeader) => void;
 }
 
 /** Renders a table view or JSON view of the `ECS` `data` */
-export const EventFieldsBrowser = pure<Props>(
-  ({
-    browserFields,
-    columnHeaders,
-    data,
-    eventId,
-    isLoading,
-    onUpdateColumns,
-    timelineId,
-    toggleColumn,
-  }) => {
+export const EventFieldsBrowser = React.memo<Props>(
+  ({ browserFields, columnHeaders, data, eventId, onUpdateColumns, timelineId, toggleColumn }) => {
     const fieldsByName = getAllFieldsByName(browserFields);
     return (
-      <EuiInMemoryTable
-        items={sortBy(data, ['field']).map(item => {
-          return {
-            ...item,
-            ...fieldsByName[item.field],
-            valuesConcatenated: item.values != null ? item.values.join() : '',
-          };
-        })}
-        columns={getColumns({
-          browserFields,
-          columnHeaders,
-          eventId,
-          isLoading,
-          onUpdateColumns,
-          timelineId,
-          toggleColumn,
-        })}
-        pagination={false}
-        search={search}
-        sorting={true}
-      />
+      <div className="euiTable--compressed">
+        <EuiInMemoryTable
+          items={sortBy(data, ['field']).map(item => {
+            return {
+              ...item,
+              ...fieldsByName[item.field],
+              valuesConcatenated: item.values != null ? item.values.join() : '',
+            };
+          })}
+          columns={getColumns({
+            browserFields,
+            columnHeaders,
+            eventId,
+            onUpdateColumns,
+            contextId: timelineId,
+            toggleColumn,
+          })}
+          pagination={false}
+          search={search}
+          sorting={true}
+        />
+      </div>
     );
   }
 );

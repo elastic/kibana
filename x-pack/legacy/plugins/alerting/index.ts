@@ -15,7 +15,7 @@ export function alerting(kibana: any) {
   return new kibana.Plugin({
     id: 'alerting',
     configPrefix: 'xpack.alerting',
-    require: ['kibana', 'elasticsearch', 'actions', 'task_manager'],
+    require: ['kibana', 'elasticsearch', 'actions', 'task_manager', 'encrypted_saved_objects'],
     isEnabled(config: Legacy.KibanaConfig) {
       return (
         config.get('xpack.alerting.enabled') === true &&
@@ -27,7 +27,7 @@ export function alerting(kibana: any) {
     config(Joi: Root) {
       return Joi.object()
         .keys({
-          enabled: Joi.boolean().default(true),
+          enabled: Joi.boolean().default(false),
         })
         .default();
     },

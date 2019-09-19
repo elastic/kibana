@@ -12,15 +12,15 @@ import { i18n } from '@kbn/i18n';
 
 import { createPermissionFailureMessage } from '../../../../../privilege/check_privilege';
 
-import { useCreateAnalyticsForm } from '../../hooks/use_create_analytics_form';
+import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 
+import { CreateAnalyticsAdvancedEditor } from '../create_analytics_advanced_editor';
 import { CreateAnalyticsForm } from '../create_analytics_form';
 import { CreateAnalyticsModal } from '../create_analytics_modal';
 
-export const CreateAnalyticsButton: FC = () => {
-  const { state, actions } = useCreateAnalyticsForm();
-  const { disabled, isModalVisible } = state;
-  const { openModal } = actions;
+export const CreateAnalyticsButton: FC<CreateAnalyticsFormProps> = props => {
+  const { disabled, isAdvancedEditorEnabled, isModalVisible } = props.state;
+  const { openModal } = props.actions;
 
   const button = (
     <EuiButton
@@ -32,7 +32,7 @@ export const CreateAnalyticsButton: FC = () => {
       data-test-subj="mlDataFrameAnalyticsButtonCreate"
     >
       {i18n.translate('xpack.ml.dataframe.analyticsList.createDataFrameAnalyticsButton', {
-        defaultMessage: 'Create data frame analytics job',
+        defaultMessage: 'Create analytics job',
       })}
     </EuiButton>
   );
@@ -52,8 +52,9 @@ export const CreateAnalyticsButton: FC = () => {
     <Fragment>
       {button}
       {isModalVisible && (
-        <CreateAnalyticsModal actions={actions} formState={state}>
-          <CreateAnalyticsForm actions={actions} formState={state} />
+        <CreateAnalyticsModal {...props}>
+          {isAdvancedEditorEnabled === false && <CreateAnalyticsForm {...props} />}
+          {isAdvancedEditorEnabled === true && <CreateAnalyticsAdvancedEditor {...props} />}
         </CreateAnalyticsModal>
       )}
     </Fragment>

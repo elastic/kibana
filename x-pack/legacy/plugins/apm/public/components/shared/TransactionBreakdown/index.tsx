@@ -17,7 +17,7 @@ import { useTransactionBreakdown } from '../../../hooks/useTransactionBreakdown'
 import { TransactionBreakdownHeader } from './TransactionBreakdownHeader';
 import { TransactionBreakdownKpiList } from './TransactionBreakdownKpiList';
 import { TransactionBreakdownGraph } from './TransactionBreakdownGraph';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import { trackEvent } from '../../../../../infra/public/hooks/use_track_metric';
 
 const NoTransactionsTitle = styled.span`
   font-weight: bold;
@@ -33,8 +33,6 @@ const TransactionBreakdown: React.FC<{
     status,
     receivedDataDuringLifetime
   } = useTransactionBreakdown();
-
-  const loading = status === FETCH_STATUS.LOADING || status === undefined;
 
   const { kpis, timeseries } = data;
 
@@ -53,6 +51,11 @@ const TransactionBreakdown: React.FC<{
             hideShowChartButton={!hasHits}
             onToggleClick={() => {
               setShowChart(!showChart);
+              if (showChart) {
+                trackEvent({ app: 'apm', name: 'hide_breakdown_chart' });
+              } else {
+                trackEvent({ app: 'apm', name: 'show_breakdown_chart' });
+              }
             }}
           />
         </EuiFlexItem>
@@ -61,7 +64,7 @@ const TransactionBreakdown: React.FC<{
             <TransactionBreakdownKpiList kpis={kpis} />
           </EuiFlexItem>
         ) : (
-          !loading && (
+          status === 'success' && (
             <>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup justifyContent="center">

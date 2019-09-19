@@ -20,7 +20,7 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
-import { NoResults } from '../../errors';
+import { NoResults } from '../errors';
 import { Binder } from '../../binder';
 import { Layout } from './layout/layout';
 import { ChartTitle } from './chart_title';
@@ -156,7 +156,7 @@ export class Handler {
     chartSelection.each(function (chartData) {
       const chart = new self.ChartClass(self, this, chartData);
 
-      self.vis.activeEvents().forEach(function (event) {
+      self.vis.eventNames().forEach(function (event) {
         self.enable(event, chart);
       });
 

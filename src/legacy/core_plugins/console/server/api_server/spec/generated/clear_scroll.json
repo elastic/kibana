@@ -1,0 +1,12 @@
+{
+  "clear_scroll": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_search/scroll",
+      "_search/scroll/{scroll_id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-request-body.html#request-body-search-scroll"
+  }
+}

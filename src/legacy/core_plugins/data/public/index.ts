@@ -28,19 +28,40 @@ export function plugin() {
 
 /** @public types */
 export type DataSetup = DataSetup;
-export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';
 
-/** @public types */
-export { IndexPattern, IndexPatterns, StaticIndexPattern, Field } from './index_patterns';
-export { Query, QueryBar, QueryBarInput } from './query';
 export { FilterBar, ApplyFiltersPopover } from './filter';
-export { SearchBar, SearchBarProps } from './search';
+export {
+  Field,
+  FieldType,
+  IndexPattern,
+  IndexPatterns,
+  StaticIndexPattern,
+} from './index_patterns';
+export { Query, QueryBarInput } from './query';
+export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
+
+/** @public static code */
+export * from '../common';
 export {
   FilterManager,
   FilterStateManager,
   uniqFilters,
   onlyDisabledFiltersChanged,
 } from './filter/filter_manager';
-
-/** @public static code */
-export * from '../common';
+export {
+  CONTAINS_SPACES,
+  getFromSavedObject,
+  getRoutes,
+  isFilterable,
+  IndexPatternSelect,
+  validateIndexPattern,
+  ILLEGAL_CHARACTERS,
+  INDEX_PATTERN_ILLEGAL_CHARACTERS,
+  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
+  IndexPatternAlreadyExists,
+  IndexPatternMissingIndices,
+  NoDefaultIndexPattern,
+  NoDefinedIndexPatterns,
+  mockFields,
+  mockIndexPattern,
+} from './index_patterns';

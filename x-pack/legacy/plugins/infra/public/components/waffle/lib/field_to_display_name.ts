@@ -26,11 +26,11 @@ export const fieldToName = (field: string, intl: InjectedIntl) => {
     }),
     'cloud.availability_zone': intl.formatMessage({
       id: 'xpack.infra.groupByDisplayNames.availabilityZone',
-      defaultMessage: 'Availability Zone',
+      defaultMessage: 'Availability zone',
     }),
     'cloud.machine.type': intl.formatMessage({
       id: 'xpack.infra.groupByDisplayNames.machineType',
-      defaultMessage: 'Machine Type',
+      defaultMessage: 'Machine type',
     }),
     'cloud.project.id': intl.formatMessage({
       id: 'xpack.infra.groupByDisplayNames.projectID',
@@ -38,11 +38,11 @@ export const fieldToName = (field: string, intl: InjectedIntl) => {
     }),
     'cloud.provider': intl.formatMessage({
       id: 'xpack.infra.groupByDisplayNames.provider',
-      defaultMessage: 'Cloud Provider',
+      defaultMessage: 'Cloud provider',
     }),
     'service.type': intl.formatMessage({
       id: 'xpack.infra.groupByDisplayNames.serviceType',
-      defaultMessage: 'Service Type',
+      defaultMessage: 'Service type',
     }),
   };
   return LOOKUP[field] || field;

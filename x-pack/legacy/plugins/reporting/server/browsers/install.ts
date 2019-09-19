@@ -38,15 +38,16 @@ export async function installBrowser(
   }
 
   const binaryPath = path.join(installsPath, pkg.binaryRelativePath);
-  const rawChecksum = await md5(binaryPath).catch(() => '');
+  const binaryChecksum = await md5(binaryPath).catch(() => '');
 
-  if (rawChecksum !== pkg.rawChecksum) {
+  if (binaryChecksum !== pkg.binaryChecksum) {
     const archive = path.join(browser.paths.archivesPath, pkg.archiveFilename);
     logger.debug(`Extracting [${archive}] to [${binaryPath}]`);
     await extract(archive, installsPath);
     await chmod(binaryPath, '755');
   }
 
+  logger.debug(`Browser installed at ${binaryPath}`);
   return {
     binaryPath,
   };

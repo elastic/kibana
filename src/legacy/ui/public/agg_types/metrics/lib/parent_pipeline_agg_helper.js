@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { MetricAggParamEditor } from '../../controls/metric_agg';
-import { SubAggParamEditor } from '../../controls/sub_agg';
+import { MetricAggParamEditor } from '../../../vis/editors/default/controls/metric_agg';
+import { SubAggParamEditor } from '../../../vis/editors/default/controls/sub_agg';
 import _ from 'lodash';
-import { AggConfig } from '../../../vis/agg_config';
 import { Schemas } from '../../../vis/editors/default/schemas';
 import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
@@ -55,14 +54,8 @@ const parentPipelineAggHelper = {
       {
         name: 'customMetric',
         editorComponent: SubAggParamEditor,
-        type: AggConfig,
+        type: 'agg',
         default: null,
-        serialize: function (customMetric) {
-          return customMetric.toJSON();
-        },
-        deserialize: function (state, agg) {
-          return this.makeAgg(agg, state);
-        },
         makeAgg: function (termsAgg, state) {
           state = state || { type: 'count' };
           state.schema = metricAggSchema;
@@ -84,7 +77,7 @@ const parentPipelineAggHelper = {
     if (agg.params.customMetric) {
       subAgg = agg.params.customMetric;
     } else {
-      subAgg = agg.aggConfigs.byId[agg.params.metricAgg];
+      subAgg = agg.aggConfigs.byId(agg.params.metricAgg);
     }
     return subAgg.type.getFormat(subAgg);
   }

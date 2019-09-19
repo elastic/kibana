@@ -40,7 +40,7 @@ export function useFirstLastSeenHostQuery<TCache = object>(
   const [lastSeen, updateLastSeen] = useState(null);
   const [errorMessage, updateErrorMessage] = useState(null);
 
-  async function fetchFirstLastSeenHost() {
+  async function fetchFirstLastSeenHost(signal: AbortSignal) {
     updateLoading(true);
     return apolloClient
       .query<GetHostFirstLastSeenQuery.Query, GetHostFirstLastSeenQuery.Variables>({
@@ -51,6 +51,11 @@ export function useFirstLastSeenHostQuery<TCache = object>(
           hostName,
           defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
         },
+        context: {
+          fetchOptions: {
+            signal,
+          },
+        },
       })
       .then(
         result => {
@@ -58,24 +63,21 @@ export function useFirstLastSeenHostQuery<TCache = object>(
           updateFirstSeen(get('data.source.HostFirstLastSeen.firstSeen', result));
           updateLastSeen(get('data.source.HostFirstLastSeen.lastSeen', result));
           updateErrorMessage(null);
-          return result;
         },
         error => {
           updateLoading(false);
+          updateFirstSeen(null);
+          updateLastSeen(null);
           updateErrorMessage(error.message);
-          return error;
         }
       );
   }
 
   useEffect(() => {
-    try {
-      fetchFirstLastSeenHost();
-    } catch (err) {
-      updateFirstSeen(null);
-      updateLastSeen(null);
-      updateErrorMessage(err.toString());
-    }
+    const abortCtrl = new AbortController();
+    const signal = abortCtrl.signal;
+    fetchFirstLastSeenHost(signal);
+    return () => abortCtrl.abort();
   }, []);
 
   return { firstSeen, lastSeen, loading, errorMessage };

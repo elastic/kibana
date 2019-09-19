@@ -29,15 +29,18 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
   describe('visualize app', () => {
     before(async () => {
       log.debug('Starting visualize before method');
-      browser.setWindowSize(1280, 800);
+      await browser.setWindowSize(1280, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.loadIfNeeded('long_window_logstash');
       await esArchiver.load('visualize');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'logstash-*',
+        'format:bytes:defaultPattern': '0,0.[000]b',
+      });
     });
 
     describe('', function() {
-      this.tags('ciGroup9');
+      this.tags('ciGroup3');
 
       loadTestFile(require.resolve('./_embedding_chart'));
       loadTestFile(require.resolve('./_chart_types'));
@@ -47,7 +50,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('', function() {
-      this.tags('ciGroup10');
+      this.tags('ciGroup4');
 
       loadTestFile(require.resolve('./_inspector'));
       loadTestFile(require.resolve('./_experimental_vis'));
@@ -59,7 +62,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('', function() {
-      this.tags('ciGroup11');
+      this.tags('ciGroup5');
 
       loadTestFile(require.resolve('./_line_chart'));
       loadTestFile(require.resolve('./_pie_chart'));
@@ -73,7 +76,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('', function() {
-      this.tags('ciGroup12');
+      this.tags('ciGroup6');
 
       loadTestFile(require.resolve('./_tag_cloud'));
       loadTestFile(require.resolve('./_tile_map'));

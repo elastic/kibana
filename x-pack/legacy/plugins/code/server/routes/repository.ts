@@ -79,8 +79,13 @@ export function repositoryRoute(
           const payload = {
             url: repoUrl,
           };
-          const endpoint = await codeServices.locate(req, repoUrl);
-          await repositoryService.clone(endpoint, payload);
+          // before the repository is cloned, it doesn't exist in the cluster
+          // in this case, it should be allocated right away, otherwise it cannot be found in the cluster
+          const endpoint = await codeServices.allocate(req, repoUrl);
+          // the endpoint could be undefined, as we may not clone it here for the cluster mode implementation
+          if (endpoint) {
+            await repositoryService.clone(endpoint, payload);
+          }
           return repo;
         } catch (error2) {
           const msg = `Issue repository clone request for ${repoUrl} error`;
@@ -171,7 +176,7 @@ export function repositoryRoute(
 
         let indexStatus = null;
         try {
-          indexStatus = await repoObjectClient.getRepositoryLspIndexStatus(repoUri);
+          indexStatus = await repoObjectClient.getRepositoryIndexStatus(repoUri);
         } catch (error) {
           log.debug(`Get repository index status ${repoUri} error: ${error}`);
         }

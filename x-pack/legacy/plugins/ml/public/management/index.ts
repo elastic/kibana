@@ -15,9 +15,13 @@ import { management } from 'ui/management';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { i18n } from '@kbn/i18n';
 import { JOBS_LIST_PATH } from './management_urls';
+import { LICENSE_TYPE } from '../../common/constants/license';
 import 'plugins/ml/management/jobs_list';
 
-if (xpackInfo.get('features.ml.showLinks', false) === true) {
+if (
+  xpackInfo.get('features.ml.showLinks', false) === true &&
+  xpackInfo.get('features.ml.licenseType') === LICENSE_TYPE.FULL
+) {
   management.register('ml', {
     display: i18n.translate('xpack.ml.management.mlTitle', {
       defaultMessage: 'Machine Learning',

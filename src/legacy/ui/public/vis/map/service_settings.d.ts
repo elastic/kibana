@@ -25,6 +25,27 @@ export interface TmsLayer {
   attribution: string;
 }
 
+export interface FileLayer {
+  name: string;
+  origin: string;
+  id: string;
+  format: string | { type: string };
+  fields: FileLayerField[];
+}
+
+export interface FileLayerField {
+  name: string;
+  description: string;
+  type: string;
+}
+
+export interface VectorLayer extends FileLayer {
+  layerId: string;
+  isEMS: boolean;
+}
+
 export interface ServiceSettings {
+  getEMSHotLink(layer: FileLayer): Promise<string>;
   getTMSServices(): Promise<TmsLayer[]>;
+  getFileLayers(): Promise<FileLayer[]>;
 }

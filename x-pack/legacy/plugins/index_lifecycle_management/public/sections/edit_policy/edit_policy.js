@@ -111,7 +111,7 @@ export class EditPolicy extends Component {
     if (firstError) {
       toastNotifications.addDanger(
         i18n.translate('xpack.indexLifecycleMgmt.editPolicy.formErrorsMessage', {
-          defaultMessage: 'Please fix the  errors on this page.'
+          defaultMessage: 'Please fix the errors on this page.'
         })
       );
       const errorRowId = `${firstError.replace('.', '-')}-row`;
@@ -130,9 +130,11 @@ export class EditPolicy extends Component {
   showNodeDetailsFlyout = selectedNodeAttrsForDetails => {
     this.setState({ isShowingNodeDetailsFlyout: true, selectedNodeAttrsForDetails });
   };
-  showPolicyJsonFlyout = () => {
-    this.setState({ isShowingPolicyJsonFlyout: true });
+
+  togglePolicyJsonFlyout = () => {
+    this.setState(({ isShowingPolicyJsonFlyout }) => ({ isShowingPolicyJsonFlyout: !isShowingPolicyJsonFlyout }));
   };
+
   render() {
     const {
       selectedPolicy,
@@ -145,7 +147,7 @@ export class EditPolicy extends Component {
       originalPolicyName,
     } = this.props;
     const selectedPolicyName = selectedPolicy.name;
-    const { isShowingErrors } = this.state;
+    const { isShowingErrors, isShowingPolicyJsonFlyout } = this.state;
 
     return (
       <EuiPage>
@@ -167,6 +169,7 @@ export class EditPolicy extends Component {
                   })}
               </h4>
             </EuiTitle>
+
             <div className="euiAnimateContentLoad">
               <EuiSpacer size="xs" />
               <EuiText color="subdued">
@@ -188,7 +191,9 @@ export class EditPolicy extends Component {
                   />
                 </p>
               </EuiText>
+
               <EuiSpacer />
+
               <Fragment>
                 {isNewPolicy ? null : (
                   <Fragment>
@@ -212,6 +217,7 @@ export class EditPolicy extends Component {
                       </EuiText>
                       <EuiSpacer />
                     </Fragment>
+
                     <EuiFormRow>
                       <EuiSwitch
                         data-test-subj="saveAsNewSwitch"
@@ -232,6 +238,7 @@ export class EditPolicy extends Component {
                     </EuiFormRow>
                   </Fragment>
                 )}
+
                 {saveAsNewPolicy || isNewPolicy ? (
                   <EuiDescribedFormGroup
                     title={
@@ -273,30 +280,40 @@ export class EditPolicy extends Component {
                   </EuiDescribedFormGroup>
                 ) : null}
               </Fragment>
+
               <EuiSpacer />
+
               <HotPhase
                 selectedPolicy={selectedPolicy}
                 errors={errors[PHASE_HOT]}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_HOT], false)}
               />
+
               <EuiHorizontalRule />
+
               <WarmPhase
                 errors={errors[PHASE_WARM]}
                 showNodeDetailsFlyout={this.showNodeDetailsFlyout}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_WARM], false)}
               />
+
               <EuiHorizontalRule />
+
               <ColdPhase
                 errors={errors[PHASE_COLD]}
                 showNodeDetailsFlyout={this.showNodeDetailsFlyout}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_COLD], false)}
               />
+
               <EuiHorizontalRule />
+
               <DeletePhase
                 errors={errors[PHASE_DELETE]}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_DELETE], false)}
               />
+
               <EuiHorizontalRule />
+
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup>
@@ -322,6 +339,7 @@ export class EditPolicy extends Component {
                         )}
                       </EuiButton>
                     </EuiFlexItem>
+
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty data-test-subj="cancelTestPolicy" onClick={this.backToPolicyList}>
                         <FormattedMessage
@@ -332,21 +350,31 @@ export class EditPolicy extends Component {
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
+
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={this.showPolicyJsonFlyout}>
-                    <FormattedMessage
-                      id="xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButton"
-                      defaultMessage="Show request"
-                    />
+                  <EuiButtonEmpty onClick={this.togglePolicyJsonFlyout}>
+                    {isShowingPolicyJsonFlyout ? (
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.hidePolicyJsonButto"
+                        defaultMessage="Hide request"
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButto"
+                        defaultMessage="Show request"
+                      />
+                    )}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
+
               {this.state.isShowingNodeDetailsFlyout ? (
                 <NodeAttrsDetails
                   selectedNodeAttrs={this.state.selectedNodeAttrsForDetails}
                   close={() => this.setState({ isShowingNodeDetailsFlyout: false })}
                 />
               ) : null}
+
               {this.state.isShowingPolicyJsonFlyout ? (
                 <PolicyJsonFlyout
                   policyName={selectedPolicyName || ''}

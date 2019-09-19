@@ -19,23 +19,17 @@ import { setHttpClient } from '../../public/services/api';
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
-jest.mock('react-ace', () => {
-  const { PureComponent } = require('react');
-  return class extends PureComponent {
-    editor = {
-      textInput: {
-        getElement() {
-          return { removeAttribute() {}, addEventListener() {} };
-        }
-      }
-    };
-    render() {
-      return <div />;
-    }
-  };
-});
-jest.mock('brace/theme/textmate', () => 'brace/theme/textmate');
-jest.mock('brace/ext/language_tools', () => 'brace/ext/language_tools');
+
+jest.mock('ui/chrome', () => ({
+  breadcrumbs: { set: () => { } },
+  addBasePath: path => path || '/api/index_management',
+}));
+
+jest.mock('ui/index_patterns', () => ({
+  ILLEGAL_CHARACTERS: '',
+  CONTAINS_SPACES: '',
+  validateIndexPattern: () => { },
+}));
 
 setHttpClient(axios.create({ adapter: axiosXhrAdapter }));
 let server = null;

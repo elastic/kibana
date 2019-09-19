@@ -6,12 +6,10 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiColorPicker
-} from '@elastic/eui';
+import { EuiColorPicker } from '@elastic/eui';
 import { staticColorShape } from '../style_option_shapes';
 
-export function StaticColorSelection({ onChange, styleOptions }) {
+export function StaticColorSelection({ onChange, styleOptions, swatches }) {
   const onColorChange = color => {
     onChange({ color });
   };
@@ -20,11 +18,13 @@ export function StaticColorSelection({ onChange, styleOptions }) {
     <EuiColorPicker
       onChange={onColorChange}
       color={styleOptions.color}
+      swatches={swatches}
+      compressed
     />
   );
 }
 
 StaticColorSelection.propTypes = {
   styleOptions: staticColorShape.isRequired,
-  onChange: PropTypes.func.isRequired
+  onChange: PropTypes.func.isRequired,
 };

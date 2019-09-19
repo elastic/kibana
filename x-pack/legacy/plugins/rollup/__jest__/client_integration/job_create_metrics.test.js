@@ -7,21 +7,7 @@
 import { setupEnvironment, pageHelpers } from './helpers';
 
 jest.mock('ui/new_platform');
-
-jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
-  return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
-});
-
-jest.mock('ui/chrome', () => ({
-  addBasePath: () => '/api/rollup',
-  breadcrumbs: { set: () => {} },
-  getInjected: () => ({}),
-  getUiSettingsClient: () => ({}),
-  getSavedObjectsClient: () => ({}),
-}));
-
-jest.mock('ui/timefilter', () => {});
+jest.mock('ui/index_patterns');
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 
@@ -36,6 +22,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
   let getEuiStepsHorizontalActive;
   let goToStep;
   let table;
+  let metrics;
 
   beforeAll(() => {
     ({ server, httpRequestsMockHelpers } = setupEnvironment());
@@ -56,6 +43,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       getEuiStepsHorizontalActive,
       goToStep,
       table,
+      metrics,
     } = setup());
   });
 
@@ -175,6 +163,9 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       }
     };
 
+    const numericTypeMetrics = ['avg', 'max', 'min', 'sum', 'value_count'];
+    const dateTypeMetrics = ['max', 'min', 'value_count'];
+
     it('should have an empty field list', async () => {
       await goToStep(5);
 
@@ -189,7 +180,6 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       });
 
       it('should have "avg", "max", "min", "sum" & "value count" metrics for *numeric* fields', () => {
-        const numericTypeMetrics = ['avg', 'max', 'min', 'sum', 'value_count'];
         addFieldToList('numeric');
         numericTypeMetrics.forEach(type => {
           try {
@@ -203,11 +193,10 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         const { rows: [firstRow] } = table.getMetaData('rollupJobMetricsFieldList');
         const columnWithMetricsCheckboxes = 2;
         const metricsCheckboxes = firstRow.columns[columnWithMetricsCheckboxes].reactWrapper.find('input');
-        expect(metricsCheckboxes.length).toBe(numericTypeMetrics.length);
+        expect(metricsCheckboxes.length).toBe(numericTypeMetrics.length + 1 /* add one for select all */);
       });
 
       it('should have "max", "min", & "value count" metrics for *date* fields', () => {
-        const dateTypeMetrics = ['max', 'min', 'value_count'];
         addFieldToList('date');
 
         dateTypeMetrics.forEach(type => {
@@ -222,7 +211,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         const { rows: [firstRow] } = table.getMetaData('rollupJobMetricsFieldList');
         const columnWithMetricsCheckboxes = 2;
         const metricsCheckboxes = firstRow.columns[columnWithMetricsCheckboxes].reactWrapper.find('input');
-        expect(metricsCheckboxes.length).toBe(dateTypeMetrics.length);
+        expect(metricsCheckboxes.length).toBe(dateTypeMetrics.length + 1 /* add one for select all */);
       });
 
       it('should not allow to go to the next step if at least one metric type is not selected', () => {
@@ -247,11 +236,161 @@ describe('Create Rollup Job, step 5: Metrics', () => {
 
         const columnsFirstRow = fieldListRows[0].columns;
         // The last column is the eui "actions" column
-        const deleteButton = columnsFirstRow[columnsFirstRow.length - 1].reactWrapper.find('button');
+        const deleteButton = columnsFirstRow[columnsFirstRow.length - 1].reactWrapper.find('button').last();
         deleteButton.simulate('click');
 
         ({ rows: fieldListRows } = table.getMetaData('rollupJobMetricsFieldList'));
         expect(fieldListRows[0].columns[0].value).toEqual('No metrics fields added');
+      });
+    });
+
+    describe('when using multi-selectors', () => {
+      let getSelectAllInputForRow;
+      let getFieldChooserColumnForRow;
+      let getFieldListTableRows;
+
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields, dateFields });
+        await goToStep(5);
+        await addFieldToList('numeric');
+        await addFieldToList('date');
+        find('rollupJobSelectAllMetricsPopoverButton').simulate('click');
+        ({ getSelectAllInputForRow, getFieldChooserColumnForRow, getFieldListTableRows } = metrics);
+      });
+
+      const expectAllFieldChooserInputs = (fieldChooserColumn, expected) => {
+        const inputs = fieldChooserColumn.reactWrapper.find('input');
+        inputs.forEach((input) => {
+          expect(input.props().checked).toBe(expected);
+        });
+      };
+
+      it('should select all of the fields in a row',  async () => {
+        // The last column is the eui "actions" column
+        const selectAllCheckbox = getSelectAllInputForRow(0);
+        selectAllCheckbox.simulate('change', { checked: true });
+        const fieldChooserColumn = getFieldChooserColumnForRow(0);
+        expectAllFieldChooserInputs(fieldChooserColumn, true);
+      });
+
+      it('should deselect all of the fields in a row ',  async () => {
+        const selectAllCheckbox = getSelectAllInputForRow(0);
+        selectAllCheckbox.simulate('change', { checked: true });
+
+        let fieldChooserColumn = getFieldChooserColumnForRow(0);
+        expectAllFieldChooserInputs(fieldChooserColumn, true);
+
+        selectAllCheckbox.simulate('change', { checked: false });
+        fieldChooserColumn = getFieldChooserColumnForRow(0);
+        expectAllFieldChooserInputs(fieldChooserColumn, false);
+      });
+
+      it('should select all of the metric types across rows (column-wise)',  () => {
+        const selectAllAvgCheckbox = find('rollupJobMetricsSelectAllCheckbox-avg');
+        selectAllAvgCheckbox.first().simulate('change', { checked: true });
+
+        const rows = getFieldListTableRows();
+
+        rows
+          .filter((row) => {
+            const [, metricTypeCol ] = row.columns;
+            return metricTypeCol.value === 'numeric';
+          })
+          .forEach((row, idx) => {
+            const fieldChooser = getFieldChooserColumnForRow(idx);
+            fieldChooser.reactWrapper.find('input').forEach(input => {
+              const props = input.props();
+              if (props['data-test-subj'].endsWith('avg')) {
+                expect(props.checked).toBe(true);
+              } else {
+                expect(props.checked).toBe(false);
+              }
+            });
+          });
+      });
+
+      it('should deselect all of the metric types across rows (column-wise)',  () => {
+        const selectAllAvgCheckbox = find('rollupJobMetricsSelectAllCheckbox-avg');
+
+        // Select first, which adds metrics column-wise, and then de-select column-wise to ensure
+        // that we correctly remove/undo our adding action.
+        selectAllAvgCheckbox.last().simulate('change', { checked: true });
+        selectAllAvgCheckbox.last().simulate('change', { checked: false });
+
+        const rows = getFieldListTableRows();
+
+        rows.forEach((row, idx) => {
+          const [, metricTypeCol ] = row.columns;
+          if (metricTypeCol.value !== 'numeric') {
+            return;
+          }
+          const fieldChooser = getFieldChooserColumnForRow(idx);
+          fieldChooser.reactWrapper.find('input').forEach(input => {
+            expect(input.props().checked).toBe(false);
+          });
+        });
+      });
+
+      it('should correctly select across rows and columns',  async () => {
+        /**
+         * Tricky test case where we want to determine that the column-wise and row-wise
+         * selections are interacting correctly with each other.
+         *
+         * We will select avg (numeric) and max (numeric + date) to ensure that we are
+         * testing across metrics types too. The plan is:
+         *
+         * 1. Select all avg column-wise
+         * 2. Select all max column-wise
+         * 3. Select and deselect row-wise the first numeric metric row. Because some items will
+         *    have been selected by the previous column-wise selection we want to test that row-wise
+         *    select all followed by de-select can effectively undo the column-wise selections.
+         * 4. Expect the avg and max select all checkboxes to be unchecked
+         * 5. Select all on the last date metric row-wise
+         * 6. Select then deselect all max column-wise
+         * 7. Expect everything but all and max to be selected on the last date metric row
+         *
+         * Let's a go!
+         */
+
+        // 1.
+        find('rollupJobMetricsSelectAllCheckbox-avg').first().simulate('change', { checked: true });
+        // 2.
+        find('rollupJobMetricsSelectAllCheckbox-max').first().simulate('change', { checked: true });
+
+        const selectAllCheckbox = getSelectAllInputForRow(0);
+
+        // 3.
+        // Select all (which should check all checkboxes)
+        selectAllCheckbox.simulate('change', { checked: true });
+        // Deselect all (which should deselect all checkboxes)
+        selectAllCheckbox.simulate('change', { checked: false });
+
+        // 4.
+        expect(find('rollupJobMetricsSelectAllCheckbox-avg').first().props().checked).toBe(false);
+        expect(find('rollupJobMetricsSelectAllCheckbox-max').first().props().checked).toBe(false);
+
+        let rows = getFieldListTableRows();
+        // 5.
+        getSelectAllInputForRow(rows.length - 1).simulate('change', { checked: true });
+
+        // 6.
+        find('rollupJobMetricsSelectAllCheckbox-max').first().simulate('change', { checked: true });
+        find('rollupJobMetricsSelectAllCheckbox-max').first().simulate('change', { checked: false });
+
+        rows = getFieldListTableRows();
+        const lastRowFieldChooserColumn = getFieldChooserColumnForRow(rows.length - 1);
+        // 7.
+        lastRowFieldChooserColumn.reactWrapper.find('input').forEach((input) => {
+          const props = input.props();
+          if (
+            props['data-test-subj'].endsWith('max') ||
+            props['data-test-subj'].endsWith('All')
+          ) {
+            expect(props.checked).toBe(false);
+          } else {
+            expect(props.checked).toBe(true);
+          }
+        });
       });
     });
   });

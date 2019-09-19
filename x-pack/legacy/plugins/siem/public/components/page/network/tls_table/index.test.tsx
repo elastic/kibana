@@ -17,6 +17,8 @@ import { createStore, networkModel, State } from '../../../../store';
 import { TlsTable } from '.';
 import { mockTlsData } from './mock';
 
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+
 describe('Tls Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
@@ -35,6 +37,7 @@ describe('Tls Table Component', () => {
             data={mockTlsData.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockTlsData.pageInfo)}
             id="tls"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockTlsData.pageInfo)}
@@ -57,6 +60,7 @@ describe('Tls Table Component', () => {
               data={mockTlsData.edges}
               fakeTotalCount={getOr(50, 'fakeTotalCount', mockTlsData.pageInfo)}
               id="tls"
+              isInspect={false}
               loading={false}
               loadPage={loadPage}
               showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockTlsData.pageInfo)}

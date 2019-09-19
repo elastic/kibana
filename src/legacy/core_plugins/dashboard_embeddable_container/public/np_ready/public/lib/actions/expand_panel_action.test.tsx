@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isErrorEmbeddable, EmbeddableFactory, GetEmbeddableFactory } from '../embeddable_api';
+import { isErrorEmbeddable, EmbeddableFactory } from '../embeddable_api';
 import { ExpandPanelAction } from './expand_panel_action';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
@@ -30,29 +30,40 @@ import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
 } from '../../../../../../embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable';
+import { DashboardOptions } from '../embeddable/dashboard_container_factory';
 
-const __embeddableFactories = new Map<string, EmbeddableFactory>();
-__embeddableFactories.set(
+const embeddableFactories = new Map<string, EmbeddableFactory>();
+embeddableFactories.set(
   CONTACT_CARD_EMBEDDABLE,
   new ContactCardEmbeddableFactory({} as any, (() => null) as any, {} as any)
 );
-const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
 
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable;
 
 beforeEach(async () => {
-  container = new DashboardContainer(
-    getSampleDashboardInput({
-      panels: {
-        '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
-          explicitInput: { firstName: 'Sam', id: '123' },
-          type: CONTACT_CARD_EMBEDDABLE,
-        }),
-      },
-    }),
-    { getEmbeddableFactory } as any
-  );
+  const options: DashboardOptions = {
+    ExitFullScreenButton: () => null,
+    SavedObjectFinder: () => null,
+    application: {} as any,
+    embeddable: {
+      getEmbeddableFactory: (id: string) => embeddableFactories.get(id)!,
+    } as any,
+    inspector: {} as any,
+    notifications: {} as any,
+    overlays: {} as any,
+    savedObjectMetaData: {} as any,
+    uiActions: {} as any,
+  };
+  const input = getSampleDashboardInput({
+    panels: {
+      '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'Sam', id: '123' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+    },
+  });
+  container = new DashboardContainer(input, options);
 
   const contactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,

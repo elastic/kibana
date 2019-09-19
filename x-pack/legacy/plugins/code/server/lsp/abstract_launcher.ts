@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ChildProcess } from 'child_process';
-import fs from 'fs';
 import { ResponseError } from 'vscode-jsonrpc';
 import { LanguageServerStartFailed } from '../../common/lsp_error_codes';
 import { Logger } from '../log';
@@ -14,21 +12,20 @@ import { LoggerFactory } from '../utils/log_factory';
 import { ILanguageServerLauncher } from './language_server_launcher';
 import { LanguageServerProxy } from './proxy';
 import { RequestExpander } from './request_expander';
+import { ControlledProgram } from './process/controlled_program';
 
 let seqNo = 1;
-
-const OOM_SCORE_ADJ = 667;
-const OOM_ADJ = 10;
 
 export abstract class AbstractLauncher implements ILanguageServerLauncher {
   running: boolean = false;
   private currentPid: number = -1;
-  private child: ChildProcess | null = null;
+  private child: ControlledProgram | null = null;
   private startTime: number = -1;
   private proxyConnected: boolean = false;
   protected readonly log: Logger;
   private spawnTimes: number = 0;
   private launchReject?: (reason?: any) => void;
+  launchFailed: boolean = false;
   protected constructor(
     readonly name: string,
     readonly targetHost: string,
@@ -38,10 +35,9 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
     this.log = this.loggerFactory.getLogger([`${seqNo++}`, `${this.name}`, 'code']);
   }
 
-  public async launch(builtinWorkspace: boolean, maxWorkspace: number, installationPath: string) {
+  public async launch(builtinWorkspace: boolean, maxWorkspace: number) {
     const port = await this.getPort();
     const log: Logger = this.log;
-    let child: ChildProcess;
     const proxy = new LanguageServerProxy(port, this.targetHost, log);
     if (this.options.lsp.detach) {
       log.debug('Detach mode, expected language server launch externally');
@@ -52,29 +48,30 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
         this.running = false;
         if (!proxy.isClosed) {
           log.debug(`${this.name} language server disconnected, reconnecting`);
-          setTimeout(() => this.reconnect(proxy, installationPath), 1000);
+          setTimeout(() => this.reconnect(proxy), 1000);
         }
       });
     } else {
-      child = await this.doSpawnProcess(installationPath, port, log);
+      const child = await this.doSpawnProcess(port, log);
       this.onProcessExit(child, () => {
-        if (!proxy.isClosed) this.reconnect(proxy, installationPath);
+        if (!proxy.isClosed) this.reconnect(proxy);
       });
       proxy.onDisconnected(async () => {
         this.proxyConnected = false;
         if (!proxy.isClosed) {
           log.debug('proxy disconnected, reconnecting');
           setTimeout(async () => {
-            await this.reconnect(proxy, installationPath, child);
+            await this.reconnect(proxy, child);
           }, 1000);
         } else if (this.child) {
           log.info('proxy closed, kill process');
-          await this.killProcess(this.child);
+          await this.killProcess(child);
         }
       });
+      this.child = child;
     }
     proxy.onExit(() => {
-      log.debug('proxy exited, is the process running? ' + this.running);
+      log.debug('proxy exited, is the program running? ' + this.running);
       if (this.child && this.running) {
         const p = this.child!;
         this.killProcess(p);
@@ -96,9 +93,9 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
     return this.createExpander(proxy, builtinWorkspace, maxWorkspace);
   }
 
-  private onProcessExit(child: ChildProcess, reconnectFn: () => void) {
+  private onProcessExit(child: ControlledProgram, reconnectFn: () => void) {
     const pid = child.pid;
-    child.on('exit', () => {
+    child.onExit(() => {
       if (this.currentPid === pid) {
         this.running = false;
         // if the process exited before proxy connected, then we reconnect
@@ -119,28 +116,24 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
   /**
    * try reconnect the proxy when disconnected
    */
-  public async reconnect(
-    proxy: LanguageServerProxy,
-    installationPath: string,
-    child?: ChildProcess
-  ) {
+  public async reconnect(proxy: LanguageServerProxy, child?: ControlledProgram) {
     this.log.debug('reconnecting');
     if (this.options.lsp.detach) {
       this.startConnect(proxy);
     } else {
       const processExpired = () => Date.now() - this.startTime > this.startupTimeout;
-      if (child && !child.killed && !processExpired()) {
+      if (child && !child.killed() && !processExpired()) {
         this.startConnect(proxy);
       } else {
         if (this.spawnTimes < this.maxRespawn) {
           if (child && this.running) {
-            this.log.debug('killing the old process.');
+            this.log.debug('killing the old program.');
             await this.killProcess(child);
           }
           const port = await this.getPort();
           proxy.changePort(port);
-          this.child = await this.doSpawnProcess(installationPath, port, this.log);
-          this.onProcessExit(this.child, () => this.reconnect(proxy, installationPath, child));
+          this.child = await this.doSpawnProcess(port, this.log);
+          this.onProcessExit(this.child, () => this.reconnect(proxy, child));
           this.startConnect(proxy);
         } else {
           const ServerStartFailed = new ResponseError(
@@ -148,44 +141,21 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
             'Launch language server failed.'
           );
           this.launchReject!(ServerStartFailed);
+          this.launchFailed = true;
           proxy.setError(ServerStartFailed);
-          this.log.warn(`spawned process ${this.spawnTimes} times, mark this proxy unusable.`);
+          this.log.warn(`spawned program ${this.spawnTimes} times, mark this proxy unusable.`);
         }
       }
     }
   }
 
-  private async doSpawnProcess(
-    installationPath: string,
-    port: number,
-    log: Logger
-  ): Promise<ChildProcess> {
-    this.log.debug('spawn process');
-    const child = await this.spawnProcess(installationPath, port, log);
-    const pid = child.pid;
-    this.currentPid = pid;
-    this.log.debug('spawned a child process ' + pid);
+  private async doSpawnProcess(port: number, log: Logger): Promise<ControlledProgram> {
+    this.log.debug('start program');
+    const child = await this.spawnProcess(port, log);
+    this.currentPid = child.pid;
     this.spawnTimes += 1;
     this.startTime = Date.now();
     this.running = true;
-    if (this.options.lsp.oomScoreAdj && process.platform === 'linux') {
-      try {
-        // clone form https://github.com/elastic/ml-cpp/blob/4dd90fa93338667b681364657222715f81c9868a/lib/core/CProcessPriority_Linux.cc
-        fs.writeFileSync(`/proc/${pid}/oom_score_adj`, `${OOM_SCORE_ADJ}\n`);
-        this.log.debug(`wrote oom_score_adj of process ${pid} to ${OOM_SCORE_ADJ}`);
-      } catch (e) {
-        this.log.warn(e);
-        try {
-          fs.writeFileSync(`/proc/${pid}/oom_adj`, `${OOM_ADJ}\n`);
-          this.log.debug(`wrote oom_adj of process ${pid} to ${OOM_ADJ}`);
-        } catch (err) {
-          this.log.warn(
-            'write oom_score_adj and oom_adj file both failed, reduce priority not working'
-          );
-          this.log.warn(err);
-        }
-      }
-    }
     return child;
   }
 
@@ -198,6 +168,8 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
   /**
    * await for proxy connected, create a request expander
    * @param proxy
+   * @param builtinWorkspace
+   * @param maxWorkspace
    */
   abstract createExpander(
     proxy: LanguageServerProxy,
@@ -205,29 +177,23 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
     maxWorkspace: number
   ): RequestExpander;
 
-  abstract async spawnProcess(
-    installationPath: string,
-    port: number,
-    log: Logger
-  ): Promise<ChildProcess>;
+  abstract async spawnProcess(port: number, log: Logger): Promise<ControlledProgram>;
 
-  protected killProcess(child: ChildProcess) {
-    if (!child.killed) {
+  protected killProcess(child: ControlledProgram) {
+    if (!child.killed()) {
       return new Promise<boolean>((resolve, reject) => {
         // if not killed within 1s
         const t = setTimeout(reject, 1000);
-        child.on('exit', () => {
+        child.onExit(() => {
           clearTimeout(t);
           resolve(true);
         });
-        child.kill();
-        this.log.info('killed process ' + child.pid);
+        child.kill(false);
       })
         .catch(() => {
           // force kill
-          child.kill('SIGKILL');
-          this.log.info('force killed process ' + child.pid);
-          return child.killed;
+          child.kill(true);
+          return child.killed();
         })
         .finally(() => {
           if (this.currentPid === child.pid) this.running = false;

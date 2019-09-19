@@ -17,39 +17,37 @@
  * under the License.
  */
 
+import { IUiActionsSetup } from 'src/plugins/ui_actions/public';
 import {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
 } from '../../../../../../core/public';
-import { TriggerRegistry, ActionRegistry, EmbeddableFactoryRegistry } from './types';
+import { EmbeddableFactoryRegistry } from './types';
 import { createApi, EmbeddableApi } from './api';
 import { bootstrap } from './bootstrap';
 
+export interface IEmbeddableSetupDependencies {
+  uiActions: IUiActionsSetup;
+}
+
 export class EmbeddablePublicPlugin implements Plugin<any, any> {
-  private readonly triggers: TriggerRegistry = new Map();
-  private readonly actions: ActionRegistry = new Map();
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private api!: EmbeddableApi;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, { uiActions }: IEmbeddableSetupDependencies) {
     ({ api: this.api } = createApi({
-      actions: this.actions,
       embeddableFactories: this.embeddableFactories,
-      triggers: this.triggers,
     }));
-    bootstrap(this.api);
+    bootstrap(uiActions);
 
-    const { registerTrigger, registerAction, registerEmbeddableFactory, attachAction } = this.api;
+    const { registerEmbeddableFactory } = this.api;
 
     return {
-      registerTrigger,
-      registerAction,
       registerEmbeddableFactory,
-      attachAction,
     };
   }
 

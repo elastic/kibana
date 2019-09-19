@@ -26,13 +26,14 @@ import _ from 'lodash';
  * part when formatting with moment.js -> e.g. [SSS]
  */
 export function analysePatternForFract(pattern) {
-
   const fracSecMatch = pattern.match('S+'); //extract fractional seconds sub-pattern
+  const fracSecMatchStr = fracSecMatch ? fracSecMatch[0] : '';
+
   return {
-    length: fracSecMatch[0] ? fracSecMatch[0].length : 0,
-    patternNanos: fracSecMatch[0],
+    length: fracSecMatchStr.length,
+    patternNanos: fracSecMatchStr,
     pattern,
-    patternEscaped: fracSecMatch[0] ? pattern.replace(fracSecMatch[0], `[${fracSecMatch[0]}]`) : '',
+    patternEscaped: fracSecMatchStr ? pattern.replace(fracSecMatch, `[${fracSecMatch}]`) : '',
   };
 }
 
@@ -42,11 +43,9 @@ export function analysePatternForFract(pattern) {
  * milliseconds, the fractional pattern is replaced by the fractional value of the raw timestamp
  */
 export function formatWithNanos(dateMomentObj, valRaw, fracPatternObj) {
-
   if (fracPatternObj.length <= 3) {
     //S,SS,SSS is formatted correctly by moment.js
     return dateMomentObj.format(fracPatternObj.pattern);
-
   } else {
     //Beyond SSS the precise value of the raw datetime string is used
     const valFormatted = dateMomentObj.format(fracPatternObj.patternEscaped);
@@ -99,7 +98,7 @@ export function createDateNanosFormat(FieldFormat) {
 
           const date = moment(val);
 
-          if(typeof val !== 'string' && date.isValid()) {
+          if (typeof val !== 'string' && date.isValid()) {
             //fallback for max/min aggregation, where unixtime in ms is returned as a number
             //aggregations in Elasticsearch generally just return ms
             return date.format(fallbackPattern);

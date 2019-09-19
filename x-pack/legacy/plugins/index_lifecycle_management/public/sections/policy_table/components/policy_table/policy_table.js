@@ -32,6 +32,7 @@ import {
   EuiText,
   EuiPageBody,
   EuiPageContent,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 
@@ -174,6 +175,7 @@ export class PolicyTable extends Component {
   buildRowCell(fieldName, value) {
     if (fieldName === 'name') {
       return (
+        /* eslint-disable-next-line @elastic/eui/href-or-on-click */
         <EuiLink
           className="policyTable__link"
           data-test-subj="policyTablePolicyNameLink"
@@ -298,6 +300,22 @@ export class PolicyTable extends Component {
     const { name } = policy;
     const cells = Object.entries(COLUMNS).map(([fieldName, { width }]) => {
       const value = policy[fieldName];
+
+      if (fieldName === 'name') {
+        return (
+          <th
+            key={`${fieldName}-${name}`}
+            className="euiTableRowCell"
+            scope="row"
+            data-test-subj={`policyTableCell-${fieldName}`}
+          >
+            <div className={`euiTableCellContent policyTable__content--${fieldName}`}>
+              {this.buildRowCell(fieldName, value)}
+            </div>
+          </th>
+        );
+      }
+
       return (
         <EuiTableRowCell
           key={`${fieldName}-${name}`}
@@ -378,6 +396,7 @@ export class PolicyTable extends Component {
       policyFilterChanged,
       filter,
       policyListLoaded,
+      policies,
     } = this.props;
     const { selectedPoliciesMap } = this.state;
     const numSelected = Object.keys(selectedPoliciesMap).length;
@@ -389,6 +408,20 @@ export class PolicyTable extends Component {
       } else if (totalNumberOfPolicies > 0) {
         tableContent = (
           <EuiTable className="policyTable__horizontalScroll">
+            <EuiScreenReaderOnly>
+              <caption
+                role="status"
+                aria-relevant="text"
+                aria-live="polite"
+              >
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.policyTable.captionText"
+                  defaultMessage="Below is the index lifecycle policy table
+                    containing {count, plural, one {# row} other {# rows}} out of {total}."
+                  values={{ count: policies.length, total: totalNumberOfPolicies }}
+                />
+              </caption>
+            </EuiScreenReaderOnly>
             <EuiTableHeader>{this.buildHeader()}</EuiTableHeader>
             <EuiTableBody>{this.buildRows()}</EuiTableBody>
           </EuiTable>

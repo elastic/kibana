@@ -107,7 +107,7 @@ export const repositoryManagement = handleActions<
     [String(importRepoFailed)]: (state, action: Action<any>) =>
       produce<RepositoryManagementState>(state, draft => {
         if (action.payload) {
-          if (action.payload.res.status === 304) {
+          if (action.payload.response && action.payload.response.status === 304) {
             draft.toastMessage = i18n.translate(
               'xpack.code.repositoryManagement.repoImportedMessage',
               {

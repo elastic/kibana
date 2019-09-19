@@ -26,6 +26,7 @@ import { CoreContext } from '../core_context';
 import { DevConfig, DevConfigType } from '../dev';
 import { BasePathProxyServer, HttpConfig, HttpConfigType } from '../http';
 import { Logger } from '../logging';
+import { PluginsServiceSetup, PluginsServiceStart } from '../plugins';
 
 interface LegacyKbnServer {
   applyLoggingConfiguration: (settings: Readonly<Record<string, any>>) => void;
@@ -46,13 +47,25 @@ function getLegacyRawConfig(config: Config) {
   return rawConfig;
 }
 
-interface SetupDeps {
-  core: InternalCoreSetup;
+/**
+ * @public
+ * @deprecated
+ */
+export interface LegacyServiceSetupDeps {
+  core: InternalCoreSetup & {
+    plugins: PluginsServiceSetup;
+  };
   plugins: Record<string, unknown>;
 }
 
-interface StartDeps {
-  core: InternalCoreStart;
+/**
+ * @public
+ * @deprecated
+ */
+export interface LegacyServiceStartDeps {
+  core: InternalCoreStart & {
+    plugins: PluginsServiceStart;
+  };
   plugins: Record<string, unknown>;
 }
 
@@ -63,7 +76,7 @@ export class LegacyService implements CoreService {
   private readonly httpConfig$: Observable<HttpConfig>;
   private kbnServer?: LegacyKbnServer;
   private configSubscription?: Subscription;
-  private setupDeps?: SetupDeps;
+  private setupDeps?: LegacyServiceSetupDeps;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('legacy-service');
@@ -74,10 +87,10 @@ export class LegacyService implements CoreService {
       .atPath<HttpConfigType>('server')
       .pipe(map(rawConfig => new HttpConfig(rawConfig, coreContext.env)));
   }
-  public async setup(setupDeps: SetupDeps) {
+  public async setup(setupDeps: LegacyServiceSetupDeps) {
     this.setupDeps = setupDeps;
   }
-  public async start(startDeps: StartDeps) {
+  public async start(startDeps: LegacyServiceStartDeps) {
     const { setupDeps } = this;
     if (!setupDeps) {
       throw new Error('Legacy service is not setup yet.');
@@ -143,7 +156,11 @@ export class LegacyService implements CoreService {
     );
   }
 
-  private async createKbnServer(config: Config, setupDeps: SetupDeps, startDeps: StartDeps) {
+  private async createKbnServer(
+    config: Config,
+    setupDeps: LegacyServiceSetupDeps,
+    startDeps: LegacyServiceStartDeps
+  ) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const KbnServer = require('../../../legacy/server/kbn_server');
     const kbnServer: LegacyKbnServer = new KbnServer(getLegacyRawConfig(config), {

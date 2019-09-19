@@ -41,7 +41,7 @@ export async function startMLJob({
   transactionType: string;
 }) {
   const indexPatternName = core.injectedMetadata.getInjectedVar(
-    'apmIndexPatternTitle'
+    'apmTransactionIndices'
   );
   const groups = ['apm', serviceName.toLowerCase()];
   const filter: ESFilter[] = [

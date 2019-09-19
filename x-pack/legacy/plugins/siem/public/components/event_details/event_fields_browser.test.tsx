@@ -14,6 +14,8 @@ import { EventFieldsBrowser } from './event_fields_browser';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { defaultHeaders } from '../../mock/header';
 
+jest.mock('../../lib/settings/use_kibana_ui_setting');
+
 describe('EventFieldsBrowser', () => {
   describe('column headers', () => {
     ['Field', 'Value', 'Description'].forEach(header => {
@@ -25,7 +27,6 @@ describe('EventFieldsBrowser', () => {
               columnHeaders={defaultHeaders}
               data={mockDetailItemData}
               eventId={mockDetailItemDataId}
-              isLoading={false}
               onUpdateColumns={jest.fn()}
               timelineId="test"
               toggleColumn={jest.fn()}
@@ -47,7 +48,6 @@ describe('EventFieldsBrowser', () => {
             columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            isLoading={false}
             onUpdateColumns={jest.fn()}
             timelineId="test"
             toggleColumn={jest.fn()}
@@ -74,7 +74,6 @@ describe('EventFieldsBrowser', () => {
             columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={eventId}
-            isLoading={false}
             onUpdateColumns={jest.fn()}
             timelineId="test"
             toggleColumn={jest.fn()}
@@ -100,7 +99,6 @@ describe('EventFieldsBrowser', () => {
             columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={eventId}
-            isLoading={false}
             onUpdateColumns={jest.fn()}
             timelineId="test"
             toggleColumn={jest.fn()}
@@ -127,7 +125,6 @@ describe('EventFieldsBrowser', () => {
             columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={eventId}
-            isLoading={false}
             onUpdateColumns={jest.fn()}
             timelineId="test"
             toggleColumn={toggleColumn}
@@ -161,7 +158,6 @@ describe('EventFieldsBrowser', () => {
             columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            isLoading={false}
             onUpdateColumns={jest.fn()}
             timelineId="test"
             toggleColumn={jest.fn()}
@@ -189,7 +185,6 @@ describe('EventFieldsBrowser', () => {
             columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            isLoading={false}
             onUpdateColumns={jest.fn()}
             timelineId="test"
             toggleColumn={jest.fn()}
@@ -214,7 +209,6 @@ describe('EventFieldsBrowser', () => {
             columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            isLoading={false}
             onUpdateColumns={jest.fn()}
             timelineId="test"
             toggleColumn={jest.fn()}
@@ -223,7 +217,7 @@ describe('EventFieldsBrowser', () => {
       );
       expect(
         wrapper
-          .find('[data-test-subj="draggable-content"]')
+          .find('[data-test-subj="draggable-content-@timestamp"]')
           .at(0)
           .text()
       ).toEqual('Feb 28, 2019 @ 16:50:54.621');
@@ -239,7 +233,6 @@ describe('EventFieldsBrowser', () => {
             columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            isLoading={false}
             onUpdateColumns={jest.fn()}
             timelineId="test"
             toggleColumn={jest.fn()}

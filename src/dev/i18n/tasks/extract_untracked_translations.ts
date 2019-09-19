@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createFailError } from '../../run';
+import { createFailError } from '@kbn/dev-utils';
 import {
   I18nConfig,
   matchEntriesWithExctractors,

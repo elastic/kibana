@@ -8,6 +8,7 @@ import { GenericParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 import { Legacy } from 'kibana';
 
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { InfraMetricModel } from '../metrics/adapter_types';
 import {
   InfraBackendFrameworkAdapter,
@@ -34,6 +35,11 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
 
   constructor(private server: Legacy.Server) {
     this.version = server.config().get('pkg.version');
+  }
+
+  public config(req: InfraFrameworkRequest<Legacy.Request>): KibanaConfig {
+    const internalRequest = req[internalInfraFrameworkRequest];
+    return internalRequest.server.config();
   }
 
   public exposeStaticDir(urlPath: string, dir: string): void {

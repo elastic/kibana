@@ -49,12 +49,19 @@ export const sslSchema = schema.object(
       schema.oneOf([schema.literal('TLSv1'), schema.literal('TLSv1.1'), schema.literal('TLSv1.2')]),
       { defaultValue: ['TLSv1.1', 'TLSv1.2'], minSize: 1 }
     ),
-    requestCert: schema.maybe(schema.boolean({ defaultValue: false })),
+    clientAuthentication: schema.oneOf(
+      [schema.literal('none'), schema.literal('optional'), schema.literal('required')],
+      { defaultValue: 'none' }
+    ),
   },
   {
     validate: ssl => {
       if (ssl.enabled && (!ssl.key || !ssl.certificate)) {
         return 'must specify [certificate] and [key] when ssl is enabled';
+      }
+
+      if (!ssl.enabled && ssl.clientAuthentication !== 'none') {
+        return 'must enable ssl to use [clientAuthentication]';
       }
     },
   }
@@ -69,7 +76,8 @@ export class SslConfig {
   public certificate: string | undefined;
   public certificateAuthorities: string[] | undefined;
   public keyPassphrase: string | undefined;
-  public requestCert: boolean | undefined;
+  public requestCert: boolean;
+  public rejectUnauthorized: boolean;
 
   public cipherSuites: string[];
   public supportedProtocols: string[];
@@ -86,7 +94,8 @@ export class SslConfig {
     this.keyPassphrase = config.keyPassphrase;
     this.cipherSuites = config.cipherSuites;
     this.supportedProtocols = config.supportedProtocols;
-    this.requestCert = config.requestCert;
+    this.requestCert = config.clientAuthentication !== 'none';
+    this.rejectUnauthorized = config.clientAuthentication === 'required';
   }
 
   /**

@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-export default function (server) {
+export function validateEsRoute(server) {
   server.route({
     method: 'GET',
     path: '/api/timelion/validate/es',

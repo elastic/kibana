@@ -6,6 +6,8 @@
 
 import { RepositoryUri } from '../../model';
 import {
+  CommitIndexName,
+  CommitSchema,
   DocumentAnalysisSettings,
   DocumentIndexName,
   DocumentSchema,
@@ -54,5 +56,16 @@ export const getReferenceIndexCreationRequest = (repoUri: RepositoryUri): IndexC
       auto_expand_replicas: '0-1',
     },
     schema: ReferenceSchema,
+  };
+};
+
+export const getCommitIndexCreationRequest = (repoUri: RepositoryUri): IndexCreationRequest => {
+  return {
+    index: CommitIndexName(repoUri),
+    settings: {
+      number_of_shards: 1,
+      auto_expand_replicas: '0-1',
+    },
+    schema: CommitSchema,
   };
 };

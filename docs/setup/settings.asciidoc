@@ -27,10 +27,8 @@ in a manner that is inconsistent with `/proc/self/cgroup`
 
 `csp.rules:`:: A template
 https://w3c.github.io/webappsec-csp/[content-security-policy] that disables
-certain unnecessary and potentially insecure capabilities in the browser. All
-instances of `{nonce}` will be replaced with an automatically generated nonce
-at load time. We strongly recommend that you keep the default CSP rules that
-ship with Kibana.
+certain unnecessary and potentially insecure capabilities in the browser. We
+strongly recommend that you keep the default CSP rules that ship with Kibana.
 
 `csp.strict:`:: *Default: `true`* Blocks access to Kibana to any browser that
 does not enforce even rudimentary CSP rules. In practice, this will disable
@@ -121,7 +119,7 @@ which is proxied through the Kibana server.
 `interpreter.enableInVisualize`:: *Default: true* Enables use of interpreter in
 Visualize.
 
-`kibana.defaultAppId:`:: *Default: "discover"* The default application to load.
+`kibana.defaultAppId:`:: *Default: "home"* The default application to load.
 
 `kibana.index:`:: *Default: ".kibana"* Kibana uses an index in Elasticsearch to
 store saved searches, visualizations and dashboards. Kibana creates a new index
@@ -294,6 +292,10 @@ files that should be trusted.
 `server.ssl.cipherSuites:`:: *Default: ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-GCM-SHA384, DHE-RSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-SHA256, DHE-RSA-AES128-SHA256, ECDHE-RSA-AES256-SHA384, DHE-RSA-AES256-SHA384, ECDHE-RSA-AES256-SHA256, DHE-RSA-AES256-SHA256, HIGH,!aNULL, !eNULL, !EXPORT, !DES, !RC4, !MD5, !PSK, !SRP, !CAMELLIA*.
 Details on the format, and the valid options, are available via the
 https://www.openssl.org/docs/man1.0.2/apps/ciphers.html#CIPHER-LIST-FORMAT[OpenSSL cipher list format documentation].
+
+`server.ssl.clientAuthentication:`:: *Default: none* Controls the server’s behavior in regard to requesting a certificate from client
+connections. Valid values are `required`, `optional`, and `none`. `required` forces a client to present a certificate, while `optional`
+requests a client certificate but the client is not required to present one.
 
 `server.ssl.enabled:`:: *Default: "false"* Enables SSL for outgoing requests
 from the Kibana server to the browser. When set to `true`,

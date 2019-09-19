@@ -4,24 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
 import { ActionsPlugin } from '../../../actions';
-import { AlertType, Services, AlertServices } from '../types';
 import { ConcreteTaskInstance } from '../../../task_manager';
-import { createFireHandler } from './create_fire_handler';
+import { createExecutionHandler } from './create_execution_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
 import { AlertInstance } from './alert_instance';
 import { getNextRunAt } from './get_next_run_at';
 import { validateAlertTypeParams } from './validate_alert_type_params';
-import { SpacesPlugin } from '../../../spaces';
+import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
+import {
+  AlertType,
+  AlertServices,
+  GetBasePathFunction,
+  GetServicesFunction,
+  RawAlert,
+  SpaceIdToNamespaceFunction,
+} from '../types';
 
 interface CreateTaskRunnerFunctionOptions {
-  getServices: (basePath: string) => Services;
+  isSecurityEnabled: boolean;
+  getServices: GetServicesFunction;
   alertType: AlertType;
   executeAction: ActionsPlugin['execute'];
-  internalSavedObjectsRepository: SavedObjectsClientContract;
-  spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
-  getBasePath: SpacesPlugin['getBasePath'];
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
+  spaceIdToNamespace: SpaceIdToNamespaceFunction;
+  getBasePath: GetBasePathFunction;
 }
 
 interface TaskRunnerOptions {
@@ -32,30 +39,68 @@ export function getCreateTaskRunnerFunction({
   getServices,
   alertType,
   executeAction,
-  internalSavedObjectsRepository,
+  encryptedSavedObjectsPlugin,
   spaceIdToNamespace,
   getBasePath,
+  isSecurityEnabled,
 }: CreateTaskRunnerFunctionOptions) {
   return ({ taskInstance }: TaskRunnerOptions) => {
     return {
       run: async () => {
-        const namespace = spaceIdToNamespace(taskInstance.params.spaceId);
-        const alertSavedObject = await internalSavedObjectsRepository.get(
+        const { alertId, spaceId } = taskInstance.params;
+        const requestHeaders: Record<string, string> = {};
+        const namespace = spaceIdToNamespace(spaceId);
+        // Only fetch encrypted attributes here, we'll create a saved objects client
+        // scoped with the API key to fetch the remaining data.
+        const {
+          attributes: { apiKey },
+        } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAlert>(
           'alert',
-          taskInstance.params.alertId,
+          alertId,
           { namespace }
         );
 
-        // Validate
-        const validatedAlertTypeParams = validateAlertTypeParams(
-          alertType,
-          alertSavedObject.attributes.alertTypeParams
-        );
+        if (isSecurityEnabled && !apiKey) {
+          throw new Error('API key is required. The attribute "apiKey" is missing.');
+        } else if (isSecurityEnabled) {
+          requestHeaders.authorization = `ApiKey ${apiKey}`;
+        }
 
-        const fireHandler = createFireHandler({
-          alertSavedObject,
+        const fakeRequest = {
+          headers: requestHeaders,
+          getBasePath: () => getBasePath(spaceId),
+        };
+
+        const services = getServices(fakeRequest);
+        // Ensure API key is still valid and user has access
+        const {
+          attributes: { alertTypeParams, actions, interval },
+          references,
+        } = await services.savedObjectsClient.get<RawAlert>('alert', alertId);
+
+        // Validate
+        const validatedAlertTypeParams = validateAlertTypeParams(alertType, alertTypeParams);
+
+        // Inject ids into actions
+        const actionsWithIds = actions.map(action => {
+          const actionReference = references.find(obj => obj.name === action.actionRef);
+          if (!actionReference) {
+            throw new Error(
+              `Action reference "${action.actionRef}" not found in alert id: ${alertId}`
+            );
+          }
+          return {
+            ...action,
+            id: actionReference.id,
+          };
+        });
+
+        const executionHandler = createExecutionHandler({
+          alertId,
           executeAction,
-          spaceId: taskInstance.params.spaceId,
+          apiKey,
+          actions: actionsWithIds,
+          spaceId,
         });
         const alertInstances: Record<string, AlertInstance> = {};
         const alertInstancesData = taskInstance.state.alertInstances || {};
@@ -65,7 +110,7 @@ export function getCreateTaskRunnerFunction({
         const alertInstanceFactory = createAlertInstanceFactory(alertInstances);
 
         const alertTypeServices: AlertServices = {
-          ...getServices(taskInstance.params.basePath),
+          ...services,
           alertInstanceFactory,
         };
 
@@ -81,23 +126,20 @@ export function getCreateTaskRunnerFunction({
           Object.keys(alertInstances).map(alertInstanceId => {
             const alertInstance = alertInstances[alertInstanceId];
 
-            // Unpersist any alert instances that were not explicitly fired in this alert execution
-            if (!alertInstance.shouldFire()) {
+            // Unpersist any alert instances that were not explicitly scheduled in this alert execution
+            if (!alertInstance.hasScheduledActions()) {
               delete alertInstances[alertInstanceId];
               return;
             }
 
-            const { actionGroup, context, state } = alertInstance.getFireOptions()!;
+            const { actionGroup, context, state } = alertInstance.getSechduledActionOptions()!;
             alertInstance.replaceMeta({ lastFired: Date.now() });
-            alertInstance.resetFire();
-            return fireHandler(actionGroup, context, state);
+            alertInstance.unscheduleActions();
+            return executionHandler({ actionGroup, context, state, alertInstanceId });
           })
         );
 
-        const nextRunAt = getNextRunAt(
-          new Date(taskInstance.startedAt!),
-          alertSavedObject.attributes.interval
-        );
+        const nextRunAt = getNextRunAt(new Date(taskInstance.startedAt!), interval);
 
         return {
           state: {

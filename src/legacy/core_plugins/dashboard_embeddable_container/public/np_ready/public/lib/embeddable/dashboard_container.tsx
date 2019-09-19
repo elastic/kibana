@@ -21,9 +21,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { Filter } from '@kbn/es-query';
-import { CoreStart } from '../../../../../../../../core/public';
-import { RefreshInterval, TimeRange } from '../../../../../../../../plugins/data/public';
-
+import { RefreshInterval, TimeRange } from 'src/plugins/data/public';
+import { IUiActionsStart } from '../../../../../../../../plugins/ui_actions/public';
 import {
   Container,
   ContainerInput,
@@ -31,16 +30,20 @@ import {
   ViewMode,
   EmbeddableFactory,
   IEmbeddable,
-  GetEmbeddableFactory,
-  GetActionsCompatibleWithTrigger,
-  GetEmbeddableFactories,
 } from '../../../../../../embeddable_api/public/np_ready/public';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_container_factory';
 import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import { Query } from '../../../../../../data/public';
+import { CoreStart } from '../../../../../../../../core/public';
 import { Start as InspectorStartContract } from '../../../../../../../../plugins/inspector/public';
+import { Start as EmbeddableStartContract } from '../../../../../../embeddable_api/public/np_ready/public';
+import {
+  KibanaReactContext,
+  KibanaReactContextValue,
+  KibanaContextProvider,
+} from '../../../../../../../../plugins/kibana_react/public';
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;
@@ -72,23 +75,26 @@ export interface InheritedChildInput extends IndexSignature {
   id: string;
 }
 
-export interface ViewportProps {
-  getActions: GetActionsCompatibleWithTrigger;
-  getEmbeddableFactory: GetEmbeddableFactory;
-  getAllEmbeddableFactories: GetEmbeddableFactories;
+export interface DashboardContainerOptions {
+  application: CoreStart['application'];
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
+  embeddable: EmbeddableStartContract;
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
   ExitFullScreenButton: React.ComponentType<any>;
+  uiActions: IUiActionsStart;
 }
+
+export type DashboardReactContextValue = KibanaReactContextValue<DashboardContainerOptions>;
+export type DashboardReactContext = KibanaReactContext<DashboardContainerOptions>;
 
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
   constructor(
     initialInput: DashboardContainerInput,
-    private readonly viewportProps: ViewportProps,
+    private readonly options: DashboardContainerOptions,
     parent?: Container
   ) {
     super(
@@ -100,7 +106,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         ...initialInput,
       },
       { embeddableLoaded: {} },
-      viewportProps.getEmbeddableFactory,
+      options.embeddable.getEmbeddableFactory,
       parent
     );
   }
@@ -119,7 +125,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public render(dom: HTMLElement) {
     ReactDOM.render(
       <I18nProvider>
-        <DashboardViewport container={this} {...this.viewportProps} />
+        <KibanaContextProvider services={this.options}>
+          <DashboardViewport container={this} />
+        </KibanaContextProvider>
       </I18nProvider>,
       dom
     );

@@ -17,10 +17,13 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
+import {
+  IAction,
+  IncompatibleActionError,
+} from '../../../../../../../../../../plugins/ui_actions/public';
 import { ContainerInput, IContainer } from '../../../containers';
 import { ViewMode } from '../../../types';
-import { Action, ActionContext } from '../../../actions';
-import { IncompatibleActionError } from '../../../errors';
+import { IEmbeddable } from '../../../embeddables';
 
 export const REMOVE_PANEL_ACTION = 'deletePanel';
 
@@ -28,19 +31,22 @@ interface ExpandedPanelInput extends ContainerInput {
   expandedPanelId: string;
 }
 
-function hasExpandedPanelInput(
-  container: IContainer | IContainer<ExpandedPanelInput>
-): container is IContainer<ExpandedPanelInput> {
-  return (container as IContainer<ExpandedPanelInput>).getInput().expandedPanelId !== undefined;
+interface ActionContext {
+  embeddable: IEmbeddable;
 }
 
-export class RemovePanelAction extends Action {
-  public readonly type = REMOVE_PANEL_ACTION;
-  constructor() {
-    super(REMOVE_PANEL_ACTION);
+function hasExpandedPanelInput(
+  container: IContainer
+): container is IContainer<{}, ExpandedPanelInput> {
+  return (container as IContainer<{}, ExpandedPanelInput>).getInput().expandedPanelId !== undefined;
+}
 
-    this.order = 5;
-  }
+export class RemovePanelAction implements IAction<ActionContext> {
+  public readonly type = REMOVE_PANEL_ACTION;
+  public readonly id = REMOVE_PANEL_ACTION;
+  public order = 5;
+
+  constructor() {}
 
   public getDisplayName() {
     return i18n.translate('embeddableApi.panel.removePanel.displayName', {
@@ -63,8 +69,8 @@ export class RemovePanelAction extends Action {
     );
   }
 
-  public execute({ embeddable }: ActionContext) {
-    if (!embeddable.parent || !this.isCompatible({ embeddable })) {
+  public async execute({ embeddable }: ActionContext) {
+    if (!embeddable.parent || !(await this.isCompatible({ embeddable }))) {
       throw new IncompatibleActionError();
     }
     embeddable.parent.removeEmbeddable(embeddable.id);

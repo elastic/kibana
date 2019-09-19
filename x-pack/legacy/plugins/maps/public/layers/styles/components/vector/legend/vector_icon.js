@@ -97,6 +97,17 @@ function extractColorFromStyleProperty(colorStyleProperty, defaultColor) {
   }
 
   // return middle of gradient for dynamic style property
+
+  if (colorStyleProperty.options.useCustomColorRamp) {
+    if (!colorStyleProperty.options.customColorRamp ||
+      !colorStyleProperty.options.customColorRamp.length) {
+      return defaultColor;
+    }
+    // favor the lowest color in even arrays
+    const middleIndex = Math.floor((colorStyleProperty.options.customColorRamp.length - 1) / 2);
+    return colorStyleProperty.options.customColorRamp[middleIndex].color;
+  }
+
   return getColorRampCenterColor(colorStyleProperty.options.color);
 }
 

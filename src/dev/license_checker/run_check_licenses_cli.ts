@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { run } from '@kbn/dev-utils';
 import { getInstalledPackages } from '../npm';
-import { run } from '../run';
 
 import { LICENSE_WHITELIST, DEV_ONLY_LICENSE_WHITELIST, LICENSE_OVERRIDES } from './config';
 import { assertLicensesValid } from './valid';

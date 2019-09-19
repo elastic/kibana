@@ -7,7 +7,7 @@
 import { drag, drop } from '../../lib/drag_n_drop/helpers';
 import {
   clickOutsideFieldsBrowser,
-  openFieldsBrowser,
+  openTimelineFieldsBrowser,
   populateTimeline,
   filterFieldsBrowser,
 } from '../../lib/fields_browser/helpers';
@@ -21,7 +21,7 @@ import {
 } from '../../lib/fields_browser/selectors';
 import { logout } from '../../lib/logout';
 import { HOSTS_PAGE } from '../../lib/urls';
-import { loginAndWaitForPage } from '../../lib/util/helpers';
+import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../lib/util/helpers';
 
 const defaultHeaders = [
   { id: '@timestamp' },
@@ -40,13 +40,13 @@ describe('Fields Browser', () => {
   });
 
   afterEach(() => {
-    logout();
+    return logout();
   });
 
   it('renders the fields browser with the expected title when the Fields button is clicked', () => {
     populateTimeline();
 
-    openFieldsBrowser();
+    openTimelineFieldsBrowser();
 
     cy.get(FIELDS_BROWSER_TITLE)
       .invoke('text')
@@ -56,7 +56,7 @@ describe('Fields Browser', () => {
   it('closes the fields browser when the user clicks outside of it', () => {
     populateTimeline();
 
-    openFieldsBrowser();
+    openTimelineFieldsBrowser();
 
     clickOutsideFieldsBrowser();
 
@@ -66,7 +66,7 @@ describe('Fields Browser', () => {
   it('displays the `default ECS` category (by default)', () => {
     populateTimeline();
 
-    openFieldsBrowser();
+    openTimelineFieldsBrowser();
 
     cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_TITLE)
       .invoke('text')
@@ -76,7 +76,7 @@ describe('Fields Browser', () => {
   it('the `defaultECS` (selected) category count matches the default timeline header count', () => {
     populateTimeline();
 
-    openFieldsBrowser();
+    openTimelineFieldsBrowser();
 
     cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_COUNT)
       .invoke('text')
@@ -86,7 +86,7 @@ describe('Fields Browser', () => {
   it('displays a checked checkbox for all of the default timeline columns', () => {
     populateTimeline();
 
-    openFieldsBrowser();
+    openTimelineFieldsBrowser();
 
     defaultHeaders.forEach(header =>
       cy.get(`[data-test-subj="field-${header.id}-checkbox"]`).should('be.checked')
@@ -98,15 +98,21 @@ describe('Fields Browser', () => {
 
     populateTimeline();
 
-    cy.get(`[data-test-subj="header-text-${toggleField}"]`).should('exist');
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${toggleField}"]`).should(
+      'exist'
+    );
 
-    openFieldsBrowser();
+    openTimelineFieldsBrowser();
 
-    cy.get(`[data-test-subj="field-${toggleField}-checkbox"]`).uncheck();
+    cy.get(
+      `[data-test-subj="timeline"] [data-test-subj="field-${toggleField}-checkbox"]`
+    ).uncheck();
 
     clickOutsideFieldsBrowser();
 
-    cy.get(`[data-test-subj="header-text-${toggleField}"]`).should('not.exist');
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${toggleField}"]`).should(
+      'not.exist'
+    );
   });
 
   it('displays the expected count of categories that match the filter input', () => {
@@ -114,7 +120,7 @@ describe('Fields Browser', () => {
 
     populateTimeline();
 
-    openFieldsBrowser();
+    openTimelineFieldsBrowser();
 
     filterFieldsBrowser(filterInput);
 
@@ -128,7 +134,7 @@ describe('Fields Browser', () => {
 
     populateTimeline();
 
-    openFieldsBrowser();
+    openTimelineFieldsBrowser();
 
     filterFieldsBrowser(filterInput);
 
@@ -142,7 +148,7 @@ describe('Fields Browser', () => {
 
     populateTimeline();
 
-    openFieldsBrowser();
+    openTimelineFieldsBrowser();
 
     filterFieldsBrowser(`${category}.`);
 
@@ -156,7 +162,7 @@ describe('Fields Browser', () => {
 
     populateTimeline();
 
-    openFieldsBrowser();
+    openTimelineFieldsBrowser();
 
     filterFieldsBrowser(filterInput);
 
@@ -171,17 +177,21 @@ describe('Fields Browser', () => {
 
     populateTimeline();
 
-    openFieldsBrowser();
+    openTimelineFieldsBrowser();
 
     filterFieldsBrowser(filterInput);
 
-    cy.get(`[data-test-subj="header-text-${toggleField}"]`).should('not.exist');
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${toggleField}"]`).should(
+      'not.exist'
+    );
 
-    cy.get(`[data-test-subj="field-${toggleField}-checkbox"]`).check();
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="field-${toggleField}-checkbox"]`).check();
 
     clickOutsideFieldsBrowser();
 
-    cy.get(`[data-test-subj="header-text-${toggleField}"]`).should('exist');
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${toggleField}"]`).should(
+      'exist'
+    );
   });
 
   it('adds a field to the timeline when the user drags and drops a field', () => {
@@ -190,19 +200,25 @@ describe('Fields Browser', () => {
 
     populateTimeline();
 
-    openFieldsBrowser();
+    openTimelineFieldsBrowser();
 
     filterFieldsBrowser(filterInput);
 
-    cy.get(`[data-test-subj="header-text-${toggleField}"]`).should('not.exist');
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${toggleField}"]`).should(
+      'not.exist'
+    );
 
-    cy.get(`[data-test-subj="field-name-${toggleField}"]`).then(field => drag(field));
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="field-name-${toggleField}"]`).then(field =>
+      drag(field)
+    );
 
-    cy.get(`[data-test-subj="headers-group"]`).then(headersDropArea => drop(headersDropArea));
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="headers-group"]`).then(headersDropArea =>
+      drop(headersDropArea)
+    );
 
-    clickOutsideFieldsBrowser();
-
-    cy.get(`[data-test-subj="header-text-${toggleField}"]`).should('exist');
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${toggleField}"]`, {
+      timeout: DEFAULT_TIMEOUT,
+    }).should('exist');
   });
 
   it('resets all fields in the timeline when `Reset Fields` is clicked', () => {
@@ -211,22 +227,28 @@ describe('Fields Browser', () => {
 
     populateTimeline();
 
-    openFieldsBrowser();
+    openTimelineFieldsBrowser();
 
     filterFieldsBrowser(filterInput);
 
-    cy.get(`[data-test-subj="header-text-${toggleField}"]`).should('not.exist');
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${toggleField}"]`).should(
+      'not.exist'
+    );
 
-    cy.get(`[data-test-subj="field-${toggleField}-checkbox"]`).check();
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="field-${toggleField}-checkbox"]`).check();
 
     clickOutsideFieldsBrowser();
 
-    cy.get(`[data-test-subj="header-text-${toggleField}"]`).should('exist');
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${toggleField}"]`).should(
+      'exist'
+    );
 
-    openFieldsBrowser();
+    openTimelineFieldsBrowser();
 
-    cy.get('[data-test-subj="reset-fields"]').click();
+    cy.get('[data-test-subj="timeline"] [data-test-subj="reset-fields"]').click();
 
-    cy.get(`[data-test-subj="header-text-${toggleField}"]`).should('not.exist');
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${toggleField}"]`).should(
+      'not.exist'
+    );
   });
 });

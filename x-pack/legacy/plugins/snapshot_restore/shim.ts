@@ -29,6 +29,11 @@ export interface Plugins {
       isCloudEnabled: boolean;
     };
   };
+  settings: {
+    config: {
+      isSlmEnabled: boolean;
+    };
+  };
   xpack_main: any;
   elasticsearch: any;
 }
@@ -54,6 +59,13 @@ export function createShim(
       cloud: {
         config: {
           isCloudEnabled: get(server.plugins, 'cloud.config.isCloudEnabled', false),
+        },
+      },
+      settings: {
+        config: {
+          isSlmEnabled: server.config()
+            ? server.config().get('xpack.snapshot_restore.slm_ui.enabled')
+            : true,
         },
       },
       xpack_main: server.plugins.xpack_main,

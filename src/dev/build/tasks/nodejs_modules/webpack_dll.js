@@ -18,9 +18,10 @@
  */
 
 import { deleteAll, isFileAccessible, read, write } from '../../lib';
-import { dirname, sep, relative, resolve } from 'path';
+import { dirname, relative, resolve } from 'path';
 import pkgUp from 'pkg-up';
 import globby from 'globby';
+import normalizePosixPath from 'normalize-path';
 
 function checkDllEntryAccess(entry, baseDir = '') {
   const resolvedPath = baseDir ? resolve(baseDir, entry) : entry;
@@ -48,7 +49,7 @@ export async function getDllEntries(manifestPath, whiteListedModules, baseDir = 
   // Only includes modules who are not in the white list of modules
   // and that are node_modules
   return modules.filter(entry => {
-    const isWhiteListed = whiteListedModules.some(nonEntry => entry.includes(`node_modules${sep}${nonEntry}${sep}`));
+    const isWhiteListed = whiteListedModules.some(nonEntry => normalizePosixPath(entry).includes(`node_modules/${nonEntry}`));
     const isNodeModule = entry.includes('node_modules');
 
     // NOTE: when using dynamic imports on webpack the entry paths could be created
@@ -69,6 +70,7 @@ export async function cleanDllModuleFromEntryPath(logger, entryPath) {
   const modulePkgPath = await pkgUp(entryPath);
   const modulePkg = JSON.parse(await read(modulePkgPath));
   const moduleDir = dirname(modulePkgPath);
+  const normalizedModuleDir = normalizePosixPath(moduleDir);
 
   // Cancel the cleanup for this module as it
   // was already done.
@@ -93,9 +95,9 @@ export async function cleanDllModuleFromEntryPath(logger, entryPath) {
   // until the following issue gets closed
   // https://github.com/sindresorhus/globby/issues/87
   const filesToDelete = await globby([
-    `${moduleDir}/**`,
-    `!${moduleDir}/**/*.+(css)`,
-    `!${moduleDir}/**/*.+(gif|ico|jpeg|jpg|tiff|tif|svg|png|webp)`,
+    `${normalizedModuleDir}/**`,
+    `!${normalizedModuleDir}/**/*.+(css)`,
+    `!${normalizedModuleDir}/**/*.+(gif|ico|jpeg|jpg|tiff|tif|svg|png|webp)`,
   ]);
 
   await deleteAll(filesToDelete.filter(path => {

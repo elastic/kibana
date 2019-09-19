@@ -9,12 +9,33 @@ import { ESFilter } from 'elasticsearch';
 import { UIFilters } from '../../../../typings/ui-filters';
 import { getEnvironmentUiFilterES } from './get_environment_ui_filter_es';
 import { getKueryUiFilterES } from './get_kuery_ui_filter_es';
+import {
+  localUIFilters,
+  localUIFilterNames
+} from '../../ui_filters/local_ui_filters/config';
 
 export async function getUiFiltersES(server: Server, uiFilters: UIFilters) {
-  const kuery = await getKueryUiFilterES(server, uiFilters.kuery);
-  const environment = getEnvironmentUiFilterES(uiFilters.environment);
+  const { kuery, environment, ...localFilterValues } = uiFilters;
+
+  const mappedFilters = localUIFilterNames
+    .filter(name => name in localFilterValues)
+    .map(filterName => {
+      const field = localUIFilters[filterName];
+      const value = localFilterValues[filterName];
+      return {
+        terms: {
+          [field.fieldName]: value
+        }
+      };
+    }) as ESFilter[];
 
   // remove undefined items from list
-  const filters = [kuery, environment].filter(filter => !!filter) as ESFilter[];
-  return filters;
+  const esFilters = [
+    await getKueryUiFilterES(server, uiFilters.kuery),
+    getEnvironmentUiFilterES(uiFilters.environment)
+  ]
+    .filter(filter => !!filter)
+    .concat(mappedFilters) as ESFilter[];
+
+  return esFilters;
 }

@@ -8,17 +8,17 @@ import React, { useEffect, useState } from 'react';
 
 import { SearchResponse } from 'elasticsearch';
 
-import { idx } from '@kbn/elastic-idx';
-
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { ml } from '../../../../../services/ml_api_service';
+import { getNestedProperty } from '../../../../../util/object_utils';
 
 import {
   getDefaultSelectableFields,
   getFlattenedFields,
   isDefaultQuery,
   EsDoc,
+  EsDocSource,
   EsFieldName,
   PivotQuery,
 } from '../../../../common';
@@ -46,7 +46,7 @@ export const useSourceIndexData = (
 ): UseSourceIndexDataReturnType => {
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(SOURCE_INDEX_STATUS.UNUSED);
-  const [tableItems, setTableItems] = useState([] as EsDoc[]);
+  const [tableItems, setTableItems] = useState<EsDoc[]>([]);
 
   const getSourceIndexData = async function() {
     setErrorMessage('');
@@ -63,7 +63,7 @@ export const useSourceIndexData = (
       const docs = resp.hits.hits;
 
       if (docs.length === 0) {
-        setTableItems([] as EsDoc[]);
+        setTableItems([]);
         setStatus(SOURCE_INDEX_STATUS.LOADED);
         return;
       }
@@ -78,12 +78,13 @@ export const useSourceIndexData = (
       // or is a nested fields when displaying it via EuiInMemoryTable.
       const flattenedFields = getFlattenedFields(docs[0]._source);
       const transformedTableItems = docs.map(doc => {
-        const item = {} as {
-          [key: string]: any;
-        };
+        const item: EsDocSource = {};
         flattenedFields.forEach(ff => {
-          item[ff] = idx(doc._source, _ => _[ff]);
+          item[ff] = getNestedProperty(doc._source, ff);
           if (item[ff] === undefined) {
+            // If the attribute is undefined, it means it was not a nested property
+            // but had dots in its actual name. This selects the property by its
+            // full name and assigns it to `item[ff]`.
             item[ff] = doc._source[`"${ff}"`];
           }
         });
@@ -93,11 +94,15 @@ export const useSourceIndexData = (
         };
       });
 
-      setTableItems(transformedTableItems as EsDoc[]);
+      setTableItems(transformedTableItems);
       setStatus(SOURCE_INDEX_STATUS.LOADED);
     } catch (e) {
-      setErrorMessage(JSON.stringify(e));
-      setTableItems([] as EsDoc[]);
+      if (e.message !== undefined) {
+        setErrorMessage(e.message);
+      } else {
+        setErrorMessage(JSON.stringify(e));
+      }
+      setTableItems([]);
       setStatus(SOURCE_INDEX_STATUS.ERROR);
     }
   };

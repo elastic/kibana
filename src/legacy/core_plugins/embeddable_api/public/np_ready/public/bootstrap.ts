@@ -17,8 +17,13 @@
  * under the License.
  */
 
-import { EmbeddableApi } from './api/types';
-import { CONTEXT_MENU_TRIGGER, APPLY_FILTER_TRIGGER, ApplyFilterAction } from './lib';
+import { IUiActionsSetup } from 'src/plugins/ui_actions/public';
+import {
+  CONTEXT_MENU_TRIGGER,
+  APPLY_FILTER_TRIGGER,
+  createFilterAction,
+  PANEL_BADGE_TRIGGER,
+} from './lib';
 
 /**
  * This method initializes Embeddable plugin with initial set of
@@ -26,7 +31,7 @@ import { CONTEXT_MENU_TRIGGER, APPLY_FILTER_TRIGGER, ApplyFilterAction } from '.
  *
  * @param api
  */
-export const bootstrap = (api: EmbeddableApi) => {
+export const bootstrap = (uiActions: IUiActionsSetup) => {
   const triggerContext = {
     id: CONTEXT_MENU_TRIGGER,
     title: 'Context menu',
@@ -39,10 +44,17 @@ export const bootstrap = (api: EmbeddableApi) => {
     description: 'Triggered when user applies filter to an embeddable.',
     actionIds: [],
   };
-  const actionApplyFilter = new ApplyFilterAction();
+  const triggerBadge = {
+    id: PANEL_BADGE_TRIGGER,
+    title: 'Panel badges',
+    description: 'Actions appear in title bar when an embeddable loads in a panel',
+    actionIds: [],
+  };
+  const actionApplyFilter = createFilterAction();
 
-  api.registerTrigger(triggerContext);
-  api.registerTrigger(triggerFilter);
-  api.registerAction(actionApplyFilter);
-  api.attachAction(triggerFilter.id, actionApplyFilter.id);
+  uiActions.registerTrigger(triggerContext);
+  uiActions.registerTrigger(triggerFilter);
+  uiActions.registerAction(actionApplyFilter);
+  uiActions.registerTrigger(triggerBadge);
+  uiActions.attachAction(triggerFilter.id, actionApplyFilter.id);
 };

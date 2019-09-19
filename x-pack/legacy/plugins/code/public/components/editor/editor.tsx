@@ -9,9 +9,9 @@ import { editor as editorInterfaces, IDisposable } from 'monaco-editor';
 import React from 'react';
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { Hover, Position, TextDocumentPositionParams } from 'vscode-languageserver-protocol';
+import { Hover, Position } from 'vscode-languageserver-protocol';
 import { GitBlame } from '../../../common/git_blame';
-import { closeReferences, FetchFileResponse, findReferences, hoverResult } from '../../actions';
+import { closePanel, FetchFileResponse, hoverResult } from '../../actions';
 import { MainRouteParams } from '../../common/types';
 import { BlameWidget } from '../../monaco/blame/blame_widget';
 import { monaco } from '../../monaco/monaco';
@@ -24,8 +24,7 @@ import { ReferencesPanel } from './references_panel';
 import { encodeRevisionString } from '../../../common/uri_util';
 
 export interface EditorActions {
-  closeReferences(changeUrl: boolean): void;
-  findReferences(params: TextDocumentPositionParams): void;
+  closePanel(changeUrl: boolean): void;
   hoverResult(hover: Hover): void;
 }
 
@@ -33,10 +32,10 @@ interface Props {
   hidden?: boolean;
   file?: FetchFileResponse;
   revealPosition?: Position;
-  isReferencesOpen: boolean;
-  isReferencesLoading: boolean;
-  references: any[];
-  referencesTitle: string;
+  panelShowing: boolean;
+  isPanelLoading: boolean;
+  panelContents: any[];
+  panelTitle: string;
   hover?: Hover;
   refUrl?: string;
   blames: GitBlame[];
@@ -134,16 +133,16 @@ export class EditorComponent extends React.Component<IProps> {
     if (this.monaco && qs !== prevProps.location.search) {
       this.monaco.updateUrlQuery(qs);
     }
-    if (this.monaco && this.monaco.editor) {
+    if (this.editor) {
       if (prevProps.showBlame !== this.props.showBlame && this.props.showBlame) {
-        this.monaco.editor.updateOptions({ lineDecorationsWidth: 316 });
+        this.editor.updateOptions({ lineDecorationsWidth: 316 });
         this.loadBlame(this.props.blames);
       } else if (!this.props.showBlame) {
         this.destroyBlameWidgets();
-        this.monaco.editor.updateOptions({ lineDecorationsWidth: 16 });
+        this.editor.updateOptions({ lineDecorationsWidth: 16 });
       }
       if (prevProps.blames !== this.props.blames && this.props.showBlame) {
-        this.monaco.editor.updateOptions({ lineDecorationsWidth: 316 });
+        this.editor.updateOptions({ lineDecorationsWidth: 316 });
         this.loadBlame(this.props.blames);
       }
     }
@@ -221,6 +220,10 @@ export class EditorComponent extends React.Component<IProps> {
         lang = 'text';
       }
       this.editor = await this.monaco.loadFile(repo, file, text, lang, revision);
+      if (this.props.showBlame) {
+        this.editor.updateOptions({ lineDecorationsWidth: 316 });
+        this.loadBlame(this.props.blames);
+      }
       this.registerGutterClickHandler();
     }
   }
@@ -237,12 +240,12 @@ export class EditorComponent extends React.Component<IProps> {
 
   private renderReferences() {
     return (
-      this.props.isReferencesOpen && (
+      this.props.panelShowing && (
         <ReferencesPanel
-          onClose={() => this.props.closeReferences(true)}
-          references={this.props.references}
-          isLoading={this.props.isReferencesLoading}
-          title={this.props.referencesTitle}
+          onClose={() => this.props.closePanel(true)}
+          references={this.props.panelContents}
+          isLoading={this.props.isPanelLoading}
+          title={this.props.panelTitle}
           refUrl={this.props.refUrl}
         />
       )
@@ -252,10 +255,10 @@ export class EditorComponent extends React.Component<IProps> {
 
 const mapStateToProps = (state: RootState) => ({
   file: state.file.file,
-  isReferencesOpen: state.editor.showing,
-  isReferencesLoading: state.editor.loading,
-  references: state.editor.references,
-  referencesTitle: state.editor.referencesTitle,
+  panelShowing: state.editor.panelShowing,
+  isPanelLoading: state.editor.loading,
+  panelContents: state.editor.panelContents,
+  panelTitle: state.editor.panelTitle,
   hover: state.editor.hover,
   refUrl: refUrlSelector(state),
   revealPosition: state.editor.revealPosition,
@@ -263,8 +266,7 @@ const mapStateToProps = (state: RootState) => ({
 });
 
 const mapDispatchToProps = {
-  closeReferences,
-  findReferences,
+  closePanel,
   hoverResult,
 };
 

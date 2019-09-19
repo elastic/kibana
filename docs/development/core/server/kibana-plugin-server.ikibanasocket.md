@@ -12,6 +12,13 @@ A tiny abstraction for TCP socket.
 export interface IKibanaSocket 
 ```
 
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [authorizationError](./kibana-plugin-server.ikibanasocket.authorizationerror.md) | <code>Error</code> | The reason why the peer's certificate has not been verified. This property becomes available only when <code>authorized</code> is <code>false</code>. |
+|  [authorized](./kibana-plugin-server.ikibanasocket.authorized.md) | <code>boolean</code> | Indicates whether or not the peer certificate was signed by one of the specified CAs. When TLS isn't used the value is <code>undefined</code>. |
+
 ## Methods
 
 |  Method | Description |

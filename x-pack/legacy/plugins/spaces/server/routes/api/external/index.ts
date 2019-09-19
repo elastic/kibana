@@ -13,13 +13,13 @@ import { initGetSpacesApi } from './get';
 import { initPostSpacesApi } from './post';
 import { initPutSpacesApi } from './put';
 import { SpacesServiceSetup } from '../../../new_platform/spaces_service/spaces_service';
-import { SpacesHttpServiceSetup } from '../../../new_platform/plugin';
+import { initCopyToSpacesApi } from './copy_to_space';
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 interface RouteDeps {
   xpackMain: XPackMainPlugin;
-  http: SpacesHttpServiceSetup;
+  legacyRouter: Legacy.Server['route'];
   savedObjects: SavedObjectsService;
   spacesService: SpacesServiceSetup;
   log: Logger;
@@ -43,4 +43,5 @@ export function initExternalSpacesApi({ xpackMain, ...rest }: RouteDeps) {
   initGetSpacesApi(deps);
   initPostSpacesApi(deps);
   initPutSpacesApi(deps);
+  initCopyToSpacesApi(deps);
 }

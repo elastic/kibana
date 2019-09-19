@@ -17,7 +17,84 @@
  * under the License.
  */
 
+import {
+  Positions,
+  ChartModes,
+  ChartTypes,
+  AxisModes,
+  InterpolationModes,
+  Rotates,
+  ScaleTypes,
+  ThresholdLineStyles,
+} from './utils/collections';
+
 export interface CommonVislibParams {
   addTooltip: boolean;
-  legendPosition: 'right' | 'left' | 'top' | 'bottom';
+  legendPosition: Positions;
+}
+
+interface Labels {
+  filter: boolean;
+  rotate?: Rotates;
+  show: boolean;
+  truncate: number | null;
+}
+
+export interface Scale {
+  boundsMargin?: number | '';
+  defaultYExtents?: boolean;
+  max?: number | null;
+  min?: number | null;
+  mode?: AxisModes;
+  setYExtents?: boolean;
+  type: ScaleTypes;
+}
+
+interface ThresholdLine {
+  show: boolean;
+  value: number;
+  width: number;
+  style: ThresholdLineStyles;
+  color: string;
+}
+
+export interface Axis {
+  id: string;
+  labels: Labels;
+  position: Positions;
+  scale: Scale;
+  show: boolean;
+  style: object;
+  title: { text: string };
+  type: string;
+}
+
+export interface ValueAxis extends Axis {
+  name: string;
+}
+
+export interface SeriesParam {
+  data: { label: string; id: string };
+  drawLinesBetweenPoints: boolean;
+  interpolate: InterpolationModes;
+  lineWidth?: number;
+  mode: ChartModes;
+  show: boolean;
+  showCircles: boolean;
+  type: ChartTypes;
+  valueAxis: string;
+}
+
+export interface BasicVislibParams extends CommonVislibParams {
+  addTimeMarker: boolean;
+  categoryAxes: Axis[];
+  orderBucketsBySum?: boolean;
+  labels: Labels;
+  thresholdLine: ThresholdLine;
+  valueAxes: ValueAxis[];
+  grid: {
+    categoryLines: boolean;
+    valueAxis?: string;
+  };
+  seriesParams: SeriesParam[];
 }

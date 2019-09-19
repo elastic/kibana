@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
@@ -20,15 +21,16 @@ const ParamsSchema = schema.object({
 });
 
 // action type definition
-
-export const actionType: ActionType = {
-  id: '.server-log',
-  name: 'server-log',
-  validate: {
-    params: ParamsSchema,
-  },
-  executor,
-};
+export function getActionType(): ActionType {
+  return {
+    id: '.server-log',
+    name: 'server-log',
+    validate: {
+      params: ParamsSchema,
+    },
+    executor,
+  };
+}
 
 // action executor
 
@@ -40,9 +42,16 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   try {
     services.log(params.tags, params.message);
   } catch (err) {
+    const message = i18n.translate('xpack.actions.builtin.serverLog.errorLoggingErrorMessage', {
+      defaultMessage: 'error in action "{id}" logging message: {errorMessage}',
+      values: {
+        id,
+        errorMessage: err.message,
+      },
+    });
     return {
       status: 'error',
-      message: `error in action ${id} logging message: ${err.message}`,
+      message,
     };
   }
 

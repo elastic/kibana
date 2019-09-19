@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSelect, EuiFormLabel } from '@elastic/eui';
+import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFetcher } from '../../../hooks/useFetcher';
-import { loadEnvironmentsFilter } from '../../../services/rest/apm/ui_filters';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
@@ -17,6 +16,7 @@ import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED
 } from '../../../../common/environment_filter_values';
+import { callApmApi } from '../../../services/rest/callApmApi';
 
 function updateEnvironmentUrl(
   location: ReturnType<typeof useLocation>,
@@ -81,23 +81,24 @@ export const EnvironmentFilter: React.FC = () => {
   const { environment } = uiFilters;
   const { data: environments = [], status = 'loading' } = useFetcher(() => {
     if (start && end) {
-      return loadEnvironmentsFilter({
-        start,
-        end,
-        serviceName
+      return callApmApi({
+        pathname: '/api/apm/ui_filters/environments',
+        params: {
+          query: {
+            start,
+            end,
+            serviceName
+          }
+        }
       });
     }
   }, [start, end, serviceName]);
 
   return (
     <EuiSelect
-      prepend={
-        <EuiFormLabel>
-          {i18n.translate('xpack.apm.filter.environment.label', {
-            defaultMessage: 'environment'
-          })}
-        </EuiFormLabel>
-      }
+      prepend={i18n.translate('xpack.apm.filter.environment.label', {
+        defaultMessage: 'environment'
+      })}
       options={getOptions(environments)}
       value={environment || ENVIRONMENT_ALL}
       onChange={event => {

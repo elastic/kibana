@@ -5,6 +5,7 @@
  */
 
 import qs from 'querystring';
+import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
 import { StringMap } from '../../../../typings/common';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
@@ -19,7 +20,7 @@ export function fromQuery(query: StringMap<any>) {
   });
 }
 
-export interface APMQueryParams {
+export type APMQueryParams = {
   transactionId?: string;
   transactionName?: string;
   transactionType?: string;
@@ -38,7 +39,7 @@ export interface APMQueryParams {
   rangeTo?: string;
   refreshPaused?: string | boolean;
   refreshInterval?: string | number;
-}
+} & { [key in LocalUIFilterName]?: string };
 
 // forces every value of T[K] to be type: string
 type StringifyAll<T> = { [K in keyof T]: string };

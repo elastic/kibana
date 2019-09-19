@@ -5,68 +5,65 @@
  */
 
 import createContainer from 'constate-latest';
-import { useMemo, useEffect, useState } from 'react';
-import { values } from 'lodash';
-import { getJobId } from '../../../../common/log_analysis';
+import { useEffect, useMemo, useCallback } from 'react';
+import { bucketSpan } from '../../../../common/log_analysis';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callJobsSummaryAPI } from './api/ml_get_jobs_summary_api';
-
-type JobStatus = 'unknown' | 'closed' | 'closing' | 'failed' | 'opened' | 'opening' | 'deleted';
-// type DatafeedStatus = 'unknown' | 'started' | 'starting' | 'stopped' | 'stopping' | 'deleted';
+import { callSetupMlModuleAPI, SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
+import { useLogAnalysisCleanup } from './log_analysis_cleanup';
+import { useStatusState } from './log_analysis_status_state';
 
 export const useLogAnalysisJobs = ({
   indexPattern,
   sourceId,
   spaceId,
+  timeField,
 }: {
   indexPattern: string;
   sourceId: string;
   spaceId: string;
+  timeField: string;
 }) => {
-  const [jobStatus, setJobStatus] = useState<{
-    logEntryRate: JobStatus;
-  }>({
-    logEntryRate: 'unknown',
-  });
+  const { cleanupMLResources } = useLogAnalysisCleanup({ sourceId, spaceId });
+  const [statusState, dispatch] = useStatusState();
 
-  // const [setupMlModuleRequest, setupMlModule] = useTrackedPromise(
-  //   {
-  //     cancelPreviousOn: 'resolution',
-  //     createPromise: async () => {
-  //       kfetch({
-  //         method: 'POST',
-  //         pathname: '/api/ml/modules/setup',
-  //         body: JSON.stringify(
-  //           setupMlModuleRequestPayloadRT.encode({
-  //             indexPatternName: indexPattern,
-  //             prefix: getJobIdPrefix(spaceId, sourceId),
-  //             startDatafeed: true,
-  //           })
-  //         ),
-  //       });
-  //     },
-  //   },
-  //   [indexPattern, spaceId, sourceId]
-  // );
+  const [setupMlModuleRequest, setupMlModule] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'resolution',
+      createPromise: async (start, end) => {
+        dispatch({ type: 'startedSetup' });
+        return await callSetupMlModuleAPI(
+          start,
+          end,
+          spaceId,
+          sourceId,
+          indexPattern,
+          timeField,
+          bucketSpan
+        );
+      },
+      onResolve: ({ datafeeds, jobs }: SetupMlModuleResponsePayload) => {
+        dispatch({ type: 'finishedSetup', datafeeds, jobs, spaceId, sourceId });
+      },
+      onReject: () => {
+        dispatch({ type: 'failedSetup' });
+      },
+    },
+    [indexPattern, spaceId, sourceId, timeField, bucketSpan]
+  );
 
   const [fetchJobStatusRequest, fetchJobStatus] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return callJobsSummaryAPI(spaceId, sourceId);
+        dispatch({ type: 'fetchingJobStatuses' });
+        return await callJobsSummaryAPI(spaceId, sourceId);
       },
       onResolve: response => {
-        if (response && response.length) {
-          const logEntryRate = response.find(
-            (job: any) => job.id === getJobId(spaceId, sourceId, 'log-entry-rate')
-          );
-          setJobStatus({
-            logEntryRate: logEntryRate ? logEntryRate.jobState : 'unknown',
-          });
-        }
+        dispatch({ type: 'fetchedJobStatuses', payload: response, spaceId, sourceId });
       },
-      onReject: error => {
-        // TODO: Handle errors
+      onReject: err => {
+        dispatch({ type: 'failedFetchingJobStatuses' });
       },
     },
     [indexPattern, spaceId, sourceId]
@@ -76,21 +73,37 @@ export const useLogAnalysisJobs = ({
     fetchJobStatus();
   }, []);
 
-  const isSetupRequired = useMemo(() => {
-    const jobStates = values(jobStatus);
-    return (
-      jobStates.filter(state => state === 'opened' || state === 'opening').length < jobStates.length
-    );
-  }, [jobStatus]);
-
   const isLoadingSetupStatus = useMemo(() => fetchJobStatusRequest.state === 'pending', [
     fetchJobStatusRequest.state,
   ]);
 
+  const viewResults = useCallback(() => {
+    dispatch({ type: 'viewedResults' });
+  }, []);
+
+  const retry = useCallback(
+    (start, end) => {
+      dispatch({ type: 'startedSetup' });
+      cleanupMLResources()
+        .then(() => {
+          setupMlModule(start, end);
+        })
+        .catch(() => {
+          dispatch({ type: 'failedSetup' });
+        });
+    },
+    [cleanupMLResources, setupMlModule]
+  );
+
   return {
-    jobStatus,
-    isSetupRequired,
+    setupMlModuleRequest,
+    jobStatus: statusState.jobStatus,
     isLoadingSetupStatus,
+    setup: setupMlModule,
+    retry,
+    setupStatus: statusState.setupStatus,
+    viewResults,
+    fetchJobStatus,
   };
 };
 

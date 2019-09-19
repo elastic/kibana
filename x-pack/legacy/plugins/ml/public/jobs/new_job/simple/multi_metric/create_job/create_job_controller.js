@@ -18,6 +18,7 @@ import dateMath from '@elastic/datemath';
 import angular from 'angular';
 
 import uiRoutes from 'ui/routes';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { MlTimeBuckets } from 'plugins/ml/util/ml_time_buckets';
@@ -46,7 +47,7 @@ import template from './create_job.html';
 import { timefilter } from 'ui/timefilter';
 
 uiRoutes
-  .when('/jobs/new_job/simple/multi_metric', {
+  .when('/jobs/new_job_old/multi_metric', {
     template,
     k7Breadcrumbs: getCreateMultiMetricJobBreadcrumbs,
     resolve: {
@@ -138,7 +139,7 @@ module
       bucketSpanValid: true,
       bucketSpanEstimator: { status: 0, message: '' },
       cardinalityValidator: { status: 0, message: '' },
-      aggTypeOptions: filterAggTypes(aggTypes.byType[METRIC_AGG_TYPE]),
+      aggTypeOptions: filterAggTypes(aggTypes[METRIC_AGG_TYPE]),
       fields: [],
       splitFields: [],
       timeFields: [],
@@ -757,15 +758,18 @@ module
       preLoadJob($scope, appState);
     });
 
-    $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
-      $scope.loadVis();
-      if ($scope.formConfig.splitField !== undefined) {
-        $scope.setModelMemoryLimit();
+    const fetchSub = subscribeWithScope($scope, timefilter.getFetch$(), {
+      next: () => {
+        $scope.loadVis();
+        if ($scope.formConfig.splitField !== undefined) {
+          $scope.setModelMemoryLimit();
+        }
       }
     });
 
     $scope.$on('$destroy', () => {
       globalForceStop = true;
       angular.element(window).off('resize');
+      fetchSub.unsubscribe();
     });
   });

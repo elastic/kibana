@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import url from 'url';
+import queryString from 'querystring';
 import { DetailSymbolInformation } from '@elastic/lsp-extension';
 
 import { npStart } from 'ui/new_platform';
 import { Location } from 'vscode-languageserver-types';
 import { monaco } from '../monaco';
 import { LspRestClient, TextDocumentMethods } from '../../../common/lsp_client';
+import { parseSchema } from '../../../common/uri_util';
+import { history } from '../../utils/url';
 
 export const definitionProvider: monaco.languages.DefinitionProvider = {
   async provideDefinition(
@@ -41,6 +45,20 @@ export const definitionProvider: monaco.languages.DefinitionProvider = {
       return [];
     }
 
+    function openDefinitionsPanel() {
+      if (model && position) {
+        const { uri } = parseSchema(model.uri.toString());
+        const refUrl = `git:/${uri}!L${position.lineNumber - 1}:${position.column - 1}`;
+        const queries = url.parse(history.location.search, true).query;
+        const query = queryString.stringify({
+          ...queries,
+          tab: 'definitions',
+          refUrl,
+        });
+        history.push(`${uri}?${query}`);
+      }
+    }
+
     const result = await lspMethods.edefinition.send({
       position: {
         line: position.lineNumber - 1,
@@ -52,20 +70,19 @@ export const definitionProvider: monaco.languages.DefinitionProvider = {
     });
 
     if (result) {
-      const locations = result.filter(l => l.location !== undefined).map(l => l.location!);
-      if (locations.length > 0) {
-        return locations.map(handleLocation);
+      if (result.length > 1) {
+        openDefinitionsPanel();
+        return result.filter(l => l.location !== undefined).map(l => handleLocation(l.location!));
       } else {
-        let qnameResults: monaco.languages.Location[] = [];
-        for (const l of result) {
-          if (l.qname) {
-            qnameResults = qnameResults.concat(await handleQname(l.qname));
-          }
+        const l = result[0];
+        const location = l.location;
+        if (location) {
+          return [handleLocation(location)];
+        } else if (l.qname) {
+          return await handleQname(l.qname);
         }
-        return qnameResults;
       }
     }
-
     return [];
   },
 };
