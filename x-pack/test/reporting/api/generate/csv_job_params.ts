@@ -27,25 +27,25 @@ export default function({ getService }: { getService: any }) {
   };
 
   describe('Generation from Job Params', () => {
-    it('Rejects bogus jobParams', async () => {
+    before(async () => {
       await esArchiver.load('reporting/logs');
       await esArchiver.load('logstash_functional');
+    }); // prettier-ignore
+    after(async () => {
+      await esArchiver.unload('reporting/logs');
+      await esArchiver.unload('logstash_functional');
+    }); // prettier-ignore
 
+    it('Rejects bogus jobParams', async () => {
       const { status: resStatus, text: resText } = (await generateAPI.getCsvFromParamsInPayload({
         jobParams: 0,
       })) as supertest.Response;
 
       expect(resStatus).to.eql(400);
       expect(resText).to.match(/\\\"jobParams\\\" must be a string/);
-
-      await esArchiver.unload('reporting/logs');
-      await esArchiver.unload('logstash_functional');
     });
 
     it('Rejects empty jobParams', async () => {
-      await esArchiver.load('reporting/logs');
-      await esArchiver.load('logstash_functional');
-
       const {
         status: resStatus,
         text: resText,
@@ -53,37 +53,22 @@ export default function({ getService }: { getService: any }) {
 
       expect(resStatus).to.eql(400);
       expect(resText).to.match(/jobParams RISON string is required/);
-
-      await esArchiver.unload('reporting/logs');
-      await esArchiver.unload('logstash_functional');
     });
 
     it('Accepts jobParams in POST payload', async () => {
-      await esArchiver.load('reporting/logs');
-      await esArchiver.load('logstash_functional');
-
       const { status: resStatus, text: resText } = (await generateAPI.getCsvFromParamsInPayload({
         jobParams: JOB_PARAMS_IN_POSTBODY,
       })) as supertest.Response;
       expect(resStatus).to.eql(200);
       expect(resText).to.match(/"jobtype":"csv"/);
-
-      await esArchiver.unload('reporting/logs');
-      await esArchiver.unload('logstash_functional');
     });
 
     it('Accepts jobParams in query string', async () => {
-      await esArchiver.load('reporting/logs');
-      await esArchiver.load('logstash_functional');
-
       const { status: resStatus, text: resText } = (await generateAPI.getCsvFromParamsInQueryString(
         JOB_PARAMS_IN_QUERYSTRING
       )) as supertest.Response;
       expect(resStatus).to.eql(200);
       expect(resText).to.match(/"jobtype":"csv"/);
-
-      await esArchiver.unload('reporting/logs');
-      await esArchiver.unload('logstash_functional');
     });
   });
 }
