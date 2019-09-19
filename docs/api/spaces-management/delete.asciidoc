@@ -6,9 +6,9 @@
 
 Deletes a {kib} space.
 
-WARNING: When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone. 
+experimental["The underlying Spaces concepts are stable, but the APIs for managing Spaces are experimental."]
 
-experimental["This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental."]
+WARNING: When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone. 
 
 [[spaces-api-delete-request]]
 ==== Request
