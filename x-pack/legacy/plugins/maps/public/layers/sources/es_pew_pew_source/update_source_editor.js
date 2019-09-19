@@ -60,7 +60,7 @@ export class UpdateSourceEditor extends Component {
       <>
         <EuiTitle size="xxs">
           <h6>
-            <FormattedMessage id="xpack.maps.source.esGrid.metricsLabel" defaultMessage="Metrics" />
+            <FormattedMessage id="xpack.maps.source.pewPew.metricsLabel" defaultMessage="Metrics" />
           </h6>
         </EuiTitle>
         <EuiSpacer size="s" />
