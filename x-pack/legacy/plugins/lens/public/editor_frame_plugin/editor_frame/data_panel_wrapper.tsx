@@ -32,6 +32,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
         type: 'UPDATE_DATASOURCE_STATE',
         updater,
         datasourceId: props.activeDatasource!,
+        clearStagedPreview: true,
       });
     },
     [props.dispatch, props.activeDatasource]
