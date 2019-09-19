@@ -86,7 +86,7 @@ describe('ApplySiemFilterAction', () => {
         });
         expect(result).toBe(false);
       } else {
-        throw new Error('Invalid embeddable in unit test');
+        throw new Error('Invalid embeddable or filter in unit test');
       }
     });
 
