@@ -22,6 +22,20 @@ export const LogAnalysisJobConfigurationSection: React.FunctionComponent = () =>
         />
       </EuiDescriptionListTitle>
       <EuiDescriptionListDescription>placeholder</EuiDescriptionListDescription>
+      <EuiDescriptionListTitle>
+        <FormattedMessage
+          id="xpack.infra.logs.analysis.jobStatusPopover.startTimeConfigurationLabel"
+          defaultMessage="Start time"
+        />
+      </EuiDescriptionListTitle>
+      <EuiDescriptionListDescription>placeholder</EuiDescriptionListDescription>
+      <EuiDescriptionListTitle>
+        <FormattedMessage
+          id="xpack.infra.logs.analysis.jobStatusPopover.startTimeConfigurationLabel"
+          defaultMessage="End time"
+        />
+      </EuiDescriptionListTitle>
+      <EuiDescriptionListDescription>placeholder</EuiDescriptionListDescription>
     </EuiDescriptionList>
   );
 };

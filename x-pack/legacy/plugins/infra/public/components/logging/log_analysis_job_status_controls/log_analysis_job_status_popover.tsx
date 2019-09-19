@@ -4,13 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPopover, EuiPopoverTitle, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
-import { JobStatus, JobType } from '../../../../common/log_analysis';
-import { LogAnalysisJobConfigurationSection } from './log_analysis_job_configuration_section';
+import { JobStatus, JobType, jobTypeRT } from '../../../../common/log_analysis';
 import { LogAnalysisJobStatusSection } from './log_analysis_job_status_section';
 
 export const LogAnalysisJobStatusPopover: React.FunctionComponent<{
@@ -33,10 +39,25 @@ export const LogAnalysisJobStatusPopover: React.FunctionComponent<{
         />
       </EuiPopoverTitle>
       <PopoverContent>
-        <LogAnalysisJobConfigurationSection />
-        <EuiSpacer />
-        <LogAnalysisJobStatusSection jobStatus={jobStatus} />
+        {Object.entries(jobStatus).map(([currentJobType, currentJobStatus]) =>
+          jobTypeRT.is(currentJobType) ? (
+            <LogAnalysisJobStatusSection
+              key={currentJobType}
+              jobStatus={currentJobStatus}
+              jobType={currentJobType}
+            />
+          ) : null
+        )}
       </PopoverContent>
+      <EuiPopoverFooter>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButton color="warning" disabled iconType="broom" size="s">
+              Reset jobs
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPopoverFooter>
     </EuiPopover>
   );
 };
