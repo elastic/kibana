@@ -15,6 +15,7 @@ import { DurationLineSeriesList } from './duration_line_series_list';
 import { DurationChartEmptyState } from './duration_chart_empty_state';
 import { ChartWrapper } from './chart_wrapper';
 import { useUrlParams } from '../../../hooks';
+import { getTickFormat } from './get_tick_format';
 
 interface DurationChartProps {
   /**
@@ -80,7 +81,7 @@ export const DurationChart = ({
               domain={{ min: 0 }}
               id={getAxisId('left')}
               position={Position.Left}
-              tickFormat={d => Number(d).toFixed(0)}
+              tickFormat={d => getTickFormat(d)}
               title={i18n.translate('xpack.uptime.monitorCharts.durationChart.leftAxis.title', {
                 defaultMessage: 'Duration ms',
               })}
