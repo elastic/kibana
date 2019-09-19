@@ -87,10 +87,11 @@ export const DurationChart = ({
                 defaultMessage: 'Duration ms',
               })}
             />
-            {hasLines && (
+            {hasLines ? (
               <DurationLineSeriesList lines={locationDurationLines} meanColor={meanColor} />
+            ) : (
+              <DurationChartEmptyState />
             )}
-            {!hasLines && <DurationChartEmptyState />}
           </Chart>
         </ChartWrapper>
       </EuiPanel>
