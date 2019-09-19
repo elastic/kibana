@@ -121,13 +121,14 @@ export function buildExpression({
   const visualizationExpression = visualization.toExpression(visualizationState, framePublicAPI);
 
   const expressionContext = removeDateRange
-    ? { query: framePublicAPI.query }
+    ? { query: framePublicAPI.query, filters: framePublicAPI.filters }
     : {
         query: framePublicAPI.query,
         timeRange: {
           from: framePublicAPI.dateRange.fromDate,
           to: framePublicAPI.dateRange.toDate,
         },
+        filters: framePublicAPI.filters,
       };
 
   const completeExpression = prependDatasourceExpression(

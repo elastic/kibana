@@ -6,9 +6,16 @@
 
 import React, { useEffect, useReducer } from 'react';
 import { CoreSetup, CoreStart } from 'src/core/public';
-import { Query } from '../../../../../../../src/legacy/core_plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import { Query, SavedQuery } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
-import { Datasource, DatasourcePublicAPI, FramePublicAPI, Visualization } from '../../types';
+import {
+  Datasource,
+  DatasourcePublicAPI,
+  FramePublicAPI,
+  Visualization,
+  DatasourceMetaData,
+} from '../../types';
 import { reducer, getInitialState } from './state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel_wrapper';
@@ -34,7 +41,12 @@ export interface EditorFrameProps {
     toDate: string;
   };
   query: Query;
-  onChange: (arg: { indexPatternTitles: string[]; doc: Document }) => void;
+  filters: Filter[];
+  savedQuery?: SavedQuery;
+  onChange: (arg: {
+    filterableIndexPatterns: DatasourceMetaData['filterableIndexPatterns'];
+    doc: Document;
+  }) => void;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
@@ -98,6 +110,7 @@ export function EditorFrame(props: EditorFrameProps) {
     datasourceLayers,
     dateRange: props.dateRange,
     query: props.query,
+    filters: props.filters,
 
     addNewLayer() {
       const newLayerId = generateId();
@@ -170,7 +183,7 @@ export function EditorFrame(props: EditorFrameProps) {
       return;
     }
 
-    const indexPatternTitles: string[] = [];
+    const indexPatterns: DatasourceMetaData['filterableIndexPatterns'] = [];
     Object.entries(props.datasourceMap)
       .filter(([id, datasource]) => {
         const stateWrapper = state.datasourceStates[id];
@@ -181,10 +194,8 @@ export function EditorFrame(props: EditorFrameProps) {
         );
       })
       .forEach(([id, datasource]) => {
-        indexPatternTitles.push(
-          ...datasource
-            .getMetaData(state.datasourceStates[id].state)
-            .filterableIndexPatterns.map(pattern => pattern.title)
+        indexPatterns.push(
+          ...datasource.getMetaData(state.datasourceStates[id].state).filterableIndexPatterns
         );
       });
 
@@ -201,8 +212,16 @@ export function EditorFrame(props: EditorFrameProps) {
       framePublicAPI,
     });
 
-    props.onChange({ indexPatternTitles, doc });
-  }, [state.datasourceStates, state.visualization, props.query, props.dateRange, state.title]);
+    props.onChange({ filterableIndexPatterns: indexPatterns, doc });
+  }, [
+    state.datasourceStates,
+    state.visualization,
+    props.query,
+    props.dateRange,
+    props.filters,
+    props.savedQuery,
+    state.title,
+  ]);
 
   return (
     <FrameLayout
@@ -222,6 +241,7 @@ export function EditorFrame(props: EditorFrameProps) {
           core={props.core}
           query={props.query}
           dateRange={props.dateRange}
+          filters={props.filters}
         />
       }
       configPanel={

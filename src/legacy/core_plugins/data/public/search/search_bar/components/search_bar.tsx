@@ -78,10 +78,14 @@ export interface SearchBarProps {
   isRefreshPaused?: boolean;
   refreshInterval?: number;
   showAutoRefreshOnly?: boolean;
-  showSaveQuery?: boolean;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
+  // Show when user has privileges to save
+  showSaveQuery?: boolean;
+  // User has saved the current state as a saved query
   onSaved?: (savedQuery: SavedQuery) => void;
+  // User has modified the saved query, your app should persist the update
   onSavedQueryUpdated?: (savedQuery: SavedQuery) => void;
+  // User has cleared the active query, which should not clear filters
   onClearSavedQuery?: () => void;
   customSubmitButton?: React.ReactNode;
 }

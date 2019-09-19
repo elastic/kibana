@@ -11,6 +11,11 @@ import chrome from 'ui/chrome';
 import { Storage } from 'ui/storage';
 import { CoreSetup, CoreStart } from 'src/core/public';
 import { npSetup, npStart } from 'ui/new_platform';
+import { DataSetup } from 'src/legacy/core_plugins/data/public';
+import {
+  setup as dataSetup,
+  start as dataStart,
+} from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 import { editorFrameSetup, editorFrameStart, editorFrameStop } from '../editor_frame_plugin';
 import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from '../indexpattern_plugin';
 import { SavedObjectIndexStore } from '../persistence';
@@ -29,7 +34,7 @@ export class AppPlugin {
 
   constructor() {}
 
-  setup(core: CoreSetup) {
+  setup(core: CoreSetup, plugins: { data: DataSetup }) {
     // TODO: These plugins should not be called from the top level, but since this is the
     // entry point to the app we have no choice until the new platform is ready
     const indexPattern = indexPatternDatasourceSetup();
@@ -45,7 +50,7 @@ export class AppPlugin {
     editorFrameSetupInterface.registerVisualization(metricVisualization);
   }
 
-  start(core: CoreStart) {
+  start(core: CoreStart, plugins: { data: DataSetup }) {
     if (this.store === null) {
       throw new Error('Start lifecycle called before setup lifecycle');
     }
@@ -60,6 +65,7 @@ export class AppPlugin {
       return (
         <App
           core={core}
+          data={plugins.data}
           editorFrame={this.instance!}
           store={new Storage(localStorage)}
           savedObjectsClient={chrome.getSavedObjectsClient()}
@@ -109,6 +115,12 @@ export class AppPlugin {
 
 const app = new AppPlugin();
 
-export const appSetup = () => app.setup(npSetup.core);
-export const appStart = () => app.start(npStart.core);
+export const appSetup = () =>
+  app.setup(npSetup.core, {
+    data: dataSetup,
+  });
+export const appStart = () =>
+  app.start(npStart.core, {
+    data: dataStart,
+  });
 export const appStop = () => app.stop();
