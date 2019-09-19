@@ -66,6 +66,7 @@ uiRoutes.when('/', {
 export const start = pluginInstance.start(npStart.core, {
   embeddable: embeddableStart,
   inspector: npStart.plugins.inspector,
+  uiActions: npStart.plugins.uiActions,
   __LEGACY: {
     SavedObjectFinder,
     ExitFullScreenButton,

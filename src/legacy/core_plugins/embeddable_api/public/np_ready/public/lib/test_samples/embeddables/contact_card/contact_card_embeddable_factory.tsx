@@ -19,12 +19,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+
 import { EmbeddableFactory } from '../../../embeddables';
 import { Container } from '../../../containers';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';
 import { ContactCardInitializer } from './contact_card_initializer';
 import { EmbeddableFactoryOptions } from '../../../embeddables/embeddable_factory';
-import { ExecuteTriggerActions } from '../../../types';
 import { CoreStart } from '../../../../../../../../../../core/public';
 
 export const CONTACT_CARD_EMBEDDABLE = 'CONTACT_CARD_EMBEDDABLE';
@@ -34,7 +35,7 @@ export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardE
 
   constructor(
     options: EmbeddableFactoryOptions<any>,
-    private readonly execTrigger: ExecuteTriggerActions,
+    private readonly execTrigger: TExecuteTriggerActions,
     private readonly overlays: CoreStart['overlays']
   ) {
     super(options);

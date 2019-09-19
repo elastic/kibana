@@ -39,18 +39,21 @@ import {
   ContactCardEmbeddableOutput,
 } from '../../../../../embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable';
 import { embeddablePluginMock } from '../../../../../embeddable_api/public/np_ready/public/mocks';
-import { EditModeAction } from '../../../../../embeddable_api/public/np_ready/public/lib/test_samples/actions/edit_mode_action';
+import { createEditModeAction } from '../../../../../embeddable_api/public/np_ready/public/lib/test_samples/actions/edit_mode_action';
 // eslint-disable-next-line
 import { inspectorPluginMock } from '../../../../../../../plugins/inspector/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../plugins/kibana_react/public';
+// eslint-disable-next-line
+import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
 
 test('DashboardContainer in edit mode shows edit mode actions', async () => {
   const inspector = inspectorPluginMock.createStartContract();
   const { setup, doStart } = embeddablePluginMock.createInstance();
+  const uiActionsSetup = uiActionsPluginMock.createSetupContract();
 
-  const editModeAction = new EditModeAction();
-  setup.registerAction(editModeAction);
-  setup.attachAction(CONTEXT_MENU_TRIGGER, editModeAction.id);
+  const editModeAction = createEditModeAction();
+  uiActionsSetup.registerAction(editModeAction);
+  uiActionsSetup.attachAction(CONTEXT_MENU_TRIGGER, editModeAction.id);
   setup.registerEmbeddableFactory(
     CONTACT_CARD_EMBEDDABLE,
     new ContactCardEmbeddableFactory({} as any, (() => null) as any, {} as any)
@@ -67,6 +70,7 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
     inspector: {} as any,
     SavedObjectFinder: () => null,
     ExitFullScreenButton: () => null,
+    uiActions: {} as any,
   };
   const container = new DashboardContainer(initialInput, options);
 
