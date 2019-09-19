@@ -116,13 +116,11 @@ describe('ApplySiemFilterAction', () => {
         type: MAP_SAVED_OBJECT_TYPE,
       };
       if (isPartialFilterAction(action) && isEmbeddable(embeddable)) {
-        if (isEmbeddable(embeddable)) {
-          await expect(
-            action.execute({
-              embeddable,
-            })
-          ).rejects.toThrow('Applying a filter requires a filter as context');
-        }
+        await expect(
+          action.execute({
+            embeddable,
+          })
+        ).rejects.toThrow('Applying a filter requires a filter as context');
       } else {
         throw new Error('Invalid embeddable or filter in unit test');
       }
