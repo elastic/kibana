@@ -4,6 +4,7 @@ exports[`OptionsTab should renders OptionsTab 1`] = `
 <EuiForm>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="updateFiltersOnChange"
@@ -24,6 +25,7 @@ exports[`OptionsTab should renders OptionsTab 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="useTimeFilter"
@@ -44,6 +46,7 @@ exports[`OptionsTab should renders OptionsTab 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="pinFilters"

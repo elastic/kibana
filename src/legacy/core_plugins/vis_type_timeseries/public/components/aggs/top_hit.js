@@ -153,8 +153,12 @@ const TopHitAggUi = props => {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
-            <FormattedMessage id="visTypeTimeseries.topHit.aggregationLabel" defaultMessage="Aggregation" />
+            <FormattedMessage
+              id="visTypeTimeseries.topHit.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
           </EuiFormLabel>
+          <EuiSpacer size="xs" />
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -166,7 +170,9 @@ const TopHitAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('field')}
-            label={<FormattedMessage id="visTypeTimeseries.topHit.fieldLabel" defaultMessage="Field" />}
+            label={
+              <FormattedMessage id="visTypeTimeseries.topHit.fieldLabel" defaultMessage="Field" />
+            }
           >
             <FieldSelect
               fields={fields}
@@ -186,7 +192,9 @@ const TopHitAggUi = props => {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('size')}
-            label={<FormattedMessage id="visTypeTimeseries.topHit.sizeLabel" defaultMessage="Size" />}
+            label={
+              <FormattedMessage id="visTypeTimeseries.topHit.sizeLabel" defaultMessage="Size" />
+            }
           >
             {/*
               EUITODO: The following input couldn't be converted to EUI because of type mis-match.
@@ -211,9 +219,12 @@ const TopHitAggUi = props => {
           >
             <EuiComboBox
               isClearable={false}
-              placeholder={i18n.translate('visTypeTimeseries.topHit.aggregateWith.selectPlaceholder', {
-                defaultMessage: 'Select...',
-              })}
+              placeholder={i18n.translate(
+                'visTypeTimeseries.topHit.aggregateWith.selectPlaceholder',
+                {
+                  defaultMessage: 'Select...',
+                }
+              )}
               options={aggWithOptions}
               selectedOptions={selectedAggWithOption ? [selectedAggWithOption] : []}
               onChange={handleSelectChange('agg_with')}
@@ -224,7 +235,12 @@ const TopHitAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('order_by')}
-            label={<FormattedMessage id="visTypeTimeseries.topHit.orderByLabel" defaultMessage="Order by" />}
+            label={
+              <FormattedMessage
+                id="visTypeTimeseries.topHit.orderByLabel"
+                defaultMessage="Order by"
+              />
+            }
           >
             <FieldSelect
               restrict={ORDER_DATE_RESTRICT_FIELDS}
@@ -238,7 +254,9 @@ const TopHitAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('order')}
-            label={<FormattedMessage id="visTypeTimeseries.topHit.orderLabel" defaultMessage="Order" />}
+            label={
+              <FormattedMessage id="visTypeTimeseries.topHit.orderLabel" defaultMessage="Order" />
+            }
           >
             <EuiComboBox
               isClearable={false}
