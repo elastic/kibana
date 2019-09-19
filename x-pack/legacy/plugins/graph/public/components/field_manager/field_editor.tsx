@@ -21,7 +21,6 @@ import {
   EuiSpacer,
   // @ts-ignore
   EuiHighlight,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
