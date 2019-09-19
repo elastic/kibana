@@ -3,7 +3,9 @@
 = Reporting from Kibana
 
 [partintro]
+
 --
+
 You can generate reports that contain {kib} dashboards,
 visualizations, and saved searches. Dashboards and visualizations are
 exported as PDF documents, while saved searches in Discover
@@ -14,13 +16,55 @@ Reporting is located in the share menu from the {kib} toolbar:
 [role="screenshot"]
 image::user/reporting/images/share-button.png["Share"]
 
-You can also <<automating-report-generation, generate reports automatically>>.
+[float]
+== System setup
 
-To use {reporting} in a production environment, <<securing-reporting, secure
-the Reporting endpoints>>.
+{reporting} is automatically enabled in {kib}. The first time {kib} runs, it extracts a custom build for the Chromium web browser, which
+runs on the server in headless mode to load {kib} and capture the rendered {kib} charts as images.
+
+Chromium is an open-source project not related to Elastic, but the Chromium binary for {kib} has been custom-built by Elastic to ensure it
+works with minimal setup. However, the {kib} server OS might still require additional dependencies for Chromium. See the
+<<reporting-troubleshooting-system-dependencies, Reporting Troubleshooting>> section for more information about the system dependencies
+for different operating systems.
+
+[float]
+== Manually generate reports
+
+. Open {kib} in your web browser and log in. If you are running {kib}
+locally, go to `http://localhost:5601`. To access {kib} and generate
+reports, you need the `kibana_user` and `reporting_user` roles. For more
+information, see <<secure-reporting>>.
+
+. Open the dashboard, visualization, or saved search you want to include
+in the report.
+
+. Click *Share* in the {kib} toolbar:
++
+[role="screenshot"]
+image:user/reporting/images/share-button.png["Reporting Button",link="share-button.png"]
+
+. Depending on the {kib} application, choose the appropriate options:
+
+.. If you're on Discover:
+  ... Select *CSV Reports*
+
+  ... Click the *Generate CSV* button.
+
+.. If you're on Visualize or Dashboard:
+  ... Select *PDF Reports*
+
+  ... Dashboard only: Choose to enable *Optimize for printing* layout mode. For an explanation of the different layout modes, see <<pdf-layout-modes, PDF Layout Modes>>.
+
+  ... Click the *Generate PDF* button.
+
+[float]
+== Automatically generate reports
+
+If you want to automatically generate reports from a script or with
+{watcher}, see <<automating-report-generation, Automating Report Generation>>
+
 --
 
-include::getting-started.asciidoc[]
 include::automating-report-generation.asciidoc[]
 include::pdf-layout-modes.asciidoc[]
 include::configuring-reporting.asciidoc[]
