@@ -17,8 +17,8 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
+import { IAction } from 'src/plugins/ui_actions/public';
 import { ViewMode, GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
-import { Action } from '../../../../actions';
 import { openAddPanelFlyout } from './open_add_panel_flyout';
 import { NotificationsStart } from '../../../../../../../../../../../core/public';
 import { KibanaReactOverlays } from '../../../../../../../../../../../plugins/kibana_react/public';
@@ -30,8 +30,9 @@ interface ActionContext {
   embeddable: IContainer;
 }
 
-export class AddPanelAction extends Action<ActionContext> {
+export class AddPanelAction implements IAction<ActionContext> {
   public readonly type = ADD_PANEL_ACTION_ID;
+  public readonly id = ADD_PANEL_ACTION_ID;
 
   constructor(
     private readonly getFactory: GetEmbeddableFactory,
@@ -39,9 +40,7 @@ export class AddPanelAction extends Action<ActionContext> {
     private readonly overlays: KibanaReactOverlays,
     private readonly notifications: NotificationsStart,
     private readonly SavedObjectFinder: React.ComponentType<any>
-  ) {
-    super(ADD_PANEL_ACTION_ID);
-  }
+  ) {}
 
   public getDisplayName() {
     return i18n.translate('embeddableApi.addPanel.displayName', {

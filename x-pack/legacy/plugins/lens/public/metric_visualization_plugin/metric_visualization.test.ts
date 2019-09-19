@@ -38,11 +38,11 @@ describe('metric_visualization', () => {
 
       expect(initialState.accessor).toBeDefined();
       expect(initialState).toMatchInlineSnapshot(`
-        Object {
-          "accessor": "test-id1",
-          "layerId": "l42",
-        }
-      `);
+                Object {
+                  "accessor": "test-id1",
+                  "layerId": "l42",
+                }
+            `);
     });
 
     it('loads from persisted state', () => {
@@ -82,6 +82,9 @@ describe('metric_visualization', () => {
               "arguments": Object {
                 "accessor": Array [
                   "a",
+                ],
+                "mode": Array [
+                  "full",
                 ],
                 "title": Array [
                   "shazm",
