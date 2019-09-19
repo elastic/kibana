@@ -875,47 +875,49 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
         ) : null}
 
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexGroup gutterSize="m" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                color="secondary"
-                data-test-subj="saveWatchButton"
-                type="submit"
-                iconType="check"
-                isDisabled={hasErrors || hasActionErrors}
-                isLoading={isSaving}
-                onClick={async () => {
-                  setIsSaving(true);
-                  const savedWatch = await onWatchSave(watch);
-                  if (savedWatch && savedWatch.error) {
-                    setIsSaving(false);
-                    return setServerError(savedWatch.error);
-                  }
-                }}
-              >
-                {watch.isNew ? (
-                  <FormattedMessage
-                    id="xpack.watcher.sections.watchEdit.threshold.createButtonLabel"
-                    defaultMessage="Create alert"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.watcher.sections.watchEdit.threshold.saveButtonLabel"
-                    defaultMessage="Save alert"
-                  />
-                )}
-              </EuiButton>
-            </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="m" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  color="secondary"
+                  data-test-subj="saveWatchButton"
+                  type="submit"
+                  iconType="check"
+                  isDisabled={hasErrors || hasActionErrors}
+                  isLoading={isSaving}
+                  onClick={async () => {
+                    setIsSaving(true);
+                    const savedWatch = await onWatchSave(watch);
+                    if (savedWatch && savedWatch.error) {
+                      setIsSaving(false);
+                      return setServerError(savedWatch.error);
+                    }
+                  }}
+                >
+                  {watch.isNew ? (
+                    <FormattedMessage
+                      id="xpack.watcher.sections.watchEdit.threshold.createButtonLabel"
+                      defaultMessage="Create alert"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.watcher.sections.watchEdit.threshold.saveButtonLabel"
+                      defaultMessage="Save alert"
+                    />
+                  )}
+                </EuiButton>
+              </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => goToWatchList()}>
-                {i18n.translate('xpack.watcher.sections.watchEdit.threshold.cancelButtonLabel', {
-                  defaultMessage: 'Cancel',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={() => goToWatchList()}>
+                  {i18n.translate('xpack.watcher.sections.watchEdit.threshold.cancelButtonLabel', {
+                    defaultMessage: 'Cancel',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={() => setIsRequestVisible(!isRequestVisible)}>
