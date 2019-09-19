@@ -44,6 +44,7 @@ export function FieldPicker(props: FieldPickerProps) {
       anchorPosition="downLeft"
       ownFocus
       button={
+        // TODO disable as long as no datasource is picked
         <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={() => setOpen(true)}>
           {hasSelectedFields
             ? i18n.translate('xpack.graph.bar.pickMoreFieldsLabel', {

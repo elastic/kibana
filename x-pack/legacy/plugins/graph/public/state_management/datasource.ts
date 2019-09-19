@@ -12,6 +12,7 @@ import { GraphState, GraphStoreDependencies } from './store';
 import { reset } from './global';
 import { loadFields } from './fields';
 import { mapFields } from '../services/persistence';
+import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/datasource');
 
@@ -77,13 +78,15 @@ export const datasourceSelector = (state: GraphState) => state.datasource;
 export const datasourceSaga = ({
   indexPatternProvider,
   notifications,
-}: Pick<GraphStoreDependencies, 'notifications' | 'indexPatternProvider'>) =>
+  createWorkspace
+}: GraphStoreDependencies) =>
   function*() {
     function* fetchFields(action: Action<IndexpatternDatasource>) {
       try {
-        const indexPattern = yield call(indexPatternProvider.get, action.payload.id);
+        const indexPattern: IndexPattern = yield call(indexPatternProvider.get, action.payload.id);
         yield put(loadFields(mapFields(indexPattern)));
         yield put(datasourceLoaded());
+        createWorkspace(indexPattern.title);
       } catch (e) {
         // in case of errors, reset the datasource and show notification
         yield put(setDatasource({ type: 'none' }));

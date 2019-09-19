@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import actionCreatorFactory from 'typescript-fsa';
+import actionCreatorFactory, { Action } from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { createSelector } from 'reselect';
-import { WorkspaceField } from '../types';
-import { GraphState } from './store';
+import { select, takeLatest } from 'redux-saga/effects';
+import { WorkspaceField  } from '../types';
+import { GraphState, GraphStoreDependencies } from './store';
 import { reset } from './global';
 import { setDatasource } from './datasource';
+import { matchesOne, InferActionType } from './helpers';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/fields');
 
@@ -57,3 +59,61 @@ export const liveResponseFieldsSelector = createSelector(
   selectedFieldsSelector,
   fields => fields.filter(field => field.hopSize && field.hopSize > 0)
 );
+
+/**
+ * Saga making sure the fields in the store are always synced with the fields
+ * known to the workspace.
+ *
+ * Won't be necessary once the workspace is moved to redux
+ */
+export const syncFieldsSaga = ({ getWorkspace }: Pick<GraphStoreDependencies, 'getWorkspace'>) =>
+  function*() {
+    function* syncFields() {
+      const workspace = getWorkspace();
+      if (!workspace) {
+        return;
+      }
+
+      const selectedFields = selectedFieldsSelector(yield select());
+      workspace.options.vertex_fields = selectedFields;
+    }
+
+    yield takeLatest(matchesOne(loadFields, selectField, deselectField), syncFields);
+  };
+
+/**
+ * Saga making sure the field styles (icons and colors) are applied to nodes currently active
+ * in the workspace.
+ *
+ * Won't be necessary once the workspace is moved to redux
+ */
+export const syncNodeStyleSaga = ({ getWorkspace }: Pick<GraphStoreDependencies, 'getWorkspace'>) =>
+  function*() {
+    function* syncNodeStyle(action: Action<InferActionType<typeof updateFieldProperties>>) {
+      const workspace = getWorkspace();
+      if (!workspace) {
+        return;
+      }
+      const newColor = action.payload.fieldProperties.color;
+      if (newColor) {
+        workspace.nodes.forEach(function(node) {
+          if (node.data.field === action.payload.fieldName) {
+            node.color = newColor;
+          }
+        });
+      }
+      const newIcon = action.payload.fieldProperties.icon;
+
+      if (newIcon) {
+        workspace.nodes.forEach(function(node) {
+          if (node.data.field === action.payload.fieldName) {
+            node.icon = newIcon;
+          }
+        });
+      }
+      const selectedFields = selectedFieldsSelector(yield select());
+      workspace.options.vertex_fields = selectedFields;
+    }
+
+    yield takeLatest(updateFieldProperties.match, syncNodeStyle);
+  };

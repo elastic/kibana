@@ -28,8 +28,8 @@ import { WorkspaceField } from '../../types';
 import { iconChoices } from '../../helpers/style_choices';
 import { LegacyIcon } from '../legacy_icon';
 import { FieldIcon } from './field_icon';
+import { UpdateableFieldProperties } from './field_manager';
 
-type UpdateableFieldProperties = 'hopSize' | 'lastValidHopSize' | 'color' | 'icon';
 export interface FieldPickerProps {
   field: WorkspaceField;
   allFields: WorkspaceField[];

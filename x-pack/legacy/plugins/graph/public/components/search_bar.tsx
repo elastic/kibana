@@ -16,13 +16,21 @@ import React, { useState } from 'react';
 
 import { CoreStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
 import { IndexPatternSavedObject } from '../types';
 import { openSourceModal } from '../services/source_modal';
+import {
+  GraphState,
+  datasourceSelector,
+  requestDatasource,
+  IndexpatternDatasource,
+} from '../state_management';
 
 export interface SearchBarProps {
   isLoading: boolean;
   initialQuery?: string;
-  currentIndexPattern?: IndexPatternSavedObject;
+  currentIndexPattern?: IndexpatternDatasource;
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
   onQuerySubmit: (query: string) => void;
   savedObjects: CoreStart['savedObjects'];
@@ -30,7 +38,7 @@ export interface SearchBarProps {
   overlays: CoreStart['overlays'];
 }
 
-export function SearchBar({
+function SearchBarComponent({
   currentIndexPattern,
   onQuerySubmit,
   isLoading,
@@ -73,7 +81,7 @@ export function SearchBar({
                   }}
                 >
                   {currentIndexPattern
-                    ? currentIndexPattern.attributes.title
+                    ? currentIndexPattern.title
                     : // This branch will be shown if the user exits the
                       // initial picker modal
                       i18n.translate('xpack.graph.bar.pickSourceLabel', {
@@ -95,3 +103,24 @@ export function SearchBar({
     </form>
   );
 }
+
+export const SearchBar = connect(
+  (state: GraphState) => {
+    const datasource = datasourceSelector(state);
+    return {
+      currentIndexPattern:
+        datasource.current.type === 'indexpattern' ? datasource.current : undefined,
+    };
+  },
+  dispatch => ({
+    onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => {
+      dispatch(
+        requestDatasource({
+          type: 'indexpattern',
+          id: indexPattern.id,
+          title: indexPattern.attributes.title,
+        })
+      );
+    },
+  })
+)(SearchBarComponent);

@@ -15,6 +15,7 @@ import { openSourceModal } from '../services/source_modal';
 
 jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
 
+// TODO fix tests
 describe('search_bar', () => {
   it('should render search bar and submit queryies', () => {
     const querySubmit = jest.fn();

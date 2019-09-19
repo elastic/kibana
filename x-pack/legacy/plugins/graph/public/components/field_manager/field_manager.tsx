@@ -8,6 +8,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
 import { FieldPicker } from './field_picker';
 import { FieldEditor } from './field_editor';
 import {
@@ -16,40 +17,50 @@ import {
   updateFieldProperties,
   selectField,
   deselectField,
-  GraphDispatch,
   GraphState,
 } from '../../state_management';
+import { WorkspaceField } from '../../types';
 
-export interface FieldManagerProps {
-  state: GraphState;
-  dispatch: GraphDispatch;
-}
+export type UpdateableFieldProperties = 'hopSize' | 'lastValidHopSize' | 'color' | 'icon';
 
-export function FieldManager({ state, dispatch }: FieldManagerProps) {
-  const allFields = fieldsSelector(state);
-  const selectedFields = selectedFieldsSelector(state);
-
-  const actionCreators = bindActionCreators(
-    {
-      updateFieldProperties,
-      selectField,
-      deselectField,
-    },
-    dispatch
-  );
-
+function FieldManagerComponent(props: {
+  allFields: WorkspaceField[];
+  selectedFields: WorkspaceField[];
+  updateFieldProperties: (props: {
+    fieldName: string;
+    fieldProperties: Partial<Pick<WorkspaceField, UpdateableFieldProperties>>;
+  }) => void;
+  selectField: (fieldName: string) => void;
+  deselectField: (fieldName: string) => void;
+}) {
   return (
     <I18nProvider>
       <EuiFlexGroup gutterSize="s" className="gphFieldManager" alignItems="center">
-        {selectedFields.map(field => (
+        {props.selectedFields.map(field => (
           <EuiFlexItem key={field.name} grow={false}>
-            <FieldEditor allFields={allFields} {...actionCreators} field={field} />
+            <FieldEditor {...props} field={field} />
           </EuiFlexItem>
         ))}
         <EuiFlexItem grow={false}>
-          <FieldPicker allFields={allFields} {...actionCreators} />
+          <FieldPicker {...props} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </I18nProvider>
   );
 }
+
+export const FieldManager = connect(
+  (state: GraphState) => ({
+    allFields: fieldsSelector(state),
+    selectedFields: selectedFieldsSelector(state),
+  }),
+  dispatch =>
+    bindActionCreators(
+      {
+        updateFieldProperties,
+        selectField,
+        deselectField,
+      },
+      dispatch
+    )
+)(FieldManagerComponent);

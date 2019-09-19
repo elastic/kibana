@@ -7,13 +7,12 @@
 import createSagaMiddleware from 'redux-saga';
 import { combineReducers, createStore, Store, AnyAction, Dispatch, applyMiddleware } from 'redux';
 import { CoreStart } from 'src/core/public';
-import { fieldsReducer, FieldsState } from './fields';
+import { fieldsReducer, FieldsState, syncNodeStyleSaga, syncFieldsSaga } from './fields';
 import { UrlTemplatesState, urlTemplatesReducer } from './url_templates';
 import { AdvancedSettingsState, advancedSettingsReducer } from './advanced_settings';
 import { DatasourceState, datasourceReducer, datasourceSaga } from './datasource';
 import { IndexPatternProvider, Workspace, IndexPatternSavedObject, GraphSavePolicy, GraphWorkspaceSavedObject } from '../types';
 import { loadingSaga, savingSaga } from './persistence';
-import { syncNodeStyleSaga, syncFieldsSaga } from './workspace';
 import { metaDataReducer, MetaDataState } from './meta_data';
 
 export interface GraphState {
