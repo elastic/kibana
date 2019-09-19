@@ -11,6 +11,7 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
   const comboBox = getService('comboBox');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const log = getService('log');
 
   return {
     async assertTimeRangeSectionExists() {
@@ -34,7 +35,11 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async assertEventRateChartExists() {
-      await testSubjects.existOrFail('mlEventRateChart');
+      await testSubjects.existOrFail('~mlEventRateChart');
+    },
+
+    async assertEventRateChartHasData() {
+      await testSubjects.existOrFail('mlEventRateChart withData');
     },
 
     async assertAggAndFieldInputExists() {
@@ -163,6 +168,12 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
       expect(comboBoxSelectedOptions).to.eql(influencers);
     },
 
+    async assertAnomalyChartExists(chartType: string, preSelector?: string) {
+      let chartSelector = `mlAnomalyChart ${chartType}`;
+      chartSelector = !preSelector ? chartSelector : `${preSelector} > ${chartSelector}`;
+      log.debug('chartSelector: ' + chartSelector);
+    },
+
     async assertDetectorPreviewExists(
       aggAndFieldIdentifier: string,
       detectorPosition: number,
@@ -173,7 +184,8 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
       expect(
         await testSubjects.getVisibleText(`detector ${detectorPosition} > detectorTitle`)
       ).to.eql(aggAndFieldIdentifier);
-      await testSubjects.existOrFail(`detector ${detectorPosition} > mlAnomalyChart ${chartType}`);
+
+      await this.assertAnomalyChartExists(chartType, `detector ${detectorPosition}`);
     },
 
     async assertDetectorSplitExists(splitField: string) {
@@ -194,7 +206,15 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
       );
     },
 
+    async waitForNextButtonVisible() {
+      await retry.waitFor(
+        'next button to be visible',
+        async () => await testSubjects.isDisplayed('mlJobWizardNavButtonNext')
+      );
+    },
+
     async clickNextButton() {
+      await this.waitForNextButtonVisible();
       await testSubjects.clickWhenNotDisabled('mlJobWizardNavButtonNext');
     },
 

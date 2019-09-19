@@ -12,12 +12,20 @@ export function MachineLearningJobTypeSelectionProvider({ getService }: FtrProvi
   return {
     async selectSingleMetricJob() {
       await testSubjects.clickWhenNotDisabled('mlJobTypeLinkSingleMetricJob');
-      await testSubjects.existOrFail('mlPageJobWizard');
+      await this.assertSingleMetricJobWizardOpen();
+    },
+
+    async assertSingleMetricJobWizardOpen() {
+      await testSubjects.existOrFail('mlPageJobWizard single_metric');
     },
 
     async selectMultiMetricJob() {
       await testSubjects.clickWhenNotDisabled('mlJobTypeLinkMultiMetricJob');
-      await testSubjects.existOrFail('mlPageJobWizard');
+      await this.assertMultiMetricJobWizardOpen();
+    },
+
+    async assertMultiMetricJobWizardOpen() {
+      await testSubjects.existOrFail('mlPageJobWizard multi_metric');
     },
   };
 }
