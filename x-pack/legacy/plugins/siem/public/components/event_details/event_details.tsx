@@ -16,7 +16,6 @@ import { OnUpdateColumns } from '../timeline/events';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import * as i18n from './translations';
-import { useTimelineWidthContext } from '../timeline/timeline_context';
 
 export type View = 'table-view' | 'json-view';
 
@@ -32,9 +31,8 @@ interface Props {
   toggleColumn: (column: ColumnHeader) => void;
 }
 
-const Details = styled.div<{ width: number }>`
+const Details = styled.div`
   user-select: none;
-  width: ${({ width }) => `${width}px`};
 `;
 
 Details.displayName = 'Details';
@@ -51,7 +49,6 @@ export const EventDetails = React.memo<Props>(
     timelineId,
     toggleColumn,
   }) => {
-    const width = useTimelineWidthContext();
     const tabs: EuiTabbedContentTab[] = [
       {
         id: 'table-view',
@@ -76,7 +73,7 @@ export const EventDetails = React.memo<Props>(
     ];
 
     return (
-      <Details data-test-subj="eventDetails" width={width}>
+      <Details data-test-subj="eventDetails">
         <EuiTabbedContent
           tabs={tabs}
           selectedTab={view === 'table-view' ? tabs[0] : tabs[1]}

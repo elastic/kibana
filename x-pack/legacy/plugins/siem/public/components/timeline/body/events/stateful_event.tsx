@@ -17,7 +17,8 @@ import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { SkeletonRow } from '../../../skeleton_row';
 import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
 import { ExpandableEvent } from '../../expandable_event';
-import { EventsTrAttributes, EventsTrGroup } from '../../styles';
+import { EventsTrGroup, EventsTrSupplement, OFFSET_SCROLLBAR } from '../../styles';
+import { useTimelineWidthContext } from '../../timeline_context';
 import { ColumnHeader } from '../column_headers/column_header';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { ColumnRenderer } from '../renderers/column_renderer';
@@ -82,6 +83,27 @@ const TOP_OFFSET = 50;
  * rows.
  */
 const BOTTOM_OFFSET = -500;
+
+interface AttributesProps {
+  children: React.ReactNode;
+}
+
+const Attributes = React.memo<AttributesProps>(({ children }) => {
+  const width = useTimelineWidthContext();
+
+  // Passing the styles directly to the component because the width is
+  // being calculated and is recommended by Styled Components for performance
+  // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
+  return (
+    <EventsTrSupplement
+      className="siemEventsTable__trSupplement--attributes"
+      data-test-subj="event-details"
+      style={{ width: `${width - OFFSET_SCROLLBAR}px` }}
+    >
+      {children}
+    </EventsTrSupplement>
+  );
+});
 
 export class StatefulEvent extends React.Component<Props, State> {
   private _isMounted: boolean = false;
@@ -202,7 +224,7 @@ export class StatefulEvent extends React.Component<Props, State> {
                       timelineId,
                     })}
 
-                    <EventsTrAttributes data-test-subj="event-details">
+                    <Attributes>
                       <ExpandableEvent
                         browserFields={browserFields}
                         columnHeaders={columnHeaders}
@@ -213,7 +235,7 @@ export class StatefulEvent extends React.Component<Props, State> {
                         timelineId={timelineId}
                         toggleColumn={toggleColumn}
                       />
-                    </EventsTrAttributes>
+                    </Attributes>
                   </EventsTrGroup>
                 )}
               </TimelineDetailsComponentQuery>

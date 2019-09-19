@@ -8,6 +8,8 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { rgba } from 'polished';
 import styled, { css } from 'styled-components';
 
+export const OFFSET_SCROLLBAR = 17;
+
 export const EventsTable = styled.div.attrs({
   className: 'siemEventsTable',
   role: 'table',
@@ -147,41 +149,16 @@ export const EventsTrData = styled.div.attrs({
 `;
 EventsTrData.displayName = 'EventsTrData';
 
-export const EventsTrNotes = styled.div.attrs({
-  className: 'siemEventsTable__trNotes',
-})`
+export const EventsTrSupplement = styled.div.attrs({
+  className: 'siemEventsTable__trSupplement',
+})<{ className: string }>`
   ${({ theme }) => css`
     font-size: ${theme.eui.euiFontSizeXS};
     line-height: ${theme.eui.euiLineHeight};
-    // Michael: To be implemented in future style changes.
-    // padding-left: ${theme.eui.paddingSizes.xl};
+    padding: 0 ${theme.eui.paddingSizes.xs} 0 ${theme.eui.paddingSizes.xl};
   `}
 `;
-EventsTrNotes.displayName = 'EventsTrNotes';
-
-export const EventsTrSummary = styled.div.attrs({
-  className: 'siemEventsTable__trSummary',
-})`
-  ${({ theme }) => css`
-    font-size: ${theme.eui.euiFontSizeXS};
-    line-height: ${theme.eui.euiLineHeight};
-    // Michael: To be implemented in future style changes.
-    // padding-left: ${theme.eui.paddingSizes.xl};
-  `}
-`;
-EventsTrSummary.displayName = 'EventsTrSummary';
-
-export const EventsTrAttributes = styled.div.attrs({
-  className: 'siemEventsTable__trAttributes',
-})`
-  ${({ theme }) => css`
-    font-size: ${theme.eui.euiFontSizeXS};
-    line-height: ${theme.eui.euiLineHeight};
-    // Michael: To be implemented in future style changes.
-    // padding-left: ${theme.eui.paddingSizes.xl};
-  `}
-`;
-EventsTrAttributes.displayName = 'EventsTrAttributes';
+EventsTrSupplement.displayName = 'EventsTrSupplement';
 
 export const EventsTdGroupActions = styled.div.attrs({
   className: 'siemEventsTable__tdGroupActions',

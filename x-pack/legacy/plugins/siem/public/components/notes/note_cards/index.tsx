@@ -12,7 +12,6 @@ import { Note } from '../../../lib/note';
 import { AddNote } from '../add_note';
 import { AssociateNote, GetNewNoteId, UpdateNote } from '../helpers';
 import { NoteCard } from '../note_card';
-import { useTimelineWidthContext } from '../../timeline/timeline_context';
 
 const AddNoteContainer = styled.div``;
 
@@ -28,23 +27,16 @@ interface NoteCardsCompProps {
   children: React.ReactNode;
 }
 
-const NoteCardsComp = React.memo<NoteCardsCompProps>(({ children }) => {
-  const width = useTimelineWidthContext();
-
-  // Passing the styles directly to the component because the width is
-  // being calculated and is recommended by Styled Components for performance
-  // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-  return (
-    <EuiPanel
-      data-test-subj="note-cards"
-      hasShadow={false}
-      paddingSize="none"
-      style={{ width: `${width - 10}px`, border: 'none' }}
-    >
-      {children}
-    </EuiPanel>
-  );
-});
+const NoteCardsComp = React.memo<NoteCardsCompProps>(({ children }) => (
+  <EuiPanel
+    data-test-subj="note-cards"
+    hasShadow={false}
+    paddingSize="none"
+    style={{ border: 'none' }}
+  >
+    {children}
+  </EuiPanel>
+));
 
 NoteCardsComp.displayName = 'NoteCardsComp';
 
