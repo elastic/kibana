@@ -25,7 +25,7 @@ import { Vis } from '../../vis';
 import { VisResponseData } from './types';
 import { Inspector } from '../../inspector';
 import { EmbeddedVisualizeHandler, RequestHandlerParams } from './embedded_visualize_handler';
-import { AggConfigs } from 'ui/vis/agg_configs';
+import { AggConfigs } from 'ui/agg_types/agg_configs';
 
 jest.mock('ui/new_platform');
 

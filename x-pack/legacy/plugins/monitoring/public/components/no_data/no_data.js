@@ -30,7 +30,7 @@ import { CheckerErrors } from './checker_errors';
 function NoDataMessage(props) {
   const { isLoading, reason, checkMessage } = props;
 
-  if (isLoading && checkMessage !== null) {
+  if (isLoading) {
     return <CheckingSettings checkMessage={checkMessage} />;
   }
 

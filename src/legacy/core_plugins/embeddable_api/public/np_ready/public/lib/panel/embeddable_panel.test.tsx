@@ -25,11 +25,11 @@ import { nextTick } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
-import { Action } from '../actions';
+import { IAction, ITrigger } from 'src/plugins/ui_actions/public';
 import { Trigger, GetEmbeddableFactory, ViewMode } from '../types';
 import { EmbeddableFactory, isErrorEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from './embeddable_panel';
-import { EditModeAction } from '../test_samples/actions/edit_mode_action';
+import { createEditModeAction } from '../test_samples/actions';
 import {
   ContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
@@ -43,12 +43,12 @@ import {
 // eslint-disable-next-line
 import { inspectorPluginMock } from '../../../../../../../../plugins/inspector/public/mocks';
 
-const actionRegistry = new Map<string, Action>();
-const triggerRegistry = new Map<string, Trigger>();
+const actionRegistry = new Map<string, IAction>();
+const triggerRegistry = new Map<string, ITrigger>();
 const embeddableFactories = new Map<string, EmbeddableFactory>();
 const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
 
-const editModeAction = new EditModeAction();
+const editModeAction = createEditModeAction();
 const trigger: Trigger = {
   id: CONTEXT_MENU_TRIGGER,
   actionIds: [editModeAction.id],

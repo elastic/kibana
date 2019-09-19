@@ -43,6 +43,7 @@ import { VisProvider as Vis } from 'ui/vis/index.js';
 // @ts-ignore
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import chrome from 'ui/chrome';
 
 import { plugin } from '.';
 
@@ -58,4 +59,9 @@ export const setup = pluginInstance.setup(npSetup.core, {
     VisTypesRegistryProvider,
   },
 });
-export const start = pluginInstance.start(npStart.core, {});
+export const start = pluginInstance.start(npStart.core, {
+  __LEGACY: {
+    VisTypesRegistryProvider,
+    chrome,
+  },
+});
