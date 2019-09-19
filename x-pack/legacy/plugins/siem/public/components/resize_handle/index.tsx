@@ -61,7 +61,6 @@ const ResizeHandleContainer = styled.div<{
     z-index: ${(position === 'absolute' || position === 'relative') && theme.eui.euiZLevel1};
   `}
 `;
-
 ResizeHandleContainer.displayName = 'ResizeHandleContainer';
 
 export const addGlobalResizeCursorStyleToBody = () => {

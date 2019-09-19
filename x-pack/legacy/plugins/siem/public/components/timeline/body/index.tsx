@@ -129,5 +129,4 @@ export const Body = React.memo<BodyProps>(
     );
   }
 );
-
 Body.displayName = 'Body';

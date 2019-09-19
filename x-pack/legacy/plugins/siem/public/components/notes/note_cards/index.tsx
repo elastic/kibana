@@ -14,13 +14,11 @@ import { AssociateNote, GetNewNoteId, UpdateNote } from '../helpers';
 import { NoteCard } from '../note_card';
 
 const AddNoteContainer = styled.div``;
-
 AddNoteContainer.displayName = 'AddNoteContainer';
 
 const NoteContainer = styled.div`
   margin-top: 5px;
 `;
-
 NoteContainer.displayName = 'NoteContainer';
 
 interface NoteCardsCompProps {
@@ -37,14 +35,12 @@ const NoteCardsComp = React.memo<NoteCardsCompProps>(({ children }) => (
     {children}
   </EuiPanel>
 ));
-
 NoteCardsComp.displayName = 'NoteCardsComp';
 
 const NotesContainer = styled(EuiFlexGroup)`
   padding: 0 5px;
   margin-bottom: 5px;
 `;
-
 NotesContainer.displayName = 'NotesContainer';
 
 interface Props {

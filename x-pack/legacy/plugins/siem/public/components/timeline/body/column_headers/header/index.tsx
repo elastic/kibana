@@ -74,7 +74,6 @@ const HeaderComp = React.memo<HeaderCompProps>(
     );
   }
 );
-
 HeaderComp.displayName = 'HeaderComp';
 
 interface Props {

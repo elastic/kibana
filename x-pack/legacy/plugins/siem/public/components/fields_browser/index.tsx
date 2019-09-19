@@ -4,24 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionCreator } from 'typescript-fsa';
-import { connect } from 'react-redux';
 import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
+import { connect } from 'react-redux';
 import styled from 'styled-components';
+import { ActionCreator } from 'typescript-fsa';
 
 import { BrowserFields } from '../../containers/source';
+import { timelineActions } from '../../store/actions';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { DEFAULT_CATEGORY_NAME } from '../timeline/body/column_headers/default_headers';
 import { OnUpdateColumns } from '../timeline/events';
-
 import { FieldsBrowser } from './field_browser';
-import { FieldBrowserProps } from './types';
 import { filterBrowserFieldsByFieldName, mergeBrowserFieldsWithDefaultCategory } from './helpers';
-
 import * as i18n from './translations';
-import { timelineActions } from '../../store/actions';
+import { FieldBrowserProps } from './types';
 
 const fieldsButtonClassName = 'fields-button';
 

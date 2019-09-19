@@ -93,5 +93,4 @@ export const Events = React.memo<Props>(
     </EventsTbody>
   )
 );
-
 Events.displayName = 'Events';

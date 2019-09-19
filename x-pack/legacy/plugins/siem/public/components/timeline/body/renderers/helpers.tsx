@@ -28,11 +28,9 @@ export const getValues = (field: string, data: TimelineNonEcsData[]): string[] |
 export const Details = styled.div`
   margin: 5px 0 5px 10px;
 `;
-
 Details.displayName = 'Details';
 
 export const TokensFlexItem = styled(EuiFlexItem)`
   margin-left: 3px;
 `;
-
 TokensFlexItem.displayName = 'TokensFlexItem';

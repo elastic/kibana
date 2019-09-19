@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+
 import { RowRenderer } from './row_renderer';
 
 export const plainRowRenderer: RowRenderer = {

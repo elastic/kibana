@@ -19,7 +19,6 @@ export const TimelineProperties = styled.div`
   justify-content: space-between;
   user-select: none;
 `;
-
 TimelineProperties.displayName = 'TimelineProperties';
 
 export const DatePicker = styled(EuiFlexItem)<{ width: number }>`
@@ -29,14 +28,12 @@ export const DatePicker = styled(EuiFlexItem)<{ width: number }>`
     width: auto;
   }
 `;
-
 DatePicker.displayName = 'DatePicker';
 
 export const NameField = styled(EuiFieldText)`
   width: 150px;
   margin-right: 5px;
 `;
-
 NameField.displayName = 'NameField';
 
 export const DescriptionContainer = styled.div`
@@ -44,26 +41,22 @@ export const DescriptionContainer = styled.div`
   margin-right: 5px;
   min-width: 150px;
 `;
-
 DescriptionContainer.displayName = 'DescriptionContainer';
 
 export const ButtonContainer = styled.div<{ animate: boolean }>`
   animation: ${fadeInEffect} ${({ animate }) => (animate ? '0.3s' : '0s')};
 `;
-
 ButtonContainer.displayName = 'ButtonContainer';
 
 export const LabelText = styled.div`
   margin-left: 10px;
 `;
-
 LabelText.displayName = 'LabelText';
 
 export const StyledStar = styled(EuiIcon)`
   margin-right: 5px;
   cursor: pointer;
 `;
-
 StyledStar.displayName = 'StyledStar';
 
 export const Facet = styled.div`
@@ -81,11 +74,9 @@ export const Facet = styled.div`
   padding-right: 8px;
   user-select: none;
 `;
-
 Facet.displayName = 'Facet';
 
 export const LockIconContainer = styled(EuiFlexItem)`
   margin-right: 2px;
 `;
-
 LockIconContainer.displayName = 'LockIconContainer';

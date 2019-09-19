@@ -40,7 +40,6 @@ export const newTimelineToolTip = 'Create a new timeline';
 const NotesCountBadge = (props: EuiBadgeProps) => (
   <EuiBadge {...props} style={{ marginLeft: '5px' }} />
 );
-
 NotesCountBadge.displayName = 'NotesCountBadge';
 
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
@@ -69,7 +68,6 @@ export const StarIcon = pure<{
     )}
   </div>
 ));
-
 StarIcon.displayName = 'StarIcon';
 
 export const Description = pure<{
@@ -91,7 +89,6 @@ export const Description = pure<{
     </DescriptionContainer>
   </EuiToolTip>
 ));
-
 Description.displayName = 'Description';
 
 export const Name = pure<{ timelineId: string; title: string; updateTitle: UpdateTitle }>(
@@ -108,7 +105,6 @@ export const Name = pure<{ timelineId: string; title: string; updateTitle: Updat
     </EuiToolTip>
   )
 );
-
 Name.displayName = 'Name';
 
 export const NewTimeline = pure<{
@@ -129,7 +125,6 @@ export const NewTimeline = pure<{
     {i18n.NEW_TIMELINE}
   </EuiButtonEmpty>
 ));
-
 NewTimeline.displayName = 'NewTimeline';
 
 interface NotesButtonProps {
@@ -170,7 +165,6 @@ const LargeNotesButton = pure<{ noteIds: string[]; text?: string; toggleShowNote
     </EuiButton>
   )
 );
-
 LargeNotesButton.displayName = 'LargeNotesButton';
 
 const SmallNotesButton = pure<{ noteIds: string[]; toggleShowNotes: () => void }>(
@@ -183,7 +177,6 @@ const SmallNotesButton = pure<{ noteIds: string[]; toggleShowNotes: () => void }
     />
   )
 );
-
 SmallNotesButton.displayName = 'SmallNotesButton';
 
 /**
@@ -225,7 +218,6 @@ const NotesButtonComponent = pure<NotesButtonProps>(
     </ButtonContainer>
   )
 );
-
 NotesButtonComponent.displayName = 'NotesButtonComponent';
 
 export const NotesButton = pure<NotesButtonProps>(
@@ -269,5 +261,4 @@ export const NotesButton = pure<NotesButtonProps>(
       </EuiToolTip>
     )
 );
-
 NotesButton.displayName = 'NotesButton';

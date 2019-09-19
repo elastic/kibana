@@ -8,7 +8,6 @@ import { get, isEmpty, noop } from 'lodash/fp';
 import { BrowserFields } from '../../../containers/source';
 import { Ecs } from '../../../graphql/types';
 import { OnPinEvent, OnUnPinEvent } from '../events';
-
 import { ColumnHeader } from './column_headers/column_header';
 import * as i18n from './translations';
 

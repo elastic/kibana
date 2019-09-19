@@ -124,5 +124,4 @@ export const StatefulEventChild = React.memo<Props>(
     );
   }
 );
-
 StatefulEventChild.displayName = 'StatefulEventChild';

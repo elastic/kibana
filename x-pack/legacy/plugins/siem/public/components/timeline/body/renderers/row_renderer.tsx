@@ -30,7 +30,6 @@ export const RowRendererContainer = React.memo<RowRendererContainerProps>(({ chi
     </EventsTrSupplement>
   );
 });
-
 RowRendererContainer.displayName = 'RowRendererContainer';
 
 export interface RowRenderer {

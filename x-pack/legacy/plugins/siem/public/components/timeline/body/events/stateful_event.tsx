@@ -17,15 +17,15 @@ import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { SkeletonRow } from '../../../skeleton_row';
 import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
 import { ExpandableEvent } from '../../expandable_event';
+import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, OFFSET_SCROLLBAR } from '../../styles';
 import { useTimelineWidthContext } from '../../timeline_context';
 import { ColumnHeader } from '../column_headers/column_header';
-import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
+import { eventIsPinned } from '../helpers';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
 import { StatefulEventChild } from './stateful_event_child';
-import { eventIsPinned } from '../helpers';
 
 interface Props {
   actionsColumnWidth: number;

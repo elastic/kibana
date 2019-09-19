@@ -58,5 +58,4 @@ export const Actions = React.memo<Props>(({ header, onColumnRemoved, sort }) => 
     </>
   );
 });
-
 Actions.displayName = 'Actions';

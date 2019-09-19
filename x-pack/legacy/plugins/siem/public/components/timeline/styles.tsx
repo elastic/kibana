@@ -8,7 +8,15 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { rgba } from 'polished';
 import styled, { css } from 'styled-components';
 
+/**
+ * OFFSET PIXEL VALUES
+ */
+
 export const OFFSET_SCROLLBAR = 17;
+
+/**
+ * EVENTS TABLE
+ */
 
 export const EventsTable = styled.div.attrs({
   className: 'siemEventsTable',
@@ -37,6 +45,8 @@ export const EventsTable = styled.div.attrs({
   `}
 `;
 EventsTable.displayName = 'EventsTable';
+
+/* EVENTS HEAD */
 
 export const EventsThead = styled.div.attrs({
   className: 'siemEventsTable__thead',
@@ -112,6 +122,8 @@ export const EventsThContent = styled.div.attrs({
   `}
 `;
 EventsThContent.displayName = 'EventsThContent';
+
+/* EVENTS BODY */
 
 export const EventsTbody = styled.div.attrs({
   className: 'siemEventsTable__tbody',
@@ -199,6 +211,10 @@ export const EventsTdContent = styled.div.attrs({
   `}
 `;
 EventsTdContent.displayName = 'EventsTdContent';
+
+/**
+ * EVENTS HEADING
+ */
 
 export const EventsHeading = styled.div.attrs({
   className: 'siemEventsHeading',
@@ -289,6 +305,10 @@ export const EventsHeadingHandle = styled.div.attrs({
   `}
 `;
 EventsHeadingHandle.displayName = 'EventsHeadingHandle';
+
+/**
+ * EVENTS LOADING
+ */
 
 export const EventsLoading = styled(EuiLoadingSpinner)`
   margin: ${({ theme }) => theme.eui.euiSizeXS};

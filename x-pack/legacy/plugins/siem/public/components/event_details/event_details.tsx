@@ -9,10 +9,9 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { DetailItem } from '../../graphql/types';
+import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { OnUpdateColumns } from '../timeline/events';
-
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import * as i18n from './translations';

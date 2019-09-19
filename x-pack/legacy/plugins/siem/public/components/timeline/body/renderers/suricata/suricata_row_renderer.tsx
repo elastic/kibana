@@ -19,6 +19,7 @@ export const suricataRowRenderer: RowRenderer = {
     return (
       <>
         {children}
+
         <RowRendererContainer>
           <SuricataDetails data={data} browserFields={browserFields} timelineId={timelineId} />
         </RowRendererContainer>

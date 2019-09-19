@@ -18,6 +18,8 @@ import {
 } from '../../../drag_and_drop/helpers';
 import { DraggableFieldBadge } from '../../../draggables/field_badge';
 import { StatefulFieldsBrowser } from '../../../fields_browser';
+import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
+import { isContainerResizing } from '../../../resize_handle/is_resizing';
 import {
   OnColumnRemoved,
   OnColumnResized,
@@ -34,12 +36,9 @@ import {
   EventsTrHeader,
 } from '../../styles';
 import { Sort } from '../sort';
-
 import { ColumnHeader } from './column_header';
 import { EventsSelect } from './events_select';
 import { Header } from './header';
-import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
-import { isContainerResizing } from '../../../resize_handle/is_resizing';
 
 interface Props {
   actionsColumnWidth: number;
@@ -173,5 +172,4 @@ export const ColumnHeaders = React.memo<Props>(
     );
   }
 );
-
 ColumnHeaders.displayName = 'ColumnHeaders';
