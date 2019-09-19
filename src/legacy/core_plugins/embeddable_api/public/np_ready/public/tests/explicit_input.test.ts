@@ -35,12 +35,16 @@ import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world
 // eslint-disable-next-line
 import { coreMock } from '../../../../../../../core/public/mocks';
 
-const { setup, doStart, coreStart } = testPlugin(coreMock.createSetup(), coreMock.createStart());
+const { setup, doStart, coreStart, uiActions } = testPlugin(
+  coreMock.createSetup(),
+  coreMock.createStart()
+);
 const start = doStart();
+
 setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
 const factory = new SlowContactCardEmbeddableFactory({
   loadTickCount: 2,
-  execAction: start.executeTriggerActions,
+  execAction: uiActions.executeTriggerActions,
 });
 setup.registerEmbeddableFactory(CONTACT_CARD_EMBEDDABLE, factory);
 setup.registerEmbeddableFactory(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
@@ -76,7 +80,7 @@ test('Explicit embeddable input mapped to undefined with no inherited value will
   const container = new HelloWorldContainer(
     { id: 'hello', panels: {} },
     {
-      getActions: start.getTriggerCompatibleActions,
+      getActions: uiActions.getTriggerCompatibleActions,
       getAllEmbeddableFactories: start.getEmbeddableFactories,
       getEmbeddableFactory: start.getEmbeddableFactory,
       notifications: coreStart.notifications,
@@ -124,7 +128,7 @@ test('Explicit input tests in async situations', (done: () => void) => {
       },
     },
     {
-      getActions: start.getTriggerCompatibleActions,
+      getActions: uiActions.getTriggerCompatibleActions,
       getAllEmbeddableFactories: start.getEmbeddableFactories,
       getEmbeddableFactory: start.getEmbeddableFactory,
       notifications: coreStart.notifications,

@@ -17,46 +17,41 @@
  * under the License.
  */
 
-export abstract class Action<ActionContext extends {} = {}> {
+export interface IAction<ActionContext extends {} = {}> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
    * Higher numbers are displayed first.
    */
-  public order: number = 0;
+  order?: number;
 
-  public abstract readonly type: string;
-  constructor(public readonly id: string) {}
+  id: string;
+
+  readonly type: string;
 
   /**
    * Optional EUI icon type that can be displayed along with the title.
    */
-  public getIconType(context: ActionContext): string | undefined {
-    return undefined;
-  }
+  getIconType(context: ActionContext): string | undefined;
 
   /**
    * Returns a title to be displayed to the user.
    * @param context
    */
-  public abstract getDisplayName(context: ActionContext): string;
+  getDisplayName(context: ActionContext): string;
 
   /**
    * Returns a promise that resolves to true if this action is compatible given the context,
    * otherwise resolves to false.
    */
-  public async isCompatible(context: ActionContext): Promise<boolean> {
-    return true;
-  }
+  isCompatible(context: ActionContext): Promise<boolean>;
 
   /**
    * If this returns something truthy, this is used in addition to the `execute` method when clicked.
    */
-  public getHref(context: ActionContext): string | undefined {
-    return undefined;
-  }
+  getHref?(context: ActionContext): string | undefined;
 
   /**
    * Executes the action.
    */
-  public abstract async execute(context: ActionContext): Promise<void>;
+  execute(context: ActionContext): Promise<void>;
 }

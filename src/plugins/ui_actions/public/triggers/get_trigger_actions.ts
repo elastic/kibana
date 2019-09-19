@@ -17,19 +17,13 @@
  * under the License.
  */
 
-import { EmbeddableApiPure } from './types';
+import { IUiActionsApiPure } from '../types';
+import { IAction } from '../actions';
 
-export const detachAction: EmbeddableApiPure['detachAction'] = ({ triggers }) => (
-  triggerId,
-  actionId
-) => {
-  const trigger = triggers.get(triggerId);
-
-  if (!trigger) {
-    throw new Error(
-      `No trigger [triggerId = ${triggerId}] exists, for detaching action [actionId = ${actionId}].`
-    );
-  }
-
-  trigger.actionIds = trigger.actionIds.filter(id => id !== actionId);
+export const getTriggerActions: IUiActionsApiPure['getTriggerActions'] = ({
+  api,
+  actions,
+}) => id => {
+  const trigger = api.getTrigger!(id);
+  return trigger.actionIds.map(actionId => actions.get(actionId)).filter(Boolean) as IAction[];
 };
