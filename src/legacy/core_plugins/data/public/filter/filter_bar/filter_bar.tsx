@@ -46,6 +46,7 @@ interface Props {
   intl: InjectedIntl;
   uiSettings: UiSettingsClientContract;
   savedObjectsClient: SavedObjectsClientContract;
+  showSaveQuery?: boolean;
 }
 
 interface State {
@@ -109,6 +110,7 @@ class FilterBarUI extends Component<Props, State> {
           indexPatterns={this.props.indexPatterns}
           uiSettings={this.props.uiSettings}
           savedQueryService={createSavedQueryService(this.props.savedObjectsClient)}
+          showSaveQuery={this.props.showSaveQuery}
         />
       </EuiFlexItem>
     ));
@@ -152,6 +154,7 @@ class FilterBarUI extends Component<Props, State> {
                 key={JSON.stringify(newFilter)}
                 uiSettings={this.props.uiSettings}
                 savedQueryService={createSavedQueryService(this.props.savedObjectsClient)}
+                showSaveQuery={this.props.showSaveQuery}
               />
             </div>
           </EuiFlexItem>

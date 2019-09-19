@@ -67,6 +67,7 @@ interface Props {
   intl: InjectedIntl;
   uiSettings: UiSettingsClientContract;
   savedQueryService: SavedQueryService;
+  showSaveQuery?: boolean;
 }
 
 interface State {
@@ -140,19 +141,21 @@ class FilterEditorUI extends Component<Props, State> {
                   />
                 )}
               </EuiTab>
-              <EuiTab onClick={this.toggleSavedQueryEditor}>
-                {this.state.isNewFilter ? (
-                  <FormattedMessage
-                    id="data.filter.filterEditor.tabUseSavedQueryFilterPopupTitle"
-                    defaultMessage="Use saved query"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="data.filter.filterEditor.tabChangeSavedQueryFilterPopupTitle"
-                    defaultMessage="Change saved query"
-                  />
-                )}
-              </EuiTab>
+              {this.props.showSaveQuery && (
+                <EuiTab onClick={this.toggleSavedQueryEditor}>
+                  {this.state.isNewFilter ? (
+                    <FormattedMessage
+                      id="data.filter.filterEditor.tabUseSavedQueryFilterPopupTitle"
+                      defaultMessage="Use saved query"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="data.filter.filterEditor.tabChangeSavedQueryFilterPopupTitle"
+                      defaultMessage="Change saved query"
+                    />
+                  )}
+                </EuiTab>
+              )}
             </EuiTabs>
             <EuiFlexGroup direction={'rowReverse'}>
               <EuiFlexItem grow={false}>
@@ -443,6 +446,7 @@ class FilterEditorUI extends Component<Props, State> {
   }
   private renderSavedQueryEditor() {
     // pass along the index pattern, uiSettings, savedQueryService and any other items we need for the params
+    // pass along the security-related item of if the user has access to saved objects.
     // pass along the onChange handler
     // pass along the value (this is where we compile the filter params object)
     // return the selectable component

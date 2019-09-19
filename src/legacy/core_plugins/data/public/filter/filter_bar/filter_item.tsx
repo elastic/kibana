@@ -44,6 +44,7 @@ interface Props {
   intl: InjectedIntl;
   uiSettings: UiSettingsClientContract;
   savedQueryService: SavedQueryService;
+  showSaveQuery?: boolean;
 }
 
 interface State {
