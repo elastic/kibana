@@ -41,7 +41,7 @@ export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
 }) => void;
 
 export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: Props) => {
-  const { colors, setHeadingText } = useContext(UptimeSettingsContext);
+  const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
   const [getUrlParams, updateUrl] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
   const { dateRangeStart, dateRangeEnd, search } = params;
@@ -81,6 +81,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
 
   const updateQuery: UptimeSearchBarQueryChangeHandler = ({ queryText }) => {
     updateUrl({ search: queryText || '' });
+    refreshApp();
   };
 
   const linkParameters = stringifyUrlParams(params);
