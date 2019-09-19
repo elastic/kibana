@@ -41,8 +41,7 @@ import listingTemplate from './angular/templates/listing_ng_wrapper.html';
 import { getReadonlyBadge } from './badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { FieldManager } from './components/field_manager';
-import { SearchBar } from './components/search_bar';
+import { GraphApp } from './components/app';
 import { VennDiagram } from './components/venn_diagram';
 import { Listing } from './components/listing';
 import { Settings } from './components/settings';
@@ -107,15 +106,10 @@ app.directive('graphListing', function (reactDirective) {
   return reactDirective(Listing);
 });
 
-app.directive('graphFieldManager', function (reactDirective) {
-  return reactDirective(FieldManager, [
+app.directive('graphApp', function (reactDirective) {
+  return reactDirective(GraphApp, [
     ['state', { watchDepth: 'reference' }],
     ['dispatch', { watchDepth: 'reference' }],
-  ]);
-});
-
-app.directive('graphSearchBar', function (reactDirective) {
-  return reactDirective(SearchBar, [
     ['currentIndexPattern', { watchDepth: 'reference' }],
     ['isLoading', { watchDepth: 'reference' }],
     ['onIndexPatternSelected', { watchDepth: 'reference' }],
@@ -384,10 +378,7 @@ app.controller('graphuiPlugin', function (
       .then(handleSuccess)
       .then(function (indexPattern) {
         store.dispatch(loadFields(mapFields(indexPattern)));
-        $scope.filteredFields = $scope.allFields;
-        if ($scope.allFields.length > 0) {
-          $scope.selectedField = $scope.allFields[0];
-        }
+        $scope.$digest();
       }, handleError);
   };
 

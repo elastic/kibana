@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { IndexPatternSavedObject } from '../types';
 import { openSourceModal } from '../services/source_modal';
 
-interface SearchBarProps {
+export interface SearchBarProps {
   isLoading: boolean;
   initialQuery?: string;
   currentIndexPattern?: IndexPatternSavedObject;

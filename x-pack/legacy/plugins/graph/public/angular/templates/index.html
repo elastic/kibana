@@ -7,23 +7,18 @@
     <graph-inspect ng-show="menus.showInspect"></graph-inspect>
   </div>
 
-  <div class="gphGraph__bar">
-    <graph-search-bar
-      current-index-pattern="selectedIndex"
-      on-index-pattern-selected="uiSelectIndex"
-      on-query-submit="submit"
-      saved-objects="pluginDependencies.savedObjects"
-      ui-settings="pluginDependencies.uiSettings"
-      overlays="pluginDependencies.overlays"
-      is-loading="loading"
-      initial-query="initialQuery"
-    ></graph-search-bar>
-    <graph-field-manager
-      state="reduxState"
-      dispatch="reduxDispatch"
-    ></graph-field-manager>
-  </div>
-
+  <graph-app
+    current-index-pattern="selectedIndex"
+    on-index-pattern-selected="uiSelectIndex"
+    on-query-submit="submit"
+    saved-objects="pluginDependencies.savedObjects"
+    ui-settings="pluginDependencies.uiSettings"
+    overlays="pluginDependencies.overlays"
+    is-loading="loading"
+    initial-query="initialQuery"
+    state="reduxState"
+    dispatch="reduxDispatch"
+  ></graph-app>
 
   <div class="gphGraph__container" id="GraphSvgContainer">
     <svg class="gphGraph" width="100%" height="100%" pointer-events="all" id="graphSvg" ng-click="hideAllConfigPanels()">
