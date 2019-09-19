@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { fill } from 'lodash';
-import { of, from, throwError } from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
+import { of, from } from 'rxjs';
 import { takeWithBackpressure, TAKE_RESULT } from './take_with_backpressure';
 
 async function acceptAnyValue(_: any) {
@@ -19,9 +18,6 @@ function acceptTheValue(expectedValue: any) {
 }
 async function acceptOddNumbers(value: number) {
   return value % 2 === 1;
-}
-async function acceptEvenNumbers(value: number) {
-  return !(await acceptOddNumbers(value));
 }
 
 describe('takeWithBackpressure', () => {
