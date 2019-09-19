@@ -16,14 +16,6 @@ import { GeometryFilterForm } from '../../components/geometry_filter_form';
 
 export class FeatureGeometryFilterForm extends Component {
 
-  componentDidMount() {
-    this.props.reevaluateTooltipPosition();
-  }
-
-  componentDidUpdate() {
-    this.props.reevaluateTooltipPosition();
-  }
-
   _createFilter = ({ geometryLabel, indexPatternId, geoFieldName, geoFieldType, relation }) => {
     const filter = createSpatialFilterWithGeometry({
       geometry: this.props.feature.geometry,

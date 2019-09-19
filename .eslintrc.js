@@ -559,8 +559,7 @@ module.exports = {
         'no-param-reassign': 'error',
         'no-process-exit': 'error',
         'no-prototype-builtins': 'error',
-        // This will be turned on after bug fixes are mostly complete
-        // 'no-return-await': 'warn',
+        'no-return-await': 'error',
         'no-self-compare': 'error',
         'no-shadow-restricted-names': 'error',
         'no-sparse-arrays': 'error',

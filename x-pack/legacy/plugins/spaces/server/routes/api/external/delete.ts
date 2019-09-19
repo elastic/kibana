@@ -10,9 +10,9 @@ import { SpacesClient } from '../../../lib/spaces_client';
 import { ExternalRouteDeps, ExternalRouteRequestFacade } from '.';
 
 export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
-  const { http, savedObjects, spacesService, routePreCheckLicenseFn } = deps;
+  const { legacyRouter, savedObjects, spacesService, routePreCheckLicenseFn } = deps;
 
-  http.route({
+  legacyRouter({
     method: 'DELETE',
     path: '/api/spaces/space/{id}',
     async handler(request: ExternalRouteRequestFacade, h: any) {

@@ -6,7 +6,7 @@
 
 Retrieves a specified {kib} space.
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental["The underlying Spaces concepts are stable, but the APIs for managing Spaces are experimental."]
 
 [[spaces-api-get-request]]
 ==== Request
@@ -32,6 +32,7 @@ The API returns the following:
   "description" : "This is the Marketing Space",
   "color": "#aabbcc",
   "initials": "MK",
-  "disabledFeatures": []
+  "disabledFeatures": [],
+  "imageUrl": ""
 }
 --------------------------------------------------
