@@ -18,6 +18,9 @@
  */
 
 import { CoreSetup, CoreStart } from 'src/core/public';
+// eslint-disable-next-line
+import { uiActionsTestPlugin } from 'src/plugins/ui_actions/public/tests';
+import { IUiActionsApi } from 'src/plugins/ui_actions/public';
 import { EmbeddablePublicPlugin } from '../plugin';
 
 export interface TestPluginReturn {
@@ -26,15 +29,17 @@ export interface TestPluginReturn {
   coreStart: CoreStart;
   setup: ReturnType<EmbeddablePublicPlugin['setup']>;
   doStart: (anotherCoreStart?: CoreStart) => ReturnType<EmbeddablePublicPlugin['start']>;
+  uiActions: IUiActionsApi;
 }
 
 export const testPlugin = (
   coreSetup: CoreSetup = {} as CoreSetup,
   coreStart: CoreStart = {} as CoreStart
 ): TestPluginReturn => {
+  const uiActions = uiActionsTestPlugin(coreSetup, coreStart);
   const initializerContext = {} as any;
   const plugin = new EmbeddablePublicPlugin(initializerContext);
-  const setup = plugin.setup(coreSetup);
+  const setup = plugin.setup(coreSetup, { uiActions: uiActions.setup });
 
   return {
     plugin,
@@ -45,5 +50,6 @@ export const testPlugin = (
       const start = plugin.start(anotherCoreStart);
       return start;
     },
+    uiActions: uiActions.doStart(coreStart),
   };
 };
