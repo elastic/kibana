@@ -18,6 +18,8 @@ export const updateTableActivePage = actionCreator<{
   tableType: HostsTableType;
 }>('UPDATE_HOST_TABLE_ACTIVE_PAGE');
 
+export const setHostTablesActivePageToZero = actionCreator('SET_HOST_TABLES_ACTIVE_PAGE_TO_ZERO');
+
 export const updateTableLimit = actionCreator<{
   hostsType: HostsType;
   limit: number;

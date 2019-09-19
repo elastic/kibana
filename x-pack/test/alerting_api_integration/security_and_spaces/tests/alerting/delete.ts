@@ -71,6 +71,43 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
+
+        it(`shouldn't delete alert from another space`, async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestAlertData())
+            .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'alert');
+
+          const response = await supertestWithoutAuth
+            .delete(`${getUrlPrefix('other')}/api/alert/${createdAlert.id}`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password);
+
+          expect(response.statusCode).to.eql(404);
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+            case 'space_1_all at space1':
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: `Saved object [alert/${createdAlert.id}] not found`,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
       });
     }
   });

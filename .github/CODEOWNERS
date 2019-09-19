@@ -2,6 +2,9 @@
 # Identify which groups will be pinged by changes to different parts of the codebase.
 # For more info, see https://help.github.com/articles/about-codeowners/
 
+# App
+/x-pack/legacy/plugins/lens/ @elastic/kibana-app
+
 # App Architecture
 /src/plugins/data/ @elastic/kibana-app-arch
 /src/plugins/kibana_utils/ @elastic/kibana-app-arch
@@ -26,6 +29,9 @@
 
 # Machine Learning
 /x-pack/legacy/plugins/ml/  @elastic/ml-ui
+/x-pack/test/functional/apps/machine_learning/  @elastic/ml-ui
+/x-pack/test/functional/services/machine_learning/  @elastic/ml-ui
+/x-pack/test/functional/services/ml.ts  @elastic/ml-ui
 
 # Operations
 /renovate.json5 @elastic/kibana-operations

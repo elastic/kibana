@@ -31,6 +31,7 @@ const asyncPipeline = promisify(pipeline);
 const V1_VERSIONS_API = 'https://artifacts-api.elastic.co/v1/versions';
 
 const { cache } = require('./utils');
+const { resolveCustomSnapshotUrl } = require('./custom_snapshots');
 const { createCliError, isCliError } = require('./errors');
 
 const TEST_ES_SNAPSHOT_VERSION = process.env.TEST_ES_SNAPSHOT_VERSION
@@ -95,23 +96,9 @@ exports.Artifact = class Artifact {
   static async getSnapshot(license, version, log) {
     const urlVersion = `${encodeURIComponent(version)}-SNAPSHOT`;
 
-    if (process.env.KBN_ES_SNAPSHOT_URL) {
-      const ext = process.platform === 'win32' ? 'zip' : 'tar.gz';
-      const os = process.platform === 'win32' ? 'windows' : process.platform;
-      const name = license === 'oss' ? 'elasticsearch-oss' : 'elasticsearch';
-      const overrideUrl = process.env.KBN_ES_SNAPSHOT_URL.replace('{name}', name)
-        .replace('{ext}', ext)
-        .replace('{os}', os);
-
-      return new Artifact(
-        {
-          url: overrideUrl,
-          checksumUrl: overrideUrl + '.sha512',
-          checksumType: 'sha512',
-          filename: path.basename(overrideUrl),
-        },
-        log
-      );
+    const customSnapshotArtifactSpec = resolveCustomSnapshotUrl(urlVersion, license);
+    if (customSnapshotArtifactSpec) {
+      return new Artifact(customSnapshotArtifactSpec, log);
     }
 
     const urlBuild = encodeURIComponent(TEST_ES_SNAPSHOT_VERSION);

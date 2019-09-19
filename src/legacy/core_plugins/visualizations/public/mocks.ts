@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import chrome from 'ui/chrome';
+
 jest.mock('ui/vis/vis_filters');
 jest.mock('ui/vis/default_feedback_message');
 jest.mock('ui/vis/index.js');
@@ -52,9 +54,13 @@ const createSetupContract = (): VisualizationsSetup => ({
   },
 });
 
-const createStartContract = (): VisualizationsStart => ({});
+const createStartContract = (): VisualizationsStart => ({
+  types: {
+    get: jest.fn(),
+  },
+});
 
-const createInstance = () => {
+const createInstance = async () => {
   const plugin = new VisualizationsPlugin({} as PluginInitializerContext);
 
   const setup = plugin.setup(coreMock.createSetup(), {
@@ -67,7 +73,13 @@ const createInstance = () => {
       VisTypesRegistryProvider,
     },
   });
-  const doStart = () => plugin.start(coreMock.createStart(), {});
+  const doStart = () =>
+    plugin.start(coreMock.createStart(), {
+      __LEGACY: {
+        VisTypesRegistryProvider,
+        chrome,
+      },
+    });
 
   return {
     plugin,

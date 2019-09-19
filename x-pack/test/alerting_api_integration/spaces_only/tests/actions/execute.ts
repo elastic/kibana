@@ -88,6 +88,41 @@ export default function({ getService }: FtrProviderContext) {
       });
     });
 
+    it(`shouldn't execute an action from another space`, async () => {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          description: 'My action',
+          actionTypeId: 'test.index-record',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+        })
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+
+      const reference = `actions-execute-2:${Spaces.space1.id}`;
+      await supertest
+        .post(`${getUrlPrefix(Spaces.other.id)}/api/action/${createdAction.id}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            reference,
+            index: esTestIndexName,
+            message: 'Testing 123',
+          },
+        })
+        .expect(404, {
+          statusCode: 404,
+          error: 'Not Found',
+          message: `Saved object [action/${createdAction.id}] not found`,
+        });
+    });
+
     it('should handle execute request appropriately and have proper callCluster and savedObjectsClient authorization', async () => {
       const reference = `actions-execute-3:${Spaces.space1.id}`;
       const { body: createdAction } = await supertest

@@ -50,5 +50,27 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         throttle: '1m',
       });
     });
+
+    it(`shouldn't find alert from another space`, async () => {
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData())
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+
+      await supertest
+        .get(
+          `${getUrlPrefix(
+            Spaces.other.id
+          )}/api/alert/_find?search=test.noop&search_fields=alertTypeId`
+        )
+        .expect(200, {
+          page: 1,
+          perPage: 20,
+          total: 0,
+          data: [],
+        });
+    });
   });
 }

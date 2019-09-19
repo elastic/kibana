@@ -50,6 +50,7 @@ class VisualizeListingTableUi extends Component {
         editItem={capabilities.get().visualize.save ? this.props.editItem : null}
         tableColumns={this.getTableColumns()}
         listingLimit={this.props.listingLimit}
+        selectable={item => item.canDelete}
         initialFilter={''}
         noItemsFragment={this.getNoItemsMessage()}
         entityName={
@@ -105,6 +106,19 @@ class VisualizeListingTableUi extends Component {
             {this.renderItemTypeIcon(record)}
             {record.typeTitle}
             {this.getExperimentalBadge(record)}
+          </span>
+        )
+      },
+      {
+        field: 'description',
+        name: intl.formatMessage({
+          id: 'kbn.dashboard.listing.table.descriptionColumnName',
+          defaultMessage: 'Description',
+        }),
+        sortable: true,
+        render: (field, record) =>  (
+          <span>
+            {record.description}
           </span>
         )
       },

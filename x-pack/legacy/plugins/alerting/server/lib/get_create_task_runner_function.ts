@@ -96,6 +96,7 @@ export function getCreateTaskRunnerFunction({
         });
 
         const executionHandler = createExecutionHandler({
+          alertId,
           log: services.log,
           executeAction,
           apiKey,
@@ -130,7 +131,7 @@ export function getCreateTaskRunnerFunction({
               const { actionGroup, context, state } = alertInstance.getSechduledActionOptions()!;
               alertInstance.updateLastScheduledActions(actionGroup);
               alertInstance.unscheduleActions();
-              return executionHandler(actionGroup, context, state);
+              return executionHandler({ actionGroup, context, state, alertInstanceId });
             } else {
               // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
               delete alertInstances[alertInstanceId];

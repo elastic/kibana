@@ -23,6 +23,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
       className="url-label"
       compressed={true}
       describedByIds={Array []}
+      display="row"
       error={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
@@ -48,6 +49,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
     <EuiFormRow
       compressed={true}
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
       hasEmptyLabelSpace={false}
       label={
@@ -84,6 +86,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
     <EuiFormRow
       compressed={true}
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
       hasEmptyLabelSpace={false}
       label={
@@ -118,6 +121,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
     </EuiFormRow>
     <EuiFormRow
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
       hasEmptyLabelSpace={false}
       label={
@@ -154,6 +158,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
           className="url-time-range"
           compressed={true}
           describedByIds={Array []}
+          display="row"
           fullWidth={false}
           hasEmptyLabelSpace={false}
           label={
@@ -215,6 +220,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
       className="url-label"
       compressed={true}
       describedByIds={Array []}
+      display="row"
       error={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
@@ -240,6 +246,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
     <EuiFormRow
       compressed={true}
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
       hasEmptyLabelSpace={false}
       label={
@@ -276,6 +283,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
     <EuiFormRow
       compressed={true}
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
       hasEmptyLabelSpace={false}
       label={
@@ -310,6 +318,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
     </EuiFormRow>
     <EuiFormRow
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
       hasEmptyLabelSpace={false}
       label={
@@ -352,6 +361,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
           className="url-time-range"
           compressed={true}
           describedByIds={Array []}
+          display="row"
           fullWidth={false}
           hasEmptyLabelSpace={false}
           label={
@@ -390,6 +400,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
           className="url-time-range"
           compressed={true}
           describedByIds={Array []}
+          display="row"
           error={
             Array [
               "Invalid interval format",
@@ -445,6 +456,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
       className="url-label"
       compressed={true}
       describedByIds={Array []}
+      display="row"
       error={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
@@ -470,6 +482,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
     <EuiFormRow
       compressed={true}
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
       hasEmptyLabelSpace={false}
       label={
@@ -506,6 +519,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
     <EuiFormRow
       compressed={true}
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
       hasEmptyLabelSpace={false}
       label={
@@ -540,6 +554,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
     </EuiFormRow>
     <EuiFormRow
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
       hasEmptyLabelSpace={false}
       label={
@@ -582,6 +597,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
           className="url-time-range"
           compressed={true}
           describedByIds={Array []}
+          display="row"
           fullWidth={false}
           hasEmptyLabelSpace={false}
           label={
@@ -620,6 +636,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
           className="url-time-range"
           compressed={true}
           describedByIds={Array []}
+          display="row"
           error={Array []}
           fullWidth={false}
           hasEmptyLabelSpace={false}
@@ -671,6 +688,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
       className="url-label"
       compressed={true}
       describedByIds={Array []}
+      display="row"
       error={
         Array [
           "A unique label must be supplied",
@@ -700,6 +718,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
     <EuiFormRow
       compressed={true}
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
       hasEmptyLabelSpace={false}
       label={
@@ -736,6 +755,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
     <EuiFormRow
       compressed={true}
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
       hasEmptyLabelSpace={false}
       label={
@@ -770,6 +790,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
     </EuiFormRow>
     <EuiFormRow
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
       hasEmptyLabelSpace={false}
       label={
@@ -806,6 +827,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
           className="url-time-range"
           compressed={true}
           describedByIds={Array []}
+          display="row"
           fullWidth={false}
           hasEmptyLabelSpace={false}
           label={
@@ -867,6 +889,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
       className="url-label"
       compressed={true}
       describedByIds={Array []}
+      display="row"
       error={
         Array [
           "A unique label must be supplied",
@@ -896,6 +919,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
     <EuiFormRow
       compressed={true}
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
       hasEmptyLabelSpace={false}
       label={
@@ -932,6 +956,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
     <EuiFormRow
       compressed={true}
       describedByIds={Array []}
+      display="row"
       fullWidth={true}
       hasEmptyLabelSpace={false}
       label={
@@ -979,6 +1004,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
       className="url-label"
       compressed={true}
       describedByIds={Array []}
+      display="row"
       error={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
@@ -1004,6 +1030,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
     <EuiFormRow
       compressed={true}
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
       hasEmptyLabelSpace={false}
       label={
@@ -1040,6 +1067,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
     <EuiFormRow
       compressed={true}
       describedByIds={Array []}
+      display="row"
       fullWidth={true}
       hasEmptyLabelSpace={false}
       label={

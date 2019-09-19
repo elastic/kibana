@@ -28,7 +28,8 @@
     "kbnESQuery": "packages/kbn-es-query",
     "inspector": "src/plugins/inspector",
     "kibana-react": "src/plugins/kibana_react",
-    "esUi": "src/plugins/es_ui_shared"
+    "esUi": "src/plugins/es_ui_shared",
+    "uiActions": "src/plugins/ui_actions"
   },
   "exclude": ["src/legacy/ui/ui_render/ui_render_mixin.js"],
   "translations": []
