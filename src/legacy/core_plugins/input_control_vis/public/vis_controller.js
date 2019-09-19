@@ -23,6 +23,7 @@ import { I18nContext } from 'ui/i18n';
 import { InputControlVis } from './components/vis/input_control_vis';
 import { controlFactory } from './control/control_factory';
 import { getLineageMap } from './lineage';
+import { setup as data } from '../../../core_plugins/data/public/legacy';
 
 class VisController {
   constructor(el, vis) {
@@ -32,7 +33,8 @@ class VisController {
 
     this.queryBarUpdateHandler = this.updateControlsFromKbn.bind(this);
 
-    this.updateSubsciption = this.vis.API.queryFilter.getUpdates$()
+    this.filterManager = data.filter.filterManager;
+    this.updateSubsciption = this.filterManager.getUpdates$()
       .subscribe(this.queryBarUpdateHandler);
   }
 
@@ -121,7 +123,7 @@ class VisController {
     this.controls.map(async (control) => {
       if (control.hasAncestors() && control.hasUnsetAncestor()) {
         control.filterManager.findFilters().forEach((existingFilter) => {
-          this.vis.API.queryFilter.removeFilter(existingFilter);
+          this.filterManager.removeFilter(existingFilter);
         });
       }
     });
@@ -141,11 +143,11 @@ class VisController {
     stagedControls.forEach((control) => {
       // to avoid duplicate filters, remove any old filters for control
       control.filterManager.findFilters().forEach((existingFilter) => {
-        this.vis.API.queryFilter.removeFilter(existingFilter);
+        this.filterManager.removeFilter(existingFilter);
       });
     });
 
-    this.vis.API.queryFilter.addFilters(newFilters, this.visParams.pinFilters);
+    this.filterManager.addFilters(newFilters, this.visParams.pinFilters);
   }
 
   clearControls = async () => {
