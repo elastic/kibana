@@ -425,32 +425,45 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
   if (props.topValues && props.topValues.buckets.length) {
     return wrapInPopover(
       <div data-test-subj="lnsFieldListPanel-topValues">
-        {props.topValues.buckets.map(topValue => (
-          <div className="lnsFieldItem__topValue" key={topValue.key}>
-            <EuiFlexGroup alignItems="stretch" key={topValue.key} gutterSize="xs">
-              <EuiFlexItem grow={true} className="eui-textTruncate">
-                <EuiToolTip content={formatter.convert(topValue.key)} delay="long">
-                  <EuiText size="s" className="eui-textTruncate">
-                    {formatter.convert(topValue.key)}
+        {props.topValues.buckets.map(topValue => {
+          const formatted = formatter.convert(topValue.key);
+          return (
+            <div className="lnsFieldItem__topValue" key={topValue.key}>
+              <EuiFlexGroup alignItems="stretch" key={topValue.key} gutterSize="xs">
+                <EuiFlexItem grow={true} className="eui-textTruncate">
+                  {formatted === '' ? (
+                    <EuiText size="s" color="subdued">
+                      <em>
+                        {i18n.translate('xpack.lens.indexPattern.fieldPanelEmptyStringValue', {
+                          defaultMessage: 'Empty string',
+                        })}
+                      </em>
+                    </EuiText>
+                  ) : (
+                    <EuiToolTip content={formatted} delay="long">
+                      <EuiText size="s" className="eui-textTruncate">
+                        {formatted}
+                      </EuiText>
+                    </EuiToolTip>
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" textAlign="left" color={euiTextColor}>
+                    {Math.round((topValue.count / props.sampledValues!) * 100)}%
                   </EuiText>
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" textAlign="left" color={euiTextColor}>
-                  {Math.round((topValue.count / props.sampledValues!) * 100)}%
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
 
-            <EuiProgress
-              className="lnsFieldItem__topValueProgress"
-              value={topValue.count / props.sampledValues!}
-              max={1}
-              size="s"
-              color={euiButtonColor}
-            />
-          </div>
-        ))}
+              <EuiProgress
+                className="lnsFieldItem__topValueProgress"
+                value={topValue.count / props.sampledValues!}
+                max={1}
+                size="s"
+                color={euiButtonColor}
+              />
+            </div>
+          );
+        })}
         {otherCount ? (
           <>
             <EuiFlexGroup alignItems="stretch" gutterSize="xs">
