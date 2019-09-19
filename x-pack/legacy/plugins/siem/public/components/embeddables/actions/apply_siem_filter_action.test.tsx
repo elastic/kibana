@@ -112,10 +112,10 @@ describe('ApplySiemFilterAction', () => {
       const action = new ApplySiemFilterAction({
         applyFilterQueryFromKueryExpression,
       });
-      if (isPartialFilterAction(action)) {
-        const embeddable = {
-          type: MAP_SAVED_OBJECT_TYPE,
-        };
+      const embeddable = {
+        type: MAP_SAVED_OBJECT_TYPE,
+      };
+      if (isPartialFilterAction(action) && isEmbeddable(embeddable)) {
         if (isEmbeddable(embeddable)) {
           await expect(
             action.execute({
@@ -124,7 +124,7 @@ describe('ApplySiemFilterAction', () => {
           ).rejects.toThrow('Applying a filter requires a filter as context');
         }
       } else {
-        throw new Error('Invalid filter action in unit test');
+        throw new Error('Invalid embeddable or filter in unit test');
       }
     });
 
