@@ -26,10 +26,3 @@
   display: flex;
   flex-direction: column;
 }
-
-// This is a temporary workaround for https://github.com/elastic/kibana/issues/39808
-// A real fix will most likely depend on changes in elastic-charts.
-
-.infMetricsExplorerChart .echTooltip {
-  max-width: 90vw;
-}
