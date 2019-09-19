@@ -87,6 +87,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 foo: true,
               },
               interval: '12s',
+              throttle: '1m',
               actions: [],
             });
 
