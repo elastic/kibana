@@ -19,8 +19,9 @@
 
 import Joi from 'joi';
 import Boom from 'boom';
-import Wreck from '@hapi/wreck';
 import { trimLeft, trimRight } from 'lodash';
+import request from 'request';
+import { parse } from 'querystring';
 
 function resolveUri(base, path) {
   let pathToUse = `${trimRight(base, '/')}/${trimLeft(path, '/')}`;
@@ -68,10 +69,6 @@ export const createProxyRoute = ({
   method: 'POST',
   config: {
     tags: ['access:console'],
-    payload: {
-      output: 'stream',
-      parse: false,
-    },
 
     validate: {
       query: Joi.object()
@@ -105,42 +102,54 @@ export const createProxyRoute = ({
       const { path, method } = query;
       const uri = resolveUri(baseUrl, path);
 
+      // Because this can technically be provided by a settings-defined proxy config, we need to
+      // preserve these property names to maintain BWC.
       const { timeout, rejectUnauthorized, agent, headers } = getConfigForReq(req, uri);
-      const makeRequest = async payloadToSend => {
-        const wreckOptions = {
-          payload: payloadToSend,
-          timeout,
-          rejectUnauthorized,
-          agent,
-          headers: {
-            ...headers,
-            ...getProxyHeaders(req),
-          },
+
+      return await new Promise((resolve) => {
+        const pathParts = path.split('?'); // TODO: Ensure this only has 2 parts
+        const requestHeaders = {
+          ...headers,
+          ...getProxyHeaders(req),
         };
 
-        const esResponse = await Wreck.request(method, uri, wreckOptions);
+        // We use the request library because Hapi, Axios, and Superagent don't support GET requests
+        // with bodies, but ES APIs do. Similarly with DELETE requests with bodiese. If we need to
+        // deprecate use of this library, we can also solve this issue with Node's http library.
+        // See #39170 for details.
+        request({
+          method,
+          uri,
+          timeout,
+          qs: parse(pathParts[1] || ''),
+          headers: requestHeaders,
+          body: payload ? JSON.stringify(payload) : undefined,
+          // agentOptions,
+        }, (error, response, body) => {
+          const {
+            statusCode,
+            statusMessage,
+            headers: { warning },
+          } = response;
 
-        if (method.toUpperCase() !== 'HEAD') {
-          return h
-            .response(esResponse)
-            .code(esResponse.statusCode)
-            .header('warning', esResponse.headers.warning);
-        }
+          let result;
 
-        return h
-          .response(`${esResponse.statusCode} - ${esResponse.statusMessage}`)
-          .code(esResponse.statusCode)
-          .type('text/plain')
-          .header('warning', esResponse.headers.warning);
-      };
-      // Wreck assumes that DELETE requests will not have a body, and thus it does not
-      // parse the payload to pass it along, so we have to do this manually here.
-      if (method.toUpperCase() === 'DELETE') {
-        const data = await Wreck.read(payload);
-        return await makeRequest(data);
-      } else {
-        return await makeRequest(payload);
-      }
+          if (method.toUpperCase() !== 'HEAD') {
+            result = h
+              .response(body)
+              .code(statusCode)
+              .header('warning', warning);
+          } else {
+            result = h
+              .response(`${statusCode} - ${statusMessage}`)
+              .code(statusCode)
+              .type('text/plain')
+              .header('warning', warning);
+          }
+
+          resolve(result);
+        });
+      });
     },
   },
 });
