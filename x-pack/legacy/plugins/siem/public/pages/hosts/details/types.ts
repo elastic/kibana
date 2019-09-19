@@ -12,7 +12,7 @@ import { HostsTableType } from '../../../store/hosts/model';
 import { HostsQueryProps } from '../hosts';
 import { NavTab } from '../../../components/navigation/types';
 import {
-  AnonamaliesChildren,
+  AnomaliesChildren,
   CommonChildren,
   KeyHostsNavTabWithoutMlPermission,
 } from '../navigation/types';
@@ -31,7 +31,7 @@ interface HostDetailsComponentDispatchProps {
 }
 
 export interface HostDetailsBodyProps extends HostsQueryProps {
-  children: CommonChildren | AnonamaliesChildren;
+  children: CommonChildren | AnomaliesChildren;
 }
 
 export type HostDetailsComponentProps = HostDetailsComponentReduxProps &

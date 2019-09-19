@@ -57,4 +57,4 @@ export type HostsComponentsQueryProps = QueryTabBodyProps & {
 };
 
 export type CommonChildren = (args: HostsComponentsQueryProps) => JSX.Element;
-export type AnonamaliesChildren = (args: AnomaliesQueryTabBodyProps) => JSX.Element;
+export type AnomaliesChildren = (args: AnomaliesQueryTabBodyProps) => JSX.Element;
