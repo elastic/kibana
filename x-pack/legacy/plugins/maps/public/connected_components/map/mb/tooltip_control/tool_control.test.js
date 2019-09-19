@@ -260,7 +260,7 @@ describe('TooltipControl', () => {
     });
 
     test('should safely handle map move when there is no tooltip location', () => {
-      mount(
+      const component = mount(
         <TooltipControl
           {...defaultProps}
           clearTooltipState={clearTooltipStateStub}
@@ -268,6 +268,7 @@ describe('TooltipControl', () => {
       );
 
       mockMbMapHandlers.move();
+      component.update();
 
       sinon.assert.notCalled(clearTooltipStateStub);
     });
