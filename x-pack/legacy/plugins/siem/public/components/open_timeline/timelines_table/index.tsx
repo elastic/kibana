@@ -144,6 +144,7 @@ export const TimelinesTable = pure<TimelinesTableProps>(
           onToggleShowNotes,
           showExtendedColumnsAndActions,
         })}
+        compressed
         data-test-subj="timelines-table"
         isExpandable={true}
         isSelectable={showExtendedColumnsAndActions}
