@@ -39,6 +39,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React, { Component } from 'react';
 import { UiSettingsClientContract } from 'src/core/public';
+import { SavedQueryFilterParams } from '@kbn/es-query';
 import { Field, IndexPattern } from '../../../index_patterns';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {
@@ -59,6 +60,8 @@ import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
 import { SavedQueryService } from '../../../search/search_bar/lib/saved_query_service';
 import { SavedQueryEditorUI } from './saved_query_editor';
+
+export type SavedQueryParamsPartial = Partial<SavedQueryFilterParams>;
 
 interface Props {
   filter: Filter;
@@ -448,12 +451,13 @@ class FilterEditorUI extends Component<Props, State> {
       dateFormatTZ: this.props.uiSettings.get('defaults', 'dateFormatTZ'),
     };
     const savedQueryValue = { ...this.state.params, indexPattern, esQueryConfig };
+    // TODO: the onChange handler is being passed a whole lot more than what it needs to. I'd like to only handle the saved query name and compile the savedQueryParams during the save action.
     return (
       <SavedQueryEditorUI
         showSaveQuery={this.props.showSaveQuery}
         value={savedQueryValue}
         savedQueryService={this.props.savedQueryService}
-        onChange={this.onParamsChange}
+        onChange={this.onSavedQueryParamsChange}
       />
     );
   }
@@ -579,6 +583,11 @@ class FilterEditorUI extends Component<Props, State> {
   };
 
   private onParamsChange = (params: any) => {
+    this.setState({ params });
+  };
+
+  private onSavedQueryParamsChange = (params: SavedQueryFilterParams) => {
+    // what Id like to do is only act on a change in the saved query
     this.setState({ params });
   };
 

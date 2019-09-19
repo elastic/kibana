@@ -63,7 +63,7 @@ interface SavedQueryTimeFilterConverted {
 }
 
 export interface SavedQueryFilterParams {
-  savedQuery: SavedQuery;
+  savedQuery?: SavedQuery;
   esQueryConfig: EsQueryConfig;
   indexPattern: IndexPattern;
 }

@@ -18,17 +18,19 @@
  */
 
 import React, { FunctionComponent, useEffect, useState, Fragment } from 'react';
-import { SavedQueryFilterParams } from '@kbn/es-query';
+import { EuiSelectable } from '@elastic/eui';
+import { Option } from '@elastic/eui/src/components/selectable/types';
 import { i18n } from '@kbn/i18n';
+import { SavedQueryFilterParams } from '@kbn/es-query';
+import { sortBy } from 'lodash';
+import { SavedQuery } from '../../../search/search_bar/index';
 import { SavedQueryService } from '../../../search/search_bar/lib/saved_query_service';
-
-type SavedQueryParamsPartial = Partial<SavedQueryFilterParams>;
 
 interface Props {
   showSaveQuery?: boolean;
-  value?: SavedQueryParamsPartial; // is this an object containing a savedQuery, the esQueryConfig and the indexPattern or just the string version of the SQ name?
+  value?: SavedQueryFilterParams; // is this an object containing a savedQuery, the esQueryConfig and the indexPattern or just the string version of the SQ name?
   savedQueryService: SavedQueryService;
-  onChange: (params: SavedQueryParamsPartial) => void;
+  onChange: (params: SavedQueryFilterParams) => void;
 }
 
 export const SavedQueryEditorUI: FunctionComponent<Props> = ({
@@ -37,12 +39,30 @@ export const SavedQueryEditorUI: FunctionComponent<Props> = ({
   savedQueryService,
   onChange,
 }) => {
-  return (
-    <ul>
-      <li key={1}>Saved Query 1</li>
-      <li key={2}>Saved Query 2</li>
-      <li key={3}>Saved Query 3</li>
-      <li key={4}>Saved Query 4</li>
-    </ul>
+  const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
+  useEffect(() => {
+    const fetchQueries = async () => {
+      const allSavedQueries = await savedQueryService.getAllSavedQueries();
+      const sortedAllSavedQueries = sortBy(allSavedQueries, 'attributes.title');
+      setSavedQueries(sortedAllSavedQueries);
+    };
+    fetchQueries();
+  }, []); // an empty array to only fetch saved queries once on rendering
+
+  const noSavedQueriesDescriptionText = i18n.translate(
+    'data.search.searchBar.savedQueryNoSavedQueriesText',
+    {
+      defaultMessage: 'There are no saved queries.',
+    }
   );
+
+  const savedQueryRows = () => {
+    if (!savedQueries) {
+      return <div>{noSavedQueriesDescriptionText}</div>;
+    }
+    return savedQueries.map(savedQuery => (
+      <li key={savedQuery.id}>{savedQuery.attributes.title}</li>
+    ));
+  };
+  return <ul>{savedQueryRows()}</ul>;
 };
