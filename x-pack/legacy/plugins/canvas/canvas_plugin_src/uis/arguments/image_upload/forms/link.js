@@ -9,6 +9,8 @@ import PropTypes from 'prop-types';
 import { EuiForm, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButton } from '@elastic/eui';
 import { ArgumentStrings } from '../../../../strings';
 
+const { ImageUpload: strings } = ArgumentStrings;
+
 export const LinkForm = ({ url, inputRef, onSubmit }) => (
   <EuiForm onSubmit={onSubmit} className="eui-textRight">
     <EuiFlexGroup gutterSize="xs">
@@ -17,8 +19,8 @@ export const LinkForm = ({ url, inputRef, onSubmit }) => (
           compressed
           defaultValue={url}
           inputRef={inputRef}
-          placeholder={ArgumentStrings.ImageUpload.getUrlFieldPlaceholder()}
-          aria-label={ArgumentStrings.ImageUpload.getUrlFieldPlaceholder()}
+          placeholder={strings.getUrlFieldPlaceholder()}
+          aria-label={strings.getUrlFieldPlaceholder()}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

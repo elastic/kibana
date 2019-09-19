@@ -9,12 +9,14 @@ import { EuiFilePicker } from '@elastic/eui';
 import { Loading } from '../../../../../public/components/loading/loading';
 import { ArgumentStrings } from '../../../../strings';
 
+const { ImageUpload: strings } = ArgumentStrings;
+
 export const FileForm = ({ loading, onChange }) =>
   loading ? (
-    <Loading animated text={ArgumentStrings.ImageUpload.getImageUploading()} />
+    <Loading animated text={strings.getImageUploading()} />
   ) : (
     <EuiFilePicker
-      initialPromptText={ArgumentStrings.ImageUpload.getFileUploadPrompt()}
+      initialPromptText={strings.getFileUploadPrompt()}
       onChange={onChange}
       compressed
       className="canvasImageUpload"
