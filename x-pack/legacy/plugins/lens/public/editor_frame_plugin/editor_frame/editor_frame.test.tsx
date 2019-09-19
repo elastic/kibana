@@ -1153,7 +1153,14 @@ describe('editor_frame', () => {
           .find('[data-test-subj="lnsSuggestion"]')
           .find(EuiPanel)
           .map(el => el.parents(EuiToolTip).prop('content'))
-      ).toEqual(['Suggestion1', 'Suggestion2', 'Suggestion3', 'Suggestion4', 'Suggestion5']);
+      ).toEqual([
+        'Current',
+        'Suggestion1',
+        'Suggestion2',
+        'Suggestion3',
+        'Suggestion4',
+        'Suggestion5',
+      ]);
     });
 
     it('should switch to suggested visualization', async () => {
@@ -1196,7 +1203,7 @@ describe('editor_frame', () => {
       act(() => {
         instance
           .find('[data-test-subj="lnsSuggestion"]')
-          .first()
+          .at(2)
           .simulate('click');
       });
 

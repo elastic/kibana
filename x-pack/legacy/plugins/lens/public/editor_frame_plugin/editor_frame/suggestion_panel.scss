@@ -10,25 +10,20 @@
 }
 
 .lnsSuggestionsPanel__title {
-  margin: $euiSizeS 0 $euiSizeXS;
+  margin-left: $euiSizeXS / 2;
 }
 
 .lnsSuggestionsPanel__suggestions {
   @include euiScrollBar;
   @include lnsOverflowShadowHorizontal;
   padding-top: $euiSizeXS;
-  overflow-x: auto;
+  overflow-x: scroll;
   overflow-y: hidden;
   display: flex;
 
   // Padding / negative margins to make room for overflow shadow
   padding-left: $euiSizeXS;
   margin-left: -$euiSizeXS;
-
-  // Add margin to the next of the same type
-  > * + * {
-    margin-left: $euiSizeS;
-  }
 }
 
 // These sizes also match canvas' page thumbnails for consistency
@@ -39,8 +34,13 @@ $lnsSuggestionWidth: 150px;
   flex: 0 0 auto;
   width: $lnsSuggestionWidth !important;
   height: $lnsSuggestionHeight;
-  // Allows the scrollbar to stay flush to window
-  margin-bottom: $euiSize;
+  margin-right: $euiSizeS;
+  margin-left: $euiSizeXS / 2;
+  margin-bottom: $euiSizeXS / 2;
+}
+
+.lnsSuggestionPanel__button-isSelected {
+  @include euiFocusRing;
 }
 
 .lnsSidebar__suggestionIcon {
@@ -57,4 +57,16 @@ $lnsSuggestionWidth: 150px;
   height: $lnsSuggestionHeight - $euiSize;
   pointer-events: none;
   margin: 0 $euiSizeS;
+}
+
+.lnsSuggestionChartWrapper--withLabel {
+  height: $lnsSuggestionHeight - $euiSizeL;
+}
+
+.lnsSuggestionPanel__buttonLabel {
+  @include euiFontSizeXS;
+  display: block;
+  font-weight: $euiFontWeightBold;
+  text-align: center;
+  flex-grow: 0;
 }
