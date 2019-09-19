@@ -5,9 +5,7 @@
 <titleabbrev>List pipeline</titleabbrev>
 ++++
 
-List all centrally-managed Logstash pipelines.
-
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] List all centrally-managed Logstash pipelines.
 
 [[logstash-configuration-management-api-list-request]]
 ==== Request

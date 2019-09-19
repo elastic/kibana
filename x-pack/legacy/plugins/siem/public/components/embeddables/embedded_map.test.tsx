@@ -17,12 +17,18 @@ jest.mock('ui/new_platform', () => ({
         getKibanaVersion: () => '8.0.0',
       },
     },
+    plugins: {
+      uiActions: require('../../../../../../../src/plugins/ui_actions/public/mocks').uiActionsPluginMock.createSetupContract(),
+    },
   },
   npSetup: {
     core: {
       uiSettings: {
         get$: () => 'world',
       },
+    },
+    plugins: {
+      uiActions: require('../../../../../../../src/plugins/ui_actions/public/mocks').uiActionsPluginMock.createStartContract(),
     },
   },
 }));

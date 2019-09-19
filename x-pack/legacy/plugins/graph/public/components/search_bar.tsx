@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiPopover,
-  EuiButtonEmpty,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import React, { useState } from 'react';
 
 import { Storage } from 'ui/storage';
@@ -25,7 +18,7 @@ import {
   IndexPattern,
 } from '../../../../../../src/legacy/core_plugins/data/public';
 import { IndexPatternSavedObject } from '../types/app_state';
-import { SourcePicker } from './source_picker';
+import { openSourceModal } from '../services/source_modal';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -38,6 +31,7 @@ interface SearchBarProps {
   savedObjects: CoreStart['savedObjects'];
   uiSettings: CoreStart['uiSettings'];
   http: CoreStart['http'];
+  overlays: CoreStart['overlays'];
 }
 
 function queryToString(query: Query, indexPattern: IndexPattern) {
@@ -56,17 +50,17 @@ function queryToString(query: Query, indexPattern: IndexPattern) {
   return JSON.stringify(query.query);
 }
 
-export function SearchBar({
-  currentIndexPattern,
-  onQuerySubmit,
-  isLoading,
-  onIndexPatternSelected,
-  uiSettings,
-  savedObjects,
-  http,
-  initialQuery,
-}: SearchBarProps) {
-  const [open, setOpen] = useState(false);
+export function SearchBar(props: SearchBarProps) {
+  const {
+    currentIndexPattern,
+    onQuerySubmit,
+    isLoading,
+    onIndexPatternSelected,
+    uiSettings,
+    savedObjects,
+    http,
+    initialQuery,
+  } = props;
   const [query, setQuery] = useState<Query>({ language: 'kuery', query: initialQuery || '' });
   return (
     <I18nProvider>
@@ -95,44 +89,28 @@ export function SearchBar({
                 defaultMessage: 'Search your data and add to your graph',
               })}
               prepend={
-                <EuiPopover
-                  id="graphSourcePicker"
-                  anchorPosition="downLeft"
-                  ownFocus
-                  button={
-                    <EuiToolTip
-                      content={i18n.translate('xpack.graph.bar.pickSourceTooltip', {
-                        defaultMessage: 'Click here to pick another data source',
-                      })}
-                    >
-                      <EuiButtonEmpty
-                        size="xs"
-                        className="gphSearchBar__datasourceButton"
-                        onClick={() => setOpen(true)}
-                      >
-                        {currentIndexPattern
-                          ? currentIndexPattern.title
-                          : // This branch will be shown if the user exits the
-                            // initial picker modal
-                            i18n.translate('xpack.graph.bar.pickSourceLabel', {
-                              defaultMessage: 'Click here to pick a data source',
-                            })}
-                      </EuiButtonEmpty>
-                    </EuiToolTip>
-                  }
-                  isOpen={open}
-                  closePopover={() => setOpen(false)}
+                <EuiToolTip
+                  content={i18n.translate('xpack.graph.bar.pickSourceTooltip', {
+                    defaultMessage: 'Click here to pick another data source',
+                  })}
                 >
-                  <SourcePicker
-                    onIndexPatternSelected={pattern => {
-                      onIndexPatternSelected(pattern);
-                      setOpen(false);
+                  <EuiButtonEmpty
+                    size="xs"
+                    className="gphSearchBar__datasourceButton"
+                    data-test-subj="graphDatasourceButton"
+                    onClick={() => {
+                      openSourceModal(props, onIndexPatternSelected);
                     }}
-                    currentIndexPattern={currentIndexPattern}
-                    uiSettings={uiSettings}
-                    savedObjects={savedObjects}
-                  />
-                </EuiPopover>
+                  >
+                    {currentIndexPattern
+                      ? currentIndexPattern.attributes.title
+                      : // This branch will be shown if the user exits the
+                        // initial picker modal
+                        i18n.translate('xpack.graph.bar.pickSourceLabel', {
+                          defaultMessage: 'Click here to pick a data source',
+                        })}
+                  </EuiButtonEmpty>
+                </EuiToolTip>
               }
               onChange={setQuery}
             />

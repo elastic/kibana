@@ -13,6 +13,10 @@ import { act } from 'react-dom/test-utils';
 import { IndexPattern, QueryBarInput } from 'src/legacy/core_plugins/data/public';
 
 jest.mock('ui/new_platform');
+import { EuiFieldText } from '@elastic/eui';
+import { openSourceModal } from '../services/source_modal';
+
+jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
 
 describe('search_bar', () => {
   it('should render search bar and submit queryies', () => {
@@ -24,6 +28,8 @@ describe('search_bar', () => {
         onQuerySubmit={querySubmit}
         savedObjects={{} as CoreStart['savedObjects']}
         uiSettings={{} as CoreStart['uiSettings']}
+        http={{} as CoreStart['http']}
+        overlays={{} as CoreStart['overlays']}
         currentIndexPattern={{ title: 'Testpattern' } as IndexPattern}
       />
     );
@@ -48,6 +54,7 @@ describe('search_bar', () => {
         savedObjects={{} as CoreStart['savedObjects']}
         uiSettings={{} as CoreStart['uiSettings']}
         http={{} as CoreStart['http']}
+        overlays={{} as CoreStart['overlays']}
         currentIndexPattern={{ title: 'Testpattern', fields: [{ name: 'test' }] } as IndexPattern}
       />
     );
@@ -74,20 +81,16 @@ describe('search_bar', () => {
         onQuerySubmit={() => {}}
         savedObjects={{} as CoreStart['savedObjects']}
         uiSettings={{} as CoreStart['uiSettings']}
-        currentIndexPattern={{ title: 'Testpattern' } as IndexPattern}
+        http={{} as CoreStart['http']}
+        overlays={{} as CoreStart['overlays']}
+        currentIndexPattern={{ attributes: { title: 'Testpattern' } } as IndexPatternSavedObject}
       />
     );
 
-    const newIndexpattern = {} as IndexPatternSavedObject;
-
-    // pick the SourcePicker component out of the tree because
+    // pick the button component out of the tree because
     // it's part of a popover and thus not covered by enzyme
-    (instance
-      .find(QueryBarInput)
-      .prop('prepend') as ReactElement).props.children.props.onIndexPatternSelected(
-      newIndexpattern
-    );
+    (instance.find(EuiFieldText).prop('prepend') as ReactElement).props.children.props.onClick();
 
-    expect(indexPatternSelected).toHaveBeenCalledWith(newIndexpattern);
+    expect(openSourceModal).toHaveBeenCalled();
   });
 });

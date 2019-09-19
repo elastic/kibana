@@ -25,6 +25,10 @@ interface SetupDependencies {
   VisTypesRegistryProvider: any;
 }
 
+interface StartDependencies {
+  VisTypesRegistryProvider: any;
+  Private: any;
+}
 /**
  * Vis Types Service
  *
@@ -42,6 +46,15 @@ export class TypesService {
     };
   }
 
+  public start({ VisTypesRegistryProvider, Private }: StartDependencies) {
+    const visTypes = Private(VisTypesRegistryProvider);
+    return {
+      get: (visualization: string) => {
+        return visTypes.byName[visualization];
+      },
+    };
+  }
+
   public stop() {
     // nothing to do here yet
   }
@@ -49,6 +62,7 @@ export class TypesService {
 
 /** @internal */
 export type TypesSetup = ReturnType<TypesService['setup']>;
+export type TypesStart = ReturnType<TypesService['start']>;
 
 /** @public types */
 export type VisTypeAlias = VisTypeAlias;
