@@ -35,6 +35,12 @@ import {
 } from './shim';
 
 /** @internal */
+export { LegacyDependenciesPluginStart as TimelionStartDependencies };
+
+/** @internal */
+export { LegacyDependenciesPluginSetup as TimelionSetupDependencies };
+
+/** @internal */
 export interface TimelionPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPlugin['setup']>;
   visualizations: VisualizationsSetup;

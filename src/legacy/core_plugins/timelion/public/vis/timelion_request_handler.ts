@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 // @ts-ignore
 import { buildEsQuery, getEsQueryConfig, Filter } from '@kbn/es-query';
 // @ts-ignore
@@ -28,7 +27,7 @@ import { TimeRange } from 'src/plugins/data/public';
 import { VisParams } from 'ui/vis';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
-import { LegacyDependenciesPluginSetup } from '../shim';
+import { TimelionSetupDependencies } from '../plugin';
 
 interface Stats {
   cacheCount: number;
@@ -51,7 +50,7 @@ export interface TimelionSuccessResponse {
   type: KIBANA_CONTEXT_NAME;
 }
 
-export function getTimelionRequestHandler(dependencies: LegacyDependenciesPluginSetup) {
+export function getTimelionRequestHandler(dependencies: TimelionSetupDependencies) {
   const { config, $http } = dependencies;
   const timezone = timezoneProvider(config)();
 
@@ -67,42 +66,38 @@ export function getTimelionRequestHandler(dependencies: LegacyDependenciesPlugin
     visParams: VisParams;
     forceFetch?: boolean;
   }) => {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       const expression = visParams.expression;
+
       if (!expression) return;
+
       const esQueryConfigs = getEsQueryConfig(config);
-      const httpResult = $http
-        .post('../api/timelion/run', {
+
+      try {
+        const response = await $http.post('../api/timelion/run', {
           sheet: [expression],
           extended: {
             es: {
               filter: buildEsQuery(undefined, query, filters, esQueryConfigs),
             },
           },
-          time: _.extend(timeRange, {
-            interval: visParams.interval,
-            timezone,
-          }),
-        })
-        .then((resp: any) => resp.data)
-        .catch((resp: any) => {
-          throw resp.data;
+          time: { ...timeRange, interval: visParams.interval, timezone },
         });
 
-      httpResult
-        .then(function(resp: TimelionSuccessResponse) {
-          resolve(resp);
-        })
-        .catch(function(resp: any) {
-          const err = new Error(resp.message);
-          err.stack = resp.stack;
-          toastNotifications.addError(err, {
-            title: i18n.translate('timelion.requestHandlerErrorTitle', {
-              defaultMessage: 'Timelion request error',
-            }),
-          });
-          reject(err);
+        resolve(response.data);
+      } catch (e) {
+        const err = new Error(e.data.message);
+
+        err.stack = e.data.stack;
+
+        toastNotifications.addError(err, {
+          title: i18n.translate('timelion.requestHandlerErrorTitle', {
+            defaultMessage: 'Timelion request error',
+          }),
         });
+
+        reject(err);
+      }
     });
   };
 }
