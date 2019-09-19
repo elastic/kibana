@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { createQueryFilterClauses } from '../../utils/build_query';
+import { createQueryFilterClauses, calculateTimeseriesInterval } from '../../utils/build_query';
 import { RequestBasicOptions } from '../framework';
-import { calculateTimeseriesInterval } from './calculate_timeseries_interval';
 
 export const buildEventsOverTimeQuery = ({
   filterQuery,
@@ -28,7 +27,8 @@ export const buildEventsOverTimeQuery = ({
   ];
 
   const getHistogramAggregation = () => {
-    const interval = calculateTimeseriesInterval(from, to, 1);
+    const minIntervalSeconds = 10;
+    const interval = calculateTimeseriesInterval(from, to, minIntervalSeconds);
     const histogramTimestampField = '@timestamp';
     const dateHistogram = {
       date_histogram: {

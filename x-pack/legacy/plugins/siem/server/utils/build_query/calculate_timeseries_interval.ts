@@ -94,7 +94,7 @@ export function calculateTimeseriesInterval(
 ) {
   const duration = moment.duration(upperBoundInMsSinceEpoch - lowerBoundInMsSinceEpoch, 'ms');
 
-  const matchedInterval = calculateAuto.near(100, duration);
+  const matchedInterval = calculateAuto.near(50, duration);
 
   return matchedInterval ? Math.max(matchedInterval.asSeconds(), 1) : null;
 }
