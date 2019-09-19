@@ -154,7 +154,6 @@ export class FeatureTooltip extends React.Component {
         showFilterButtons={this.props.showFilterButtons}
         onCloseTooltip={this._onCloseTooltip}
         addFilters={this.props.addFilters}
-        reevaluateTooltipPosition={this.props.reevaluateTooltipPosition}
       />
     );
   }
@@ -352,7 +351,6 @@ export class FeatureTooltip extends React.Component {
           feature={currentFeature}
           geoFields={filteredGeoFields}
           addFilters={this.props.addFilters}
-          reevaluateTooltipPosition={this.props.reevaluateTooltipPosition}
         />
       );
     }

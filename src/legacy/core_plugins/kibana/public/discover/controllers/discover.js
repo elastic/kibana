@@ -257,7 +257,7 @@ function discoverController(
       description: i18n.translate('kbn.discover.localMenu.newSearchDescription', {
         defaultMessage: 'New Search',
       }),
-      run: function () { kbnUrl.change('/discover'); },
+      run: function () { $scope.$evalAsync(() => { kbnUrl.change('/discover'); }); },
       testId: 'discoverNewButton',
     };
 

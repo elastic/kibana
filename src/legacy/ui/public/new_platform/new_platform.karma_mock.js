@@ -39,6 +39,11 @@ export const npSetup = {
         },
       },
     },
+    uiActions: {
+      attachAction: sinon.fake(),
+      registerAction: sinon.fake(),
+      registerTrigger: sinon.fake(),
+    },
   },
 };
 
@@ -59,6 +64,16 @@ export const npStart = {
         onClose: Promise.resolve(undefined),
         close: () => Promise.resolve(undefined),
       }),
+    },
+    uiActions: {
+      attachAction: sinon.fake(),
+      registerAction: sinon.fake(),
+      registerTrigger: sinon.fake(),
+      detachAction: sinon.fake(),
+      executeTriggerActions: sinon.fake(),
+      getTrigger: sinon.fake(),
+      getTriggerActions: sinon.fake(),
+      getTriggerCompatibleActions: sinon.fake(),
     },
   },
 };
