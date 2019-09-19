@@ -28,8 +28,8 @@ const isEmbeddable = (
   return get('type', embeddable) != null;
 };
 
-// Partial actions for testing that even though the types are there JavaScript
-// as circumvented the types and is calling execute and isCompatible without a filter array
+// Partial actions for testing that even though the types are there, JavaScript
+// could circumvent the types and call execute() and isCompatible() without a filter array
 interface PartialAction {
   execute: ({ embeddable }: { embeddable: ActionContext['embeddable'] }) => Promise<string>;
   isCompatible: ({ embeddable }: { embeddable: ActionContext['embeddable'] }) => Promise<boolean>;
