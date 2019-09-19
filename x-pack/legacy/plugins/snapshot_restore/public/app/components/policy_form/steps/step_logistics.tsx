@@ -405,6 +405,8 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             />
           </EuiFormRow>
 
+          <EuiSpacer size="m" />
+
           <EuiText size="s">
             <EuiLink
               onClick={() => {
@@ -447,6 +449,8 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
               });
             }}
           />
+
+          <EuiSpacer size="s" />
 
           <EuiText size="s">
             <EuiLink

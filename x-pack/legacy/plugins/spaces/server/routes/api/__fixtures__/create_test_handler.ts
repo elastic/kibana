@@ -7,9 +7,8 @@
 import * as Rx from 'rxjs';
 import { Server } from 'hapi';
 import { Legacy } from 'kibana';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { httpServiceMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, coreMock } from 'src/core/server/mocks';
 import { SavedObjectsSchema, SavedObjectsService } from 'src/core/server';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from 'src/legacy/utils/streams';
@@ -20,7 +19,7 @@ import { ExternalRouteDeps } from '../external';
 import { SpacesService } from '../../../new_platform/spaces_service';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { InternalRouteDeps } from '../v1';
-import { SpacesHttpServiceSetup } from '../../../new_platform/plugin';
+import { LegacyAPI } from '../../../new_platform/plugin';
 
 interface KibanaServer extends Legacy.Server {
   savedObjects: any;
@@ -215,28 +214,22 @@ export function createTestHandler(
       fatal: jest.fn(),
     };
 
-    const uiSettingsService = {
-      getDefaults: jest.fn().mockResolvedValue({
-        defaultRoute: { value: '/app/fallbackRoute' },
-      }),
-      get: jest.fn().mockImplementation((key: string) => {
-        if (key === 'defaultRoute') {
-          return '/app/spaceDefaultRoute';
-        }
-        throw new Error(`unexpected UI Settings Service call using key ${key}`);
-      }),
-    };
+    const coreSetupMock = coreMock.createSetup();
 
-    const uiSettingsServiceFactory = jest.fn().mockReturnValue(uiSettingsService);
-
-    const service = new SpacesService(log, server.config().get('server.basePath'));
-    const spacesService = await service.setup({
-      http: httpServiceMock.createSetupContract(),
-      elasticsearch: elasticsearchServiceMock.createSetupContract(),
-      uiSettingsServiceFactory,
+    const legacyAPI = {
+      legacyConfig: {
+        serverBasePath: mockConfig.get('server.basePath'),
+        serverDefaultRoute: mockConfig.get('server.defaultRoute'),
+      },
       savedObjects: server.savedObjects,
+    } as LegacyAPI;
+
+    const service = new SpacesService(log, () => legacyAPI);
+    const spacesService = await service.setup({
+      http: coreSetupMock.http,
+      elasticsearch: elasticsearchServiceMock.createSetupContract(),
       security: createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
-      spacesAuditLogger: {} as SpacesAuditLogger,
+      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
       config$: Rx.of({ maxSpaces: 1000 }),
     });
 
@@ -255,15 +248,12 @@ export function createTestHandler(
     });
 
     initApiFn({
-      http: ({
-        server,
-        route: server.route.bind(server),
-      } as unknown) as SpacesHttpServiceSetup,
+      getLegacyAPI: () => legacyAPI,
       routePreCheckLicenseFn: pre,
       savedObjects: server.savedObjects,
       spacesService,
       log,
-      config: mockConfig as KibanaConfig,
+      legacyRouter: server.route.bind(server),
     });
 
     teardowns.push(() => server.stop());

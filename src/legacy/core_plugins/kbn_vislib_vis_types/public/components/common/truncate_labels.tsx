@@ -44,6 +44,7 @@ function TruncateLabelsOption({ disabled, value, setValue }: TruncateLabelsOptio
         value={value === null ? '' : value}
         onChange={onChange}
         fullWidth
+        compressed
       />
     </EuiFormRow>
   );
