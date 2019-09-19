@@ -1,30 +1,35 @@
 [[saved-objects-api-get]]
-=== Get Object
+=== Get object API
+++++
+<titleabbrev>Get object</titleabbrev>
+++++
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Retrieve a single {kib} saved object by ID.
 
-The get saved object API enables you to retrieve a single Kibana saved object
-by id.
-
-Note: You cannot access this endpoint via the Console in Kibana.
-
+[[saved-objects-api-get-request]]
 ==== Request
 
 `GET /api/saved_objects/<type>/<id>`
 
-==== Path Parameters
+[[saved-objects-api-get-params]]
+==== Path parameters
 
-`type` (required)::
-  (string) Valid options, include: `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`
+`type`::
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
 
-`id` (required)::
-  (string) ID of object to retrieve
+`id`::
+  (Required, string) The ID of the object to retrieve.
 
+[[saved-objects-api-get-codes]]
+==== Response code
 
-==== Examples
+`200`:: 
+    Indicates a successful call.
 
-The following example retrieves the index pattern object with an id of
-`my-pattern`.
+[[saved-objects-api-get-example]]      
+==== Example
+
+Retrieve the index pattern object with the `my-pattern` ID:
 
 [source,js]
 --------------------------------------------------
@@ -32,8 +37,7 @@ GET api/saved_objects/index-pattern/my-pattern
 --------------------------------------------------
 // KIBANA
 
-A successful call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
+The API returns the following:
 
 [source,js]
 --------------------------------------------------

@@ -12,6 +12,13 @@ const Space1: Space = {
   disabledFeatures: [],
 };
 
+const Other: Space = {
+  id: 'other',
+  name: 'Other',
+  disabledFeatures: [],
+};
+
 export const Spaces = {
   space1: Space1,
+  other: Other,
 };

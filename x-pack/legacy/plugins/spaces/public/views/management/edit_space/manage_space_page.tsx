@@ -21,7 +21,7 @@ import { Breadcrumb } from 'ui/chrome';
 import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
 import { Capabilities } from 'src/core/public';
-import { Feature } from '../../../../../xpack_main/types';
+import { Feature } from '../../../../../../../plugins/features/server';
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
 import { SpacesManager } from '../../../lib';
@@ -78,7 +78,7 @@ class ManageSpacePageUI extends Component<Props, State> {
 
     const { spaceId, spacesManager, intl, setBreadcrumbs } = this.props;
 
-    const getFeatures = kfetch({ method: 'get', pathname: '/api/features/v1' });
+    const getFeatures = kfetch({ method: 'get', pathname: '/api/features' });
 
     if (spaceId) {
       try {
@@ -215,7 +215,7 @@ class ManageSpacePageUI extends Component<Props, State> {
 
   public maybeGetSecureSpacesMessage = () => {
     if (this.editingExistingSpace()) {
-      return <SecureSpaceMessage capabilities={this.props.capabilities} />;
+      return <SecureSpaceMessage />;
     }
     return null;
   };
@@ -335,6 +335,7 @@ class ManageSpacePageUI extends Component<Props, State> {
       initials,
       color,
       disabledFeatures = [],
+      imageUrl,
     } = this.state.space;
 
     const params = {
@@ -344,6 +345,7 @@ class ManageSpacePageUI extends Component<Props, State> {
       initials,
       color,
       disabledFeatures,
+      imageUrl,
     };
 
     let action;

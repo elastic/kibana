@@ -13,7 +13,7 @@ import { getManageSpacesUrl } from '../lib/constants';
 interface Props {
   isDisabled?: boolean;
   className?: string;
-  size?: 's' | 'l';
+  size?: 's' | 'm';
   style?: CSSProperties;
   onClick?: () => void;
   capabilities: Capabilities;

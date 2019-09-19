@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
-import { Capabilities } from 'src/core/public';
-import { Feature } from '../../../xpack_main/types';
+import { UICapabilities } from 'ui/capabilities';
+import { Feature } from '../../../../../plugins/features/server';
 import { Space } from '../../common/model/space';
 
 export function toggleUICapabilities(
   features: Feature[],
-  capabilities: Capabilities,
+  capabilities: UICapabilities,
   activeSpace: Space
 ) {
   const clonedCapabilities = _.cloneDeep(capabilities);
@@ -22,7 +22,7 @@ export function toggleUICapabilities(
 
 function toggleDisabledFeatures(
   features: Feature[],
-  capabilities: Capabilities,
+  capabilities: UICapabilities,
   activeSpace: Space
 ) {
   const disabledFeatureKeys: string[] = activeSpace.disabledFeatures;

@@ -35,15 +35,11 @@ interface State {
 const NA = 'n/a';
 const UNKNOWN = 'unknown';
 
-const getDimensions = (info: JobInfo) => {
+const getDimensions = (info: JobInfo): string => {
   const defaultDimensions = { width: null, height: null };
   const { width, height } = get(info, 'payload.layout.dimensions', defaultDimensions);
   if (width && height) {
-    return (
-      <Fragment>
-        Width: {width} x Height: {height}
-      </Fragment>
-    );
+    return `Width: ${width} x Height: ${height}`;
   }
   return NA;
 };
@@ -77,8 +73,21 @@ export class ReportInfoButton extends Component<Props, State> {
 
     const jobType = info.jobtype || NA;
 
-    // TODO queue method (clicked UI, watcher, etc)
-    const jobInfoParts = {
+    interface JobInfo {
+      title: string;
+      description: string;
+    }
+
+    interface JobInfoMap {
+      [thing: string]: JobInfo[];
+    }
+
+    const attempts = info.attempts ? info.attempts.toString() : NA;
+    const maxAttempts = info.max_attempts ? info.max_attempts.toString() : NA;
+    const priority = info.priority ? info.priority.toString() : NA;
+    const timeout = info.timeout ? info.timeout.toString() : NA;
+
+    const jobInfoParts: JobInfoMap = {
       datetimes: [
         {
           title: 'Created By',
@@ -105,21 +114,21 @@ export class ReportInfoButton extends Component<Props, State> {
         },
         {
           title: 'Browser Timezone',
-          description: info.payload.browserTimezone || NA,
+          description: get(info, 'payload.browserTimezone') || NA,
         },
       ],
       payload: [
         {
           title: 'Title',
-          description: info.payload.title || NA,
+          description: get(info, 'payload.title') || NA,
         },
         {
           title: 'Type',
-          description: info.payload.type || NA,
+          description: get(info, 'payload.type') || NA,
         },
         {
           title: 'Layout',
-          description: info.meta.layout || NA,
+          description: get(info, 'meta.layout') || NA,
         },
         {
           title: 'Dimensions',
@@ -131,29 +140,29 @@ export class ReportInfoButton extends Component<Props, State> {
         },
         {
           title: 'Content Type',
-          description: info.output.content_type || NA,
+          description: get(info, 'output.content_type') || NA,
         },
         {
           title: 'Size in Bytes',
-          description: info.output.size || NA,
+          description: get(info, 'output.size') || NA,
         },
       ],
       status: [
         {
           title: 'Attempts',
-          description: info.attempts || NA,
+          description: attempts,
         },
         {
           title: 'Max Attempts',
-          description: info.max_attempts || NA,
+          description: maxAttempts,
         },
         {
           title: 'Priority',
-          description: info.priority || NA,
+          description: priority,
         },
         {
           title: 'Timeout',
-          description: info.timeout || NA,
+          description: timeout,
         },
         {
           title: 'Status',

@@ -15,14 +15,14 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function getViewString(lat, lon, zoom) {
   return `${lat},${lon},${zoom}`;
 }
 
 export class SetViewControl extends Component {
-
-  state = {}
+  state = {};
 
   static getDerivedStateFromProps(nextProps, prevState) {
     const nextView = getViewString(nextProps.center.lat, nextProps.center.lon, nextProps.zoom);
@@ -64,7 +64,7 @@ export class SetViewControl extends Component {
     this.setState({
       [name]: isNaN(sanitizedValue) ? '' : sanitizedValue,
     });
-  }
+  };
 
   _renderNumberFormRow = ({ value, min, max, onChange, label, dataTestSubj }) => {
     const isInvalid = value === '' || value > max || value < min;
@@ -72,31 +72,23 @@ export class SetViewControl extends Component {
     return {
       isInvalid,
       component: (
-        <EuiFormRow
-          label={label}
-          isInvalid={isInvalid}
-          error={error}
-          compressed
-        >
+        <EuiFormRow label={label} isInvalid={isInvalid} error={error} display="rowCompressed">
           <EuiFieldNumber
+            compressed
             value={value}
             onChange={onChange}
             isInvalid={isInvalid}
             data-test-subj={dataTestSubj}
           />
         </EuiFormRow>
-      )
+      ),
     };
-  }
+  };
 
   _onSubmit = () => {
-    const {
-      lat,
-      lon,
-      zoom
-    } = this.state;
+    const { lat, lon, zoom } = this.state;
     this.props.onSubmit({ lat, lon, zoom });
-  }
+  };
 
   _renderSetViewForm() {
     const { isInvalid: isLatInvalid, component: latFormRow } = this._renderNumberFormRow({
@@ -104,7 +96,9 @@ export class SetViewControl extends Component {
       min: -90,
       max: 90,
       onChange: this._onLatChange,
-      label: 'Latitude',
+      label: i18n.translate('xpack.maps.setViewControl.latitudeLabel', {
+        defaultMessage: 'Latitude',
+      }),
       dataTestSubj: 'latitudeInput',
     });
 
@@ -113,7 +107,9 @@ export class SetViewControl extends Component {
       min: -180,
       max: 180,
       onChange: this._onLonChange,
-      label: 'Longitude',
+      label: i18n.translate('xpack.maps.setViewControl.longitudeLabel', {
+        defaultMessage: 'Longitude',
+      }),
       dataTestSubj: 'longitudeInput',
     });
 
@@ -122,30 +118,29 @@ export class SetViewControl extends Component {
       min: 0,
       max: 24,
       onChange: this._onZoomChange,
-      label: 'Zoom',
+      label: i18n.translate('xpack.maps.setViewControl.zoomLabel', {
+        defaultMessage: 'Zoom',
+      }),
       dataTestSubj: 'zoomInput',
     });
 
     return (
       <EuiForm data-test-subj="mapSetViewForm">
-
         {latFormRow}
 
         {lonFormRow}
 
         {zoomFormRow}
 
-        <EuiFormRow hasEmptyLabelSpace>
-          <EuiButton
-            size="s"
-            disabled={isLatInvalid || isLonInvalid || isZoomInvalid}
-            onClick={this._onSubmit}
-            data-test-subj="submitViewButton"
-          >
-            Go
-          </EuiButton>
-        </EuiFormRow>
-
+        <EuiButton
+          size="s"
+          fill
+          disabled={isLatInvalid || isLonInvalid || isZoomInvalid}
+          onClick={this._onSubmit}
+          data-test-subj="submitViewButton"
+        >
+          <FormattedMessage id="xpack.maps.setViewControl.submitButtonLabel" defaultMessage="Go" />
+        </EuiButton>
       </EuiForm>
     );
   }
@@ -154,21 +149,21 @@ export class SetViewControl extends Component {
     return (
       <EuiPopover
         anchorPosition="leftUp"
-        button={(
+        button={
           <EuiButtonIcon
             className="mapToolbarOverlay__button"
             onClick={this._togglePopover}
             data-test-subj="toggleSetViewVisibilityButton"
             iconType="crosshairs"
             color="text"
-            aria-label={i18n.translate('xpack.maps.viewControl.goToButtonLabel', {
-              defaultMessage: 'Go to'
+            aria-label={i18n.translate('xpack.maps.setViewControl.goToButtonLabel', {
+              defaultMessage: 'Go to',
             })}
-            title={i18n.translate('xpack.maps.viewControl.goToButtonLabel', {
-              defaultMessage: 'Go to'
+            title={i18n.translate('xpack.maps.setViewControl.goToButtonLabel', {
+              defaultMessage: 'Go to',
             })}
           />
-        )}
+        }
         isOpen={this.props.isSetViewOpen}
         closePopover={this.props.closeSetView}
       >
@@ -183,7 +178,7 @@ SetViewControl.propTypes = {
   zoom: PropTypes.number.isRequired,
   center: PropTypes.shape({
     lat: PropTypes.number.isRequired,
-    lon: PropTypes.number.isRequired
+    lon: PropTypes.number.isRequired,
   }),
   onSubmit: PropTypes.func.isRequired,
   closeSetView: PropTypes.func.isRequired,

@@ -18,7 +18,7 @@ import { ES_SEARCH, ES_GEO_FIELD_TYPE, ES_SIZE_LIMIT } from '../../../../common/
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { ESTooltipProperty } from '../../tooltips/es_tooltip_property';
-import { getTermsFields } from '../../../index_pattern_util';
+import { getSourceFields } from '../../../index_pattern_util';
 
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 
@@ -29,7 +29,7 @@ export class ESSearchSource extends AbstractESSource {
     defaultMessage: 'Documents'
   });
   static description = i18n.translate('xpack.maps.source.esSearchDescription', {
-    defaultMessage: 'Geospatial data from a Kibana index pattern'
+    defaultMessage: 'Vector data from a Kibana index pattern'
   });
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
@@ -325,7 +325,8 @@ export class ESSearchSource extends AbstractESSource {
 
   async getLeftJoinFields() {
     const indexPattern = await this._getIndexPattern();
-    return getTermsFields(indexPattern.fields)
+    // Left fields are retrieved from _source.
+    return getSourceFields(indexPattern.fields)
       .map(field => {
         return { name: field.name, label: field.name };
       });

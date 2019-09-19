@@ -23,7 +23,7 @@ import { kfetch } from 'ui/kfetch';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
 import { Capabilities } from 'src/core/public';
-import { Feature } from '../../../../../xpack_main/types';
+import { Feature } from '../../../../../../../plugins/features/server';
 import { isReservedSpace } from '../../../../common';
 import { DEFAULT_SPACE_ID } from '../../../../common/constants';
 import { Space } from '../../../../common/model/space';
@@ -73,7 +73,7 @@ class SpacesGridPageUI extends Component<Props, State> {
     return (
       <div className="spcGridPage" data-test-subj="spaces-grid-page">
         <EuiPageContent horizontalPosition="center">{this.getPageContent()}</EuiPageContent>
-        <SecureSpaceMessage capabilities={this.props.capabilities} />
+        <SecureSpaceMessage />
         {this.getConfirmDeleteModal()}
       </div>
     );
@@ -230,7 +230,7 @@ class SpacesGridPageUI extends Component<Props, State> {
     });
 
     const getSpaces = spacesManager.getSpaces();
-    const getFeatures = kfetch({ method: 'get', pathname: '/api/features/v1' });
+    const getFeatures = kfetch({ method: 'get', pathname: '/api/features' });
 
     try {
       const [spaces, features] = await Promise.all([getSpaces, getFeatures]);

@@ -21,6 +21,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import angular from 'angular';
+import { Subscription } from 'rxjs';
 import moment from 'moment';
 import chrome from 'ui/chrome';
 import dateMath from '@elastic/datemath';
@@ -53,7 +54,6 @@ import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { getFilterGenerator } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
-import { VisualizeLoaderProvider } from 'ui/visualize/loader/visualize_loader';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { getDocLink } from 'ui/documentation_links';
 import '../components/fetch_error';
@@ -195,8 +195,6 @@ function discoverController(
   localStorage,
   uiCapabilities
 ) {
-  const visualizeLoader = Private(VisualizeLoaderProvider);
-  let visualizeHandler;
   const Vis = Private(VisProvider);
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
   const getUnhashableStates = Private(getUnhashableStatesProvider);
@@ -209,11 +207,17 @@ function discoverController(
     requests: new RequestAdapter()
   };
 
-  let filterUpdateSubscription;
-  let filterFetchSubscription;
+  const subscriptions = new Subscription();
 
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
+  $scope.timefilterUpdateHandler = (ranges) => {
+    timefilter.setTime({
+      from: moment(ranges.from).toISOString(),
+      to: moment(ranges.to).toISOString(),
+      mode: 'absolute',
+    });
+  };
 
   $scope.getDocLink = getDocLink;
   $scope.intervalOptions = intervalOptions;
@@ -236,8 +240,7 @@ function discoverController(
   const savedSearch = $route.current.locals.savedSearch;
   $scope.$on('$destroy', () => {
     savedSearch.destroy();
-    if (filterFetchSubscription) filterFetchSubscription.unsubscribe();
-    if (filterUpdateSubscription) filterUpdateSubscription.unsubscribe();
+    subscriptions.unsubscribe();
   });
 
   const $appStatus = $scope.appStatus = this.appStatus = {
@@ -253,7 +256,7 @@ function discoverController(
       description: i18n.translate('kbn.discover.localMenu.newSearchDescription', {
         defaultMessage: 'New Search',
       }),
-      run: function () { kbnUrl.change('/discover'); },
+      run: function () { $scope.$evalAsync(() => { kbnUrl.change('/discover'); }); },
       testId: 'discoverNewButton',
     };
 
@@ -564,10 +567,19 @@ function discoverController(
 
     $scope.updateDataSource()
       .then(function () {
-        $scope.$listen(timefilter, 'autoRefreshFetch', $scope.fetch);
-        $scope.$listen(timefilter, 'refreshIntervalUpdate', $scope.updateRefreshInterval);
-        $scope.$listen(timefilter, 'timeUpdate', $scope.updateTime);
-        $scope.$listen(timefilter, 'fetch', $scope.fetch);
+        subscriptions.add(subscribeWithScope($scope, timefilter.getAutoRefreshFetch$(), {
+          next: $scope.fetch
+        }));
+
+        subscriptions.add(subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
+          next: $scope.updateRefreshInterval
+        }));
+        subscriptions.add(subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
+          next: $scope.updateTime
+        }));
+        subscriptions.add(subscribeWithScope($scope, timefilter.getFetch$(), {
+          next: $scope.fetch
+        }));
 
         $scope.$watchCollection('state.sort', function (sort) {
           if (!sort) return;
@@ -580,19 +592,19 @@ function discoverController(
         });
 
         // update data source when filters update
-        filterUpdateSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
+        subscriptions.add(subscribeWithScope($scope, queryFilter.getUpdates$(), {
           next: () => {
             $scope.filters = queryFilter.getFilters();
             $scope.updateDataSource().then(function () {
               $state.save();
             });
           }
-        });
+        }));
 
         // fetch data when filters fire fetch event
-        filterFetchSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
+        subscriptions.add(subscribeWithScope($scope, queryFilter.getUpdates$(), {
           next: $scope.fetch
-        });
+        }));
 
         // update data source when hitting forward/back and the query changes
         $scope.$listen($state, 'fetch_with_changes', function (diff) {
@@ -613,7 +625,7 @@ function discoverController(
         // no timefield, no vis, nothing to update
           if (!$scope.opts.timefield) return;
 
-          const buckets = $scope.vis.getAggConfig().bySchemaGroup.buckets;
+          const buckets = $scope.vis.getAggConfig().bySchemaGroup('buckets');
 
           if (buckets && buckets.length === 1) {
             $scope.bucketInterval = buckets[0].buckets.getInterval();
@@ -753,6 +765,9 @@ function discoverController(
       })
       .then(onResults)
       .catch((error) => {
+        // If the request was aborted then no need to surface this error in the UI
+        if (error instanceof Error && error.name === 'AbortError') return;
+
         const fetchError = getPainlessError(error);
 
         if (fetchError) {
@@ -783,15 +798,7 @@ function discoverController(
         .resolve(buildVislibDimensions($scope.vis, { timeRange: $scope.timeRange, searchSource: $scope.searchSource }))
         .then(resp => responseHandler(tabifiedData, resp))
         .then(resp => {
-          visualizeHandler.render({
-            as: 'visualization',
-            value: {
-              visType: $scope.vis.type.name,
-              visData: resp,
-              visConfig: $scope.vis.params,
-              params: {},
-            }
-          });
+          $scope.histogramData = resp;
         });
     }
 
@@ -924,7 +931,7 @@ function discoverController(
   };
 
   $scope.onSavedQueryUpdated = savedQuery => {
-    $scope.savedQuery = savedQuery;
+    $scope.savedQuery = { ...savedQuery };
   };
 
   $scope.onClearSavedQuery = () => {
@@ -956,15 +963,14 @@ function discoverController(
     $scope.fetch();
   };
 
-  $scope.$watch('savedQuery', (newSavedQuery, oldSavedQuery) => {
+  $scope.$watch('savedQuery', (newSavedQuery) => {
     if (!newSavedQuery) return;
 
     $state.savedQuery = newSavedQuery.id;
     $state.save();
 
-    if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
-      updateStateFromSavedQuery(newSavedQuery);
-    }
+    updateStateFromSavedQuery(newSavedQuery);
+
   });
 
   $scope.$watch('state.savedQuery', newSavedQueryId => {
@@ -973,12 +979,14 @@ function discoverController(
       return;
     }
 
-    savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
-      $scope.$evalAsync(() => {
-        $scope.savedQuery = savedQuery;
-        updateStateFromSavedQuery(savedQuery);
+    if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+      savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
+        $scope.$evalAsync(() => {
+          $scope.savedQuery = savedQuery;
+          updateStateFromSavedQuery(savedQuery);
+        });
       });
-    });
+    }
   });
 
   async function setupVisualization() {
@@ -1035,13 +1043,6 @@ function discoverController(
 
     $scope.searchSource.setField('aggs', function () {
       return $scope.vis.getAggConfig().toDsl();
-    });
-
-    $timeout(async () => {
-      const visEl = $element.find('#discoverHistogram')[0];
-      visualizeHandler = await visualizeLoader.embedVisualizationWithSavedObject(visEl, visSavedObject, {
-        autoFetch: false,
-      });
     });
   }
 

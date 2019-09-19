@@ -273,6 +273,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
             }}
           />
         </ErrableFormRow>
+        <EuiSpacer />
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem>
             <ErrableFormRow
@@ -698,6 +699,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                   id="watchThresholdPopover"
                   button={
                     <EuiExpression
+                      data-test-subj="watchThresholdButton"
                       description={comparators[watch.thresholdComparator].text}
                       value={watch.threshold
                         .slice(0, comparators[watch.thresholdComparator].requiredValues)
@@ -759,6 +761,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                                   errors={errors}
                                 >
                                   <EuiFieldNumber
+                                    data-test-subj="watchThresholdInput"
                                     value={watch.threshold[i] == null ? '' : watch.threshold[i]}
                                     min={0}
                                     step={0.1}

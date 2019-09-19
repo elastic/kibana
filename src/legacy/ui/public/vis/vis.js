@@ -30,21 +30,16 @@
 import { EventEmitter } from 'events';
 import _ from 'lodash';
 import { VisTypesRegistryProvider } from '../registry/vis_types';
-import { AggConfigs } from './agg_configs';
+import { AggConfigs } from '../agg_types/agg_configs';
 import { PersistedState } from '../persisted_state';
-import { FilterBarQueryFilterProvider } from '../filter_manager/query_filter';
 import { updateVisualizationConfig } from './vis_update';
 import { SearchSourceProvider } from '../courier/search_source';
-import { SavedObjectsClientProvider } from '../saved_objects';
 
-import { timefilter } from '../timefilter';
 import '../directives/bind';
 
-export function VisProvider(Private, indexPatterns, getAppState) {
+export function VisProvider(Private, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
-  const queryFilter = Private(FilterBarQueryFilterProvider);
   const SearchSource = Private(SearchSourceProvider);
-  const savedObjectsClient = Private(SavedObjectsClientProvider);
 
   class Vis extends EventEmitter {
     constructor(indexPattern, visState) {
@@ -66,11 +61,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
       this.sessionState = {};
 
       this.API = {
-        savedObjectsClient: savedObjectsClient,
         SearchSource: SearchSource,
-        indexPatterns: indexPatterns,
-        timeFilter: timefilter,
-        queryFilter: queryFilter,
         events: {
           filter: data => this.eventsSubject.next({ name: 'filterBucket', data }),
           brush: data => this.eventsSubject.next({ name: 'brush', data }),
@@ -99,7 +90,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
       updateVisualizationConfig(state.params, this.params);
 
       if (state.aggs || !this.aggs) {
-        this.aggs = new AggConfigs(this.indexPattern, state.aggs, this.type.schemas.all);
+        this.aggs = new AggConfigs(this.indexPattern, state.aggs ? state.aggs.aggs || state.aggs : [], this.type.schemas.all);
       }
     }
 
@@ -124,7 +115,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
         title: this.title,
         type: this.type.name,
         params: _.cloneDeep(this.params),
-        aggs: this.aggs
+        aggs: this.aggs.aggs
           .map(agg => agg.toJSON())
           .filter(agg => includeDisabled || agg.enabled)
           .filter(Boolean)
@@ -136,7 +127,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
         title: state.title,
         type: state.type,
         params: _.cloneDeep(state.params),
-        aggs: state.aggs
+        aggs: state.aggs.aggs
           .map(agg => agg.toJSON())
           .filter(agg => agg.enabled)
           .filter(Boolean)
@@ -145,7 +136,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
 
     copyCurrentState(includeDisabled = false) {
       const state = this.getCurrentState(includeDisabled);
-      state.aggs = new AggConfigs(this.indexPattern, state.aggs, this.type.schemas.all);
+      state.aggs = new AggConfigs(this.indexPattern, state.aggs.aggs || state.aggs, this.type.schemas.all);
       return state;
     }
 
@@ -180,7 +171,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
     }
 
     hasSchemaAgg(schemaName, aggTypeName) {
-      const aggs = this.aggs.bySchemaName[schemaName] || [];
+      const aggs = this.aggs.bySchemaName(schemaName) || [];
       return aggs.some(function (agg) {
         if (!agg.type || !agg.type.name) return false;
         return agg.type.name === aggTypeName;

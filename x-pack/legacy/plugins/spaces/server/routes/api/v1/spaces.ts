@@ -16,9 +16,9 @@ import { getActiveSpace } from '../../../lib/get_active_space';
 import { getSpaceSelectorUrl } from '../../../lib/get_space_selector_url';
 
 export function initInternalSpacesApi(deps: InternalRouteDeps) {
-  const { http, config, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
+  const { legacyRouter, spacesService, http, getLegacyAPI, routePreCheckLicenseFn } = deps;
 
-  http.route({
+  legacyRouter({
     method: 'GET',
     path: '/api/spaces/v1/activeSpace',
     async handler(request: Legacy.Request) {
@@ -26,7 +26,7 @@ export function initInternalSpacesApi(deps: InternalRouteDeps) {
       return await getActiveSpace(
         spacesClient,
         http.basePath.get(request),
-        config.get('server.basePath')
+        getLegacyAPI().legacyConfig.serverBasePath
       );
     },
     options: {
@@ -34,12 +34,12 @@ export function initInternalSpacesApi(deps: InternalRouteDeps) {
     },
   });
 
-  http.route({
+  legacyRouter({
     method: 'GET',
     path: '/api/spaces/v1/npStart',
     async handler() {
       return {
-        spaceSelectorUrl: getSpaceSelectorUrl(config),
+        spaceSelectorUrl: getSpaceSelectorUrl(getLegacyAPI().legacyConfig.serverBasePath),
       };
     },
     options: {
@@ -48,14 +48,18 @@ export function initInternalSpacesApi(deps: InternalRouteDeps) {
     },
   });
 
-  http.route({
+  legacyRouter({
     method: 'POST',
     path: '/api/spaces/v1/space/{id}/select',
     async handler(request: any) {
+      const { savedObjects, legacyConfig } = getLegacyAPI();
+
       const { SavedObjectsClient } = savedObjects;
       const spacesClient: SpacesClient = await spacesService.scopedClient(request);
       const id = request.params.id;
 
+      const basePath = legacyConfig.serverBasePath;
+      const defaultRoute = legacyConfig.serverDefaultRoute;
       try {
         const existingSpace: Space | null = await getSpaceById(
           spacesClient,
@@ -67,11 +71,7 @@ export function initInternalSpacesApi(deps: InternalRouteDeps) {
         }
 
         return {
-          location: addSpaceIdToPath(
-            config.get('server.basePath'),
-            existingSpace.id,
-            config.get('server.defaultRoute')
-          ),
+          location: addSpaceIdToPath(basePath, existingSpace.id, defaultRoute),
         };
       } catch (error) {
         return wrapError(error);

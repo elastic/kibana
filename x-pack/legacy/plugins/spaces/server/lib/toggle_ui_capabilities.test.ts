@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature } from '../../../xpack_main/types';
+import { Feature } from '../../../../../plugins/features/server';
 import { Space } from '../../common/model/space';
 import { toggleUICapabilities } from './toggle_ui_capabilities';
 import { Capabilities } from 'src/core/public';

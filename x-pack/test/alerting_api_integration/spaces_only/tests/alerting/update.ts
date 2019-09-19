@@ -41,6 +41,32 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           ...updatedData,
           id: createdAlert.id,
           updatedBy: null,
+          apiKeyOwner: null,
+        });
+    });
+
+    it(`shouldn't update alert from another space`, async () => {
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData())
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+
+      await supertest
+        .put(`${getUrlPrefix(Spaces.other.id)}/api/alert/${createdAlert.id}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          alertTypeParams: {
+            foo: true,
+          },
+          interval: '12s',
+          actions: [],
+        })
+        .expect(404, {
+          statusCode: 404,
+          error: 'Not Found',
+          message: `Saved object [alert/${createdAlert.id}] not found`,
         });
     });
   });

@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`NoteCardBody renders correctly against snapshot 1`] = `
-<Component
+<NoteCardBody
   rawNote="#  This is a note"
 />
 `;

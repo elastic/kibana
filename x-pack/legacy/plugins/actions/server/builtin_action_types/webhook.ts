@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import { curry } from 'lodash';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { map, getOrElse } from 'fp-ts/lib/Option';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
 import { nullableType } from './lib/nullable';
 import { isOk, promiseResult, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 // config definition
 enum WebhookMethods {
@@ -17,45 +21,67 @@ enum WebhookMethods {
   PUT = 'put',
 }
 
-export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
-
 const HeadersSchema = schema.recordOf(schema.string(), schema.string());
-
-const ConfigSchema = schema.object({
+const configSchemaProps = {
   url: schema.string(),
   method: schema.oneOf([schema.literal(WebhookMethods.POST), schema.literal(WebhookMethods.PUT)], {
     defaultValue: WebhookMethods.POST,
   }),
   headers: nullableType(HeadersSchema),
-});
+};
+const ConfigSchema = schema.object(configSchemaProps);
+type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 // secrets definition
-export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
+type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 const SecretsSchema = schema.object({
   user: schema.string(),
   password: schema.string(),
 });
 
 // params definition
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
+type ActionParamsType = TypeOf<typeof ParamsSchema>;
 const ParamsSchema = schema.object({
   body: schema.maybe(schema.string()),
 });
 
 // action type definition
-export const actionType: ActionType = {
-  id: '.webhook',
-  name: 'webhook',
-  validate: {
-    config: ConfigSchema,
-    secrets: SecretsSchema,
-    params: ParamsSchema,
-  },
-  executor,
-};
+export function getActionType(configurationUtilities: ActionsConfigurationUtilities): ActionType {
+  return {
+    id: '.webhook',
+    name: 'webhook',
+    validate: {
+      config: schema.object(configSchemaProps, {
+        validate: curry(valdiateActionTypeConfig)(configurationUtilities),
+      }),
+      secrets: SecretsSchema,
+      params: ParamsSchema,
+    },
+    executor: curry(executor)(configurationUtilities),
+  };
+}
+
+function valdiateActionTypeConfig(
+  configurationUtilities: ActionsConfigurationUtilities,
+  configObject: ActionTypeConfigType
+) {
+  try {
+    configurationUtilities.ensureWhitelistedUri(configObject.url);
+  } catch (whitelistError) {
+    return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
+      defaultMessage: 'error configuring webhook action: {message}',
+      values: {
+        message: whitelistError.message,
+      },
+    });
+  }
+}
 
 // action executor
-async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
+export async function executor(
+  configurationUtilities: ActionsConfigurationUtilities,
+  execOptions: ActionTypeExecutorOptions
+): Promise<ActionTypeExecutorResult> {
   const log = (level: string, msg: string) =>
     execOptions.services.log([level, 'actions', 'webhook'], msg);
 
@@ -81,7 +107,7 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
     const {
       value: { status, statusText },
     } = result;
-    log('debug', `response from ${id} webhook event: [HTTP ${status}] ${statusText}`);
+    log('debug', `response from webhook action "${id}": [HTTP ${status}] ${statusText}`);
 
     return successResult(data);
   } else {
@@ -100,9 +126,11 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
 
       // special handling for rate limiting
       if (status === 429) {
-        return getRetryAfterIntervalFromHeaders(responseHeaders)
-          .map(retry => retryResultSeconds(id, message, retry))
-          .getOrElse(retryResult(id, message));
+        return pipe(
+          getRetryAfterIntervalFromHeaders(responseHeaders),
+          map(retry => retryResultSeconds(id, message, retry)),
+          getOrElse(() => retryResult(id, message))
+        );
       }
       return errorResultInvalid(id, message);
     }
@@ -110,7 +138,7 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
     const message = i18n.translate('xpack.actions.builtin.webhook.unreachableRemoteWebhook', {
       defaultMessage: 'Unreachable Remote Webhook, are you sure the address is correct?',
     });
-    log(`warn`, `error on ${id} webhook event: ${message}`);
+    log(`warn`, `error on ${id} webhook action: ${message}`);
     return errorResultUnreachable(id, message);
   }
 }
@@ -122,7 +150,8 @@ function successResult(data: any): ActionTypeExecutorResult {
 
 function errorResultInvalid(id: string, message: string): ActionTypeExecutorResult {
   const errMessage = i18n.translate('xpack.actions.builtin.webhook.invalidResponseErrorMessage', {
-    defaultMessage: 'an error occurred in action "{id}" calling a remote webhook: {message}',
+    defaultMessage:
+      'Invalid Response: an error occurred in webhook action "{id}" calling a remote webhook: {message}',
     values: {
       id,
       message,
@@ -136,7 +165,8 @@ function errorResultInvalid(id: string, message: string): ActionTypeExecutorResu
 
 function errorResultUnreachable(id: string, message: string): ActionTypeExecutorResult {
   const errMessage = i18n.translate('xpack.actions.builtin.webhook.unreachableErrorMessage', {
-    defaultMessage: 'an error occurred in action "{id}" calling a remote webhook: {message}',
+    defaultMessage:
+      'Unreachable Webhook: an error occurred in webhook action "{id}" calling a remote webhook: {message}',
     values: {
       id,
       message,
@@ -152,7 +182,8 @@ function retryResult(id: string, message: string): ActionTypeExecutorResult {
   const errMessage = i18n.translate(
     'xpack.actions.builtin.webhook.invalidResponseRetryLaterErrorMessage',
     {
-      defaultMessage: 'an error occurred in action "{id}" calling a remote webhook, retry later',
+      defaultMessage:
+        'Invalid Response: an error occurred in webhook action "{id}" calling a remote webhook, retry later',
       values: {
         id,
       },
@@ -178,7 +209,7 @@ function retryResultSeconds(
     'xpack.actions.builtin.webhook.invalidResponseRetryDateErrorMessage',
     {
       defaultMessage:
-        'an error occurred in action "{id}" calling a remote webhook, retry at {retryString}: {message}',
+        'Invalid Response: an error occurred in webhook action "{id}" calling a remote webhook, retry at {retryString}: {message}',
       values: {
         id,
         retryString,

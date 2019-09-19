@@ -29,6 +29,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
       <EuiForm>
         <EuiFormRow
           describedByIds={Array []}
+          display="row"
           fullWidth={true}
           hasEmptyLabelSpace={false}
           label="Spaces"
@@ -160,6 +161,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
         </EuiFormRow>
         <EuiFormRow
           describedByIds={Array []}
+          display="row"
           fullWidth={true}
           hasEmptyLabelSpace={false}
           label="Privilege"
@@ -558,13 +560,10 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
             data-test-subj="cancelSpacePrivilegeButton"
             flush="left"
-            iconSide="left"
             iconType="cross"
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Cancel"
@@ -581,10 +580,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
             data-test-subj="createSpacePrivilegeButton"
             disabled={true}
             fill={true}
-            iconSide="left"
             onClick={[Function]}
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Update space privilege"

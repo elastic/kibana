@@ -17,9 +17,11 @@
  * under the License.
  */
 
-import { Action, ActionContext } from '../../actions';
+import {
+  IAction,
+  IncompatibleActionError,
+} from '../../../../../../../../../plugins/ui_actions/public';
 import { EmbeddableInput, Embeddable, EmbeddableOutput, IEmbeddable } from '../../embeddables';
-import { IncompatibleActionError } from '../../errors';
 
 export const SAY_HELLO_ACTION = 'SAY_HELLO_ACTION';
 
@@ -36,14 +38,20 @@ export function hasFullNameOutput(
   );
 }
 
-export class SayHelloAction extends Action {
+interface ActionContext {
+  embeddable: Embeddable<EmbeddableInput, FullNameEmbeddableOutput>;
+  message?: string;
+}
+
+export class SayHelloAction implements IAction<ActionContext> {
   public readonly type = SAY_HELLO_ACTION;
+  public readonly id = SAY_HELLO_ACTION;
+
   private sayHello: (name: string) => void;
 
   // Taking in a function, instead of always directly interacting with the dom,
   // can make testing the execute part of the action easier.
   constructor(sayHello: (name: string) => void) {
-    super(SAY_HELLO_ACTION);
     this.sayHello = sayHello;
   }
 
@@ -51,11 +59,13 @@ export class SayHelloAction extends Action {
     return 'Say hello';
   }
 
+  getIconType() {
+    return undefined;
+  }
+
   // Can use typescript generics to get compiler time warnings for immediate feedback if
   // the context is not compatible.
-  async isCompatible(
-    context: ActionContext<Embeddable<EmbeddableInput, FullNameEmbeddableOutput>>
-  ) {
+  async isCompatible(context: ActionContext) {
     // Option 1: only compatible with Greeting Embeddables.
     // return context.embeddable.type === CONTACT_CARD_EMBEDDABLE;
 
@@ -63,20 +73,15 @@ export class SayHelloAction extends Action {
     return hasFullNameOutput(context.embeddable);
   }
 
-  async execute(
-    context: ActionContext<
-      Embeddable<EmbeddableInput, FullNameEmbeddableOutput>,
-      { message?: string }
-    >
-  ) {
+  async execute(context: ActionContext) {
     if (!(await this.isCompatible(context))) {
       throw new IncompatibleActionError();
     }
 
     const greeting = `Hello, ${context.embeddable.getOutput().fullName}`;
 
-    if (context.triggerContext && context.triggerContext.message) {
-      this.sayHello(`${greeting}.  ${context.triggerContext.message}`);
+    if (context.message) {
+      this.sayHello(`${greeting}.  ${context.message}`);
     } else {
       this.sayHello(greeting);
     }

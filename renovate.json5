@@ -23,14 +23,14 @@
     'release_note:skip',
     'renovate',
     'v8.0.0',
-    'v7.4.0',
+    'v7.5.0',
   ],
   major: {
     labels: [
       'release_note:skip',
       'renovate',
       'v8.0.0',
-      'v7.4.0',
+      'v7.5.0',
       'renovate:major',
     ],
   },
@@ -135,6 +135,7 @@
         groupName: 'graphql related packages',
         packagePatterns: [
           '(\\b|_)graphql(\\b|_)',
+          '(\\b|_)apollo(\\b|_)',
         ],
       },
       {
@@ -209,7 +210,7 @@
           'release_note:skip',
           'renovate',
           'v8.0.0',
-          'v7.4.0',
+          'v7.5.0',
           ':ml',
         ],
       },
@@ -232,6 +233,13 @@
           '@types/jsts',
         ],
         allowedVersions: '^1.6.2',
+      },
+      {
+        groupSlug: 'storybook',
+        groupName: 'storybook related packages',
+        packagePatterns: [
+          '(\\b|_)storybook(\\b|_)',
+        ],
       },
       {
         groupSlug: 'json-stable-stringify',
@@ -362,6 +370,14 @@
         ],
       },
       {
+        groupSlug: 'history',
+        groupName: 'history related packages',
+        packageNames: [
+          'history',
+          '@types/history',
+        ],
+      },
+      {
         groupSlug: 'humps',
         groupName: 'humps related packages',
         packageNames: [
@@ -439,6 +455,14 @@
         packageNames: [
           'minimatch',
           '@types/minimatch',
+        ],
+      },
+      {
+        groupSlug: 'mkdirp',
+        groupName: 'mkdirp related packages',
+        packageNames: [
+          'mkdirp',
+          '@types/mkdirp',
         ],
       },
       {
@@ -610,14 +634,6 @@
         ],
       },
       {
-        groupSlug: 'history',
-        groupName: 'history related packages',
-        packageNames: [
-          'history',
-          '@types/history',
-        ],
-      },
-      {
         groupSlug: 'jsdom',
         groupName: 'jsdom related packages',
         packageNames: [
@@ -634,6 +650,14 @@
         ],
       },
       {
+        groupSlug: 'mapbox-gl',
+        groupName: 'mapbox-gl related packages',
+        packageNames: [
+          'mapbox-gl',
+          '@types/mapbox-gl',
+        ],
+      },
+      {
         groupSlug: 'memoize-one',
         groupName: 'memoize-one related packages',
         packageNames: [
@@ -647,14 +671,6 @@
         packageNames: [
           'mime',
           '@types/mime',
-        ],
-      },
-      {
-        groupSlug: 'mkdirp',
-        groupName: 'mkdirp related packages',
-        packageNames: [
-          'mkdirp',
-          '@types/mkdirp',
         ],
       },
       {
@@ -727,30 +743,6 @@
         packageNames: [
           'reduce-reducers',
           '@types/reduce-reducers',
-        ],
-      },
-      {
-        groupSlug: '@storybook/addon-actions',
-        groupName: '@storybook/addon-actions related packages',
-        packageNames: [
-          '@storybook/addon-actions',
-          '@types/storybook__addon-actions',
-        ],
-      },
-      {
-        groupSlug: '@storybook/addon-info',
-        groupName: '@storybook/addon-info related packages',
-        packageNames: [
-          '@storybook/addon-info',
-          '@types/storybook__addon-info',
-        ],
-      },
-      {
-        groupSlug: '@storybook/addon-knobs',
-        groupName: '@storybook/addon-knobs related packages',
-        packageNames: [
-          '@storybook/addon-knobs',
-          '@types/storybook__addon-knobs',
         ],
       },
       {

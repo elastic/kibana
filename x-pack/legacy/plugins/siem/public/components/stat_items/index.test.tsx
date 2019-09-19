@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, ReactWrapper } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
+import { ThemeProvider } from 'styled-components';
 
 import {
   StatItemsComponent,
@@ -36,42 +38,47 @@ const from = new Date('2019-06-15T06:00:00.000Z').valueOf();
 const to = new Date('2019-06-18T06:00:00.000Z').valueOf();
 
 describe('Stat Items Component', () => {
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const state: State = mockGlobalState;
   const store = createStore(state, apolloClientObservable);
 
   describe.each([
     [
       mount(
-        <ReduxStoreProvider store={store}>
-          <StatItemsComponent
-            description="HOSTS"
-            fields={[{ key: 'hosts', value: null, color: '#3185FC', icon: 'cross' }]}
-            from={from}
-            id="statItems"
-            index={0}
-            key="mock-keys"
-            to={to}
-            narrowDateRange={mockNarrowDateRange}
-          />
-        </ReduxStoreProvider>
+        <ThemeProvider theme={theme}>
+          <ReduxStoreProvider store={store}>
+            <StatItemsComponent
+              description="HOSTS"
+              fields={[{ key: 'hosts', value: null, color: '#3185FC', icon: 'cross' }]}
+              from={from}
+              id="statItems"
+              index={0}
+              key="mock-keys"
+              to={to}
+              narrowDateRange={mockNarrowDateRange}
+            />
+          </ReduxStoreProvider>
+        </ThemeProvider>
       ),
     ],
     [
       mount(
-        <ReduxStoreProvider store={store}>
-          <StatItemsComponent
-            areaChart={[]}
-            barChart={[]}
-            description="HOSTS"
-            fields={[{ key: 'hosts', value: null, color: '#3185FC', icon: 'cross' }]}
-            from={from}
-            id="statItems"
-            index={0}
-            key="mock-keys"
-            to={to}
-            narrowDateRange={mockNarrowDateRange}
-          />
-        </ReduxStoreProvider>
+        <ThemeProvider theme={theme}>
+          <ReduxStoreProvider store={store}>
+            <StatItemsComponent
+              areaChart={[]}
+              barChart={[]}
+              description="HOSTS"
+              fields={[{ key: 'hosts', value: null, color: '#3185FC', icon: 'cross' }]}
+              from={from}
+              id="statItems"
+              index={0}
+              key="mock-keys"
+              to={to}
+              narrowDateRange={mockNarrowDateRange}
+            />
+          </ReduxStoreProvider>
+        </ThemeProvider>
       ),
     ],
   ])('disable charts', wrapper => {

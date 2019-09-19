@@ -47,5 +47,23 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
         expect(e.status).to.eql(404);
       }
     });
+
+    it(`shouldn't disable alert from another space`, async () => {
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData({ enabled: true }))
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+
+      await supertest
+        .post(`${getUrlPrefix(Spaces.other.id)}/api/alert/${createdAlert.id}/_disable`)
+        .set('kbn-xsrf', 'foo')
+        .expect(404, {
+          statusCode: 404,
+          error: 'Not Found',
+          message: `Saved object [alert/${createdAlert.id}] not found`,
+        });
+    });
   });
 }

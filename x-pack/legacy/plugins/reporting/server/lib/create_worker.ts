@@ -24,7 +24,7 @@ function createWorkerFn(server: KbnServer) {
   const kibanaName = config.get('server.name');
   const kibanaId = config.get('server.uuid');
   const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
-  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'queue', 'create-worker']);
+  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'queue-worker']);
 
   // Once more document types are added, this will need to be passed in
   return function createWorker(queue: ESQueueInstance) {
@@ -42,7 +42,7 @@ function createWorkerFn(server: KbnServer) {
       if (!jobExecutor) {
         throw new Error(`Unable to find a job executor for the claimed job: [${job._id}]`);
       }
-      return jobExecutor(jobdoc, cancellationToken);
+      return jobExecutor(job._id, jobdoc, cancellationToken);
     };
     const workerOptions = {
       kibanaName,

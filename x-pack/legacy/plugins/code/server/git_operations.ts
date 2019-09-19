@@ -316,6 +316,7 @@ export class GitOperations {
 
     const res: Commit[] = commits.map(c => {
       return {
+        repoUri: uri,
         id: c.sha(),
         message: c.message(),
         body: c.body(),

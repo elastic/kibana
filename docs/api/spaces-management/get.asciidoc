@@ -1,83 +1,28 @@
 [[spaces-api-get]]
-=== Get Space
+=== Get a space API
+++++
+<titleabbrev>Get space</titleabbrev>
+++++
 
-experimental["This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental."]
+Retrieves a specified {kib} space.
 
-Retrieves all {kib} spaces, or a specific space.
+experimental["The underlying Spaces concepts are stable, but the APIs for managing Spaces are experimental."]
 
-Note: You cannot access this endpoint via the Console in Kibana.
+[[spaces-api-get-request]]
+==== Request
 
-==== Get all {kib} spaces
+`GET /api/spaces/space/marketing`
 
-===== Request
+[[spaces-api-get-response-codes]]
+==== Response code
 
-To retrieve all spaces, issue a GET request to the
-/api/spaces/space endpoint.
+`200`::
+  Indicates a successful call.
 
-[source,js]
---------------------------------------------------
-GET /api/spaces/space
-GET /api/spaces/space?purpose= copySavedObjectsIntoSpace
---------------------------------------------------
-// KIBANA
+[[spaces-api-get-example]]
+==== Example
 
-===== Request Query Parameters
-purpose (optional) :: Retrieve the available spaces for a specific purpose. This parameter only has an effect when security is enabled.
-`any` (default) ::: Retrieves all spaces the user is authorized to access.
-`copySavedObjectsIntoSpace` ::: Retrieves all spaces the user is authorized to copy saved objects into via Saved Objects Management.
-
-
-===== Response
-
-A successful call returns a response code of `200` and a response body containing a JSON
-representation of the spaces.
-
-If you are not authorized for any spaces for the provided `purpose`, then a response code of `403` will be returned.
-
-[source,js]
---------------------------------------------------
-[
-  {
-    "id": "default",
-    "name": "Default",
-    "description" : "This is the Default Space",
-    "disabledFeatures": [],
-    "_reserved": true
-  },
-  {
-    "id": "marketing",
-    "name": "Marketing",
-    "description" : "This is the Marketing Space",
-    "color": "#aabbcc",
-    "disabledFeatures": ["apm"],
-    "initials": "MK"
-  },
-  {
-    "id": "sales",
-    "name": "Sales",
-    "initials": "MK",
-    "disabledFeatures": ["discover", "timelion"],
-  },
-]
---------------------------------------------------
-
-==== Get a specific space
-
-===== Request
-
-To retrieve a specific space, issue a GET request to
-the `/api/spaces/space/<space_id>` endpoint:
-
-[source,js]
---------------------------------------------------
-GET /api/spaces/space/marketing
---------------------------------------------------
-// KIBANA
-
-===== Response
-
-A successful call returns a response code of `200` and a response body containing a JSON
-representation of the space.
+The API returns the following:
 
 [source,js]
 --------------------------------------------------
@@ -87,6 +32,7 @@ representation of the space.
   "description" : "This is the Marketing Space",
   "color": "#aabbcc",
   "initials": "MK",
-  "disabledFeatures": []
+  "disabledFeatures": [],
+  "imageUrl": ""
 }
 --------------------------------------------------

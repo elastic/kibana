@@ -6,6 +6,7 @@
 
 import { LOGOUT } from '../urls';
 
-export const logout = () => {
+export const logout = (): null => {
   cy.visit(`${Cypress.config().baseUrl}${LOGOUT}`);
+  return null;
 };

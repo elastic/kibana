@@ -6,7 +6,7 @@
 
 import { ActionsPlugin } from '../../../actions';
 import { ConcreteTaskInstance } from '../../../task_manager';
-import { createFireHandler } from './create_fire_handler';
+import { createExecutionHandler } from './create_execution_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
 import { AlertInstance } from './alert_instance';
 import { getNextRunAt } from './get_next_run_at';
@@ -95,7 +95,8 @@ export function getCreateTaskRunnerFunction({
           };
         });
 
-        const fireHandler = createFireHandler({
+        const executionHandler = createExecutionHandler({
+          alertId,
           executeAction,
           apiKey,
           actions: actionsWithIds,
@@ -125,16 +126,16 @@ export function getCreateTaskRunnerFunction({
           Object.keys(alertInstances).map(alertInstanceId => {
             const alertInstance = alertInstances[alertInstanceId];
 
-            // Unpersist any alert instances that were not explicitly fired in this alert execution
-            if (!alertInstance.shouldFire()) {
+            // Unpersist any alert instances that were not explicitly scheduled in this alert execution
+            if (!alertInstance.hasScheduledActions()) {
               delete alertInstances[alertInstanceId];
               return;
             }
 
-            const { actionGroup, context, state } = alertInstance.getFireOptions()!;
+            const { actionGroup, context, state } = alertInstance.getSechduledActionOptions()!;
             alertInstance.replaceMeta({ lastFired: Date.now() });
-            alertInstance.resetFire();
-            return fireHandler(actionGroup, context, state);
+            alertInstance.unscheduleActions();
+            return executionHandler({ actionGroup, context, state, alertInstanceId });
           })
         );
 
