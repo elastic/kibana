@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
@@ -25,26 +25,17 @@ import { Footer, footerHeight } from '../timeline/footer';
 import { combineQueries } from '../timeline/helpers';
 import { isCompactFooter } from '../timeline/timeline';
 import { ManageTimelineContext } from '../timeline/timeline_context';
+import { HeaderPanel } from '../header_panel';
 
-import { EventsViewerHeader } from './events_viewer_header';
 import { TimelineRefetch } from '../timeline/refetch_timeline';
+import * as i18n from './translations';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;
 
 const WrappedByAutoSizer = styled.div`
   width: 100%;
 `; // required by AutoSizer
-
 WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
-
-const EventsViewerContainer = styled(EuiFlexGroup)`
-  overflow: hidden;
-  padding: 0 10px 0 12px;
-  user-select: none;
-  width: 100%;
-`;
-
-EventsViewerContainer.displayName = 'EventsViewerContainer';
 
 interface Props {
   browserFields: BrowserFields;
@@ -103,18 +94,14 @@ export const EventsViewer = React.memo<Props>(
       <EuiPanel data-test-subj="events-viewer-panel" grow={false}>
         <AutoSizer detectAnyWindowResize={true} content>
           {({ measureRef, content: { width = 0 } }) => (
-            <EventsViewerContainer
-              data-test-subj="events-viewer-container"
-              direction="column"
-              gutterSize="none"
-              justifyContent="flexStart"
-            >
+            <>
               <WrappedByAutoSizer innerRef={measureRef}>
                 <div
                   data-test-subj="events-viewer-measured"
                   style={{ height: '0px', width: '100%' }}
                 />
               </WrappedByAutoSizer>
+
               {combinedQueries != null ? (
                 <TimelineQuery
                   fields={columnsHeader.map(c => c.id)}
@@ -138,10 +125,13 @@ export const EventsViewer = React.memo<Props>(
                     totalCount = 0,
                   }) => (
                     <>
-                      <EventsViewerHeader
+                      <HeaderPanel
                         id={id}
                         showInspect={showInspect}
-                        totalCount={totalCount}
+                        subtitle={`${i18n.SHOWING}: ${totalCount.toLocaleString()} ${i18n.UNIT(
+                          totalCount
+                        )}`}
+                        title={i18n.EVENTS}
                       />
 
                       <div data-test-subj="events-container" style={{ width: `${width}px` }}>
@@ -153,6 +143,7 @@ export const EventsViewer = React.memo<Props>(
                             loading={loading}
                             refetch={refetch}
                           />
+
                           <StatefulBody
                             browserFields={browserFields}
                             data={events}
@@ -162,6 +153,7 @@ export const EventsViewer = React.memo<Props>(
                             sort={sort}
                             toggleColumn={toggleColumn}
                           />
+
                           <Footer
                             compact={isCompactFooter(width)}
                             getUpdatedAt={getUpdatedAt}
@@ -185,7 +177,7 @@ export const EventsViewer = React.memo<Props>(
                   )}
                 </TimelineQuery>
               ) : null}
-            </EventsViewerContainer>
+            </>
           )}
         </AutoSizer>
       </EuiPanel>
