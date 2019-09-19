@@ -106,8 +106,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('multiple chart types', function () {
-      // FLAKY: https://github.com/elastic/kibana/issues/45970
-      it.skip('should change average series type to histogram', async function () {
+      it('should change average series type to histogram', async function () {
         await pointSeriesVis.setSeriesType(1, 'histogram');
         await PageObjects.visualize.clickGo();
         const length = await pointSeriesVis.getHistogramSeries();
