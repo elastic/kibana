@@ -6,7 +6,6 @@
 
 import * as React from 'react';
 import VisibilitySensor from 'react-visibility-sensor';
-import styled, { css } from 'styled-components';
 import uuid from 'uuid';
 
 import { BrowserFields } from '../../../../containers/source';
@@ -15,6 +14,7 @@ import { TimelineItem, DetailItem } from '../../../../graphql/types';
 import { requestIdleCallbackViaScheduler } from '../../../../lib/helpers/scheduler';
 import { Note } from '../../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
+import { SkeletonRow } from '../../../skeleton_row';
 import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
 import { ExpandableEvent } from '../../expandable_event';
 import { EventsTrAttributes, EventsTrGroup } from '../../styles';
@@ -83,49 +83,6 @@ const TOP_OFFSET = 50;
  */
 const BOTTOM_OFFSET = -500;
 
-const SkeletonRow = styled.div`
-  display: flex;
-  height: 12px;
-`;
-
-const SkeletonCell = styled.div`
-  ${({ theme }) => css`
-    background-color: ${theme.eui.euiColorLightestShade};
-    border-radius: 2px;
-    flex: 1;
-
-    & + & {
-      margin-left: 8px;
-    }
-  `}
-`;
-
-const LoadingCols = ({ cols = 4 }) => {
-  const colElements = [];
-
-  for (let i = 0; i < cols; i++) {
-    colElements.push(<SkeletonCell key={i}></SkeletonCell>);
-  }
-
-  return <SkeletonRow>{colElements}</SkeletonRow>;
-};
-
-/**
- * This is missing the height props intentionally for performance reasons that
- * you can see here:
- * https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
- *
- * We inline the height style for performance reasons directly on the component.
- */
-export const EmptyRow = styled.div`
-  ${({ theme }) => css`
-    // background-color: ${theme.eui.euiColorLightestShade};
-    border-bottom: ${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiColorLightShade};
-
-    padding: 10px 4px;
-  `}
-`;
-
 export class StatefulEvent extends React.Component<Props, State> {
   private _isMounted: boolean = false;
 
@@ -186,14 +143,7 @@ export class StatefulEvent extends React.Component<Props, State> {
     // see componentDidMount() for when it schedules the first
     // time this stateful component should be rendered.
     if (!this.state.initialRender) {
-      // height is being inlined directly in here because of performance with StyledComponents
-      // involving quick and constant changes to the DOM.
-      // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-      return (
-        <EmptyRow style={{ height: DEFAULT_ROW_HEIGHT }}>
-          <LoadingCols cols={9} />
-        </EmptyRow>
-      );
+      return <SkeletonRow cellCount={9} />;
     }
 
     return (
@@ -215,9 +165,9 @@ export class StatefulEvent extends React.Component<Props, State> {
                   <EventsTrGroup
                     className={STATEFUL_EVENT_CSS_CLASS_NAME}
                     data-test-subj="event"
-                    innerRef={divElement => {
-                      if (divElement != null) {
-                        this.divElement = divElement;
+                    innerRef={c => {
+                      if (c != null) {
+                        this.divElement = c;
                       }
                     }}
                   >
@@ -276,11 +226,7 @@ export class StatefulEvent extends React.Component<Props, State> {
             // height is being inlined directly in here because of performance with StyledComponents
             // involving quick and constant changes to the DOM.
             // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-            return (
-              <EmptyRow style={{ height }}>
-                <LoadingCols cols={9} />
-              </EmptyRow>
-            );
+            return <SkeletonRow cellCount={9} style={{ height }} />;
           }
         }}
       </VisibilitySensor>
