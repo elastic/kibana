@@ -9,6 +9,7 @@ import { createExecutionHandler } from './create_execution_handler';
 const createExecutionHandlerParams = {
   executeAction: jest.fn(),
   spaceId: 'default',
+  alertId: '1',
   apiKey: 'MTIzOmFiYw==',
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
   getBasePath: jest.fn().mockReturnValue(undefined),
@@ -29,7 +30,12 @@ beforeEach(() => jest.resetAllMocks());
 
 test('calls executeAction per selected action', async () => {
   const executionHandler = createExecutionHandler(createExecutionHandlerParams);
-  await executionHandler('default', {}, {});
+  await executionHandler({
+    actionGroup: 'default',
+    state: {},
+    context: {},
+    alertInstanceId: '2',
+  });
   expect(createExecutionHandlerParams.executeAction).toHaveBeenCalledTimes(1);
   expect(createExecutionHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
@@ -49,13 +55,23 @@ test('calls executeAction per selected action', async () => {
 
 test('limits executeAction per action group', async () => {
   const executionHandler = createExecutionHandler(createExecutionHandlerParams);
-  await executionHandler('other-group', {}, {});
+  await executionHandler({
+    actionGroup: 'other-group',
+    state: {},
+    context: {},
+    alertInstanceId: '2',
+  });
   expect(createExecutionHandlerParams.executeAction).toMatchInlineSnapshot(`[MockFunction]`);
 });
 
 test('context attribute gets parameterized', async () => {
   const executionHandler = createExecutionHandler(createExecutionHandlerParams);
-  await executionHandler('default', { value: 'context-val' }, {});
+  await executionHandler({
+    actionGroup: 'default',
+    context: { value: 'context-val' },
+    state: {},
+    alertInstanceId: '2',
+  });
   expect(createExecutionHandlerParams.executeAction).toHaveBeenCalledTimes(1);
   expect(createExecutionHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
@@ -75,7 +91,12 @@ test('context attribute gets parameterized', async () => {
 
 test('state attribute gets parameterized', async () => {
   const executionHandler = createExecutionHandler(createExecutionHandlerParams);
-  await executionHandler('default', {}, { value: 'state-val' });
+  await executionHandler({
+    actionGroup: 'default',
+    context: {},
+    state: { value: 'state-val' },
+    alertInstanceId: '2',
+  });
   expect(createExecutionHandlerParams.executeAction).toHaveBeenCalledTimes(1);
   expect(createExecutionHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
     Array [

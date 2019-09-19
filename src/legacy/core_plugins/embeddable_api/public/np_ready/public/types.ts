@@ -17,10 +17,6 @@
  * under the License.
  */
 
-import { Action } from './lib/actions';
 import { EmbeddableFactory } from './lib/embeddables';
-import { Trigger } from './lib/types';
 
-export type TriggerRegistry = Map<string, Trigger>;
-export type ActionRegistry = Map<string, Action>;
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableFactory>;

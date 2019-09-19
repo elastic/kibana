@@ -983,10 +983,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@14.0.0":
-  version "14.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-14.0.0.tgz#4af6e687aec7b981a87dc4da15699f0d92ad17de"
-  integrity sha512-kU3WNPysOYZkgsrQOO1RmLgQmJWYmjVHw4w4HoliwLka2N9AtEYtNu+rFprkDwO7Pvd1lxb/mRPGdJ6NZtZdvA==
+"@elastic/eui@14.2.0":
+  version "14.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-14.2.0.tgz#d6368250e7261c63c06443d3cf3f7cf800916ff2"
+  integrity sha512-6nCV/Q2Ek3zTUj549+cFFx5rpx4ZZ2pjmspPsBhUwsn685qzAPsCv4WB40u4mWBZtMRZagBN2q2M2YxZHSPBLw==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -10455,10 +10455,10 @@ ejs@^2.6.1:
   resolved "https://registry.yarnpkg.com/ejs/-/ejs-2.6.1.tgz#498ec0d495655abc6f23cd61868d926464071aa0"
   integrity sha512-0xy4A/twfrRCnkhfk8ErDi5DqdAsAqeGxht4xkCUrsvhhbQNs7E+4jV0CN7+NKIY0aHE72+XvqtBIXzD31ZbXQ==
 
-elasticsearch-browser@^16.2.0:
-  version "16.2.0"
-  resolved "https://registry.yarnpkg.com/elasticsearch-browser/-/elasticsearch-browser-16.2.0.tgz#f107907bad31c7be994215530a8996664cddc3b0"
-  integrity sha512-hJ1lBa+GUfwcIp7gvh0EaTVUOcfrhiVAYjVUpFanhp8Fc2HagpBRCYbZnzBzBPyi8FeT9M/kuFUKqVnfMeU6kg==
+elasticsearch-browser@^16.4.0:
+  version "16.4.0"
+  resolved "https://registry.yarnpkg.com/elasticsearch-browser/-/elasticsearch-browser-16.4.0.tgz#0e0b9b781f9f5207498085ce1d47d916ff46fb82"
+  integrity sha512-VILNtZQytYnT3mYit3SeN+SgjqOw4piZEhUrHjl7bNY1OGU7nwODtVj/rL7bc0pTmVAnDTtq0CBKE+ncjd+3hQ==
 
 elasticsearch@^15.2.0:
   version "15.2.0"
@@ -10469,10 +10469,10 @@ elasticsearch@^15.2.0:
     chalk "^1.0.0"
     lodash "^4.17.10"
 
-elasticsearch@^16.2.0:
-  version "16.2.0"
-  resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-16.2.0.tgz#c1f5dd41b5c5a0d65794888d042e3e240074a0fc"
-  integrity sha512-wOaz8HjpRiZ08d33+5rKaJkHsS/nkjD80Mh0s77Bs3DdKjB4ZfrJS8P4FfNKMGP/Gx658eVBlifcLqFnREbPhA==
+elasticsearch@^16.4.0:
+  version "16.4.0"
+  resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-16.4.0.tgz#534d6d83a9e0cc3080bec92b89dac0eb1e4d4c73"
+  integrity sha512-uJN1hNNB8fBkaDqhC1SW8NbEC6Ge63fUHj0vJ9BZdHBlIhbsUq68Y5DUv6TRoE6IC8ezCDFqhRs7m7ar19+iiQ==
   dependencies:
     agentkeepalive "^3.4.1"
     chalk "^1.0.0"

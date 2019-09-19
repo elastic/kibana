@@ -20,8 +20,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor, EuiBadge, EuiIcon, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
+import { IAction } from 'src/plugins/ui_actions/public';
 import { PanelOptionsMenu } from './panel_options_menu';
-import { Action } from '../../actions';
 import { IEmbeddable } from '../../embeddables';
 import { VisualizeEmbeddable } from '../../../../../../../kibana/public/visualize/embeddable/visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../../../kibana/public/visualize/embeddable/constants';
@@ -32,11 +32,11 @@ export interface PanelHeaderProps {
   hidePanelTitles: boolean;
   getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor>;
   closeContextMenu: boolean;
-  badges: Action[];
+  badges: IAction[];
   embeddable: IEmbeddable;
 }
 
-function renderBadges(badges: Action[], embeddable: IEmbeddable) {
+function renderBadges(badges: IAction[], embeddable: IEmbeddable) {
   return badges.map(badge => (
     <EuiBadge
       key={badge.id}

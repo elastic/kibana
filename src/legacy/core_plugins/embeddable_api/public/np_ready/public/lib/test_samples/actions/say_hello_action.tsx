@@ -17,9 +17,11 @@
  * under the License.
  */
 
-import { Action } from '../../actions';
+import {
+  IAction,
+  IncompatibleActionError,
+} from '../../../../../../../../../plugins/ui_actions/public';
 import { EmbeddableInput, Embeddable, EmbeddableOutput, IEmbeddable } from '../../embeddables';
-import { IncompatibleActionError } from '../../errors';
 
 export const SAY_HELLO_ACTION = 'SAY_HELLO_ACTION';
 
@@ -41,19 +43,24 @@ interface ActionContext {
   message?: string;
 }
 
-export class SayHelloAction extends Action<ActionContext> {
+export class SayHelloAction implements IAction<ActionContext> {
   public readonly type = SAY_HELLO_ACTION;
+  public readonly id = SAY_HELLO_ACTION;
+
   private sayHello: (name: string) => void;
 
   // Taking in a function, instead of always directly interacting with the dom,
   // can make testing the execute part of the action easier.
   constructor(sayHello: (name: string) => void) {
-    super(SAY_HELLO_ACTION);
     this.sayHello = sayHello;
   }
 
   getDisplayName() {
     return 'Say hello';
+  }
+
+  getIconType() {
+    return undefined;
   }
 
   // Can use typescript generics to get compiler time warnings for immediate feedback if
