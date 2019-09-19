@@ -54,7 +54,7 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
           &nbsp;
           <EuiTextColor color="warning" size="xs">
             {i18n.translate('xpack.monitoring.setupMode.monitorAllNodes', {
-              defaultMessage: 'Some nodes only use internal collection'
+              defaultMessage: 'Some nodes use only internal collection'
             })}
           </EuiTextColor>
         </Fragment>

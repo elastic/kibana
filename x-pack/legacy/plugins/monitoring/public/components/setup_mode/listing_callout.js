@@ -41,12 +41,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
           >
             <p>
               {i18n.translate('xpack.monitoring.setupMode.detectedNodeDescription', {
-                defaultMessage: `Based on your indices, we think you might have a {product} {identifier}. Click 'Set up monitoring'
-                below to start monitoring this {identifier}.`,
-                values: {
-                  product: formatProductName(productName),
-                  identifier: getIdentifier(productName)
-                }
+                defaultMessage: `Click 'Set up monitoring' below to start monitoring this {identifier}.`
               })}
             </p>
           </EuiCallOut>
@@ -58,7 +53,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
       <Fragment>
         <EuiCallOut
           title={i18n.translate('xpack.monitoring.setupMode.noMonitoringDataFound', {
-            defaultMessage: 'We did not detect any {product} {identifier}.',
+            defaultMessage: 'No {product} {identifier} detected.',
             values: {
               product: formatProductName(productName),
               identifier: getIdentifier(productName, true)
@@ -68,7 +63,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
         >
           <p>
             {i18n.translate('xpack.monitoring.setupMode.netNewUserDescription', {
-              defaultMessage: `If you have {product} {identifier}, click 'Set up monitoring' below to monitor with Metricbeat.`,
+              defaultMessage: `Click 'Set up monitoring' to start monitoring with Metricbeat.`,
               values: {
                 product: formatProductName(productName),
                 identifier: getIdentifier(productName, true)
