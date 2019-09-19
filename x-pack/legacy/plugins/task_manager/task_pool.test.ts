@@ -184,6 +184,18 @@ describe('TaskPool', () => {
     sinon.assert.calledWithMatch(logger.error, /Failed to cancel task "shooooo!"/);
   });
 
+  test('throws if claimOwnership errors', async () => {
+    const logger = mockLogger();
+    const pool = new TaskPool({
+      logger,
+      maxWorkers: 20,
+    });
+
+    await expect(pool.run([mockTaskWithFailingOwnership()])).rejects.toThrow(
+      'failed to claim ownership'
+    );
+  });
+
   function mockRun() {
     return sinon.spy(async () => {
       await sleep(0);
@@ -196,6 +208,17 @@ describe('TaskPool', () => {
       isExpired: false,
       cancel: async () => undefined,
       claimOwnership: async () => true,
+      run: mockRun(),
+    };
+  }
+
+  function mockTaskWithFailingOwnership() {
+    return {
+      isExpired: false,
+      cancel: async () => undefined,
+      claimOwnership: async () => {
+        throw new Error('failed to claim ownership');
+      },
       run: mockRun(),
     };
   }

@@ -77,27 +77,31 @@ export class TaskPool {
 
   private async attemptToRun(tasks: TaskRunner[]): Promise<boolean> {
     return new Promise((resolve, reject) => {
+      const taskPool = this;
       from(tasks)
         .pipe(
           takeWithBackpressure(task => task.claimOwnership(), this.availableWorkers),
           tap(ifTaskManagerHasRanOutOfWorkerCapacity(() => resolve(false))),
-          tap(ifClaimingOwnershipThrewAnError(() => reject(false))),
           filter(taskManagerHasClaimedOwnership),
           map(([, task]) => task)
         )
-        .subscribe(
-          task => {
-            this.running.add(task);
+        .subscribe({
+          next(task: TaskRunner) {
+            taskPool.running.add(task);
             task
               .run()
               .catch((err: Error) => {
-                this.logger.warn(`Task ${task} failed in attempt to run: ${err.message}`);
+                taskPool.logger.warn(`Task ${task} failed in attempt to run: ${err.message}`);
               })
-              .then(() => this.running.delete(task));
+              .then(() => taskPool.running.delete(task));
           },
-          ex => reject(ex),
-          () => resolve(true)
-        );
+          error(err) {
+            reject(err);
+          },
+          complete() {
+            resolve(true);
+          },
+        });
     });
   }
 
