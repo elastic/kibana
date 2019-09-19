@@ -1,6 +1,6 @@
 [role="xpack"]
 [[graph-configuration]]
-== Configuring Graph
+=== Configuring Graph
 
 When a user saves a graph workspace in Kibana, it is stored in the `.kibana`
 index along with other saved objects like visualizations and dashboards.
@@ -59,7 +59,7 @@ image::user/graph/images/graph-read-only-badge.png[Example of Graph's read only 
 
 [float]
 [[disable-drill-down]]
-=== Disabling drill down configuration
+==== Disabling drill down configuration
 
 By default, users can configure _drill down_ URLs to display additional
 information about a selected vertex in a new browser window. For example,
