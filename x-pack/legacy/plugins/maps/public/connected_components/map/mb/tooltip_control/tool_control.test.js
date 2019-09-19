@@ -71,6 +71,18 @@ const hoverTooltipState = {
   ]
 };
 
+const lockedTooltipState = {
+  type: TOOLTIP_TYPE.LOCKED,
+  location: [-120, 30],
+  features: [
+    {
+      id: 1,
+      layerId: layerId,
+      geometry: {},
+    }
+  ]
+};
+
 describe('TooltipControl', () => {
 
   describe('render', () => {
@@ -114,7 +126,43 @@ describe('TooltipControl', () => {
     });
   });
 
-  describe('onClick', () => {
+  describe('on mouse out', () => {
+    const clearTooltipStateStub = sinon.stub();
+
+    beforeEach(() => {
+      clearTooltipStateStub.reset();
+    });
+
+    test('should clear hover tooltip state', () => {
+      mount(
+        <TooltipControl
+          {...defaultProps}
+          clearTooltipState={clearTooltipStateStub}
+          tooltipState={hoverTooltipState}
+        />
+      );
+
+      mockMbMapHandlers.mouseout();
+
+      sinon.assert.calledOnce(clearTooltipStateStub);
+    });
+
+    test('should not clear locked tooltip state', () => {
+      mount(
+        <TooltipControl
+          {...defaultProps}
+          clearTooltipState={clearTooltipStateStub}
+          tooltipState={lockedTooltipState}
+        />
+      );
+
+      mockMbMapHandlers.mouseout();
+
+      sinon.assert.notCalled(clearTooltipStateStub);
+    });
+  });
+
+  describe('on click', () => {
     const mockMapMouseEvent = {
       point: { x: 0, y: 0 },
       lngLat: { lng: 0, lat: 0 },
@@ -159,21 +207,20 @@ describe('TooltipControl', () => {
       sinon.assert.notCalled(setTooltipStateStub);
     });
 
-    test('should set tooltip state when there are features at clicked location', () => {
-      featuresAtLocation = [
-        {
-          geometry: {
-            type: 'Point',
-            coordinates: [ 100, 30 ]
-          },
-          layer: {
-            id: mbLayerId
-          },
-          properties: {
-            __kbn__feature_id__: 1
-          }
+    test('should set tooltip state when there are features at clicked location and remove duplicate features', () => {
+      const feature = {
+        geometry: {
+          type: 'Point',
+          coordinates: [ 100, 30 ]
+        },
+        layer: {
+          id: mbLayerId
+        },
+        properties: {
+          __kbn__feature_id__: 1
         }
-      ];
+      };
+      featuresAtLocation = [feature, feature];
       mount(
         <TooltipControl
           {...defaultProps}
