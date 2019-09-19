@@ -3,7 +3,7 @@
 
 Kibana CI uses a Jenkins feature called "Pipelines" to automate testing of the code in pull requests and on tracked branches. Pipelines are defined within the repository via the `Jenkinsfile` at the root of the project.
 
-For information about Jenkins Pipelines can be found link:https://jenkins.io/doc/book/pipeline/[in the Jenkins book].
+More information about Jenkins Pipelines can be found link:https://jenkins.io/doc/book/pipeline/[in the Jenkins book].
 
 [float]
 === Github Checks
