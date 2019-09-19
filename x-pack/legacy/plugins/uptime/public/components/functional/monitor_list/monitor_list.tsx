@@ -218,7 +218,7 @@ export const MonitorListComponent = (props: Props) => {
                 {
                   defaultMessage: 'Integrations',
                   description:
-                    'The heading column of some action buttons that will take users to other Obsevability apps',
+                    'The heading column of some action buttons that will take users to other Observability apps',
                 }
               ),
               render: (state: any, summary: MonitorSummary) => (

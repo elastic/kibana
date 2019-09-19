@@ -4,17 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServerRoute } from 'hapi';
 import { Observable } from 'rxjs';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { SavedObjectsService } from 'src/core/server';
-import {
-  Logger,
-  HttpServiceSetup,
-  PluginInitializerContext,
-  ElasticsearchServiceSetup,
-} from 'src/core/server';
+import { SavedObjectsService, CoreSetup } from 'src/core/server';
+import { Logger, PluginInitializerContext } from 'src/core/server';
 import { CapabilitiesModifier } from 'src/legacy/server/capabilities';
+import { Legacy } from 'kibana';
 import { OptionalPlugin } from '../../../../server/lib/optional_plugin';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 import { createDefaultSpace } from '../lib/create_default_space';
@@ -35,14 +29,14 @@ import { SpacesServiceSetup } from './spaces_service/spaces_service';
 import { SpacesConfigType } from './config';
 import { getActiveSpace } from '../lib/get_active_space';
 import { toggleUICapabilities } from '../lib/toggle_ui_capabilities';
+import { initSpacesRequestInterceptors } from '../lib/request_interceptors';
 
-export interface SpacesHttpServiceSetup extends HttpServiceSetup {
-  route(route: ServerRoute | ServerRoute[]): void;
-}
-export interface SpacesCoreSetup {
-  http: SpacesHttpServiceSetup;
+/**
+ * Describes a set of APIs that is available in the legacy platform only and required by this plugin
+ * to function properly.
+ */
+export interface LegacyAPI {
   savedObjects: SavedObjectsService;
-  elasticsearch: ElasticsearchServiceSetup;
   usage: {
     collectorSet: {
       register: (collector: any) => void;
@@ -57,6 +51,12 @@ export interface SpacesCoreSetup {
   auditLogger: {
     create: (pluginId: string) => AuditLogger;
   };
+  legacyConfig: {
+    kibanaIndex: string;
+    serverBasePath: string;
+    serverDefaultRoute: string;
+  };
+  router: Legacy.Server['route'];
 }
 
 export interface PluginsSetup {
@@ -70,31 +70,45 @@ export interface PluginsSetup {
 
 export interface SpacesPluginSetup {
   spacesService: SpacesServiceSetup;
-  // TODO: this is temporary, required by request interceptors which are initialized in legacy plugin
-  log: Logger;
+  registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
 }
 
-export interface SpacesInitializerContext extends PluginInitializerContext {
-  legacyConfig: KibanaConfig;
-}
 export class Plugin {
   private readonly pluginId = 'spaces';
 
-  private config$: Observable<SpacesConfigType>;
+  private readonly config$: Observable<SpacesConfigType>;
 
-  private log: Logger;
+  private readonly log: Logger;
 
-  constructor(private readonly initializerContext: SpacesInitializerContext) {
+  private legacyAPI?: LegacyAPI;
+  private readonly getLegacyAPI = () => {
+    if (!this.legacyAPI) {
+      throw new Error('Legacy API is not registered!');
+    }
+    return this.legacyAPI;
+  };
+
+  private spacesAuditLogger?: SpacesAuditLogger;
+  private readonly getSpacesAuditLogger = () => {
+    if (!this.spacesAuditLogger) {
+      this.spacesAuditLogger = new SpacesAuditLogger(
+        this.getLegacyAPI().auditLogger.create(this.pluginId)
+      );
+    }
+    return this.spacesAuditLogger;
+  };
+
+  constructor(initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<SpacesConfigType>();
     this.log = initializerContext.logger.get();
   }
 
-  public async setup(core: SpacesCoreSetup, plugins: PluginsSetup): Promise<SpacesPluginSetup> {
+  public async setup(core: CoreSetup, plugins: PluginsSetup): Promise<SpacesPluginSetup> {
     const xpackMainPlugin: XPackMainPlugin = plugins.xpackMain;
     watchStatusAndLicenseToInitialize(xpackMainPlugin, plugins.spaces, async () => {
       await createDefaultSpace({
         elasticsearch: core.elasticsearch,
-        savedObjects: core.savedObjects,
+        savedObjects: this.getLegacyAPI().savedObjects,
       });
     });
 
@@ -102,76 +116,89 @@ export class Plugin {
     // to re-compute the license check results for this plugin.
     xpackMainPlugin.info.feature(this.pluginId).registerLicenseCheckResultsGenerator(checkLicense);
 
-    const spacesAuditLogger = new SpacesAuditLogger(core.auditLogger.create(this.pluginId));
+    const service = new SpacesService(this.log, this.getLegacyAPI);
 
-    const service = new SpacesService(
-      this.log,
-      this.initializerContext.legacyConfig.get('server.basePath')
-    );
     const spacesService = await service.setup({
       http: core.http,
       elasticsearch: core.elasticsearch,
-      savedObjects: core.savedObjects,
       security: plugins.security,
-      spacesAuditLogger,
+      getSpacesAuditLogger: this.getSpacesAuditLogger,
       config$: this.config$,
     });
 
-    const { addScopedSavedObjectsClientWrapperFactory, types } = core.savedObjects;
+    return {
+      spacesService,
+      registerLegacyAPI: (legacyAPI: LegacyAPI) => {
+        this.legacyAPI = legacyAPI;
+        this.setupLegacyComponents(core, spacesService, plugins.xpackMain);
+      },
+    };
+  }
+
+  private setupLegacyComponents(
+    core: CoreSetup,
+    spacesService: SpacesServiceSetup,
+    xpackMainPlugin: XPackMainPlugin
+  ) {
+    const legacyAPI = this.getLegacyAPI();
+
+    const { addScopedSavedObjectsClientWrapperFactory, types } = legacyAPI.savedObjects;
     addScopedSavedObjectsClientWrapperFactory(
       Number.MIN_SAFE_INTEGER,
       'spaces',
       spacesSavedObjectsClientWrapperFactory(spacesService, types)
     );
 
-    core.tutorial.addScopedTutorialContextFactory(
+    legacyAPI.tutorial.addScopedTutorialContextFactory(
       createSpacesTutorialContextFactory(spacesService)
     );
 
-    core.capabilities.registerCapabilitiesModifier(async (request, uiCapabilities) => {
+    legacyAPI.capabilities.registerCapabilitiesModifier(async (request, uiCapabilities) => {
       const spacesClient = await spacesService.scopedClient(request);
       try {
         const activeSpace = await getActiveSpace(
           spacesClient,
           core.http.basePath.get(request),
-          this.initializerContext.legacyConfig.get('server.basePath')
+          legacyAPI.legacyConfig.serverBasePath
         );
 
-        const features = plugins.xpackMain.getFeatures();
+        const features = xpackMainPlugin.getFeatures();
         return toggleUICapabilities(features, uiCapabilities, activeSpace);
       } catch (e) {
         return uiCapabilities;
       }
     });
 
+    // Register a function with server to manage the collection of usage stats
+    legacyAPI.usage.collectorSet.register(
+      getSpacesUsageCollector({
+        kibanaIndex: legacyAPI.legacyConfig.kibanaIndex,
+        usage: legacyAPI.usage,
+        xpackMain: xpackMainPlugin,
+      })
+    );
+
     initInternalApis({
-      http: core.http,
-      config: this.initializerContext.legacyConfig,
-      savedObjects: core.savedObjects,
+      legacyRouter: legacyAPI.router,
+      getLegacyAPI: this.getLegacyAPI,
       spacesService,
       xpackMain: xpackMainPlugin,
     });
 
     initExternalSpacesApi({
-      http: core.http,
+      legacyRouter: legacyAPI.router,
       log: this.log,
-      savedObjects: core.savedObjects,
+      savedObjects: legacyAPI.savedObjects,
       spacesService,
       xpackMain: xpackMainPlugin,
     });
 
-    // Register a function with server to manage the collection of usage stats
-    core.usage.collectorSet.register(
-      getSpacesUsageCollector({
-        config: this.initializerContext.legacyConfig,
-        usage: core.usage,
-        xpackMain: xpackMainPlugin,
-      })
-    );
-
-    return {
-      spacesService,
+    initSpacesRequestInterceptors({
+      http: core.http,
       log: this.log,
-    };
+      getLegacyAPI: this.getLegacyAPI,
+      spacesService,
+      xpackMain: xpackMainPlugin,
+    });
   }
 }
