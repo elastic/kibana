@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Action } from 'typescript-fsa';
 import { SavedViewListFlyout } from './saved_view_list_flyout';
@@ -20,6 +20,7 @@ import {
 } from '../../graphql/types';
 import { InfraWaffleMapBounds, InfraGroupByOptions } from '../../lib/lib';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../store/local/waffle_filter';
+import { useDeleteSavedObject } from '../../hooks/use_delete_saved_object';
 
 interface Props {
   viewState: WaffleViewState;
@@ -39,6 +40,7 @@ interface Props {
 export const SavedViewsToolbarControls = (props: Props) => {
   const { data, loading, find } = useFindSavedObject('config');
   const { create } = useCreateSavedObject('config');
+  const { deleteObject, deletedId } = useDeleteSavedObject('config');
   const [modalOpen, setModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
@@ -47,13 +49,21 @@ export const SavedViewsToolbarControls = (props: Props) => {
     setModalOpen(true);
   }, []);
 
-  const saveView = (view: any) => {
+  const saveView = (
+    view: { type: string; data: { [p: string]: any } },
+    shouldIncludeTime: boolean = false
+  ) => {
+    const currentState = { ...props.viewState, ...(!shouldIncludeTime ? { time: undefined } : {}) };
     view.data = {
       ...view.data,
-      ...props.viewState,
+      ...currentState,
     };
     create(view);
   };
+
+  const deleteView = useCallback((id: string) => {
+    deleteObject(id);
+  }, []);
 
   const openSaveModal = useCallback(() => {
     setCreateModalOpen(true);
@@ -66,6 +76,12 @@ export const SavedViewsToolbarControls = (props: Props) => {
   const closeModal = useCallback(() => {
     setModalOpen(false);
   }, []);
+
+  useEffect(() => {
+    if (deletedId !== undefined) {
+      loadViews();
+    }
+  }, [deletedId]);
 
   const views: Array<{ name: string; id: string } & WaffleViewState> = [];
   if (data) {
@@ -85,13 +101,13 @@ export const SavedViewsToolbarControls = (props: Props) => {
       <EuiFlexGroup>
         <EuiButtonEmpty onClick={openSaveModal}>
           <FormattedMessage
-            defaultMessage="Save View"
+            defaultMessage="Save view"
             id="xpack.infra.waffle.savedViews.saveViewLabel"
           />
         </EuiButtonEmpty>
         <EuiButtonEmpty onClick={loadViews}>
           <FormattedMessage
-            defaultMessage="Load Views"
+            defaultMessage="Load views"
             id="xpack.infra.waffle.savedViews.loadViewsLabel"
           />
         </EuiButtonEmpty>
@@ -101,6 +117,7 @@ export const SavedViewsToolbarControls = (props: Props) => {
         <SavedViewListFlyout
           loading={loading}
           views={views}
+          deleteView={deleteView}
           close={closeModal}
           loadView={(viewState: WaffleViewState) => {
             if (viewState.time) {

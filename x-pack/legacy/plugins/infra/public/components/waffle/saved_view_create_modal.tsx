@@ -5,7 +5,8 @@
  */
 
 import React, { useCallback, useState } from 'react';
-
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiButton,
@@ -16,6 +17,8 @@ import {
   EuiModalHeaderTitle,
   EuiOverlayMask,
   EuiFieldText,
+  EuiCheckbox,
+  EuiSpacer,
 } from '@elastic/eui';
 
 interface Props {
@@ -25,6 +28,7 @@ interface Props {
 
 export const SavedViewCreateModal = ({ close, save }: Props) => {
   const [viewName, setViewName] = useState('');
+  const [includeTime, setIncludeTime] = useState(false);
   const textChange = useCallback(e => {
     setViewName(e.target.value);
   }, []);
@@ -37,26 +41,54 @@ export const SavedViewCreateModal = ({ close, save }: Props) => {
     close();
   }, [viewName]);
 
+  const handleCheckboxChange = useCallback(e => {
+    setIncludeTime(e.target.checked);
+  }, []);
+
   return (
     <EuiOverlayMask>
       <EuiModal onClose={close}>
         <EuiModalHeader>
-          <EuiModalHeaderTitle>Save View</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>
+            <FormattedMessage
+              defaultMessage="Save View"
+              id="xpack.infra.waffle.savedView.createHeader"
+            />
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>
           <EuiFieldText
-            placeholder="View name"
+            placeholder={i18n.translate('xpack.infra.waffle.savedViews.viewNamePlaceholder', {
+              defaultMessage: 'Name',
+            })}
             value={viewName}
             onChange={textChange}
             aria-label="Use aria labels when no actual label is in use"
           />
+          <EuiSpacer size="m" />
+          <EuiCheckbox
+            id={'saved-view-save-time-checkbox'}
+            label={
+              <FormattedMessage
+                defaultMessage="Include time filter?"
+                id="xpack.infra.waffle.savedViews.includeTimeFilterLabel"
+              />
+            }
+            checked={includeTime}
+            onChange={handleCheckboxChange}
+          />
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={close}>Cancel</EuiButtonEmpty>
+          <EuiButtonEmpty onClick={close}>
+            <FormattedMessage
+              defaultMessage="Cancel"
+              id="xpack.infra.waffle.savedViews.cancelButton"
+            />
+          </EuiButtonEmpty>
           <EuiButton color="primary" onClick={saveView}>
-            Save
+            <FormattedMessage defaultMessage="Save" id="xpack.infra.waffle.savedViews.saveButton" />
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>
