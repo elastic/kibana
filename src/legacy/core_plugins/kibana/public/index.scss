@@ -39,13 +39,15 @@
 
 // helper classes to show/hide elements in Percy
 @media only percy {
-  body:not(.percyWhitelist) {
-    .hideInPercy {
-      visibility: hidden;
+  .hideInPercy {
+    visibility: hidden;
+
+    img {
+      display: none;
     }
   }
 
-  body.percyWhitelist {
+  body.percyHideAllByDefault {
     * {
       visibility: hidden;
     }

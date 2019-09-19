@@ -33,6 +33,21 @@ export const DEFAULT_OPTIONS = {
   widths: [1200],
 };
 
+export interface SnapshotOptions {
+  /**
+   * name to append to visual test name
+   */
+  name?: string;
+  /**
+   * test subject selectiors to __show__ in screenshot
+   */
+  show?: string[];
+  /**
+   * test subject selectiors to __hide__ in screenshot
+   */
+  hide?: string[];
+}
+
 export async function VisualTestingProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
@@ -54,12 +69,6 @@ export async function VisualTestingProvider({ getService }: FtrProviderContext) 
     return statsCache.get(test)!;
   }
 
-  interface SnapshotOptions {
-    name?: string;
-    selectors?: string[];
-    isWhitelist?: boolean;
-  }
-
   return new (class VisualTesting {
     public async snapshot(options: SnapshotOptions = {}) {
       log.debug('Capturing percy snapshot');
@@ -69,7 +78,7 @@ export async function VisualTestingProvider({ getService }: FtrProviderContext) 
       }
 
       const [domSnapshot, url] = await Promise.all([
-        this.getSnapshot(options.selectors, options.isWhitelist),
+        this.getSnapshot(options.show, options.hide),
         browser.getCurrentUrl(),
       ]);
       const stats = getStats(currentTest);
@@ -89,19 +98,20 @@ export async function VisualTestingProvider({ getService }: FtrProviderContext) 
       }
     }
 
-    private async getSnapshot(selectors: string[] = [], isWhitelist = false) {
-      const testSubjSelectors = selectors.map(testSubjSelector);
-      const snapshot = await browser.execute<[string[], boolean], string | false>(
+    private async getSnapshot(show: string[] = [], hide: string[] = []) {
+      const showSelectors = show.map(testSubjSelector);
+      const hideSelectors = hide.map(testSubjSelector);
+      const snapshot = await browser.execute<[string[], string[]], string | false>(
         takePercySnapshot,
-        testSubjSelectors,
-        isWhitelist
+        showSelectors,
+        hideSelectors
       );
       return snapshot !== false
         ? snapshot
-        : await browser.execute<[string[], boolean], string>(
+        : await browser.execute<[string[], string[]], string>(
             takePercySnapshotWithAgent,
-            testSubjSelectors,
-            isWhitelist
+            showSelectors,
+            hideSelectors
           );
     }
   })();

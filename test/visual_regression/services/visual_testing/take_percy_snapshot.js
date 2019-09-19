@@ -20,32 +20,44 @@
 import { readFileSync } from 'fs';
 import { agentJsFilename } from '@percy/agent/dist/utils/sdk-utils';
 
-export function takePercySnapshot(selectors, isWhitelist) {
+export function takePercySnapshot(show, hide) {
   if (!window.PercyAgent) {
     return false;
   }
-
-  const agent = new window.PercyAgent({
-    handleAgentCommunication: false
-  });
 
   const queryAll = selector => [
     ...document.querySelectorAll(selector)
   ];
 
-  if (isWhitelist) {
-    document.body.classList.add('percyWhitelist');
+  const setSelectorClass = (selectors, className, remove) => {
+    for (const selector of selectors) {
+      for (const element of queryAll(selector)) {
+        if (remove) {
+          element.classList.remove(className);
+        } else {
+          console.log(className, element);
+
+          element.classList.add(className);
+        }
+      }
+    }
+  };
+
+  const hideByDefault = show.length > 0;
+  const agent = new window.PercyAgent({
+    handleAgentCommunication: false
+  });
+
+  if (hideByDefault) {
+    document.body.classList.add('percyHideAllByDefault');
   } else {
-    document.body.classList.remove('percyWhitelist');
+    document.body.classList.remove('percyHideAllByDefault');
   }
 
   // set Percy visibility on elements
-  const className = isWhitelist ? 'showInPercy' : 'hideInPercy';
-  for (const selector of selectors) {
-    for (const element of queryAll(selector)) {
-      element.classList.add(className);
-    }
-  }
+  const className = hideByDefault ? 'showInPercy' : 'hideInPercy';
+  const selectors = hideByDefault ? show : hide;
+  setSelectorClass(selectors, className, false);
 
   // array of canvas/image replacements
   const replacements = [];
@@ -70,12 +82,8 @@ export function takePercySnapshot(selectors, isWhitelist) {
   }
 
   // restore element visibility
-  document.body.classList.remove('percyWhitelist');
-  for (const selector of selectors) {
-    for (const element of queryAll(selector)) {
-      element.classList.remove(className);
-    }
-  }
+  document.body.classList.remove('percyHideAllByDefault');
+  setSelectorClass(selectors, className, true);
 
   return snapshot;
 }
