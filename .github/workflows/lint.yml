@@ -1,0 +1,23 @@
+name: Lint
+# This workflow is triggered on pushes to the repository.
+on:
+  push:
+    paths:
+      - '*.js'
+      - '*.json'
+      - '*.ts'
+      - '*.tsx'
+  pull_request:
+    paths:
+      - '*.js'
+      - '*.json'
+      - '*.ts'
+      - '*.tsx'
+
+jobs:
+  build:
+    name: ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - name: ESLint checks
+        uses: spalger/kibana-eslint-action@1.1
