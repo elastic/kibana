@@ -36,6 +36,8 @@ export function FieldPicker(props: FieldPickerProps) {
     setFieldOptions(toOptions(unselectedFields));
   }, [props.allFields]);
 
+  const allFieldsUnselected = fieldOptions.every(option => option.checked !== 'on');
+
   return (
     <EuiPopover
       id="graphFieldPicker"
@@ -63,7 +65,16 @@ export function FieldPicker(props: FieldPickerProps) {
         })}
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiSelectable searchable options={fieldOptions} onChange={setFieldOptions}>
+      <EuiSelectable
+        searchProps={{
+          placeholder: i18n.translate('xpack.graph.fieldManager.fieldSearchPlaceholder', {
+            defaultMessage: 'Filter fields',
+          }),
+        }}
+        searchable
+        options={fieldOptions}
+        onChange={setFieldOptions}
+      >
         {(list, search) => (
           <>
             {search}
@@ -75,6 +86,7 @@ export function FieldPicker(props: FieldPickerProps) {
         data-test-subj="graphFieldPickerAdd"
         fill
         fullWidth
+        disabled={allFieldsUnselected}
         onClick={() => {
           setOpen(false);
           fieldOptions.forEach((option, index) => {

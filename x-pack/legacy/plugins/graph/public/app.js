@@ -41,12 +41,11 @@ import listingTemplate from './angular/templates/listing_ng_wrapper.html';
 import { getReadonlyBadge } from './badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { FieldManager } from './components/field_manager';
-import { SearchBar } from './components/search_bar';
+import { GraphApp } from './components/app';
+import { VennDiagram } from './components/venn_diagram';
 import { Listing } from './components/listing';
 import { Settings } from './components/settings';
 
-import './angular/angular_venn_simple.js';
 import gws from './angular/graph_client_workspace.js';
 import { SavedWorkspacesProvider } from './angular/services/saved_workspaces';
 import {
@@ -99,25 +98,25 @@ app.directive('focusOn', function () {
   };
 });
 
+app.directive('vennDiagram', function (reactDirective) {
+  return reactDirective(VennDiagram);
+});
+
 app.directive('graphListing', function (reactDirective) {
   return reactDirective(Listing);
 });
 
-app.directive('graphFieldManager', function (reactDirective) {
-  return reactDirective(FieldManager, [
+app.directive('graphApp', function (reactDirective) {
+  return reactDirective(GraphApp, [
     ['state', { watchDepth: 'reference' }],
     ['dispatch', { watchDepth: 'reference' }],
-  ]);
-});
-
-app.directive('graphSearchBar', function (reactDirective) {
-  return reactDirective(SearchBar, [
     ['currentIndexPattern', { watchDepth: 'reference' }],
     ['isLoading', { watchDepth: 'reference' }],
     ['onIndexPatternSelected', { watchDepth: 'reference' }],
     ['onQuerySubmit', { watchDepth: 'reference' }],
     ['savedObjects', { watchDepth: 'reference' }],
-    ['uiSettings', { watchDepth: 'reference' }]
+    ['uiSettings', { watchDepth: 'reference' }],
+    ['overlays', { watchDepth: 'reference' }]
   ]);
 });
 
@@ -346,6 +345,10 @@ app.controller('graphuiPlugin', function (
     store.dispatch(action);
   };
 
+  $scope.pluginDependencies = npStart.core;
+
+  $scope.loading = false;
+
   const updateScope = () => {
     const newState = store.getState();
     $scope.reduxState = newState;
@@ -496,9 +499,8 @@ app.controller('graphuiPlugin', function (
         'term2': ti.term2,
         'v1': ti.v1,
         'v2': ti.v2,
-        'overlap': ti.overlap,
-        width: 100,
-        height: 60 });
+        'overlap': ti.overlap
+      });
 
     }
     $scope.detail = { mergeCandidates };
@@ -527,34 +529,6 @@ app.controller('graphuiPlugin', function (
       .on('zoom', redraw));
 
 
-  const managementUrl = npStart.core.chrome.navLinks.get('kibana:management').url;
-  const url = `${managementUrl}/kibana/index_patterns`;
-
-  if ($route.current.locals.indexPatterns.length === 0) {
-    toastNotifications.addWarning({
-      title: i18n.translate('xpack.graph.noDataSourceNotificationMessageTitle', {
-        defaultMessage: 'No data source',
-      }),
-      text: (
-        <p>
-          <FormattedMessage
-            id="xpack.graph.noDataSourceNotificationMessageText"
-            defaultMessage="Go to {managementIndexPatternsLink} and create an index pattern"
-            values={{
-              managementIndexPatternsLink: (
-                <a href={url}>
-                  <FormattedMessage
-                    id="xpack.graph.noDataSourceNotificationMessageText.managementIndexPatternLinkText"
-                    defaultMessage="Management &gt; Index Patterns"
-                  />
-                </a>
-              )
-            }}
-          />
-        </p>
-      ),
-    });
-  }
 
 
   // ===== Menubar configuration =========
@@ -695,6 +669,36 @@ app.controller('graphuiPlugin', function (
       payload: $route.current.locals.savedWorkspace,
     });
   } else {
+    const managementUrl = npStart.core.chrome.navLinks.get('kibana:management').url;
+    const url = `${managementUrl}/kibana/index_patterns`;
+
+    if ($route.current.locals.indexPatterns.length === 0) {
+      toastNotifications.addWarning({
+        title: i18n.translate('xpack.graph.noDataSourceNotificationMessageTitle', {
+          defaultMessage: 'No data source',
+        }),
+        text: (
+          <p>
+            <FormattedMessage
+              id="xpack.graph.noDataSourceNotificationMessageText"
+              defaultMessage="Go to {managementIndexPatternsLink} and create an index pattern"
+              values={{
+                managementIndexPatternsLink: (
+                  <a href={url}>
+                    <FormattedMessage
+                      id="xpack.graph.noDataSourceNotificationMessageText.managementIndexPatternLinkText"
+                      defaultMessage="Management &gt; Index Patterns"
+                    />
+                  </a>
+                )
+              }}
+            />
+          </p>
+        ),
+      });
+
+      return;
+    }
     openSourceModal(npStart.core, indexPattern => {
       $scope.reduxDispatch({
         type: 'x-pack/graph/datasource/SET_DATASOURCE',
@@ -707,3 +711,4 @@ app.controller('graphuiPlugin', function (
     });
   }
 });
+

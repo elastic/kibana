@@ -7,20 +7,18 @@
     <graph-inspect ng-show="menus.showInspect"></graph-inspect>
   </div>
 
-  <graph-search-bar
+  <graph-app
     current-index-pattern="selectedIndex"
     on-index-pattern-selected="uiSelectIndex"
     on-query-submit="submit"
     saved-objects="pluginDependencies.savedObjects"
     ui-settings="pluginDependencies.uiSettings"
+    overlays="pluginDependencies.overlays"
     is-loading="loading"
     initial-query="initialQuery"
-  ></graph-search-bar>
-    
-  <graph-field-manager
     state="reduxState"
     dispatch="reduxDispatch"
-  ></graph-field-manager>
+  ></graph-app>
 
   <div class="gphGraph__container" id="GraphSvgContainer">
     <svg class="gphGraph" width="100%" height="100%" pointer-events="all" id="graphSvg" ng-click="hideAllConfigPanels()">
@@ -353,7 +351,7 @@
           </span>
 
           <!-- Venn diagram of term/shared doc intersections -->
-          <div class="gphLinkSummary__venn" venn="mc"></div>
+          <venn-diagram left-value="mc.v1" right-value="mc.v2" overlap="mc.overlap"></venn-diagram>
 
           <small
             class="gphLinkSummary__term--1"

@@ -77,10 +77,15 @@ export function ChartSwitch(props: Props) {
   const commitSelection = (selection: VisualizationSelection) => {
     setFlyoutOpen(false);
 
-    switchToSuggestion(props.framePublicAPI, props.dispatch, {
-      ...selection,
-      visualizationState: selection.getVisualizationState(),
-    });
+    switchToSuggestion(
+      props.framePublicAPI,
+      props.dispatch,
+      {
+        ...selection,
+        visualizationState: selection.getVisualizationState(),
+      },
+      'SWITCH_VISUALIZATION'
+    );
   };
 
   function getSelection(

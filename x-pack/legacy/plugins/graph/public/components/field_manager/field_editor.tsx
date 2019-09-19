@@ -21,7 +21,6 @@ import {
   EuiSpacer,
   // @ts-ignore
   EuiHighlight,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
@@ -94,35 +93,33 @@ export function FieldEditor({
       initialFocus=".gphFieldEditor"
       panelClassName="gphFieldEditor"
       button={
-        <EuiToolTip content={badgeDescription}>
-          <EuiBadge
-            className={classNames('gphFieldEditorBadge', {
-              'gphFieldEditorBadge--disabled': isDisabled,
-            })}
-            iconOnClick={() => {}}
-            iconOnClickAriaLabel=""
-            onClickAriaLabel={badgeDescription}
-            title=""
-            onClick={e => {
-              if (e.shiftKey) {
-                toggleDisabledState();
-              } else {
-                setOpen(true);
-              }
-            }}
-          >
-            <div className="gphFieldEditorBadge__color" style={{ backgroundColor: color }}>
-              <LegacyIcon
-                className={classNames({
-                  'gphFieldEditorBadge__icon--dark': darkColor,
-                  'gphFieldEditorBadge__icon--light': !darkColor,
-                })}
-                icon={icon}
-              />
-            </div>
-            {field.name}
-          </EuiBadge>
-        </EuiToolTip>
+        <EuiBadge
+          className={classNames('gphFieldEditorBadge', {
+            'gphFieldEditorBadge--disabled': isDisabled,
+          })}
+          iconOnClick={() => {}}
+          iconOnClickAriaLabel=""
+          onClickAriaLabel={badgeDescription}
+          title=""
+          onClick={e => {
+            if (e.shiftKey) {
+              toggleDisabledState();
+            } else {
+              setOpen(true);
+            }
+          }}
+        >
+          <div className="gphFieldEditorBadge__color" style={{ backgroundColor: color }}>
+            <LegacyIcon
+              className={classNames({
+                'gphFieldEditorBadge__icon--dark': darkColor,
+                'gphFieldEditorBadge__icon--light': !darkColor,
+              })}
+              icon={icon}
+            />
+          </div>
+          {field.name}
+        </EuiBadge>
       }
       isOpen={open}
       closePopover={() => setOpen(false)}
@@ -158,7 +155,8 @@ export function FieldEditor({
       <EuiFormRow
         label=""
         helpText={i18n.translate('xpack.graph.fieldManager.disabledDescription', {
-          defaultMessage: "A disabled field won't show up in new searches",
+          defaultMessage:
+            "A disabled field won't show up in new searches. You can also Shift+click on the badge to toggle the field.",
         })}
       >
         <EuiSwitch
