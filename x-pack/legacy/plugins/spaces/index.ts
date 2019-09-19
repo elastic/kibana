@@ -4,21 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Rx from 'rxjs';
 import { resolve } from 'path';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
-import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { Legacy } from 'kibana';
+import { SpacesServiceSetup } from '../../../plugins/spaces/server/spaces_service/spaces_service';
+import { SpacesPluginSetup } from '../../../plugins/spaces/server';
 import { createOptionalPlugin } from '../../server/lib/optional_plugin';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 import mappings from './mappings.json';
 import { wrapError } from './server/lib/errors';
-import { getActiveSpace } from './server/lib/get_active_space';
 import { getSpaceSelectorUrl } from './server/lib/get_space_selector_url';
 import { migrateToKibana660 } from './server/lib/migrations';
-import { plugin } from './server/new_platform';
 import { SecurityPlugin } from '../security';
-import { SpacesServiceSetup } from './server/new_platform/spaces_service/spaces_service';
 import { initSpaceSelectorView } from './server/routes/views';
 
 export interface SpacesPlugin {
@@ -92,18 +90,19 @@ export const spaces = (kibana: Record<string, any>) =>
       },
       async replaceInjectedVars(
         vars: Record<string, any>,
-        request: Record<string, any>,
+        request: Legacy.Request,
         server: Record<string, any>
       ) {
-        const spacesClient = await server.plugins.spaces.getScopedSpacesClient(request);
+        const spacesPlugin = server.newPlatform.setup.plugins.spaces as SpacesPluginSetup;
+        if (!spacesPlugin) {
+          throw new Error('New Platform XPack Spaces plugin is not available.');
+        }
+        const spaceId = spacesPlugin.spacesService.getSpaceId(request);
+        const spacesClient = await spacesPlugin.spacesService.scopedClient(request);
         try {
           vars.activeSpace = {
             valid: true,
-            space: await getActiveSpace(
-              spacesClient,
-              request.getBasePath(),
-              server.config().get('server.basePath')
-            ),
+            space: await spacesClient.get(spaceId),
           };
         } catch (e) {
           vars.activeSpace = {
@@ -118,49 +117,15 @@ export const spaces = (kibana: Record<string, any>) =>
 
     async init(server: Server) {
       const kbnServer = (server as unknown) as KbnServer;
-      const initializerContext = {
-        config: {
-          create: () => {
-            return Rx.of({
-              maxSpaces: server.config().get('xpack.spaces.maxSpaces'),
-            });
-          },
-        },
-        logger: {
-          get(...contextParts: string[]) {
-            return kbnServer.newPlatform.coreContext.logger.get(
-              'plugins',
-              'spaces',
-              ...contextParts
-            );
-          },
-        },
-      } as PluginInitializerContext;
 
-      const core = (kbnServer.newPlatform.setup.core as unknown) as CoreSetup;
-
-      const plugins = {
-        xpackMain: server.plugins.xpack_main,
-        // TODO: Spaces has a circular dependency with Security right now.
-        // Security is not yet available when init runs, so this is wrapped in an optional function for the time being.
-        security: createOptionalPlugin<SecurityPlugin>(
-          server.config(),
-          'xpack.security',
-          server.plugins,
-          'security'
-        ),
-        spaces: this,
-      };
-
-      const { spacesService, registerLegacyAPI } = await plugin(initializerContext).setup(
-        core,
-        plugins
-      );
+      const spacesPlugin = kbnServer.newPlatform.setup.plugins.spaces as SpacesPluginSetup;
+      if (!spacesPlugin) {
+        throw new Error('New Platform XPack Spaces plugin is not available.');
+      }
 
       const config = server.config();
 
-      registerLegacyAPI({
-        router: server.route.bind(server),
+      spacesPlugin.registerLegacyAPI({
         legacyConfig: {
           serverBasePath: config.get('server.basePath'),
           serverDefaultRoute: config.get('server.defaultRoute'),
@@ -178,14 +143,21 @@ export const spaces = (kibana: Record<string, any>) =>
           create: (pluginId: string) =>
             new AuditLogger(server, pluginId, server.config(), server.plugins.xpack_main.info),
         },
+        security: createOptionalPlugin<SecurityPlugin>(
+          server.config(),
+          'xpack.security',
+          server.plugins,
+          'security'
+        ),
+        xpackMain: server.plugins.xpack_main,
       });
 
       initSpaceSelectorView(server);
 
-      server.expose('getSpaceId', (request: any) => spacesService.getSpaceId(request));
-      server.expose('spaceIdToNamespace', spacesService.spaceIdToNamespace);
-      server.expose('namespaceToSpaceId', spacesService.namespaceToSpaceId);
-      server.expose('getBasePath', spacesService.getBasePath);
-      server.expose('getScopedSpacesClient', spacesService.scopedClient);
+      server.expose('getSpaceId', (request: any) => spacesPlugin.spacesService.getSpaceId(request));
+      server.expose('spaceIdToNamespace', spacesPlugin.spacesService.spaceIdToNamespace);
+      server.expose('namespaceToSpaceId', spacesPlugin.spacesService.namespaceToSpaceId);
+      server.expose('getBasePath', spacesPlugin.spacesService.getBasePath);
+      server.expose('getScopedSpacesClient', spacesPlugin.spacesService.scopedClient);
     },
   });

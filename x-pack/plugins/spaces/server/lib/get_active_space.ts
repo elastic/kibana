@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SpacesClient } from '../../../../../plugins/spaces/server/lib/spaces_client';
 import { Space } from '../../common/model/space';
 import { wrapError } from './errors';
+import { SpacesClient } from './spaces_client';
 import { getSpaceIdFromPath } from './spaces_url_parser';
 
-// TODO: ML is relying on this for some reason. Otherwise this can be removed altogether.
 export async function getActiveSpace(
   spacesClient: SpacesClient,
   requestBasePath: string,

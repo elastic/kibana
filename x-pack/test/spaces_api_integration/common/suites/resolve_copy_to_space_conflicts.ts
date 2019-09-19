@@ -9,7 +9,7 @@ import { SuperTest } from 'supertest';
 import { EsArchiver } from 'src/es_archiver';
 import { SavedObject } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../../../legacy/plugins/spaces/common/constants';
-import { CopyResponse } from '../../../../legacy/plugins/spaces/server/lib/copy_to_spaces';
+import { CopyResponse } from '../../../../plugins/spaces/server/lib/copy_to_spaces';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
