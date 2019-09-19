@@ -17,25 +17,32 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useEffect, useState, Fragment } from 'react';
-import { sortBy } from 'lodash';
 import { SavedQueryFilterParams } from '@kbn/es-query';
-import { UiSettingsClientContract } from 'src/core/public';
-import { IndexPattern } from '../../../index_patterns';
-import { SavedQuery } from '../../../search/search_bar/index';
+import { i18n } from '@kbn/i18n';
 import { SavedQueryService } from '../../../search/search_bar/lib/saved_query_service';
-
-const pageCount = 50;
 
 type SavedQueryParamsPartial = Partial<SavedQueryFilterParams>;
 
 interface Props {
-  indexPattern: IndexPattern;
-  uiSettings: UiSettingsClientContract;
   showSaveQuery?: boolean;
-  loadedSavedQuery?: SavedQuery;
+  value?: SavedQueryParamsPartial; // is this an object containing a savedQuery, the esQueryConfig and the indexPattern or just the string version of the SQ name?
   savedQueryService: SavedQueryService;
-  onLoad: (savedQuery: SavedQuery) => void;
   onChange: (params: SavedQueryParamsPartial) => void;
 }
+
+export const SavedQueryEditorUI: FunctionComponent<Props> = ({
+  showSaveQuery,
+  value,
+  savedQueryService,
+  onChange,
+}) => {
+  return (
+    <ul>
+      <li key={1}>Saved Query 1</li>
+      <li key={2}>Saved Query 2</li>
+      <li key={3}>Saved Query 3</li>
+      <li key={4}>Saved Query 4</li>
+    </ul>
+  );
+};

@@ -30,6 +30,7 @@ import {
   PhraseFilter,
   PhrasesFilter,
   RangeFilter,
+  SavedQueryFilter,
 } from '@kbn/es-query';
 import { omit } from 'lodash';
 import { Ipv4Address } from '../../../../../../../../plugins/kibana_utils/public';
@@ -77,6 +78,12 @@ export function getFilterParams(filter: Filter) {
       return {
         from: (filter as RangeFilter).meta.params.gte,
         to: (filter as RangeFilter).meta.params.lt,
+      };
+    case 'savedQuery':
+      return {
+        savedQuery: (filter as SavedQueryFilter).meta.params.savedQuery,
+        esQueryConfig: (filter as SavedQueryFilter).meta.params.esQueryConfig,
+        indexPattern: (filter as SavedQueryFilter).meta.params.indexPattern,
       };
   }
 }

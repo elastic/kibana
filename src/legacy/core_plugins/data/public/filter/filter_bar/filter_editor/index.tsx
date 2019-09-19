@@ -58,6 +58,7 @@ import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
 import { SavedQueryService } from '../../../search/search_bar/lib/saved_query_service';
+import { SavedQueryEditorUI } from './saved_query_editor';
 
 interface Props {
   filter: Filter;
@@ -435,21 +436,28 @@ class FilterEditorUI extends Component<Props, State> {
     }
   }
   private renderSavedQueryList() {
-    return (
-      <ul>
-        <li key={1}>Saved Query 1</li>
-        <li key={2}>Saved Query 2</li>
-        <li key={3}>Saved Query 3</li>
-        <li key={4}>Saved Query 4</li>
-      </ul>
-    );
-  }
-  private renderSavedQueryEditor() {
     // pass along the index pattern, uiSettings, savedQueryService and any other items we need for the params
     // pass along the security-related item of if the user has access to saved objects.
     // pass along the onChange handler
-    // pass along the value (this is where we compile the filter params object)
+    // pass along the value as the saved query filter params object (this is where we compile the filter params object)
     // return the selectable component
+    const indexPattern = this.state.selectedIndexPattern;
+    const esQueryConfig = {
+      allowLeadingWildcards: this.props.uiSettings.get('defaults', 'allowLeadingWildcards'),
+      queryStringOptions: this.props.uiSettings.get('defaults', 'es:query:queryStringOptions'),
+      dateFormatTZ: this.props.uiSettings.get('defaults', 'dateFormatTZ'),
+    };
+    const savedQueryValue = { ...this.state.params, indexPattern, esQueryConfig };
+    return (
+      <SavedQueryEditorUI
+        showSaveQuery={this.props.showSaveQuery}
+        value={savedQueryValue}
+        savedQueryService={this.props.savedQueryService}
+        onChange={this.onParamsChange}
+      />
+    );
+  }
+  private renderSavedQueryEditor() {
     return (
       <div>
         <EuiFlexGroup responsive={false} gutterSize="s">
