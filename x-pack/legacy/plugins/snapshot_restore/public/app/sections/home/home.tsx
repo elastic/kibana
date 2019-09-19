@@ -7,8 +7,6 @@
 import React, { useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
-import chrome from 'ui/chrome';
-
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -45,6 +43,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
   const {
     core: {
       i18n: { FormattedMessage },
+      chrome,
     },
   } = useAppDependencies();
 

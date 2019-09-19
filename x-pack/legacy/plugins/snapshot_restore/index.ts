@@ -39,11 +39,9 @@ export function snapshotRestore(kibana: any) {
       const { core, plugins } = createShim(server, PLUGIN.ID);
       const { i18n } = core;
       const snapshotRestorePlugin = new SnapshotRestorePlugin();
-      const config = server.config();
-      const isSlmEnabled = config.get('xpack.snapshot_restore.slm_ui.enabled') as boolean;
 
       // Start plugin
-      snapshotRestorePlugin.start(core, plugins, isSlmEnabled);
+      snapshotRestorePlugin.start(core, plugins);
 
       // Register license checker
       plugins.license.registerLicenseChecker(

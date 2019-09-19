@@ -7,7 +7,6 @@
 import React, { useContext } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { EuiPageContent } from '@elastic/eui';
-import chrome from 'ui/chrome';
 
 import { APP_REQUIRED_CLUSTER_PRIVILEGES } from '../../common/constants';
 import { SectionLoading, SectionError } from './components';
@@ -27,6 +26,7 @@ export const App: React.FunctionComponent = () => {
   const {
     core: {
       i18n: { FormattedMessage },
+      chrome,
     },
   } = useAppDependencies();
   const { apiError } = useContext(AuthorizationContext);
