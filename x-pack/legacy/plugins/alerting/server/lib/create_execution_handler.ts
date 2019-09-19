@@ -9,25 +9,40 @@ import { ActionsPlugin } from '../../../actions';
 import { transformActionParams } from './transform_action_params';
 
 interface CreateExecutionHandlerOptions {
+  alertId: string;
   executeAction: ActionsPlugin['execute'];
   actions: AlertAction[];
   spaceId: string;
   apiKey?: string;
 }
 
+interface ExecutionHandlerOptions {
+  actionGroup: string;
+  alertInstanceId: string;
+  context: Context;
+  state: State;
+}
+
 export function createExecutionHandler({
+  alertId,
   executeAction,
   actions: alertActions,
   spaceId,
   apiKey,
 }: CreateExecutionHandlerOptions) {
-  return async (actionGroup: string, context: Context, state: State) => {
+  return async ({ actionGroup, context, state, alertInstanceId }: ExecutionHandlerOptions) => {
     const actions = alertActions
       .filter(({ group }) => group === actionGroup)
       .map(action => {
         return {
           ...action,
-          params: transformActionParams(action.params, state, context),
+          params: transformActionParams({
+            alertId,
+            alertInstanceId,
+            context,
+            params: action.params,
+            state,
+          }),
         };
       });
     for (const action of actions) {
