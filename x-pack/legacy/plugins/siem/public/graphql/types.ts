@@ -111,8 +111,6 @@ export interface Source {
   status: SourceStatus;
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
-  /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
-  Events: EventsData;
 
   Timeline: TimelineData;
 
@@ -339,20 +337,36 @@ export interface Inspect {
   response: string[];
 }
 
-export interface EventsData {
-  edges: EcsEdges[];
+export interface TimelineData {
+  edges: TimelineEdges[];
 
   totalCount: number;
 
-  pageInfo: PageInfoPaginated;
+  pageInfo: PageInfo;
 
   inspect?: Inspect | null;
 }
 
-export interface EcsEdges {
-  node: Ecs;
+export interface TimelineEdges {
+  node: TimelineItem;
 
   cursor: CursorType;
+}
+
+export interface TimelineItem {
+  _id: string;
+
+  _index?: string | null;
+
+  data: TimelineNonEcsData[];
+
+  ecs: Ecs;
+}
+
+export interface TimelineNonEcsData {
+  field: string;
+
+  value?: ToStringArray | null;
 }
 
 export interface Ecs {
@@ -805,38 +819,6 @@ export interface SshEcsFields {
   method?: ToStringArray | null;
 
   signature?: ToStringArray | null;
-}
-
-export interface TimelineData {
-  edges: TimelineEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfo;
-
-  inspect?: Inspect | null;
-}
-
-export interface TimelineEdges {
-  node: TimelineItem;
-
-  cursor: CursorType;
-}
-
-export interface TimelineItem {
-  _id: string;
-
-  _index?: string | null;
-
-  data: TimelineNonEcsData[];
-
-  ecs: Ecs;
-}
-
-export interface TimelineNonEcsData {
-  field: string;
-
-  value?: ToStringArray | null;
 }
 
 export interface PageInfo {
@@ -1511,6 +1493,12 @@ export interface ResponseFavoriteTimeline {
   favorite?: FavoriteTimelineResult[] | null;
 }
 
+export interface EcsEdges {
+  node: Ecs;
+
+  cursor: CursorType;
+}
+
 export interface EventsTimelineData {
   edges: EcsEdges[];
 
@@ -1587,12 +1575,6 @@ export interface PaginationInputPaginated {
   querySize: number;
 }
 
-export interface SortField {
-  sortFieldId: string;
-
-  direction: Direction;
-}
-
 export interface PaginationInput {
   /** The limit parameter allows you to configure the maximum amount of items to be returned */
   limit: number;
@@ -1600,6 +1582,12 @@ export interface PaginationInput {
   cursor?: string | null;
   /** The tiebreaker parameter allow to be more precise to fetch the next item */
   tiebreaker?: string | null;
+}
+
+export interface SortField {
+  sortFieldId: string;
+
+  direction: Direction;
 }
 
 export interface LastTimeDetails {
@@ -1813,17 +1801,6 @@ export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
 
   pagination: PaginationInputPaginated;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface EventsSourceArgs {
-  pagination: PaginationInputPaginated;
-
-  sortField: SortField;
-
-  timerange?: TimerangeInput | null;
 
   filterQuery?: string | null;
 

@@ -40,6 +40,9 @@ const indexRequestTimeTitle = i18n.translate('xpack.monitoring.metrics.esIndex.r
 const indexIndexingRateTitle = i18n.translate('xpack.monitoring.metrics.esIndex.indexingRateTitle', {
   defaultMessage: 'Indexing Rate'
 });
+const nodeIoRateTitle = i18n.translate('xpack.monitoring.metrics.esNode.ioRateTitle', {
+  defaultMessage: 'I/O Operations Rate'
+});
 const indexSegmentCountTitle = i18n.translate('xpack.monitoring.metrics.esIndex.segmentCountTitle', {
   defaultMessage: 'Segment Count'
 });
@@ -423,6 +426,48 @@ export const metrics = {
     }),
     description: i18n.translate('xpack.monitoring.metrics.esIndex.indexWriterDescription', {
       defaultMessage: 'Heap memory used by the Index Writer. This is NOT a part of Lucene Total.'
+    })
+  }),
+  node_total_cumul_io: new RequestRateMetric({
+    field: 'node_stats.fs.io_stats.total.operations',
+    title: nodeIoRateTitle,
+    format: LARGE_FLOAT,
+    units: 'ops',
+    type: 'node',
+    derivative: true,
+    label: i18n.translate('xpack.monitoring.metrics.esNode.totalIoLabel', {
+      defaultMessage: 'Total I/O'
+    }),
+    description: i18n.translate('xpack.monitoring.metrics.esNode.totalIoDescription', {
+      defaultMessage: 'Total I/O. (This metric is not supported on all platforms and may display N/A if I/O data is unavailable.)'
+    })
+  }),
+  node_total_read_io: new RequestRateMetric({
+    field: 'node_stats.fs.io_stats.total.read_operations',
+    title: nodeIoRateTitle,
+    format: LARGE_FLOAT,
+    units: 'ops',
+    type: 'node',
+    derivative: true,
+    label: i18n.translate('xpack.monitoring.metrics.esNode.totalIoReadLabel', {
+      defaultMessage: 'Total Read I/O'
+    }),
+    description: i18n.translate('xpack.monitoring.metrics.esNode.totalIoReadDescription', {
+      defaultMessage: 'Total Read I/O. (This metric is not supported on all platforms and may display N/A if I/O data is unavailable.)'
+    })
+  }),
+  node_total_write_io: new RequestRateMetric({
+    field: 'node_stats.fs.io_stats.total.write_operations',
+    title: nodeIoRateTitle,
+    format: LARGE_FLOAT,
+    units: 'ops',
+    type: 'node',
+    derivative: true,
+    label: i18n.translate('xpack.monitoring.metrics.esNode.totalIoWriteLabel', {
+      defaultMessage: 'Total Write I/O'
+    }),
+    description: i18n.translate('xpack.monitoring.metrics.esNode.totalIoWriteDescription', {
+      defaultMessage: 'Total Write I/O. (This metric is not supported on all platforms and may display N/A if I/O data is unavailable.)'
     })
   }),
   index_request_rate_primary: new ElasticsearchMetric({
