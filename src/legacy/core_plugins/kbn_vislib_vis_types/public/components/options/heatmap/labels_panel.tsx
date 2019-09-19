@@ -17,15 +17,8 @@
  * under the License.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import {
-  EuiColorPicker,
-  EuiFormRow,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-  isValidHex,
-} from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiColorPicker, EuiFormRow, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 

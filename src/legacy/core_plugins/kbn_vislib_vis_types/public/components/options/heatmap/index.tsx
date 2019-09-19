@@ -77,13 +77,14 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
 
         <SwitchOption
           label={i18n.translate('kbnVislibVisTypes.editors.heatmap.highlightLabel', {
-            defaultMessage: 'Highlight in the legend',
+            defaultMessage: 'Highlight range',
           })}
           paramName="enableHover"
           value={stateParams.enableHover}
           setValue={setValue}
           tooltip={i18n.translate('kbnVislibVisTypes.editors.heatmap.highlightLabelTooltip', {
-            defaultMessage: 'Highlight hovered value in the legend.',
+            defaultMessage:
+              'Highlight hovered range in the chart and corresponding label in the legend.',
           })}
         />
       </EuiPanel>
