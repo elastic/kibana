@@ -14,7 +14,7 @@ import { IEmbeddable } from '../../../../../../../../src/legacy/core_plugins/emb
 
 export const APPLY_SIEM_FILTER_ACTION_ID = 'APPLY_SIEM_FILTER_ACTION_ID';
 
-interface ActionContext {
+export interface ActionContext {
   embeddable: IEmbeddable;
   filters: Filter[];
 }
