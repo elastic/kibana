@@ -52,7 +52,7 @@ describe('Spaces API', () => {
 
     const result = JSON.parse(payload);
     expect(result).toEqual({
-      spaceSelectorUrl: '/',
+      spaceSelectorUrl: '/spaces/space_selector',
     });
   });
 

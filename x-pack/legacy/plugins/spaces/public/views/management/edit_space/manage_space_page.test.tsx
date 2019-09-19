@@ -6,7 +6,6 @@
 jest.mock('ui/kfetch', () => ({
   kfetch: () => Promise.resolve([{ id: 'feature-1', name: 'feature 1' }]),
 }));
-import '../../../__mocks__/ui_capabilities';
 import '../../../__mocks__/xpack_info';
 import { EuiButton, EuiLink, EuiSwitch } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';

@@ -183,6 +183,7 @@ export class Plugin {
       getLegacyAPI: this.getLegacyAPI,
       spacesService,
       xpackMain: xpackMainPlugin,
+      http: core.http,
     });
 
     initExternalSpacesApi({
