@@ -7,8 +7,11 @@
 import { parseIsPaused } from './parse_is_paused';
 import { parseUrlInt } from './parse_url_int';
 import { CLIENT_DEFAULTS } from '../../../../common/constants';
+import { parseAbsoluteDate } from './parse_absolute_date';
 
 export interface UptimeUrlParams {
+  absoluteDateRangeStart: number;
+  absoluteDateRangeEnd: number;
   autorefreshInterval: number;
   autorefreshIsPaused: boolean;
   dateRangeStart: string;
@@ -23,6 +26,8 @@ export interface UptimeUrlParams {
 }
 
 const {
+  ABSOLUTE_DATE_RANGE_START,
+  ABSOLUTE_DATE_RANGE_END,
   AUTOREFRESH_INTERVAL,
   AUTOREFRESH_IS_PAUSED,
   DATE_RANGE_START,
@@ -80,6 +85,14 @@ export const getSupportedUrlParams = (params: {
   } = filteredParams;
 
   return {
+    absoluteDateRangeStart: parseAbsoluteDate(
+      dateRangeStart || DATE_RANGE_START,
+      ABSOLUTE_DATE_RANGE_START
+    ),
+    absoluteDateRangeEnd: parseAbsoluteDate(
+      dateRangeEnd || DATE_RANGE_END,
+      ABSOLUTE_DATE_RANGE_END
+    ),
     autorefreshInterval: parseUrlInt(autorefreshInterval, AUTOREFRESH_INTERVAL),
     autorefreshIsPaused: parseIsPaused(autorefreshIsPaused, AUTOREFRESH_IS_PAUSED),
     dateRangeStart: dateRangeStart || DATE_RANGE_START,
