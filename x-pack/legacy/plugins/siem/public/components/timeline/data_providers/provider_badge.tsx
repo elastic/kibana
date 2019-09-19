@@ -78,8 +78,6 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
     const title = `${field}: "${formattedValue}"`;
 
     return (
-      // Ref: https://github.com/elastic/eui/issues/1655
-      // @ts-ignore
       <ProviderBadgeStyled
         id={`${providerId}-${field}-${val}`}
         className={classes}

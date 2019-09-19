@@ -23,7 +23,7 @@ import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const log = getService('log');
-  const browser = getService('browser');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const PageObjects = getPageObjects(['common', 'header', 'visualize', 'timePicker']);
@@ -49,14 +49,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.common.navigateToUrl('visualize', 'create?type=metrics');
       log.debug('Set absolute time range from "' + fromTime + '" to "' + toTime + '"');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      if (browser.isFirefox) {
-        // https://github.com/elastic/kibana/issues/24058
-        await PageObjects.common.sleep(2000);
-      }
     }
 
     public async checkTabIsLoaded(testSubj: string, name: string) {
-      const isPresent = await testSubjects.exists(testSubj, { timeout: 5000 });
+      const isPresent = await testSubjects.exists(testSubj, { timeout: 10000 });
       if (!isPresent) {
         throw new Error(`TSVB ${name} tab is not loaded`);
       }
@@ -194,8 +190,11 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      * @memberof VisualBuilderPage
      */
     public async markdownSwitchSubTab(subTab: 'data' | 'options' | 'markdown') {
-      const element = await testSubjects.find(`${subTab}-subtab`);
-      await element.click();
+      const tab = await testSubjects.find(`${subTab}-subtab`);
+      const isSelected = await tab.getAttribute('aria-selected');
+      if (isSelected !== 'true') {
+        await tab.click();
+      }
     }
 
     /**
@@ -336,13 +335,14 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async createNewAgg(nth = 0) {
+      const prevAggs = await testSubjects.findAll('aggSelector');
       const elements = await testSubjects.findAll('addMetricAddBtn');
       await elements[nth].click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const aggs = await testSubjects.findAll('aggSelector');
-      if (aggs.length < 2) {
-        throw new Error('there should be atleast 2 aggSelectors');
-      }
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+      await retry.waitFor('new agg is added', async () => {
+        const currentAggs = await testSubjects.findAll('aggSelector');
+        return currentAggs.length > prevAggs.length;
+      });
     }
 
     public async selectAggType(value: string, nth = 0) {
@@ -481,10 +481,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async cloneSeries(nth: number = 0): Promise<void> {
-      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
       const cloneBtnArray = await testSubjects.findAll('AddCloneBtn');
       await cloneBtnArray[nth].click();
-      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     /**

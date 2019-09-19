@@ -42,5 +42,5 @@ export const anomaliesTableData = async (
     signal,
   });
   await throwIfNotOk(response);
-  return await response.json();
+  return response.json();
 };

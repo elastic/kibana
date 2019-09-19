@@ -18,15 +18,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visFactory } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { GaugeOptions } from './components/options';
 import { getGaugeCollections } from './utils/collections';
+import { vislibVisController } from './controller';
 
-export default function GaugeVisType(Private) {
-  const VisFactory = Private(VisFactoryProvider);
-
-  return VisFactory.createVislibVisualization({
+export default function GaugeVisType() {
+  return visFactory.createBaseVisualization({
     name: 'gauge',
     title: i18n.translate('kbnVislibVisTypes.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
     icon: 'visGauge',
@@ -79,9 +78,7 @@ export default function GaugeVisType(Private) {
         }
       },
     },
-    events: {
-      brush: { disabled: true },
-    },
+    visualization: vislibVisController,
     editorConfig: {
       collections: getGaugeCollections(),
       optionsTemplate: GaugeOptions,

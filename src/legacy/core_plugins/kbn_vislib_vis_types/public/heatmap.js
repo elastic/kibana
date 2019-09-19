@@ -17,20 +17,21 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visFactory } from '../../../ui/public/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { getHeatmapCollections } from './utils/collections';
 import { HeatmapOptions } from './components/options';
+import { vislibVisController } from './controller';
 
-export default function HeatmapVisType(Private) {
-  const VisFactory = Private(VisFactoryProvider);
+export default function HeatmapVisType() {
 
-  return VisFactory.createVislibVisualization({
+  return visFactory.createBaseVisualization({
     name: 'heatmap',
     title: i18n.translate('kbnVislibVisTypes.heatmap.heatmapTitle', { defaultMessage: 'Heat Map' }),
     icon: 'visHeatmap',
     description: i18n.translate('kbnVislibVisTypes.heatmap.heatmapDescription', { defaultMessage: 'Shade cells within a matrix' }),
+    visualization: vislibVisController,
     visConfig: {
       defaults: {
         type: 'heatmap',
@@ -61,6 +62,9 @@ export default function HeatmapVisType(Private) {
           }
         }]
       },
+    },
+    events: {
+      brush: { disabled: false },
     },
     editorConfig: {
       collections: getHeatmapCollections(),

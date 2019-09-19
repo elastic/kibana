@@ -17,6 +17,7 @@ import { TestProviders } from '../../mock';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { cloneDeep } from 'lodash/fp';
 
+jest.mock('ui/new_platform');
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 jest.mock('ui/documentation_links', () => ({
