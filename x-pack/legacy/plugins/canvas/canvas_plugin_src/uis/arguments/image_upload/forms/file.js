@@ -16,6 +16,7 @@ export const FileForm = ({ loading, onChange }) =>
       initialPromptText="Select or drag and drop an image"
       onChange={onChange}
       compressed
+      display="default"
       className="canvasImageUpload"
       accept="image/*"
     />

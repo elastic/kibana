@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiSpacer, EuiButtonGroup } from '@elastic/eui';
+import { EuiSpacer, EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import { get } from 'lodash';
 import { AssetPicker } from '../../../../public/components/asset_picker';
 import { elasticOutline } from '../../../lib/elastic_outline';
@@ -114,13 +114,15 @@ class ImageUpload extends React.Component {
     }
 
     const selectUrlType = (
-      <EuiButtonGroup
-        buttonSize="s"
-        options={urlTypeOptions}
-        idSelected={urlType}
-        onChange={this.changeUrlType}
-        isFullWidth
-      />
+      <EuiFormRow display="rowCompressed">
+        <EuiButtonGroup
+          buttonSize="compressed"
+          options={urlTypeOptions}
+          idSelected={urlType}
+          onChange={this.changeUrlType}
+          isFullWidth
+        />
+      </EuiFormRow>
     );
 
     const forms = {
