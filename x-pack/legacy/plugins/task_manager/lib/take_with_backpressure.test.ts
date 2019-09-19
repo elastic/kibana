@@ -77,6 +77,7 @@ describe('takeWithBackpressure', () => {
 
   describe('maintaining backpressure', () => {
     test('it should take only as many subjects as it has capacity for', done => {
+      expect.assertions(3);
       of(1, 2, 3)
         .pipe(takeWithBackpressure(acceptAnyValue, 2))
         .subscribe(
