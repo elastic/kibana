@@ -63,7 +63,9 @@ export function createShim(
       },
       settings: {
         config: {
-          isSlmEnabled: server.config().get('xpack.snapshot_restore.slm_ui.enabled'),
+          isSlmEnabled: server.config()
+            ? server.config().get('xpack.snapshot_restore.slm_ui.enabled')
+            : true,
         },
       },
       xpack_main: server.plugins.xpack_main,
