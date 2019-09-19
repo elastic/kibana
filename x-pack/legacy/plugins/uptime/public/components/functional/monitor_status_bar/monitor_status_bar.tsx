@@ -10,11 +10,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import moment from 'moment';
 import React from 'react';
-import { Ping } from '../../../common/graphql/types';
-import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
-import { monitorStatusBarQuery } from '../../queries';
-import { EmptyStatusBar } from './empty_status_bar';
-import { convertMicrosecondsToMilliseconds } from '../../lib/helper';
+import { Ping } from '../../../../common/graphql/types';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
+import { monitorStatusBarQuery } from '../../../queries';
+import { EmptyStatusBar } from '../empty_status_bar';
+import { convertMicrosecondsToMilliseconds } from '../../../lib/helper';
+import { MonitorSSLCertificate } from './monitor_ssl_certificate';
 
 interface MonitorStatusBarQueryResult {
   monitorStatus?: Ping[];
@@ -28,13 +29,14 @@ type Props = MonitorStatusBarProps & UptimeGraphQLQueryProps<MonitorStatusBarQue
 
 export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
   if (data && data.monitorStatus && data.monitorStatus.length) {
-    const { monitor, timestamp } = data.monitorStatus[0];
-    const duration = get(monitor, 'duration.us', undefined);
+    const { monitor, timestamp, tls } = data.monitorStatus[0];
+    const duration: number | undefined = get(monitor, 'duration.us', undefined);
     const status = get<'up' | 'down'>(monitor, 'status', 'down');
     const full = get<string>(data.monitorStatus[0], 'url.full');
+
     return (
       <EuiPanel>
-        <EuiFlexGroup gutterSize="l">
+        <EuiFlexGroup gutterSize="l" wrap>
           <EuiFlexItem grow={false}>
             <EuiHealth
               aria-label={i18n.translate(
@@ -93,11 +95,12 @@ export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
                 defaultMessage: 'Time since last check',
               }
             )}
-            grow={false}
+            grow={true}
           >
             {moment(new Date(timestamp).valueOf()).fromNow()}
           </EuiFlexItem>
         </EuiFlexGroup>
+        <MonitorSSLCertificate tls={tls} />
       </EuiPanel>
     );
   }
