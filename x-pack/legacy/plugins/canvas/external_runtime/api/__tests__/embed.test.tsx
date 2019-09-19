@@ -13,7 +13,7 @@ jest.mock('../../supported_renderers');
 
 describe('Embed API', () => {
   beforeEach(function() {
-    // @ts-ignore
+    // @ts-ignore Applying a global in Jest is alright.
     global.fetch = jest.fn().mockImplementation(() => {
       const p = new Promise((resolve, _reject) => {
         resolve({

@@ -16,19 +16,14 @@ export type onSetIntervalProp = (interval: string) => void;
 export interface Props {
   isEnabled: boolean;
   interval: string;
-  onSetAutoplay?: onSetAutoplayProp;
-  onSetInterval?: onSetIntervalProp;
+  onSetAutoplay: onSetAutoplayProp;
+  onSetInterval: onSetIntervalProp;
 }
 
 /**
  * The panel used to configure Autolay in Embedded Workpads.
  */
-export const AutoplaySettings = ({
-  isEnabled,
-  interval,
-  onSetAutoplay = () => {},
-  onSetInterval = () => {},
-}: Props) => (
+export const AutoplaySettings = ({ isEnabled, interval, onSetAutoplay, onSetInterval }: Props) => (
   <div style={{ padding: 16 }}>
     <EuiSwitch
       name="cycle"
