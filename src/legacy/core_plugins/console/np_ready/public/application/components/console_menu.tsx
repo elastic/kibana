@@ -35,6 +35,7 @@ interface Props {
   getCurl: (cb: (text: string) => void) => void;
   getDocumentation: () => Promise<string | null>;
   autoIndent: (ev?: React.MouseEvent) => void;
+  addNotification?: (opts: { title: string }) => void;
 }
 
 interface State {
@@ -65,6 +66,14 @@ export class ConsoleMenu extends Component<Props, State> {
 
   copyAsCurl() {
     this.copyText(this.state.curlCode);
+    const { addNotification } = this.props;
+    if (addNotification) {
+      addNotification({
+        title: i18n.translate('console.consoleMenu.copyAsCurlMessage', {
+          defaultMessage: 'Copied as cURL!',
+        }),
+      });
+    }
   }
 
   copyText(text: string) {
