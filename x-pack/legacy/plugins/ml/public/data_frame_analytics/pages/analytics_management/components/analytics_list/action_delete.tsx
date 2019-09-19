@@ -30,7 +30,7 @@ interface DeleteActionProps {
 export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
   const disabled = item.stats.state === DATA_FRAME_TASK_STATE.STARTED;
 
-  const canDeleteDataFrame: boolean = checkPermission('canDeleteDataFrame');
+  const canDeleteDataFrameAnalytics: boolean = checkPermission('canDeleteDataFrameAnalytics');
 
   const [isModalVisible, setModalVisible] = useState(false);
 
@@ -49,7 +49,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
     <EuiButtonEmpty
       size="xs"
       color="text"
-      disabled={disabled || !canDeleteDataFrame}
+      disabled={disabled || !canDeleteDataFrameAnalytics}
       iconType="trash"
       onClick={openModal}
       aria-label={buttonDeleteText}
@@ -58,7 +58,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
     </EuiButtonEmpty>
   );
 
-  if (disabled || !canDeleteDataFrame) {
+  if (disabled || !canDeleteDataFrameAnalytics) {
     deleteButton = (
       <EuiToolTip
         position="top"
