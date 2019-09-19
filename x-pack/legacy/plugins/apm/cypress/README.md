@@ -18,7 +18,13 @@ yarn cypress run
 
 Update kibana.yml with the [cloud credentials](https://p.elstc.co/paste/nRxc9Fuq#0GKJvmrJajnl-PjgBZSnpItKaixWgPb2xn6DCyGD6nw). The cloud instance contains the static data set
 
-### Content Security Policy (CSP) Settings
+### Kibana
+
+#### `--no-base-path`
+
+Kibana must be started with `yarn start --no-base-path`
+
+#### Content Security Policy (CSP) Settings
 
 Your local or cloud Kibana server must have the `csp.strict: false` setting
 configured in `kibana.dev.yml`, or `kibana.yml`, as shown in the example below:
@@ -39,10 +45,10 @@ unsupported user agents, like the one reported by Cypress when running tests.
 2. Post to APM Server
 
 ```
-node replay.js --server-url http://localhost:8200 --secret-token abcd --events ./events.json
+node ingest-data/replay.js --server-url http://localhost:8200 --secret-token abcd --events ./events.json
 ```
 
-### How to generate static data
+### Generate static data
 
 Capture data from all agents with [apm-integration-testing](https://github.com/elastic/apm-integration-testing):
 

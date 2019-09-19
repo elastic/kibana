@@ -48,21 +48,7 @@ node scripts/jest.js plugins/apm --updateSnapshot
 
 ### Cypress E2E tests
 
-_Note: Run the following commands from `kibana/x-pack/legacy/plugins/apm/cypress`._
-
-#### Interactive mode
-
-```
-yarn cypress open
-```
-
-#### Headless mode
-
-```
-yarn cypress run
-```
-
----
+See the Cypress-specific [readme.md](cypress/README.md)
 
 ### Linting
 
