@@ -43,6 +43,7 @@ export class MemoryTokenAdapter implements TokenAdapterType {
       expire_at,
       policy_id: policy.id,
       policy_shared_id: policy.sharedId,
+      enrollment_rules: [],
     };
 
     return this.tokens[id];

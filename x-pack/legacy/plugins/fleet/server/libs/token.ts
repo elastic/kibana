@@ -6,7 +6,15 @@
 
 import { sign as signToken, verify as verifyToken } from 'jsonwebtoken';
 import { createHmac } from 'crypto';
-import { TokenVerificationResponse, TokenType, Token } from './adapters/tokens/adapter_types';
+import * as _ from 'lodash';
+import Boom from 'boom';
+import uuid from 'uuid/v4';
+import {
+  TokenVerificationResponse,
+  TokenType,
+  Token,
+  EnrollmentRuleData,
+} from './adapters/tokens/adapter_types';
 import { TokenAdapter } from './adapters/tokens/adapter_types';
 import { FrameworkLib } from './framework';
 import { FrameworkUser } from './adapters/framework/adapter_types';
@@ -123,12 +131,105 @@ export class TokenLib {
     return token;
   }
 
+  public async addEnrollmentRuleForPolicy(
+    user: FrameworkUser,
+    policyId: string,
+    ruleData: EnrollmentRuleData
+  ) {
+    const token = await this.adapter.getByPolicyId(user, policyId);
+    if (!token) {
+      throw Boom.notFound(`No token found for policy: ${policyId}`);
+    }
+
+    const rule = {
+      ...ruleData,
+      id: uuid(),
+      created_at: new Date().toISOString(),
+    };
+
+    await this.adapter.update(user, token.id, {
+      enrollment_rules: token.enrollment_rules.concat([rule]),
+    });
+
+    return rule;
+  }
+
+  public async updateEnrollmentRuleForPolicy(
+    user: FrameworkUser,
+    policyId: string,
+    ruleId: string,
+    ruleData: EnrollmentRuleData
+  ) {
+    const token = await this._getTokenByPolicyIdOrThrow(user, policyId);
+
+    const ruleToUpdate = token.enrollment_rules.find(rule => rule.id === ruleId);
+    if (!ruleToUpdate) {
+      throw Boom.notFound(`Rule not found: ${ruleId}`);
+    }
+    const ruleIndex = token.enrollment_rules.indexOf(ruleToUpdate);
+
+    const rule = {
+      ...ruleToUpdate,
+      ...ruleData,
+      updated_at: new Date().toISOString(),
+    };
+
+    await this.adapter.update(user, token.id, {
+      enrollment_rules: [
+        ...token.enrollment_rules.slice(0, ruleIndex),
+        rule,
+        ...token.enrollment_rules.slice(ruleIndex + 1),
+      ],
+    });
+
+    return rule;
+  }
+
+  public async deleteEnrollmentRuleForPolicy(
+    user: FrameworkUser,
+    policyId: string,
+    ruleId: string
+  ) {
+    const token = await this._getTokenByPolicyIdOrThrow(user, policyId);
+    const ruleIndex = token.enrollment_rules.findIndex(rule => rule.id === ruleId);
+    if (ruleIndex < 0) {
+      throw Boom.notFound(`Rule not found: ${ruleId}`);
+    }
+
+    await this.adapter.update(user, token.id, {
+      enrollment_rules: [
+        ...token.enrollment_rules.slice(0, ruleIndex),
+        ...token.enrollment_rules.slice(ruleIndex + 1),
+      ],
+    });
+  }
+
+  public async deleteAllEnrollmentRulesForPolicy(user: FrameworkUser, policyId: string) {
+    const token = await this._getTokenByPolicyIdOrThrow(user, policyId);
+    await this.adapter.update(user, token.id, {
+      enrollment_rules: [],
+    });
+  }
+
   public async hashToken(token: string): Promise<string> {
     const encryptionKey = this.frameworkLib.getSetting('encryptionKey');
 
     const hmac = createHmac('sha512', encryptionKey);
 
     return hmac.update(token).digest('hex');
+  }
+
+  /**
+   * Get the token for a given policy.
+   * @param user
+   * @param policyId
+   */
+  private async _getTokenByPolicyIdOrThrow(user: FrameworkUser, policyId: string) {
+    const token = await this.adapter.getByPolicyId(user, policyId);
+    if (!token) {
+      throw Boom.notFound(`No token found for policy: ${policyId}`);
+    }
+    return token;
   }
 
   private _verifyJWTToken(token: string): JWTToken {
