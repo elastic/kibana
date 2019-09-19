@@ -6,5 +6,4 @@
 
 export declare function serializeJsonWatch(name: string, json: any): any;
 export declare function serializeThresholdWatch(config: any): any;
-export declare function serializeMonitoringWatch(config: any): any;
 export declare function buildInput(config: any): any;

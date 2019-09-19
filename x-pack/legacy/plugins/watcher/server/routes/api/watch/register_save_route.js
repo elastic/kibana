@@ -5,7 +5,7 @@
  */
 
 import { WATCH_TYPES } from '../../../../common/constants';
-import { serializeJsonWatch, serializeThresholdWatch, serializeMonitoringWatch } from '../../../../common/lib/serialization';
+import { serializeJsonWatch, serializeThresholdWatch } from '../../../../common/lib/serialization';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError, wrapCustomError } from '../../../lib/error_wrappers';
@@ -72,10 +72,6 @@ export function registerSaveRoute(server) {
 
         case WATCH_TYPES.THRESHOLD:
           serializedWatch = serializeThresholdWatch(watchConfig);
-          break;
-
-        case WATCH_TYPES.MONITORING:
-          serializedWatch = serializeMonitoringWatch();
           break;
       }
 
