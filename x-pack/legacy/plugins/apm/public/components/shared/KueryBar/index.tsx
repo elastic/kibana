@@ -10,10 +10,7 @@ import { EuiCallOut } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import {
-  AutocompleteSuggestion,
-  getAutocompleteProvider
-} from 'ui/autocomplete_providers';
+import { npSetup } from 'ui/new_platform';
 import { StaticIndexPattern, getFromSavedObject } from 'ui/index_patterns';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { fromQuery, toQuery } from '../Links/url_helpers';
@@ -29,10 +26,14 @@ import { useMatchedRoutes } from '../../../hooks/useMatchedRoutes';
 import { RouteName } from '../../app/Main/route_config/route_names';
 import { useKibanaCore } from '../../../../../observability/public';
 import { getAPMIndexPattern } from '../../../services/rest/savedObjects';
+import { AutocompleteSuggestion } from '../../../../../../../../src/plugins/data/public';
 
 const Container = styled.div`
   margin-bottom: 10px;
 `;
+
+const getAutocompleteProvider = (language: string) =>
+  npSetup.plugins.data.autocomplete.getProvider(language);
 
 interface State {
   indexPattern: StaticIndexPattern | null;

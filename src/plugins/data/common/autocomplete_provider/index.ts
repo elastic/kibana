@@ -16,13 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { AutocompleteProvider } from './types';
 
-const autocompleteProviders = new Map();
+export class AutocompleteProviderRegister {
+  private readonly registeredProviders: Map<string, AutocompleteProvider> = new Map();
 
-export function addAutocompleteProvider(language, provider) {
-  autocompleteProviders.set(language, provider);
-}
+  public addProvider(language: string, provider: AutocompleteProvider): void {
+    if (language && provider) {
+      this.registeredProviders.set(language, provider);
+    }
+  }
 
-export function getAutocompleteProvider(language) {
-  return autocompleteProviders.get(language);
+  public getProvider(language: string): AutocompleteProvider | undefined {
+    return this.registeredProviders.get(language);
+  }
+
+  public clearProviders(): void {
+    this.registeredProviders.clear();
+  }
 }

@@ -33,7 +33,6 @@ import 'plugins/ml/components/confirm_modal';
 import 'plugins/ml/components/navigation_menu';
 import 'plugins/ml/components/loading_indicator';
 import 'plugins/ml/settings';
-import 'uiExports/autocompleteProviders';
 
 import uiRoutes from 'ui/routes';
 

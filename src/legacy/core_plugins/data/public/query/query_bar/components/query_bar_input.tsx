@@ -23,19 +23,19 @@ import React from 'react';
 import { EuiFieldText, EuiOutsideClickDetector, PopoverAnchorPosition } from '@elastic/eui';
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import {
-  AutocompleteSuggestion,
-  AutocompleteSuggestionType,
-  getAutocompleteProvider,
-} from 'ui/autocomplete_providers';
 import { debounce, compact, isEqual, omit } from 'lodash';
 import { PersistedLog } from 'ui/persisted_log';
 import { Storage } from 'ui/storage';
+import { npSetup } from 'ui/new_platform';
 import {
   UiSettingsClientContract,
   SavedObjectsClientContract,
   HttpServiceBase,
 } from 'src/core/public';
+import {
+  AutocompleteSuggestion,
+  AutocompleteSuggestionType,
+} from '../../../../../../../plugins/data/public';
 import { IndexPattern, StaticIndexPattern } from '../../../index_patterns';
 import { Query } from '../index';
 import { fromUser, matchPairs, toUser } from '../lib';
@@ -43,6 +43,9 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 import { getQueryLog } from '../lib/get_query_log';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
+
+const getAutocompleteProvider = (language: string) =>
+  npSetup.plugins.data.autocomplete.getProvider(language);
 
 interface Props {
   uiSettings: UiSettingsClientContract;

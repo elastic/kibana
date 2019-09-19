@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-
-import { getAutocompleteProvider } from 'ui/autocomplete_providers';
+import { npSetup } from 'ui/new_platform';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+
+const getAutocompleteProvider = language => npSetup.plugins.data.autocomplete.getProvider(language);
 
 export async function getSuggestions(
   query,
