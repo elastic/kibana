@@ -17,13 +17,12 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
+import { IAction } from 'src/plugins/ui_actions/public';
 import { ContainerInput, IContainer } from '../../../containers';
 import { ViewMode, GetEmbeddableFactory, GetEmbeddableFactories } from '../../../types';
-import { Action } from '../../../actions';
 import { NotificationsStart } from '../../../../../../../../../../core/public';
 import { KibanaReactOverlays } from '../../../../../../../../../../plugins/kibana_react/public';
 import { openChangeViewFlyout } from '../../../panel/panel_header/panel_actions/add_panel/open_change_view_flyout';
-import { IEmbeddable } from '../../../embeddables';
 
 export const CHANGE_VIEW_ACTION = 'changeView';
 
@@ -32,7 +31,7 @@ interface ExpandedPanelInput extends ContainerInput {
 }
 
 interface ActionContext {
-  embeddable: IEmbeddable;
+  embeddable: IContainer;
 }
 
 function hasExpandedPanelInput(
@@ -41,18 +40,18 @@ function hasExpandedPanelInput(
   return (container as IContainer<{}, ExpandedPanelInput>).getInput().expandedPanelId !== undefined;
 }
 
-export class ChangeViewAction extends Action {
+export class ChangeViewAction implements IAction<ActionContext> {
   public readonly type = CHANGE_VIEW_ACTION;
+  public readonly id = CHANGE_VIEW_ACTION;
+  public order = 11;
+
   constructor(
     private readonly getFactory: GetEmbeddableFactory,
     private readonly getAllFactories: GetEmbeddableFactories,
     private readonly overlays: KibanaReactOverlays,
     private readonly notifications: NotificationsStart,
     private readonly SavedObjectFinder: React.ComponentType<any>
-  ) {
-    super(CHANGE_VIEW_ACTION);
-    this.order = 11;
-  }
+  ) {}
 
   public getDisplayName() {
     return i18n.translate('embeddableApi.panel.removePanel.replaceView', {
