@@ -27,7 +27,7 @@ describe('JobsTable', () => {
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 
-  test('should render the hyper link which points specifically to the job id', () => {
+  test('should render the hyperlink which points specifically to the job id', () => {
     const wrapper = mount(
       <JobsTable
         isLoading={true}
