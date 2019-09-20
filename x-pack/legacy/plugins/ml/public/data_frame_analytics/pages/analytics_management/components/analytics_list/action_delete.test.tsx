@@ -5,10 +5,11 @@
  */
 
 import React from 'react';
-import { cleanup, queryHelpers, render } from 'react-testing-library';
+import { cleanup, render } from 'react-testing-library';
 import 'jest-dom/extend-expect';
 
 import * as CheckPrivilige from '../../../../../privilege/check_privilege';
+import { queryByTestSubj } from '../../../../../util/test_utils';
 
 import { DeleteAction } from './action_delete';
 
@@ -18,9 +19,6 @@ jest.mock('../../../../../privilege/check_privilege', () => ({
   checkPermission: jest.fn(() => false),
   createPermissionFailureMessage: jest.fn(),
 }));
-
-const queryByTestSubj = (container: HTMLElement, id: string) =>
-  queryHelpers.queryByAttribute('data-test-subj', container, id);
 
 describe('DeleteAction', () => {
   afterEach(cleanup);
