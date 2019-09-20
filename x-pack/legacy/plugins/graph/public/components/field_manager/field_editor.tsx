@@ -99,6 +99,7 @@ export function FieldEditor({
         lastValidHopSize: isDisabled ? 0 : initialField.hopSize,
       },
     });
+    setOpen(false);
   }
 
   const badgeDescription = isDisabled
@@ -151,7 +152,6 @@ export function FieldEditor({
     >
       <EuiContextMenu
         initialPanelId="root"
-        key={`${initialField.name}-${isDisabled}`}
         panels={[
           {
             id: 'root',
@@ -181,6 +181,7 @@ export function FieldEditor({
                 icon: <EuiIcon type="trash" size="m" />,
                 onClick: () => {
                   deselectField(initialField.name);
+                  setOpen(false);
                 },
               },
             ],
