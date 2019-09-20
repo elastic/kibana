@@ -19,7 +19,6 @@
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 import { YExtents, YExtentsProps } from '../y_extents';
 import { ScaleTypes } from '../../../../utils/collections';
 import { NumberInputOption } from '../../../common';
@@ -91,26 +90,22 @@ describe('YExtents component', () => {
   it('should call setScale with input number', () => {
     const inputNumber = 5;
     const comp = mount(<YExtents {...defaultProps} />);
-    act(() => {
-      const inputProps = comp
-        .find(NumberInputOption)
-        .first()
-        .props();
-      inputProps.setValue(PARAM_NAME, inputNumber);
-    });
+    const inputProps = comp
+      .find(NumberInputOption)
+      .first()
+      .props();
+    inputProps.setValue(PARAM_NAME, inputNumber);
 
     expect(setScale).toBeCalledWith(PARAM_NAME, inputNumber);
   });
 
   it('should call setScale with null when input is empty', () => {
     const comp = mount(<YExtents {...defaultProps} />);
-    act(() => {
-      const inputProps = comp
-        .find(NumberInputOption)
-        .first()
-        .props();
-      inputProps.setValue(PARAM_NAME, '');
-    });
+    const inputProps = comp
+      .find(NumberInputOption)
+      .first()
+      .props();
+    inputProps.setValue(PARAM_NAME, '');
 
     expect(setScale).toBeCalledWith(PARAM_NAME, null);
   });

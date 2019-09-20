@@ -112,13 +112,6 @@ describe('ValueAxesPanel component', () => {
     } as any;
   });
 
-  afterEach(() => {
-    setParamByIndex.mockClear();
-    onValueAxisPositionChanged.mockClear();
-    addValueAxis.mockClear();
-    removeValueAxis.mockClear();
-  });
-
   it('should init with the default set of props', () => {
     const comp = shallow(<ValueAxesPanel {...defaultProps} />);
 

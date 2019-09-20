@@ -19,7 +19,6 @@
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 import { ChartOptions, ChartOptionsParams } from '../chart_options';
 import { SeriesParam, ValueAxis } from '../../../../types';
 import { Positions, ScaleTypes } from '../../../../utils/collections';
@@ -113,9 +112,7 @@ describe('ChartOptions component', () => {
   it('should call changeValueAxis when valueAxis is changed', () => {
     const comp = mount(<ChartOptions {...defaultProps} />);
     const paramName = 'valueAxis';
-    act(() => {
-      comp.find({ paramName }).prop('setValue')(paramName, 'new');
-    });
+    comp.find({ paramName }).prop('setValue')(paramName, 'new');
 
     expect(changeValueAxis).toBeCalledWith(0, paramName, 'new');
   });
@@ -123,9 +120,7 @@ describe('ChartOptions component', () => {
   it('should call setParamByIndex when mode is changed', () => {
     const comp = mount(<ChartOptions {...defaultProps} />);
     const paramName = 'mode';
-    act(() => {
-      comp.find({ paramName }).prop('setValue')(paramName, ChartModes.NORMAL);
-    });
+    comp.find({ paramName }).prop('setValue')(paramName, ChartModes.NORMAL);
 
     expect(setParamByIndex).toBeCalledWith('seriesParams', 0, paramName, ChartModes.NORMAL);
   });

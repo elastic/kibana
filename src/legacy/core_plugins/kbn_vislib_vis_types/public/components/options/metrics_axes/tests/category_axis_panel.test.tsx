@@ -19,7 +19,6 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 import { CategoryAxisPanel, CategoryAxisPanelProps } from '../category_axis_panel';
 import { Axis } from '../../../../types';
 import { ScaleTypes, Positions, positions, AxisTypes } from '../../../../utils/collections';
@@ -65,38 +64,27 @@ describe('CategoryAxisPanel component', () => {
     } as any;
   });
 
-  afterEach(() => {
-    setCategoryAxis.mockClear();
-    onPositionChanged.mockClear();
-  });
-
   it('should init with the default set of props', () => {
     const comp = shallow(<CategoryAxisPanel {...defaultProps} />);
 
     expect(comp).toMatchSnapshot();
   });
 
-  it('should show LabelOptions when axis.show is true', () => {
+  it('should respond axis.show', () => {
     const comp = shallow(<CategoryAxisPanel {...defaultProps} />);
 
     expect(comp.find(LabelOptions).exists()).toBeTruthy();
-  });
 
-  it('should hide LabelOptions when axis.show is false', () => {
-    axis.show = false;
-    const comp = shallow(<CategoryAxisPanel {...defaultProps} />);
-
+    comp.setProps({ axis: { ...axis, show: false } });
     expect(comp.find(LabelOptions).exists()).toBeFalsy();
   });
 
   it('should call onPositionChanged when position is changed', () => {
     const value = Positions.RIGHT;
     const comp = shallow(<CategoryAxisPanel {...defaultProps} />);
-    act(() => {
-      comp.find({ paramName: 'position' }).prop('setValue')('position', value);
-    });
+    comp.find({ paramName: 'position' }).prop('setValue')('position', value);
 
-    expect(setCategoryAxis).toBeCalledWith({ ...axis, position: value });
+    expect(setCategoryAxis).toHaveBeenLastCalledWith({ ...axis, position: value });
     expect(onPositionChanged).toBeCalledWith(value);
   });
 });

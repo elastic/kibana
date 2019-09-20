@@ -19,7 +19,6 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 import { CustomExtentsOptions, CustomExtentsOptionsProps } from '../custom_extents_options';
 import { ValueAxis } from '../../../../types';
 import { YExtents } from '../y_extents';
@@ -57,12 +56,6 @@ describe('CustomExtentsOptions component', () => {
     };
   });
 
-  afterEach(() => {
-    setValueAxis.mockClear();
-    setValueAxisScale.mockClear();
-    setMultipleValidity.mockClear();
-  });
-
   it('should init with the default set of props', () => {
     const comp = shallow(<CustomExtentsOptions {...defaultProps} />);
 
@@ -76,27 +69,21 @@ describe('CustomExtentsOptions component', () => {
 
     it('should set validity as true when value is positive', () => {
       const comp = shallow(<CustomExtentsOptions {...defaultProps} />);
-      act(() => {
-        comp.find({ paramName: boundsMarginParamName }).prop('setValue')(boundsMarginParamName, 5);
-      });
+      comp.find({ paramName: boundsMarginParamName }).prop('setValue')(boundsMarginParamName, 5);
 
       expect(setMultipleValidity).toBeCalledWith(boundsMarginParamName, true);
     });
 
     it('should set validity as true when value is empty', () => {
       const comp = shallow(<CustomExtentsOptions {...defaultProps} />);
-      act(() => {
-        comp.find({ paramName: boundsMarginParamName }).prop('setValue')(boundsMarginParamName, '');
-      });
+      comp.find({ paramName: boundsMarginParamName }).prop('setValue')(boundsMarginParamName, '');
 
       expect(setMultipleValidity).toBeCalledWith(boundsMarginParamName, true);
     });
 
     it('should set validity as false when value is negative', () => {
       const comp = shallow(<CustomExtentsOptions {...defaultProps} />);
-      act(() => {
-        comp.find({ paramName: boundsMarginParamName }).prop('setValue')(boundsMarginParamName, -1);
-      });
+      comp.find({ paramName: boundsMarginParamName }).prop('setValue')(boundsMarginParamName, -1);
 
       expect(setMultipleValidity).toBeCalledWith(boundsMarginParamName, false);
     });
@@ -122,12 +109,10 @@ describe('CustomExtentsOptions component', () => {
 
     it('should call setValueAxis when value is true', () => {
       const comp = shallow(<CustomExtentsOptions {...defaultProps} />);
-      act(() => {
-        comp.find({ paramName: defaultYExtentsParamName }).prop('setValue')(
-          defaultYExtentsParamName,
-          true
-        );
-      });
+      comp.find({ paramName: defaultYExtentsParamName }).prop('setValue')(
+        defaultYExtentsParamName,
+        true
+      );
 
       expect(setMultipleValidity).not.toBeCalled();
       const newScale = { ...defaultProps.axis.scale, defaultYExtents: true };
@@ -136,12 +121,10 @@ describe('CustomExtentsOptions component', () => {
 
     it('should reset boundsMargin when value is false', () => {
       const comp = shallow(<CustomExtentsOptions {...defaultProps} />);
-      act(() => {
-        comp.find({ paramName: defaultYExtentsParamName }).prop('setValue')(
-          defaultYExtentsParamName,
-          false
-        );
-      });
+      comp.find({ paramName: defaultYExtentsParamName }).prop('setValue')(
+        defaultYExtentsParamName,
+        false
+      );
 
       expect(setMultipleValidity).toBeCalledWith(boundsMarginParamName, true);
       const newScale = {
@@ -174,9 +157,7 @@ describe('CustomExtentsOptions component', () => {
 
     it('should call setValueAxis when value is true', () => {
       const comp = shallow(<CustomExtentsOptions {...defaultProps} />);
-      act(() => {
-        comp.find({ paramName: setYExtentsParamName }).prop('setValue')(setYExtentsParamName, true);
-      });
+      comp.find({ paramName: setYExtentsParamName }).prop('setValue')(setYExtentsParamName, true);
 
       const newScale = { ...defaultProps.axis.scale, setYExtents: true };
       expect(setValueAxis).toBeCalledWith(scaleParamName, newScale);
@@ -184,12 +165,7 @@ describe('CustomExtentsOptions component', () => {
 
     it('should reset min and max when value is false', () => {
       const comp = shallow(<CustomExtentsOptions {...defaultProps} />);
-      act(() => {
-        comp.find({ paramName: setYExtentsParamName }).prop('setValue')(
-          setYExtentsParamName,
-          false
-        );
-      });
+      comp.find({ paramName: setYExtentsParamName }).prop('setValue')(setYExtentsParamName, false);
 
       const newScale = {
         ...defaultProps.axis.scale,

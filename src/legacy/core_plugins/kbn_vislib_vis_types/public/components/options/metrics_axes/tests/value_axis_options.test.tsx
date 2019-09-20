@@ -19,7 +19,6 @@
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 import { ValueAxisOptions, ValueAxisOptionsParams } from '../value_axis_options';
 import { Axis } from '../../../../types';
 import { TextInputOption } from '../../../common';
@@ -79,11 +78,6 @@ describe('ValueAxisOptions component', () => {
     } as any;
   });
 
-  afterEach(() => {
-    setParamByIndex.mockClear();
-    onValueAxisPositionChanged.mockClear();
-  });
-
   it('should init with the default set of props', () => {
     const comp = shallow(<ValueAxisOptions {...defaultProps} />);
 
@@ -125,9 +119,7 @@ describe('ValueAxisOptions component', () => {
   it('should call onValueAxisPositionChanged when position is changed', () => {
     const value = Positions.RIGHT;
     const comp = shallow(<ValueAxisOptions {...defaultProps} />);
-    act(() => {
-      comp.find({ paramName: 'position' }).prop('setValue')('position', value);
-    });
+    comp.find({ paramName: 'position' }).prop('setValue')('position', value);
 
     expect(onValueAxisPositionChanged).toBeCalledWith(defaultProps.index, value);
   });
@@ -136,9 +128,7 @@ describe('ValueAxisOptions component', () => {
     defaultProps.axis.show = true;
     const textValue = 'New title';
     const comp = shallow(<ValueAxisOptions {...defaultProps} />);
-    act(() => {
-      comp.find(TextInputOption).prop('setValue')('text', textValue);
-    });
+    comp.find(TextInputOption).prop('setValue')('text', textValue);
 
     expect(setParamByIndex).toBeCalledWith('valueAxes', defaultProps.index, 'title', {
       text: textValue,
@@ -148,9 +138,7 @@ describe('ValueAxisOptions component', () => {
   it('should call setValueAxis when scale value is changed', () => {
     const scaleValue = ScaleTypes.SQUARE_ROOT;
     const comp = shallow(<ValueAxisOptions {...defaultProps} />);
-    act(() => {
-      comp.find({ paramName: 'type' }).prop('setValue')('type', scaleValue);
-    });
+    comp.find({ paramName: 'type' }).prop('setValue')('type', scaleValue);
 
     expect(setParamByIndex).toBeCalledWith('valueAxes', defaultProps.index, 'scale', {
       ...defaultProps.axis.scale,

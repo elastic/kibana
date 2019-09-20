@@ -20,7 +20,6 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { act } from 'react-dom/test-utils';
 import { LineOptions, LineOptionsParams } from '../line_options';
 import { SeriesParam } from '../../../../types';
 import { NumberInputOption } from '../../../common';
@@ -75,30 +74,24 @@ describe('LineOptions component', () => {
 
   it('should set lineWidth as undefined when empty value', () => {
     const comp = mountWithIntl(<LineOptions {...defaultProps} />);
-    act(() => {
-      comp.find(NumberInputOption).prop('setValue')(lineWidthParamName, '');
-    });
+    comp.find(NumberInputOption).prop('setValue')(lineWidthParamName, '');
 
     expect(setChart).toBeCalledWith(lineWidthParamName, undefined);
   });
 
   it('should set lineWidth value', () => {
     const comp = mountWithIntl(<LineOptions {...defaultProps} />);
-    act(() => {
-      comp.find(NumberInputOption).prop('setValue')(lineWidthParamName, 5);
-    });
+    comp.find(NumberInputOption).prop('setValue')(lineWidthParamName, 5);
 
     expect(setChart).toBeCalledWith(lineWidthParamName, 5);
   });
 
   it('should set drawLinesBetweenPoints', () => {
     const comp = shallow(<LineOptions {...defaultProps} />);
-    act(() => {
-      comp.find({ paramName: 'drawLinesBetweenPoints' }).prop('setValue')(
-        'drawLinesBetweenPoints',
-        false
-      );
-    });
+    comp.find({ paramName: 'drawLinesBetweenPoints' }).prop('setValue')(
+      'drawLinesBetweenPoints',
+      false
+    );
 
     expect(setChart).toBeCalledWith('drawLinesBetweenPoints', false);
   });

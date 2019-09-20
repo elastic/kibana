@@ -19,7 +19,6 @@
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 import { MetricsAxisOptions } from '../index';
 import { BasicVislibParams, SeriesParam, ValueAxis } from '../../../../types';
 import { ValidationVisOptionsProps } from '../../../common';
@@ -107,11 +106,6 @@ describe('MetricsAxisOptions component', () => {
       setValue,
       setVisType,
     } as any;
-  });
-
-  afterEach(() => {
-    setValue.mockClear();
-    setVisType.mockClear();
   });
 
   it('should init with the default set of props', () => {
@@ -305,9 +299,7 @@ describe('MetricsAxisOptions component', () => {
 
   it('should add value axis', () => {
     const comp = shallow(<MetricsAxisOptions {...defaultProps} />);
-    act(() => {
-      comp.find(ValueAxesPanel).prop('addValueAxis')();
-    });
+    comp.find(ValueAxesPanel).prop('addValueAxis')();
 
     expect(setValue).toHaveBeenCalledWith('valueAxes', [axis, axisRight]);
   });
@@ -319,9 +311,7 @@ describe('MetricsAxisOptions component', () => {
 
     it('should remove value axis', () => {
       const comp = shallow(<MetricsAxisOptions {...defaultProps} />);
-      act(() => {
-        comp.find(ValueAxesPanel).prop('removeValueAxis')(axis);
-      });
+      comp.find(ValueAxesPanel).prop('removeValueAxis')(axis);
 
       expect(setValue).toHaveBeenCalledWith('valueAxes', [axisRight]);
     });
@@ -329,9 +319,7 @@ describe('MetricsAxisOptions component', () => {
     it('should update seriesParams "valueAxis" prop', () => {
       const updatedSeriesParam = { ...seriesParam, valueAxis: 'ValueAxis-2' };
       const comp = shallow(<MetricsAxisOptions {...defaultProps} />);
-      act(() => {
-        comp.find(ValueAxesPanel).prop('removeValueAxis')(axis);
-      });
+      comp.find(ValueAxesPanel).prop('removeValueAxis')(axis);
 
       expect(setValue).toHaveBeenCalledWith('seriesParams', [updatedSeriesParam]);
     });
@@ -340,9 +328,7 @@ describe('MetricsAxisOptions component', () => {
       const updatedGrid = { valueAxis: undefined };
       defaultProps.stateParams.seriesParams[0].valueAxis = 'ValueAxis-2';
       const comp = shallow(<MetricsAxisOptions {...defaultProps} />);
-      act(() => {
-        comp.find(ValueAxesPanel).prop('removeValueAxis')(axis);
-      });
+      comp.find(ValueAxesPanel).prop('removeValueAxis')(axis);
 
       expect(setValue).toHaveBeenCalledWith('grid', updatedGrid);
     });
@@ -350,9 +336,7 @@ describe('MetricsAxisOptions component', () => {
 
   it('should update axis value when when category position chnaged', () => {
     const comp = shallow(<MetricsAxisOptions {...defaultProps} />);
-    act(() => {
-      comp.find(CategoryAxisPanel).prop('onPositionChanged')(Positions.LEFT);
-    });
+    comp.find(CategoryAxisPanel).prop('onPositionChanged')(Positions.LEFT);
 
     const updatedValues = [{ ...axis, name: 'BottomAxis-1', position: Positions.BOTTOM }];
     expect(setValue).toHaveBeenCalledWith('valueAxes', updatedValues);

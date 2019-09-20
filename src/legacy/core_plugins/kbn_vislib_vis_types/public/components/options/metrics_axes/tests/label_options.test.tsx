@@ -20,7 +20,6 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { act } from 'react-dom/test-utils';
 import { LabelOptions, LabelOptionsProps } from '../label_options';
 import { Axis } from '../../../../types';
 import { TruncateLabelsOption } from '../../../common';
@@ -79,9 +78,7 @@ describe('LabelOptions component', () => {
 
   it('should set rotate as number', () => {
     const comp = mountWithIntl(<LabelOptions {...defaultProps} />);
-    act(() => {
-      comp.find({ paramName: rotateParamName }).prop('setValue')(rotateParamName, '5');
-    });
+    comp.find({ paramName: rotateParamName }).prop('setValue')(rotateParamName, '5');
 
     const newAxes = [{ ...axis, labels: { ...axis.labels, rotate: 5 } }];
     expect(setValue).toBeCalledWith('categoryAxes', newAxes);
@@ -90,9 +87,7 @@ describe('LabelOptions component', () => {
   it('should set filter value', () => {
     const comp = mountWithIntl(<LabelOptions {...defaultProps} />);
     expect(defaultProps.stateParams.categoryAxes[0].labels.filter).toBeFalsy();
-    act(() => {
-      comp.find({ paramName: filterParamName }).prop('setValue')(filterParamName, true);
-    });
+    comp.find({ paramName: filterParamName }).prop('setValue')(filterParamName, true);
 
     const newAxes = [{ ...axis, labels: { ...axis.labels, filter: true } }];
     expect(setValue).toBeCalledWith('categoryAxes', newAxes);
@@ -101,9 +96,7 @@ describe('LabelOptions component', () => {
   it('should set value for valueAxes', () => {
     defaultProps.axesName = 'valueAxes';
     const comp = shallow(<LabelOptions {...defaultProps} />);
-    act(() => {
-      comp.find(TruncateLabelsOption).prop('setValue')('truncate', 10);
-    });
+    comp.find(TruncateLabelsOption).prop('setValue')('truncate', 10);
 
     const newAxes = [{ ...axis, labels: { ...axis.labels, truncate: 10 } }];
     expect(setValue).toBeCalledWith('valueAxes', newAxes);
