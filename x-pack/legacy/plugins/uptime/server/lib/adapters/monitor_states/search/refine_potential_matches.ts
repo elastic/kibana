@@ -85,7 +85,13 @@ export const mostRecentCheckGroups = async (queryContext: QueryContext, monitorI
     body: {
       size: 0,
       query: {
-        terms: { 'monitor.id': monitorIds },
+        bool: {
+          must: [
+            {terms: { 'monitor.id': monitorIds }},
+            // only match summary docs because we only want the latest *complete* check group.
+            {exists: {field: 'summary.down'}}
+          ]
+        }
       },
       aggs: {
         monitor: {
