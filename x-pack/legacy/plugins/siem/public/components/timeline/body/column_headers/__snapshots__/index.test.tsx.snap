@@ -484,104 +484,15 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
         </EventsThContent>
       </EventsTh>
     </EventsThGroupActions>
-    <DroppableWrapper
+    <Connect(Droppable)
+      direction="horizontal"
       droppableId="droppableId.timelineColumns.test"
+      ignoreContainerClipping={false}
       isDropDisabled={false}
       type="drag-type-field"
     >
-      <EventsThGroupData
-        data-test-subj="headers-group"
-      >
-        <Connect(Draggable)
-          data-test-subj="draggable"
-          disableInteractiveElementBlocking={false}
-          draggableId="draggableId.field.timeline-column-headers-test.@timestamp"
-          index={0}
-          isDragDisabled={true}
-          key="@timestamp"
-          type="drag-type-field"
-        >
-          <Component />
-        </Connect(Draggable)>
-        <Connect(Draggable)
-          data-test-subj="draggable"
-          disableInteractiveElementBlocking={false}
-          draggableId="draggableId.field.timeline-column-headers-test.message"
-          index={1}
-          isDragDisabled={true}
-          key="message"
-          type="drag-type-field"
-        >
-          <Component />
-        </Connect(Draggable)>
-        <Connect(Draggable)
-          data-test-subj="draggable"
-          disableInteractiveElementBlocking={false}
-          draggableId="draggableId.field.timeline-column-headers-test.event!!!DOT!!!category"
-          index={2}
-          isDragDisabled={true}
-          key="event.category"
-          type="drag-type-field"
-        >
-          <Component />
-        </Connect(Draggable)>
-        <Connect(Draggable)
-          data-test-subj="draggable"
-          disableInteractiveElementBlocking={false}
-          draggableId="draggableId.field.timeline-column-headers-test.event!!!DOT!!!action"
-          index={3}
-          isDragDisabled={true}
-          key="event.action"
-          type="drag-type-field"
-        >
-          <Component />
-        </Connect(Draggable)>
-        <Connect(Draggable)
-          data-test-subj="draggable"
-          disableInteractiveElementBlocking={false}
-          draggableId="draggableId.field.timeline-column-headers-test.host!!!DOT!!!name"
-          index={4}
-          isDragDisabled={true}
-          key="host.name"
-          type="drag-type-field"
-        >
-          <Component />
-        </Connect(Draggable)>
-        <Connect(Draggable)
-          data-test-subj="draggable"
-          disableInteractiveElementBlocking={false}
-          draggableId="draggableId.field.timeline-column-headers-test.source!!!DOT!!!ip"
-          index={5}
-          isDragDisabled={true}
-          key="source.ip"
-          type="drag-type-field"
-        >
-          <Component />
-        </Connect(Draggable)>
-        <Connect(Draggable)
-          data-test-subj="draggable"
-          disableInteractiveElementBlocking={false}
-          draggableId="draggableId.field.timeline-column-headers-test.destination!!!DOT!!!ip"
-          index={6}
-          isDragDisabled={true}
-          key="destination.ip"
-          type="drag-type-field"
-        >
-          <Component />
-        </Connect(Draggable)>
-        <Connect(Draggable)
-          data-test-subj="draggable"
-          disableInteractiveElementBlocking={false}
-          draggableId="draggableId.field.timeline-column-headers-test.user!!!DOT!!!name"
-          index={7}
-          isDragDisabled={true}
-          key="user.name"
-          type="drag-type-field"
-        >
-          <Component />
-        </Connect(Draggable)>
-      </EventsThGroupData>
-    </DroppableWrapper>
+      <Component />
+    </Connect(Droppable)>
   </EventsTrHeader>
 </EventsThead>
 `;
