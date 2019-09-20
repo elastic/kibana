@@ -4,16 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import DateMath from '@elastic/datemath';
 import { getSupportedUrlParams } from '../get_supported_url_params';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
 
 describe('getSupportedUrlParams', () => {
+  let dateMathSpy: any;
+  const MOCK_DATE_VALUE = 20;
+
+  beforeEach(() => {
+    dateMathSpy = jest.spyOn(DateMath, 'parse');
+    dateMathSpy.mockReturnValue(MOCK_DATE_VALUE);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('returns custom values', () => {
     const customValues = {
       autorefreshInterval: '23',
       autorefreshIsPaused: 'false',
-      dateRangeStart: 'foo',
-      dateRangeEnd: 'bar',
+      dateRangeStart: 'now-15m',
+      dateRangeEnd: 'now',
       monitorListPageIndex: '23',
       monitorListPageSize: '50',
       monitorListSortDirection: 'desc',
@@ -39,6 +52,8 @@ describe('getSupportedUrlParams', () => {
     const result = getSupportedUrlParams({});
     expect(result).toMatchSnapshot();
     expect(result).toEqual({
+      absoluteDateRangeStart: MOCK_DATE_VALUE,
+      absoluteDateRangeEnd: MOCK_DATE_VALUE,
       autorefreshInterval: AUTOREFRESH_INTERVAL,
       autorefreshIsPaused: AUTOREFRESH_IS_PAUSED,
       dateRangeStart: DATE_RANGE_START,
