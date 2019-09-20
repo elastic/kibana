@@ -303,7 +303,7 @@ export class WorkpadLoader extends React.PureComponent {
         disabled={!canUserWrite}
         aria-label={strings.getDeleteButtonAriaLabel(selectedWorkpads.length)}
       >
-        {strings.getExportButtonLabel(selectedWorkpads.length)}
+        {strings.getDeleteButtonLabel(selectedWorkpads.length)}
       </EuiButton>
     );
 
