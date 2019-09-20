@@ -57,11 +57,11 @@ export const NewCalendar = injectI18n(class NewCalendar extends Component {
       saving: false,
       selectedCalendar: undefined,
     };
-    timefilter.disableTimeRangeSelector();
-    timefilter.disableAutoRefreshSelector();
   }
 
   componentDidMount() {
+    timefilter.disableTimeRangeSelector();
+    timefilter.disableAutoRefreshSelector();
     this.formSetup();
   }
 
