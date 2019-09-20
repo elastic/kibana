@@ -7,12 +7,33 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { RepoSelector } from './repo_selector';
+import { CodeIntegration } from './code_integration';
 
 const Container = styled.div`
   padding: 1rem;
 `;
+const Frame = styled.div`
+  display: flex;
+  justify-content: flex-end;
+`;
 
-const items = Array.from(Array(20).keys()).map(i => <RepoSelector id={i} />);
+const frames = Array.from(Array(10).keys());
+const myProject = { url: 'https://github.com/rylnd/my_project', mapping: false };
 
-export const ApmDemo = () => <Container>{items}</Container>;
+const associateToService = (project: { url: string; mapping: boolean }, frame: number) => (
+  repo: string
+) => console.log(`repo ${repo} chosen for project ${project.url} from frame ${frame}`);
+
+export const ApmDemo = () => (
+  <Container>
+    {frames.map(frame => (
+      <Frame key={`frame-${frame}`}>
+        <CodeIntegration
+          project={myProject}
+          frame={frame}
+          onSelect={associateToService(myProject, frame)}
+        />
+      </Frame>
+    ))}
+  </Container>
+);
