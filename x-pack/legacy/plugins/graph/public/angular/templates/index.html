@@ -6,19 +6,21 @@
   <div class="gphGraph__menus" ng-show="menus.showInspect">
     <graph-inspect ng-show="menus.showInspect"></graph-inspect>
   </div>
+
+  <graph-search-bar
+    current-index-pattern="selectedIndex"
+    on-index-pattern-selected="uiSelectIndex"
+    on-query-submit="submit"
+    saved-objects="pluginDependencies.savedObjects"
+    ui-settings="pluginDependencies.uiSettings"
+    http="pluginDependencies.http"
+    overlays="pluginDependencies.overlays"
+    is-loading="loading"
+    initial-query="initialQuery"
+  ></graph-search-bar>
     
   <div class="gphGraph__bar">
     <div class="gphGraph__flexGroup">
-      <!-- Select index pattern. -->
-      <select class="form-control gphIndexSelect" name="mySelect" ng-change="uiSelectIndex()" ng-class="{'gphIndexSelect-unselected':selectedIndex === null}"
-        ng-options="option.attributes.title for option in indices" ng-model="grr.proposedIndex">
-        <option
-          value=""
-          i18n-id="xpack.graph.topNavMenu.selectIndexPatternOptionLabel"
-          i18n-default-message="Select index pattern…"
-        ></option>
-      </select>
-
       <!-- Added fields. -->
       <span
         class="gphNoUserSelect"
@@ -53,22 +55,6 @@
           <span aria-hidden="true" class="kuiIcon fa-plus"></span>
         </button>
       </span>
-
-      <!-- Search. -->
-      <form ng-submit="submit()" name="graphBasicSearch" class="gphGraph__flexGroupFiller" style="width: 100%">
-        <div class="kuiLocalSearch">
-          <input name="searchTerm" type="text" class="kuiLocalSearchInput" ng-model="grr.searchTerm" ng-disabled="liveResponseFields.length === 0"
-            ng-focus="kbnTopNav.close()" placeholder="foo AND bar NOT baz" autocomplete="off">
-          <button
-            class="kuiLocalSearchButton"
-            type="submit"
-            ng-disabled="liveResponseFields.length === 0"
-            aria-label="{{ ::'xpack.graph.topNavMenu.searchButtonAriaLabel' | i18n: { defaultMessage: 'Search' } }}"
-          >
-            <span aria-hidden="true" class="kuiIcon fa-search"></span>
-          </button>
-        </div>
-      </form>
     </div>
   </div>
 
@@ -560,7 +546,7 @@
           </span>
 
           <!-- Venn diagram of term/shared doc intersections -->
-          <div class="gphLinkSummary__venn" venn="mc"></div>
+          <venn-diagram left-value="mc.v1" right-value="mc.v2" overlap="mc.overlap"></venn-diagram>
 
           <small
             class="gphLinkSummary__term--1"

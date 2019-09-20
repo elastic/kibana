@@ -7,8 +7,6 @@
 import React, { Fragment } from 'react';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiTitle,
   EuiPanel,
   EuiFormRow,
@@ -27,8 +25,7 @@ const MIN_ZOOM = 0;
 const MAX_ZOOM = 24;
 
 export function LayerSettings(props) {
-
-  const onLabelChange = (event) => {
+  const onLabelChange = event => {
     const label = event.target.value;
     props.updateLabel(props.layerId, label);
   };
@@ -38,7 +35,7 @@ export function LayerSettings(props) {
     props.updateMaxZoom(props.layerId, Math.min(MAX_ZOOM, parseInt(max, 10)));
   };
 
-  const onAlphaChange = (alpha) => {
+  const onAlphaChange = alpha => {
     props.updateAlpha(props.layerId, alpha);
   };
 
@@ -48,37 +45,33 @@ export function LayerSettings(props) {
 
   const renderZoomSliders = () => {
     return (
-      <EuiFormRow
+      <ValidatedDualRange
         label={i18n.translate('xpack.maps.layerPanel.settingsPanel.visibleZoomLabel', {
-          defaultMessage: 'Zoom range for layer visibility'
+          defaultMessage: 'Zoom range for layer visibility',
         })}
-      >
-        <ValidatedDualRange
-          min={MIN_ZOOM}
-          max={MAX_ZOOM}
-          value={[props.minZoom, props.maxZoom]}
-          showInput
-          showRange
-          onChange={onZoomChange}
-          allowEmptyRange={false}
-        />
-      </EuiFormRow>
+        formRowDisplay="rowCompressed"
+        min={MIN_ZOOM}
+        max={MAX_ZOOM}
+        value={[props.minZoom, props.maxZoom]}
+        showInput
+        showRange
+        showLabels
+        onChange={onZoomChange}
+        allowEmptyRange={false}
+        compressed
+      />
     );
   };
 
   const renderLabel = () => {
     return (
       <EuiFormRow
-        label={
-          i18n.translate('xpack.maps.layerPanel.settingsPanel.layerNameLabel', {
-            defaultMessage: 'Layer name'
-          })
-        }
+        label={i18n.translate('xpack.maps.layerPanel.settingsPanel.layerNameLabel', {
+          defaultMessage: 'Layer name',
+        })}
+        display="rowCompressed"
       >
-        <EuiFieldText
-          value={props.label}
-          onChange={onLabelChange}
-        />
+        <EuiFieldText value={props.label} onChange={onLabelChange} compressed />
       </EuiFormRow>
     );
   };
@@ -86,24 +79,22 @@ export function LayerSettings(props) {
   const renderAlphaSlider = () => {
     return (
       <EuiFormRow
-        label={
-          i18n.translate('xpack.maps.layerPanel.settingsPanel.layerTransparencyLabel', {
-            defaultMessage: 'Layer transparency'
-          })
-        }
+        label={i18n.translate('xpack.maps.layerPanel.settingsPanel.layerTransparencyLabel', {
+          defaultMessage: 'Layer transparency',
+        })}
+        display="rowCompressed"
       >
-        <div className="mapAlphaRange">
-          <ValidatedRange
-            min={.00}
-            max={1.00}
-            step={.05}
-            value={props.alpha}
-            onChange={onAlphaChange}
-            showLabels
-            showInput
-            showRange
-          />
-        </div>
+        <ValidatedRange
+          min={0.0}
+          max={1.0}
+          step={0.05}
+          value={props.alpha}
+          onChange={onAlphaChange}
+          showLabels
+          showInput
+          showRange
+          compressed
+        />
       </EuiFormRow>
     );
   };
@@ -112,19 +103,15 @@ export function LayerSettings(props) {
     const layerSupportsGlobalQuery = props.layer.getIndexPatternIds().length;
 
     const applyGlobalQueryCheckbox = (
-      <EuiFormRow>
-        <EuiSwitch
-          label={
-            i18n.translate('xpack.maps.layerPanel.applyGlobalQueryCheckboxLabel', {
-              defaultMessage: `Apply global filter to layer`
-            })
-          }
-          checked={layerSupportsGlobalQuery ? props.applyGlobalQuery : false}
-          onChange={onApplyGlobalQueryChange}
-          disabled={!layerSupportsGlobalQuery}
-          data-test-subj="mapLayerPanelApplyGlobalQueryCheckbox"
-        />
-      </EuiFormRow>
+      <EuiSwitch
+        label={i18n.translate('xpack.maps.layerPanel.applyGlobalQueryCheckboxLabel', {
+          defaultMessage: `Apply global filter to layer`,
+        })}
+        checked={layerSupportsGlobalQuery ? props.applyGlobalQuery : false}
+        onChange={onApplyGlobalQueryChange}
+        disabled={!layerSupportsGlobalQuery}
+        data-test-subj="mapLayerPanelApplyGlobalQueryCheckbox"
+      />
     );
 
     if (layerSupportsGlobalQuery) {
@@ -134,11 +121,9 @@ export function LayerSettings(props) {
     return (
       <EuiToolTip
         position="top"
-        content={
-          i18n.translate('xpack.maps.layerPanel.applyGlobalQueryCheckbox.disableTooltip', {
-            defaultMessage: `Layer does not support filtering.`
-          })
-        }
+        content={i18n.translate('xpack.maps.layerPanel.applyGlobalQueryCheckbox.disableTooltip', {
+          defaultMessage: `Layer does not support filtering.`,
+        })}
       >
         {applyGlobalQueryCheckbox}
       </EuiToolTip>
@@ -148,23 +133,21 @@ export function LayerSettings(props) {
   return (
     <Fragment>
       <EuiPanel>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h5>
-                <FormattedMessage
-                  id="xpack.maps.layerPanel.layerSettingsTitle"
-                  defaultMessage="Layer Settings"
-                />
-              </h5>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle size="xs">
+          <h5>
+            <FormattedMessage
+              id="xpack.maps.layerPanel.layerSettingsTitle"
+              defaultMessage="Layer settings"
+            />
+          </h5>
+        </EuiTitle>
 
-        <EuiSpacer size="m"/>
+        <EuiSpacer size="m" />
         {renderLabel()}
         {renderZoomSliders()}
         {renderAlphaSlider()}
+
+        <EuiSpacer size="m" />
         {renderApplyGlobalQueryCheckbox()}
       </EuiPanel>
 

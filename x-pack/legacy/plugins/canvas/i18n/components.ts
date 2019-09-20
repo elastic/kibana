@@ -8,6 +8,23 @@ import { i18n } from '@kbn/i18n';
 import { CANVAS, JSON, KIBANA, PDF, POST, URL } from './constants';
 
 export const ComponentStrings = {
+  App: {
+    getLoadErrorTitle: () =>
+      i18n.translate('xpack.canvas.app.loadErrorTitle', {
+        defaultMessage: 'Canvas failed to load :(',
+      }),
+    getLoadErrorMessage: (error: string) =>
+      i18n.translate('xpack.canvas.app.loadErrorMessage', {
+        defaultMessage: 'Message: {error}',
+        values: {
+          error,
+        },
+      }),
+    getLoadingMessage: () =>
+      i18n.translate('xpack.canvas.app.loadingMessage', {
+        defaultMessage: 'Canvas is loading',
+      }),
+  },
   AddEmbeddableFlyout: {
     getNoItemsText: () =>
       i18n.translate('xpack.canvas.embedObject.noMatchingObjectsMessage', {
@@ -90,6 +107,26 @@ export const ComponentStrings = {
         values: {
           percentageUsed,
         },
+      }),
+  },
+  AssetPicker: {
+    getAssetAltText: () =>
+      i18n.translate('xpack.canvas.assetpicker.assetAltText', {
+        defaultMessage: 'Asset thumbnail',
+      }),
+  },
+  ColorManager: {
+    getAddAriaLabel: () =>
+      i18n.translate('xpack.canvas.colorManager.addAriaLabel', {
+        defaultMessage: 'Add Color',
+      }),
+    getCodePlaceholder: () =>
+      i18n.translate('xpack.canvas.colorManager.codePlaceholder', {
+        defaultMessage: 'Color code',
+      }),
+    getRemoveAriaLabel: () =>
+      i18n.translate('xpack.canvas.colorManager.removeAriaLabel', {
+        defaultMessage: 'Remove Color',
       }),
   },
   HelpMenu: {
