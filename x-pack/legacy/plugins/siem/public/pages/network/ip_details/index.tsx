@@ -6,7 +6,7 @@
 
 import { getOr } from 'lodash/fp';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useContext } from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { pure } from 'recompose';
@@ -32,6 +32,8 @@ import { IpOverviewQuery } from '../../../containers/ip_overview';
 import { manageQuery } from '../../../components/page/manage_query';
 import { AnomalyTableProvider } from '../../../components/ml/anomaly/anomaly_table_provider';
 import { networkToCriteria } from '../../../components/ml/criteria/network_to_criteria';
+import { MlCapabilitiesContext } from '../../../components/ml/permissions/ml_capabilities_provider';
+import { hasMlUserPermissions } from '../../../components/ml/permissions/has_ml_user_permissions';
 
 import { DomainsQuery } from '../../../containers/domains';
 import { DomainsTable } from '../../../components/page/network/domains_table';
@@ -56,139 +58,143 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
     from,
     setQuery,
     isInitializing,
-  }) => (
-    <>
-      <WithSource sourceId="default" data-test-subj="ip-details-page">
-        {({ indicesExist, indexPattern }) => {
-          const ip = decodeIpv6(detailName);
+  }) => {
+    const capabilities = useContext(MlCapabilitiesContext);
 
-          return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-            <StickyContainer>
-              <FiltersGlobal>
-                <NetworkKql
-                  indexPattern={indexPattern}
-                  setQuery={setQuery}
-                  type={networkModel.NetworkType.details}
-                />
-              </FiltersGlobal>
+    return (
+      <>
+        <WithSource sourceId="default" data-test-subj="ip-details-page">
+          {({ indicesExist, indexPattern }) => {
+            const ip = decodeIpv6(detailName);
 
-              <HeaderPage
-                data-test-subj="ip-details-headline"
-                subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
-                title={ip}
-                draggableArguments={{ field: `${flowTarget}.ip`, value: ip }}
-              >
-                <FlowTargetSelectConnected />
-              </HeaderPage>
-
-              <IpOverviewQuery
-                skip={isInitializing}
-                sourceId="default"
-                filterQuery={filterQuery}
-                type={networkModel.NetworkType.details}
-                ip={ip}
-              >
-                {({ id, inspect, ipOverviewData, loading, refetch }) => (
-                  <AnomalyTableProvider
-                    criteriaFields={networkToCriteria(detailName, flowTarget)}
-                    startDate={from}
-                    endDate={to}
-                    skip={isInitializing}
-                  >
-                    {({ isLoadingAnomaliesData, anomaliesData }) => (
-                      <IpOverviewManage
-                        id={id}
-                        inspect={inspect}
-                        ip={ip}
-                        data={ipOverviewData}
-                        anomaliesData={anomaliesData}
-                        loading={loading}
-                        isLoadingAnomaliesData={isLoadingAnomaliesData}
-                        type={networkModel.NetworkType.details}
-                        flowTarget={flowTarget}
-                        refetch={refetch}
-                        setQuery={setQuery}
-                        startDate={from}
-                        endDate={to}
-                        narrowDateRange={(score, interval) => {
-                          const fromTo = scoreIntervalToDateTime(score, interval);
-                          setAbsoluteRangeDatePicker({
-                            id: 'global',
-                            from: fromTo.from,
-                            to: fromTo.to,
-                          });
-                        }}
-                      />
-                    )}
-                  </AnomalyTableProvider>
-                )}
-              </IpOverviewQuery>
-
-              <EuiHorizontalRule />
-
-              <DomainsQuery
-                endDate={to}
-                filterQuery={filterQuery}
-                flowTarget={flowTarget}
-                ip={ip}
-                skip={isInitializing}
-                sourceId="default"
-                startDate={from}
-                type={networkModel.NetworkType.details}
-              >
-                {({
-                  id,
-                  inspect,
-                  isInspected,
-                  domains,
-                  totalCount,
-                  pageInfo,
-                  loading,
-                  loadPage,
-                  refetch,
-                }) => (
-                  <DomainsTableManage
-                    data={domains}
+            return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+              <StickyContainer>
+                <FiltersGlobal>
+                  <NetworkKql
                     indexPattern={indexPattern}
-                    id={id}
-                    inspect={inspect}
-                    flowTarget={flowTarget}
-                    fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                    ip={ip}
-                    isInspect={isInspected}
-                    loading={loading}
-                    loadPage={loadPage}
-                    showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-                    refetch={refetch}
                     setQuery={setQuery}
-                    totalCount={totalCount}
                     type={networkModel.NetworkType.details}
                   />
-                )}
-              </DomainsQuery>
+                </FiltersGlobal>
 
-              <EuiSpacer />
+                <HeaderPage
+                  data-test-subj="ip-details-headline"
+                  subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
+                  title={ip}
+                  draggableArguments={{ field: `${flowTarget}.ip`, value: ip }}
+                >
+                  <FlowTargetSelectConnected />
+                </HeaderPage>
 
-              <SiemNavigation
-                navTabs={navTabsIPDetails(detailName)}
-                display="default"
-                showBorder={true}
-              />
+                <IpOverviewQuery
+                  skip={isInitializing}
+                  sourceId="default"
+                  filterQuery={filterQuery}
+                  type={networkModel.NetworkType.details}
+                  ip={ip}
+                >
+                  {({ id, inspect, ipOverviewData, loading, refetch }) => (
+                    <AnomalyTableProvider
+                      criteriaFields={networkToCriteria(detailName, flowTarget)}
+                      startDate={from}
+                      endDate={to}
+                      skip={isInitializing}
+                    >
+                      {({ isLoadingAnomaliesData, anomaliesData }) => (
+                        <IpOverviewManage
+                          id={id}
+                          inspect={inspect}
+                          ip={ip}
+                          data={ipOverviewData}
+                          anomaliesData={anomaliesData}
+                          loading={loading}
+                          isLoadingAnomaliesData={isLoadingAnomaliesData}
+                          type={networkModel.NetworkType.details}
+                          flowTarget={flowTarget}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          startDate={from}
+                          endDate={to}
+                          narrowDateRange={(score, interval) => {
+                            const fromTo = scoreIntervalToDateTime(score, interval);
+                            setAbsoluteRangeDatePicker({
+                              id: 'global',
+                              from: fromTo.from,
+                              to: fromTo.to,
+                            });
+                          }}
+                        />
+                      )}
+                    </AnomalyTableProvider>
+                  )}
+                </IpOverviewQuery>
 
-              <EuiSpacer />
-            </StickyContainer>
-          ) : (
-            <>
-              <HeaderPage title={ip} />
+                <EuiHorizontalRule />
 
-              <NetworkEmptyPage />
-            </>
-          );
-        }}
-      </WithSource>
-      <SpyRoute />
-    </>
-  )
+                <DomainsQuery
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  flowTarget={flowTarget}
+                  ip={ip}
+                  skip={isInitializing}
+                  sourceId="default"
+                  startDate={from}
+                  type={networkModel.NetworkType.details}
+                >
+                  {({
+                    id,
+                    inspect,
+                    isInspected,
+                    domains,
+                    totalCount,
+                    pageInfo,
+                    loading,
+                    loadPage,
+                    refetch,
+                  }) => (
+                    <DomainsTableManage
+                      data={domains}
+                      indexPattern={indexPattern}
+                      id={id}
+                      inspect={inspect}
+                      flowTarget={flowTarget}
+                      fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                      ip={ip}
+                      isInspect={isInspected}
+                      loading={loading}
+                      loadPage={loadPage}
+                      showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+                      refetch={refetch}
+                      setQuery={setQuery}
+                      totalCount={totalCount}
+                      type={networkModel.NetworkType.details}
+                    />
+                  )}
+                </DomainsQuery>
+
+                <EuiSpacer />
+
+                <SiemNavigation
+                  navTabs={navTabsIPDetails(detailName, hasMlUserPermissions(capabilities))}
+                  display="default"
+                  showBorder={true}
+                />
+
+                <EuiSpacer />
+              </StickyContainer>
+            ) : (
+              <>
+                <HeaderPage title={ip} />
+
+                <NetworkEmptyPage />
+              </>
+            );
+          }}
+        </WithSource>
+        <SpyRoute />
+      </>
+    );
+  }
 );
 
 IPDetailsComponent.displayName = 'IPDetailsComponent';
