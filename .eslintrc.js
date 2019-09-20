@@ -510,6 +510,14 @@ module.exports = {
       // typescript and javascript for front and back end
       files: ['x-pack/legacy/plugins/siem/**/*.{js,ts,tsx}'],
       plugins: ['eslint-plugin-node', 'react'],
+      env: {
+        mocha: true,
+        jest: true,
+      },
+      globals: {
+        cy: true,
+        Cypress: true,
+      },
       rules: {
         'accessor-pairs': 'error',
         'array-callback-return': 'error',
@@ -564,8 +572,7 @@ module.exports = {
         'no-shadow-restricted-names': 'error',
         'no-sparse-arrays': 'error',
         'no-this-before-super': 'error',
-        // This will be turned on after bug fixes are mostly complete
-        // 'no-undef': 'warn',
+        'no-undef': 'error',
         'no-unreachable': 'error',
         'no-unsafe-finally': 'error',
         'no-useless-call': 'error',
