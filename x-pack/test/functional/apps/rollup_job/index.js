@@ -6,7 +6,7 @@
 
 export default function ({ loadTestFile }) {
 
-  describe('rollup job', function () {
+  describe('rollup app', function () {
     this.tags('ciGroup5');
 
     loadTestFile(require.resolve('./rollup_jobs'));

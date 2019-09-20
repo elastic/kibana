@@ -12,10 +12,10 @@ export default function ({ getService, getPageObjects }) {
 
   const log = getService('log');
   const es = getService('es');
-  // const savedObjects = getService('kibanaServer').savedObjects;
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['security', 'rollup', 'common', 'indexManagement', 'settings', 'discover']);
 
-  describe('rollup jobs', function () {
+  describe('rollup job', function () {
     const rollupJobName = 'rollup-to-be-' + Math.floor(Math.random() * 10000);
     const indexName = 'rollup-to-be';
     async function loadDates(dates, prepend = 'to-be-rolled-up') {
@@ -52,14 +52,23 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.common.navigateToApp('indexManagement');
 
-      await PageObjects.common.sleep(10000);
       await PageObjects.indexManagement.toggleRollupIndices();
-      const indices = await PageObjects.indexManagement.getIndexList();
 
       await log.debug('If the index exists then the rollup job has successfully' +
         'been created and is waiting to or has triggered.');
-      indices.filter(i => i.indexName === indexName);
-      expect(indices.length).to.be.greaterThan(0);
+      await retry.waitForWithTimeout('Wait for job to be triggered', 20000,
+        async () => {
+          await PageObjects.indexManagement.reloadIndices();
+
+          const indices = await PageObjects.indexManagement.getIndexList();
+          const filteredIndices = indices.filter(i => i.indexName === indexName);
+          await log.debug(filteredIndices);
+
+          expect(filteredIndices.length).to.be.greaterThan(0);
+          return (filteredIndices[0].indexName === indexName) && (filteredIndices[0].indexDocuments !== '0');
+        }
+      );
+
 
     });
 
@@ -76,7 +85,6 @@ export default function ({ getService, getPageObjects }) {
       ];
 
       await loadDates(futureDates, 'live-data');
-      await PageObjects.common.sleep(10000);
 
       await PageObjects.common.navigateToApp('settings');
       await PageObjects.settings.createIndexPattern('live*,' + indexName, '@timestamp', false);

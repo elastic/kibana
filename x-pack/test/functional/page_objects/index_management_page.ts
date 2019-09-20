@@ -8,54 +8,51 @@ import { map as mapAsync } from 'bluebird';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function IndexManagementPageProvider({ getService }: FtrProviderContext) {
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
 
   return {
     async sectionHeadingText() {
       return await testSubjects.getVisibleText('appTitle');
     },
-    async reloadIndicesButton() {
-      return await testSubjects.find('reloadIndicesButton');
+    async reloadIndices() {
+      await testSubjects.click('reloadIndicesButton');
     },
     async toggleRollupIndices() {
       await testSubjects.click('checkboxToggles-rollupToggle');
     },
 
     async getIndexList() {
-      const indices = await testSubjects.findAll('indexTableRow');
-      return mapAsync(indices, async index => {
-        const indexNameLinkCell = await index.findByCssSelector(
-          '[data-test-subj="indexTableIndexNameLink"]'
-        );
-        const indexHealthCell = await index.findByCssSelector(
-          '[data-test-subj="indexTableCell-health"]'
-        );
-        const indexStatusCell = await index.findByCssSelector(
-          '[data-test-subj="indexTableCell-status"]'
-        );
-        const indexPrimaryCell = await index.findByCssSelector(
-          '[data-test-subj="indexTableCell-primary"]'
-        );
-        const indexReplicasCell = await index.findByCssSelector(
-          '[data-test-subj="indexTableCell-replica"]'
-        );
-        const indexDocumentsCell = await index.findByCssSelector(
-          '[data-test-subj="indexTableCell-documents"]'
-        );
-        const indexSizeCell = await index.findByCssSelector(
-          '[data-test-subj="indexTableCell-size"]'
-        );
-
-        return {
-          indexName: await indexNameLinkCell.getVisibleText(),
-          indexHealth: await indexHealthCell.getVisibleText(),
-          indexStatus: await indexStatusCell.getVisibleText(),
-          indexPrimary: await indexPrimaryCell.getVisibleText(),
-          indexReplicas: await indexReplicasCell.getVisibleText(),
-          indexDocuments: await indexDocumentsCell.getVisibleText(),
-          indexSize: await indexSizeCell.getVisibleText(),
-        };
-      });
+      const table = await find.byCssSelector('table');
+      const $ = await table.parseDomContent();
+      return $.findTestSubjects('indexTableRow')
+        .toArray()
+        .map(row => {
+          return {
+            indexName: $(row)
+              .findTestSubject('indexTableIndexNameLink')
+              .text(),
+            indexHealth: $(row)
+              .findTestSubject('indexTableCell-health')
+              .text(),
+            indexStatus: $(row)
+              .findTestSubject('indexTableCell-status')
+              .text(),
+            indexPrimary: $(row)
+              .findTestSubject('indexTableCell-primary')
+              .text(),
+            indexReplicas: $(row)
+              .findTestSubject('indexTableCell-replica')
+              .text(),
+            indexDocuments: $(row)
+              .findTestSubject('indexTableCell-documents')
+              .text()
+              .replace('documents', ''),
+            indexSize: $(row)
+              .findTestSubject('indexTableCell-size')
+              .text(),
+          };
+        });
     },
     async changeTabs(tab: 'indicesTab' | 'templatesTab') {
       return await testSubjects.click(tab);
