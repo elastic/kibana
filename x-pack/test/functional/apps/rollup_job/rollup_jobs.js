@@ -52,10 +52,8 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.common.navigateToApp('indexManagement');
 
-      await log.debug('Wait a 10 seconds to ensure that the job has triggered.');
       await PageObjects.common.sleep(10000);
       await PageObjects.indexManagement.toggleRollupIndices();
-      await PageObjects.common.sleep(2000);
       const indices = await PageObjects.indexManagement.getIndexList();
 
       await log.debug('If the index exists then the rollup job has successfully' +
@@ -67,10 +65,6 @@ export default function ({ getService, getPageObjects }) {
 
     it('create hybrid index pattern', async () => {
       await log.debug('Stop the rollup job created in the previous test.');
-      await es.transport.request({
-        path: `/_rollup/job/${rollupJobName}/_stop?wait_for_completion=true`,
-        method: 'POST',
-      });
 
       await log.debug('Add data for 1,2 and 3 days into the future.');
       const now = new Date();
@@ -82,19 +76,23 @@ export default function ({ getService, getPageObjects }) {
       ];
 
       await loadDates(futureDates, 'live-data');
-      await log.debug('Delete old data that was rolled up.');
-      await es.indices.delete({ index: 'to-be*' });
-
       await PageObjects.common.sleep(10000);
+
       await PageObjects.common.navigateToApp('settings');
       await PageObjects.settings.createIndexPattern('live*,' + indexName, '@timestamp', false);
 
       await PageObjects.common.navigateToApp('discover');
       const hits = await PageObjects.discover.getHitCount();
-      expect(hits).to.be('7');
+      expect(Number.parseInt(hits)).to.be.greaterThan(6);
     });
 
     after(async () => {
+      //Stop the running rollup job.
+      await es.transport.request({
+        path: `/_rollup/job/${rollupJobName}/_stop?wait_for_completion=true`,
+        method: 'POST',
+      });
+      //Delete the rollup job.
       es.transport.request({
         path: `/_rollup/job/${rollupJobName}`,
         method: 'DELETE',
@@ -103,7 +101,6 @@ export default function ({ getService, getPageObjects }) {
       await es.indices.delete({ index: 'rollup*' });
       await es.indices.delete({ index: 'live*' });
       await es.indices.delete({ index: 'live*,rollup-to-be*' });
-      // await savedObjects.delete('/api/saved_objects/index-pattern/live*,rollup-to-be*');
     });
   });
 }
