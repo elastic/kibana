@@ -34,7 +34,8 @@ interface IPDetailsComponentDispatchProps {
   detailName: string;
 }
 
-export type IPDetailsComponentProps = IPDetailsComponentReduxProps & { detailName: string };
+export type IPDetailsComponentProps = IPDetailsComponentReduxProps &
+  NetworkQueryProps & { detailName: string };
 
 export type IPDetailsBodyComponentProps = IPDetailsComponentReduxProps &
   IPDetailsComponentDispatchProps &

@@ -16,7 +16,7 @@ import { AnomaliesQueryTabBody, TlsQueryTabBody, UsersQueryTabBody } from './nav
 const networkPagePath = `/:pageName(network)`;
 const ipDetailsPagePath = networkPagePath + '/ip/:detailName';
 
-type Props = Partial<RouteComponentProps<{}>> & { url: string };
+type Props = Partial<RouteComponentProps<{}>>;
 
 const getIPDetailsTabPath = (pagePath: string) =>
   `${pagePath}/ip/:detailName/:tabName(` +
@@ -24,7 +24,7 @@ const getIPDetailsTabPath = (pagePath: string) =>
   `${IpDetailsTableType.users}|` +
   `${IpDetailsTableType.anomalies})`;
 
-export const NetworkContainer = React.memo<Props>(({ url }) => (
+export const NetworkContainer = React.memo<Props>(() => (
   <GlobalTime>
     {({ to, from, setQuery, deleteQuery, isInitializing }) => (
       <Switch>
@@ -62,13 +62,16 @@ export const NetworkContainer = React.memo<Props>(({ url }) => (
             );
           }}
         />
-        <Redirect
-          from={`${url}/ip/:detailName`}
-          to={{
-            pathname: `${url}/ip/:detailName/${IpDetailsTableType.tls}`,
-          }}
+        <Route
+          path={`${networkPagePath}/ip/:detailName`}
+          render={({ location: { search = '', pathname } }) => (
+            <Redirect to={`${pathname}/${IpDetailsTableType.tls}${search}`} />
+          )}
         />
-        <Redirect from="/network/" to={{ pathname: '/network' }} />
+        <Route
+          path="/network/"
+          render={({ location: { search = '' } }) => <Redirect to={`/network${search}`} />}
+        />
       </Switch>
     )}
   </GlobalTime>

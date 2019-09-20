@@ -8,10 +8,8 @@ import { Breadcrumb } from 'ui/chrome';
 
 import { decodeIpv6 } from '../../../lib/helpers';
 import { getNetworkUrl } from '../../../components/link_to/redirect_to_network';
-
 import { networkModel, networkSelectors } from '../../../store/network';
 import { State } from '../../../store';
-
 import * as i18n from '../translations';
 
 export const type = networkModel.NetworkType.details;
@@ -32,6 +30,7 @@ export const getBreadcrumbs = (ip: string | undefined, search: string[]): Breadc
       href: `${getNetworkUrl()}${search && search[0] ? search[0] : ''}`,
     },
   ];
+
   if (ip) {
     return [
       ...breadcrumbs,
