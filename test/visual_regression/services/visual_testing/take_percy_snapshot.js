@@ -29,16 +29,18 @@ export function takePercySnapshot(show, hide) {
     ...document.querySelectorAll(selector)
   ];
 
-  const setSelectorClass = (selectors, className, remove) => {
+  const add = (selectors, className) => {
     for (const selector of selectors) {
       for (const element of queryAll(selector)) {
-        if (remove) {
-          element.classList.remove(className);
-        } else {
-          console.log(className, element);
+        element.classList.add(className);
+      }
+    }
+  };
 
-          element.classList.add(className);
-        }
+  const remove = (selectors, className) => {
+    for (const selector of selectors) {
+      for (const element of queryAll(selector)) {
+        element.classList.remove(className);
       }
     }
   };
@@ -57,7 +59,7 @@ export function takePercySnapshot(show, hide) {
   // set Percy visibility on elements
   const className = hideByDefault ? 'showInPercy' : 'hideInPercy';
   const selectors = hideByDefault ? show : hide;
-  setSelectorClass(selectors, className, false);
+  add(selectors, className);
 
   // array of canvas/image replacements
   const replacements = [];
@@ -83,7 +85,7 @@ export function takePercySnapshot(show, hide) {
 
   // restore element visibility
   document.body.classList.remove('percyHideAllByDefault');
-  setSelectorClass(selectors, className, true);
+  remove(selectors, className);
 
   return snapshot;
 }

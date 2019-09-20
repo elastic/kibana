@@ -57,3 +57,26 @@
     }
   }
 }
+
+
+body.percyHideAllByDefault {
+  * {
+    visibility: hidden;
+  }
+
+  .showInPercy * {
+    visibility: visible;
+  }
+
+  .hideInPercy {
+    visibility: visible;
+  }
+}
+
+.hideInPercy {
+  visibility: hidden;
+}
+
+.showInPercy {
+  visibility: visible;
+}
