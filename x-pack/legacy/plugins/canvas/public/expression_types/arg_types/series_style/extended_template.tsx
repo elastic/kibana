@@ -73,14 +73,17 @@ export const ExtendedTemplate: FunctionComponent<Props> = props => {
   return (
     <div>
       {name !== 'defaultStyle' && (
-        <EuiFormRow label="Series Identifier" display="rowCompressed">
-          <EuiSelect
-            compressed
-            value={selectedSeries}
-            options={labelOptions}
-            onChange={ev => handleChange('label', ev)}
-          />
-        </EuiFormRow>
+        <Fragment>
+          <EuiFormRow label="Series Identifier" display="rowCompressed">
+            <EuiSelect
+              compressed
+              value={selectedSeries}
+              options={labelOptions}
+              onChange={ev => handleChange('label', ev)}
+            />
+          </EuiFormRow>
+          <EuiSpacer size="s" />
+        </Fragment>
       )}
       {hasPropFields && (
         <Fragment>
