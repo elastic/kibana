@@ -233,8 +233,10 @@ class FilterEditorUI extends Component<Props, State> {
     return (
       <div>
         <EuiFlexGroup responsive={false} gutterSize="s">
-          <EuiFlexItem style={{ maxWidth: '188px' }}>{this.renderFieldInput()}</EuiFlexItem>
-          <EuiFlexItem style={{ maxWidth: '188px' }}>{this.renderOperatorInput()}</EuiFlexItem>
+          <EuiFlexItem>{this.renderFieldInput()}</EuiFlexItem>
+          <EuiFlexItem grow={false} style={{ width: 164 }}>
+            {this.renderOperatorInput()}
+          </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <div data-test-subj="filterParams">{this.renderParamsEditor()}</div>

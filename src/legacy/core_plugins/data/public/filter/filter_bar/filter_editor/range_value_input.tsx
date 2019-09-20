@@ -17,15 +17,7 @@
  * under the License.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIcon,
-  EuiLink,
-  EuiFormHelpText,
-  EuiFormControlLayoutDelimited,
-} from '@elastic/eui';
+import { EuiIcon, EuiLink, EuiFormHelpText, EuiFormControlLayoutDelimited } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import { Component } from 'react';
