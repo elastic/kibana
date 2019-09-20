@@ -24,7 +24,7 @@ describe('JobSwitch', () => {
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 
-  test('should call onJobStateChange when the switch is clicked to a a true/open', () => {
+  test('should call onJobStateChange when the switch is clicked to be true/open', () => {
     const wrapper = mount(
       <JobSwitch
         isSummaryLoading={false}
