@@ -4,9 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export enum SocketKind {
-  CLONE_PROGRESS = 'clone-progress',
-  DELETE_PROGRESS = 'delete-progress',
-  INDEX_PROGRESS = 'index-progress',
-  INSTALL_PROGRESS = 'install-progress',
+export function getTestAlertData(overwrites = {}) {
+  return {
+    enabled: true,
+    alertTypeId: 'test.noop',
+    interval: '10s',
+    throttle: '1m',
+    actions: [],
+    alertTypeParams: {},
+    ...overwrites,
+  };
 }

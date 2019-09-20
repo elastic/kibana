@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface TemplateValidation {
-  isValid: boolean;
-  errors: { [key: string]: React.ReactNode[] };
+export enum CodeUsageMetrics {
+  ENABLED = 'enabled',
+  REPOSITORIES = 'repositories',
+  LANGUAGE_SERVERS = 'langserver',
 }
