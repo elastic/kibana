@@ -5,9 +5,9 @@
  */
 
 export const getTickFormat = (value?: number | null): string => {
-  const res = Number(value);
-  if (isNaN(res) || value === null) {
+  const parsedNumber = Number(value);
+  if (isNaN(parsedNumber) || value === null) {
     return 'N/A';
   }
-  return res.toFixed();
+  return parsedNumber.toFixed();
 };
