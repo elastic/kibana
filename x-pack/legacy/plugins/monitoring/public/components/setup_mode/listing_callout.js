@@ -13,6 +13,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { formatProductName, getIdentifier } from './formatting';
 
+const MIGRATE_TO_MB_LABEL = i18n.translate('xpack.monitoring.setupMode.migrateToMetricbeat', {
+  defaultMessage: 'Migrate to Metricbeat',
+});
+
 export function ListingCallOut({ setupModeData, productName, customRenderer = null }) {
   if (customRenderer) {
     const { shouldRender, componentToRender } = customRenderer();
@@ -119,20 +123,41 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
     );
   }
 
-  if (setupModeData.totalUniqueInstanceCount > 0 &&
-      setupModeData.totalUniqueFullyMigratedCount === 0 && setupModeData.totalUniquePartiallyMigratedCount === 0) {
+  if (setupModeData.totalUniqueInstanceCount > 0) {
+    if (setupModeData.totalUniqueFullyMigratedCount === 0 && setupModeData.totalUniquePartiallyMigratedCount === 0) {
+      return (
+        <Fragment>
+          <EuiCallOut
+            title={MIGRATE_TO_MB_LABEL}
+            color="danger"
+            iconType="flag"
+          >
+            <p>
+              {i18n.translate('xpack.monitoring.setupMode.migrateToMetricbeatDescription', {
+                defaultMessage: `These {product} {identifier} are monitored through internal collection.
+                Migrate to monitor with Metricbeat.`,
+                values: {
+                  product: formatProductName(productName),
+                  identifier: getIdentifier(productName, true)
+                }
+              })}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m"/>
+        </Fragment>
+      );
+    }
+
     return (
       <Fragment>
         <EuiCallOut
-          title={i18n.translate('xpack.monitoring.setupMode.migrateToMetricbeat', {
-            defaultMessage: 'Migrate to Metricbeat',
-          })}
+          title={MIGRATE_TO_MB_LABEL}
           color="danger"
           iconType="flag"
         >
           <p>
-            {i18n.translate('xpack.monitoring.setupMode.migrateToMetricbeatDescription', {
-              defaultMessage: `These {product} {identifier} are monitored through internal collection. Migrate to monitor with Metricbeat.`,
+            {i18n.translate('xpack.monitoring.setupMode.migrateSomeToMetricbeatDescription', {
+              defaultMessage: `Some {product} {identifier} are monitored through internal collection. Migrate to monitor with Metricbeat.`,
               values: {
                 product: formatProductName(productName),
                 identifier: getIdentifier(productName, true)
