@@ -68,6 +68,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
         const wrappedError = wrapError(error);
         return response.customError({
           body: wrappedError,
+          headers: wrappedError.output.headers,
           statusCode: wrappedError.output.statusCode,
         });
       }
