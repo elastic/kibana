@@ -28,8 +28,8 @@ const BasicTable = styled(EuiBasicTable)`
     animation: none; //Prevents applying max-height from animation
   }
 
-  .euiTableCellContent__text {
-    width: 100%; //Fixes collapsing nested flex content
+  .euiTableRow-isExpandedRow .euiTableCellContent__text {
+    width: 100%; //Fixes collapsing nested flex content in IE11
   }
 `;
 BasicTable.displayName = 'BasicTable';
