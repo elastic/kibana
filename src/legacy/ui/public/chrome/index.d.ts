@@ -46,7 +46,7 @@ declare interface Chrome extends ChromeNavLinks {
   getSavedObjectsClient(): SavedObjectsClientContract;
   getUiSettingsClient(): any;
   setVisible(visible: boolean): any;
-  getInjected(key: string, defaultValue?: any): any;
+  getInjected<T = unknown>(key: string, defaultValue?: any): T;
   setRootController(name: string, Controller: any): any;
   setBrand(brand: ChromeBrand): this;
   getBrand(key: keyof ChromeBrand): ChromeBrand[keyof ChromeBrand];

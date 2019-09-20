@@ -9,10 +9,16 @@ import chrome from 'ui/chrome';
 
 import { LogAnalysisJobs } from '../../../containers/logs/log_analysis';
 import { Source } from '../../../containers/source';
+interface ActiveSpace {
+  space: {
+    id: string;
+  };
+}
 
 export const AnalysisPageProviders: React.FunctionComponent = ({ children }) => {
   const { sourceId, source } = useContext(Source.Context);
-  const spaceId = chrome.getInjected('activeSpace').space.id;
+  const activeSpace = chrome.getInjected<ActiveSpace | null>('activeSpace');
+  const spaceId = activeSpace ? activeSpace.space.id : 'default';
 
   return (
     <LogAnalysisJobs.Provider

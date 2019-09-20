@@ -24,7 +24,7 @@ import { createAnalyticsReporter, setTelemetryReporter } from '../services/telem
 
 function telemetryInit($injector: any) {
   const localStorage = $injector.get('localStorage');
-  const debug = chrome.getInjected('debugUiMetric');
+  const debug = chrome.getInjected<boolean>('debugUiMetric');
   const $http = $injector.get('$http');
   const basePath = chrome.getBasePath();
   const uiReporter = createAnalyticsReporter({ localStorage, $http, basePath, debug });
