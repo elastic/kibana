@@ -170,23 +170,22 @@ const Application = (props: UptimeAppProps) => {
                           <EuiSpacer size="s" />
                           <Switch>
                             <Route
-                              exact
-                              path="/"
+                              path="/monitor/:monitorId/:location?"
                               render={routerProps => (
-                                <OverviewPage
-                                  basePath={basePath}
-                                  logOverviewPageLoad={logOverviewPageLoad}
+                                <MonitorPage
+                                  logMonitorPageLoad={logMonitorPageLoad}
+                                  query={client.query}
                                   setBreadcrumbs={setBreadcrumbs}
                                   {...routerProps}
                                 />
                               )}
                             />
                             <Route
-                              path="/monitor/:monitorId/:location?"
+                              path="/"
                               render={routerProps => (
-                                <MonitorPage
-                                  logMonitorPageLoad={logMonitorPageLoad}
-                                  query={client.query}
+                                <OverviewPage
+                                  basePath={basePath}
+                                  logOverviewPageLoad={logOverviewPageLoad}
                                   setBreadcrumbs={setBreadcrumbs}
                                   {...routerProps}
                                 />
