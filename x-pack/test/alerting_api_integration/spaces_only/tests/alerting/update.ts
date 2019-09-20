@@ -62,6 +62,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           },
           interval: '12s',
           actions: [],
+          throttle: '1m',
         })
         .expect(404, {
           statusCode: 404,
