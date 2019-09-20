@@ -257,7 +257,7 @@ class FilterEditorUI extends Component<Props, State> {
           isDisabled={!selectedIndexPattern}
           placeholder={this.props.intl.formatMessage({
             id: 'data.filter.filterEditor.fieldSelectPlaceholder',
-            defaultMessage: 'Select a field',
+            defaultMessage: 'Select a field first',
           })}
           options={fields}
           selectedOptions={selectedField ? [selectedField] : []}
@@ -283,10 +283,17 @@ class FilterEditorUI extends Component<Props, State> {
       >
         <OperatorComboBox
           isDisabled={!selectedField}
-          placeholder={this.props.intl.formatMessage({
-            id: 'data.filter.filterEditor.operatorSelectPlaceholder',
-            defaultMessage: 'Select an operator',
-          })}
+          placeholder={
+            selectedField
+              ? this.props.intl.formatMessage({
+                  id: 'data.filter.filterEditor.operatorSelectPlaceholderSelect',
+                  defaultMessage: 'Select',
+                })
+              : this.props.intl.formatMessage({
+                  id: 'data.filter.filterEditor.operatorSelectPlaceholderWaiting',
+                  defaultMessage: 'Waiting',
+                })
+          }
           options={operators}
           selectedOptions={selectedOperator ? [selectedOperator] : []}
           getLabel={({ message }) => message}
