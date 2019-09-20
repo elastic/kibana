@@ -34,7 +34,7 @@
     "@kbn/pm": "1.0.0",
     "@kbn/test": "1.0.0",
     "@kbn/utility-types": "1.0.0",
-    "@mattapperson/slapshot": "1.4.1",
+    "@mattapperson/slapshot": "1.4.3",
     "@storybook/addon-actions": "^5.1.11",
     "@storybook/addon-console": "^1.2.1",
     "@storybook/addon-info": "^5.1.11",

@@ -1,0 +1,5726 @@
+
+exports['Policies Lib create should create a new policy - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571515795215
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib create should create a new policy - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "81a28d50-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib create should create a new policy - get - "81a28d50-db19-11e9-a487-5f6358861e5b" (3)'] = {
+  "results": {
+    "id": "81a28d50-db19-11e9-a487-5f6358861e5b",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib list should list all active policies - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571515795215
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should list all active policies - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "8253b4e0-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-2",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should list all active policies - get info (3)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571515795215
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should list all active policies - create - {"name":"test2","description":"test description"} (4)'] = {
+  "results": {
+    "id": "82e8f000-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-3",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should list all active policies - get info (5)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571515795215
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should list all active policies - create - {"name":"test3","description":"test description"} (6)'] = {
+  "results": {
+    "id": "83846cb0-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-4",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should list all active policies - list - {"page":1,"perPage":25} (7)'] = {
+  "results": [
+    {
+      "id": "8253b4e0-db19-11e9-a487-5f6358861e5b",
+      "name": "test",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-2",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "82e8f000-db19-11e9-a487-5f6358861e5b",
+      "name": "test2",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-3",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "83846cb0-db19-11e9-a487-5f6358861e5b",
+      "name": "test3",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-4",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Policies Lib list should not list inactive policies - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571515795215
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should not list inactive policies - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "84267910-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-5",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - get - "84267910-db19-11e9-a487-5f6358861e5b" (3)'] = {
+  "results": {
+    "id": "84267910-db19-11e9-a487-5f6358861e5b",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-5",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - create - {"name":"foo","description":"test description"} (4)'] = {
+  "results": {
+    "id": "84bd13c0-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-5",
+    "version": 1
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - update - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - get info (6)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571515795215
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should not list inactive policies - create - {"name":"test2","description":"test description"} (7)'] = {
+  "results": {
+    "id": "85f4d070-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-6",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - get info (8)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571515795215
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should not list inactive policies - create - {"name":"test3","description":"test description"} (9)'] = {
+  "results": {
+    "id": "86909b40-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-7",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - list - {"page":1,"perPage":25} (10)'] = {
+  "results": [
+    {
+      "id": "84bd13c0-db19-11e9-a487-5f6358861e5b",
+      "name": "foo",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-5",
+      "version": 1,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "85f4d070-db19-11e9-a487-5f6358861e5b",
+      "name": "test2",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-6",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "86909b40-db19-11e9-a487-5f6358861e5b",
+      "name": "test3",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-7",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571515795215
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "87360300-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-8",
+    "version": 0
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get - "87360300-db19-11e9-a487-5f6358861e5b" (3)'] = {
+  "results": {
+    "id": "87360300-db19-11e9-a487-5f6358861e5b",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-8",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - create - {"name":"foo","description":"test description"} (4)'] = {
+  "results": {
+    "id": "87cb3e20-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-8",
+    "version": 1
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - update - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get - "87cb3e20-db19-11e9-a487-5f6358861e5b" (6)'] = {
+  "results": {
+    "id": "87cb3e20-db19-11e9-a487-5f6358861e5b",
+    "name": "foo",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-8",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get - "87360300-db19-11e9-a487-5f6358861e5b" (7)'] = {
+  "results": {
+    "id": "87360300-db19-11e9-a487-5f6358861e5b",
+    "name": "test",
+    "description": "test description",
+    "status": "locked",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-8",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019 16:10:32 GMT-0400 (GMT-04:00)",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571515795215
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "891a7a70-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-9",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - get - "891a7a70-db19-11e9-a487-5f6358861e5b" (3)'] = {
+  "results": {
+    "id": "891a7a70-db19-11e9-a487-5f6358861e5b",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-9",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - create - {"name":"foo","description":"test description"} (4)'] = {
+  "results": {
+    "id": "89b3fb50-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-9",
+    "version": 1
+  }
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - update - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - listVersions - {"sharedID":"shared-uuid-9","activeOnly":false,"page":1,"perPage":25} (6)'] = {
+  "results": [
+    {
+      "id": "89b3fb50-db19-11e9-a487-5f6358861e5b",
+      "name": "foo",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-9",
+      "version": 1,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "891a7a70-db19-11e9-a487-5f6358861e5b",
+      "name": "test",
+      "description": "test description",
+      "status": "locked",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-9",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019 16:10:35 GMT-0400 (GMT-04:00)",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571515795215
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "8aef1360-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-10",
+    "version": 0
+  }
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - get - "8aef1360-db19-11e9-a487-5f6358861e5b" (3)'] = {
+  "results": {
+    "id": "8aef1360-db19-11e9-a487-5f6358861e5b",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-10",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - create - {"name":"foo","description":"test description"} (4)'] = {
+  "results": {
+    "id": "8b8734b0-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-10",
+    "version": 1
+  }
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - update - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - deleteVersion - "8aef1360-db19-11e9-a487-5f6358861e5b" (6)'] = {
+  "results": {
+    "success": true
+  }
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - listVersions - {"sharedID":"shared-uuid-10","activeOnly":false,"page":1,"perPage":25} (7)'] = {
+  "results": [
+    {
+      "id": "8b8734b0-db19-11e9-a487-5f6358861e5b",
+      "name": "foo",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-10",
+      "version": 1,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571515795215
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "8d5b5870-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-11",
+    "version": 0
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - get - "8d5b5870-db19-11e9-a487-5f6358861e5b" (3)'] = {
+  "results": {
+    "id": "8d5b5870-db19-11e9-a487-5f6358861e5b",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-11",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - create - {"name":"foo","description":"test description"} (4)'] = {
+  "results": {
+    "id": "8df48b30-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-11",
+    "version": 1
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - update - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - listVersions - {"sharedID":"shared-uuid-11","activeOnly":false,"page":1,"perPage":10000} (6)'] = {
+  "results": [
+    {
+      "id": "8df48b30-db19-11e9-a487-5f6358861e5b",
+      "name": "foo",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-11",
+      "version": 1,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "8d5b5870-db19-11e9-a487-5f6358861e5b",
+      "name": "test",
+      "description": "test description",
+      "status": "locked",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-11",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019 16:10:42 GMT-0400 (GMT-04:00)",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - deleteVersion - "8df48b30-db19-11e9-a487-5f6358861e5b" (7)'] = {
+  "results": {
+    "success": true
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - deleteVersion - "8d5b5870-db19-11e9-a487-5f6358861e5b" (8)'] = {
+  "results": {
+    "success": true
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - list - {"page":1,"perPage":25} (9)'] = {
+  "results": []
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571515795215
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "9061e1b0-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-12",
+    "version": 0
+  }
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - get - "9061e1b0-db19-11e9-a487-5f6358861e5b" (3)'] = {
+  "results": {
+    "id": "9061e1b0-db19-11e9-a487-5f6358861e5b",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-12",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - create - {"name":"test","description":"test description"} (4)'] = {
+  "results": {
+    "id": "90fe48c0-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-12",
+    "version": 0
+  }
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - update - {"name":"foo","description":"description"} (5)'] = {
+  "results": {
+    "id": "90fe48c0-db19-11e9-a487-5f6358861e5b",
+    "version": 1
+  }
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - list - {"page":1,"perPage":25} (6)'] = {
+  "results": [
+    {
+      "id": "9061e1b0-db19-11e9-a487-5f6358861e5b",
+      "name": "test",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-12",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "90fe48c0-db19-11e9-a487-5f6358861e5b",
+      "name": "foo",
+      "description": "description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-13",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson",
+      "data_sources": []
+    }
+  ]
+}
+
+exports['Policies Lib requestAddDataSource Should add data sources and inputs to the policy - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571515795215
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib requestAddDataSource Should add data sources and inputs to the policy - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "9238c490-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-14",
+    "version": 0
+  }
+}
+
+exports['Policies Lib requestAddDataSource Should add data sources and inputs to the policy - get - "9238c490-db19-11e9-a487-5f6358861e5b" (3)'] = {
+  "results": {
+    "id": "9238c490-db19-11e9-a487-5f6358861e5b",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-14",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib requestAddDataSource Should add data sources and inputs to the policy - addInputs - [{"other":"{}","data_source_id":"uuid-15"},{"other":"{}","data_source_id":"uuid-15"}] (4)'] = {
+  "results": [
+    "92d049a0-db19-11e9-a487-5f6358861e5b",
+    "9368b910-db19-11e9-a487-5f6358861e5b"
+  ]
+}
+
+exports['Policies Lib requestAddDataSource Should add data sources and inputs to the policy - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "94074300-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-14",
+    "version": 1
+  }
+}
+
+exports['Policies Lib requestAddDataSource Should add data sources and inputs to the policy - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib requestAddDataSource Should add data sources and inputs to the policy - get - "94074300-db19-11e9-a487-5f6358861e5b" (7)'] = {
+  "results": {
+    "id": "94074300-db19-11e9-a487-5f6358861e5b",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-14",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-15",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "92d049a0-db19-11e9-a487-5f6358861e5b",
+          "9368b910-db19-11e9-a487-5f6358861e5b"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571515795215
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "95420cf0-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-16",
+    "version": 0
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - get - "95420cf0-db19-11e9-a487-5f6358861e5b" (3)'] = {
+  "results": {
+    "id": "95420cf0-db19-11e9-a487-5f6358861e5b",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-16",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - addInputs - [{"other":"{}","data_source_id":"uuid-17"},{"other":"{}","data_source_id":"uuid-17"}] (4)'] = {
+  "results": [
+    "95db18a0-db19-11e9-a487-5f6358861e5b",
+    "9672ebd0-db19-11e9-a487-5f6358861e5b"
+  ]
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "97106450-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-16",
+    "version": 1
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - get - "97106450-db19-11e9-a487-5f6358861e5b" (7)'] = {
+  "results": {
+    "id": "97106450-db19-11e9-a487-5f6358861e5b",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-16",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-17",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "95db18a0-db19-11e9-a487-5f6358861e5b",
+          "9672ebd0-db19-11e9-a487-5f6358861e5b"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - get - "97106450-db19-11e9-a487-5f6358861e5b" (8)'] = {
+  "results": {
+    "id": "97106450-db19-11e9-a487-5f6358861e5b",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-16",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-17",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "95db18a0-db19-11e9-a487-5f6358861e5b",
+          "9672ebd0-db19-11e9-a487-5f6358861e5b"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - create - {"name":"test","description":"test description"} (9)'] = {
+  "results": {
+    "id": "9848bd40-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-16",
+    "version": 2
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - update - {"name":"test","description":"test description"} (10)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - get - "9848bd40-db19-11e9-a487-5f6358861e5b" (11)'] = {
+  "results": {
+    "id": "9848bd40-db19-11e9-a487-5f6358861e5b",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-16",
+    "version": 2,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571515795215
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "99850dd0-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-18",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "99850dd0-db19-11e9-a487-5f6358861e5b" (3)'] = {
+  "results": {
+    "id": "99850dd0-db19-11e9-a487-5f6358861e5b",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-18",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [{"other":"{\"foo\":\"bar\"}","data_source_id":"uuid-19"}] (4)'] = {
+  "results": [
+    "9a1ba880-db19-11e9-a487-5f6358861e5b"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "9abb9200-db19-11e9-a487-5f6358861e5b",
+    "shared_id": "shared-uuid-18",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "9abb9200-db19-11e9-a487-5f6358861e5b" (7)'] = {
+  "results": {
+    "id": "9abb9200-db19-11e9-a487-5f6358861e5b",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-18",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-19",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "9a1ba880-db19-11e9-a487-5f6358861e5b"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib create should create a new policy - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571516898683
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib create should create a new policy - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "0fe369c0-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib create should create a new policy - get - "0fe369c0-db1c-11e9-b169-e5b8e36f8fed" (3)'] = {
+  "results": {
+    "id": "0fe369c0-db1c-11e9-b169-e5b8e36f8fed",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib list should list all active policies - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571516898683
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should list all active policies - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "1095c9d0-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-2",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should list all active policies - get info (3)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571516898683
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should list all active policies - create - {"name":"test2","description":"test description"} (4)'] = {
+  "results": {
+    "id": "112adde0-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-3",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should list all active policies - get info (5)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571516898683
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should list all active policies - create - {"name":"test3","description":"test description"} (6)'] = {
+  "results": {
+    "id": "11c5e560-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-4",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should list all active policies - list - {"page":1,"perPage":25} (7)'] = {
+  "results": [
+    {
+      "id": "1095c9d0-db1c-11e9-b169-e5b8e36f8fed",
+      "name": "test",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-2",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "112adde0-db1c-11e9-b169-e5b8e36f8fed",
+      "name": "test2",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-3",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "11c5e560-db1c-11e9-b169-e5b8e36f8fed",
+      "name": "test3",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-4",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Policies Lib list should not list inactive policies - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571516898683
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should not list inactive policies - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "12666b20-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-5",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - get - "12666b20-db1c-11e9-b169-e5b8e36f8fed" (3)'] = {
+  "results": {
+    "id": "12666b20-db1c-11e9-b169-e5b8e36f8fed",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-5",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - create - {"name":"foo","description":"test description"} (4)'] = {
+  "results": {
+    "id": "12fe3e50-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-5",
+    "version": 1
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - update - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - get info (6)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571516898683
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should not list inactive policies - create - {"name":"test2","description":"test description"} (7)'] = {
+  "results": {
+    "id": "1437a8b0-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-6",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - get info (8)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571516898683
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should not list inactive policies - create - {"name":"test3","description":"test description"} (9)'] = {
+  "results": {
+    "id": "14d2d740-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-7",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - list - {"page":1,"perPage":25} (10)'] = {
+  "results": [
+    {
+      "id": "12fe3e50-db1c-11e9-b169-e5b8e36f8fed",
+      "name": "foo",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-5",
+      "version": 1,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "1437a8b0-db1c-11e9-b169-e5b8e36f8fed",
+      "name": "test2",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-6",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "14d2d740-db1c-11e9-b169-e5b8e36f8fed",
+      "name": "test3",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-7",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571516898683
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "15724b90-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-8",
+    "version": 0
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get - "15724b90-db1c-11e9-b169-e5b8e36f8fed" (3)'] = {
+  "results": {
+    "id": "15724b90-db1c-11e9-b169-e5b8e36f8fed",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-8",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - create - {"name":"foo","description":"test description"} (4)'] = {
+  "results": {
+    "id": "160b0920-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-8",
+    "version": 1
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - update - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get - "160b0920-db1c-11e9-b169-e5b8e36f8fed" (6)'] = {
+  "results": {
+    "id": "160b0920-db1c-11e9-b169-e5b8e36f8fed",
+    "name": "foo",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-8",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get - "15724b90-db1c-11e9-b169-e5b8e36f8fed" (7)'] = {
+  "results": {
+    "id": "15724b90-db1c-11e9-b169-e5b8e36f8fed",
+    "name": "test",
+    "description": "test description",
+    "status": "locked",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-8",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019 16:28:49 GMT-0400 (GMT-04:00)",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571516898683
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "17492e70-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-9",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - get - "17492e70-db1c-11e9-b169-e5b8e36f8fed" (3)'] = {
+  "results": {
+    "id": "17492e70-db1c-11e9-b169-e5b8e36f8fed",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-9",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - create - {"name":"foo","description":"test description"} (4)'] = {
+  "results": {
+    "id": "17e03e50-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-9",
+    "version": 1
+  }
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - update - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - listVersions - {"sharedID":"shared-uuid-9","activeOnly":false,"page":1,"perPage":25} (6)'] = {
+  "results": [
+    {
+      "id": "17e03e50-db1c-11e9-b169-e5b8e36f8fed",
+      "name": "foo",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-9",
+      "version": 1,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "17492e70-db1c-11e9-b169-e5b8e36f8fed",
+      "name": "test",
+      "description": "test description",
+      "status": "locked",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-9",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019 16:28:52 GMT-0400 (GMT-04:00)",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571516898683
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "191d0410-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-10",
+    "version": 0
+  }
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - get - "191d0410-db1c-11e9-b169-e5b8e36f8fed" (3)'] = {
+  "results": {
+    "id": "191d0410-db1c-11e9-b169-e5b8e36f8fed",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-10",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - create - {"name":"foo","description":"test description"} (4)'] = {
+  "results": {
+    "id": "19b43b00-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-10",
+    "version": 1
+  }
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - update - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - deleteVersion - "191d0410-db1c-11e9-b169-e5b8e36f8fed" (6)'] = {
+  "results": {
+    "success": true
+  }
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - listVersions - {"sharedID":"shared-uuid-10","activeOnly":false,"page":1,"perPage":25} (7)'] = {
+  "results": [
+    {
+      "id": "19b43b00-db1c-11e9-b169-e5b8e36f8fed",
+      "name": "foo",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-10",
+      "version": 1,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571516898683
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "1b8acfc0-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-11",
+    "version": 0
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - get - "1b8acfc0-db1c-11e9-b169-e5b8e36f8fed" (3)'] = {
+  "results": {
+    "id": "1b8acfc0-db1c-11e9-b169-e5b8e36f8fed",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-11",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - create - {"name":"foo","description":"test description"} (4)'] = {
+  "results": {
+    "id": "1c216a70-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-11",
+    "version": 1
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - update - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - listVersions - {"sharedID":"shared-uuid-11","activeOnly":false,"page":1,"perPage":10000} (6)'] = {
+  "results": [
+    {
+      "id": "1c216a70-db1c-11e9-b169-e5b8e36f8fed",
+      "name": "foo",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-11",
+      "version": 1,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "1b8acfc0-db1c-11e9-b169-e5b8e36f8fed",
+      "name": "test",
+      "description": "test description",
+      "status": "locked",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-11",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019 16:28:59 GMT-0400 (GMT-04:00)",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - deleteVersion - "1c216a70-db1c-11e9-b169-e5b8e36f8fed" (7)'] = {
+  "results": {
+    "success": true
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - deleteVersion - "1b8acfc0-db1c-11e9-b169-e5b8e36f8fed" (8)'] = {
+  "results": {
+    "success": true
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - list - {"page":1,"perPage":25} (9)'] = {
+  "results": []
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571516898683
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "1e924360-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-12",
+    "version": 0
+  }
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - get - "1e924360-db1c-11e9-b169-e5b8e36f8fed" (3)'] = {
+  "results": {
+    "id": "1e924360-db1c-11e9-b169-e5b8e36f8fed",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-12",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - create - {"name":"test","description":"test description"} (4)'] = {
+  "results": {
+    "id": "1f2fe2f0-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-12",
+    "version": 0
+  }
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - update - {"name":"foo","description":"description"} (5)'] = {
+  "results": {
+    "id": "1f2fe2f0-db1c-11e9-b169-e5b8e36f8fed",
+    "version": 1
+  }
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - list - {"page":1,"perPage":25} (6)'] = {
+  "results": [
+    {
+      "id": "1e924360-db1c-11e9-b169-e5b8e36f8fed",
+      "name": "test",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-12",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "1f2fe2f0-db1c-11e9-b169-e5b8e36f8fed",
+      "name": "foo",
+      "description": "description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-13",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson",
+      "data_sources": []
+    }
+  ]
+}
+
+exports['Policies Lib requestAddDataSource Should add data sources and inputs to the policy - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571516898683
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib requestAddDataSource Should add data sources and inputs to the policy - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "207f4650-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-14",
+    "version": 0
+  }
+}
+
+exports['Policies Lib requestAddDataSource Should add data sources and inputs to the policy - get - "207f4650-db1c-11e9-b169-e5b8e36f8fed" (3)'] = {
+  "results": {
+    "id": "207f4650-db1c-11e9-b169-e5b8e36f8fed",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-14",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib requestAddDataSource Should add data sources and inputs to the policy - addInputs - [{"other":"{}","data_source_id":"uuid-15"},{"other":"{}","data_source_id":"uuid-15"}] (4)'] = {
+  "results": [
+    "21119b40-db1c-11e9-b169-e5b8e36f8fed",
+    "21b50730-db1c-11e9-b169-e5b8e36f8fed"
+  ]
+}
+
+exports['Policies Lib requestAddDataSource Should add data sources and inputs to the policy - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "22558cf0-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-14",
+    "version": 1
+  }
+}
+
+exports['Policies Lib requestAddDataSource Should add data sources and inputs to the policy - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib requestAddDataSource Should add data sources and inputs to the policy - get - "22558cf0-db1c-11e9-b169-e5b8e36f8fed" (7)'] = {
+  "results": {
+    "id": "22558cf0-db1c-11e9-b169-e5b8e36f8fed",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-14",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-15",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "21119b40-db1c-11e9-b169-e5b8e36f8fed",
+          "21b50730-db1c-11e9-b169-e5b8e36f8fed"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571516898683
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "2393d950-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-16",
+    "version": 0
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - get - "2393d950-db1c-11e9-b169-e5b8e36f8fed" (3)'] = {
+  "results": {
+    "id": "2393d950-db1c-11e9-b169-e5b8e36f8fed",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-16",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - addInputs - [{"other":"{}","data_source_id":"uuid-17"},{"other":"{}","data_source_id":"uuid-17"}] (4)'] = {
+  "results": [
+    "242a4cf0-db1c-11e9-b169-e5b8e36f8fed",
+    "24c26e40-db1c-11e9-b169-e5b8e36f8fed"
+  ]
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "25608300-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-16",
+    "version": 1
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - get - "25608300-db1c-11e9-b169-e5b8e36f8fed" (7)'] = {
+  "results": {
+    "id": "25608300-db1c-11e9-b169-e5b8e36f8fed",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-16",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-17",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "242a4cf0-db1c-11e9-b169-e5b8e36f8fed",
+          "24c26e40-db1c-11e9-b169-e5b8e36f8fed"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - get - "25608300-db1c-11e9-b169-e5b8e36f8fed" (8)'] = {
+  "results": {
+    "id": "25608300-db1c-11e9-b169-e5b8e36f8fed",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-16",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-17",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "242a4cf0-db1c-11e9-b169-e5b8e36f8fed",
+          "24c26e40-db1c-11e9-b169-e5b8e36f8fed"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - create - {"name":"test","description":"test description"} (9)'] = {
+  "results": {
+    "id": "2698dbf0-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-16",
+    "version": 2
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - update - {"name":"test","description":"test description"} (10)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - get - "2698dbf0-db1c-11e9-b169-e5b8e36f8fed" (11)'] = {
+  "results": {
+    "id": "2698dbf0-db1c-11e9-b169-e5b8e36f8fed",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-16",
+    "version": 2,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571516898683
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "27d3f400-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-18",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "27d3f400-db1c-11e9-b169-e5b8e36f8fed" (3)'] = {
+  "results": {
+    "id": "27d3f400-db1c-11e9-b169-e5b8e36f8fed",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-18",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [{"other":"{\"foo\":\"bar\"}","data_source_id":"uuid-19"}] (4)'] = {
+  "results": [
+    "286c1550-db1c-11e9-b169-e5b8e36f8fed"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "2906a7a0-db1c-11e9-b169-e5b8e36f8fed",
+    "shared_id": "shared-uuid-18",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "2906a7a0-db1c-11e9-b169-e5b8e36f8fed" (7)'] = {
+  "results": {
+    "id": "2906a7a0-db1c-11e9-b169-e5b8e36f8fed",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-18",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-19",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "286c1550-db1c-11e9-b169-e5b8e36f8fed"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["286c1550-db1c-11e9-b169-e5b8e36f8fed"],"page":1,"perPage":10000} (8)'] = {
+  "results": []
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571517038427
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "63035200-db1c-11e9-9963-aba8c56ebf02",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "63035200-db1c-11e9-9963-aba8c56ebf02" (3)'] = {
+  "results": {
+    "id": "63035200-db1c-11e9-9963-aba8c56ebf02",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [{"other":"{\"foo\":\"bar\"}","data_source_id":"uuid-2"}] (4)'] = {
+  "results": [
+    "63c43100-db1c-11e9-9963-aba8c56ebf02"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "646e2ca0-db1c-11e9-9963-aba8c56ebf02",
+    "shared_id": "shared-uuid-1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "646e2ca0-db1c-11e9-9963-aba8c56ebf02" (7)'] = {
+  "results": {
+    "id": "646e2ca0-db1c-11e9-9963-aba8c56ebf02",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-2",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "63c43100-db1c-11e9-9963-aba8c56ebf02"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["63c43100-db1c-11e9-9963-aba8c56ebf02"],"page":1,"perPage":10000} (8)'] = {
+  "results": []
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571517155173
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "a805f240-db1c-11e9-bcba-11b2c537a0d1",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "a805f240-db1c-11e9-bcba-11b2c537a0d1" (3)'] = {
+  "results": {
+    "id": "a805f240-db1c-11e9-bcba-11b2c537a0d1",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [{"other":"{\"foo\":\"bar\"}","data_source_id":"uuid-2"}] (4)'] = {
+  "results": [
+    "a8bd5b60-db1c-11e9-bcba-11b2c537a0d1"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "a957edb0-db1c-11e9-bcba-11b2c537a0d1",
+    "shared_id": "shared-uuid-1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "a957edb0-db1c-11e9-bcba-11b2c537a0d1" (7)'] = {
+  "results": {
+    "id": "a957edb0-db1c-11e9-bcba-11b2c537a0d1",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-2",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "a8bd5b60-db1c-11e9-bcba-11b2c537a0d1"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["a8bd5b60-db1c-11e9-bcba-11b2c537a0d1"],"page":1,"perPage":10000} (8)'] = {
+  "results": []
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571517619107
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "bccb5ed0-db1d-11e9-a55e-f7e31b1dad89",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "bccb5ed0-db1d-11e9-a55e-f7e31b1dad89" (3)'] = {
+  "results": {
+    "id": "bccb5ed0-db1d-11e9-a55e-f7e31b1dad89",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [{"other":"{\"foo\":\"bar\"}","data_source_id":"uuid-2"}] (4)'] = {
+  "results": [
+    "bd8befb0-db1d-11e9-a55e-f7e31b1dad89"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "be2f82b0-db1d-11e9-a55e-f7e31b1dad89",
+    "shared_id": "shared-uuid-1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "be2f82b0-db1d-11e9-a55e-f7e31b1dad89" (7)'] = {
+  "results": {
+    "id": "be2f82b0-db1d-11e9-a55e-f7e31b1dad89",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-2",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "bd8befb0-db1d-11e9-a55e-f7e31b1dad89"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["bd8befb0-db1d-11e9-a55e-f7e31b1dad89"],"page":1,"perPage":10000} (8)'] = {
+  "results": []
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571517680810
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "e2aaa700-db1d-11e9-8dc0-278f06df2e67",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "e2aaa700-db1d-11e9-8dc0-278f06df2e67" (3)'] = {
+  "results": {
+    "id": "e2aaa700-db1d-11e9-8dc0-278f06df2e67",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [{"other":"{\"foo\":\"bar\"}","data_source_id":"uuid-2"}] (4)'] = {
+  "results": [
+    "e2fb8620-db1d-11e9-8dc0-278f06df2e67"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "e3941ca0-db1d-11e9-8dc0-278f06df2e67",
+    "shared_id": "shared-uuid-1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "e3941ca0-db1d-11e9-8dc0-278f06df2e67" (7)'] = {
+  "results": {
+    "id": "e3941ca0-db1d-11e9-8dc0-278f06df2e67",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-2",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "e2fb8620-db1d-11e9-8dc0-278f06df2e67"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["e2fb8620-db1d-11e9-8dc0-278f06df2e67"],"page":1,"perPage":10000} (8)'] = {
+  "results": []
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571517772100
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "18444560-db1e-11e9-a6b0-5fbc67e25f16",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "18444560-db1e-11e9-a6b0-5fbc67e25f16" (3)'] = {
+  "results": {
+    "id": "18444560-db1e-11e9-a6b0-5fbc67e25f16",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [{"other":"{\"foo\":\"bar\"}","data_source_id":"uuid-2"}] (4)'] = {
+  "results": [
+    "18a79b10-db1e-11e9-a6b0-5fbc67e25f16"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "193e5cd0-db1e-11e9-a6b0-5fbc67e25f16",
+    "shared_id": "shared-uuid-1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "193e5cd0-db1e-11e9-a6b0-5fbc67e25f16" (7)'] = {
+  "results": {
+    "id": "193e5cd0-db1e-11e9-a6b0-5fbc67e25f16",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-2",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "18a79b10-db1e-11e9-a6b0-5fbc67e25f16"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["18a79b10-db1e-11e9-a6b0-5fbc67e25f16"],"page":1,"perPage":10000} (8)'] = {
+  "results": []
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571517909137
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "69ad2ed0-db1e-11e9-bb16-91b6542ae719",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "69ad2ed0-db1e-11e9-bb16-91b6542ae719" (3)'] = {
+  "results": {
+    "id": "69ad2ed0-db1e-11e9-bb16-91b6542ae719",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [{"other":"{\"foo\":\"bar\"}","data_source_id":"uuid-2"}] (4)'] = {
+  "results": [
+    "6a7a42d0-db1e-11e9-bb16-91b6542ae719"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "6b132770-db1e-11e9-bb16-91b6542ae719",
+    "shared_id": "shared-uuid-1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "6b132770-db1e-11e9-bb16-91b6542ae719" (7)'] = {
+  "results": {
+    "id": "6b132770-db1e-11e9-bb16-91b6542ae719",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-2",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "6a7a42d0-db1e-11e9-bb16-91b6542ae719"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["6a7a42d0-db1e-11e9-bb16-91b6542ae719"],"page":1,"perPage":10000} (8)'] = {
+  "results": []
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571518113816
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "e44eebb0-db1e-11e9-bfb1-f3f1e5594de9",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "e44eebb0-db1e-11e9-bfb1-f3f1e5594de9" (3)'] = {
+  "results": {
+    "id": "e44eebb0-db1e-11e9-bfb1-f3f1e5594de9",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [{"other":"{\"foo\":\"bar\"}","data_source_id":"uuid-2"}] (4)'] = {
+  "results": [
+    "e52c2c50-db1e-11e9-bfb1-f3f1e5594de9"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "e5d6eb40-db1e-11e9-bfb1-f3f1e5594de9",
+    "shared_id": "shared-uuid-1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "e5d6eb40-db1e-11e9-bfb1-f3f1e5594de9" (7)'] = {
+  "results": {
+    "id": "e5d6eb40-db1e-11e9-bfb1-f3f1e5594de9",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-2",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "e52c2c50-db1e-11e9-bfb1-f3f1e5594de9"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["e52c2c50-db1e-11e9-bfb1-f3f1e5594de9"],"page":1,"perPage":10000} (8)'] = {
+  "results": []
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571518166651
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "03c5baf0-db1f-11e9-b419-dbcc7077d02e",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "03c5baf0-db1f-11e9-b419-dbcc7077d02e" (3)'] = {
+  "results": {
+    "id": "03c5baf0-db1f-11e9-b419-dbcc7077d02e",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [{"other":"{\"foo\":\"bar\"}","data_source_id":"uuid-2"}] (4)'] = {
+  "results": [
+    "0482c960-db1f-11e9-b419-dbcc7077d02e"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "051c9860-db1f-11e9-b419-dbcc7077d02e",
+    "shared_id": "shared-uuid-1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "051c9860-db1f-11e9-b419-dbcc7077d02e" (7)'] = {
+  "results": {
+    "id": "051c9860-db1f-11e9-b419-dbcc7077d02e",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-2",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "0482c960-db1f-11e9-b419-dbcc7077d02e"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["0482c960-db1f-11e9-b419-dbcc7077d02e"],"page":1,"perPage":10000} (8)'] = {
+  "results": []
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571518253941
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "3a3546f0-db1f-11e9-aff6-7585e8c01e0f",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "3a3546f0-db1f-11e9-aff6-7585e8c01e0f" (3)'] = {
+  "results": {
+    "id": "3a3546f0-db1f-11e9-aff6-7585e8c01e0f",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [{"other":"{\"foo\":\"bar\"}","data_source_id":"uuid-2"}] (4)'] = {
+  "results": [
+    "3b01beb0-db1f-11e9-aff6-7585e8c01e0f"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "3b9a5530-db1f-11e9-aff6-7585e8c01e0f",
+    "shared_id": "shared-uuid-1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "3b9a5530-db1f-11e9-aff6-7585e8c01e0f" (7)'] = {
+  "results": {
+    "id": "3b9a5530-db1f-11e9-aff6-7585e8c01e0f",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-2",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "3b01beb0-db1f-11e9-aff6-7585e8c01e0f"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["3b01beb0-db1f-11e9-aff6-7585e8c01e0f"],"page":1,"perPage":10000} (8)'] = {
+  "results": []
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571518374957
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "80866030-db1f-11e9-8a21-ddff8833845d",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "80866030-db1f-11e9-8a21-ddff8833845d" (3)'] = {
+  "results": {
+    "id": "80866030-db1f-11e9-8a21-ddff8833845d",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [{"other":"{\"foo\":\"bar\"}","data_source_id":"uuid-2"}] (4)'] = {
+  "results": [
+    "8165c3b0-db1f-11e9-8a21-ddff8833845d"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "82018e80-db1f-11e9-8a21-ddff8833845d",
+    "shared_id": "shared-uuid-1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "82018e80-db1f-11e9-8a21-ddff8833845d" (7)'] = {
+  "results": {
+    "id": "82018e80-db1f-11e9-8a21-ddff8833845d",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-2",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "8165c3b0-db1f-11e9-8a21-ddff8833845d"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["8165c3b0-db1f-11e9-8a21-ddff8833845d"],"page":1,"perPage":10000} (8)'] = {
+  "results": []
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571518503365
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "cb5d76c0-db1f-11e9-aed7-d9b0d7ee8233",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "cb5d76c0-db1f-11e9-aed7-d9b0d7ee8233" (3)'] = {
+  "results": {
+    "id": "cb5d76c0-db1f-11e9-aed7-d9b0d7ee8233",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [{"other":"{\"foo\":\"bar\"}","data_source_id":"uuid-2"}] (4)'] = {
+  "results": [
+    "cc218a10-db1f-11e9-aed7-d9b0d7ee8233"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "ccb9f980-db1f-11e9-aed7-d9b0d7ee8233",
+    "shared_id": "shared-uuid-1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "ccb9f980-db1f-11e9-aed7-d9b0d7ee8233" (7)'] = {
+  "results": {
+    "id": "ccb9f980-db1f-11e9-aed7-d9b0d7ee8233",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-2",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "cc218a10-db1f-11e9-aed7-d9b0d7ee8233"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["cc218a10-db1f-11e9-aed7-d9b0d7ee8233"],"page":1,"perPage":10000} (8)'] = {
+  "results": []
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571518627595
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "15fc1830-db20-11e9-99c6-fdc62d579d97",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "15fc1830-db20-11e9-99c6-fdc62d579d97" (3)'] = {
+  "results": {
+    "id": "15fc1830-db20-11e9-99c6-fdc62d579d97",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [{"other":"{\"foo\":\"bar\"}","data_source_id":"uuid-2"}] (4)'] = {
+  "results": [
+    "16a80fa0-db20-11e9-99c6-fdc62d579d97"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "17411b50-db20-11e9-99c6-fdc62d579d97",
+    "shared_id": "shared-uuid-1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "17411b50-db20-11e9-99c6-fdc62d579d97" (7)'] = {
+  "results": {
+    "id": "17411b50-db20-11e9-99c6-fdc62d579d97",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-2",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "16a80fa0-db20-11e9-99c6-fdc62d579d97"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["16a80fa0-db20-11e9-99c6-fdc62d579d97"],"page":1,"perPage":10000} (8)'] = {
+  "results": []
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571518738365
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "57e48020-db20-11e9-b6c4-8bc7306be262",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "57e48020-db20-11e9-b6c4-8bc7306be262" (3)'] = {
+  "results": {
+    "id": "57e48020-db20-11e9-b6c4-8bc7306be262",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [{"other":"{\"foo\":\"bar\"}","data_source_id":"uuid-2"}] (4)'] = {
+  "results": [
+    "58af9850-db20-11e9-b6c4-8bc7306be262"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "5949dc80-db20-11e9-b6c4-8bc7306be262",
+    "shared_id": "shared-uuid-1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "5949dc80-db20-11e9-b6c4-8bc7306be262" (7)'] = {
+  "results": {
+    "id": "5949dc80-db20-11e9-b6c4-8bc7306be262",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-2",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "58af9850-db20-11e9-b6c4-8bc7306be262"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["58af9850-db20-11e9-b6c4-8bc7306be262"],"page":1,"perPage":10000} (8)'] = {
+  "results": []
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571518801206
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "7d2390b0-db20-11e9-90f1-fb8626c8f696",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "7d2390b0-db20-11e9-90f1-fb8626c8f696" (3)'] = {
+  "results": {
+    "id": "7d2390b0-db20-11e9-90f1-fb8626c8f696",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [{"other":"{\"foo\":\"bar\"}","data_source_id":"uuid-2"}] (4)'] = {
+  "results": [
+    "7de002e0-db20-11e9-90f1-fb8626c8f696"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "7e7983c0-db20-11e9-90f1-fb8626c8f696",
+    "shared_id": "shared-uuid-1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "7e7983c0-db20-11e9-90f1-fb8626c8f696" (7)'] = {
+  "results": {
+    "id": "7e7983c0-db20-11e9-90f1-fb8626c8f696",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-2",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "7de002e0-db20-11e9-90f1-fb8626c8f696"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["7de002e0-db20-11e9-90f1-fb8626c8f696"],"page":1,"perPage":10000} (8)'] = {
+  "results": []
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571518899471
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "b7917370-db20-11e9-b1ba-53bc48983d95",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "b7917370-db20-11e9-b1ba-53bc48983d95" (3)'] = {
+  "results": {
+    "id": "b7917370-db20-11e9-b1ba-53bc48983d95",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [{"other":"{\"foo\":\"bar\"}","data_source_id":"uuid-2"}] (4)'] = {
+  "results": [
+    "b84b74a0-db20-11e9-b1ba-53bc48983d95"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "b8e98960-db20-11e9-b1ba-53bc48983d95",
+    "shared_id": "shared-uuid-1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "b8e98960-db20-11e9-b1ba-53bc48983d95" (7)'] = {
+  "results": {
+    "id": "b8e98960-db20-11e9-b1ba-53bc48983d95",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-2",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "b84b74a0-db20-11e9-b1ba-53bc48983d95"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["b84b74a0-db20-11e9-b1ba-53bc48983d95"],"page":1,"perPage":10000} (8)'] = {
+  "results": []
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571519021419
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "00299680-db21-11e9-b9b9-71a6f55a67dd",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "00299680-db21-11e9-b9b9-71a6f55a67dd" (3)'] = {
+  "results": {
+    "id": "00299680-db21-11e9-b9b9-71a6f55a67dd",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [{"other":"{\"foo\":\"bar\"}","data_source_id":"uuid-2"}] (4)'] = {
+  "results": [
+    "00f068f0-db21-11e9-b9b9-71a6f55a67dd"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "0189c2c0-db21-11e9-b9b9-71a6f55a67dd",
+    "shared_id": "shared-uuid-1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "0189c2c0-db21-11e9-b9b9-71a6f55a67dd" (7)'] = {
+  "results": {
+    "id": "0189c2c0-db21-11e9-b9b9-71a6f55a67dd",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-2",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "00f068f0-db21-11e9-b9b9-71a6f55a67dd"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["00f068f0-db21-11e9-b9b9-71a6f55a67dd"],"page":1,"perPage":10000} (8)'] = {
+  "results": [
+    {
+      "other": "{\"foo\":\"bar\"}",
+      "data_source_id": "uuid-2"
+    }
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571519152001
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "4e70cd90-db21-11e9-a688-934083cc0040",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "4e70cd90-db21-11e9-a688-934083cc0040" (3)'] = {
+  "results": {
+    "id": "4e70cd90-db21-11e9-a688-934083cc0040",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [{"other":"{\"foo\":\"bar\"}","data_source_id":"uuid-2"}] (4)'] = {
+  "results": [
+    "4f388a60-db21-11e9-a688-934083cc0040"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "4fd2f5a0-db21-11e9-a688-934083cc0040",
+    "shared_id": "shared-uuid-1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "4fd2f5a0-db21-11e9-a688-934083cc0040" (7)'] = {
+  "results": {
+    "id": "4fd2f5a0-db21-11e9-a688-934083cc0040",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-2",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "4f388a60-db21-11e9-a688-934083cc0040"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["4f388a60-db21-11e9-a688-934083cc0040"],"page":1,"perPage":10000} (8)'] = {
+  "results": []
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571519490587
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "17ee1240-db22-11e9-8ef7-454d4c989b18",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "17ee1240-db22-11e9-8ef7-454d4c989b18" (3)'] = {
+  "results": {
+    "id": "17ee1240-db22-11e9-8ef7-454d4c989b18",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [{"other":"{\"foo\":\"bar\"}","data_source_id":"uuid-2"}] (4)'] = {
+  "results": [
+    "18ab95e0-db22-11e9-8ef7-454d4c989b18"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "1944efb0-db22-11e9-8ef7-454d4c989b18",
+    "shared_id": "shared-uuid-1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "1944efb0-db22-11e9-8ef7-454d4c989b18" (7)'] = {
+  "results": {
+    "id": "1944efb0-db22-11e9-8ef7-454d4c989b18",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-2",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "18ab95e0-db22-11e9-8ef7-454d4c989b18"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["18ab95e0-db22-11e9-8ef7-454d4c989b18"]} (8)'] = {
+  "results": [
+    {
+      "other": "{\"foo\":\"bar\"}",
+      "data_source_id": "uuid-2"
+    }
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571519682994
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "8ab576b0-db22-11e9-9714-03644f1efe82",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "8ab576b0-db22-11e9-9714-03644f1efe82" (3)'] = {
+  "results": {
+    "id": "8ab576b0-db22-11e9-9714-03644f1efe82",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [{"other":"{\"foo\":\"bar\"}","data_source_id":"uuid-2"}] (4)'] = {
+  "results": [
+    "8b754440-db22-11e9-9714-03644f1efe82"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "8c0e7700-db22-11e9-9714-03644f1efe82",
+    "shared_id": "shared-uuid-1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "8c0e7700-db22-11e9-9714-03644f1efe82" (7)'] = {
+  "results": {
+    "id": "8c0e7700-db22-11e9-9714-03644f1efe82",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-2",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "8b754440-db22-11e9-9714-03644f1efe82"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["8b754440-db22-11e9-9714-03644f1efe82"]} (8)'] = {
+  "results": [
+    {
+      "other": "{\"foo\":\"bar\"}",
+      "data_source_id": "uuid-2"
+    }
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571519798557
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "d00a7cb0-db22-11e9-bc08-8d46fab4eff1",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "d00a7cb0-db22-11e9-bc08-8d46fab4eff1" (3)'] = {
+  "results": {
+    "id": "d00a7cb0-db22-11e9-bc08-8d46fab4eff1",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - ["uuid-2"] (4)'] = {
+  "results": [
+    "d0be3c50-db22-11e9-bc08-8d46fab4eff1"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "d16c56a0-db22-11e9-bc08-8d46fab4eff1",
+    "shared_id": "shared-uuid-1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "d16c56a0-db22-11e9-bc08-8d46fab4eff1" (7)'] = {
+  "results": {
+    "id": "d16c56a0-db22-11e9-bc08-8d46fab4eff1",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-2",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "d0be3c50-db22-11e9-bc08-8d46fab4eff1"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["d0be3c50-db22-11e9-bc08-8d46fab4eff1"]} (8)'] = {
+  "results": [
+    {
+      "other": "{\"foo\":\"bar\"}",
+      "data_source_id": "uuid-2"
+    }
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571519934400
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "20ed4630-db23-11e9-8940-29e60274b341",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "20ed4630-db23-11e9-8940-29e60274b341" (3)'] = {
+  "results": {
+    "id": "20ed4630-db23-11e9-8940-29e60274b341",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [null] (4)'] = {
+  "results": [
+    "21b9bdf0-db23-11e9-8940-29e60274b341"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "22542930-db23-11e9-8940-29e60274b341",
+    "shared_id": "shared-uuid-1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "22542930-db23-11e9-8940-29e60274b341" (7)'] = {
+  "results": {
+    "id": "22542930-db23-11e9-8940-29e60274b341",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-2",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "21b9bdf0-db23-11e9-8940-29e60274b341"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["21b9bdf0-db23-11e9-8940-29e60274b341"]} (8)'] = {
+  "results": [
+    {
+      "other": "{\"foo\":\"bar\"}",
+      "data_source_id": "uuid-2"
+    }
+  ]
+}
+
+exports['Policies Lib create should create a new policy - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571520038171
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib create should create a new policy - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "cad44cc0-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-1",
+    "version": 0
+  }
+}
+
+exports['Policies Lib create should create a new policy - get - "cad44cc0-db23-11e9-9d24-fb3c1e67cbc1" (3)'] = {
+  "results": {
+    "id": "cad44cc0-db23-11e9-9d24-fb3c1e67cbc1",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-1",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib list should list all active policies - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571520038171
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should list all active policies - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "cb99e6b0-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-2",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should list all active policies - get info (3)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571520038171
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should list all active policies - create - {"name":"test2","description":"test description"} (4)'] = {
+  "results": {
+    "id": "cc31e0f0-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-3",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should list all active policies - get info (5)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571520038171
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should list all active policies - create - {"name":"test3","description":"test description"} (6)'] = {
+  "results": {
+    "id": "cccc4c30-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-4",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should list all active policies - list - {"page":1,"perPage":25} (7)'] = {
+  "results": [
+    {
+      "id": "cb99e6b0-db23-11e9-9d24-fb3c1e67cbc1",
+      "name": "test",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-2",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "cc31e0f0-db23-11e9-9d24-fb3c1e67cbc1",
+      "name": "test2",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-3",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "cccc4c30-db23-11e9-9d24-fb3c1e67cbc1",
+      "name": "test3",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-4",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Policies Lib list should not list inactive policies - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571520038171
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should not list inactive policies - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "cd6d2010-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-5",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - get - "cd6d2010-db23-11e9-9d24-fb3c1e67cbc1" (3)'] = {
+  "results": {
+    "id": "cd6d2010-db23-11e9-9d24-fb3c1e67cbc1",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-5",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - create - {"name":"foo","description":"test description"} (4)'] = {
+  "results": {
+    "id": "ce045700-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-5",
+    "version": 1
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - update - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - get info (6)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571520038171
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should not list inactive policies - create - {"name":"test2","description":"test description"} (7)'] = {
+  "results": {
+    "id": "cf392d80-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-6",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - get info (8)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571520038171
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should not list inactive policies - create - {"name":"test3","description":"test description"} (9)'] = {
+  "results": {
+    "id": "cfd3e6e0-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-7",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - list - {"page":1,"perPage":25} (10)'] = {
+  "results": [
+    {
+      "id": "ce045700-db23-11e9-9d24-fb3c1e67cbc1",
+      "name": "foo",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-5",
+      "version": 1,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "cf392d80-db23-11e9-9d24-fb3c1e67cbc1",
+      "name": "test2",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-6",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "cfd3e6e0-db23-11e9-9d24-fb3c1e67cbc1",
+      "name": "test3",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-7",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571520038171
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "d073a950-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-8",
+    "version": 0
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get - "d073a950-db23-11e9-9d24-fb3c1e67cbc1" (3)'] = {
+  "results": {
+    "id": "d073a950-db23-11e9-9d24-fb3c1e67cbc1",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-8",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - create - {"name":"foo","description":"test description"} (4)'] = {
+  "results": {
+    "id": "d10a1cf0-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-8",
+    "version": 1
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - update - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get - "d10a1cf0-db23-11e9-9d24-fb3c1e67cbc1" (6)'] = {
+  "results": {
+    "id": "d10a1cf0-db23-11e9-9d24-fb3c1e67cbc1",
+    "name": "foo",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-8",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get - "d073a950-db23-11e9-9d24-fb3c1e67cbc1" (7)'] = {
+  "results": {
+    "id": "d073a950-db23-11e9-9d24-fb3c1e67cbc1",
+    "name": "test",
+    "description": "test description",
+    "status": "locked",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-8",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019 17:24:09 GMT-0400 (GMT-04:00)",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571520038171
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "d24757e0-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-9",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - get - "d24757e0-db23-11e9-9d24-fb3c1e67cbc1" (3)'] = {
+  "results": {
+    "id": "d24757e0-db23-11e9-9d24-fb3c1e67cbc1",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-9",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - create - {"name":"foo","description":"test description"} (4)'] = {
+  "results": {
+    "id": "d2fac960-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-9",
+    "version": 1
+  }
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - update - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - listVersions - {"sharedID":"shared-uuid-9","activeOnly":false,"page":1,"perPage":25} (6)'] = {
+  "results": [
+    {
+      "id": "d2fac960-db23-11e9-9d24-fb3c1e67cbc1",
+      "name": "foo",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-9",
+      "version": 1,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "d24757e0-db23-11e9-9d24-fb3c1e67cbc1",
+      "name": "test",
+      "description": "test description",
+      "status": "locked",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-9",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019 17:24:13 GMT-0400 (GMT-04:00)",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571520038171
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "d43d8290-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-10",
+    "version": 0
+  }
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - get - "d43d8290-db23-11e9-9d24-fb3c1e67cbc1" (3)'] = {
+  "results": {
+    "id": "d43d8290-db23-11e9-9d24-fb3c1e67cbc1",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-10",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - create - {"name":"foo","description":"test description"} (4)'] = {
+  "results": {
+    "id": "d4d57cd0-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-10",
+    "version": 1
+  }
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - update - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - deleteVersion - "d43d8290-db23-11e9-9d24-fb3c1e67cbc1" (6)'] = {
+  "results": {
+    "success": true
+  }
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - listVersions - {"sharedID":"shared-uuid-10","activeOnly":false,"page":1,"perPage":25} (7)'] = {
+  "results": [
+    {
+      "id": "d4d57cd0-db23-11e9-9d24-fb3c1e67cbc1",
+      "name": "foo",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-10",
+      "version": 1,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571520038171
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "d6a84100-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-11",
+    "version": 0
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - get - "d6a84100-db23-11e9-9d24-fb3c1e67cbc1" (3)'] = {
+  "results": {
+    "id": "d6a84100-db23-11e9-9d24-fb3c1e67cbc1",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-11",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - create - {"name":"foo","description":"test description"} (4)'] = {
+  "results": {
+    "id": "d7406250-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-11",
+    "version": 1
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - update - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - listVersions - {"sharedID":"shared-uuid-11","activeOnly":false,"page":1,"perPage":10000} (6)'] = {
+  "results": [
+    {
+      "id": "d7406250-db23-11e9-9d24-fb3c1e67cbc1",
+      "name": "foo",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-11",
+      "version": 1,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "d6a84100-db23-11e9-9d24-fb3c1e67cbc1",
+      "name": "test",
+      "description": "test description",
+      "status": "locked",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-11",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019 17:24:20 GMT-0400 (GMT-04:00)",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - deleteVersion - "d7406250-db23-11e9-9d24-fb3c1e67cbc1" (7)'] = {
+  "results": {
+    "success": true
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - deleteVersion - "d6a84100-db23-11e9-9d24-fb3c1e67cbc1" (8)'] = {
+  "results": {
+    "success": true
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - list - {"page":1,"perPage":25} (9)'] = {
+  "results": []
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571520038171
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "d9addfe0-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-12",
+    "version": 0
+  }
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - get - "d9addfe0-db23-11e9-9d24-fb3c1e67cbc1" (3)'] = {
+  "results": {
+    "id": "d9addfe0-db23-11e9-9d24-fb3c1e67cbc1",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-12",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - create - {"name":"test","description":"test description"} (4)'] = {
+  "results": {
+    "id": "da467660-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-12",
+    "version": 0
+  }
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - update - {"name":"foo","description":"description"} (5)'] = {
+  "results": {
+    "id": "da467660-db23-11e9-9d24-fb3c1e67cbc1",
+    "version": 1
+  }
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - list - {"page":1,"perPage":25} (6)'] = {
+  "results": [
+    {
+      "id": "d9addfe0-db23-11e9-9d24-fb3c1e67cbc1",
+      "name": "test",
+      "description": "test description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-12",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "da467660-db23-11e9-9d24-fb3c1e67cbc1",
+      "name": "foo",
+      "description": "description",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "shared-uuid-13",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "created_on": "Thu Sep 19 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Thu Sep 19 2019",
+      "updated_by": "mattapperson",
+      "data_sources": []
+    }
+  ]
+}
+
+exports['Policies Lib requestAddDataSource Should add data sources and inputs to the policy - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571520038171
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib requestAddDataSource Should add data sources and inputs to the policy - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "db811940-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-14",
+    "version": 0
+  }
+}
+
+exports['Policies Lib requestAddDataSource Should add data sources and inputs to the policy - get - "db811940-db23-11e9-9d24-fb3c1e67cbc1" (3)'] = {
+  "results": {
+    "id": "db811940-db23-11e9-9d24-fb3c1e67cbc1",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-14",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib requestAddDataSource Should add data sources and inputs to the policy - addInputs - [null,null] (4)'] = {
+  "results": [
+    "dc178ce0-db23-11e9-9d24-fb3c1e67cbc1",
+    "dcafae30-db23-11e9-9d24-fb3c1e67cbc1"
+  ]
+}
+
+exports['Policies Lib requestAddDataSource Should add data sources and inputs to the policy - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "dd4e8640-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-14",
+    "version": 1
+  }
+}
+
+exports['Policies Lib requestAddDataSource Should add data sources and inputs to the policy - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib requestAddDataSource Should add data sources and inputs to the policy - get - "dd4e8640-db23-11e9-9d24-fb3c1e67cbc1" (7)'] = {
+  "results": {
+    "id": "dd4e8640-db23-11e9-9d24-fb3c1e67cbc1",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-14",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-15",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "dc178ce0-db23-11e9-9d24-fb3c1e67cbc1",
+          "dcafae30-db23-11e9-9d24-fb3c1e67cbc1"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571520038171
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "de8bc130-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-16",
+    "version": 0
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - get - "de8bc130-db23-11e9-9d24-fb3c1e67cbc1" (3)'] = {
+  "results": {
+    "id": "de8bc130-db23-11e9-9d24-fb3c1e67cbc1",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-16",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - addInputs - [null,null] (4)'] = {
+  "results": [
+    "df2234d0-db23-11e9-9d24-fb3c1e67cbc1",
+    "dfba5620-db23-11e9-9d24-fb3c1e67cbc1"
+  ]
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "e057f5b0-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-16",
+    "version": 1
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - get - "e057f5b0-db23-11e9-9d24-fb3c1e67cbc1" (7)'] = {
+  "results": {
+    "id": "e057f5b0-db23-11e9-9d24-fb3c1e67cbc1",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-16",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-17",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "df2234d0-db23-11e9-9d24-fb3c1e67cbc1",
+          "dfba5620-db23-11e9-9d24-fb3c1e67cbc1"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - get - "e057f5b0-db23-11e9-9d24-fb3c1e67cbc1" (8)'] = {
+  "results": {
+    "id": "e057f5b0-db23-11e9-9d24-fb3c1e67cbc1",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-16",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-17",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "df2234d0-db23-11e9-9d24-fb3c1e67cbc1",
+          "dfba5620-db23-11e9-9d24-fb3c1e67cbc1"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - create - {"name":"test","description":"test description"} (9)'] = {
+  "results": {
+    "id": "e1909cc0-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-16",
+    "version": 2
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - update - {"name":"test","description":"test description"} (10)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib requestDeleteDataSource Should delete data sources - get - "e1909cc0-db23-11e9-9d24-fb3c1e67cbc1" (11)'] = {
+  "results": {
+    "id": "e1909cc0-db23-11e9-9d24-fb3c1e67cbc1",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-16",
+    "version": 2,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1571520038171
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "e2ca0720-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-18",
+    "version": 0
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "e2ca0720-db23-11e9-9d24-fb3c1e67cbc1" (3)'] = {
+  "results": {
+    "id": "e2ca0720-db23-11e9-9d24-fb3c1e67cbc1",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-18",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - addInputs - [null] (4)'] = {
+  "results": [
+    "e3620160-db23-11e9-9d24-fb3c1e67cbc1"
+  ]
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - create - {"name":"test","description":"test description"} (5)'] = {
+  "results": {
+    "id": "e3fc4590-db23-11e9-9d24-fb3c1e67cbc1",
+    "shared_id": "shared-uuid-18",
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - update - {"name":"test","description":"test description"} (6)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - get - "e3fc4590-db23-11e9-9d24-fb3c1e67cbc1" (7)'] = {
+  "results": {
+    "id": "e3fc4590-db23-11e9-9d24-fb3c1e67cbc1",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "shared-uuid-18",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [
+      {
+        "uuid": "uuid-19",
+        "output": "43hi34hi5y3i53o4",
+        "inputs": [
+          "e3620160-db23-11e9-9d24-fb3c1e67cbc1"
+        ],
+        "queue": "\"\""
+      }
+    ],
+    "created_on": "Thu Sep 19 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Thu Sep 19 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib getFull Should return a policy with all inputs, not just refs to the inputs - getInputsById - {"ids":["e3620160-db23-11e9-9d24-fb3c1e67cbc1"]} (8)'] = {
+  "results": [
+    {
+      "other": "{\"foo\":\"bar\"}",
+      "data_source_id": "uuid-19"
+    }
+  ]
+}

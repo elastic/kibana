@@ -1,0 +1,3957 @@
+
+exports['Agent Adapter create should create a new agent - create:agents (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "5dff9500-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"localhost\"}",
+      "user_provided_metadata": "{}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:20:55.888Z",
+    "version": "WzAsMV0="
+  }
+}
+
+exports['Agent Adapter create should create a new agent - find:{"type":"agents","perPage":1000} (2)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "5dff9500-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"localhost\"}",
+          "user_provided_metadata": "{}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:20:55.888Z",
+        "version": "WzAsMV0="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter create should create a new agent - delete:agents:5dff9500-db23-11e9-9cfa-4b0d72dd400d:{} (3)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should create a new agent with the specified id if specified - create:agents (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "test-agent-id-1",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"localhost\"}",
+      "user_provided_metadata": "{}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:20:57.332Z",
+    "version": "WzIsMV0="
+  }
+}
+
+exports['Agent Adapter create should create a new agent with the specified id if specified - find:{"type":"agents","perPage":1000} (2)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "test-agent-id-1",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"localhost\"}",
+          "user_provided_metadata": "{}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:20:57.332Z",
+        "version": "WzIsMV0="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter create should create a new agent with the specified id if specified - delete:agents:test-agent-id-1:{} (3)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should allow to create a new agent with the same id two time if override is true - create:agents (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "test-agent-id-2",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"localhost\"}",
+      "user_provided_metadata": "{}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:20:59.364Z",
+    "version": "WzQsMV0="
+  }
+}
+
+exports['Agent Adapter create should allow to create a new agent with the same id two time if override is true - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "test-agent-id-2",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"localhost\"}",
+      "user_provided_metadata": "{}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:00.382Z",
+    "version": "WzUsMV0="
+  }
+}
+
+exports['Agent Adapter create should allow to create a new agent with the same id two time if override is true - find:{"type":"agents","perPage":1000} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "test-agent-id-2",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"localhost\"}",
+          "user_provided_metadata": "{}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:00.382Z",
+        "version": "WzUsMV0="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter create should allow to create a new agent with the same id two time if override is true - delete:agents:test-agent-id-2:{} (4)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should allow to create a new agent with the same id two time if override is true - create:agents (5)'] = {
+  "results": {
+    "type": "agents",
+    "id": "61e55ab0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"localhost\"}",
+      "user_provided_metadata": "{}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:02.427Z",
+    "version": "WzcsMV0="
+  }
+}
+
+exports['Agent Adapter update should allow to update an agent - get:agents:61e55ab0-db23-11e9-9cfa-4b0d72dd400d:{"active":true}:{} (1)'] = {
+  "results": {
+    "id": "61e55ab0-db23-11e9-9cfa-4b0d72dd400d",
+    "type": "agents",
+    "updated_at": "2019-09-19T21:21:03.451Z",
+    "version": "WzgsMV0=",
+    "references": [],
+    "attributes": {
+      "active": true
+    }
+  }
+}
+
+exports['Agent Adapter update should allow to update an agent - get:agents:61e55ab0-db23-11e9-9cfa-4b0d72dd400d:{} (2)'] = {
+  "results": {
+    "id": "61e55ab0-db23-11e9-9cfa-4b0d72dd400d",
+    "type": "agents",
+    "updated_at": "2019-09-19T21:21:03.451Z",
+    "version": "WzgsMV0=",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": true,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"localhost\"}",
+      "user_provided_metadata": "{}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": []
+  }
+}
+
+exports['Agent Adapter update should allow to update an agent - find:{"type":"agents","perPage":1000} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "61e55ab0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": true,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"localhost\"}",
+          "user_provided_metadata": "{}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:03.451Z",
+        "version": "WzgsMV0="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter update should allow to update an agent - delete:agents:61e55ab0-db23-11e9-9cfa-4b0d72dd400d:{} (4)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter update should allow to update an agent - create:agents (5)'] = {
+  "results": {
+    "type": "agents",
+    "id": "63b7f7d0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"localhost\"}",
+      "user_provided_metadata": "{}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:05.485Z",
+    "version": "WzEwLDFd"
+  }
+}
+
+exports['Agent Adapter delete should delete an agent - delete:agents:63b7f7d0-db23-11e9-9cfa-4b0d72dd400d:{} (1)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter delete should delete an agent - get:agents:63b7f7d0-db23-11e9-9cfa-4b0d72dd400d:{} (2)'] = {
+  "results": null
+}
+
+exports['Agent Adapter delete should delete an agent - find:{"type":"agents","perPage":1000} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['Agent Adapter delete should delete an agent - create:agents (4)'] = {
+  "results": {
+    "type": "agents",
+    "id": "64f46f70-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:07.559Z",
+    "version": "WzEyLDFd"
+  }
+}
+
+exports['Agent Adapter delete should delete an agent - create:agents (5)'] = {
+  "results": {
+    "type": "agents",
+    "id": "658df050-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent2",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"elastic.co\"}",
+      "user_provided_metadata": "{\"color\":\"blue\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:08.565Z",
+    "version": "WzEzLDFd"
+  }
+}
+
+exports['Agent Adapter findEphemeralByPolicySharedId should allow to find agent by policy shared id - find:{"type":"agents","search":"shared_policy_id_1","searchFields":["policy_shared_id"]} (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "64f46f70-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:07.559Z",
+        "version": "WzEyLDFd"
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter findEphemeralByPolicySharedId should allow to find agent by policy shared id - find:{"type":"agents","perPage":1000} (2)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 2,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "64f46f70-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:07.559Z",
+        "version": "WzEyLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "658df050-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"elastic.co\"}",
+          "user_provided_metadata": "{\"color\":\"blue\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:08.565Z",
+        "version": "WzEzLDFd"
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter findEphemeralByPolicySharedId should allow to find agent by policy shared id - delete:agents:64f46f70-db23-11e9-9cfa-4b0d72dd400d:{} (3)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter findEphemeralByPolicySharedId should allow to find agent by policy shared id - delete:agents:658df050-db23-11e9-9cfa-4b0d72dd400d:{} (4)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - create:agents (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "6760db90-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent0",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:11.625Z",
+    "version": "WzE2LDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "67fc3130-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-06T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:12.642Z",
+    "version": "WzE3LDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (3)'] = {
+  "results": {
+    "type": "agents",
+    "id": "68975fc0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent2",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-07T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:13.660Z",
+    "version": "WzE4LDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (4)'] = {
+  "results": {
+    "type": "agents",
+    "id": "6932b560-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent3",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-08T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:14.678Z",
+    "version": "WzE5LDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (5)'] = {
+  "results": {
+    "type": "agents",
+    "id": "69cece50-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent4",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-09T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:15.701Z",
+    "version": "WzIwLDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (6)'] = {
+  "results": {
+    "type": "agents",
+    "id": "6a6c46d0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent5",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-10T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:16.733Z",
+    "version": "WzIxLDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (7)'] = {
+  "results": {
+    "type": "agents",
+    "id": "6b085fc0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent6",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-11T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:17.756Z",
+    "version": "WzIyLDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (8)'] = {
+  "results": {
+    "type": "agents",
+    "id": "6ba40380-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent7",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-12T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:18.776Z",
+    "version": "WzIzLDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (9)'] = {
+  "results": {
+    "type": "agents",
+    "id": "6c3f5920-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent8",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-13T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:19.794Z",
+    "version": "WzI0LDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (10)'] = {
+  "results": {
+    "type": "agents",
+    "id": "6cdaaec0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent9",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-14T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:20.812Z",
+    "version": "WzI1LDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (11)'] = {
+  "results": {
+    "type": "agents",
+    "id": "6d76a0a0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent10",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-15T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:21.834Z",
+    "version": "WzI2LDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (12)'] = {
+  "results": {
+    "type": "agents",
+    "id": "6e121d50-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent11",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-16T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:22.853Z",
+    "version": "WzI3LDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (13)'] = {
+  "results": {
+    "type": "agents",
+    "id": "6eac1360-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent12",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-17T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:23.862Z",
+    "version": "WzI4LDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (14)'] = {
+  "results": {
+    "type": "agents",
+    "id": "6f46f3d0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent13",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-18T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:24.877Z",
+    "version": "WzI5LDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (15)'] = {
+  "results": {
+    "type": "agents",
+    "id": "6fe1fb50-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent14",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-19T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:25.893Z",
+    "version": "WzMwLDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (16)'] = {
+  "results": {
+    "type": "agents",
+    "id": "707e6260-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent15",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-20T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:26.918Z",
+    "version": "WzMxLDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (17)'] = {
+  "results": {
+    "type": "agents",
+    "id": "71335a80-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent16",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-21T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:28.104Z",
+    "version": "WzMyLDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (18)'] = {
+  "results": {
+    "type": "agents",
+    "id": "71ced730-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent17",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-22T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:29.123Z",
+    "version": "WzMzLDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (19)'] = {
+  "results": {
+    "type": "agents",
+    "id": "72710aa0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent18",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-23T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:30.186Z",
+    "version": "WzM0LDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (20)'] = {
+  "results": {
+    "type": "agents",
+    "id": "730d98c0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent19",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-24T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:31.212Z",
+    "version": "WzM1LDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - find:{"type":"agents","perPage":20} (21)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 20,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "6760db90-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent0",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:11.625Z",
+        "version": "WzE2LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "68975fc0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-07T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:13.660Z",
+        "version": "WzE4LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "67fc3130-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-06T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:12.642Z",
+        "version": "WzE3LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6932b560-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent3",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-08T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:14.678Z",
+        "version": "WzE5LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6eac1360-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent12",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-17T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:23.862Z",
+        "version": "WzI4LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6d76a0a0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent10",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-15T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:21.834Z",
+        "version": "WzI2LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6e121d50-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent11",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-16T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:22.853Z",
+        "version": "WzI3LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "69cece50-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent4",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-09T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:15.701Z",
+        "version": "WzIwLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6a6c46d0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent5",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-10T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:16.733Z",
+        "version": "WzIxLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6b085fc0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent6",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-11T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:17.756Z",
+        "version": "WzIyLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6ba40380-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent7",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-12T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:18.776Z",
+        "version": "WzIzLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6c3f5920-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent8",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-13T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:19.794Z",
+        "version": "WzI0LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6cdaaec0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent9",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-14T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:20.812Z",
+        "version": "WzI1LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6f46f3d0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent13",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-18T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:24.877Z",
+        "version": "WzI5LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6fe1fb50-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent14",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-19T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:25.893Z",
+        "version": "WzMwLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "707e6260-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent15",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-20T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:26.918Z",
+        "version": "WzMxLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "71335a80-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent16",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-21T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:28.104Z",
+        "version": "WzMyLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "71ced730-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent17",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-22T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:29.123Z",
+        "version": "WzMzLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "72710aa0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent18",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-23T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:30.186Z",
+        "version": "WzM0LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "730d98c0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent19",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-24T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:31.212Z",
+        "version": "WzM1LDFd"
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter list should list all agents - find:{"type":"agents","perPage":1000} (22)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 20,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "6760db90-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent0",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:11.625Z",
+        "version": "WzE2LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "68975fc0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-07T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:13.660Z",
+        "version": "WzE4LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "67fc3130-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-06T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:12.642Z",
+        "version": "WzE3LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6932b560-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent3",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-08T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:14.678Z",
+        "version": "WzE5LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6eac1360-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent12",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-17T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:23.862Z",
+        "version": "WzI4LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6d76a0a0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent10",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-15T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:21.834Z",
+        "version": "WzI2LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6e121d50-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent11",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-16T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:22.853Z",
+        "version": "WzI3LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "69cece50-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent4",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-09T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:15.701Z",
+        "version": "WzIwLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6a6c46d0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent5",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-10T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:16.733Z",
+        "version": "WzIxLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6b085fc0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent6",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-11T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:17.756Z",
+        "version": "WzIyLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6ba40380-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent7",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-12T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:18.776Z",
+        "version": "WzIzLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6c3f5920-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent8",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-13T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:19.794Z",
+        "version": "WzI0LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6cdaaec0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent9",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-14T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:20.812Z",
+        "version": "WzI1LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6f46f3d0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent13",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-18T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:24.877Z",
+        "version": "WzI5LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "6fe1fb50-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent14",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-19T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:25.893Z",
+        "version": "WzMwLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "707e6260-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent15",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-20T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:26.918Z",
+        "version": "WzMxLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "71335a80-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent16",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-21T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:28.104Z",
+        "version": "WzMyLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "71ced730-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent17",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-22T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:29.123Z",
+        "version": "WzMzLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "72710aa0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent18",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-23T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:30.186Z",
+        "version": "WzM0LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "730d98c0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent19",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-24T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:31.212Z",
+        "version": "WzM1LDFd"
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:6760db90-db23-11e9-9cfa-4b0d72dd400d:{} (23)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:68975fc0-db23-11e9-9cfa-4b0d72dd400d:{} (24)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:67fc3130-db23-11e9-9cfa-4b0d72dd400d:{} (25)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:6932b560-db23-11e9-9cfa-4b0d72dd400d:{} (26)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:6eac1360-db23-11e9-9cfa-4b0d72dd400d:{} (27)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:6d76a0a0-db23-11e9-9cfa-4b0d72dd400d:{} (28)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:6e121d50-db23-11e9-9cfa-4b0d72dd400d:{} (29)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:69cece50-db23-11e9-9cfa-4b0d72dd400d:{} (30)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:6a6c46d0-db23-11e9-9cfa-4b0d72dd400d:{} (31)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:6b085fc0-db23-11e9-9cfa-4b0d72dd400d:{} (32)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:6ba40380-db23-11e9-9cfa-4b0d72dd400d:{} (33)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:6c3f5920-db23-11e9-9cfa-4b0d72dd400d:{} (34)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:6cdaaec0-db23-11e9-9cfa-4b0d72dd400d:{} (35)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:6f46f3d0-db23-11e9-9cfa-4b0d72dd400d:{} (36)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:6fe1fb50-db23-11e9-9cfa-4b0d72dd400d:{} (37)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:707e6260-db23-11e9-9cfa-4b0d72dd400d:{} (38)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:71335a80-db23-11e9-9cfa-4b0d72dd400d:{} (39)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:71ced730-db23-11e9-9cfa-4b0d72dd400d:{} (40)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:72710aa0-db23-11e9-9cfa-4b0d72dd400d:{} (41)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:730d98c0-db23-11e9-9cfa-4b0d72dd400d:{} (42)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "7fc92de0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent0",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:52.574Z",
+    "version": "WzU2LDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "80685410-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-06T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:53.617Z",
+    "version": "WzU3LDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (3)'] = {
+  "results": {
+    "type": "agents",
+    "id": "8102e660-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent2",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-07T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:54.630Z",
+    "version": "WzU4LDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (4)'] = {
+  "results": {
+    "type": "agents",
+    "id": "819c1920-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent3",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-08T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:55.634Z",
+    "version": "WzU5LDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (5)'] = {
+  "results": {
+    "type": "agents",
+    "id": "82388030-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent4",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-09T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:56.659Z",
+    "version": "WzYwLDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (6)'] = {
+  "results": {
+    "type": "agents",
+    "id": "82d3aec0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent5",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-10T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:57.676Z",
+    "version": "WzYxLDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (7)'] = {
+  "results": {
+    "type": "agents",
+    "id": "836df2f0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent6",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-11T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:58.687Z",
+    "version": "WzYyLDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (8)'] = {
+  "results": {
+    "type": "agents",
+    "id": "84094890-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent7",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-12T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:21:59.705Z",
+    "version": "WzYzLDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (9)'] = {
+  "results": {
+    "type": "agents",
+    "id": "84a4ec50-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent8",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-13T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:00.725Z",
+    "version": "WzY0LDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (10)'] = {
+  "results": {
+    "type": "agents",
+    "id": "853ebb50-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent9",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-14T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:01.733Z",
+    "version": "WzY1LDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (11)'] = {
+  "results": {
+    "type": "agents",
+    "id": "85db7080-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent10",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-15T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:02.759Z",
+    "version": "WzY2LDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (12)'] = {
+  "results": {
+    "type": "agents",
+    "id": "867629e0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent11",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-16T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:03.774Z",
+    "version": "WzY3LDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (13)'] = {
+  "results": {
+    "type": "agents",
+    "id": "87109520-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent12",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-17T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:04.786Z",
+    "version": "WzY4LDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (14)'] = {
+  "results": {
+    "type": "agents",
+    "id": "87ab9ca0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent13",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-18T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:05.802Z",
+    "version": "WzY5LDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (15)'] = {
+  "results": {
+    "type": "agents",
+    "id": "8846f240-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent14",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-19T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:06.820Z",
+    "version": "WzcwLDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (16)'] = {
+  "results": {
+    "type": "agents",
+    "id": "88e15d80-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent15",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-20T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:07.832Z",
+    "version": "WzcxLDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (17)'] = {
+  "results": {
+    "type": "agents",
+    "id": "897befd0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent16",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-21T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:08.844Z",
+    "version": "WzcyLDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (18)'] = {
+  "results": {
+    "type": "agents",
+    "id": "8a16a930-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent17",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-22T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:09.859Z",
+    "version": "WzczLDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (19)'] = {
+  "results": {
+    "type": "agents",
+    "id": "8ab33750-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent18",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-23T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:10.885Z",
+    "version": "Wzc0LDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (20)'] = {
+  "results": {
+    "type": "agents",
+    "id": "8b4df0b0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent19",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-24T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:11.899Z",
+    "version": "Wzc1LDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - find:{"type":"agents","page":1,"perPage":3,"sortField":"enrolled_at","sortOrder":"ASC"} (21)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 3,
+    "total": 20,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "7fc92de0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent0",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:52.574Z",
+        "version": "WzU2LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "80685410-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-06T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:53.617Z",
+        "version": "WzU3LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "8102e660-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-07T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:54.630Z",
+        "version": "WzU4LDFd"
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - find:{"type":"agents","perPage":1000} (22)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 20,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "7fc92de0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent0",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:52.574Z",
+        "version": "WzU2LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "8102e660-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-07T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:54.630Z",
+        "version": "WzU4LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "819c1920-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent3",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-08T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:55.634Z",
+        "version": "WzU5LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "82388030-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent4",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-09T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:56.659Z",
+        "version": "WzYwLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "82d3aec0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent5",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-10T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:57.676Z",
+        "version": "WzYxLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "836df2f0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent6",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-11T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:58.687Z",
+        "version": "WzYyLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "84094890-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent7",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-12T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:59.705Z",
+        "version": "WzYzLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "84a4ec50-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent8",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-13T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:00.725Z",
+        "version": "WzY0LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "80685410-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-06T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:21:53.617Z",
+        "version": "WzU3LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "85db7080-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent10",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-15T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:02.759Z",
+        "version": "WzY2LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "87109520-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent12",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-17T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:04.786Z",
+        "version": "WzY4LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "87ab9ca0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent13",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-18T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:05.802Z",
+        "version": "WzY5LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "88e15d80-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent15",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-20T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:07.832Z",
+        "version": "WzcxLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "897befd0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent16",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-21T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:08.844Z",
+        "version": "WzcyLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "8a16a930-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent17",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-22T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:09.859Z",
+        "version": "WzczLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "867629e0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent11",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-16T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:03.774Z",
+        "version": "WzY3LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "8846f240-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent14",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-19T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:06.820Z",
+        "version": "WzcwLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "853ebb50-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent9",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-14T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:01.733Z",
+        "version": "WzY1LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "8ab33750-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent18",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-23T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:10.885Z",
+        "version": "Wzc0LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "8b4df0b0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent19",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-24T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:11.899Z",
+        "version": "Wzc1LDFd"
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:7fc92de0-db23-11e9-9cfa-4b0d72dd400d:{} (23)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:8102e660-db23-11e9-9cfa-4b0d72dd400d:{} (24)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:819c1920-db23-11e9-9cfa-4b0d72dd400d:{} (25)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:82388030-db23-11e9-9cfa-4b0d72dd400d:{} (26)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:82d3aec0-db23-11e9-9cfa-4b0d72dd400d:{} (27)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:836df2f0-db23-11e9-9cfa-4b0d72dd400d:{} (28)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:84094890-db23-11e9-9cfa-4b0d72dd400d:{} (29)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:84a4ec50-db23-11e9-9cfa-4b0d72dd400d:{} (30)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:80685410-db23-11e9-9cfa-4b0d72dd400d:{} (31)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:85db7080-db23-11e9-9cfa-4b0d72dd400d:{} (32)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:87109520-db23-11e9-9cfa-4b0d72dd400d:{} (33)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:87ab9ca0-db23-11e9-9cfa-4b0d72dd400d:{} (34)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:88e15d80-db23-11e9-9cfa-4b0d72dd400d:{} (35)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:897befd0-db23-11e9-9cfa-4b0d72dd400d:{} (36)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:8a16a930-db23-11e9-9cfa-4b0d72dd400d:{} (37)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:867629e0-db23-11e9-9cfa-4b0d72dd400d:{} (38)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:8846f240-db23-11e9-9cfa-4b0d72dd400d:{} (39)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:853ebb50-db23-11e9-9cfa-4b0d72dd400d:{} (40)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:8ab33750-db23-11e9-9cfa-4b0d72dd400d:{} (41)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:8b4df0b0-db23-11e9-9cfa-4b0d72dd400d:{} (42)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "982bb3d0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent0",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:33.484Z",
+    "version": "Wzk2LDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "98c5d0f0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-06T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:34.495Z",
+    "version": "Wzk3LDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (3)'] = {
+  "results": {
+    "type": "agents",
+    "id": "995f51d0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent2",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-07T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:35.501Z",
+    "version": "Wzk4LDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (4)'] = {
+  "results": {
+    "type": "agents",
+    "id": "99f9bd10-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent3",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-08T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:36.513Z",
+    "version": "Wzk5LDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (5)'] = {
+  "results": {
+    "type": "agents",
+    "id": "9a9560d0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent4",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-09T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:37.533Z",
+    "version": "WzEwMCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (6)'] = {
+  "results": {
+    "type": "agents",
+    "id": "9b321600-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent5",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-10T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:38.560Z",
+    "version": "WzEwMSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (7)'] = {
+  "results": {
+    "type": "agents",
+    "id": "9bce07e0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent6",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-11T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:39.582Z",
+    "version": "WzEwMiwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (8)'] = {
+  "results": {
+    "type": "agents",
+    "id": "9c698490-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent7",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-12T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:40.601Z",
+    "version": "WzEwMywxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (9)'] = {
+  "results": {
+    "type": "agents",
+    "id": "9d03c8c0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent8",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-13T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:41.612Z",
+    "version": "WzEwNCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (10)'] = {
+  "results": {
+    "type": "agents",
+    "id": "9d9e5b10-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent9",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-14T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:42.625Z",
+    "version": "WzEwNSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (11)'] = {
+  "results": {
+    "type": "agents",
+    "id": "9e393b80-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent10",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-15T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:43.640Z",
+    "version": "WzEwNiwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (12)'] = {
+  "results": {
+    "type": "agents",
+    "id": "9ed44300-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent11",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-16T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:44.655Z",
+    "version": "WzEwNywxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (13)'] = {
+  "results": {
+    "type": "agents",
+    "id": "9f6f2370-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent12",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-17T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:45.671Z",
+    "version": "WzEwOCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (14)'] = {
+  "results": {
+    "type": "agents",
+    "id": "a00b1550-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent13",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-18T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:46.693Z",
+    "version": "WzEwOSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (15)'] = {
+  "results": {
+    "type": "agents",
+    "id": "a0a58090-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent14",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-19T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:47.705Z",
+    "version": "WzExMCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (16)'] = {
+  "results": {
+    "type": "agents",
+    "id": "a1432020-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent15",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-20T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:48.738Z",
+    "version": "WzExMSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (17)'] = {
+  "results": {
+    "type": "agents",
+    "id": "a1ddd980-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent16",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-21T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:49.752Z",
+    "version": "WzExMiwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (18)'] = {
+  "results": {
+    "type": "agents",
+    "id": "a2790810-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent17",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-22T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:50.769Z",
+    "version": "WzExMywxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (19)'] = {
+  "results": {
+    "type": "agents",
+    "id": "a3139a60-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent18",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-23T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:51.782Z",
+    "version": "WzExNCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (20)'] = {
+  "results": {
+    "type": "agents",
+    "id": "a3ae2cb0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent19",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-24T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:22:52.795Z",
+    "version": "WzExNSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - find:{"type":"agents","page":1,"perPage":3,"sortField":"enrolled_at","sortOrder":"DESC"} (21)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 3,
+    "total": 20,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "a3ae2cb0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent19",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-24T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:52.795Z",
+        "version": "WzExNSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "a3139a60-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent18",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-23T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:51.782Z",
+        "version": "WzExNCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "a2790810-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent17",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-22T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:50.769Z",
+        "version": "WzExMywxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - find:{"type":"agents","perPage":1000} (22)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 20,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "982bb3d0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent0",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:33.484Z",
+        "version": "Wzk2LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "995f51d0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-07T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:35.501Z",
+        "version": "Wzk4LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "99f9bd10-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent3",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-08T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:36.513Z",
+        "version": "Wzk5LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9a9560d0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent4",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-09T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:37.533Z",
+        "version": "WzEwMCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "98c5d0f0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-06T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:34.495Z",
+        "version": "Wzk3LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9e393b80-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent10",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-15T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:43.640Z",
+        "version": "WzEwNiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "9f6f2370-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent12",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-17T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:45.671Z",
+        "version": "WzEwOCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "a00b1550-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent13",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-18T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:46.693Z",
+        "version": "WzEwOSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "9ed44300-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent11",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-16T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:44.655Z",
+        "version": "WzEwNywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "9b321600-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent5",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-10T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:38.560Z",
+        "version": "WzEwMSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "9bce07e0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent6",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-11T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:39.582Z",
+        "version": "WzEwMiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "9c698490-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent7",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-12T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:40.601Z",
+        "version": "WzEwMywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "9d03c8c0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent8",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-13T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:41.612Z",
+        "version": "WzEwNCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "9d9e5b10-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent9",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-14T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:42.625Z",
+        "version": "WzEwNSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "a0a58090-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent14",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-19T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:47.705Z",
+        "version": "WzExMCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "a1432020-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent15",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-20T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:48.738Z",
+        "version": "WzExMSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "a1ddd980-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent16",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-21T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:49.752Z",
+        "version": "WzExMiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "a2790810-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent17",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-22T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:50.769Z",
+        "version": "WzExMywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "a3139a60-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent18",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-23T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:51.782Z",
+        "version": "WzExNCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "a3ae2cb0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent19",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-24T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:22:52.795Z",
+        "version": "WzExNSwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:982bb3d0-db23-11e9-9cfa-4b0d72dd400d:{} (23)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:995f51d0-db23-11e9-9cfa-4b0d72dd400d:{} (24)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:99f9bd10-db23-11e9-9cfa-4b0d72dd400d:{} (25)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:9a9560d0-db23-11e9-9cfa-4b0d72dd400d:{} (26)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:98c5d0f0-db23-11e9-9cfa-4b0d72dd400d:{} (27)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:9e393b80-db23-11e9-9cfa-4b0d72dd400d:{} (28)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:9f6f2370-db23-11e9-9cfa-4b0d72dd400d:{} (29)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:a00b1550-db23-11e9-9cfa-4b0d72dd400d:{} (30)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:9ed44300-db23-11e9-9cfa-4b0d72dd400d:{} (31)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:9b321600-db23-11e9-9cfa-4b0d72dd400d:{} (32)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:9bce07e0-db23-11e9-9cfa-4b0d72dd400d:{} (33)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:9c698490-db23-11e9-9cfa-4b0d72dd400d:{} (34)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:9d03c8c0-db23-11e9-9cfa-4b0d72dd400d:{} (35)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:9d9e5b10-db23-11e9-9cfa-4b0d72dd400d:{} (36)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:a0a58090-db23-11e9-9cfa-4b0d72dd400d:{} (37)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:a1432020-db23-11e9-9cfa-4b0d72dd400d:{} (38)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:a1ddd980-db23-11e9-9cfa-4b0d72dd400d:{} (39)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:a2790810-db23-11e9-9cfa-4b0d72dd400d:{} (40)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:a3139a60-db23-11e9-9cfa-4b0d72dd400d:{} (41)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:a3ae2cb0-db23-11e9-9cfa-4b0d72dd400d:{} (42)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by local metadata - create:agents (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "b088e290-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:23:14.361Z",
+    "version": "WzEzNiwxXQ=="
+  }
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by local metadata - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "b122d8a0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent2",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"elastic.co\"}",
+      "user_provided_metadata": "{\"color\":\"blue\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:23:15.370Z",
+    "version": "WzEzNywxXQ=="
+  }
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by local metadata - find:{"type":"agents","search":"elastic.co"} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "b122d8a0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"elastic.co\"}",
+          "user_provided_metadata": "{\"color\":\"blue\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:23:15.370Z",
+        "version": "WzEzNywxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by local metadata - find:{"type":"agents","perPage":1000} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 2,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "b088e290-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:23:14.361Z",
+        "version": "WzEzNiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "b122d8a0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"elastic.co\"}",
+          "user_provided_metadata": "{\"color\":\"blue\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:23:15.370Z",
+        "version": "WzEzNywxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by local metadata - delete:agents:b088e290-db23-11e9-9cfa-4b0d72dd400d:{} (5)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by local metadata - delete:agents:b122d8a0-db23-11e9-9cfa-4b0d72dd400d:{} (6)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by user provided metadata - create:agents (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "b2f54eb0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:23:18.427Z",
+    "version": "WzE0MCwxXQ=="
+  }
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by user provided metadata - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "b39203e0-db23-11e9-9cfa-4b0d72dd400d",
+    "attributes": {
+      "shared_id": "agent2",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "policy_id": "policy_id_1",
+      "policy_shared_id": "shared_policy_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"elastic.co\"}",
+      "user_provided_metadata": "{\"color\":\"blue\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-09-19T21:23:19.454Z",
+    "version": "WzE0MSwxXQ=="
+  }
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by user provided metadata - find:{"type":"agents","search":"red"} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "b2f54eb0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:23:18.427Z",
+        "version": "WzE0MCwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by user provided metadata - find:{"type":"agents","perPage":1000} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 2,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "b2f54eb0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:23:18.427Z",
+        "version": "WzE0MCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "b39203e0-db23-11e9-9cfa-4b0d72dd400d",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "policy_id": "policy_id_1",
+          "policy_shared_id": "shared_policy_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"elastic.co\"}",
+          "user_provided_metadata": "{\"color\":\"blue\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-09-19T21:23:19.454Z",
+        "version": "WzE0MSwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by user provided metadata - delete:agents:b2f54eb0-db23-11e9-9cfa-4b0d72dd400d:{} (5)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by user provided metadata - delete:agents:b39203e0-db23-11e9-9cfa-4b0d72dd400d:{} (6)'] = {
+  "results": {}
+}
