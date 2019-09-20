@@ -8,7 +8,11 @@ import { EuiCard, EuiIcon, ICON_TYPES } from '@elastic/eui';
 import { useLinks } from '../hooks';
 import { IntegrationListItem, IntegrationInfo } from '../../common/types';
 
-type IntegrationCardProps = IntegrationListItem | IntegrationInfo;
+export interface BadgeProps {
+  showInstalledBadge?: boolean;
+}
+
+type IntegrationCardProps = (IntegrationListItem | IntegrationInfo) & BadgeProps;
 
 export function IntegrationCard({
   description,
@@ -16,6 +20,8 @@ export function IntegrationCard({
   title,
   version,
   icon: iconUrl,
+  showInstalledBadge,
+  status,
 }: IntegrationCardProps) {
   const { toDetailView } = useLinks();
   const url = toDetailView({ name, version });
@@ -41,6 +47,7 @@ export function IntegrationCard({
 
   return (
     <EuiCard
+      betaBadgeLabel={showInstalledBadge && status === 'installed' ? 'Installed' : ''}
       layout="horizontal"
       title={title}
       description={description}

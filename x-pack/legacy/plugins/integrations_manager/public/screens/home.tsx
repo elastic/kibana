@@ -16,12 +16,20 @@ import {
   EuiPageBody,
   EuiPageWidthProps,
   EuiSpacer,
+  // @ts-ignore (elastic/eui#1557) & (elastic/eui#1262) EuiSearchBar is not exported yet
+  EuiSearchBar,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import * as JsSearch from 'js-search';
 import styled from 'styled-components';
 import { PLUGIN } from '../../common/constants';
-import { CategorySummaryItem, CategorySummaryList, IntegrationList } from '../../common/types';
+import {
+  CategorySummaryItem,
+  CategorySummaryList,
+  IntegrationList,
+  IntegrationListItem,
+} from '../../common/types';
 import { IntegrationListGrid } from '../components/integration_list_grid';
 import { getCategories, getIntegrations } from '../data';
 import { useBreadcrumbs, useCore, useLinks } from '../hooks';
@@ -31,36 +39,68 @@ const FullBleedPage = styled(EuiPage)`
   background-color: ${p => p.theme.eui.euiColorLightestShade};
 `;
 
+const searchModel = new JsSearch.Search('name');
+['description', 'name', 'title'].forEach(index => searchModel.addIndex(index));
+
 export function Home() {
   const { toListView } = useLinks();
   useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }]);
 
   const [list, setList] = useState<IntegrationList>([]);
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState<IntegrationList>([]);
+
   useEffect(() => {
-    getIntegrations({ category: selectedCategory }).then(setList);
+    getIntegrations({ category: selectedCategory }).then(results => {
+      setList(results);
+      if (selectedCategory === '') searchModel.addDocuments(results);
+    });
   }, [selectedCategory]);
 
   if (!list) return null;
   const installedIntegrations = list.filter(({ status }) => status === 'installed');
 
   const maxContentWidth = 1200;
+  const placeholder = 'Find a new package, or one you already use.';
+  const SearchBar = (
+    <EuiSearchBar
+      box={{
+        placeholder,
+        incremental: true,
+      }}
+      onChange={({ queryText }: { queryText: string }) => {
+        setSearchTerm(queryText);
+        const results = searchModel.search(queryText);
+        const ids = results.map(value => (value as IntegrationListItem).name);
+        const filtered = list.filter(o => ids.includes(o.name));
+        setSearchResults(filtered);
+      }}
+    />
+  );
+
   return (
     <Fragment>
-      <Header restrictWidth={maxContentWidth} />
+      <Header restrictWidth={maxContentWidth} SearchBar={SearchBar} />
       <EuiHorizontalRule margin="none" />
       <FullBleedPage>
         <EuiPageBody restrictWidth={maxContentWidth}>
           <Fragment>
             <EuiSpacer size="l" />
-            <InstalledListGrid list={installedIntegrations} />
-            {installedIntegrations.length ? <EuiHorizontalRule margin="l" /> : null}
-            <AvailableListGrid
-              list={list}
-              onCategoryChange={category => {
-                setSelectedCategory(category.id);
-              }}
-            />
+            {searchTerm ? (
+              <SearchResultsGrid term={searchTerm} results={searchResults} />
+            ) : (
+              <Fragment>
+                <InstalledListGrid list={installedIntegrations} />
+                {installedIntegrations.length ? <EuiHorizontalRule margin="l" /> : null}
+                <AvailableListGrid
+                  list={list}
+                  onCategoryChange={category => {
+                    setSelectedCategory(category.id);
+                  }}
+                />
+              </Fragment>
+            )}
           </Fragment>
         </EuiPageBody>
       </FullBleedPage>
@@ -68,17 +108,32 @@ export function Home() {
   );
 }
 
-function Header({ restrictWidth }: EuiPageWidthProps) {
+function Header({
+  restrictWidth,
+  SearchBar,
+}: EuiPageWidthProps & {
+  SearchBar: React.ReactNode;
+}) {
+  const left = (
+    <EuiFlexGroup alignItems="center" gutterSize="none">
+      <EuiFlexItem>
+        <HeroCopy />
+        <EuiSpacer size="xl" />
+        <EuiFlexGroup>
+          <EuiFlexItem grow={4}>{SearchBar}</EuiFlexItem>
+          <EuiFlexItem grow={2} />
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+  const right = <HeroImage />;
+
   return (
     <FullBleedPage>
       <EuiPageBody restrictWidth={restrictWidth}>
         <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem grow={1}>
-            <HeroCopy />
-          </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            <HeroImage />
-          </EuiFlexItem>
+          <EuiFlexItem grow={1}>{left}</EuiFlexItem>
+          <EuiFlexItem grow={1}>{right}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageBody>
     </FullBleedPage>
@@ -92,14 +147,12 @@ function HeroCopy() {
   `;
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none">
-      <EuiFlexItem>
-        <EuiTitle size="l">
-          <h1>Add Your Data</h1>
-        </EuiTitle>
-        <Subtitle>Some creative copy about integrations goes here.</Subtitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <Fragment>
+      <EuiTitle size="l">
+        <h1>Add Your Data</h1>
+      </EuiTitle>
+      <Subtitle>Some creative copy about integrations goes here.</Subtitle>
+    </Fragment>
   );
 }
 
@@ -169,4 +222,23 @@ function InstalledListGrid({ list }: InstalledListGridProps) {
   const installedTitle = 'Your Integrations';
 
   return <IntegrationListGrid title={installedTitle} list={list} controls={<div />} />;
+}
+
+function SearchResultsGrid({ term, results }: { term: string; results: IntegrationList }) {
+  const title = 'Search results';
+
+  return (
+    <IntegrationListGrid
+      title={title}
+      list={results}
+      showInstalledBadge={true}
+      controls={
+        <EuiTitle>
+          <EuiText>
+            {results.length} results for "{term}"
+          </EuiText>
+        </EuiTitle>
+      }
+    />
+  );
 }
