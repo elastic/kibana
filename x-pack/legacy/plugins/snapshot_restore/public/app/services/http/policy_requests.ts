@@ -11,6 +11,7 @@ import {
   UIM_POLICY_DELETE_MANY,
   UIM_POLICY_CREATE,
   UIM_POLICY_UPDATE,
+  UIM_POLICY_RETENTION_SETTINGS_UPDATE,
 } from '../../constants';
 import { uiMetricService } from '../ui_metric';
 import { httpService } from './http';
@@ -92,4 +93,18 @@ export const useLoadRetentionSettings = () => {
     path: httpService.addBasePath(`${API_BASE_PATH}policies/retention_settings`),
     method: 'get',
   });
+};
+
+export const updateRetentionSchedule = (retentionSchedule: string) => {
+  const result = sendRequest({
+    path: httpService.addBasePath(`${API_BASE_PATH}policies/retention_settings`),
+    method: 'put',
+    body: {
+      retentionSchedule,
+    },
+  });
+
+  const { trackUiMetric } = uiMetricService;
+  trackUiMetric(UIM_POLICY_RETENTION_SETTINGS_UPDATE);
+  return result;
 };

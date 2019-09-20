@@ -24,6 +24,7 @@ export function registerPolicyRoutes(router: Router, plugins: Plugins) {
   router.put('policies/{name}', updateHandler);
   router.get('policies/indices', getIndicesHandler);
   router.get('policies/retention_settings', getRetentionSettingsHandler);
+  router.put('policies/retention_settings', updateRetentionSettingsHandler);
 }
 
 export const getAllHandler: RouterRouteHandler = async (
@@ -183,11 +184,28 @@ export const getRetentionSettingsHandler: RouterRouteHandler = async (): Promise
       ...persistent,
       ...transient,
     };
-    return retentionSettings;
+
+    const { retention_schedule: retentionSchedule } = retentionSettings;
+
+    return { retentionSchedule };
   } catch (e) {
     // Silently swallow error and return undefined for managed repository name
     // so that downstream calls are not blocked. In a healthy environment we do
     // not expect to reach here.
     return;
   }
+};
+
+export const updateRetentionSettingsHandler: RouterRouteHandler = async (req, callWithRequest) => {
+  const { retentionSchedule } = req.payload as { retentionSchedule: string };
+
+  return await callWithRequest('cluster.putSettings', {
+    body: {
+      persistent: {
+        slm: {
+          retention_schedule: retentionSchedule,
+        },
+      },
+    },
+  });
 };

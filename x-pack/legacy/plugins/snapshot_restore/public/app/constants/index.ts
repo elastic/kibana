@@ -91,6 +91,9 @@ export const REMOVE_INDEX_SETTINGS_SUGGESTIONS: string[] = INDEX_SETTING_SUGGEST
 export const DEFAULT_POLICY_SCHEDULE = '0 30 1 * * ?';
 export const DEFAULT_POLICY_FREQUENCY = DAY;
 
+export const DEFAULT_RETENTION_SCHEDULE = '0 30 1 * * ?';
+export const DEFAULT_RETENTION_FREQUENCY = DAY;
+
 // UI Metric constants
 export const UIM_APP_NAME = 'snapshot_restore';
 export const UIM_REPOSITORY_LIST_LOAD = 'repository_list_load';
@@ -119,3 +122,4 @@ export const UIM_POLICY_DELETE = 'policy_delete';
 export const UIM_POLICY_DELETE_MANY = 'policy_delete_many';
 export const UIM_POLICY_CREATE = 'policy_create';
 export const UIM_POLICY_UPDATE = 'policy_update';
+export const UIM_POLICY_RETENTION_SETTINGS_UPDATE = 'policy_retention_settings_update';

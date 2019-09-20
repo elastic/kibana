@@ -118,6 +118,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       name: i18n.translate('xpack.snapshotRestore.policyList.table.retentionColumnTitle', {
         defaultMessage: 'Retention',
       }),
+      width: '100px',
       render: (retention: SlmPolicy['retention']) =>
         retention ? (
           <EuiIcon
