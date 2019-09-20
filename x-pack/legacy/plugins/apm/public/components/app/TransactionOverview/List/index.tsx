@@ -50,9 +50,6 @@ export function TransactionList({ items, isLoading }: Props) {
                 traceId={sample.trace.id}
                 transactionName={sample.transaction.name}
                 transactionType={sample.transaction.type}
-                data-cy={`link-to-transaction-${encodeURIComponent(
-                  transactionName
-                )}`}
               >
                 {transactionName || NOT_AVAILABLE_LABEL}
               </TransactionNameLink>

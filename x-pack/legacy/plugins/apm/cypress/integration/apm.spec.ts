@@ -17,8 +17,10 @@ describe('When clicking opbeans-go service', () => {
     // show loading text for services
     cy.contains('Loading...');
 
-    // click the first service in the list
-    cy.get('[data-cy=link-to-service-opbeans-go]').click({ force: true });
+    // click opbeans-go service
+    cy.get(':contains(opbeans-go)')
+      .last()
+      .click({ force: true });
   });
 
   it('should redirect to correct path with correct params', () => {
