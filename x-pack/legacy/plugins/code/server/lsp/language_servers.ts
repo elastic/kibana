@@ -69,8 +69,8 @@ export const CTAGS: LanguageServerDefinition = {
   embedPath: require.resolve('@elastic/ctags-langserver/lib/cli.js'),
   priority: 1,
 };
-export const LanguageServers: LanguageServerDefinition[] = [TYPESCRIPT, JAVA, CTAGS, GO];
-export const LanguageServersDeveloping: LanguageServerDefinition[] = [];
+export const LanguageServers: LanguageServerDefinition[] = [TYPESCRIPT, JAVA, GO];
+export const LanguageServersDeveloping: LanguageServerDefinition[] = [CTAGS];
 
 export function enabledLanguageServers(server: ServerFacade) {
   const devMode: boolean = server.config().get('env.dev');

@@ -6,8 +6,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function codeApp({ loadTestFile }: FtrProviderContext) {
-  // FLAKY: https://github.com/elastic/kibana/issues/45094
-  describe.skip('Code', function codeAppTestSuite() {
+  describe('Code', function codeAppTestSuite() {
     // Add 'skipCloud' regarding issue: https://github.com/elastic/kibana/issues/39386
     this.tags(['ciGroup2', 'skipCloud']);
     loadTestFile(require.resolve('./lang_server_coverage'));
