@@ -167,10 +167,6 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
     }
   };
 
-  public updateIsInvalid = () => {
-    this.setState({ isInvalid: isImportRepositoryURLInvalid(this.state.repoURL) });
-  };
-
   public renderImportModal = () => {
     return (
       <EuiOverlayMask>
@@ -202,7 +198,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
                 <EuiFieldText
                   value={this.state.repoURL}
                   onChange={this.onChange}
-                  onBlur={this.updateIsInvalid}
+                  onBlur={this.onChange}
                   placeholder="https://github.com/Microsoft/TypeScript-Node-Starter"
                   aria-label="input project url"
                   data-test-subj="importRepositoryUrlInputBox"
