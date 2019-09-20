@@ -33,20 +33,18 @@
 
 // helper classes to show/hide elements in Percy
 @media only percy {
-  .hideInPercy {
-    visibility: hidden;
+  .showInPercy {
+    visibility: visible;
 
-    img {
-      display: none;
+    .hideInPercy {
+      visibility: hidden;
     }
   }
 
-  body.percyHideAllByDefault {
-    * {
-      visibility: hidden;
-    }
+  .hideInPercy {
+    visibility: hidden;
 
-    .showInPercy * {
+    .showInPercy {
       visibility: visible;
     }
   }
