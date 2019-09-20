@@ -43,11 +43,6 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
         color ${theme.eui.euiAnimSpeedFast} ease;
     }
 
-    .euiBadge,
-    .euiBadge__text {
-      cursor: grab;
-    }
-
     ${!isDragging &&
       `
       & {
@@ -74,6 +69,15 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
           position: absolute;
           top: 2px;
           width: 4px;
+        }
+      }
+
+      &:hover {
+        &,
+        & .euiBadge,
+        & .euiBadge__text {
+          cursor: move; //Fallback for IE11
+          cursor: grab;
         }
       }
 
