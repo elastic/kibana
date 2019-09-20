@@ -33,10 +33,7 @@ jest.mock('ui/vis/response_handlers/legacy', () => {
 
   return {
     mockResponseHandler,
-    legacyResponseHandlerProvider: () => {
-      // debugger;
-      return { handler: mockResponseHandler };
-    },
+    legacyResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
   };
 });
 
