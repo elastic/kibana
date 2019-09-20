@@ -1,5 +1,10 @@
-.gphFieldPicker__list {
+.gphFieldPicker__popoverPanel {
   width: 350px;
+  padding: $euiSizeXS;
+}
+
+.gphFieldPicker__selectableList {
+  margin: 0 (-$euiSizeXS) (-$euiSizeXS);
 }
 
 .gphFieldPicker__button {

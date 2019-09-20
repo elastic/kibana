@@ -2,7 +2,8 @@
   @include gphFieldBadgeSize;
 }
 
-.gphFieldEditorBadge--disabled {
+.gphFieldEditorBadge--disabled,
+.gphFieldEditorBadge--disabled:focus {
   opacity: 0.7;
   text-decoration: line-through;
 }

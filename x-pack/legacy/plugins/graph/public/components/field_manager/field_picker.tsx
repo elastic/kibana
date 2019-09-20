@@ -63,7 +63,7 @@ export function FieldPicker({ fieldMap, selectField, deselectField }: FieldPicke
       }
       isOpen={open}
       closePopover={() => setOpen(false)}
-      panelClassName="gphFieldPicker__list"
+      panelClassName="gphFieldPicker__popoverPanel"
     >
       {open && (
         <EuiSelectable
@@ -71,6 +71,10 @@ export function FieldPicker({ fieldMap, selectField, deselectField }: FieldPicke
             placeholder: i18n.translate('xpack.graph.fieldManager.fieldSearchPlaceholder', {
               defaultMessage: 'Filter fields',
             }),
+            compressed: true,
+          }}
+          listProps={{
+            className: 'gphFieldPicker__selectableList',
           }}
           searchable
           options={fieldOptions}
