@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
-import { timefilter } from 'ui/timefilter';
 import { EventsTable } from '../events_table/';
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
@@ -79,9 +78,6 @@ export const CalendarForm = injectI18n(function CalendarForm({
   showNewEventModal,
   intl
 }) {
-  timefilter.disableTimeRangeSelector();
-  timefilter.disableAutoRefreshSelector();
-
   const msg = intl.formatMessage({
     id: 'xpack.ml.calendarsEdit.calendarForm.allowedCharactersDescription',
     defaultMessage: 'Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; ' +

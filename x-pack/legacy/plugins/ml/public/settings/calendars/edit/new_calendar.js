@@ -8,6 +8,7 @@
 
 import React, { Component, Fragment } from 'react';
 import { PropTypes } from 'prop-types';
+import { timefilter } from 'ui/timefilter';
 
 import { injectI18n } from '@kbn/i18n/react';
 
@@ -56,6 +57,8 @@ export const NewCalendar = injectI18n(class NewCalendar extends Component {
       saving: false,
       selectedCalendar: undefined,
     };
+    timefilter.disableTimeRangeSelector();
+    timefilter.disableAutoRefreshSelector();
   }
 
   componentDidMount() {
