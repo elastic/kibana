@@ -253,6 +253,11 @@ export enum GaugeTypes {
   CIRCLE = 'Circle',
 }
 
+export enum GaugeColorModes {
+  LABELS = 'Labels',
+  NONE = 'None',
+}
+
 const getGaugeTypes = () => [
   {
     text: i18n.translate('kbnVislibVisTypes.gauge.gaugeTypes.arcText', {

@@ -20,8 +20,9 @@
 import { visFactory } from '../../../ui/public/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
+import { AggGroupNames } from 'ui/vis/editors/default';
 import { PieOptions } from './components/options';
-import { getPositions } from './utils/collections';
+import { getPositions, Positions } from './utils/collections';
 import { vislibVisController } from './controller';
 
 export default function HistogramVisType() {
@@ -37,7 +38,7 @@ export default function HistogramVisType() {
         type: 'pie',
         addTooltip: true,
         addLegend: true,
-        legendPosition: 'right',
+        legendPosition: Positions.RIGHT,
         isDonut: true,
         labels: {
           show: false,
@@ -54,7 +55,7 @@ export default function HistogramVisType() {
       optionsTemplate: PieOptions,
       schemas: new Schemas([
         {
-          group: 'metrics',
+          group: AggGroupNames.Metrics,
           name: 'metric',
           title: i18n.translate('kbnVislibVisTypes.pie.metricTitle', { defaultMessage: 'Slice size' }),
           min: 1,
@@ -65,7 +66,7 @@ export default function HistogramVisType() {
           ]
         },
         {
-          group: 'buckets',
+          group: AggGroupNames.Buckets,
           name: 'segment',
           title: i18n.translate('kbnVislibVisTypes.pie.segmentTitle', { defaultMessage: 'Split slices' }),
           min: 0,
@@ -73,7 +74,7 @@ export default function HistogramVisType() {
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         },
         {
-          group: 'buckets',
+          group: AggGroupNames.Buckets,
           name: 'split',
           title: i18n.translate('kbnVislibVisTypes.pie.splitTitle', { defaultMessage: 'Split chart' }),
           mustBeFirst: true,

@@ -19,8 +19,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
+import { AggGroupNames } from 'ui/vis/editors/default';
+import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
 import { GaugeOptions } from './components/options';
-import { getGaugeCollections } from './utils/collections';
+import { getGaugeCollections, GaugeTypes, GaugeColorModes } from './utils/collections';
 import { vislibVisController } from './controller';
 import { visFactory } from '../../../ui/public/vis/vis_factory';
 
@@ -44,13 +46,13 @@ export default function GoalVisType() {
           verticalSplit: false,
           autoExtend: false,
           percentageMode: true,
-          gaugeType: 'Arc',
+          gaugeType: GaugeTypes.ARC,
           gaugeStyle: 'Full',
           backStyle: 'Full',
           orientation: 'vertical',
           useRanges: false,
-          colorSchema: 'Green to Red',
-          gaugeColorMode: 'None',
+          colorSchema: ColorSchemas.GreenToRed,
+          gaugeColorMode: GaugeColorModes.NONE,
           colorsRange: [
             { from: 0, to: 10000 }
           ],
@@ -81,7 +83,7 @@ export default function GoalVisType() {
       optionsTemplate: GaugeOptions,
       schemas: new Schemas([
         {
-          group: 'metrics',
+          group: AggGroupNames.Metrics,
           name: 'metric',
           title: i18n.translate('kbnVislibVisTypes.goal.metricTitle', { defaultMessage: 'Metric' }),
           min: 1,
@@ -93,7 +95,7 @@ export default function GoalVisType() {
           ]
         },
         {
-          group: 'buckets',
+          group: AggGroupNames.Buckets,
           name: 'group',
           title: i18n.translate('kbnVislibVisTypes.goal.groupTitle', { defaultMessage: 'Split group' }),
           min: 0,

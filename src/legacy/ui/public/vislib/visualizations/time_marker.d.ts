@@ -17,20 +17,10 @@
  * under the License.
  */
 
-import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
-import { RangeValues } from 'ui/vis/editors/default/controls/ranges';
-import { TimeMarker } from 'ui/vislib/visualizations/time_marker';
-import { CommonVislibParams, ColorSchemaVislibParams, ValueAxis } from './types';
-import { Positions } from './utils/collections';
-
-export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaVislibParams {
-  type: 'heatmap';
-  addLegend: boolean;
-  enableHover: boolean;
-  colorsNumber: number | '';
-  colorsRange: RangeValues[];
-  valueAxes: ValueAxis[];
-  setColorRange: boolean;
-  percentageMode: boolean;
-  times: TimeMarker[];
+export interface TimeMarker {
+  time: string;
+  class?: string;
+  color?: string;
+  opacity?: number;
+  width?: number;
 }

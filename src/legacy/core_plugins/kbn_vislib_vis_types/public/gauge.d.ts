@@ -33,8 +33,6 @@ interface Gauge extends ColorSchemaVislibParams {
   labels: {
     show: boolean;
   };
-  minAngle?: number;
-  maxAngle?: number;
   percentageMode: boolean;
   scale: {
     show: boolean;

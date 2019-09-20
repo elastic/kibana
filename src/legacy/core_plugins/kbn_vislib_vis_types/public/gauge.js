@@ -20,8 +20,10 @@
 import { i18n } from '@kbn/i18n';
 import { visFactory } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
+import { AggGroupNames } from 'ui/vis/editors/default';
+import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
 import { GaugeOptions } from './components/options';
-import { getGaugeCollections } from './utils/collections';
+import { getGaugeCollections, Alignments, GaugeColorModes, GaugeTypes } from './utils/collections';
 import { vislibVisController } from './controller';
 
 export default function GaugeVisType() {
@@ -39,15 +41,15 @@ export default function GaugeVisType() {
         addLegend: true,
         isDisplayWarning: false,
         gauge: {
-          alignment: 'automatic',
+          alignment: Alignments.AUTOMATIC,
           extendRange: true,
           percentageMode: false,
-          gaugeType: 'Arc',
+          gaugeType: GaugeTypes.ARC,
           gaugeStyle: 'Full',
           backStyle: 'Full',
           orientation: 'vertical',
-          colorSchema: 'Green to Red',
-          gaugeColorMode: 'Labels',
+          colorSchema: ColorSchemas.GreenToRed,
+          gaugeColorMode: GaugeColorModes.LABELS,
           colorsRange: [
             { from: 0, to: 50 },
             { from: 50, to: 75 },
@@ -84,7 +86,7 @@ export default function GaugeVisType() {
       optionsTemplate: GaugeOptions,
       schemas: new Schemas([
         {
-          group: 'metrics',
+          group: AggGroupNames.Metrics,
           name: 'metric',
           title: i18n.translate('kbnVislibVisTypes.gauge.metricTitle', { defaultMessage: 'Metric' }),
           min: 1,
@@ -96,7 +98,7 @@ export default function GaugeVisType() {
           ]
         },
         {
-          group: 'buckets',
+          group: AggGroupNames.Buckets,
           name: 'group',
           title: i18n.translate('kbnVislibVisTypes.gauge.groupTitle', { defaultMessage: 'Split group' }),
           min: 0,
