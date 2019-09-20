@@ -41,7 +41,10 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
           >
             <p>
               {i18n.translate('xpack.monitoring.setupMode.detectedNodeDescription', {
-                defaultMessage: `Click 'Set up monitoring' below to start monitoring this {identifier}.`
+                defaultMessage: `Click 'Set up monitoring' below to start monitoring this {identifier}.`,
+                values: {
+                  identifier: getIdentifier(productName)
+                }
               })}
             </p>
           </EuiCallOut>
@@ -64,10 +67,6 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
           <p>
             {i18n.translate('xpack.monitoring.setupMode.netNewUserDescription', {
               defaultMessage: `Click 'Set up monitoring' to start monitoring with Metricbeat.`,
-              values: {
-                product: formatProductName(productName),
-                identifier: getIdentifier(productName, true)
-              }
             })}
           </p>
         </EuiCallOut>
