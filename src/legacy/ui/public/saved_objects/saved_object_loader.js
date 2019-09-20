@@ -111,7 +111,7 @@ export class SavedObjectLoader {
         search: search ? `${search}*` : undefined,
         perPage: size,
         page: 1,
-        searchFields: ['title^3', 'description'],
+        searchFields: ['title^3', 'description', 'starred'],
         defaultSearchOperator: 'AND',
         fields,
       }).then((resp) => {
@@ -125,6 +125,7 @@ export class SavedObjectLoader {
 
   find(search = '', size = 100) {
     return this.findAll(search, size).then(resp => {
+      //console.log(resp.hits);
       return {
         total: resp.total,
         hits: resp.hits.filter(savedObject => !savedObject.error)

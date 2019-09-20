@@ -22,7 +22,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiLink, EuiButton, EuiEmptyPrompt, EuiButtonToggle } from '@elastic/eui';
 
 import { TableListView } from './../../table_list_view';
 
@@ -36,6 +36,9 @@ export const EMPTY_FILTER = '';
 export class DashboardListing extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      preferredDash: false,
+    };
   }
 
   render() {
@@ -161,6 +164,25 @@ export class DashboardListing extends React.Component {
         }),
         dataType: 'string',
         sortable: true,
+      },
+      {
+        field: 'starred',
+        name: i18n.translate('kbn.dashboard.listing.table.starredColumnName', {
+          defaultMessage: 'Starred',
+        }),
+        sortable: false,
+        render: (field, record) => (
+          <div>
+            <EuiButtonToggle
+              label="Toggle Me"
+              iconType={record.starred ? 'starFilled' : 'starEmpty'}
+              color={record.starred ? 'warning' : 'primary'}
+              isEmpty
+              isIconOnly
+            />
+          </div>
+        ),
+        width: '80px',
       },
     ];
     return tableColumns;
