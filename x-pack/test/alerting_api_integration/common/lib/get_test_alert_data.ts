@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ObjectRemover } from './object_remover';
-export { getUrlPrefix } from './space_test_utils';
-export { ES_TEST_INDEX_NAME, ESTestIndexTool } from './es_test_index_tool';
-export { getTestAlertData } from './get_test_alert_data';
+export function getTestAlertData(overwrites = {}) {
+  return {
+    enabled: true,
+    alertTypeId: 'test.noop',
+    interval: '10s',
+    throttle: '1m',
+    actions: [],
+    alertTypeParams: {},
+    ...overwrites,
+  };
+}
