@@ -9,6 +9,7 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { JobsTable } from './jobs_table';
 import { mockJobsSummaryResponse } from '../__mocks__/api';
+import { cloneDeep } from 'lodash/fp';
 
 describe('JobsTable', () => {
   let onJobStateChangeMock = jest.fn();
@@ -41,6 +42,24 @@ describe('JobsTable', () => {
         .first()
         .props().href
     ).toEqual('/test/base/path/app/ml#/jobs?mlManagement=(jobId:rc-rare-process-windows-5)');
+  });
+
+  test('should render the hyperlink with URI encodings which points specifically to the job id', () => {
+    const cloneJobsSummaryResponse = cloneDeep(mockJobsSummaryResponse);
+    cloneJobsSummaryResponse[0].id = 'job id with spaces';
+    const wrapper = mount(
+      <JobsTable
+        isLoading={true}
+        jobs={cloneJobsSummaryResponse}
+        onJobStateChange={onJobStateChangeMock}
+      />
+    );
+    expect(
+      wrapper
+        .find('[data-test-subj="jobs-table-link"]')
+        .first()
+        .props().href
+    ).toEqual('/test/base/path/app/ml#/jobs?mlManagement=(jobId:job%20id%20with%20spaces)');
   });
 
   test('should call onJobStateChange when the switch is clicked to be true/open', () => {

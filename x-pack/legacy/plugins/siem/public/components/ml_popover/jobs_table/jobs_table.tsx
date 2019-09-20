@@ -40,7 +40,7 @@ const getJobsTableColumns = (
       <JobNameWrapper>
         <EuiLink
           data-test-subj="jobs-table-link"
-          href={`${chrome.getBasePath()}/app/ml#/jobs?mlManagement=(jobId:${id})`}
+          href={`${chrome.getBasePath()}/app/ml#/jobs?mlManagement=(jobId:${encodeURI(id)})`}
           target="_blank"
         >
           <EuiText size="s">{id}</EuiText>
