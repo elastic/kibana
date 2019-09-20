@@ -6,13 +6,32 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGrid, EuiFlexItem, EuiLink, EuiImage, EuiIcon } from '@elastic/eui';
+import {
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiLink,
+  // @ts-ignore (elastic/eui#1557) EuiImage is not exported yet
+  EuiImage,
+  EuiIcon,
+} from '@elastic/eui';
 
-export class AssetPicker extends PureComponent {
+import { CanvasAsset } from '../../../types';
+
+import { ComponentStrings } from '../../../i18n';
+
+const { AssetPicker: strings } = ComponentStrings;
+
+interface Props {
+  assets: CanvasAsset[];
+  selected?: string;
+  onChange: (asset: CanvasAsset) => void;
+}
+
+export class AssetPicker extends PureComponent<Props> {
   static propTypes = {
-    assets: PropTypes.array,
+    assets: PropTypes.array.isRequired,
     selected: PropTypes.string,
-    onChange: PropTypes.func,
+    onChange: PropTypes.func.isRequired,
   };
 
   componentDidMount() {
@@ -38,7 +57,7 @@ export class AssetPicker extends PureComponent {
               disabled={asset.id === selected}
               onClick={() => onChange(asset)}
             >
-              <EuiImage url={asset.value} alt="Asset thumbnail" />
+              <EuiImage url={asset.value} alt={strings.getAssetAltText()} />
               {asset.id === selected && (
                 <EuiIcon className="canvasAssetPicker__selected" type="checkInCircleFilled" />
               )}

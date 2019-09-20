@@ -4667,8 +4667,6 @@
     "xpack.graph.topNavMenu.saveWorkspace.enabledAriaLabel": "保存工作空间",
     "xpack.graph.topNavMenu.saveWorkspace.enabledLabel": "保存",
     "xpack.graph.topNavMenu.saveWorkspace.enabledTooltip": "保存此工作空间",
-    "xpack.graph.topNavMenu.searchButtonAriaLabel": "搜索",
-    "xpack.graph.topNavMenu.selectIndexPatternOptionLabel": "选择索引模式......",
     "xpack.graph.topNavMenu.settingsAriaLabel": "设置",
     "xpack.graph.topNavMenu.settingsLabel": "设置",
     "xpack.graph.errorToastTitle": "Graph 错误",
