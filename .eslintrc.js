@@ -514,10 +514,6 @@ module.exports = {
         mocha: true,
         jest: true,
       },
-      globals: {
-        cy: true,
-        Cypress: true,
-      },
       rules: {
         'accessor-pairs': 'error',
         'array-callback-return': 'error',
