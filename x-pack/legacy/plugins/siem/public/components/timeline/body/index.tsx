@@ -86,7 +86,7 @@ export const Body = React.memo<BodyProps>(
     );
 
     return (
-      <EventsTable tableHeight={height}>
+      <EventsTable data-test-subj="events-table" tableHeight={height}>
         <ColumnHeaders
           actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
           browserFields={browserFields}

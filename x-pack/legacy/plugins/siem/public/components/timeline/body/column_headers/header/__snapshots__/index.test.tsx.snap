@@ -1,24 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Header renders correctly against snapshot 1`] = `
-<HeaderContainer
-  data-test-subj="header-container"
-  gutterSize="none"
-  key="@timestamp"
-  width="190px"
->
-  <Resizeable
-    handle={
-      <FullHeightFlexItem
-        grow={false}
-      >
-        <ColumnHeaderResizeHandle />
-      </FullHeightFlexItem>
-    }
-    height="35px"
-    id="@timestamp"
-    onResize={[Function]}
-    render={[Function]}
-  />
-</HeaderContainer>
+<Resizeable
+  bottom={0}
+  handle={<EventsHeadingHandle />}
+  id="@timestamp"
+  onResize={[Function]}
+  position="absolute"
+  render={[Function]}
+  right="-1px"
+  top={0}
+/>
 `;

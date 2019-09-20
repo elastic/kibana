@@ -41,7 +41,10 @@ const HeaderComp = React.memo<HeaderCompProps>(
     return (
       <EventsHeading data-test-subj="header" isLoading={isLoading}>
         {header.aggregatable ? (
-          <EventsHeadingTitleButton onClick={!isResizing && !isLoading ? onClick : noop}>
+          <EventsHeadingTitleButton
+            data-test-subj="header-sort-button"
+            onClick={!isResizing && !isLoading ? onClick : noop}
+          >
             <TruncatableText data-test-subj={`header-text-${header.id}`}>
               <EuiToolTip
                 data-test-subj="header-tooltip"

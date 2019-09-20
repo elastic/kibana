@@ -6,7 +6,6 @@
 
 import styled from 'styled-components';
 
-export const CELL_RESIZE_HANDLE_WIDTH = 2; // px;
 export const TIMELINE_RESIZE_HANDLE_WIDTH = 2; // px
 
 export const CommonResizeHandle = styled.div`

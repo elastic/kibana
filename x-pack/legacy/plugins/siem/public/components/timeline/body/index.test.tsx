@@ -80,7 +80,7 @@ describe('Body', () => {
       ).toEqual(true);
     });
 
-    test('it renders the vertical scroll container', () => {
+    test('it renders the scroll container', () => {
       const wrapper = mount(
         <TestProviders>
           <Body
@@ -112,7 +112,7 @@ describe('Body', () => {
 
       expect(
         wrapper
-          .find('[data-test-subj="vertical-scroll-container"]')
+          .find('[data-test-subj="events-table"]')
           .first()
           .exists()
       ).toEqual(true);
@@ -208,8 +208,9 @@ describe('Body', () => {
 
     const addaNoteToEvent = (wrapper: ReactWrapper, note: string) => {
       wrapper
-        .find('[data-test-subj="timeline-notes-icon"]')
+        .find('[data-test-subj="add-note"]')
         .first()
+        .find('button')
         .simulate('click');
       wrapper.update();
       wrapper

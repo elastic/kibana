@@ -143,7 +143,7 @@ describe('Hosts Table', () => {
             .find('.euiTable thead tr th button')
             .first()
             .text()
-        ).toEqual('NameClick to sort in descending order');
+        ).toEqual('Host nameClick to sort in descending order');
       });
     });
   });

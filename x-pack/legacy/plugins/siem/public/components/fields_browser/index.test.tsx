@@ -38,7 +38,7 @@ describe('StatefulFieldsBrowser', () => {
         .find('[data-test-subj="show-field-browser"]')
         .first()
         .text()
-    ).toEqual('Fields');
+    ).toEqual('Columns');
   });
 
   describe('toggleShow', () => {

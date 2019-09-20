@@ -18,7 +18,7 @@ import {
   Resizeable,
   calculateDeltaX,
 } from '.';
-import { CellResizeHandle } from './styled_handles';
+import { CommonResizeHandle } from './styled_handles';
 
 describe('Resizeable', () => {
   afterEach(() => {
@@ -29,7 +29,7 @@ describe('Resizeable', () => {
     const wrapper = mount(
       <TestProviders>
         <Resizeable
-          handle={<CellResizeHandle data-test-subj="test-resize-handle" />}
+          handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
           height="100%"
           id="test"
           onResize={jest.fn()}
@@ -48,7 +48,7 @@ describe('Resizeable', () => {
     const wrapper = shallow(
       <TestProviders>
         <Resizeable
-          handle={<CellResizeHandle data-test-subj="test-resize-handle" />}
+          handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
           height="100%"
           id="test"
           onResize={jest.fn()}
@@ -65,7 +65,7 @@ describe('Resizeable', () => {
       mount(
         <TestProviders>
           <Resizeable
-            handle={<CellResizeHandle data-test-subj="test-resize-handle" />}
+            handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
             height="100%"
             id="test"
             onResize={jest.fn()}
@@ -82,7 +82,7 @@ describe('Resizeable', () => {
         mount(
           <TestProviders>
             <Resizeable
-              handle={<CellResizeHandle data-test-subj="test-resize-handle" />}
+              handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
               height="100%"
               id="test"
               onResize={jest.fn()}
@@ -102,7 +102,7 @@ describe('Resizeable', () => {
         mount(
           <TestProviders>
             <Resizeable
-              handle={<CellResizeHandle data-test-subj="test-resize-handle" />}
+              handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
               height="100%"
               id="test"
               onResize={jest.fn()}
