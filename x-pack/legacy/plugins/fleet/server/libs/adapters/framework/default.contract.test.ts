@@ -8,7 +8,6 @@ import Slapshot from '@mattapperson/slapshot';
 import { MemorizeFrameworkAdapter } from './memorize';
 import { FrameworkAdapter } from './default';
 import { FrameworkAdapter as FrameworkAdapterType } from './adapter_types';
-import { createKibanaServer } from '../../../../../../../test_utils/jest/contract_tests/servers';
 
 describe('Agent Adapter', () => {
   let adapter: FrameworkAdapterType;
@@ -16,6 +15,10 @@ describe('Agent Adapter', () => {
 
   beforeAll(async () => {
     await Slapshot.callWhenOnline(async () => {
+      const { createKibanaServer } = await import(
+        '../../../../../../../test_utils/jest/contract_tests/servers'
+      );
+
       servers = await createKibanaServer({
         security: { enabled: false },
       });

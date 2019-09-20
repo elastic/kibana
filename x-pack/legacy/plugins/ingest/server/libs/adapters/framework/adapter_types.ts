@@ -8,10 +8,9 @@
 
 import { Lifecycle, ResponseToolkit } from 'hapi';
 import * as t from 'io-ts';
-import { Legacy } from 'kibana';
 import { Cluster, ClusterConfig } from 'src/legacy/core_plugins/elasticsearch';
 import { ApmOssPlugin } from 'src/legacy/core_plugins/apm_oss';
-import { Request } from 'src/legacy/server/kbn_server';
+import { Request, Server } from 'src/legacy/server/kbn_server';
 import { XPackInfo } from '../../../../../xpack_main/server/lib/xpack_info';
 import {
   Feature,
@@ -24,7 +23,7 @@ export const internalUser: FrameworkInternalUser = {
   kind: 'internal',
 };
 
-export interface KibanaLegacyServer extends Legacy.Server {
+export interface KibanaLegacyServer extends Server {
   plugins: {
     xpack_main: {
       status: {
@@ -56,8 +55,8 @@ export interface KibanaLegacyServer extends Legacy.Server {
     ingest: any;
   };
   expose: { (key: string, value: any): void; (obj: object): void };
-  config: () => any;
-  route: (routeConfig: any) => void;
+  policy: () => any;
+  route: (routePolicy: any) => void;
   log: (message: string) => void;
 }
 
@@ -120,7 +119,7 @@ export interface KibanaUser extends t.TypeOf<typeof RuntimeKibanaUser> {}
 
 export interface FrameworkAuthenticatedUser<AuthDataType = any> {
   kind: 'authenticated';
-  [internalAuthData]: AuthDataType;
+  [internalAuthData]?: AuthDataType;
   username: string;
   roles: string[];
   full_name: string | null;
@@ -156,7 +155,7 @@ export interface FrameworkRouteOptions<RouteResponse extends FrameworkResponse =
   licenseRequired?: string[];
   requiredRoles?: string[];
   handler: FrameworkRouteHandler<Request, RouteResponse>;
-  config?: {};
+  policy?: {};
 }
 
 export type FrameworkRouteHandler<

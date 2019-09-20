@@ -5,16 +5,13 @@
  */
 
 export const mappings = {
-  configurations: {
+  policies: {
     properties: {
       name: {
         type: 'text',
       },
       description: {
         type: 'text',
-      },
-      output: {
-        type: 'keyword',
       },
       monitoring_enabled: {
         type: 'boolean',
@@ -24,16 +21,25 @@ export const mappings = {
       },
       data_sources: {
         properties: {
-          id: {
+          uuid: {
             type: 'keyword',
           },
           meta: {
             type: 'keyword',
           },
-          config_id: {
+          output: {
             type: 'keyword',
           },
-          config: {
+          queue: {
+            type: 'keyword',
+          },
+          policy_id: {
+            type: 'keyword',
+          },
+          policy: {
+            type: 'keyword',
+          },
+          inputs: {
             type: 'keyword',
           },
         },
@@ -50,7 +56,7 @@ export const mappings = {
       status: {
         type: 'keyword',
       },
-      updated_at: {
+      created_on: {
         type: 'keyword',
       },
       created_by: {
@@ -60,6 +66,16 @@ export const mappings = {
         type: 'keyword',
       },
       updated_by: {
+        type: 'keyword',
+      },
+    },
+  },
+  inputs: {
+    properties: {
+      other: {
+        type: 'text',
+      },
+      data_source_id: {
         type: 'keyword',
       },
     },

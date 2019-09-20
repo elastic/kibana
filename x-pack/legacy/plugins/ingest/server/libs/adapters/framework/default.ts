@@ -8,6 +8,7 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
 import { get } from 'lodash';
 import { Request } from 'src/legacy/server/kbn_server';
+import { AuthenticatedUser } from '../../../../../../../plugins/security/common/model';
 import { XPackInfo } from '../../../../../xpack_main/server/lib/xpack_info';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../../../../server/lib/mirror_plugin_status';
@@ -77,12 +78,12 @@ export class BackendFrameworkAdapter {
     }
   }
 
-  public exposeMethod(name: string, method: () => any) {
-    this.server.expose(name, method);
+  public expose(name: string, thing: any) {
+    this.server.expose(name, thing);
   }
 
   public async getUser(request: Request): Promise<KibanaUser | null> {
-    let user;
+    let user: AuthenticatedUser;
     try {
       user = await this.server.plugins.security.getUser(request);
     } catch (e) {
@@ -108,7 +109,7 @@ export class BackendFrameworkAdapter {
 
     // If, for some reason, we cannot get the license information
     // from Elasticsearch, assume worst case and disable
-    if (!xpackInfo || !xpackInfo.isAvailable()) {
+    if (!xpackInfo) {
       this.info = null;
       return;
     }
@@ -135,7 +136,7 @@ export class BackendFrameworkAdapter {
         },
       };
     } catch (e) {
-      this.server.log(`Error accessing required xPackInfo in ${this.PLUGIN_ID} Kibana adapter`);
+      this.log(`Error accessing required xPackInfo in ${this.PLUGIN_ID} Kibana adapter`);
       throw e;
     }
 

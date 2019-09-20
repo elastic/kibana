@@ -88,7 +88,7 @@ export class SODatabaseAdapter {
    * @example
    *
    * bulkGet([
-   *   { id: 'one', type: 'config' },
+   *   { id: 'one', type: 'policy' },
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */

@@ -11,7 +11,6 @@ import { AgentAdapter } from './default';
 import { SODatabaseAdapter as SODatabaseAdapterType } from '../saved_objets_database/adapter_types';
 import { SODatabaseAdapter } from '../saved_objets_database/default';
 import { MemorizeSODatabaseAdapter } from '../saved_objets_database/memorize_adapter';
-import { createKibanaServer } from '../../../../../../../test_utils/jest/contract_tests/servers';
 import { Agent, SortOptions } from './adapter_type';
 import { FrameworkUser, internalAuthData } from '../framework/adapter_types';
 
@@ -57,6 +56,9 @@ describe('Agent Adapter', () => {
 
   beforeAll(async () => {
     await Slapshot.callWhenOnline(async () => {
+      const { createKibanaServer } = await import(
+        '../../../../../../../test_utils/jest/contract_tests/servers'
+      );
       servers = await createKibanaServer({
         security: { enabled: false },
       });
