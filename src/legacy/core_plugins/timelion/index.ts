@@ -43,6 +43,8 @@ const timelionPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPl
           .default([]),
       }).default();
     },
+    // @ts-ignore
+    // https://github.com/elastic/kibana/pull/44039#discussion_r326582255
     uiCapabilities() {
       return {
         timelion: {
