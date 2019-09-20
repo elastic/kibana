@@ -43,6 +43,6 @@ export class Events {
     req: FrameworkRequest,
     options: RequestBasicOptions
   ): Promise<EventsOverTimeData> {
-    return await this.adapter.getEventsOverTime(req, options);
+    return this.adapter.getEventsOverTime(req, options);
   }
 }

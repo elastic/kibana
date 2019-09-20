@@ -101,7 +101,7 @@ export const BarChartWithCustomPrompt = React.memo<{
     ) ? (
     <BarChartBaseComponent height={height} width={width} data={data} configs={configs} />
   ) : (
-    <ChartHolder />
+    <ChartHolder height={height} width={width} />
   );
 });
 
@@ -113,7 +113,7 @@ export const BarChart = React.memo<{
 }>(({ barChart, configs }) => {
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
-  return (
+  return get(`0.value.length`, barChart) ? (
     <AutoSizer detectAnyWindowResize={false} content>
       {({ measureRef, content: { height, width } }) => (
         <WrappedByAutoSizer innerRef={measureRef} height={getChartHeight(customHeight, height)}>
@@ -126,6 +126,8 @@ export const BarChart = React.memo<{
         </WrappedByAutoSizer>
       )}
     </AutoSizer>
+  ) : (
+    <ChartHolder height={getChartHeight(customHeight)} width={getChartWidth(customWidth)} />
   );
 });
 

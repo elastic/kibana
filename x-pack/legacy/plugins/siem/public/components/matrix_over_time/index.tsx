@@ -10,8 +10,7 @@ import { ScaleType, niceTimeFormatter, Position } from '@elastic/charts';
 import { getOr, head, last } from 'lodash/fp';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
-import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiLoadingContent } from '@elastic/eui';
 import { BarChart } from '../charts/barchart';
 import { HeaderPanel } from '../header_panel';
 import { ChartSeriesData, UpdateDateRange } from '../charts/common';
@@ -19,6 +18,7 @@ import { MatrixOverTimeHistogramData } from '../../graphql/types';
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
 import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { Loader } from '../loader';
+import { Panel } from '../panel';
 
 export interface MatrixOverTimeBasicProps {
   id: string;
@@ -72,15 +72,6 @@ const getBarchartConfigs = (from: number, to: number, onBrushEnd: UpdateDateRang
   customHeight: 324,
 });
 
-const Panel = styled(EuiPanel)<{ loading: number }>`
-  position: relative;
-
-  ${({ loading }) =>
-    loading &&
-    `
-    overflow: hidden;`}
-`;
-
 export const MatrixOverTimeHistogram = ({
   id,
   loading,
@@ -111,12 +102,12 @@ export const MatrixOverTimeHistogram = ({
     if (totalCount >= 0 && loadingInitial) {
       setLoadingInitial(false);
     }
-  }, [totalCount, showInspect]);
+  }, [loading]);
 
   return (
     <Panel
       data-test-subj={`${dataKey}Panel`}
-      loading={loading ? 1 : 0}
+      loading={loading}
       onMouseEnter={() => setShowInspect(true)}
       onMouseLeave={() => setShowInspect(false)}
     >

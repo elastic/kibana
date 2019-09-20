@@ -122,7 +122,7 @@ export const AreaChartWithCustomPrompt = React.memo<{
     ) ? (
     <AreaChartBaseComponent height={height} width={width} data={data} configs={configs} />
   ) : (
-    <ChartHolder />
+    <ChartHolder height={height} width={width} />
   );
 });
 
@@ -135,7 +135,7 @@ export const AreaChart = React.memo<{
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
 
-  return (
+  return get(`0.value.length`, areaChart) ? (
     <AutoSizer detectAnyWindowResize={false} content>
       {({ measureRef, content: { height, width } }) => (
         <WrappedByAutoSizer innerRef={measureRef} height={getChartHeight(customHeight, height)}>
@@ -148,6 +148,8 @@ export const AreaChart = React.memo<{
         </WrappedByAutoSizer>
       )}
     </AutoSizer>
+  ) : (
+    <ChartHolder height={getChartHeight(customHeight)} width={getChartWidth(customWidth)} />
   );
 });
 

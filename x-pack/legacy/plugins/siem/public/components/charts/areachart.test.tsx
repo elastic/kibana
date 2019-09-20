@@ -7,7 +7,7 @@
 import { ShallowWrapper, shallow } from 'enzyme';
 import * as React from 'react';
 
-import { AreaChartBaseComponent, AreaChartWithCustomPrompt } from './areachart';
+import { AreaChartBaseComponent, AreaChartWithCustomPrompt, AreaChart } from './areachart';
 import { ChartHolder, ChartSeriesData } from './common';
 import { ScaleType, AreaSeries, Axis } from '@elastic/charts';
 
@@ -332,5 +332,38 @@ describe('AreaChartWithCustomPrompt', () => {
       expect(shallowWrapper.find(AreaChartBaseComponent)).toHaveLength(0);
       expect(shallowWrapper.find(ChartHolder)).toHaveLength(1);
     });
+  });
+});
+
+describe('AreaChart', () => {
+  let shallowWrapper: ShallowWrapper;
+  const mockConfig = {
+    series: {
+      xScaleType: ScaleType.Time,
+      yScaleType: ScaleType.Linear,
+      stackAccessors: ['g'],
+    },
+    axis: {
+      xTickFormatter: jest.fn(),
+      yTickFormatter: jest.fn(),
+      tickSize: 8,
+    },
+    customHeight: 324,
+  };
+
+  it('should render if data exist', () => {
+    const mockData = [
+      { key: 'uniqueSourceIps', value: [{ y: 100, x: 100, g: 'group' }], color: '#DB1374' },
+    ];
+    shallowWrapper = shallow(<AreaChart configs={mockConfig} areaChart={mockData} />);
+    expect(shallowWrapper.find('AutoSizer')).toHaveLength(1);
+    expect(shallowWrapper.find('ChartHolder')).toHaveLength(0);
+  });
+
+  it('should render a chartHolder if no data given', () => {
+    const mockData = [{ key: 'uniqueSourceIps', value: [], color: '#DB1374' }];
+    shallowWrapper = shallow(<AreaChart configs={mockConfig} areaChart={mockData} />);
+    expect(shallowWrapper.find('AutoSizer')).toHaveLength(0);
+    expect(shallowWrapper.find('ChartHolder')).toHaveLength(1);
   });
 });

@@ -28,16 +28,23 @@ export const defaultChartHeight = '100%';
 export const defaultChartWidth = '100%';
 const chartDefaultRotation: Rotation = 0;
 const chartDefaultRendering: Rendering = 'canvas';
-const FlexGroup = styled(EuiFlexGroup)`
-  height: 100%;
+const FlexGroup = styled(EuiFlexGroup)<{ height?: string | null; width?: string | null }>`
+  height: ${({ height }) => (height ? height : '100%')};
+  width: ${({ width }) => (width ? width : '100%')};
 `;
 
 FlexGroup.displayName = 'FlexGroup';
 
 export type UpdateDateRange = (min: number, max: number) => void;
 
-export const ChartHolder = () => (
-  <FlexGroup justifyContent="center" alignItems="center">
+export const ChartHolder = ({
+  height = '100%',
+  width = '100%',
+}: {
+  height?: string | null;
+  width?: string | null;
+}) => (
+  <FlexGroup justifyContent="center" alignItems="center" height={height} width={width}>
     <EuiFlexItem grow={false}>
       <EuiText size="s" textAlign="center" color="subdued">
         {i18n.translate('xpack.siem.chart.dataNotAvailableTitle', {

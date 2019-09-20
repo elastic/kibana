@@ -7,7 +7,7 @@
 import { shallow, ShallowWrapper } from 'enzyme';
 import * as React from 'react';
 
-import { BarChartBaseComponent, BarChartWithCustomPrompt } from './barchart';
+import { BarChartBaseComponent, BarChartWithCustomPrompt, BarChart } from './barchart';
 import { ChartSeriesData, ChartHolder } from './common';
 import { BarSeries, ScaleType, Axis } from '@elastic/charts';
 
@@ -292,5 +292,38 @@ describe.each([
   it('render Chart Holder', () => {
     expect(shallowWrapper.find(BarChartBaseComponent)).toHaveLength(0);
     expect(shallowWrapper.find(ChartHolder)).toHaveLength(1);
+  });
+});
+
+describe('BarChart', () => {
+  let shallowWrapper: ShallowWrapper;
+  const mockConfig = {
+    series: {
+      xScaleType: ScaleType.Time,
+      yScaleType: ScaleType.Linear,
+      stackAccessors: ['g'],
+    },
+    axis: {
+      xTickFormatter: jest.fn(),
+      yTickFormatter: jest.fn(),
+      tickSize: 8,
+    },
+    customHeight: 324,
+  };
+
+  it('should render if data exist', () => {
+    const mockData = [
+      { key: 'uniqueSourceIps', value: [{ y: 100, x: 100, g: 'group' }], color: '#DB1374' },
+    ];
+    shallowWrapper = shallow(<BarChart configs={mockConfig} barChart={mockData} />);
+    expect(shallowWrapper.find('AutoSizer')).toHaveLength(1);
+    expect(shallowWrapper.find('ChartHolder')).toHaveLength(0);
+  });
+
+  it('should render a chartHolder if no data given', () => {
+    const mockData = [{ key: 'uniqueSourceIps', value: [], color: '#DB1374' }];
+    shallowWrapper = shallow(<BarChart configs={mockConfig} barChart={mockData} />);
+    expect(shallowWrapper.find('AutoSizer')).toHaveLength(0);
+    expect(shallowWrapper.find('ChartHolder')).toHaveLength(1);
   });
 });

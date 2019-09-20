@@ -3,6 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/*
+ ** Applying the same logic as:
+ ** x-pack/legacy/plugins/apm/server/lib/helpers/get_bucket_size/calculate_auto.js
+ */
 import moment from 'moment';
 import { get } from 'lodash/fp';
 const d = moment.duration;
@@ -37,7 +41,7 @@ const find = (
   ) => number | moment.Duration | undefined,
   last?: boolean
 ): ((buckets: number, duration: number | moment.Duration) => moment.Duration | undefined) => {
-  function pick(buckets: number, duration: number | moment.Duration): number | moment.Duration {
+  const pick = (buckets: number, duration: number | moment.Duration): number | moment.Duration => {
     const target =
       typeof duration === 'number' ? duration / buckets : duration.asMilliseconds() / buckets;
     let lastResp = null;
@@ -60,7 +64,7 @@ const find = (
     // fallback to just a number of milliseconds, ensure ms is >= 1
     const ms = Math.max(Math.floor(target), 1);
     return moment.duration(ms, 'ms');
-  }
+  };
 
   return (buckets, duration) => {
     const interval = pick(buckets, duration);
@@ -87,14 +91,14 @@ export const calculateAuto = {
   }),
 };
 
-export function calculateTimeseriesInterval(
+export const calculateTimeseriesInterval = (
   lowerBoundInMsSinceEpoch: number,
   upperBoundInMsSinceEpoch: number,
   minIntervalSeconds: number
-) {
+) => {
   const duration = moment.duration(upperBoundInMsSinceEpoch - lowerBoundInMsSinceEpoch, 'ms');
 
   const matchedInterval = calculateAuto.near(50, duration);
 
   return matchedInterval ? Math.max(matchedInterval.asSeconds(), 1) : null;
-}
+};
