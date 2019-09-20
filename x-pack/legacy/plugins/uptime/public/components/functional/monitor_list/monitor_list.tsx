@@ -21,7 +21,6 @@ import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { formatUptimeGraphQLErrorList } from '../../../lib/helper/format_error_list';
 import { ExpandedRowMap } from './types';
 import { MonitorListDrawer } from './monitor_list_drawer';
-import { CLIENT_DEFAULTS } from '../../../../common/constants';
 import { MonitorBarSeries } from '../charts';
 import { MonitorPageLink } from '../monitor_page_link';
 import { MonitorListActionsPopover } from './monitor_list_actions_popover';
@@ -54,7 +53,6 @@ export const MonitorListComponent = (props: Props) => {
     absoluteStartDate,
     absoluteEndDate,
     dangerColor,
-    successColor,
     data,
     errors,
     hasActiveFilters,
@@ -92,6 +90,21 @@ export const MonitorListComponent = (props: Props) => {
   //   },
   // };
 
+  const getExpandedRowMap = () => {
+    return drawerIds.reduce((map: ExpandedRowMap, id: string) => {
+      return {
+        ...map,
+        [id]: (
+          <MonitorListDrawer
+            summary={
+              items ? items.find(({ monitor_id: monitorId }) => monitorId === id) : undefined
+            }
+          />
+        ),
+      };
+    }, {});
+  };
+
   return (
     <Fragment>
       <EuiPanel>
@@ -110,21 +123,7 @@ export const MonitorListComponent = (props: Props) => {
           isExpandable={true}
           hasActions={true}
           itemId="monitor_id"
-          itemIdToExpandedRowMap={drawerIds.reduce((map: ExpandedRowMap, id: string) => {
-            return {
-              ...map,
-              [id]: (
-                <MonitorListDrawer
-                  condensedCheckLimit={CLIENT_DEFAULTS.CONDENSED_CHECK_LIMIT}
-                  summary={
-                    items ? items.find(({ monitor_id: monitorId }) => monitorId === id) : undefined
-                  }
-                  successColor={successColor}
-                  dangerColor={dangerColor}
-                />
-              ),
-            };
-          }, {})}
+          itemIdToExpandedRowMap={getExpandedRowMap()}
           items={items}
           // TODO: not needed without sorting and pagination
           // onChange={onChange}
