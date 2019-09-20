@@ -22,6 +22,7 @@ import React, { Component } from 'react';
 import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   getCurl: (cb: (text: string) => void) => void;
