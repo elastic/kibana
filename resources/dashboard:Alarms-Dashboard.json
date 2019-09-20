@@ -1,0 +1,41 @@
+{
+   "migrationVersion": {
+      "dashboard": "7.0.0"
+   }, 
+   "references": [
+      {
+         "type": "visualization", 
+         "name": "panel_0", 
+         "id": "Total-Alarms-Fired-(Count)"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_1", 
+         "id": "Count-of-Total-Alarms-Fired-by-Name-(Bar-Chart)"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_2", 
+         "id": "Summary-of-Total-Alarms-Fired-(Pie-Chart)"
+      }, 
+      {
+         "type": "search", 
+         "name": "panel_3", 
+         "id": "Alarms-Table"
+      }
+   ], 
+   "type": "dashboard", 
+   "dashboard": {
+      "hits": 0, 
+      "timeRestore": false, 
+      "description": "", 
+      "title": "Alarms Dashboard", 
+      "panelsJSON": "[{\"gridData\":{\"h\":12,\"i\":\"1\",\"w\":48,\"x\":0,\"y\":16},\"panelIndex\":\"1\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_0\"},{\"gridData\":{\"h\":16,\"i\":\"2\",\"w\":24,\"x\":0,\"y\":0},\"panelIndex\":\"2\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_1\"},{\"gridData\":{\"h\":16,\"i\":\"3\",\"w\":24,\"x\":24,\"y\":0},\"panelIndex\":\"3\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{\"columns\":[\"RuleName\",\"RuleSeverity\",\"Application\",\"Session\",\"SrcIP\",\"DestIP\",\"TotalBytes\"],\"sort\":[\"TimeUpdated\",\"desc\"]},\"gridData\":{\"h\":20,\"i\":\"4\",\"w\":48,\"x\":0,\"y\":28},\"panelIndex\":\"4\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_3\"}]", 
+      "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}", 
+      "version": 2, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"*\",\"language\":\"lucene\"}}"
+      }
+   }, 
+   "updated_at": "2019-09-20T17:04:30.894Z"
+}
