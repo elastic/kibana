@@ -69,7 +69,6 @@ function CategoryAxisPanel(props: CategoryAxisPanelProps) {
       <EuiSpacer size="s" />
 
       <SelectOption
-        id="categoryAxisPosition"
         label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.categoryAxis.positionLabel', {
           defaultMessage: 'Position',
         })}

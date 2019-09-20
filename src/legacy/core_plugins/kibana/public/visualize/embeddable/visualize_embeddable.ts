@@ -36,8 +36,6 @@ import {
   EmbeddableOutput,
   Embeddable,
   Container,
-  APPLY_FILTER_TRIGGER,
-  Trigger,
 } from '../../../../embeddable_api/public/np_ready/public';
 import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
@@ -128,10 +126,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       return undefined;
     }
     return this.handler.inspectorAdapters;
-  }
-
-  public supportsTrigger(trigger: Trigger) {
-    return trigger.id !== APPLY_FILTER_TRIGGER;
   }
 
   /**

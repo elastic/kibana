@@ -17,11 +17,8 @@
  * under the License.
  */
 
-import {
-  IncompatibleActionError,
-  PanelNotFoundError,
-  EmbeddableFactoryNotFoundError,
-} from './errors';
+import { IncompatibleActionError } from 'src/plugins/ui_actions/public';
+import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from './errors';
 
 describe('IncompatibleActionError', () => {
   test('is instance of error', () => {

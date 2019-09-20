@@ -12,7 +12,8 @@
     background-color: $euiColorLightestShade;
   }
 
-  .code-line-decoration + .cldr.folding {
+  .cldr.code-mark-line-number + .cldr.folding,
+  .cldr.code-line-decoration + .cldr.folding {
     left: -124px !important;
     opacity: 1;
   }
