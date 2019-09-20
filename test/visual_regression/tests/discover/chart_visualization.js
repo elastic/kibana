@@ -74,10 +74,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.common.sleep(400);
         await PageObjects.discover.setChartInterval('Daily');
-        await retry.try(async () => {
-          await visualTesting.snapshot({
-            show: ['discoverChart'],
-          });
+        await visualTesting.snapshot({
+          show: ['discoverChart'],
         });
       });
 
@@ -86,10 +84,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.common.sleep(400);
         await PageObjects.discover.setChartInterval('Weekly');
-        await retry.try(async () => {
-          await visualTesting.snapshot({
-            show: ['discoverChart'],
-          });
+        await visualTesting.snapshot({
+          show: ['discoverChart'],
         });
       });
 
@@ -146,11 +142,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.common.sleep(400);
-        await retry.try(async function () {
-          await visualTesting.snapshot({
-            show: ['discoverChart'],
-          });
+        await visualTesting.snapshot({
+          show: ['discoverChart'],
         });
       });
     });
