@@ -143,17 +143,22 @@ export const WorkpadExport: FunctionComponent<Props> = ({
   ) : null;
 
   return (
-    <Popover
-      button={exportControl}
-      panelPaddingSize="none"
-      tooltip={strings.getShareWorkpadMessage()}
-      tooltipPosition="bottom"
-    >
-      {({ closePopover }: { closePopover: ClosePopoverFn }) => (
-        <EuiContextMenu initialPanelId={0} panels={flattenPanelTree(getPanelTree(closePopover))} />
-      )}
+    <div>
+      <Popover
+        button={exportControl}
+        panelPaddingSize="none"
+        tooltip={strings.getShareWorkpadMessage()}
+        tooltipPosition="bottom"
+      >
+        {({ closePopover }: { closePopover: ClosePopoverFn }) => (
+          <EuiContextMenu
+            initialPanelId={0}
+            panels={flattenPanelTree(getPanelTree(closePopover))}
+          />
+        )}
+      </Popover>
       {flyout}
-    </Popover>
+    </div>
   );
 };
 
