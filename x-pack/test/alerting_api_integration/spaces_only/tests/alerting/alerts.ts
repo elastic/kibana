@@ -6,64 +6,72 @@
 
 import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
-import { getTestAlertData, setupEsTestIndex, destroyEsTestIndex } from './utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import {
+  ESTestIndexTool,
+  ES_TEST_INDEX_NAME,
+  getUrlPrefix,
+  getTestAlertData,
+  ObjectRemover,
+} from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const retry = getService('retry');
+  const esTestIndexTool = new ESTestIndexTool(es, retry);
 
   describe('alerts', () => {
-    let esTestIndexName: string;
     const authorizationIndex = '.kibana-test-authorization';
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
-      await destroyEsTestIndex(es);
-      ({ name: esTestIndexName } = await setupEsTestIndex(es));
+      await esTestIndexTool.destroy();
+      await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
     });
     afterEach(() => objectRemover.removeAll());
     after(async () => {
-      await destroyEsTestIndex(es);
+      await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
     });
 
-    async function waitForTestIndexDoc(source: string, reference: string) {
-      return await retry.try(async () => {
-        const searchResult = await es.search({
-          index: esTestIndexName,
-          body: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      source,
-                    },
+    async function searchTestIndexDocs(source: string, reference: string) {
+      return await es.search({
+        index: ES_TEST_INDEX_NAME,
+        body: {
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    source,
                   },
-                  {
-                    term: {
-                      reference,
-                    },
+                },
+                {
+                  term: {
+                    reference,
                   },
-                ],
-              },
+                },
+              ],
             },
           },
-        });
-        expect(searchResult.hits.total.value).to.eql(1);
-        return searchResult.hits.hits[0];
+        },
       });
     }
 
-    it('should schedule task, run alert and fire actions', async () => {
-      const reference = `create-test-1:${Spaces.space1.id}`;
+    async function waitForTestIndexDocs(source: string, reference: string, numDocs: number = 1) {
+      return await retry.try(async () => {
+        const searchResult = await searchTestIndexDocs(source, reference);
+        expect(searchResult.hits.total.value).to.eql(numDocs);
+        return searchResult.hits.hits;
+      });
+    }
+
+    async function createIndexRecordAction(spaceId: string) {
       const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .post(`${getUrlPrefix(spaceId)}/api/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           description: 'My action',
@@ -76,7 +84,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+      objectRemover.add(spaceId, createdAction.id, 'action');
+      return createdAction;
+    }
+
+    it('should schedule task, run alert and schedule actions', async () => {
+      const reference = `create-test-1:${Spaces.space1.id}`;
+      const createdAction = await createIndexRecordAction(Spaces.space1.id);
 
       const response = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
@@ -86,7 +100,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             interval: '1m',
             alertTypeId: 'test.always-firing',
             alertTypeParams: {
-              index: esTestIndexName,
+              index: ES_TEST_INDEX_NAME,
               reference,
             },
             actions: [
@@ -94,7 +108,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 group: 'default',
                 id: createdAction.id,
                 params: {
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   reference,
                   message:
                     'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
@@ -106,17 +120,23 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       expect(response.statusCode).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
-      const alertTestRecord = await waitForTestIndexDoc('alert:test.always-firing', reference);
+      const alertTestRecord = (await waitForTestIndexDocs(
+        'alert:test.always-firing',
+        reference
+      ))[0];
       expect(alertTestRecord._source).to.eql({
         source: 'alert:test.always-firing',
         reference,
         state: {},
         params: {
-          index: esTestIndexName,
+          index: ES_TEST_INDEX_NAME,
           reference,
         },
       });
-      const actionTestRecord = await waitForTestIndexDoc('action:test.index-record', reference);
+      const actionTestRecord = (await waitForTestIndexDocs(
+        'action:test.index-record',
+        reference
+      ))[0];
       expect(actionTestRecord._source).to.eql({
         config: {
           unencrypted: `This value shouldn't get encrypted`,
@@ -125,7 +145,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           encrypted: 'This value should be encrypted',
         },
         params: {
-          index: esTestIndexName,
+          index: ES_TEST_INDEX_NAME,
           reference,
           message: 'instanceContextValue: true, instanceStateValue: true',
         },
@@ -160,7 +180,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             interval: '1m',
             alertTypeId: 'test.always-firing',
             alertTypeParams: {
-              index: esTestIndexName,
+              index: ES_TEST_INDEX_NAME,
               reference: 'create-test-2',
             },
             actions: [
@@ -169,7 +189,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 id: createdAction.id,
                 params: {
                   reference,
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   retryAt: retryDate.getTime(),
                 },
               },
@@ -231,7 +251,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               callClusterAuthorizationIndex: authorizationIndex,
               savedObjectsClientType: 'dashboard',
               savedObjectsClientId: '1',
-              index: esTestIndexName,
+              index: ES_TEST_INDEX_NAME,
               reference,
             },
           })
@@ -239,7 +259,10 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       expect(response.statusCode).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
-      const alertTestRecord = await waitForTestIndexDoc('alert:test.authorization', reference);
+      const alertTestRecord = (await waitForTestIndexDocs(
+        'alert:test.authorization',
+        reference
+      ))[0];
       expect(alertTestRecord._source.state).to.eql({
         callClusterSuccess: true,
         savedObjectsClientSuccess: false,
@@ -271,7 +294,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           getTestAlertData({
             alertTypeId: 'test.always-firing',
             alertTypeParams: {
-              index: esTestIndexName,
+              index: ES_TEST_INDEX_NAME,
               reference,
             },
             actions: [
@@ -282,7 +305,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   callClusterAuthorizationIndex: authorizationIndex,
                   savedObjectsClientType: 'dashboard',
                   savedObjectsClientId: '1',
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   reference,
                 },
               },
@@ -292,7 +315,10 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       expect(response.statusCode).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
-      const actionTestRecord = await waitForTestIndexDoc('action:test.authorization', reference);
+      const actionTestRecord = (await waitForTestIndexDocs(
+        'action:test.authorization',
+        reference
+      ))[0];
       expect(actionTestRecord._source.state).to.eql({
         callClusterSuccess: true,
         savedObjectsClientSuccess: false,
