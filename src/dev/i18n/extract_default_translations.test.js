@@ -30,13 +30,14 @@ const pluginsPaths = [
   path.join(fixturesPath, 'test_plugin_1'),
   path.join(fixturesPath, 'test_plugin_2'),
   path.join(fixturesPath, 'test_plugin_3'),
+  path.join(fixturesPath, 'test_plugin_3_additional_path'),
 ];
 
 const config = {
   paths: {
-    plugin_1: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_1',
-    plugin_2: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_2',
-    plugin_3: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3',
+    plugin_1: ['src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_1'],
+    plugin_2: ['src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_2'],
+    plugin_3: ['src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3'],
   },
   exclude: [],
 };
