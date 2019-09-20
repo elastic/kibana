@@ -23,6 +23,7 @@ import { ControlEditor } from './control_editor';
 import { addControl, moveControl, newControl, removeControl, setControl } from '../../editor_utils';
 import { getLineageMap, getParentCandidates } from '../../lineage';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { setup as data } from '../../../../../core_plugins/data/public/legacy';
 
 import {
   EuiButton,
@@ -40,7 +41,7 @@ class ControlsTabUi extends Component {
   }
 
   getIndexPattern = async (indexPatternId) => {
-    return await this.props.vis.API.indexPatterns.get(indexPatternId);
+    return await data.indexPatterns.indexPatterns.get(indexPatternId);
   }
 
   onChange = value => this.props.setValue('controls', value)
