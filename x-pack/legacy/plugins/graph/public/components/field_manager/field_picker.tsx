@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect, ReactNode } from 'react';
-import { EuiPopover, EuiSelectable, EuiBadge, EuiIcon } from '@elastic/eui';
+import { EuiPopover, EuiSelectable, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { WorkspaceField } from '../../types';
 
