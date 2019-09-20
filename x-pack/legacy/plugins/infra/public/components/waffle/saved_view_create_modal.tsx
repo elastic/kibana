@@ -35,7 +35,7 @@ export const SavedViewCreateModal = ({ close, save }: Props) => {
   const saveView = useCallback(() => {
     save(viewName, includeTime);
     close();
-  }, [viewName]);
+  }, [viewName, includeTime]);
 
   return (
     <EuiOverlayMask>
@@ -54,9 +54,12 @@ export const SavedViewCreateModal = ({ close, save }: Props) => {
             placeholder={i18n.translate('xpack.infra.waffle.savedViews.viewNamePlaceholder', {
               defaultMessage: 'Name',
             })}
+            data-test-subj="savedViewViweName"
             value={viewName}
             onChange={textChange}
-            aria-label="Use aria labels when no actual label is in use"
+            aria-label={i18n.translate('xpack.infra.waffle.savedViews.viewNamePlaceholder', {
+              defaultMessage: 'Name',
+            })}
           />
           <EuiSpacer size="m" />
           <EuiCheckbox
@@ -79,7 +82,7 @@ export const SavedViewCreateModal = ({ close, save }: Props) => {
               id="xpack.infra.waffle.savedViews.cancelButton"
             />
           </EuiButtonEmpty>
-          <EuiButton color="primary" onClick={saveView}>
+          <EuiButton color="primary" onClick={saveView} data-test-subj="createSavedViewButton">
             <FormattedMessage defaultMessage="Save" id="xpack.infra.waffle.savedViews.saveButton" />
           </EuiButton>
         </EuiModalFooter>

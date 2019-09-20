@@ -31,9 +31,10 @@ export const useSavedView = <ViewState>(defaultViewState: ViewState, viewType: s
   const { create } = useCreateSavedObject('config');
   const { deleteObject, deletedId } = useDeleteSavedObject('config');
   const deleteView = useCallback((id: string) => deleteObject(id), []);
-  const saveView = useCallback((d: { [p: string]: any }) => {
-    create({ type: viewType, data: d });
-  }, []);
+  const saveView = useCallback(
+    (d: { [p: string]: any }) => create({ type: viewType, data: d }),
+    []
+  );
 
   const savedObjects = data ? data.savedObjects : [];
   const views = useMemo(() => {

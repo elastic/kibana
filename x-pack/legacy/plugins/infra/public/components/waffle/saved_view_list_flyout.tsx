@@ -23,11 +23,11 @@ interface Props {
   views: SavedView[];
   loading: boolean;
   close(): void;
-  loadView(vs: WaffleViewState): void;
+  setView(vs: WaffleViewState): void;
   deleteView(id: string): void;
 }
 
-export const SavedViewListFlyout = ({ close, views, loadView, deleteView, loading }: Props) => {
+export const SavedViewListFlyout = ({ close, views, setView, deleteView, loading }: Props) => {
   const columns = [
     {
       field: 'name',
@@ -38,7 +38,7 @@ export const SavedViewListFlyout = ({ close, views, loadView, deleteView, loadin
         return (
           <EuiButtonEmpty
             onClick={() => {
-              loadView(item);
+              setView(item);
               close();
             }}
           >
@@ -69,7 +69,7 @@ export const SavedViewListFlyout = ({ close, views, loadView, deleteView, loadin
   ];
 
   return (
-    <EuiFlyout onClose={close}>
+    <EuiFlyout onClose={close} data-test-subj="loadViewsFlyout">
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2>
