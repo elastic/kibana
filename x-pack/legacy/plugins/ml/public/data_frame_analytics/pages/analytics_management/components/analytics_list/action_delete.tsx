@@ -47,6 +47,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
 
   let deleteButton = (
     <EuiButtonEmpty
+      data-test-subj="mlAnalyticsJobDeleteButton"
       size="xs"
       color="text"
       disabled={disabled || !canDeleteDataFrameAnalytics}
