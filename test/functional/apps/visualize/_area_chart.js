@@ -221,7 +221,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.skip('switch between Y axis scale types', () => {
+    describe('switch between Y axis scale types', () => {
       before(initAreaChart);
       const axisId = 'ValueAxis-1';
 

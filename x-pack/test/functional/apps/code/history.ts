@@ -26,7 +26,7 @@ export default function manageRepositoriesFunctionalTests({
     await testSubjects.exists(selector, { allowHidden: true });
 
   // FLAKY: https://github.com/elastic/kibana/issues/37859
-  describe.skip('History', function() {
+  describe('History', function() {
     this.tags('smoke');
     const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
 

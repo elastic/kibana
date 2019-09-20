@@ -11,7 +11,7 @@ export default function({ getService }: FtrProviderContext) {
 
   let version: string;
 
-  describe.skip('Privileges', () => {
+  describe('Privileges', () => {
     before(async () => {
       const versionService = getService('kibanaServer').version;
       version = await versionService.get();

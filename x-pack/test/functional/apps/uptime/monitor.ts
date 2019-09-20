@@ -17,7 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
     after(async () => await esArchiver.unload(archive));
     // TODO: update this test when states index is finalized
-    it.skip('loads and displays uptime data based on date range', async () => {
+    it('loads and displays uptime data based on date range', async () => {
       await pageObjects.uptime.loadDataAndGoToMonitorPage(
         '2019-01-28 12:40:08.078',
         '2019-01-29 12:40:08.078',

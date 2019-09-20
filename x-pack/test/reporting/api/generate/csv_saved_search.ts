@@ -271,7 +271,7 @@ export default function({ getService }: { getService: any }) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/37471
-    describe.skip('Non-Immediate', () => {
+    describe('Non-Immediate', () => {
       it('using queries in job params', async () => {
         // load test data that contains a saved search and documents
         await esArchiver.load('reporting/scripted');

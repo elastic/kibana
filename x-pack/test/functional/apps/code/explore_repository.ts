@@ -29,7 +29,7 @@ export default function exploreRepositoryFunctionalTests({
   // FLAKY https://github.com/elastic/kibana/issues/44286
   // FLAKY https://github.com/elastic/kibana/issues/43557
   // FLAKY https://github.com/elastic/kibana/issues/42567
-  describe.skip('Explore Repository', function() {
+  describe('Explore Repository', function() {
     this.tags('smoke');
     describe('Explore a repository', () => {
       const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';

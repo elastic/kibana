@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
 
 
-  describe.skip('graph', function () { // eslint-disable-line jest/no-disabled-tests
+  describe('graph', function () { // eslint-disable-line jest/no-disabled-tests
     before(async () => {
       await browser.setWindowSize(1600, 1000);
       log.debug('load graph/secrepo data');
@@ -108,7 +108,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     // open the same graph workspace again and make sure the results are the same
-    it.skip('should open Graph workspace', async function () {
+    it('should open Graph workspace', async function () {
       await PageObjects.graph.openGraph(graphName);
       const circlesText = await PageObjects.graph.getGraphCircleText();
       log.debug('circle count = ' + circlesText.length);
@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }) {
       expect(circlesText.length).to.equal(expectedText.length);
     });
 
-    it.skip('should delete graph', async function () {
+    it('should delete graph', async function () {
       const alertText = await PageObjects.graph.deleteGraph(graphName);
       log.debug('alertText = ' + alertText);
     });

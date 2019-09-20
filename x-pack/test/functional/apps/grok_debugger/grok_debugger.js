@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('syntax highlighting', () => {
-      it.skip('applies the correct CSS classes', async () => {
+      it('applies the correct CSS classes', async () => {
         const grokPattern = '\\[(?:-|%{NUMBER:bytes:int})\\]';
 
         await grokDebugger.setPatternInput(grokPattern);

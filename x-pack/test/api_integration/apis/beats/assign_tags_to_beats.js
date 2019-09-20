@@ -180,7 +180,7 @@ export default function ({ getService }) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/34038
-    it.skip('should return errors for non-existent beats', async () => {
+    it('should return errors for non-existent beats', async () => {
       const nonExistentBeatId = chance.word();
 
       const { body: apiResponse } = await supertest

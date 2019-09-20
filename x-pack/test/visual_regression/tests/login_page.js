@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'security']);
 
   describe('Security', () => {
-    describe.skip('Login Page', () => {
+    describe('Login Page', () => {
       before(async () => {
         await esArchiver.load('empty_kibana');
         await PageObjects.security.logout();

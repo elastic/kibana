@@ -11,7 +11,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['uptime']);
 
   // FLAKY: https://github.com/elastic/kibana/issues/35773
-  describe.skip('overview page', function() {
+  describe('overview page', function() {
     this.tags(['skipFirefox']);
     const DEFAULT_DATE_START = '2019-01-28 12:40:08.078';
     const DEFAULT_DATE_END = '2019-01-29 12:40:08.078';

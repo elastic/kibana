@@ -153,7 +153,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.skip('switch between Y axis scale types', () => {
+    describe('switch between Y axis scale types', () => {
       before(initBarChart);
       const axisId = 'ValueAxis-1';
 
@@ -278,7 +278,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/45105
-    describe.skip('vertical bar with multiple splits', function () {
+    describe('vertical bar with multiple splits', function () {
       before(initBarChart);
 
       it('should show correct series', async function () {

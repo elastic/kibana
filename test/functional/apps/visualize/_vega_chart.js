@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }) {
           await inspector.expectIsNotEnabled();
         });
 
-        it.skip('should have some initial vega spec text', async function () {
+        it('should have some initial vega spec text', async function () {
           const vegaSpec = await PageObjects.visualize.getVegaSpec();
           expect(vegaSpec).to.contain('{').and.to.contain('data');
           expect(vegaSpec.length).to.be.above(500);
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }) {
           await filterBar.removeAllFilters();
         });
 
-        it.skip('should render different data in response to filter change', async function () {
+        it('should render different data in response to filter change', async function () {
           await PageObjects.visualize.expectVisToMatchScreenshot('vega_chart');
           await filterBar.addFilter('@tags.raw', 'is', 'error');
           await PageObjects.visualize.expectVisToMatchScreenshot('vega_chart_filtered');

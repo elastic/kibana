@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   // FLAKY: https://github.com/elastic/kibana/issues/40173
-  describe.skip('dashboard snapshots', function describeIndexTests() {
+  describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
       // We use a really small window to minimize differences across os's and browsers.
       await browser.setWindowSize(1000, 700);
@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
     });
 
     // Skip until https://github.com/elastic/kibana/issues/19471 is fixed
-    it.skip('compare TSVB snapshot', async () => {
+    it('compare TSVB snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInLogstashDataRange();
@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/40173
-    it.skip('compare area chart snapshot', async () => {
+    it('compare area chart snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInLogstashDataRange();

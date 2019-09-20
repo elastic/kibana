@@ -19,7 +19,7 @@ export default function langServerCoverageFunctionalTests({
   // Use https://github.com/elastic/code-examples_smoke repository to smoke test
   // all language servers.
   // FLAKY: https://github.com/elastic/kibana/issues/44576
-  describe.skip('Lang Server Coverage', () => {
+  describe('Lang Server Coverage', () => {
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
     before(async () => {
       // Navigate to the code app.

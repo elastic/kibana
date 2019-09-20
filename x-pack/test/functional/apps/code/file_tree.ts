@@ -19,7 +19,7 @@ export default function exploreRepositoryFunctionalTests({
   const exists = async (selector: string) => testSubjects.exists(selector, { allowHidden: true });
 
   // FLAKY: https://github.com/elastic/kibana/issues/45079
-  describe.skip('File Tree', function() {
+  describe('File Tree', function() {
     this.tags('smoke');
     const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
 
