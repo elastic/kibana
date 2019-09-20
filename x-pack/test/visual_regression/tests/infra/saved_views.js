@@ -26,6 +26,7 @@ export default function ({ getPageObjects, getService }) {
       it('should open flyout list', async () => {
         await PageObjects.infraHome.openSaveViewsFlyout();
         await visualTesting.snapshot();
+        await PageObjects.infraHome.closeSavedViewFlyout();
       });
 
       it('should open saved view modal', async () => {

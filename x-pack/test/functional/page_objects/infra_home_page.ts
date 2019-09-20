@@ -45,6 +45,10 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.click('loadViews');
     },
 
+    async closeSavedViewFlyout() {
+      return await testSubjects.click('cancelSavedViewModal');
+    },
+
     async openCreateSaveViewModal() {
       return await testSubjects.click('openSaveViewModal');
     },

@@ -90,7 +90,7 @@ export const SavedViewListFlyout = ({ close, views, setView, deleteView, loading
       </EuiFlyoutBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={close}>
+        <EuiButtonEmpty data-test-subj="cancelSavedViewModal" onClick={close}>
           <FormattedMessage defaultMessage="Cancel" id="xpack.infra.openView.cancelButton" />
         </EuiButtonEmpty>
       </EuiModalFooter>
