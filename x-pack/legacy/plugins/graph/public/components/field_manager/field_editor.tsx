@@ -12,8 +12,6 @@ import {
   EuiComboBox,
   EuiColorPicker,
   EuiFieldNumber,
-  isColorDark,
-  hexToRgb,
   // @ts-ignore
   EuiHighlight,
   EuiContextMenu,
@@ -58,8 +56,6 @@ export function FieldEditor({
   const { color, hopSize, lastValidHopSize, icon, name: fieldName } = currentField;
 
   const isDisabled = initialField.hopSize === 0;
-
-  const darkColor = isColorDark(...hexToRgb(color));
 
   // update local field copy if changed from the outside
   useEffect(() => {
@@ -125,8 +121,6 @@ export function FieldEditor({
           className={classNames('gphFieldEditorBadge', {
             'gphFieldEditorBadge--disabled': isDisabled,
           })}
-          iconOnClick={() => {}}
-          iconOnClickAriaLabel=""
           onClickAriaLabel={badgeDescription}
           title=""
           onClick={e => {
@@ -137,13 +131,7 @@ export function FieldEditor({
             }
           }}
         >
-          <LegacyIcon
-            className={classNames('gphFieldEditorBadge__icon', {
-              'gphFieldEditorBadge__icon--dark': darkColor,
-              'gphFieldEditorBadge__icon--light': !darkColor,
-            })}
-            icon={initialField.icon}
-          />
+          <LegacyIcon className={'gphFieldEditorBadge__icon'} icon={initialField.icon} />
           {initialField.name}
         </EuiBadge>
       }

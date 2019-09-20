@@ -1,10 +1,8 @@
-.gphFieldPickerList {
+.gphFieldPicker__list {
   width: 350px;
 }
 
-.gphFieldPickerButton {
+.gphFieldPicker__button {
+  @include gphFieldBadgeSize;
   color: $euiColorPrimary;
-  background-color: $euiColorEmptyShade;
-  border: 1px solid $euiColorLightShade;
-  padding: $euiSizeXS $euiSizeM;
 }

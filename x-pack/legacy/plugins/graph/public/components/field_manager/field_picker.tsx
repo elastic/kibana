@@ -51,19 +51,19 @@ export function FieldPicker({ fieldMap, selectField, deselectField }: FieldPicke
       panelPaddingSize="none"
       button={
         <EuiBadge
-          className="gphFieldPickerButton"
+          className="gphFieldPicker__button"
+          color="hollow"
+          iconType="plusInCircleFilled"
           onClick={() => setOpen(true)}
-          iconOnClick={() => {}}
-          iconOnClickAriaLabel=""
           onClickAriaLabel={badgeDescription}
           title=""
         >
-          <EuiIcon type="plusInCircleFilled" /> {badgeDescription}
+          {badgeDescription}
         </EuiBadge>
       }
       isOpen={open}
       closePopover={() => setOpen(false)}
-      panelClassName="gphFieldPickerList"
+      panelClassName="gphFieldPicker__list"
     >
       {open && (
         <EuiSelectable
