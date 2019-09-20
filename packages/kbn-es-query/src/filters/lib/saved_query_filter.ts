@@ -43,13 +43,13 @@ interface EsQueryConfig {
   dateFormatTZ: string | null;
 }
 interface IndexPattern {
-  id: string;
+  id?: string;
   title: string;
-  url: string;
-  active: boolean;
-  default: boolean;
+  url?: string;
+  active?: boolean;
+  default?: boolean;
   tag?: string[];
-  sort: string;
+  sort?: string;
 }
 
 interface SavedQueryAttributes {

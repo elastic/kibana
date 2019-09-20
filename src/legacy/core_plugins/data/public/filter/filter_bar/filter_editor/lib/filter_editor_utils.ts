@@ -82,8 +82,6 @@ export function getFilterParams(filter: Filter) {
     case 'savedQuery':
       return {
         savedQuery: (filter as SavedQueryFilter).meta.params.savedQuery,
-        esQueryConfig: (filter as SavedQueryFilter).meta.params.esQueryConfig,
-        indexPattern: (filter as SavedQueryFilter).meta.params.indexPattern,
       };
   }
 }

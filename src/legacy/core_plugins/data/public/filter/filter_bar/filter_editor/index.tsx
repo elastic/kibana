@@ -33,7 +33,7 @@ import {
   EuiTabs,
   EuiTab,
 } from '@elastic/eui';
-import { FieldFilter, Filter } from '@kbn/es-query';
+import { FieldFilter, Filter, buildSavedQueryFilter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
@@ -41,6 +41,7 @@ import React, { Component } from 'react';
 import { UiSettingsClientContract } from 'src/core/public';
 import { SavedQueryFilterParams } from '@kbn/es-query';
 import { Field, IndexPattern } from '../../../index_patterns';
+import { SavedQuery } from '../../../search/search_bar/index';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {
   buildCustomFilter,
@@ -438,34 +439,24 @@ class FilterEditorUI extends Component<Props, State> {
         );
     }
   }
-  private renderSavedQueryList() {
-    // pass along the index pattern, uiSettings, savedQueryService and any other items we need for the params
+
+  private renderSavedQueryEditor() {
     // pass along the security-related item of if the user has access to saved objects.
     // pass along the onChange handler
     // pass along the value as the saved query filter params object (this is where we compile the filter params object)
-    // return the selectable component
-    const indexPattern = this.state.selectedIndexPattern;
-    const esQueryConfig = {
-      allowLeadingWildcards: this.props.uiSettings.get('defaults', 'allowLeadingWildcards'),
-      queryStringOptions: this.props.uiSettings.get('defaults', 'es:query:queryStringOptions'),
-      dateFormatTZ: this.props.uiSettings.get('defaults', 'dateFormatTZ'),
-    };
-    const savedQueryValue = { ...this.state.params, indexPattern, esQueryConfig };
+    // return the selectable componen
     // TODO: the onChange handler is being passed a whole lot more than what it needs to. I'd like to only handle the saved query name and compile the savedQueryParams during the save action.
-    return (
-      <SavedQueryEditorUI
-        showSaveQuery={this.props.showSaveQuery}
-        value={savedQueryValue}
-        savedQueryService={this.props.savedQueryService}
-        onChange={this.onSavedQueryParamsChange}
-      />
-    );
-  }
-  private renderSavedQueryEditor() {
     return (
       <div>
         <EuiFlexGroup responsive={false} gutterSize="s">
-          <EuiFlexItem style={{ maxWidth: '188px' }}>{this.renderSavedQueryList()}</EuiFlexItem>
+          <EuiFlexItem>
+            <SavedQueryEditorUI
+              showSaveQuery={this.props.showSaveQuery}
+              value={this.state.params}
+              savedQueryService={this.props.savedQueryService}
+              onChange={this.onSavedQueryParamsChange}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </div>
     );
@@ -586,8 +577,7 @@ class FilterEditorUI extends Component<Props, State> {
     this.setState({ params });
   };
 
-  private onSavedQueryParamsChange = (params: SavedQueryFilterParams) => {
-    // what Id like to do is only act on a change in the saved query
+  private onSavedQueryParamsChange = (params: SavedQuery) => {
     this.setState({ params });
   };
 
@@ -604,6 +594,7 @@ class FilterEditorUI extends Component<Props, State> {
       useCustomLabel,
       customLabel,
       isCustomEditorOpen,
+      isSavedQueryEditorOpen,
       queryDsl,
     } = this.state;
 
@@ -630,6 +621,20 @@ class FilterEditorUI extends Component<Props, State> {
         $state.store
       );
       this.props.onSubmit(filter);
+    } else if (indexPattern && isSavedQueryEditorOpen) {
+      // const indexPattern = this.state.selectedIndexPattern;
+      // this.props.uiSettings.get('filterEditor:suggestValues')
+      const esQueryConfig = {
+        allowLeadingWildcards: this.props.uiSettings.get('query:allowLeadingWildcards'),
+        queryStringOptions: this.props.uiSettings.get('query:queryString:options'),
+        dateFormatTZ: this.props.uiSettings.get('dateFormat:tz'),
+      };
+      const savedQueryParams = {
+        savedQuery: this.state.params,
+        indexPattern,
+        esQueryConfig,
+      };
+      const filter = buildSavedQueryFilter(savedQueryParams);
     }
   };
 }

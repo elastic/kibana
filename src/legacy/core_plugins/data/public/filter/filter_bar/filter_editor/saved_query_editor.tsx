@@ -29,9 +29,9 @@ import { SavedQueryService } from '../../../search/search_bar/lib/saved_query_se
 
 interface Props {
   showSaveQuery?: boolean;
-  value: SavedQueryFilterParams; // is this an object containing a savedQuery, the esQueryConfig and the indexPattern or just the string version of the SQ name?
+  value?: SavedQuery; // is this an object containing a savedQuery, the esQueryConfig and the indexPattern or just the string version of the SQ name?
   savedQueryService: SavedQueryService;
-  onChange: (params: SavedQueryFilterParams) => void;
+  onChange: (params: SavedQuery) => void;
 }
 // problem with types is that the SavedQuery type used here is the one from Saved Objects. The type the filter is expecting is the one with the converted timefilter
 export const SavedQueryEditorUI: FunctionComponent<Props> = ({
@@ -41,17 +41,11 @@ export const SavedQueryEditorUI: FunctionComponent<Props> = ({
   onChange,
 }) => {
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
-  const [selectedSavedQuery, setSelectedSavedQuery] = useState(
-    (value && value.savedQuery) || undefined
-  );
+  const [selectedSavedQuery, setSelectedSavedQuery] = useState((value as SavedQuery) || undefined);
   useEffect(() => {
     const fetchQueries = async () => {
       const allSavedQueries = await savedQueryService.getAllSavedQueries();
-      const allSavedQueriesWithoutTimefilter = allSavedQueries.map(savedQuery => {
-        savedQuery.attributes.timefilter = undefined;
-        return savedQuery;
-      });
-      const sortedAllSavedQueries = sortBy(allSavedQueriesWithoutTimefilter, 'attributes.title');
+      const sortedAllSavedQueries = sortBy(allSavedQueries, 'attributes.title');
       setSavedQueries(sortedAllSavedQueries);
     };
     fetchQueries();
@@ -64,16 +58,10 @@ export const SavedQueryEditorUI: FunctionComponent<Props> = ({
     }
   );
   const onSavedQueryChange = (selected: any) => {
-    const newSelectedSavedQuery = {
-      id: selected[0].id,
-      attributes: {
-        ...selected[0].attributes,
-        timefilter: undefined,
-      },
-    };
+    const newSelectedSavedQuery = { ...selected[0] };
     setSelectedSavedQuery(newSelectedSavedQuery);
-    const newParams = { ...value, savedQuery: selectedSavedQuery };
-    onChange(newParams);
+
+    onChange(selected[0]);
   };
   const renderSavedQueryInput = () => {
     return (
@@ -92,7 +80,7 @@ export const SavedQueryEditorUI: FunctionComponent<Props> = ({
             )}
             options={savedQueries}
             selectedOptions={selectedSavedQuery ? [selectedSavedQuery] : []}
-            getLabel={savedQuery => savedQuery.attributes.title}
+            getLabel={savedQuery => savedQuery.id}
             onChange={onSavedQueryChange}
             singleSelection={{ asPlainText: true }}
             isClearable={false}
