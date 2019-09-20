@@ -56,7 +56,7 @@ function LayerPanelChooser({
       <EuiButtonEmpty
         flush="left"
         className="eui-textTruncate"
-        size="s"
+        size="xs"
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
         {...rest}
       >
@@ -73,8 +73,10 @@ function LayerPanelChooser({
         closePopover={() => setPopoverIsOpen(false)}
         className="eui-textTruncate"
         anchorClassName="eui-textTruncate"
+        display="block"
+        panelPaddingSize="s"
       >
-        <div style={{ minWidth: 200 }}>
+        <div style={{ minWidth: 300 }}>
           <EuiSelectable
             searchable
             singleSelection="always"
