@@ -25,7 +25,7 @@ const RUN_KBN_SERVER_STARTUP = require.resolve('./fixtures/run_kbn_server_startu
 const SETUP_NODE_ENV = require.resolve('../../../../setup_node_env');
 const SECOND = 1000;
 
-describe('config/deprecation warnings mixin', function () {
+describe('config/deprecation warnings', function () {
   this.timeout(15 * SECOND);
 
   let stdio = '';
@@ -99,11 +99,12 @@ describe('config/deprecation warnings mixin', function () {
         }
       })
       .filter(Boolean)
-      .filter(line => (
-        line.type === 'log' &&
+      .filter(line => {
+        console.log(line);
+        return line.type === 'log' &&
         line.tags.includes('deprecation') &&
-        line.tags.includes('warning')
-      ));
+        line.tags.includes('warning');
+      });
 
     expect(deprecationLines).to.have.length(1);
     expect(deprecationLines[0]).to.have.property('message', 'uiSettings.enabled is deprecated and is no longer used');

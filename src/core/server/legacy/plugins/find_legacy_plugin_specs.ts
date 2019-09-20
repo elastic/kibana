@@ -126,7 +126,7 @@ export async function findLegacyPluginSpecs(settings: unknown, loggerFactory: Lo
   const [disabledPluginSpecs, pluginSpecs] = await forkJoin(
     disabledSpec$.pipe(toArray()),
     spec$.pipe(toArray()),
-    log$
+    log$.pipe(toArray())
   ).toPromise();
 
   return {
