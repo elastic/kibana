@@ -21,4 +21,5 @@ export const setup = pluginInstance.setup(npSetup.core, {
 });
 export const start = pluginInstance.start(npStart.core, {
   embeddable: embeddableStart,
+  uiActions: npStart.plugins.uiActions,
 });

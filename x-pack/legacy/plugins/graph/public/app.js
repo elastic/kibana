@@ -16,11 +16,11 @@ import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 
 import 'ui/autoload/all';
-// TODO: remove ui imports completely (move tDelete o plugins)
 import 'ui/kbn_top_nav';
 import 'ui/directives/saved_object_finder';
 import 'ui/directives/input_focus';
 import 'ui/saved_objects/ui/saved_object_save_as_checkbox';
+import 'uiExports/autocompleteProviders';
 import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
@@ -41,6 +41,7 @@ import listingTemplate from './angular/templates/listing_ng_wrapper.html';
 import { getReadonlyBadge } from './badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { SearchBar } from './components/search_bar';
 import { VennDiagram } from './components/venn_diagram';
 import { Listing } from './components/listing';
 import { Settings } from './components/settings';
@@ -57,8 +58,9 @@ import {
   outlinkEncoders,
 } from './helpers/outlink_encoders';
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
-import { appStateToSavedWorkspace, savedWorkspaceToAppState, lookupIndexPattern, mapFields } from './services/persistence';
+import { openSourceModal } from './services/source_modal';
 import { openSaveModal } from  './services/save_modal';
+import { appStateToSavedWorkspace, savedWorkspaceToAppState, lookupIndexPattern, mapFields } from './services/persistence';
 import { urlTemplateRegex } from  './helpers/url_template';
 import {
   asAngularSyncedObservable,
@@ -95,6 +97,20 @@ app.directive('vennDiagram', function (reactDirective) {
 
 app.directive('graphListing', function (reactDirective) {
   return reactDirective(Listing);
+});
+
+app.directive('graphSearchBar', function (reactDirective) {
+  return reactDirective(SearchBar, [
+    ['currentIndexPattern', { watchDepth: 'reference' }],
+    ['isLoading', { watchDepth: 'reference' }],
+    ['onIndexPatternSelected', { watchDepth: 'reference' }],
+    ['onQuerySubmit', { watchDepth: 'reference' }],
+    ['savedObjects', { watchDepth: 'reference' }],
+    ['uiSettings', { watchDepth: 'reference' }],
+    ['http', { watchDepth: 'reference' }],
+    ['initialQuery', { watchDepth: 'reference' }],
+    ['overlays', { watchDepth: 'reference' }]
+  ]);
 });
 
 if (uiRoutes.enable) {
@@ -244,6 +260,10 @@ app.controller('graphuiPlugin', function (
   $scope.allSavingDisabled = $scope.graphSavePolicy === 'none';
   $scope.searchTerm = '';
 
+  $scope.pluginDependencies = npStart.core;
+
+  $scope.loading = false;
+
   //So scope properties can be used consistently with ng-model
   $scope.grr = $scope;
 
@@ -369,11 +389,9 @@ app.controller('graphuiPlugin', function (
     }), confirmModalOptions);
   }
 
-  $scope.uiSelectIndex = function () {
+  $scope.uiSelectIndex = function (proposedIndex) {
     canWipeWorkspace(function () {
-      $scope.indexSelected($scope.proposedIndex);
-    }, function () {
-      $scope.proposedIndex = $scope.selectedIndex;
+      $scope.indexSelected(proposedIndex);
     });
   };
 
@@ -384,17 +402,18 @@ app.controller('graphuiPlugin', function (
     $scope.basicModeSelectedSingleField = null;
     $scope.selectedField = null;
     $scope.selectedFieldConfig = null;
-    $scope.selectedIndex = selectedIndex;
-    $scope.proposedIndex = selectedIndex;
 
     return $route.current.locals.GetIndexPatternProvider.get(selectedIndex.id)
       .then(handleSuccess)
       .then(function (indexPattern) {
+        $scope.selectedIndex = indexPattern;
         $scope.allFields = mapFields(indexPattern);
         $scope.filteredFields = $scope.allFields;
         if ($scope.allFields.length > 0) {
           $scope.selectedField = $scope.allFields[0];
         }
+
+        $scope.$digest();
       }, handleError);
   };
 
@@ -414,6 +433,7 @@ app.controller('graphuiPlugin', function (
       index: indexName,
       query: query
     };
+    $scope.loading = true;
     return $http.post('../api/graph/graphExplore', request)
       .then(function (resp) {
         if (resp.data.resp.timed_out) {
@@ -425,7 +445,10 @@ app.controller('graphuiPlugin', function (
         }
         responseHandler(resp.data.resp);
       })
-      .catch(handleHttpError);
+      .catch(handleHttpError)
+      .finally(() => {
+        $scope.loading = false;
+      });
   }
 
 
@@ -435,20 +458,24 @@ app.controller('graphuiPlugin', function (
       index: indexName,
       body: query
     };
+    $scope.loading = true;
     $http.post('../api/graph/searchProxy', request)
       .then(function (resp) {
         responseHandler(resp.data.resp);
       })
-      .catch(handleHttpError);
+      .catch(handleHttpError)
+      .finally(() => {
+        $scope.loading = false;
+      });
   };
 
-  $scope.submit = function () {
+  $scope.submit = function (searchTerm) {
     $scope.hideAllConfigPanels();
     initWorkspaceIfRequired();
     const numHops = 2;
-    if ($scope.searchTerm.startsWith('{')) {
+    if (searchTerm.startsWith('{')) {
       try {
-        const query = JSON.parse($scope.searchTerm);
+        const query = JSON.parse(searchTerm);
         if (query.vertices) {
           // Is a graph explore request
           $scope.workspace.callElasticsearch(query);
@@ -462,7 +489,7 @@ app.controller('graphuiPlugin', function (
       }
       return;
     }
-    $scope.workspace.simpleSearch($scope.searchTerm, $scope.liveResponseFields, numHops);
+    $scope.workspace.simpleSearch(searchTerm, $scope.liveResponseFields, numHops);
   };
 
   $scope.clearWorkspace = function () {
@@ -578,7 +605,7 @@ app.controller('graphuiPlugin', function (
       return;
     }
     const options = {
-      indexName: $scope.selectedIndex.attributes.title,
+      indexName: $scope.selectedIndex.title,
       vertex_fields: $scope.selectedFields,
       // Here we have the opportunity to look up labels for nodes...
       nodeLabeller: function () {
@@ -632,9 +659,6 @@ app.controller('graphuiPlugin', function (
       });
     }
   }
-
-  $scope.indices = $route.current.locals.indexPatterns.filter(indexPattern => !indexPattern.attributes.type);
-
 
   $scope.setDetail = function (data) {
     $scope.detail = data;
@@ -706,7 +730,7 @@ app.controller('graphuiPlugin', function (
   const managementUrl = npStart.core.chrome.navLinks.get('kibana:management').url;
   const url = `${managementUrl}/kibana/index_patterns`;
 
-  if ($scope.indices.length === 0) {
+  if ($route.current.locals.indexPatterns.length === 0) {
     toastNotifications.addWarning({
       title: i18n.translate('xpack.graph.noDataSourceNotificationMessageTitle', {
         defaultMessage: 'No data source',
@@ -748,7 +772,9 @@ app.controller('graphuiPlugin', function (
     }),
     run: function () {
       canWipeWorkspace(function () {
-        kbnUrl.change('/workspace/', {});
+        $scope.$evalAsync(() => {
+          kbnUrl.change('/workspace/', {});
+        });
       });  },
     testId: 'graphNewButton',
   });
@@ -868,7 +894,7 @@ app.controller('graphuiPlugin', function (
   // Deal with situation of request to open saved workspace
   if ($route.current.locals.savedWorkspace) {
     $scope.savedWorkspace = $route.current.locals.savedWorkspace;
-    const selectedIndex = lookupIndexPattern($scope.savedWorkspace, $scope.indices);
+    const selectedIndex = lookupIndexPattern($scope.savedWorkspace, $route.current.locals.indexPatterns);
     if(!selectedIndex) {
       toastNotifications.addDanger(
         i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
@@ -902,13 +928,18 @@ app.controller('graphuiPlugin', function (
       }
       // Allow URLs to include a user-defined text query
       if ($route.current.params.query) {
-        $scope.searchTerm = $route.current.params.query;
-        $scope.submit();
+        $scope.initialQuery = $route.current.params.query;
+        $scope.submit($route.current.params.query);
       }
+
+      $scope.$digest();
     });
   } else {
     $route.current.locals.SavedWorkspacesProvider.get().then(function (newWorkspace) {
       $scope.savedWorkspace = newWorkspace;
+      openSourceModal(npStart.core, indexPattern => {
+        $scope.indexSelected(indexPattern);
+      });
     });
   }
 
