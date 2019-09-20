@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface TemplateValidation {
-  isValid: boolean;
-  errors: { [key: string]: React.ReactNode[] };
+export function getTestAlertData(overwrites = {}) {
+  return {
+    enabled: true,
+    alertTypeId: 'test.noop',
+    interval: '10s',
+    throttle: '1m',
+    actions: [],
+    alertTypeParams: {},
+    ...overwrites,
+  };
 }

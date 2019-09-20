@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getTestAlertData } from './utils';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -32,6 +31,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         },
         interval: '12s',
         actions: [],
+        throttle: '1m',
       };
       await supertest
         .put(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}`)
@@ -62,6 +62,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           },
           interval: '12s',
           actions: [],
+          throttle: '1m',
         })
         .expect(404, {
           statusCode: 404,
