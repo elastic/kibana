@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { EmbeddableApi } from './api/types';
+import { IUiActionsSetup } from 'src/plugins/ui_actions/public';
 import {
   CONTEXT_MENU_TRIGGER,
   APPLY_FILTER_TRIGGER,
-  ApplyFilterAction,
+  createFilterAction,
   PANEL_BADGE_TRIGGER,
 } from './lib';
 
@@ -31,7 +31,7 @@ import {
  *
  * @param api
  */
-export const bootstrap = (api: EmbeddableApi) => {
+export const bootstrap = (uiActions: IUiActionsSetup) => {
   const triggerContext = {
     id: CONTEXT_MENU_TRIGGER,
     title: 'Context menu',
@@ -50,11 +50,11 @@ export const bootstrap = (api: EmbeddableApi) => {
     description: 'Actions appear in title bar when an embeddable loads in a panel',
     actionIds: [],
   };
-  const actionApplyFilter = new ApplyFilterAction();
+  const actionApplyFilter = createFilterAction();
 
-  api.registerTrigger(triggerContext);
-  api.registerTrigger(triggerFilter);
-  api.registerAction(actionApplyFilter);
-  api.registerTrigger(triggerBadge);
-  api.attachAction(triggerFilter.id, actionApplyFilter.id);
+  uiActions.registerTrigger(triggerContext);
+  uiActions.registerTrigger(triggerFilter);
+  uiActions.registerAction(actionApplyFilter);
+  uiActions.registerTrigger(triggerBadge);
+  uiActions.attachAction(triggerFilter.id, actionApplyFilter.id);
 };

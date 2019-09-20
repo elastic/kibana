@@ -41,7 +41,6 @@ export function registerMapsTelemetryTask(server) {
       title: 'Maps telemetry fetch task',
       type: TELEMETRY_TASK_TYPE,
       timeout: '1m',
-      numWorkers: 2,
       createTaskRunner: telemetryTaskRunner(server),
     },
   });

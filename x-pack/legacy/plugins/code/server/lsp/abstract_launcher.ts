@@ -25,6 +25,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
   protected readonly log: Logger;
   private spawnTimes: number = 0;
   private launchReject?: (reason?: any) => void;
+  launchFailed: boolean = false;
   protected constructor(
     readonly name: string,
     readonly targetHost: string,
@@ -140,6 +141,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
             'Launch language server failed.'
           );
           this.launchReject!(ServerStartFailed);
+          this.launchFailed = true;
           proxy.setError(ServerStartFailed);
           this.log.warn(`spawned program ${this.spawnTimes} times, mark this proxy unusable.`);
         }
