@@ -262,10 +262,7 @@ Operations::
 * Only provide obsoleteIndexTemplatePattern to the default index migrator to avoid race conditions {pull}42016[#42016]
 Platform::
 * Modify I18nProvider so that it does not generate new React components {pull}43556[#43556]
-* Use pipes for communication with chrome to avoid networking snafus {pull}42097[#42097]
 * Fix rawChecksums in chromium build and rename for clarity {pull}44665[#44665]
-* Fix duplicate fetch in Visualize {pull}41204[#41204]
-* Ensure visualizations in percentage mode respect the advanced settings percent format {pull}39044[#39044]
 * Resolve filter index references when importing saved objects {pull}42974[#42974]
 Queries::
 * Saved query requires title {pull}45029[#45029]
@@ -273,6 +270,7 @@ Queries::
 Reporting::
 * Fix Relative Date format in CSV export {pull}40544[#40544]
 * Fix TypeError with pending job info {pull}43924[#43924]
+* Use pipes for communication with chrome to avoid networking snafus {pull}42097[#42097]
 Security::
 * Allow for hex color codes that include uppercase characters {pull}43470[#43470]
 * Prevent space identifier url example from overflowing panel {pull}44871[#44871]
@@ -296,6 +294,8 @@ Visualizations::
 * No longer registering Timelion feature if it's disabled {pull}42193[#42193]
 * Fix Timelion color error when filtering data {pull}23876[#23876]
 * Fix truncated formatting on tooltip {pull}41769[#41769]
+* Ensure visualizations in percentage mode respect the advanced settings percent format {pull}39044[#39044]
+* Fix duplicate fetch in Visualize {pull}41204[#41204]
 
 
 [[release-notes-7.3.2]]
