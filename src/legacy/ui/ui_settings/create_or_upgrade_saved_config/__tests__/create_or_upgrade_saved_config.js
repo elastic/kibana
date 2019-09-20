@@ -55,7 +55,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
       });
 
       sinon.assert.calledOnce(getUpgradeableConfig);
-      sinon.assert.alwaysCalledWith(getUpgradeableConfig, { savedObjectsClient, version, namespace: options.namespace });
+      sinon.assert.alwaysCalledWith(getUpgradeableConfig, { savedObjectsClient, version });
 
       return resp;
     }
@@ -80,8 +80,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
       sinon.assert.calledWithExactly(savedObjectsClient.create, 'config', {
         buildNum,
       }, {
-        id: version,
-        namespace: undefined
+        id: version
       });
     });
   });
@@ -116,7 +115,6 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
         },
         {
           id: version,
-          namespace: undefined,
         }
       );
     });
@@ -157,22 +155,6 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
       }
 
       sinon.assert.notCalled(logWithMetadata);
-    });
-  });
-
-  describe('"namespace" option', () => {
-    it('uses the namespace option when provided', async () => {
-      const { run, savedObjectsClient } = setup();
-
-      await run({ namespace: 'custom-namespace' });
-
-      sinon.assert.calledOnce(savedObjectsClient.create);
-      sinon.assert.calledWithExactly(savedObjectsClient.create, 'config', {
-        buildNum,
-      }, {
-        id: version,
-        namespace: 'custom-namespace'
-      });
     });
   });
 

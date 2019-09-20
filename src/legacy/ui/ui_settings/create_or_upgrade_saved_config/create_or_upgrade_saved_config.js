@@ -24,7 +24,6 @@ import { getUpgradeableConfig } from './get_upgradeable_config';
 export async function createOrUpgradeSavedConfig(options) {
   const {
     savedObjectsClient,
-    namespace,
     version,
     buildNum,
     logWithMetadata,
@@ -34,8 +33,7 @@ export async function createOrUpgradeSavedConfig(options) {
   // try to find an older config we can upgrade
   const upgradeableConfig = await getUpgradeableConfig({
     savedObjectsClient,
-    version,
-    namespace
+    version
   });
 
   // default to the attributes of the upgradeableConfig if available
@@ -49,7 +47,7 @@ export async function createOrUpgradeSavedConfig(options) {
     await savedObjectsClient.create(
       'config',
       attributes,
-      { id: version, namespace }
+      { id: version }
     );
   } catch (error) {
     if (onWriteError) {

@@ -43,8 +43,7 @@ describe('ui settings', () => {
       defaults = {},
       overrides,
       esDocSource = {},
-      savedObjectsClient = createObjectsClientStub(TYPE, ID, esDocSource),
-      namespace,
+      savedObjectsClient = createObjectsClientStub(TYPE, ID, esDocSource)
     } = options;
 
     const uiSettings = new UiSettingsService({
@@ -54,7 +53,6 @@ describe('ui settings', () => {
       getDefaults: getDefaults || (() => defaults),
       savedObjectsClient,
       overrides,
-      namespace,
     });
 
     const createOrUpgradeSavedConfig = sandbox.stub(createOrUpgradeSavedConfigNS, 'createOrUpgradeSavedConfig');
@@ -74,12 +72,6 @@ describe('ui settings', () => {
     it('returns a promise', () => {
       const { uiSettings } = setup();
       expect(uiSettings.setMany({ a: 'b' })).to.be.a(Promise);
-    });
-
-    it('uses the provided namespace', async () => {
-      const { uiSettings, savedObjectsClient } = setup({ namespace: 'custom-namespace' });
-      await uiSettings.setMany({ one: 'value' });
-      savedObjectsClient.assertUpdateQuery({ one: 'value' }, 'custom-namespace');
     });
 
     it('updates a single value in one operation', async () => {
@@ -146,12 +138,6 @@ describe('ui settings', () => {
       expect(uiSettings.set('a', 'b')).to.be.a(Promise);
     });
 
-    it('uses the provided namespace', async () => {
-      const { uiSettings, savedObjectsClient } = setup({ namespace: 'custom-namespace' });
-      await uiSettings.set('one', 'value');
-      savedObjectsClient.assertUpdateQuery({ one: 'value' }, 'custom-namespace');
-    });
-
     it('updates single values by (key, value)', async () => {
       const { uiSettings, savedObjectsClient } = setup();
       await uiSettings.set('one', 'value');
@@ -179,12 +165,6 @@ describe('ui settings', () => {
       expect(uiSettings.remove('one')).to.be.a(Promise);
     });
 
-    it('uses the provided namespace', async () => {
-      const { uiSettings, savedObjectsClient } = setup({ namespace: 'custom-namespace' });
-      await uiSettings.remove('one');
-      savedObjectsClient.assertUpdateQuery({ one: null }, 'custom-namespace');
-    });
-
     it('removes single values by key', async () => {
       const { uiSettings, savedObjectsClient } = setup();
       await uiSettings.remove('one');
@@ -210,12 +190,6 @@ describe('ui settings', () => {
     it('returns a promise', () => {
       const { uiSettings } = setup();
       expect(uiSettings.removeMany(['one'])).to.be.a(Promise);
-    });
-
-    it('uses the provided namespace', async () => {
-      const { uiSettings, savedObjectsClient } = setup({ namespace: 'custom-namespace' });
-      await uiSettings.removeMany(['one']);
-      savedObjectsClient.assertUpdateQuery({ one: null }, 'custom-namespace');
     });
 
     it('removes a single value', async () => {
@@ -275,12 +249,6 @@ describe('ui settings', () => {
       const { uiSettings, savedObjectsClient } = setup();
       await uiSettings.getUserProvided();
       savedObjectsClient.assertGetQuery();
-    });
-
-    it('pulls user configuration from ES using the provided namespace', async () => {
-      const { uiSettings, savedObjectsClient } = setup({ namespace: 'custom-namespace' });
-      await uiSettings.getUserProvided();
-      savedObjectsClient.assertGetQuery('custom-namespace');
     });
 
     it('returns user configuration', async () => {
@@ -406,13 +374,6 @@ describe('ui settings', () => {
       savedObjectsClient.assertGetQuery();
     });
 
-    it('pulls user configuration from ES using the provided namespace', async () => {
-      const esDocSource = {};
-      const { uiSettings, savedObjectsClient } = setup({ esDocSource, namespace: 'custom-namespace' });
-      await uiSettings.getRaw();
-      savedObjectsClient.assertGetQuery('custom-namespace');
-    });
-
     it(`without user configuration it's equal to the defaults`, async () => {
       const esDocSource = {};
       const defaults = { key: { value: chance.word() } };
@@ -462,13 +423,6 @@ describe('ui settings', () => {
       const { uiSettings, savedObjectsClient } = setup({ esDocSource });
       await uiSettings.getAll();
       savedObjectsClient.assertGetQuery();
-    });
-
-    it('pulls user configuration from ES using the provided namespace', async () => {
-      const esDocSource = {};
-      const { uiSettings, savedObjectsClient } = setup({ esDocSource, namespace: 'custom-namespace' });
-      await uiSettings.getAll();
-      savedObjectsClient.assertGetQuery('custom-namespace');
     });
 
     it(`returns defaults when es doc is empty`, async () => {
@@ -529,13 +483,6 @@ describe('ui settings', () => {
       const { uiSettings, savedObjectsClient } = setup({ esDocSource });
       await uiSettings.get();
       savedObjectsClient.assertGetQuery();
-    });
-
-    it('pulls user configuration from ES using the provided namespace', async () => {
-      const esDocSource = {};
-      const { uiSettings, savedObjectsClient } = setup({ esDocSource, namespace: 'custom-namespace' });
-      await uiSettings.get();
-      savedObjectsClient.assertGetQuery('custom-namespace');
     });
 
     it(`returns the promised value for a key`, async () => {

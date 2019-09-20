@@ -25,8 +25,8 @@ import { UiSettingsService } from './ui_settings_service';
  *
  *  @param {Hapi.Server} server
  *  @param {Object} options
- *  @property {SavedObjectsClient} options.savedObjectsClient instance of the saved objects client
- *  @property {string} options.namespace optional namespace to scope the SavedObjectsClient to
+ *  @property {AsyncFunction} options.callCluster function that accepts a method name and
+ *                            param object which causes a request via some elasticsearch client
  *  @property {AsyncFunction} [options.getDefaults] async function that returns defaults/details about
  *                            the uiSettings.
  *  @return {UiSettingsService}
@@ -38,7 +38,6 @@ export function uiSettingsServiceFactory(server, options) {
     savedObjectsClient,
     getDefaults,
     overrides,
-    namespace,
   } = options;
 
   return new UiSettingsService({
@@ -48,7 +47,6 @@ export function uiSettingsServiceFactory(server, options) {
     savedObjectsClient,
     getDefaults,
     overrides,
-    namespace,
     logWithMetadata: (...args) => server.logWithMetadata(...args),
   });
 }

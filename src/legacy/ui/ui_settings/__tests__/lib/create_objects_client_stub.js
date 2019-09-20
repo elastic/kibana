@@ -31,23 +31,21 @@ export function createObjectsClientStub(type, id, esDocSource = {}) {
     errors: savedObjectsClientErrors
   };
 
-  savedObjectsClient.assertGetQuery = (expectedNamespace) => {
+  savedObjectsClient.assertGetQuery = () => {
     sinon.assert.calledOnce(savedObjectsClient.get);
 
     const { args } = savedObjectsClient.get.getCall(0);
     expect(args[0]).to.be(type);
     expect(args[1]).to.eql(id);
-    expect(args[2]).to.eql({ namespace: expectedNamespace });
   };
 
-  savedObjectsClient.assertUpdateQuery = (expectedChanges, expectedNamespace) => {
+  savedObjectsClient.assertUpdateQuery = (expectedChanges) => {
     sinon.assert.calledOnce(savedObjectsClient.update);
 
     const { args } = savedObjectsClient.update.getCall(0);
     expect(args[0]).to.be(type);
     expect(args[1]).to.eql(id);
     expect(args[2]).to.eql(expectedChanges);
-    expect(args[3]).to.eql({ namespace: expectedNamespace });
   };
 
   return savedObjectsClient;

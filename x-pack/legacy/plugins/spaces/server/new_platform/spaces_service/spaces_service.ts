@@ -26,8 +26,6 @@ export interface SpacesServiceSetup {
 
   getBasePath(spaceId: string): string;
 
-  getDefaultRoute(request: RequestFacade, spaceId?: string): Promise<string>;
-
   isInDefaultSpace(request: RequestFacade): boolean;
 
   spaceIdToNamespace(spaceId: string): string | undefined;
@@ -83,22 +81,6 @@ export class SpacesService {
       },
       spaceIdToNamespace,
       namespaceToSpaceId,
-      getDefaultRoute: async (request: RequestFacade, spaceId: string = getSpaceId(request)) => {
-        const uiSettingsService = uiSettingsServiceFactory({
-          savedObjectsClient: savedObjects.getScopedSavedObjectsClient(request, {
-            excludedWrappers: ['spaces'],
-          }),
-          namespace: spaceIdToNamespace(spaceId),
-        });
-
-        const defaultRoute = await uiSettingsService.get('defaultRoute');
-
-        if (defaultRoute && defaultRoute.startsWith('/')) {
-          return defaultRoute;
-        }
-
-        return (await uiSettingsService.getDefaults()).defaultRoute.value;
-      },
       scopedClient: async (request: RequestFacade) => {
         return combineLatest(elasticsearch.adminClient$, config$)
           .pipe(

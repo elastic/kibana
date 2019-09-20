@@ -43,7 +43,6 @@ export class UiSettingsService {
       id,
       buildNum,
       savedObjectsClient,
-      namespace,
       // we use a function for getDefaults() so that defaults can be different in
       // different scenarios, and so they can change over time
       getDefaults = () => ({}),
@@ -56,7 +55,6 @@ export class UiSettingsService {
     this._id = id;
     this._buildNum = buildNum;
     this._savedObjectsClient = savedObjectsClient;
-    this._namespace = namespace;
     this._getDefaults = getDefaults;
     this._overrides = overrides;
     this._logWithMetadata = logWithMetadata;
@@ -148,7 +146,7 @@ export class UiSettingsService {
     }
 
     try {
-      await this._savedObjectsClient.update(this._type, this._id, changes, { namespace: this._namespace });
+      await this._savedObjectsClient.update(this._type, this._id, changes);
     } catch (error) {
       const { isNotFoundError } = this._savedObjectsClient.errors;
       if (!isNotFoundError(error) || !autoCreateOrUpgradeIfMissing) {
@@ -157,7 +155,6 @@ export class UiSettingsService {
 
       await createOrUpgradeSavedConfig({
         savedObjectsClient: this._savedObjectsClient,
-        namespace: this._namespace,
         version: this._id,
         buildNum: this._buildNum,
         logWithMetadata: this._logWithMetadata,
@@ -190,13 +187,12 @@ export class UiSettingsService {
     );
 
     try {
-      const resp = await this._savedObjectsClient.get(this._type, this._id, { namespace: this._namespace });
+      const resp = await this._savedObjectsClient.get(this._type, this._id);
       return resp.attributes;
     } catch (error) {
       if (isNotFoundError(error) && autoCreateOrUpgradeIfMissing) {
         const failedUpgradeAttributes = await createOrUpgradeSavedConfig({
           savedObjectsClient: this._savedObjectsClient,
-          namespace: this._namespace,
           version: this._id,
           buildNum: this._buildNum,
           logWithMetadata: this._logWithMetadata,

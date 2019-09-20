@@ -14,7 +14,6 @@ const createSetupContractMock = (spaceId = DEFAULT_SPACE_ID) => {
     getSpaceId: jest.fn().mockReturnValue(spaceId),
     isInDefaultSpace: jest.fn().mockReturnValue(spaceId === DEFAULT_SPACE_ID),
     getBasePath: jest.fn().mockReturnValue(''),
-    getDefaultRoute: jest.fn().mockResolvedValue('/app/defaultRoute'),
     scopedClient: jest.fn().mockResolvedValue(spacesClientMock.create()),
     namespaceToSpaceId: jest.fn().mockImplementation(namespaceToSpaceId),
     spaceIdToNamespace: jest.fn().mockImplementation(spaceIdToNamespace),

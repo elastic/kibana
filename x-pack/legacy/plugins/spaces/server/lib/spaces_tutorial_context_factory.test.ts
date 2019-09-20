@@ -59,7 +59,6 @@ describe('createSpacesTutorialContextFactory', () => {
       security: createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
       getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
       config$: Rx.of({ maxSpaces: 1000 }),
-      uiSettingsServiceFactory: null as any,
     });
     const contextFactory = createSpacesTutorialContextFactory(spacesService);
 

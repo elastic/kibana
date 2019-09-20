@@ -41,7 +41,7 @@ describe('Spaces API', () => {
     await Promise.all(teardowns.splice(0).map(fn => fn()));
   });
 
-  test('POST space/{id}/select should respond with the new space location including default route', async () => {
+  test('POST space/{id}/select should respond with the new space location', async () => {
     const { response } = await request('POST', '/api/spaces/v1/space/a-space/select');
 
     const { statusCode, payload } = response;
@@ -49,7 +49,7 @@ describe('Spaces API', () => {
     expect(statusCode).toEqual(200);
 
     const result = JSON.parse(payload);
-    expect(result.location).toEqual('/s/a-space/app/spaceDefaultRoute');
+    expect(result.location).toEqual('/s/a-space');
   });
 
   test(`returns result of routePreCheckLicense`, async () => {
@@ -74,7 +74,7 @@ describe('Spaces API', () => {
     expect(statusCode).toEqual(404);
   });
 
-  test('POST space/{id}/select should respond with the new space location including default route when a server.basePath is in use', async () => {
+  test('POST space/{id}/select should respond with the new space location when a server.basePath is in use', async () => {
     const testConfig = {
       'server.basePath': '/my/base/path',
     };
@@ -88,6 +88,6 @@ describe('Spaces API', () => {
     expect(statusCode).toEqual(200);
 
     const result = JSON.parse(payload);
-    expect(result.location).toEqual('/my/base/path/s/a-space/app/spaceDefaultRoute');
+    expect(result.location).toEqual('/my/base/path/s/a-space');
   });
 });
