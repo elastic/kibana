@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './commands';
+import { register } from '@cypress/snapshot';
+
+register();

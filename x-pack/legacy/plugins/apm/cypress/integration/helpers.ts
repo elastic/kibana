@@ -39,7 +39,7 @@ export function loginAndWaitForPage(url: string) {
         }
       : {};
 
-    const fullUrl = `${BASE_URL}${url}?RANGE_FROM=${RANGE_FROM}&RANGE_TO=${RANGE_TO}`;
+    const fullUrl = `${BASE_URL}${url}?rangeFrom=${RANGE_FROM}&rangeTo=${RANGE_TO}`;
     cy.visit(fullUrl, options);
   });
 

@@ -8,7 +8,7 @@
   "integrationFolder": "./integration",
   "pluginsFile": "./plugins/index.js",
   "screenshotsFolder": "./screenshots",
-  "supportFile": "./support/index.js",
+  "supportFile": "./support/index.ts",
   "videosFolder": "./videos",
   "useRelativeSnapshots": true
 }
