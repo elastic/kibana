@@ -28,9 +28,11 @@ interface Query {
 interface TimeRange {
   timestamp: RangeFilterParams;
   format: string;
+  from?: string;
+  to?: string;
 }
 
-interface SavedQuery {
+export interface SavedQuery {
   id: string;
   attributes: SavedQueryAttributes;
 }
@@ -59,7 +61,7 @@ interface SavedQueryAttributes {
 }
 
 interface SavedQueryTimeFilterConverted {
-  range: TimeRange;
+  range?: TimeRange;
 }
 
 export interface SavedQueryFilterParams {

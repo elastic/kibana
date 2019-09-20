@@ -18,21 +18,22 @@
  */
 
 import React, { FunctionComponent, useEffect, useState, Fragment } from 'react';
-import { EuiSelectable } from '@elastic/eui';
-import { Option } from '@elastic/eui/src/components/selectable/types';
 import { i18n } from '@kbn/i18n';
 import { SavedQueryFilterParams } from '@kbn/es-query';
 import { sortBy } from 'lodash';
+import { EuiFormRow } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
+import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { SavedQuery } from '../../../search/search_bar/index';
 import { SavedQueryService } from '../../../search/search_bar/lib/saved_query_service';
 
 interface Props {
   showSaveQuery?: boolean;
-  value?: SavedQueryFilterParams; // is this an object containing a savedQuery, the esQueryConfig and the indexPattern or just the string version of the SQ name?
+  value: SavedQueryFilterParams; // is this an object containing a savedQuery, the esQueryConfig and the indexPattern or just the string version of the SQ name?
   savedQueryService: SavedQueryService;
   onChange: (params: SavedQueryFilterParams) => void;
 }
-
+// problem with types is that the SavedQuery type used here is the one from Saved Objects. The type the filter is expecting is the one with the converted timefilter
 export const SavedQueryEditorUI: FunctionComponent<Props> = ({
   showSaveQuery,
   value,
@@ -40,29 +41,68 @@ export const SavedQueryEditorUI: FunctionComponent<Props> = ({
   onChange,
 }) => {
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
+  const [selectedSavedQuery, setSelectedSavedQuery] = useState(
+    (value && value.savedQuery) || undefined
+  );
   useEffect(() => {
     const fetchQueries = async () => {
       const allSavedQueries = await savedQueryService.getAllSavedQueries();
-      const sortedAllSavedQueries = sortBy(allSavedQueries, 'attributes.title');
+      const allSavedQueriesWithoutTimefilter = allSavedQueries.map(savedQuery => {
+        savedQuery.attributes.timefilter = undefined;
+        return savedQuery;
+      });
+      const sortedAllSavedQueries = sortBy(allSavedQueriesWithoutTimefilter, 'attributes.title');
       setSavedQueries(sortedAllSavedQueries);
     };
     fetchQueries();
   }, []); // an empty array to only fetch saved queries once on rendering
 
   const noSavedQueriesDescriptionText = i18n.translate(
-    'data.search.searchBar.savedQueryNoSavedQueriesText',
+    'data.filter.filterEditor.savedQueryFilterEditor.savedQueryNoSavedQueriesText',
     {
       defaultMessage: 'There are no saved queries.',
     }
   );
-
-  const savedQueryRows = () => {
-    if (!savedQueries) {
-      return <div>{noSavedQueriesDescriptionText}</div>;
-    }
-    return savedQueries.map(savedQuery => (
-      <li key={savedQuery.id}>{savedQuery.attributes.title}</li>
-    ));
+  const onSavedQueryChange = (selected: any) => {
+    const newSelectedSavedQuery = {
+      id: selected[0].id,
+      attributes: {
+        ...selected[0].attributes,
+        timefilter: undefined,
+      },
+    };
+    setSelectedSavedQuery(newSelectedSavedQuery);
+    const newParams = { ...value, savedQuery: selectedSavedQuery };
+    onChange(newParams);
   };
-  return <ul>{savedQueryRows()}</ul>;
+  const renderSavedQueryInput = () => {
+    return (
+      <EuiFormRow
+        label={i18n.translate('data.filter.filterEditor.savedQueryFilterEditor.fieldSelectLabel', {
+          defaultMessage: 'Saved query',
+        })}
+      >
+        {savedQueries && savedQueries.length ? (
+          <GenericComboBox
+            id="savedQueryInput"
+            isDisabled={!savedQueries.length}
+            placeholder={i18n.translate(
+              'data.filter.filterEditor.savedQueryFilterEditor.savedQerySelectPlaceholder',
+              { defaultMessage: 'Select a saved query' }
+            )}
+            options={savedQueries}
+            selectedOptions={selectedSavedQuery ? [selectedSavedQuery] : []}
+            getLabel={savedQuery => savedQuery.attributes.title}
+            onChange={onSavedQueryChange}
+            singleSelection={{ asPlainText: true }}
+            isClearable={false}
+          />
+        ) : (
+          <p>{noSavedQueriesDescriptionText}</p>
+        )}
+      </EuiFormRow>
+    );
+  };
+
+  return <Fragment>{renderSavedQueryInput()}</Fragment>;
 };
