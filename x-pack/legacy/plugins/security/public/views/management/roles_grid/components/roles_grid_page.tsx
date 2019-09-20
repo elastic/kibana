@@ -15,7 +15,6 @@ import {
   EuiPageContentHeaderSection,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   EuiButtonIcon,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
