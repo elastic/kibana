@@ -105,7 +105,12 @@
         "tokenHash" : "b0e83363575be247419c69d0f9e1379e362e2d9928f7d80e65d0c3e4470c6082892d6f63855044bc101584e6e299090945911da23b27de8ebcd3761e23787e61",
         "policy_id" : "policy:1",
         "policy_shared_id" : "policy:1",
-        "active" : true
+        "active" : true,
+        "enrollment_rules": [{
+          "id": "rule:1",
+          "ip_ranges": ["0.0.0.0/0"],
+          "created_at" : "2019-09-20T01:57:50.986Z"
+        }]
       },
       "type" : "tokens",
       "updated_at" : "2019-09-16T19:31:48.518Z"

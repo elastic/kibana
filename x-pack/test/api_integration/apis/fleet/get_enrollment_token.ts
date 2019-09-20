@@ -14,7 +14,7 @@ export default function({ getService }: FtrProviderContext) {
 
   describe('fleet_get_tokens', () => {
     before(async () => {
-      await esArchiver.load('fleet/agents');
+      await esArchiver.loadIfNeeded('fleet/agents');
     });
     after(async () => {
       await esArchiver.unload('fleet/agents');

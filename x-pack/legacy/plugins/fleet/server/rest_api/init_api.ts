@@ -9,16 +9,22 @@ import { createListAgentsRoute } from './agents/list';
 import { createDeleteAgentsRoute } from './agents/delete';
 import { createEnrollAgentsRoute } from './agents/enroll';
 import { createCheckinAgentsRoute } from './agents/checkin';
-import { createGetEnrollmentTokenRoute } from './tokens/get_enrollment';
+import { createGetEnrollmentTokenRoute } from './policy/tokens';
 import { FleetServerLib } from '../libs/types';
 import { HapiFrameworkAdapter } from '../libs/adapters/framework/hapi_framework_adapter';
 import { createAgentsAddActionRoute } from './agents/add_action';
+import {
+  createDeleteEnrollmentRuleRoute,
+  createGetEnrollmentRulesRoute,
+  createPostEnrollmentRulesRoute,
+} from './policy/rules';
 
 export function initRestApi(server: Server, libs: FleetServerLib) {
   const frameworkAdapter = new HapiFrameworkAdapter(server);
 
   createAgentsRoutes(frameworkAdapter, libs);
   createTokensRoutes(frameworkAdapter, libs);
+  createPolicyEnrollmentRoutes(frameworkAdapter, libs);
 }
 
 function createAgentsRoutes(adapter: HapiFrameworkAdapter, libs: FleetServerLib) {
@@ -31,4 +37,10 @@ function createAgentsRoutes(adapter: HapiFrameworkAdapter, libs: FleetServerLib)
 
 function createTokensRoutes(adapter: HapiFrameworkAdapter, libs: FleetServerLib) {
   adapter.registerRoute(createGetEnrollmentTokenRoute(libs));
+}
+
+function createPolicyEnrollmentRoutes(adapter: HapiFrameworkAdapter, libs: FleetServerLib) {
+  adapter.registerRoute(createDeleteEnrollmentRuleRoute(libs));
+  adapter.registerRoute(createGetEnrollmentRulesRoute(libs));
+  adapter.registerRoute(createPostEnrollmentRulesRoute(libs));
 }
