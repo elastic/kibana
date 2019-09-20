@@ -15,7 +15,7 @@ import d3 from 'd3';
 import angular from 'angular';
 import moment from 'moment';
 
-import { TimeBuckets } from 'ui/time_buckets';
+import { MlTimeBuckets } from '../../../../../util/ml_time_buckets';
 import { drawLineChartDots, numTicksForDateFormat } from 'plugins/ml/util/chart_utils';
 
 import { uiModules } from 'ui/modules';
@@ -129,7 +129,7 @@ module.directive('mlSingleMetricJobChart', function () {
       lineChartXScale = lineChartXScale.domain(d3.extent(data, d => d.date));
 
       // Get the scaled date format to use for x axis tick labels.
-      const timeBuckets = new TimeBuckets();
+      const timeBuckets = new MlTimeBuckets();
       timeBuckets.setInterval('auto');
       if (data.length > 0) {
         const xDomain = lineChartXScale.domain();

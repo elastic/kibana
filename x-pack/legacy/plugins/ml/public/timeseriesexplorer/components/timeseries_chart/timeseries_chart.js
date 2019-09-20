@@ -39,7 +39,7 @@ import {
   showMultiBucketAnomalyTooltip,
 } from '../../../util/chart_utils';
 import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
-import { TimeBuckets } from 'ui/time_buckets';
+import { MlTimeBuckets } from '../../../util/ml_time_buckets';
 import { mlTableService } from '../../../services/table_service';
 import { ContextChartMask } from '../context_chart_mask';
 import { findChartPointForAnomalyTime } from '../../timeseriesexplorer_utils';
@@ -629,7 +629,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     }
 
     // Get the scaled date format to use for x axis tick labels.
-    const timeBuckets = new TimeBuckets();
+    const timeBuckets = new MlTimeBuckets();
     timeBuckets.setInterval('auto');
     timeBuckets.setBounds(bounds);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();
@@ -916,7 +916,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
     // Add x axis.
     const bounds = timefilter.getActiveBounds();
-    const timeBuckets = new TimeBuckets();
+    const timeBuckets = new MlTimeBuckets();
     timeBuckets.setInterval('auto');
     timeBuckets.setBounds(bounds);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();

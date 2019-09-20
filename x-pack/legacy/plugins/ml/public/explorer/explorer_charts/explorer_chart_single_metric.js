@@ -36,8 +36,8 @@ import {
   showMultiBucketAnomalyMarker,
   showMultiBucketAnomalyTooltip,
 } from '../../util/chart_utils';
-import { TimeBuckets } from 'ui/time_buckets';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
+import { MlTimeBuckets } from '../../util/ml_time_buckets';
 import { mlEscape } from '../../util/string_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
@@ -187,14 +187,14 @@ export const ExplorerChartSingleMetric = injectI18n(class ExplorerChartSingleMet
 
     function drawLineChartAxes() {
       // Get the scaled date format to use for x axis tick labels.
-      const timeBuckets = new TimeBuckets();
+      const timeBuckets = new MlTimeBuckets();
       const bounds = { min: moment(config.plotEarliest), max: moment(config.plotLatest) };
       timeBuckets.setBounds(bounds);
       timeBuckets.setInterval('auto');
       const xAxisTickFormat = timeBuckets.getScaledDateFormat();
 
       const tickValuesStart = Math.max(config.selectedEarliest, config.plotEarliest);
-      // +1 ms to account for the ms that was substracted for query aggregations.
+      // +1 ms to account for the ms that was subtracted for query aggregations.
       const interval = config.selectedLatest - config.selectedEarliest + 1;
       const tickValues = getTickValues(tickValuesStart, interval, config.plotEarliest, config.plotLatest);
 
