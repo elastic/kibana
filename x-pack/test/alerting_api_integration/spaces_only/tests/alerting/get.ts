@@ -45,6 +45,23 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
     });
 
+    it(`shouldn't find alert from another space`, async () => {
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData())
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+
+      await supertest
+        .get(`${getUrlPrefix(Spaces.other.id)}/api/alert/${createdAlert.id}`)
+        .expect(404, {
+          statusCode: 404,
+          error: 'Not Found',
+          message: `Saved object [alert/${createdAlert.id}] not found`,
+        });
+    });
+
     it(`should handle get alert request appropriately when alert doesn't exist`, async () => {
       await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/1`).expect(404, {
         statusCode: 404,
