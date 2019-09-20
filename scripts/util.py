@@ -29,7 +29,7 @@ class LogConfig:
 
 
 class Utility:
-    OUTPUT_FILE = "export.json"
+    OUTPUT_FILE = 'export.json'
     INDENT_LEVEL = 3
     MAIN_LOG_PATH_DEFAULT='/var/log/probe/KibanaStartup.log'
     LOGGER = None
@@ -58,8 +58,8 @@ class Utility:
             value = list_ob[key]
             return value
         except:
-            self.logging.warning("No element in list for index: " + key)
-            return ""
+            self.logging.warning('No element in list for index: ' + key)
+            return ''
 
     def time_has_run_out(self, start, curr, max):
         return curr - start > max
@@ -69,7 +69,7 @@ class Utility:
             return json.load(file_raw)
 
     def remove_all_char(self, string, to_remove):
-        return string.replace(to_remove, "")
+        return string.replace(to_remove, '')
 
     def print_to_file(self, content, filename=OUTPUT_FILE):
         with open(filename, 'w') as outputfile:

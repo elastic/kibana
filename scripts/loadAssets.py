@@ -15,7 +15,7 @@ UTIL = Utility()
 logging, rotating_handler = UTIL.get_logging()
 logger = logging.getLogger()
 
-resources = "/usr/local/kibana-7.2.0-linux-x64/resources"
+resources = '/usr/local/kibana-7.2.0-linux-x64/resources'
 
 def check_elasticsearch_health():
     try:
@@ -25,11 +25,11 @@ def check_elasticsearch_health():
         if not response.ok:
             response.raise_for_status()
 
-        logger.info("elasticsearch status: " + "\n" + UTIL.pretty_format(response.json()))
+        logger.info('elasticsearch status:\n' + UTIL.pretty_format(response.json()))
         return True
 
     except Exception as err:
-        logger.warning("[loadAssets.py] Caught HTTP exception: {0}".format(err))
+        logger.warning('[loadAssets.py] Caught HTTP exception: {0}'.format(err))
         return False
 
 def set_default_index_pattern():
@@ -37,16 +37,17 @@ def set_default_index_pattern():
         url = 'http://localhost:9200/.kibana/_update/config:7.2.0'
 
         postJson = {
-            "doc": {
-                "config": {
-                    "defaultIndex" : "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b"
+            'doc': {
+                'config': {
+                    'defaultIndex' : '361f5c00-b47c-11e9-86a0-cd3d7bf2f81b'
                 }
             }
         }
 
         session = requests.Session()
-        # Retry on Internal Server Error (500) and Service Unavailable (503)
-        retries = Retry(total=5, backoff_factor=0.3, status_forcelist=[ 500, 503])
+        # Retry on: Request Timeout (408), Internal Server Error (500), Bad Gateway (502), Service Unavailable (503),
+        # and Gateway timeout (504)
+        retries = Retry(total=5, backoff_factor=0.3, status_forcelist=[408, 500, 502, 503, 504])
         session.mount('https://', HTTPAdapter(max_retries=retries))
         session.mount('http://', HTTPAdapter(max_retries=retries))
         esJson = json.dumps(postJson)
@@ -56,12 +57,12 @@ def set_default_index_pattern():
         if not response.ok:
             response.raise_for_status()
 
-        logger.info("Successfully set index pattern:\n" + UTIL.pretty_format(response.json()))
+        logger.info('Successfully set index pattern:\n' + UTIL.pretty_format(response.json()))
         return True
 
     except Exception as err:
-        logger.warning("[loadAssets.py] Failed to set default index pattern: {0}".format(err) \
-            + "\n\turl: {0}".format(url) + "\n\tpostJson: {0}".format(postJson))
+        logger.warning('[loadAssets.py] Failed to set default index pattern: {0}'.format(err) \
+            + '\n\turl: {0}'.format(url) + '\n\tpostJson: {0}'.format(postJson))
         return False
 
 def put_document_from_file(es_id, path_to_updated_json):
@@ -81,24 +82,26 @@ def put_document_from_file(es_id, path_to_updated_json):
         if not response.ok:
             response.raise_for_status()
 
-        logger.info("PUT RETURNS: " + "\n" + UTIL.pretty_format(response.json()))
+        logger.info('PUT RETURNS:\n' + UTIL.pretty_format(response.json()))
         return True, response.text
 
     except Exception as err:
-        logger.warning("[loadAssets.py] Caught HTTP exception: {0}".format(err))
-        return False, "Not found"
+        logger.warning('[loadAssets.py] Caught HTTP exception: {0}'.format(err))
+        return False, 'Not found'
 
 def get_es_id(filename):
     return splitext(filename)[0]
 
-def load_assets(path_to_files, files):
+def load_assets(path_to_files):
+    # Create arrays of the filenames in the resources directory
+    files = [filename for filename in listdir(resources) if isfile(join(resources, filename))]
     for file in files:
-        logger.info("--------- " + file + " ---------")
-        full_file_path = path_to_files + "/" + file
+        logger.info('--------- ' + file + ' ---------')
+        full_file_path = path_to_files + '/' + file
         es_id = get_es_id(file)
         created, created_ret = put_document_from_file(es_id, full_file_path)
         if not created:
-            logger.warning("Failed to load kibana object: " + file)
+            logger.warning('Failed to load kibana object: ' + file)
 
 
 # ----------------- MAIN -----------------
@@ -106,13 +109,11 @@ def main():
 
     es_ok = check_elasticsearch_health()
     if es_ok:
-        # Create arrays of the filenames in the resources directory
-        objects = [filename for filename in listdir(resources) if isfile(join(resources, filename))]
         # Load all the artifacts appropriately
-        load_assets(resources, objects)
+        load_assets(resources)
         set_default_index_pattern()
     else:
-      print "elasticsearch is not ready\n"
+      logger.error('elasticsearch is not ready\n')
       sys.exit(1)
 
 
