@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton, EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiFieldText, EuiLink, EuiText } from '@elastic/eui';
 import {
   Query,
   QueryBarInput,
@@ -123,6 +123,28 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
           label={i18n.translate('xpack.lens.indexPattern.filterRatioDividesLabel', {
             defaultMessage: 'Divided by:',
           })}
+          labelAppend={
+            <EuiText size="xs">
+              {hasDenominator ? (
+                <EuiLink>
+                  <FormattedMessage
+                    id="xpack.lens.indexPattern.filterRatioUseDocumentsButton"
+                    defaultMessage="Use count of documents"
+                  />
+                </EuiLink>
+              ) : (
+                <EuiLink
+                  data-test-subj="lns-indexPatternFilterRatio-showDenominatorButton"
+                  onClick={() => setDenominator(true)}
+                >
+                  <FormattedMessage
+                    id="xpack.lens.indexPattern.filterRatioUseDenominatorButton"
+                    defaultMessage="Use filter"
+                  />
+                </EuiLink>
+              )}
+            </EuiText>
+          }
         >
           {hasDenominator ? (
             <QueryBarInput
@@ -147,25 +169,15 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
               }}
             />
           ) : (
-            <>
-              <FormattedMessage
-                id="xpack.lens.indexPattern.filterRatioDefaultDenominator"
-                defaultMessage="Count of documents"
-              />
-
-              <EuiFormRow>
-                <EuiButton
-                  data-test-subj="lns-indexPatternFilterRatio-showDenominatorButton"
-                  fill
-                  onClick={() => setDenominator(true)}
-                >
-                  <FormattedMessage
-                    id="xpack.lens.indexPattern.filterRatioUseDenominatorButton"
-                    defaultMessage="Divide by filter instead"
-                  />
-                </EuiButton>
-              </EuiFormRow>
-            </>
+            <EuiFieldText
+              readOnly
+              defaultValue={i18n.translate(
+                'xpack.lens.indexPattern.filterRatioDefaultDenominator',
+                {
+                  defaultMessage: 'Count of documents',
+                }
+              )}
+            />
           )}
         </EuiFormRow>
       </div>

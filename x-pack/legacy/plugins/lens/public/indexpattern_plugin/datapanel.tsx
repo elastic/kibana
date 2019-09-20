@@ -468,6 +468,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     />
                     <EuiPopoverFooter>
                       <EuiSwitch
+                        compressed
                         checked={!showEmptyFields}
                         onChange={() => {
                           onToggleEmptyFields();
