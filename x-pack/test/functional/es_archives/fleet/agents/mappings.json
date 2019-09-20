@@ -1,7 +1,10 @@
 {
   "type": "index",
   "value": {
-    "index": ".fleet",
+    "aliases": {
+      ".fleet": {}
+    },
+    "index": ".fleet_1",
     "mappings": {
       "dynamic": "strict",
       "properties": {
