@@ -31,6 +31,7 @@ import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
 import { config as devConfig } from './dev';
+import { config as kibanaConfig } from './kibana_config';
 import { mapToObject } from '../utils/';
 import { ContextService } from './context';
 import { InternalCoreSetup } from './index';
@@ -148,6 +149,7 @@ export class Server {
       [httpConfig.path, httpConfig.schema],
       [pluginsConfig.path, pluginsConfig.schema],
       [devConfig.path, devConfig.schema],
+      [kibanaConfig.path, kibanaConfig.schema],
     ];
 
     for (const [path, schema] of schemas) {
