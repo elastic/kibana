@@ -19,6 +19,8 @@
 
 import { BaseVisType } from './base_vis_type';
 import $ from 'jquery';
+// eslint-disable-next-line
+import chrome from '../../chrome';
 
 
 export function AngularVisTypeProvider($compile, $rootScope) {
