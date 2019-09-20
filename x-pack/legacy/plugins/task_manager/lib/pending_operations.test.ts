@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PendingOperations, createPendingOperations } from './pending_operations';
+import { createPendingOperations } from './pending_operations';
 
 describe('PendingOperations', () => {
   describe('trackOperationOn', () => {
