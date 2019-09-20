@@ -377,6 +377,7 @@ app.controller('graphuiPlugin', function (
     return $route.current.locals.GetIndexPatternProvider.get(selectedIndex.id)
       .then(handleSuccess)
       .then(function (indexPattern) {
+        $scope.selectedIndex = indexPattern;
         store.dispatch(loadFields(mapFields(indexPattern)));
         $scope.$digest();
       }, handleError);
@@ -832,9 +833,8 @@ app.controller('graphuiPlugin', function (
       );
       return;
     }
-    $scope.selectedIndex = selectedIndex;
-    $scope.proposedIndex = selectedIndex;
     $route.current.locals.GetIndexPatternProvider.get(selectedIndex.id).then(indexPattern => {
+      $scope.selectedIndex = indexPattern;
       initWorkspaceIfRequired();
       const {
         urlTemplates,

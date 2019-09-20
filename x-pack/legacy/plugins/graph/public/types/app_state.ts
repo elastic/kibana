@@ -5,6 +5,7 @@
  */
 
 import { SimpleSavedObject } from 'src/core/public';
+import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { Workspace } from './workspace_state';
 import { FontawesomeIcon } from '../helpers/style_choices';
 import { OutlinkEncoder } from '../helpers/outlink_encoders';
@@ -44,5 +45,5 @@ export interface AppState {
   workspace: Workspace;
   allFields: WorkspaceField[];
   selectedFields: WorkspaceField[];
-  selectedIndex: IndexPatternSavedObject;
+  selectedIndex: IndexPattern;
 }

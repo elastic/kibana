@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect, ReactNode } from 'react';
-import { EuiPopover, EuiSelectable, EuiBadge } from '@elastic/eui';
+import { EuiPopover, EuiSelectable, EuiBadge, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { WorkspaceField } from '../../types';
 
@@ -51,16 +51,14 @@ export function FieldPicker({ fieldMap, selectField, deselectField }: FieldPicke
       panelPaddingSize="none"
       button={
         <EuiBadge
-          iconType="plusInCircleFilled"
           className="gphFieldPickerButton"
           onClick={() => setOpen(true)}
-          iconSide="left"
           iconOnClick={() => {}}
           iconOnClickAriaLabel=""
           onClickAriaLabel={badgeDescription}
           title=""
         >
-          {badgeDescription}
+          <EuiIcon type="plusInCircleFilled" /> {badgeDescription}
         </EuiBadge>
       }
       isOpen={open}
