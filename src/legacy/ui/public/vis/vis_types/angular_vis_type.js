@@ -20,6 +20,7 @@
 import $ from 'jquery';
 import chrome from 'ui/chrome';
 
+// hello
 export class AngularVisController {
   constructor(domeElement, vis) {
     this.el = $(domeElement);
