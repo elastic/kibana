@@ -36,6 +36,8 @@ export class NoDataController extends MonitoringViewBaseController {
         if (monitoringClustersData && monitoringClustersData.length) {
           kbnUrl.redirect('/home');
           return monitoringClustersData;
+        } else if (this.isCollectionEnabledUpdated) {
+          return Promise.resolve(this.data);
         }
       }
       catch (err) {
