@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+// @ts-ignore
 import { palettes } from '@elastic/eui/lib/services';
 
 export interface FontawesomeIcon {
