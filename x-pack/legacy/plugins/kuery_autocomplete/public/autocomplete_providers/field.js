@@ -40,10 +40,10 @@ export function getSuggestionsProvider({ indexPatterns }) {
         ? field.subType.nested.path.slice(nestedPath ? nestedPath.length + 1 : 0)
         : '';
       const text = field.subType && field.subType.nested && remainingPath.length > 0
-        ? `${escapeKuery(remainingPath)}:{ ${escapeKuery(fieldName.slice(field.subType.nested.path.length + 1))} }`
+        ? `${escapeKuery(remainingPath)}:{ ${escapeKuery(fieldName.slice(field.subType.nested.path.length + 1))}  }`
         : `${escapeKuery(fieldName.slice(nestedPath ? nestedPath.length + 1 : 0))} `;
       const description = getDescription(fieldName);
-      const cursorIndex = field.subType && field.subType.nested
+      const cursorIndex = field.subType && field.subType.nested && remainingPath.length > 0
         ? text.length - 2
         : text.length;
       return { type, text, description, start, end, cursorIndex };

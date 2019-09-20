@@ -332,12 +332,10 @@ export class QueryBarInputUI extends Component<Props, State> {
 
     this.onQueryStringChange(newQueryString);
 
-    if (cursorIndex) {
-      this.setState({
-        selectionStart: start + cursorIndex,
-        selectionEnd: start + cursorIndex,
-      });
-    }
+    this.setState({
+      selectionStart: start + (cursorIndex ? cursorIndex : text.length),
+      selectionEnd: start + (cursorIndex ? cursorIndex : text.length),
+    });
 
     if (type === recentSearchType) {
       this.setState({ isSuggestionsVisible: false, index: null });
