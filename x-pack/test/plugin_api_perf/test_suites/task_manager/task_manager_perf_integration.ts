@@ -19,17 +19,21 @@ export default function({ getService }: { getService: (service: string) => any }
     );
 
     it('should run 10 tasks every second for a minute', async () => {
-      const stressTestResult = await supertest
+      const { runningAverageTasks, runningAverageLeadTime } = await supertest
         .post('/api/perf_tasks')
         .set('kbn-xsrf', 'xxx')
         .send({ tasksToSpawn: 10, durationInSeconds: 60 })
         .expect(200)
         .then((response: any) => response.body);
 
-      log.debug(`Stress Test Result: ${JSON.stringify(stressTestResult)}`);
+      log.debug(`Stress Test Result:`);
+      log.debug(`Average number of tasks executed per second: ${runningAverageTasks}`);
+      log.debug(
+        `Average time it took from the moment a task's scheduled time was reached, until Task Manager picked it up: ${runningAverageLeadTime}`
+      );
 
-      expect(stressTestResult.runningAverageTasks).to.be.greaterThan(0);
-      expect(stressTestResult.runningAverageLeadTime).to.be.greaterThan(0);
+      expect(runningAverageTasks).to.be.greaterThan(0);
+      expect(runningAverageLeadTime).to.be.greaterThan(0);
     });
   });
 }
