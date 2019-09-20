@@ -82,8 +82,13 @@ export class ExtendedTemplate extends PureComponent<Props> {
 
     return (
       <Fragment>
-        <EuiFormRow label="Position" compressed>
-          <EuiSelect value={position} options={options} onChange={this.setArgValue('position')} />
+        <EuiFormRow label="Position" display="rowCompressed">
+          <EuiSelect
+            compressed
+            value={position}
+            options={options}
+            onChange={this.setArgValue('position')}
+          />
         </EuiFormRow>
       </Fragment>
     );

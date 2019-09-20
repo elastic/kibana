@@ -121,6 +121,7 @@ export const TextStylePicker = ({
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
             options={styleButtons}
+            buttonSize="compressed"
             idToSelectedMap={stylesSelectedMap}
             onChange={onStyleChange}
             type="multi"
@@ -130,6 +131,7 @@ export const TextStylePicker = ({
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
             options={alignmentButtons}
+            buttonSize="compressed"
             isIconOnly
             idSelected={align}
             onChange={onAlignmentChange}
