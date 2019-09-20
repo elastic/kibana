@@ -7,14 +7,10 @@
 import { mapValues, uniq, indexBy } from 'lodash';
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import {
-  EuiComboBox,
   EuiLoadingSpinner,
-  // @ts-ignore
-  EuiHighlight,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
-  EuiButtonEmpty,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiContextMenuPanelProps,
@@ -36,6 +32,7 @@ import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import { FieldItem } from './field_item';
 import { FieldIcon } from './field_icon';
 import { updateLayerIndexPattern } from './state_helpers';
+import { ChangeIndexPattern } from './change_indexpattern';
 
 // TODO the typings for EuiContextMenuPanel are incorrect - watchedItemProps is missing. This can be removed when the types are adjusted
 const FixedEuiContextMenuPanel = (EuiContextMenuPanel as unknown) as React.FunctionComponent<
@@ -46,7 +43,7 @@ function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
   return fieldA.name.localeCompare(fieldB.name, undefined, { sensitivity: 'base' });
 }
 
-const supportedFieldTypes = new Set(['string', 'number', 'boolean', 'date', 'ip']);
+const supportedFieldTypes = ['string', 'number', 'boolean', 'date'];
 const PAGINATION_SIZE = 50;
 
 const fieldTypeNames: Record<DataType, string> = {
@@ -54,7 +51,6 @@ const fieldTypeNames: Record<DataType, string> = {
   number: i18n.translate('xpack.lens.datatypes.number', { defaultMessage: 'number' }),
   boolean: i18n.translate('xpack.lens.datatypes.boolean', { defaultMessage: 'boolean' }),
   date: i18n.translate('xpack.lens.datatypes.date', { defaultMessage: 'date' }),
-  ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP' }),
 };
 
 function isSingleEmptyLayer(layerMap: IndexPatternPrivateState['layers']) {
@@ -178,7 +174,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     return (
       <EuiFlexGroup
         gutterSize="m"
-        className="lnsInnerIndexPatternDataPanel"
+        className="lnsIndexPatternDataPanel"
         direction="column"
         responsive={false}
       >
@@ -240,7 +236,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   );
 
   const displayedFields = allFields.filter(field => {
-    if (!supportedFieldTypes.has(field.type)) {
+    if (!supportedFieldTypes.includes(field.type)) {
       return false;
     }
 
@@ -329,82 +325,43 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     <ChildDragDropProvider {...dragDropContext}>
       <EuiFlexGroup
         gutterSize="none"
-        className="lnsInnerIndexPatternDataPanel"
+        className="lnsIndexPatternDataPanel"
         direction="column"
         responsive={false}
       >
         <EuiFlexItem grow={null}>
-          <div className="lnsInnerIndexPatternDataPanel__header">
-            {!showIndexPatternSwitcher ? (
-              <>
-                <EuiTitle size="xxs">
-                  <h4
-                    className="lnsInnerIndexPatternDataPanel__header"
-                    title={currentIndexPattern.title}
-                  >
-                    {currentIndexPattern.title}{' '}
-                  </h4>
-                </EuiTitle>
-                <EuiButtonEmpty
-                  data-test-subj="indexPattern-switch-link"
-                  className="lnsInnerIndexPatternDataPanel__changeLink"
-                  onClick={() => setShowIndexPatternSwitcher(true)}
-                  size="xs"
-                >
-                  (
-                  <FormattedMessage
-                    id="xpack.lens.indexPatterns.changePatternLabel"
-                    defaultMessage="change"
-                  />
-                  )
-                </EuiButtonEmpty>
-              </>
-            ) : (
-              <EuiComboBox
+          <div className="lnsIndexPatternDataPanel__header">
+            <EuiTitle size="xxs" className="eui-textTruncate">
+              <h4 title={currentIndexPattern.title}>{currentIndexPattern.title} </h4>
+            </EuiTitle>
+            <div>
+              <ChangeIndexPattern
                 data-test-subj="indexPattern-switcher"
-                options={Object.values(indexPatterns).map(({ title, id }) => ({
-                  label: title,
-                  value: id,
-                }))}
-                inputRef={el => {
-                  if (el) {
-                    el.focus();
-                  }
+                trigger={{
+                  label: i18n.translate('xpack.lens.indexPatterns.changePatternLabel', {
+                    defaultMessage: '(change)',
+                  }),
+                  'data-test-subj': 'indexPattern-switch-link',
                 }}
-                selectedOptions={
-                  currentIndexPatternId
-                    ? [
-                        {
-                          label: currentIndexPattern.title,
-                          value: currentIndexPattern.id,
-                        },
-                      ]
-                    : undefined
-                }
-                singleSelection={{ asPlainText: true }}
-                isClearable={false}
-                onBlur={() => {
-                  setShowIndexPatternSwitcher(false);
-                }}
-                onChange={choices => {
-                  onChangeIndexPattern!(choices[0].value as string);
+                currentIndexPatternId={currentIndexPatternId}
+                indexPatterns={indexPatterns}
+                onChangeIndexPattern={(newId: string) => {
+                  if (onChangeIndexPattern) onChangeIndexPattern(newId);
 
                   setLocalState(s => ({
                     ...s,
                     nameFilter: '',
                     typeFilter: [],
                   }));
-
-                  setShowIndexPatternSwitcher(false);
                 }}
               />
-            )}
+            </div>
           </div>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup
             gutterSize="s"
-            className="lnsInnerIndexPatternDataPanel__filterWrapper"
+            className="lnsIndexPatternDataPanel__filter-wrapper"
             responsive={false}
           >
             <EuiFlexItem grow={true}>
@@ -469,7 +426,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     />
                     <EuiPopoverFooter>
                       <EuiSwitch
-                        compressed
                         checked={!showEmptyFields}
                         onChange={() => {
                           onToggleEmptyFields();
@@ -518,7 +474,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             </EuiFlexItem>
           </EuiFlexGroup>
           <div
-            className="lnsInnerIndexPatternDataPanel__listWrapper"
+            className="lnsFieldListPanel__list-wrapper"
             ref={el => {
               if (el && !el.dataset.dynamicScroll) {
                 el.dataset.dynamicScroll = 'true';
@@ -527,7 +483,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             }}
             onScroll={lazyScroll}
           >
-            <div className="lnsInnerIndexPatternDataPanel__list">
+            <div className="lnsFieldListPanel__list">
               {localState.isLoading && <EuiLoadingSpinner />}
 
               {paginatedFields.map(field => {

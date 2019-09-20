@@ -5,137 +5,28 @@
  */
 
 import _ from 'lodash';
-import React, { useState } from 'react';
-import {
-  // @ts-ignore
-  EuiHighlight,
-  EuiButtonEmpty,
-  EuiIconTip,
-  EuiPopover,
-  EuiSelectable,
-  EuiButtonEmptyProps,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { DatasourceLayerPanelProps, StateSetter } from '../types';
-import { IndexPatternPrivateState, IndexPatternLayer } from './indexpattern';
-import { isLayerTransferable, updateLayerIndexPattern } from './state_helpers';
+import { IndexPatternPrivateState } from './indexpattern';
+import { updateLayerIndexPattern } from './state_helpers';
+import { ChangeIndexPattern } from './change_indexpattern';
 
 export interface IndexPatternLayerPanelProps extends DatasourceLayerPanelProps {
   state: IndexPatternPrivateState;
   setState: StateSetter<IndexPatternPrivateState>;
 }
-
-export interface LayerPanelChooserTriggerProps extends EuiButtonEmptyProps {
-  label: string;
-}
-
-function LayerPanelChooser({
-  indexPatterns,
-  layer,
-  onChangeIndexPattern,
-  trigger,
-}: {
-  indexPatterns: IndexPatternPrivateState['indexPatterns'];
-  layer: IndexPatternLayer;
-  onChangeIndexPattern: (newId: string) => void;
-  trigger: LayerPanelChooserTriggerProps;
-}) {
-  const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-  // const currentIndexPatternId = layer.indexPatternId;
-  const indexPatternList = Object.values(indexPatterns)
-    // .filter(indexPattern => indexPattern.id !== layer.indexPatternId)
-    .map(indexPattern => ({
-      ...indexPattern,
-      isTransferable: isLayerTransferable(layer, indexPattern),
-    }));
-
-  const createTrigger = function() {
-    const { label, ...rest } = trigger;
-    return (
-      <EuiButtonEmpty
-        flush="left"
-        className="eui-textTruncate"
-        size="xs"
-        onClick={() => setPopoverIsOpen(!isPopoverOpen)}
-        {...rest}
-      >
-        {label}
-      </EuiButtonEmpty>
-    );
-  };
-
-  return (
-    <>
-      <EuiPopover
-        button={createTrigger()}
-        isOpen={isPopoverOpen}
-        closePopover={() => setPopoverIsOpen(false)}
-        className="eui-textTruncate"
-        anchorClassName="eui-textTruncate"
-        display="block"
-        panelPaddingSize="s"
-      >
-        <div style={{ minWidth: 300 }}>
-          <EuiSelectable
-            searchable
-            singleSelection="always"
-            options={indexPatternList.map(indexPattern => ({
-              label: indexPattern.title,
-              value: indexPattern,
-              checked: indexPattern.id === layer.indexPatternId ? 'on' : undefined,
-              prepend:
-                indexPattern && indexPattern.isTransferable ? (
-                  undefined
-                ) : (
-                  <EuiIconTip
-                    type="minusInCircle"
-                    content={i18n.translate(
-                      'xpack.lens.indexPattern.lossyIndexPatternSwitchDescription',
-                      {
-                        defaultMessage:
-                          'Not all operations are compatible with this index pattern and will be removed on switching.',
-                      }
-                    )}
-                  />
-                ),
-            }))}
-            onChange={choices => {
-              if (choices.length) {
-                onChangeIndexPattern(
-                  _.find(choices, function(c) {
-                    return c.checked === 'on';
-                  })!.value!.id
-                );
-              }
-            }}
-            searchProps={{
-              compressed: true,
-            }}
-          >
-            {(list, search) => (
-              <>
-                {search}
-                {list}
-              </>
-            )}
-          </EuiSelectable>
-        </div>
-      </EuiPopover>
-    </>
-  );
-}
-
 export function LayerPanel({ state, setState, layerId }: IndexPatternLayerPanelProps) {
   return (
     <I18nProvider>
-      <LayerPanelChooser
+      <ChangeIndexPattern
+        data-test-subj="indexPattern-switcher"
         trigger={{
           label: state.indexPatterns[state.layers[layerId].indexPatternId].title,
           'data-test-subj': 'lns_layerIndexPatternLabel',
         }}
-        indexPatterns={state.indexPatterns}
         layer={state.layers[layerId]}
+        indexPatterns={state.indexPatterns}
         onChangeIndexPattern={newId => {
           setState({
             ...state,
