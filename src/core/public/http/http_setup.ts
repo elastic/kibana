@@ -149,7 +149,7 @@ export const setup = (
     responsePromise: Promise<HttpResponse>,
     controller: HttpInterceptController
   ) {
-    let current: HttpResponse | null = null;
+    let current: HttpResponse | undefined;
 
     const finalHttpResponse = await [...interceptors].reduce(
       (promise, interceptor) =>
@@ -183,7 +183,7 @@ export const setup = (
                 controller
               );
 
-              checkHalt(controller);
+              checkHalt(controller, error);
 
               if (!next) {
                 throw error;

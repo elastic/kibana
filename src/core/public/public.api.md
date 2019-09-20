@@ -397,7 +397,7 @@ export interface HttpErrorRequest {
     // (undocumented)
     error: Error;
     // (undocumented)
-    request?: Request;
+    request: Request;
 }
 
 // @public (undocumented)

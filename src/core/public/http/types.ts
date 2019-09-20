@@ -102,7 +102,7 @@ export interface HttpErrorResponse {
 }
 /** @public */
 export interface HttpErrorRequest {
-  request?: Request;
+  request: Request;
   error: Error;
 }
 /** @public */
