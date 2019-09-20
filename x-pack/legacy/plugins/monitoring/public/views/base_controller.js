@@ -70,7 +70,8 @@ export class MonitoringViewBaseController {
     reactNodeId = null, // WIP: https://github.com/elastic/x-pack-kibana/issues/5198
     $scope,
     $injector,
-    options = {}
+    options = {},
+    fetchDataImmediately = true
   }) {
     const titleService = $injector.get('title');
     const $executor = $injector.get('$executor');
@@ -93,6 +94,8 @@ export class MonitoringViewBaseController {
       zoomOutHandler: () => $window.history.back(),
       showZoomOutBtn: () => zoomInLevel > 0
     };
+
+    this.routeOptions = {};
 
     const {
       enableTimeFilter = true,
@@ -119,7 +122,7 @@ export class MonitoringViewBaseController {
         this.updateDataPromise = null;
       }
       const _api = apiUrlFn ? apiUrlFn() : api;
-      const promises = [_getPageData($injector, _api)];
+      const promises = [_getPageData($injector, _api, this.routeOptions)];
       const setupMode = getSetupModeState();
       if (setupMode.enabled) {
         promises.push(updateSetupModeData());
@@ -132,7 +135,7 @@ export class MonitoringViewBaseController {
         });
       });
     };
-    this.updateData();
+    fetchDataImmediately && this.updateData();
 
     $executor.register({
       execute: () => this.updateData()

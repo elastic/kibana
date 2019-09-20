@@ -24,7 +24,7 @@ import { CODE_PATH_LOGSTASH } from '../../../../common/constants';
  * Logstash Pipelines Listing page
  */
 
-const getPageData = ($injector) => {
+const getPageData = ($injector, _api = undefined, routeOptions = {}) => {
   const $http = $injector.get('$http');
   const globalState = $injector.get('globalState');
   const Private = $injector.get('Private');
@@ -37,7 +37,8 @@ const getPageData = ($injector) => {
     timeRange: {
       min: timeBounds.min.toISOString(),
       max: timeBounds.max.toISOString()
-    }
+    },
+    ...routeOptions
   })
     .then(response => response.data)
     .catch((err) => {
@@ -64,7 +65,6 @@ uiRoutes
         const routeInit = Private(routeInitProvider);
         return routeInit({ codePaths: [CODE_PATH_LOGSTASH] });
       },
-      pageData: getPageData
     },
     controller: class LogstashPipelinesList extends MonitoringViewBaseEuiTableController {
       constructor($injector, $scope) {

@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { cloneDeep, last, omit } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { getMetrics } from '../details/get_metrics';
@@ -71,10 +70,25 @@ export async function processPipelinesAPIResponse(response, throughputMetricKey,
   return processedResponse;
 }
 
-export async function getPipelines(req, logstashIndexPattern, metricSet) {
+
+export async function getPipelines(req, logstashIndexPattern, pipelineIds, metricSet) {
   checkParam(logstashIndexPattern, 'logstashIndexPattern in logstash/getPipelines');
   checkParam(metricSet, 'metricSet in logstash/getPipelines');
+  checkParam(pipelineIds, 'pipelineIds in logstash/getPipelines');
 
-  const metricsResponse = await getMetrics(req, logstashIndexPattern, metricSet);
+  const filters = [
+    {
+      nested: {
+        path: 'logstash_stats.pipelines',
+        query: {
+          terms: {
+            'logstash_stats.pipelines.id': pipelineIds
+          }
+        }
+      }
+    }
+  ];
+
+  const metricsResponse = await getMetrics(req, logstashIndexPattern, metricSet, filters);
   return _handleResponse(metricsResponse);
 }

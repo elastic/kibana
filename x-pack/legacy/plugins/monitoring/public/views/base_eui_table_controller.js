@@ -8,6 +8,8 @@ import { MonitoringViewBaseController } from './';
 import { euiTableStorageGetter, euiTableStorageSetter } from 'plugins/monitoring/components/table';
 import { EUI_SORT_ASCENDING } from '../../common/constants';
 
+const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
+
 /**
  * Class to manage common instantiation behaviors in a view controller
  * And add persistent state to a table:
@@ -34,7 +36,10 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
    *
    */
   constructor(args) {
-    super(args);
+    super({
+      ...args,
+      fetchDataImmediately: false
+    });
     const { storageKey, $injector } = args;
     const storage = $injector.get('localStorage');
 
@@ -42,10 +47,22 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
     const setLocalStorageData = euiTableStorageSetter(storageKey);
     const { page, sort } = getLocalStorageData(storage);
 
-    this.pagination = page || {
+    this.pagination = {
       initialPageSize: 20,
-      pageSizeOptions: [5, 10, 20, 50]
+      initialPageIndex: 0,
+      pageSizeOptions: PAGE_SIZE_OPTIONS
     };
+
+    if (page) {
+      if (!PAGE_SIZE_OPTIONS.includes(page.size)) {
+        page.size = 20;
+      }
+      this.pagination = {
+        initialPageSize: page.size,
+        initialPageIndex: page.index,
+        pageSizeOptions: PAGE_SIZE_OPTIONS
+      };
+    }
 
     this.sorting = sort || {
       sort: {
@@ -62,5 +79,15 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
         }
       });
     };
+
+    this.routeOptions = {
+      pagination: {
+        size: this.pagination.initialPageSize,
+        index: this.pagination.initialPageIndex
+      },
+      ...this.sorting
+    };
+
+    this.updateData();
   }
 }
