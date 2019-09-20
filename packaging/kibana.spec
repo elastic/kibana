@@ -6,7 +6,7 @@ License:       https://github.com/elastic/kibana/blob/master/licenses/APACHE-LIC
 Group:         Development/Tools
 URL:           https://github.com/elastic/kibana
 Source:        https://github.com/elastic/kibana
-Requires:      python-elasticsearch >= 1.9.0
+Requires:      python >= 2.7.5, python-requests, python-chardet
 Requires(post): systemd
 
 %description
@@ -38,10 +38,10 @@ cp systemd/kibana.service %{buildroot}/lib/systemd/system
 
 mkdir -p %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64
 cp -a build/oss/%{name}-%{kibana_version}-linux-x86_64/* %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/
+cp -a resources/ %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/
 
 mkdir -p %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/scripts
 cp scripts/exportAssets.py %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/scripts
-cp scripts/setDefaultIndex.py %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/scripts
 cp scripts/loadAssets.py %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/scripts
 cp scripts/util.py %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/scripts
 

@@ -1,0 +1,40 @@
+{
+   "migrationVersion": {
+      "search": "7.0.0"
+   }, 
+   "references": [
+      {
+         "type": "index-pattern", 
+         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.index"
+      }, 
+      {
+         "type": "index-pattern", 
+         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      }
+   ], 
+   "search": {
+      "sort": [
+         "TimeUpdated", 
+         "desc"
+      ], 
+      "hits": 0, 
+      "description": "", 
+      "title": "Attachment Table", 
+      "version": 2, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"highlight\":{\"pre_tags\":[\"@kibana-highlighted-field@\"],\"post_tags\":[\"@/kibana-highlighted-field@\"],\"fields\":{\"*\":{}},\"fragment_size\":2147483647},\"filter\":[{\"meta\":{\"negate\":false,\"key\":\"Attach\",\"value\":\"true\",\"disabled\":false,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"Attach\":{\"query\":true,\"type\":\"phrase\"}}}}],\"query\":{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+      }, 
+      "columns": [
+         "Attach", 
+         "SenderEmail", 
+         "ReceiverEmail", 
+         "Filename", 
+         "AttachSize", 
+         "AttachType"
+      ]
+   }, 
+   "type": "search", 
+   "updated_at": "2019-09-10T15:48:50.528Z"
+}

@@ -1,0 +1,51 @@
+{
+   "migrationVersion": {
+      "dashboard": "7.0.0"
+   }, 
+   "references": [
+      {
+         "type": "index-pattern", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index", 
+         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b"
+      }, 
+      {
+         "type": "index-pattern", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index", 
+         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b"
+      }, 
+      {
+         "type": "index-pattern", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index", 
+         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b"
+      }, 
+      {
+         "type": "search", 
+         "name": "panel_0", 
+         "id": "Capture-Table"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_1", 
+         "id": "Top-Applications-By-Bandwidth-(histogram)"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_2", 
+         "id": "Top-Applications-By-Bandwidth-(pie)"
+      }
+   ], 
+   "type": "dashboard", 
+   "dashboard": {
+      "hits": 0, 
+      "timeRestore": false, 
+      "description": "", 
+      "title": "Capture Dashboard", 
+      "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":18,\"w\":48,\"h\":21,\"i\":\"1\"},\"panelIndex\":\"1\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":0,\"w\":36,\"h\":18,\"i\":\"2\"},\"panelIndex\":\"2\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":36,\"y\":0,\"w\":12,\"h\":18,\"i\":\"3\"},\"panelIndex\":\"3\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_2\"}]", 
+      "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}", 
+      "version": 1, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"filter\":[{\"meta\":{\"alias\":\"Pcap Captured\",\"negate\":false,\"type\":\"phrase\",\"key\":\"Captured\",\"value\":\"true\",\"params\":{\"query\":true},\"disabled\":false,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"Captured\":{\"query\":true,\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}},{\"range\":{\"TimeStartRaw\":{\"gte\":\"1568688732\"}},\"meta\":{\"type\":\"range\",\"disabled\":false,\"negate\":false,\"alias\":\"Pcap Available on Disk\",\"key\":\"TimeStartRaw\",\"value\":\"1,566,770,100 to +\u221e\",\"params\":{\"gte\":\"1568688732\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index\"},\"$state\":{\"store\":\"appState\"}},{\"meta\":{\"alias\":\"Pcap Written to Disk\",\"negate\":false,\"type\":\"phrase\",\"key\":\"Written\",\"value\":\"true\",\"params\":{\"query\":true},\"disabled\":false,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index\"},\"query\":{\"match\":{\"Written\":{\"query\":true,\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"query\":{\"language\":\"lucene\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\",\"time_zone\":\"America/Denver\"}}}}"
+      }
+   }, 
+   "updated_at": "2019-09-16T21:43:45.043Z"
+}
