@@ -6,11 +6,10 @@
 
 import { noop } from 'lodash/fp';
 import * as React from 'react';
-import { Draggable } from 'react-beautiful-dnd';
+import { Draggable, Droppable } from 'react-beautiful-dnd';
 
 import { BrowserFields } from '../../../../containers/source';
 import { DragEffects } from '../../../drag_and_drop/draggable_wrapper';
-import { DroppableWrapper } from '../../../drag_and_drop/droppable_wrapper';
 import {
   droppableTimelineColumnsPrefix,
   getDraggableFieldId,
@@ -112,61 +111,71 @@ export const ColumnHeaders = React.memo<Props>(
             </EventsTh>
           </EventsThGroupActions>
 
-          <DroppableWrapper
+          <Droppable
+            direction={'horizontal'}
             droppableId={`${droppableTimelineColumnsPrefix}${timelineId}`}
             isDropDisabled={false}
             type={DRAG_TYPE_FIELD}
           >
-            <EventsThGroupData data-test-subj="headers-group">
-              {columnHeaders.map((header, i) => (
-                <Draggable
-                  data-test-subj="draggable"
-                  draggableId={getDraggableFieldId({
-                    contextId: `timeline-column-headers-${timelineId}`,
-                    fieldId: header.id,
-                  })}
-                  index={i}
-                  isDragDisabled={isResizing}
-                  key={header.id}
-                  type={DRAG_TYPE_FIELD}
-                >
-                  {(provided, snapshot) => (
-                    <EventsTh
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      data-test-subj="draggable-header"
-                      innerRef={provided.innerRef}
-                      isDragging={snapshot.isDragging}
-                      position="relative"
-                      style={{ flexBasis: header.width + 'px', ...provided.draggableProps.style }}
-                    >
-                      {!snapshot.isDragging ? (
-                        <EventsThContent>
-                          <Header
-                            timelineId={timelineId}
-                            header={header}
-                            onColumnRemoved={onColumnRemoved}
-                            onColumnResized={onColumnResized}
-                            onColumnSorted={onColumnSorted}
-                            onFilterChange={onFilterChange}
-                            setIsResizing={setIsResizing}
-                            sort={sort}
-                          />
-                        </EventsThContent>
-                      ) : (
-                        <DragEffects>
-                          <DraggableFieldBadge
-                            fieldId={header.id}
-                            fieldWidth={header.width + 'px'}
-                          />
-                        </DragEffects>
-                      )}
-                    </EventsTh>
-                  )}
-                </Draggable>
-              ))}
-            </EventsThGroupData>
-          </DroppableWrapper>
+            {dropProvided => (
+              <EventsThGroupData
+                data-test-subj="headers-group"
+                innerRef={dropProvided.innerRef}
+                {...dropProvided.droppableProps}
+              >
+                {columnHeaders.map((header, i) => (
+                  <Draggable
+                    data-test-subj="draggable"
+                    draggableId={getDraggableFieldId({
+                      contextId: `timeline-column-headers-${timelineId}`,
+                      fieldId: header.id,
+                    })}
+                    index={i}
+                    isDragDisabled={isResizing}
+                    key={header.id}
+                    type={DRAG_TYPE_FIELD}
+                  >
+                    {(dragProvided, dragSnapshot) => (
+                      <EventsTh
+                        {...dragProvided.draggableProps}
+                        {...dragProvided.dragHandleProps}
+                        data-test-subj="draggable-header"
+                        innerRef={dragProvided.innerRef}
+                        isDragging={dragSnapshot.isDragging}
+                        position="relative"
+                        style={{
+                          flexBasis: header.width + 'px',
+                          ...dragProvided.draggableProps.style,
+                        }}
+                      >
+                        {!dragSnapshot.isDragging ? (
+                          <EventsThContent>
+                            <Header
+                              timelineId={timelineId}
+                              header={header}
+                              onColumnRemoved={onColumnRemoved}
+                              onColumnResized={onColumnResized}
+                              onColumnSorted={onColumnSorted}
+                              onFilterChange={onFilterChange}
+                              setIsResizing={setIsResizing}
+                              sort={sort}
+                            />
+                          </EventsThContent>
+                        ) : (
+                          <DragEffects>
+                            <DraggableFieldBadge
+                              fieldId={header.id}
+                              fieldWidth={header.width + 'px'}
+                            />
+                          </DragEffects>
+                        )}
+                      </EventsTh>
+                    )}
+                  </Draggable>
+                ))}
+              </EventsThGroupData>
+            )}
+          </Droppable>
         </EventsTrHeader>
       </EventsThead>
     );
