@@ -5,9 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { getTestAlertData } from './utils';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import { getTestAlertData, getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -62,6 +61,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 createdBy: user.username,
                 interval: '10s',
                 scheduledTaskId: response.body.scheduledTaskId,
+                throttle: '1m',
                 updatedBy: user.username,
                 apiKeyOwner: user.username,
               });
@@ -243,7 +243,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'child "interval" fails because ["interval" with value "10x" fails to match the seconds (5s) pattern, "interval" with value "10x" fails to match the minutes (5m) pattern, "interval" with value "10x" fails to match the hours (5h) pattern, "interval" with value "10x" fails to match the days (5d) pattern]',
+                  'child "interval" fails because ["interval" with value "10x" fails to match the seconds pattern, "interval" with value "10x" fails to match the minutes pattern, "interval" with value "10x" fails to match the hours pattern, "interval" with value "10x" fails to match the days pattern]',
                 validation: {
                   source: 'payload',
                   keys: ['interval', 'interval', 'interval', 'interval'],
@@ -280,7 +280,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'child "interval" fails because ["interval" with value "0s" fails to match the seconds (5s) pattern, "interval" with value "0s" fails to match the minutes (5m) pattern, "interval" with value "0s" fails to match the hours (5h) pattern, "interval" with value "0s" fails to match the days (5d) pattern]',
+                  'child "interval" fails because ["interval" with value "0s" fails to match the seconds pattern, "interval" with value "0s" fails to match the minutes pattern, "interval" with value "0s" fails to match the hours pattern, "interval" with value "0s" fails to match the days pattern]',
                 validation: {
                   source: 'payload',
                   keys: ['interval', 'interval', 'interval', 'interval'],

@@ -5,15 +5,16 @@
  */
 
 import React from 'react';
-import { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
+import { SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
 import { GraphWorkspaceSavedObject, GraphSavePolicy } from '../types';
-import { GraphSaveModal, OnSaveGraphProps } from '../components/graph_save_modal';
+import { SaveModal, OnSaveGraphProps } from '../components/save_modal';
 
-export function save({
+export function openSaveModal({
   savePolicy,
   hasData,
   workspace,
   saveWorkspace,
+  showSaveModal,
 }: {
   savePolicy: GraphSavePolicy;
   hasData: boolean;
@@ -26,6 +27,7 @@ export function save({
     },
     dataConsent: boolean
   ) => Promise<SaveResult>;
+  showSaveModal: (el: React.ReactNode) => void;
 }) {
   const currentTitle = workspace.title;
   const currentDescription = workspace.description;
@@ -55,7 +57,7 @@ export function save({
     });
   };
   showSaveModal(
-    <GraphSaveModal
+    <SaveModal
       savePolicy={savePolicy}
       hasData={hasData}
       onSave={onSave}

@@ -273,6 +273,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
             }}
           />
         </ErrableFormRow>
+        <EuiSpacer />
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem>
             <ErrableFormRow
