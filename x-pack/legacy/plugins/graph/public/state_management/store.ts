@@ -34,6 +34,7 @@ export interface GraphStoreDependencies {
   showSaveModal: (el: React.ReactNode) => void;
   savePolicy: GraphSavePolicy;
   changeUrl: (newUrl: string) => void;
+  notifyAngular: () => void;
 }
 
 export const createGraphStore = (deps: GraphStoreDependencies) => {

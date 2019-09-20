@@ -87,7 +87,7 @@ export const syncFieldsSaga = ({ getWorkspace }: Pick<GraphStoreDependencies, 'g
  *
  * Won't be necessary once the workspace is moved to redux
  */
-export const syncNodeStyleSaga = ({ getWorkspace }: Pick<GraphStoreDependencies, 'getWorkspace'>) =>
+export const syncNodeStyleSaga = ({ getWorkspace, notifyAngular }: GraphStoreDependencies) =>
   function*() {
     function* syncNodeStyle(action: Action<InferActionType<typeof updateFieldProperties>>) {
       const workspace = getWorkspace();
@@ -111,6 +111,8 @@ export const syncNodeStyleSaga = ({ getWorkspace }: Pick<GraphStoreDependencies,
           }
         });
       }
+      notifyAngular();
+
       const selectedFields = selectedFieldsSelector(yield select());
       workspace.options.vertex_fields = selectedFields;
     }
