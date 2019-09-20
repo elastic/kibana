@@ -10,8 +10,9 @@ import Promise from 'bluebird';
 import { checkParam } from '../error_missing_required';
 import { getSeries } from './get_series';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
+import { getTimezone } from '../get_timezone';
 
-export function getMetrics(req, indexPattern, metricSet = [], filters = []) {
+export async function getMetrics(req, indexPattern, metricSet = [], filters = []) {
   checkParam(indexPattern, 'indexPattern in details/getMetrics');
   checkParam(metricSet, 'metricSet in details/getMetrics');
 
@@ -21,6 +22,7 @@ export function getMetrics(req, indexPattern, metricSet = [], filters = []) {
   const max = moment.utc(req.payload.timeRange.max).valueOf();
   const minIntervalSeconds = config.get('xpack.monitoring.min_interval_seconds');
   const bucketSize = calculateTimeseriesInterval(min, max, minIntervalSeconds);
+  const timezone = await getTimezone(req.server, req.getSavedObjectsClient());
 
   return Promise.map(metricSet, metric => {
     // metric names match the literal metric name, but they can be supplied in groups or individually
@@ -33,7 +35,7 @@ export function getMetrics(req, indexPattern, metricSet = [], filters = []) {
     }
 
     return Promise.map(metricNames, metricName => {
-      return getSeries(req, indexPattern, metricName, filters, { min, max, bucketSize });
+      return getSeries(req, indexPattern, metricName, filters, { min, max, bucketSize, timezone });
     });
   })
     .then(rows => {

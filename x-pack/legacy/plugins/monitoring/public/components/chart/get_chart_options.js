@@ -14,7 +14,7 @@ export function getChartOptions(axisOptions) {
     },
     xaxis: {
       color: CHART_LINE_COLOR,
-      timezone: 'browser',
+      timezone: 'utc',
       mode: 'time', // requires `time` flot plugin
       font: {
         color: CHART_TEXT_COLOR

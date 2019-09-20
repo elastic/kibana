@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import { get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { createTimeFilter } from '../create_query';
 import { detectReason } from './detect_reason';
+import { formatUTCTimestampForTimezone } from '../format_timezone';
+import { getTimezone } from '../get_timezone';
 
 async function handleResponse(response, req, filebeatIndexPattern, opts) {
   const result = {
@@ -15,15 +18,17 @@ async function handleResponse(response, req, filebeatIndexPattern, opts) {
     logs: []
   };
 
+  const timezone = await getTimezone(req.server, req.getSavedObjectsClient());
   const hits = get(response, 'hits.hits', []);
   if (hits.length) {
     result.enabled = true;
     result.logs = hits.map(hit => {
       const source = hit._source;
       const type = get(source, 'event.dataset').split('.')[1];
+      const utcTimestamp = moment(get(source, '@timestamp')).valueOf();
 
       return {
-        timestamp: get(source, '@timestamp'),
+        timestamp: formatUTCTimestampForTimezone(utcTimestamp, timezone),
         component: get(source, 'elasticsearch.component'),
         node: get(source, 'elasticsearch.node.name'),
         index: get(source, 'elasticsearch.index.name'),
