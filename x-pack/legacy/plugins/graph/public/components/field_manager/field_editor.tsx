@@ -120,8 +120,8 @@ export function FieldEditor({
         <EuiBadge
           color={initialField.color}
           iconSide="right"
-          className={classNames('gphFieldEditorBadge', {
-            'gphFieldEditorBadge--disabled': isDisabled,
+          className={classNames('gphFieldEditor__badge', {
+            'gphFieldEditor__badge--disabled': isDisabled,
           })}
           onClickAriaLabel={badgeDescription}
           title=""
@@ -133,7 +133,7 @@ export function FieldEditor({
             }
           }}
         >
-          <LegacyIcon className={'gphFieldEditorBadge__icon'} icon={initialField.icon} />
+          <LegacyIcon className={'gphFieldEditor__badgeIcon'} icon={initialField.icon} />
           {initialField.name}
         </EuiBadge>
       }
