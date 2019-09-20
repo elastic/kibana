@@ -10,7 +10,7 @@ import { CursorDirection } from '../../../../../common/graphql/types';
 import { MonitorGroups, MonitorLocCheckGroup } from './fetch_page';
 
 // This is the second phase of the query, it determines whether the provided check groups are the latest complete
-// check groups for their asociated monitor IDs. If not, it discards the result.
+// check groups for their associated monitor IDs. If not, it discards the result.
 export const refinePotentialMatches = async (
   queryContext: QueryContext,
   monitorIds: string[],
@@ -65,6 +65,7 @@ const fullyMatchingIds = async (
         location,
         checkGroup,
         status: topSource.summary.down > 0 ? 'down' : 'up',
+        summaryTimestamp: topSource['@timestamp']
       };
 
       // This monitor doesn't match, so just skip ahead and don't add it to the output
@@ -87,11 +88,11 @@ export const mostRecentCheckGroups = async (queryContext: QueryContext, monitorI
       query: {
         bool: {
           must: [
-            {terms: { 'monitor.id': monitorIds }},
+            { terms: { 'monitor.id': monitorIds } },
             // only match summary docs because we only want the latest *complete* check group.
-            {exists: {field: 'summary.down'}}
-          ]
-        }
+            { exists: { field: 'summary.down' } },
+          ],
+        },
       },
       aggs: {
         monitor: {

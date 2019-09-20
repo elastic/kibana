@@ -98,6 +98,7 @@ export interface MonitorLocCheckGroup {
   location: string | null;
   checkGroup: string;
   status: 'up' | 'down';
+  summaryTimestamp: Date;
 }
 
 // Represents a page that has not yet been enriched.

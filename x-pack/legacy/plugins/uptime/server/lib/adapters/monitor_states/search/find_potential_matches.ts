@@ -27,8 +27,13 @@ export const findPotentialMatches = async (
 
     // Doc count can be zero if status filter optimization does not match
     if (b.summaries.doc_count > 0) {
-      const checkGroup = b.summaries.top.hits.hits[0]._source.monitor.check_group;
-      checkGroups.add(checkGroup);
+      // Here we grab the most recent 2 check groups per location and add them to the list.
+      // Why 2? Because the most recent one may be a partial result from mode: all, and hence not match a summary doc.
+      b.summaries.locations.buckets.forEach((b: any) => {
+        b.top.hits.hits.forEach( (h: any) => {
+          checkGroups.add(h._source.monitor.check_group);
+        });
+      });
     }
   });
 
@@ -81,13 +86,20 @@ const queryBody = (queryContext: QueryContext, searchAfter: any, size: number) =
           summaries: {
             filter: { bool: { filter: [statusFilterClause] } },
             aggs: {
-              top: {
-                top_hits: {
-                  sort: [{ '@timestamp': 'desc' }],
-                  _source: {
-                    includes: ['monitor.check_group', '@timestamp', 'summary.up', 'summary.down'],
+              // Here we grab the most recent 2 check groups per location.
+              // Why 2? Because the most recent one may not be for a summary, it may be incomplete.
+              locations: {
+                terms: {field: "observer.geo.name", missing: "__missing__"},
+                aggs: {
+                  top: {
+                    top_hits: {
+                      sort: [{ '@timestamp': 'desc' }],
+                      _source: {
+                        includes: ['monitor.check_group', '@timestamp', 'summary.up', 'summary.down'],
+                      },
+                      size: 2,
+                    },
                   },
-                  size: 1,
                 },
               },
             },
