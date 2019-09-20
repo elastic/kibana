@@ -103,6 +103,8 @@ export const EventsTh = styled.div.attrs({
 
   .siemEventsTable__thGroupData &:hover {
     background-color: ${({ theme }) => theme.eui.euiTableHoverColor};
+    cursor: move; //Fallback for IE11
+    cursor: grab;
   }
 `;
 EventsTh.displayName = 'EventsTh';
@@ -111,14 +113,15 @@ export const EventsThContent = styled.div.attrs({
   className: 'siemEventsTable__thContent',
 })<{ textAlign?: string }>`
   ${({ textAlign, theme }) => css`
-    flex: 1;
+    // flex: 1;
     font-size: ${theme.eui.euiFontSizeXS};
     font-weight: ${theme.eui.euiFontWeightSemiBold};
     line-height: ${theme.eui.euiLineHeight};
-    max-width: 100%;
+    // max-width: 100%;
     min-width: 0;
     padding: ${theme.eui.paddingSizes.xs};
     text-align: ${textAlign};
+    width: 100%; //Using width: 100% instead of flex: 1 and max-width: 100% for IE11
   `}
 `;
 EventsThContent.displayName = 'EventsThContent';
@@ -201,13 +204,14 @@ export const EventsTdContent = styled.div.attrs({
   className: 'siemEventsTable__tdContent',
 })<{ textAlign?: string }>`
   ${({ textAlign, theme }) => css`
-    flex: 1;
+    // flex: 1;
     font-size: ${theme.eui.euiFontSizeXS};
     line-height: ${theme.eui.euiLineHeight};
-    max-width: 100%;
+    // max-width: 100%;
     min-width: 0;
     padding: ${theme.eui.paddingSizes.xs};
     text-align: ${textAlign};
+    width: 100%; //Using width: 100% instead of flex: 1 and max-width: 100% for IE11
   `}
 `;
 EventsTdContent.displayName = 'EventsTdContent';

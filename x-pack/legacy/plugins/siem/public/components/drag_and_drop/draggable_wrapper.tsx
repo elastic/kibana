@@ -190,30 +190,28 @@ class DraggableWrapperComponent extends React.Component<Props> {
                 index={0}
                 key={getDraggableId(dataProvider.id)}
               >
-                {(provided, snapshot) => {
-                  return (
-                    <ProviderContainer
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      innerRef={provided.innerRef}
-                      data-test-subj="providerContainer"
-                      isDragging={snapshot.isDragging}
-                      style={{
-                        ...provided.draggableProps.style,
-                      }}
-                    >
-                      {truncate && !snapshot.isDragging ? (
-                        <TruncatableText data-test-subj="draggable-truncatable-content">
-                          {render(dataProvider, provided, snapshot)}
-                        </TruncatableText>
-                      ) : (
-                        <span data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}>
-                          {render(dataProvider, provided, snapshot)}
-                        </span>
-                      )}
-                    </ProviderContainer>
-                  );
-                }}
+                {(provided, snapshot) => (
+                  <ProviderContainer
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    innerRef={provided.innerRef}
+                    data-test-subj="providerContainer"
+                    isDragging={snapshot.isDragging}
+                    style={{
+                      ...provided.draggableProps.style,
+                    }}
+                  >
+                    {truncate && !snapshot.isDragging ? (
+                      <TruncatableText data-test-subj="draggable-truncatable-content">
+                        {render(dataProvider, provided, snapshot)}
+                      </TruncatableText>
+                    ) : (
+                      <span data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}>
+                        {render(dataProvider, provided, snapshot)}
+                      </span>
+                    )}
+                  </ProviderContainer>
+                )}
               </Draggable>
               {droppableProvided.placeholder}
             </div>
