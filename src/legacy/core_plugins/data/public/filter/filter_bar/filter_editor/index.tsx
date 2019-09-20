@@ -442,10 +442,8 @@ class FilterEditorUI extends Component<Props, State> {
 
   private renderSavedQueryEditor() {
     // pass along the security-related item of if the user has access to saved objects.
-    // pass along the onChange handler
-    // pass along the value as the saved query filter params object (this is where we compile the filter params object)
-    // return the selectable componen
-    // TODO: the onChange handler is being passed a whole lot more than what it needs to. I'd like to only handle the saved query name and compile the savedQueryParams during the save action.
+    // pass along the value as the saved query filter params object (this is where we add the saved query object)
+    // TODO: use the selectable component
     return (
       <div>
         <EuiFlexGroup responsive={false} gutterSize="s">
@@ -454,7 +452,7 @@ class FilterEditorUI extends Component<Props, State> {
               showSaveQuery={this.props.showSaveQuery}
               value={this.state.params}
               savedQueryService={this.props.savedQueryService}
-              onChange={this.onSavedQueryParamsChange}
+              onChange={this.onSavedQueryChange}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -577,7 +575,7 @@ class FilterEditorUI extends Component<Props, State> {
     this.setState({ params });
   };
 
-  private onSavedQueryParamsChange = (params: SavedQuery) => {
+  private onSavedQueryChange = (params: SavedQuery) => {
     this.setState({ params });
   };
 
@@ -622,8 +620,6 @@ class FilterEditorUI extends Component<Props, State> {
       );
       this.props.onSubmit(filter);
     } else if (indexPattern && isSavedQueryEditorOpen) {
-      // const indexPattern = this.state.selectedIndexPattern;
-      // this.props.uiSettings.get('filterEditor:suggestValues')
       const esQueryConfig = {
         allowLeadingWildcards: this.props.uiSettings.get('query:allowLeadingWildcards'),
         queryStringOptions: this.props.uiSettings.get('query:queryString:options'),
@@ -634,7 +630,9 @@ class FilterEditorUI extends Component<Props, State> {
         indexPattern,
         esQueryConfig,
       };
+      // TODO: first convert the timefilter on the saved query before building the filter. We don't have access to any of the timefilter methods in the package
       const filter = buildSavedQueryFilter(savedQueryParams);
+      this.props.onSubmit(filter);
     }
   };
 }

@@ -19,17 +19,15 @@
 
 import React, { FunctionComponent, useEffect, useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { SavedQueryFilterParams } from '@kbn/es-query';
 import { sortBy } from 'lodash';
 import { EuiFormRow } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
-import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
+import { GenericComboBox } from './generic_combo_box';
 import { SavedQuery } from '../../../search/search_bar/index';
 import { SavedQueryService } from '../../../search/search_bar/lib/saved_query_service';
 
 interface Props {
   showSaveQuery?: boolean;
-  value?: SavedQuery; // is this an object containing a savedQuery, the esQueryConfig and the indexPattern or just the string version of the SQ name?
+  value?: SavedQuery; // is this an object containing a savedQuery
   savedQueryService: SavedQueryService;
   onChange: (params: SavedQuery) => void;
 }
