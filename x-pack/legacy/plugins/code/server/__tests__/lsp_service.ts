@@ -195,7 +195,7 @@ describe('lsp_service tests', () => {
       await lspservice.shutdown();
     }
     // @ts-ignore
-  }).timeout(10000);
+  }).timeout(30000);
 
   it('unload a workspace', async () => {
     const lspservice = mockLspService();
@@ -234,7 +234,7 @@ describe('lsp_service tests', () => {
       await lspservice.shutdown();
     }
     // @ts-ignore
-  }).timeout(10000);
+  }).timeout(30000);
 
   it('should work if a worktree exists', async () => {
     const lspservice = mockLspService();
@@ -267,7 +267,7 @@ describe('lsp_service tests', () => {
       await lspservice.shutdown();
     }
     // @ts-ignore
-  }).timeout(20000);
+  }).timeout(30000);
 
   it('should update if a worktree is not the newest', async () => {
     const lspservice = mockLspService();
@@ -295,5 +295,5 @@ describe('lsp_service tests', () => {
       await lspservice.shutdown();
     }
     // @ts-ignore
-  }).timeout(10000);
+  }).timeout(30000);
 });

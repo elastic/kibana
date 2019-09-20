@@ -161,6 +161,7 @@ export class WorkspaceHandler {
     const worktrees = await this.listWorktrees(git);
     for (const wt of worktrees.values()) {
       await git.raw(['worktree', 'remove', wt.path, '--force']);
+      await git.deleteLocalBranch(wt.branch);
     }
     const workspaceDir = await this.workspaceDir(repoUri);
     await del([workspaceDir], { force: true });

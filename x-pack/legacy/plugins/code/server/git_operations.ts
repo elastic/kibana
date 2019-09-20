@@ -15,7 +15,7 @@ import {
   Repository,
   Revwalk,
 } from '@elastic/nodegit';
-import { LsTreeSummary, simplegit } from '@elastic/simple-git/dist/';
+import { FileItem, LsTreeSummary, simplegit } from '@elastic/simple-git/dist/';
 import { SimpleGit } from '@elastic/simple-git/dist/promise';
 import Boom from 'boom';
 import LruCache from 'lru-cache';
@@ -27,17 +27,16 @@ import { CommitDiff, Diff, DiffKind } from '../common/git_diff';
 import { Commit, FileTree, FileTreeItemType, RepositoryUri } from '../model';
 import { CommitInfo, ReferenceInfo, ReferenceType } from '../model/commit';
 import { detectLanguage } from './utils/detect_language';
-import {
-  GitPrime,
-  TreeEntry,
-  CommitDescription,
-  TagDescription,
-  GitObjectDescription,
-  BlobDescription,
-} from './utils/git_prime';
+import { FormatParser } from './utils/format_parser';
 
 export const HEAD = 'HEAD';
 export const DEFAULT_TREE_CHILDREN_LIMIT = 50;
+
+export interface Blob {
+  isBinary(): boolean;
+  content(): Buffer;
+  rawsize(): number;
+}
 
 /**
  * do a nodegit operation and check the results. If it throws a not found error or returns null,
@@ -62,19 +61,19 @@ async function checkExists<R>(func: () => Promise<R>, message: string): Promise<
   return result;
 }
 
-function entry2Tree(entry: TreeEntry, prefixPath: string = ''): FileTree {
+function entry2Tree(entry: FileItem, prefixPath: string = ''): FileTree {
   const type: FileTreeItemType = GitOperations.mode2type(entry.mode);
-  const { path, oid } = entry;
+  const { path, id } = entry;
   return {
     name: path,
     path: prefixPath ? prefixPath + '/' + path : path,
-    sha1: oid,
+    sha1: id,
     type,
   };
 }
 
 interface Tree {
-  entries: TreeEntry[];
+  entries: FileItem[];
   oid: string;
 }
 export class GitOperations {
@@ -125,7 +124,7 @@ export class GitOperations {
         isBinary(): boolean {
           return isBinaryFileSync(buffer);
         },
-      } as BlobDescription;
+      } as Blob;
     } else {
       throw Boom.unsupportedMediaType(`${uri}/${path} is not a file.`);
     }
@@ -238,12 +237,7 @@ export class GitOperations {
     const lsTree = new LsTreeSummary(git, oid, path, {});
     const entries = await lsTree.allFiles();
     return {
-      entries: entries.map(f => ({
-        mode: f.mode,
-        type: f.type,
-        oid: f.id,
-        path: f.path,
-      })),
+      entries,
       oid,
     } as Tree;
   }
@@ -363,10 +357,10 @@ export class GitOperations {
           name: path.split('/').pop() || '',
           path,
           type: type2item(file.type!),
-          sha1: file.oid,
+          sha1: file.id,
         };
         if (file.type === 'tree') {
-          await this.fillChildren(git, result, await this.readTree(git, file.oid), {
+          await this.fillChildren(git, result, await this.readTree(git, file.id), {
             skip,
             limit,
             flatten,
@@ -398,7 +392,7 @@ export class GitOperations {
       const child = entry2Tree(e, result.path);
       result.children.push(child);
       if (flatten && child.type === FileTreeItemType.Directory) {
-        const tree = await this.readTree(git, e.oid);
+        const tree = await this.readTree(git, e.id);
         if (tree.entries.length === 1) {
           await this.fillChildren(git, child, tree, { skip, limit, flatten });
         }
@@ -420,14 +414,14 @@ export class GitOperations {
           result.children = [];
         }
         const child = entry2Tree(entry, result.path);
-        const idx = result.children.findIndex(i => i.sha1 === entry.oid);
+        const idx = result.children.findIndex(i => i.sha1 === entry.id);
         if (idx < 0) {
           result.children.push(child);
         } else {
           result.children[idx] = child;
         }
         if (entry.type === 'tree') {
-          const subTree = await this.readTree(git, entry.oid);
+          const subTree = await this.readTree(git, entry.id);
           await this.fillChildren(git, child, subTree, opt);
           if (rest.length > 0) {
             await this.resolvePath(git, child, subTree, rest, opt);
@@ -595,35 +589,45 @@ export class GitOperations {
   }
 
   public async getBranchAndTags(repoUri: string): Promise<ReferenceInfo[]> {
-    const gitdir = this.repoDir(repoUri);
-    const remoteBranches = await GitPrime.listBranches({ gitdir, remote: 'origin' });
-    const results: ReferenceInfo[] = [];
-    for (const name of remoteBranches) {
-      const reference = `refs/remotes/origin/${name}`;
-      const commit = await this.getCommitInfo(repoUri, reference);
-      if (commit) {
-        results.push({
-          name,
-          reference,
-          type: ReferenceType.REMOTE_BRANCH,
-          commit,
-        });
+    const format = {
+      name: '%(refname:short)',
+      reference: '%(refname)',
+      type: '%(objecttype)',
+      commit: {
+        updated: '%(*authordate)',
+        message: '%(*contents)',
+        committer: '%(*committername)',
+        author: '%(*authorname)',
+        id: '%(*objectname)',
+        parents: '%(*parent)',
+        treeId: '%(*tree)',
+      },
+    };
+    const parser = new FormatParser(format);
+    const git = await this.openGit(repoUri);
+    const result = await git.raw([
+      'for-each-ref',
+      '--format=' + parser.toFormatStr(),
+      'refs/tags/*',
+      'refs/remotes/origin/*',
+    ]);
+    const results = parser.parseResult(result);
+    return results.map(r => {
+      const ref: ReferenceInfo = {
+        name: r.name.startsWith('origin/') ? r.name.slice(7) : r.name,
+        reference: r.reference,
+        type: r.type === 'tag' ? ReferenceType.TAG : ReferenceType.REMOTE_BRANCH,
+      };
+      if (r.commit && r.commit.id) {
+        const commit = {
+          ...r.commit,
+        };
+        commit.parents = r.commit.parents ? r.commit.parents.split(' ') : [];
+        commit.updated = new Date(r.commit.updated);
+        ref.commit = commit;
       }
-    }
-    const tags = await GitPrime.listTags({ gitdir });
-    for (const name of tags) {
-      const reference = `refs/tags/${name}`;
-      const commit = await this.getCommitInfo(repoUri, reference);
-      if (commit) {
-        results.push({
-          name,
-          reference,
-          type: ReferenceType.TAG,
-          commit,
-        });
-      }
-    }
-    return results;
+      return ref;
+    });
   }
 
   public async getCommitOr404(repoUri: string, ref: string): Promise<CommitInfo> {
@@ -661,57 +665,32 @@ export class GitOperations {
     return (result.all as unknown) as CommitInfo[];
   }
 
+  public async resolveRef(repoUri: string, ref: string): Promise<string | null> {
+    const git = await this.openGit(repoUri);
+    let oid = '';
+
+    try {
+      // try local branches or tags
+      oid = (await git.revparse(['-q', '--verify', ref])).trim();
+    } catch (e) {
+      // try remote branches
+    }
+    if (!oid) {
+      try {
+        oid = (await git.revparse(['-q', '--verify', `origin/${ref}`])).trim();
+      } catch (e1) {
+        // no match
+      }
+    }
+    return oid || null;
+  }
+
   public async getCommitInfo(repoUri: string, ref: string): Promise<CommitInfo | null> {
-    const gitdir = this.repoDir(repoUri);
-    // depth: avoid infinite loop
-    let obj: GitObjectDescription | null = null;
-    let oid: string = '';
-    if (/^[0-9a-f]{5,40}$/.test(ref)) {
-      // it's possible ref is sha-1 object id
-      try {
-        oid = ref;
-        if (oid.length < 40) {
-          oid = await GitPrime.expandOid({ gitdir, oid });
-        }
-        obj = await GitPrime.readObject({ gitdir, oid });
-      } catch (e) {
-        // expandOid or readObject failed
-      }
-    }
-    // test if it is a reference
-    if (!obj) {
-      try {
-        // try local branches or tags
-        oid = await GitPrime.resolveRef({ gitdir, ref, depth: 10 });
-      } catch (e) {
-        // try remote branches
-        try {
-          oid = await GitPrime.resolveRef({ gitdir, ref: `origin/${ref}`, depth: 10 });
-        } catch (e1) {
-          // no match
-        }
-      }
-      if (oid) {
-        obj = await GitPrime.readObject({ gitdir, oid });
-      }
-    }
-    if (obj) {
-      if (obj.type === 'commit') {
-        const commit = obj.object as CommitDescription;
-        return {
-          id: obj.oid,
-          author: commit.author.name,
-          committer: commit.committer.name,
-          message: commit.message,
-          updated: new Date(commit.committer.timestamp * 1000),
-          parents: commit.parent,
-          treeId: commit.tree,
-        } as CommitInfo;
-      } else if (obj.type === 'tag') {
-        const tag = obj.object as TagDescription;
-        if (tag.type === 'commit') {
-          return await this.getCommitInfo(repoUri, tag.object);
-        }
+    const oid = await this.resolveRef(repoUri, ref);
+    if (oid) {
+      const commits = await this.log(repoUri, oid, 1);
+      if (commits.length > 0) {
+        return commits[0];
       }
     }
     return null;

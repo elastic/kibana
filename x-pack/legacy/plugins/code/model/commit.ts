@@ -17,7 +17,7 @@ export interface CommitInfo {
 export interface ReferenceInfo {
   name: string;
   reference: string;
-  commit: CommitInfo;
+  commit?: CommitInfo;
   type: ReferenceType;
 }
 

@@ -34,11 +34,10 @@ describe('git_operations', () => {
 
     try {
       const g = new GitOperations(serverOptions.repoPath);
-      const uri = path.join(repoUri, '.git');
-      const defaultBranch = await g.getDefaultBranch(uri);
+      const defaultBranch = await g.getDefaultBranch(repoUri);
       assert.strictEqual(defaultBranch, 'trunk');
-      const headRevision = await g.getHeadRevision(uri);
-      const headCommit = await g.getCommitInfo(uri, 'HEAD');
+      const headRevision = await g.getHeadRevision(repoUri);
+      const headCommit = await g.getCommitInfo(repoUri, 'HEAD');
       assert.strictEqual(headRevision, headCommit!.id);
     } finally {
       rimraf.sync(repoDir);
