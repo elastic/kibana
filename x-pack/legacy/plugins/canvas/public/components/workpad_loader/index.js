@@ -64,7 +64,7 @@ export const WorkpadLoader = compose(
     cloneWorkpad: props => async workpadId => {
       try {
         const workpad = await workpadService.get(workpadId);
-        workpad.name += ` - ${strings.getClonedWorkpadNameSuffixLabel()}`;
+        workpad.name = strings.getClonedWorkpadNameSuffixLabel(workpad.name);
         workpad.id = getId('workpad');
         await workpadService.create(workpad);
         props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });

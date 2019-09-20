@@ -418,12 +418,12 @@ export const ComponentStrings = {
       }),
   },
   WorkpadLoader: {
-    getClonedWorkpadNameSuffixLabel: () =>
+    getClonedWorkpadNameLabel: (workpadName: string) =>
       i18n.translate('xpack.canvas.workpadLoader.clonedWorkpad', {
-        defaultMessage: 'Copy',
+        defaultMessage: 'Copy of {workpadName}',
         description:
           'This suffix is added to the end of the name of a cloned workpad to indicate that this ' +
-          'new workpad is a copy of the original workpad. Example: "My Canvas workpad - Copy"',
+          'new workpad is a copy of the original workpad. Example: "Copy of Sales Pitch"',
       }),
     getCloneToolTip: () =>
       i18n.translate('xpack.canvas.workpadLoader.cloneTooltip', {
