@@ -7,7 +7,7 @@
 Creates a new {kib} role, or updates the attributes of an existing role. {kib} roles are stored in the
 {es} native realm.
 
-experimental["This API is *experimental* and may be changed or removed completely in a future release. The underlying mechanism of enforcing role based access control is stable, but the APIs for managing the roles are currently experimental."]
+experimental["The underlying mechanism of enforcing role-based access control is stable, but the APIs for managing the roles are experimental."]
 
 [[role-management-api-put-request]]
 ==== Request

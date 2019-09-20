@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { ContainerTooSmall } from '../../errors';
+import { ContainerTooSmall } from '../errors';
 
 /**
  * Common errors shared between constructors

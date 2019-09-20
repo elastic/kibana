@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSelect, EuiFormLabel } from '@elastic/eui';
+import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFetcher } from '../../../hooks/useFetcher';
@@ -96,13 +96,9 @@ export const EnvironmentFilter: React.FC = () => {
 
   return (
     <EuiSelect
-      prepend={
-        <EuiFormLabel>
-          {i18n.translate('xpack.apm.filter.environment.label', {
-            defaultMessage: 'environment'
-          })}
-        </EuiFormLabel>
-      }
+      prepend={i18n.translate('xpack.apm.filter.environment.label', {
+        defaultMessage: 'environment'
+      })}
       options={getOptions(environments)}
       value={environment || ENVIRONMENT_ALL}
       onChange={event => {

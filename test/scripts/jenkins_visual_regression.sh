@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
 set -e
-trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
 
-if [[ "$IS_PIPELINE_JOB" ]] ; then
+if [[ -z "$IS_PIPELINE_JOB" ]] ; then
+  trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
+else
   source src/dev/ci_setup/setup_env.sh
 fi
 
@@ -26,7 +27,7 @@ fi
 export TEST_BROWSER_HEADLESS=1
 
 checks-reporter-with-killswitch "Kibana visual regression tests" \
-  yarn run percy exec \
+  yarn run percy exec -t 500 \
   node scripts/functional_tests \
     --debug --bail \
     --kibana-install-dir "$installDir" \
