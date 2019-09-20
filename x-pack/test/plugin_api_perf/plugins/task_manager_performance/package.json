@@ -7,5 +7,6 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
+    "joi": "^13.5.2"
   }
 }
