@@ -1,3 +1,4 @@
+@import './field_itm';
 @import './dimension_panel/index';
 
 
@@ -52,7 +53,6 @@
   @include euiFontSizeS;
   background: $euiColorEmptyShade;
   border-radius: $euiBorderRadius;
-  padding: $euiSizeS;
   margin-bottom: $euiSizeXS;
   transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance;
 
@@ -69,4 +69,9 @@
 
 .lnsFieldListPanel__fieldName {
   margin-left: $euiSizeXS;
+}
+
+.lnsFieldListPanel__fieldInfo {
+  padding: $euiSizeS;
+  font-weight: $euiFontWeightMedium;
 }
