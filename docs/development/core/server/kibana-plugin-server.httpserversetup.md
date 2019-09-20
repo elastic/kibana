@@ -17,7 +17,7 @@ export interface HttpServerSetup
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [auth](./kibana-plugin-server.httpserversetup.auth.md) | <code>{</code><br/><code>        get: GetAuthState;</code><br/><code>        isAuthenticated: IsAuthenticated;</code><br/><code>        getAuthHeaders: GetAuthHeaders;</code><br/><code>    }</code> |  |
-|  [basePath](./kibana-plugin-server.httpserversetup.basepath.md) | <code>BasePath</code> | [BasePath](./kibana-plugin-server.basepath.md) |
+|  [basePath](./kibana-plugin-server.httpserversetup.basepath.md) | <code>BasePathContract</code> | [BasePath](./kibana-plugin-server.basepath.md) |
 |  [createCookieSessionStorageFactory](./kibana-plugin-server.httpserversetup.createcookiesessionstoragefactory.md) | <code>&lt;T&gt;(cookieOptions: SessionStorageCookieOptions&lt;T&gt;) =&gt; Promise&lt;SessionStorageFactory&lt;T&gt;&gt;</code> | Creates cookie based session storage factory [SessionStorageFactory](./kibana-plugin-server.sessionstoragefactory.md) |
 |  [isTlsEnabled](./kibana-plugin-server.httpserversetup.istlsenabled.md) | <code>boolean</code> | Flag showing whether a server was configured to use TLS connection. |
 |  [registerAuth](./kibana-plugin-server.httpserversetup.registerauth.md) | <code>(handler: AuthenticationHandler) =&gt; void</code> | To define custom authentication and/or authorization mechanism for incoming requests. A handler should return a state to associate with the incoming request. The state can be retrieved later via http.auth.get(..) Only one AuthenticationHandler can be registered. |

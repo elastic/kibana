@@ -116,6 +116,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [APICaller](./kibana-plugin-server.apicaller.md) |  |
 |  [AuthenticationHandler](./kibana-plugin-server.authenticationhandler.md) |  |
 |  [AuthHeaders](./kibana-plugin-server.authheaders.md) | Auth Headers map |
+|  [BasePathContract](./kibana-plugin-server.basepathcontract.md) | Access or manipulate the Kibana base path[BasePath](./kibana-plugin-server.basepath.md) |
 |  [ConfigPath](./kibana-plugin-server.configpath.md) |  |
 |  [ElasticsearchClientConfig](./kibana-plugin-server.elasticsearchclientconfig.md) |  |
 |  [GetAuthHeaders](./kibana-plugin-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |

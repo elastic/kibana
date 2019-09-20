@@ -9,5 +9,5 @@
 <b>Signature:</b>
 
 ```typescript
-basePath: BasePath;
+basePath: BasePathContract;
 ```

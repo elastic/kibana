@@ -95,3 +95,11 @@ export class BasePath {
     return path;
   };
 }
+
+/**
+ * Access or manipulate the Kibana base path
+ *
+ * {@link BasePath}
+ * @public
+ */
+export type BasePathContract = Pick<BasePath, keyof BasePath>;

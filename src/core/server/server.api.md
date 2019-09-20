@@ -65,6 +65,9 @@ export class BasePath {
     set: (request: KibanaRequest<unknown, unknown, unknown> | LegacyRequest, requestSpecificBasePath: string) => void;
 }
 
+// @public
+export type BasePathContract = Pick<BasePath, keyof BasePath>;
+
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
 // 
 // @internal (undocumented)
@@ -241,7 +244,7 @@ export interface HttpServerSetup {
         getAuthHeaders: GetAuthHeaders;
     };
     // (undocumented)
-    basePath: BasePath;
+    basePath: BasePathContract;
     createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;
     isTlsEnabled: boolean;
     registerAuth: (handler: AuthenticationHandler) => void;
