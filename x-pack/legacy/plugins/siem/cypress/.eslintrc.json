@@ -1,4 +1,3 @@
-// https://github.com/cypress-io/eslint-plugin-cypress#usage
 {
   "plugins": ["cypress"],
   "env": {
