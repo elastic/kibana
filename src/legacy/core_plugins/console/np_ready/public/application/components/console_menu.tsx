@@ -19,17 +19,9 @@
 
 import React, { Component } from 'react';
 
-import {
-  EuiGlobalToastList,
-  EuiGlobalToastListToast as Toast,
-  EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiPopover,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 
 interface Props {
   getCurl: (cb: (text: string) => void) => void;
@@ -41,8 +33,6 @@ interface Props {
 interface State {
   isPopoverOpen: boolean;
   curlCode: string;
-  toasts: Toast[];
-  toastId: number;
 }
 
 export class ConsoleMenu extends Component<Props, State> {
@@ -52,8 +42,6 @@ export class ConsoleMenu extends Component<Props, State> {
     this.state = {
       curlCode: '',
       isPopoverOpen: false,
-      toasts: [],
-      toastId: 1,
     };
   }
 
@@ -83,7 +71,6 @@ export class ConsoleMenu extends Component<Props, State> {
     textField.select();
     document.execCommand('copy');
     textField.remove();
-    this.addCopyToast();
   }
 
   onButtonClick = () => {
@@ -111,26 +98,6 @@ export class ConsoleMenu extends Component<Props, State> {
   autoIndent: any = (event: React.MouseEvent) => {
     this.closePopover();
     this.props.autoIndent(event);
-  };
-
-  addCopyToast = () => {
-    const toast: Toast = {
-      id: String(this.state.toastId),
-      title: i18n.translate('console.consoleMenu.copyRequestAsCurlMessage', {
-        defaultMessage: 'Request copied as cURL',
-      }),
-      color: 'success',
-    };
-
-    this.setState({
-      toastId: this.state.toastId + 1,
-      toasts: this.state.toasts.concat(toast),
-    });
-  };
-
-  removeCopyToast = (removedToast: Toast) => {
-    const newToastsArray = this.state.toasts.filter(tst => tst.id !== removedToast.id);
-    this.setState({ toasts: newToastsArray });
   };
 
   render() {
@@ -183,26 +150,17 @@ export class ConsoleMenu extends Component<Props, State> {
     ];
 
     return (
-      <span>
-        <span onMouseEnter={this.mouseEnter}>
-          <EuiPopover
-            id="contextMenu"
-            button={button}
-            isOpen={this.state.isPopoverOpen}
-            closePopover={this.closePopover}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenuPanel items={items} />
-          </EuiPopover>
-        </span>
-        <span>
-          <EuiGlobalToastList
-            toasts={this.state.toasts}
-            dismissToast={this.removeCopyToast}
-            toastLifeTimeMs={6000}
-          />
-        </span>
+      <span onMouseEnter={this.mouseEnter}>
+        <EuiPopover
+          id="contextMenu"
+          button={button}
+          isOpen={this.state.isPopoverOpen}
+          closePopover={this.closePopover}
+          panelPaddingSize="none"
+          anchorPosition="downLeft"
+        >
+          <EuiContextMenuPanel items={items} />
+        </EuiPopover>
       </span>
     );
   }
