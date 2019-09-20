@@ -84,12 +84,12 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
   } else if (templateToClone) {
     const templateData = {
       ...templateToClone,
-      ...{ name: `${decodedTemplateName}-copy` },
+      name: `${decodedTemplateName}-copy`,
     } as Template;
 
     content = (
       <TemplateForm
-        template={templateData}
+        defaultValue={templateData}
         onSave={onSave}
         isSaving={isSaving}
         saveError={saveError}
