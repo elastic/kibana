@@ -44,7 +44,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       dateRangeStart,
       dateRangeEnd,
       pagination,
-      filterClause: filters,
+      filterClause: filters && filters !== '' ? JSON.parse(filters) : null,
       size,
       statusFilter,
     };
