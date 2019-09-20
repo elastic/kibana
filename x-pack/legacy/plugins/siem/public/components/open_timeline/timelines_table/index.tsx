@@ -9,6 +9,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import * as i18n from '../translations';
 import {
   DeleteTimelines,
   OnOpenTimeline,
@@ -22,14 +23,11 @@ import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
 
-import * as i18n from '../translations';
-
 const BasicTable = styled(EuiBasicTable)`
   .euiTableCellContent {
     animation: none;
   }
 `;
-
 BasicTable.displayName = 'BasicTable';
 
 const getExtendedColumnsIfEnabled = (showExtendedColumnsAndActions: boolean) =>
@@ -161,5 +159,4 @@ export const TimelinesTable = pure<TimelinesTableProps>(
     );
   }
 );
-
 TimelinesTable.displayName = 'TimelinesTable';
