@@ -43,7 +43,7 @@ describe('JobsTable', () => {
     ).toEqual('/test/base/path/app/ml#/jobs?mlManagement=(jobId:rc-rare-process-windows-5)');
   });
 
-  test('should call onJobStateChange when the switch is clicked to a a true/open', () => {
+  test('should call onJobStateChange when the switch is clicked to be true/open', () => {
     const wrapper = mount(
       <JobsTable
         isLoading={false}
