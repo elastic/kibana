@@ -7,13 +7,7 @@
 import { map, take } from 'rxjs/operators';
 import { Observable, Subscription, combineLatest } from 'rxjs';
 import { Legacy } from 'kibana';
-import {
-  Logger,
-  ElasticsearchServiceSetup,
-  HttpServiceSetup,
-  KibanaRequest,
-  SavedObjectsLegacyService,
-} from 'src/core/server';
+import { Logger, KibanaRequest, CoreSetup } from 'src/core/server';
 import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { SecurityPlugin } from '../../../../security';
@@ -21,6 +15,7 @@ import { SpacesClient } from '../../lib/spaces_client';
 import { getSpaceIdFromPath, addSpaceIdToPath } from '../../lib/spaces_url_parser';
 import { SpacesConfigType } from '../config';
 import { namespaceToSpaceId, spaceIdToNamespace } from '../../lib/utils/namespace';
+import { LegacyAPI } from '../plugin';
 
 type RequestFacade = KibanaRequest | Legacy.Request;
 
@@ -39,26 +34,24 @@ export interface SpacesServiceSetup {
 }
 
 interface SpacesServiceDeps {
-  http: HttpServiceSetup;
-  elasticsearch: ElasticsearchServiceSetup;
-  savedObjects: SavedObjectsLegacyService;
+  http: CoreSetup['http'];
+  elasticsearch: CoreSetup['elasticsearch'];
   security: OptionalPlugin<SecurityPlugin>;
   config$: Observable<SpacesConfigType>;
-  spacesAuditLogger: any;
+  getSpacesAuditLogger(): any;
 }
 
 export class SpacesService {
   private configSubscription$?: Subscription;
 
-  constructor(private readonly log: Logger, private readonly serverBasePath: string) {}
+  constructor(private readonly log: Logger, private readonly getLegacyAPI: () => LegacyAPI) {}
 
   public async setup({
     http,
     elasticsearch,
-    savedObjects,
     security,
     config$,
-    spacesAuditLogger,
+    getSpacesAuditLogger,
   }: SpacesServiceDeps): Promise<SpacesServiceSetup> {
     const getSpaceId = (request: RequestFacade) => {
       // Currently utilized by reporting
@@ -68,7 +61,7 @@ export class SpacesService {
         ? (request as Record<string, any>).getBasePath()
         : http.basePath.get(request);
 
-      const spaceId = getSpaceIdFromPath(basePath, this.serverBasePath);
+      const spaceId = getSpaceIdFromPath(basePath, this.getServerBasePath());
 
       return spaceId;
     };
@@ -79,7 +72,7 @@ export class SpacesService {
         if (!spaceId) {
           throw new TypeError(`spaceId is required to retrieve base path`);
         }
-        return addSpaceIdToPath(this.serverBasePath, spaceId);
+        return addSpaceIdToPath(this.getServerBasePath(), spaceId);
       },
       isInDefaultSpace: (request: RequestFacade) => {
         const spaceId = getSpaceId(request);
@@ -92,14 +85,14 @@ export class SpacesService {
         return combineLatest(elasticsearch.adminClient$, config$)
           .pipe(
             map(([clusterClient, config]) => {
-              const internalRepository = savedObjects.getSavedObjectsRepository(
+              const internalRepository = this.getLegacyAPI().savedObjects.getSavedObjectsRepository(
                 clusterClient.callAsInternalUser,
                 ['space']
               );
 
               const callCluster = clusterClient.asScoped(request).callAsCurrentUser;
 
-              const callWithRequestRepository = savedObjects.getSavedObjectsRepository(
+              const callWithRequestRepository = this.getLegacyAPI().savedObjects.getSavedObjectsRepository(
                 callCluster,
                 ['space']
               );
@@ -107,7 +100,7 @@ export class SpacesService {
               const authorization = security.isEnabled ? security.authorization : null;
 
               return new SpacesClient(
-                spacesAuditLogger,
+                getSpacesAuditLogger(),
                 (message: string) => {
                   this.log.debug(message);
                 },
@@ -130,5 +123,9 @@ export class SpacesService {
       this.configSubscription$.unsubscribe();
       this.configSubscription$ = undefined;
     }
+  }
+
+  private getServerBasePath() {
+    return this.getLegacyAPI().legacyConfig.serverBasePath;
   }
 }

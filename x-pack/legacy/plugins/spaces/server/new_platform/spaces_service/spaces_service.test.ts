@@ -5,12 +5,13 @@
  */
 import * as Rx from 'rxjs';
 import { SpacesService } from './spaces_service';
-import { httpServiceMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { coreMock, elasticsearchServiceMock } from 'src/core/server/mocks';
 import { SpacesAuditLogger } from '../../lib/audit_logger';
 import { KibanaRequest, SavedObjectsLegacyService } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { getSpaceIdFromPath } from '../../lib/spaces_url_parser';
 import { createOptionalPlugin } from '../../../../../server/lib/optional_plugin';
+import { LegacyAPI } from '../plugin';
 
 const mockLogger = {
   trace: jest.fn(),
@@ -23,9 +24,18 @@ const mockLogger = {
 };
 
 const createService = async (serverBasePath: string = '') => {
-  const spacesService = new SpacesService(mockLogger, serverBasePath);
+  const legacyAPI = {
+    legacyConfig: {
+      serverBasePath,
+    },
+    savedObjects: ({
+      getSavedObjectsRepository: jest.fn().mockReturnValue(null),
+    } as unknown) as SavedObjectsLegacyService,
+  } as LegacyAPI;
 
-  const httpSetup = httpServiceMock.createSetupContract();
+  const spacesService = new SpacesService(mockLogger, () => legacyAPI);
+
+  const httpSetup = coreMock.createSetup().http;
   httpSetup.basePath.get = jest.fn().mockImplementation((request: KibanaRequest) => {
     const spaceId = getSpaceIdFromPath(request.url.path);
 
@@ -40,10 +50,7 @@ const createService = async (serverBasePath: string = '') => {
     elasticsearch: elasticsearchServiceMock.createSetupContract(),
     config$: Rx.of({ maxSpaces: 10 }),
     security: createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
-    savedObjects: ({
-      getSavedObjectsRepository: jest.fn().mockReturnValue(null),
-    } as unknown) as SavedObjectsLegacyService,
-    spacesAuditLogger: new SpacesAuditLogger({}),
+    getSpacesAuditLogger: () => new SpacesAuditLogger({}),
   });
 
   return spacesServiceSetup;
