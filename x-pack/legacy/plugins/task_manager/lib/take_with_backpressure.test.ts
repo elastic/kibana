@@ -268,6 +268,57 @@ describe('takeWithBackpressure', () => {
         );
     });
 
+    test('it should wait for pending operations to complete before short circuiting', done => {
+      expect.assertions(6);
+      of(
+        { id: 1, throwsAsync: false },
+        { id: 2, throwsAsync: false },
+        { id: 3, throwsAsync: true },
+        { id: 4, throwsAsync: false },
+        { id: 5, throwsAsync: false },
+        { id: 6, throwsAsync: false }
+      )
+        .pipe(
+          takeWithBackpressure(async subject => {
+            if (subject.throwsAsync) {
+              await delay(1000);
+              throw new Error('invalid!');
+            }
+            return true;
+          }, 5)
+        )
+        .subscribe(
+          ([result, subject]: [TAKE_RESULT, { id: number; throwsAsync: boolean }]) => {
+            switch (subject.id) {
+              case 1:
+                expect(result).toEqual(TAKE_RESULT.TAKEN);
+                break;
+              case 2:
+                expect(result).toEqual(TAKE_RESULT.TAKEN);
+                break;
+              case 3:
+                expect(result).toEqual(TAKE_RESULT.TAKE_FAILURE);
+                break;
+              case 4:
+                expect(result).toEqual(TAKE_RESULT.TAKEN);
+                break;
+              case 5:
+                expect(result).toEqual(TAKE_RESULT.TAKEN);
+                break;
+              case 6:
+                // The sixth item will not make it into pending as we only have capacity for 5
+                expect(result).toEqual(TAKE_RESULT.TAKE_FAILURE);
+                break;
+            }
+          },
+          () => done(),
+          () => {
+            // observable should have ended with an error!
+            done.fail();
+          }
+        );
+    });
+
     test('it should short circuit once an error occurs in the source observable', done => {
       of(
         { id: 1, throws: false },
@@ -285,7 +336,7 @@ describe('takeWithBackpressure', () => {
           () => {
             // ideally we would drain the running queue, but as we're currently
             // dealing with an observable over a bounded synchronous array, we'll
-            // defer dealign with this t oa later point
+            // defer dealing with this to a later point
             done.fail();
           },
           () => done(),
@@ -297,3 +348,9 @@ describe('takeWithBackpressure', () => {
     });
   });
 });
+
+function delay(ms: number): Promise<void> {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms);
+  });
+}

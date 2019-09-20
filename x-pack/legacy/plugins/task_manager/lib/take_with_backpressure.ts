@@ -6,6 +6,7 @@
 
 import { Observable, Subscriber } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
+import { PendingOperations, createPendingOperations } from './pending_operations';
 
 export enum TAKE_RESULT {
   TAKEN = 'TAKEN',
@@ -16,9 +17,8 @@ export enum TAKE_RESULT {
 export type TakeWithBackpressureResult<T> = [TAKE_RESULT, T];
 
 interface BackpressuredTakeState<T> {
-  taken: number;
   sourceCompleted: boolean;
-  pending: number;
+  pending: PendingOperations<BackpressuredTakeSubject, boolean>;
   queue: BackpressuredTakeSubject[];
 }
 
@@ -40,7 +40,7 @@ function drainQueueAsFailure(queue: BackpressuredTakeSubject[]): Promise<void | 
 }
 
 function isThereAnyWorkToBeDone<T>(state: BackpressuredTakeState<T>): boolean {
-  return state.pending > 0 || !state.sourceCompleted || state.queue.length > 0;
+  return state.pending.hasPendingTasks || !state.sourceCompleted || state.queue.length > 0;
 }
 
 function createQueuePoller<T>(
@@ -49,26 +49,27 @@ function createQueuePoller<T>(
   capacity: number
 ): () => void {
   return async function poll() {
+    const { pending, queue } = state;
     if (!isThereAnyWorkToBeDone(state)) {
       observer.complete();
-    } else if (state.queue.length) {
-      if (state.taken === capacity) {
-        await drainQueue(state.queue, subjectToSkip => subjectToSkip.skip());
+    } else if (queue.length) {
+      if (capacity === 0) {
+        await drainQueue(queue, subjectToSkip => subjectToSkip.skip());
+        await pending.whenPendingTasksComplete();
         poll();
-      } else if (state.taken + state.pending < capacity) {
-        const subject = state.queue.shift()!;
+      } else if (pending.pendingTasks < capacity) {
+        const subject = queue.shift()!;
         try {
-          state.pending++;
-          if (await subject.attemptToTake()) {
-            state.taken++;
+          if (await pending.trackOperationOn(subject, subject.attemptToTake())) {
+            capacity--;
           }
-          state.pending--;
+          pending.untrack(subject);
         } catch (err) {
           subject.fail();
-          await drainQueueAsFailure(state.queue).then(() => {
-            observer.error(err);
-            state.pending--;
-          });
+          await drainQueueAsFailure(queue);
+          pending.untrack(subject);
+          await pending.whenPendingTasksComplete();
+          observer.error(err);
         }
         poll();
       }
@@ -109,9 +110,9 @@ export function takeWithBackpressure<T>(
   capacity: number
 ) {
   return (source: Observable<T>) => {
+    const pending = createPendingOperations<BackpressuredTakeSubject, boolean>();
     const state: BackpressuredTakeState<T> = {
-      pending: 0,
-      taken: 0,
+      pending,
       queue: [],
       sourceCompleted: false,
     };
@@ -123,10 +124,10 @@ export function takeWithBackpressure<T>(
           next(nextSubject: TakeWithBackpressureResult<T>) {
             observer.next(nextSubject);
           },
-          error(err) {
-            drainQueueAsFailure(state.queue).then(() => {
-              observer.error(err);
-            });
+          async error(err) {
+            await drainQueueAsFailure(state.queue);
+            await pending.whenPendingTasksComplete();
+            observer.error(err);
           },
           complete() {
             state.sourceCompleted = true;

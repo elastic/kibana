@@ -133,14 +133,6 @@ function ifTaskManagerHasRanOutOfWorkerCapacity(callback: () => void) {
   };
 }
 
-function ifClaimingOwnershipThrewAnError(callback: () => void) {
-  return function([result]: [TAKE_RESULT, TaskRunner]) {
-    if (result === TAKE_RESULT.TAKE_FAILURE) {
-      callback();
-    }
-  };
-}
-
 function taskManagerHasClaimedOwnership([result]: [TAKE_RESULT, TaskRunner]) {
   return result === TAKE_RESULT.TAKEN;
 }
