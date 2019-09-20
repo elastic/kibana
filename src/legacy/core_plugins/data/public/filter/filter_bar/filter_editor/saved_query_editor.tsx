@@ -63,34 +63,31 @@ export const SavedQueryEditorUI: FunctionComponent<Props> = ({
 
     onChange(selected[0]);
   };
-  const renderSavedQueryInput = () => {
-    return (
-      <EuiFormRow
-        label={i18n.translate('data.filter.filterEditor.savedQueryFilterEditor.fieldSelectLabel', {
-          defaultMessage: 'Saved query',
-        })}
-      >
-        {savedQueries && savedQueries.length ? (
-          <GenericComboBox
-            id="savedQueryInput"
-            isDisabled={!savedQueries.length}
-            placeholder={i18n.translate(
-              'data.filter.filterEditor.savedQueryFilterEditor.savedQerySelectPlaceholder',
-              { defaultMessage: 'Select a saved query' }
-            )}
-            options={savedQueries}
-            selectedOptions={selectedSavedQuery ? [selectedSavedQuery] : []}
-            getLabel={savedQuery => savedQuery.id}
-            onChange={onSavedQueryChange}
-            singleSelection={{ asPlainText: true }}
-            isClearable={false}
-          />
-        ) : (
-          <p>{noSavedQueriesDescriptionText}</p>
-        )}
-      </EuiFormRow>
-    );
-  };
 
-  return <Fragment>{renderSavedQueryInput()}</Fragment>;
+  return (
+    <EuiFormRow
+      label={i18n.translate('data.filter.filterEditor.savedQueryFilterEditor.fieldSelectLabel', {
+        defaultMessage: 'Saved query',
+      })}
+    >
+      {savedQueries && savedQueries.length ? (
+        <GenericComboBox
+          id="savedQueryInput"
+          isDisabled={!savedQueries.length}
+          placeholder={i18n.translate(
+            'data.filter.filterEditor.savedQueryFilterEditor.savedQerySelectPlaceholder',
+            { defaultMessage: 'Select a saved query' }
+          )}
+          options={savedQueries}
+          selectedOptions={selectedSavedQuery ? [selectedSavedQuery] : []}
+          getLabel={({ id }) => id}
+          onChange={onSavedQueryChange}
+          singleSelection={{ asPlainText: false }}
+          isClearable={false}
+        />
+      ) : (
+        <p>{noSavedQueriesDescriptionText}</p>
+      )}
+    </EuiFormRow>
+  );
 };
