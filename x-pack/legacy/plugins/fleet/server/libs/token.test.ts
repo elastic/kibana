@@ -161,6 +161,7 @@ describe('Token Lib', () => {
         token: '{}',
         type: TokenType.ENROLMENT_TOKEN,
         created_at: '2019-09-12T12:48:42+0000',
+        enrollment_rules: [],
       };
 
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
@@ -182,6 +183,7 @@ describe('Token Lib', () => {
         tokenHash: 'asdasd',
         type: TokenType.ENROLMENT_TOKEN,
         created_at: '2019-09-12T12:48:42+0000',
+        enrollment_rules: [],
       };
 
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));

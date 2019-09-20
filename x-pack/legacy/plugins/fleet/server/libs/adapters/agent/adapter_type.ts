@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 import { FrameworkUser } from '../framework/adapter_types';
 
-const RuntimeAgentType = t.union([
+export const RuntimeAgentType = t.union([
   t.literal('PERMANENT'),
   t.literal('EPHEMERAL'),
   t.literal('EPHEMERAL_INSTANCE'),

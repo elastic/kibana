@@ -56,6 +56,7 @@ export class TokenAdapter implements TokenAdapterType {
       policy_shared_id: policy.sharedId,
       expire_at,
       active,
+      enrollment_rules: [],
     });
 
     return {
@@ -85,6 +86,7 @@ export class TokenAdapter implements TokenAdapterType {
 
     const tokens = res.saved_objects.map(this._savedObjectToToken);
     const token = getFirstOrNull(tokens);
+
     return token ? await this._getDecrypted(token.id) : null;
   }
 

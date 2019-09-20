@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as t from 'io-ts';
 import { FrameworkUser } from '../framework/adapter_types';
+import { RuntimeAgentType } from '../agent/adapter_type';
 
 export interface EnrollmentTokenData {
   policy: { id: string; sharedId: string };
@@ -13,6 +15,29 @@ export interface EnrollmentTokenData {
 export interface AccessTokenData {
   policy: { id: string; sharedId: string };
 }
+
+export const RuntimeEnrollmentRuleData = t.partial(
+  {
+    ip_ranges: t.array(t.string),
+    window_duration: t.interface(
+      {
+        from: t.string,
+        to: t.string,
+      },
+      'WindowDuration'
+    ),
+    types: t.array(RuntimeAgentType),
+  },
+  'EnrollmentRuleData'
+);
+
+export type EnrollmentRuleData = t.TypeOf<typeof RuntimeEnrollmentRuleData>;
+
+export type EnrollmentRule = EnrollmentRuleData & {
+  id: string;
+  created_at: string;
+  updated_at?: string;
+};
 
 export type TokenVerificationResponse =
   | {
@@ -38,6 +63,7 @@ export interface Token {
   created_at: string;
   expire_at?: string;
   active: boolean;
+  enrollment_rules: EnrollmentRule[];
   policy_id: string;
   policy_shared_id: string;
   [k: string]: any; // allow to use it as saved object attributes type

@@ -51,6 +51,7 @@ export function fleet(kibana: any) {
       server.plugins.encrypted_saved_objects.registerType({
         type: 'tokens',
         attributesToEncrypt: new Set(['token']),
+        attributesToExcludeFromAAD: new Set(['enrollment_rules']),
       });
       initServerWithKibana(server);
     },
