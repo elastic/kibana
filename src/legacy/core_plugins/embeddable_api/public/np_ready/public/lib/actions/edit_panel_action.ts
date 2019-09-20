@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Action } from './action';
+import { IAction } from 'src/plugins/ui_actions/public';
 import { GetEmbeddableFactory, ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
 import { IEmbeddable } from '../embeddables';
@@ -29,12 +29,12 @@ interface ActionContext {
   embeddable: IEmbeddable;
 }
 
-export class EditPanelAction extends Action<ActionContext> {
+export class EditPanelAction implements IAction<ActionContext> {
   public readonly type = EDIT_PANEL_ACTION_ID;
-  constructor(private readonly getEmbeddableFactory: GetEmbeddableFactory) {
-    super(EDIT_PANEL_ACTION_ID);
-    this.order = 15;
-  }
+  public readonly id = EDIT_PANEL_ACTION_ID;
+  public order = 15;
+
+  constructor(private readonly getEmbeddableFactory: GetEmbeddableFactory) {}
 
   public getDisplayName({ embeddable }: ActionContext) {
     const factory = this.getEmbeddableFactory(embeddable.type);

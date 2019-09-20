@@ -49,7 +49,7 @@ describe('AutoScale', () => {
         )
       ).toMatchInlineSnapshot(`
         <div
-          style="display:flex;justify-content:center;align-items:center;max-width:100%;max-height:100%;overflow:hidden"
+          style="display:flex;justify-content:center;align-items:center;max-width:100%;max-height:100%;overflow:hidden;line-height:1.5"
         >
           <div
             style="transform:scale(0)"
