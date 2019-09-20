@@ -161,7 +161,7 @@ describe('deserialize', () => {
           "icon": Object {
             "class": "fa-folder-open-o",
             "code": "",
-            "label": "folder open",
+            "label": "Folder open",
             "patterns": Array [
               /category/i,
               /folder/i,

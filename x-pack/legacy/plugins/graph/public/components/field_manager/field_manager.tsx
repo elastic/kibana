@@ -18,6 +18,7 @@ import {
   deselectField,
   GraphDispatch,
   GraphState,
+  fieldMapSelector,
 } from '../../state_management';
 
 export interface FieldManagerProps {
@@ -26,6 +27,7 @@ export interface FieldManagerProps {
 }
 
 export function FieldManager({ state, dispatch }: FieldManagerProps) {
+  const fieldMap = fieldMapSelector(state);
   const allFields = fieldsSelector(state);
   const selectedFields = selectedFieldsSelector(state);
 
@@ -47,7 +49,7 @@ export function FieldManager({ state, dispatch }: FieldManagerProps) {
           </EuiFlexItem>
         ))}
         <EuiFlexItem grow={false}>
-          <FieldPicker allFields={allFields} {...actionCreators} />
+          <FieldPicker fieldMap={fieldMap} {...actionCreators} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </I18nProvider>

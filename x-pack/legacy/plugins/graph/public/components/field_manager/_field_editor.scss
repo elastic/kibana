@@ -1,5 +1,6 @@
 .gphFieldEditorBadge {
-  padding-left: 0;
+  // 3px to line up with a badge with visible border (gphFieldPickerButton)
+  padding: 3px $euiSizeM 3px 0;
 }
 
 .gphFieldEditorBadge--disabled {
@@ -7,10 +8,8 @@
   text-decoration: line-through;
 }
 
-.gphFieldEditorBadge__color {
+.gphFieldEditorBadge__icon {
   display: inline-flex;
-  width: $euiSizeL;
-  height: $euiSizeL;
   align-items: center;
   justify-content: center;
 
@@ -26,5 +25,8 @@
 
 .gphFieldEditorBadge__icon--light {
   color: $euiColorDarkestShade;
+}
 
+.gphFieldEditor__displayForm {
+  padding: $euiSizeL;
 }

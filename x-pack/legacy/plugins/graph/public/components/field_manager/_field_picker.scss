@@ -1,3 +1,10 @@
 .gphFieldPickerList {
-  max-width: 300px;
+  width: 350px;
+}
+
+.gphFieldPickerButton {
+  color: $euiColorPrimary;
+  background-color: $euiColorEmptyShade;
+  border: 1px solid $euiColorLightShade;
+  padding: $euiSizeXS $euiSizeM;
 }
