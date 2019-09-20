@@ -65,7 +65,7 @@ const fullyMatchingIds = async (
         location,
         checkGroup,
         status: topSource.summary.down > 0 ? 'down' : 'up',
-        summaryTimestamp: topSource['@timestamp']
+        summaryTimestamp: topSource['@timestamp'],
       };
 
       // This monitor doesn't match, so just skip ahead and don't add it to the output
