@@ -52,7 +52,7 @@ export class AbstractLayer {
   }
 
   destroy() {
-    if(this._source) {
+    if (this._source) {
       this._source.destroy();
     }
   }
@@ -250,6 +250,24 @@ export class AbstractLayer {
   renderSourceSettingsEditor = ({ onChange }) => {
     return this._source.renderSourceSettingsEditor({ onChange });
   };
+
+  getPrevRequestToken(dataId) {
+    const prevDataRequest = this.getDataRequest(dataId);
+    if (!prevDataRequest) {
+      return;
+    }
+
+    return prevDataRequest.getRequestToken();
+  }
+
+  getInFlightRequestTokens() {
+    if (!this._dataRequests) {
+      return [];
+    }
+
+    const requestTokens = this._dataRequests.map(dataRequest => dataRequest.getRequestToken());
+    return _.compact(requestTokens);
+  }
 
   getSourceDataRequest() {
     return this.getDataRequest(SOURCE_DATA_ID_ORIGIN);
