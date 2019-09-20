@@ -16,11 +16,11 @@ import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 
 import 'ui/autoload/all';
-// TODO: remove ui imports completely (move tDelete o plugins)
 import 'ui/kbn_top_nav';
 import 'ui/directives/saved_object_finder';
 import 'ui/directives/input_focus';
 import 'ui/saved_objects/ui/saved_object_save_as_checkbox';
+import 'uiExports/autocompleteProviders';
 import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
@@ -116,6 +116,8 @@ app.directive('graphApp', function (reactDirective) {
     ['onQuerySubmit', { watchDepth: 'reference' }],
     ['savedObjects', { watchDepth: 'reference' }],
     ['uiSettings', { watchDepth: 'reference' }],
+    ['http', { watchDepth: 'reference' }],
+    ['initialQuery', { watchDepth: 'reference' }],
     ['overlays', { watchDepth: 'reference' }]
   ]);
 });
@@ -371,8 +373,6 @@ app.controller('graphuiPlugin', function (
     $scope.basicModeSelectedSingleField = null;
     $scope.selectedField = null;
     $scope.selectedFieldConfig = null;
-    $scope.selectedIndex = selectedIndex;
-    $scope.proposedIndex = selectedIndex;
 
     return $route.current.locals.GetIndexPatternProvider.get(selectedIndex.id)
       .then(handleSuccess)
@@ -534,7 +534,7 @@ app.controller('graphuiPlugin', function (
       return;
     }
     const options = {
-      indexName: $scope.selectedIndex.attributes.title,
+      indexName: $scope.selectedIndex.title,
       vertex_fields: $scope.selectedFields,
       // Here we have the opportunity to look up labels for nodes...
       nodeLabeller: function () {
@@ -853,6 +853,8 @@ app.controller('graphuiPlugin', function (
         $scope.initialQuery = $route.current.params.query;
         $scope.submit($route.current.params.query);
       }
+
+      $scope.$digest();
     });
   } else {
     $route.current.locals.SavedWorkspacesProvider.get().then(function (newWorkspace) {
