@@ -5,7 +5,7 @@
  */
 
 import React, { useContext } from 'react';
-import { EuiText, EuiHealth, EuiLink } from '@elastic/eui';
+import { EuiText, EuiHealth, EuiLink, EuiSpacer } from '@elastic/eui';
 import { MonitorSummary, CheckMonitor } from '../../../../common/graphql/types';
 import { CheckList } from './check_list';
 import { toCondensedCheck } from './to_condensed_check';
@@ -40,16 +40,18 @@ export const MonitorListDrawer = ({ summary }: MonitorListDrawerProps) => {
   if (summary.state.checks.length < CLIENT_DEFAULTS.CONDENSED_CHECK_LIMIT) {
     return (
       <>
-        <EuiLink>{summary.state.url.full}</EuiLink>
+        <EuiLink href={summary.state.url.full}>{summary.state.url.full}</EuiLink>
+        <EuiSpacer size="s" />
         <EuiText>
           <EuiHealth color={danger} />
-          Down in {upLocations.map(location => (location.name || location.ip) + ',')}
+          Down in {downLocations.map(location => (location.name || location.ip) + ',')}
         </EuiText>
+        <EuiSpacer size="s" />
         <EuiText>
           <EuiHealth color={success} />
           Up in {upLocations.map(location => (location.name || location.ip) + ',')}
         </EuiText>
-        <CheckList checks={summary.state.checks} />
+        {/* <CheckList checks={summary.state.checks} /> */}
       </>
     );
   } else {
