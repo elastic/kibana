@@ -42,7 +42,9 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
   externalRouter.post(
     {
       path: '/api/spaces/_copy_saved_objects',
-      tags: ['access:copySavedObjectsToSpaces'],
+      options: {
+        tags: ['access:copySavedObjectsToSpaces'],
+      },
       validate: {
         body: schema.object({
           spaces: schema.arrayOf(
@@ -114,7 +116,9 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
   externalRouter.post(
     {
       path: '/api/spaces/_resolve_copy_saved_objects_errors',
-      tags: ['access:copySavedObjectsToSpaces'],
+      options: {
+        tags: ['access:copySavedObjectsToSpaces'],
+      },
       validate: {
         body: schema.object({
           retries: schema.object(
