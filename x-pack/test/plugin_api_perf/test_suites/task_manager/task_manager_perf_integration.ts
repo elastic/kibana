@@ -11,13 +11,6 @@ export default function({ getService }: { getService: (service: string) => any }
   const supertest = getService('supertest');
 
   describe('stressing task manager', () => {
-    beforeEach(() =>
-      supertest
-        .delete('/api/sample_tasks')
-        .set('kbn-xsrf', 'xxx')
-        .expect(200)
-    );
-
     it('should run 10 tasks every second for a minute', async () => {
       const { runningAverageTasks, runningAverageLeadTime } = await supertest
         .post('/api/perf_tasks')
