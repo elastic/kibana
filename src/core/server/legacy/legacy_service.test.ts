@@ -21,6 +21,14 @@ import { BehaviorSubject, throwError } from 'rxjs';
 
 jest.mock('../../../legacy/server/kbn_server');
 jest.mock('../../../cli/cluster/cluster_manager');
+jest.mock('./plugins/find_legacy_plugin_specs.ts', () => ({
+  findLegacyPluginSpecs: (settings: Record<string, any>) => ({
+    pluginSpecs: [],
+    pluginExtendedConfig: settings,
+    disabledPluginSpecs: [],
+    uiExports: [],
+  }),
+}));
 
 import { LegacyService } from '.';
 // @ts-ignore: implicit any for JS file
@@ -137,12 +145,14 @@ describe('once LegacyService is set up with connection info', () => {
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
       { server: { autoListen: true } },
+      { server: { autoListen: true } },
       {
         setupDeps,
         startDeps,
         handledConfigPaths: ['foo.bar'],
         logger,
-      }
+      },
+      { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
 
     const [mockKbnServer] = MockKbnServer.mock.instances;
@@ -165,12 +175,14 @@ describe('once LegacyService is set up with connection info', () => {
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
       { server: { autoListen: true } },
+      { server: { autoListen: true } },
       {
         setupDeps,
         startDeps,
         handledConfigPaths: ['foo.bar'],
         logger,
-      }
+      },
+      { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
 
     const [mockKbnServer] = MockKbnServer.mock.instances;
@@ -190,7 +202,9 @@ describe('once LegacyService is set up with connection info', () => {
     });
 
     await legacyService.setup(setupDeps);
-    await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingSnapshot();
+    await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"something failed"`
+    );
 
     const [mockKbnServer] = MockKbnServer.mock.instances;
     expect(mockKbnServer.listen).toHaveBeenCalled();
@@ -206,8 +220,12 @@ describe('once LegacyService is set up with connection info', () => {
       configService: configService as any,
     });
 
-    await expect(legacyService.setup(setupDeps)).rejects.toThrowErrorMatchingSnapshot();
-    await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingSnapshot();
+    await expect(legacyService.setup(setupDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"something failed"`
+    );
+    await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Legacy service is not setup yet."`
+    );
 
     expect(MockKbnServer).not.toHaveBeenCalled();
     expect(MockClusterManager).not.toHaveBeenCalled();
@@ -292,12 +310,14 @@ describe('once LegacyService is set up without connection info', () => {
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
       { server: { autoListen: true } },
+      { server: { autoListen: true } },
       {
         setupDeps,
         startDeps,
         handledConfigPaths: ['foo.bar'],
         logger,
-      }
+      },
+      { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
   });
 

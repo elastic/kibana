@@ -18,7 +18,7 @@
  */
 
 import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription } from 'rxjs';
-import { first, map, mergeMap, publishReplay, tap } from 'rxjs/operators';
+import { first, map, publishReplay, tap } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import { InternalCoreSetup, InternalCoreStart } from '../';
 import { SavedObjectsLegacyUiExports } from '../types';
@@ -29,7 +29,7 @@ import { BasePathProxyServer, HttpConfig, HttpConfigType } from '../http';
 import { Logger } from '../logging';
 import { PluginsServiceSetup, PluginsServiceStart } from '../plugins';
 import { findLegacyPluginSpecs } from './plugins';
-import { collectUiExports as collectLegacyUiExports } from '../../../legacy/ui/ui_exports/collect_ui_exports';
+import { LegacyPluginSpec } from './plugins/find_legacy_plugin_specs';
 
 interface LegacyKbnServer {
   applyLoggingConfiguration: (settings: Readonly<Record<string, any>>) => void;
@@ -73,7 +73,7 @@ export interface LegacyServiceStartDeps {
 }
 
 export interface LegacyServiceSetup {
-  pluginSpecs: unknown[];
+  pluginSpecs: LegacyPluginSpec[];
   uiExports: SavedObjectsLegacyUiExports;
   pluginExtendedConfig: Config;
 }
@@ -87,6 +87,15 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
   private configSubscription?: Subscription;
   private setupDeps?: LegacyServiceSetupDeps;
   private update$: ConnectableObservable<Config> | undefined;
+  private legacyRawConfig: Config | undefined;
+  private legacyPlugins:
+    | {
+        pluginSpecs: LegacyPluginSpec[];
+        disabledPluginSpecs: LegacyPluginSpec[];
+        uiExports: SavedObjectsLegacyUiExports;
+      }
+    | undefined;
+  private settings: Record<string, any> | undefined;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('legacy-service');
@@ -97,6 +106,7 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
       .atPath<HttpConfigType>('server')
       .pipe(map(rawConfig => new HttpConfig(rawConfig, coreContext.env)));
   }
+
   public async setup(setupDeps: LegacyServiceSetupDeps) {
     this.setupDeps = setupDeps;
 
@@ -112,16 +122,37 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
 
     this.configSubscription = this.update$.connect();
 
-    const settings = await this.update$
+    this.settings = await this.update$
       .pipe(
         first(),
         map(config => getLegacyRawConfig(config))
       )
       .toPromise();
 
-    const { pluginSpecs, pluginExtendedConfig } = await findLegacyPluginSpecs(settings);
+    const {
+      pluginSpecs,
+      pluginExtendedConfig,
+      disabledPluginSpecs,
+      uiExports,
+    } = await findLegacyPluginSpecs(this.settings, this.coreContext.logger);
 
-    const uiExports = collectLegacyUiExports(pluginSpecs);
+    this.legacyPlugins = {
+      pluginSpecs,
+      disabledPluginSpecs,
+      uiExports,
+    };
+
+    this.legacyRawConfig = pluginExtendedConfig;
+
+    // check for unknown uiExport types
+    if (uiExports.unknown && uiExports.unknown.length > 0) {
+      throw new Error(
+        `Unknown uiExport types: ${uiExports.unknown
+          .map(({ pluginSpec, type }) => `${type} from ${pluginSpec.getId()}`)
+          .join(', ')}`
+      );
+    }
+
     return {
       pluginSpecs,
       uiExports,
@@ -131,24 +162,24 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
 
   public async start(startDeps: LegacyServiceStartDeps) {
     const { setupDeps } = this;
-    if (!setupDeps || !this.update$) {
+    if (!setupDeps || !this.legacyRawConfig || !this.legacyPlugins || !this.settings) {
       throw new Error('Legacy service is not setup yet.');
     }
     this.log.debug('starting legacy service');
 
     // Receive initial config and create kbnServer/ClusterManager.
-    this.kbnServer = await this.update$
-      .pipe(
-        first(),
-        mergeMap(async config => {
-          if (this.coreContext.env.isDevClusterMaster) {
-            await this.createClusterManager(config);
-            return;
-          }
-          return await this.createKbnServer(config, setupDeps, startDeps);
-        })
-      )
-      .toPromise();
+
+    if (this.coreContext.env.isDevClusterMaster) {
+      await this.createClusterManager(this.legacyRawConfig);
+    } else {
+      this.kbnServer = await this.createKbnServer(
+        this.settings,
+        this.legacyRawConfig,
+        setupDeps,
+        startDeps,
+        this.legacyPlugins
+      );
+    }
   }
 
   public async stop() {
@@ -178,24 +209,35 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
 
     require('../../../cli/cluster/cluster_manager').create(
       this.coreContext.env.cliArgs,
-      getLegacyRawConfig(config),
+      config,
       await basePathProxy$.toPromise()
     );
   }
 
   private async createKbnServer(
+    settings: Record<string, any>,
     config: Config,
     setupDeps: LegacyServiceSetupDeps,
-    startDeps: LegacyServiceStartDeps
+    startDeps: LegacyServiceStartDeps,
+    legacyPlugins: {
+      pluginSpecs: LegacyPluginSpec[];
+      disabledPluginSpecs: LegacyPluginSpec[];
+      uiExports: SavedObjectsLegacyUiExports;
+    }
   ) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const KbnServer = require('../../../legacy/server/kbn_server');
-    const kbnServer: LegacyKbnServer = new KbnServer(getLegacyRawConfig(config), {
-      handledConfigPaths: await this.coreContext.configService.getUsedPaths(),
-      setupDeps,
-      startDeps,
-      logger: this.coreContext.logger,
-    });
+    const kbnServer: LegacyKbnServer = new KbnServer(
+      settings,
+      config,
+      {
+        handledConfigPaths: await this.coreContext.configService.getUsedPaths(),
+        setupDeps,
+        startDeps,
+        logger: this.coreContext.logger,
+      },
+      legacyPlugins
+    );
 
     // The kbnWorkerType check is necessary to prevent the repl
     // from being started multiple times in different processes.

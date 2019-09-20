@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
-import { toArray } from 'rxjs/operators';
+import { Observable, merge, forkJoin } from 'rxjs';
+import { toArray, tap, distinct, map } from 'rxjs/operators';
 import {
   findPluginSpecs,
   defaultConfig,
@@ -26,16 +26,113 @@ import {
 } from '../../../../legacy/plugin_discovery/find_plugin_specs.js';
 // @ts-ignore
 import { transformDeprecations } from '../../../../../src/legacy/server/config/transform_deprecations.js';
+import { LoggerFactory } from '../../logging';
+import { collectUiExports as collectLegacyUiExports } from '../../../../legacy/ui/ui_exports/collect_ui_exports';
+import { Config } from '../../config';
 
-export async function findLegacyPluginSpecs(settings: unknown) {
-  const configToMutate = defaultConfig(settings);
+export interface LegacyPluginPack {
+  getPath(): string;
+}
+
+export interface LegacyPluginSpec {
+  getId: () => unknown;
+  getExpectedKibanaVersion: () => string;
+  getConfigPrefix: () => string;
+}
+
+export async function findLegacyPluginSpecs(settings: unknown, loggerFactory: LoggerFactory) {
+  const configToMutate: Config = defaultConfig(settings);
   const {
+    pack$,
+    invalidDirectoryError$,
+    invalidPackError$,
+    otherError$,
+    deprecation$,
+    invalidVersionSpec$,
     spec$,
+    disabledSpec$,
   }: {
-    spec$: Observable<unknown>;
+    pack$: Observable<LegacyPluginPack>;
+    invalidDirectoryError$: Observable<{ path: string }>;
+    invalidPackError$: Observable<{ path: string }>;
+    otherError$: Observable<unknown>;
+    deprecation$: Observable<unknown>;
+    invalidVersionSpec$: Observable<LegacyPluginSpec>;
+    spec$: Observable<LegacyPluginSpec>;
+    disabledSpec$: Observable<LegacyPluginSpec>;
   } = findPluginSpecs(settings, configToMutate) as any;
+
+  const logger = loggerFactory.get('legacy-plugins');
+
+  const log$ = merge(
+    pack$.pipe(
+      tap(definition => {
+        const path = definition.getPath();
+        logger.debug(`Found plugin at ${path}`, { path });
+      })
+    ),
+
+    invalidDirectoryError$.pipe(
+      tap(error => {
+        logger.warn(`Unable to scan directory for plugins "${error.path}"`, {
+          err: error,
+          dir: error.path,
+        });
+      })
+    ),
+
+    invalidPackError$.pipe(
+      tap(error => {
+        logger.warn(`Skipping non-plugin directory at ${error.path}`, {
+          path: error.path,
+        });
+      })
+    ),
+
+    otherError$.pipe(
+      tap(error => {
+        // rethrow unhandled errors, which will fail the server
+        throw error;
+      })
+    ),
+
+    invalidVersionSpec$.pipe(
+      map(spec => {
+        const name = spec.getId();
+        const pluginVersion = spec.getExpectedKibanaVersion();
+        // @ts-ignore
+        const kibanaVersion = settings.pkg.version;
+        return `Plugin "${name}" was disabled because it expected Kibana version "${pluginVersion}", and found "${kibanaVersion}".`;
+      }),
+      distinct(),
+      tap(message => {
+        logger.warn(message);
+      })
+    ),
+
+    deprecation$.pipe(
+      tap(({ spec, message }) => {
+        const deprecationLogger = loggerFactory.get(
+          'plugins',
+          spec.getConfigPrefix(),
+          'config',
+          'deprecation'
+        );
+        deprecationLogger.warn(message);
+      })
+    )
+  );
+
+  const [disabledPluginSpecs, pluginSpecs] = await forkJoin(
+    disabledSpec$.pipe(toArray()),
+    spec$.pipe(toArray()),
+    log$
+  ).toPromise();
+
   return {
-    pluginSpecs: await spec$.pipe(toArray()).toPromise(),
+    disabledPluginSpecs,
+    pluginSpecs,
     pluginExtendedConfig: configToMutate,
+    uiExports: collectLegacyUiExports(pluginSpecs),
   };
 }

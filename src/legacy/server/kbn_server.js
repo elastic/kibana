@@ -24,7 +24,6 @@ import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
 import { Config } from './config';
 import loggingConfiguration from './logging/configuration';
-import configSetupMixin from './config/setup';
 import httpMixin from './http';
 import { coreMixin } from './core';
 import { loggingMixin } from './logging';
@@ -50,14 +49,16 @@ import { i18nMixin } from './i18n';
 const rootDir = fromRoot('.');
 
 export default class KbnServer {
-  constructor(settings, core) {
+  constructor(settings, config, core, legacyPlugins) {
     this.name = pkg.name;
     this.version = pkg.version;
     this.build = pkg.build || false;
     this.rootDir = rootDir;
     this.settings = settings || {};
+    this.config = config;
 
     const { setupDeps, startDeps, handledConfigPaths, logger } = core;
+
     this.newPlatform = {
       coreContext: {
         logger,
@@ -70,11 +71,12 @@ export default class KbnServer {
       },
     };
 
+    this.uiExports = legacyPlugins.uiExports;
+    this.pluginSpecs = legacyPlugins.pluginSpecs;
+    this.disabledPluginSpecs = legacyPlugins.disabledPluginSpecs;
+
     this.ready = constant(this.mixin(
       Plugins.waitForInitSetupMixin,
-
-      // sets this.config, reads this.settings
-      configSetupMixin,
 
       // sets this.server
       httpMixin,
@@ -101,7 +103,7 @@ export default class KbnServer {
       // tell the config we are done loading plugins
       configCompleteMixin,
 
-      // setup this.uiExports and this.uiBundles
+      // setup this.uiBundles
       uiMixin,
       indexPatternsMixin,
 

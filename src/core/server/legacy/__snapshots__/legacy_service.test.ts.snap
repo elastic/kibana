@@ -1,7 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`once LegacyService is set up with connection info creates legacy kbnServer and closes it if \`listen\` fails. 1`] = `"something failed"`;
-
 exports[`once LegacyService is set up with connection info reconfigures logging configuration if new config is received.: applyLoggingConfiguration params 1`] = `
 Array [
   Array [
@@ -13,10 +11,6 @@ Array [
   ],
 ]
 `;
-
-exports[`once LegacyService is set up with connection info throws if fails to retrieve initial config. 1`] = `"something failed"`;
-
-exports[`once LegacyService is set up with connection info throws if fails to retrieve initial config. 2`] = `"something failed"`;
 
 exports[`once LegacyService is set up without connection info reconfigures logging configuration if new config is received.: applyLoggingConfiguration params 1`] = `
 Array [
