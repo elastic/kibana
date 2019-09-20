@@ -117,10 +117,6 @@ describe('Code Usage Collector', () => {
             key: 'Java',
           },
           {
-            enabled: 1,
-            key: 'Ctags',
-          },
-          {
             enabled: 0,
             key: 'Go',
           },

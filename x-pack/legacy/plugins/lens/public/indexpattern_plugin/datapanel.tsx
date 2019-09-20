@@ -532,11 +532,14 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 const overallField = fieldByName[field.name];
                 return (
                   <FieldItem
+                    core={core}
                     indexPattern={currentIndexPattern}
                     key={field.name}
                     field={field}
                     highlight={localState.nameFilter.toLowerCase()}
                     exists={overallField ? !!overallField.exists : false}
+                    dateRange={dateRange}
+                    query={query}
                   />
                 );
               })}
