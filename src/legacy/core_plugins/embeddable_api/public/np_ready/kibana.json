@@ -2,5 +2,9 @@
   "id": "embeddable",
   "version": "kibana",
   "server": false,
-  "ui": true
+  "ui": true,
+  "requiredPlugins": [
+    "embeddable",
+    "inspector"
+  ]
 }

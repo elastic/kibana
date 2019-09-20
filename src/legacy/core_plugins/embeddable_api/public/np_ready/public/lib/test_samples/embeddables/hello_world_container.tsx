@@ -20,13 +20,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CoreStart } from 'src/core/public';
+import { TGetActionsCompatibleWithTrigger } from 'src/plugins/ui_actions/public';
 import { Container, ViewMode, ContainerInput } from '../..';
 import { HelloWorldContainerComponent } from './hello_world_container_component';
-import {
-  GetEmbeddableFactory,
-  GetActionsCompatibleWithTrigger,
-  GetEmbeddableFactories,
-} from '../../types';
+import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../types';
 import { Start as InspectorStartContract } from '../../../../../../../../../plugins/inspector/public';
 
 export const HELLO_WORLD_CONTAINER = 'HELLO_WORLD_CONTAINER';
@@ -48,7 +45,7 @@ interface HelloWorldContainerInput extends ContainerInput {
 }
 
 interface HelloWorldContainerOptions {
-  getActions: GetActionsCompatibleWithTrigger;
+  getActions: TGetActionsCompatibleWithTrigger;
   getEmbeddableFactory: GetEmbeddableFactory;
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];

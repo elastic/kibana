@@ -17,29 +17,23 @@
  * under the License.
  */
 
-import { Action } from './action';
-import { ApplyFilterAction } from './apply_filter_action';
+import { createFilterAction } from './apply_filter_action';
 import { expectError } from '../../tests/helpers';
 
-test('is instance of Action', () => {
-  const action = new ApplyFilterAction();
-  expect(action).toBeInstanceOf(Action);
-});
-
 test('has APPLY_FILTER_ACTION type and id', () => {
-  const action = new ApplyFilterAction();
+  const action = createFilterAction();
   expect(action.id).toBe('APPLY_FILTER_ACTION');
   expect(action.type).toBe('APPLY_FILTER_ACTION');
 });
 
 test('has expected display name', () => {
-  const action = new ApplyFilterAction();
-  expect(action.getDisplayName()).toMatchInlineSnapshot(`"Apply filter to current view"`);
+  const action = createFilterAction();
+  expect(action.getDisplayName({} as any)).toMatchInlineSnapshot(`"Apply filter to current view"`);
 });
 
 describe('isCompatible()', () => {
-  test('when embeddable filters and triggerContext filters exist, returns true', async () => {
-    const action = new ApplyFilterAction();
+  test('when embeddable filters and filters exist, returns true', async () => {
+    const action = createFilterAction();
     const result = await action.isCompatible({
       embeddable: {
         getRoot: () => ({
@@ -54,7 +48,7 @@ describe('isCompatible()', () => {
   });
 
   test('when embeddable filters not set, returns false', async () => {
-    const action = new ApplyFilterAction();
+    const action = createFilterAction();
     const result = await action.isCompatible({
       embeddable: {
         getRoot: () => ({
@@ -68,8 +62,8 @@ describe('isCompatible()', () => {
     expect(result).toBe(false);
   });
 
-  test('when triggerContext or triggerContext filters are not set, returns false', async () => {
-    const action = new ApplyFilterAction();
+  test('when triggerContext or filters are not set, returns false', async () => {
+    const action = createFilterAction();
 
     const result1 = await action.isCompatible({
       embeddable: {
@@ -98,9 +92,9 @@ const getEmbeddable = () => {
 };
 
 describe('execute()', () => {
-  describe('when triggerContext not set', () => {
+  describe('when no filters are given', () => {
     test('throws an error', async () => {
-      const action = new ApplyFilterAction();
+      const action = createFilterAction();
       const error = expectError(() =>
         action.execute({
           embeddable: getEmbeddable(),
@@ -109,8 +103,8 @@ describe('execute()', () => {
       expect(error).toBeInstanceOf(Error);
     });
 
-    test('updates filter input on success', async done => {
-      const action = new ApplyFilterAction();
+    test('updates filter input on success', async () => {
+      const action = createFilterAction();
       const [embeddable, root] = getEmbeddable();
 
       await action.execute({
@@ -122,23 +116,6 @@ describe('execute()', () => {
       expect(root.updateInput.mock.calls[0][0]).toMatchObject({
         filters: ['FILTER'],
       });
-
-      done();
-    });
-
-    test('checks if action isCompatible', async done => {
-      const action = new ApplyFilterAction();
-      const spy = jest.spyOn(action, 'isCompatible');
-      const [embeddable] = getEmbeddable();
-
-      await action.execute({
-        embeddable,
-        filters: ['FILTER' as any],
-      });
-
-      expect(spy).toHaveBeenCalledTimes(1);
-
-      done();
     });
   });
 });

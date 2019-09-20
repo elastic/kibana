@@ -6,18 +6,11 @@
 
 import React, { Fragment } from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export function SourceSettings({ layer, updateSourceProp }) {
-
   const onSourceChange = ({ propName, value }) => {
     updateSourceProp(layer.getId(), propName, value);
   };
@@ -31,20 +24,16 @@ export function SourceSettings({ layer, updateSourceProp }) {
   return (
     <Fragment>
       <EuiPanel>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h5>
-                <FormattedMessage
-                  id="xpack.maps.layerPanel.sourceSettingsTitle"
-                  defaultMessage="Source Settings"
-                />
-              </h5>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle size="xs">
+          <h5>
+            <FormattedMessage
+              id="xpack.maps.layerPanel.sourceSettingsTitle"
+              defaultMessage="Source settings"
+            />
+          </h5>
+        </EuiTitle>
 
-        <EuiSpacer size="m"/>
+        <EuiSpacer size="m" />
 
         {sourceSettingsEditor}
       </EuiPanel>
