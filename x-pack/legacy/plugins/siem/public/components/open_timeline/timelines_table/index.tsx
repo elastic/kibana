@@ -25,7 +25,11 @@ import { getIconHeaderColumns } from './icon_header_columns';
 
 const BasicTable = styled(EuiBasicTable)`
   .euiTableCellContent {
-    animation: none;
+    animation: none; //Prevents applying max-height from animation
+  }
+
+  .euiTableCellContent__text {
+    width: 100%; //Fixes collapsing nested flex content
   }
 `;
 BasicTable.displayName = 'BasicTable';
