@@ -10,18 +10,18 @@ import * as React from 'react';
 import { Router } from 'react-router-dom';
 import { MockedProvider } from 'react-apollo/test-utils';
 
-import '../../mock/match_media';
-import '../../mock/ui_settings';
-import { apolloClientObservable, mockGlobalState, TestProviders } from '../../mock';
-import { IPDetailsComponent, IPDetails } from './ip_details';
-import { FlowTarget } from '../../graphql/types';
-import { createStore, State } from '../../store';
+import '../../../mock/match_media';
+import '../../../mock/ui_settings';
+import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../mock';
+import { IPDetailsComponent, IPDetails } from './index';
+import { FlowTarget } from '../../../graphql/types';
+import { createStore, State } from '../../../store';
 import { cloneDeep } from 'lodash/fp';
-import { mocksSource } from '../../containers/source/mock';
-import { InputsModelId } from '../../store/inputs/constants';
+import { mocksSource } from '../../../containers/source/mock';
+import { InputsModelId } from '../../../store/inputs/constants';
 import { ActionCreator } from 'typescript-fsa';
 
-jest.mock('../../lib/settings/use_kibana_ui_setting');
+jest.mock('../../../lib/settings/use_kibana_ui_setting');
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';

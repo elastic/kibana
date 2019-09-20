@@ -7,31 +7,71 @@
 import React from 'react';
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
-import { IPDetails } from './ip_details';
+import { IPDetails, IPDetailsBody } from './ip_details';
+import { GlobalTime } from '../../containers/global_time';
+import { IpDetailsTableType } from '../../store/network/model';
 import { Network } from './network';
+import { AnomaliesQueryTabBody, TlsQueryTabBody, UsersQueryTabBody } from './navigation';
 
-const networkPath = `/:pageName(network)`;
+const networkPagePath = `/:pageName(network)`;
+const ipDetailsPagePath = networkPagePath + '/ip/:detailName';
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
-export const NetworkContainer = React.memo<Props>(() => (
-  <Switch>
-    <Route strict exact path={networkPath} render={() => <Network />} />
-    <Route
-      path={`${networkPath}/ip/:detailName`}
-      render={({
-        match: {
-          params: { detailName },
-        },
-      }) => <IPDetails detailName={detailName} />}
-    />
-    <Route
-      path="/network/"
-      render={({ location: { search = '' } }) => (
-        <Redirect from="/network/" to={`/network${search}`} />
-      )}
-    />
-  </Switch>
+const getIPDetailsTabPath = (pagePath: string) =>
+  `${pagePath}/ip/:detailName/:tabName(` +
+  `${IpDetailsTableType.tls}|` +
+  `${IpDetailsTableType.users}|` +
+  `${IpDetailsTableType.anomalies})`;
+
+export const NetworkContainer = React.memo<Props>(({ url }) => (
+  <GlobalTime>
+    {({ to, from, setQuery, deleteQuery, isInitializing }) => (
+      <Switch>
+        <Route strict exact path={networkPagePath} render={() => <Network />} />
+        <Route
+          strict
+          exact
+          path={getIPDetailsTabPath(networkPagePath)}
+          render={props => {
+            const commonProps = {
+              deleteQuery,
+              from,
+              to,
+              setQuery,
+              isInitializing,
+              detailName: props.match.params.detailName,
+            };
+
+            return (
+              <>
+                <IPDetails {...commonProps} />
+                <Route
+                  path={`${ipDetailsPagePath}/:tabName(${IpDetailsTableType.tls})`}
+                  render={() => <IPDetailsBody {...commonProps} children={TlsQueryTabBody} />}
+                />
+                <Route
+                  path={`${ipDetailsPagePath}/:tabName(${IpDetailsTableType.users})`}
+                  render={() => <IPDetailsBody {...commonProps} children={UsersQueryTabBody} />}
+                />
+                <Route
+                  path={`${ipDetailsPagePath}/:tabName(${IpDetailsTableType.anomalies})`}
+                  render={() => <IPDetailsBody {...commonProps} children={AnomaliesQueryTabBody} />}
+                />
+              </>
+            );
+          }}
+        />
+        <Redirect
+          from={`${url}/ip/:detailName`}
+          to={{
+            pathname: `${url}/ip/:detailName/${IpDetailsTableType.tls}`,
+          }}
+        />
+        <Redirect from="/network/" to={{ pathname: '/network' }} />
+      </Switch>
+    )}
+  </GlobalTime>
 ));
 
 NetworkContainer.displayName = 'NetworkContainer';

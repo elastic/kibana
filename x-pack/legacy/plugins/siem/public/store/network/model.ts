@@ -34,6 +34,7 @@ export enum IpDetailsTableType {
   domains = 'domains',
   tls = 'tls',
   users = 'users',
+  anomalies = 'anomalies',
 }
 
 export interface BasicQueryPaginated {
@@ -81,6 +82,7 @@ export interface IpOverviewQueries {
   [IpDetailsTableType.domains]: DomainsQuery;
   [IpDetailsTableType.tls]: TlsQuery;
   [IpDetailsTableType.users]: UsersQuery;
+  [IpDetailsTableType.anomalies]: null | undefined;
 }
 
 export interface NetworkDetailsModel {

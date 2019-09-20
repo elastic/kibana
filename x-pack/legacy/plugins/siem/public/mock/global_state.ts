@@ -112,6 +112,7 @@ export const mockGlobalState: State = {
           limit: 10,
           usersSortField: { field: UsersFields.name, direction: Direction.asc },
         },
+        anomalies: null,
       },
     },
   },
