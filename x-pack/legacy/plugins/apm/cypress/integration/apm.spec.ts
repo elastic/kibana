@@ -9,15 +9,10 @@
 
 import { loginAndWaitForPage } from './helpers';
 
-const rangeFrom = '2019-09-04T18:00:00.000Z';
-const rangeTo = '2019-09-05T06:00:00.000Z';
-
 describe('When clicking opbeans-go service', () => {
   before(() => {
     // open service overview page
-    loginAndWaitForPage(
-      `/app/apm#/services?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`
-    );
+    loginAndWaitForPage(`/app/apm#/services`);
 
     // show loading text for services
     cy.contains('Loading...');
@@ -28,7 +23,6 @@ describe('When clicking opbeans-go service', () => {
 
   it('should redirect to correct path with correct params', () => {
     cy.url().should('contain', `/app/apm#/services/opbeans-go/transactions`);
-    cy.url().should('contain', `rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`);
     cy.url().should('contain', `transactionType=request`);
   });
 

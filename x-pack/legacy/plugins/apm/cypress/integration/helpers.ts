@@ -8,6 +8,10 @@
 
 import { safeLoad } from 'js-yaml';
 
+const RANGE_FROM = '2019-09-04T18:00:00.000Z';
+const RANGE_TO = '2019-09-05T06:00:00.000Z';
+const BASE_URL = Cypress.config().baseUrl;
+
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate with Kibana
  */
@@ -23,13 +27,20 @@ export function loginAndWaitForPage(url: string) {
     const username = config['elasticsearch.username'];
     const password = config['elasticsearch.password'];
 
+    const hasCredentials = username && password;
+
     cy.log(
       `Authenticating via config credentials from "${KIBANA_DEV_YML_PATH}". username: ${username}, password: ${password}`
     );
 
-    cy.visit(`${Cypress.config().baseUrl}${url}`, {
-      auth: { username, password }
-    });
+    const options = hasCredentials
+      ? {
+          auth: { username, password }
+        }
+      : {};
+
+    const fullUrl = `${BASE_URL}${url}?RANGE_FROM=${RANGE_FROM}&RANGE_TO=${RANGE_TO}`;
+    cy.visit(fullUrl, options);
   });
 
   cy.viewport('macbook-15');

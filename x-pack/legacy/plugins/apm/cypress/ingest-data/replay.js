@@ -47,13 +47,19 @@ async function insertItem(item) {
   try {
     const url = `${APM_SERVER_URL}${item.url}`;
     console.log(Date.now(), url);
+
+    const headers = {
+      'content-type': 'application/x-ndjson'
+    };
+
+    if (SECRET_TOKEN) {
+      headers.Authorization = `Bearer ${SECRET_TOKEN}`;
+    }
+
     await axios({
       method: item.method,
       url,
-      headers: {
-        'content-type': 'application/x-ndjson',
-        Authorization: `Bearer ${SECRET_TOKEN}`
-      },
+      headers,
       data: item.body
     });
 
