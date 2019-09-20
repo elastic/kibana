@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.14.110",
+    "@types/js-yaml": "^3.12.1",
     "@types/react-beautiful-dnd": "^10.0.1"
   },
   "dependencies": {
