@@ -63,6 +63,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [LegacyNavLink](./kibana-plugin-public.legacynavlink.md) |  |
 |  [NotificationsSetup](./kibana-plugin-public.notificationssetup.md) |  |
 |  [NotificationsStart](./kibana-plugin-public.notificationsstart.md) |  |
+|  [OverlayBannersStart](./kibana-plugin-public.overlaybannersstart.md) |  |
 |  [OverlayRef](./kibana-plugin-public.overlayref.md) |  |
 |  [OverlayStart](./kibana-plugin-public.overlaystart.md) |  |
 |  [Plugin](./kibana-plugin-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
@@ -95,6 +96,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpStart](./kibana-plugin-public.httpstart.md) |  |
 |  [IContextHandler](./kibana-plugin-public.icontexthandler.md) | A function registered by a plugin to perform some action. |
 |  [IContextProvider](./kibana-plugin-public.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
+|  [OverlayBannerMount](./kibana-plugin-public.overlaybannermount.md) | A function that will mount the banner inside the provided element. |
+|  [OverlayBannerUnmount](./kibana-plugin-public.overlaybannerunmount.md) | A function that will unmount the banner from the element. |
 |  [PluginInitializer](./kibana-plugin-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
 |  [PluginOpaqueId](./kibana-plugin-public.pluginopaqueid.md) |  |
 |  [RecursiveReadonly](./kibana-plugin-public.recursivereadonly.md) |  |

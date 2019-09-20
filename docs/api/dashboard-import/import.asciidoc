@@ -4,9 +4,7 @@
 <titleabbrev>Import dashboard</titleabbrev>
 ++++
 
-Import dashboards and corresponding saved objects.
-
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Import dashboards and corresponding saved objects.
 
 [[dashboard-api-import-request]]
 ==== Request

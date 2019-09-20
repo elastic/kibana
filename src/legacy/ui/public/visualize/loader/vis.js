@@ -31,12 +31,9 @@ import { EventEmitter } from 'events';
 import _ from 'lodash';
 import { VisTypesRegistryProvider } from '../../registry/vis_types';
 import { PersistedState } from '../../persisted_state';
-import { FilterBarQueryFilterProvider } from '../../filter_manager/query_filter';
-import { timefilter } from 'ui/timefilter';
 
 export function VisProvider(Private, indexPatterns, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
-  const queryFilter = Private(FilterBarQueryFilterProvider);
 
   class Vis extends EventEmitter {
     constructor(visState = { type: 'histogram' }) {
@@ -50,9 +47,6 @@ export function VisProvider(Private, indexPatterns, getAppState) {
       this.sessionState = {};
 
       this.API = {
-        indexPatterns: indexPatterns,
-        timeFilter: timefilter,
-        queryFilter: queryFilter,
         events: {
           filter: data => {
             if (!this.eventsSubject) return;
