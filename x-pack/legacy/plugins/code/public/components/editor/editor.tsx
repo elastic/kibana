@@ -133,16 +133,16 @@ export class EditorComponent extends React.Component<IProps> {
     if (this.monaco && qs !== prevProps.location.search) {
       this.monaco.updateUrlQuery(qs);
     }
-    if (this.monaco && this.monaco.editor) {
+    if (this.editor) {
       if (prevProps.showBlame !== this.props.showBlame && this.props.showBlame) {
-        this.monaco.editor.updateOptions({ lineDecorationsWidth: 316 });
+        this.editor.updateOptions({ lineDecorationsWidth: 316 });
         this.loadBlame(this.props.blames);
       } else if (!this.props.showBlame) {
         this.destroyBlameWidgets();
-        this.monaco.editor.updateOptions({ lineDecorationsWidth: 16 });
+        this.editor.updateOptions({ lineDecorationsWidth: 16 });
       }
       if (prevProps.blames !== this.props.blames && this.props.showBlame) {
-        this.monaco.editor.updateOptions({ lineDecorationsWidth: 316 });
+        this.editor.updateOptions({ lineDecorationsWidth: 316 });
         this.loadBlame(this.props.blames);
       }
     }
@@ -220,6 +220,10 @@ export class EditorComponent extends React.Component<IProps> {
         lang = 'text';
       }
       this.editor = await this.monaco.loadFile(repo, file, text, lang, revision);
+      if (this.props.showBlame) {
+        this.editor.updateOptions({ lineDecorationsWidth: 316 });
+        this.loadBlame(this.props.blames);
+      }
       this.registerGutterClickHandler();
     }
   }

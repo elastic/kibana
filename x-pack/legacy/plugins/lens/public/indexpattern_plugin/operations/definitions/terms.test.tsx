@@ -526,11 +526,14 @@ describe('terms', () => {
         />
       );
 
-      instance.find(EuiRange).prop('onChange')!({
-        target: {
-          value: '7',
-        },
-      } as React.ChangeEvent<HTMLInputElement>);
+      instance.find(EuiRange).prop('onChange')!(
+        {
+          target: {
+            value: '7',
+          },
+        } as React.ChangeEvent<HTMLInputElement>,
+        true
+      );
       expect(setStateSpy).toHaveBeenCalledWith({
         ...state,
         layers: {

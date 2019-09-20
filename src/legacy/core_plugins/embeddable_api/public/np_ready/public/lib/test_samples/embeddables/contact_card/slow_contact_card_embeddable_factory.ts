@@ -17,13 +17,13 @@
  * under the License.
  */
 
+import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
 import { Container, EmbeddableFactory } from '../../..';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';
 import { CONTACT_CARD_EMBEDDABLE } from './contact_card_embeddable_factory';
-import { ExecuteTriggerActions } from '../../../types';
 
 interface SlowContactCardEmbeddableFactoryOptions {
-  execAction: ExecuteTriggerActions;
+  execAction: TExecuteTriggerActions;
   loadTickCount?: number;
 }
 

@@ -45,25 +45,10 @@ export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
 }) => void;
 
 export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: Props) => {
-  const { absoluteStartDate, absoluteEndDate, colors, setHeadingText } = useContext(
-    UptimeSettingsContext
-  );
+  const { colors, setHeadingText } = useContext(UptimeSettingsContext);
   const [getUrlParams, updateUrl] = useUrlParams();
-  const params = getUrlParams();
-  const {
-    dateRangeStart,
-    dateRangeEnd,
-    filters: urlFilters,
-    // TODO: reintegrate pagination in future release
-    // monitorListPageIndex,
-    // monitorListPageSize,
-    // TODO: reintegrate sorting in future release
-    // monitorListSortDirection,
-    // monitorListSortField,
-    search,
-    statusFilter,
-  } = params;
-
+  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
+  const { dateRangeStart, dateRangeEnd, filters: urlFilters, search, statusFilter } = params;
   const [indexPattern, setIndexPattern] = useState<any>(undefined);
 
   useEffect(() => {
@@ -156,8 +141,8 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
           </EuiFlexItem>
           <EuiFlexItem grow={8}>
             <SnapshotHistogram
-              absoluteStartDate={absoluteStartDate}
-              absoluteEndDate={absoluteEndDate}
+              absoluteStartDate={absoluteDateRangeStart}
+              absoluteEndDate={absoluteDateRangeEnd}
               successColor={colors.success}
               dangerColor={colors.danger}
               variables={sharedProps}
@@ -167,8 +152,8 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <MonitorList
-          absoluteStartDate={absoluteStartDate}
-          absoluteEndDate={absoluteEndDate}
+          absoluteStartDate={absoluteDateRangeStart}
+          absoluteEndDate={absoluteDateRangeEnd}
           dangerColor={colors.danger}
           hasActiveFilters={!!filters}
           implementsCustomErrorState={true}
