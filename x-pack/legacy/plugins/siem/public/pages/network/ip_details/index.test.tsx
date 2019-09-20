@@ -71,6 +71,10 @@ const getMockProps = (ip: string) => ({
     hash: '',
   },
   detailName: ip,
+  from: 0,
+  to: 0,
+  setQuery: jest.fn(),
+  isInitializing: false,
   match: { params: { detailName: ip, search: '' }, isExact: true, path: '', url: '' },
   setAbsoluteRangeDatePicker: (jest.fn() as unknown) as ActionCreator<{
     id: InputsModelId;

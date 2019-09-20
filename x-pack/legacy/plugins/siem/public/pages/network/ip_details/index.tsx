@@ -15,7 +15,6 @@ import { FiltersGlobal } from '../../../components/filters_global';
 import { HeaderPage } from '../../../components/header_page';
 import { LastEventTime } from '../../../components/last_event_time';
 import { FlowTargetSelectConnected } from '../../../components/page/network/flow_target_select_connected';
-import { GlobalTime } from '../../../containers/global_time';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../../containers/source';
 import { LastEventIndexKey } from '../../../graphql/types';
 import { decodeIpv6 } from '../../../lib/helpers';

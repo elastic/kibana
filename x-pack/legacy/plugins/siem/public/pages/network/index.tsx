@@ -16,7 +16,7 @@ import { AnomaliesQueryTabBody, TlsQueryTabBody, UsersQueryTabBody } from './nav
 const networkPagePath = `/:pageName(network)`;
 const ipDetailsPagePath = networkPagePath + '/ip/:detailName';
 
-type Props = Partial<RouteComponentProps<{}>>;
+type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
 const getIPDetailsTabPath = (pagePath: string) =>
   `${pagePath}/ip/:detailName/:tabName(` +
