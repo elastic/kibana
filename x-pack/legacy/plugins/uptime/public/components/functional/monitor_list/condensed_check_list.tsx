@@ -13,10 +13,11 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import moment from 'moment';
-import React from 'react';
+import React, { useContext } from 'react';
 import { CondensedCheck, CondensedCheckStatus } from './types';
 import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { LocationLink } from './location_link';
+import { UptimeSettingsContext } from '../../../contexts';
 
 const getBadgeColor = (status: string, successColor: string, dangerColor: string) => {
   switch (status) {
@@ -44,51 +45,57 @@ const getHealthColor = (dangerColor: string, status: string, successColor: strin
 
 interface CondensedCheckListProps {
   condensedChecks: CondensedCheck[];
-  successColor: string;
-  dangerColor: string;
 }
 
-export const CondensedCheckList = ({
-  condensedChecks,
-  dangerColor,
-  successColor,
-}: CondensedCheckListProps) => (
-  <EuiFlexGrid columns={3} style={{ paddingLeft: '40px' }}>
-    {condensedChecks.map(({ childStatuses, location, status, timestamp }: CondensedCheck) => (
-      <React.Fragment key={location || 'null'}>
-        <EuiFlexItem>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <MonitorListStatusColumn status={status} timestamp={timestamp} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <LocationLink location={location} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            position="right"
-            title="Check statuses"
-            content={childStatuses.map(
-              ({ status: checkStatus, ip, timestamp: condensedTimestamp }: CondensedCheckStatus) =>
-                ip ? (
-                  <EuiFlexGroup key={ip}>
-                    <EuiFlexItem>
-                      <EuiHealth color={getHealthColor(successColor, checkStatus, dangerColor)} />
-                    </EuiFlexItem>
-                    <EuiFlexItem>{ip}</EuiFlexItem>
-                    <EuiFlexItem>{moment(parseInt(condensedTimestamp, 10)).fromNow()}</EuiFlexItem>
-                  </EuiFlexGroup>
-                ) : null
-            )}
-          >
-            <EuiBadge
-              color={getBadgeColor(status, successColor, dangerColor)}
-            >{`${childStatuses.length} checks`}</EuiBadge>
-          </EuiToolTip>
-        </EuiFlexItem>
-      </React.Fragment>
-    ))}
-  </EuiFlexGrid>
-);
+export const CondensedCheckList = ({ condensedChecks }: CondensedCheckListProps) => {
+  const {
+    colors: { success, danger },
+  } = useContext(UptimeSettingsContext);
+
+  return (
+    <EuiFlexGrid columns={3} style={{ paddingLeft: '40px' }}>
+      {condensedChecks.map(({ childStatuses, location, status, timestamp }: CondensedCheck) => (
+        <React.Fragment key={location || 'null'}>
+          <EuiFlexItem>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <MonitorListStatusColumn status={status} timestamp={timestamp} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <LocationLink location={location} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              position="right"
+              title="Check statuses"
+              content={childStatuses.map(
+                ({
+                  status: checkStatus,
+                  ip,
+                  timestamp: condensedTimestamp,
+                }: CondensedCheckStatus) =>
+                  ip ? (
+                    <EuiFlexGroup key={ip}>
+                      <EuiFlexItem>
+                        <EuiHealth color={getHealthColor(success, checkStatus, danger)} />
+                      </EuiFlexItem>
+                      <EuiFlexItem>{ip}</EuiFlexItem>
+                      <EuiFlexItem>
+                        {moment(parseInt(condensedTimestamp, 10)).fromNow()}
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  ) : null
+              )}
+            >
+              <EuiBadge
+                color={getBadgeColor(status, success, danger)}
+              >{`${childStatuses.length} checks`}</EuiBadge>
+            </EuiToolTip>
+          </EuiFlexItem>
+        </React.Fragment>
+      ))}
+    </EuiFlexGrid>
+  );
+};
