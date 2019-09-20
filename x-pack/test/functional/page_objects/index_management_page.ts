@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { map as mapAsync } from 'bluebird';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function IndexManagementPageProvider({ getService }: FtrProviderContext) {
@@ -17,6 +16,9 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     },
     async reloadIndices() {
       await testSubjects.click('reloadIndicesButton');
+    },
+    async reloadIndicesButton() {
+      return await testSubjects.find('reloadIndicesButton');
     },
     async toggleRollupIndices() {
       await testSubjects.click('checkboxToggles-rollupToggle');
