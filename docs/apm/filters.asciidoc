@@ -1,21 +1,29 @@
 [[filters]]
 === Filters
 
-Global filters are ways you can filter your data within the APM UI.
+APM provides two different ways you can filter your data within the APM App:
+
+* <<global-filters>>
+* <<local-filters>>
+
+[[global-filters]]
+==== Global filters
+
+Global filters are ways you can filter your data across the APM app.
 They are available in the Services, Transactions, Errors, Metrics, and Traces views,
 and any filter applied will persist as you move between pages.
 
 [role="screenshot"]
-image::apm/images/global-filters.png[Global filters available in the APM UI in Kibana]
+image::apm/images/global-filters.png[Global filters available in the APM app in Kibana]
 
 [float]
-==== Global time range
+===== Global time range
 
 The <<set-time-filter,global time range filter>> in {kib} restricts APM data to a specific time period.
 
 [float]
 [[query-bar]]
-==== Query bar
+===== Query bar
 
 The query bar is a powerful data query feature.
 Similar to the query bar in {kibana-ref}/discover.html[Discover],
@@ -27,7 +35,7 @@ See <<query-bar,advanced queries>> for more information and sample queries.
 
 [float]
 [[environment-selector]]
-==== Service environment filter
+===== Service environment filter
 
 The environment selector is a global filter for `service.environment`.
 It allows you to view only relevant data, and is especially useful for separating development from production environments.
@@ -46,3 +54,12 @@ v|*Go:* {apm-go-ref}/configuration.html#config-environment[`ELASTIC_APM_ENVIRONM
 *Ruby:* {apm-ruby-ref}/configuration.html#config-environment[`environment`]
 *Real User Monitoring:* {apm-rum-ref}/configuration.html#environment[`environment`]
 |===
+
+[[local-filters]]
+==== Local filters
+
+Local filters are ways you can filter your APM data on each individual page.
+Filters do not persist as you move between pages, and are typically only relevant in the current context.
+
+[role="screenshot"]
+image::apm/images/local-filter.png[Local filters available in the APM app in Kibana]
