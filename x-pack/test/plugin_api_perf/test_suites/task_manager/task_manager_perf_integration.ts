@@ -5,13 +5,10 @@
  */
 
 import expect from '@kbn/expect';
-import url from 'url';
-import supertestAsPromised from 'supertest-as-promised';
 
 export default function({ getService }: { getService: (service: string) => any }) {
   const log = getService('log');
-  const config = getService('config');
-  const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
+  const supertest = getService('supertest');
 
   describe('stressing task manager', () => {
     beforeEach(() =>
