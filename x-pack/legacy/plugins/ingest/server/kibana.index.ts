@@ -5,10 +5,13 @@
  */
 
 import { compose } from './libs/compose/kibana';
+import { initRestApi } from './rest_api/init_api';
 
 export const initServerWithKibana = (hapiServer: any) => {
   const libs = compose(hapiServer);
   libs.framework.log('Ingest is composed -- debug message');
 
   libs.framework.expose('policy', libs.policy);
+
+  initRestApi(hapiServer, libs);
 };

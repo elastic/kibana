@@ -29,5 +29,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./short_urls'));
     loadTestFile(require.resolve('./lens'));
     loadTestFile(require.resolve('./fleet'));
+    loadTestFile(require.resolve('./ingest'));
   });
 }

@@ -92,7 +92,7 @@ describe('Policies Lib', () => {
       expect(typeof newPolicy.shared_id).toBe('string');
       expect(typeof newPolicy.version).toBe('number');
 
-      const gottenPolicies = await libs.policy.list();
+      const { items: gottenPolicies } = await libs.policy.list();
       expect(gottenPolicies.length).toBe(3);
       expect(gottenPolicies.find(c => c.id === newPolicy.id) !== undefined).toBe(true);
       expect(gottenPolicies.find(c => c.id === newPolicy2.id) !== undefined).toBe(true);
@@ -111,7 +111,7 @@ describe('Policies Lib', () => {
       expect(typeof newPolicy.shared_id).toBe('string');
       expect(typeof newPolicy.version).toBe('number');
 
-      const gottenPolicies = await libs.policy.list();
+      const { items: gottenPolicies } = await libs.policy.list();
       expect(gottenPolicies.length).toBe(3);
       expect(gottenPolicies.find(c => c.id === updated.id) !== undefined).toBe(true);
       expect(gottenPolicies.find(c => c.id === newPolicy2.id) !== undefined).toBe(true);
@@ -183,7 +183,7 @@ describe('Policies Lib', () => {
         expect(e).toBe(undefined);
       }
 
-      const gottenPolicies = await libs.policy.list();
+      const { items: gottenPolicies } = await libs.policy.list();
       expect(gottenPolicies.length).toBe(0);
     });
   });
@@ -194,7 +194,7 @@ describe('Policies Lib', () => {
 
       await libs.policy.createNewPolicyFrom(newPolicy.id, 'foo', 'description');
 
-      const gottenPolicies = await libs.policy.list();
+      const { items: gottenPolicies } = await libs.policy.list();
       expect(gottenPolicies.length).toBe(2);
       expect(gottenPolicies.find(c => c.name === 'foo') !== undefined).toBe(true);
       expect(gottenPolicies.find(c => c.name === 'foo')!.shared_id).not.toBe(

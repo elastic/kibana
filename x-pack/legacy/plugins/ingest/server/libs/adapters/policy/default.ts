@@ -14,15 +14,12 @@ import { PolicyFile, DatasourceInput, BackupPolicyFile } from './adapter_types';
 export class PolicyAdapter {
   constructor(private readonly so: SODatabaseAdapter) {}
 
-  public async create(
-    policy: NewPolicyFile
-  ): Promise<{ id: string; shared_id: string; version: number }> {
+  public async create(policy: NewPolicyFile): Promise<PolicyFile> {
     const newSo = await this.so.create<PolicyFile>('policies', (policy as any) as PolicyFile);
 
     return {
       id: newSo.id,
-      shared_id: newSo.attributes.shared_id,
-      version: newSo.attributes.version,
+      ...newSo.attributes,
     };
   }
 
@@ -49,7 +46,10 @@ export class PolicyAdapter {
     }
   }
 
-  public async list(page: number = 1, perPage: number = 25): Promise<PolicyFile[]> {
+  public async list(
+    page: number = 1,
+    perPage: number = 25
+  ): Promise<{ items: PolicyFile[]; total: number }> {
     const policys = await this.so.find<any>({
       type: 'policies',
       search: '*',
@@ -88,7 +88,7 @@ export class PolicyAdapter {
         return acc;
       }, new Map<string, PolicyFile>());
 
-    return [...uniqPolicyFile.values()];
+    return { items: [...uniqPolicyFile.values()], total: policys.total };
   }
 
   public async listVersions(

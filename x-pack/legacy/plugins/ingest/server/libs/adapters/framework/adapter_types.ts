@@ -148,7 +148,7 @@ export interface FrameworkRequest<KibanaServerRequestGenaric extends Partial<Req
   query: KibanaServerRequestGenaric['query'];
 }
 
-export interface FrameworkRouteOptions<RouteResponse extends FrameworkResponse = any> {
+export interface FrameworkRoute<RouteResponse extends FrameworkResponse = any> {
   path: string;
   method: string | string[];
   vhost?: string;
@@ -158,9 +158,11 @@ export interface FrameworkRouteOptions<RouteResponse extends FrameworkResponse =
   policy?: {};
 }
 
+export type FrameworkResponseToolkit = ResponseToolkit;
+
 export type FrameworkRouteHandler<
-  RouteRequest extends Request,
-  RouteResponse extends FrameworkResponse
+  RouteRequest extends Request = any,
+  RouteResponse extends FrameworkResponse = any
 > = (request: FrameworkRequest<RouteRequest>, h: ResponseToolkit) => Promise<RouteResponse>;
 
 export type FrameworkResponse = Lifecycle.ReturnValue;
