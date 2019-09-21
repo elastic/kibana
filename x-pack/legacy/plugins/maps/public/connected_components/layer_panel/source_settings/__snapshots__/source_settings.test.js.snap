@@ -3,21 +3,17 @@
 exports[`Should render source settings editor 1`] = `
 <Fragment>
   <EuiPanel>
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiTitle
-          size="xs"
-        >
-          <h5>
-            <FormattedMessage
-              defaultMessage="Source Settings"
-              id="xpack.maps.layerPanel.sourceSettingsTitle"
-              values={Object {}}
-            />
-          </h5>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Source settings"
+          id="xpack.maps.layerPanel.sourceSettingsTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
     <EuiSpacer
       size="m"
     />
