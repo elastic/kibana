@@ -48,12 +48,9 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('query', function () {
-      this.tags(['skipFirefox']);
-
       it('should show bars in the correct time zone', async function () {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.common.sleep(400);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -62,7 +59,6 @@ export default function ({ getService, getPageObjects }) {
       it('should show correct data for chart interval Hourly', async function () {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.common.sleep(400);
         await PageObjects.discover.setChartInterval('Hourly');
         await visualTesting.snapshot({
           show: ['discoverChart'],
@@ -72,7 +68,6 @@ export default function ({ getService, getPageObjects }) {
       it('should show correct data for chart interval Daily', async function () {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.common.sleep(400);
         await PageObjects.discover.setChartInterval('Daily');
         await visualTesting.snapshot({
           show: ['discoverChart'],
@@ -82,7 +77,6 @@ export default function ({ getService, getPageObjects }) {
       it('should show correct data for chart interval Weekly', async function () {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.common.sleep(400);
         await PageObjects.discover.setChartInterval('Weekly');
         await visualTesting.snapshot({
           show: ['discoverChart'],
@@ -97,7 +91,6 @@ export default function ({ getService, getPageObjects }) {
         });
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.common.sleep(400);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -106,7 +99,6 @@ export default function ({ getService, getPageObjects }) {
       it('should show correct data for chart interval Monthly', async function () {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.common.sleep(400);
         await PageObjects.discover.setChartInterval('Monthly');
         await visualTesting.snapshot({
           show: ['discoverChart'],
@@ -116,7 +108,6 @@ export default function ({ getService, getPageObjects }) {
       it('should show correct data for chart interval Yearly', async function () {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.common.sleep(400);
         await PageObjects.discover.setChartInterval('Yearly');
         await visualTesting.snapshot({
           show: ['discoverChart'],
@@ -126,7 +117,6 @@ export default function ({ getService, getPageObjects }) {
       it('should show correct data for chart interval Auto', async function () {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.common.sleep(400);
         await PageObjects.discover.setChartInterval('Auto');
         await visualTesting.snapshot({
           show: ['discoverChart'],
