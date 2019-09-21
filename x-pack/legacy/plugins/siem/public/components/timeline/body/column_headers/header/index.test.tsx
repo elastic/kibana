@@ -221,7 +221,7 @@ describe('Header', () => {
       const mockOnColumnRemoved = jest.fn();
 
       const wrapper = mount(
-        <CloseButton columnId={columnHeader.id} show={true} onColumnRemoved={mockOnColumnRemoved} />
+        <CloseButton columnId={columnHeader.id} onColumnRemoved={mockOnColumnRemoved} />
       );
 
       wrapper
