@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
 
-      expect(percentDifference).to.be.lessThan(0.01);
+      expect(percentDifference).to.be.lessThan(0.02);
     });
 
     it('compare area chart snapshot', async () => {
@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
 
       // Testing some OS/browser differences were shown to cause .009 percent difference.
-      expect(percentDifference).to.be.lessThan(0.01);
+      expect(percentDifference).to.be.lessThan(0.02);
     });
   });
 }
