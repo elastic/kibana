@@ -67,7 +67,7 @@ export function registerGenerateFromJobParams(
         const jobParams = rison.decode(jobParamsRison);
         response = await handler(exportType, jobParams, request, h);
       } catch (err) {
-        throw handleError(exportType, err);
+        throw boom.badRequest(`invalid rison: ${jobParamsRison}`);
       }
       return response;
     },

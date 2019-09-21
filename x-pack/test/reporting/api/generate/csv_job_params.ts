@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import supertest from 'supertest';
-import { JOB_PARAMS_IN_POSTBODY, JOB_PARAMS_IN_QUERYSTRING } from './fixtures';
+import { JOB_PARAMS_RISON } from './fixtures';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: { getService: any }) {
@@ -21,7 +21,7 @@ export default function({ getService }: { getService: any }) {
     },
     getCsvFromParamsInQueryString: async (jobParams: string = '') => {
       return await supertestSvc
-        .post(`/api/reporting/generate/csv?jobParams=${jobParams}`)
+        .post(`/api/reporting/generate/csv?jobParams=${encodeURIComponent(jobParams)}`)
         .set('kbn-xsrf', 'xxx');
     },
   };
@@ -41,8 +41,8 @@ export default function({ getService }: { getService: any }) {
         jobParams: 0,
       })) as supertest.Response;
 
-      expect(resStatus).to.eql(400);
       expect(resText).to.match(/\\\"jobParams\\\" must be a string/);
+      expect(resStatus).to.eql(400);
     });
 
     it('Rejects empty jobParams', async () => {
@@ -57,18 +57,18 @@ export default function({ getService }: { getService: any }) {
 
     it('Accepts jobParams in POST payload', async () => {
       const { status: resStatus, text: resText } = (await generateAPI.getCsvFromParamsInPayload({
-        jobParams: JOB_PARAMS_IN_POSTBODY,
+        jobParams: JOB_PARAMS_RISON,
       })) as supertest.Response;
-      expect(resStatus).to.eql(200);
       expect(resText).to.match(/"jobtype":"csv"/);
+      expect(resStatus).to.eql(200);
     });
 
     it('Accepts jobParams in query string', async () => {
       const { status: resStatus, text: resText } = (await generateAPI.getCsvFromParamsInQueryString(
-        JOB_PARAMS_IN_QUERYSTRING
+        JOB_PARAMS_RISON
       )) as supertest.Response;
-      expect(resStatus).to.eql(200);
       expect(resText).to.match(/"jobtype":"csv"/);
+      expect(resStatus).to.eql(200);
     });
   });
 }
