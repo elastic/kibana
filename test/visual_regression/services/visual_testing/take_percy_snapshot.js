@@ -25,6 +25,27 @@ export function takePercySnapshot(show, hide) {
     return false;
   }
 
+  // add percy styles to hide/show specific elements
+  const styleElement = document.createElement('style');
+  styleElement.appendChild(document.createTextNode(`
+    .hideInPercy {
+      visibility: hidden;
+
+      .showInPercy {
+        visibility: visible;
+      }
+    }
+
+    .showInPercy {
+      visibility: visible;
+
+      .hideInPercy {
+        visibility: hidden;
+      }
+    }
+  `));
+  document.head.appendChild(styleElement);
+
   const add = (selectors, className) => {
     for (const selector of selectors) {
       for (const element of document.querySelectorAll(selector)) {
@@ -80,6 +101,7 @@ export function takePercySnapshot(show, hide) {
     return snapshot;
   } finally {
     // restore element visibility
+    document.head.removeChild(styleElement);
     remove(['body'], 'hideInPercy');
     remove(show, 'showInPercy');
     remove(hide, 'hideInPercy');
