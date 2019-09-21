@@ -48,8 +48,6 @@ import {
   createLogLegacyImportRoute,
 } from './routes';
 
-const cacheIndexPatterns = new SavedObjectsCacheIndexPatterns();
-
 function getImportableAndExportableTypes({ kbnServer, visibleTypes }) {
   const { savedObjectsManagement = {} } = kbnServer.uiExports;
   return visibleTypes.filter(
@@ -66,6 +64,7 @@ export function savedObjectsMixin(kbnServer, server) {
   const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
   const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
   const importableAndExportableTypes = getImportableAndExportableTypes({ kbnServer, visibleTypes });
+  const cacheIndexPatterns = new SavedObjectsCacheIndexPatterns();
 
   server.decorate('server', 'kibanaMigrator', migrator);
   server.decorate(

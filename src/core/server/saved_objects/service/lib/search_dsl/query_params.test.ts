@@ -996,7 +996,15 @@ describe('searchDsl/queryParams', () => {
           mappings: MAPPINGS,
           schema: SCHEMA,
           namespace: 'foo-namespace',
-          filter: 'global.name: GLOBAL',
+          kueryNode: {
+            type: 'function',
+            function: 'is',
+            arguments: [
+              { type: 'literal', value: 'global.name' },
+              { type: 'literal', value: 'GLOBAL' },
+              { type: 'literal', value: false },
+            ],
+          },
           indexPattern: INDEX_PATTERN,
         })
       ).toEqual({
@@ -1083,7 +1091,36 @@ describe('searchDsl/queryParams', () => {
           mappings: MAPPINGS,
           schema: SCHEMA,
           namespace: 'foo-namespace',
-          filter: 'global.name: GLOBAL and NOT saved.obj.key1: "key"',
+          kueryNode: {
+            type: 'function',
+            function: 'and',
+            arguments: [
+              {
+                type: 'function',
+                function: 'is',
+                arguments: [
+                  { type: 'literal', value: 'global.name' },
+                  { type: 'literal', value: 'GLOBAL' },
+                  { type: 'literal', value: false },
+                ],
+              },
+              {
+                type: 'function',
+                function: 'not',
+                arguments: [
+                  {
+                    type: 'function',
+                    function: 'is',
+                    arguments: [
+                      { type: 'literal', value: 'saved.obj.key1' },
+                      { type: 'literal', value: 'key' },
+                      { type: 'literal', value: true },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
           indexPattern: INDEX_PATTERN,
         })
       ).toEqual({
@@ -1194,7 +1231,15 @@ describe('searchDsl/queryParams', () => {
           namespace: 'foo-namespace',
           search: 'y*',
           searchFields: ['title'],
-          filter: 'global.name: GLOBAL',
+          kueryNode: {
+            type: 'function',
+            function: 'is',
+            arguments: [
+              { type: 'literal', value: 'global.name' },
+              { type: 'literal', value: 'GLOBAL' },
+              { type: 'literal', value: false },
+            ],
+          },
           indexPattern: INDEX_PATTERN,
         })
       ).toEqual({

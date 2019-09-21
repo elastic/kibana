@@ -1181,6 +1181,8 @@ describe('SavedObjectsRepository', () => {
             type: 'foo',
             id: '1',
           },
+          indexPattern: undefined,
+          kueryNode: null,
         };
 
         await savedObjectsRepository.find(relevantOpts);

@@ -20,7 +20,7 @@
 import { FieldDescriptor } from 'src/legacy/server/index_patterns/service/index_patterns_service';
 import { IndexPatternsService } from 'src/legacy/server/index_patterns';
 
-interface SavedObjectsIndexPatternField {
+export interface SavedObjectsIndexPatternField {
   name: string;
   type: string;
   aggregatable: boolean;

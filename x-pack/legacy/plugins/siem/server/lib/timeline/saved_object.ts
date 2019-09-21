@@ -266,6 +266,7 @@ export class Timeline {
         userName != null ? convertStringToBase64(userName) : null
       }`;
     }
+    options.filter = 'siem-ui-timeline.title: "best"';
 
     const savedObjects = await savedObjectsClient.find(options);
 

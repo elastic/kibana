@@ -47,3 +47,15 @@ export function fromKueryExpression(
 export function toElasticsearchQuery(node: KueryNode, indexPattern: any): JsonObject;
 
 export function doesKueryExpressionHaveLuceneSyntaxError(expression: string): boolean;
+
+type FunctionName =
+  | 'is'
+  | 'and'
+  | 'or'
+  | 'not'
+  | 'range'
+  | 'exists'
+  | 'geoBoundingBox'
+  | 'geoPolygon';
+
+export function buildKueryNode(functionName: FunctionName, ...functionArgs: any): KueryNode;

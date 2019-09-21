@@ -47,6 +47,7 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
 } from '../../types';
+import { validateConvertFilterToKueryNode } from './filter_utils';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -111,7 +112,7 @@ export class SavedObjectsRepository {
     } = options;
 
     // It's important that we migrate documents / mark them as up-to-date
-    // prior to writing them to the index. Otherwise, we'll cause unecessary
+    // prior to writing them to the index. Otherwise, we'll cause unnecessary
     // index migrations to run at Kibana startup, and those will probably fail
     // due to invalidly versioned documents in the index.
     //
@@ -442,6 +443,15 @@ export class SavedObjectsRepository {
       throw new TypeError('options.filter is missing index pattern to work correctly');
     }
 
+    const kueryNode =
+      filter && filter !== ''
+        ? validateConvertFilterToKueryNode(
+            allowedTypes,
+            filter,
+            this._cacheIndexPatterns.getIndexPatterns()
+          )
+        : null;
+
     const esOptions = {
       index: this.getIndicesForTypes(allowedTypes),
       size: perPage,
@@ -460,9 +470,8 @@ export class SavedObjectsRepository {
           sortOrder,
           namespace,
           hasReference,
-          indexPattern:
-            filter && filter !== '' ? this._cacheIndexPatterns.getIndexPatterns() : undefined,
-          filter,
+          indexPattern: kueryNode != null ? this._cacheIndexPatterns.getIndexPatterns() : undefined,
+          kueryNode,
         }),
       },
     };

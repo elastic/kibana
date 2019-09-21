@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { toElasticsearchQuery, KueryNode } from '@kbn/es-query';
 
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
 import { SavedObjectsIndexPattern } from '../cache_index_patterns';
-import { convertKqlToElasticSearchQuery } from '../kql_utils';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -92,7 +92,7 @@ interface QueryParams {
   searchFields?: string[];
   defaultSearchOperator?: string;
   hasReference?: HasReferenceQueryParams;
-  filter?: string;
+  kueryNode?: KueryNode;
   indexPattern?: SavedObjectsIndexPattern;
 }
 
@@ -108,13 +108,13 @@ export function getQueryParams({
   searchFields,
   defaultSearchOperator,
   hasReference,
-  filter,
+  kueryNode,
   indexPattern,
 }: QueryParams) {
   const types = getTypes(mappings, type);
   const bool: any = {
     filter: [
-      ...convertKqlToElasticSearchQuery(filter || '', indexPattern),
+      ...(kueryNode != null ? [toElasticsearchQuery(kueryNode, indexPattern)] : []),
       {
         bool: {
           must: hasReference
