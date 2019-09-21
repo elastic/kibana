@@ -22,7 +22,7 @@ import { visFactory } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { colorSchemas } from 'ui/vislib/components/color/colormaps';
 import { GaugeOptions } from './components/options';
-import { vislibVisController } from './controller';
+import { VislibVisController } from './controller';
 
 export default function GaugeVisType() {
   return visFactory.createBaseVisualization({
@@ -78,7 +78,7 @@ export default function GaugeVisType() {
         }
       },
     },
-    visualization: vislibVisController,
+    visualization: VislibVisController,
     editorConfig: {
       collections: {
         gaugeTypes: [

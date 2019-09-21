@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import heatmapTemplate from './editors/heatmap.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
-import { vislibVisController } from './controller';
+import { VislibVisController } from './controller';
 import './controls/heatmap_options';
 
 export default function HeatmapVisType() {
@@ -31,7 +31,7 @@ export default function HeatmapVisType() {
     title: i18n.translate('kbnVislibVisTypes.heatmap.heatmapTitle', { defaultMessage: 'Heat Map' }),
     icon: 'visHeatmap',
     description: i18n.translate('kbnVislibVisTypes.heatmap.heatmapDescription', { defaultMessage: 'Shade cells within a matrix' }),
-    visualization: vislibVisController,
+    visualization: VislibVisController,
     visConfig: {
       defaults: {
         type: 'heatmap',

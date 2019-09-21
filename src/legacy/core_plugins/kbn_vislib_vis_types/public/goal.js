@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { colorSchemas } from 'ui/vislib/components/color/colormaps';
 import { GaugeOptions } from './components/options';
-import { vislibVisController } from './controller';
+import { VislibVisController } from './controller';
 import { visFactory } from '../../../ui/public/vis/vis_factory';
 
 export default function GoalVisType() {
@@ -32,7 +32,7 @@ export default function GoalVisType() {
     description: i18n.translate('kbnVislibVisTypes.goal.goalDescription', {
       defaultMessage: 'A goal chart indicates how close you are to your final goal.'
     }),
-    visualization: vislibVisController,
+    visualization: VislibVisController,
     visConfig: {
       defaults: {
         addTooltip: true,

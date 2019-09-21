@@ -21,7 +21,7 @@ import { visFactory } from '../../../ui/public/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { PieOptions } from './components/options';
-import { vislibVisController } from './controller';
+import { VislibVisController } from './controller';
 
 export default function HistogramVisType() {
   return visFactory.createBaseVisualization({
@@ -29,7 +29,7 @@ export default function HistogramVisType() {
     title: i18n.translate('kbnVislibVisTypes.pie.pieTitle', { defaultMessage: 'Pie' }),
     icon: 'visPie',
     description: i18n.translate('kbnVislibVisTypes.pie.pieDescription', { defaultMessage: 'Compare parts of a whole' }),
-    visualization: vislibVisController,
+    visualization: VislibVisController,
     visConfig: {
       defaults: {
         type: 'pie',

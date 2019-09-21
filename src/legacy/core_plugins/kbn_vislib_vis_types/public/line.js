@@ -35,7 +35,7 @@ import {
 } from './utils/collections';
 import { palettes } from '@elastic/eui/lib/services';
 import { getAreaOptionTabs, countLabel } from './utils/common_config';
-import { vislibVisController } from './controller';
+import { VislibVisController } from './controller';
 
 export default function PointSeriesVisType() {
   return visFactory.createBaseVisualization({
@@ -43,7 +43,7 @@ export default function PointSeriesVisType() {
     title: i18n.translate('kbnVislibVisTypes.line.lineTitle', { defaultMessage: 'Line' }),
     icon: 'visLine',
     description: i18n.translate('kbnVislibVisTypes.line.lineDescription', { defaultMessage: 'Emphasize trends' }),
-    visualization: vislibVisController,
+    visualization: VislibVisController,
     visConfig: {
       defaults: {
         type: 'line',
