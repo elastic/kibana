@@ -26,11 +26,10 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/40173
-  describe.skip('dashboard snapshots', function describeIndexTests() {
+  describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
       // We use a really small window to minimize differences across os's and browsers.
-      await browser.setWindowSize(1000, 700);
+      await browser.setScreenshotSize(1000, 500);
     });
 
     after(async function () {
@@ -39,8 +38,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.dashboard.deleteDashboard('area', id);
     });
 
-    // Skip until https://github.com/elastic/kibana/issues/19471 is fixed
-    it.skip('compare TSVB snapshot', async () => {
+    it('compare TSVB snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInLogstashDataRange();
@@ -49,7 +47,6 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
 
       await PageObjects.dashboard.saveDashboard('tsvb');
       await PageObjects.common.closeToast();
-
       await PageObjects.dashboard.clickFullScreenMode();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickExpandPanelToggle();
@@ -59,11 +56,10 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
 
-      expect(percentDifference).to.be.lessThan(0.05);
+      expect(percentDifference).to.be.lessThan(0.01);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/40173
-    it.skip('compare area chart snapshot', async () => {
+    it('compare area chart snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInLogstashDataRange();
@@ -80,7 +76,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
 
       // Testing some OS/browser differences were shown to cause .009 percent difference.
-      expect(percentDifference).to.be.lessThan(0.05);
+      expect(percentDifference).to.be.lessThan(0.01);
     });
   });
 }
