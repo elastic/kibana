@@ -137,6 +137,7 @@ export class PipelineListing extends Component {
       sorting,
       pagination,
       onTableChange,
+      fetchMoreData,
       upgradeMessage,
       className
     } = this.props;
@@ -164,6 +165,7 @@ export class PipelineListing extends Component {
               }}
               message={upgradeMessage}
               pagination={pagination}
+              fetchMoreData={fetchMoreData}
               search={{
                 box: {
                   incremental: true,

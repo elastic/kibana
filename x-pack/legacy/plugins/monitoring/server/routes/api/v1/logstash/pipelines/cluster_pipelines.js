@@ -57,7 +57,8 @@ async function getLogstashPipelineIds(req, logstashIndexPattern, size) {
 }
 
 function paginate({ size,  index }, data) {
-  return data.slice(index * size, size);
+  const start = index * size;
+  return data.slice(start, Math.min(data.length, start + size));
 }
 
 /**
@@ -95,18 +96,21 @@ export function logstashClusterPipelinesRoute(server) {
       const clusterUuid = req.params.clusterUuid;
       const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
 
-      const pipelines = await getLogstashPipelineIds(req, lsIndexPattern, config.get('xpack.monitoring.max_bucket_size'));
-      const pipelineIds = get(pipelines, 'aggregations.nested_context.pipelines.buckets', []).map(bucket => ({ id: bucket.key }));
+      const rawPipelines = await getLogstashPipelineIds(req, lsIndexPattern, config.get('xpack.monitoring.max_bucket_size'));
+      const pipelines = get(rawPipelines, 'aggregations.nested_context.pipelines.buckets', []).map(bucket => ({ id: bucket.key }));
 
       // Manually apply pagination/sorting/filtering concerns
 
       // Filtering
 
       // Sorting
-      const sortedPipelineIds = sortByOrder(pipelineIds, sort.field, sort.direction);
+      const sortedPipelines = sortByOrder(pipelines, pipeline => pipeline[sort.field], sort.direction);
 
       // Pagination
-      const pageOfPipelineIds = paginate(pagination, sortedPipelineIds);
+      const pageOfPipelines = paginate(pagination, sortedPipelines);
+
+      // Just the IDs for the rest
+      const pipelineIds = pageOfPipelines.map(pipeline => pipeline.id);
 
       const throughputMetric = 'logstash_cluster_pipeline_throughput';
       const nodesCountMetric = 'logstash_cluster_pipeline_nodes_count';
@@ -117,15 +121,23 @@ export function logstashClusterPipelinesRoute(server) {
       ];
 
       try {
+        const pipelineData = sortByOrder(
+          await getPipelines(req, lsIndexPattern, pipelineIds, metricSet),
+          pipeline => pipeline[sort.field],
+          sort.direction
+        );
         const response = await processPipelinesAPIResponse(
           {
-            pipelines: await getPipelines(req, lsIndexPattern, pageOfPipelineIds, metricSet),
+            pipelines: pipelineData,
             clusterStatus: await getClusterStatus(req, lsIndexPattern, { clusterUuid })
           },
           throughputMetric,
           nodesCountMetric
         );
-        return response;
+        return {
+          ...response,
+          totalPipelineCount: pipelines.length
+        };
       } catch (err) {
         throw handleError(err, req);
       }

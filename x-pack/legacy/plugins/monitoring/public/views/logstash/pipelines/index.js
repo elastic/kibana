@@ -93,6 +93,11 @@ uiRoutes
             ? makeUpgradeMessage(pageData.clusterStatus.versions, i18n)
             : null;
 
+          const pagination = {
+            ...this.pagination,
+            totalItemCount: pageData.totalPipelineCount
+          };
+
           super.renderReact(
             <I18nContext>
               <PipelineListing
@@ -101,8 +106,14 @@ uiRoutes
                 stats={pageData.clusterStatus}
                 data={pageData.pipelines}
                 sorting={this.sorting}
-                pagination={this.pagination}
+                pagination={pagination}
                 onTableChange={this.onTableChange}
+                fetchMoreData={async ({ page, sort }) => {
+                  this.setPagination(page);
+                  this.setSorting(sort);
+                  this.updateData();
+                  // return await getPageData($injector);
+                }}
                 upgradeMessage={upgradeMessage}
                 dateFormat={config.get('dateFormat')}
                 angular={{

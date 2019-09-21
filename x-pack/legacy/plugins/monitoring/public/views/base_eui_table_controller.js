@@ -48,8 +48,8 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
     const { page, sort } = getLocalStorageData(storage);
 
     this.pagination = {
-      initialPageSize: 20,
-      initialPageIndex: 0,
+      pageSize: 20,
+      pageIndex: 0,
       pageSizeOptions: PAGE_SIZE_OPTIONS
     };
 
@@ -57,19 +57,10 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
       if (!PAGE_SIZE_OPTIONS.includes(page.size)) {
         page.size = 20;
       }
-      this.pagination = {
-        initialPageSize: page.size,
-        initialPageIndex: page.index,
-        pageSizeOptions: PAGE_SIZE_OPTIONS
-      };
+      this.setPagination(page);
     }
 
-    this.sorting = sort || {
-      sort: {
-        field: 'name',
-        direction: EUI_SORT_ASCENDING
-      }
-    };
+    this.setSorting(sort);
 
     this.onTableChange = ({ page, sort }) => {
       setLocalStorageData(storage, {
@@ -80,14 +71,33 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
       });
     };
 
-    this.routeOptions = {
+    this.updateData();
+  }
+
+  setPagination(page) {
+    this.pagination = {
+      pageSize: page.size,
+      pageIndex: page.index,
+      pageSizeOptions: PAGE_SIZE_OPTIONS
+    };
+  }
+
+  setSorting(sort) {
+    this.sorting = sort || {
+      sort: {
+        field: 'name',
+        direction: EUI_SORT_ASCENDING
+      }
+    };
+  }
+
+  getPaginationRouteOptions() {
+    return {
       pagination: {
-        size: this.pagination.initialPageSize,
-        index: this.pagination.initialPageIndex
+        size: this.pagination.pageSize,
+        index: this.pagination.pageIndex
       },
       ...this.sorting
     };
-
-    this.updateData();
   }
 }

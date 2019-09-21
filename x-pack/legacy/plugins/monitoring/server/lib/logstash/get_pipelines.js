@@ -7,7 +7,7 @@ import { cloneDeep, last, omit } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { getMetrics } from '../details/get_metrics';
 
-export function _handleResponse(response) {
+export function _handleResponse(response, exclusivePipelineIds) {
   const pipelinesById = {};
 
   const metrics = Object.keys(response);
@@ -15,6 +15,9 @@ export function _handleResponse(response) {
     response[metric][0].data.forEach(([x, y]) => {
       const pipelineIds = Object.keys(y);
       pipelineIds.forEach(pipelineId => {
+        if (exclusivePipelineIds && !exclusivePipelineIds.includes(pipelineId)) {
+          return;
+        }
         // Create new pipeline object if necessary
         if (!pipelinesById.hasOwnProperty(pipelineId)) {
           pipelinesById[pipelineId] = {
@@ -90,5 +93,5 @@ export async function getPipelines(req, logstashIndexPattern, pipelineIds, metri
   ];
 
   const metricsResponse = await getMetrics(req, logstashIndexPattern, metricSet, filters);
-  return _handleResponse(metricsResponse);
+  return _handleResponse(metricsResponse, pipelineIds);
 }

@@ -95,8 +95,6 @@ export class MonitoringViewBaseController {
       showZoomOutBtn: () => zoomInLevel > 0
     };
 
-    this.routeOptions = {};
-
     const {
       enableTimeFilter = true,
       enableAutoRefresh = true
@@ -122,7 +120,7 @@ export class MonitoringViewBaseController {
         this.updateDataPromise = null;
       }
       const _api = apiUrlFn ? apiUrlFn() : api;
-      const promises = [_getPageData($injector, _api, this.routeOptions)];
+      const promises = [_getPageData($injector, _api, this.getPaginationRouteOptions())];
       const setupMode = getSetupModeState();
       if (setupMode.enabled) {
         promises.push(updateSetupModeData());
@@ -177,5 +175,9 @@ export class MonitoringViewBaseController {
     } else {
       render(component, document.getElementById(this.reactNodeId));
     }
+  }
+
+  getPaginationRouteOptions() {
+    return {};
   }
 }
