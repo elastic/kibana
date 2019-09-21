@@ -25,13 +25,30 @@ export function takePercySnapshot(show, hide) {
     return false;
   }
 
-  const queryAll = selector => [
-    ...document.querySelectorAll(selector)
-  ];
+  // add percy styles to hide/show specific elements
+  const styleElement = document.createElement('style');
+  styleElement.appendChild(document.createTextNode(`
+    .hideInPercy {
+      visibility: hidden;
+
+      .showInPercy {
+        visibility: visible;
+      }
+    }
+
+    .showInPercy {
+      visibility: visible;
+
+      .hideInPercy {
+        visibility: hidden;
+      }
+    }
+  `));
+  document.head.appendChild(styleElement);
 
   const add = (selectors, className) => {
     for (const selector of selectors) {
-      for (const element of queryAll(selector)) {
+      for (const element of document.querySelectorAll(selector)) {
         element.classList.add(className);
       }
     }
@@ -39,55 +56,52 @@ export function takePercySnapshot(show, hide) {
 
   const remove = (selectors, className) => {
     for (const selector of selectors) {
-      for (const element of queryAll(selector)) {
+      for (const element of document.querySelectorAll(selector)) {
         element.classList.remove(className);
       }
     }
   };
 
-  const hideByDefault = show.length > 0;
-  const agent = new window.PercyAgent({
-    handleAgentCommunication: false
-  });
-
-  if (hideByDefault) {
-    document.body.classList.add('percyHideAllByDefault');
-  } else {
-    document.body.classList.remove('percyHideAllByDefault');
+  // set Percy visibility on elements
+  add(hide, 'hideInPercy');
+  if (show.length > 0) {
+    // hide the body by default
+    add(['body'], 'hideInPercy');
+    add(show, 'showInPercy');
   }
 
-  // set Percy visibility on elements
-  const className = hideByDefault ? 'showInPercy' : 'hideInPercy';
-  const selectors = hideByDefault ? show : hide;
-  add(selectors, className);
-
-  // array of canvas/image replacements
-  const replacements = [];
-
   // convert canvas elements into static images
-  for (const canvas of queryAll('canvas')) {
+  const replacements = [];
+  for (const canvas of document.querySelectorAll('canvas')) {
     const image = document.createElement('img');
+    image.classList.value = canvas.classList.value;
     image.src = canvas.toDataURL();
     image.style.cssText = window.getComputedStyle(canvas).cssText;
     canvas.parentElement.replaceChild(image, canvas);
     replacements.push({ canvas, image });
   }
 
-  // cache the dom snapshot containing the images
-  const snapshot = agent.snapshot(document, {
-    widths: [document.documentElement.clientWidth]
-  });
+  try {
+    const agent = new window.PercyAgent({
+      handleAgentCommunication: false
+    });
 
-  // restore replaced canvases
-  for (const { image, canvas } of replacements) {
-    image.parentElement.replaceChild(canvas, image);
+    // cache the dom snapshot containing the images
+    return agent.snapshot(document, {
+      widths: [document.documentElement.clientWidth]
+    });
+  } finally {
+    // restore replaced canvases
+    for (const { image, canvas } of replacements) {
+      image.parentElement.replaceChild(canvas, image);
+    }
+
+    // restore element visibility
+    document.head.removeChild(styleElement);
+    remove(['body'], 'hideInPercy');
+    remove(show, 'showInPercy');
+    remove(hide, 'hideInPercy');
   }
-
-  // restore element visibility
-  document.body.classList.remove('percyHideAllByDefault');
-  remove(selectors, className);
-
-  return snapshot;
 }
 
 export const takePercySnapshotWithAgent = `
