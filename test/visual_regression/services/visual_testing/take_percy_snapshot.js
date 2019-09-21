@@ -62,10 +62,6 @@ export function takePercySnapshot(show, hide) {
     }
   };
 
-  const agent = new window.PercyAgent({
-    handleAgentCommunication: false
-  });
-
   // set Percy visibility on elements
   add(hide, 'hideInPercy');
   if (show.length > 0) {
@@ -74,32 +70,32 @@ export function takePercySnapshot(show, hide) {
     add(show, 'showInPercy');
   }
 
+  // convert canvas elements into static images
+  const replacements = [];
+  for (const canvas of document.querySelectorAll('canvas')) {
+    const image = document.createElement('img');
+    image.classList.value = canvas.classList.value;
+    image.src = canvas.toDataURL();
+    image.style.cssText = window.getComputedStyle(canvas).cssText;
+    canvas.parentElement.replaceChild(image, canvas);
+    replacements.push({ canvas, image });
+  }
+
   try {
-    // array of canvas/image replacements
-    const replacements = [];
-
-    // convert canvas elements into static images
-    for (const canvas of document.querySelectorAll('canvas')) {
-      const image = document.createElement('img');
-      image.classList.value = canvas.classList.value;
-      image.src = canvas.toDataURL();
-      image.style.cssText = window.getComputedStyle(canvas).cssText;
-      canvas.parentElement.replaceChild(image, canvas);
-      replacements.push({ canvas, image });
-    }
-
-    // cache the dom snapshot containing the images
-    const snapshot = agent.snapshot(document, {
-      widths: [document.documentElement.clientWidth]
+    const agent = new window.PercyAgent({
+      handleAgentCommunication: false
     });
 
+    // cache the dom snapshot containing the images
+    return agent.snapshot(document, {
+      widths: [document.documentElement.clientWidth]
+    });
+  } finally {
     // restore replaced canvases
     for (const { image, canvas } of replacements) {
       image.parentElement.replaceChild(canvas, image);
     }
 
-    return snapshot;
-  } finally {
     // restore element visibility
     document.head.removeChild(styleElement);
     remove(['body'], 'hideInPercy');
