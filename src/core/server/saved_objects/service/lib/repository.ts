@@ -590,7 +590,6 @@ export class SavedObjectsRepository {
       attributes: response._source[type],
       references: response._source.references || [],
       migrationVersion: response._source.migrationVersion,
-      starred: response._source.starred,
     };
   }
 

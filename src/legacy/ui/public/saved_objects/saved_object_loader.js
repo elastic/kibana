@@ -111,7 +111,7 @@ export class SavedObjectLoader {
         search: search ? `${search}*` : undefined,
         perPage: size,
         page: 1,
-        searchFields: ['title^3', 'description', 'starred'],
+        searchFields: ['title^3', 'description'],
         defaultSearchOperator: 'AND',
         fields,
       }).then((resp) => {

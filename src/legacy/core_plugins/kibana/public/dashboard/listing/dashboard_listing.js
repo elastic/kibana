@@ -22,9 +22,15 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiLink, EuiButton, EuiEmptyPrompt, EuiButtonToggle } from '@elastic/eui';
+import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
 import { TableListView } from './../../table_list_view';
+
+import chrome from 'ui/chrome';
+import { UserAPIClient } from '../../../../../../../x-pack/legacy/plugins/security/public/lib/api';
+
+import { toastNotifications as notifications } from 'ui/notify';
+
 
 export const EMPTY_FILTER = '';
 
@@ -36,9 +42,108 @@ export const EMPTY_FILTER = '';
 export class DashboardListing extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      preferredDash: false,
-    };
+  }
+
+  getCurrentSpace() {
+    const basePath = chrome.getBasePath();
+    const matchResult = basePath.match(/^\/.*\/s\/([a-z0-9_\-]+)/);
+
+    if (!matchResult || matchResult.length === 0) {
+      return 'default';
+    }
+    return matchResult[1];
+  }
+
+  async addOrRemoveDashboardToFavedObjects(objId, action) {
+
+    const currentSpace = this.getCurrentSpace();
+    const newObj = currentSpace + ':dashboard:' + objId;
+
+    const apiClient = new UserAPIClient();
+    const currentUser = await apiClient.getCurrentUser();
+    let favedObjectsArr = currentUser.metadata.favedObjects;
+
+    if (favedObjectsArr) {
+      if (action === 'add') {
+        favedObjectsArr.push(newObj);
+      } else {
+        const index = favedObjectsArr.indexOf(newObj);
+        if (index > -1) {
+          favedObjectsArr.splice(index, 1);
+        }
+      }
+    } else {
+      if (action === 'add') {
+        favedObjectsArr = [newObj];
+      }
+    }
+
+    const userToSave = { ...currentUser };
+    delete userToSave.authentication_realm;
+    delete userToSave.lookup_realm;
+
+    userToSave.metadata = { favedObjects: favedObjectsArr };
+
+    try {
+      await apiClient.saveUser(userToSave);
+      return 0;
+    } catch (e) {
+      return 1;
+    }
+
+    return 0;
+  }
+
+  async starOnClick(objId, isStarred, theTable) {
+
+    let action = 'add';
+    let modItem = 0;
+
+    for (let i = 0; i < theTable.state.items.length; i++)
+    {
+      if (theTable.state.items[i].id === objId) {
+        theTable.state.items[i].starred = !theTable.state.items[i].starred;
+        if (theTable.state.items[i].starred === false) {
+          action = 'remove';
+        }
+        modItem = i;
+      }
+      theTable.setState({
+        items: theTable.state.items
+      });
+    }
+
+    const result = await this.addOrRemoveDashboardToFavedObjects(objId, action);
+    if (result !== 0) {
+      notifications.addDanger('Unable to add star to this object');
+      theTable.state.items[modItem].starred = !theTable.state.items[modItem].starred;
+      theTable.setState({
+        items: theTable.state.items
+      });
+    }
+  }
+
+  async starredListGetter(items) {
+    const apiClient = new UserAPIClient();
+    const currentUser = await apiClient.getCurrentUser();
+    this.favedObjectsArr = currentUser.metadata.favedObjects;
+
+    if (this.favedObjectsArr === undefined) {
+      return [];
+    }
+
+    const currentSpace = this.getCurrentSpace();
+
+    const lofFaved = this.favedObjectsArr;
+    for (let i = 0; i < items.length; i++)
+    {
+      const objToSearch = currentSpace + ':dashboard:' + items[i].id;
+      if (lofFaved.indexOf(objToSearch) > -1) {
+        items[i].starred = true;
+      }
+    }
+
+    return this.favedObjectsArr;
   }
 
   render() {
@@ -61,6 +166,9 @@ export class DashboardListing extends React.Component {
         tableListTitle={i18n.translate('kbn.dashboard.listing.dashboardsTitle', {
           defaultMessage: 'Dashboards',
         })}
+        starredEntities={true}
+        starClick={this.starOnClick.bind(this)}
+        starProcessor={this.starredListGetter.bind(this)}
       />
     );
   }
@@ -164,25 +272,6 @@ export class DashboardListing extends React.Component {
         }),
         dataType: 'string',
         sortable: true,
-      },
-      {
-        field: 'starred',
-        name: i18n.translate('kbn.dashboard.listing.table.starredColumnName', {
-          defaultMessage: 'Starred',
-        }),
-        sortable: false,
-        render: (field, record) => (
-          <div>
-            <EuiButtonToggle
-              label="Toggle Me"
-              iconType={record.starred ? 'starFilled' : 'starEmpty'}
-              color={record.starred ? 'warning' : 'primary'}
-              isEmpty
-              isIconOnly
-            />
-          </div>
-        ),
-        width: '80px',
       },
     ];
     return tableColumns;

@@ -37,6 +37,7 @@ import {
   EuiOverlayMask,
   EuiConfirmModal,
   EuiCallOut,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { npStart } from 'ui/new_platform';
@@ -87,7 +88,12 @@ class TableListViewUi extends React.Component {
   }
 
   debouncedFetch = _.debounce(async (filter) => {
+
     const response = await this.props.findItems(filter);
+
+    if (this.props.starredEntities) {
+      await this.props.starProcessor(response.hits);
+    }
 
     if (!this._isMounted) {
       return;
@@ -354,6 +360,32 @@ class TableListViewUi extends React.Component {
       });
     }
 
+    /* starred */
+    if (this.props.starredEntities) {
+      columns.push({
+        field: 'starred',
+        name: i18n.translate('kbn.table_list_view.listing.table.starredTitle', {
+          defaultMessage: 'Starred',
+        }),
+        dataType: 'boolean',
+        sortable: true,
+        width: '80px',
+        render: (field, record) => (
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ display: 'inline-block' }}>
+              &nbsp;&nbsp;&nbsp;<EuiIcon
+                type={record.starred ? 'starFilled' : 'starEmpty'}
+                color={record.starred ? 'orange' : 'default'}
+                onClick={() => {
+                  this.props.starClick(record.id, record.starred, this);
+                }}
+              />
+            </div>
+          </div>
+        ),
+      });
+    }
+
     const noItemsMessage = (
       <FormattedMessage
         id="kbn.table_list_view.listing.noMatchedItemsMessage"
@@ -474,6 +506,10 @@ TableListViewUi.propTypes = {
   entityName: PropTypes.string.isRequired,
   entityNamePlural: PropTypes.string.isRequired,
   tableListTitle: PropTypes.string.isRequired,
+
+  starredEntities: PropTypes.bool,
+  starClick: PropTypes.func,
+  starProcessor: PropTypes.func,
 };
 
 TableListViewUi.defaultProps = {
