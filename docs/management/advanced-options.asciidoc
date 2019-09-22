@@ -210,7 +210,7 @@ might increase the search time. This setting is off by default. Users must opt-i
 
 [horizontal]
 `siem:defaultAnomalyScore`:: The threshold above which anomalies are displayed in the SIEM app.
-`siem:defaultIndex`:: A comma-delimited list of index patterns from which the SIEM app collects events. 
+`siem:defaultIndex`:: A comma-delimited list of Elasticsearch indices from which the SIEM app collects events. 
 `siem:refreshIntervalDefaults`:: The default refresh interval for the SIEM time filter, in milliseconds.
 `siem:timeDefaults`:: The default period of time in the SIEM time filter.
 
