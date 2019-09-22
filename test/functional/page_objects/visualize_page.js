@@ -546,9 +546,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async selectAggregateWith(fieldValue) {
-      const sortSelect = await testSubjects.find(`visDefaultEditorAggregateWith`);
-      const sortMetric = await sortSelect.findByCssSelector(`option[value="${fieldValue}"]`);
-      await sortMetric.click();
+      await testSubjects.selectValue('visDefaultEditorAggregateWith', fieldValue);
     }
 
     async getInterval() {

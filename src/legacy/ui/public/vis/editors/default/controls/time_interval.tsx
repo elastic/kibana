@@ -131,6 +131,7 @@ function TimeIntervalParamEditor({
       })}
     >
       <EuiComboBox
+        compressed
         fullWidth={true}
         data-test-subj="visEditorInterval"
         isInvalid={showValidation ? !isValid : false}
