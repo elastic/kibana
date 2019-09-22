@@ -15,22 +15,62 @@ import {
   EuiPortal,
   EuiSpacer,
   EuiTabbedContent,
-  EuiTitle
+  EuiTitle,
+  EuiBadge
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get, keys } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import { idx } from '@kbn/elastic-idx';
+import { Summary } from '../../../../../../shared/Summary';
+import { TimestampSummaryItem } from '../../../../../../shared/Summary/TimestampSummaryItem';
+import { DurationSummaryItem } from '../../../../../../shared/Summary/DurationSummaryItem';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
 import { DiscoverSpanLink } from '../../../../../../shared/Links/DiscoverLinks/DiscoverSpanLink';
 import { Stacktrace } from '../../../../../../shared/Stacktrace';
-import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
 import { ResponsiveFlyout } from '../ResponsiveFlyout';
 import { DatabaseContext } from './DatabaseContext';
 import { HttpContext } from './HttpContext';
 import { StickySpanProperties } from './StickySpanProperties';
+
+function formatType(type: string) {
+  switch (type) {
+    case 'db':
+      return 'DB';
+    case 'hard-navigation':
+      return i18n.translate(
+        'xpack.apm.transactionDetails.spanFlyout.spanType.navigationTimingLabel',
+        {
+          defaultMessage: 'Navigation timing'
+        }
+      );
+    default:
+      return type;
+  }
+}
+
+function formatSubtype(subtype: string) {
+  switch (subtype) {
+    case 'mysql':
+      return 'MySQL';
+    default:
+      return subtype;
+  }
+}
+
+function getSpanTypes(span: Span) {
+  const { type, subtype, action } = span.span;
+
+  const [primaryType, subtypeFromType, actionFromType] = type.split('.'); // This is to support 6.x data
+
+  return {
+    spanType: formatType(primaryType),
+    spanSubtype: formatSubtype(subtype || subtypeFromType),
+    spanAction: action || actionFromType
+  };
+}
 
 const TagName = styled.div`
   font-weight: bold;
@@ -62,6 +102,7 @@ export function SpanFlyout({
     key,
     value: get(spanLabels, key)
   }));
+  const spanTypes = getSpanTypes(span);
 
   return (
     <EuiPortal>
@@ -96,9 +137,27 @@ export function SpanFlyout({
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <FlyoutTopLevelProperties transaction={parentTransaction} />
-          <EuiHorizontalRule />
-          <StickySpanProperties span={span} totalDuration={totalDuration} />
+          <StickySpanProperties span={span} transaction={parentTransaction} />
+          <EuiSpacer size="m" />
+          <Summary
+            items={[
+              <TimestampSummaryItem time={span.timestamp.us / 1000} />,
+              <DurationSummaryItem
+                duration={span.span.duration.us}
+                totalDuration={totalDuration}
+                parentType="transaction"
+              />,
+              <>
+                <EuiBadge color="hollow">{spanTypes.spanType}</EuiBadge>
+                {spanTypes.spanSubtype && (
+                  <EuiBadge color="hollow">{spanTypes.spanSubtype}</EuiBadge>
+                )}
+                {spanTypes.spanAction && (
+                  <EuiBadge color="hollow">{spanTypes.spanAction}</EuiBadge>
+                )}
+              </>
+            ]}
+          />
           <EuiHorizontalRule />
           <HttpContext httpContext={httpContext} />
           <DatabaseContext dbContext={dbContext} />

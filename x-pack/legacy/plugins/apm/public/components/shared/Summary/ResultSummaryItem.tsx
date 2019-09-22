@@ -12,7 +12,7 @@ interface ResultProps {
   result: string;
 }
 
-export function Result({ result }: ResultProps) {
+export function ResultSummaryItem({ result }: ResultProps) {
   return (
     <EuiToolTip
       content={i18n.translate('xpack.apm.transactionDetails.resultLabel', {
