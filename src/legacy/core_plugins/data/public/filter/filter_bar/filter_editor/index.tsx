@@ -61,6 +61,7 @@ import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
 import { SavedQueryService } from '../../../search/search_bar/lib/saved_query_service';
 import { SavedQueryEditorUI } from './saved_query_editor';
+import { SavedQuerySingleSelect } from './saved_query_single_select';
 
 export type SavedQueryParamsPartial = Partial<SavedQueryFilterParams>;
 
@@ -448,12 +449,13 @@ class FilterEditorUI extends Component<Props, State> {
       <div>
         <EuiFlexGroup responsive={false} gutterSize="s">
           <EuiFlexItem>
-            <SavedQueryEditorUI
+            <SavedQuerySingleSelect savedQueryService={this.props.savedQueryService} />
+            {/* <SavedQueryEditorUI
               showSaveQuery={this.props.showSaveQuery}
               value={this.state.params}
               savedQueryService={this.props.savedQueryService}
               onChange={this.onSavedQueryChange}
-            />
+            /> */}
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
