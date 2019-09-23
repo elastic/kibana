@@ -102,8 +102,12 @@ export class MonitorGroupIterator {
     const current = this.getCurrent();
 
     // Trim the buffer to free space before fetching more
-    this.buffer = current ? [current] : [];
-    this.bufferPos = 0;
+    // We only need to do this if there is actually something in the buffer.
+    // This also behaves correctly in the -1 case for bufferPos, where we don't want to make it 0.
+    if (current) {
+      this.buffer = [current];
+      this.bufferPos = 0;
+    }
 
     const results = await this.chunkFetcher(this.queryContext, this.searchAfter, size);
     // If we've hit the end of the stream searchAfter will be empty
