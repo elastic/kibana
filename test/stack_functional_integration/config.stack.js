@@ -24,30 +24,35 @@
 // } from './services';
 
 export default async function ({ readConfigFile }) {
-  const commonConfig = await readConfigFile(require.resolve('../common/config'));
+  const defaultConfig = await readConfigFile(require.resolve('../functional/config'));
+  // const commonConfig = await readConfigFile(require.resolve('../common/config'));
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
+    ...defaultConfig.getAll(),
     junit: {
       reportName: 'Stack Functional Integration Tests'
     },
+    browser: {
+      type: 'chrome'
+    },
     testFiles: [
       require.resolve('./test/functional/apps/telemetry'),
-      require.resolve('./test/functional/apps/metricbeat'),
-      require.resolve('./test/functional/apps/filebeat'),
-      require.resolve('./test/functional/apps/packetbeat'),
-      require.resolve('./test/functional/apps/monitoring'),
+      // require.resolve('./test/functional/apps/metricbeat'),
+      // require.resolve('./test/functional/apps/filebeat'),
+      // require.resolve('./test/functional/apps/packetbeat'),
+      // require.resolve('./test/functional/apps/monitoring'),
     ],
     services: {
-      es: commonConfig.get('services.es'),
-      esArchiver: commonConfig.get('services.esArchiver'),
-      retry: commonConfig.get('services.retry'),
+      // es: commonConfig.get('services.es'),
+      // esArchiver: commonConfig.get('services.esArchiver'),
+      // retry: commonConfig.get('services.retry'),
       // supertest: KibanaSupertestProvider,
       // supertestWithoutAuth: KibanaSupertestWithoutAuthProvider,
       // esSupertest: ElasticsearchSupertestProvider,
     },
-    servers: commonConfig.get('servers'),
-    esTestCluster: commonConfig.get('esTestCluster'),
+    // servers: commonConfig.get('servers'),
+    // esTestCluster: commonConfig.get('esTestCluster'),
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
