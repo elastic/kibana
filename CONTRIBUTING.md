@@ -319,7 +319,7 @@ Note that for VSCode, to enable "live" linting of TypeScript (and other) file ty
     ]
 ```
 
-`eslint` can fix trivial lint errors. And `eslint` plugin can do that for you when you save a file by adding this line in your setting.
+`eslint`  can automatically fix trivial lint errors when you save a file by adding this line in your setting.
 
 ```json
   "eslint.autoFixOnSave": true,
