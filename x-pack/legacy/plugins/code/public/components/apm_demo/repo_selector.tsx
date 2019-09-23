@@ -60,7 +60,7 @@ export const RepoSelector = ({ onSelect, repos: _repos }: Props) => {
   return (
     <>
       <EuiSelect options={options} value={selectedValue} onChange={handleChange} />
-      <EuiButton disabled={!selectedRepo} onClick={handleSave}>
+      <EuiButton disabled={!selectedRepo} onClick={handleSave} style={{ marginTop: '1rem' }}>
         Save Mapping
       </EuiButton>
       {showModal && (

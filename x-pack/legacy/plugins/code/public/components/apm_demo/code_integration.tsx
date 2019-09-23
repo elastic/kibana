@@ -5,7 +5,8 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButton, EuiPopover } from '@elastic/eui';
+import styled from 'styled-components';
+import { EuiButtonEmpty, EuiPopover, EuiText } from '@elastic/eui';
 
 import { RepoSelector } from './repo_selector';
 
@@ -17,10 +18,15 @@ interface Props {
 
 const repos = ['a', 'b', 'c'];
 
+const PopoverContent = styled.div`
+  margin-bottom: 1rem;
+  width: 300px;
+`;
+
 export const CodeIntegration = ({ onRepoSelect, frame, project }: Props) => {
   const [showSelector, setShowSelector] = useState(false);
 
-  const onClick = () => {
+  const handleClick = () => {
     if (project.mapping) {
       // TODO: link to code
       console.log('going to frame', frame, 'in project', project.url);
@@ -29,7 +35,17 @@ export const CodeIntegration = ({ onRepoSelect, frame, project }: Props) => {
     }
   };
 
-  const button = <EuiButton onClick={onClick}>View in Code</EuiButton>;
+  const handleSelect = (codeId: string) => {
+    onRepoSelect(codeId);
+    setShowSelector(false);
+    // TODO: show success
+  };
+
+  const button = (
+    <EuiButtonEmpty iconType="logoCode" onClick={handleClick}>
+      View in Code
+    </EuiButtonEmpty>
+  );
 
   return (
     <EuiPopover
@@ -38,7 +54,16 @@ export const CodeIntegration = ({ onRepoSelect, frame, project }: Props) => {
       isOpen={showSelector}
       closePopover={() => setShowSelector(false)}
     >
-      <RepoSelector onSelect={onRepoSelect} repos={repos} />
+      <PopoverContent>
+        <EuiText size="s">
+          <h3>No repository mapping found</h3>
+          <p>
+            We can't find the mapping between service and the source code. Select the repository or
+            import a new one.
+          </p>
+        </EuiText>
+      </PopoverContent>
+      <RepoSelector onSelect={handleSelect} repos={repos} />
     </EuiPopover>
   );
 };
