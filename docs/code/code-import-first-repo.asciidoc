@@ -29,7 +29,7 @@ xpack.code.ui.enabled: true
 https://github.com/Microsoft/TypeScript-Node-Starter
 ----
 
-`https` is recommend for cloning git repositories.
+`https` is recommend for cloning most git repositories. To clone a private repository, [use SSH]. 
 
 . Click *Import*.
 +
