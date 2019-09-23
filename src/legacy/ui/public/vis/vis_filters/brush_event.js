@@ -21,77 +21,46 @@ import _ from 'lodash';
 import moment from 'moment';
 import { buildRangeFilter } from '@kbn/es-query';
 
-export function onBrushEvent(timefilter, event, $state) {
+export function onBrushEvent(event) {
   const isNumber = event.data.ordered;
   const isDate = isNumber && event.data.ordered.date;
 
   const xRaw = _.get(event.data, 'series[0].values[0].xRaw');
-  if (!xRaw) return;
+  if (!xRaw) return [];
   const column = xRaw.table.columns[xRaw.column];
-  if (!column) return;
+  if (!column) return [];
   const aggConfig = event.aggConfigs[xRaw.column];
-  if (!aggConfig) return;
+  if (!aggConfig) return [];
   const indexPattern = aggConfig.getIndexPattern();
   const field = aggConfig.params.field;
-  if (!field) return;
-  const fieldName = field.name;
+  if (!field) return [];
 
-  if (isDate && indexPattern.timeFieldName === fieldName) {
-    setTimefilter();
-  } else if (isNumber) {
-    setRange();
+  if (event.range.length <= 1) return [];
+
+  const min = event.range[0];
+  const max = event.range[event.range.length - 1];
+  if (min === max) return [];
+
+  let range;
+
+  if (isDate) {
+    range = {
+      gte: moment(min).toISOString(),
+      lt: moment(max).toISOString(),
+      format: 'strict_date_optional_time'
+    };
+  } else {
+    range = {
+      gte: min,
+      lt: max
+    };
   }
 
-  function setTimefilter() {
-    const from = moment(event.range[0]);
-    const to = moment(event.range[1]);
+  const newFilter = buildRangeFilter(
+    field,
+    range,
+    indexPattern,
+    event.data.xAxisFormatter);
 
-    if (to - from === 0) return;
-
-    timefilter.setTime({
-      from,
-      to,
-      mode: 'absolute'
-    });
-  }
-
-  function setRange() {
-    if (event.range.length <= 1) return;
-
-    const existingFilter = $state.filters.find(filter => (
-      filter.meta && filter.meta.key === fieldName
-    ));
-
-    const min = event.range[0];
-    const max = event.range[event.range.length - 1];
-    let range;
-
-    if (isDate) {
-      range = {
-        gte: moment(min).toISOString(),
-        lt: moment(max).toISOString(),
-        format: 'strict_date_optional_time'
-      };
-    } else {
-      range = {
-        gte: min,
-        lt: max
-      };
-    }
-
-    if (_.has(existingFilter, 'range')) {
-      existingFilter.range[fieldName] = range;
-    } else {
-      const newFilter = buildRangeFilter(
-        field,
-        range,
-        indexPattern,
-        event.data.xAxisFormatter);
-      if (existingFilter) {
-        Object.assign(existingFilter, newFilter);
-      } else {
-        $state.$newFilters = [newFilter];
-      }
-    }
-  }
+  return [newFilter];
 }

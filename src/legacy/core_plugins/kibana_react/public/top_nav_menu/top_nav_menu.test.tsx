@@ -61,6 +61,7 @@ describe('TopNavMenu', () => {
       <TopNavMenu
         name="test"
         timeHistory={timefilterSetupMock.history}
+        toasts={startMock.notifications.toasts}
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
       />
@@ -74,6 +75,7 @@ describe('TopNavMenu', () => {
       <TopNavMenu
         name="test"
         timeHistory={timefilterSetupMock.history}
+        toasts={startMock.notifications.toasts}
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
         config={[menuItems[0]]}
@@ -88,6 +90,7 @@ describe('TopNavMenu', () => {
       <TopNavMenu
         name="test"
         timeHistory={timefilterSetupMock.history}
+        toasts={startMock.notifications.toasts}
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
         config={menuItems}
@@ -102,6 +105,7 @@ describe('TopNavMenu', () => {
       <TopNavMenu
         name="test"
         timeHistory={timefilterSetupMock.history}
+        toasts={startMock.notifications.toasts}
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
         http={startMock.http}

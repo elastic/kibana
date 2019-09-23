@@ -24,7 +24,6 @@ import React, { Component } from 'react';
 
 import { Storage } from 'ui/storage';
 import { documentationLinks } from 'ui/documentation_links';
-import { Toast, toastNotifications } from 'ui/notify';
 import { PersistedLog } from 'ui/persisted_log';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSuperDatePicker } from '@elastic/eui';
@@ -34,6 +33,8 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import {
   UiSettingsClientContract,
   SavedObjectsClientContract,
+  Toast,
+  CoreStart,
   HttpServiceBase,
 } from 'src/core/public';
 import { IndexPattern } from '../../../index_patterns';
@@ -68,6 +69,7 @@ interface Props {
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   customSubmitButton?: any;
   isDirty: boolean;
+  toasts: CoreStart['notifications']['toasts'];
   uiSettings: UiSettingsClientContract;
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpServiceBase;
@@ -309,7 +311,7 @@ export class QueryBarTopRowUI extends Component<Props, State> {
 
   private handleLuceneSyntaxWarning() {
     if (!this.props.query) return;
-    const { intl, store } = this.props;
+    const { intl, store, toasts } = this.props;
     const { query, language } = this.props.query;
     if (
       language === 'kuery' &&
@@ -317,7 +319,7 @@ export class QueryBarTopRowUI extends Component<Props, State> {
       (!store || !store.get('kibana.luceneSyntaxWarningOptOut')) &&
       doesKueryExpressionHaveLuceneSyntaxError(query)
     ) {
-      const toast = toastNotifications.addWarning({
+      const toast = toasts.addWarning({
         title: intl.formatMessage({
           id: 'data.query.queryBar.luceneSyntaxWarningTitle',
           defaultMessage: 'Lucene syntax warning',
@@ -360,9 +362,8 @@ export class QueryBarTopRowUI extends Component<Props, State> {
   private onLuceneSyntaxWarningOptOut(toast: Toast) {
     if (!this.props.store) return;
     this.props.store.set('kibana.luceneSyntaxWarningOptOut', true);
-    toastNotifications.remove(toast);
+    this.props.toasts.remove(toast);
   }
 }
 
-// @ts-ignore
 export const QueryBarTopRow = injectI18n(QueryBarTopRowUI);

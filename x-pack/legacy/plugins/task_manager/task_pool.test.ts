@@ -9,41 +9,33 @@ import { TaskPool } from './task_pool';
 import { mockLogger, resolvable, sleep } from './test_utils';
 
 describe('TaskPool', () => {
-  test('occupiedWorkers are a sum of worker costs', async () => {
+  test('occupiedWorkers are a sum of running tasks', async () => {
     const pool = new TaskPool({
       maxWorkers: 200,
       logger: mockLogger(),
     });
 
-    const result = await pool.run([
-      { ...mockTask(), numWorkers: 10 },
-      { ...mockTask(), numWorkers: 20 },
-      { ...mockTask(), numWorkers: 30 },
-    ]);
+    const result = await pool.run([{ ...mockTask() }, { ...mockTask() }, { ...mockTask() }]);
 
     expect(result).toBeTruthy();
-    expect(pool.occupiedWorkers).toEqual(60);
+    expect(pool.occupiedWorkers).toEqual(3);
   });
 
   test('availableWorkers are a function of total_capacity - occupiedWorkers', async () => {
     const pool = new TaskPool({
-      maxWorkers: 100,
+      maxWorkers: 10,
       logger: mockLogger(),
     });
 
-    const result = await pool.run([
-      { ...mockTask(), numWorkers: 20 },
-      { ...mockTask(), numWorkers: 30 },
-      { ...mockTask(), numWorkers: 40 },
-    ]);
+    const result = await pool.run([{ ...mockTask() }, { ...mockTask() }, { ...mockTask() }]);
 
     expect(result).toBeTruthy();
-    expect(pool.availableWorkers).toEqual(10);
+    expect(pool.availableWorkers).toEqual(7);
   });
 
   test('does not run tasks that are beyond its available capacity', async () => {
     const pool = new TaskPool({
-      maxWorkers: 10,
+      maxWorkers: 2,
       logger: mockLogger(),
     });
 
@@ -51,19 +43,20 @@ describe('TaskPool', () => {
     const shouldNotRun = mockRun();
 
     const result = await pool.run([
-      { ...mockTask(), numWorkers: 9, run: shouldRun },
-      { ...mockTask(), numWorkers: 9, run: shouldNotRun },
+      { ...mockTask(), run: shouldRun },
+      { ...mockTask(), run: shouldRun },
+      { ...mockTask(), run: shouldNotRun },
     ]);
 
     expect(result).toBeFalsy();
-    expect(pool.availableWorkers).toEqual(1);
-    sinon.assert.calledOnce(shouldRun);
+    expect(pool.availableWorkers).toEqual(0);
+    sinon.assert.calledTwice(shouldRun);
     sinon.assert.notCalled(shouldNotRun);
   });
 
   test('clears up capacity when a task completes', async () => {
     const pool = new TaskPool({
-      maxWorkers: 10,
+      maxWorkers: 1,
       logger: mockLogger(),
     });
 
@@ -81,33 +74,34 @@ describe('TaskPool', () => {
     });
 
     const result = await pool.run([
-      { ...mockTask(), numWorkers: 9, run: firstRun },
-      { ...mockTask(), numWorkers: 2, run: secondRun },
+      { ...mockTask(), run: firstRun },
+      { ...mockTask(), run: secondRun },
     ]);
 
     expect(result).toBeFalsy();
-    expect(pool.occupiedWorkers).toEqual(9);
-    expect(pool.availableWorkers).toEqual(1);
+    expect(pool.occupiedWorkers).toEqual(1);
+    expect(pool.availableWorkers).toEqual(0);
 
     await firstWork;
     sinon.assert.calledOnce(firstRun);
     sinon.assert.notCalled(secondRun);
 
-    await pool.run([{ ...mockTask(), numWorkers: 2, run: secondRun }]);
+    expect(pool.occupiedWorkers).toEqual(0);
+    await pool.run([{ ...mockTask(), run: secondRun }]);
+    expect(pool.occupiedWorkers).toEqual(1);
 
-    expect(pool.occupiedWorkers).toEqual(2);
-    expect(pool.availableWorkers).toEqual(8);
+    expect(pool.availableWorkers).toEqual(0);
 
     await secondWork;
 
     expect(pool.occupiedWorkers).toEqual(0);
-    expect(pool.availableWorkers).toEqual(10);
+    expect(pool.availableWorkers).toEqual(1);
     sinon.assert.calledOnce(secondRun);
   });
 
   test('run cancels expired tasks prior to running new tasks', async () => {
     const pool = new TaskPool({
-      maxWorkers: 10,
+      maxWorkers: 2,
       logger: mockLogger(),
     });
 
@@ -117,7 +111,6 @@ describe('TaskPool', () => {
     const result = await pool.run([
       {
         ...mockTask(),
-        numWorkers: 9,
         async run() {
           this.isExpired = true;
           expired.resolve();
@@ -130,7 +123,6 @@ describe('TaskPool', () => {
       },
       {
         ...mockTask(),
-        numWorkers: 1,
         async run() {
           await sleep(10);
           return {
@@ -142,17 +134,17 @@ describe('TaskPool', () => {
     ]);
 
     expect(result).toBeTruthy();
-    expect(pool.occupiedWorkers).toEqual(10);
+    expect(pool.occupiedWorkers).toEqual(2);
     expect(pool.availableWorkers).toEqual(0);
 
     await expired;
 
-    expect(await pool.run([{ ...mockTask(), numWorkers: 7 }])).toBeTruthy();
+    expect(await pool.run([{ ...mockTask() }])).toBeTruthy();
     sinon.assert.calledOnce(shouldRun);
     sinon.assert.notCalled(shouldNotRun);
 
-    expect(pool.occupiedWorkers).toEqual(8);
-    expect(pool.availableWorkers).toEqual(2);
+    expect(pool.occupiedWorkers).toEqual(2);
+    expect(pool.availableWorkers).toEqual(0);
   });
 
   test('logs if cancellation errors', async () => {
@@ -166,7 +158,6 @@ describe('TaskPool', () => {
     const result = await pool.run([
       {
         ...mockTask(),
-        numWorkers: 7,
         async run() {
           this.isExpired = true;
           await sleep(10);
@@ -202,7 +193,6 @@ describe('TaskPool', () => {
 
   function mockTask() {
     return {
-      numWorkers: 1,
       isExpired: false,
       cancel: async () => undefined,
       claimOwnership: async () => true,

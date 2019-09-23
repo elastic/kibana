@@ -24,11 +24,6 @@ import $ from 'jquery';
 import { uiModules } from '../../modules';
 import template from './kbn_chrome.html';
 
-import {
-  GlobalBannerList,
-  banners,
-} from '../../notify';
-
 import { I18nContext } from '../../i18n';
 import { npStart } from '../../new_platform';
 import { chromeHeaderNavControlsRegistry, NavControlSide } from '../../registry/chrome_header_nav_controls';
@@ -78,20 +73,15 @@ export function kbnChromeProvider(chrome, internals) {
 
           // Banners
           const bannerListContainer = document.getElementById('globalBannerList');
-          // Banners not supported in New Platform yet
-          // https://github.com/elastic/kibana/issues/41986
           if (bannerListContainer) {
+            // This gets rendered manually by the legacy platform because this component must be inside the .app-wrapper
             ReactDOM.render(
               <I18nContext>
-                <GlobalBannerList
-                  banners={banners.list}
-                  subscribe={banners.onChange}
-                />
+                {npStart.core.overlays.banners.getComponent()}
               </I18nContext>,
               bannerListContainer
             );
           }
-
 
           return chrome;
         }

@@ -29,7 +29,7 @@ export default function manageRepositoriesFunctionalTests({
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
       });
 
       it('import repository', async () => {
