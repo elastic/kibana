@@ -18,26 +18,12 @@
  */
 
 import { IndexPatternsService } from './service';
+import KbnServer from '../kbn_server';
+import { APICaller } from '../../../core/server';
+import { Legacy } from '../../../../kibana';
+import { registerRoutes } from './routes';
 
-import {
-  createFieldsForWildcardRoute,
-  createFieldsForTimePatternRoute,
-} from './routes';
-
-export function indexPatternsMixin(kbnServer, server) {
-  const pre = {
-    /**
-    *  Create an instance of the `indexPatterns` service
-    *  @type {Hapi.Pre}
-    */
-    getIndexPatternsService: {
-      assign: 'indexPatterns',
-      method(request) {
-        return request.getIndexPatternsService();
-      }
-    }
-  };
-
+export function indexPatternsMixin(kbnServer: KbnServer, server: Legacy.Server) {
   /**
    *  Create an instance of the IndexPatternsService
    *
@@ -55,12 +41,16 @@ export function indexPatternsMixin(kbnServer, server) {
    *  @method request.getIndexPatternsService
    *  @type {IndexPatternsService}
    */
-  server.addMemoizedFactoryToRequest('getIndexPatternsService', request => {
+  server.addMemoizedFactoryToRequest('getIndexPatternsService', (request: Legacy.Request) => {
     const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
-    const callCluster = (...args) => callWithRequest(request, ...args);
+    const callCluster: APICaller = (endpoint, params, options) =>
+      callWithRequest(request, endpoint, params, options);
     return server.indexPatternsServiceFactory({ callCluster });
   });
 
-  server.route(createFieldsForWildcardRoute(pre));
-  server.route(createFieldsForTimePatternRoute(pre));
+  registerRoutes(kbnServer.newPlatform.setup.core);
 }
+
+export type IndexPatternsServiceFactory = (args: {
+  callCluster: (endpoint: string, clientParams: any, options: any) => Promise<any>;
+}) => IndexPatternsService;
