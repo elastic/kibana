@@ -19,16 +19,16 @@ const AlignRight = styled.div`
   text-align: right;
 `;
 
-const associateToService = (project: { uri: string; mapping: boolean }, frame: Frame) => (
-  repo: string
-) => console.log(`repo ${repo} chosen for project ${project.uri} from frame ${frame}`);
+const associateToService = (frame: Frame) => (repo: string) =>
+  alert(`repo ${repo} associated with frame ${JSON.stringify(frame)}`);
+const handleImport = (repo: string) => alert(`import done: ${repo}`);
 
 export const ApmDemo = () => (
   <Container>
     {frames.map((frame, i) => {
       const { uri, filePath, compositeContent, language } = frame;
       const { content, lineMapping, ranges } = compositeContent;
-      const project = { uri, mapping: i % 2 === 0 };
+      const isIntegrated = i % 2 === 0;
       const key = `${uri}-${filePath}`;
 
       return (
@@ -36,9 +36,10 @@ export const ApmDemo = () => (
           <AlignRight>
             <CodeIntegration
               repos={repos}
-              project={project}
+              isIntegrated={isIntegrated}
               frame={frame}
-              onRepoSelect={associateToService(project, frame)}
+              onRepoSelect={associateToService(frame)}
+              onImportSuccess={handleImport}
             />
           </AlignRight>
           <CodeBlock

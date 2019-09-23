@@ -10,14 +10,17 @@ import { ImportModal } from './import_modal';
 import { isImportRepositoryURLInvalid } from '../../utils/url';
 
 interface Props {
-  onSelect: (codeId: string) => void;
+  onSelect: (repo: string) => void;
+  onImport: (repo: string) => void;
   repos: string[];
 }
 
 const placeHolderOption = { value: 'select_new', text: 'Select' };
 const importNewOption = { value: 'import_new', text: 'Import new' };
+const importStub: (repo: string) => Promise<string> = repo =>
+  new Promise(resolve => setTimeout(() => resolve(repo), 5000));
 
-export const RepoSelector = ({ onSelect, repos: _repos }: Props) => {
+export const RepoSelector = ({ onImport, onSelect, repos: _repos }: Props) => {
   const [selectedValue, setSelectedValue] = useState(placeHolderOption.value);
   const [newRepo, setNewRepo] = useState('');
   const [isInvalid, setIsInvalid] = useState(false);
@@ -49,6 +52,7 @@ export const RepoSelector = ({ onSelect, repos: _repos }: Props) => {
 
   const handleImportSubmit = () => {
     setSelectedValue(newRepo);
+    importStub(newRepo).then(onImport);
     setShowModal(false);
   };
 

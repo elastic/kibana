@@ -13,8 +13,9 @@ import { RepoSelector } from './repo_selector';
 import { Frame } from './data';
 
 interface Props {
-  onRepoSelect: (codeId: string) => void;
-  project: { mapping: boolean; uri: string };
+  onRepoSelect: (repo: string) => void;
+  onImportSuccess: (repo: string) => void;
+  isIntegrated: boolean;
   frame: Frame;
   repos: string[];
 }
@@ -24,11 +25,17 @@ const PopoverContent = styled.div`
   width: 300px;
 `;
 
-export const CodeIntegration = ({ onRepoSelect, frame, project, repos }: Props) => {
+export const CodeIntegration = ({
+  frame,
+  isIntegrated,
+  onRepoSelect,
+  onImportSuccess,
+  repos,
+}: Props) => {
   const [showSelector, setShowSelector] = useState(false);
 
   const handleClick = () => {
-    if (project.mapping) {
+    if (isIntegrated) {
       const fileLinkUrl = `/${frame.uri}/blob/HEAD/${frame.filePath}`;
       history.push(fileLinkUrl);
     } else {
@@ -64,7 +71,7 @@ export const CodeIntegration = ({ onRepoSelect, frame, project, repos }: Props) 
           </p>
         </EuiText>
       </PopoverContent>
-      <RepoSelector onSelect={handleSelect} repos={repos} />
+      <RepoSelector onSelect={handleSelect} onImport={onImportSuccess} repos={repos} />
     </EuiPopover>
   );
 };
