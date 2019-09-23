@@ -41,6 +41,16 @@ export interface ServiceRequirements {
   'version.max': RequirementVersion;
 }
 
+// from /categories
+// https://github.com/elastic/integrations-registry/blob/master/docs/api/categories.json
+export type CategorySummaryList = CategorySummaryItem[];
+export type CategoryId = string;
+export interface CategorySummaryItem {
+  id: CategoryId;
+  title: string;
+  count: number;
+}
+
 export type RequirementsByServiceName = Record<ServiceName, ServiceRequirements>;
 export interface AssetParts {
   pkgkey: string;

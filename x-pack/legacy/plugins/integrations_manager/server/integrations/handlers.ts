@@ -8,6 +8,8 @@ import { AssetType, Request, ResponseToolkit } from '../../common/types';
 import { PluginContext } from '../plugin';
 import { getClient } from '../saved_objects';
 import {
+  SearchParams,
+  getCategories,
   getClusterAccessor,
   getIntegrationInfo,
   getIntegrations,
@@ -17,6 +19,10 @@ import {
 
 interface Extra extends ResponseToolkit {
   context: PluginContext;
+}
+
+interface ListIntegrationsRequest extends Request {
+  query: Request['query'] & SearchParams;
 }
 
 interface PackageRequest extends Request {
@@ -37,9 +43,16 @@ type AssetRequestParams = PackageRequest['params'] & {
   asset?: AssetType;
 };
 
-export async function handleGetList(req: Request, extra: Extra) {
+export async function handleGetCategories(req: Request, extra: Extra) {
+  return getCategories();
+}
+
+export async function handleGetList(req: ListIntegrationsRequest, extra: Extra) {
   const savedObjectsClient = getClient(req);
-  const integrationList = await getIntegrations({ savedObjectsClient });
+  const integrationList = await getIntegrations({
+    savedObjectsClient,
+    category: req.query.category,
+  });
 
   return integrationList;
 }
