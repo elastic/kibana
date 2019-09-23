@@ -25,9 +25,15 @@ import { AppStateClass } from 'ui/state_management/app_state';
 import { DashboardAppState } from './types';
 import { TimeRange } from 'src/plugins/data/public';
 import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
+import { InputTimeRange } from 'ui/timefilter';
+
+jest.mock('ui/registry/field_formats', () => ({
+  fieldFormats: {
+    getDefaultInstance: jest.fn(),
+  },
+}));
 
 import { dataPluginMock } from '../../../../core_plugins/data/public/mocks';
-import { InputTimeRange } from 'ui/timefilter';
 const dataSetupMock = dataPluginMock.createSetup();
 
 describe('DashboardState', function() {
