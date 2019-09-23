@@ -5,47 +5,24 @@
  */
 import React, { Fragment } from 'react';
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import {
-  InstallationStatus,
-  IntegrationsGroupedByStatus,
-  IntegrationList,
-  IntegrationListItem,
-} from '../../common/types';
-import { entries } from '../../common/type_utils';
+import { IntegrationList, IntegrationListItem } from '../../common/types';
 import { IntegrationCard } from './integration_card';
 
-interface GridProps {
-  map: IntegrationsGroupedByStatus;
-}
-
 interface ListProps {
-  status: InstallationStatus;
+  title: string;
   list: IntegrationList;
 }
 
-export function IntegrationsGridByStatus({ map }: GridProps) {
-  if (!map) return null;
-  return (
-    <Fragment>
-      {entries(map).map(([status, list]) => (
-        <IntegrationListGrid key={status} status={status} list={list} />
-      ))}
-    </Fragment>
-  );
-}
+export function IntegrationListGrid({ title, list }: ListProps) {
+  if (!list.length) return null;
 
-export function IntegrationListGrid({ status, list }: ListProps) {
-  const titles: Record<InstallationStatus, string> = {
-    installed: 'Your Integrations',
-    not_installed: 'Available Integrations',
-  };
   return (
     <Fragment>
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <EuiText>
-            <h2>{titles[status]}</h2>
+            <h2>{title}</h2>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={3}>

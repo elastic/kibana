@@ -16,7 +16,6 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const queryBar = getService('queryBar');
   const comboBox = getService('comboBox');
-  const browser = getService('browser');
 
   function escapeLayerName(layerName) {
     return layerName.split(' ').join('_');
@@ -482,12 +481,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async uploadJsonFileForIndexing(path) {
       log.debug(`Setting the path on the file input`);
-      if (browser.isW3CEnabled) {
-        const input = await find.byCssSelector('.euiFilePicker__input');
-        await input.type(path);
-      } else {
-        await find.setValue('.euiFilePicker__input', path);
-      }
+      const input = await find.byCssSelector('.euiFilePicker__input');
+      await input.type(path);
       log.debug(`File selected`);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -539,7 +534,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async openInspectorMapView() {
-      await inspector.openInspectorView('inspectorViewChooserMap');
+      await inspector.openInspectorView('~inspectorViewChooserMap');
     }
 
     // Method should only be used when multiple requests are expected

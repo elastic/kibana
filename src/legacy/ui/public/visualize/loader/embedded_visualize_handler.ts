@@ -22,9 +22,10 @@ import { debounce, forEach, get, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
+import { Filter } from '@kbn/es-query';
 import { toastNotifications } from 'ui/notify';
 // @ts-ignore untyped dependency
-import { AggConfigs } from 'ui/vis/agg_configs';
+import { AggConfigs } from 'ui/agg_types/agg_configs';
 import { SearchSource } from 'ui/courier';
 import { QueryFilter } from 'ui/filter_manager/query_filter';
 import { TimeRange } from 'src/plugins/data/public';
@@ -53,7 +54,6 @@ import {
   VisualizeUpdateParams,
 } from './types';
 import { queryGeohashBounds } from './utils';
-import { Filter } from '../../../../core_plugins/data/public/expressions/lib/_types';
 
 interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   Private: IPrivate;

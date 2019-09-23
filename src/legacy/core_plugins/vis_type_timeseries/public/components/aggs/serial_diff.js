@@ -25,7 +25,14 @@ import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { createNumberHandler } from '../lib/create_number_handler';
-import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiFormRow } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
+  EuiFormRow,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const SerialDiffAgg = props => {
@@ -51,8 +58,12 @@ export const SerialDiffAgg = props => {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
-            <FormattedMessage id="visTypeTimeseries.serialDiff.aggregationLabel" defaultMessage="Aggregation" />
+            <FormattedMessage
+              id="visTypeTimeseries.serialDiff.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
           </EuiFormLabel>
+          <EuiSpacer size="xs" />
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -64,7 +75,12 @@ export const SerialDiffAgg = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('metric')}
-            label={<FormattedMessage id="visTypeTimeseries.serialDiff.metricLabel" defaultMessage="Metric" />}
+            label={
+              <FormattedMessage
+                id="visTypeTimeseries.serialDiff.metricLabel"
+                defaultMessage="Metric"
+              />
+            }
           >
             <MetricSelect
               onChange={handleSelectChange('field')}

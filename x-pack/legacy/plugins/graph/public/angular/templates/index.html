@@ -3,8 +3,8 @@
   <kbn-top-nav name="workspacesTopNav" config="topNavMenu">
   </kbn-top-nav>
 
-  <div class="gphGraph__menus" ng-show="menus.showSettings">
-    <graph-settings ng-show="menus.showSettings"></graph-settings>
+  <div class="gphGraph__menus" ng-show="menus.showInspect">
+    <graph-inspect ng-show="menus.showInspect"></graph-inspect>
   </div>
     
   <div class="gphGraph__bar">
@@ -560,7 +560,7 @@
           </span>
 
           <!-- Venn diagram of term/shared doc intersections -->
-          <div class="gphLinkSummary__venn" venn="mc"></div>
+          <venn-diagram left-value="mc.v1" right-value="mc.v2" overlap="mc.overlap"></venn-diagram>
 
           <small
             class="gphLinkSummary__term--1"

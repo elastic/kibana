@@ -46,7 +46,7 @@ export default function({ getService }: FtrProviderContext) {
       await ml.jobSourceSelection.selectSourceIndexPattern('farequote');
     });
 
-    it('loads the single metric job wizard page', async () => {
+    it('loads the multi metric job wizard page', async () => {
       await ml.jobTypeSelection.selectMultiMetricJob();
     });
 
@@ -73,13 +73,13 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('inputs the split field and displays split cards', async () => {
-      await ml.jobWizardCommon.assertMultiMetricSplitFieldInputExists();
-      await ml.jobWizardCommon.selectMultiMetricSplitField(splitField);
-      await ml.jobWizardCommon.assertMultiMetricSplitFieldSelection(splitField);
+      await ml.jobWizardMultiMetric.assertSplitFieldInputExists();
+      await ml.jobWizardMultiMetric.selectSplitField(splitField);
+      await ml.jobWizardMultiMetric.assertSplitFieldSelection(splitField);
 
-      await ml.jobWizardCommon.assertDetectorSplitExists(splitField);
-      await ml.jobWizardCommon.assertDetectorSplitFrontCardTitle('AAL');
-      await ml.jobWizardCommon.assertDetectorSplitNumberOfBackCards(9);
+      await ml.jobWizardMultiMetric.assertDetectorSplitExists(splitField);
+      await ml.jobWizardMultiMetric.assertDetectorSplitFrontCardTitle('AAL');
+      await ml.jobWizardMultiMetric.assertDetectorSplitNumberOfBackCards(9);
 
       await ml.jobWizardCommon.assertInfluencerSelection([splitField]);
     });
@@ -198,7 +198,6 @@ export default function({ getService }: FtrProviderContext) {
       const expectedModelSizeStats = {
         job_id: jobId,
         result_type: 'model_size_stats',
-        model_bytes: '1.8 MB',
         model_bytes_exceeded: '0',
         model_bytes_memory_limit: '20971520',
         total_by_field_count: '59',

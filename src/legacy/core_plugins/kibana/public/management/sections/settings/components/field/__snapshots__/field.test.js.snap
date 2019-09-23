@@ -38,6 +38,7 @@ exports[`Field for array setting should render as read only if saving is disable
             "array:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -126,6 +127,7 @@ exports[`Field for array setting should render as read only with help text if ov
             "array:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -213,6 +215,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
             "array:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -279,6 +282,7 @@ exports[`Field for array setting should render default value if there is no user
             "array:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -367,6 +371,7 @@ exports[`Field for array setting should render user value if there is user value
             "array:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -452,6 +457,7 @@ exports[`Field for boolean setting should render as read only if saving is disab
             "boolean:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -544,6 +550,7 @@ exports[`Field for boolean setting should render as read only with help text if 
             "boolean:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -635,6 +642,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
             "boolean:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -705,6 +713,7 @@ exports[`Field for boolean setting should render default value if there is no us
             "boolean:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -797,6 +806,7 @@ exports[`Field for boolean setting should render user value if there is user val
             "boolean:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -886,6 +896,7 @@ exports[`Field for image setting should render as read only if saving is disable
             "image:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -973,6 +984,7 @@ exports[`Field for image setting should render as read only with help text if ov
             "image:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -1057,6 +1069,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
             "image:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -1122,6 +1135,7 @@ exports[`Field for image setting should render default value if there is no user
             "image:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -1209,6 +1223,7 @@ exports[`Field for image setting should render user value if there is user value
             "image:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -1332,6 +1347,7 @@ exports[`Field for json setting should render as read only if saving is disabled
             "json:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -1441,6 +1457,7 @@ exports[`Field for json setting should render as read only with help text if ove
             "json:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -1545,6 +1562,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
             "json:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -1654,6 +1672,7 @@ exports[`Field for json setting should render default value if there is no user 
             "json:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -1782,6 +1801,7 @@ exports[`Field for json setting should render user value if there is user value 
             "json:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -1884,6 +1904,7 @@ exports[`Field for markdown setting should render as read only if saving is disa
             "markdown:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -1989,6 +2010,7 @@ exports[`Field for markdown setting should render as read only with help text if
             "markdown:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -2093,6 +2115,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
             "markdown:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -2176,6 +2199,7 @@ exports[`Field for markdown setting should render default value if there is no u
             "markdown:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -2281,6 +2305,7 @@ exports[`Field for markdown setting should render user value if there is user va
             "markdown:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -2383,6 +2408,7 @@ exports[`Field for number setting should render as read only if saving is disabl
             "number:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -2471,6 +2497,7 @@ exports[`Field for number setting should render as read only with help text if o
             "number:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -2558,6 +2585,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
             "number:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -2624,6 +2652,7 @@ exports[`Field for number setting should render default value if there is no use
             "number:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -2712,6 +2741,7 @@ exports[`Field for number setting should render user value if there is user valu
             "number:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -2797,6 +2827,7 @@ exports[`Field for select setting should render as read only if saving is disabl
             "select:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -2902,6 +2933,7 @@ exports[`Field for select setting should render as read only with help text if o
             "select:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -3006,6 +3038,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
             "select:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -3089,6 +3122,7 @@ exports[`Field for select setting should render default value if there is no use
             "select:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -3194,6 +3228,7 @@ exports[`Field for select setting should render user value if there is user valu
             "select:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -3296,6 +3331,7 @@ exports[`Field for string setting should render as read only if saving is disabl
             "string:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -3384,6 +3420,7 @@ exports[`Field for string setting should render as read only with help text if o
             "string:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -3471,6 +3508,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
             "string:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -3537,6 +3575,7 @@ exports[`Field for string setting should render default value if there is no use
             "string:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -3625,6 +3664,7 @@ exports[`Field for string setting should render user value if there is user valu
             "string:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}

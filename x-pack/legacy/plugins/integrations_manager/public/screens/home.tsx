@@ -17,37 +17,40 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { PLUGIN } from '../../common/constants';
-import { IntegrationsGroupedByStatus } from '../../common/types';
-import { IntegrationsGridByStatus } from '../components/integration_list_grid';
-import { getIntegrationsGroupedByStatus } from '../data';
+import { IntegrationList } from '../../common/types';
+import { IntegrationListGrid } from '../components/integration_list_grid';
+import { getIntegrations } from '../data';
 import { useBreadcrumbs, useCore, useLinks } from '../hooks';
 
 export function Home() {
   const { toListView } = useLinks();
   useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }]);
 
-  const [map, setMap] = useState<IntegrationsGroupedByStatus>({
-    installed: [],
-    not_installed: [],
-  });
+  const [list, setList] = useState<IntegrationList>([]);
 
   useEffect(() => {
-    getIntegrationsGroupedByStatus().then(setMap);
+    getIntegrations().then(setList);
   }, []);
 
-  return <HomeLayout map={map} restrictWidth={1200} />;
+  return <HomeLayout list={list} restrictWidth={1200} />;
 }
 
 type LayoutProps = {
-  map: IntegrationsGroupedByStatus;
+  list: IntegrationList;
 } & EuiPageWidthProps;
 function HomeLayout(props: LayoutProps) {
-  const { map, restrictWidth } = props;
+  const { list, restrictWidth } = props;
+  if (!list) return null;
+
   const { theme } = useCore();
   const FullWidthHeader = styled(EuiPage)`
     border-bottom: ${theme.eui.euiBorderThin};
     padding-bottom: ${theme.eui.paddingSizes.s};
   `;
+
+  const availableTitle = 'Available Integrations';
+  const installedTitle = 'Your Integrations';
+  const installedIntegrations = list.filter(({ status }) => status === 'installed');
 
   return (
     <Fragment>
@@ -58,7 +61,10 @@ function HomeLayout(props: LayoutProps) {
       </FullWidthHeader>
       <EuiPage>
         <EuiPageBody restrictWidth={restrictWidth}>
-          <IntegrationsGridByStatus map={map} />
+          <Fragment>
+            <IntegrationListGrid title={installedTitle} list={installedIntegrations} />
+            <IntegrationListGrid title={availableTitle} list={list} />
+          </Fragment>
         </EuiPageBody>
       </EuiPage>
     </Fragment>

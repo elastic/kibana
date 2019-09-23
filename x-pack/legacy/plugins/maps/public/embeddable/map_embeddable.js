@@ -138,9 +138,7 @@ export class MapEmbeddable extends Embeddable {
   addFilters = filters => {
     start.executeTriggerActions(APPLY_FILTER_TRIGGER, {
       embeddable: this,
-      triggerContext: {
-        filters,
-      },
+      filters,
     });
   }
 

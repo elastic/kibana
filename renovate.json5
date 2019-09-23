@@ -474,6 +474,14 @@
         ],
       },
       {
+        groupSlug: 'mkdirp',
+        groupName: 'mkdirp related packages',
+        packageNames: [
+          'mkdirp',
+          '@types/mkdirp',
+        ],
+      },
+      {
         groupSlug: 'moment-timezone',
         groupName: 'moment-timezone related packages',
         packageNames: [
@@ -679,14 +687,6 @@
         packageNames: [
           'mime',
           '@types/mime',
-        ],
-      },
-      {
-        groupSlug: 'mkdirp',
-        groupName: 'mkdirp related packages',
-        packageNames: [
-          'mkdirp',
-          '@types/mkdirp',
         ],
       },
       {
