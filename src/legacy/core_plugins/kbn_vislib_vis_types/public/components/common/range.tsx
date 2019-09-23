@@ -18,7 +18,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFormRow, EuiRange } from '@elastic/eui';
+import { EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface RangeOptionProps<ParamName extends string> {
@@ -50,13 +50,8 @@ function RangeOption<ParamName extends string>({
     values: { min, max },
   });
 
-  const onChangeHandler = (
-    event: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    isValid: boolean
-  ) => {
-    const {
-      currentTarget: { valueAsNumber },
-    } = event as React.ChangeEvent<HTMLInputElement>; // since we don't show ticks on EuiRange, the currentTarget will definitely be HTMLInputElement type, so we can cast the event directly.
+  const onChangeHandler: EuiRangeProps['onChange'] = (event, isValid) => {
+    const { valueAsNumber } = event.target as HTMLInputElement; // since we don't show ticks on EuiRange, the target will definitely be HTMLInputElement type, so we can cast it directly.
 
     setStateValue(valueAsNumber);
     setIsValidState(isValid);
