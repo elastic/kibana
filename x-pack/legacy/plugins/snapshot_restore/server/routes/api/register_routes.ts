@@ -12,9 +12,14 @@ import { registerRestoreRoutes } from './restore';
 import { registerPolicyRoutes } from './policy';
 
 export const registerRoutes = (router: Router, plugins: Plugins): void => {
+  const isSlmEnabled = plugins.settings.config.isSlmEnabled;
+
   registerAppRoutes(router, plugins);
   registerRepositoriesRoutes(router, plugins);
   registerSnapshotsRoutes(router, plugins);
   registerRestoreRoutes(router);
-  registerPolicyRoutes(router, plugins);
+
+  if (isSlmEnabled) {
+    registerPolicyRoutes(router, plugins);
+  }
 };

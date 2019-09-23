@@ -18,8 +18,5 @@
  */
 
 export * from './edit_mode_action';
-export * from './get_message_modal';
-export * from './hello_world_action';
-export * from './restricted_action';
 export * from './say_hello_action';
 export * from './send_message_action';

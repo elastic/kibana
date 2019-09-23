@@ -6,29 +6,26 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { TaskDictionary, SanitizedTaskDefinition, TaskInstance, TaskStatus } from './task';
+import { TaskDictionary, TaskDefinition, TaskInstance, TaskStatus } from './task';
 import { FetchOpts, TaskStore } from './task_store';
 import { mockLogger } from './test_utils';
 import { SavedObjectsClientMock } from 'src/core/server/mocks';
 import { SavedObjectsSerializer, SavedObjectsSchema, SavedObjectAttributes } from 'src/core/server';
 
-const taskDefinitions: TaskDictionary<SanitizedTaskDefinition> = {
+const taskDefinitions: TaskDictionary<TaskDefinition> = {
   report: {
     type: 'report',
     title: '',
-    numWorkers: 1,
     createTaskRunner: jest.fn(),
   },
   dernstraight: {
     type: 'dernstraight',
     title: '',
-    numWorkers: 1,
     createTaskRunner: jest.fn(),
   },
   yawn: {
     type: 'yawn',
     title: '',
-    numWorkers: 1,
     createTaskRunner: jest.fn(),
   },
 };
@@ -378,13 +375,11 @@ describe('TaskStore', () => {
             foo: {
               type: 'foo',
               title: '',
-              numWorkers: 1,
               createTaskRunner: jest.fn(),
             },
             bar: {
               type: 'bar',
               title: '',
-              numWorkers: 1,
               maxAttempts: customMaxAttempts,
               createTaskRunner: jest.fn(),
             },
