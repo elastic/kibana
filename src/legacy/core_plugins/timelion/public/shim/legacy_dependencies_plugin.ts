@@ -21,12 +21,11 @@ import chrome from 'ui/chrome';
 import { Plugin } from 'kibana/public';
 // @ts-ignore
 import { visFactory } from 'ui/vis/vis_factory';
-import { npStart, npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { initTimelionLegacyModule } from './timelion_legacy_module';
 
 /** @internal */
 export interface LegacyDependenciesPluginSetup {
-  config: any;
   createBaseVisualization: Function;
 }
 
@@ -44,7 +43,6 @@ export class LegacyDependenciesPlugin
     initTimelionLegacyModule();
 
     return {
-      config: npSetup.core.uiSettings,
       createBaseVisualization: visFactory.createBaseVisualization,
     } as LegacyDependenciesPluginSetup;
   }

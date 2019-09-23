@@ -69,7 +69,7 @@ export class TimelionPlugin
 
   public async setup(core: CoreSetup, plugins: TimelionPluginSetupDependencies) {
     const dependencies: LegacyDependenciesPluginSetup = await plugins.__LEGACY.setup();
-    plugins.expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
+    plugins.expressions.registerFunction(() => getTimelionVisualizationConfig());
     plugins.visualizations.types.registerVisualization(() =>
       getTimelionVisualization(dependencies)
     );

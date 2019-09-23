@@ -21,7 +21,6 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunction, KibanaContext, Render } from 'src/plugins/expressions/public';
 import { getTimelionRequestHandler, TimelionSuccessResponse } from './vis/timelion_request_handler';
-import { TimelionSetupDependencies } from './plugin';
 
 const name = 'timelion_vis';
 
@@ -40,9 +39,12 @@ type Context = KibanaContext | null;
 type VisParams = Arguments;
 type Return = Promise<Render<RenderValue>>;
 
-export const getTimelionVisualizationConfig = (
-  dependencies: TimelionSetupDependencies
-): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
+export const getTimelionVisualizationConfig = (): ExpressionFunction<
+  typeof name,
+  Context,
+  Arguments,
+  Return
+> => ({
   name,
   type: 'render',
   context: {
@@ -65,7 +67,7 @@ export const getTimelionVisualizationConfig = (
     },
   },
   async fn(context, args) {
-    const timelionRequestHandler = getTimelionRequestHandler(dependencies);
+    const timelionRequestHandler = getTimelionRequestHandler();
 
     const visParams = { expression: args.expression, interval: args.interval };
 

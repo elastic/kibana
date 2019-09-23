@@ -28,7 +28,7 @@ import { TimelionSetupDependencies } from '../plugin';
 import { AngularVisController } from '../../../../ui/public/vis/vis_types/angular_vis_type';
 
 export function getTimelionVisualization(dependencies: TimelionSetupDependencies) {
-  const timelionRequestHandler = getTimelionRequestHandler(dependencies);
+  const timelionRequestHandler = getTimelionRequestHandler();
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.

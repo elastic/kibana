@@ -28,7 +28,6 @@ import { TimeRange } from 'src/plugins/data/public';
 import { VisParams } from 'ui/vis';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
-import { TimelionSetupDependencies } from '../plugin';
 
 interface Stats {
   cacheCount: number;
@@ -51,11 +50,10 @@ export interface TimelionSuccessResponse {
   type: KIBANA_CONTEXT_NAME;
 }
 
-const { http } = npSetup.core;
+const { http, uiSettings } = npSetup.core;
 
-export function getTimelionRequestHandler(dependencies: TimelionSetupDependencies) {
-  const { config } = dependencies;
-  const timezone = timezoneProvider(config)();
+export function getTimelionRequestHandler() {
+  const timezone = timezoneProvider(uiSettings)();
 
   return ({
     timeRange,
@@ -74,7 +72,7 @@ export function getTimelionRequestHandler(dependencies: TimelionSetupDependencie
 
       if (!expression) return;
 
-      const esQueryConfigs = getEsQueryConfig(config);
+      const esQueryConfigs = getEsQueryConfig(uiSettings);
 
       try {
         const data = await http.post('../api/timelion/run', {
