@@ -59,6 +59,7 @@ export function FieldPicker({ fieldMap, selectField, deselectField }: FieldPicke
           })}
           color="hollow"
           iconType="plusInCircleFilled"
+          aria-disabled={!hasFields}
           onClick={() => {
             if (hasFields) {
               setOpen(true);
