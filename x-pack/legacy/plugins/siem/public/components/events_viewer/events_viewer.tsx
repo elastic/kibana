@@ -145,7 +145,7 @@ export const EventsViewer = React.memo<Props>(
                       />
 
                       <div
-                        data-test-subj={`events-container-${loading}`}
+                        data-test-subj={`events-container-loading-${loading}`}
                         style={{ width: `${width}px` }}
                       >
                         <ManageTimelineContext loading={loading} width={width}>

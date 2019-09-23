@@ -11,7 +11,14 @@ export const INSPECT_MODAL = '[data-test-subj="modal-inspect-euiModal"]';
 export const TIMELINE_SETTINGS_ICON = '[data-test-subj="settings-gear"]';
 export const TIMELINE_INSPECT_BUTTON = '[data-test-subj="inspect-empty-button"]';
 
-export const INSPECT_BUTTONS_IN_SIEM = [
+interface InspectButtonMetadata {
+  altInspectId?: string;
+  id: string;
+  title: string;
+  url: string;
+}
+
+export const INSPECT_BUTTONS_IN_SIEM: InspectButtonMetadata[] = [
   {
     id: '[data-test-subj="stat-hosts"]',
     title: 'Hosts Stat',
@@ -30,74 +37,62 @@ export const INSPECT_BUTTONS_IN_SIEM = [
   {
     id: '[data-test-subj="stat-networkEvents"]',
     title: 'Network events Stat',
-    type: 'stat',
     url: NETWORK_PAGE,
   },
   {
     id: '[data-test-subj="stat-dnsQueries"]',
     title: 'DNS queries Stat',
-    type: 'stat',
     url: NETWORK_PAGE,
   },
   {
     id: '[data-test-subj="stat-uniqueFlowId"]',
     title: 'Unique flow IDs Stat',
-    type: 'stat',
     url: NETWORK_PAGE,
   },
   {
     id: '[data-test-subj="stat-tlsHandshakes"]',
     title: 'TLS handshakes Stat',
-    type: 'stat',
     url: NETWORK_PAGE,
   },
   {
     id: '[data-test-subj="stat-UniqueIps"]',
     title: 'Unique private IPs Stat',
-    type: 'stat',
     url: NETWORK_PAGE,
   },
   {
-    id: '[data-test-subj="table-topNFlowSource-false"]',
+    id: '[data-test-subj="table-topNFlowSource-loading-false"]',
     title: 'Source IPs Table',
-    type: 'table',
     url: NETWORK_PAGE,
   },
   {
-    id: '[data-test-subj="table-topNFlowDestination-false"]',
+    id: '[data-test-subj="table-topNFlowDestination-loading-false"]',
     title: 'Destination IPs Table',
-    type: 'table',
     url: NETWORK_PAGE,
   },
   {
-    id: '[data-test-subj="table-dns-false"]',
+    id: '[data-test-subj="table-dns-loading-false"]',
     title: 'Top DNS Domains Table',
-    type: 'table',
     url: NETWORK_PAGE,
   },
   {
-    id: '[data-test-subj="table-allHosts-false"]',
+    id: '[data-test-subj="table-allHosts-loading-false"]',
     title: 'All Hosts Table',
-    type: 'table',
     url: HOSTS_PAGE_TAB_URLS.allHosts,
   },
   {
-    id: '[data-test-subj="table-authentications-false"]',
+    id: '[data-test-subj="table-authentications-loading-false"]',
     title: 'Authentications Table',
-    type: 'table',
     url: HOSTS_PAGE_TAB_URLS.authentications,
   },
   {
-    id: '[data-test-subj="table-uncommonProcesses-false"]',
+    id: '[data-test-subj="table-uncommonProcesses-loading-false"]',
     title: 'Uncommon processes Table',
-    type: 'table',
     url: HOSTS_PAGE_TAB_URLS.uncommonProcesses,
   },
   {
-    id: '[data-test-subj="events-container-false"]',
     altInspectId: `[data-test-subj="events-viewer-header"] ${INSPECT_BUTTON_ICON}`,
+    id: '[data-test-subj="events-container-false"]',
     title: 'Events Table',
-    type: 'table',
     url: HOSTS_PAGE_TAB_URLS.events,
   },
 ];
