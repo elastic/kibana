@@ -7,8 +7,15 @@
 import { ActionCreator } from 'typescript-fsa';
 
 import { InputsModelId } from '../../../store/inputs/constants';
-import { CommonChildren, AnonamaliesChildren, HostsQueryProps } from '../hosts';
 import { HostComponentProps } from '../../../components/link_to/redirect_to_hosts';
+import { HostsTableType } from '../../../store/hosts/model';
+import { HostsQueryProps } from '../hosts';
+import { NavTab } from '../../../components/navigation/types';
+import {
+  AnomaliesChildren,
+  CommonChildren,
+  KeyHostsNavTabWithoutMlPermission,
+} from '../navigation/types';
 
 interface HostDetailsComponentReduxProps {
   filterQueryExpression: string;
@@ -24,7 +31,7 @@ interface HostDetailsComponentDispatchProps {
 }
 
 export interface HostDetailsBodyProps extends HostsQueryProps {
-  children: CommonChildren | AnonamaliesChildren;
+  children: CommonChildren | AnomaliesChildren;
 }
 
 export type HostDetailsComponentProps = HostDetailsComponentReduxProps &
@@ -35,3 +42,16 @@ export type HostDetailsComponentProps = HostDetailsComponentReduxProps &
 export type HostDetailsBodyComponentProps = HostDetailsComponentReduxProps &
   HostDetailsComponentDispatchProps &
   HostDetailsBodyProps;
+
+type KeyHostDetailsNavTabWithoutMlPermission = HostsTableType.authentications &
+  HostsTableType.uncommonProcesses &
+  HostsTableType.events;
+
+type KeyHostDetailsNavTabWithMlPermission = KeyHostsNavTabWithoutMlPermission &
+  HostsTableType.anomalies;
+
+type KeyHostDetailsNavTab =
+  | KeyHostDetailsNavTabWithoutMlPermission
+  | KeyHostDetailsNavTabWithMlPermission;
+
+export type HostDetailsNavTab = Record<KeyHostDetailsNavTab, NavTab>;
