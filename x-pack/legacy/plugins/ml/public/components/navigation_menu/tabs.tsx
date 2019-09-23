@@ -60,11 +60,10 @@ export function getTabs(tabId: TabId, disableLinks: boolean): Tab[] {
 
 enum TAB_TEST_SUBJECT {
   // overview = 'mlOverview',
-  jobs = 'mlTabJobManagement',
-  explorer = 'mlTabAnomalyExplorer',
-  timeseriesexplorer = 'mlTabSingleMetricViewer',
-  datavisualizer = 'mlTabDataVisualizer',
-  settings = 'mlTabSettings',
+  jobs = 'mlSubTab jobManagement',
+  explorer = 'mlSubTab anomalyExplorer',
+  timeseriesexplorer = 'mlSubTab singleMetricViewer',
+  settings = 'mlSubTab settings',
 }
 
 type TAB_TEST_SUBJECTS = keyof typeof TAB_TEST_SUBJECT;
@@ -83,7 +82,9 @@ export const Tabs: FC<Props> = ({ tabId, mainTabId, disableLinks }) => {
         const id = tab.id;
         return (
           <EuiLink
-            data-test-subj={TAB_TEST_SUBJECT[id as TAB_TEST_SUBJECTS]}
+            data-test-subj={
+              TAB_TEST_SUBJECT[id as TAB_TEST_SUBJECTS] + (id === selectedTabId ? ' selected' : '')
+            }
             href={`${chrome.getBasePath()}/app/ml#/${id}`}
             key={`${id}-key`}
             color="text"
