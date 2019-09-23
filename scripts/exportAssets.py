@@ -30,6 +30,16 @@ def check_elasticsearch_health():
         logger.warning('[exportAssets.py] Caught HTTP exception: {0}'.format(err))
         return False
 
+def asset_object_received(response_json):
+    if response_json.get('hits'):
+        if response_json['hits']['total']['value'] == 1:
+            asset = response_json['hits']['hits'][0]
+            asset_id = asset['_id']
+            logger.info('Get asset:' + asset_id)
+            return True
+    logger.warning('asset_object_received - no object found.')
+    return False
+
 def get_search_title_json(es_type, es_title):
     es_field = es_type + '.title'
       
@@ -66,16 +76,17 @@ def get_asset(es_query):
         headers = { 'Content-type': 'application/json' }
         response = session.get(url, headers=headers, data=esQuery)
 
-        logger.info('GET RETURNS:\n' + UTIL.pretty_format(response.json()))
+        response.raise_for_status()
 
-        if not response.ok:
-            response.raise_for_status()
+        if not asset_object_received(response.json()):
+            raise Exception('Failed to get asset', es_query)
 
         return True, response.text
 
     except Exception as err:
-        logger.info('[exportAssets.py] Caught HTTP exception: {0}'.format(err))
-        return False, 'Not found'
+        logger.info('GET RETURNS:\n' + UTIL.pretty_format(response.json()))
+        logger.info('[exportAssets.py] Caught exception: {0}'.format(err))
+        return False, 'python request failed'
 
 def print_error_and_usage(argParser, error):
     print 'Error:  ' + error + '\n'
@@ -103,31 +114,40 @@ def strip_metadata(json_string):
     ob = json.loads(json_string)['hits']['hits'][0]
     return UTIL.safe_list_read(list_ob=ob, key='_source')
 
-def get_dashboard_panels(panels_str):
-    panels_with_type = {}
-    db_panels_json = panels_str
-    for index, panel in enumerate(db_panels_json):
-        panel_id = UTIL.safe_list_read(list_ob=db_panels_json[index], key='id')
-        panel_type = UTIL.safe_list_read(list_ob=db_panels_json[index], key='type')
-        panels_with_type[panel_id] = panel_type
-    return panels_with_type
+def get_asset_references(db_asset_json):
+    asset_with_type = {}
+    for index, asset in enumerate(db_asset_json):
+        asset_id = UTIL.safe_list_read(list_ob=db_asset_json[index], key='id')
+        asset_type = UTIL.safe_list_read(list_ob=db_asset_json[index], key='type')
+        asset_with_type[asset_id] = asset_type
+    return asset_with_type
 
 def export_all_files(asset_dict):
     for asset_name, asset_content in asset_dict.iteritems():
+        log_msg = 'Exporting asset: ' + asset_name
+        logging.info(log_msg)
+        print log_msg
         UTIL.print_to_file(asset_content, asset_name)
 
-def get_all_dashboard_content_from_ES(output_dir, dashboard_raw, asset_dict):
-    db_json = UTIL.make_json(dashboard_raw)
-    db_panels_raw = UTIL.safe_list_read(list_ob=db_json, key='references')
-    panels_with_type = get_dashboard_panels(db_panels_raw)
-    for panel_id, panel_type in panels_with_type.iteritems():
-        es_query = get_search_id_json(panel_type, panel_id)
+def get_asset_content_from_ES(output_dir, asset_raw, asset_dict):
+    db_json = UTIL.make_json(asset_raw)
+    db_references_raw = UTIL.safe_list_read(list_ob=db_json, key='references')
+    references_with_type = get_asset_references(db_references_raw)
+    for reference_id, reference_type in references_with_type.iteritems():
+        es_query = get_search_id_json(reference_type, reference_id)
         success, asset_raw = get_asset(es_query)
         if success:
-            asset_id = panel_type + ':' + panel_id
+            asset_id = reference_type + ':' + reference_id
             add_asset_to_output_dict(output_dir, asset_raw=asset_raw, asset_id=asset_id, asset_dict=asset_dict)
+            # Recursively get all asset references
+            get_asset_content_from_ES(output_dir=output_dir, \
+                        asset_raw=UTIL.safe_list_read(list_ob=asset_dict, \
+                            key=get_full_path(output_dir=output_dir, asset_id=asset_id)), \
+                        asset_dict=asset_dict)
         else:
-            print 'ERROR: Failed to get asset ' + panel_id + ' needed by dashboard.'
+            error_msg = 'ERROR: Failed to get asset ' + reference_id
+            logger.warning(error_msg)
+            print error_msg
 
 def add_asset_to_output_dict(output_dir, asset_raw, asset_id, asset_dict):
     asset_raw_no_meta = strip_metadata(json_string=asset_raw)
@@ -177,21 +197,14 @@ def main(argv):
         success, asset_raw = get_asset(es_query)
 
         if success:
-            ret_json = json.loads(asset_raw)
-            if ret_json['hits']['total']['value'] == 1:
-                asset = ret_json['hits']['hits'][0]
-                asset_id = asset['_id']
-                add_asset_to_output_dict(output_dir, asset_raw=asset_raw, asset_id=asset_id, \
-                    asset_dict=file_paths_and_contents)
-                if asset_type == 'dashboard':
-                    get_all_dashboard_content_from_ES(output_dir=output_dir, \
-                        dashboard_raw=UTIL.safe_list_read(list_ob=file_paths_and_contents, \
-                            key=get_full_path(output_dir=output_dir, asset_id=asset_id)), \
-                        asset_dict=file_paths_and_contents)
-                export_all_files(asset_dict=file_paths_and_contents)
-            else:
-                print 'Failed to find ' + asset_type + ' named "' + asset_title + '" in elasticsearch.'
-                sys.exit(1)
+            asset_id = json.loads(asset_raw)['hits']['hits'][0]['_id']
+            add_asset_to_output_dict(output_dir, asset_raw=asset_raw, asset_id=asset_id, \
+                asset_dict=file_paths_and_contents)
+            get_asset_content_from_ES(output_dir=output_dir, \
+                asset_raw=UTIL.safe_list_read(list_ob=file_paths_and_contents, \
+                    key=get_full_path(output_dir=output_dir, asset_id=asset_id)), \
+                asset_dict=file_paths_and_contents)
+            export_all_files(asset_dict=file_paths_and_contents)
         else:
             print 'ERROR: Attempt to get ' + asset_type + ' named "' + asset_title + '" failed.'
             print 'See ' + EXPORT_LOG + ' for more details.'

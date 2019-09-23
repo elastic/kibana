@@ -1,0 +1,36 @@
+{
+   "migrationVersion": {
+      "search": "7.0.0"
+   }, 
+   "references": [
+      {
+         "type": "index-pattern", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.index", 
+         "id": "f655f660-db31-11e9-9a47-f1b6a93b3342"
+      }
+   ], 
+   "search": {
+      "sort": [
+         "TimeUpdated", 
+         "desc"
+      ], 
+      "hits": 0, 
+      "description": "", 
+      "title": "Alarms Table", 
+      "version": 2, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"query\":{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\",\"time_zone\":\"America/Denver\"}},\"language\":\"lucene\"},\"highlight\":{\"pre_tags\":[\"@kibana-highlighted-field@\"],\"post_tags\":[\"@/kibana-highlighted-field@\"],\"fields\":{\"*\":{}},\"fragment_size\":2147483647},\"filter\":[],\"highlightAll\":true,\"version\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+      }, 
+      "columns": [
+         "RuleName", 
+         "RuleSeverity", 
+         "Application", 
+         "Session", 
+         "SrcIP", 
+         "DestIP", 
+         "TotalBytes"
+      ]
+   }, 
+   "type": "search", 
+   "updated_at": "2019-09-19T23:36:00.668Z"
+}
