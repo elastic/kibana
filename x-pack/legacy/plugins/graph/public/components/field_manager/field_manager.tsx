@@ -43,22 +43,20 @@ export function FieldManager({ state, dispatch, pickerOpen, setPickerOpen }: Fie
   );
 
   return (
-    <I18nProvider>
-      <EuiFlexGroup gutterSize="s" className="gphFieldManager" alignItems="center" wrap>
-        {selectedFields.map(field => (
-          <EuiFlexItem key={field.name} grow={false}>
-            <FieldEditor allFields={allFields} {...actionCreators} field={field} />
-          </EuiFlexItem>
-        ))}
-        <EuiFlexItem grow={false}>
-          <FieldPicker
-            open={pickerOpen}
-            setOpen={setPickerOpen}
-            fieldMap={fieldMap}
-            {...actionCreators}
-          />
+    <EuiFlexGroup gutterSize="s" className="gphFieldManager" alignItems="center" wrap>
+      {selectedFields.map(field => (
+        <EuiFlexItem key={field.name} grow={false}>
+          <FieldEditor allFields={allFields} {...actionCreators} field={field} />
         </EuiFlexItem>
-      </EuiFlexGroup>
-    </I18nProvider>
+      ))}
+      <EuiFlexItem grow={false}>
+        <FieldPicker
+          open={pickerOpen}
+          setOpen={setPickerOpen}
+          fieldMap={fieldMap}
+          {...actionCreators}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

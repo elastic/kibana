@@ -6,6 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useState } from 'react';
+import { I18nProvider } from '@kbn/i18n/react';
 import { FieldManagerProps, FieldManager } from './field_manager';
 import { SearchBarProps, SearchBar } from './search_bar';
 import { GuidancePanel } from './guidance_panel';
@@ -21,7 +22,7 @@ export function GraphApp(props: GraphAppProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
   return (
-    <>
+    <I18nProvider>
       <div className="gphGraph__bar">
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
@@ -45,6 +46,6 @@ export function GraphApp(props: GraphAppProps) {
           }}
         />
       )}
-    </>
+    </I18nProvider>
   );
 }

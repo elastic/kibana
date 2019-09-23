@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export interface GuidancePanelProps {
   onFillWorkspace: () => void;
@@ -21,10 +22,11 @@ function ListItem({ children, disabled }: { children: ReactNode; disabled: boole
   return (
     <li
       className={classNames('gphGuidancePanel__item', {
-        'graphGuidancePanel__item--disabled': disabled,
+        'gphGuidancePanel__item--disabled': disabled,
       })}
+      aria-disabled={disabled}
     >
-      <EuiIcon type="check" className="gphGuidancePanel__itemIcon" />
+      <EuiIcon type="check" className="gphGuidancePanel__itemIcon" aria-hidden={true} />
       {children}
     </li>
   );
@@ -40,34 +42,74 @@ export function GuidancePanel(props: GuidancePanelProps) {
   } = props;
 
   return (
-    <EuiPanel>
-      <EuiFlexGroup direction="column" className="gphGuidancePanel">
-        <EuiFlexItem>
-          <EuiIcon type="graphApp" size="xxl" />
-          <EuiText>
-            <h1>
-              {i18n.translate('xpack.graph.guidancePanel.title', {
-                defaultMessage: "Let's get started!",
-              })}
-            </h1>
-            <ul className="graphGuidancePanel__list">
-              <ListItem disabled={false}>
-                Choose an <EuiLink onClick={onOpenDatasourcePicker}>index pattern</EuiLink> above
-              </ListItem>
-              <ListItem disabled={!hasDatasource}>
-                <EuiLink onClick={onOpenFieldPicker}>Select fields</EuiLink> to explore
-              </ListItem>
-              <ListItem disabled={!hasFields}>
-                It's time to search for something you are interested in in the search bar above or
-                you can try our suggestion to{' '}
-                <EuiLink onClick={onFillWorkspace}>
-                  show top terms and correlations among them
-                </EuiLink>
-              </ListItem>
-            </ul>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+    <EuiFlexGroup justifyContent="center">
+      <EuiFlexItem className="gphGuidancePanel">
+        <EuiPanel>
+          <EuiFlexGroup direction="column" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="graphApp" size="xxl" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <h1>
+                  {i18n.translate('xpack.graph.guidancePanel.title', {
+                    defaultMessage: "Let's get started!",
+                  })}
+                </h1>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ul className="gphGuidancePanel__list">
+                <ListItem disabled={false}>
+                  <FormattedMessage
+                    id="xpack.graph.guidancePanel.datasource.item"
+                    defaultMessage="Choose an {indexpattern} above"
+                    values={{
+                      indexpattern: (
+                        <EuiLink onClick={onOpenDatasourcePicker}>
+                          {i18n.translate('xpack.graph.guidancePanel.datasource.indexpattern', {
+                            defaultMessage: 'index pattern',
+                          })}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </ListItem>
+                <ListItem disabled={!hasDatasource}>
+                  <FormattedMessage
+                    id="xpack.graph.guidancePanel.fields.item"
+                    defaultMessage="{fields} to explore"
+                    values={{
+                      fields: (
+                        <EuiLink onClick={onOpenFieldPicker}>
+                          {i18n.translate('xpack.graph.guidancePanel.fields.selectfields', {
+                            defaultMessage: 'Select fields',
+                          })}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </ListItem>
+                <ListItem disabled={!hasFields}>
+                  <FormattedMessage
+                    id="xpack.graph.guidancePanel.nodes.item"
+                    defaultMessage=" It's time to search for something you are interested in in the search bar above! You can also try our suggestion to {topTerms}"
+                    values={{
+                      topTerms: (
+                        <EuiLink onClick={onFillWorkspace}>
+                          {i18n.translate('xpack.graph.guidancePanel.nodes.topTerms', {
+                            defaultMessage: 'show top terms and correlations among them',
+                          })}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </ListItem>
+              </ul>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

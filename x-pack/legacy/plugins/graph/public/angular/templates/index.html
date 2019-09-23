@@ -24,7 +24,9 @@
     on-fill-workspace="fillWorkspace"
   ></graph-app>
 
-  <div class="gphGraph__container" id="GraphSvgContainer" ng-if="workspace">
+  <!-- The graph svg container has to be there from the start because of some listeners being registered,
+       this is why it's using ng-show instead of ng-if -->
+  <div class="gphGraph__container" id="GraphSvgContainer" ng-show="workspace">
     <svg class="gphGraph" width="100%" height="100%" pointer-events="all" id="graphSvg" ng-click="hideAllConfigPanels()">
       <g id="svgRootGroup">
         <g>

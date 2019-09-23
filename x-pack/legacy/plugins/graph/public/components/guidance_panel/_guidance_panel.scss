@@ -1,14 +1,38 @@
-.gphWorkspaceOverlay {
-  position: absolute;
-  z-index: 1;
-  width: 100%;
-  height: 500px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.gphGuidancePanel {
+  max-width: 580px;
+  margin: $euiSizeL 0;
 }
 
-.gphWorkspaceOverlay__content {
-  max-width: 700px;
-  text-align: center;
+.gphGuidancePanel__list {
+  list-style: none !important;
+  margin: 0;
+  padding: 0;
+}
+
+.gphGuidancePanel__item {
+  display: block;
+  max-width: 420px;
+  position: relative;
+  padding-left: $euiSizeL;
+  margin-bottom: $euiSizeL;
+
+  button {
+    // make buttons wrap lines like regular text
+    display: contents;
+  }
+}
+
+.gphGuidancePanel__item--disabled {
+  color: $euiColorMediumShade;
+  pointer-events: none;
+
+  button {
+    color: $euiColorDarkShade !important;
+  }
+}
+
+.gphGuidancePanel__itemIcon {
+  position: absolute;
+  left: 0;
+  top: 0;
 }

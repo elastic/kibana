@@ -447,7 +447,7 @@ app.controller('graphuiPlugin', function (
     const fields = selectedFieldsSelector(store.getState());
     const topTermNodes = await fetchTopNodes(
       npStart.core.http.post,
-      $scope.selectedIndex.attributes.title,
+      $scope.selectedIndex.title,
       fields
     );
     $scope.workspace.mergeGraph({
@@ -881,9 +881,6 @@ app.controller('graphuiPlugin', function (
   } else {
     $route.current.locals.SavedWorkspacesProvider.get().then(function (newWorkspace) {
       $scope.savedWorkspace = newWorkspace;
-      openSourceModal(npStart.core, indexPattern => {
-        $scope.indexSelected(indexPattern);
-      });
     });
   }
 
