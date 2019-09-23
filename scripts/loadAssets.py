@@ -32,39 +32,6 @@ def check_elasticsearch_health():
         logger.warning('[loadAssets.py] Caught HTTP exception: {0}'.format(err))
         return False
 
-def set_default_index_pattern():
-    try:
-        url = 'http://localhost:9200/.kibana/_update/config:7.2.0'
-
-        postJson = {
-            'doc': {
-                'config': {
-                    'defaultIndex' : '361f5c00-b47c-11e9-86a0-cd3d7bf2f81b'
-                }
-            }
-        }
-
-        session = requests.Session()
-        # Retry on: Request Timeout (408), Internal Server Error (500), Bad Gateway (502), Service Unavailable (503),
-        # and Gateway timeout (504)
-        retries = Retry(total=5, backoff_factor=0.3, status_forcelist=[408, 500, 502, 503, 504])
-        session.mount('https://', HTTPAdapter(max_retries=retries))
-        session.mount('http://', HTTPAdapter(max_retries=retries))
-        esJson = json.dumps(postJson)
-        headers = { 'Content-type': 'application/json' }
-        response = session.post(url, headers=headers, data=esJson)
-
-        if not response.ok:
-            response.raise_for_status()
-
-        logger.info('Successfully set index pattern:\n' + UTIL.pretty_format(response.json()))
-        return True
-
-    except Exception as err:
-        logger.warning('[loadAssets.py] Failed to set default index pattern: {0}'.format(err) \
-            + '\n\turl: {0}'.format(url) + '\n\tpostJson: {0}'.format(postJson))
-        return False
-
 def put_document_from_file(es_id, path_to_updated_json):
     content = UTIL.read_json_from_file(path_to_updated_json)
     try:
@@ -111,7 +78,6 @@ def main():
     if es_ok:
         # Load all the artifacts appropriately
         load_assets(resources)
-        set_default_index_pattern()
     else:
       logger.error('elasticsearch is not ready\n')
       sys.exit(1)

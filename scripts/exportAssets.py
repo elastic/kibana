@@ -31,14 +31,14 @@ def check_elasticsearch_health():
         return False
 
 def asset_object_received(response_json):
-    if response_json['hits']['total']['value'] == 1:
-        asset = response_json['hits']['hits'][0]
-        asset_id = asset['_id']
-        logger.info('Get asset:' + asset_id)
-        return True
-    else:
-        logger.warning('asset_object_received - no object found.')
-        return False
+    if response_json.get('hits'):
+        if response_json['hits']['total']['value'] == 1:
+            asset = response_json['hits']['hits'][0]
+            asset_id = asset['_id']
+            logger.info('Get asset:' + asset_id)
+            return True
+    logger.warning('asset_object_received - no object found.')
+    return False
 
 def get_search_title_json(es_type, es_title):
     es_field = es_type + '.title'
@@ -114,9 +114,8 @@ def strip_metadata(json_string):
     ob = json.loads(json_string)['hits']['hits'][0]
     return UTIL.safe_list_read(list_ob=ob, key='_source')
 
-def get_asset_references(asset_str):
+def get_asset_references(db_asset_json):
     asset_with_type = {}
-    db_asset_json = asset_str
     for index, asset in enumerate(db_asset_json):
         asset_id = UTIL.safe_list_read(list_ob=db_asset_json[index], key='id')
         asset_type = UTIL.safe_list_read(list_ob=db_asset_json[index], key='type')
