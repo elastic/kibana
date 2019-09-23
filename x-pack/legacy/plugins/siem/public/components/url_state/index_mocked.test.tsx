@@ -9,7 +9,7 @@ import { difference } from 'lodash/fp';
 import * as React from 'react';
 
 import { HookWrapper } from '../../mock/hook_wrapper';
-import { SiemPageName } from '../../pages/home/home_navigations';
+import { SiemPageName } from '../../pages/home/types';
 
 import { CONSTANTS } from './constants';
 import { getFilterQuery, getMockPropsObj, mockHistory, testCases } from './test_dependencies';

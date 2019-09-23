@@ -7,7 +7,7 @@
 import React from 'react';
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
-import { SiemPageName } from '../home/home_navigations';
+import { SiemPageName } from '../home/types';
 import { GlobalTime } from '../../containers/global_time';
 import { IpDetailsTableType } from '../../store/network/model';
 

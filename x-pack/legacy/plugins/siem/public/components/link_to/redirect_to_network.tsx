@@ -8,6 +8,7 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { RedirectWrapper } from './redirect_wrapper';
+import { SiemPageName } from '../../pages/home/types';
 
 export type NetworkComponentProps = RouteComponentProps<{
   detailName: string;
@@ -20,7 +21,15 @@ export const RedirectToNetworkPage = ({
   },
   location: { search },
 }: NetworkComponentProps) => (
-  <RedirectWrapper to={detailName ? `/network/ip/${detailName}${search}` : `/network${search}`} />
+  <RedirectWrapper
+    to={
+      detailName
+        ? `/${SiemPageName.network}/ip/${detailName}${search}`
+        : `/${SiemPageName.network}${search}`
+    }
+  />
 );
 
-export const getNetworkUrl = () => '#/link-to/network';
+const baseNetworkUrl = `#/link-to/${SiemPageName.network}`;
+export const getNetworkUrl = () => baseNetworkUrl;
+export const getIPDetailsUrl = (detailName: string) => `${baseNetworkUrl}/ip/${detailName}`;

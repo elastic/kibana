@@ -10,7 +10,7 @@ import { getOr } from 'lodash/fp';
 import { APP_NAME } from '../../../../common/constants';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/details/utils';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
-import { SiemPageName } from '../../../pages/home/home_navigations';
+import { SiemPageName } from '../../../pages/home/types';
 import { RouteSpyState } from '../../../utils/route/types';
 import { getOverviewUrl } from '../../link_to';
 

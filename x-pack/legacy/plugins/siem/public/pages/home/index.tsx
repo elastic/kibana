@@ -28,7 +28,8 @@ import { WithSource } from '../../containers/source';
 import { MlPopover } from '../../components/ml_popover/ml_popover';
 import { MlHostConditionalContainer } from '../../components/ml/conditional_links/ml_host_conditional_container';
 import { MlNetworkConditionalContainer } from '../../components/ml/conditional_links/ml_network_conditional_container';
-import { SiemPageName, navTabs } from './home_navigations';
+import { navTabs } from './home_navigations';
+import { SiemPageName } from './types';
 import { UseUrlState } from '../../components/url_state';
 import { SpyRoute } from '../../utils/route/spy_routes';
 

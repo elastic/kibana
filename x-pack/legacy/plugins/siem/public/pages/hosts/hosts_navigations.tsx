@@ -24,10 +24,12 @@ import { ESTermQuery } from '../../../common/typed_json';
 import { HostsTableType } from '../../store/hosts/model';
 import { StatefulEventsViewer } from '../../components/events_viewer';
 import { NavTab } from '../../components/navigation/types';
+import { SiemPageName } from '../home/types';
 
-const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/hosts/${tabName}`;
+const baseTabsOnHostsUrl = `#/${SiemPageName.hosts}`;
+const getTabsOnHostsUrl = (tabName: HostsTableType) => `${baseTabsOnHostsUrl}/${tabName}`;
 const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) => {
-  return `#/hosts/${hostName}/${tabName}`;
+  return `${baseTabsOnHostsUrl}/${hostName}/${tabName}`;
 };
 
 type KeyHostsNavTabWithoutMlPermission = HostsTableType.hosts &

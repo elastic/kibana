@@ -13,7 +13,7 @@ import { RedirectToNetworkPage } from './redirect_to_network';
 import { RedirectToOverviewPage } from './redirect_to_overview';
 import { RedirectToTimelinesPage } from './redirect_to_timelines';
 import { HostsTableType } from '../../store/hosts/model';
-import { SiemPageName } from '../../pages/home/home_navigations';
+import { SiemPageName } from '../../pages/home/types';
 
 interface LinkToPageProps {
   match: RouteMatch<{}>;

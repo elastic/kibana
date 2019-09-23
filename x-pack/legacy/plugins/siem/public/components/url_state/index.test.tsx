@@ -21,7 +21,7 @@ import { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
 import { CONSTANTS } from './constants';
 import { RouteSpyState } from '../../utils/route/types';
-import { SiemPageName } from '../../pages/home/home_navigations';
+import { SiemPageName } from '../../pages/home/types';
 
 let mockProps: UrlStateContainerPropTypes;
 

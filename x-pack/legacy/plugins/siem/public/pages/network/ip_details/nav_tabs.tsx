@@ -9,9 +9,10 @@ import * as i18n from '../translations';
 import { IpDetailsTableType } from '../../../store/network/model';
 import { KeyIPDetailsNavTab } from './types';
 import { NavTab } from '../../../components/navigation/types';
+import { SiemPageName } from '../../home/types';
 
 const getTabsOnIpDetailsUrl = (ip: string, tabName: IpDetailsTableType) => {
-  return `#/network/ip/${ip}/${tabName}`;
+  return `#/${SiemPageName.network}/ip/${ip}/${tabName}`;
 };
 
 export const navTabsIPDetails = (

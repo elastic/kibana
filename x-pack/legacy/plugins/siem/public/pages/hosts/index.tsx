@@ -18,7 +18,7 @@ import {
 import { HostsBody } from './hosts_body';
 import { HostsTableType } from '../../store/hosts/model';
 import { GlobalTime } from '../../containers/global_time';
-import { SiemPageName } from '../home/home_navigations';
+import { SiemPageName } from '../home/types';
 import { Hosts } from './hosts';
 
 const hostsPagePath = `/:pageName(${SiemPageName.hosts})`;

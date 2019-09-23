@@ -17,6 +17,7 @@ import {
 } from '../../../../containers/overview/overview_network';
 import { inputsModel } from '../../../../store/inputs';
 import { OverviewNetworkStats } from '../overview_network_stats';
+import { getNetworkUrl } from '../../../link_to';
 
 export interface OwnProps {
   startDate: number;
@@ -58,7 +59,7 @@ export const OverviewNetwork = pure<OwnProps>(({ endDate, startDate, setQuery })
             />
           }
         >
-          <EuiButton href="#/link-to/network/">
+          <EuiButton href={`${getNetworkUrl()}/`}>
             <FormattedMessage
               id="xpack.siem.overview.networkAction"
               defaultMessage="View network"
