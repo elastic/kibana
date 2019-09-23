@@ -69,6 +69,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.closeToast();
 
       await PageObjects.dashboard.clickFullScreenMode();
+      await PageObjects.common.sleep(5000); // screenshot shows it's still not in fullscreen mode
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickExpandPanelToggle();
 
