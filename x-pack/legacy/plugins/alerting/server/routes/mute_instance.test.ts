@@ -5,7 +5,7 @@
  */
 
 import { createMockServer } from './_mock_server';
-import { muteAlertInstanceRoute } from './mute';
+import { muteAlertInstanceRoute } from './mute_instance';
 
 const { server, alertsClient } = createMockServer();
 muteAlertInstanceRoute(server);
@@ -18,5 +18,5 @@ test('mutes an alert instance', async () => {
 
   const { statusCode } = await server.inject(request);
   expect(statusCode).toBe(204);
-  expect(alertsClient.mute).toHaveBeenCalledWith({ alertId: '1', alertInstanceId: '2' });
+  expect(alertsClient.muteInstance).toHaveBeenCalledWith({ alertId: '1', alertInstanceId: '2' });
 });

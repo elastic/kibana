@@ -5,7 +5,7 @@
  */
 
 import { createMockServer } from './_mock_server';
-import { unmuteAlertInstanceRoute } from './unmute';
+import { unmuteAlertInstanceRoute } from './unmute_instance';
 
 const { server, alertsClient } = createMockServer();
 unmuteAlertInstanceRoute(server);
@@ -18,5 +18,5 @@ test('unmutes an alert instance', async () => {
 
   const { statusCode } = await server.inject(request);
   expect(statusCode).toBe(204);
-  expect(alertsClient.unmute).toHaveBeenCalledWith({ alertId: '1', alertInstanceId: '2' });
+  expect(alertsClient.unmuteInstance).toHaveBeenCalledWith({ alertId: '1', alertInstanceId: '2' });
 });

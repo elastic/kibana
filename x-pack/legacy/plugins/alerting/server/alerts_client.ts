@@ -289,7 +289,13 @@ export class AlertsClient {
     }
   }
 
-  public async mute({ alertId, alertInstanceId }: { alertId: string; alertInstanceId: string }) {
+  public async muteInstance({
+    alertId,
+    alertInstanceId,
+  }: {
+    alertId: string;
+    alertInstanceId: string;
+  }) {
     const existingObject = await this.savedObjectsClient.get('alert', alertId);
     const mutedInstanceIds = existingObject.attributes.mutedInstanceIds || [];
     if (!mutedInstanceIds.includes(alertInstanceId)) {
@@ -309,7 +315,13 @@ export class AlertsClient {
     }
   }
 
-  public async unmute({ alertId, alertInstanceId }: { alertId: string; alertInstanceId: string }) {
+  public async unmuteInstance({
+    alertId,
+    alertInstanceId,
+  }: {
+    alertId: string;
+    alertInstanceId: string;
+  }) {
     const existingObject = await this.savedObjectsClient.get('alert', alertId);
     const mutedInstanceIds = existingObject.attributes.mutedInstanceIds || [];
     if (mutedInstanceIds.includes(alertInstanceId)) {

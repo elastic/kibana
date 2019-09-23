@@ -729,7 +729,7 @@ describe('disable()', () => {
   });
 });
 
-describe('mute()', () => {
+describe('muteInstance()', () => {
   test('mutes an alert instance', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     savedObjectsClient.get.mockResolvedValueOnce({
@@ -745,7 +745,7 @@ describe('mute()', () => {
       references: [],
     });
 
-    await alertsClient.mute({ alertId: '1', alertInstanceId: '2' });
+    await alertsClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
     expect(savedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
@@ -772,12 +772,12 @@ describe('mute()', () => {
       references: [],
     });
 
-    await alertsClient.mute({ alertId: '1', alertInstanceId: '2' });
+    await alertsClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
     expect(savedObjectsClient.update).not.toHaveBeenCalled();
   });
 });
 
-describe('unmute()', () => {
+describe('unmuteInstance()', () => {
   test('unmutes an alert instance', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     savedObjectsClient.get.mockResolvedValueOnce({
@@ -793,7 +793,7 @@ describe('unmute()', () => {
       references: [],
     });
 
-    await alertsClient.unmute({ alertId: '1', alertInstanceId: '2' });
+    await alertsClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
     expect(savedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
@@ -820,7 +820,7 @@ describe('unmute()', () => {
       references: [],
     });
 
-    await alertsClient.unmute({ alertId: '1', alertInstanceId: '2' });
+    await alertsClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
     expect(savedObjectsClient.update).not.toHaveBeenCalled();
   });
 });

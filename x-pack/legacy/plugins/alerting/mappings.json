@@ -47,6 +47,9 @@
       "throttle": {
         "type": "keyword"
       },
+      "muted": {
+        "type": "boolean"
+      },
       "mutedInstanceIds": {
         "type": "keyword"
       }
