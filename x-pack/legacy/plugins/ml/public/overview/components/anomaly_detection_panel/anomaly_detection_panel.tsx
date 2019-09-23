@@ -103,8 +103,8 @@ export const AnomalyDetectionPanel: FC = () => {
       // Check results for each group's promise index and update state
       Object.keys(scores).forEach(groupId => {
         const resultsIndex = scores[groupId] && scores[groupId].index;
-        scores[groupId] = results[resultsIndex];
-        tempGroups[groupId].max_anomaly_score = results[resultsIndex];
+        scores[groupId] = resultsIndex !== undefined && results[resultsIndex];
+        tempGroups[groupId].max_anomaly_score = resultsIndex !== undefined && results[resultsIndex];
       });
 
       setGroups(tempGroups);

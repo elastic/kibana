@@ -66,7 +66,7 @@ interface TabData {
 }
 
 const TAB_DATA: Record<TabId, TabData> = {
-  overview: { testSubject: 'mlTabOverview', pathId: 'overview' },
+  overview: { testSubject: 'mlMainTab overview', pathId: 'overview' },
   anomaly_detection: { testSubject: 'mlMainTab anomalyDetection', pathId: 'jobs' },
   data_frames: { testSubject: 'mlMainTab dataFrames' },
   data_frame_analytics: { testSubject: 'mlMainTab dataFrameAnalytics' },

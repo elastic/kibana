@@ -51,7 +51,7 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToOverview() {
-      await this.navigateToArea('mlTabOverview', 'mlPageOverview');
+      await this.navigateToArea('mlMainTab overview', 'mlPageOverview');
     },
 
     async navigateToAnomalyDetection() {
