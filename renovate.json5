@@ -762,6 +762,14 @@
         ],
       },
       {
+        groupSlug: 'yargs',
+        groupName: 'yargs related packages',
+        packageNames: [
+          'yargs',
+          '@types/yargs',
+        ],
+      },
+      {
         groupSlug: 'intl-relativeformat',
         groupName: 'intl-relativeformat related packages',
         packageNames: [
