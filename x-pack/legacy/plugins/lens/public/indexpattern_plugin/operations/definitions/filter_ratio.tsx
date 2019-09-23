@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiFieldText, EuiLink, EuiText } from '@elastic/eui';
+import { isEqual } from 'lodash';
 import {
   Query,
   QueryBarInput,
@@ -27,6 +28,8 @@ export interface FilterRatioIndexPatternColumn extends BaseIndexPatternColumn {
     denominator: Query;
   };
 }
+
+const initialQuery = { language: 'kuery', query: '' };
 
 export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternColumn> = {
   type: 'filter_ratio',
@@ -50,8 +53,8 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
       isBucketed: false,
       scale: 'ratio',
       params: {
-        numerator: { language: 'kuery', query: '' },
-        denominator: { language: 'kuery', query: '' },
+        numerator: initialQuery,
+        denominator: initialQuery,
       },
     };
   },
@@ -87,7 +90,9 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
     savedObjectsClient,
     http,
   }) => {
-    const [hasDenominator, setDenominator] = useState(false);
+    const [hasDenominator, setDenominator] = useState(
+      !isEqual(currentColumn.params.denominator, initialQuery)
+    );
 
     return (
       <div>
@@ -123,10 +128,25 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
           label={i18n.translate('xpack.lens.indexPattern.filterRatioDividesLabel', {
             defaultMessage: 'Divided by:',
           })}
+          data-test-subj="lns-indexPatternFilterRatio-dividedByRow"
           labelAppend={
             <EuiText size="xs">
               {hasDenominator ? (
-                <EuiLink>
+                <EuiLink
+                  data-test-subj="lns-indexPatternFilterRatio-hideDenominatorButton"
+                  onClick={() => {
+                    setDenominator(false);
+                    setState(
+                      updateColumnParam({
+                        state,
+                        layerId,
+                        currentColumn,
+                        paramName: 'denominator',
+                        value: initialQuery,
+                      })
+                    );
+                  }}
+                >
                   <FormattedMessage
                     id="xpack.lens.indexPattern.filterRatioUseDocumentsButton"
                     defaultMessage="Use count of documents"
