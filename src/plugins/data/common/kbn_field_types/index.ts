@@ -17,16 +17,11 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { DataPublicPlugin } from './plugin';
+export { KbnFieldType } from './kbn_field_type';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DataPublicPlugin(initializerContext);
-}
-
-export { DataPublicPlugin as Plugin };
-
-export * from '../common';
-export * from './autocomplete_provider';
-
-export * from './types';
+export {
+  castEsToKbnFieldTypeName,
+  getKbnFieldType,
+  getKbnTypeNames,
+  getFilterableKbnTypeNames,
+} from './kbn_field_types';

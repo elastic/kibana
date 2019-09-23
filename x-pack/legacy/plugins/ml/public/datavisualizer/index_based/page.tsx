@@ -25,7 +25,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { KBN_FIELD_TYPES, ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
+import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';
 // @ts-ignore
 import { isFullLicense } from '../../license/check_license';
