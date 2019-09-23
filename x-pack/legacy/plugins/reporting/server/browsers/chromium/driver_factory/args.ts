@@ -11,16 +11,9 @@ interface LaunchArgs {
   viewport: BrowserConfig['viewport'];
   disableSandbox: BrowserConfig['disableSandbox'];
   proxy: BrowserConfig['proxy'];
-  verboseLogging: BrowserConfig['verboseLogging'];
 }
 
-export const args = ({
-  userDataDir,
-  viewport,
-  disableSandbox,
-  proxy: proxyConfig,
-  verboseLogging,
-}: LaunchArgs) => {
+export const args = ({ userDataDir, viewport, disableSandbox, proxy: proxyConfig }: LaunchArgs) => {
   const flags = [
     // Disable built-in Google Translate service
     '--disable-translate',
