@@ -16,13 +16,15 @@ import {
   EuiSpacer,
   EuiTabbedContent,
   EuiTitle,
-  EuiBadge
+  EuiBadge,
+  EuiToolTip
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get, keys } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import { idx } from '@kbn/elastic-idx';
+import { px, units } from '../../../../../../../style/variables';
 import { Summary } from '../../../../../../shared/Summary';
 import { TimestampSummaryItem } from '../../../../../../shared/Summary/TimestampSummaryItem';
 import { DurationSummaryItem } from '../../../../../../shared/Summary/DurationSummaryItem';
@@ -74,6 +76,11 @@ function getSpanTypes(span: Span) {
 
 const TagName = styled.div`
   font-weight: bold;
+`;
+
+const SpanBadge = styled(EuiBadge)`
+  display: inline-block;
+  margin-right: ${px(units.quarter)};
 `;
 
 interface Props {
@@ -148,12 +155,35 @@ export function SpanFlyout({
                 parentType="transaction"
               />,
               <>
-                <EuiBadge color="hollow">{spanTypes.spanType}</EuiBadge>
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.apm.transactionDetails.spanFlyout.spanType',
+                    { defaultMessage: 'Type' }
+                  )}
+                >
+                  <SpanBadge color="hollow">{spanTypes.spanType}</SpanBadge>
+                </EuiToolTip>
                 {spanTypes.spanSubtype && (
-                  <EuiBadge color="hollow">{spanTypes.spanSubtype}</EuiBadge>
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.apm.transactionDetails.spanFlyout.spanSubtype',
+                      { defaultMessage: 'Subtype' }
+                    )}
+                  >
+                    <SpanBadge color="hollow">
+                      {spanTypes.spanSubtype}
+                    </SpanBadge>
+                  </EuiToolTip>
                 )}
                 {spanTypes.spanAction && (
-                  <EuiBadge color="hollow">{spanTypes.spanAction}</EuiBadge>
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.apm.transactionDetails.spanFlyout.spanAction',
+                      { defaultMessage: 'Action' }
+                    )}
+                  >
+                    <SpanBadge color="hollow">{spanTypes.spanAction}</SpanBadge>
+                  </EuiToolTip>
                 )}
               </>
             ]}
