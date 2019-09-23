@@ -14,9 +14,9 @@ import { SpacesClient } from '../../../lib/spaces_client';
 import { ExternalRouteDeps, ExternalRouteRequestFacade } from '.';
 
 export function initGetSpacesApi(deps: ExternalRouteDeps) {
-  const { http, log, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
+  const { legacyRouter, log, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
 
-  http.route({
+  legacyRouter({
     method: 'GET',
     path: '/api/spaces/space',
     async handler(request: ExternalRouteRequestFacade) {
@@ -51,7 +51,7 @@ export function initGetSpacesApi(deps: ExternalRouteDeps) {
     },
   });
 
-  http.route({
+  legacyRouter({
     method: 'GET',
     path: '/api/spaces/space/{id}',
     async handler(request: ExternalRouteRequestFacade) {

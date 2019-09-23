@@ -5,9 +5,7 @@
 <titleabbrev>Create pipeline</titleabbrev>
 ++++
 
-Create a centrally-managed Logstash pipeline, or update an existing pipeline.
-
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Create a centrally-managed Logstash pipeline, or update an existing pipeline.
 
 [[logstash-configuration-management-api-create-request]]
 ==== Request
