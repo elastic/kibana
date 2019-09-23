@@ -21,8 +21,6 @@ import { EmbeddableDependencies } from '../types';
 
 export const createDeps = (): EmbeddableDependencies => {
   const deps: EmbeddableDependencies = {
-    triggers: new Map<any, any>(),
-    actions: new Map<any, any>(),
     embeddableFactories: new Map<any, any>(),
   };
   return deps;

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Space, User } from '../common/types';
+import { ES_TEST_INDEX_NAME } from '../common/lib';
 
 const NoKibanaPrivileges: User = {
   username: 'no_kibana_privileges',
@@ -20,7 +21,7 @@ const NoKibanaPrivileges: User = {
           privileges: ['all'],
         },
         {
-          names: ['.kibaka-alerting-test-data*'],
+          names: [`${ES_TEST_INDEX_NAME}*`],
           privileges: ['all'],
         },
       ],
@@ -57,7 +58,7 @@ const GlobalRead: User = {
       cluster: ['manage_api_key'],
       indices: [
         {
-          names: ['.kibaka-alerting-test-data*'],
+          names: [`${ES_TEST_INDEX_NAME}*`],
           privileges: ['all'],
         },
       ],
@@ -85,7 +86,7 @@ const Space1All: User = {
       cluster: ['manage_api_key'],
       indices: [
         {
-          names: ['.kibaka-alerting-test-data*'],
+          names: [`${ES_TEST_INDEX_NAME}*`],
           privileges: ['all'],
         },
       ],
@@ -107,7 +108,13 @@ const Space2: Space = {
   disabledFeatures: [],
 };
 
-export const Spaces: Space[] = [Space1, Space2];
+const OtherSpace: Space = {
+  id: 'other',
+  name: 'Other',
+  disabledFeatures: [],
+};
+
+export const Spaces: Space[] = [Space1, Space2, OtherSpace];
 
 // For all scenarios, we define both an instance in addition
 // to a "type" definition so that we can use the exhaustive switch in
