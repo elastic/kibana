@@ -50,7 +50,6 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.tagCloudWithValuesFound(['CN', 'IN', 'US', 'BR', 'ID']);
     // TODO add test for 'region map viz'
     // TODO add test for 'tsvb gauge' viz
-    await dashboardExpect.tsvbTimeSeriesLegendCount(1);
     // TODO add test for 'geo map' viz
     // This tests the presence of the two input control embeddables
     await dashboardExpect.inputControlItemCount(5);
@@ -86,12 +85,12 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.tsvbMetricValuesExist(['0']);
     await dashboardExpect.tsvbMarkdownWithValuesExists(['Hi Avg last bytes: 0']);
     await dashboardExpect.tsvbTableCellCount(0);
-    await dashboardExpect.tsvbTimeSeriesLegendCount(1);
     await dashboardExpect.tsvbTopNValuesExist(['0']);
     await dashboardExpect.vegaTextsDoNotExist(['5,000']);
   };
 
-  describe('dashboard embeddable rendering', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/46305
+  describe.skip('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
       await PageObjects.dashboard.clickNewDashboard();
 

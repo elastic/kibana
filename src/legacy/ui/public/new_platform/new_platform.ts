@@ -16,8 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { InternalCoreSetup, InternalCoreStart } from '../../../../core/public';
+import { IUiActionsStart, IUiActionsSetup } from 'src/plugins/ui_actions/public';
+import { LegacyCoreSetup, LegacyCoreStart } from '../../../../core/public';
 import { Plugin as DataPlugin } from '../../../../plugins/data/public';
+import { Plugin as ExpressionsPlugin } from '../../../../plugins/expressions/public';
 import {
   Setup as InspectorSetup,
   Start as InspectorStart,
@@ -25,21 +27,25 @@ import {
 
 export interface PluginsSetup {
   data: ReturnType<DataPlugin['setup']>;
+  expressions: ReturnType<ExpressionsPlugin['setup']>;
   inspector: InspectorSetup;
+  uiActions: IUiActionsSetup;
 }
 
 export interface PluginsStart {
   data: ReturnType<DataPlugin['start']>;
+  expressions: ReturnType<ExpressionsPlugin['start']>;
   inspector: InspectorStart;
+  uiActions: IUiActionsStart;
 }
 
 export const npSetup = {
-  core: (null as unknown) as InternalCoreSetup,
+  core: (null as unknown) as LegacyCoreSetup,
   plugins: {} as PluginsSetup,
 };
 
 export const npStart = {
-  core: (null as unknown) as InternalCoreStart,
+  core: (null as unknown) as LegacyCoreStart,
   plugins: {} as PluginsStart,
 };
 
@@ -48,18 +54,18 @@ export const npStart = {
  * @internal
  */
 export function __reset__() {
-  npSetup.core = (null as unknown) as InternalCoreSetup;
+  npSetup.core = (null as unknown) as LegacyCoreSetup;
   npSetup.plugins = {} as any;
-  npStart.core = (null as unknown) as InternalCoreStart;
+  npStart.core = (null as unknown) as LegacyCoreStart;
   npStart.plugins = {} as any;
 }
 
-export function __setup__(coreSetup: InternalCoreSetup, plugins: PluginsSetup) {
+export function __setup__(coreSetup: LegacyCoreSetup, plugins: PluginsSetup) {
   npSetup.core = coreSetup;
   npSetup.plugins = plugins;
 }
 
-export function __start__(coreStart: InternalCoreStart, plugins: PluginsStart) {
+export function __start__(coreStart: LegacyCoreStart, plugins: PluginsStart) {
   npStart.core = coreStart;
   npStart.plugins = plugins;
 }

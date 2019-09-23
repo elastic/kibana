@@ -1,0 +1,80 @@
+[[role-management-api-get]]
+=== Get all {kib} roles API
+++++
+<titleabbrev>Get all roles</titleabbrev>
+++++
+
+Retrieves all {kib} roles.
+
+experimental["The underlying mechanism of enforcing role-based access control is stable, but the APIs for managing the roles are experimental."]
+
+[[role-management-api-get-prereqs]]
+==== Prerequisite 
+
+To use the get role API, you must have the `manage_security` cluster privilege.
+
+[[role-management-api-retrieve-all-request-body]]
+==== Request
+
+`GET /api/security/role`
+
+[[role-management-api-retrieve-all-response-codes]]
+==== Response code
+
+`200`:: 
+  Indicates a successful call.
+  
+[[role-management-api-retrieve-all-example]]
+==== Example
+
+The API returns the following:
+
+[source,js]
+--------------------------------------------------
+[
+  {
+    "name": "my_kibana_role",
+    "metadata" : {
+      "version" : 1
+    },
+    "transient_metadata": {
+      "enabled": true
+    },
+    "elasticsearch": {
+      "indices": [ ],
+      "cluster": [ ],
+      "run_as": [ ]
+    },
+    "kibana": [{
+      "base": [
+        "all"
+      ],
+      "feature": {},
+      "spaces": [
+        "*"
+      ]
+    }]
+  },
+  {
+    "name": "my_admin_role",
+    "metadata" : {
+      "version" : 1
+    },
+    "transient_metadata": {
+      "enabled": true
+    },
+    "elasticsearch": {
+      "cluster" : [ "all" ],
+      "indices" : [ {
+        "names" : [ "index1", "index2" ],
+        "privileges" : [ "all" ],
+        "field_security" : {
+          "grant" : [ "title", "body" ]
+        },
+        "query" : "{\"match\": {\"title\": \"foo\"}}"
+      } ],
+    },
+    "kibana": [ ]
+  }
+]
+--------------------------------------------------

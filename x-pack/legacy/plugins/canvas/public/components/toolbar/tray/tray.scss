@@ -6,4 +6,9 @@
 .canvasTray__panel {
   background-color: $euiPageBackgroundColor;
   border-radius: 0;
+
+  &.canvasTray__panel--holdingExpression {
+    background-color: $euiColorEmptyShade;
+  }
 }
+

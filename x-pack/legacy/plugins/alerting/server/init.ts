@@ -27,6 +27,7 @@ import {
   updateAlertRoute,
   enableAlertRoute,
   disableAlertRoute,
+  updateApiKeyRoute,
   muteAlertInstanceRoute,
   unmuteAlertInstanceRoute,
 } from './routes';
@@ -127,6 +128,7 @@ export function init(server: Server) {
   updateAlertRoute(server);
   enableAlertRoute(server);
   disableAlertRoute(server);
+  updateApiKeyRoute(server);
   muteAlertInstanceRoute(server);
   unmuteAlertInstanceRoute(server);
 

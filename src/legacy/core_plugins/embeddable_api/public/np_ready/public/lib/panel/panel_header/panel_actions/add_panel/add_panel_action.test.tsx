@@ -30,6 +30,7 @@ import { FilterableEmbeddableFactory } from '../../../../test_samples/embeddable
 import { FilterableContainer } from '../../../../test_samples/embeddables/filterable_container';
 import { GetEmbeddableFactory } from '../../../../types';
 import { coreMock } from '../../../../../../../../../../../core/public/mocks';
+import { ContactCardEmbeddable } from '../../../../test_samples';
 
 const embeddableFactories = new Map<string, EmbeddableFactory>();
 embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
@@ -88,11 +89,7 @@ test('Is not compatible when container is in view mode', async () => {
 });
 
 test('Is not compatible when embeddable is not a container', async () => {
-  expect(
-    await action.isCompatible({
-      embeddable,
-    })
-  ).toBe(false);
+  expect(await action.isCompatible({ embeddable } as any)).toBe(false);
 });
 
 test('Is compatible when embeddable is a parent and in edit mode', async () => {
@@ -103,13 +100,15 @@ test('Is compatible when embeddable is a parent and in edit mode', async () => {
 test('Execute throws an error when called with an embeddable that is not a container', async () => {
   async function check() {
     await action.execute({
-      // @ts-ignore
-      embeddable: new ContactCardEmbeddable({
-        firstName: 'sue',
-        id: '123',
-        viewMode: ViewMode.EDIT,
-      }),
-    });
+      embeddable: new ContactCardEmbeddable(
+        {
+          firstName: 'sue',
+          id: '123',
+          viewMode: ViewMode.EDIT,
+        },
+        {} as any
+      ),
+    } as any);
   }
   await expect(check()).rejects.toThrow(Error);
 });

@@ -12,6 +12,9 @@ import { DatafeedId, JobId } from '../job_creator/configs';
 import { DATAFEED_STATE } from '../../../../../common/constants/states';
 
 const REFRESH_INTERVAL_MS = 100;
+const TARGET_PROGRESS_DELTA = 2;
+const REFRESH_RATE_ADJUSTMENT_DELAY_MS = 2000;
+
 type Progress = number;
 export type ProgressSubscriber = (progress: number) => void;
 
@@ -29,6 +32,9 @@ export class JobRunner {
     stop: boolean;
   };
   private _subscribers: ProgressSubscriber[];
+
+  private _datafeedStartTime: number = 0;
+  private _performRefreshRateAdjustment: boolean = false;
 
   constructor(jobCreator: JobCreator) {
     this._jobId = jobCreator.jobId;
@@ -71,6 +77,7 @@ export class JobRunner {
     pollProgress: boolean
   ): Promise<boolean> {
     try {
+      this._datafeedStartTime = Date.now();
       // link the _subscribers list from the JobCreator
       // to the progress BehaviorSubject.
       const subscriptions =
@@ -88,17 +95,29 @@ export class JobRunner {
       this._percentageComplete = 0;
 
       const check = async () => {
-        const { isRunning, progress } = await this.getProgress();
+        const { isRunning, progress: prog, isJobClosed } = await this.getProgress();
 
+        // if the progress has reached 100% but the job is still running,
+        // dial the progress back to 99 to avoid any post creation buttons from
+        // appearing as they only rely on the progress.
+        const progress =
+          prog === 100 && (isRunning === true || isJobClosed === false) ? prog - 1 : prog;
+
+        this._adjustRefreshInterval(progress);
         this._percentageComplete = progress;
         this._progress$.next(this._percentageComplete);
 
-        if (isRunning === true && this._stopRefreshPoll.stop === false) {
+        if ((isRunning === true || isJobClosed === false) && this._stopRefreshPoll.stop === false) {
           setTimeout(async () => {
             await check();
           }, this._refreshInterval);
         } else {
-          // job has finished running, unsubscribe everyone
+          // job has finished running, set progress to 100%
+          // it may be lower than 100 on completion as the progress
+          // is calculated based on latest_record_timestamp which may be earlier
+          // than the end date supplied to the datafeed
+          this._progress$.next(100);
+          // unsubscribe everyone
           subscriptions.forEach(s => s.unsubscribe());
         }
       };
@@ -113,6 +132,33 @@ export class JobRunner {
     }
   }
 
+  private _adjustRefreshInterval(progress: number) {
+    if (this._performRefreshRateAdjustment === false) {
+      // for the first couple of seconds of the job running, don't
+      // adjust the refresh interval
+      const timeDeltaMs = Date.now() - this._datafeedStartTime;
+      if (timeDeltaMs > REFRESH_RATE_ADJUSTMENT_DELAY_MS) {
+        this._performRefreshRateAdjustment = true;
+      } else {
+        return;
+      }
+    }
+
+    const progressDelta = progress - this._percentageComplete;
+    if (progressDelta !== 0) {
+      // adjust the refresh interval so that it produces a change in percentage
+      // that is close to the target
+      this._refreshInterval = Math.floor(
+        this._refreshInterval * (TARGET_PROGRESS_DELTA / progressDelta)
+      );
+
+      // don't let the interval fall below the initial default.
+      if (this._refreshInterval < REFRESH_INTERVAL_MS) {
+        this._refreshInterval = REFRESH_INTERVAL_MS;
+      }
+    }
+  }
+
   public async startDatafeed() {
     return await this._startDatafeed(this._start, this._end, true);
   }
@@ -123,7 +169,11 @@ export class JobRunner {
     return await this._startDatafeed(start, undefined, false);
   }
 
-  public async getProgress(): Promise<{ progress: Progress; isRunning: boolean }> {
+  public async getProgress(): Promise<{
+    progress: Progress;
+    isRunning: boolean;
+    isJobClosed: boolean;
+  }> {
     return await ml.jobs.getLookBackProgress(this._jobId, this._start, this._end);
   }
 

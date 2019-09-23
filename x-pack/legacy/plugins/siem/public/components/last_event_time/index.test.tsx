@@ -4,94 +4,83 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
-import { render } from 'react-testing-library';
 
+import { getEmptyValue } from '../empty_value';
 import { LastEventIndexKey } from '../../graphql/types';
 import { mockLastEventTimeQuery } from '../../containers/events/last_event_time/mock';
-import { wait } from '../../lib/helpers';
+
+import { useLastEventTimeQuery } from '../../containers/events/last_event_time';
 import { TestProviders } from '../../mock';
 import '../../mock/ui_settings';
 
 import { LastEventTime } from '.';
+import { mount } from 'enzyme';
+
+const mockUseLastEventTimeQuery: jest.Mock = useLastEventTimeQuery as jest.Mock;
+jest.mock('../../containers/events/last_event_time', () => ({
+  useLastEventTimeQuery: jest.fn(),
+}));
 
 describe('Last Event Time Stat', () => {
-  // this is just a little hack to silence a warning that we'll get until react
-  // fixes this: https://github.com/facebook/react/pull/14853
-  // For us that mean we need to upgrade to 16.9.0
-  // and we will be able to do that when we are in master
-  // eslint-disable-next-line no-console
-  const originalError = console.error;
-
-  beforeAll(() => {
-    // eslint-disable-next-line no-console
-    console.error = (...args: string[]) => {
-      if (/Warning.*not wrapped in act/.test(args[0])) {
-        return;
-      }
-      originalError.call(console, ...args);
-    };
-  });
-
-  afterAll(() => {
-    // eslint-disable-next-line no-console
-    console.error = originalError;
+  beforeEach(() => {
+    mockUseLastEventTimeQuery.mockReset();
   });
 
   test('Loading', async () => {
-    const { container } = render(
+    mockUseLastEventTimeQuery.mockImplementation(() => ({
+      loading: true,
+      lastSeen: null,
+      errorMessage: null,
+    }));
+    const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockLastEventTimeQuery} addTypename={false}>
-          <LastEventTime indexKey={LastEventIndexKey.hosts} />
-        </MockedProvider>
+        <LastEventTime indexKey={LastEventIndexKey.hosts} />
       </TestProviders>
     );
-    expect(container.innerHTML).toBe(
+    expect(wrapper.html()).toBe(
       '<span class="euiLoadingSpinner euiLoadingSpinner--medium"></span>'
     );
   });
   test('Last seen', async () => {
-    const { container } = render(
+    mockUseLastEventTimeQuery.mockImplementation(() => ({
+      loading: false,
+      lastSeen: mockLastEventTimeQuery[0].result.data!.source.LastEventTime.lastSeen,
+      errorMessage: mockLastEventTimeQuery[0].result.data!.source.LastEventTime.errorMessage,
+    }));
+    const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockLastEventTimeQuery} addTypename={false}>
-          <LastEventTime indexKey={LastEventIndexKey.hosts} />
-        </MockedProvider>
+        <LastEventTime indexKey={LastEventIndexKey.hosts} />
       </TestProviders>
     );
-    await wait();
 
-    expect(container.innerHTML).toBe(
-      '<span class="euiToolTipAnchor">Last event: 12 days ago</span>'
-    );
+    expect(wrapper.html()).toBe('<span class="euiToolTipAnchor">Last event: 12 days ago</span>');
   });
   test('Bad date time string', async () => {
-    const badDateTime = cloneDeep(mockLastEventTimeQuery);
-    badDateTime[0].result.data!.source.LastEventTime.lastSeen = 'something-invalid';
-    const { container } = render(
+    mockUseLastEventTimeQuery.mockImplementation(() => ({
+      loading: false,
+      lastSeen: 'something-invalid',
+      errorMessage: mockLastEventTimeQuery[0].result.data!.source.LastEventTime.errorMessage,
+    }));
+    const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={badDateTime} addTypename={false}>
-          <LastEventTime indexKey={LastEventIndexKey.hosts} />
-        </MockedProvider>
+        <LastEventTime indexKey={LastEventIndexKey.hosts} />
       </TestProviders>
     );
-    await wait();
 
-    expect(container.innerHTML).toBe('something-invalid');
+    expect(wrapper.html()).toBe('something-invalid');
   });
   test('Null time string', async () => {
-    const nullDateTime = cloneDeep(mockLastEventTimeQuery);
-    nullDateTime[0].result.data!.source.LastEventTime.lastSeen = null;
-    const { container } = render(
+    mockUseLastEventTimeQuery.mockImplementation(() => ({
+      loading: false,
+      lastSeen: null,
+      errorMessage: mockLastEventTimeQuery[0].result.data!.source.LastEventTime.errorMessage,
+    }));
+    const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={nullDateTime} addTypename={false}>
-          <LastEventTime indexKey={LastEventIndexKey.hosts} />
-        </MockedProvider>
+        <LastEventTime indexKey={LastEventIndexKey.hosts} />
       </TestProviders>
     );
-    await wait();
-
-    expect(container.innerHTML).toBe('--');
+    expect(wrapper.html()).toContain(getEmptyValue());
   });
 });

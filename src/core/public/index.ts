@@ -61,7 +61,7 @@ import {
   ToastInput,
   ToastsApi,
 } from './notifications';
-import { OverlayRef, OverlayStart } from './overlays';
+import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
@@ -71,6 +71,9 @@ import { IContextContainer, IContextProvider, ContextSetup, IContextHandler } fr
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
+
+export { App, AppBase, AppUnmount, AppMountContext, AppMountParameters } from './application';
+
 export {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
@@ -104,6 +107,14 @@ export {
   HttpBody,
 } from './http';
 
+export {
+  OverlayStart,
+  OverlayBannerMount,
+  OverlayBannerUnmount,
+  OverlayBannersStart,
+  OverlayRef,
+} from './overlays';
+
 /**
  * Core services exposed to the `Plugin` setup lifecycle
  *
@@ -114,6 +125,8 @@ export {
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup {
+  /** {@link ApplicationSetup} */
+  application: ApplicationSetup;
   /** {@link ContextSetup} */
   context: ContextSetup;
   /** {@link FatalErrorsSetup} */
@@ -137,7 +150,7 @@ export interface CoreSetup {
  */
 export interface CoreStart {
   /** {@link ApplicationStart} */
-  application: Pick<ApplicationStart, 'capabilities'>;
+  application: ApplicationStart;
   /** {@link ChromeStart} */
   chrome: ChromeStart;
   /** {@link DocLinksStart} */
@@ -156,15 +169,33 @@ export interface CoreStart {
   uiSettings: UiSettingsClientContract;
 }
 
-/** @internal */
-export interface InternalCoreSetup extends CoreSetup {
-  application: ApplicationSetup;
+/**
+ * Setup interface exposed to the legacy platform via the `ui/new_platform` module.
+ *
+ * @remarks
+ * Some methods are not supported in the legacy platform and while present to make this type compatibile with
+ * {@link CoreSetup}, unsupported methods will throw exceptions when called.
+ *
+ * @public
+ * @deprecated
+ */
+export interface LegacyCoreSetup extends CoreSetup {
+  /** @deprecated */
   injectedMetadata: InjectedMetadataSetup;
 }
 
-/** @internal */
-export interface InternalCoreStart extends CoreStart {
-  application: ApplicationStart;
+/**
+ * Start interface exposed to the legacy platform via the `ui/new_platform` module.
+ *
+ * @remarks
+ * Some methods are not supported in the legacy platform and while present to make this type compatibile with
+ * {@link CoreStart}, unsupported methods will throw exceptions when called.
+ *
+ * @public
+ * @deprecated
+ */
+export interface LegacyCoreStart extends CoreStart {
+  /** @deprecated */
   injectedMetadata: InjectedMetadataStart;
 }
 
@@ -198,8 +229,6 @@ export {
   LegacyNavLink,
   NotificationsSetup,
   NotificationsStart,
-  OverlayRef,
-  OverlayStart,
   Plugin,
   PluginInitializer,
   PluginInitializerContext,

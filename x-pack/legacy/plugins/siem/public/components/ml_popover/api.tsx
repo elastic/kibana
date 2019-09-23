@@ -9,6 +9,7 @@ import {
   CloseJobsResponse,
   Group,
   IndexPatternResponse,
+  IndexPatternSavedObject,
   Job,
   MlSetupArgs,
   SetupMlResponse,
@@ -23,14 +24,17 @@ import {
 import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { DEFAULT_KBN_VERSION } from '../../../common/constants';
 
-const emptyIndexPattern: string[] = [];
+const emptyIndexPattern: IndexPatternSavedObject[] = [];
 
 /**
  * Fetches ML Groups Data
  *
  * @param headers
  */
-export const groupsData = async (headers: Record<string, string | undefined>): Promise<Group[]> => {
+export const groupsData = async (
+  headers: Record<string, string | undefined>,
+  signal: AbortSignal
+): Promise<Group[]> => {
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/groups`, {
     method: 'GET',
@@ -41,9 +45,10 @@ export const groupsData = async (headers: Record<string, string | undefined>): P
       'kbn-xsrf': kbnVersion,
       ...headers,
     },
+    signal,
   });
   await throwIfNotOk(response);
-  return await response.json();
+  return response.json();
 };
 
 /**
@@ -178,7 +183,8 @@ export const stopDatafeeds = async (
  */
 export const jobsSummary = async (
   jobIds: string[],
-  headers: Record<string, string | undefined>
+  headers: Record<string, string | undefined>,
+  signal: AbortSignal
 ): Promise<Job[]> => {
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/jobs_summary`, {
@@ -191,19 +197,21 @@ export const jobsSummary = async (
       'kbn-system-api': 'true',
       ...headers,
     },
+    signal,
   });
   await throwIfNotOk(response);
-  return await response.json();
+  return response.json();
 };
 
 /**
  * Fetches Configured Index Patterns from the Kibana saved objects API (as ML does during create job flow)
- *
+ * TODO: Used by more than just ML now -- refactor to shared component https://github.com/elastic/siem-team/issues/448
  * @param headers
  */
 export const getIndexPatterns = async (
-  headers: Record<string, string | undefined>
-): Promise<string[]> => {
+  headers: Record<string, string | undefined>,
+  signal: AbortSignal
+): Promise<IndexPatternSavedObject[]> => {
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(
     `${chrome.getBasePath()}/api/saved_objects/_find?type=index-pattern&fields=title&fields=type&per_page=10000`,
@@ -216,19 +224,14 @@ export const getIndexPatterns = async (
         'kbn-system-api': 'true',
         ...headers,
       },
+      signal,
     }
   );
   await throwIfNotOk(response);
   const results: IndexPatternResponse = await response.json();
 
   if (results.saved_objects && Array.isArray(results.saved_objects)) {
-    return results.saved_objects.reduce(
-      (acc: string[], v) => [
-        ...acc,
-        ...(v.attributes && v.attributes.title ? [v.attributes.title] : []),
-      ],
-      []
-    );
+    return results.saved_objects;
   } else {
     return emptyIndexPattern;
   }

@@ -140,8 +140,6 @@ export interface Source {
   status: SourceStatus;
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
-  /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
-  Events: EventsData;
 
   Timeline: TimelineData;
 
@@ -368,20 +366,36 @@ export interface Inspect {
   response: string[];
 }
 
-export interface EventsData {
-  edges: EcsEdges[];
+export interface TimelineData {
+  edges: TimelineEdges[];
 
   totalCount: number;
 
-  pageInfo: PageInfoPaginated;
+  pageInfo: PageInfo;
 
   inspect?: Inspect | null;
 }
 
-export interface EcsEdges {
-  node: Ecs;
+export interface TimelineEdges {
+  node: TimelineItem;
 
   cursor: CursorType;
+}
+
+export interface TimelineItem {
+  _id: string;
+
+  _index?: string | null;
+
+  data: TimelineNonEcsData[];
+
+  ecs: Ecs;
+}
+
+export interface TimelineNonEcsData {
+  field: string;
+
+  value?: ToStringArray | null;
 }
 
 export interface Ecs {
@@ -836,38 +850,6 @@ export interface SshEcsFields {
   signature?: ToStringArray | null;
 }
 
-export interface TimelineData {
-  edges: TimelineEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfo;
-
-  inspect?: Inspect | null;
-}
-
-export interface TimelineEdges {
-  node: TimelineItem;
-
-  cursor: CursorType;
-}
-
-export interface TimelineItem {
-  _id: string;
-
-  _index?: string | null;
-
-  data: TimelineNonEcsData[];
-
-  ecs: Ecs;
-}
-
-export interface TimelineNonEcsData {
-  field: string;
-
-  value?: ToStringArray | null;
-}
-
 export interface PageInfo {
   endCursor?: CursorType | null;
 
@@ -973,11 +955,13 @@ export interface Overview {
 }
 
 export interface AutonomousSystem {
-  as_org?: string | null;
+  number?: number | null;
 
-  asn?: string | null;
+  organization?: AutonomousSystemOrganization | null;
+}
 
-  ip?: string | null;
+export interface AutonomousSystemOrganization {
+  name?: string | null;
 }
 
 export interface DomainsData {
@@ -1195,33 +1179,57 @@ export interface NetworkTopNFlowEdges {
 export interface NetworkTopNFlowItem {
   _id?: string | null;
 
-  source?: TopNFlowItem | null;
+  source?: TopNFlowItemSource | null;
 
-  destination?: TopNFlowItem | null;
-
-  client?: TopNFlowItem | null;
-
-  server?: TopNFlowItem | null;
+  destination?: TopNFlowItemDestination | null;
 
   network?: TopNFlowNetworkEcsField | null;
 }
 
-export interface TopNFlowItem {
-  count?: number | null;
+export interface TopNFlowItemSource {
+  autonomous_system?: AutonomousSystemItem | null;
 
   domain?: string[] | null;
 
   ip?: string | null;
+
+  location?: GeoItem | null;
+
+  flows?: number | null;
+
+  destination_ips?: number | null;
+}
+
+export interface AutonomousSystemItem {
+  name?: string | null;
+
+  number?: number | null;
+}
+
+export interface GeoItem {
+  geo?: GeoEcsFields | null;
+
+  flowTarget?: FlowTarget | null;
+}
+
+export interface TopNFlowItemDestination {
+  autonomous_system?: AutonomousSystemItem | null;
+
+  domain?: string[] | null;
+
+  ip?: string | null;
+
+  location?: GeoItem | null;
+
+  flows?: number | null;
+
+  source_ips?: number | null;
 }
 
 export interface TopNFlowNetworkEcsField {
-  bytes?: number | null;
+  bytes_in?: number | null;
 
-  packets?: number | null;
-
-  transport?: string | null;
-
-  direction?: NetworkDirectionEcs[] | null;
+  bytes_out?: number | null;
 }
 
 export interface NetworkDnsData {
@@ -1514,6 +1522,12 @@ export interface ResponseFavoriteTimeline {
   favorite?: FavoriteTimelineResult[] | null;
 }
 
+export interface EcsEdges {
+  node: Ecs;
+
+  cursor: CursorType;
+}
+
 export interface EventsTimelineData {
   edges: EcsEdges[];
 
@@ -1590,12 +1604,6 @@ export interface PaginationInputPaginated {
   querySize: number;
 }
 
-export interface SortField {
-  sortFieldId: string;
-
-  direction: Direction;
-}
-
 export interface PaginationInput {
   /** The limit parameter allows you to configure the maximum amount of items to be returned */
   limit: number;
@@ -1603,6 +1611,12 @@ export interface PaginationInput {
   cursor?: string | null;
   /** The tiebreaker parameter allow to be more precise to fetch the next item */
   tiebreaker?: string | null;
+}
+
+export interface SortField {
+  sortFieldId: string;
+
+  direction: Direction;
 }
 
 export interface LastTimeDetails {
@@ -1821,17 +1835,6 @@ export interface AuthenticationsSourceArgs {
 
   defaultIndex: string[];
 }
-export interface EventsSourceArgs {
-  pagination: PaginationInputPaginated;
-
-  sortField: SortField;
-
-  timerange?: TimerangeInput | null;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
 export interface TimelineSourceArgs {
   pagination: PaginationInput;
 
@@ -1984,9 +1987,7 @@ export interface NetworkTopNFlowSourceArgs {
 
   filterQuery?: string | null;
 
-  flowDirection: FlowDirection;
-
-  flowTarget: FlowTarget;
+  flowTarget: FlowTargetNew;
 
   pagination: PaginationInputPaginated;
 
@@ -2152,10 +2153,17 @@ export enum UsersFields {
   count = 'count',
 }
 
+export enum FlowTargetNew {
+  destination = 'destination',
+  source = 'source',
+}
+
 export enum NetworkTopNFlowFields {
-  bytes = 'bytes',
-  packets = 'packets',
-  ipCount = 'ipCount',
+  bytes_in = 'bytes_in',
+  bytes_out = 'bytes_out',
+  flows = 'flows',
+  destination_ips = 'destination_ips',
+  source_ips = 'source_ips',
 }
 
 export enum NetworkDnsFields {
@@ -2483,8 +2491,6 @@ export namespace SourceResolvers {
     status?: StatusResolver<SourceStatus, TypeParent, Context>;
     /** Gets Authentication success and failures based on a timerange */
     Authentications?: AuthenticationsResolver<AuthenticationsData, TypeParent, Context>;
-    /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
-    Events?: EventsResolver<EventsData, TypeParent, Context>;
 
     Timeline?: TimelineResolver<TimelineData, TypeParent, Context>;
 
@@ -2549,24 +2555,6 @@ export namespace SourceResolvers {
     timerange: TimerangeInput;
 
     pagination: PaginationInputPaginated;
-
-    filterQuery?: string | null;
-
-    defaultIndex: string[];
-  }
-
-  export type EventsResolver<R = EventsData, Parent = Source, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context,
-    EventsArgs
-  >;
-  export interface EventsArgs {
-    pagination: PaginationInputPaginated;
-
-    sortField: SortField;
-
-    timerange?: TimerangeInput | null;
 
     filterQuery?: string | null;
 
@@ -2815,9 +2803,7 @@ export namespace SourceResolvers {
 
     filterQuery?: string | null;
 
-    flowDirection: FlowDirection;
-
-    flowTarget: FlowTarget;
+    flowTarget: FlowTargetNew;
 
     pagination: PaginationInputPaginated;
 
@@ -3515,56 +3501,108 @@ export namespace InspectResolvers {
   >;
 }
 
-export namespace EventsDataResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = EventsData> {
-    edges?: EdgesResolver<EcsEdges[], TypeParent, Context>;
+export namespace TimelineDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = TimelineData> {
+    edges?: EdgesResolver<TimelineEdges[], TypeParent, Context>;
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
-    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, Context>;
+    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
-  export type EdgesResolver<R = EcsEdges[], Parent = EventsData, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type TotalCountResolver<R = number, Parent = EventsData, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type EdgesResolver<
+    R = TimelineEdges[],
+    Parent = TimelineData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = TimelineData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type PageInfoResolver<
-    R = PageInfoPaginated,
-    Parent = EventsData,
+    R = PageInfo,
+    Parent = TimelineData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type InspectResolver<
     R = Inspect | null,
-    Parent = EventsData,
+    Parent = TimelineData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace EcsEdgesResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = EcsEdges> {
-    node?: NodeResolver<Ecs, TypeParent, Context>;
+export namespace TimelineEdgesResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = TimelineEdges> {
+    node?: NodeResolver<TimelineItem, TypeParent, Context>;
 
     cursor?: CursorResolver<CursorType, TypeParent, Context>;
   }
 
-  export type NodeResolver<R = Ecs, Parent = EcsEdges, Context = SiemContext> = Resolver<
+  export type NodeResolver<
+    R = TimelineItem,
+    Parent = TimelineEdges,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type CursorResolver<
+    R = CursorType,
+    Parent = TimelineEdges,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace TimelineItemResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = TimelineItem> {
+    _id?: IdResolver<string, TypeParent, Context>;
+
+    _index?: IndexResolver<string | null, TypeParent, Context>;
+
+    data?: DataResolver<TimelineNonEcsData[], TypeParent, Context>;
+
+    ecs?: EcsResolver<Ecs, TypeParent, Context>;
+  }
+
+  export type IdResolver<R = string, Parent = TimelineItem, Context = SiemContext> = Resolver<
     R,
     Parent,
     Context
   >;
-  export type CursorResolver<R = CursorType, Parent = EcsEdges, Context = SiemContext> = Resolver<
+  export type IndexResolver<
+    R = string | null,
+    Parent = TimelineItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DataResolver<
+    R = TimelineNonEcsData[],
+    Parent = TimelineItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type EcsResolver<R = Ecs, Parent = TimelineItem, Context = SiemContext> = Resolver<
     R,
     Parent,
     Context
   >;
+}
+
+export namespace TimelineNonEcsDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = TimelineNonEcsData> {
+    field?: FieldResolver<string, TypeParent, Context>;
+
+    value?: ValueResolver<ToStringArray | null, TypeParent, Context>;
+  }
+
+  export type FieldResolver<
+    R = string,
+    Parent = TimelineNonEcsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ValueResolver<
+    R = ToStringArray | null,
+    Parent = TimelineNonEcsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace EcsResolvers {
@@ -5083,110 +5121,6 @@ export namespace SshEcsFieldsResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace TimelineDataResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = TimelineData> {
-    edges?: EdgesResolver<TimelineEdges[], TypeParent, Context>;
-
-    totalCount?: TotalCountResolver<number, TypeParent, Context>;
-
-    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
-
-    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
-  }
-
-  export type EdgesResolver<
-    R = TimelineEdges[],
-    Parent = TimelineData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type TotalCountResolver<
-    R = number,
-    Parent = TimelineData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type PageInfoResolver<
-    R = PageInfo,
-    Parent = TimelineData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type InspectResolver<
-    R = Inspect | null,
-    Parent = TimelineData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace TimelineEdgesResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = TimelineEdges> {
-    node?: NodeResolver<TimelineItem, TypeParent, Context>;
-
-    cursor?: CursorResolver<CursorType, TypeParent, Context>;
-  }
-
-  export type NodeResolver<
-    R = TimelineItem,
-    Parent = TimelineEdges,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type CursorResolver<
-    R = CursorType,
-    Parent = TimelineEdges,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace TimelineItemResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = TimelineItem> {
-    _id?: IdResolver<string, TypeParent, Context>;
-
-    _index?: IndexResolver<string | null, TypeParent, Context>;
-
-    data?: DataResolver<TimelineNonEcsData[], TypeParent, Context>;
-
-    ecs?: EcsResolver<Ecs, TypeParent, Context>;
-  }
-
-  export type IdResolver<R = string, Parent = TimelineItem, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type IndexResolver<
-    R = string | null,
-    Parent = TimelineItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type DataResolver<
-    R = TimelineNonEcsData[],
-    Parent = TimelineItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type EcsResolver<R = Ecs, Parent = TimelineItem, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-}
-
-export namespace TimelineNonEcsDataResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = TimelineNonEcsData> {
-    field?: FieldResolver<string, TypeParent, Context>;
-
-    value?: ValueResolver<ToStringArray | null, TypeParent, Context>;
-  }
-
-  export type FieldResolver<
-    R = string,
-    Parent = TimelineNonEcsData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type ValueResolver<
-    R = ToStringArray | null,
-    Parent = TimelineNonEcsData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-}
-
 export namespace PageInfoResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = PageInfo> {
     endCursor?: EndCursorResolver<CursorType | null, TypeParent, Context>;
@@ -5527,26 +5461,31 @@ export namespace OverviewResolvers {
 
 export namespace AutonomousSystemResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = AutonomousSystem> {
-    as_org?: AsOrgResolver<string | null, TypeParent, Context>;
+    number?: NumberResolver<number | null, TypeParent, Context>;
 
-    asn?: AsnResolver<string | null, TypeParent, Context>;
-
-    ip?: IpResolver<string | null, TypeParent, Context>;
+    organization?: OrganizationResolver<AutonomousSystemOrganization | null, TypeParent, Context>;
   }
 
-  export type AsOrgResolver<
-    R = string | null,
+  export type NumberResolver<
+    R = number | null,
     Parent = AutonomousSystem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type AsnResolver<
-    R = string | null,
+  export type OrganizationResolver<
+    R = AutonomousSystemOrganization | null,
     Parent = AutonomousSystem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type IpResolver<
+}
+
+export namespace AutonomousSystemOrganizationResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = AutonomousSystemOrganization> {
+    name?: NameResolver<string | null, TypeParent, Context>;
+  }
+
+  export type NameResolver<
     R = string | null,
-    Parent = AutonomousSystem,
+    Parent = AutonomousSystemOrganization,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }
@@ -6303,13 +6242,9 @@ export namespace NetworkTopNFlowItemResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = NetworkTopNFlowItem> {
     _id?: IdResolver<string | null, TypeParent, Context>;
 
-    source?: SourceResolver<TopNFlowItem | null, TypeParent, Context>;
+    source?: SourceResolver<TopNFlowItemSource | null, TypeParent, Context>;
 
-    destination?: DestinationResolver<TopNFlowItem | null, TypeParent, Context>;
-
-    client?: ClientResolver<TopNFlowItem | null, TypeParent, Context>;
-
-    server?: ServerResolver<TopNFlowItem | null, TypeParent, Context>;
+    destination?: DestinationResolver<TopNFlowItemDestination | null, TypeParent, Context>;
 
     network?: NetworkResolver<TopNFlowNetworkEcsField | null, TypeParent, Context>;
   }
@@ -6320,22 +6255,12 @@ export namespace NetworkTopNFlowItemResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SourceResolver<
-    R = TopNFlowItem | null,
+    R = TopNFlowItemSource | null,
     Parent = NetworkTopNFlowItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DestinationResolver<
-    R = TopNFlowItem | null,
-    Parent = NetworkTopNFlowItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type ClientResolver<
-    R = TopNFlowItem | null,
-    Parent = NetworkTopNFlowItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type ServerResolver<
-    R = TopNFlowItem | null,
+    R = TopNFlowItemDestination | null,
     Parent = NetworkTopNFlowItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -6346,60 +6271,152 @@ export namespace NetworkTopNFlowItemResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace TopNFlowItemResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = TopNFlowItem> {
-    count?: CountResolver<number | null, TypeParent, Context>;
+export namespace TopNFlowItemSourceResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = TopNFlowItemSource> {
+    autonomous_system?: AutonomousSystemResolver<AutonomousSystemItem | null, TypeParent, Context>;
 
     domain?: DomainResolver<string[] | null, TypeParent, Context>;
 
     ip?: IpResolver<string | null, TypeParent, Context>;
+
+    location?: LocationResolver<GeoItem | null, TypeParent, Context>;
+
+    flows?: FlowsResolver<number | null, TypeParent, Context>;
+
+    destination_ips?: DestinationIpsResolver<number | null, TypeParent, Context>;
   }
 
-  export type CountResolver<
-    R = number | null,
-    Parent = TopNFlowItem,
+  export type AutonomousSystemResolver<
+    R = AutonomousSystemItem | null,
+    Parent = TopNFlowItemSource,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DomainResolver<
     R = string[] | null,
-    Parent = TopNFlowItem,
+    Parent = TopNFlowItemSource,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type IpResolver<
     R = string | null,
-    Parent = TopNFlowItem,
+    Parent = TopNFlowItemSource,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type LocationResolver<
+    R = GeoItem | null,
+    Parent = TopNFlowItemSource,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type FlowsResolver<
+    R = number | null,
+    Parent = TopNFlowItemSource,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DestinationIpsResolver<
+    R = number | null,
+    Parent = TopNFlowItemSource,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace AutonomousSystemItemResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = AutonomousSystemItem> {
+    name?: NameResolver<string | null, TypeParent, Context>;
+
+    number?: NumberResolver<number | null, TypeParent, Context>;
+  }
+
+  export type NameResolver<
+    R = string | null,
+    Parent = AutonomousSystemItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NumberResolver<
+    R = number | null,
+    Parent = AutonomousSystemItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace GeoItemResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = GeoItem> {
+    geo?: GeoResolver<GeoEcsFields | null, TypeParent, Context>;
+
+    flowTarget?: FlowTargetResolver<FlowTarget | null, TypeParent, Context>;
+  }
+
+  export type GeoResolver<
+    R = GeoEcsFields | null,
+    Parent = GeoItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type FlowTargetResolver<
+    R = FlowTarget | null,
+    Parent = GeoItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace TopNFlowItemDestinationResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = TopNFlowItemDestination> {
+    autonomous_system?: AutonomousSystemResolver<AutonomousSystemItem | null, TypeParent, Context>;
+
+    domain?: DomainResolver<string[] | null, TypeParent, Context>;
+
+    ip?: IpResolver<string | null, TypeParent, Context>;
+
+    location?: LocationResolver<GeoItem | null, TypeParent, Context>;
+
+    flows?: FlowsResolver<number | null, TypeParent, Context>;
+
+    source_ips?: SourceIpsResolver<number | null, TypeParent, Context>;
+  }
+
+  export type AutonomousSystemResolver<
+    R = AutonomousSystemItem | null,
+    Parent = TopNFlowItemDestination,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DomainResolver<
+    R = string[] | null,
+    Parent = TopNFlowItemDestination,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type IpResolver<
+    R = string | null,
+    Parent = TopNFlowItemDestination,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type LocationResolver<
+    R = GeoItem | null,
+    Parent = TopNFlowItemDestination,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type FlowsResolver<
+    R = number | null,
+    Parent = TopNFlowItemDestination,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type SourceIpsResolver<
+    R = number | null,
+    Parent = TopNFlowItemDestination,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }
 
 export namespace TopNFlowNetworkEcsFieldResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = TopNFlowNetworkEcsField> {
-    bytes?: BytesResolver<number | null, TypeParent, Context>;
+    bytes_in?: BytesInResolver<number | null, TypeParent, Context>;
 
-    packets?: PacketsResolver<number | null, TypeParent, Context>;
-
-    transport?: TransportResolver<string | null, TypeParent, Context>;
-
-    direction?: DirectionResolver<NetworkDirectionEcs[] | null, TypeParent, Context>;
+    bytes_out?: BytesOutResolver<number | null, TypeParent, Context>;
   }
 
-  export type BytesResolver<
+  export type BytesInResolver<
     R = number | null,
     Parent = TopNFlowNetworkEcsField,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type PacketsResolver<
+  export type BytesOutResolver<
     R = number | null,
-    Parent = TopNFlowNetworkEcsField,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type TransportResolver<
-    R = string | null,
-    Parent = TopNFlowNetworkEcsField,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type DirectionResolver<
-    R = NetworkDirectionEcs[] | null,
     Parent = TopNFlowNetworkEcsField,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -7427,6 +7444,25 @@ export namespace ResponseFavoriteTimelineResolvers {
     Parent = ResponseFavoriteTimeline,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
+}
+
+export namespace EcsEdgesResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = EcsEdges> {
+    node?: NodeResolver<Ecs, TypeParent, Context>;
+
+    cursor?: CursorResolver<CursorType, TypeParent, Context>;
+  }
+
+  export type NodeResolver<R = Ecs, Parent = EcsEdges, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type CursorResolver<R = CursorType, Parent = EcsEdges, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
 }
 
 export namespace EventsTimelineDataResolvers {

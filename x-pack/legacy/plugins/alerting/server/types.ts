@@ -45,6 +45,7 @@ export interface AlertType {
   validate?: {
     params?: { validate: (object: any) => any };
   };
+  actionGroups: string[];
   executor: ({ services, params, state }: AlertExecutorOptions) => Promise<State | void>;
 }
 
@@ -72,6 +73,8 @@ export interface Alert {
   createdBy: string | null;
   updatedBy: string | null;
   apiKey?: string;
+  apiKeyOwner?: string;
+  throttle: string | null;
   mutedInstanceIds: string[];
 }
 
@@ -85,6 +88,8 @@ export interface RawAlert extends SavedObjectAttributes {
   createdBy: string | null;
   updatedBy: string | null;
   apiKey?: string;
+  apiKeyOwner?: string;
+  throttle: string | null;
   mutedInstanceIds: string[];
 }
 

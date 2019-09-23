@@ -38,11 +38,7 @@ exports[`Data Frame: Job List Expanded Row <ExpandedRowDetailsPane /> Minimal in
 `;
 
 exports[`Data Frame: Job List Expanded Row <Section /> Minimal initialization 1`] = `
-<EuiPanel
-  grow={true}
-  hasShadow={false}
-  paddingSize="m"
->
+<EuiPanel>
   <EuiTitle
     size="xs"
   >

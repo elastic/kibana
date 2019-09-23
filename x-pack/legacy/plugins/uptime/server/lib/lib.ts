@@ -9,12 +9,14 @@ import { UMBackendFrameworkAdapter } from './adapters/framework';
 import { UMMonitorsDomain, UMPingsDomain } from './domains';
 import { UMAuthDomain } from './domains/auth';
 import { UMMonitorStatesAdapter } from './adapters/monitor_states';
+import { UMSavedObjectsDomain } from './domains/saved_objects';
 
 export interface UMDomainLibs {
   auth: UMAuthDomain;
   monitors: UMMonitorsDomain;
   monitorStates: UMMonitorStatesAdapter;
   pings: UMPingsDomain;
+  savedObjects: UMSavedObjectsDomain;
 }
 
 export interface UMServerLibs extends UMDomainLibs {

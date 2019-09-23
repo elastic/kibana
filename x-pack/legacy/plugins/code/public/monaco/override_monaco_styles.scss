@@ -1,25 +1,28 @@
-.monaco-editor .cursors-layer > .cursor {
-  display: none !important;
-}
+.codeContainer__editor {
+  .monaco-editor .cursors-layer > .cursor {
+    display: none !important;
+  }
 
-textarea.inputarea {
-  display: none !important;
-}
+  textarea.inputarea {
+    display: none !important;
+  }
 
-.monaco-editor.mac .margin-view-overlays .line-numbers {
-  cursor: pointer;
-  background-color: $euiColorLightestShade;
-}
+  .monaco-editor.mac .margin-view-overlays .line-numbers {
+    cursor: pointer;
+    background-color: $euiColorLightestShade;
+  }
 
-.code-line-decoration + .cldr.folding {
-  left: -124px !important;
-  opacity: 1;
-}
+  .cldr.code-mark-line-number + .cldr.folding,
+  .cldr.code-line-decoration + .cldr.folding {
+    left: -124px !important;
+    opacity: 1;
+  }
 
-span.mtk6 {
-  color: $euiColorSecondary;
-}
+  span.mtk6 {
+    color: $euiColorSecondary;
+  }
 
-span.mtk29 {
-  color: $euiColorAccent;
+  span.mtk29 {
+    color: $euiColorAccent;
+  }
 }

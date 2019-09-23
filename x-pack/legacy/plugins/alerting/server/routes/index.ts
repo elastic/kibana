@@ -12,5 +12,6 @@ export { listAlertTypesRoute } from './list_alert_types';
 export { updateAlertRoute } from './update';
 export { enableAlertRoute } from './enable';
 export { disableAlertRoute } from './disable';
+export { updateApiKeyRoute } from './update_api_key';
 export { muteAlertInstanceRoute } from './mute';
 export { unmuteAlertInstanceRoute } from './unmute';

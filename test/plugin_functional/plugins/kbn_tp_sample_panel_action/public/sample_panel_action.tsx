@@ -18,48 +18,45 @@
  */
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { npStart } from 'ui/new_platform';
+import { npStart, npSetup } from 'ui/new_platform';
 
 import {
-  Action,
-  ActionContext,
   CONTEXT_MENU_TRIGGER,
+  IEmbeddable,
 } from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { setup } from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { createAction } from '../../../../../src/plugins/ui_actions/public';
 
-class SamplePanelAction extends Action {
-  public readonly type = 'samplePanelAction';
-
-  constructor() {
-    super('samplePanelAction');
-  }
-
-  public getDisplayName() {
-    return 'Sample Panel Action';
-  }
-
-  public execute = ({ embeddable }: ActionContext) => {
-    if (!embeddable) {
-      return;
-    }
-    npStart.core.overlays.openFlyout(
-      <React.Fragment>
-        <EuiFlyoutHeader>
-          <EuiTitle size="m" data-test-subj="samplePanelActionTitle">
-            <h1>{embeddable.getTitle()}</h1>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <h3 data-test-subj="samplePanelActionBody">This is a sample action</h3>
-        </EuiFlyoutBody>
-      </React.Fragment>,
-      {
-        'data-test-subj': 'samplePanelActionFlyout',
-      }
-    );
-  };
+interface ActionContext {
+  embeddable: IEmbeddable;
 }
 
-const action = new SamplePanelAction();
-setup.registerAction(action);
-setup.attachAction(CONTEXT_MENU_TRIGGER, action.id);
+function createSamplePanelAction() {
+  return createAction<ActionContext>({
+    type: 'samplePanelAction',
+    getDisplayName: () => 'Sample Panel Action',
+    execute: async ({ embeddable }) => {
+      if (!embeddable) {
+        return;
+      }
+      npStart.core.overlays.openFlyout(
+        <React.Fragment>
+          <EuiFlyoutHeader>
+            <EuiTitle size="m" data-test-subj="samplePanelActionTitle">
+              <h1>{embeddable.getTitle()}</h1>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <h3 data-test-subj="samplePanelActionBody">This is a sample action</h3>
+          </EuiFlyoutBody>
+        </React.Fragment>,
+        {
+          'data-test-subj': 'samplePanelActionFlyout',
+        }
+      );
+    },
+  });
+}
+
+const action = createSamplePanelAction();
+npSetup.plugins.uiActions.registerAction(action);
+npSetup.plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, action.id);

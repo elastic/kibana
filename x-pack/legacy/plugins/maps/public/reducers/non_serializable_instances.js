@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import chrome from 'ui/chrome';
 import { RequestAdapter } from 'ui/inspector/adapters';
 import { MapAdapter } from '../inspector/adapters/map_adapter';
+
+const REGISTER_CANCEL_CALLBACK = 'REGISTER_CANCEL_CALLBACK';
+const UNREGISTER_CANCEL_CALLBACK = 'UNREGISTER_CANCEL_CALLBACK';
 
 function createInspectorAdapters() {
   const inspectorAdapters = {
@@ -20,18 +22,67 @@ function createInspectorAdapters() {
 }
 
 // Reducer
-export function nonSerializableInstances(state) {
+export function nonSerializableInstances(state, action = {}) {
   if (!state) {
     return {
       inspectorAdapters: createInspectorAdapters(),
+      cancelRequestCallbacks: new Map(), // key is request token, value is cancel callback
     };
   }
 
-  // state is read only and provides access to non-serializeable object instances
-  return state;
+  switch (action.type) {
+    case REGISTER_CANCEL_CALLBACK:
+      state.cancelRequestCallbacks.set(action.requestToken, action.callback);
+      return {
+        ...state,
+      };
+    case UNREGISTER_CANCEL_CALLBACK:
+      state.cancelRequestCallbacks.delete(action.requestToken);
+      return {
+        ...state,
+      };
+    default:
+      return state;
+
+
+  }
 }
 
 // Selectors
 export const getInspectorAdapters = ({ nonSerializableInstances }) => {
-  return _.get(nonSerializableInstances, 'inspectorAdapters', {});
+  return nonSerializableInstances.inspectorAdapters;
+};
+
+export const getCancelRequestCallbacks = ({ nonSerializableInstances }) => {
+  return nonSerializableInstances.cancelRequestCallbacks;
+};
+
+// Actions
+export const registerCancelCallback = (requestToken, callback) => {
+  return {
+    type: REGISTER_CANCEL_CALLBACK,
+    requestToken,
+    callback,
+  };
+};
+
+export const unregisterCancelCallback = (requestToken) => {
+  return {
+    type: UNREGISTER_CANCEL_CALLBACK,
+    requestToken,
+  };
+};
+
+export const cancelRequest = (requestToken) => {
+  return (dispatch, getState) => {
+    if (!requestToken) {
+      return;
+    }
+
+    const cancelCallback = getCancelRequestCallbacks(getState()).get(requestToken);
+    if (cancelCallback) {
+      cancelCallback();
+      dispatch(unregisterCancelCallback(requestToken));
+    }
+  };
 };

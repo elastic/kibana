@@ -27,7 +27,7 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
 import { useMatchedRoutes } from '../../../hooks/useMatchedRoutes';
 import { RouteName } from '../../app/Main/route_config/route_names';
-import { useCore } from '../../../hooks/useCore';
+import { useKibanaCore } from '../../../../../observability/public';
 import { getAPMIndexPattern } from '../../../services/rest/savedObjects';
 
 const Container = styled.div`
@@ -86,7 +86,7 @@ function getSuggestions(
 }
 
 export function KueryBar() {
-  const core = useCore();
+  const core = useKibanaCore();
   const [state, setState] = useState<State>({
     indexPattern: null,
     suggestions: [],

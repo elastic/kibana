@@ -11,7 +11,7 @@ export default function({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('page navigation', function() {
-    this.tags('smoke');
+    this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('empty_kibana');
     });
@@ -24,6 +24,10 @@ export default function({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToMl();
     });
 
+    it('loads the anomaly detection area', async () => {
+      await ml.navigation.navigateToAnomalyDetection();
+    });
+
     it('loads the job management page', async () => {
       await ml.navigation.navigateToJobManagement();
       await ml.jobManagement.assertJobStatsBarExists();
@@ -32,7 +36,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('loads the anomaly explorer page', async () => {
-      await ml.navigation.navigateToAnomalyExplorert();
+      await ml.navigation.navigateToAnomalyExplorer();
       await ml.anomalyExplorer.assertAnomalyExplorerEmptyListMessageExists();
     });
 
@@ -41,21 +45,26 @@ export default function({ getService }: FtrProviderContext) {
       await ml.singleMetricViewer.assertSingleMetricViewerEmptyListMessageExsist();
     });
 
+    it('loads the settings page', async () => {
+      await ml.navigation.navigateToSettings();
+      await ml.settings.assertSettingsCalendarLinkExists();
+      await ml.settings.assertSettingsFilterlistLinkExists();
+    });
+
     it('loads the data frame page', async () => {
       await ml.navigation.navigateToDataFrames();
       await ml.dataFrames.assertDataFrameEmptyListMessageExists();
+    });
+
+    it('loads the data frame analytics page', async () => {
+      await ml.navigation.navigateToDataFrameAnalytics();
+      await ml.dataFrameAnalytics.assertEmptyListMessageExists();
     });
 
     it('loads the data visualizer page', async () => {
       await ml.navigation.navigateToDataVisualizer();
       await ml.dataVisualizer.assertDataVisualizerImportDataCardExists();
       await ml.dataVisualizer.assertDataVisualizerIndexDataCardExists();
-    });
-
-    it('loads the settings page', async () => {
-      await ml.navigation.navigateToSettings();
-      await ml.settings.assertSettingsCalendarLinkExists();
-      await ml.settings.assertSettingsFilterlistLinkExists();
     });
   });
 }

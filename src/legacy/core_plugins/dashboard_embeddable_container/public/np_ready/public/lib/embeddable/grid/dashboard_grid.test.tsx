@@ -68,6 +68,7 @@ function prepare(props?: Partial<DashboardGridProps>) {
     inspector: {} as any,
     SavedObjectFinder: () => null,
     ExitFullScreenButton: () => null,
+    uiActions: {} as any,
   };
   dashboardContainer = new DashboardContainer(initialInput, options);
   const defaultTestProps: DashboardGridProps = {
@@ -100,7 +101,7 @@ test('renders DashboardGrid', () => {
     </KibanaContextProvider>
   );
 
-  const panelElements = component.find('EmbeddableChildPanelUi');
+  const panelElements = component.find('EmbeddableChildPanel');
   expect(panelElements.length).toBe(2);
 });
 
@@ -115,7 +116,7 @@ test('renders DashboardGrid with no visualizations', async () => {
   props.container.updateInput({ panels: {} });
   await nextTick();
   component.update();
-  expect(component.find('InjectIntl(EmbeddableChildPanelUi)').length).toBe(0);
+  expect(component.find('EmbeddableChildPanel').length).toBe(0);
 });
 
 test('DashboardGrid removes panel when removed from container', async () => {
@@ -132,7 +133,7 @@ test('DashboardGrid removes panel when removed from container', async () => {
   props.container.updateInput({ panels: filteredPanels });
   await nextTick();
   component.update();
-  const panelElements = component.find('InjectIntl(EmbeddableChildPanelUi)');
+  const panelElements = component.find('EmbeddableChildPanel');
   expect(panelElements.length).toBe(1);
 });
 
@@ -148,7 +149,7 @@ test('DashboardGrid renders expanded panel', async () => {
   await nextTick();
   component.update();
   // Both panels should still exist in the dom, so nothing needs to be re-fetched once minimized.
-  expect(component.find('InjectIntl(EmbeddableChildPanelUi)').length).toBe(2);
+  expect(component.find('EmbeddableChildPanel').length).toBe(2);
 
   expect(
     (component.find('DashboardGridUi').state() as { expandedPanelId?: string }).expandedPanelId
@@ -157,7 +158,7 @@ test('DashboardGrid renders expanded panel', async () => {
   props.container.updateInput({ expandedPanelId: undefined });
   await nextTick();
   component.update();
-  expect(component.find('InjectIntl(EmbeddableChildPanelUi)').length).toBe(2);
+  expect(component.find('EmbeddableChildPanel').length).toBe(2);
 
   expect(
     (component.find('DashboardGridUi').state() as { expandedPanelId?: string }).expandedPanelId

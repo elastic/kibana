@@ -30,9 +30,12 @@ import {
 } from 'ui/autocomplete_providers';
 import { debounce, compact, isEqual, omit } from 'lodash';
 import { PersistedLog } from 'ui/persisted_log';
-import { kfetch } from 'ui/kfetch';
 import { Storage } from 'ui/storage';
-import { UiSettingsClientContract } from 'src/core/public';
+import {
+  UiSettingsClientContract,
+  SavedObjectsClientContract,
+  HttpServiceBase,
+} from 'src/core/public';
 import { IndexPattern, StaticIndexPattern } from '../../../index_patterns';
 import { Query } from '../index';
 import { fromUser, matchPairs, toUser } from '../lib';
@@ -44,6 +47,8 @@ import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 interface Props {
   uiSettings: UiSettingsClientContract;
   indexPatterns: Array<IndexPattern | string>;
+  savedObjectsClient: SavedObjectsClientContract;
+  http: HttpServiceBase;
   store: Storage;
   intl: InjectedIntl;
   query: Query;
@@ -53,6 +58,7 @@ interface Props {
   prepend?: React.ReactNode;
   persistedLog?: PersistedLog;
   bubbleSubmitEvent?: boolean;
+  placeholder?: string;
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
   onChange?: (query: Query) => void;
   onSubmit?: (query: Query) => void;
@@ -111,6 +117,7 @@ export class QueryBarInputUI extends Component<Props, State> {
     ) as IndexPattern[];
 
     const objectPatternsFromStrings = (await fetchIndexPatterns(
+      this.props.savedObjectsClient,
       stringPatterns,
       this.props.uiSettings
     )) as IndexPattern[];
@@ -357,9 +364,7 @@ export class QueryBarInputUI extends Component<Props, State> {
     // Send telemetry info every time the user opts in or out of kuery
     // As a result it is important this function only ever gets called in the
     // UI component's change handler.
-    kfetch({
-      pathname: '/api/kibana/kql_opt_in_telemetry',
-      method: 'POST',
+    this.props.http.post('/api/kibana/kql_opt_in_telemetry', {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
@@ -451,6 +456,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       'onChange',
       'onSubmit',
       'uiSettings',
+      'savedObjectsClient',
     ]);
 
     return (
@@ -466,10 +472,13 @@ export class QueryBarInputUI extends Component<Props, State> {
           <div role="search">
             <div className="kuiLocalSearchAssistedInput">
               <EuiFieldText
-                placeholder={this.props.intl.formatMessage({
-                  id: 'data.query.queryBar.searchInputPlaceholder',
-                  defaultMessage: 'Search',
-                })}
+                placeholder={
+                  this.props.placeholder ||
+                  this.props.intl.formatMessage({
+                    id: 'data.query.queryBar.searchInputPlaceholder',
+                    defaultMessage: 'Search',
+                  })
+                }
                 value={this.getQueryString()}
                 onKeyDown={this.onKeyDown}
                 onKeyUp={this.onKeyUp}
