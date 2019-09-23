@@ -317,6 +317,7 @@ export class AlertsClient {
         id,
         {
           muted: true,
+          mutedInstanceIds: [],
           updatedBy: await this.getUserName(),
         },
         { references }
@@ -335,6 +336,7 @@ export class AlertsClient {
         id,
         {
           muted: false,
+          mutedInstanceIds: [],
           updatedBy: await this.getUserName(),
         },
         { references }

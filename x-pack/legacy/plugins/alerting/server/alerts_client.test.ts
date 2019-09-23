@@ -753,7 +753,7 @@ describe('mute()', () => {
     expect(savedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
-      { muted: true, updatedBy: 'elastic' },
+      { muted: true, mutedInstanceIds: [], updatedBy: 'elastic' },
       { references: [] }
     );
   });
@@ -790,7 +790,7 @@ describe('unmute()', () => {
     expect(savedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
-      { muted: false, updatedBy: 'elastic' },
+      { muted: false, mutedInstanceIds: [], updatedBy: 'elastic' },
       { references: [] }
     );
   });
