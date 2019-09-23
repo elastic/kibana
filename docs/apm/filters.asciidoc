@@ -9,7 +9,7 @@ APM provides two different ways you can filter your data within the APM App:
 [[global-filters]]
 ==== Global filters
 
-Global filters are ways you can filter your data across the APM app.
+Global filters are ways you can filter any and all data across the APM app.
 They are available in the Services, Transactions, Errors, Metrics, and Traces views,
 and any filter applied will persist as you move between pages.
 
@@ -58,12 +58,14 @@ v|*Go:* {apm-go-ref}/configuration.html#config-environment[`ELASTIC_APM_ENVIRONM
 [[local-filters]]
 ==== Local filters
 
-Local filters are ways you can filter your APM data on each individual page.
-They persist between pages, but only where they are applicable -- they are typically most useful in their original context.
+Local filters are ways you can filter your specific APM data on each individual page.
+The filters shown are relevant to your data, and will persist between pages,
+but only where they are applicable -- they are typically most useful in their original context.
 As an example, if you select a host on the Services overview, then select a transaction group,
 the host filter will still be applied.
+
 These filters are very useful for quickly and easily removing noise from your data. 
-With just a click you can filter transactions by the transaction result,
+With just a click, you can filter your transactions by the transaction result,
 host, container ID, and more. 
 
 [role="screenshot"]
