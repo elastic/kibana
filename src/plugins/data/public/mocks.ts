@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { AutocompleteProviderRegister, Plugin } from '.';
+import { Plugin } from '.';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
@@ -29,14 +29,16 @@ const autocompleteMock: any = {
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
-    autocomplete: autocompleteMock as AutocompleteProviderRegister,
+    autocomplete: autocompleteMock as Setup['autocomplete'],
   };
 
   return setupContract;
 };
 
 const createStartContract = (): Start => {
-  const startContract: Start = undefined;
+  const startContract: Start = {
+    autocomplete: autocompleteMock as Start['autocomplete'],
+  };
   return startContract;
 };
 

@@ -18,20 +18,32 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { AutocompleteProviderRegister } from '../common/autocomplete_provider';
+import { AutocompleteProviderRegister } from './autocomplete_provider';
 
-export class DataPublicPlugin implements Plugin<{}> {
+export interface DataPublicPluginSetup {
+  autocomplete: Pick<AutocompleteProviderRegister, 'addProvider' | 'getProvider'>;
+}
+
+export interface DataPublicPluginStart {
+  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
+}
+
+export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
   private readonly autocomplete = new AutocompleteProviderRegister();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup): DataPublicPluginSetup {
     return {
       autocomplete: this.autocomplete,
     };
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart): DataPublicPluginStart {
+    return {
+      autocomplete: this.autocomplete,
+    };
+  }
 
   public stop() {
     this.autocomplete.clearProviders();

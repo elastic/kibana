@@ -10,7 +10,7 @@ import { EuiCallOut } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { StaticIndexPattern, getFromSavedObject } from 'ui/index_patterns';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { fromQuery, toQuery } from '../Links/url_helpers';
@@ -33,7 +33,7 @@ const Container = styled.div`
 `;
 
 const getAutocompleteProvider = (language: string) =>
-  npSetup.plugins.data.autocomplete.getProvider(language);
+  npStart.plugins.data.autocomplete.getProvider(language);
 
 interface State {
   indexPattern: StaticIndexPattern | null;

@@ -6,13 +6,13 @@
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { ElasticsearchAdapter } from './adapter_types';
 import { AutocompleteSuggestion } from '../../../../../../../../src/plugins/data/public';
 
 const getAutocompleteProvider = (language: string) =>
-  npSetup.plugins.data.autocomplete.getProvider(language);
+  npStart.plugins.data.autocomplete.getProvider(language);
 
 export class RestElasticsearchAdapter implements ElasticsearchAdapter {
   private cachedIndexPattern: any = null;

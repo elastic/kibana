@@ -19,6 +19,5 @@
 
 export * from './query';
 export * from './field_formats';
-export * from './autocomplete_provider';
 
 export * from './types';

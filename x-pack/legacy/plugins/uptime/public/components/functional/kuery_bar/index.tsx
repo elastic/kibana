@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import { uniqueId, startsWith } from 'lodash';
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { EuiCallOut } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -29,7 +29,7 @@ interface State {
 }
 
 const getAutocompleteProvider = (language: string) =>
-  npSetup.plugins.data.autocomplete.getProvider(language);
+  npStart.plugins.data.autocomplete.getProvider(language);
 
 function convertKueryToEsQuery(kuery: string, indexPattern: StaticIndexPattern) {
   const ast = fromKueryExpression(kuery);

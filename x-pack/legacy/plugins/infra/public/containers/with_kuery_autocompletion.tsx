@@ -5,13 +5,13 @@
  */
 
 import React from 'react';
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { RendererFunction } from '../utils/typed_react';
 import { AutocompleteSuggestion } from '../../../../../../src/plugins/data/public';
 
 const getAutocompleteProvider = (language: string) =>
-  npSetup.plugins.data.autocomplete.getProvider(language);
+  npStart.plugins.data.autocomplete.getProvider(language);
 
 interface WithKueryAutocompletionLifecycleProps {
   children: RendererFunction<{

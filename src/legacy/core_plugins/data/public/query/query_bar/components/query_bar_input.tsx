@@ -26,7 +26,7 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { debounce, compact, isEqual, omit } from 'lodash';
 import { PersistedLog } from 'ui/persisted_log';
 import { Storage } from 'ui/storage';
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import {
   UiSettingsClientContract,
   SavedObjectsClientContract,
@@ -45,7 +45,7 @@ import { getQueryLog } from '../lib/get_query_log';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 
 const getAutocompleteProvider = (language: string) =>
-  npSetup.plugins.data.autocomplete.getProvider(language);
+  npStart.plugins.data.autocomplete.getProvider(language);
 
 interface Props {
   uiSettings: UiSettingsClientContract;

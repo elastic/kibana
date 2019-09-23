@@ -21,16 +21,19 @@ import { AutocompleteProvider } from './types';
 export class AutocompleteProviderRegister {
   private readonly registeredProviders: Map<string, AutocompleteProvider> = new Map();
 
+  /** @public **/
   public addProvider(language: string, provider: AutocompleteProvider): void {
     if (language && provider) {
       this.registeredProviders.set(language, provider);
     }
   }
 
+  /** @public **/
   public getProvider(language: string): AutocompleteProvider | undefined {
     return this.registeredProviders.get(language);
   }
 
+  /** @internal **/
   public clearProviders(): void {
     this.registeredProviders.clear();
   }

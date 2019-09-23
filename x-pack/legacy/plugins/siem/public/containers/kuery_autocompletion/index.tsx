@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
 
@@ -34,7 +34,7 @@ interface KueryAutocompletionLifecycleState {
 }
 
 const getAutocompleteProvider = (language: string) =>
-  npSetup.plugins.data.autocomplete.getProvider(language);
+  npStart.plugins.data.autocomplete.getProvider(language);
 
 export class KueryAutocompletion extends React.PureComponent<
   KueryAutocompletionLifecycleProps,
