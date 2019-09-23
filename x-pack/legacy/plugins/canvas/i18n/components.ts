@@ -418,8 +418,8 @@ export const ComponentStrings = {
       }),
   },
   WorkpadLoader: {
-    getClonedWorkpadNameLabel: (workpadName: string) =>
-      i18n.translate('xpack.canvas.workpadLoader.clonedWorkpad', {
+    getClonedWorkpadName: (workpadName: string) =>
+      i18n.translate('xpack.canvas.workpadLoader.clonedWorkpadName', {
         defaultMessage: 'Copy of {workpadName}',
         description:
           'This suffix is added to the end of the name of a cloned workpad to indicate that this ' +
@@ -522,7 +522,7 @@ export const ComponentStrings = {
         },
       }),
     getLoadWorkpadArialLabel: (workpadName: string) =>
-      i18n.translate('xpack.canvas.workpadLoader.filePickerPlaceholder', {
+      i18n.translate('xpack.canvas.workpadLoader.loadWorkpadArialLabel', {
         defaultMessage: `Load workpad '{workpadName}'`,
         values: {
           workpadName,
