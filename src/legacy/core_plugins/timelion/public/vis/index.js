@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visFactory } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { TimelionRequestHandlerProvider } from './timelion_request_handler';
 import { DefaultEditorSize } from 'ui/vis/editor_size';
+import { AngularVisController } from '../../../../ui/public/vis/vis_types/angular_vis_type';
 
 // we also need to load the controller and directive used by the template
 import './timelion_vis_controller';
@@ -34,18 +35,18 @@ import editorConfigTemplate from './timelion_vis_params.html';
 VisTypesRegistryProvider.register(TimelionVisProvider);
 
 export default function TimelionVisProvider(Private) {
-  const VisFactory = Private(VisFactoryProvider);
   const timelionRequestHandler = Private(TimelionRequestHandlerProvider);
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
-  return VisFactory.createAngularVisualization({
+  return visFactory.createBaseVisualization({
     name: 'timelion',
     title: 'Timelion',
     icon: 'visTimelion',
     description: i18n.translate('timelion.timelionDescription', {
       defaultMessage: 'Build time-series using functional expressions',
     }),
+    visualization: AngularVisController,
     visConfig: {
       defaults: {
         expression: '.es(*)',
