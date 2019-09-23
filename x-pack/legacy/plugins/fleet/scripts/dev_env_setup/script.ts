@@ -4,46 +4,49 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import yargs from 'yargs';
+import { createFlagError, run } from '@kbn/dev-utils';
 import fetch from 'node-fetch';
-
-function log(message: string, data: any) {
-  /* eslint-disable no-console */
-  console.log(message, JSON.stringify(data, null, 2));
-}
 
 interface Policy {
   id: string;
 }
 
-async function run() {
-  const argv = yargs
-    .options({
-      kibanaUrl: {
-        describe: 'Kibana url',
-        type: 'string',
-        default: 'http://localhost:5601',
-      },
-      kibanaUser: {
-        describe: 'Kibana username,',
-        type: 'string',
-        default: 'elastic',
-      },
-      kibanaPassword: {
-        describe: 'Kibana password,',
-        type: 'string',
-        default: 'changeme',
-      },
-    })
-    .help().argv;
+run(
+  async ({ flags, log }) => {
+    const kibanaUrl = flags.kibanaUrl || 'http://localhost:5601';
 
-  const { kibanaUrl, kibanaUser, kibanaPassword } = argv;
+    const kibanaUser = flags.kibanaUser || 'elastic';
+    const kibanaPassword = flags.kibanaPassword || 'changeme';
 
-  const policy = await createPolicy(kibanaUrl, kibanaUser, kibanaPassword);
-  log('Policy created', policy);
-  const token = await getEnrollmentToken(kibanaUrl, kibanaUser, kibanaPassword, policy.id);
-  log('Enrollment token', token);
-}
+    if (kibanaUrl && typeof kibanaUrl !== 'string') {
+      throw createFlagError('please provide a single --kibanaUrl flag');
+    }
+    if (kibanaUser && typeof kibanaUser !== 'string') {
+      throw createFlagError('please provide a single --kibanaUser flag');
+    }
+    if (kibanaPassword && typeof kibanaPassword !== 'string') {
+      throw createFlagError('please provide a single --kibanaPassword flag');
+    }
+
+    const policy = await createPolicy(kibanaUrl, kibanaUser, kibanaPassword);
+    log.info('Policy created', policy);
+    const token = await getEnrollmentToken(kibanaUrl, kibanaUser, kibanaPassword, policy.id);
+    log.info('Enrollment token', token);
+  },
+  {
+    description: `
+      Setup a fleet test policy and generate an enrollment token.
+    `,
+    flags: {
+      string: ['kibanaUrl', 'kibanaUser', 'kibanaPassword'],
+      help: `
+        --kibanaUrl kibanaURL to run the fleet agent
+        --kibanaUser Kibana username
+        --kibanaPassword Kibana password
+      `,
+    },
+  }
+);
 
 async function createPolicy(
   kibanaURL: string,
@@ -90,10 +93,3 @@ async function getEnrollmentToken(
   const json = await res.json();
   return json.item.token;
 }
-
-run()
-  .then(() => process.exit(0))
-  .catch(err => {
-    log('A unexpected error happened', err);
-    process.exit(1);
-  });

@@ -4,13 +4,13 @@ you can run a development fleet agent that is going to enroll and checkin every 
 For this you can run the following command in the fleet pluging directory.
 
 ```
-npx ts-node scripts/dev_agent.ts <enrollmentToken> --kibanaUrl=http://localhost:5603/qed
+node scripts/dev_agent --enrollmentToken=<enrollmentToken> --kibanaUrl=http://localhost:5603/qed
 ```
 
 To generate a dummy config and an enrollment token you can use this script
 
 ```
-npx ts-node scripts/dev_env_setup.ts --kibanaUrl=http://localhost:5603/qed --kibanaUser=elastic --kibanaPassword=changeme
+node scripts/dev_env_setup --kibanaUrl=http://localhost:5603/qed --kibanaUser=elastic --kibanaPassword=changeme
 ```
 
 #### Testing load

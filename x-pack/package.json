@@ -104,7 +104,6 @@
     "@types/tar-fs": "^1.16.1",
     "@types/tinycolor2": "^1.4.1",
     "@types/uuid": "^3.4.4",
-    "@types/yargs": "^13.0.0",
     "abab": "^1.0.4",
     "ansicolors": "0.3.2",
     "axios": "^0.19.0",

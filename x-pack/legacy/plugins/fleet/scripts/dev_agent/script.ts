@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import yargs from 'yargs';
+import { createFlagError, run, ToolingLog } from '@kbn/dev-utils';
 import fetch from 'node-fetch';
 
 const CHECKIN_INTERVAL = 3000; // 3 seconds
@@ -20,39 +20,41 @@ process.once('SIGINT', () => {
   closing = true;
 });
 
-function log(message: string, data: any) {
-  /* eslint-disable no-console */
-  console.log(message, JSON.stringify(data, null, 2));
-}
+run(
+  async ({ flags, log }) => {
+    if (!flags.kibanaUrl || typeof flags.kibanaUrl !== 'string') {
+      throw createFlagError('please provide a single --path flag');
+    }
 
-async function run() {
-  const argv = yargs
-    .command('$0 <enrollmentToken>', 'Run a development agent')
-    .options({
-      kibanaUrl: {
-        describe: 'Kibana url',
-        type: 'string',
-      },
-    })
-    .help().argv;
+    if (!flags.enrollmentToken || typeof flags.enrollmentToken !== 'string') {
+      throw createFlagError('please provide a single --path flag');
+    }
+    const kibanaUrl: string = (flags.kibanaUrl as string) || 'http://localhost:5601';
+    const agent = await enroll(kibanaUrl, flags.enrollmentToken as string);
 
-  const enrollmentToken: string = argv._[0];
-  if (!enrollmentToken) {
-    throw new Error('Missing enrollment token, see help');
+    log.info('Enrolled with sucess', agent);
+
+    while (!closing) {
+      await new Promise((resolve, reject) =>
+        setTimeout(() => checkin(kibanaUrl, agent, log).then(resolve, reject), CHECKIN_INTERVAL)
+      );
+    }
+  },
+  {
+    description: `
+      Run a fleet development agent.
+    `,
+    flags: {
+      string: ['kibanaUrl', 'enrollmentToken'],
+      help: `
+        --kibanaUrl kibanaURL to run the fleet agent
+        --enrollmentToken enrollment token
+      `,
+    },
   }
-  const kibanaURL: string = argv.kibanaUrl || 'http://localhost:5601';
-  const agent = await enroll(kibanaURL, enrollmentToken);
+);
 
-  log('Enrolled with sucess', agent);
-
-  while (!closing) {
-    await new Promise((resolve, reject) =>
-      setTimeout(() => checkin(kibanaURL, agent).then(resolve, reject), CHECKIN_INTERVAL)
-    );
-  }
-}
-
-async function checkin(kibanaURL: string, agent: Agent) {
+async function checkin(kibanaURL: string, agent: Agent, log: ToolingLog) {
   const res = await fetch(`${kibanaURL}/api/fleet/agents/${agent.id}/checkin`, {
     method: 'POST',
     body: JSON.stringify({
@@ -65,7 +67,7 @@ async function checkin(kibanaURL: string, agent: Agent) {
   });
 
   const json = await res.json();
-  log('checkin', json);
+  log.info('checkin', json);
 }
 
 async function enroll(kibanaURL: string, token: string): Promise<Agent> {
@@ -89,16 +91,8 @@ async function enroll(kibanaURL: string, token: string): Promise<Agent> {
   });
 
   const json = await res.json();
-
   return {
     id: json.item.id,
     access_token: json.item.access_token,
   };
 }
-
-run()
-  .then(() => process.exit(0))
-  .catch(err => {
-    log(err.message, err);
-    process.exit(1);
-  });
