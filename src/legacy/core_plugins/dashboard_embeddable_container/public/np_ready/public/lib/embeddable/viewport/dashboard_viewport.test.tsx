@@ -59,6 +59,7 @@ function getProps(
     inspector: {} as any,
     SavedObjectFinder: () => null,
     ExitFullScreenButton,
+    uiActions: {} as any,
   };
 
   const input = getSampleDashboardInput({
