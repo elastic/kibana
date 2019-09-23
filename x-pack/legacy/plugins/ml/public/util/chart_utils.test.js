@@ -6,6 +6,12 @@
 
 import seriesConfig from '../explorer/explorer_charts/__mocks__/mock_series_config_filebeat';
 
+jest.mock('ui/registry/field_formats', () => ({
+  fieldFormats: {
+    getDefaultInstance: jest.fn(),
+  },
+}));
+
 jest.mock('ui/timefilter', () => {
   const dateMath = require('@elastic/datemath');
   const { dataPluginMock } = require('../../../../../../src/legacy/core_plugins/data/public/mocks');
