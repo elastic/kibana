@@ -83,12 +83,28 @@ export function initSpacesOnPostAuthRequestInterceptor({
 
         space = await spacesClient.get(spaceId);
       } catch (error) {
+        const wrappedError = wrapError(error);
+
+        const requiresAuthChallenge = wrappedError.output.statusCode === 401;
+        if (requiresAuthChallenge) {
+          log.warn(`Unable to navigate to space "${spaceId}" due to HTTP/401 response. ${error}`);
+
+          return response.customError({
+            body: wrappedError,
+            headers: wrappedError.output.headers,
+            statusCode: wrappedError.output.statusCode,
+          });
+        }
+
         log.error(
           `Unable to navigate to space "${spaceId}", redirecting to Space Selector. ${error}`
         );
         // Space doesn't exist, or user not authorized for space, or some other issue retrieving the active space.
         const result = response.redirected({
-          headers: { location: getSpaceSelectorUrl(serverBasePath) },
+          headers: {
+            ...wrappedError.output.headers,
+            location: getSpaceSelectorUrl(serverBasePath),
+          },
         });
         return result;
       }

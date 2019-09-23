@@ -107,7 +107,7 @@ describe('onPostAuthInterceptor', () => {
   async function request(
     path: string,
     availableSpaces: any[],
-    testOptions = { simulateGetSpacesFailure: false }
+    testOptions = { simulateGetSpacesFailure: false, simulateGetSingleSpaceFailure: false }
   ) {
     const { http } = await root.setup();
 
@@ -190,6 +190,9 @@ describe('onPostAuthInterceptor', () => {
         return Promise.resolve(availableSpaces.map(convertSavedObjectToSpace));
       },
       get(spaceId: string) {
+        if (testOptions.simulateGetSingleSpaceFailure) {
+          throw Boom.unauthorized('missing credendials', 'Protected Elasticsearch');
+        }
         const space = availableSpaces.find(s => s.id === spaceId);
         if (!space) {
           throw new Error('space not found');
@@ -315,7 +318,7 @@ describe('onPostAuthInterceptor', () => {
     }, 30000);
   });
 
-  it('handles space retrieval errors gracefully, responding with headers returned from ES', async () => {
+  it('handles space retrieval errors gracefully when requesting the root, responding with headers returned from ES', async () => {
     const spaces = [
       {
         id: 'a-space',
@@ -328,6 +331,46 @@ describe('onPostAuthInterceptor', () => {
 
     const { response, spacesService } = await request('/', spaces, {
       simulateGetSpacesFailure: true,
+      simulateGetSingleSpaceFailure: false,
+    });
+
+    expect(response.status).toEqual(401);
+
+    expect(response.header).toMatchObject({
+      'www-authenticate': `Protected Elasticsearch error="missing credendials"`,
+    });
+
+    expect(response.body).toMatchInlineSnapshot(`
+            Object {
+              "error": "Unauthorized",
+              "message": "missing credendials",
+              "statusCode": 401,
+            }
+        `);
+
+    expect(spacesService.scopedClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          authorization: headers.authorization,
+        }),
+      })
+    );
+  });
+
+  it('handles space retrieval errors gracefully when requesting an app, responding with headers returned from ES', async () => {
+    const spaces = [
+      {
+        id: 'a-space',
+        type: 'space',
+        attributes: {
+          name: 'a space',
+        },
+      },
+    ];
+
+    const { response, spacesService } = await request('/app/kibana', spaces, {
+      simulateGetSpacesFailure: false,
+      simulateGetSingleSpaceFailure: true,
     });
 
     expect(response.status).toEqual(401);
