@@ -72,7 +72,7 @@ export class MonitorGroupIterator {
 
   // Returns the last item fetched with next(). null if no items fetched with
   // next or if next has not yet been invoked.
-  current(): MonitorGroups | null {
+  getCurrent(): MonitorGroups | null {
     return this.buffer[this.bufferPos] || null;
   }
 
@@ -99,10 +99,10 @@ export class MonitorGroupIterator {
     size: number = CHUNK_SIZE
   ): Promise<{ hasMore: boolean; gotHit: boolean }> {
     // Trim the buffer to just the current element since we'll be fetching more
-    const current = this.current();
+    const current = this.getCurrent();
 
     // Trim the buffer to free space before fetching more
-    this.buffer = [current];
+    this.buffer = current ? [current] : [];
     this.bufferPos = 0;
 
     const results = await this.chunkFetcher(this.queryContext, this.searchAfter, size);
@@ -126,7 +126,7 @@ export class MonitorGroupIterator {
       return null;
     }
 
-    const current = this.current();
+    const current = this.getCurrent();
     if (!current) {
       return null;
     }
@@ -144,7 +144,7 @@ export class MonitorGroupIterator {
   // Returns a copy of this fetcher that goes backwards from the current position
   reverse(): MonitorGroupIterator | null {
     const reverseContext = Object.assign({}, this.queryContext);
-    const current = this.current();
+    const current = this.getCurrent();
 
     reverseContext.pagination = {
       cursorKey: current ? { monitor_id: current.id } : null,

@@ -63,6 +63,7 @@ const makeMonitorGroups = (count: number): MonitorGroups[] => {
   const groups: MonitorGroups[] = [];
   for (let i = 0; i < count; i++) {
     const id = `monitor-${i}`;
+
     groups.push({
       id,
       groups: [
@@ -71,6 +72,7 @@ const makeMonitorGroups = (count: number): MonitorGroups[] => {
           location: 'a-location',
           status: 'up',
           checkGroup: `check-group-${i}`,
+          summaryTimestamp: new Date(),
         },
       ],
     });
