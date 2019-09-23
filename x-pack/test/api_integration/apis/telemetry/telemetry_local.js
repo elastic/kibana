@@ -39,9 +39,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/45983
-  // FLAKY: https://github.com/elastic/kibana/issues/45884
-  describe.skip('/api/telemetry/v2/clusters/_stats with monitoring disabled', () => {
+  describe('/api/telemetry/v2/clusters/_stats with monitoring disabled', () => {
     before('', async () => {
       await esSupertest.put('/_cluster/settings').send(disableCollection).expect(200);
       await new Promise(r => setTimeout(r, 1000));
