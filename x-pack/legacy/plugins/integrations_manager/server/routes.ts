@@ -12,6 +12,12 @@ import * as Integrations from './integrations/handlers';
 export const routes: ServerRoute[] = [
   {
     method: 'GET',
+    path: CommonRoutes.API_CATEGORIES_PATTERN,
+    options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
+    handler: Integrations.handleGetCategories,
+  },
+  {
+    method: 'GET',
     path: CommonRoutes.API_LIST_PATTERN,
     options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
     handler: Integrations.handleGetList,

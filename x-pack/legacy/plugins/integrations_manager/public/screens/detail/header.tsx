@@ -34,6 +34,7 @@ export function Header(props: HeaderProps) {
   const FullWidthNavRow = styled(EuiPage)`
     /* no left padding so link is against column left edge  */
     padding-left: 0;
+    background-color: ${p => p.theme.eui.euiColorLightestShade};
   `;
 
   const Text = styled.span`

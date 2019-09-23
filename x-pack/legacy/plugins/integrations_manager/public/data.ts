@@ -5,8 +5,20 @@
  */
 
 import { HttpHandler } from 'src/core/public';
-import { getInstallPath, getInfoPath, getListPath, getRemovePath } from '../common/routes';
-import { IntegrationInfo, IntegrationList, IntegrationsGroupedByStatus } from '../common/types';
+import {
+  getCategoriesPath,
+  getInfoPath,
+  getInstallPath,
+  getListPath,
+  getRemovePath,
+  ListParams,
+} from '../common/routes';
+import {
+  CategorySummaryList,
+  IntegrationInfo,
+  IntegrationList,
+  IntegrationsGroupedByStatus,
+} from '../common/types';
 
 let _fetch: HttpHandler;
 
@@ -14,9 +26,17 @@ export function setClient(client: HttpHandler): void {
   _fetch = client;
 }
 
-export async function getIntegrations(): Promise<IntegrationList> {
+export async function getCategories(): Promise<CategorySummaryList> {
+  const path = getCategoriesPath();
+  const list: CategorySummaryList = await _fetch(path);
+
+  return list;
+}
+
+export async function getIntegrations(params?: ListParams): Promise<IntegrationList> {
   const path = getListPath();
-  const list: IntegrationList = await _fetch(path);
+  const options = params ? { query: { ...params } } : undefined;
+  const list: IntegrationList = await _fetch(path, options);
 
   return list;
 }

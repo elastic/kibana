@@ -5,82 +5,83 @@
  */
 import React, { Fragment, useState, useEffect } from 'react';
 import {
+  EuiFacetButton,
+  EuiFacetGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   // @ts-ignore (elastic/eui#1557) & (elastic/eui#1262) EuiImage is not exported yet
   EuiImage,
   EuiPage,
   EuiPageBody,
   EuiPageWidthProps,
+  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { PLUGIN } from '../../common/constants';
-import { IntegrationList } from '../../common/types';
+import { CategorySummaryItem, CategorySummaryList, IntegrationList } from '../../common/types';
 import { IntegrationListGrid } from '../components/integration_list_grid';
-import { getIntegrations } from '../data';
+import { getCategories, getIntegrations } from '../data';
 import { useBreadcrumbs, useCore, useLinks } from '../hooks';
+
+const FullBleedPage = styled(EuiPage)`
+  padding: 0;
+  background-color: ${p => p.theme.eui.euiColorLightestShade};
+`;
 
 export function Home() {
   const { toListView } = useLinks();
   useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }]);
 
   const [list, setList] = useState<IntegrationList>([]);
-
+  const [selectedCategory, setSelectedCategory] = useState('');
   useEffect(() => {
-    getIntegrations().then(setList);
-  }, []);
+    getIntegrations({ category: selectedCategory }).then(setList);
+  }, [selectedCategory]);
 
-  return <HomeLayout list={list} restrictWidth={1200} />;
-}
-
-type LayoutProps = {
-  list: IntegrationList;
-} & EuiPageWidthProps;
-function HomeLayout(props: LayoutProps) {
-  const { list, restrictWidth } = props;
   if (!list) return null;
-
-  const { theme } = useCore();
-  const FullWidthHeader = styled(EuiPage)`
-    border-bottom: ${theme.eui.euiBorderThin};
-    padding-bottom: ${theme.eui.paddingSizes.s};
-  `;
-
-  const availableTitle = 'Available Integrations';
-  const installedTitle = 'Your Integrations';
   const installedIntegrations = list.filter(({ status }) => status === 'installed');
 
+  const maxContentWidth = 1200;
   return (
     <Fragment>
-      <FullWidthHeader>
-        <EuiPageBody restrictWidth={restrictWidth}>
-          <Header />
-        </EuiPageBody>
-      </FullWidthHeader>
-      <EuiPage>
-        <EuiPageBody restrictWidth={restrictWidth}>
+      <Header restrictWidth={maxContentWidth} />
+      <EuiHorizontalRule margin="none" />
+      <FullBleedPage>
+        <EuiPageBody restrictWidth={maxContentWidth}>
           <Fragment>
-            <IntegrationListGrid title={installedTitle} list={installedIntegrations} />
-            <IntegrationListGrid title={availableTitle} list={list} />
+            <EuiSpacer size="l" />
+            <InstalledListGrid list={installedIntegrations} />
+            {installedIntegrations.length ? <EuiHorizontalRule margin="l" /> : null}
+            <AvailableListGrid
+              list={list}
+              onCategoryChange={category => {
+                setSelectedCategory(category.id);
+              }}
+            />
           </Fragment>
         </EuiPageBody>
-      </EuiPage>
+      </FullBleedPage>
     </Fragment>
   );
 }
 
-function Header() {
+function Header({ restrictWidth }: EuiPageWidthProps) {
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={1}>
-        <HeroCopy />
-      </EuiFlexItem>
-      <EuiFlexItem grow={1}>
-        <HeroImage />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <FullBleedPage>
+      <EuiPageBody restrictWidth={restrictWidth}>
+        <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem grow={1}>
+            <HeroCopy />
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <HeroImage />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPageBody>
+    </FullBleedPage>
   );
 }
 
@@ -91,7 +92,7 @@ function HeroCopy() {
   `;
 
   return (
-    <EuiFlexGroup alignItems="center">
+    <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem>
         <EuiTitle size="l">
           <h1>Add Your Data</h1>
@@ -104,13 +105,68 @@ function HeroCopy() {
 
 function HeroImage() {
   const { toAssets } = useLinks();
+  const FlexGroup = styled(EuiFlexGroup)`
+    margin-bottom: -6px; // puts image directly on EuiHorizontalRule
+  `;
 
   return (
-    <EuiFlexGroup justifyContent="flexEnd">
+    <FlexGroup gutterSize="none" justifyContent="flexEnd">
       <EuiImage
         alt="Illustration of computer"
         url={toAssets('illustration_kibana_getting_started@2x.png')}
       />
-    </EuiFlexGroup>
+    </FlexGroup>
   );
+}
+
+interface AvailableListGridProps {
+  list: IntegrationList;
+  onCategoryChange: (item: CategorySummaryItem) => any;
+}
+
+function AvailableListGrid({ list, onCategoryChange }: AvailableListGridProps) {
+  const [categories, setCategories] = useState<CategorySummaryList>([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
+
+  useEffect(() => {
+    getCategories().then(setCategories);
+  }, []);
+
+  const noFilter: CategorySummaryItem = {
+    id: '',
+    title: 'All',
+    count: list.length,
+  };
+
+  const availableTitle = 'Available Integrations';
+  const controls = (
+    <EuiFacetGroup>
+      {[noFilter, ...categories].map(category => (
+        <EuiFacetButton
+          isSelected={category.id === selectedCategory}
+          key={category.id}
+          id={category.id}
+          quantity={category.count}
+          onClick={() => {
+            onCategoryChange(category);
+            setSelectedCategory(category.id);
+          }}
+        >
+          {category.title}
+        </EuiFacetButton>
+      ))}
+    </EuiFacetGroup>
+  );
+
+  return <IntegrationListGrid title={availableTitle} controls={controls} list={list} />;
+}
+
+interface InstalledListGridProps {
+  list: IntegrationList;
+}
+
+function InstalledListGrid({ list }: InstalledListGridProps) {
+  const installedTitle = 'Your Integrations';
+
+  return <IntegrationListGrid title={installedTitle} list={list} controls={<div />} />;
 }
