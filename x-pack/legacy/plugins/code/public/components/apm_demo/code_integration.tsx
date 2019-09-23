@@ -8,28 +8,29 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { EuiButtonEmpty, EuiPopover, EuiText } from '@elastic/eui';
 
+import { history } from '../../utils/url';
 import { RepoSelector } from './repo_selector';
+import { Frame } from './data';
 
 interface Props {
   onRepoSelect: (codeId: string) => void;
-  project: { mapping: boolean; url: string };
-  frame: number;
+  project: { mapping: boolean; uri: string };
+  frame: Frame;
+  repos: string[];
 }
-
-const repos = ['a', 'b', 'c'];
 
 const PopoverContent = styled.div`
   margin-bottom: 1rem;
   width: 300px;
 `;
 
-export const CodeIntegration = ({ onRepoSelect, frame, project }: Props) => {
+export const CodeIntegration = ({ onRepoSelect, frame, project, repos }: Props) => {
   const [showSelector, setShowSelector] = useState(false);
 
   const handleClick = () => {
     if (project.mapping) {
-      // TODO: link to code
-      console.log('going to frame', frame, 'in project', project.url);
+      const fileLinkUrl = `/${frame.uri}/blob/HEAD/${frame.filePath}`;
+      history.push(fileLinkUrl);
     } else {
       setShowSelector(true);
     }

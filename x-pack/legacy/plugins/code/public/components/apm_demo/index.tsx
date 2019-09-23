@@ -7,33 +7,51 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import { CodeBlock } from '../codeblock/codeblock';
 import { CodeIntegration } from './code_integration';
+import { Frame, frames, repos } from './data';
 
 const Container = styled.div`
   padding: 1rem;
 `;
-const Frame = styled.div`
-  display: flex;
-  justify-content: flex-end;
+
+const AlignRight = styled.div`
+  text-align: right;
 `;
 
-const frames = Array.from(Array(10).keys());
-const myProject = { url: 'https://github.com/rylnd/my_project', mapping: false };
-
-const associateToService = (project: { url: string; mapping: boolean }, frame: number) => (
+const associateToService = (project: { uri: string; mapping: boolean }, frame: Frame) => (
   repo: string
-) => console.log(`repo ${repo} chosen for project ${project.url} from frame ${frame}`);
+) => console.log(`repo ${repo} chosen for project ${project.uri} from frame ${frame}`);
 
 export const ApmDemo = () => (
   <Container>
-    {frames.map(frame => (
-      <Frame key={`frame-${frame}`}>
-        <CodeIntegration
-          project={myProject}
-          frame={frame}
-          onRepoSelect={associateToService(myProject, frame)}
-        />
-      </Frame>
-    ))}
+    {frames.map((frame, i) => {
+      const { uri, filePath, compositeContent, language } = frame;
+      const { content, lineMapping, ranges } = compositeContent;
+      const project = { uri, mapping: i % 2 === 0 };
+      const key = `${uri}-${filePath}`;
+
+      return (
+        <div key={key}>
+          <AlignRight>
+            <CodeIntegration
+              repos={repos}
+              project={project}
+              frame={frame}
+              onRepoSelect={associateToService(project, frame)}
+            />
+          </AlignRight>
+          <CodeBlock
+            language={language}
+            startLine={0}
+            code={content}
+            highlightRanges={ranges}
+            folding={false}
+            lineNumbersFunc={l => lineMapping[l - 1]}
+            onClick={() => {}}
+          />
+        </div>
+      );
+    })}
   </Container>
 );
