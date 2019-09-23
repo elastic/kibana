@@ -20,7 +20,7 @@
 import chrome from 'ui/chrome';
 import { Plugin } from 'kibana/public';
 // @ts-ignore
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visFactory } from 'ui/vis/vis_factory';
 import { npStart, npSetup } from 'ui/new_platform';
 import { initTimelionLegacyModule } from './timelion_legacy_module';
 
@@ -28,7 +28,7 @@ import { initTimelionLegacyModule } from './timelion_legacy_module';
 export interface LegacyDependenciesPluginSetup {
   $http: any;
   config: any;
-  createAngularVisualization: Function;
+  createBaseVisualization: Function;
 }
 
 /** @internal */
@@ -45,12 +45,11 @@ export class LegacyDependenciesPlugin
     initTimelionLegacyModule();
 
     const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get('Private');
 
     return {
       $http: $injector.get('$http'),
       config: npSetup.core.uiSettings,
-      createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
+      createBaseVisualization: visFactory.createBaseVisualization,
     } as LegacyDependenciesPluginSetup;
   }
 

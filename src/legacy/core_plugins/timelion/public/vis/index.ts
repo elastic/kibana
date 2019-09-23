@@ -24,19 +24,22 @@ import { getTimelionRequestHandler } from './timelion_request_handler';
 import visConfigTemplate from './timelion_vis.html';
 import editorConfigTemplate from './timelion_vis_params.html';
 import { TimelionSetupDependencies } from '../plugin';
+// @ts-ignore
+import { AngularVisController } from '../../../../ui/public/vis/vis_types/angular_vis_type';
 
 export function getTimelionVisualization(dependencies: TimelionSetupDependencies) {
   const timelionRequestHandler = getTimelionRequestHandler(dependencies);
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
-  return dependencies.createAngularVisualization({
+  return dependencies.createBaseVisualization({
     name: 'timelion',
     title: 'Timelion',
     icon: 'visTimelion',
     description: i18n.translate('timelion.timelionDescription', {
       defaultMessage: 'Build time-series using functional expressions',
     }),
+    visualization: AngularVisController,
     visConfig: {
       defaults: {
         expression: '.es(*)',
