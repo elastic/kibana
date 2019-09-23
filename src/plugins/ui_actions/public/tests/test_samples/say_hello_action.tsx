@@ -19,30 +19,25 @@
 
 import React from 'react';
 import { EuiFlyout } from '@elastic/eui';
-import { CoreStart } from '../../../../../../../../../core/public';
-import { Action } from '../..';
+import { CoreStart } from 'src/core/public';
+import { IAction, createAction } from '../../actions';
 
-export const HELLO_WORLD_ACTION_ID = 'HELLO_WORLD_ACTION_ID';
+export const SAY_HELLO_ACTION = 'SAY_HELLO_ACTION';
 
-export class HelloWorldAction extends Action {
-  public readonly type = HELLO_WORLD_ACTION_ID;
-
-  constructor(private readonly overlays: CoreStart['overlays']) {
-    super(HELLO_WORLD_ACTION_ID);
-  }
-
-  public getDisplayName() {
-    return 'Hello World Action!';
-  }
-
-  public async execute() {
-    const flyoutSession = this.overlays.openFlyout(
-      <EuiFlyout ownFocus onClose={() => flyoutSession && flyoutSession.close()}>
-        Hello World, I am a hello world action!
-      </EuiFlyout>,
-      {
-        'data-test-subj': 'helloWorldAction',
-      }
-    );
-  }
+export function createSayHelloAction(overlays: CoreStart['overlays']): IAction<{ name: string }> {
+  return createAction<{ name: string }>({
+    type: SAY_HELLO_ACTION,
+    getDisplayName: ({ name }) => `Hello, ${name}`,
+    isCompatible: async ({ name }) => name !== undefined,
+    execute: async context => {
+      const flyoutSession = overlays.openFlyout(
+        <EuiFlyout ownFocus onClose={() => flyoutSession && flyoutSession.close()}>
+          this.getDisplayName(context)
+        </EuiFlyout>,
+        {
+          'data-test-subj': 'sayHelloAction',
+        }
+      );
+    },
+  });
 }

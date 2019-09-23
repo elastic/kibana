@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { EmbeddableApiPure } from './types';
-import { Action, buildContextMenuForActions, openContextMenu } from '../lib';
+import { IUiActionsApiPure } from '../types';
+import { buildContextMenuForActions, openContextMenu } from '../context_menu';
+import { IAction } from '../actions';
 
-const executeSingleAction = async <A extends {} = {}>(action: Action<A>, actionContext: A) => {
-  const href = action.getHref(actionContext);
+const executeSingleAction = async <A extends {} = {}>(action: IAction<A>, actionContext: A) => {
+  const href = action.getHref && action.getHref(actionContext);
 
   // TODO: Do we need a `getHref()` special case?
   if (href) {
@@ -32,7 +33,7 @@ const executeSingleAction = async <A extends {} = {}>(action: Action<A>, actionC
   await action.execute(actionContext);
 };
 
-export const executeTriggerActions: EmbeddableApiPure['executeTriggerActions'] = ({
+export const executeTriggerActions: IUiActionsApiPure['executeTriggerActions'] = ({
   api,
 }) => async (triggerId, actionContext) => {
   const actions = await api.getTriggerCompatibleActions!(triggerId, actionContext);

@@ -17,26 +17,14 @@
  * under the License.
  */
 
-import { Action } from '../../actions';
+import { IAction, createAction } from '../../actions';
 
 export const RESTRICTED_ACTION = 'RESTRICTED_ACTION';
 
-export class RestrictedAction<A> extends Action<A> {
-  public readonly type = RESTRICTED_ACTION;
-
-  private isCompatibleFn: (context: A) => boolean;
-  constructor(isCompatible: (context: A) => boolean) {
-    super(RESTRICTED_ACTION);
-    this.isCompatibleFn = isCompatible;
-  }
-
-  getDisplayName() {
-    return `I am only sometimes compatible`;
-  }
-
-  async isCompatible(context: A) {
-    return this.isCompatibleFn(context);
-  }
-
-  async execute() {}
+export function createRestrictedAction<C>(isCompatibleIn: (context: C) => boolean): IAction<C> {
+  return createAction<C>({
+    type: RESTRICTED_ACTION,
+    isCompatible: async context => isCompatibleIn(context),
+    execute: async () => {},
+  });
 }

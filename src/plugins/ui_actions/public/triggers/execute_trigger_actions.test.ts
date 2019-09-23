@@ -17,49 +17,33 @@
  * under the License.
  */
 
-import { testPlugin, TestPluginReturn } from './test_plugin';
-import { of } from './helpers';
-import { Action, openContextMenu, IEmbeddable } from '../lib';
-import {
-  ContactCardEmbeddable,
-  CONTACT_USER_TRIGGER,
-} from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable';
-import { SEND_MESSAGE_ACTION } from '../lib/test_samples/actions/send_message_action';
+import { IAction, createAction } from '../actions';
+import { openContextMenu } from '../context_menu';
+import { IUiActionsTestPluginReturn, uiActionsTestPlugin } from '../tests/test_plugin';
 
-jest.mock('../lib/context_menu_actions');
+jest.mock('../context_menu');
 
 const executeFn = jest.fn();
 const openContextMenuSpy = (openContextMenu as any) as jest.SpyInstance;
 
-class TestAction<A> extends Action<A> {
-  public readonly type = 'testAction';
-  public checkCompatibility: (context: A) => boolean;
+const CONTACT_USER_TRIGGER = 'CONTACT_USER_TRIGGER';
 
-  constructor(id: string, checkCompatibility: (context: A) => boolean) {
-    super(id);
-    this.checkCompatibility = checkCompatibility;
-  }
-
-  public getDisplayName() {
-    return 'test';
-  }
-
-  async isCompatible(context: A) {
-    return this.checkCompatibility(context);
-  }
-
-  async execute(context: unknown) {
-    executeFn(context);
-  }
+function createTestAction<A>(id: string, checkCompatibility: (context: A) => boolean): IAction<A> {
+  return createAction<A>({
+    type: 'testAction',
+    id,
+    isCompatible: context => Promise.resolve(checkCompatibility(context)),
+    execute: context => executeFn(context),
+  });
 }
 
-let embeddables: TestPluginReturn;
+let uiActions: IUiActionsTestPluginReturn;
 const reset = () => {
-  embeddables = testPlugin();
+  uiActions = uiActionsTestPlugin();
 
-  embeddables.setup.registerTrigger({
+  uiActions.setup.registerTrigger({
     id: CONTACT_USER_TRIGGER,
-    actionIds: [SEND_MESSAGE_ACTION],
+    actionIds: ['SEND_MESSAGE_ACTION'],
   });
 
   executeFn.mockReset();
@@ -68,23 +52,17 @@ const reset = () => {
 beforeEach(reset);
 
 test('executes a single action mapped to a trigger', async () => {
-  const { setup, doStart } = embeddables;
+  const { setup, doStart } = uiActions;
   const trigger = {
     id: 'MY-TRIGGER',
     title: 'My trigger',
     actionIds: ['test1'],
   };
-  const action = new TestAction('test1', () => true);
+  const action = createTestAction('test1', () => true);
   setup.registerTrigger(trigger);
   setup.registerAction(action);
 
-  const context = {
-    embeddable: new ContactCardEmbeddable(
-      { id: '123', firstName: 'Stacey', lastName: 'G' },
-      { execAction: (() => null) as any }
-    ),
-    triggerContext: {},
-  };
+  const context = {};
   const start = doStart();
   await start.executeTriggerActions('MY-TRIGGER', context);
 
@@ -93,7 +71,7 @@ test('executes a single action mapped to a trigger', async () => {
 });
 
 test('throws an error if there are no compatible actions to execute', async () => {
-  const { setup, doStart } = embeddables;
+  const { setup, doStart } = uiActions;
   const trigger = {
     id: 'MY-TRIGGER',
     title: 'My trigger',
@@ -101,48 +79,27 @@ test('throws an error if there are no compatible actions to execute', async () =
   };
   setup.registerTrigger(trigger);
 
-  const context = {
-    embeddable: new ContactCardEmbeddable(
-      { id: '123', firstName: 'Stacey', lastName: 'G' },
-      { execAction: (() => null) as any }
-    ),
-    triggerContext: {},
-  };
+  const context = {};
   const start = doStart();
-  const [, error] = await of(start.executeTriggerActions('MY-TRIGGER', context));
-
-  expect(error).toBeInstanceOf(Error);
-  expect(error.message).toMatchInlineSnapshot(
-    `"No compatible actions found to execute for trigger [triggerId = MY-TRIGGER]."`
+  await expect(start.executeTriggerActions('MY-TRIGGER', context)).rejects.toMatchObject(
+    new Error('No compatible actions found to execute for trigger [triggerId = MY-TRIGGER].')
   );
 });
 
 test('does not execute an incompatible action', async () => {
-  const { setup, doStart } = embeddables;
+  const { setup, doStart } = uiActions;
   const trigger = {
     id: 'MY-TRIGGER',
     title: 'My trigger',
     actionIds: ['test1'],
   };
-  const action = new TestAction<{ embeddable: IEmbeddable }>(
-    'test1',
-    ({ embeddable }) => embeddable.id === 'executeme'
-  );
-  const embeddable = new ContactCardEmbeddable(
-    {
-      id: 'executeme',
-      firstName: 'Stacey',
-      lastName: 'G',
-    },
-    {} as any
-  );
+  const action = createTestAction<{ name: string }>('test1', ({ name }) => name === 'executeme');
   setup.registerTrigger(trigger);
   setup.registerAction(action);
 
   const start = doStart();
   const context = {
-    embeddable,
-    triggerContext: {},
+    name: 'executeme',
   };
   await start.executeTriggerActions('MY-TRIGGER', context);
 
@@ -150,22 +107,14 @@ test('does not execute an incompatible action', async () => {
 });
 
 test('shows a context menu when more than one action is mapped to a trigger', async () => {
-  const { setup, doStart } = embeddables;
+  const { setup, doStart } = uiActions;
   const trigger = {
     id: 'MY-TRIGGER',
     title: 'My trigger',
     actionIds: ['test1', 'test2'],
   };
-  const action1 = new TestAction('test1', () => true);
-  const action2 = new TestAction('test2', () => true);
-  const embeddable = new ContactCardEmbeddable(
-    {
-      id: 'executeme',
-      firstName: 'Stacey',
-      lastName: 'G',
-    },
-    {} as any
-  );
+  const action1 = createTestAction('test1', () => true);
+  const action2 = createTestAction('test2', () => true);
   setup.registerTrigger(trigger);
   setup.registerAction(action1);
   setup.registerAction(action2);
@@ -173,10 +122,7 @@ test('shows a context menu when more than one action is mapped to a trigger', as
   expect(openContextMenu).toHaveBeenCalledTimes(0);
 
   const start = doStart();
-  const context = {
-    embeddable,
-    triggerContext: {},
-  };
+  const context = {};
   await start.executeTriggerActions('MY-TRIGGER', context);
 
   expect(executeFn).toBeCalledTimes(0);
@@ -184,16 +130,14 @@ test('shows a context menu when more than one action is mapped to a trigger', as
 });
 
 test('passes whole action context to isCompatible()', async () => {
-  const { setup, doStart } = embeddables;
+  const { setup, doStart } = uiActions;
   const trigger = {
     id: 'MY-TRIGGER',
     title: 'My trigger',
     actionIds: ['test'],
   };
-  const action = new TestAction<{ triggerContext: any }>('test', ({ triggerContext }) => {
-    expect(triggerContext).toEqual({
-      foo: 'bar',
-    });
+  const action = createTestAction<{ foo: string }>('test', ({ foo }) => {
+    expect(foo).toEqual('bar');
     return true;
   });
 
@@ -201,11 +145,6 @@ test('passes whole action context to isCompatible()', async () => {
   setup.registerAction(action);
   const start = doStart();
 
-  const context = {
-    embeddable: {} as any,
-    triggerContext: {
-      foo: 'bar',
-    },
-  };
+  const context = { foo: 'bar' };
   await start.executeTriggerActions('MY-TRIGGER', context);
 });

@@ -17,14 +17,9 @@
  * under the License.
  */
 
-import { EmbeddableApiPure } from './types';
-
-export const getTrigger: EmbeddableApiPure['getTrigger'] = ({ triggers }) => id => {
-  const trigger = triggers.get(id);
-
-  if (!trigger) {
-    throw new Error(`Trigger [triggerId = ${id}] does not exist.`);
-  }
-
-  return trigger;
-};
+export interface ITrigger {
+  id: string;
+  title?: string;
+  description?: string;
+  actionIds: string[];
+}

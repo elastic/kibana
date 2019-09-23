@@ -17,27 +17,29 @@
  * under the License.
  */
 
-import { testPlugin, TestPluginReturn } from './test_plugin';
-import { HelloWorldAction } from '../lib/test_samples/actions/hello_world_action';
-import { SayHelloAction } from '../lib/test_samples/actions/say_hello_action';
-import { RestrictedAction } from '../lib/test_samples/actions/restricted_action';
-import { EmptyEmbeddable } from '../lib/test_samples/embeddables/empty_embeddable';
-import { CONTEXT_MENU_TRIGGER, IEmbeddable } from '../lib';
-import { of } from './helpers';
+import { createSayHelloAction } from '../tests/test_samples/say_hello_action';
+import { IUiActionsTestPluginReturn, uiActionsTestPlugin } from '../tests/test_plugin';
+import { createRestrictedAction, createHelloWorldAction } from '../tests/test_samples';
+import { IAction } from '../actions';
 
-let action: SayHelloAction;
-let embeddables: TestPluginReturn;
+let action: IAction<{ name: string }>;
+let uiActions: IUiActionsTestPluginReturn;
 beforeEach(() => {
-  embeddables = testPlugin();
-  action = new SayHelloAction(() => {});
+  uiActions = uiActionsTestPlugin();
+  action = createSayHelloAction({} as any);
 
-  embeddables.setup.registerAction(action);
-  embeddables.setup.attachAction(CONTEXT_MENU_TRIGGER, action.id);
+  uiActions.setup.registerAction(action);
+  uiActions.setup.registerTrigger({
+    id: 'trigger',
+    title: 'trigger',
+    actionIds: [],
+  });
+  uiActions.setup.attachAction('trigger', action.id);
 });
 
 test('can register and get actions', async () => {
-  const { setup, plugin } = embeddables;
-  const helloWorldAction = new HelloWorldAction({} as any);
+  const { setup, plugin } = uiActions;
+  const helloWorldAction = createHelloWorldAction({} as any);
   const length = (plugin as any).actions.size;
 
   setup.registerAction(helloWorldAction);
@@ -48,9 +50,8 @@ test('can register and get actions', async () => {
 });
 
 test('getTriggerCompatibleActions returns attached actions', async () => {
-  const { setup, doStart } = embeddables;
-  const embeddable = new EmptyEmbeddable({ id: '123' });
-  const helloWorldAction = new HelloWorldAction({} as any);
+  const { setup, doStart } = uiActions;
+  const helloWorldAction = createHelloWorldAction({} as any);
 
   setup.registerAction(helloWorldAction);
 
@@ -63,24 +64,19 @@ test('getTriggerCompatibleActions returns attached actions', async () => {
   setup.attachAction('MY-TRIGGER', helloWorldAction.id);
 
   const start = doStart();
-  const actions = await start.getTriggerCompatibleActions('MY-TRIGGER', {
-    embeddable,
-  });
+  const actions = await start.getTriggerCompatibleActions('MY-TRIGGER', {});
 
   expect(actions.length).toBe(1);
   expect(actions[0].id).toBe(helloWorldAction.id);
 });
 
 test('filters out actions not applicable based on the context', async () => {
-  const { setup, doStart } = embeddables;
-  const restrictedAction = new RestrictedAction<{ embeddable: IEmbeddable }>(context => {
-    return context.embeddable.id === 'accept';
+  const { setup, doStart } = uiActions;
+  const restrictedAction = createRestrictedAction<{ accept: boolean }>(context => {
+    return context.accept;
   });
 
   setup.registerAction(restrictedAction);
-
-  const acceptEmbeddable = new EmptyEmbeddable({ id: 'accept' });
-  const rejectEmbeddable = new EmptyEmbeddable({ id: 'reject' });
 
   const testTrigger = {
     id: 'MY-TRIGGER',
@@ -91,36 +87,26 @@ test('filters out actions not applicable based on the context', async () => {
   setup.registerTrigger(testTrigger);
 
   const start = doStart();
-  let actions = await start.getTriggerCompatibleActions(testTrigger.id, {
-    embeddable: acceptEmbeddable,
-  });
+  let actions = await start.getTriggerCompatibleActions(testTrigger.id, { accept: true });
 
   expect(actions.length).toBe(1);
 
-  actions = await start.getTriggerCompatibleActions(testTrigger.id, {
-    embeddable: rejectEmbeddable,
-  });
+  actions = await start.getTriggerCompatibleActions(testTrigger.id, { accept: false });
 
   expect(actions.length).toBe(0);
 });
 
 test(`throws an error with an invalid trigger ID`, async () => {
-  const { doStart } = embeddables;
+  const { doStart } = uiActions;
   const start = doStart();
-  const [, error] = await of(
-    start.getTriggerCompatibleActions('I do not exist', {
-      embeddable: new EmptyEmbeddable({ id: 'empty' }),
-    })
-  );
 
-  await expect(error).toBeInstanceOf(Error);
-  await expect(error.message).toMatchInlineSnapshot(
-    `"Trigger [triggerId = I do not exist] does not exist."`
+  await expect(start.getTriggerCompatibleActions('I do not exist', {})).rejects.toMatchObject(
+    new Error('Trigger [triggerId = I do not exist] does not exist.')
   );
 });
 
 test(`with a trigger mapping that maps to an non-existing action returns empty list`, async () => {
-  const { setup, doStart } = embeddables;
+  const { setup, doStart } = uiActions;
   const testTrigger = {
     id: '123',
     title: '123',
@@ -129,9 +115,7 @@ test(`with a trigger mapping that maps to an non-existing action returns empty l
   setup.registerTrigger(testTrigger);
 
   const start = doStart();
-  const actions = await start.getTriggerCompatibleActions(testTrigger.id, {
-    embeddable: new EmptyEmbeddable({ id: 'empty' }),
-  });
+  const actions = await start.getTriggerCompatibleActions(testTrigger.id, {});
 
   expect(actions).toEqual([]);
 });

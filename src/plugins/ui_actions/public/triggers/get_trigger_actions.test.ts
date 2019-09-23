@@ -17,22 +17,22 @@
  * under the License.
  */
 
-import { testPlugin } from './test_plugin';
-import { Action } from '../lib';
+import { IAction } from '../actions';
+import { uiActionsTestPlugin } from '../tests/test_plugin';
 
-const action1 = ({
+const action1: IAction = {
   id: 'action1',
   order: 1,
   type: 'type1',
-} as any) as Action;
-const action2 = ({
+} as any;
+const action2: IAction = {
   id: 'action2',
   order: 2,
   type: 'type2',
-} as any) as Action;
+} as any;
 
 test('returns actions set on trigger', () => {
-  const { setup, doStart } = testPlugin();
+  const { setup, doStart } = uiActionsTestPlugin();
   setup.registerAction(action1);
   setup.registerAction(action2);
   setup.registerTrigger({

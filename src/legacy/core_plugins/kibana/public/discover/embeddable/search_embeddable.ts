@@ -37,12 +37,12 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { timefilter, getTime } from 'ui/timefilter';
 import { TimeRange } from 'src/plugins/data/public';
+import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
 import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
   Embeddable,
   Container,
-  ExecuteTriggerActions,
 } from '../../../../embeddable_api/public/np_ready/public';
 import * as columnActions from '../doc_table/actions/columns';
 import { SavedSearch } from '../types';
@@ -124,7 +124,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       queryFilter,
     }: SearchEmbeddableConfig,
     initialInput: SearchInput,
-    private readonly executeTriggerActions: ExecuteTriggerActions,
+    private readonly executeTriggerActions: TExecuteTriggerActions,
     parent?: Container
   ) {
     super(

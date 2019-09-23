@@ -20,7 +20,7 @@
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Action } from '../actions';
+import { IAction } from '../actions';
 
 /**
  * Transforms an array of Actions to the shape EuiContextMenuPanel expects.
@@ -30,7 +30,7 @@ export async function buildContextMenuForActions<A>({
   actionContext,
   closeMenu,
 }: {
-  actions: Array<Action<A>>;
+  actions: Array<IAction<A>>;
   actionContext: A;
   closeMenu: () => void;
 }): Promise<EuiContextMenuPanelDescriptor> {
@@ -42,7 +42,7 @@ export async function buildContextMenuForActions<A>({
 
   return {
     id: 'mainMenu',
-    title: i18n.translate('embeddableApi.actionPanel.title', {
+    title: i18n.translate('uiActions.actionPanel.title', {
       defaultMessage: 'Options',
     }),
     items: menuItems,
@@ -57,7 +57,7 @@ async function buildEuiContextMenuPanelItems<A>({
   actionContext,
   closeMenu,
 }: {
-  actions: Array<Action<A>>;
+  actions: Array<IAction<A>>;
   actionContext: A;
   closeMenu: () => void;
 }) {
@@ -93,7 +93,7 @@ function convertPanelActionToContextMenuItem<A>({
   actionContext,
   closeMenu,
 }: {
-  action: Action<A>;
+  action: IAction<A>;
   actionContext: A;
   closeMenu: () => void;
 }): EuiContextMenuPanelItemDescriptor {
@@ -109,7 +109,7 @@ function convertPanelActionToContextMenuItem<A>({
     closeMenu();
   };
 
-  if (action.getHref(actionContext)) {
+  if (action.getHref && action.getHref(actionContext)) {
     menuPanelItem.href = action.getHref(actionContext);
   }
 
