@@ -125,7 +125,6 @@ export class SavedObjectLoader {
 
   find(search = '', size = 100) {
     return this.findAll(search, size).then(resp => {
-      //console.log(resp.hits);
       return {
         total: resp.total,
         hits: resp.hits.filter(savedObject => !savedObject.error)

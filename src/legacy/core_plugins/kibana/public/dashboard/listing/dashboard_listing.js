@@ -82,7 +82,11 @@ export class DashboardListing extends React.Component {
     delete userToSave.authentication_realm;
     delete userToSave.lookup_realm;
 
-    userToSave.metadata = { favedObjects: favedObjectsArr };
+    if (userToSave.metadata) {
+      userToSave.metadata.favedObjects = favedObjectsArr;
+    } else {
+      userToSave.metadata = { favedObjects: favedObjectsArr };
+    }
 
     try {
       await apiClient.saveUser(userToSave);
@@ -115,7 +119,11 @@ export class DashboardListing extends React.Component {
 
     const result = await this.addOrRemoveDashboardToFavedObjects(objId, action);
     if (result !== 0) {
-      notifications.addDanger('Unable to add star to this object');
+      const errorMsg = i18n.translate('kbn.dashboard.listing.unableToAddStarError', {
+        defaultMessage: 'Unable to add star to this object'
+      });
+      notifications.addDanger(errorMsg);
+
       theTable.state.items[modItem].starred = !theTable.state.items[modItem].starred;
       theTable.setState({
         items: theTable.state.items
