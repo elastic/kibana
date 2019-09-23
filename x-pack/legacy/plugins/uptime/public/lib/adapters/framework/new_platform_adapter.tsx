@@ -7,6 +7,7 @@
 import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { get } from 'lodash';
 import { CreateGraphQLClient } from './framework_adapter_types';
 import { UptimeApp, UptimeAppProps } from '../../../uptime_app';
 import { getIntegratedAppAvailability } from './capabilities_adapter';
@@ -32,9 +33,10 @@ export const getKibanaFrameworkAdapter = (core: CoreStart): UMFrameworkAdapter =
     capabilities,
     INTEGRATED_SOLUTIONS
   );
+  const canSave = get(capabilities, 'uptime.save', false);
   const props: UptimeAppProps = {
     basePath: basePath.get(),
-    canSave: !!capabilities.uptime.save,
+    canSave,
     client: createApolloClient(`${basePath.get()}/api/uptime/graphql`, 'true'),
     darkMode: core.uiSettings.get('theme:darkMode'),
     i18n,
