@@ -24,8 +24,8 @@ export class IntegrationsSearchClient extends DocumentSearchClient {
   public async resolveSnippets(
     req: ResolveSnippetsIntegrationRequest
   ): Promise<IntegrationsSearchResult> {
-    const { repoUris, filePath, lineNumStart, lineNumEnd } = req;
-    const index = DocumentSearchIndexWithScope(repoUris);
+    const { repoUri, filePath, lineNumStart, lineNumEnd } = req;
+    const index = DocumentSearchIndexWithScope([repoUri]);
 
     let fallback = false;
     let rawRes = await this.client.search({
@@ -75,11 +75,11 @@ export class IntegrationsSearchClient extends DocumentSearchClient {
     const hits: any[] = rawRes.hits.hits;
     const results: SearchResultItem[] = hits.map(hit => {
       const doc: Document = hit._source;
-      const { repoUri, path, language } = doc;
+      const { repoUri: uri, path, language } = doc;
 
       const sourceContent = this.getSnippetContent(doc, lineNumStart, lineNumEnd);
       const item: SearchResultItem = {
-        uri: repoUri,
+        uri,
         filePath: path,
         language: language!,
         hits: 1,

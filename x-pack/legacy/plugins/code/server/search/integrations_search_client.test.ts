@@ -110,7 +110,7 @@ beforeEach(() => {
 test('Document search', async () => {
   // 1. The first response should have 1 result.
   const responseWithResult = await integSearchClient.resolveSnippets({
-    repoUris: ['github.com/Microsoft/TypeScript-Node-Starter'],
+    repoUri: 'github.com/Microsoft/TypeScript-Node-Starter',
     filePath: 'src/types/express-flash.d.ts',
     lineNumStart: 3,
     lineNumEnd: 7,
@@ -149,7 +149,7 @@ test('Document search', async () => {
 
   // 2. The first response should have 0 results.
   const responseWithEmptyResult = await integSearchClient.resolveSnippets({
-    repoUris: ['github.com/Microsoft/TypeScript-Node-Starter'],
+    repoUri: 'github.com/Microsoft/TypeScript-Node-Starter',
     filePath: 'src/types/foo-bar',
     lineNumStart: 3,
     lineNumEnd: 7,

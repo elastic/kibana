@@ -110,7 +110,7 @@ export interface SymbolSearchRequest extends SearchRequest {
 }
 
 export interface CodeIntegrationRequest {
-  repoUris: RepositoryUri[];
+  repoUri: RepositoryUri;
   revision?: string;
 }
 

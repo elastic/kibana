@@ -10,6 +10,7 @@ import { RequestFacade, RequestQueryFacade } from '../../';
 import {
   CommitSearchRequest,
   DocumentSearchRequest,
+  IntegrationsSearchResult,
   RepositorySearchRequest,
   ResolveSnippetsIntegrationRequest,
   SymbolSearchRequest,
@@ -160,24 +161,16 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
   // * lineNumEnd: Optional. The end line number of the snippet.
   router.route({
     path: '/api/code/integration/snippets',
-    method: 'GET',
+    method: 'POST',
     async handler(req: RequestFacade) {
-      const { repoUri, revision, filePath, lineNum, lineNumEnd } = req.query as RequestQueryFacade;
-
-      try {
-        const integRequest: ResolveSnippetsIntegrationRequest = {
-          repoUris: typeof repoUri === 'string' ? [repoUri] : (repoUri as string[]),
-          revision: revision ? (revision as string) : undefined,
-          filePath: filePath as string,
-          lineNumStart: lineNum ? parseInt(lineNum as string, 10) : 0,
-          lineNumEnd: lineNumEnd ? parseInt(lineNumEnd as string, 10) : undefined,
-        };
-        const integClient = new IntegrationsSearchClient(new EsClientWithRequest(req), log);
-        const res = await integClient.resolveSnippets(integRequest);
-        return res;
-      } catch (error) {
-        return Boom.internal(`Invalid request for resovling snippets.`);
-      }
+      const reqs: ResolveSnippetsIntegrationRequest[] = (req.payload as any).requests;
+      const responses = await Promise.all(
+        reqs.map((integrationReq: ResolveSnippetsIntegrationRequest) => {
+          const integClient = new IntegrationsSearchClient(new EsClientWithRequest(req), log);
+          return integClient.resolveSnippets(integrationReq);
+        })
+      );
+      return responses;
     },
   });
 }
