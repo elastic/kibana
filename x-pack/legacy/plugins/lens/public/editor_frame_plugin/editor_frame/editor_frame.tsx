@@ -84,6 +84,7 @@ export function EditorFrame(props: EditorFrameProps) {
               type: 'UPDATE_DATASOURCE_STATE',
               datasourceId: id,
               updater: newState,
+              clearStagedPreview: true,
             });
           },
           layer
@@ -265,6 +266,7 @@ export function EditorFrame(props: EditorFrameProps) {
             visualizationMap={props.visualizationMap}
             dispatch={dispatch}
             ExpressionRenderer={props.ExpressionRenderer}
+            stagedPreview={state.stagedPreview}
           />
         )
       }

@@ -1007,8 +1007,6 @@ exports[`Field for image setting should render as read only with help text if ov
           allowFullScreen={true}
           alt="image:test:setting"
           aria-label="image test setting"
-          fullScreenIconColor="light"
-          size="original"
           url="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
         />
       </EuiFormRow>
@@ -1270,8 +1268,6 @@ exports[`Field for image setting should render user value if there is user value
           allowFullScreen={true}
           alt="image:test:setting"
           aria-label="image test setting"
-          fullScreenIconColor="light"
-          size="original"
           url="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
         />
       </EuiFormRow>
