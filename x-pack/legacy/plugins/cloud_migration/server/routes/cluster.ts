@@ -8,7 +8,7 @@ import { Router, RouterRouteHandler } from '../../../../server/lib/create_router
 
 // import { ClusterState } from '../../../common/types';
 
-import { Plugins } from '../../shim';
+import { Plugins } from '../shim';
 
 export function registerClusterRoutes(router: Router, plugins: Plugins) {
   // const callWithInternalUser = plugins.elasticsearch.getCluster('data').callWithInternalUser;
@@ -20,5 +20,5 @@ export function registerClusterRoutes(router: Router, plugins: Plugins) {
   /**
    * Map Router paths to handlers
    */
-  router.get('/cluster_state', getClusterStateHandler);
+  router.get('/cluster/state', getClusterStateHandler);
 }

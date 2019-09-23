@@ -5,6 +5,15 @@
  */
 import React from 'react';
 
+import { useCore } from './app_context';
+
 export const App = () => {
+  const {
+    api: { cluster },
+  } = useCore();
+
+  const { data, error, isLoading } = cluster.state.get();
+
+  // console.log('DATA', data, 'ERROR', error, 'IS LOADING', isLoading);
   return <h1>Cloud migration Plugin!...</h1>;
 };
