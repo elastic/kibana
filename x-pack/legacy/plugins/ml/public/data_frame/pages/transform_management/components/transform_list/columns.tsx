@@ -22,7 +22,7 @@ import {
   ComputedColumnType,
   ExpanderColumnType,
   FieldDataColumnType,
-} from '../../../../../../common/types/eui/in_memory_table';
+} from '../../../../../components/ml_in_memory_table';
 
 import {
   getTransformProgress,
