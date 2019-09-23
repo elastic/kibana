@@ -15,6 +15,7 @@ import {
   MetricsExplorerAggregation,
 } from '../../../server/routes/metrics_explorer/types';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
+import { isDisplayable } from '../../utils/is_displayable';
 
 interface Props {
   autoFocus?: boolean;
@@ -61,7 +62,9 @@ export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = 
     [options, onChange]
   );
 
-  const comboOptions = fields.map(field => ({ label: field.name, value: field.name }));
+  const comboOptions = fields
+    .filter(field => isDisplayable(field))
+    .map(field => ({ label: field.name, value: field.name }));
   const selectedOptions = options.metrics
     .filter(m => m.aggregation !== MetricsExplorerAggregation.count)
     .map(metric => ({

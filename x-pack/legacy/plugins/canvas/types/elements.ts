@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionAST } from 'src/plugins/data/common/expressions';
+import { ExpressionAST } from 'src/plugins/expressions/common/expressions';
+import { CanvasElement } from '.';
 
 export interface ElementSpec {
   name: string;
@@ -78,25 +79,4 @@ export interface ElementPosition {
   parent: string | null;
 }
 
-export interface PositionedElement {
-  /**
-   * a Canvas element used to populate config forms
-   */
-  id: string;
-  /**
-   * layout engine settings
-   */
-  position: ElementPosition;
-  /**
-   * Canvas expression used to generate the element
-   */
-  expression: string;
-  /**
-   * AST of the Canvas expression for the element
-   */
-  ast: ExpressionAST;
-  /**
-   * Applied filter
-   */
-  filter: string;
-}
+export type PositionedElement = CanvasElement & { ast: ExpressionAST };

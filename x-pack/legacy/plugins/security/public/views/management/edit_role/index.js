@@ -13,8 +13,7 @@ import template from 'plugins/security/views/management/edit_role/edit_role.html
 import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';
 import 'plugins/security/services/shield_indices';
-
-import { IndexPatternsProvider } from 'ui/index_patterns';
+import { setup as data } from '../../../../../../../../src/legacy/core_plugins/data/public/legacy';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { SpacesManager } from '../../../../../spaces/public/lib';
 import { ROLES_PATH, CLONE_ROLES_PATH, EDIT_ROLES_PATH } from '../management_urls';
@@ -75,8 +74,8 @@ const routeDefinition = (action) => ({
       return ShieldUser.query().$promise
         .then(users => _.map(users, 'username'));
     },
-    indexPatterns(Private) {
-      const indexPatterns = Private(IndexPatternsProvider);
+    indexPatterns() {
+      const { indexPatterns } = data.indexPatterns;
       return indexPatterns.getTitles();
     },
     spaces(spacesEnabled) {
@@ -92,7 +91,7 @@ const routeDefinition = (action) => ({
       return kfetch({ method: 'get', pathname: '/api/security/v1/esPrivileges/builtin' });
     },
     features() {
-      return kfetch({ method: 'get', pathname: '/api/features/v1' }).catch(e => {
+      return kfetch({ method: 'get', pathname: '/api/features' }).catch(e => {
         // TODO: This check can be removed once all of these `resolve` entries are moved out of Angular and into the React app.
         const unauthorizedForFeatures = _.get(e, 'body.statusCode') === 404;
         if (unauthorizedForFeatures) {

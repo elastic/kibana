@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { FieldType } from 'ui/index_patterns';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
+import { isDisplayable } from '../../utils/is_displayable';
 
 interface Props {
   options: MetricsExplorerOptions;
@@ -25,6 +26,19 @@ export const MetricsExplorerGroupBy = ({ options, onChange, fields }: Props) => 
     },
     [onChange]
   );
+
+  const metricPrefixes = options.metrics
+    .map(
+      metric =>
+        (metric.field &&
+          metric.field
+            .split(/\./)
+            .slice(0, 2)
+            .join('.')) ||
+        null
+    )
+    .filter(metric => metric) as string[];
+
   return (
     <EuiComboBox
       placeholder={i18n.translate('xpack.infra.metricsExplorer.groupByLabel', {
@@ -34,7 +48,7 @@ export const MetricsExplorerGroupBy = ({ options, onChange, fields }: Props) => 
       singleSelection={true}
       selectedOptions={(options.groupBy && [{ label: options.groupBy }]) || []}
       options={fields
-        .filter(f => f.aggregatable && f.type === 'string')
+        .filter(f => isDisplayable(f, metricPrefixes) && f.aggregatable && f.type === 'string')
         .map(f => ({ label: f.name }))}
       onChange={handleChange}
       isClearable={true}

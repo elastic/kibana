@@ -54,13 +54,9 @@ exports[`render 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           fill={true}
           href="#/management/kibana/objects?_a=(tab:search)"
-          iconSide="left"
           onClick={[Function]}
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Manage searches"

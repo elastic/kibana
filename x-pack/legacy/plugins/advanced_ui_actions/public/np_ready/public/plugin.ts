@@ -5,6 +5,7 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { IUiActionsStart } from 'src/plugins/ui_actions/public';
 import {
   Plugin as EmbeddablePlugin,
   CONTEXT_MENU_TRIGGER,
@@ -21,6 +22,7 @@ interface SetupDependencies {
 
 interface StartDependencies {
   embeddable: ReturnType<EmbeddablePlugin['start']>;
+  uiActions: IUiActionsStart;
 }
 
 export type Setup = void;
@@ -32,7 +34,7 @@ export class AdvancedUiActionsPublicPlugin
 
   public setup(core: CoreSetup, { embeddable }: SetupDependencies): Setup {}
 
-  public start(core: CoreStart, { embeddable }: StartDependencies): Start {
+  public start(core: CoreStart, { embeddable, uiActions }: StartDependencies): Start {
     const dateFormat = core.uiSettings.get('dateFormat') as string;
     const commonlyUsedRanges = core.uiSettings.get('timepicker:quickRanges') as CommonlyUsedRange[];
     const timeRangeAction = new CustomTimeRangeAction({
@@ -40,16 +42,16 @@ export class AdvancedUiActionsPublicPlugin
       dateFormat,
       commonlyUsedRanges,
     });
-    embeddable.registerAction(timeRangeAction);
-    embeddable.attachAction(CONTEXT_MENU_TRIGGER, timeRangeAction.id);
+    uiActions.registerAction(timeRangeAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, timeRangeAction.id);
 
     const timeRangeBadge = new CustomTimeRangeBadge({
       openModal: core.overlays.openModal,
       dateFormat,
       commonlyUsedRanges,
     });
-    embeddable.registerAction(timeRangeBadge);
-    embeddable.attachAction(PANEL_BADGE_TRIGGER, timeRangeBadge.id);
+    uiActions.registerAction(timeRangeBadge);
+    uiActions.attachAction(PANEL_BADGE_TRIGGER, timeRangeBadge.id);
   }
 
   public stop() {}

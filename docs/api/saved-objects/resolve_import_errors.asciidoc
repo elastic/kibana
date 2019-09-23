@@ -4,7 +4,7 @@
 <titleabbrev>Resolve import errors</titleabbrev>
 ++++
 
-Resolve errors from the import API. 
+experimental[] Resolve errors from the import API. 
 
 To resolve errors, you can: 
 
@@ -13,8 +13,6 @@ To resolve errors, you can:
 * Overwrite specific saved objects
 
 * Change references to different saved objects
-
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
 [[saved-objects-api-resolve-import-errors-request]]
 ==== Request

@@ -131,8 +131,8 @@ export const LogsToolbar = () => {
                 currentTime={visibleMidpointTime}
                 isLiveStreaming={isAutoReloading}
                 jumpToTime={jumpToTargetPositionTime}
-                startLiveStreaming={interval => {
-                  startLiveStreaming(interval);
+                startLiveStreaming={() => {
+                  startLiveStreaming();
                   setSurroundingLogsId(null);
                 }}
                 stopLiveStreaming={stopLiveStreaming}

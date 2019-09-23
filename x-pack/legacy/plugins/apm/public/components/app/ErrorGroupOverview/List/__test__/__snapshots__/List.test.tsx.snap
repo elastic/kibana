@@ -56,60 +56,66 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
       <div
         className="euiTableHeaderMobile"
       >
-        <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+        <EuiFlexGroup
+          alignItems="baseline"
+          justifyContent="spaceBetween"
+          responsive={false}
         >
           <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          />
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
           >
             <div
-              className="euiTableSortMobile"
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            />
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <div
-                className="euiPopover euiPopover--anchorDownRight"
-                id="sortPopover"
-                onKeyDown={[Function]}
-                onMouseDown={[Function]}
-                onMouseUp={[Function]}
-                onTouchEnd={[Function]}
-                onTouchStart={[Function]}
+                className="euiTableSortMobile"
               >
                 <div
-                  className="euiPopover__anchor"
+                  className="euiPopover euiPopover--anchorDownRight"
+                  id="sortPopover"
+                  onKeyDown={[Function]}
+                  onMouseDown={[Function]}
+                  onMouseUp={[Function]}
+                  onTouchEnd={[Function]}
+                  onTouchStart={[Function]}
                 >
-                  <button
-                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiButtonEmpty--flushRight"
-                    onClick={[Function]}
-                    type="button"
+                  <div
+                    className="euiPopover__anchor"
                   >
-                    <span
-                      className="euiButtonEmpty__content"
+                    <button
+                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiButtonEmpty--flushRight"
+                      onClick={[Function]}
+                      type="button"
                     >
-                      <svg
-                        aria-hidden="true"
-                        className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
-                        focusable="false"
-                        height={16}
-                        style={null}
-                        viewBox="0 0 16 16"
-                        width={16}
-                        xmlns="http://www.w3.org/2000/svg"
-                      />
                       <span
-                        className="euiButtonEmpty__text"
+                        className="euiButtonEmpty__content"
                       >
-                        Sorting
+                        <svg
+                          aria-hidden="true"
+                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
+                          focusable="false"
+                          height={16}
+                          style={null}
+                          viewBox="0 0 16 16"
+                          width={16}
+                          xmlns="http://www.w3.org/2000/svg"
+                        />
+                        <span
+                          className="euiButtonEmpty__text"
+                        >
+                          Sorting
+                        </span>
                       </span>
-                    </span>
-                  </button>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </EuiFlexGroup>
       </div>
       <table
         className="euiTable euiTable--responsive"
@@ -268,60 +274,66 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
       <div
         className="euiSpacer euiSpacer--m"
       />
-      <div
-        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        responsive={false}
       >
         <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
         >
           <div
-            className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
-            id="customizablePagination"
-            onKeyDown={[Function]}
-            onMouseDown={[Function]}
-            onMouseUp={[Function]}
-            onTouchEnd={[Function]}
-            onTouchStart={[Function]}
+            className="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <div
-              className="euiPopover__anchor"
+              className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+              id="customizablePagination"
+              onKeyDown={[Function]}
+              onMouseDown={[Function]}
+              onMouseUp={[Function]}
+              onTouchEnd={[Function]}
+              onTouchStart={[Function]}
             >
-              <button
-                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty--iconRight"
-                onClick={[Function]}
-                type="button"
+              <div
+                className="euiPopover__anchor"
               >
-                <span
-                  className="euiButtonEmpty__content"
+                <button
+                  className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty--iconRight"
+                  onClick={[Function]}
+                  type="button"
                 >
-                  <svg
-                    aria-hidden="true"
-                    className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
-                    focusable="false"
-                    height={16}
-                    style={null}
-                    viewBox="0 0 16 16"
-                    width={16}
-                    xmlns="http://www.w3.org/2000/svg"
-                  />
                   <span
-                    className="euiButtonEmpty__text"
+                    className="euiButtonEmpty__content"
                   >
-                    Rows per page
-                    : 
-                    25
+                    <svg
+                      aria-hidden="true"
+                      className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
+                      focusable="false"
+                      height={16}
+                      style={null}
+                      viewBox="0 0 16 16"
+                      width={16}
+                      xmlns="http://www.w3.org/2000/svg"
+                    />
+                    <span
+                      className="euiButtonEmpty__text"
+                    >
+                      Rows per page
+                      : 
+                      25
+                    </span>
                   </span>
-                </span>
-              </button>
+                </button>
+              </div>
             </div>
           </div>
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <span />
+          </div>
         </div>
-        <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
-        >
-          <span />
-        </div>
-      </div>
+      </EuiFlexGroup>
     </div>
   </div>
 </Memo(UnoptimizedManagedTable)>
@@ -438,60 +450,66 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
       <div
         className="euiTableHeaderMobile"
       >
-        <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+        <EuiFlexGroup
+          alignItems="baseline"
+          justifyContent="spaceBetween"
+          responsive={false}
         >
           <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          />
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
           >
             <div
-              className="euiTableSortMobile"
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            />
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <div
-                className="euiPopover euiPopover--anchorDownRight"
-                id="sortPopover"
-                onKeyDown={[Function]}
-                onMouseDown={[Function]}
-                onMouseUp={[Function]}
-                onTouchEnd={[Function]}
-                onTouchStart={[Function]}
+                className="euiTableSortMobile"
               >
                 <div
-                  className="euiPopover__anchor"
+                  className="euiPopover euiPopover--anchorDownRight"
+                  id="sortPopover"
+                  onKeyDown={[Function]}
+                  onMouseDown={[Function]}
+                  onMouseUp={[Function]}
+                  onTouchEnd={[Function]}
+                  onTouchStart={[Function]}
                 >
-                  <button
-                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiButtonEmpty--flushRight"
-                    onClick={[Function]}
-                    type="button"
+                  <div
+                    className="euiPopover__anchor"
                   >
-                    <span
-                      className="euiButtonEmpty__content"
+                    <button
+                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiButtonEmpty--flushRight"
+                      onClick={[Function]}
+                      type="button"
                     >
-                      <svg
-                        aria-hidden="true"
-                        className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
-                        focusable="false"
-                        height={16}
-                        style={null}
-                        viewBox="0 0 16 16"
-                        width={16}
-                        xmlns="http://www.w3.org/2000/svg"
-                      />
                       <span
-                        className="euiButtonEmpty__text"
+                        className="euiButtonEmpty__content"
                       >
-                        Sorting
+                        <svg
+                          aria-hidden="true"
+                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
+                          focusable="false"
+                          height={16}
+                          style={null}
+                          viewBox="0 0 16 16"
+                          width={16}
+                          xmlns="http://www.w3.org/2000/svg"
+                        />
+                        <span
+                          className="euiButtonEmpty__text"
+                        >
+                          Sorting
+                        </span>
                       </span>
-                    </span>
-                  </button>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </EuiFlexGroup>
       </div>
       <table
         className="euiTable euiTable--responsive"
@@ -1060,60 +1078,66 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
       <div
         className="euiSpacer euiSpacer--m"
       />
-      <div
-        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        responsive={false}
       >
         <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
         >
           <div
-            className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
-            id="customizablePagination"
-            onKeyDown={[Function]}
-            onMouseDown={[Function]}
-            onMouseUp={[Function]}
-            onTouchEnd={[Function]}
-            onTouchStart={[Function]}
+            className="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <div
-              className="euiPopover__anchor"
+              className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+              id="customizablePagination"
+              onKeyDown={[Function]}
+              onMouseDown={[Function]}
+              onMouseUp={[Function]}
+              onTouchEnd={[Function]}
+              onTouchStart={[Function]}
             >
-              <button
-                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty--iconRight"
-                onClick={[Function]}
-                type="button"
+              <div
+                className="euiPopover__anchor"
               >
-                <span
-                  className="euiButtonEmpty__content"
+                <button
+                  className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty--iconRight"
+                  onClick={[Function]}
+                  type="button"
                 >
-                  <svg
-                    aria-hidden="true"
-                    className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
-                    focusable="false"
-                    height={16}
-                    style={null}
-                    viewBox="0 0 16 16"
-                    width={16}
-                    xmlns="http://www.w3.org/2000/svg"
-                  />
                   <span
-                    className="euiButtonEmpty__text"
+                    className="euiButtonEmpty__content"
                   >
-                    Rows per page
-                    : 
-                    25
+                    <svg
+                      aria-hidden="true"
+                      className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
+                      focusable="false"
+                      height={16}
+                      style={null}
+                      viewBox="0 0 16 16"
+                      width={16}
+                      xmlns="http://www.w3.org/2000/svg"
+                    />
+                    <span
+                      className="euiButtonEmpty__text"
+                    >
+                      Rows per page
+                      : 
+                      25
+                    </span>
                   </span>
-                </span>
-              </button>
+                </button>
+              </div>
             </div>
           </div>
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <span />
+          </div>
         </div>
-        <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
-        >
-          <span />
-        </div>
-      </div>
+      </EuiFlexGroup>
     </div>
   </div>
 </Memo(UnoptimizedManagedTable)>

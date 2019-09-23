@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AggConfig } from '../../../agg_config';
+import { AggConfig } from '../../../../agg_types/agg_config';
 import { isAggRemovable, calcAggIsTooLow, isInvalidAggsTouched } from './agg_group_helper';
 import { AggsState } from './agg_group_state';
 

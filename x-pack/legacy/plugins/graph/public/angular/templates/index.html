@@ -3,22 +3,24 @@
   <kbn-top-nav name="workspacesTopNav" config="topNavMenu">
   </kbn-top-nav>
 
-  <div class="gphGraph__menus" ng-show="menus.showSettings">
-    <graph-settings ng-show="menus.showSettings"></graph-settings>
+  <div class="gphGraph__menus" ng-show="menus.showInspect">
+    <graph-inspect ng-show="menus.showInspect"></graph-inspect>
   </div>
+
+  <graph-search-bar
+    current-index-pattern="selectedIndex"
+    on-index-pattern-selected="uiSelectIndex"
+    on-query-submit="submit"
+    saved-objects="pluginDependencies.savedObjects"
+    ui-settings="pluginDependencies.uiSettings"
+    http="pluginDependencies.http"
+    overlays="pluginDependencies.overlays"
+    is-loading="loading"
+    initial-query="initialQuery"
+  ></graph-search-bar>
     
   <div class="gphGraph__bar">
     <div class="gphGraph__flexGroup">
-      <!-- Select index pattern. -->
-      <select class="form-control gphIndexSelect" name="mySelect" ng-change="uiSelectIndex()" ng-class="{'gphIndexSelect-unselected':selectedIndex === null}"
-        ng-options="option.attributes.title for option in indices" ng-model="grr.proposedIndex">
-        <option
-          value=""
-          i18n-id="xpack.graph.topNavMenu.selectIndexPatternOptionLabel"
-          i18n-default-message="Select index pattern…"
-        ></option>
-      </select>
-
       <!-- Added fields. -->
       <span
         class="gphNoUserSelect"
@@ -53,22 +55,6 @@
           <span aria-hidden="true" class="kuiIcon fa-plus"></span>
         </button>
       </span>
-
-      <!-- Search. -->
-      <form ng-submit="submit()" name="graphBasicSearch" class="gphGraph__flexGroupFiller" style="width: 100%">
-        <div class="kuiLocalSearch">
-          <input name="searchTerm" type="text" class="kuiLocalSearchInput" ng-model="grr.searchTerm" ng-disabled="liveResponseFields.length === 0"
-            ng-focus="kbnTopNav.close()" placeholder="foo AND bar NOT baz" autocomplete="off">
-          <button
-            class="kuiLocalSearchButton"
-            type="submit"
-            ng-disabled="liveResponseFields.length === 0"
-            aria-label="{{ ::'xpack.graph.topNavMenu.searchButtonAriaLabel' | i18n: { defaultMessage: 'Search' } }}"
-          >
-            <span aria-hidden="true" class="kuiIcon fa-search"></span>
-          </button>
-        </div>
-      </form>
     </div>
   </div>
 
@@ -326,7 +312,7 @@
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null ||workspace.nodes.length === 0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.removeVerticesButtonTooltip' | i18n: { defaultMessage: 'Remove vertices from workspace' } }}"
-          ng-click="setDetail(null);workspace.deleteSelection();">
+          ng-click="setDetail(null);workspace.deleteSelection();" data-test-subj="graphRemoveSelection">
           <span class="kuiIcon fa-trash"></span>
         </button>
 
@@ -350,13 +336,13 @@
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace.nodes.length === 0" ng-if="workspace.nodes.length === 0||workspace.force === null"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.runLayoutButtonTooltip' | i18n: { defaultMessage: 'Run layout' } }}"
-          ng-click="workspace.runLayout()">
+          ng-click="workspace.runLayout()" data-test-subj="graphResumeLayout">
           <span class="kuiIcon fa-play"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-if="workspace.force !== null&&workspace.nodes.length>0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.pauseLayoutButtonTooltip' | i18n: { defaultMessage: 'Pause layout' } }}"
-          ng-click="workspace.stopLayout()">
+          ng-click="workspace.stopLayout()" data-test-subj="graphPauseLayout">
           <span class="kuiIcon fa-pause"></span>
         </button>
       </div>
@@ -373,7 +359,7 @@
             type="button" class="kuiButton kuiButton--basic kuiButton--small gphVertexSelect__button"
             ng-disabled="workspace.nodes.length === 0" ng-click="setDetail(null);workspace.selectAll()"
             i18n-id="xpack.graph.sidebar.selections.selectAllButtonLabel"
-            i18n-default-message="all"
+            i18n-default-message="all" data-test-subj="graphSelectAll"
           ></button>
 
           <button
@@ -389,7 +375,7 @@
             type="button" class="kuiButton kuiButton--basic kuiButton--small gphVertexSelect__button"
             ng-disabled="workspace.nodes.length === 0" ng-click="setDetail(null);workspace.selectInvert()"
             i18n-id="xpack.graph.sidebar.selections.invertSelectionButtonLabel"
-            i18n-default-message="invert"
+            i18n-default-message="invert" data-test-subj="graphInvertSelection"
           ></button>
 
           <button
@@ -397,7 +383,7 @@
             type="button" class="kuiButton kuiButton--basic kuiButton--small gphVertexSelect__button"
             ng-disabled="workspace.selectedNodes.length === 0" ng-click="setDetail(null);workspace.selectNeighbours()"
             i18n-id="xpack.graph.sidebar.selections.selectNeighboursButtonLabel"
-            i18n-default-message="linked"
+            i18n-default-message="linked" data-test-subj="graphLinkedSelection"
           ></button>
         </div>
 
@@ -560,7 +546,7 @@
           </span>
 
           <!-- Venn diagram of term/shared doc intersections -->
-          <div class="gphLinkSummary__venn" venn="mc"></div>
+          <venn-diagram left-value="mc.v1" right-value="mc.v2" overlap="mc.overlap"></venn-diagram>
 
           <small
             class="gphLinkSummary__term--1"

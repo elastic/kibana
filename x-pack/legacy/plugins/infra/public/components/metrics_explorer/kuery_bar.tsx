@@ -11,6 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { AutocompleteField } from '../autocomplete_field';
+import { isDisplayable } from '../../utils/is_displayable';
 
 interface Props {
   derivedIndexPattern: StaticIndexPattern;
@@ -43,22 +44,28 @@ export const MetricsExplorerKueryBar = ({ derivedIndexPattern, onSubmit, value }
     setDraftQuery(query);
   };
 
-  return (
-    <WithKueryAutocompletion indexPattern={derivedIndexPattern}>
-      {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
-        <AutocompleteField
-          isLoadingSuggestions={isLoadingSuggestions}
-          isValid={isValid}
-          loadSuggestions={loadSuggestions}
-          onChange={handleChange}
-          onSubmit={onSubmit}
-          placeholder={i18n.translate('xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder', {
-            defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
-          })}
-          suggestions={suggestions}
-          value={draftQuery}
-        />
-      )}
-    </WithKueryAutocompletion>
-  );
-};
+    const filteredDerivedIndexPattern = {
+      ...derivedIndexPattern,
+      fields: derivedIndexPattern.fields.filter(field => isDisplayable(field)),
+    };
+
+    return (
+      <WithKueryAutocompletion indexPattern={filteredDerivedIndexPattern}>
+        {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
+          <AutocompleteField
+            isLoadingSuggestions={isLoadingSuggestions}
+            isValid={isValid}
+            loadSuggestions={loadSuggestions}
+            onChange={handleChange}
+            onSubmit={onSubmit}
+            placeholder={i18n.translate('xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder', {
+              defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
+            })}
+            suggestions={suggestions}
+            value={draftQuery}
+          />
+        )}
+      </WithKueryAutocompletion>
+    );
+  }
+);

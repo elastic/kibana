@@ -14,7 +14,7 @@ const noop = () => undefined;
 
 interface LogTimeControlsProps {
   currentTime: number | null;
-  startLiveStreaming: (interval: number) => any;
+  startLiveStreaming: () => any;
   stopLiveStreaming: () => any;
   isLiveStreaming: boolean;
   jumpToTime: (time: number) => any;
@@ -25,7 +25,6 @@ export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
     const { currentTime, isLiveStreaming } = this.props;
 
     const currentMoment = currentTime ? moment(currentTime) : null;
-
     if (isLiveStreaming) {
       return (
         <EuiFlexGroup gutterSize="s">
@@ -88,7 +87,7 @@ export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
   };
 
   private startLiveStreaming = () => {
-    this.props.startLiveStreaming(5000);
+    this.props.startLiveStreaming();
   };
 
   private stopLiveStreaming = () => {

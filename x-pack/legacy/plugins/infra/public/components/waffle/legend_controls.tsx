@@ -14,6 +14,7 @@ import {
   EuiFormRow,
   EuiPopover,
   EuiPopoverTitle,
+  EuiSpacer,
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
@@ -92,6 +93,7 @@ export const LegendControls = ({ autoBounds, boundsOverride, onChange, dataBound
               onChange={handleAutoChange}
             />
           </EuiFormRow>
+          <EuiSpacer />
           {(!boundsValidRange && (
             <EuiText color="danger" grow={false} size="s">
               <p>

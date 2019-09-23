@@ -5,7 +5,7 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { useContext } from 'react';
+import * as React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
@@ -63,7 +63,7 @@ export type HostsComponentProps = HostsComponentReduxProps &
 
 const HostsComponent = React.memo<HostsComponentProps>(
   ({ isInitializing, filterQuery, from, setAbsoluteRangeDatePicker, setQuery, to }) => {
-    const capabilities = useContext(MlCapabilitiesContext);
+    const capabilities = React.useContext(MlCapabilitiesContext);
     return (
       <>
         <WithSource sourceId="default">
@@ -71,7 +71,11 @@ const HostsComponent = React.memo<HostsComponentProps>(
             indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
                 <FiltersGlobal>
-                  <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.page} />
+                  <HostsKql
+                    indexPattern={indexPattern}
+                    setQuery={setQuery}
+                    type={hostsModel.HostsType.page}
+                  />
                 </FiltersGlobal>
 
                 <HeaderPage
@@ -97,14 +101,7 @@ const HostsComponent = React.memo<HostsComponentProps>(
                         setQuery={setQuery}
                         to={to}
                         narrowDateRange={(min: number, max: number) => {
-                          /**
-                           * Using setTimeout here because of this issue:
-                           * https://github.com/elastic/elastic-charts/issues/360
-                           * Need to remove the setTimeout here after this issue is fixed.
-                           * */
-                          setTimeout(() => {
-                            setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-                          }, 500);
+                          setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
                         }}
                       />
                     )}

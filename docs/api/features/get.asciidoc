@@ -4,14 +4,12 @@
 <titleabbrev>Get features</titleabbrev>
 ++++
 
-Retrieves all {kib} features.
-
-experimental[This API is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Retrieves all {kib} features.
 
 [[features-api-get-request]]
 ==== Request
 
-`GET /api/features/v1`
+`GET /api/features`
 
 [[features-api-get-codes]]
 ==== Response code

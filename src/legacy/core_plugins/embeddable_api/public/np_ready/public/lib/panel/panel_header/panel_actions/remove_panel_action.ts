@@ -17,10 +17,12 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
+import {
+  IAction,
+  IncompatibleActionError,
+} from '../../../../../../../../../../plugins/ui_actions/public';
 import { ContainerInput, IContainer } from '../../../containers';
 import { ViewMode } from '../../../types';
-import { Action } from '../../../actions';
-import { IncompatibleActionError } from '../../../errors';
 import { IEmbeddable } from '../../../embeddables';
 
 export const REMOVE_PANEL_ACTION = 'deletePanel';
@@ -39,13 +41,12 @@ function hasExpandedPanelInput(
   return (container as IContainer<{}, ExpandedPanelInput>).getInput().expandedPanelId !== undefined;
 }
 
-export class RemovePanelAction extends Action<ActionContext> {
+export class RemovePanelAction implements IAction<ActionContext> {
   public readonly type = REMOVE_PANEL_ACTION;
-  constructor() {
-    super(REMOVE_PANEL_ACTION);
+  public readonly id = REMOVE_PANEL_ACTION;
+  public order = 5;
 
-    this.order = 5;
-  }
+  constructor() {}
 
   public getDisplayName() {
     return i18n.translate('embeddableApi.panel.removePanel.displayName', {

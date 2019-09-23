@@ -45,6 +45,7 @@ export const CustomFieldPanel = class extends React.PureComponent<Props, State> 
             compressed
           >
             <EuiComboBox
+              compressed
               placeholder={i18n.translate('xpack.infra.waffle.customGroupByDropdownPlacehoder', {
                 defaultMessage: 'Select one',
               })}
@@ -68,7 +69,6 @@ export const CustomFieldPanel = class extends React.PureComponent<Props, State> 
       </div>
     );
   }
-
   private handleSubmit = () => {
     this.props.onSubmit(this.state.selectedOptions[0].label);
   };

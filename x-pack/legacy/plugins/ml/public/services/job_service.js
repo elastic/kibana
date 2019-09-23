@@ -34,6 +34,8 @@ class JobService {
     this.tempJobCloningObjects = {
       job: undefined,
       skipTimeRangeStep: false,
+      start: undefined,
+      end: undefined,
     };
 
     this.jobs = [];
