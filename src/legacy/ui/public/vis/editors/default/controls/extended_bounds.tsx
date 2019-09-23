@@ -19,7 +19,7 @@
 
 import React, { useEffect, ChangeEvent } from 'react';
 
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isUndefined } from 'lodash';
 import { AggParamEditorProps } from '..';
@@ -95,11 +95,7 @@ function ExtendedBoundsParamEditor({
               fullWidth={true}
               isInvalid={showValidation ? !isValid : false}
               aria-label={minLabel}
-              prepend={
-                <EuiText size="xs">
-                  <strong>{minLabel}</strong>
-                </EuiText>
-              }
+              prepend={minLabel}
               compressed
             />
           </EuiFlexItem>
@@ -111,11 +107,7 @@ function ExtendedBoundsParamEditor({
               fullWidth={true}
               isInvalid={showValidation ? !isValid : false}
               aria-label={maxLabel}
-              prepend={
-                <EuiText size="xs">
-                  <strong>{maxLabel}</strong>
-                </EuiText>
-              }
+              prepend={maxLabel}
               compressed
             />
           </EuiFlexItem>

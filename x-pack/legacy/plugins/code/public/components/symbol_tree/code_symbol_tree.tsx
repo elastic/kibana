@@ -110,7 +110,7 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activeSymbol?: 
           item.items = this.symbolsToSideNavItems(s.members);
         }
         item.renderItem = this.getStructureTreeItemRenderer(
-          s.range,
+          s.selectionRange,
           s.name,
           s.kind,
           s.members.length > 0,
@@ -119,7 +119,7 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activeSymbol?: 
         );
       } else {
         item.renderItem = this.getStructureTreeItemRenderer(
-          s.range,
+          s.selectionRange,
           s.name,
           s.kind,
           false,
