@@ -22,6 +22,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment-timezone';
 import { timefilter } from 'ui/timefilter';
+import { npSetup } from 'ui/new_platform';
 // @ts-ignore
 import observeResize from '../../lib/observe_resize';
 // @ts-ignore
@@ -32,21 +33,22 @@ import { xaxisFormatterProvider } from './xaxis_formatter';
 import { generateTicksProvider } from './tick_generator';
 
 const DEBOUNCE_DELAY = 50;
+const { uiSettings } = npSetup.core;
 
 export function timechartFn(dependencies: TimelionStartDependencies) {
-  const { config, $rootScope, $compile } = dependencies;
+  const { $rootScope, $compile } = dependencies;
   return function() {
     return {
       help: 'Draw a timeseries chart',
       render($scope: any, $elem: any) {
         const template = '<div class="chart-top-title"></div><div class="chart-canvas"></div>';
         const formatters = tickFormatters() as any;
-        const getxAxisFormatter = xaxisFormatterProvider(config);
+        const getxAxisFormatter = xaxisFormatterProvider(uiSettings);
         const generateTicks = generateTicksProvider();
 
         // TODO: I wonder if we should supply our own moment that sets this every time?
         // could just use angular's injection to provide a moment service?
-        moment.tz.setDefault(config.get('dateFormat:tz'));
+        moment.tz.setDefault(uiSettings.get('dateFormat:tz'));
 
         const render = $scope.seriesList.render || {};
 
@@ -297,9 +299,9 @@ export function timechartFn(dependencies: TimelionStartDependencies) {
           const interval = calculateInterval(
             time.min.valueOf(),
             time.max.valueOf(),
-            config.get('timelion:target_buckets') || 200,
+            uiSettings.get('timelion:target_buckets') || 200,
             $scope.interval,
-            config.get('timelion:min_interval') || '1ms'
+            uiSettings.get('timelion:min_interval') || '1ms'
           );
           const format = getxAxisFormatter(interval);
 

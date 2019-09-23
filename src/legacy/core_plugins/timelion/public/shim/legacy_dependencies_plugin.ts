@@ -33,7 +33,6 @@ export interface LegacyDependenciesPluginSetup {
 export interface LegacyDependenciesPluginStart {
   $rootScope: any;
   $compile: any;
-  config: any;
 }
 
 export class LegacyDependenciesPlugin
