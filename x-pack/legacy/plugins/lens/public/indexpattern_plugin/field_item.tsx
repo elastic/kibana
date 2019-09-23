@@ -33,7 +33,7 @@ import {
   niceTimeFormatter,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { toElasticsearchQuery } from '@kbn/es-query';
+import { Filter, toElasticsearchQuery, buildQueryFromFilters } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/common';
 // @ts-ignore
 import { fieldFormats } from '../../../../../../src/legacy/ui/public/registry/field_formats';
@@ -51,6 +51,7 @@ export interface FieldItemProps {
   exists: boolean;
   query: Query;
   dateRange: DatasourceDataPanelProps['dateRange'];
+  filters: Filter[];
 }
 
 interface State {
@@ -70,7 +71,7 @@ function wrapOnDot(str?: string) {
 }
 
 export function FieldItem(props: FieldItemProps) {
-  const { core, field, indexPattern, highlight, exists, query, dateRange } = props;
+  const { core, field, indexPattern, highlight, exists, query, dateRange, filters } = props;
 
   const [infoIsOpen, setOpen] = useState(false);
 
@@ -111,6 +112,7 @@ export function FieldItem(props: FieldItemProps) {
       .post(`/api/lens/index_stats/${indexPattern.title}/field`, {
         body: JSON.stringify({
           query: toElasticsearchQuery(query, indexPattern),
+          filters: buildQueryFromFilters(query, indexPattern),
           fromDate: dateRange.fromDate,
           toDate: dateRange.toDate,
           timeFieldName: indexPattern.timeFieldName,

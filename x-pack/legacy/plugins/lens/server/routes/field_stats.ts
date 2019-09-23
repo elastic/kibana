@@ -25,6 +25,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
         body: schema.object(
           {
             query: schema.object({}, { allowUnknowns: true }),
+            filters: schema.arrayOf(schema.object({}, { allowUnknowns: true })),
             fromDate: schema.string(),
             toDate: schema.string(),
             timeFieldName: schema.string(),
@@ -48,7 +49,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
       try {
         const filters = {
           bool: {
-            filter: [
+            filter: req.body.filters.concat([
               {
                 range: {
                   [timeFieldName]: {
@@ -58,7 +59,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
                 },
               },
               query,
-            ],
+            ]),
           },
         };
 

@@ -48,6 +48,7 @@ function getDefaultProps() {
     onChange: jest.fn(),
     dateRange: { fromDate: '', toDate: '' },
     query: { query: '', language: 'lucene' },
+    filters: [],
     core: coreMock.createSetup(),
   };
 }
@@ -256,6 +257,7 @@ describe('editor_frame', () => {
         addNewLayer: expect.any(Function),
         removeLayers: expect.any(Function),
         query: { query: '', language: 'lucene' },
+        filters: [],
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
       });
     });
@@ -409,56 +411,58 @@ describe('editor_frame', () => {
       instance.update();
 
       expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-                Object {
-                  "chain": Array [
-                    Object {
-                      "arguments": Object {},
-                      "function": "kibana",
-                      "type": "function",
-                    },
-                    Object {
-                      "arguments": Object {
-                        "filters": Array [],
-                        "query": Array [
-                          "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
-                        ],
-                        "timeRange": Array [
-                          "{\\"from\\":\\"\\",\\"to\\":\\"\\"}",
-                        ],
+        Object {
+          "chain": Array [
+            Object {
+              "arguments": Object {},
+              "function": "kibana",
+              "type": "function",
+            },
+            Object {
+              "arguments": Object {
+                "filters": Array [
+                  "[]",
+                ],
+                "query": Array [
+                  "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
+                ],
+                "timeRange": Array [
+                  "{\\"from\\":\\"\\",\\"to\\":\\"\\"}",
+                ],
+              },
+              "function": "kibana_context",
+              "type": "function",
+            },
+            Object {
+              "arguments": Object {
+                "layerIds": Array [
+                  "first",
+                ],
+                "tables": Array [
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {},
+                        "function": "datasource",
+                        "type": "function",
                       },
-                      "function": "kibana_context",
-                      "type": "function",
-                    },
-                    Object {
-                      "arguments": Object {
-                        "layerIds": Array [
-                          "first",
-                        ],
-                        "tables": Array [
-                          Object {
-                            "chain": Array [
-                              Object {
-                                "arguments": Object {},
-                                "function": "datasource",
-                                "type": "function",
-                              },
-                            ],
-                            "type": "expression",
-                          },
-                        ],
-                      },
-                      "function": "lens_merge_tables",
-                      "type": "function",
-                    },
-                    Object {
-                      "arguments": Object {},
-                      "function": "vis",
-                      "type": "function",
-                    },
-                  ],
-                  "type": "expression",
-                }
-            `);
+                    ],
+                    "type": "expression",
+                  },
+                ],
+              },
+              "function": "lens_merge_tables",
+              "type": "function",
+            },
+            Object {
+              "arguments": Object {},
+              "function": "vis",
+              "type": "function",
+            },
+          ],
+          "type": "expression",
+        }
+      `);
     });
 
     it('should render individual expression for each given layer', async () => {
@@ -525,7 +529,9 @@ describe('editor_frame', () => {
             },
             Object {
               "arguments": Object {
-                "filters": Array [],
+                "filters": Array [
+                  "[]",
+                ],
                 "query": Array [
                   "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
                 ],
@@ -1397,7 +1403,7 @@ describe('editor_frame', () => {
 
       expect(onChange).toHaveBeenCalledTimes(2);
       expect(onChange).toHaveBeenNthCalledWith(1, {
-        indexPatternTitles: ['resolved'],
+        filterableIndexPatterns: [{ id: '1', title: 'resolved' }],
         doc: {
           expression: '',
           id: undefined,
@@ -1407,6 +1413,7 @@ describe('editor_frame', () => {
             datasourceStates: { testDatasource: undefined },
             query: { query: '', language: 'lucene' },
             filters: [],
+            dateRange: { fromDate: '', toDate: '' },
           },
           title: 'New visualization',
           type: 'lens',
@@ -1414,7 +1421,8 @@ describe('editor_frame', () => {
         },
       });
       expect(onChange).toHaveBeenLastCalledWith({
-        indexPatternTitles: ['resolved'],
+        // indexPatternTitles: ['resolved'],
+        filterableIndexPatterns: [{ id: '1', title: 'resolved' }],
         doc: {
           expression: '',
           id: undefined,
@@ -1426,6 +1434,7 @@ describe('editor_frame', () => {
             datasourceStates: { testDatasource: undefined },
             query: { query: '', language: 'lucene' },
             filters: [],
+            dateRange: { fromDate: '', toDate: '' },
           },
           title: 'New visualization',
           type: 'lens',
@@ -1473,7 +1482,7 @@ describe('editor_frame', () => {
       await waitForPromises();
       expect(onChange).toHaveBeenCalledTimes(3);
       expect(onChange).toHaveBeenNthCalledWith(3, {
-        indexPatternTitles: [],
+        filterableIndexPatterns: [],
         doc: {
           expression: expect.stringContaining('vis "expression"'),
           id: undefined,
@@ -1483,6 +1492,7 @@ describe('editor_frame', () => {
             visualization: { initialState: true },
             query: { query: 'new query', language: 'lucene' },
             filters: [],
+            dateRange: { fromDate: '', toDate: '' },
           },
           title: 'New visualization',
           type: 'lens',

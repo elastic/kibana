@@ -29,7 +29,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Query } from 'src/plugins/data/common';
+// import { Query } from 'src/plugins/data/common';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { IndexPatternPrivateState, IndexPatternField, IndexPattern } from './indexpattern';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
@@ -151,6 +151,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   indexPatterns,
   query,
   dateRange,
+  filters,
   dragDropContext,
   showIndexPatternSwitcher,
   setShowIndexPatternSwitcher,
@@ -159,12 +160,12 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   showEmptyFields,
   onToggleEmptyFields,
   core,
-}: Partial<DatasourceDataPanelProps> & {
+}: Pick<DatasourceDataPanelProps, Exclude<keyof DatasourceDataPanelProps, 'state' | 'setState'>> & {
   currentIndexPatternId: string;
   indexPatterns: Record<string, IndexPattern>;
-  dateRange: DatasourceDataPanelProps['dateRange'];
-  query: Query;
-  core: DatasourceDataPanelProps['core'];
+  // dateRange: DatasourceDataPanelProps['dateRange'];
+  // query: Query;
+  // core: DatasourceDataPanelProps['core'];
   dragDropContext: DragContextState;
   showIndexPatternSwitcher: boolean;
   setShowIndexPatternSwitcher: (show: boolean) => void;
@@ -540,6 +541,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     exists={overallField ? !!overallField.exists : false}
                     dateRange={dateRange}
                     query={query}
+                    filters={filters}
                   />
                 );
               })}

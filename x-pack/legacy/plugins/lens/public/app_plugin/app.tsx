@@ -25,7 +25,7 @@ import { NativeRenderer } from '../native_renderer';
 interface State {
   isLoading: boolean;
   isDirty: boolean;
-  indexPatternTitles: string[];
+  // indexPatternTitles: string[];
   indexPatterns: IndexPatternInstance[];
   persistedDoc?: Document;
 
@@ -65,7 +65,7 @@ export function App({
   const [state, setState] = useState<State>({
     isLoading: !!docId,
     isDirty: false,
-    indexPatternTitles: [],
+    // indexPatternTitles: [],
     indexPatterns: [],
 
     query: { query: '', language },
@@ -101,15 +101,33 @@ export function App({
       docStorage
         .load(docId)
         .then(doc => {
-          setState({
-            ...state,
-            isLoading: false,
-            persistedDoc: doc,
-            query: doc.state.query,
-            indexPatternTitles: doc.state.datasourceMetaData.filterableIndexPatterns.map(
-              ({ title }) => title
-            ),
-          });
+          Promise.all(
+            doc.state.datasourceMetaData.filterableIndexPatterns.map(({ id }) =>
+              data.indexPatterns.indexPatterns.get(id)
+            )
+          )
+            .then(indexPatterns => {
+              setState({
+                ...state,
+                isLoading: false,
+                persistedDoc: doc,
+                query: doc.state.query,
+                filters: doc.state.filters,
+                dateRange: doc.state.dateRange || state.dateRange,
+                indexPatterns,
+              });
+            })
+            .catch(() => {
+              setState({ ...state, isLoading: false });
+
+              core.notifications.toasts.addDanger(
+                i18n.translate('xpack.lens.editorFrame.indexPatternLoadingError', {
+                  defaultMessage: 'Error loading index patterns',
+                })
+              );
+
+              redirectTo();
+            });
         })
         .catch(() => {
           setState({ ...state, isLoading: false });
@@ -179,7 +197,7 @@ export function App({
                 disableButton: !isSaveable,
               },
             ]}
-            data-test-subj="lnsApp_queryBar"
+            data-test-subj="lnsApp_topNav"
             screenTitle={'lens'}
             onQuerySubmit={payload => {
               const { dateRange, query } = payload;
@@ -213,17 +231,21 @@ export function App({
                 ...state,
                 savedQuery,
                 filters: savedQuery.attributes.filters || state.filters,
-                query: savedQuery.attributes.query || state.query,
-                dateRange: savedQuery.attributes.timefilter
-                  ? {
-                      fromDate: savedQuery.attributes.timefilter.from,
-                      toDate: savedQuery.attributes.timefilter.from,
-                    }
-                  : state.dateRange,
+                query: savedQuery.attributes.query,
               });
             }}
             onClearSavedQuery={() => {
-              setState({ ...state, savedQuery: undefined });
+              setState({
+                ...state,
+                savedQuery: undefined,
+                filters: [],
+                query: {
+                  query: '',
+                  language:
+                    store.get('kibana.userQueryLanguage') ||
+                    core.uiSettings.get('search:queryLanguage'),
+                },
+              });
             }}
             query={state.query}
             dateRangeFrom={state.dateRange.fromDate}
@@ -247,23 +269,28 @@ export function App({
               doc: state.persistedDoc,
               onError,
               onChange: ({ filterableIndexPatterns, doc }) => {
+                lastKnownDocRef.current = doc;
+
+                if (!_.isEqual(state.persistedDoc, doc)) {
+                  setState({ ...state, isDirty: true });
+                }
+
                 Promise.all(
                   filterableIndexPatterns.map(({ id }) => data.indexPatterns.indexPatterns.get(id))
-                ).then(indexPatterns => {
-                  setState({ ...state, indexPatterns });
-                });
-
-                const indexPatternTitles = filterableIndexPatterns.map(pattern => pattern.id);
-                const indexPatternChange = !_.isEqual(state.indexPatternTitles, indexPatternTitles);
-                const docChange = !_.isEqual(state.persistedDoc, doc);
-                if (indexPatternChange || docChange) {
-                  setState({
-                    ...state,
-                    indexPatternTitles,
-                    isDirty: docChange,
+                )
+                  .then(indexPatterns => {
+                    setState({
+                      ...state,
+                      indexPatterns,
+                    });
+                  })
+                  .catch(() => {
+                    core.notifications.toasts.addDanger(
+                      i18n.translate('xpack.lens.editorFrame.indexPatternLoadingError', {
+                        defaultMessage: 'Error loading index patterns',
+                      })
+                    );
                   });
-                }
-                lastKnownDocRef.current = doc;
               },
             }}
           />

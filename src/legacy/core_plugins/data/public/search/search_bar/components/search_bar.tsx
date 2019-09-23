@@ -85,7 +85,7 @@ export interface SearchBarProps {
   onSaved?: (savedQuery: SavedQuery) => void;
   // User has modified the saved query, your app should persist the update
   onSavedQueryUpdated?: (savedQuery: SavedQuery) => void;
-  // User has cleared the active query, which should not clear filters
+  // User has cleared the active query, your app should clear the entire query bar
   onClearSavedQuery?: () => void;
   customSubmitButton?: React.ReactNode;
 }
