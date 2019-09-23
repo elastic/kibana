@@ -9,7 +9,8 @@ import { SecurityService, SpacesService } from '../../../common/services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestWithoutAuth');
+  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security: SecurityService = getService('security');
   const spaces: SpacesService = getService('spaces');
   const log = getService('log');
@@ -30,7 +31,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   interface Endpoint {
     req: {
       url: string;
-      method?: 'get' | 'post';
+      method?: 'get' | 'post' | 'delete';
       body?: any;
     };
     expectForbidden: (result: any) => void;
@@ -132,10 +133,10 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       req: {
         method: 'post',
         url: `/api/apm/settings/agent-configuration/search`,
-        body: { service: { name: 'my-service' } },
+        body: { service: { name: 'test-service' } },
       },
       expectForbidden: expect404,
-      expectResponse: expect404, // 404 is the default response if no config was found
+      expectResponse: expect200,
     },
   ];
 
@@ -146,7 +147,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     ],
   };
 
-  async function executeRequest(
+  async function executeAsUser(
     { method = 'get', url, body }: Endpoint['req'],
     username: string,
     password: string,
@@ -154,7 +155,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   ) {
     const basePath = spaceId ? `/s/${spaceId}` : '';
 
-    let request = supertest[method](`${basePath}${url}`);
+    let request = supertestWithoutAuth[method](`${basePath}${url}`);
 
     // json body
     if (body) {
@@ -166,6 +167,28 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       .set('kbn-xsrf', 'foo')
       .then((response: any) => ({ error: undefined, response }))
       .catch((error: any) => ({ error, response: undefined }));
+  }
+
+  async function executeAsAdmin({ method = 'get', url, body }: Endpoint['req'], spaceId?: string) {
+    const basePath = spaceId ? `/s/${spaceId}` : '';
+
+    let request = supertest[method](`${basePath}${url}`);
+
+    // json body
+    if (body) {
+      request = request.send(body);
+    }
+
+    const response = await request.set('kbn-xsrf', 'foo');
+
+    const { statusCode, req } = response;
+    if (statusCode !== 200) {
+      log.debug(`Endpoint: ${req.method} ${req.path}
+      Status code: ${statusCode}
+      Response: ${response.body.message}`);
+    }
+
+    return response;
   }
 
   async function executeRequests({
@@ -181,7 +204,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   }) {
     for (const endpoint of endpoints) {
       log.debug(`hitting ${endpoint.req.url}`);
-      const result = await executeRequest(endpoint.req, username, password, spaceId);
+      const result = await executeAsUser(endpoint.req, username, password, spaceId);
       try {
         if (expectation === 'forbidden') {
           endpoint.expectForbidden(result);
@@ -202,6 +225,28 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   }
 
   describe('apm feature controls', () => {
+    let res: any;
+    before(async () => {
+      log.debug('creating agent configuration');
+      res = await executeAsAdmin({
+        method: 'post',
+        url: '/api/apm/settings/agent-configuration/new',
+        body: {
+          service: { name: 'test-service' },
+          settings: { transaction_sample_rate: 0.5 },
+        },
+      });
+    });
+
+    after(async () => {
+      log.debug('deleting agent configuration');
+      const configurationId = res.body._id;
+      await executeAsAdmin({
+        method: 'delete',
+        url: `/api/apm/settings/agent-configuration/${configurationId}`,
+      });
+    });
+
     it(`APIs can't be accessed by logstash_read user`, async () => {
       const username = 'logstash_read';
       const roleName = 'logstash_read';
