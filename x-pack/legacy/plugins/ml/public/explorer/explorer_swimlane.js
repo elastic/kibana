@@ -354,8 +354,15 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       .each(function () {
         if (swimlaneData.fieldName !== undefined) {
           d3.select(this)
-            .attr('tooltip-html-unsafe', label => `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(label)}`)
-            .attr('tooltip-placement', 'right')
+            .on('mouseover', label => {
+              mlChartTooltipService.show(`${mlEscape(swimlaneData.fieldName)}: ${mlEscape(label)}`, this, {
+                x: 170,
+                y: 20
+              });
+            })
+            .on('mouseout', () => {
+              mlChartTooltipService.hide();
+            })
             .attr('aria-label', label => `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(label)}`);
         }
       });
