@@ -8,21 +8,19 @@ import React from 'react';
 import { StatefulEventsViewer } from '../../../components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
 
+const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
+
 export const EventsQueryTabBody = ({
   endDate,
   kqlQueryExpression,
   startDate,
-}: HostsComponentsQueryProps) => {
-  const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
-
-  return (
-    <StatefulEventsViewer
-      end={endDate}
-      id={HOSTS_PAGE_TIMELINE_ID}
-      kqlQueryExpression={kqlQueryExpression}
-      start={startDate}
-    />
-  );
-};
+}: HostsComponentsQueryProps) => (
+  <StatefulEventsViewer
+    end={endDate}
+    id={HOSTS_PAGE_TIMELINE_ID}
+    kqlQueryExpression={kqlQueryExpression}
+    start={startDate}
+  />
+);
 
 EventsQueryTabBody.displayName = 'EventsQueryTabBody';
