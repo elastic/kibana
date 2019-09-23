@@ -67,10 +67,10 @@ interface TabData {
 
 const TAB_DATA: Record<TabId, TabData> = {
   // overview: { testSubject: 'mlTabOverview', pathId: 'overview' },
-  anomaly_detection: { testSubject: 'mlTabAnomalyDetection', pathId: 'jobs' },
-  data_frames: { testSubject: 'mlTabDataFrames' },
-  data_frame_analytics: { testSubject: 'mlTabDataFrameAnalytics' },
-  datavisualizer: { testSubject: 'mlTabDataVisualizer' },
+  anomaly_detection: { testSubject: 'mlMainTab anomalyDetection', pathId: 'jobs' },
+  data_frames: { testSubject: 'mlMainTab dataFrames' },
+  data_frame_analytics: { testSubject: 'mlMainTab dataFrameAnalytics' },
+  datavisualizer: { testSubject: 'mlMainTab dataVisualizer' },
 };
 
 export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
@@ -89,7 +89,7 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
         const defaultPathId = TAB_DATA[id].pathId || id;
         return (
           <EuiLink
-            data-test-subj={testSubject}
+            data-test-subj={testSubject + (id === selectedTabId ? ' selected' : '')}
             href={`${chrome.getBasePath()}/app/ml#/${defaultPathId}`}
             key={`${id}-key`}
             color="text"
