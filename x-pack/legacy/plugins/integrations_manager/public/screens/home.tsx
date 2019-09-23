@@ -46,22 +46,37 @@ export function Home() {
   const { toListView } = useLinks();
   useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }]);
 
-  const [list, setList] = useState<IntegrationList>([]);
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const maxContentWidth = 1200;
+  const { bar, term, results } = useSearch();
+
+  return (
+    <Fragment>
+      <Header restrictWidth={maxContentWidth} SearchBar={bar} />
+      <EuiHorizontalRule margin="none" />
+      <FullBleedPage>
+        <EuiPageBody restrictWidth={maxContentWidth}>
+          <Fragment>
+            <EuiSpacer size="l" />
+            {term ? <SearchResultsGrid term={term} results={results} /> : <IntegrationLists />}
+          </Fragment>
+        </EuiPageBody>
+      </FullBleedPage>
+    </Fragment>
+  );
+}
+
+function useSearch() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [allIntegrations, setAllIntegrations] = useState<IntegrationList>([]);
   const [searchResults, setSearchResults] = useState<IntegrationList>([]);
 
   useEffect(() => {
-    getIntegrations({ category: selectedCategory }).then(results => {
-      setList(results);
-      if (selectedCategory === '') searchModel.addDocuments(results);
+    getIntegrations().then(results => {
+      setAllIntegrations(results);
+      searchModel.addDocuments(results);
     });
-  }, [selectedCategory]);
+  }, []);
 
-  if (!list) return null;
-  const installedIntegrations = list.filter(({ status }) => status === 'installed');
-
-  const maxContentWidth = 1200;
   const placeholder = 'Find a new package, or one you already use.';
   const SearchBar = (
     <EuiSearchBar
@@ -73,37 +88,37 @@ export function Home() {
         setSearchTerm(queryText);
         const results = searchModel.search(queryText);
         const ids = results.map(value => (value as IntegrationListItem).name);
-        const filtered = list.filter(o => ids.includes(o.name));
+        const filtered = allIntegrations.filter(o => ids.includes(o.name));
         setSearchResults(filtered);
       }}
     />
   );
 
+  return {
+    bar: SearchBar,
+    term: searchTerm,
+    results: searchResults,
+  };
+}
+
+function IntegrationLists() {
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [list, setList] = useState<IntegrationList>([]);
+
+  useEffect(() => {
+    getIntegrations({ category: selectedCategory }).then(results => {
+      setList(results);
+    });
+  }, [selectedCategory]);
+
+  if (!list) return null;
+  const installedIntegrations = list.filter(({ status }) => status === 'installed');
+
   return (
     <Fragment>
-      <Header restrictWidth={maxContentWidth} SearchBar={SearchBar} />
-      <EuiHorizontalRule margin="none" />
-      <FullBleedPage>
-        <EuiPageBody restrictWidth={maxContentWidth}>
-          <Fragment>
-            <EuiSpacer size="l" />
-            {searchTerm ? (
-              <SearchResultsGrid term={searchTerm} results={searchResults} />
-            ) : (
-              <Fragment>
-                <InstalledListGrid list={installedIntegrations} />
-                {installedIntegrations.length ? <EuiHorizontalRule margin="l" /> : null}
-                <AvailableListGrid
-                  list={list}
-                  onCategoryChange={category => {
-                    setSelectedCategory(category.id);
-                  }}
-                />
-              </Fragment>
-            )}
-          </Fragment>
-        </EuiPageBody>
-      </FullBleedPage>
+      <InstalledListGrid list={installedIntegrations} />
+      {installedIntegrations.length ? <EuiHorizontalRule margin="l" /> : null}
+      <AvailableListGrid list={list} onCategoryChange={({ id }) => setSelectedCategory(id)} />
     </Fragment>
   );
 }
