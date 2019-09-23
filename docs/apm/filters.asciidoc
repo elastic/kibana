@@ -4,7 +4,7 @@
 APM provides two different ways you can filter your data within the APM App:
 
 * <<global-filters>>
-* <<local-filters>>
+* <<contextual-filters>>
 
 [[global-filters]]
 ==== Global filters
@@ -55,8 +55,8 @@ v|*Go:* {apm-go-ref}/configuration.html#config-environment[`ELASTIC_APM_ENVIRONM
 *Real User Monitoring:* {apm-rum-ref}/configuration.html#environment[`environment`]
 |===
 
-[[local-filters]]
-==== Local filters
+[[contextual-filters]]
+==== Contextual filters
 
 Local filters are ways you can filter your specific APM data on each individual page.
 The filters shown are relevant to your data, and will persist between pages,
