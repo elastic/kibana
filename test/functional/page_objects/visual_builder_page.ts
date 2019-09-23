@@ -107,18 +107,26 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async enterMarkdown(markdown: string) {
       const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       await this.clearMarkdown();
-      await input.type(markdown);
+      await input.type(markdown, { charByChar: true });
       await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     public async clearMarkdown() {
-      const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
-      // click for switching context(fix for "should render first table variable" test)
-      // see _tsvb_markdown.js
       // Since we use ACE editor and that isn't really storing its value inside
       // a textarea we must really select all text and remove it, and cannot use
       // clearValue().
-      await input.clearValueWithKeyboard();
+      await retry.waitForWithTimeout('text area is cleared', 20000, async () => {
+        const editor = await testSubjects.find('codeEditorContainer');
+        const $ = await editor.parseDomContent();
+        const value = $('.ace_line').text();
+        if (value.length > 0) {
+          log.debug('Clearing text area input');
+          const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
+          await input.clearValueWithKeyboard();
+        }
+
+        return value.length === 0;
+      });
     }
 
     public async getMarkdownText(): Promise<string> {
