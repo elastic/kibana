@@ -366,17 +366,18 @@ class TableListViewUi extends React.Component {
         name: i18n.translate('kbn.table_list_view.listing.table.starredTitle', {
           defaultMessage: 'Starred',
         }),
-        dataType: 'string',
-        sortable: true,
+        sortable: ({ starred }) => starred ? false : true,
         width: '80px',
         render: (field, record) => (
-          <EuiIcon
-            type={record.starred ? 'starFilled' : 'starEmpty'}
-            color={record.starred ? 'yellow' : 'default'}
-            onClick={() => {
-              this.props.starClick(record.id, record.starred, this);
-            }}
-          />
+          <div style={{ marginLeft: '25%' }}>
+            <EuiIcon
+              type={record.starred ? 'starFilled' : 'starEmpty'}
+              color={record.starred ? 'gold' : 'default'}
+              onClick={() => {
+                this.props.starClick(record.id, record.starred, this);
+              }}
+            />
+          </div>
         ),
       });
     }
