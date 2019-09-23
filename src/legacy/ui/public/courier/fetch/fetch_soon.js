@@ -18,13 +18,16 @@
  */
 
 import { callClient } from './call_client';
+import { npSetup } from 'ui/new_platform';
 
+const config = npSetup.core.uiSettings;
+const esShardTimeout = npSetup.core.injectedMetadata.getInjectedVar('esShardTimeout');
 /**
  * This is usually the right fetch provider to use, rather than FetchNowProvider, as this class introduces
  * a slight delay in the request process to allow multiple requests to queue up (e.g. when a dashboard
  * is loading).
  */
-export function FetchSoonProvider(es, config, esShardTimeout) {
+export function FetchSoonProvider(es) {
 /**
    * Delays executing a function for a given amount of time, and returns a promise that resolves
    * with the result.
