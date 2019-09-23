@@ -123,6 +123,7 @@ function OrderByParamEditor({
         value={value}
         onChange={ev => setValue(ev.target.value)}
         fullWidth={true}
+        compressed
         isInvalid={showValidation ? !isValid : false}
         onBlur={setTouched}
         data-test-subj={`visEditorOrderBy${agg.id}`}

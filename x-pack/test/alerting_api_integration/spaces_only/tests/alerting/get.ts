@@ -5,9 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { getTestAlertData } from './utils';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -42,7 +41,25 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         createdBy: null,
         scheduledTaskId: response.body.scheduledTaskId,
         updatedBy: null,
+        throttle: '1m',
       });
+    });
+
+    it(`shouldn't find alert from another space`, async () => {
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData())
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+
+      await supertest
+        .get(`${getUrlPrefix(Spaces.other.id)}/api/alert/${createdAlert.id}`)
+        .expect(404, {
+          statusCode: 404,
+          error: 'Not Found',
+          message: `Saved object [alert/${createdAlert.id}] not found`,
+        });
     });
 
     it(`should handle get alert request appropriately when alert doesn't exist`, async () => {
