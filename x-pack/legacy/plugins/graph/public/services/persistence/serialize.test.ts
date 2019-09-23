@@ -5,14 +5,9 @@
  */
 
 import { appStateToSavedWorkspace } from './serialize';
-import {
-  GraphWorkspaceSavedObject,
-  IndexPatternSavedObject,
-  Workspace,
-  WorkspaceEdge,
-  AppState,
-} from '../../types';
-import { outlinkEncoders } from '../outlink_encoders';
+import { GraphWorkspaceSavedObject, Workspace, WorkspaceEdge, AppState } from '../../types';
+import { outlinkEncoders } from '../../helpers/outlink_encoders';
+import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 
 describe('serialize', () => {
   let appState: AppState;
@@ -66,10 +61,8 @@ describe('serialize', () => {
         },
       ],
       selectedIndex: {
-        attributes: {
-          title: 'Testindexpattern',
-        },
-      } as IndexPatternSavedObject,
+        title: 'Testindexpattern',
+      } as IndexPattern,
       urlTemplates: [
         {
           description: 'Template',

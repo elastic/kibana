@@ -44,7 +44,11 @@ export const fieldsReducer = reducerWithInitialState(initialFields)
   })
   .build();
 
-export const fieldsSelector = (state: GraphState) => Object.values(state.fields);
+export const fieldMapSelector = (state: GraphState) => state.fields;
+export const fieldsSelector = createSelector(
+  fieldMapSelector,
+  fields => Object.values(fields)
+);
 export const selectedFieldsSelector = createSelector(
   fieldsSelector,
   fields => fields.filter(field => field.selected)

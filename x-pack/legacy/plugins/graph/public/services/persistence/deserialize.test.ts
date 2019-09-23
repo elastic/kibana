@@ -8,7 +8,7 @@ import { GraphWorkspaceSavedObject } from '../../types';
 import { savedWorkspaceToAppState } from './deserialize';
 import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { createWorkspace } from '../../angular/graph_client_workspace';
-import { outlinkEncoders } from '../outlink_encoders';
+import { outlinkEncoders } from '../../helpers/outlink_encoders';
 
 describe('deserialize', () => {
   let savedWorkspace: GraphWorkspaceSavedObject;
@@ -156,12 +156,12 @@ describe('deserialize', () => {
           "type": "string",
         },
         Object {
-          "color": "#8ee684",
+          "color": "#FCA5D3",
           "hopSize": 5,
           "icon": Object {
             "class": "fa-folder-open-o",
             "code": "",
-            "label": "folder open",
+            "label": "Folder open",
             "patterns": Array [
               /category/i,
               /folder/i,

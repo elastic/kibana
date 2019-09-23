@@ -10,4 +10,3 @@ export * from './repository';
 export * from './task';
 export * from './lsp';
 export * from './workspace';
-export * from './socket';

@@ -16,22 +16,23 @@ import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 
 import 'ui/autoload/all';
-// TODO: remove ui imports completely (move to plugins)
 import 'ui/kbn_top_nav';
 import 'ui/directives/saved_object_finder';
 import 'ui/directives/input_focus';
 import 'ui/saved_objects/ui/saved_object_save_as_checkbox';
+import 'uiExports/autocompleteProviders';
 import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import { addAppRedirectMessageToUrl, fatalError, toastNotifications } from 'ui/notify';
 import { formatAngularHttpError } from 'ui/notify/lib';
-import { IndexPatternsProvider } from 'ui/index_patterns';
+import { setup as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { capabilities } from 'ui/capabilities';
+import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
@@ -40,11 +41,11 @@ import listingTemplate from './angular/templates/listing_ng_wrapper.html';
 import { getReadonlyBadge } from './badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { GraphListing } from './components/graph_listing';
-import { GraphSettings } from './components/graph_settings/graph_settings';
-import { GraphChrome } from './components/graph_chrome';
+import { GraphApp } from './components/app';
+import { VennDiagram } from './components/venn_diagram';
+import { Listing } from './components/listing';
+import { Settings } from './components/settings';
 
-import './angular/angular_venn_simple.js';
 import gws from './angular/graph_client_workspace.js';
 import { SavedWorkspacesProvider } from './angular/services/saved_workspaces';
 import {
@@ -52,17 +53,18 @@ import {
   colorChoices,
   iconChoicesByClass,
   urlTemplateIconChoices,
-} from './services/style_choices';
+} from './helpers/style_choices';
 import {
   outlinkEncoders,
-} from './services/outlink_encoders';
+} from './helpers/outlink_encoders';
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
-import { openIndexPatternModal } from './services/source';
-import { save } from  './services/save_modal';
-import { urlTemplateRegex } from  './services/url_template';
+import { openSourceModal } from './services/source_modal';
+import { openSaveModal } from  './services/save_modal';
+import { appStateToSavedWorkspace, savedWorkspaceToAppState, lookupIndexPattern, mapFields } from './services/persistence';
+import { urlTemplateRegex } from  './helpers/url_template';
 import {
   asAngularSyncedObservable,
-} from './services/as_observable';
+} from './helpers/as_observable';
 import { fetchTopNodes } from './services/fetch_top_nodes';
 import {
   createGraphStore,
@@ -71,7 +73,6 @@ import {
   selectedFieldsSelector,
   liveResponseFieldsSelector
 } from './state_management';
-import { appStateToSavedWorkspace, savedWorkspaceToAppState, lookupIndexPattern, mapFields } from './services/persistence';
 
 import './angular/directives/graph_inspect';
 
@@ -98,12 +99,16 @@ app.directive('focusOn', function () {
   };
 });
 
-app.directive('graphListing', function (reactDirective) {
-  return reactDirective(GraphListing);
+app.directive('vennDiagram', function (reactDirective) {
+  return reactDirective(VennDiagram);
 });
 
-app.directive('graphChrome', function (reactDirective) {
-  return reactDirective(GraphChrome, [
+app.directive('graphListing', function (reactDirective) {
+  return reactDirective(Listing);
+});
+
+app.directive('graphApp', function (reactDirective) {
+  return reactDirective(GraphApp, [
     ['state', { watchDepth: 'reference' }],
     ['dispatch', { watchDepth: 'reference' }],
     ['onFillWorkspace', { watchDepth: 'reference' }],
@@ -113,7 +118,10 @@ app.directive('graphChrome', function (reactDirective) {
     ['onIndexPatternSelected', { watchDepth: 'reference' }],
     ['onQuerySubmit', { watchDepth: 'reference' }],
     ['savedObjects', { watchDepth: 'reference' }],
-    ['uiSettings', { watchDepth: 'reference' }]
+    ['uiSettings', { watchDepth: 'reference' }],
+    ['http', { watchDepth: 'reference' }],
+    ['initialQuery', { watchDepth: 'reference' }],
+    ['overlays', { watchDepth: 'reference' }]
   ]);
 });
 
@@ -168,7 +176,6 @@ uiRoutes
 
       },
       //Copied from example found in wizard.js ( Kibana TODO - can't
-      // IndexPatternsProvider abstract these implementation details better?)
       indexPatterns: function (Private) {
         const savedObjectsClient = Private(SavedObjectsClientProvider);
 
@@ -179,7 +186,7 @@ uiRoutes
         }).then(response => response.savedObjects);
       },
       GetIndexPatternProvider: function (Private) {
-        return Private(IndexPatternsProvider);
+        return data.indexPatterns.indexPatterns;
       },
       SavedWorkspacesProvider: function (Private) {
         return Private(SavedWorkspacesProvider);
@@ -297,6 +304,10 @@ app.controller('graphuiPlugin', function (
     }
   };
 
+  $scope.pluginDependencies = npStart.core;
+
+  $scope.loading = false;
+
   const updateScope = () => {
     const newState = store.getState();
     $scope.reduxState = newState;
@@ -304,7 +315,7 @@ app.controller('graphuiPlugin', function (
     $scope.selectedFields = selectedFieldsSelector(newState);
     $scope.liveResponseFields = liveResponseFieldsSelector(newState);
     if ($scope.workspace) {
-      $scope.workspace.options.vertex_fields = $scope.allFields;
+      $scope.workspace.options.vertex_fields = $scope.selectedFields;
     }
   };
   store.subscribe(updateScope);
@@ -369,17 +380,12 @@ app.controller('graphuiPlugin', function (
     $scope.basicModeSelectedSingleField = null;
     $scope.selectedField = null;
     $scope.selectedFieldConfig = null;
-    $scope.selectedIndex = selectedIndex;
-    $scope.proposedIndex = selectedIndex;
 
     return $route.current.locals.GetIndexPatternProvider.get(selectedIndex.id)
       .then(handleSuccess)
       .then(function (indexPattern) {
+        $scope.selectedIndex = indexPattern;
         store.dispatch(loadFields(mapFields(indexPattern)));
-        $scope.filteredFields = $scope.allFields;
-        if ($scope.allFields.length > 0) {
-          $scope.selectedField = $scope.allFields[0];
-        }
         $scope.$digest();
       }, handleError);
   };
@@ -551,7 +557,7 @@ app.controller('graphuiPlugin', function (
       return;
     }
     const options = {
-      indexName: $scope.selectedIndex.attributes.title,
+      indexName: $scope.selectedIndex.title,
       vertex_fields: $scope.selectedFields,
       // Here we have the opportunity to look up labels for nodes...
       nodeLabeller: function () {
@@ -639,9 +645,8 @@ app.controller('graphuiPlugin', function (
         'term2': ti.term2,
         'v1': ti.v1,
         'v2': ti.v2,
-        'overlap': ti.overlap,
-        width: 100,
-        height: 60 });
+        'overlap': ti.overlap
+      });
 
     }
     $scope.detail = { mergeCandidates };
@@ -719,8 +724,9 @@ app.controller('graphuiPlugin', function (
     }),
     run: function () {
       canWipeWorkspace(function () {
-        $scope.resetWorkspace();
-        kbnUrl.change('/workspace/', {});
+        $scope.$evalAsync(() => {
+          kbnUrl.change('/workspace/', {});
+        });
       });  },
     testId: 'graphNewButton',
   });
@@ -753,11 +759,12 @@ app.controller('graphuiPlugin', function (
         return $scope.allSavingDisabled || $scope.selectedFields.length === 0;
       },
       run: () => {
-        save({
+        openSaveModal({
           savePolicy: $scope.graphSavePolicy,
           hasData: $scope.workspace && ($scope.workspace.nodes.length > 0 || $scope.workspace.blacklistedNodes.length > 0),
           workspace: $scope.savedWorkspace,
-          saveWorkspace: $scope.saveWorkspace
+          saveWorkspace: $scope.saveWorkspace,
+          showSaveModal
         });
       },
       testId: 'graphSaveButton',
@@ -812,9 +819,7 @@ app.controller('graphuiPlugin', function (
         allFields: [...$scope.allFields],
         canEditDrillDownUrls: $scope.canEditDrillDownUrls
       }), $scope.$digest.bind($scope));
-      currentSettingsFlyout = npStart.core.overlays.openFlyout(<GraphSettings
-        observable={settingsObservable}
-      />, {
+      currentSettingsFlyout = npStart.core.overlays.openFlyout(<Settings observable={settingsObservable} />, {
         size: 'm',
         closeButtonAriaLabel: i18n.translate('xpack.graph.settings.closeLabel', { defaultMessage: 'Close' }),
         'data-test-subj': 'graphSettingsFlyout',
@@ -850,21 +855,19 @@ app.controller('graphuiPlugin', function (
       );
       return;
     }
-    $scope.selectedIndex = selectedIndex;
-    $scope.proposedIndex = selectedIndex;
     $route.current.locals.GetIndexPatternProvider.get(selectedIndex.id).then(indexPattern => {
+      $scope.selectedIndex = indexPattern;
       initWorkspaceIfRequired();
       const {
         urlTemplates,
         advancedSettings,
-        workspace,
         allFields,
       } = savedWorkspaceToAppState($scope.savedWorkspace, indexPattern, $scope.workspace);
 
       // wire up stuff to angular
       store.dispatch(loadFields(allFields));
-      $scope.workspace = workspace;
       $scope.exploreControls = advancedSettings;
+      $scope.workspace.options.exploreControls = advancedSettings;
       $scope.urlTemplates = urlTemplates;
       $scope.workspace.runLayout();
       // Allow URLs to include a user-defined text query
@@ -872,11 +875,13 @@ app.controller('graphuiPlugin', function (
         $scope.initialQuery = $route.current.params.query;
         $scope.submit($route.current.params.query);
       }
+
+      $scope.$digest();
     });
   } else {
     $route.current.locals.SavedWorkspacesProvider.get().then(function (newWorkspace) {
       $scope.savedWorkspace = newWorkspace;
-      openIndexPatternModal(npStart.core, indexPattern => {
+      openSourceModal(npStart.core, indexPattern => {
         $scope.indexSelected(indexPattern);
       });
     });

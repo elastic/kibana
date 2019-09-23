@@ -7,7 +7,7 @@
 import createContainer from 'constate-latest';
 import { useMemo } from 'react';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { callCleanupMLResources } from './api/ml_cleanup_everything';
+import { callDeleteJobs, callStopDatafeed } from './api/ml_cleanup';
 
 export const useLogAnalysisCleanup = ({
   sourceId,
@@ -20,7 +20,17 @@ export const useLogAnalysisCleanup = ({
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return await callCleanupMLResources(spaceId, sourceId);
+        try {
+          await callStopDatafeed(spaceId, sourceId);
+        } catch (err) {
+          // Datefeed has been deleted / doesn't exist, proceed with deleting jobs anyway
+          if (err && err.res && err.res.status === 404) {
+            return await callDeleteJobs(spaceId, sourceId);
+          } else {
+            throw err;
+          }
+        }
+        return await callDeleteJobs(spaceId, sourceId);
       },
     },
     [spaceId, sourceId]
