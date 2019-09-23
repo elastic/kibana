@@ -69,9 +69,13 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.closeToast();
 
       await PageObjects.dashboard.clickFullScreenMode();
-      await PageObjects.common.sleep(5000); // screenshot shows it's still not in fullscreen mode
+      await screenshot.take('temp_area_chart_full_screen_1');
+      await PageObjects.common.sleep(5000);
+      await screenshot.take('temp_area_chart_full_screen_2');
       await dashboardPanelActions.openContextMenu();
+      await screenshot.take('temp_area_chart_full_screen_3');
       await dashboardPanelActions.clickExpandPanelToggle();
+      await PageObjects.common.sleep(5000);
 
       await PageObjects.dashboard.waitForRenderComplete();
       const percentDifference = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
