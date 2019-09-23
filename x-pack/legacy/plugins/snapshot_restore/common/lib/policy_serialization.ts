@@ -3,7 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SlmPolicy, SlmPolicyEs, SlmPolicyPayload } from '../types';
+import {
+  SlmPolicy,
+  SlmPolicyEs,
+  SlmPolicyPayload,
+  SlmPolicyStats,
+  SlmPolicyStatsEs,
+} from '../types';
 import {
   deserializeSnapshotConfig,
   serializeSnapshotConfig,
@@ -132,4 +138,30 @@ export const serializePolicy = (policy: SlmPolicyPayload): SlmPolicyEs['policy']
   }
 
   return policyEs;
+};
+
+export const deserializePolicyStats = (stats: SlmPolicyStatsEs): SlmPolicyStats => {
+  const {
+    retention_runs: retentionRuns,
+    retention_failed: retentionFailed,
+    retention_timed_out: retentionTimedOut,
+    retention_deletion_time: retentionDeletionTime,
+    retention_deletion_time_millis: retentionDeletionTimeMillis,
+    total_snapshots_taken: totalSnapshotsTaken,
+    total_snapshots_failed: totalSnapshotsFailed,
+    total_snapshots_deleted: totalSnapshotsDeleted,
+    total_snapshot_deletion_failures: totalSnapshotDeletionFailures,
+  } = stats;
+
+  return {
+    retentionRuns,
+    retentionFailed,
+    retentionTimedOut,
+    retentionDeletionTime,
+    retentionDeletionTimeMillis,
+    totalSnapshotsTaken,
+    totalSnapshotsFailed,
+    totalSnapshotsDeleted,
+    totalSnapshotDeletionFailures,
+  };
 };

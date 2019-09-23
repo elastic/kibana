@@ -15,4 +15,4 @@ export {
   deserializeSnapshotRetention,
   serializeSnapshotRetention,
 } from './snapshot_serialization';
-export { deserializePolicy, serializePolicy } from './policy_serialization';
+export { deserializePolicy, serializePolicy, deserializePolicyStats } from './policy_serialization';

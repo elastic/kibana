@@ -74,4 +74,13 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     ],
     method: 'PUT',
   });
+
+  slm.stats = ca({
+    urls: [
+      {
+        fmt: '/_slm/stats',
+      },
+    ],
+    method: 'GET',
+  });
 };

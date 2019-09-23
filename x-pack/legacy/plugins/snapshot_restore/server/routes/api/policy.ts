@@ -8,8 +8,8 @@ import {
   wrapCustomError,
   wrapEsError,
 } from '../../../../../server/lib/create_router/error_wrappers';
-import { SlmPolicyEs, SlmPolicy, SlmPolicyPayload } from '../../../common/types';
-import { deserializePolicy, serializePolicy } from '../../../common/lib';
+import { SlmPolicyEs, SlmPolicy, SlmPolicyPayload, SlmPolicyStats } from '../../../common/types';
+import { deserializePolicy, serializePolicy, deserializePolicyStats } from '../../../common/lib';
 import { Plugins } from '../../../shim';
 
 let callWithInternalUser: any;
@@ -25,6 +25,7 @@ export function registerPolicyRoutes(router: Router, plugins: Plugins) {
   router.get('policies/indices', getIndicesHandler);
   router.get('policies/retention_settings', getRetentionSettingsHandler);
   router.put('policies/retention_settings', updateRetentionSettingsHandler);
+  router.get('policies/stats', getStatsHandler);
 }
 
 export const getAllHandler: RouterRouteHandler = async (
@@ -174,26 +175,19 @@ export const getRetentionSettingsHandler: RouterRouteHandler = async (): Promise
     }
   | undefined
 > => {
-  try {
-    const { persistent, transient, defaults } = await callWithInternalUser('cluster.getSettings', {
-      filterPath: '**.slm.retention*',
-      includeDefaults: true,
-    });
-    const { slm: retentionSettings = undefined } = {
-      ...defaults,
-      ...persistent,
-      ...transient,
-    };
+  const { persistent, transient, defaults } = await callWithInternalUser('cluster.getSettings', {
+    filterPath: '**.slm.retention*',
+    includeDefaults: true,
+  });
+  const { slm: retentionSettings = undefined } = {
+    ...defaults,
+    ...persistent,
+    ...transient,
+  };
 
-    const { retention_schedule: retentionSchedule } = retentionSettings;
+  const { retention_schedule: retentionSchedule } = retentionSettings;
 
-    return { retentionSchedule };
-  } catch (e) {
-    // Silently swallow error and return undefined for managed repository name
-    // so that downstream calls are not blocked. In a healthy environment we do
-    // not expect to reach here.
-    return;
-  }
+  return { retentionSchedule };
 };
 
 export const updateRetentionSettingsHandler: RouterRouteHandler = async (req, callWithRequest) => {
@@ -208,4 +202,16 @@ export const updateRetentionSettingsHandler: RouterRouteHandler = async (req, ca
       },
     },
   });
+};
+
+export const getStatsHandler: RouterRouteHandler = async (
+  _req,
+  callWithRequest
+): Promise<SlmPolicyStats> => {
+  // Get SLM stats
+  const stats = await callWithRequest('slm.stats', {
+    human: true,
+  });
+
+  return deserializePolicyStats(stats);
 };

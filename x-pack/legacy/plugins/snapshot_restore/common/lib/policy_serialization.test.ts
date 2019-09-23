@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { deserializePolicy, serializePolicy } from './policy_serialization';
+import { deserializePolicy, serializePolicy, deserializePolicyStats } from './policy_serialization';
 
 describe('repository_serialization', () => {
   describe('deserializePolicy()', () => {
@@ -164,6 +164,48 @@ describe('repository_serialization', () => {
           max_count: 30,
           min_count: 4,
         },
+      });
+    });
+  });
+
+  describe('deserializePolicyStats()', () => {
+    it('should deserialize a slm stats', () => {
+      expect(
+        deserializePolicyStats({
+          retention_runs: 13,
+          retention_failed: 0,
+          retention_timed_out: 0,
+          retention_deletion_time: '1.4s',
+          retention_deletion_time_millis: 1404,
+          policy_metrics: {
+            'daily-snapshots2': {
+              snapshots_taken: 7,
+              snapshots_failed: 0,
+              snapshots_deleted: 6,
+              snapshot_deletion_failures: 0,
+            },
+            'daily-snapshots': {
+              snapshots_taken: 12,
+              snapshots_failed: 0,
+              snapshots_deleted: 12,
+              snapshot_deletion_failures: 6,
+            },
+          },
+          total_snapshots_taken: 19,
+          total_snapshots_failed: 0,
+          total_snapshots_deleted: 18,
+          total_snapshot_deletion_failures: 0,
+        })
+      ).toEqual({
+        retentionRuns: 13,
+        retentionFailed: 0,
+        retentionTimedOut: 0,
+        retentionDeletionTime: '1.4s',
+        retentionDeletionTimeMillis: 1404,
+        totalSnapshotsTaken: 19,
+        totalSnapshotsFailed: 0,
+        totalSnapshotsDeleted: 18,
+        totalSnapshotDeletionFailures: 0,
       });
     });
   });
