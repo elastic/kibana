@@ -11,7 +11,6 @@ import {
   getAxisId,
   getSpecId,
   Position,
-  ScaleType,
   timeFormatter,
   Settings,
 } from '@elastic/charts';
@@ -147,8 +146,7 @@ export const SnapshotHistogramComponent = ({
                   defaultMessage: 'Snapshot Y Axis',
                 })
               )}
-              position={Position.Left}
-              showOverlappingTicks={true}
+              position="left"
               title={i18n.translate('xpack.uptime.snapshotHistogram.yAxis.title', {
                 defaultMessage: 'Pings',
                 description:
@@ -163,9 +161,9 @@ export const SnapshotHistogramComponent = ({
               stackAccessors={[0]}
               timeZone="local"
               xAccessor={0}
-              xScaleType={ScaleType.Time}
+              xScaleType="time"
               yAccessors={[1]}
-              yScaleType={ScaleType.Linear}
+              yScaleType="linear"
             />
             <BarSeries
               customSeriesColors={getColorsMap(dangerColor, downSpecId)}
@@ -177,9 +175,9 @@ export const SnapshotHistogramComponent = ({
               stackAccessors={[0]}
               timeZone="local"
               xAccessor={0}
-              xScaleType={ScaleType.Time}
+              xScaleType="time"
               yAccessors={[1]}
-              yScaleType={ScaleType.Linear}
+              yScaleType="linear"
             />
           </Chart>
         </ChartWrapper>

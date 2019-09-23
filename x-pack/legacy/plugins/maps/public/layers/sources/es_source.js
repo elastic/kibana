@@ -13,13 +13,14 @@ import {
 import { createExtentFilter } from '../../elasticsearch_geo_utils';
 import { timefilter } from 'ui/timefilter';
 import _ from 'lodash';
-import { AggConfigs } from 'ui/vis/agg_configs';
+import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
 
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../reducers/util';
 import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
+import { DataRequestAbortError } from '../util/data_request';
 
 export class AbstractESSource extends AbstractVectorSource {
 
@@ -131,7 +132,12 @@ export class AbstractESSource extends AbstractVectorSource {
   }
 
 
-  async _runEsQuery(requestName, searchSource, requestDescription) {
+  async _runEsQuery(requestName, searchSource, registerCancelCallback, requestDescription) {
+    const cancel = () => {
+      searchSource.cancelQueued();
+    };
+    registerCancelCallback(cancel);
+
     try {
       return await fetchSearchSourceAndRecordWithInspector({
         inspectorAdapters: this._inspectorAdapters,
@@ -141,6 +147,10 @@ export class AbstractESSource extends AbstractVectorSource {
         requestDesc: requestDescription
       });
     } catch(error) {
+      if (error.name === 'AbortError') {
+        throw new DataRequestAbortError();
+      }
+
       throw new Error(i18n.translate('xpack.maps.source.esSource.requestFailedErrorMessage', {
         defaultMessage: `Elasticsearch search request failed, error: {message}`,
         values: { message: error.message }
