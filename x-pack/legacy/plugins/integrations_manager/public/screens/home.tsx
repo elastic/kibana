@@ -108,12 +108,11 @@ export function Home() {
   );
 }
 
-function Header({
-  restrictWidth,
-  SearchBar,
-}: EuiPageWidthProps & {
+type HeaderProps = EuiPageWidthProps & {
   SearchBar: React.ReactNode;
-}) {
+};
+
+function Header({ restrictWidth, SearchBar }: HeaderProps) {
   const left = (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem>
@@ -224,7 +223,12 @@ function InstalledListGrid({ list }: InstalledListGridProps) {
   return <IntegrationListGrid title={installedTitle} list={list} controls={<div />} />;
 }
 
-function SearchResultsGrid({ term, results }: { term: string; results: IntegrationList }) {
+interface SearchResultsGridProps {
+  term: string;
+  results: IntegrationList;
+}
+
+function SearchResultsGrid({ term, results }: SearchResultsGridProps) {
   const title = 'Search results';
 
   return (

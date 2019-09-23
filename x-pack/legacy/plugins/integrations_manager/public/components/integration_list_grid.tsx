@@ -15,8 +15,6 @@ type ListProps = {
 } & BadgeProps;
 
 export function IntegrationListGrid({ controls, title, list, showInstalledBadge }: ListProps) {
-  if (!list.length) return null;
-
   const controlsContent = <ControlsColumn title={title} controls={controls} />;
   const gridContent = <GridColumn list={list} showInstalledBadge={showInstalledBadge} />;
 
