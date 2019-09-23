@@ -1,10 +1,13 @@
-.gphFieldPickerList {
+.gphFieldPicker__popoverPanel {
   width: 350px;
+  padding: $euiSizeXS;
 }
 
-.gphFieldPickerButton {
+.gphFieldPicker__selectableList {
+  margin: 0 (-$euiSizeXS) (-$euiSizeXS);
+}
+
+.gphFieldPicker__button {
+  @include gphFieldBadgeSize;
   color: $euiColorPrimary;
-  background-color: $euiColorEmptyShade;
-  border: 1px solid $euiColorLightShade;
-  padding: $euiSizeXS $euiSizeM;
 }

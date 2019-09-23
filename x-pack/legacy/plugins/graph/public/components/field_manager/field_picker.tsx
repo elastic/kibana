@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect, ReactNode } from 'react';
-import { EuiPopover, EuiSelectable, EuiBadge, EuiIcon } from '@elastic/eui';
+import { EuiPopover, EuiSelectable, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { WorkspaceField } from '../../types';
 
@@ -51,19 +51,19 @@ export function FieldPicker({ fieldMap, selectField, deselectField }: FieldPicke
       panelPaddingSize="none"
       button={
         <EuiBadge
-          className="gphFieldPickerButton"
+          className="gphFieldPicker__button"
+          color="hollow"
+          iconType="plusInCircleFilled"
           onClick={() => setOpen(true)}
-          iconOnClick={() => {}}
-          iconOnClickAriaLabel=""
           onClickAriaLabel={badgeDescription}
           title=""
         >
-          <EuiIcon type="plusInCircleFilled" /> {badgeDescription}
+          {badgeDescription}
         </EuiBadge>
       }
       isOpen={open}
       closePopover={() => setOpen(false)}
-      panelClassName="gphFieldPickerList"
+      panelClassName="gphFieldPicker__popoverPanel"
     >
       {open && (
         <EuiSelectable
@@ -71,6 +71,10 @@ export function FieldPicker({ fieldMap, selectField, deselectField }: FieldPicke
             placeholder: i18n.translate('xpack.graph.fieldManager.fieldSearchPlaceholder', {
               defaultMessage: 'Filter fields',
             }),
+            compressed: true,
+          }}
+          listProps={{
+            className: 'gphFieldPicker__selectableList',
           }}
           searchable
           options={fieldOptions}

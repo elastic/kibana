@@ -12,8 +12,6 @@ import {
   EuiComboBox,
   EuiColorPicker,
   EuiFieldNumber,
-  isColorDark,
-  hexToRgb,
   // @ts-ignore
   EuiHighlight,
   EuiContextMenu,
@@ -23,6 +21,8 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiKeyboardAccessible,
+  EuiForm,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
@@ -58,8 +58,6 @@ export function FieldEditor({
   const { color, hopSize, lastValidHopSize, icon, name: fieldName } = currentField;
 
   const isDisabled = initialField.hopSize === 0;
-
-  const darkColor = isColorDark(...hexToRgb(color));
 
   // update local field copy if changed from the outside
   useEffect(() => {
@@ -122,11 +120,9 @@ export function FieldEditor({
         <EuiBadge
           color={initialField.color}
           iconSide="right"
-          className={classNames('gphFieldEditorBadge', {
-            'gphFieldEditorBadge--disabled': isDisabled,
+          className={classNames('gphFieldEditor__badge', {
+            'gphFieldEditor__badge--disabled': isDisabled,
           })}
-          iconOnClick={() => {}}
-          iconOnClickAriaLabel=""
           onClickAriaLabel={badgeDescription}
           title=""
           onClick={e => {
@@ -137,13 +133,7 @@ export function FieldEditor({
             }
           }}
         >
-          <LegacyIcon
-            className={classNames('gphFieldEditorBadge__icon', {
-              'gphFieldEditorBadge__icon--dark': darkColor,
-              'gphFieldEditorBadge__icon--light': !darkColor,
-            })}
-            icon={initialField.icon}
-          />
+          <LegacyIcon className={'gphFieldEditor__badgeIcon'} icon={initialField.icon} />
           {initialField.name}
         </EuiBadge>
       }
@@ -191,147 +181,148 @@ export function FieldEditor({
             title: i18n.translate('xpack.graph.fieldManager.displayFormTitle', {
               defaultMessage: 'Edit',
             }),
-            width: 400,
+            width: 280,
             content: (
-              <EuiFlexGroup
-                direction="column"
-                gutterSize="m"
-                className="gphFieldEditor__displayForm"
-              >
+              <EuiForm className="gphFieldEditor__displayForm">
                 {/* This is a workaround to prevent the field combo box from being focussed when opening the panel. */}
                 <EuiKeyboardAccessible>
                   <span style={{ opacity: 0 }} onClick={() => {}} onKeyPress={() => {}} />
                 </EuiKeyboardAccessible>
-                <EuiFlexItem>
-                  <EuiFormRow
-                    display="columnCompressed"
-                    label={i18n.translate('xpack.graph.fieldManager.fieldLabel', {
-                      defaultMessage: 'Field',
-                    })}
-                  >
-                    <EuiComboBox
-                      onChange={choices => {
-                        // value is always defined because it's an unclearable single selection
-                        const newFieldName = choices[0].value!;
+                <EuiFormRow
+                  display="columnCompressed"
+                  label={i18n.translate('xpack.graph.fieldManager.fieldLabel', {
+                    defaultMessage: 'Field',
+                  })}
+                >
+                  <EuiComboBox
+                    onChange={choices => {
+                      // value is always defined because it's an unclearable single selection
+                      const newFieldName = choices[0].value!;
 
-                        updateProp('name', newFieldName);
-                      }}
-                      singleSelection={{ asPlainText: true }}
-                      isClearable={false}
-                      options={toOptions(allFields, initialField)}
-                      selectedOptions={[
-                        {
-                          value: currentField.name,
-                          label: currentField.name,
-                          type: currentField.type,
-                        },
-                      ]}
-                      renderOption={(option, searchValue, contentClassName) => {
-                        const { type, label } = option;
-                        return (
-                          <span className={contentClassName}>
-                            <FieldIcon type={type!} />{' '}
-                            <EuiHighlight search={searchValue}>{label}</EuiHighlight>
-                          </span>
-                        );
-                      }}
-                    />
-                  </EuiFormRow>
+                      updateProp('name', newFieldName);
+                    }}
+                    singleSelection={{ asPlainText: true }}
+                    isClearable={false}
+                    options={toOptions(allFields, initialField)}
+                    selectedOptions={[
+                      {
+                        value: currentField.name,
+                        label: currentField.name,
+                        type: currentField.type,
+                      },
+                    ]}
+                    renderOption={(option, searchValue, contentClassName) => {
+                      const { type, label } = option;
+                      return (
+                        <span className={contentClassName}>
+                          <FieldIcon type={type!} />{' '}
+                          <EuiHighlight search={searchValue}>{label}</EuiHighlight>
+                        </span>
+                      );
+                    }}
+                    compressed
+                  />
+                </EuiFormRow>
 
-                  <EuiFormRow
-                    display="columnCompressed"
-                    label={i18n.translate('xpack.graph.fieldManager.colorLabel', {
-                      defaultMessage: 'Color',
-                    })}
-                  >
-                    <EuiColorPicker
-                      color={color}
-                      onChange={newColor => {
-                        updateProp('color', newColor);
-                      }}
-                    />
-                  </EuiFormRow>
+                <EuiFormRow
+                  display="columnCompressed"
+                  label={i18n.translate('xpack.graph.fieldManager.colorLabel', {
+                    defaultMessage: 'Color',
+                  })}
+                >
+                  <EuiColorPicker
+                    color={color}
+                    onChange={newColor => {
+                      updateProp('color', newColor);
+                    }}
+                    compressed
+                  />
+                </EuiFormRow>
 
-                  <EuiFormRow
-                    display="columnCompressed"
-                    label={i18n.translate('xpack.graph.fieldManager.iconLabel', {
-                      defaultMessage: 'Icon',
-                    })}
-                  >
-                    <EuiComboBox
-                      fullWidth
-                      singleSelection={{ asPlainText: true }}
-                      isClearable={false}
-                      renderOption={(option, searchValue, contentClassName) => {
-                        const { label, value } = option;
-                        return (
-                          <span className={contentClassName}>
-                            <LegacyIcon icon={value!} />{' '}
-                            <EuiHighlight search={searchValue}>{label}</EuiHighlight>
-                          </span>
-                        );
-                      }}
-                      options={iconChoices.map(currentIcon => ({
-                        label: currentIcon.label,
-                        value: currentIcon,
-                      }))}
-                      selectedOptions={[
-                        {
-                          label: icon.label,
-                          value: icon,
-                        },
-                      ]}
-                      onChange={choices => {
-                        updateProp('icon', choices[0].value!);
-                      }}
-                    />
-                  </EuiFormRow>
+                <EuiFormRow
+                  display="columnCompressed"
+                  label={i18n.translate('xpack.graph.fieldManager.iconLabel', {
+                    defaultMessage: 'Icon',
+                  })}
+                >
+                  <EuiComboBox
+                    fullWidth
+                    singleSelection={{ asPlainText: true }}
+                    isClearable={false}
+                    renderOption={(option, searchValue, contentClassName) => {
+                      const { label, value } = option;
+                      return (
+                        <span className={contentClassName}>
+                          <LegacyIcon icon={value!} />{' '}
+                          <EuiHighlight search={searchValue}>{label}</EuiHighlight>
+                        </span>
+                      );
+                    }}
+                    options={iconChoices.map(currentIcon => ({
+                      label: currentIcon.label,
+                      value: currentIcon,
+                    }))}
+                    selectedOptions={[
+                      {
+                        label: icon.label,
+                        value: icon,
+                      },
+                    ]}
+                    onChange={choices => {
+                      updateProp('icon', choices[0].value!);
+                    }}
+                    compressed
+                  />
+                </EuiFormRow>
 
-                  <EuiFormRow
-                    display="columnCompressed"
-                    label={i18n.translate('xpack.graph.fieldManager.maxHopsLabel', {
-                      defaultMessage: 'Maximum hops',
-                    })}
-                  >
-                    <EuiFieldNumber
-                      step={1}
-                      min={1}
-                      value={isDisabled ? lastValidHopSize : hopSize}
-                      onChange={({ target: { valueAsNumber } }) => {
-                        const updatedHopSize = Number.isNaN(valueAsNumber) ? 1 : valueAsNumber;
-                        updateProp(isDisabled ? 'lastValidHopSize' : 'hopSize', updatedHopSize);
+                <EuiFormRow
+                  display="columnCompressed"
+                  label={i18n.translate('xpack.graph.fieldManager.maxHopsLabel', {
+                    defaultMessage: 'Max hops',
+                  })}
+                >
+                  <EuiFieldNumber
+                    step={1}
+                    min={1}
+                    value={isDisabled ? lastValidHopSize : hopSize}
+                    onChange={({ target: { valueAsNumber } }) => {
+                      const updatedHopSize = Number.isNaN(valueAsNumber) ? 1 : valueAsNumber;
+                      updateProp(isDisabled ? 'lastValidHopSize' : 'hopSize', updatedHopSize);
+                    }}
+                    compressed
+                  />
+                </EuiFormRow>
+
+                <EuiSpacer size="s" />
+
+                <EuiFlexGroup direction="row" justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="s"
+                      onClick={() => {
+                        setCurrentField(initialField);
+                        setOpen(false);
                       }}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFlexGroup direction="row" justifyContent="flexEnd">
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        onClick={() => {
-                          setCurrentField(initialField);
-                          setOpen(false);
-                        }}
-                      >
-                        {i18n.translate('xpack.graph.fieldManager.cancelLabel', {
-                          defaultMessage: 'Cancel',
-                        })}
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        fill
-                        disabled={isEqual(initialField, currentField)}
-                        onClick={updateField}
-                      >
-                        {i18n.translate('xpack.graph.fieldManager.updateLabel', {
-                          defaultMessage: 'Update',
-                        })}
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                    >
+                      {i18n.translate('xpack.graph.fieldManager.cancelLabel', {
+                        defaultMessage: 'Cancel',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      size="s"
+                      fill
+                      disabled={isEqual(initialField, currentField)}
+                      onClick={updateField}
+                    >
+                      {i18n.translate('xpack.graph.fieldManager.updateLabel', {
+                        defaultMessage: 'Update',
+                      })}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiForm>
             ),
           },
         ]}

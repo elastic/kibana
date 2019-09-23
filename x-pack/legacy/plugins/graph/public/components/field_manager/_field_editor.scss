@@ -1,32 +1,18 @@
-.gphFieldEditorBadge {
-  // 3px to line up with a badge with visible border (gphFieldPickerButton)
-  padding: 3px $euiSizeM 3px 0;
+.gphFieldEditor__badge {
+  @include gphFieldBadgeSize;
 }
 
-.gphFieldEditorBadge--disabled {
+.gphFieldEditor__badge--disabled,
+.gphFieldEditor__badge--disabled:focus {
   opacity: 0.7;
   text-decoration: line-through;
 }
 
-.gphFieldEditorBadge__icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  margin: $euiSizeXS;
-  padding: 0;
-
-  text-align: center;
-}
-
-.gphFieldEditorBadge__icon--dark {
-  color: $euiColorEmptyShade;
-}
-
-.gphFieldEditorBadge__icon--light {
-  color: $euiColorDarkestShade;
+.gphFieldEditor__badgeIcon {
+  width: auto;
+  margin-right: $euiSizeXS;
 }
 
 .gphFieldEditor__displayForm {
-  padding: $euiSizeL;
+  padding: $euiSizeS;
 }

@@ -42,7 +42,7 @@ export function FieldManager({ state, dispatch }: FieldManagerProps) {
 
   return (
     <I18nProvider>
-      <EuiFlexGroup gutterSize="s" className="gphFieldManager" alignItems="center">
+      <EuiFlexGroup gutterSize="s" className="gphFieldManager" alignItems="center" wrap>
         {selectedFields.map(field => (
           <EuiFlexItem key={field.name} grow={false}>
             <FieldEditor allFields={allFields} {...actionCreators} field={field} />
