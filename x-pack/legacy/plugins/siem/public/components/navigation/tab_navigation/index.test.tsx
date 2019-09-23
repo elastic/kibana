@@ -12,7 +12,7 @@ import { TabNavigationProps } from './types';
 import { navTabs } from '../../../pages/home/home_navigations';
 import { SiemPageName } from '../../../pages/home/types';
 import { HostsTableType } from '../../../store/hosts/model';
-import { navTabsHostDetails } from '../../../pages/hosts/hosts_navigations';
+import { navTabsHostDetails } from '../../../pages/hosts/details/nav_tabs';
 import { CONSTANTS } from '../../url_state/constants';
 import { RouteSpyState } from '../../../utils/route/types';
 

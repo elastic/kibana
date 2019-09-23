@@ -59,7 +59,7 @@ export const OverviewNetwork = pure<OwnProps>(({ endDate, startDate, setQuery })
             />
           }
         >
-          <EuiButton href={`${getNetworkUrl()}/`}>
+          <EuiButton href={getNetworkUrl()}>
             <FormattedMessage
               id="xpack.siem.overview.networkAction"
               defaultMessage="View network"
