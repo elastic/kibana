@@ -23,8 +23,8 @@ import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 
-const TimelionRequestHandlerProvider = function (Private, $http, config) {
-  const timezone = Private(timezoneProvider)();
+export const timelionRequestHandlerProvider = function (http, config) {
+  const timezone = timezoneProvider(config);
 
   return {
     name: 'timelion',
@@ -34,17 +34,19 @@ const TimelionRequestHandlerProvider = function (Private, $http, config) {
         const expression = visParams.expression;
         if (!expression) return;
         const esQueryConfigs = getEsQueryConfig(config);
-        const httpResult = $http.post('../api/timelion/run', {
-          sheet: [expression],
-          extended: {
-            es: {
-              filter: buildEsQuery(undefined, query, filters, esQueryConfigs)
-            }
-          },
-          time: _.extend(timeRange, {
-            interval: visParams.interval,
-            timezone: timezone
-          }),
+        const httpResult = http.post('../api/timelion/run', {
+          body: {
+            sheet: [expression],
+            extended: {
+              es: {
+                filter: buildEsQuery(undefined, query, filters, esQueryConfigs)
+              }
+            },
+            time: _.extend(timeRange, {
+              interval: visParams.interval,
+              timezone: timezone
+            }),
+          }
         })
           .then(resp => resp.data)
           .catch(resp => { throw resp.data; });
@@ -67,5 +69,3 @@ const TimelionRequestHandlerProvider = function (Private, $http, config) {
     }
   };
 };
-
-export { TimelionRequestHandlerProvider };

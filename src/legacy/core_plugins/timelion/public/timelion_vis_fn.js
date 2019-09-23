@@ -20,10 +20,8 @@
 import { functionsRegistry } from 'plugins/interpreter/registries';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { TimelionRequestHandlerProvider } from './vis/timelion_request_handler';
-
-
-import chrome from 'ui/chrome';
+import { timelionRequestHandlerProvider } from './vis/timelion_request_handler';
+import { npSetup } from 'ui/new_platform';
 
 export const timelionVis = () => ({
   name: 'timelion_vis',
@@ -49,12 +47,10 @@ export const timelionVis = () => ({
     }
   },
   async fn(context, args) {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get('Private');
-    const timelionRequestHandler = Private(TimelionRequestHandlerProvider).handler;
 
     const visParams = { expression: args.expression, interval: args.interval };
 
+    const timelionRequestHandler = timelionRequestHandlerProvider(npSetup.core.http, npSetup.core.config);
     const response = await timelionRequestHandler({
       timeRange: get(context, 'timeRange', null),
       query: get(context, 'query', null),
