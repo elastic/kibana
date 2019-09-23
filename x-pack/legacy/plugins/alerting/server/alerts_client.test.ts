@@ -857,6 +857,26 @@ describe('muteInstance()', () => {
     await alertsClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
     expect(savedObjectsClient.update).not.toHaveBeenCalled();
   });
+
+  test('skips muting when alert is muted', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        interval: '10s',
+        alertTypeId: '2',
+        enabled: true,
+        scheduledTaskId: 'task-123',
+        mutedInstanceIds: [],
+        muted: true,
+      },
+      references: [],
+    });
+
+    await alertsClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
+    expect(savedObjectsClient.update).not.toHaveBeenCalled();
+  });
 });
 
 describe('unmuteInstance()', () => {
@@ -898,6 +918,26 @@ describe('unmuteInstance()', () => {
         enabled: true,
         scheduledTaskId: 'task-123',
         mutedInstanceIds: [],
+      },
+      references: [],
+    });
+
+    await alertsClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
+    expect(savedObjectsClient.update).not.toHaveBeenCalled();
+  });
+
+  test('skips unmuting when alert is muted', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        interval: '10s',
+        alertTypeId: '2',
+        enabled: true,
+        scheduledTaskId: 'task-123',
+        mutedInstanceIds: [],
+        muted: true,
       },
       references: [],
     });
