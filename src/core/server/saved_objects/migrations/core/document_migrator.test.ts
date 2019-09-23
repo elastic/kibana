@@ -20,17 +20,10 @@
 import _ from 'lodash';
 import { RawSavedObjectDoc } from '../../serialization';
 import { DocumentMigrator } from './document_migrator';
-import { Logger } from 'src/core/server/logging';
+import { loggingServiceMock } from '../../../logging/logging_service.mock';
 
-const mockLogger: jest.Mocked<Logger> = {
-  debug: jest.fn(),
-  error: jest.fn(),
-  fatal: jest.fn(),
-  info: jest.fn(),
-  log: jest.fn(),
-  trace: jest.fn(),
-  warn: jest.fn(),
-};
+const mockLoggerFactory = loggingServiceMock.create();
+const mockLogger = mockLoggerFactory.get('mock logger');
 
 describe('DocumentMigrator', () => {
   function testOpts() {
@@ -508,7 +501,7 @@ describe('DocumentMigrator', () => {
       expect('Did not throw').toEqual('But it should have!');
     } catch (error) {
       expect(error.message).toMatch(/Dang diggity!/);
-      const warning = log.warn.mock.calls[0][0];
+      const warning = loggingServiceMock.collect(mockLoggerFactory).warn[0][0];
       expect(warning).toContain(JSON.stringify(failedDoc));
       expect(warning).toContain('dog:1.2.3');
     }
@@ -536,8 +529,8 @@ describe('DocumentMigrator', () => {
       migrationVersion: {},
     };
     migrator.migrate(doc);
-    expect(mockLogger.info.mock.calls[0][0]).toEqual(logTestMsg);
-    expect(mockLogger.warn.mock.calls[1][0]).toEqual(logTestMsg);
+    expect(loggingServiceMock.collect(mockLoggerFactory).info[0][0]).toEqual(logTestMsg);
+    expect(loggingServiceMock.collect(mockLoggerFactory).warn[1][0]).toEqual(logTestMsg);
   });
 
   test('extracts the latest migration version info', () => {
