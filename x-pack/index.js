@@ -45,6 +45,7 @@ import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
 import { advancedUiActions } from './legacy/plugins/advanced_ui_actions';
 import { lens } from './legacy/plugins/lens';
+import { cloudMigration } from './legacy/plugins/cloud_migration';
 
 module.exports = function (kibana) {
   return [
@@ -89,5 +90,6 @@ module.exports = function (kibana) {
     actions(kibana),
     alerting(kibana),
     advancedUiActions(kibana),
+    cloudMigration(kibana),
   ];
 };

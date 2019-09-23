@@ -38,7 +38,8 @@
     "xpack.spaces": "legacy/plugins/spaces",
     "xpack.upgradeAssistant": "legacy/plugins/upgrade_assistant",
     "xpack.uptime": "legacy/plugins/uptime",
-    "xpack.watcher": "legacy/plugins/watcher"
+    "xpack.watcher": "legacy/plugins/watcher",
+    "xpack.cloudMigration": "legacy/plugins/cloud_migration"
   },
   "translations": [
     "plugins/translations/translations/zh-CN.json",
