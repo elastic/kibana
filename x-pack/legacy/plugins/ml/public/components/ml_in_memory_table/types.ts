@@ -192,6 +192,6 @@ interface ComponentWithConstructor<T> extends Component {
   new (): Component<T>;
 }
 
-export const MlInMemoryTable = (EuiInMemoryTable as any) as ComponentWithConstructor<
+export const MlInMemoryTableBasic = (EuiInMemoryTable as any) as ComponentWithConstructor<
   EuiInMemoryTableProps
 >;

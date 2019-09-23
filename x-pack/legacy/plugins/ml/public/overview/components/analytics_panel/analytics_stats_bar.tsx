@@ -55,7 +55,11 @@ function getAnalyticsStats(analyticsList: any[]) {
   analyticsList.forEach(job => {
     if (job.stats.state === DATA_FRAME_TASK_STATE.FAILED) {
       failedJobs++;
-    } else if (job.stats.state === DATA_FRAME_TASK_STATE.STARTED) {
+    } else if (
+      job.stats.state === DATA_FRAME_TASK_STATE.STARTED ||
+      job.stats.state === DATA_FRAME_TASK_STATE.ANALYZING ||
+      job.stats.state === DATA_FRAME_TASK_STATE.REINDEXING
+    ) {
       startedJobs++;
     } else if (job.stats.state === DATA_FRAME_TASK_STATE.STOPPED) {
       stoppedJobs++;

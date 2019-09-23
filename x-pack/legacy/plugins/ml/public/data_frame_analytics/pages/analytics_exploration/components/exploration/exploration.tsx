@@ -32,7 +32,7 @@ import euiThemeDark from '@elastic/eui/dist/eui_theme_dark.json';
 
 import {
   ColumnType,
-  MlInMemoryTable,
+  MlInMemoryTableBasic,
   OnTableChangeArg,
   SortingPropType,
   SORT_DIRECTION,
@@ -466,7 +466,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
       {clearTable === false && columns.length > 0 && sortField !== '' && (
-        <MlInMemoryTable
+        <MlInMemoryTableBasic
           allowNeutralSort={false}
           className="mlDataFrameAnalyticsExploration"
           columns={columns}
