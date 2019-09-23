@@ -131,12 +131,12 @@ export class SavedQuerySingleSelect extends Component<Props, State> {
   };
 
   onSavedQuerySelected = () => {
-    const selectedSavedQuery = this.isSelectionValid();
-    if (selectedSavedQuery.length) {
+    const selectedSavedQuery = this.savedQuerySelected();
+    if (selectedSavedQuery) {
       // this.props.onChange(selectedSavedQuery);
     }
   };
-  isSelectionValid = () => {
+  savedQuerySelected = () => {
     return this.state.options.filter(option => option.checked === 'on').length;
   };
 
@@ -152,7 +152,7 @@ export class SavedQuerySingleSelect extends Component<Props, State> {
         >
           {list => list}
         </EuiSelectable>
-        <EuiButton fill onClick={this.onSavedQuerySelected} isDisabled={!this.isSelectionValid()}>
+        <EuiButton fill onClick={this.onSavedQuerySelected} isDisabled={!this.savedQuerySelected()}>
           Save
         </EuiButton>
         <EuiButton fill isDisabled={!this.state.savedQueries}>
