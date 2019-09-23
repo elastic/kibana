@@ -20,19 +20,22 @@
 import _ from 'lodash';
 import chrome from '../chrome';
 import { FieldFormat } from '../../../../plugins/data/common/field_formats';
-import { IndexedArray } from '../indexed_array';
+// import { IndexedArray } from '../indexed_array';
 
-class FieldFormatRegistry extends IndexedArray {
+class FieldFormatRegistry {
   constructor() {
+    /*
     super({
       group: ['fieldType'],
-      index: ['id', 'name']
+      index: ['id']
     });
+    */
+    this.fieldFormats = [];
 
     this._uiSettings = chrome.getUiSettingsClient();
     this.getConfig = (...args) => this._uiSettings.get(...args);
     this._defaultMap = [];
-    this._providers = [];
+    // this._providers = [];
     this.init();
   }
 
@@ -66,7 +69,8 @@ class FieldFormatRegistry extends IndexedArray {
    * @return {Function}
    */
   getType = (formatId) => {
-    return this.byId[formatId];
+    // return this.byId[formatId];
+    return this.fieldFormats.find(format => format.id === formatId);
   };
   /**
    * Get the default FieldFormat type (class) for
@@ -79,7 +83,7 @@ class FieldFormatRegistry extends IndexedArray {
    */
   getDefaultType = (fieldType, esTypes) => {
     const config = this.getDefaultConfig(fieldType, esTypes);
-    return this.byId[config.id];
+    return this.getType(config.id);
   };
 
   /**
@@ -114,7 +118,7 @@ class FieldFormatRegistry extends IndexedArray {
    * @return {FieldFormat}
    */
   getInstance = _.memoize(function (formatId) {
-    const FieldFormat = this.byId[formatId];
+    const FieldFormat = this.fieldFormats.getType(formatId);
     if (!FieldFormat) {
       throw new Error(`Field Format '${formatId}' not found!`);
     }
@@ -131,7 +135,7 @@ class FieldFormatRegistry extends IndexedArray {
   getDefaultInstancePlain(fieldType, esTypes) {
     const conf = this.getDefaultConfig(fieldType, esTypes);
 
-    const FieldFormat = this.byId[conf.id];
+    const FieldFormat = this.getType(conf.id);
     return new FieldFormat(conf.params, this.getConfig);
   }
   /**
@@ -172,11 +176,13 @@ class FieldFormatRegistry extends IndexedArray {
     });
   }
 
+  /*
   name = 'fieldFormats';
   displayName = '[registry ' + this.name + ']';
+  */
 
   register = (module) => {
-    this.push(module(FieldFormat));
+    this.fieldFormats.push(module(FieldFormat));
     return this;
   };
 }
