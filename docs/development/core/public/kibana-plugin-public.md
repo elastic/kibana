@@ -90,11 +90,13 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AppUnmount](./kibana-plugin-public.appunmount.md) | A function called when an application should be unmounted from the page. This function should be synchronous. |
 |  [ChromeHelpExtension](./kibana-plugin-public.chromehelpextension.md) |  |
 |  [ChromeNavLinkUpdateableFields](./kibana-plugin-public.chromenavlinkupdateablefields.md) |  |
+|  [HandlerContextType](./kibana-plugin-public.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-public.handlerfunction.md) to represent the type of the context. |
+|  [HandlerFunction](./kibana-plugin-public.handlerfunction.md) | A function that accepts a context object and an optional number of additional arguments. Used for the generic types in [IContextContainer](./kibana-plugin-public.icontextcontainer.md) |
+|  [HandlerParameters](./kibana-plugin-public.handlerparameters.md) | Extracts the types of the additional arguments of a [HandlerFunction](./kibana-plugin-public.handlerfunction.md)<!-- -->, excluding the [HandlerContextType](./kibana-plugin-public.handlercontexttype.md)<!-- -->. |
 |  [HttpBody](./kibana-plugin-public.httpbody.md) |  |
 |  [HttpHandler](./kibana-plugin-public.httphandler.md) |  |
 |  [HttpSetup](./kibana-plugin-public.httpsetup.md) |  |
 |  [HttpStart](./kibana-plugin-public.httpstart.md) |  |
-|  [IContextHandler](./kibana-plugin-public.icontexthandler.md) | A function registered by a plugin to perform some action. |
 |  [IContextProvider](./kibana-plugin-public.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [OverlayBannerMount](./kibana-plugin-public.overlaybannermount.md) | A function that will mount the banner inside the provided element. |
 |  [OverlayBannerUnmount](./kibana-plugin-public.overlaybannerunmount.md) | A function that will unmount the banner from the element. |

@@ -18,6 +18,7 @@ import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
 import { Server } from 'hapi';
+import { ShallowPromise } from '@kbn/utility-types';
 import { Stream } from 'stream';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
@@ -95,7 +96,7 @@ export class ConfigService {
 
 // @public
 export interface ContextSetup {
-    createContextContainer<TContext extends {}, THandlerReturn, THandlerParmaters extends any[] = []>(): IContextContainer<TContext, THandlerReturn, THandlerParmaters>;
+    createContextContainer<THandler extends HandlerFunction<any>>(): IContextContainer<THandler>;
 }
 
 // @internal (undocumented)
@@ -121,7 +122,7 @@ export interface CoreSetup {
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
         basePath: HttpServiceSetup['basePath'];
         isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
-        registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(name: T, provider: RequestHandlerContextProvider<RequestHandlerContext>) => RequestHandlerContextContainer<RequestHandlerContext>;
+        registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(name: T, provider: RequestHandlerContextProvider<T>) => RequestHandlerContextContainer;
         createRouter: () => IRouter;
     };
 }
@@ -206,6 +207,15 @@ export type GetAuthState = (request: KibanaRequest | LegacyRequest) => {
 };
 
 // @public
+export type HandlerContextType<T extends HandlerFunction<any>> = T extends HandlerFunction<infer U> ? U : never;
+
+// @public
+export type HandlerFunction<T extends object> = (context: T, ...args: any[]) => any;
+
+// @public
+export type HandlerParameters<T extends HandlerFunction<any>> = T extends (context: any, ...args: infer U) => any ? U : never;
+
+// @public
 export type Headers = {
     [header in KnownHeaders]?: string | string[] | undefined;
 } & {
@@ -249,7 +259,7 @@ export interface HttpServerSetup {
 // @public (undocumented)
 export type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
     createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
-    registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(pluginOpaqueId: PluginOpaqueId, contextName: T, provider: RequestHandlerContextProvider<RequestHandlerContext>) => RequestHandlerContextContainer<RequestHandlerContext>;
+    registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(pluginOpaqueId: PluginOpaqueId, contextName: T, provider: RequestHandlerContextProvider<T>) => RequestHandlerContextContainer;
 };
 
 // @public (undocumented)
@@ -258,16 +268,13 @@ export interface HttpServiceStart {
 }
 
 // @public
-export interface IContextContainer<TContext extends {}, THandlerReturn, THandlerParameters extends any[] = []> {
-    createHandler(pluginOpaqueId: PluginOpaqueId, handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>): (...rest: THandlerParameters) => THandlerReturn extends Promise<any> ? THandlerReturn : Promise<THandlerReturn>;
-    registerContext<TContextName extends keyof TContext>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<TContext, TContextName, THandlerParameters>): this;
+export interface IContextContainer<THandler extends HandlerFunction<any>> {
+    createHandler(pluginOpaqueId: PluginOpaqueId, handler: THandler): (...rest: HandlerParameters<THandler>) => ShallowPromise<ReturnType<THandler>>;
+    registerContext<TContextName extends keyof HandlerContextType<THandler>>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<THandler, TContextName>): this;
 }
 
 // @public
-export type IContextHandler<TContext extends {}, TReturn, THandlerParameters extends any[] = []> = (context: TContext, ...rest: THandlerParameters) => TReturn;
-
-// @public
-export type IContextProvider<TContext extends Record<string, any>, TContextName extends keyof TContext, TProviderParameters extends any[] = []> = (context: Partial<TContext>, ...rest: TProviderParameters) => Promise<TContext[TContextName]> | TContext[TContextName];
+export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: Partial<HandlerContextType<THandler>>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
 
 // @public
 export interface IKibanaSocket {
@@ -584,16 +591,10 @@ export interface RequestHandlerContext {
 }
 
 // @public
-export type RequestHandlerContextContainer<TContext> = IContextContainer<TContext, RequestHandlerReturn | Promise<RequestHandlerReturn>, RequestHandlerParams>;
+export type RequestHandlerContextContainer = IContextContainer<RequestHandler<ObjectType<any>, ObjectType<any>, ObjectType<any>>>;
 
 // @public
-export type RequestHandlerContextProvider<TContext> = IContextProvider<TContext, keyof TContext, RequestHandlerParams>;
-
-// @public
-export type RequestHandlerParams = [KibanaRequest, KibanaResponseFactory];
-
-// @public
-export type RequestHandlerReturn = KibanaResponse;
+export type RequestHandlerContextProvider<TContextName extends keyof RequestHandlerContext> = IContextProvider<RequestHandler<ObjectType<any>, ObjectType<any>, ObjectType<any>>, TContextName>;
 
 // @public
 export type ResponseError = string | Error | {

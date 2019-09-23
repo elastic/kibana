@@ -9,6 +9,7 @@ import { MouseEventHandler } from 'react';
 import { Observable } from 'rxjs';
 import React from 'react';
 import * as Rx from 'rxjs';
+import { ShallowPromise } from '@kbn/utility-types';
 import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
 
 // @public
@@ -31,7 +32,7 @@ export interface AppBase {
 // @public (undocumented)
 export interface ApplicationSetup {
     register(app: App): void;
-    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountContext, T>): void;
+    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<App['mount'], T>): void;
 }
 
 // @public (undocumented)
@@ -44,7 +45,7 @@ export interface ApplicationStart {
         path?: string;
         state?: any;
     }): void;
-    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountContext, T>): void;
+    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<App['mount'], T>): void;
 }
 
 // @public
@@ -213,7 +214,7 @@ export interface ChromeStart {
 
 // @public
 export interface ContextSetup {
-    createContextContainer<TContext extends {}, THandlerReturn, THandlerParmaters extends any[] = []>(): IContextContainer<TContext, THandlerReturn, THandlerParmaters>;
+    createContextContainer<THandler extends HandlerFunction<any>>(): IContextContainer<THandler>;
 }
 
 // @internal (undocumented)
@@ -389,6 +390,15 @@ export interface FatalErrorsSetup {
     get$: () => Rx.Observable<FatalErrorInfo>;
 }
 
+// @public
+export type HandlerContextType<T extends HandlerFunction<any>> = T extends HandlerFunction<infer U> ? U : never;
+
+// @public
+export type HandlerFunction<T extends object> = (context: T, ...args: any[]) => any;
+
+// @public
+export type HandlerParameters<T extends HandlerFunction<any>> = T extends (context: any, ...args: infer U) => any ? U : never;
+
 // @public (undocumented)
 export type HttpBody = BodyInit | null | any;
 
@@ -537,16 +547,13 @@ export interface I18nStart {
 }
 
 // @public
-export interface IContextContainer<TContext extends {}, THandlerReturn, THandlerParameters extends any[] = []> {
-    createHandler(pluginOpaqueId: PluginOpaqueId, handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>): (...rest: THandlerParameters) => THandlerReturn extends Promise<any> ? THandlerReturn : Promise<THandlerReturn>;
-    registerContext<TContextName extends keyof TContext>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<TContext, TContextName, THandlerParameters>): this;
+export interface IContextContainer<THandler extends HandlerFunction<any>> {
+    createHandler(pluginOpaqueId: PluginOpaqueId, handler: THandler): (...rest: HandlerParameters<THandler>) => ShallowPromise<ReturnType<THandler>>;
+    registerContext<TContextName extends keyof HandlerContextType<THandler>>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<THandler, TContextName>): this;
 }
 
 // @public
-export type IContextHandler<TContext extends {}, TReturn, THandlerParameters extends any[] = []> = (context: TContext, ...rest: THandlerParameters) => TReturn;
-
-// @public
-export type IContextProvider<TContext extends Record<string, any>, TContextName extends keyof TContext, TProviderParameters extends any[] = []> = (context: Partial<TContext>, ...rest: TProviderParameters) => Promise<TContext[TContextName]> | TContext[TContextName];
+export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: Partial<HandlerContextType<THandler>>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
 
 // @public @deprecated
 export interface LegacyCoreSetup extends CoreSetup {

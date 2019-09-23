@@ -18,6 +18,7 @@
  */
 
 import { flatten } from 'lodash';
+import { ShallowPromise } from '@kbn/utility-types';
 import { pick } from '.';
 import { CoreId, PluginOpaqueId } from '../server';
 
@@ -35,26 +36,44 @@ import { CoreId, PluginOpaqueId } from '../server';
  * @public
  */
 export type IContextProvider<
-  TContext extends Record<string, any>,
-  TContextName extends keyof TContext,
-  TProviderParameters extends any[] = []
+  THandler extends HandlerFunction<any>,
+  TContextName extends keyof HandlerContextType<THandler>
 > = (
-  context: Partial<TContext>,
-  ...rest: TProviderParameters
-) => Promise<TContext[TContextName]> | TContext[TContextName];
+  context: Partial<HandlerContextType<THandler>>,
+  ...rest: HandlerParameters<THandler>
+) =>
+  | Promise<HandlerContextType<THandler>[TContextName]>
+  | HandlerContextType<THandler>[TContextName];
 
 /**
- * A function registered by a plugin to perform some action.
- *
- * @remarks
- * A new `TContext` will be built for each handler before invoking.
+ * A function that accepts a context object and an optional number of additional arguments. Used for the generic types
+ * in {@link IContextContainer}
  *
  * @public
  */
-export type IContextHandler<TContext extends {}, TReturn, THandlerParameters extends any[] = []> = (
-  context: TContext,
-  ...rest: THandlerParameters
-) => TReturn;
+export type HandlerFunction<T extends object> = (context: T, ...args: any[]) => any;
+
+/**
+ * Extracts the type of the first argument of a {@link HandlerFunction} to represent the type of the context.
+ *
+ * @public
+ */
+export type HandlerContextType<T extends HandlerFunction<any>> = T extends HandlerFunction<infer U>
+  ? U
+  : never;
+
+/**
+ * Extracts the types of the additional arguments of a {@link HandlerFunction}, excluding the
+ * {@link HandlerContextType}.
+ *
+ * @public
+ */
+export type HandlerParameters<T extends HandlerFunction<any>> = T extends (
+  context: any,
+  ...args: infer U
+) => any
+  ? U
+  : never;
 
 /**
  * An object that handles registration of context providers and configuring handlers with context.
@@ -123,13 +142,12 @@ export type IContextHandler<TContext extends {}, TReturn, THandlerParameters ext
  * }
  * ```
  *
+ * @typeParam THandler - the type of {@link HandlerFunction} this container should manage. The first argument of this
+ *                       function will be used as the context type.
+ *
  * @public
  */
-export interface IContextContainer<
-  TContext extends {},
-  THandlerReturn,
-  THandlerParameters extends any[] = []
-> {
+export interface IContextContainer<THandler extends HandlerFunction<any>> {
   /**
    * Register a new context provider.
    *
@@ -144,10 +162,10 @@ export interface IContextContainer<
    * @param provider - A {@link IContextProvider} to be called each time a new context is created.
    * @returns The {@link IContextContainer} for method chaining.
    */
-  registerContext<TContextName extends keyof TContext>(
+  registerContext<TContextName extends keyof HandlerContextType<THandler>>(
     pluginOpaqueId: PluginOpaqueId,
     contextName: TContextName,
-    provider: IContextProvider<TContext, TContextName, THandlerParameters>
+    provider: IContextProvider<THandler, TContextName>
   ): this;
 
   /**
@@ -160,31 +178,26 @@ export interface IContextContainer<
    */
   createHandler(
     pluginOpaqueId: PluginOpaqueId,
-    handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>
-  ): (
-    ...rest: THandlerParameters
-  ) => THandlerReturn extends Promise<any> ? THandlerReturn : Promise<THandlerReturn>;
+    handler: THandler
+  ): (...rest: HandlerParameters<THandler>) => ShallowPromise<ReturnType<THandler>>;
 }
 
 /** @internal */
-export class ContextContainer<
-  TContext extends Record<string, any>,
-  THandlerReturn,
-  THandlerParameters extends any[] = []
-> implements IContextContainer<TContext, THandlerReturn, THandlerParameters> {
+export class ContextContainer<THandler extends HandlerFunction<any>>
+  implements IContextContainer<THandler> {
   /**
    * Used to map contexts to their providers and associated plugin. In registration order which is tightly coupled to
    * plugin load order.
    */
   private readonly contextProviders = new Map<
-    keyof TContext,
+    keyof HandlerContextType<THandler>,
     {
-      provider: IContextProvider<TContext, keyof TContext, THandlerParameters>;
+      provider: IContextProvider<THandler, keyof HandlerContextType<THandler>>;
       source: symbol;
     }
   >();
   /** Used to keep track of which plugins registered which contexts for dependency resolution. */
-  private readonly contextNamesBySource: Map<symbol, Array<keyof TContext>>;
+  private readonly contextNamesBySource: Map<symbol, Array<keyof HandlerContextType<THandler>>>;
 
   /**
    * @param pluginDependencies - A map of plugins to an array of their dependencies.
@@ -193,13 +206,15 @@ export class ContextContainer<
     private readonly pluginDependencies: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>,
     private readonly coreId: CoreId
   ) {
-    this.contextNamesBySource = new Map<symbol, Array<keyof TContext>>([[coreId, []]]);
+    this.contextNamesBySource = new Map<symbol, Array<keyof HandlerContextType<THandler>>>([
+      [coreId, []],
+    ]);
   }
 
-  public registerContext = <TContextName extends keyof TContext>(
+  public registerContext = <TContextName extends keyof HandlerContextType<THandler>>(
     source: symbol,
     contextName: TContextName,
-    provider: IContextProvider<TContext, TContextName, THandlerParameters>
+    provider: IContextProvider<THandler, TContextName>
   ): this => {
     if (this.contextProviders.has(contextName)) {
       throw new Error(`Context provider for ${contextName} has already been registered.`);
@@ -217,27 +232,22 @@ export class ContextContainer<
     return this;
   };
 
-  public createHandler = (
-    source: symbol,
-    handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>
-  ) => {
+  public createHandler = (source: symbol, handler: THandler) => {
     if (source !== this.coreId && !this.pluginDependencies.has(source)) {
       throw new Error(`Cannot create handler for unknown plugin: ${source.toString()}`);
     }
 
-    return (async (...args: THandlerParameters) => {
+    return (async (...args: HandlerParameters<THandler>) => {
       const context = await this.buildContext(source, ...args);
       return handler(context, ...args);
-    }) as (
-      ...args: THandlerParameters
-    ) => THandlerReturn extends Promise<any> ? THandlerReturn : Promise<THandlerReturn>;
+    }) as (...args: HandlerParameters<THandler>) => ShallowPromise<ReturnType<THandler>>;
   };
 
   private async buildContext(
     source: symbol,
-    ...contextArgs: THandlerParameters
-  ): Promise<TContext> {
-    const contextsToBuild: ReadonlySet<keyof TContext> = new Set(
+    ...contextArgs: HandlerParameters<THandler>
+  ): Promise<HandlerContextType<THandler>> {
+    const contextsToBuild: ReadonlySet<keyof HandlerContextType<THandler>> = new Set(
       this.getContextNamesForSource(source)
     );
 
@@ -252,18 +262,20 @@ export class ContextContainer<
           // registered that provider.
           const exposedContext = pick(resolvedContext, [
             ...this.getContextNamesForSource(providerSource),
-          ]);
+          ]) as Partial<HandlerContextType<THandler>>;
 
           return {
             ...resolvedContext,
-            [contextName]: await provider(exposedContext as Partial<TContext>, ...contextArgs),
+            [contextName]: await provider(exposedContext, ...contextArgs),
           };
         },
-        Promise.resolve({}) as Promise<TContext>
+        Promise.resolve({}) as Promise<HandlerContextType<THandler>>
       );
   }
 
-  private getContextNamesForSource(source: symbol): ReadonlySet<keyof TContext> {
+  private getContextNamesForSource(
+    source: symbol
+  ): ReadonlySet<keyof HandlerContextType<THandler>> {
     if (source === this.coreId) {
       return this.getContextNamesForCore();
     } else {

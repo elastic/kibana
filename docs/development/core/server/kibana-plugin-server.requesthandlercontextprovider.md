@@ -9,5 +9,5 @@ Context provider for request handler. Extends request context object with provid
 <b>Signature:</b>
 
 ```typescript
-export declare type RequestHandlerContextProvider<TContext> = IContextProvider<TContext, keyof TContext, RequestHandlerParams>;
+export declare type RequestHandlerContextProvider<TContextName extends keyof RequestHandlerContext> = IContextProvider<RequestHandler<ObjectType<any>, ObjectType<any>, ObjectType<any>>, TContextName>;
 ```

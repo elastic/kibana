@@ -67,7 +67,14 @@ import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './u
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
-import { IContextContainer, IContextProvider, ContextSetup, IContextHandler } from './context';
+import {
+  IContextContainer,
+  IContextProvider,
+  ContextSetup,
+  HandlerFunction,
+  HandlerContextType,
+  HandlerParameters,
+} from './context';
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
@@ -216,7 +223,9 @@ export {
   ChromeRecentlyAccessedHistoryItem,
   ChromeStart,
   IContextContainer,
-  IContextHandler,
+  HandlerFunction,
+  HandlerContextType,
+  HandlerParameters,
   IContextProvider,
   ContextSetup,
   DocLinksStart,

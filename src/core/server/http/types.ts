@@ -16,29 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { ObjectType } from '@kbn/config-schema';
 import { IContextProvider, IContextContainer } from '../context';
-import { KibanaRequest, KibanaResponseFactory, KibanaResponse } from './router';
-
-/**
- * Parameters passed to the request handler function.
- * @public
- */
-export type RequestHandlerParams = [KibanaRequest, KibanaResponseFactory];
-
-/**
- * Expected outcome the request handler function.
- * @public
- */
-export type RequestHandlerReturn = KibanaResponse;
+import { RequestHandler } from './router';
+import { RequestHandlerContext } from '..';
 
 /**
  * An object that handles registration of http request context providers.
  * @public
  */
-export type RequestHandlerContextContainer<TContext> = IContextContainer<
-  TContext,
-  RequestHandlerReturn | Promise<RequestHandlerReturn>,
-  RequestHandlerParams
+export type RequestHandlerContextContainer = IContextContainer<
+  RequestHandler<ObjectType<any>, ObjectType<any>, ObjectType<any>>
 >;
 
 /**
@@ -47,8 +35,9 @@ export type RequestHandlerContextContainer<TContext> = IContextContainer<
  *
  * @public
  */
-export type RequestHandlerContextProvider<TContext> = IContextProvider<
-  TContext,
-  keyof TContext,
-  RequestHandlerParams
+export type RequestHandlerContextProvider<
+  TContextName extends keyof RequestHandlerContext
+> = IContextProvider<
+  RequestHandler<ObjectType<any>, ObjectType<any>, ObjectType<any>>,
+  TContextName
 >;

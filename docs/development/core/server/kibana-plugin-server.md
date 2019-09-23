@@ -119,10 +119,12 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ElasticsearchClientConfig](./kibana-plugin-server.elasticsearchclientconfig.md) |  |
 |  [GetAuthHeaders](./kibana-plugin-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |
 |  [GetAuthState](./kibana-plugin-server.getauthstate.md) | Get authentication state for a request. Returned by <code>auth</code> interceptor. |
+|  [HandlerContextType](./kibana-plugin-server.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-server.handlerfunction.md) to represent the type of the context. |
+|  [HandlerFunction](./kibana-plugin-server.handlerfunction.md) | A function that accepts a context object and an optional number of additional arguments. Used for the generic types in [IContextContainer](./kibana-plugin-server.icontextcontainer.md) |
+|  [HandlerParameters](./kibana-plugin-server.handlerparameters.md) | Extracts the types of the additional arguments of a [HandlerFunction](./kibana-plugin-server.handlerfunction.md)<!-- -->, excluding the [HandlerContextType](./kibana-plugin-server.handlercontexttype.md)<!-- -->. |
 |  [Headers](./kibana-plugin-server.headers.md) | Http request headers to read. |
 |  [HttpResponsePayload](./kibana-plugin-server.httpresponsepayload.md) | Data send to the client as a response payload. |
 |  [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |  |
-|  [IContextHandler](./kibana-plugin-server.icontexthandler.md) | A function registered by a plugin to perform some action. |
 |  [IContextProvider](./kibana-plugin-server.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [IsAuthenticated](./kibana-plugin-server.isauthenticated.md) | Return authentication status for a request. |
 |  [KibanaResponseFactory](./kibana-plugin-server.kibanaresponsefactory.md) | Creates an object containing request response payload, HTTP headers, error details, and other data transmitted to the client. |
@@ -138,8 +140,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [RequestHandler](./kibana-plugin-server.requesthandler.md) | A function executed when route path matched requested resource path. Request handler is expected to return a result of one of [KibanaResponseFactory](./kibana-plugin-server.kibanaresponsefactory.md) functions. |
 |  [RequestHandlerContextContainer](./kibana-plugin-server.requesthandlercontextcontainer.md) | An object that handles registration of http request context providers. |
 |  [RequestHandlerContextProvider](./kibana-plugin-server.requesthandlercontextprovider.md) | Context provider for request handler. Extends request context object with provided functionality or data. |
-|  [RequestHandlerParams](./kibana-plugin-server.requesthandlerparams.md) | Parameters passed to the request handler function. |
-|  [RequestHandlerReturn](./kibana-plugin-server.requesthandlerreturn.md) | Expected outcome the request handler function. |
 |  [ResponseError](./kibana-plugin-server.responseerror.md) | Error message and optional data send to the client in case of error. |
 |  [ResponseErrorAttributes](./kibana-plugin-server.responseerrorattributes.md) | Additional data to provide error details. |
 |  [ResponseHeaders](./kibana-plugin-server.responseheaders.md) | Http response headers to set. |

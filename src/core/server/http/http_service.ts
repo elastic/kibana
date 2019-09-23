@@ -83,8 +83,8 @@ export type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
   registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
     pluginOpaqueId: PluginOpaqueId,
     contextName: T,
-    provider: RequestHandlerContextProvider<RequestHandlerContext>
-  ) => RequestHandlerContextContainer<RequestHandlerContext>;
+    provider: RequestHandlerContextProvider<T>
+  ) => RequestHandlerContextContainer;
 };
 
 /** @public */
@@ -103,7 +103,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
   private readonly logger: LoggerFactory;
   private readonly log: Logger;
   private notReadyServer?: Server;
-  private requestHandlerContext?: RequestHandlerContextContainer<RequestHandlerContext>;
+  private requestHandlerContext?: RequestHandlerContextContainer;
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger;
@@ -150,7 +150,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
       registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
         pluginOpaqueId: PluginOpaqueId,
         contextName: T,
-        provider: RequestHandlerContextProvider<RequestHandlerContext>
+        provider: RequestHandlerContextProvider<T>
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
     };
 
