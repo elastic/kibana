@@ -88,43 +88,49 @@ function isKibanaUrl(urlConfig) {
   return urlValue.startsWith('kibana#/discover') || urlValue.startsWith('kibana#/dashboard');
 }
 
+/**
+ * Escape any double quotes in the value for correct use in KQL.
+ * @param {string} Input string.
+ */
+function escapeForKQL(value) {
+  return value.replace(/\"/g, '\\"');
+}
+
 // Builds a Kibana dashboard or Discover URL from the supplied config, with any
 // dollar delimited tokens substituted from the supplied anomaly record.
 function buildKibanaUrl(urlConfig, record) {
   const urlValue = urlConfig.url_value;
 
-  return String(urlValue).replace((/\$([^?&$\'"]{1,40})\$/g), (match, name) => {
+  const queryLanguageEscapeCallback = urlValue.includes('language:lucene') ? escapeForElasticsearchQuery : escapeForKQL;
 
-    // Use lodash get to allow nested JSON fields to be retrieved.
-    let tokenValue = _.get(record, name, null);
+  const getResultTokenValue = _.compose(
+    queryLanguageEscapeCallback,
+    // Kibana URLs used rison encoding, so escape with ! any ! or ' characters
+    v => v.replace(/[!']/g, '!$&'),
+    encodeURIComponent
+  );
 
-    // If the token is an influencer, then the value in the record will be an array.
-    // For now just support passing the first influencer from the array.
-    // TODO - support passing multiple influencer values.
-    if (Array.isArray(tokenValue)) {
-      tokenValue = tokenValue[0];
-    }
-
-    if (tokenValue !== null && !(name === 'earliest' || name === 'latest')) {
-
-      if (urlValue.includes('language:lucene') === true) {
-        // Escape reserved characters if the query language is lucene (default was switched to KQL in 7.1).
-        tokenValue = `${escapeForElasticsearchQuery(tokenValue)}`;
-      } else {
-        // Escape any double quotes in the value for correct use in KQL.
-        tokenValue = tokenValue.replace(/\"/g, '\\"');
-      }
-
-      // Kibana URLs used rison encoding, so escape with ! any ! or ' characters
-      tokenValue = tokenValue.replace(/[!']/g, '!$&');
-
-      // URI encode in case of special characters in the value.
-      tokenValue = encodeURIComponent(tokenValue);
-    }
-
-    // If property not found string is not replaced.
-    return (tokenValue !== null) ? tokenValue : match;
-  });
+  return String(urlValue)
+    .replace('$earliest$', record.earliest)
+    .replace('$latest$', record.latest)
+    .replace(/query:'(.+)'/, (match, queryString) => {
+      return 'query:\'' + queryString
+        .split(/\sand\s/i)
+        .map(v => v.split(':')[0])
+        .map(name => {
+        // Use lodash get to allow nested JSON fields to be retrieved.
+          const tokenValues = _.get(record, name, null);
+          if (tokenValues === null) {
+            return null;
+          }
+          const result = tokenValues
+            .map(value =>  `${name}:${getResultTokenValue(value)}`)
+            .join(' or ');
+          return tokenValues.length > 1 ? `(${result})` : result;
+        })
+        .filter(v => v !== null)
+        .join(' and ') + '\'';
+    });
 }
 
 // Returns whether the supplied label is valid for a custom URL.
