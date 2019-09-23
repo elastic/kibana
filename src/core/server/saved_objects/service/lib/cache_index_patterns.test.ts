@@ -19,6 +19,12 @@
 
 import { SavedObjectsCacheIndexPatterns } from './cache_index_patterns';
 
+const mockGetFieldsForWildcard = jest.fn();
+const mockIndexPatternsService: jest.Mock = jest.fn().mockImplementation(() => ({
+  getFieldsForWildcard: mockGetFieldsForWildcard,
+  getFieldsForTimePattern: jest.fn(),
+}));
+
 describe('SavedObjectsRepository', () => {
   let cacheIndexPatterns: SavedObjectsCacheIndexPatterns;
 
@@ -63,6 +69,7 @@ describe('SavedObjectsRepository', () => {
 
   beforeEach(() => {
     cacheIndexPatterns = new SavedObjectsCacheIndexPatterns();
+    jest.clearAllMocks();
   });
 
   it('setIndexPatterns should return an error object when indexPatternsService is undefined', async () => {
@@ -74,12 +81,11 @@ describe('SavedObjectsRepository', () => {
   });
 
   it('setIndexPatterns should return an error object if getFieldsForWildcard is not defined', async () => {
+    mockGetFieldsForWildcard.mockImplementation(() => {
+      throw new Error('something happen');
+    });
     try {
-      cacheIndexPatterns.setIndexPatternsService({
-        getFieldsForWildcard: () => {
-          throw new Error('something happen');
-        },
-      });
+      cacheIndexPatterns.setIndexPatternsService(new mockIndexPatternsService());
       await cacheIndexPatterns.setIndexPatterns('test-index');
     } catch (error) {
       expect(error.message).toMatch('Index Pattern Error - something happen');
@@ -87,20 +93,15 @@ describe('SavedObjectsRepository', () => {
   });
 
   it('setIndexPatterns should return empty array when getFieldsForWildcard is returning null or undefined', async () => {
-    const mockGetFieldsForWildcard = jest.fn();
-    cacheIndexPatterns.setIndexPatternsService({
-      getFieldsForWildcard: mockGetFieldsForWildcard,
-    });
+    mockGetFieldsForWildcard.mockImplementation(() => null);
+    cacheIndexPatterns.setIndexPatternsService(new mockIndexPatternsService());
     await cacheIndexPatterns.setIndexPatterns('test-index');
     expect(cacheIndexPatterns.getIndexPatterns()).toEqual(undefined);
   });
 
   it('setIndexPatterns should return index pattern when getFieldsForWildcard is returning fields', async () => {
-    const mockGetFieldsForWildcard = jest.fn();
     mockGetFieldsForWildcard.mockImplementation(() => fields);
-    cacheIndexPatterns.setIndexPatternsService({
-      getFieldsForWildcard: mockGetFieldsForWildcard,
-    });
+    cacheIndexPatterns.setIndexPatternsService(new mockIndexPatternsService());
     await cacheIndexPatterns.setIndexPatterns('test-index');
     expect(cacheIndexPatterns.getIndexPatterns()).toEqual({ fields, title: 'test-index' });
   });
