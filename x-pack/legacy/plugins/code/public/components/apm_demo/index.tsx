@@ -31,7 +31,7 @@ export const ApmDemo = () => (
         <CodeIntegration
           project={myProject}
           frame={frame}
-          onSelect={associateToService(myProject, frame)}
+          onRepoSelect={associateToService(myProject, frame)}
         />
       </Frame>
     ))}

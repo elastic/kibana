@@ -14,21 +14,21 @@ interface Props {
   repos: string[];
 }
 
-export const RepoSelector = ({ onSelect, repos }: Props) => {
-  const placeHolderOption = { value: 'select_new', text: 'Select' };
-  const importNewOption = { value: 'import_new', text: 'Import new' };
+const placeHolderOption = { value: 'select_new', text: 'Select' };
+const importNewOption = { value: 'import_new', text: 'Import new' };
 
+export const RepoSelector = ({ onSelect, repos: _repos }: Props) => {
   const [selectedValue, setSelectedValue] = useState(placeHolderOption.value);
   const [newRepo, setNewRepo] = useState('');
   const [isInvalid, setIsInvalid] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  const _repos = newRepo ? [...repos, newRepo] : repos;
-  const selectedRepo = _repos.find(repo => repo === selectedValue);
+  const repos = newRepo ? [..._repos, newRepo] : _repos;
+  const selectedRepo = repos.find(repo => repo === selectedValue);
 
   const options = [
     placeHolderOption,
-    ..._repos.map(repo => ({ value: repo, text: repo })),
+    ...repos.map(repo => ({ value: repo, text: repo })),
     importNewOption,
   ];
 
@@ -46,15 +46,15 @@ export const RepoSelector = ({ onSelect, repos }: Props) => {
   };
 
   const handleSave = () => selectedRepo && onSelect(selectedRepo);
-  // They technically clicked "import"; should we trigger it right then?
+
   const handleImportSubmit = () => {
     setSelectedValue(newRepo);
     setShowModal(false);
   };
 
   const handleClose = () => {
-    setShowModal(false);
     setSelectedValue(placeHolderOption.value);
+    setShowModal(false);
   };
 
   return (

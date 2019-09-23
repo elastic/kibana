@@ -10,14 +10,14 @@ import { EuiButton, EuiPopover } from '@elastic/eui';
 import { RepoSelector } from './repo_selector';
 
 interface Props {
-  onSelect: (codeId: string) => void;
+  onRepoSelect: (codeId: string) => void;
   project: { mapping: boolean; url: string };
   frame: number;
 }
 
 const repos = ['a', 'b', 'c'];
 
-export const CodeIntegration = ({ onSelect, frame, project }: Props) => {
+export const CodeIntegration = ({ onRepoSelect, frame, project }: Props) => {
   const [showSelector, setShowSelector] = useState(false);
 
   const onClick = () => {
@@ -38,7 +38,7 @@ export const CodeIntegration = ({ onSelect, frame, project }: Props) => {
       isOpen={showSelector}
       closePopover={() => setShowSelector(false)}
     >
-      <RepoSelector onSelect={onSelect} repos={repos} />
+      <RepoSelector onSelect={onRepoSelect} repos={repos} />
     </EuiPopover>
   );
 };
