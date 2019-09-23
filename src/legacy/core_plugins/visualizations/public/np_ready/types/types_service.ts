@@ -19,15 +19,8 @@
 
 import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 
-interface SetupDependencies {
-  Vis: any;
-  VisFactoryProvider: any;
-  VisTypesRegistryProvider: any;
-}
-
-interface StartDependencies {
-  VisTypesRegistryProvider: any;
-  Private: any;
+export interface VisTypeDefinition {
+  name: string;
 }
 /**
  * Vis Types Service
@@ -35,23 +28,29 @@ interface StartDependencies {
  * @internal
  */
 export class TypesService {
-  public setup({ Vis, VisFactoryProvider, VisTypesRegistryProvider }: SetupDependencies) {
+  private types: Record<string, VisTypeDefinition> = {};
+  public setup() {
     return {
-      Vis,
-      VisFactoryProvider,
-      registerVisualization: (registerFn: () => any) => {
-        VisTypesRegistryProvider.register(registerFn);
+      registerVisualization: (registerFn: () => VisTypeDefinition) => {
+        const visDefinition = registerFn();
+        if (this.types[visDefinition.name]) {
+          throw new Error('type already exists!');
+        }
+        this.types[visDefinition.name] = visDefinition;
       },
-      visTypeAliasRegistry,
+      registerAlias: visTypeAliasRegistry.add,
     };
   }
 
-  public start({ VisTypesRegistryProvider, Private }: StartDependencies) {
-    const visTypes = Private(VisTypesRegistryProvider);
+  public start() {
     return {
       get: (visualization: string) => {
-        return visTypes.byName[visualization];
+        return this.types[visualization];
       },
+      all: () => {
+        return { ...this.types };
+      },
+      getAliases: visTypeAliasRegistry.get,
     };
   }
 

@@ -43,9 +43,7 @@ import chrome from 'ui/chrome';
 import { getVisualizeLoader } from 'ui/visualize/loader';
 
 import { Legacy } from 'kibana';
-import { VisTypesRegistry, VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
-import { IPrivate } from 'ui/private';
 import { SavedObjectAttributes } from 'kibana/server';
 import {
   EmbeddableFactory,
@@ -54,6 +52,8 @@ import {
   EmbeddableOutput,
 } from '../../../../embeddable_api/public/np_ready/public';
 import { setup } from '../../../../embeddable_api/public/np_ready/public/legacy';
+import { start as visualizations } from '../../../../visualizations/public/legacy';
+
 import { showNewVisModal } from '../wizard';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
@@ -72,17 +72,13 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   VisualizationAttributes
 > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
-  private readonly visTypes: VisTypesRegistry;
+  private readonly visTypes: any;
 
   static async createVisualizeEmbeddableFactory(): Promise<VisualizeEmbeddableFactory> {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get<IPrivate>('Private');
-    const visTypes = Private(VisTypesRegistryProvider);
-
-    return new VisualizeEmbeddableFactory(visTypes);
+    return new VisualizeEmbeddableFactory(visualizations.types);
   }
 
-  constructor(visTypes: VisTypesRegistry) {
+  constructor(visTypes: any) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('kbn.visualize.savedObjectName', { defaultMessage: 'Visualization' }),
@@ -92,21 +88,23 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
             return 'visualizeApp';
           }
           return (
-            visTypes.byName[JSON.parse(savedObject.attributes.visState).type].icon || 'visualizeApp'
+            visTypes.get(JSON.parse(savedObject.attributes.visState).type).icon || 'visualizeApp'
           );
         },
         getTooltipForSavedObject: savedObject => {
           if (!visTypes) {
             return '';
           }
-          return `${savedObject.attributes.title} (${visTypes.byName[JSON.parse(savedObject.attributes.visState).type].title})`;
+          return `${savedObject.attributes.title} (${
+            visTypes.get(JSON.parse(savedObject.attributes.visState).type).title
+          })`;
         },
         showSavedObject: savedObject => {
           if (!visTypes) {
             return false;
           }
           const typeName: string = JSON.parse(savedObject.attributes.visState).type;
-          const visType = visTypes.byName[typeName];
+          const visType = visTypes.get(typeName);
           if (!visType) {
             return false;
           }

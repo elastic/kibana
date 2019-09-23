@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { setup as visualizations } from '../../visualizations/public/legacy';
+
 import './controls/line_interpolation_option';
 
 import histogramVisTypeProvider from './histogram';
@@ -29,11 +30,11 @@ import horizontalBarVisTypeProvider from './horizontal_bar';
 import gaugeVisTypeProvider from './gauge';
 import goalVisTypeProvider from './goal';
 
-VisTypesRegistryProvider.register(histogramVisTypeProvider);
-VisTypesRegistryProvider.register(lineVisTypeProvider);
-VisTypesRegistryProvider.register(pieVisTypeProvider);
-VisTypesRegistryProvider.register(areaVisTypeProvider);
-VisTypesRegistryProvider.register(heatmapVisTypeProvider);
-VisTypesRegistryProvider.register(horizontalBarVisTypeProvider);
-VisTypesRegistryProvider.register(gaugeVisTypeProvider);
-VisTypesRegistryProvider.register(goalVisTypeProvider);
+visualizations.types.registerVisualization(histogramVisTypeProvider);
+visualizations.types.registerVisualization(lineVisTypeProvider);
+visualizations.types.registerVisualization(pieVisTypeProvider);
+visualizations.types.registerVisualization(areaVisTypeProvider);
+visualizations.types.registerVisualization(heatmapVisTypeProvider);
+visualizations.types.registerVisualization(horizontalBarVisTypeProvider);
+visualizations.types.registerVisualization(gaugeVisTypeProvider);
+visualizations.types.registerVisualization(goalVisTypeProvider);
