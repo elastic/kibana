@@ -31,7 +31,6 @@ export function getGroupsFromJobs(
             id: g,
             jobIds: [job.id],
             docs_processed: job.processed_record_count,
-            earliest_timestamp: job.earliestTimestampMs,
             latest_timestamp: job.latestTimestampMs,
             max_anomaly_score: null,
           };
@@ -44,16 +43,6 @@ export function getGroupsFromJobs(
           } else if (job.latestTimestampMs > groups[g].latest_timestamp) {
             groups[g].latest_timestamp = job.latestTimestampMs;
           }
-          // if existing group's earliest timestamp is not defined, set it to current job's
-          // otherwise compare to current job's and replace if current job's earliest is less
-          if (groups[g].earliest_timestamp === undefined && job.earliestTimestampMs !== undefined) {
-            groups[g].earliest_timestamp = job.earliestTimestampMs;
-          } else if (
-            job.earliestTimestampMs !== undefined &&
-            job.earliestTimestampMs < groups[g].earliest_timestamp
-          ) {
-            groups[g].earliest_timestamp = job.earliestTimestampMs;
-          }
         }
       });
     } else {
@@ -62,18 +51,6 @@ export function getGroupsFromJobs(
       // if incoming job latest timestamp is greater than the last saved one, replace it
       if (job.latestTimestampMs > groups.ungrouped.latest_timestamp) {
         groups.ungrouped.latest_timestamp = job.latestTimestampMs;
-      }
-
-      if (
-        groups.ungrouped.earliest_timestamp === undefined &&
-        job.earliestTimestampMs !== undefined
-      ) {
-        groups.ungrouped.earliest_timestamp = job.earliestTimestampMs;
-      } else if (
-        job.earliestTimestampMs !== undefined &&
-        job.earliestTimestampMs < groups.ungrouped.earliest_timestamp
-      ) {
-        groups.ungrouped.earliest_timestamp = job.earliestTimestampMs;
       }
     }
   });

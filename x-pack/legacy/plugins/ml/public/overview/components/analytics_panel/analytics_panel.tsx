@@ -70,7 +70,7 @@ export const AnalyticsPanel: FC = () => {
             <Fragment>
               <p>
                 {i18n.translate('xpack.ml.overview.analyticsList.emptyPromptText', {
-                  defaultMessage: `Data frame analytics enable you to perform different analyses of your data and annotate it with the results. As part of its output, data frame analytics appends the results of the analysis to the source data.`,
+                  defaultMessage: `Data frame analytics enable you to perform different analyses of your data and annotate it with the results. The analytics job stores the annotated data, as well as a copy of the source data, in a new index.`,
                 })}
               </p>
             </Fragment>

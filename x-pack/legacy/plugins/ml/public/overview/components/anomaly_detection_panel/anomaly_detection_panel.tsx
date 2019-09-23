@@ -15,10 +15,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import { toastNotifications } from 'ui/notify';
 import { AnomalyDetectionTable } from './table';
 import { ml } from '../../../services/ml_api_service';
-import { mlResultsService } from '../../../services/results_service';
 import { getGroupsFromJobs, getStatsBarData, getJobsWithTimerange } from './utils';
 import { Dictionary } from '../../../../common/types/common';
 import { MlSummaryJobs, MlSummaryJob } from '../../../../common/types/jobs';
@@ -92,12 +92,10 @@ export const AnomalyDetectionPanel: FC = () => {
         .filter(group => group.jobIds.length > 0)
         .map((group, i) => {
           scores[group.id].index = i;
-          return mlResultsService.getOverallBucketScores(
-            group.jobIds,
-            1,
-            group.earliest_timestamp,
-            group.latest_timestamp
-          );
+          const latestTimestamp = group.latest_timestamp;
+          const startMoment = moment(latestTimestamp);
+          const twentyFourHoursAgo = startMoment.subtract(24, 'hours').valueOf();
+          return ml.results.getMaxAnomalyScore(group.jobIds, twentyFourHoursAgo, latestTimestamp);
         });
 
       const results = await Promise.all(promises);
@@ -105,13 +103,8 @@ export const AnomalyDetectionPanel: FC = () => {
       // Check results for each group's promise index and update state
       Object.keys(scores).forEach(groupId => {
         const resultsIndex = scores[groupId] && scores[groupId].index;
-        const promiseResult: { success: boolean; results: { [key: string]: number } } =
-          resultsIndex !== undefined && results[resultsIndex];
-        if (promiseResult.success === true && promiseResult.results !== undefined) {
-          const maxScore = Math.max(...Object.values(promiseResult.results));
-          scores[groupId] = { maxScore };
-          tempGroups[groupId].max_anomaly_score = maxScore;
-        }
+        scores[groupId] = results[resultsIndex];
+        tempGroups[groupId].max_anomaly_score = results[resultsIndex];
       });
 
       setGroups(tempGroups);
