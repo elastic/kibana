@@ -26,15 +26,12 @@
 export default async function ({ readConfigFile }) {
   const defaultConfig = await readConfigFile(require.resolve('../functional/config'));
   // const commonConfig = await readConfigFile(require.resolve('../common/config'));
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
+  // const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
     ...defaultConfig.getAll(),
     junit: {
       reportName: 'Stack Functional Integration Tests'
-    },
-    browser: {
-      type: 'chrome'
     },
     testFiles: [
       require.resolve('./test/functional/apps/telemetry'),
@@ -43,20 +40,20 @@ export default async function ({ readConfigFile }) {
       // require.resolve('./test/functional/apps/packetbeat'),
       // require.resolve('./test/functional/apps/monitoring'),
     ],
-    services: {
+    // services: {
       // es: commonConfig.get('services.es'),
       // esArchiver: commonConfig.get('services.esArchiver'),
       // retry: commonConfig.get('services.retry'),
       // supertest: KibanaSupertestProvider,
       // supertestWithoutAuth: KibanaSupertestWithoutAuthProvider,
       // esSupertest: ElasticsearchSupertestProvider,
-    },
+    // },
     // servers: commonConfig.get('servers'),
     // esTestCluster: commonConfig.get('esTestCluster'),
     kbnTestServer: {
-      ...functionalConfig.get('kbnTestServer'),
+      ...defaultConfig.get('kbnTestServer'),
       serverArgs: [
-        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        ...defaultConfig.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=true',
         '--elasticsearch.healthCheck.delay=3600000',
         '--server.xsrf.disableProtection=true',
