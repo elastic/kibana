@@ -7,6 +7,7 @@
 import React, { useState, useEffect, ReactNode } from 'react';
 import { EuiPopover, EuiSelectable, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import classNames from 'classnames';
 import { WorkspaceField } from '../../types';
 
 import { FieldIcon } from './field_icon';
@@ -23,6 +24,8 @@ export function FieldPicker({ fieldMap, selectField, deselectField }: FieldPicke
   const allFields = Object.values(fieldMap);
   const unselectedFields = allFields.filter(field => !field.selected);
   const hasSelectedFields = unselectedFields.length < allFields.length;
+
+  const hasFields = allFields.length > 0;
 
   const [fieldOptions, setFieldOptions] = useState(toOptions(allFields));
 
@@ -51,12 +54,17 @@ export function FieldPicker({ fieldMap, selectField, deselectField }: FieldPicke
       panelPaddingSize="none"
       button={
         <EuiBadge
-          className="gphFieldPicker__button"
+          className={classNames('gphFieldPicker__button', {
+            'gphFieldPicker__button--disabled': !hasFields,
+          })}
           color="hollow"
           iconType="plusInCircleFilled"
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            if (hasFields) {
+              setOpen(true);
+            }
+          }}
           onClickAriaLabel={badgeDescription}
-          title=""
         >
           {badgeDescription}
         </EuiBadge>

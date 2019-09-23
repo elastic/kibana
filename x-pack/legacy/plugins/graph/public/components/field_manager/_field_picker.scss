@@ -11,3 +11,13 @@
   @include gphFieldBadgeSize;
   color: $euiColorPrimary;
 }
+
+.gphFieldPicker__button--disabled {
+  color: $euiTextColor;
+  cursor: not-allowed !important;
+
+  &:hover,
+  &:focus {
+    text-decoration: none;
+  }
+}
