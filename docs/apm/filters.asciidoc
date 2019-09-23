@@ -59,7 +59,8 @@ v|*Go:* {apm-go-ref}/configuration.html#config-environment[`ELASTIC_APM_ENVIRONM
 ==== Local filters
 
 Local filters are ways you can filter your APM data on each individual page.
-Filters do not persist as you move between pages, and are typically only relevant in the current context.
+They do not persist as you move between pages.
+As an example, transaction filters might include things like 
 
 [role="screenshot"]
 image::apm/images/local-filter.png[Local filters available in the APM app in Kibana]
