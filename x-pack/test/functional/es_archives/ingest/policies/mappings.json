@@ -1,0 +1,130 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".ingest": {}
+    },
+    "index": ".ingest_1",
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "config": {
+          "dynamic": "true",
+          "properties": {
+            "buildNum": {
+              "type": "keyword"
+            }
+          }
+        },
+        "inputs": {
+          "properties": {
+            "data_source_id": {
+              "type": "keyword"
+            },
+            "other": {
+              "type": "text"
+            }
+          }
+        },
+        "migrationVersion": {
+          "type": "object",
+          "dynamic": "true"
+        },
+        "namespace": {
+          "type": "keyword"
+        },
+        "policies": {
+          "properties": {
+            "agent_version": {
+              "type": "keyword"
+            },
+            "created_by": {
+              "type": "keyword"
+            },
+            "created_on": {
+              "type": "keyword"
+            },
+            "data_sources": {
+              "properties": {
+                "inputs": {
+                  "type": "keyword"
+                },
+                "meta": {
+                  "type": "keyword"
+                },
+                "output": {
+                  "type": "keyword"
+                },
+                "policy": {
+                  "type": "keyword"
+                },
+                "policy_id": {
+                  "type": "keyword"
+                },
+                "queue": {
+                  "type": "keyword"
+                },
+                "uuid": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "description": {
+              "type": "text"
+            },
+            "id": {
+              "type": "keyword"
+            },
+            "monitoring_enabled": {
+              "type": "boolean"
+            },
+            "name": {
+              "type": "text"
+            },
+            "shared_id": {
+              "type": "keyword"
+            },
+            "status": {
+              "type": "keyword"
+            },
+            "updated_by": {
+              "type": "keyword"
+            },
+            "updated_on": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "integer"
+            }
+          }
+        },
+        "references": {
+          "type": "nested",
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          }
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "updated_at": {
+          "type": "date"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

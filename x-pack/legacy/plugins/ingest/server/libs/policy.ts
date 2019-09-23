@@ -38,13 +38,11 @@ export class PolicyLib {
       version: 0,
       agent_version: info.kibana.version,
       data_sources: [],
-      created_on: new Date().toDateString(),
+      created_on: new Date().toISOString(),
       created_by: withUser.username,
-      updated_on: new Date().toDateString(),
+      updated_on: new Date().toISOString(),
       updated_by: withUser.username,
     };
-
-    // TODO io-ts validations, need custom reporter
 
     return await this.adapter.create(newPolicy);
   }
@@ -86,9 +84,11 @@ export class PolicyLib {
     return policy as FullPolicyFile;
   }
 
-  public async list(page: number = 1, perPage: number = 25): Promise<PolicyFile[]> {
-    const policys = await this.adapter.list(page, perPage);
-    return policys;
+  public async list(
+    page: number = 1,
+    perPage: number = 25
+  ): Promise<{ items: PolicyFile[]; total: number }> {
+    return await this.adapter.list(page, perPage);
   }
 
   public async listVersions(

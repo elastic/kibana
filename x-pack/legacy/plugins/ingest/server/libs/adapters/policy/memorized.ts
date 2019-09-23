@@ -12,9 +12,7 @@ import { PolicyAdapter } from './default';
 export class MemorizedPolicyAdapter {
   constructor(private readonly adapter?: PolicyAdapter) {}
 
-  public async create(
-    newPolicy: NewPolicyFile
-  ): Promise<{ id: string; shared_id: string; version: number }> {
+  public async create(newPolicy: NewPolicyFile): Promise<PolicyFile> {
     const { shared_id, ...policy } = newPolicy;
     return await memorize(
       `create - ${JSON.stringify({ name: policy.name, description: policy.description })}`,
@@ -45,7 +43,10 @@ export class MemorizedPolicyAdapter {
     );
   }
 
-  public async list(page: number = 1, perPage: number = 25): Promise<PolicyFile[]> {
+  public async list(
+    page: number = 1,
+    perPage: number = 25
+  ): Promise<{ items: PolicyFile[]; total: number }> {
     return await memorize(
       `list - ${JSON.stringify({ page, perPage })}`,
       async () => {

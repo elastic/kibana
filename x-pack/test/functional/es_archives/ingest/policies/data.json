@@ -1,0 +1,80 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".ingest_1",
+    "id": "policies:1",
+    "source": {
+      "policies": {
+        "name": "Policy 1",
+        "description": "Amazing policy",
+        "status": "active",
+        "monitoring_enabled": true,
+        "shared_id": "shared-policy-1",
+        "version": 1,
+        "agent_version": "8.0.0",
+        "data_sources": [],
+        "created_on": "2019-09-20T17:35:09+0000",
+        "created_by": "nchaulet",
+        "updated_on": "2019-09-20T17:35:09+0000",
+        "updated_by": "nchaulet"
+      },
+      "type": "policies",
+      "references": [],
+      "updated_at": "2019-09-20T17:30:22.950Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ingest_1",
+    "id": "policies:2",
+    "source": {
+      "policies": {
+        "name": "Policy",
+        "description": "Amazing policy",
+        "status": "locked",
+        "monitoring_enabled": true,
+        "shared_id": "shared-policy-1",
+        "version": 0,
+        "agent_version": "8.0.0",
+        "data_sources": [],
+        "created_on": "2019-09-20T17:35:09+0000",
+        "created_by": "nchaulet",
+        "updated_on": "2019-09-20T17:35:09+0000",
+        "updated_by": "nchaulet"
+      },
+      "type": "policies",
+      "references": [],
+      "updated_at": "2019-09-20T17:30:22.950Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ingest_1",
+    "id": "policies:3",
+    "source": {
+      "policies": {
+        "name": "Policy 3",
+        "description": "Amazing policy",
+        "status": "active",
+        "monitoring_enabled": true,
+        "shared_id": "shared-policy-3",
+        "version": 0,
+        "agent_version": "8.0.0",
+        "data_sources": [],
+        "created_on": "2019-09-20T17:35:09+0000",
+        "created_by": "nchaulet",
+        "updated_on": "2019-09-20T17:35:09+0000",
+        "updated_by": "nchaulet"
+      },
+      "type": "policies",
+      "references": [],
+      "updated_at": "2019-09-20T17:30:22.950Z"
+    }
+  }
+}
