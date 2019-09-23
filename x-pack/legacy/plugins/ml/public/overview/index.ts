@@ -4,9 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  StatsBar,
-  TransformStatsBarStats,
-  AnalyticStatsBarStats,
-  JobStatsBarStats,
-} from './stats_bar';
+import './route';
+import './directive';
