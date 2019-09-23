@@ -5,13 +5,15 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
 import { FieldManagerProps, FieldManager } from './field_manager';
 import { SearchBarProps, SearchBar } from './search_bar';
 
 export interface GraphAppProps extends FieldManagerProps, SearchBarProps {}
 
 export function GraphApp(props: GraphAppProps) {
+  const [pickerOpen, setPickerOpen] = useState(false);
+
   return (
     <div className="gphGraph__bar">
       <EuiFlexGroup direction="column" gutterSize="s">

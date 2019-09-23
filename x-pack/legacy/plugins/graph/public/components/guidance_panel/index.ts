@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './graph_chrome';
+export * from './guidance_panel';
