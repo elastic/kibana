@@ -44,28 +44,27 @@ export const MetricsExplorerKueryBar = ({ derivedIndexPattern, onSubmit, value }
     setDraftQuery(query);
   };
 
-    const filteredDerivedIndexPattern = {
-      ...derivedIndexPattern,
-      fields: derivedIndexPattern.fields.filter(field => isDisplayable(field)),
-    };
+  const filteredDerivedIndexPattern = {
+    ...derivedIndexPattern,
+    fields: derivedIndexPattern.fields.filter(field => isDisplayable(field)),
+  };
 
-    return (
-      <WithKueryAutocompletion indexPattern={filteredDerivedIndexPattern}>
-        {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
-          <AutocompleteField
-            isLoadingSuggestions={isLoadingSuggestions}
-            isValid={isValid}
-            loadSuggestions={loadSuggestions}
-            onChange={handleChange}
-            onSubmit={onSubmit}
-            placeholder={i18n.translate('xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder', {
-              defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
-            })}
-            suggestions={suggestions}
-            value={draftQuery}
-          />
-        )}
-      </WithKueryAutocompletion>
-    );
-  }
-);
+  return (
+    <WithKueryAutocompletion indexPattern={filteredDerivedIndexPattern}>
+      {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
+        <AutocompleteField
+          isLoadingSuggestions={isLoadingSuggestions}
+          isValid={isValid}
+          loadSuggestions={loadSuggestions}
+          onChange={handleChange}
+          onSubmit={onSubmit}
+          placeholder={i18n.translate('xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder', {
+            defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
+          })}
+          suggestions={suggestions}
+          value={draftQuery}
+        />
+      )}
+    </WithKueryAutocompletion>
+  );
+};
