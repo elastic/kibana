@@ -13,6 +13,7 @@ import { RedirectToNetworkPage } from './redirect_to_network';
 import { RedirectToOverviewPage } from './redirect_to_overview';
 import { RedirectToTimelinesPage } from './redirect_to_timelines';
 import { HostsTableType } from '../../store/hosts/model';
+import { SiemPageName } from '../../pages/home/home_navigations';
 
 interface LinkToPageProps {
   match: RouteMatch<{}>;
@@ -20,27 +21,41 @@ interface LinkToPageProps {
 
 export const LinkToPage = pure<LinkToPageProps>(({ match }) => (
   <Switch>
-    <Route path={`${match.url}/:pageName(overview)`} component={RedirectToOverviewPage} />
-    <Route exact path={`${match.url}/:pageName(hosts)`} component={RedirectToHostsPage} />
     <Route
-      path={`${match.url}/:pageName(hosts)/:tabName(${HostsTableType.hosts}|${HostsTableType.authentications}|${HostsTableType.uncommonProcesses}|${HostsTableType.anomalies}|${HostsTableType.events})`}
+      path={`${match.url}/:pageName(${SiemPageName.overview})`}
+      component={RedirectToOverviewPage}
+    />
+    <Route
+      exact
+      path={`${match.url}/:pageName(${SiemPageName.hosts})`}
       component={RedirectToHostsPage}
     />
     <Route
-      path={`${match.url}/:pageName(hosts)/:detailName/:tabName(${HostsTableType.authentications}|${HostsTableType.uncommonProcesses}|${HostsTableType.anomalies}|${HostsTableType.events})`}
+      path={`${match.url}/:pageName(${SiemPageName.hosts})/:tabName(${HostsTableType.hosts}|${HostsTableType.authentications}|${HostsTableType.uncommonProcesses}|${HostsTableType.anomalies}|${HostsTableType.events})`}
+      component={RedirectToHostsPage}
+    />
+    <Route
+      path={`${match.url}/:pageName(${SiemPageName.hosts})/:detailName/:tabName(${HostsTableType.authentications}|${HostsTableType.uncommonProcesses}|${HostsTableType.anomalies}|${HostsTableType.events})`}
       component={RedirectToHostDetailsPage}
     />
     <Route
-      path={`${match.url}/:pageName(hosts)/:detailName`}
+      path={`${match.url}/:pageName(${SiemPageName.hosts})/:detailName`}
       component={RedirectToHostDetailsPage}
     />
 
-    <Route exact path={`${match.url}/:pageName(network)`} component={RedirectToNetworkPage} />
     <Route
-      path={`${match.url}/:pageName(network)/ip/:detailName`}
+      exact
+      path={`${match.url}/:pageName(${SiemPageName.network})`}
       component={RedirectToNetworkPage}
     />
-    <Route path={`${match.url}/:pageName(timelines)`} component={RedirectToTimelinesPage} />
+    <Route
+      path={`${match.url}/:pageName(${SiemPageName.network})/ip/:detailName`}
+      component={RedirectToNetworkPage}
+    />
+    <Route
+      path={`${match.url}/:pageName(${SiemPageName.timelines})`}
+      component={RedirectToTimelinesPage}
+    />
     <Redirect to="/" />
   </Switch>
 ));

@@ -7,13 +7,15 @@
 import React from 'react';
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
-import { IPDetails, IPDetailsBody } from './ip_details';
+import { SiemPageName } from '../home/home_navigations';
 import { GlobalTime } from '../../containers/global_time';
 import { IpDetailsTableType } from '../../store/network/model';
+
 import { Network } from './network';
 import { AnomaliesQueryTabBody, TlsQueryTabBody, UsersQueryTabBody } from './navigation';
+import { IPDetails, IPDetailsBody } from './ip_details';
 
-const networkPagePath = `/:pageName(network)`;
+const networkPagePath = `/:pageName(${SiemPageName.network})`;
 const ipDetailsPagePath = networkPagePath + '/ip/:detailName';
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
@@ -69,8 +71,10 @@ export const NetworkContainer = React.memo<Props>(() => (
           )}
         />
         <Route
-          path="/network/"
-          render={({ location: { search = '' } }) => <Redirect to={`/network${search}`} />}
+          path={`/${SiemPageName.network}/`}
+          render={({ location: { search = '' } }) => (
+            <Redirect to={`/${SiemPageName.network}${search}`} />
+          )}
         />
       </Switch>
     )}
