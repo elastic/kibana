@@ -38,7 +38,11 @@ const getJobsTableColumns = (
     name: i18n.COLUMN_JOB_NAME,
     render: ({ id, description }: Job) => (
       <JobNameWrapper>
-        <EuiLink href={`${chrome.getBasePath()}/app/ml`} target="_blank">
+        <EuiLink
+          data-test-subj="jobs-table-link"
+          href={`${chrome.getBasePath()}/app/ml#/jobs?mlManagement=(jobId:${encodeURI(id)})`}
+          target="_blank"
+        >
           <EuiText size="s">{id}</EuiText>
         </EuiLink>
         <EuiText color="subdued" size="xs">
