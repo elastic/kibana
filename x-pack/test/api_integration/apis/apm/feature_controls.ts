@@ -132,16 +132,17 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       req: {
         method: 'post',
         url: `/api/apm/settings/agent-configuration/search`,
-        body: { service: { name: 'test-service' } },
+        body: { service: { name: 'my-service' } },
       },
       expectForbidden: expect404,
-      expectResponse: expect200,
+      expectResponse: expect404, // 404 is the default response if no config was found
     },
   ];
 
   const elasticsearchRole = {
     indices: [
-      { names: ['apm-*', '.apm-agent-configuration'], privileges: ['read', 'view_index_metadata'] },
+      { names: ['apm-*'], privileges: ['read', 'view_index_metadata'] },
+      { names: ['.apm-agent-configuration'], privileges: ['read', 'write', 'view_index_metadata'] },
     ],
   };
 
@@ -155,15 +156,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
     let request = supertest[method](`${basePath}${url}`);
 
-    // send body as json
+    // json body
     if (body) {
-      request = request
-        .send({
-          service: {
-            name: 'test-service',
-          },
-        })
-        .set('Content-Type', 'application/json');
+      request = request.send(body);
     }
 
     return await request
@@ -194,10 +189,10 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           endpoint.expectResponse(result);
         }
       } catch (e) {
-        const { body, req } = result.response;
+        const { statusCode, body, req } = result.response;
         throw new Error(
           `Endpoint: ${req.method} ${req.path}
-          Status code: ${body.statusCode}
+          Status code: ${statusCode}
           Response: ${body.message}
 
           ${e.message}`
