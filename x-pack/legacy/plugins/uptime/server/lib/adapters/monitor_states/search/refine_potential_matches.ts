@@ -13,21 +13,21 @@ import { MonitorGroups, MonitorLocCheckGroup } from './fetch_page';
 // check groups for their associated monitor IDs. If not, it discards the result.
 export const refinePotentialMatches = async (
   queryContext: QueryContext,
-  monitorIds: string[],
-  filteredCheckGroups: Set<string>
+  potentialMatchMonitorIDs: string[],
+  potentialMatchCheckGroups: Set<string>
 ): Promise<MonitorGroups[]> => {
-  if (monitorIds.length === 0) {
+  if (potentialMatchMonitorIDs.length === 0) {
     return [];
   }
 
   const recentGroupsMatchingStatus = await fullyMatchingIds(
     queryContext,
-    monitorIds,
-    filteredCheckGroups
+    potentialMatchMonitorIDs,
+    potentialMatchCheckGroups
   );
 
   // Return the monitor groups filtering out things potential matches that weren't current
-  const matches: MonitorGroups[] = monitorIds
+  const matches: MonitorGroups[] = potentialMatchMonitorIDs
     .map((id: string) => {
       return { id, groups: recentGroupsMatchingStatus.get(id) || [] };
     })
@@ -46,15 +46,16 @@ export const refinePotentialMatches = async (
 
 const fullyMatchingIds = async (
   queryContext: QueryContext,
-  monitorIds: string[],
-  filteredCheckGroups: Set<string>
+  potentialMatchMonitorIDs: string[],
+  potentialMatchCheckGroups: Set<string>
 ) => {
-  const mostRecentQueryResult = await mostRecentCheckGroups(queryContext, monitorIds);
+  const mostRecentQueryResult = await mostRecentCheckGroups(queryContext, potentialMatchMonitorIDs);
 
   const matching = new Map<string, MonitorLocCheckGroup[]>();
   MonitorLoop: for (const monBucket of mostRecentQueryResult.aggregations.monitor.buckets) {
     const monitorId: string = monBucket.key;
     const groups: MonitorLocCheckGroup[] = [];
+
     for (const locBucket of monBucket.location.buckets) {
       const location = locBucket.key;
       const topSource = locBucket.top.hits.hits[0]._source;
@@ -74,13 +75,20 @@ const fullyMatchingIds = async (
       }
       groups.push(mlcg);
     }
-    matching.set(monitorId, groups);
+
+    // We only truly match the monitor if one of the most recent check groups was found in the potential matches phase
+    if (groups.some(g => potentialMatchCheckGroups.has(g.checkGroup))) {
+      matching.set(monitorId, groups);
+    }
   }
 
   return matching;
 };
 
-export const mostRecentCheckGroups = async (queryContext: QueryContext, monitorIds: string[]) => {
+export const mostRecentCheckGroups = async (
+  queryContext: QueryContext,
+  potentialMatchMonitorIDs: string[]
+) => {
   const params = {
     index: INDEX_NAMES.HEARTBEAT,
     body: {
@@ -88,7 +96,7 @@ export const mostRecentCheckGroups = async (queryContext: QueryContext, monitorI
       query: {
         bool: {
           must: [
-            { terms: { 'monitor.id': monitorIds } },
+            { terms: { 'monitor.id': potentialMatchMonitorIDs } },
             // only match summary docs because we only want the latest *complete* check group.
             { exists: { field: 'summary.down' } },
           ],
@@ -96,7 +104,7 @@ export const mostRecentCheckGroups = async (queryContext: QueryContext, monitorI
       },
       aggs: {
         monitor: {
-          terms: { field: 'monitor.id', size: monitorIds.length },
+          terms: { field: 'monitor.id', size: potentialMatchMonitorIDs.length },
           aggs: {
             location: {
               terms: { field: 'observer.geo.name', missing: 'N/A', size: 100 },
