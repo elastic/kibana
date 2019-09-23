@@ -87,7 +87,7 @@ export class SavedQuerySingleSelect extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      options: this.getMappedOptions(),
+      options: [],
       savedQueries: [],
       savedQueriesLoaded: false,
       // selectedOption: this.getSelectedOption(),
@@ -157,9 +157,9 @@ export class SavedQuerySingleSelect extends Component<Props, State> {
 
   render() {
     const { options, savedQueries, savedQueriesLoaded } = this.state;
-    if (!savedQueriesLoaded) {
+    if (!savedQueriesLoaded || !options.length) {
       return <EuiLoadingContent lines={3} />;
-    } else if (savedQueriesLoaded && !savedQueries.length) {
+    } else if (savedQueriesLoaded && !options.length) {
       return (
         <div>
           {i18n.translate('data.search.searchBar.savedQueryNoSavedQueriesText', {
