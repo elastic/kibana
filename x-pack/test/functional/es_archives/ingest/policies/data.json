@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".ingest_1",
+    "index": ".kibana-ingest_1",
     "id": "policies:1",
     "source": {
       "policies": {
@@ -28,7 +28,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".ingest_1",
+    "index": ".kibana-ingest_1",
     "id": "policies:2",
     "source": {
       "policies": {
@@ -55,7 +55,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".ingest_1",
+    "index": ".kibana-ingest_1",
     "id": "policies:3",
     "source": {
       "policies": {

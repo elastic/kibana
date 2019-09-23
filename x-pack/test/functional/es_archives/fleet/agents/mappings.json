@@ -2,9 +2,9 @@
   "type": "index",
   "value": {
     "aliases": {
-      ".fleet": {}
+      ".kibana-fleet": {}
     },
-    "index": ".fleet_1",
+    "index": ".kibana-fleet_1",
     "mappings": {
       "dynamic": "strict",
       "properties": {

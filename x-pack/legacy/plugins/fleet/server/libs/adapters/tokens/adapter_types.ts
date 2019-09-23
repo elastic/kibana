@@ -77,7 +77,7 @@ export interface TokenAdapter {
       token: string;
       tokenHash: string;
       active: boolean;
-      policy: { id: string; sharedId: string };
+      policy: { id: string };
       expire_at?: string;
     }
   ): Promise<Token>;

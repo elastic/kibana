@@ -20,7 +20,6 @@ function generateJWTToken(): string {
     {
       policy: {
         id: 'policyId',
-        sharedId: 'sharedId',
       },
       type: TokenType.ENROLMENT_TOKEN,
     },
@@ -114,7 +113,6 @@ describe('Token Lib', () => {
 
       const token = await tokens.generateEnrolmentToken(getUser(), {
         id: 'policy_id',
-        sharedId: 'policy_shared_id',
       });
 
       expect(token).toBeDefined();
@@ -126,7 +124,6 @@ describe('Token Lib', () => {
 
       const token = await tokens.generateEnrolmentToken(getUser(), {
         id: 'policy_id',
-        sharedId: 'policy_shared_id',
       });
 
       const tokenHash = hashJWTToken(token);

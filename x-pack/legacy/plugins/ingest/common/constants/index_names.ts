@@ -5,5 +5,5 @@
  */
 
 export const INDEX_NAMES = {
-  INGEST: '.ingest',
+  INGEST: '.kibana-ingest',
 };

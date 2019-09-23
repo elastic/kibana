@@ -35,6 +35,8 @@ export class AgentAdapter implements AgentAdapterType {
         ...agent,
         local_metadata: JSON.stringify(agent.local_metadata || {}),
         user_provided_metadata: JSON.stringify(agent.user_provided_metadata || {}),
+        actions: [],
+        events: [],
       },
       options
     );
@@ -44,8 +46,6 @@ export class AgentAdapter implements AgentAdapterType {
       attributes: {
         id: so.id,
         ...so.attributes,
-        actions: [],
-        events: [],
       },
     });
   }

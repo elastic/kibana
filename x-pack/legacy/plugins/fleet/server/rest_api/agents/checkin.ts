@@ -35,9 +35,6 @@ export const createCheckinAgentsRoute = (libs: FleetServerLib) => ({
   config: {
     auth: false,
     validate: {
-      query: {
-        page: Joi.number().default(1),
-      },
       headers: Joi.object({
         'kbn-fleet-access-token': Joi.string().required(),
       }).options({

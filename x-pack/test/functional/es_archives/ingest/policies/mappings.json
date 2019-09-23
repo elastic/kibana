@@ -2,9 +2,9 @@
   "type": "index",
   "value": {
     "aliases": {
-      ".ingest": {}
+      ".kibana-ingest": {}
     },
-    "index": ".ingest_1",
+    "index": ".kibana-ingest_1",
     "mappings": {
       "dynamic": "strict",
       "properties": {

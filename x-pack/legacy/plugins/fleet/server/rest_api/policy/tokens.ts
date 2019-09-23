@@ -13,7 +13,7 @@ import { FleetServerLib } from '../../libs/types';
 
 export const createGetEnrollmentTokenRoute = (libs: FleetServerLib) => ({
   method: 'GET',
-  path: '/api/policy/{policyId}/enrollment-tokens',
+  path: '/api/fleet/policies/{policyId}/enrollment-tokens',
   config: {
     auth: false,
     validate: {
@@ -29,7 +29,7 @@ export const createGetEnrollmentTokenRoute = (libs: FleetServerLib) => ({
     const token = await libs.tokens.getEnrollmentTokenForPolicy(
       request.user,
       policyId,
-      Boolean(request.query)
+      Boolean(request.query.regenerate)
     );
 
     if (!token) {
