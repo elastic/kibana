@@ -22,7 +22,7 @@ export const DurationLineSeriesList = ({ lines, meanColor }: Props) => (
         curve={CurveType.CURVE_MONOTONE_X}
         // this id is used for the line chart representing the average duration length
         customSeriesColors={getColorsMap(meanColor, getSpecId(`average-${name}`))}
-        data={line.map(({ x, y }) => [x, microsToMillis(y)])}
+        data={line.map(({ x, y }) => [x, microsToMillis(y || null)])}
         id={getSpecId(`loc-avg-${name}`)}
         key={`locline-${name}`}
         name={name}
