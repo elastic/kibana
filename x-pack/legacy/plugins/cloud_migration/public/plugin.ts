@@ -38,7 +38,8 @@ export class CloudMigrationPlugin {
 
         // Angular Lifecycle
         const appRoute = $route.current;
-        const stopListeningForLocationChange = $scope.$on('$locationChangeSuccess', () => {
+
+        const onLocationChangeSuccess = () => {
           const currentRoute = $route.current;
           const isInAppNavigation = currentRoute.$$route.template === appRoute.$$route.template;
 
@@ -51,9 +52,9 @@ export class CloudMigrationPlugin {
 
           // Unmount React app when leaving the Angular route controller
           $scope.$on('$destroy', () => {
-            if (stopListeningForLocationChange) {
-              stopListeningForLocationChange();
-            }
+            // if (stopListeningForLocationChange) {
+            //   stopListeningForLocationChange();
+            // }
             unmountReactApp(document.getElementById(REACT_ROOT_ID));
           });
 
@@ -62,7 +63,15 @@ export class CloudMigrationPlugin {
             unmountReactApp(elem);
             mountReactApp(elem, { core, plugins });
           });
-        });
+        };
+
+        // This App currently does not have a React router, so no location change success occurs
+        // For now we will call it directly when the Angular controller is initialized.
+        // const stopListeningForLocationChange = $scope.$on(
+        //   '$locationChangeSuccess',
+        //   onLocationChangeSuccess
+        // );
+        onLocationChangeSuccess();
       },
     });
   }
