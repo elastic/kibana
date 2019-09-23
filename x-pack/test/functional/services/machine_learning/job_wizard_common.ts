@@ -262,7 +262,7 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
       await retry.waitForWithTimeout(
         'job processing to finish',
         5 * 60 * 1000,
-        async () => (await testSubjects.exists('mlJobWizardButtonCreateJob')) === false
+        async () => await testSubjects.exists('mlJobWizardButtonRunInRealtime')
       );
     },
   };
