@@ -115,6 +115,10 @@ export class AbstractSource {
     return AbstractSource.isIndexingSource;
   }
 
+  isPushedData() {
+    return false;
+  }
+
   supportsElasticsearchFilters() {
     return false;
   }
