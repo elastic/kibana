@@ -201,7 +201,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       });
     }
 
-    return sortByOrder(entries, ['highlighted', 'title'], ['desc', 'asc']);
+    return sortByOrder(entries, ['highlighted', 'isPromoted', 'title'], ['desc', 'asc', 'asc']);
   }
 
   private renderVisType = (visType: VisTypeListEntry | VisTypeAliasListEntry) => {

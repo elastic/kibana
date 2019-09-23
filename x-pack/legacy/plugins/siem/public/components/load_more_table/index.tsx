@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
-  EuiPanel,
   EuiPopover,
 } from '@elastic/eui';
 import { isEmpty, noop } from 'lodash/fp';
@@ -25,6 +24,7 @@ import { HeaderPanel } from '../header_panel';
 import { Loader } from '../loader';
 
 import * as i18n from './translations';
+import { Panel } from '../panel';
 
 const DEFAULT_DATA_TEST_SUBJ = 'load-more-table';
 
@@ -188,7 +188,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
     return (
       <Panel
         data-test-subj={dataTestSubj}
-        loading={{ loading }}
+        loading={loading}
         onMouseEnter={this.mouseEnter}
         onMouseLeave={this.mouseLeave}
       >
@@ -294,18 +294,6 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
     }));
   };
 }
-
-const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
-  position: relative;
-
-  ${({ loading }) =>
-    loading &&
-    `
-    overflow: hidden;
-  `}
-`;
-
-Panel.displayName = 'Panel';
 
 const BasicTable = styled(EuiBasicTable)`
   tbody {
