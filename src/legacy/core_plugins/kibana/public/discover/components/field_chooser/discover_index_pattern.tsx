@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useState } from 'react';
-import { EuiComboBox, EuiToolTip } from '@elastic/eui';
+import { EuiComboBox, EuiToolTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { SavedObject } from 'kibana/server';
 
 interface Props {
@@ -31,40 +31,47 @@ export function DiscoverIndexPattern({
   setIndexPattern,
 }: Props) {
   if (indexPatternList.length === 0 || !selectedIndexPattern) {
+    // just in case, shouldn't happen
     return null;
   } else if (indexPatternList.length === 1) {
     return (
       <div className="index-pattern">
-        <h2 className="index-pattern-label" id="index_pattern_id" tabIndex={0}>
-          {selectedIndexPattern.attributes.title}
-        </h2>
+        <h2 className="index-pattern-label">{selectedIndexPattern.attributes.title}</h2>
       </div>
     );
   }
   const [selected, setSelected] = useState(selectedIndexPattern);
 
-  const options = indexPatternList.map(ip => ({
-    value: ip.id,
-    label: ip.attributes.title,
+  const options = indexPatternList.map(entity => ({
+    value: entity.id,
+    label: entity.attributes.title,
   }));
 
   return (
-    <EuiToolTip content={selectedIndexPattern.attributes.title}>
-      <EuiComboBox
-        className="index-pattern-selection"
-        compressed={true}
-        isClearable={false}
-        onChange={choices => {
-          const newSelected = choices[0] && indexPatternList.find(ip => ip.id === choices[0].value);
-          if (newSelected) {
-            setSelected(newSelected);
-            setIndexPattern!(newSelected.id);
-          }
-        }}
-        options={options}
-        selectedOptions={selected ? [{ value: selected.id, label: selected.attributes.title }] : []}
-        singleSelection={{ asPlainText: true }}
-      />
-    </EuiToolTip>
+    <EuiFlexGroup gutterSize="none" direction="column" responsive={false}>
+      <EuiFlexItem>
+        <EuiToolTip content={selected.attributes.title}>
+          <EuiComboBox
+            className="index-pattern-selection"
+            data-test-subj="index-pattern-selection"
+            fullWidth={true}
+            isClearable={false}
+            onChange={choices => {
+              const newSelected =
+                choices[0] && indexPatternList.find(entity => entity.id === choices[0].value);
+              if (newSelected) {
+                setSelected(newSelected);
+                setIndexPattern!(newSelected.id);
+              }
+            }}
+            options={options}
+            selectedOptions={
+              selected ? [{ value: selected.id, label: selected.attributes.title }] : []
+            }
+            singleSelection={{ asPlainText: true }}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

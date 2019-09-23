@@ -30,6 +30,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const globalNav = getService('globalNav');
   const config = getService('config');
   const defaultFindTimeout = config.get('timeouts.find');
+  const comboBox = getService('comboBox');
 
   class DiscoverPage {
     async getQueryField() {
@@ -271,8 +272,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async selectIndexPattern(indexPattern) {
-      await find.clickByCssSelector('.index-pattern-selection');
-      await find.setValue('.ui-select-search', indexPattern + '\n');
+      await comboBox.set('index-pattern-selection', indexPattern);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
