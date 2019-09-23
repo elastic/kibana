@@ -20,7 +20,7 @@ import { ExistsFilter, buildEmptyFilter, buildExistsFilter } from '@kbn/es-query
 import { mapExists } from './map_exists';
 import { mapQueryString } from './map_query_string';
 
-describe('Filter Bar Directive', () => {
+describe('filter manager utilities', () => {
   describe('mapExists()', () => {
     test('should return the key and value for matching filters', async () => {
       const filter: ExistsFilter = buildExistsFilter({ name: '_type' }, 'index');

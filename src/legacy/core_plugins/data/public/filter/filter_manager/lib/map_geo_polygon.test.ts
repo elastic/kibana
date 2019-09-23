@@ -20,7 +20,7 @@ import { mapGeoPolygon } from './map_geo_polygon';
 import { StubIndexPatterns } from '../test_helpers/stub_index_pattern';
 import { IndexPatterns } from '../../../index_patterns';
 
-describe('Filter Bar Directive', () => {
+describe('filter manager utilities', () => {
   describe('mapGeoPolygon()', () => {
     let mapGeoPolygonFn: Function;
 

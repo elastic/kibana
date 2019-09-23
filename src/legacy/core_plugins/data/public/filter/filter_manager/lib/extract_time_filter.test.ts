@@ -30,7 +30,7 @@ const mockIndexPatterns = jest.fn(
     } as any)
 );
 
-describe('Filter Bar Directive', () => {
+describe('filter manager utilities', () => {
   describe('extractTimeFilter()', () => {
     const indexPatterns = mockIndexPatterns() as IndexPatterns;
 

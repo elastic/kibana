@@ -19,7 +19,7 @@
 import { CustomFilter, buildEmptyFilter, buildQueryFilter } from '@kbn/es-query';
 import { mapDefault } from './map_default';
 
-describe('Filter Bar Directive', () => {
+describe('filter manager utilities', () => {
   describe('mapDefault()', () => {
     test('should return the key and value for matching filters', async () => {
       const filter: CustomFilter = buildQueryFilter({ match_all: {} }, 'index');

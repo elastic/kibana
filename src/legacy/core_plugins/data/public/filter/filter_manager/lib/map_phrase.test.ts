@@ -20,7 +20,7 @@ import { mapPhrase } from './map_phrase';
 import { StubIndexPatterns } from '../test_helpers/stub_index_pattern';
 import { IndexPatterns } from '../../../index_patterns';
 
-describe('Filter Bar Directive', () => {
+describe('filter manager utilities', () => {
   describe('mapPhrase()', () => {
     let mapPhraseFn: Function;
 

@@ -20,7 +20,7 @@
 import { QueryStringFilter, buildQueryFilter, buildEmptyFilter } from '@kbn/es-query';
 import { mapQueryString } from './map_query_string';
 
-describe('Filter Bar Directive', () => {
+describe('filter manager utilities', () => {
   describe('mapQueryString()', () => {
     test('should return the key and value for matching filters', async () => {
       const filter: QueryStringFilter = buildQueryFilter(

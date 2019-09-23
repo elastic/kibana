@@ -19,7 +19,7 @@
 import { Filter, buildQueryFilter, FilterStateStore } from '@kbn/es-query';
 import { uniqFilters } from './uniq_filters';
 
-describe('Filter Bar Directive', () => {
+describe('filter manager utilities', () => {
   describe('niqFilter', () => {
     test('should filter out dups', () => {
       const before: Filter[] = [

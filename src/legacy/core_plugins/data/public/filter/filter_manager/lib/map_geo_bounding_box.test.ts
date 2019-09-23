@@ -21,7 +21,7 @@ import { mapGeoBoundingBox } from './map_geo_bounding_box';
 import { StubIndexPatterns } from '../test_helpers/stub_index_pattern';
 import { IndexPatterns } from '../../../index_patterns';
 
-describe('Filter Bar Directive', () => {
+describe('filter manager utilities', () => {
   describe('mapGeoBoundingBox()', () => {
     let mapGeoBoundingBoxFn: Function;
 

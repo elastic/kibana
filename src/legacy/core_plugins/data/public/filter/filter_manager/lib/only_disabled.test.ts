@@ -20,7 +20,7 @@
 import { Filter } from '@kbn/es-query';
 import { onlyDisabledFiltersChanged } from './only_disabled';
 
-describe('Filter Bar Directive', () => {
+describe('filter manager utilities', () => {
   describe('onlyDisabledFiltersChanged()', () => {
     test('should return true if all filters are disabled', () => {
       const filters = [

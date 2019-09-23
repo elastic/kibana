@@ -19,7 +19,7 @@
 import { MissingFilter, buildEmptyFilter, ExistsFilter } from '@kbn/es-query';
 import { mapMissing } from './map_missing';
 
-describe('Filter Bar Directive', () => {
+describe('filter manager utilities', () => {
   describe('mapMissing()', () => {
     test('should return the key and value for matching filters', async () => {
       const filter: MissingFilter = {

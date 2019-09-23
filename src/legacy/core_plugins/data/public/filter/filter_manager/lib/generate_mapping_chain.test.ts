@@ -21,7 +21,7 @@ import sinon from 'sinon';
 import { Filter, buildEmptyFilter } from '@kbn/es-query';
 import { generateMappingChain } from './generate_mapping_chain';
 
-describe('Filter Bar Directive', () => {
+describe('filter manager utilities', () => {
   let mapping: any;
   let next: any;
 

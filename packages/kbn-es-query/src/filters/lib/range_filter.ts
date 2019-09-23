@@ -43,5 +43,5 @@ export type RangeFilterMeta = FilterMeta & {
 
 export type RangeFilter = Filter & {
   meta: RangeFilterMeta;
-  range?: { [key: string]: RangeFilterParams };
+  range: { [key: string]: RangeFilterParams };
 };

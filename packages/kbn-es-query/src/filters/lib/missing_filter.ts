@@ -23,5 +23,5 @@ export type MissingFilterMeta = FilterMeta;
 
 export type MissingFilter = Filter & {
   meta: MissingFilterMeta;
-  missing?: any;
+  missing: any;
 };

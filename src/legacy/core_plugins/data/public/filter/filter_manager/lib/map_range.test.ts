@@ -21,7 +21,7 @@ import { mapRange } from './map_range';
 import { StubIndexPatterns } from '../test_helpers/stub_index_pattern';
 import { IndexPatterns } from '../../../index_patterns';
 
-describe('Filter Bar Directive', () => {
+describe('filter manager utilities', () => {
   describe('mapRange()', () => {
     let mapRangeFn: Function;
 

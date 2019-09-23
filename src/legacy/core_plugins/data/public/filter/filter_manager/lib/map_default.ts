@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { CustomFilter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { find, keys, get } from 'lodash';
 
 const TYPE = 'custom';
 
-export const mapDefault = async (filter: CustomFilter) => {
+export const mapDefault = async (filter: Filter) => {
   const metaProperty = /(^\$|meta)/;
   const key = find(keys(filter), item => !item.match(metaProperty));
 

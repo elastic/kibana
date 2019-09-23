@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { RangeFilter } from '@kbn/es-query';
+import { Filter, RangeFilter } from '@kbn/es-query';
 import { get } from 'lodash';
 import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
 import { IndexPatterns, IndexPattern } from '../../../index_patterns';
@@ -26,7 +26,7 @@ const TYPE = 'range';
 
 const getFirstRangeKey = (filter: RangeFilter) => filter.range && Object.keys(filter.range)[0];
 const getRangeByKey = (filter: RangeFilter, key: string) => get(filter, ['range', key]);
-const isScriptedRange = (filter: RangeFilter) => {
+const isScriptedRange = (filter: Filter) => {
   const params = get(filter, ['script', 'script', 'params'], {});
 
   return Boolean(
@@ -58,11 +58,12 @@ function getParams(filter: RangeFilter, indexPattern?: IndexPattern) {
   return { type: TYPE, key, value, params };
 }
 
-export const mapRange = (indexPatterns: IndexPatterns) => {
-  return async (filter: RangeFilter) => {
-    const isScriptedRangeFilter = isScriptedRange(filter);
+export const isMapRangeFilter = (filter: any): filter is RangeFilter =>
+  filter && (filter.range || isScriptedRange(filter));
 
-    if (!filter.range && !isScriptedRangeFilter) {
+export const mapRange = (indexPatterns: IndexPatterns) => {
+  return async (filter: Filter) => {
+    if (!isMapRangeFilter(filter)) {
       throw filter;
     }
 

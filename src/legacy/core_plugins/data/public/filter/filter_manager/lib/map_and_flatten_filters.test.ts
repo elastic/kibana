@@ -22,7 +22,7 @@ import { mapAndFlattenFilters } from './map_and_flatten_filters';
 import { StubIndexPatterns } from '../test_helpers/stub_index_pattern';
 import { IndexPatterns } from '../../../index_patterns';
 
-describe('Filter Bar Directive', () => {
+describe('filter manager utilities', () => {
   describe('mapAndFlattenFilters()', () => {
     let mockIndexPatterns: unknown;
     let filters: unknown;

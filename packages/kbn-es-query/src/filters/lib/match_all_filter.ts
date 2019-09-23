@@ -26,5 +26,5 @@ export interface MatchAllFilterMeta extends FilterMeta {
 
 export type MatchAllFilter = Filter & {
   meta: MatchAllFilterMeta;
-  match_all?: any;
+  match_all: any;
 };

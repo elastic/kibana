@@ -20,7 +20,7 @@
 import { Filter, buildRangeFilter, FilterStateStore, buildQueryFilter } from '@kbn/es-query';
 import { dedupFilters } from './dedup_filters';
 
-describe('Filter Bar Directive', () => {
+describe('filter manager utilities', () => {
   describe('dedupFilters(existing, filters)', () => {
     test('should return only filters which are not in the existing', () => {
       const existing: Filter[] = [

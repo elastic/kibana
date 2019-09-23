@@ -22,7 +22,7 @@ import { mapFilter } from './map_filter';
 import { StubIndexPatterns } from '../test_helpers/stub_index_pattern';
 import { IndexPatterns } from '../../../index_patterns';
 
-describe('Filter Bar Directive', () => {
+describe('filter manager utilities', () => {
   let indexPatterns: IndexPatterns;
 
   beforeEach(() => {

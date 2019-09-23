@@ -27,5 +27,5 @@ export type GeoPolygonFilterMeta = FilterMeta & {
 
 export type GeoPolygonFilter = Filter & {
   meta: GeoPolygonFilterMeta;
-  geo_polygon?: any;
+  geo_polygon: any;
 };

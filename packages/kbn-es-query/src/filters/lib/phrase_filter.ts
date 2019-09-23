@@ -23,6 +23,7 @@ export type PhraseFilterMeta = FilterMeta & {
   params: {
     query: string; // The unformatted value
   };
+  field?: any;
 };
 
 export type PhraseFilter = Filter & {
