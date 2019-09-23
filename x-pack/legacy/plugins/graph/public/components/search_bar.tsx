@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import { Storage } from 'ui/storage';
 import { CoreStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import {
   QueryBarInput,
@@ -64,7 +63,6 @@ export function SearchBar(props: SearchBarProps) {
   const [query, setQuery] = useState<Query>({ language: 'kuery', query: initialQuery || '' });
   return (
     <form
-      className="gphSearchBar"
       onSubmit={e => {
         e.preventDefault();
         if (!isLoading && currentIndexPattern) {
