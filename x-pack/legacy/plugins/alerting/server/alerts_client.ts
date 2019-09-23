@@ -56,7 +56,13 @@ interface FindResult {
 }
 
 interface CreateOptions {
-  data: Pick<Alert, Exclude<keyof Alert, 'createdBy' | 'updatedBy' | 'apiKey' | 'apiKeyOwner' | 'mutedInstanceIds'>>;
+  data: Pick<
+    Alert,
+    Exclude<
+      keyof Alert,
+      'createdBy' | 'updatedBy' | 'apiKey' | 'apiKeyOwner' | 'muted' | 'mutedInstanceIds'
+    >
+  >;
   options?: {
     migrationVersion?: Record<string, string>;
   };
@@ -117,6 +123,7 @@ export class AlertsClient {
         ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
         : undefined,
       alertTypeParams: validatedAlertTypeParams,
+      muted: false,
       mutedInstanceIds: [],
     });
     const createdAlert = await this.savedObjectsClient.create('alert', rawAlert, {
@@ -286,6 +293,42 @@ export class AlertsClient {
         { references: existingObject.references }
       );
       await this.taskManager.remove(existingObject.attributes.scheduledTaskId);
+    }
+  }
+
+  public async mute({ id }: { id: string }) {
+    const {
+      references,
+      attributes: { muted },
+    } = await this.savedObjectsClient.get('alert', id);
+    if (!muted) {
+      await this.savedObjectsClient.update(
+        'alert',
+        id,
+        {
+          muted: true,
+          updatedBy: await this.getUserName(),
+        },
+        { references }
+      );
+    }
+  }
+
+  public async unmute({ id }: { id: string }) {
+    const {
+      references,
+      attributes: { muted },
+    } = await this.savedObjectsClient.get('alert', id);
+    if (muted) {
+      await this.savedObjectsClient.update(
+        'alert',
+        id,
+        {
+          muted: false,
+          updatedBy: await this.getUserName(),
+        },
+        { references }
+      );
     }
   }
 

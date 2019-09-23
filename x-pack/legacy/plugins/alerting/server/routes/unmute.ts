@@ -1,0 +1,31 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import Hapi from 'hapi';
+
+interface UnmuteRequest extends Hapi.Request {
+  params: {
+    id: string;
+  };
+}
+
+export function unmuteAlertRoute(server: Hapi.Server) {
+  server.route({
+    method: 'POST',
+    path: '/api/alert/{id}/_unmute',
+    options: {
+      tags: ['access:alerting-all'],
+      response: {
+        emptyStatusCode: 204,
+      },
+    },
+    async handler(request: UnmuteRequest, h: Hapi.ResponseToolkit) {
+      const alertsClient = request.getAlertsClient!();
+      await alertsClient.unmute(request.params);
+      return h.response();
+    },
+  });
+}
