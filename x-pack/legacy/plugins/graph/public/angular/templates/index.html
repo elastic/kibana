@@ -16,6 +16,7 @@
     http="pluginDependencies.http"
     overlays="pluginDependencies.overlays"
     is-loading="loading"
+    is-initialized="!!workspace"
     initial-query="initialQuery"
     state="reduxState"
     dispatch="reduxDispatch"
@@ -23,7 +24,7 @@
     on-fill-workspace="fillWorkspace"
   ></graph-app>
 
-  <div class="gphGraph__container" id="GraphSvgContainer">
+  <div class="gphGraph__container" id="GraphSvgContainer" ng-if="workspace">
     <svg class="gphGraph" width="100%" height="100%" pointer-events="all" id="graphSvg" ng-click="hideAllConfigPanels()">
       <g id="svgRootGroup">
         <g>

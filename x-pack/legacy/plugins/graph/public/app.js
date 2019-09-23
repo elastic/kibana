@@ -112,7 +112,7 @@ app.directive('graphApp', function (reactDirective) {
     ['state', { watchDepth: 'reference' }],
     ['dispatch', { watchDepth: 'reference' }],
     ['onFillWorkspace', { watchDepth: 'reference' }],
-    ['hasNodes', { watchDepth: 'reference' }],
+    ['isInitialized', { watchDepth: 'reference' }],
     ['currentIndexPattern', { watchDepth: 'reference' }],
     ['isLoading', { watchDepth: 'reference' }],
     ['onIndexPatternSelected', { watchDepth: 'reference' }],

@@ -4,19 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
 import React, { useState, ReactNode } from 'react';
-import { CoreStart } from 'src/core/public';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { GraphState, GraphDispatch, selectedFieldsSelector } from '../../state_management';
-import { GraphFieldManager } from '../graph_field_manager';
-import { EmptyOverlay } from './empty_overlay';
-import { UnconfiguredOverlay } from './unconfigured_overlay';
-import { IndexPatternSavedObject } from '../../types';
-import { GraphSearchBar } from '../graph_search_bar';
-import { SourcelessOverlay } from './sourceless_overlay';
 
 export interface GuidancePanelProps {
   onFillWorkspace: () => void;
@@ -29,11 +20,11 @@ export interface GuidancePanelProps {
 function ListItem({ children, disabled }: { children: ReactNode; disabled: boolean }) {
   return (
     <li
-      className={classNames('graphGuidancePanel__item', {
+      className={classNames('gphGuidancePanel__item', {
         'graphGuidancePanel__item--disabled': disabled,
       })}
     >
-      <EuiIcon type="check" className="graphGuidancePanel__itemIcon" />
+      <EuiIcon type="check" className="gphGuidancePanel__itemIcon" />
       {children}
     </li>
   );
@@ -50,7 +41,7 @@ export function GuidancePanel(props: GuidancePanelProps) {
 
   return (
     <EuiPanel>
-      <EuiFlexGroup direction="column" className="gphWorkspaceOverlay__content">
+      <EuiFlexGroup direction="column" className="gphGuidancePanel">
         <EuiFlexItem>
           <EuiIcon type="graphApp" size="xxl" />
           <EuiText>
