@@ -903,9 +903,8 @@ app.controller('graphuiPlugin', function (
       );
       return;
     }
-    $scope.selectedIndex = selectedIndex;
-    $scope.proposedIndex = selectedIndex;
     $route.current.locals.GetIndexPatternProvider.get(selectedIndex.id).then(indexPattern => {
+      $scope.selectedIndex = indexPattern;
       initWorkspaceIfRequired();
       const {
         urlTemplates,
