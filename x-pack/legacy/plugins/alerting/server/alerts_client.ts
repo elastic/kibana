@@ -75,7 +75,6 @@ interface UpdateOptions {
     actions: AlertAction[];
     alertTypeParams: Record<string, any>;
   };
-  options?: { version?: string };
 }
 
 export class AlertsClient {
@@ -196,7 +195,7 @@ export class AlertsClient {
     return removeResult;
   }
 
-  public async update({ id, data, options = {} }: UpdateOptions) {
+  public async update({ id, data }: UpdateOptions) {
     const existingObject = await this.savedObjectsClient.get('alert', id);
     const { alertTypeId } = existingObject.attributes;
     const alertType = this.alertTypeRegistry.get(alertTypeId);
@@ -212,6 +211,7 @@ export class AlertsClient {
       'alert',
       id,
       {
+        ...existingObject.attributes,
         ...data,
         alertTypeParams: validatedAlertTypeParams,
         actions,
@@ -222,15 +222,15 @@ export class AlertsClient {
           : null,
       },
       {
-        ...options,
         references,
+        version: existingObject.version,
       }
     );
     return this.getAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
   }
 
   public async updateApiKey({ id }: { id: string }) {
-    const { references } = await this.savedObjectsClient.get('alert', id);
+    const existingObject = await this.savedObjectsClient.get('alert', id);
 
     const apiKey = await this.createAPIKey();
     const username = await this.getUserName();
@@ -238,6 +238,7 @@ export class AlertsClient {
       'alert',
       id,
       {
+        ...existingObject.attributes,
         updatedBy: username,
         apiKeyOwner: apiKey.created ? username : null,
         apiKey: apiKey.created
@@ -245,7 +246,8 @@ export class AlertsClient {
           : null,
       },
       {
-        references,
+        version: existingObject.version,
+        references: existingObject.references,
       }
     );
   }
@@ -264,6 +266,7 @@ export class AlertsClient {
         'alert',
         id,
         {
+          ...existingObject.attributes,
           enabled: true,
           updatedBy: username,
           apiKeyOwner: apiKey.created ? username : null,
@@ -272,7 +275,10 @@ export class AlertsClient {
             ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
             : null,
         },
-        { references: existingObject.references }
+        {
+          version: existingObject.version,
+          references: existingObject.references,
+        }
       );
     }
   }
@@ -284,13 +290,17 @@ export class AlertsClient {
         'alert',
         id,
         {
+          ...existingObject.attributes,
           enabled: false,
           scheduledTaskId: null,
           apiKey: null,
           apiKeyOwner: null,
           updatedBy: await this.getUserName(),
         },
-        { references: existingObject.references }
+        {
+          version: existingObject.version,
+          references: existingObject.references,
+        }
       );
       await this.taskManager.remove(existingObject.attributes.scheduledTaskId);
     }
