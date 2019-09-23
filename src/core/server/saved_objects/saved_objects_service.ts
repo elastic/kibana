@@ -25,6 +25,7 @@ import { LegacyServiceSetup } from '../legacy/legacy_service';
 import { ElasticsearchServiceSetup } from '../elasticsearch';
 import { KibanaConfigType } from '../kibana_config';
 import { retryCallCluster } from '../elasticsearch/retry_call_cluster';
+import { SavedObjectsConfigType } from './saved_objects_config';
 import { Logger } from '..';
 
 /**
@@ -76,6 +77,11 @@ export class SavedObjectsService
       .pipe(first())
       .toPromise();
 
+    const savedObjectsConfig = await this.coreContext.configService
+      .atPath<SavedObjectsConfigType>('migrations')
+      .pipe(first())
+      .toPromise();
+
     this.migrator = new KibanaMigrator({
       savedObjectSchemas,
       savedObjectMappings,
@@ -84,6 +90,7 @@ export class SavedObjectsService
       logger: this.coreContext.logger.get('migrations'),
       kibanaVersion: this.coreContext.env.packageInfo.version,
       config: coreSetup.legacy.pluginExtendedConfig,
+      savedObjectsConfig,
       kibanaConfig,
       callCluster: retryCallCluster(adminClient.callAsInternalUser.bind(adminClient)),
     });
@@ -102,11 +109,14 @@ export class SavedObjectsService
      *
      * However, our build system optimize step and some tests depend on the
      * HTTP server running without an Elasticsearch server being available.
-     * So, when the `--skip-migrations` flag is true, we skip migrations all-
-     * together.
+     * So, when the `migrations.skip` is true, we skip migrations altogether.
      */
     const cliArgs = this.coreContext.env.cliArgs;
-    const skipMigrations = cliArgs.optimize || cliArgs.skipMigrations;
+    const savedObjectsConfig = await this.coreContext.configService
+      .atPath<SavedObjectsConfigType>('migrations')
+      .pipe(first())
+      .toPromise();
+    const skipMigrations = cliArgs.optimize || savedObjectsConfig.skip;
     await this.migrator!.awaitMigration(skipMigrations);
 
     return { migrator: this.migrator as KibanaMigrator };

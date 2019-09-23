@@ -30,7 +30,7 @@ describe('cli invalid config support', function () {
     const { error, status, stdout } = spawnSync(process.execPath, [
       'src/cli',
       '--config', INVALID_CONFIG_PATH,
-      '--skip-migrations'
+      '--migrations.skip=true'
     ], {
       cwd: ROOT_DIR
     });

@@ -17,20 +17,16 @@
  * under the License.
  */
 
-export * from './service';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-export { SavedObjectsSchema } from './schema';
+export type SavedObjectsConfigType = TypeOf<typeof config.schema>;
 
-export { SavedObjectsManagement } from './management';
-
-export * from './import';
-
-export { getSortedObjectsForExport, SavedObjectsExportOptions } from './export';
-
-export { SavedObjectsSerializer, RawDoc as SavedObjectsRawDoc } from './serialization';
-
-export { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';
-
-export { SavedObjectsService } from './saved_objects_service';
-
-export { config } from './saved_objects_config';
+export const config = {
+  path: 'migrations',
+  schema: schema.object({
+    batchSize: schema.number({ defaultValue: 100 }),
+    scrollDuration: schema.string({ defaultValue: '15m' }),
+    pollInterval: schema.number({ defaultValue: 1500 }),
+    skip: schema.boolean({ defaultValue: false }),
+  }),
+};

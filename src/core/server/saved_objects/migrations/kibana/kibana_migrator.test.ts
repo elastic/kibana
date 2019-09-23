@@ -122,22 +122,18 @@ function mockOptions({ configValues }: { configValues?: any } = {}): KibanaMigra
       enabled: true,
       index: '.my-index',
     } as KibanaMigratorOptions['kibanaConfig'],
+    savedObjectsConfig: {
+      batchSize: 20,
+      pollInterval: 20000,
+      scrollDuration: '10m',
+      skip: false,
+    },
     config: {
       get: (name: string) => {
         if (configValues && configValues[name]) {
           return configValues[name];
-        }
-        switch (name) {
-          case 'kibana.index':
-            return '.my-index';
-          case 'migrations.batchSize':
-            return 20;
-          case 'migrations.pollInterval':
-            return 20000;
-          case 'migrations.scrollDuration':
-            return '10m';
-          default:
-            throw new Error(`Unexpected config ${name}`);
+        } else {
+          throw new Error(`Unexpected config ${name}`);
         }
       },
     } as KibanaMigratorOptions['config'],

@@ -35,11 +35,13 @@ import {
   MigrationDefinition,
 } from '../core/document_migrator';
 import { createIndexMap } from '../core/build_index_map';
+import { SavedObjectsConfigType } from '../../saved_objects_config';
 import { Config } from '../../../config';
 
 export interface KibanaMigratorOptions {
   callCluster: CallCluster;
   config: Config;
+  savedObjectsConfig: SavedObjectsConfigType;
   kibanaConfig: KibanaConfigType;
   kibanaVersion: string;
   logger: Logger;
@@ -58,6 +60,7 @@ export interface KibanaMigratorOptions {
 export class KibanaMigrator {
   private callCluster: CallCluster;
   private config: Config;
+  private savedObjectsConfig: SavedObjectsConfigType;
   private documentMigrator: VersionedTransformer;
   private kibanaConfig: KibanaConfigType;
   private log: Logger;
@@ -72,8 +75,9 @@ export class KibanaMigrator {
    */
   constructor({
     callCluster,
-    kibanaConfig,
     config,
+    kibanaConfig,
+    savedObjectsConfig: savedObjectsConfig,
     kibanaVersion,
     logger,
     savedObjectMappings,
@@ -81,9 +85,10 @@ export class KibanaMigrator {
     savedObjectSchemas,
     savedObjectValidations,
   }: KibanaMigratorOptions) {
+    this.config = config;
     this.callCluster = callCluster;
     this.kibanaConfig = kibanaConfig;
-    this.config = config;
+    this.savedObjectsConfig = savedObjectsConfig;
     this.schema = new SavedObjectsSchema(savedObjectSchemas);
     this.serializer = new SavedObjectsSerializer(this.schema);
     this.mappingProperties = mergeProperties(savedObjectMappings || []);
@@ -131,14 +136,14 @@ export class KibanaMigrator {
 
     const migrators = Object.keys(indexMap).map(index => {
       return new IndexMigrator({
-        batchSize: this.config.get('migrations.batchSize'),
+        batchSize: this.savedObjectsConfig.batchSize,
         callCluster: this.callCluster,
         documentMigrator: this.documentMigrator,
         index,
         log: this.log,
         mappingProperties: indexMap[index].typeMappings,
-        pollInterval: this.config.get('migrations.pollInterval'),
-        scrollDuration: this.config.get('migrations.scrollDuration'),
+        pollInterval: this.savedObjectsConfig.pollInterval,
+        scrollDuration: this.savedObjectsConfig.scrollDuration,
         serializer: this.serializer,
         // Only necessary for the migrator of the kibana index.
         obsoleteIndexTemplatePattern:

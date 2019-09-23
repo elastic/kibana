@@ -210,8 +210,7 @@ export default function (program) {
       .option('--ssl', 'Run the dev server using HTTPS')
       .option('--no-base-path', 'Don\'t put a proxy in front of the dev server, which adds a random basePath')
       .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
-      .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode')
-      .option('--skip-migrations', 'Don\'t run Saved Object migrations (testing only)');
+      .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode');
   }
 
   command
@@ -240,8 +239,7 @@ export default function (program) {
           repl: !!opts.repl,
           basePath: !!opts.basePath,
           optimize: !!opts.optimize,
-          oss: !!opts.oss,
-          skipMigrations: !!opts.skipMigrations,
+          oss: !!opts.oss
         },
         features: {
           isClusterModeSupported: CAN_CLUSTER,

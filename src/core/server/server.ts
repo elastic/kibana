@@ -33,6 +33,7 @@ import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
 import { config as devConfig } from './dev';
 import { config as kibanaConfig } from './kibana_config';
+import { config as savedObjectsConfig } from './saved_objects';
 import { mapToObject } from '../utils/';
 import { ContextService } from './context';
 import { InternalCoreSetup } from './index';
@@ -163,6 +164,7 @@ export class Server {
       [pluginsConfig.path, pluginsConfig.schema],
       [devConfig.path, devConfig.schema],
       [kibanaConfig.path, kibanaConfig.schema],
+      [savedObjectsConfig.path, savedObjectsConfig.schema],
     ];
 
     for (const [path, schema] of schemas) {

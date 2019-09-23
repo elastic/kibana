@@ -60,7 +60,7 @@ module.exports = function (grunt) {
     '--plugins.initialize=false',
     '--optimize.bundleFilter=tests',
     '--server.port=5610',
-    '--skip-migrations'
+    '--migrations.skip=true'
   ];
 
   const NODE = 'node';

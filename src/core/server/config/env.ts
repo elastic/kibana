@@ -56,7 +56,6 @@ export interface CliArgs {
   optimize: boolean;
   open: boolean;
   oss: boolean;
-  skipMigrations: boolean;
 }
 
 export class Env {
