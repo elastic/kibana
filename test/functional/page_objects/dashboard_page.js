@@ -72,6 +72,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async clickFullScreenMode() {
       log.debug(`clickFullScreenMode`);
       await testSubjects.click('dashboardFullScreenMode');
+      await testSubjects.exists('exitFullScreenModeLogo');
+      await this.waitForRenderComplete();
     }
 
     async fullScreenModeMenuItemExists() {
