@@ -85,7 +85,12 @@ export function initSpacesOnPostAuthRequestInterceptor({
       } catch (error) {
         const wrappedError = wrapError(error);
 
-        const requiresAuthChallenge = wrappedError.output.statusCode === 401;
+        const requiresAuthChallenge =
+          wrappedError.output.statusCode === 401 &&
+          Object.keys(wrappedError.output.headers).find(
+            header => header.toLowerCase() === 'www-authenticate'
+          );
+
         if (requiresAuthChallenge) {
           log.warn(`Unable to navigate to space "${spaceId}" due to HTTP/401 response. ${error}`);
 
