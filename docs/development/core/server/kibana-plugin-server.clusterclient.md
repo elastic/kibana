@@ -16,7 +16,7 @@ export declare class ClusterClient
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(config, log, getAuthHeaders)](./kibana-plugin-server.clusterclient.(constructor).md) |  | Constructs a new instance of the <code>ClusterClient</code> class |
+|  [(constructor)(config, log, getAuthHeaders)](./kibana-plugin-server.clusterclient._constructor_.md) |  | Constructs a new instance of the <code>ClusterClient</code> class |
 
 ## Properties
 
