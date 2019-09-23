@@ -51,8 +51,9 @@ export const useLogAnalysisCleanup = ({
 export const LogAnalysisCleanup = createContainer(useLogAnalysisCleanup);
 
 const deleteJobs = async (spaceId: string, sourceId: string) => {
-  await callDeleteJobs(spaceId, sourceId);
-  return await waitUntilJobsAreDeleted(spaceId, sourceId);
+  const deleteJobsResponse = await callDeleteJobs(spaceId, sourceId);
+  await waitUntilJobsAreDeleted(spaceId, sourceId);
+  return deleteJobsResponse;
 };
 
 const waitUntilJobsAreDeleted = async (spaceId: string, sourceId: string) => {
