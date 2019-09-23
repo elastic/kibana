@@ -221,6 +221,16 @@ export class EmbeddedVisualizeHandler {
       if (this.actions[event.name]) {
         event.data.aggConfigs = getTableAggs(this.vis);
         const newFilters = this.actions[event.name](event.data) || [];
+        if (event.name === 'brush') {
+          const fieldName = newFilters[0].meta.key;
+          const $state = this.vis.API.getAppState();
+          const existingFilter = $state.filters.find(
+            (filter: any) => filter.meta && filter.meta.key === fieldName
+          );
+          if (existingFilter) {
+            Object.assign(existingFilter, newFilters[0]);
+          }
+        }
         visFilters.pushFilters(newFilters);
       }
     });

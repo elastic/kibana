@@ -42,12 +42,15 @@ let container: Container;
 let embeddable: ContactCardEmbeddable;
 
 beforeEach(async () => {
-  const { doStart, coreStart } = testPlugin(coreMock.createSetup(), coreMock.createStart());
+  const { doStart, coreStart, uiActions } = testPlugin(
+    coreMock.createSetup(),
+    coreMock.createStart()
+  );
   api = doStart();
 
   const contactCardFactory = new ContactCardEmbeddableFactory(
     {},
-    api.executeTriggerActions,
+    uiActions.executeTriggerActions,
     {} as any
   );
   api.registerEmbeddableFactory(contactCardFactory.type, contactCardFactory);
@@ -55,7 +58,7 @@ beforeEach(async () => {
   container = new HelloWorldContainer(
     { id: '123', panels: {} },
     {
-      getActions: api.getTriggerCompatibleActions,
+      getActions: uiActions.getTriggerCompatibleActions,
       getEmbeddableFactory: api.getEmbeddableFactory,
       getAllEmbeddableFactories: api.getEmbeddableFactories,
       overlays: coreStart.overlays,
