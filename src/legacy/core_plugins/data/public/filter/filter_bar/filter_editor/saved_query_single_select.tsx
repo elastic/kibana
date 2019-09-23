@@ -22,6 +22,8 @@ import { EuiSelectable } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
 // Types
 import { sortBy } from 'lodash';
+import { EuiLoadingContent } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { SavedQueryService } from '../../../search/search_bar/lib/saved_query_service';
 import { SavedQuery } from '../../../search/search_bar';
 
@@ -77,7 +79,8 @@ interface Props {
 }
 interface State {
   options: Option[];
-  savedQueries?: SavedQuery[];
+  savedQueries: SavedQuery[];
+  savedQueriesLoaded: boolean;
   // selectedOption: Option[];
 }
 export class SavedQuerySingleSelect extends Component<Props, State> {
@@ -85,20 +88,33 @@ export class SavedQuerySingleSelect extends Component<Props, State> {
     super(props);
     this.state = {
       options: this.getMappedOptions(),
+      savedQueries: [],
+      savedQueriesLoaded: false,
       // selectedOption: this.getSelectedOption(),
     };
   }
   async componentDidMount() {
-    await this.getSavedQueries();
+    const result = await this.getSavedQueries();
+    if (result) {
+      await this.getMappedSavedQueries();
+    }
   }
 
   getSavedQueries = async () => {
     const allSavedQueries = await this.props.savedQueryService.getAllSavedQueries();
     const sortedAllSavedQueries = sortBy(allSavedQueries, 'attributes.title');
-    const savedQueriesWithLabel = sortedAllSavedQueries
+    this.setState({
+      savedQueries: sortedAllSavedQueries,
+      savedQueriesLoaded: true,
+    });
+    this.getMappedSavedQueries();
+    return sortedAllSavedQueries;
+  };
+
+  getMappedSavedQueries = () => {
+    const savedQueriesWithLabel = this.state.savedQueries
       .map(sq => {
         return {
-          ...sq,
           label: sq.id,
           checked: undefined,
         };
@@ -107,8 +123,7 @@ export class SavedQuerySingleSelect extends Component<Props, State> {
         const { checked, ...checklessOption } = option;
         return { ...checklessOption };
       });
-    this.setState({ savedQueries: savedQueriesWithLabel });
-    return sortedAllSavedQueries;
+    this.setState({ options: savedQueriesWithLabel });
   };
 
   getMappedOptions = () => {
@@ -141,24 +156,37 @@ export class SavedQuerySingleSelect extends Component<Props, State> {
   };
 
   render() {
-    const { options, savedQueries } = this.state;
-    return (
-      <Fragment>
-        <EuiSelectable
-          options={options}
-          onChange={this.onSavedQueryChange}
-          singleSelection={true}
-          listProps={{ bordered: true }}
-        >
-          {list => list}
-        </EuiSelectable>
-        <EuiButton fill onClick={this.onSavedQuerySelected} isDisabled={!this.savedQuerySelected()}>
-          Save
-        </EuiButton>
-        <EuiButton fill isDisabled={!this.state.savedQueries}>
-          SQ?
-        </EuiButton>
-      </Fragment>
-    );
+    const { options, savedQueries, savedQueriesLoaded } = this.state;
+    if (!savedQueriesLoaded) {
+      return <EuiLoadingContent lines={3} />;
+    } else if (savedQueriesLoaded && !savedQueries.length) {
+      return (
+        <div>
+          {i18n.translate('data.search.searchBar.savedQueryNoSavedQueriesText', {
+            defaultMessage: 'There are no saved queries.',
+          })}
+        </div>
+      );
+    } else {
+      return (
+        <Fragment>
+          <EuiSelectable
+            options={options}
+            onChange={this.onSavedQueryChange}
+            singleSelection={true}
+            listProps={{ bordered: true }}
+          >
+            {list => list}
+          </EuiSelectable>
+          <EuiButton
+            fill
+            onClick={this.onSavedQuerySelected}
+            isDisabled={!this.savedQuerySelected()}
+          >
+            Save
+          </EuiButton>
+        </Fragment>
+      );
+    }
   }
 }

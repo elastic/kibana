@@ -101,7 +101,6 @@ class FilterEditorUI extends Component<Props, State> {
       useCustomLabel: props.filter.meta.alias !== null,
       customLabel: props.filter.meta.alias,
       queryDsl: JSON.stringify(getQueryDslFromFilter(props.filter), null, 2),
-      // I can't have all three operate independently, I can only have one open at a time.
       isCustomEditorOpen: this.isUnknownFilterType(),
       isSavedQueryEditorOpen: this.isSavedQueryFilterType(),
       isRegularEditorOpen: this.isRegularFilterType(),
