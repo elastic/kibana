@@ -304,11 +304,7 @@ VSCode     | [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeum
 IntelliJ   | Settings » Languages & Frameworks » JavaScript » Code Quality Tools » ESLint
 `vi`       | [scrooloose/syntastic](https://github.com/scrooloose/syntastic)
 
-#### Tools for Consistent Coding Style
-
 Another tool we use for enforcing consistent coding style is EditorConfig, which can be set up by installing a plugin in your editor that dynamically updates its configuration. Take a look at the [EditorConfig](http://editorconfig.org/#download) site to find a plugin for your editor, and browse our [`.editorconfig`](https://github.com/elastic/kibana/blob/master/.editorconfig) file to see what config rules we set up.
-
-Currently, we're migrating our codebase over to [Prettier](https://prettier.io/). Prettier is an opinionated code formatter that integrates with most editors. Prettier formats code when you save a file so that we spend less time discussing coding style and focus more on features and bugs. You can learn how to set up Prettier on your favorite editor by visiting [Prettier](https://prettier.io/) website. Our prettier rules can be found in [`.prettierrc`](https://github.com/elastic/kibana/blob/master/.prettierrc) file. 
 
 #### Setup Guide for VS Code Users
 
@@ -321,13 +317,6 @@ Note that for VSCode, to enable "live" linting of TypeScript (and other) file ty
         "typescript",
         "typescriptreact",
     ]
-```
-
-To make `prettier` automatically format your code on save, open add those lines below:
-
-```json
-  "editor.formatOnSave": true,
-  "editor.formatOnPaste": true,
 ```
 
 `eslint` can fix trivial lint errors. And `eslint` plugin can do that for you when you save a file by adding this line in your setting.
