@@ -22,7 +22,7 @@ import {
   OnTableChangeArg,
   SortDirection,
   SORT_DIRECTION,
-} from '../../../../../../common/types/eui/in_memory_table';
+} from '../../../../../components/ml_in_memory_table';
 
 import {
   DataFrameTransformId,
