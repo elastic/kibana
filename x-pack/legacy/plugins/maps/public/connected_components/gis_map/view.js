@@ -49,6 +49,7 @@ export class GisMap extends Component {
   componentWillUnmount() {
     this._isMounted = false;
     this._clearRefreshTimer();
+    this.props.cancelAllInFlightRequests();
   }
 
   // Reporting uses both a `data-render-complete` attribute and a DOM event listener to determine
