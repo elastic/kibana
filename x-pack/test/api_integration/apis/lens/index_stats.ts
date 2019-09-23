@@ -105,6 +105,20 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(Object.keys(body)).to.eql(fieldsWithData.map(field => field.name));
       });
+
+      it('should throw a 404 for a non-existent index', async () => {
+        await supertest
+          .post('/api/lens/index_stats/fake')
+          .set(COMMON_HEADERS)
+          .send({
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+            timeFieldName: '@timestamp',
+            size: 500,
+            fields: [],
+          })
+          .expect(404);
+      });
     });
   });
 };
