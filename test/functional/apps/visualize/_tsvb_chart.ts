@@ -51,8 +51,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         expect(value).to.eql('156');
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/45315
-      it.skip('should show correct data with Math Aggregation', async () => {
+      it('should show correct data with Math Aggregation', async () => {
         await PageObjects.visualBuilder.createNewAgg();
         await PageObjects.visualBuilder.selectAggType('math', 1);
         await PageObjects.visualBuilder.fillInVariable();
