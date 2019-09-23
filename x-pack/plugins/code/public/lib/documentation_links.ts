@@ -12,7 +12,7 @@ export const documentationLinks = {
   codeIntelligence: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/code.html`,
   gitFormat: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/code.html`,
   codeInstallLangServer: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/code-install-lang-server.html`,
-  codeGettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/code-getting-started.html`,
+  codeGettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/code-import-first-repo.html`,
   codeRepoManagement: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/code-repo-management.html`,
   codeSearch: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/code-search.html`,
   codeOtherFeatures: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/code-basic-nav.html`,
