@@ -19,5 +19,3 @@
 
 export * from './query';
 export * from './field_formats';
-
-export * from './types';
