@@ -21,7 +21,7 @@ import { useEffect, useState, useRef } from 'react';
 
 export interface SendRequestConfig {
   path: string;
-  method: string;
+  method: 'get' | 'post' | 'put' | 'delete' | 'patch';
   body?: any;
 }
 
@@ -34,6 +34,14 @@ export interface UseRequestConfig extends SendRequestConfig {
   pollIntervalMs?: number;
   initialData?: any;
   deserializer?: (data: any) => any;
+}
+
+export interface UseRequestResponse {
+  isInitialRequest: boolean;
+  isLoading: boolean;
+  error: null | unknown;
+  data: any;
+  sendRequest: (...args: any[]) => Promise<any>;
 }
 
 export const sendRequest = async (
@@ -65,7 +73,7 @@ export const useRequest = (
     initialData,
     deserializer = (data: any): any => data,
   }: UseRequestConfig
-) => {
+): UseRequestResponse => {
   // Main states for tracking request status and data
   const [error, setError] = useState<null | any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
