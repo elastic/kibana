@@ -1,0 +1,41 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+import {
+  CPUUsage,
+  MemoryUsage,
+  InboundTraffic,
+  OutboundTraffic,
+  fieldToName,
+} from '../intl_strings';
+import { InfraSnapshotMetricType } from '../../graphql/types';
+
+export const toolbar = [
+  {
+    type: 'metric',
+    options: [
+      {
+        text: CPUUsage,
+        value: InfraSnapshotMetricType.cpu,
+      },
+      {
+        text: MemoryUsage,
+        value: InfraSnapshotMetricType.memory,
+      },
+      {
+        text: InboundTraffic,
+        value: InfraSnapshotMetricType.rx,
+      },
+      {
+        text: OutboundTraffic,
+        value: InfraSnapshotMetricType.tx,
+      },
+    ],
+  },
+  {
+    type: 'groupBy',
+    options: ['kubernetes.namespace', 'kubernetes.node.name', 'service.type'].map(fieldToName),
+  },
+];
