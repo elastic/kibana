@@ -6,7 +6,7 @@
 
 import Hapi from 'hapi';
 
-interface MuteRequest extends Hapi.Request {
+interface UnmuteInstanceRequest extends Hapi.Request {
   params: {
     alertId: string;
     alertInstanceId: string;
@@ -23,7 +23,7 @@ export function unmuteAlertInstanceRoute(server: Hapi.Server) {
         emptyStatusCode: 204,
       },
     },
-    async handler(request: MuteRequest, h: Hapi.ResponseToolkit) {
+    async handler(request: UnmuteInstanceRequest, h: Hapi.ResponseToolkit) {
       const alertsClient = request.getAlertsClient!();
       await alertsClient.unmuteInstance(request.params);
       return h.response();
