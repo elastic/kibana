@@ -282,7 +282,7 @@
     "@kbn/utility-types": "1.0.0",
     "@microsoft/api-documenter": "7.4.3",
     "@microsoft/api-extractor": "7.4.2",
-    "@octokit/rest": "^15.10.0",
+    "@octokit/rest": "^16.30.1",
     "@percy/agent": "^0.11.0",
     "@types/angular": "1.6.50",
     "@types/angular-mocks": "^1.7.0",

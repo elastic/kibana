@@ -1305,14 +1305,6 @@
   resolved "https://registry.yarnpkg.com/@emotion/weak-memoize/-/weak-memoize-0.2.3.tgz#dfa0c92efe44a1d1a7974fb49ffeb40ef2da5a27"
   integrity sha512-zVgvPwGK7c1aVdUVc9Qv7SqepOGRDrqCw7KZPSZziWGxSlbII3gmvGLPzLX4d0n0BMbamBacUrN22zOMyFFEkQ==
 
-"@gimenete/type-writer@^0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@gimenete/type-writer/-/type-writer-0.1.3.tgz#2d4f26118b18d71f5b34ca24fdd6d1fd455c05b6"
-  integrity sha512-vhpvVfM/fYqb1aAnkgOvtDKoOgU3ZYIvDnKSDAFSoBvallmGURMlHOE0/VG/gqunUZVXGCFBGHxI8swjBh+sIA==
-  dependencies:
-    camelcase "^5.0.0"
-    prettier "^1.13.7"
-
 "@graphql-modules/epoxy@0.1.9":
   version "0.1.9"
   resolved "https://registry.yarnpkg.com/@graphql-modules/epoxy/-/epoxy-0.1.9.tgz#291879d517ba4473ea334edbb137a2cc6aed384c"
@@ -2184,12 +2176,28 @@
     universal-user-agent "^2.0.1"
     url-template "^2.0.8"
 
+"@octokit/endpoint@^5.1.0":
+  version "5.3.5"
+  resolved "https://registry.yarnpkg.com/@octokit/endpoint/-/endpoint-5.3.5.tgz#2822c3b01107806dbdce3863b6205e3eff4289ed"
+  integrity sha512-f8KqzIrnzPLiezDsZZPB+K8v8YSv6aKFl7eOu59O46lmlW4HagWl1U6NWl6LmT8d1w7NsKBI3paVtzcnRGO1gw==
+  dependencies:
+    is-plain-object "^3.0.0"
+    universal-user-agent "^4.0.0"
+
 "@octokit/plugin-retry@^2.2.0":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@octokit/plugin-retry/-/plugin-retry-2.2.0.tgz#11f3957a46ccdb7b7f33caabf8c17e57b25b80b2"
   integrity sha512-x5Kd8Lke+a4hTDCe5akZxpGmVwu1eeVt2FJX0jeo3CxHGbfHbXb4zhN5quKfGL9oBLV/EdHQIJ6zwIMjuzxOlw==
   dependencies:
     bottleneck "^2.15.3"
+
+"@octokit/request-error@^1.0.1", "@octokit/request-error@^1.0.2":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@octokit/request-error/-/request-error-1.0.4.tgz#15e1dc22123ba4a9a4391914d80ec1e5303a23be"
+  integrity sha512-L4JaJDXn8SGT+5G0uX79rZLv0MNJmfGa4vb4vy1NnpjSnWDLJRy6m90udGwvMmavwsStgbv2QNkPzzTCMmL+ig==
+  dependencies:
+    deprecation "^2.0.0"
+    once "^1.4.0"
 
 "@octokit/request@2.4.2", "@octokit/request@^2.1.2", "@octokit/request@^2.4.2":
   version "2.4.2"
@@ -2203,20 +2211,18 @@
     once "^1.4.0"
     universal-user-agent "^2.0.1"
 
-"@octokit/rest@^15.10.0":
-  version "15.10.0"
-  resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-15.10.0.tgz#9baf7430e55edf1a1024c35ae72ed2f5fc6e90e9"
-  integrity sha512-xZ4ejCZoqvKrIN3tQOKZlJ6nDQxaOdLcjRsamDnbckU7V5YTn2xheIqFXnQ2vLvxqVwyI8+2dfsODYbHxtwtSw==
+"@octokit/request@^5.0.0":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@octokit/request/-/request-5.1.0.tgz#5609dcc7b5323e529f29d535214383d9eaf0c05c"
+  integrity sha512-I15T9PwjFs4tbWyhtFU2Kq7WDPidYMvRB7spmxoQRZfxSmiqullG+Nz+KbSmpkfnlvHwTr1e31R5WReFRKMXjg==
   dependencies:
-    "@gimenete/type-writer" "^0.1.3"
-    before-after-hook "^1.1.0"
-    btoa-lite "^1.0.0"
-    debug "^3.1.0"
-    http-proxy-agent "^2.1.0"
-    https-proxy-agent "^2.2.0"
-    lodash "^4.17.4"
-    node-fetch "^2.1.1"
-    url-template "^2.0.8"
+    "@octokit/endpoint" "^5.1.0"
+    "@octokit/request-error" "^1.0.1"
+    deprecation "^2.0.0"
+    is-plain-object "^3.0.0"
+    node-fetch "^2.3.0"
+    once "^1.4.0"
+    universal-user-agent "^4.0.0"
 
 "@octokit/rest@^16.23.2":
   version "16.23.2"
@@ -2235,6 +2241,24 @@
     once "^1.4.0"
     universal-user-agent "^2.0.0"
     url-template "^2.0.8"
+
+"@octokit/rest@^16.30.1":
+  version "16.30.1"
+  resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-16.30.1.tgz#03e6dfb93e9a9cd2b3bacb95c49a8c7923f42ad0"
+  integrity sha512-1n2QzTbbaBXNLpx7WHlcsSMdJvxSdKmerXQm+bMYlKDbQM19uq446ZpGs7Ynq5SsdLj1usIfgJ9gJf4LtcWkDw==
+  dependencies:
+    "@octokit/request" "^5.0.0"
+    "@octokit/request-error" "^1.0.2"
+    atob-lite "^2.0.0"
+    before-after-hook "^2.0.0"
+    btoa-lite "^1.0.0"
+    deprecation "^2.0.0"
+    lodash.get "^4.4.2"
+    lodash.set "^4.3.2"
+    lodash.uniq "^4.5.0"
+    octokit-pagination-methods "^1.1.0"
+    once "^1.4.0"
+    universal-user-agent "^4.0.0"
 
 "@percy/agent@^0.11.0":
   version "0.11.0"
@@ -6345,15 +6369,15 @@ beeper@^1.0.0:
   resolved "https://registry.yarnpkg.com/beeper/-/beeper-1.1.1.tgz#e6d5ea8c5dad001304a70b22638447f69cb2f809"
   integrity sha1-5tXqjF2tABMEpwsiY4RH9pyy+Ak=
 
-before-after-hook@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/before-after-hook/-/before-after-hook-1.1.0.tgz#83165e15a59460d13702cb8febd6a1807896db5a"
-  integrity sha512-VOMDtYPwLbIncTxNoSzRyvaMxtXmLWLUqr8k5AfC1BzLk34HvBXaQX8snOwQZ4c0aX8aSERqtJSiI9/m2u5kuA==
-
 before-after-hook@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/before-after-hook/-/before-after-hook-1.4.0.tgz#2b6bf23dca4f32e628fd2747c10a37c74a4b484d"
   integrity sha512-l5r9ir56nda3qu14nAXIlyq1MmUSs0meCIaFAh8HwkFwP1F8eToOuS3ah2VAHHcY04jaYD7FpJC5JTXHYRbkzg==
+
+before-after-hook@^2.0.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/before-after-hook/-/before-after-hook-2.1.0.tgz#b6c03487f44e24200dd30ca5e6a1979c5d2fb635"
+  integrity sha512-IWIbu7pMqyw3EAJHzzHbWa85b6oud/yfKYg5rqB5hNE8CeMi3nX+2C2sj0HswfblST86hpVEOAb9x34NZd6P7A==
 
 better-assert@~1.0.0:
   version "1.0.2"
@@ -9831,6 +9855,11 @@ deprecation@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/deprecation/-/deprecation-1.0.1.tgz#2df79b79005752180816b7b6e079cbd80490d711"
   integrity sha512-ccVHpE72+tcIKaGMql33x5MAjKQIZrk+3x2GbJ7TeraUCZWHoT+KSZpoC+JQFsUBlSTXUrBaGiF0j6zVTepPLg==
+
+deprecation@^2.0.0:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/deprecation/-/deprecation-2.3.1.tgz#6368cbdb40abf3373b525ac87e4a260c3a700919"
+  integrity sha512-xmHIy4F3scKVwMsQ4WnVaS8bHOx0DmVwRywosKhaILI0ywMDWPtBSku2HNxRvF7jtwDRsoEwYQSfbxj8b7RlJQ==
 
 des.js@^1.0.0:
   version "1.0.0"
@@ -14815,7 +14844,7 @@ https-browserify@^1.0.0:
   resolved "https://registry.yarnpkg.com/https-browserify/-/https-browserify-1.0.0.tgz#ec06c10e0a34c0f2faf199f7fd7fc78fffd03c73"
   integrity sha1-7AbBDgo0wPL68Zn3/X/Hj//QPHM=
 
-https-proxy-agent@2.2.1, https-proxy-agent@^2.2.0, https-proxy-agent@^2.2.1:
+https-proxy-agent@2.2.1, https-proxy-agent@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-2.2.1.tgz#51552970fa04d723e04c56d04178c3f92592bbc0"
   integrity sha512-HPCTS1LW51bcyMYbxUIOO4HEOlQ1/1qRaFWcyxvwaqUS9TY88aoEuHUY33kuAh1YhVVaDQhLZsnPd+XNARWZlQ==
@@ -19929,11 +19958,6 @@ node-fetch@2.1.2:
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.1.2.tgz#ab884e8e7e57e38a944753cec706f788d1768bb5"
   integrity sha1-q4hOjn5X44qUR1POxwb3iNF2i7U=
 
-node-fetch@^2.1.1:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.2.1.tgz#1fe551e0ded6c45b3b3b937d0fb46f76df718d1e"
-  integrity sha512-ObXBpNCD3A/vYQiQtEWl7DuqjAXjfptYFuGHLdPl5U19/6kJuZV+8uMHLrkj3wJrJoyfg4nhgyFixZdaZoAiEQ==
-
 node-fetch@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.3.0.tgz#1a1d940bbfb916a1d3e0219f037e89e71f8c5fa5"
@@ -20841,7 +20865,7 @@ os-name@^2.0.1:
     macos-release "^1.0.0"
     win-release "^1.0.0"
 
-os-name@^3.0.0:
+os-name@^3.0.0, os-name@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/os-name/-/os-name-3.1.0.tgz#dec19d966296e1cd62d701a5a66ee1ddeae70801"
   integrity sha512-h8L+8aNjNcMpo/mAIBPn5PXCM16iyPGjHNWo6U1YO8sJTMHtEtyczI6QJnLoplswm6goopQkqc7OAnjhWcugVg==
@@ -21946,7 +21970,7 @@ prettier@1.14.3:
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.14.3.tgz#90238dd4c0684b7edce5f83b0fb7328e48bd0895"
   integrity sha512-qZDVnCrnpsRJJq5nSsiHCE3BYMED2OtsI+cmzIzF1QIfqm5ALf8tEJcO27zV1gKNKRPdhjO0dNWnrzssDQ1tFg==
 
-prettier@1.18.2, prettier@^1.13.7, prettier@^1.14.3:
+prettier@1.18.2, prettier@^1.14.3:
   version "1.18.2"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.18.2.tgz#6823e7c5900017b4bd3acf46fe9ac4b4d7bda9ea"
   integrity sha512-OeHeMc0JhFE9idD4ZdtNibzY0+TPHSpSSb9h8FqtP+YnoZZ1sl8Vc9b1sasjfymH3SonAF4QcA2+mzHPhMvIiw==
@@ -28343,6 +28367,13 @@ universal-user-agent@^2.0.0, universal-user-agent@^2.0.1:
   integrity sha512-eRHEHhChCBHrZsA4WEhdgiOKgdvgrMIHwnwnqD0r5C6AO8kwKcG7qSku3iXdhvHL3YvsS9ZkSGN8h/hIpoFC8g==
   dependencies:
     os-name "^3.0.0"
+
+universal-user-agent@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/universal-user-agent/-/universal-user-agent-4.0.0.tgz#27da2ec87e32769619f68a14996465ea1cb9df16"
+  integrity sha512-eM8knLpev67iBDizr/YtqkJsF3GK8gzDc6st/WKzrTuPtcsOKW/0IdL4cnMBsU69pOx0otavLWBDGTwg+dB0aA==
+  dependencies:
+    os-name "^3.1.0"
 
 universalify@^0.1.0:
   version "0.1.1"
