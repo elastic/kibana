@@ -391,7 +391,7 @@
     "grunt-available-tasks": "^0.6.3",
     "grunt-cli": "^1.2.0",
     "grunt-contrib-watch": "^1.1.0",
-    "grunt-karma": "2.0.0",
+    "grunt-karma": "^3.0.2",
     "grunt-peg": "^2.0.1",
     "grunt-run": "0.8.1",
     "gulp-babel": "^8.0.0",
