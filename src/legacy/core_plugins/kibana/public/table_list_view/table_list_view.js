@@ -360,28 +360,23 @@ class TableListViewUi extends React.Component {
       });
     }
 
-    /* starred */
     if (this.props.starredEntities) {
       columns.push({
         field: 'starred',
         name: i18n.translate('kbn.table_list_view.listing.table.starredTitle', {
           defaultMessage: 'Starred',
         }),
-        dataType: 'boolean',
+        dataType: 'string',
         sortable: true,
         width: '80px',
         render: (field, record) => (
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ display: 'inline-block' }}>
-              &nbsp;&nbsp;&nbsp;<EuiIcon
-                type={record.starred ? 'starFilled' : 'starEmpty'}
-                color={record.starred ? 'orange' : 'default'}
-                onClick={() => {
-                  this.props.starClick(record.id, record.starred, this);
-                }}
-              />
-            </div>
-          </div>
+          <EuiIcon
+            type={record.starred ? 'starFilled' : 'starEmpty'}
+            color={record.starred ? 'yellow' : 'default'}
+            onClick={() => {
+              this.props.starClick(record.id, record.starred, this);
+            }}
+          />
         ),
       });
     }

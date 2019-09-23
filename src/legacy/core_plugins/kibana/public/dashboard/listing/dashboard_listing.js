@@ -31,7 +31,6 @@ import { UserAPIClient } from '../../../../../../../x-pack/legacy/plugins/securi
 
 import { toastNotifications as notifications } from 'ui/notify';
 
-
 export const EMPTY_FILTER = '';
 
 // saved object client does not support sorting by title because title is only mapped as analyzed
@@ -61,20 +60,24 @@ export class DashboardListing extends React.Component {
 
     const apiClient = new UserAPIClient();
     const currentUser = await apiClient.getCurrentUser();
-    let favedObjectsArr = currentUser.metadata.favedObjects;
+    let favedObjectsArr;
 
-    if (favedObjectsArr) {
-      if (action === 'add') {
-        favedObjectsArr.push(newObj);
+    if (currentUser.metadata) {
+      if (currentUser.metadata.favedObjects) {
+        favedObjectsArr = currentUser.metadata.favedObjects;
       } else {
-        const index = favedObjectsArr.indexOf(newObj);
-        if (index > -1) {
-          favedObjectsArr.splice(index, 1);
-        }
+        favedObjectsArr = [];
       }
     } else {
-      if (action === 'add') {
-        favedObjectsArr = [newObj];
+      favedObjectsArr = [];
+    }
+
+    if (action === 'add') {
+      favedObjectsArr.push(newObj);
+    } else {
+      const index = favedObjectsArr.indexOf(newObj);
+      if (index > -1) {
+        favedObjectsArr.splice(index, 1);
       }
     }
 
@@ -134,9 +137,13 @@ export class DashboardListing extends React.Component {
   async starredListGetter(items) {
     const apiClient = new UserAPIClient();
     const currentUser = await apiClient.getCurrentUser();
-    this.favedObjectsArr = currentUser.metadata.favedObjects;
 
-    if (this.favedObjectsArr === undefined) {
+    this.favedObjectsArr = [];
+    if (currentUser.metadata) {
+      if (currentUser.metadata.favedObjects) {
+        this.favedObjectsArr = currentUser.metadata.favedObjects;
+      }
+    } else {
       return [];
     }
 
