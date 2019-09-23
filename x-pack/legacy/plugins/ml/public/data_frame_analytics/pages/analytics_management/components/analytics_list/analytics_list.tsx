@@ -15,12 +15,6 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 
-import {
-  OnTableChangeArg,
-  SortDirection,
-  SORT_DIRECTION,
-} from '../../../../../../common/types/eui/in_memory_table';
-
 import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 import { getTaskStateBadge } from './columns';
@@ -38,7 +32,13 @@ import { ActionDispatchers } from '../../hooks/use_create_analytics_form/actions
 import { getAnalyticsFactory } from '../../services/analytics_service';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
-import { ProgressBar, AnalyticsTable } from './analytics_table';
+import {
+  ProgressBar,
+  MlInMemoryTable,
+  OnTableChangeArg,
+  SortDirection,
+  SORT_DIRECTION,
+} from '../../../../../components/ml_in_memory_table';
 
 function getItemIdToExpandedRowMap(
   itemIds: DataFrameAnalyticsId[],
@@ -310,7 +310,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   return (
     <Fragment>
       <ProgressBar isLoading={isLoading} />
-      <AnalyticsTable
+      <MlInMemoryTable
         allowNeutralSort={false}
         className="mlAnalyticsTable"
         columns={columns}
