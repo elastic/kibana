@@ -1,19 +1,8 @@
- // SASSTODO: Create this in EUI
- @mixin lnsOverflowShadowHorizontal {
-  $hideHeight: $euiScrollBarCorner * 1.25;
-    mask-image: linear-gradient(to right,
-                  transparentize(red, .9) 0%,
-                  transparentize(red, 0) $hideHeight,
-                  transparentize(red, 0) calc(100% - #{$hideHeight}),
-                  transparentize(red, .9) 100%
-                );
-}
-
-.lnsSuggestionsPanel__title {
+.lnsSuggestionPanel__title {
   margin-left: $euiSizeXS / 2;
 }
 
-.lnsSuggestionsPanel__suggestions {
+.lnsSuggestionPanel__suggestions {
   @include euiScrollBar;
   @include lnsOverflowShadowHorizontal;
   padding-top: $euiSizeXS;
@@ -26,13 +15,9 @@
   margin-left: -$euiSizeXS;
 }
 
-// These sizes also match canvas' page thumbnails for consistency
-$lnsSuggestionHeight: 100px;
-$lnsSuggestionWidth: 150px;
-
 .lnsSuggestionPanel__button {
   flex: 0 0 auto;
-  width: $lnsSuggestionWidth !important;
+  width: $lnsSuggestionWidth !important; // sass-lint:disable-line no-important
   height: $lnsSuggestionHeight;
   margin-right: $euiSizeS;
   margin-left: $euiSizeXS / 2;
@@ -43,7 +28,7 @@ $lnsSuggestionWidth: 150px;
   @include euiFocusRing;
 }
 
-.lnsSidebar__suggestionIcon {
+.lnsSuggestionPanel__suggestionIcon {
   color: $euiColorDarkShade;
   width: 100%;
   height: 100%;
@@ -53,13 +38,13 @@ $lnsSuggestionWidth: 150px;
   padding: $euiSizeS;
 }
 
-.lnsSuggestionChartWrapper {
+.lnsSuggestionPanel__chartWrapper {
   height: $lnsSuggestionHeight - $euiSize;
   pointer-events: none;
   margin: 0 $euiSizeS;
 }
 
-.lnsSuggestionChartWrapper--withLabel {
+.lnsSuggestionPanel__chartWrapper--withLabel {
   height: $lnsSuggestionHeight - $euiSizeL;
 }
 
