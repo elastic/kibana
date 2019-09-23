@@ -439,7 +439,7 @@ class FilterEditorUI extends Component<Props, State> {
         );
     }
   }
-
+  public test = (SQ: any, SQs: any) => {};
   private renderSavedQueryEditor() {
     // pass along the security-related item of if the user has access to saved objects.
     // pass along the value as the saved query filter params object (this is where we add the saved query object)
@@ -448,7 +448,10 @@ class FilterEditorUI extends Component<Props, State> {
       <div>
         <EuiFlexGroup responsive={false} gutterSize="s">
           <EuiFlexItem>
-            <SavedQuerySingleSelect savedQueryService={this.props.savedQueryService} />
+            <SavedQuerySingleSelect
+              savedQueryService={this.props.savedQueryService}
+              onChange={this.test}
+            />
             {/* <SavedQueryEditorUI
               showSaveQuery={this.props.showSaveQuery}
               value={this.state.params}

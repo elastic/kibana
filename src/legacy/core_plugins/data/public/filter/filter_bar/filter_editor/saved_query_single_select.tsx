@@ -76,12 +76,13 @@ interface Option {
 }
 interface Props {
   savedQueryService: SavedQueryService;
+  onChange: (selectedSavedQuery: Option[], savedQueries: SavedQuery[]) => void;
 }
 interface State {
   options: Option[];
   savedQueries: SavedQuery[];
   savedQueriesLoaded: boolean;
-  // selectedOption: Option[];
+  selectedOption: Option[];
 }
 export class SavedQuerySingleSelect extends Component<Props, State> {
   constructor(props: Props) {
@@ -90,13 +91,13 @@ export class SavedQuerySingleSelect extends Component<Props, State> {
       options: [],
       savedQueries: [],
       savedQueriesLoaded: false,
-      // selectedOption: this.getSelectedOption(),
+      selectedOption: [],
     };
   }
   async componentDidMount() {
     const result = await this.getSavedQueries();
     if (result) {
-      await this.getMappedSavedQueries();
+      this.getMappedSavedQueries();
     }
   }
 
@@ -107,7 +108,6 @@ export class SavedQuerySingleSelect extends Component<Props, State> {
       savedQueries: sortedAllSavedQueries,
       savedQueriesLoaded: true,
     });
-    this.getMappedSavedQueries();
     return sortedAllSavedQueries;
   };
 
@@ -126,37 +126,26 @@ export class SavedQuerySingleSelect extends Component<Props, State> {
     this.setState({ options: savedQueriesWithLabel });
   };
 
-  getMappedOptions = () => {
-    // converts options into shape we need
-    return Options.map(option => {
-      const { checked, ...checklessOption } = option;
-      return { ...checklessOption };
-    });
-  };
-
   onSavedQueryChange = (options: Option[]) => {
-    // local to this component: sets the new options when one is selected
+    // local to this component: sets the new options when one is selected, it takes two clicks to get the selected one.
+    const selectedOption = options.filter(option => option.checked === 'on');
+    // if (selectedOption && selectedOption[0].label) {
     this.setState({
       options,
+      selectedOption,
     });
-  };
-
-  getSelectedOption = () => {
-    return this.state.options.filter(option => option.checked === 'on');
+    // }
   };
 
   onSavedQuerySelected = () => {
-    const selectedSavedQuery = this.savedQuerySelected();
-    if (selectedSavedQuery) {
-      // this.props.onChange(selectedSavedQuery);
+    if (this.state.selectedOption && this.state.savedQueries) {
+      this.props.onChange(this.state.selectedOption, this.state.savedQueries);
     }
-  };
-  savedQuerySelected = () => {
-    return this.state.options.filter(option => option.checked === 'on').length;
   };
 
   render() {
-    const { options, savedQueries, savedQueriesLoaded } = this.state;
+    const { options, savedQueriesLoaded, selectedOption } = this.state;
+    // console.log(selectedOption);
     if (!savedQueriesLoaded || !options.length) {
       return <EuiLoadingContent lines={3} />;
     } else if (savedQueriesLoaded && !options.length) {
@@ -181,7 +170,7 @@ export class SavedQuerySingleSelect extends Component<Props, State> {
           <EuiButton
             fill
             onClick={this.onSavedQuerySelected}
-            isDisabled={!this.savedQuerySelected()}
+            isDisabled={!selectedOption || !selectedOption.length}
           >
             Save
           </EuiButton>
