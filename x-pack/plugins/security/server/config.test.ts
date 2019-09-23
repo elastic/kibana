@@ -183,7 +183,19 @@ describe('config schema', () => {
       );
 
       expect(() =>
+        ConfigSchema.validate({ authProviders: ['oidc'] })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authc.oidc.realm]: expected value of type [string] but got [undefined]"`
+      );
+
+      expect(() =>
         ConfigSchema.validate({ authc: { providers: ['oidc'], oidc: {} } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authc.oidc.realm]: expected value of type [string] but got [undefined]"`
+      );
+
+      expect(() =>
+        ConfigSchema.validate({ authProviders: ['oidc'], authc: { oidc: {} } })
       ).toThrowErrorMatchingInlineSnapshot(
         `"[authc.oidc.realm]: expected value of type [string] but got [undefined]"`
       );
@@ -204,11 +216,33 @@ describe('config schema', () => {
                                           ],
                                         }
                               `);
+
+      expect(
+        ConfigSchema.validate({
+          authProviders: ['oidc'],
+          authc: { oidc: { realm: 'realm-1' } },
+        }).authc
+      ).toMatchInlineSnapshot(`
+                                        Object {
+                                          "oidc": Object {
+                                            "realm": "realm-1",
+                                          },
+                                          "providers": Array [
+                                            "oidc",
+                                          ],
+                                        }
+                              `);
     });
 
     it(`returns a validation error when authc.providers is "['oidc', 'basic']" and realm is unspecified`, async () => {
       expect(() =>
         ConfigSchema.validate({ authc: { providers: ['oidc', 'basic'] } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authc.oidc.realm]: expected value of type [string] but got [undefined]"`
+      );
+
+      expect(() =>
+        ConfigSchema.validate({ authProviders: ['oidc', 'basic'] })
       ).toThrowErrorMatchingInlineSnapshot(
         `"[authc.oidc.realm]: expected value of type [string] but got [undefined]"`
       );
@@ -230,11 +264,32 @@ describe('config schema', () => {
                                           ],
                                         }
                               `);
+
+      expect(
+        ConfigSchema.validate({
+          authProviders: ['oidc', 'basic'],
+          authc: { oidc: { realm: 'realm-1' } },
+        }).authc
+      ).toMatchInlineSnapshot(`
+                                        Object {
+                                          "oidc": Object {
+                                            "realm": "realm-1",
+                                          },
+                                          "providers": Array [
+                                            "oidc",
+                                            "basic",
+                                          ],
+                                        }
+                              `);
     });
 
     it(`realm is not allowed when authc.providers is "['basic']"`, async () => {
       expect(() =>
         ConfigSchema.validate({ authc: { providers: ['basic'], oidc: { realm: 'realm-1' } } })
+      ).toThrowErrorMatchingInlineSnapshot(`"[authc.oidc]: a value wasn't expected to be present"`);
+
+      expect(() =>
+        ConfigSchema.validate({ authProviders: ['basic'], authc: { oidc: { realm: 'realm-1' } } })
       ).toThrowErrorMatchingInlineSnapshot(`"[authc.oidc]: a value wasn't expected to be present"`);
     });
   });
@@ -251,7 +306,26 @@ describe('config schema', () => {
                                         }
                               `);
 
+      expect(ConfigSchema.validate({ authProviders: ['saml'] }).authc).toMatchInlineSnapshot(`
+                                        Object {
+                                          "providers": Array [
+                                            "saml",
+                                          ],
+                                          "saml": Object {},
+                                        }
+                              `);
+
       expect(ConfigSchema.validate({ authc: { providers: ['saml'], saml: {} } }).authc)
+        .toMatchInlineSnapshot(`
+                                        Object {
+                                          "providers": Array [
+                                            "saml",
+                                          ],
+                                          "saml": Object {},
+                                        }
+                              `);
+
+      expect(ConfigSchema.validate({ authProviders: ['saml'], authc: { saml: {} } }).authc)
         .toMatchInlineSnapshot(`
                                         Object {
                                           "providers": Array [
@@ -275,11 +349,31 @@ describe('config schema', () => {
                                           },
                                         }
                               `);
+
+      expect(
+        ConfigSchema.validate({
+          authProviders: ['saml'],
+          authc: { saml: { realm: 'realm-1' } },
+        }).authc
+      ).toMatchInlineSnapshot(`
+                                        Object {
+                                          "providers": Array [
+                                            "saml",
+                                          ],
+                                          "saml": Object {
+                                            "realm": "realm-1",
+                                          },
+                                        }
+                              `);
     });
 
     it('`realm` is not allowed if saml provider is not enabled', async () => {
       expect(() =>
         ConfigSchema.validate({ authc: { providers: ['basic'], saml: { realm: 'realm-1' } } })
+      ).toThrowErrorMatchingInlineSnapshot(`"[authc.saml]: a value wasn't expected to be present"`);
+
+      expect(() =>
+        ConfigSchema.validate({ authProviders: ['basic'], authc: { saml: { realm: 'realm-1' } } })
       ).toThrowErrorMatchingInlineSnapshot(`"[authc.saml]: a value wasn't expected to be present"`);
     });
   });
@@ -402,31 +496,5 @@ describe('createConfig$()', () => {
     `);
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toEqual([]);
-  });
-
-  it('should set authProviders to authc.providers', async () => {
-    const contextMock = coreMock.createPluginInitializerContext({
-      authProviders: ['saml', 'basic'],
-    });
-
-    const config = await createConfig$(contextMock, true)
-      .pipe(first())
-      .toPromise();
-    expect(config).toMatchInlineSnapshot(`
-                  Object {
-                    "authProviders": Array [
-                      "saml",
-                      "basic",
-                    ],
-                    "authc": Object {
-                      "providers": Array [
-                        "saml",
-                        "basic",
-                      ],
-                    },
-                    "encryptionKey": "abababababababababababababababab",
-                    "secureCookies": true,
-                  }
-            `);
   });
 });

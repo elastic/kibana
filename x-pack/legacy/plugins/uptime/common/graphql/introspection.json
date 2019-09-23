@@ -113,6 +113,12 @@
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
+              },
+              {
+                "name": "statusFilter",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
               }
             ],
             "type": { "kind": "OBJECT", "name": "LatestMonitorsResult", "ofType": null },
@@ -148,6 +154,12 @@
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
+              },
+              {
+                "name": "statusFilter",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
               }
             ],
             "type": { "kind": "OBJECT", "name": "Snapshot", "ofType": null },
@@ -180,6 +192,12 @@
               },
               {
                 "name": "filters",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "statusFilter",
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
@@ -335,49 +353,6 @@
             "deprecationReason": null
           },
           {
-            "name": "getErrorsList",
-            "description": "",
-            "args": [
-              {
-                "name": "dateRangeStart",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "dateRangeEnd",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "filters",
-                "description": "",
-                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": { "kind": "OBJECT", "name": "ErrorListItem", "ofType": null }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "getMonitorPageTitle",
             "description": "",
             "args": [
@@ -422,6 +397,12 @@
               },
               {
                 "name": "filters",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "statusFilter",
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
@@ -572,14 +553,6 @@
             "deprecationReason": null
           },
           {
-            "name": "millisFromNow",
-            "description": "Milliseconds from the timestamp to the current time",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "beat",
             "description": "The agent that recorded the ping",
             "args": [],
@@ -719,7 +692,7 @@
             "name": "tls",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "TLS", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "PingTLS", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1871,12 +1844,12 @@
       },
       {
         "kind": "OBJECT",
-        "name": "TLS",
-        "description": "",
+        "name": "PingTLS",
+        "description": "Contains monitor transmission encryption information.",
         "fields": [
           {
             "name": "certificate_not_valid_after",
-            "description": "",
+            "description": "The date and time after which the certificate is invalid.",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
@@ -2513,22 +2486,6 @@
             "deprecationReason": null
           },
           {
-            "name": "names",
-            "description": "The names users have configured for the monitors.",
-            "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "ports",
             "description": "The ports of the monitored endpoints.",
             "args": [],
@@ -2588,89 +2545,6 @@
                 "name": null,
                 "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
               }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "ErrorListItem",
-        "description": "A representation of an error state for a monitor.",
-        "fields": [
-          {
-            "name": "count",
-            "description": "The number of times this error has occurred.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "latestMessage",
-            "description": "The most recent message associated with this error type.",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "location",
-            "description": "The location assigned to the agent reporting this error.",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "monitorId",
-            "description": "The ID of the monitor reporting the error.",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "name",
-            "description": "The name configured for the monitor by the user.",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "statusCode",
-            "description": "The status code, if available, of the error request.",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "timestamp",
-            "description": "When the most recent error state occurred.",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "type",
-            "description": "What kind of error the monitor reported.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -2875,6 +2749,18 @@
               "kind": "NON_NULL",
               "name": null,
               "ofType": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "tls",
+            "description": "Transport encryption information.",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "StateTLS", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -3182,6 +3068,49 @@
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "StateTLS",
+        "description": "Contains monitor transmission encryption information.",
+        "fields": [
+          {
+            "name": "certificate_not_valid_after",
+            "description": "The date and time after which the certificate is invalid.",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "certificate_not_valid_before",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "certificates",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rtt",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "RTT", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }

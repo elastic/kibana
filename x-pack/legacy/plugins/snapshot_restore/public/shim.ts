@@ -31,6 +31,7 @@ export interface AppCore {
     fatalError: typeof fatalError;
     toastNotifications: typeof toastNotifications;
   };
+  chrome: typeof chrome;
 }
 
 export interface AppPlugins {
@@ -40,7 +41,6 @@ export interface AppPlugins {
 }
 
 export interface Core extends AppCore {
-  chrome: typeof chrome;
   http: {
     getClient(): any;
     setClient(client: any): void;

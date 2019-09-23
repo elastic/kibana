@@ -11,6 +11,7 @@ exports[`it renders without crashing 1`] = `
         <EuiFlexItem>
           <EuiFormRow
             describedByIds={Array []}
+            display="row"
             fullWidth={true}
             hasEmptyLabelSpace={false}
             isInvalid={false}
@@ -40,6 +41,7 @@ exports[`it renders without crashing 1`] = `
         <EuiFlexItem>
           <EuiFormRow
             describedByIds={Array []}
+            display="row"
             fullWidth={true}
             hasEmptyLabelSpace={false}
             label={
@@ -127,6 +129,7 @@ exports[`it renders without crashing 1`] = `
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={true}
         labelType="label"

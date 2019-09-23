@@ -81,6 +81,8 @@ const TimelionDatasource = ({ args, updateArgs, defaultIndex }) => {
         <EuiFieldText value={getInterval()} onChange={e => setArg('interval', e.target.value)} />
       </EuiFormRow>
 
+      <EuiSpacer size="m" />
+
       <EuiCallOut color="warning" title="Some tips" size="s">
         <ul>
           <li>
