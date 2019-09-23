@@ -28,6 +28,7 @@ import { useBreadcrumbs, useCore, useLinks } from '../hooks';
 
 const FullBleedPage = styled(EuiPage)`
   padding: 0;
+  background-color: ${p => p.theme.eui.euiColorLightestShade};
 `;
 
 export function Home() {
