@@ -61,12 +61,12 @@ describe('Pagination', () => {
       .then(text2 => {
         thirdPageResult = `${text2}`;
       });
-    cy.get(NAVIGATION_UNCOMMON_PROCESSES).click({ force: true });
+    cy.get(NAVIGATION_AUTHENTICATIONS).click({ force: true });
     waitForTableLoad(AUTHENTICATIONS_TABLE);
     // check authentications table starts at 1
     cy.get(getPageButtonSelector(0)).should('have.class', 'euiPaginationButton-isActive');
 
-    cy.get(NAVIGATION_AUTHENTICATIONS).click({ force: true });
+    cy.get(NAVIGATION_UNCOMMON_PROCESSES).click({ force: true });
     waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
     // check uncommon processes table picks up at 3
     cy.get(getPageButtonSelector(2)).should('have.class', 'euiPaginationButton-isActive');

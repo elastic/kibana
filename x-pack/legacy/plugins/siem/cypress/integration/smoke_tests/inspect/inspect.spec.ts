@@ -15,6 +15,7 @@ import {
 } from '../../lib/inspect/selectors';
 import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../lib/util/helpers';
 import { executeKQL, hostExistsQuery, toggleTimelineVisibility } from '../../lib/timeline/helpers';
+
 describe('Inspect', () => {
   describe('Hosts and network stats and tables', () => {
     afterEach(() => {
@@ -33,10 +34,12 @@ describe('Inspect', () => {
       })
     );
   });
+
   describe('Timeline', () => {
     afterEach(() => {
       return logout();
     });
+
     it('inspects the timeline', () => {
       loginAndWaitForPage(HOSTS_PAGE);
       toggleTimelineVisibility();
