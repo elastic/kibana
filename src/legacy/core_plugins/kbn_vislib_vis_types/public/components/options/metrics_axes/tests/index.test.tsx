@@ -27,6 +27,8 @@ import { ValueAxesPanel } from '../value_axes_panel';
 import { CategoryAxisPanel } from '../category_axis_panel';
 import { ChartTypes } from '../../../../utils/collections';
 import { AggConfig } from 'ui/vis';
+import { AggType } from 'ui/agg_types';
+import { defaultValueAxisId, valueAxis, seriesParam, categoryAxis } from './mocks';
 
 jest.mock('../series_panel', () => ({
   SeriesPanel: () => 'SeriesPanel',
@@ -38,58 +40,56 @@ jest.mock('../value_axes_panel', () => ({
   ValueAxesPanel: () => 'ValueAxesPanel',
 }));
 
+const SERIES_PARAMS = 'seriesParams';
+const VALUE_AXES = 'valueAxes';
+
+const aggCount: AggConfig = {
+  id: '1',
+  type: { name: 'count' },
+  makeLabel: () => 'Count',
+} as AggConfig;
+
+const aggAverage: AggConfig = {
+  id: '2',
+  type: { name: 'average' } as AggType,
+  makeLabel: () => 'Average',
+} as AggConfig;
+
+const createAggs = (aggs: any[]) => ({
+  aggs,
+  bySchemaName: () => aggs,
+});
+
 describe('MetricsAxisOptions component', () => {
   let setValue: jest.Mock;
   let setVisType: jest.Mock;
   let defaultProps: ValidationVisOptionsProps<BasicVislibParams>;
-  let aggs;
-  const defaultValueAxisId = 'ValueAxis-1';
   let axis: ValueAxis;
   let axisRight: ValueAxis;
-  let seriesParam: SeriesParam;
-  const aggCount = {
-    id: '1',
-    type: { name: 'count' },
-    makeLabel: () => 'Count',
-  } as AggConfig;
-  const aggAverage = {
-    id: '2',
-    type: { name: 'average' },
-    makeLabel: () => 'Average',
-  } as AggConfig;
+  let chart: SeriesParam;
 
   beforeEach(() => {
     setValue = jest.fn();
     setVisType = jest.fn();
 
-    aggs = {
-      aggs: [aggCount],
-      bySchemaName: () => [aggCount],
-    };
-
     axis = {
-      id: defaultValueAxisId,
+      ...valueAxis,
       name: 'LeftAxis-1',
       position: Positions.LEFT,
-      title: { text: '' },
-    } as ValueAxis;
+    };
     axisRight = {
+      ...valueAxis,
       id: 'ValueAxis-2',
       name: 'RightAxis-1',
       position: Positions.RIGHT,
-      title: { text: '' },
-    } as ValueAxis;
-    seriesParam = {
+    };
+    chart = {
+      ...seriesParam,
       type: ChartTypes.AREA,
-      data: {
-        label: 'Count',
-        id: '1',
-      },
-      valueAxis: defaultValueAxisId,
-    } as SeriesParam;
+    };
 
     defaultProps = {
-      aggs,
+      aggs: createAggs([aggCount]),
       aggsLabels: '',
       vis: {
         type: {
@@ -99,8 +99,8 @@ describe('MetricsAxisOptions component', () => {
       },
       stateParams: {
         valueAxes: [axis],
-        seriesParams: [seriesParam],
-        categoryAxes: [axis],
+        seriesParams: [chart],
+        categoryAxes: [categoryAxis],
         grid: { valueAxis: defaultValueAxisId },
       },
       setValue,
@@ -118,32 +118,23 @@ describe('MetricsAxisOptions component', () => {
     it('should update series when new agg is added', () => {
       const comp = mount(<MetricsAxisOptions {...defaultProps} />);
       comp.setProps({
-        aggs: {
-          aggs: [aggCount, aggAverage],
-          bySchemaName: () => [aggCount, aggAverage],
-        },
+        aggs: createAggs([aggCount, aggAverage]),
         aggsLabels: `${aggCount.makeLabel()}, ${aggAverage.makeLabel()}`,
       });
 
-      const updatedSeries = [
-        seriesParam,
-        { ...seriesParam, data: { id: '2', label: aggAverage.makeLabel() } },
-      ];
-      expect(setValue).toHaveBeenLastCalledWith('seriesParams', updatedSeries);
+      const updatedSeries = [chart, { ...chart, data: { id: '2', label: aggAverage.makeLabel() } }];
+      expect(setValue).toHaveBeenLastCalledWith(SERIES_PARAMS, updatedSeries);
     });
 
     it('should update series when new agg label is changed', () => {
       const comp = mount(<MetricsAxisOptions {...defaultProps} />);
       const agg = { id: aggCount.id, makeLabel: () => 'New label' };
       comp.setProps({
-        aggs: {
-          aggs: [agg],
-          bySchemaName: () => [agg],
-        },
+        aggs: createAggs([agg]),
       });
 
-      const updatedSeries = [{ ...seriesParam, data: { id: agg.id, label: agg.makeLabel() } }];
-      expect(setValue).toHaveBeenLastCalledWith('seriesParams', updatedSeries);
+      const updatedSeries = [{ ...chart, data: { id: agg.id, label: agg.makeLabel() } }];
+      expect(setValue).toHaveBeenLastCalledWith(SERIES_PARAMS, updatedSeries);
     });
 
     it('should update visType when one seriesParam', () => {
@@ -153,7 +144,7 @@ describe('MetricsAxisOptions component', () => {
       comp.setProps({
         stateParams: {
           ...defaultProps.stateParams,
-          seriesParams: [{ ...seriesParam, type: ChartTypes.LINE }],
+          seriesParams: [{ ...chart, type: ChartTypes.LINE }],
         },
       });
 
@@ -167,7 +158,7 @@ describe('MetricsAxisOptions component', () => {
       comp.setProps({
         stateParams: {
           ...defaultProps.stateParams,
-          seriesParams: [seriesParam, { ...seriesParam, type: ChartTypes.LINE }],
+          seriesParams: [chart, { ...chart, type: ChartTypes.LINE }],
         },
       });
 
@@ -179,19 +170,16 @@ describe('MetricsAxisOptions component', () => {
     it('should not update the value axis title if custom title was set', () => {
       defaultProps.stateParams.valueAxes[0].title.text = 'Custom title';
       const comp = mount(<MetricsAxisOptions {...defaultProps} />);
-
       const newAgg = {
-        id: '1',
-        makeLabel: () => 'Max',
+        ...aggCount,
+        makeLabel: () => 'Custom label',
       };
       comp.setProps({
-        aggs: {
-          aggs: [newAgg],
-          bySchemaName: () => [newAgg],
-        },
+        aggs: createAggs([newAgg]),
         aggsLabels: `${newAgg.makeLabel()}`,
       });
-      expect(setValue).not.toHaveBeenCalledWith('valueAxes');
+      const updatedValues = [{ ...axis, title: { text: newAgg.makeLabel() } }];
+      expect(setValue).not.toHaveBeenCalledWith(VALUE_AXES, updatedValues);
     });
 
     it('should set the custom title to match the value axis label when only one agg exists for that axis', () => {
@@ -202,33 +190,27 @@ describe('MetricsAxisOptions component', () => {
         makeLabel: () => 'Custom label',
       };
       comp.setProps({
-        aggs: {
-          aggs: [agg],
-          bySchemaName: () => [agg],
-        },
+        aggs: createAggs([agg]),
         aggsLabels: agg.makeLabel(),
       });
 
-      const updatedValues = [{ ...axis, title: { text: 'Custom label' } }];
-      expect(setValue).toHaveBeenCalledWith('valueAxes', updatedValues);
+      const updatedValues = [{ ...axis, title: { text: agg.makeLabel() } }];
+      expect(setValue).toHaveBeenCalledWith(VALUE_AXES, updatedValues);
     });
 
     it('should not set the custom title to match the value axis label when more than one agg exists for that axis', () => {
       const comp = mount(<MetricsAxisOptions {...defaultProps} />);
       const agg = { id: aggCount.id, makeLabel: () => 'Custom label' };
       comp.setProps({
-        aggs: {
-          aggs: [agg, aggAverage],
-          bySchemaName: () => [agg, aggAverage],
-        },
+        aggs: createAggs([agg, aggAverage]),
         aggsLabels: `${agg.makeLabel()}, ${aggAverage.makeLabel()}`,
         stateParams: {
           ...defaultProps.stateParams,
-          seriesParams: [seriesParam, seriesParam],
+          seriesParams: [chart, chart],
         },
       });
 
-      expect(setValue).not.toHaveBeenCalledWith('valueAxes');
+      expect(setValue).not.toHaveBeenCalledWith(VALUE_AXES);
     });
 
     it('should not overwrite the custom title with the value axis label if the custom title has been changed', () => {
@@ -240,14 +222,11 @@ describe('MetricsAxisOptions component', () => {
         makeLabel: () => 'Custom label',
       };
       comp.setProps({
-        aggs: {
-          aggs: [agg],
-          bySchemaName: () => [agg],
-        },
+        aggs: createAggs([agg]),
         aggsLabels: agg.makeLabel(),
       });
 
-      expect(setValue).not.toHaveBeenCalledWith('valueAxes');
+      expect(setValue).not.toHaveBeenCalledWith(VALUE_AXES);
     });
 
     it('should overwrite the custom title when the agg type changes', () => {
@@ -259,15 +238,12 @@ describe('MetricsAxisOptions component', () => {
         makeLabel: () => 'Max',
       };
       comp.setProps({
-        aggs: {
-          aggs: [agg],
-          bySchemaName: () => [agg],
-        },
+        aggs: createAggs([agg]),
         aggsLabels: agg.makeLabel(),
       });
 
-      const updatedValues = [{ ...axis, title: { text: 'Max' } }];
-      expect(setValue).toHaveBeenCalledWith('valueAxes', updatedValues);
+      const updatedValues = [{ ...axis, title: { text: agg.makeLabel() } }];
+      expect(setValue).toHaveBeenCalledWith(VALUE_AXES, updatedValues);
     });
 
     it('should overwrite the custom title when the agg field changes', () => {
@@ -277,23 +253,17 @@ describe('MetricsAxisOptions component', () => {
         type: { name: 'max' },
         makeLabel: () => 'Max',
       } as AggConfig;
-      defaultProps.aggs = {
-        aggs: [agg],
-        bySchemaName: () => [agg],
-      } as any;
+      defaultProps.aggs = createAggs([agg]) as any;
       const comp = mount(<MetricsAxisOptions {...defaultProps} />);
       agg.params = { field: { name: 'Field' } };
       agg.makeLabel = () => 'Max, Field';
       comp.setProps({
-        aggs: {
-          aggs: [agg],
-          bySchemaName: () => [agg],
-        },
+        aggs: createAggs([agg]),
         aggsLabels: agg.makeLabel(),
       });
 
-      const updatedValues = [{ ...axis, title: { text: 'Max, Field' } }];
-      expect(setValue).toHaveBeenCalledWith('valueAxes', updatedValues);
+      const updatedValues = [{ ...axis, title: { text: agg.makeLabel() } }];
+      expect(setValue).toHaveBeenCalledWith(VALUE_AXES, updatedValues);
     });
   });
 
@@ -301,7 +271,7 @@ describe('MetricsAxisOptions component', () => {
     const comp = shallow(<MetricsAxisOptions {...defaultProps} />);
     comp.find(ValueAxesPanel).prop('addValueAxis')();
 
-    expect(setValue).toHaveBeenCalledWith('valueAxes', [axis, axisRight]);
+    expect(setValue).toHaveBeenCalledWith(VALUE_AXES, [axis, axisRight]);
   });
 
   describe('removeValueAxis', () => {
@@ -313,15 +283,15 @@ describe('MetricsAxisOptions component', () => {
       const comp = shallow(<MetricsAxisOptions {...defaultProps} />);
       comp.find(ValueAxesPanel).prop('removeValueAxis')(axis);
 
-      expect(setValue).toHaveBeenCalledWith('valueAxes', [axisRight]);
+      expect(setValue).toHaveBeenCalledWith(VALUE_AXES, [axisRight]);
     });
 
     it('should update seriesParams "valueAxis" prop', () => {
-      const updatedSeriesParam = { ...seriesParam, valueAxis: 'ValueAxis-2' };
+      const updatedSeriesParam = { ...chart, valueAxis: 'ValueAxis-2' };
       const comp = shallow(<MetricsAxisOptions {...defaultProps} />);
       comp.find(ValueAxesPanel).prop('removeValueAxis')(axis);
 
-      expect(setValue).toHaveBeenCalledWith('seriesParams', [updatedSeriesParam]);
+      expect(setValue).toHaveBeenCalledWith(SERIES_PARAMS, [updatedSeriesParam]);
     });
 
     it('should reset grid "valueAxis" prop', () => {
@@ -339,6 +309,6 @@ describe('MetricsAxisOptions component', () => {
     comp.find(CategoryAxisPanel).prop('onPositionChanged')(Positions.LEFT);
 
     const updatedValues = [{ ...axis, name: 'BottomAxis-1', position: Positions.BOTTOM }];
-    expect(setValue).toHaveBeenCalledWith('valueAxes', updatedValues);
+    expect(setValue).toHaveBeenCalledWith(VALUE_AXES, updatedValues);
   });
 });

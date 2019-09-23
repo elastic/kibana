@@ -21,33 +21,28 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { LabelOptions, LabelOptionsProps } from '../label_options';
-import { Axis } from '../../../../types';
 import { TruncateLabelsOption } from '../../../common';
+import { valueAxis, categoryAxis } from './mocks';
+
+const FILTER = 'filter';
+const ROTATE = 'rotate';
+const DISABLED = 'disabled';
+const CATEGORY_AXES = 'categoryAxes';
 
 describe('LabelOptions component', () => {
   let setValue: jest.Mock;
   let defaultProps: LabelOptionsProps;
-  let axis: Axis;
-  const filterParamName = 'filter';
-  const rotateParamName = 'rotate';
 
   beforeEach(() => {
     setValue = jest.fn();
-    axis = {
-      labels: {
-        show: true,
-        filter: false,
-        truncate: 0,
-      },
-    } as Axis;
 
     defaultProps = {
-      axis,
-      axesName: 'categoryAxes',
+      axis: { ...valueAxis },
+      axesName: CATEGORY_AXES,
       index: 0,
       stateParams: {
-        categoryAxes: [axis],
-        valueAxes: [axis],
+        categoryAxes: [{ ...categoryAxis }],
+        valueAxes: [{ ...valueAxis }],
       } as any,
       setValue,
     } as any;
@@ -62,35 +57,35 @@ describe('LabelOptions component', () => {
   it('should show other fields when axis.labels.show is true', () => {
     const comp = shallow(<LabelOptions {...defaultProps} />);
 
-    expect(comp.find({ paramName: filterParamName }).prop('disabled')).toBeFalsy();
-    expect(comp.find({ paramName: rotateParamName }).prop('disabled')).toBeFalsy();
-    expect(comp.find(TruncateLabelsOption).prop('disabled')).toBeFalsy();
+    expect(comp.find({ paramName: FILTER }).prop(DISABLED)).toBeFalsy();
+    expect(comp.find({ paramName: ROTATE }).prop(DISABLED)).toBeFalsy();
+    expect(comp.find(TruncateLabelsOption).prop(DISABLED)).toBeFalsy();
   });
 
   it('should disable other fields when axis.labels.show is false', () => {
     defaultProps.axis.labels.show = false;
     const comp = shallow(<LabelOptions {...defaultProps} />);
 
-    expect(comp.find({ paramName: filterParamName }).prop('disabled')).toBeTruthy();
-    expect(comp.find({ paramName: rotateParamName }).prop('disabled')).toBeTruthy();
-    expect(comp.find(TruncateLabelsOption).prop('disabled')).toBeTruthy();
+    expect(comp.find({ paramName: FILTER }).prop(DISABLED)).toBeTruthy();
+    expect(comp.find({ paramName: ROTATE }).prop(DISABLED)).toBeTruthy();
+    expect(comp.find(TruncateLabelsOption).prop(DISABLED)).toBeTruthy();
   });
 
   it('should set rotate as number', () => {
     const comp = mountWithIntl(<LabelOptions {...defaultProps} />);
-    comp.find({ paramName: rotateParamName }).prop('setValue')(rotateParamName, '5');
+    comp.find({ paramName: ROTATE }).prop('setValue')(ROTATE, '5');
 
-    const newAxes = [{ ...axis, labels: { ...axis.labels, rotate: 5 } }];
-    expect(setValue).toBeCalledWith('categoryAxes', newAxes);
+    const newAxes = [{ ...categoryAxis, labels: { ...categoryAxis.labels, rotate: 5 } }];
+    expect(setValue).toBeCalledWith(CATEGORY_AXES, newAxes);
   });
 
   it('should set filter value', () => {
     const comp = mountWithIntl(<LabelOptions {...defaultProps} />);
-    expect(defaultProps.stateParams.categoryAxes[0].labels.filter).toBeFalsy();
-    comp.find({ paramName: filterParamName }).prop('setValue')(filterParamName, true);
+    expect(defaultProps.stateParams.categoryAxes[0].labels.filter).toBeTruthy();
+    comp.find({ paramName: FILTER }).prop('setValue')(FILTER, false);
 
-    const newAxes = [{ ...axis, labels: { ...axis.labels, filter: true } }];
-    expect(setValue).toBeCalledWith('categoryAxes', newAxes);
+    const newAxes = [{ ...categoryAxis, labels: { ...categoryAxis.labels, filter: false } }];
+    expect(setValue).toBeCalledWith(CATEGORY_AXES, newAxes);
   });
 
   it('should set value for valueAxes', () => {
@@ -98,7 +93,7 @@ describe('LabelOptions component', () => {
     const comp = shallow(<LabelOptions {...defaultProps} />);
     comp.find(TruncateLabelsOption).prop('setValue')('truncate', 10);
 
-    const newAxes = [{ ...axis, labels: { ...axis.labels, truncate: 10 } }];
+    const newAxes = [{ ...valueAxis, labels: { ...valueAxis.labels, truncate: 10 } }];
     expect(setValue).toBeCalledWith('valueAxes', newAxes);
   });
 });

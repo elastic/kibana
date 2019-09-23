@@ -26,11 +26,13 @@ import { LabelOptions } from '../label_options';
 import {
   ScaleTypes,
   Positions,
-  AxisModes,
   scaleTypes,
   axisModes,
   positions,
 } from '../../../../utils/collections';
+import { valueAxis, categoryAxis } from './mocks';
+
+const POSITION = 'position';
 
 interface PositionOption {
   text: string;
@@ -41,28 +43,21 @@ interface PositionOption {
 describe('ValueAxisOptions component', () => {
   let setParamByIndex: jest.Mock;
   let onValueAxisPositionChanged: jest.Mock;
+  let setMultipleValidity: jest.Mock;
   let defaultProps: ValueAxisOptionsParams;
   let axis: Axis;
 
   beforeEach(() => {
     setParamByIndex = jest.fn();
+    setMultipleValidity = jest.fn();
     onValueAxisPositionChanged = jest.fn();
-    axis = {
-      id: 'ValueAxis-1',
-      position: Positions.LEFT,
-      scale: {
-        mode: AxisModes.NORMAL,
-        type: ScaleTypes.LINEAR,
-      },
-      title: {},
-      show: true,
-    } as Axis;
+    axis = { ...valueAxis };
 
     defaultProps = {
       axis,
       index: 0,
       stateParams: {
-        categoryAxes: [axis],
+        categoryAxes: [{ ...categoryAxis }],
         valueAxes: [axis],
       },
       vis: {
@@ -75,6 +70,7 @@ describe('ValueAxisOptions component', () => {
       isCategoryAxisHorizontal: false,
       setParamByIndex,
       onValueAxisPositionChanged,
+      setMultipleValidity,
     } as any;
   });
 
@@ -96,30 +92,56 @@ describe('ValueAxisOptions component', () => {
     defaultProps.isCategoryAxisHorizontal = true;
     const comp = shallow(<ValueAxisOptions {...defaultProps} />);
 
-    const options: PositionOption[] = comp.find({ paramName: 'position' }).prop('options');
+    const options: PositionOption[] = comp.find({ paramName: POSITION }).prop('options');
 
-    expect(options.find(opt => opt.value === Positions.LEFT)!.disabled).toBeFalsy();
-    expect(options.find(opt => opt.value === Positions.RIGHT)!.disabled).toBeFalsy();
-    expect(options.find(opt => opt.value === Positions.TOP)!.disabled).toBeTruthy();
-    expect(options.find(opt => opt.value === Positions.BOTTOM)!.disabled).toBeTruthy();
+    expect(options.length).toBe(4);
+    options.forEach(({ value, disabled }) => {
+      switch (value) {
+        case Positions.LEFT:
+          expect(disabled).toBeFalsy();
+          break;
+        case Positions.RIGHT:
+          expect(disabled).toBeFalsy();
+          break;
+        case Positions.TOP:
+          expect(disabled).toBeTruthy();
+          break;
+        case Positions.BOTTOM:
+          expect(disabled).toBeTruthy();
+          break;
+      }
+    });
   });
 
   it('should only allow top and bottom value axis position when category axis is vertical', () => {
     defaultProps.isCategoryAxisHorizontal = false;
     const comp = shallow(<ValueAxisOptions {...defaultProps} />);
 
-    const options: PositionOption[] = comp.find({ paramName: 'position' }).prop('options');
+    const options: PositionOption[] = comp.find({ paramName: POSITION }).prop('options');
 
-    expect(options.find(opt => opt.value === Positions.TOP)!.disabled).toBeFalsy();
-    expect(options.find(opt => opt.value === Positions.BOTTOM)!.disabled).toBeFalsy();
-    expect(options.find(opt => opt.value === Positions.LEFT)!.disabled).toBeTruthy();
-    expect(options.find(opt => opt.value === Positions.RIGHT)!.disabled).toBeTruthy();
+    expect(options.length).toBe(4);
+    options.forEach(({ value, disabled }) => {
+      switch (value) {
+        case Positions.LEFT:
+          expect(disabled).toBeTruthy();
+          break;
+        case Positions.RIGHT:
+          expect(disabled).toBeTruthy();
+          break;
+        case Positions.TOP:
+          expect(disabled).toBeFalsy();
+          break;
+        case Positions.BOTTOM:
+          expect(disabled).toBeFalsy();
+          break;
+      }
+    });
   });
 
   it('should call onValueAxisPositionChanged when position is changed', () => {
     const value = Positions.RIGHT;
     const comp = shallow(<ValueAxisOptions {...defaultProps} />);
-    comp.find({ paramName: 'position' }).prop('setValue')('position', value);
+    comp.find({ paramName: POSITION }).prop('setValue')(POSITION, value);
 
     expect(onValueAxisPositionChanged).toBeCalledWith(defaultProps.index, value);
   });

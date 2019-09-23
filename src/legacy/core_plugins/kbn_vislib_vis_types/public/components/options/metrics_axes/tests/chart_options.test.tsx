@@ -20,56 +20,27 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { ChartOptions, ChartOptionsParams } from '../chart_options';
-import { SeriesParam, ValueAxis } from '../../../../types';
-import { Positions, ScaleTypes } from '../../../../utils/collections';
+import { SeriesParam } from '../../../../types';
 import { LineOptions } from '../line_options';
 import {
   ChartTypes,
   ChartModes,
-  InterpolationModes,
   interpolationModes,
   chartTypes,
   chartModes,
 } from '../../../../utils/collections';
+import { valueAxis, seriesParam } from './mocks';
 
 describe('ChartOptions component', () => {
   let setParamByIndex: jest.Mock;
   let changeValueAxis: jest.Mock;
   let defaultProps: ChartOptionsParams;
   let chart: SeriesParam;
-  const axis = {
-    id: 'ValueAxis-1',
-    name: 'ValueAxis-1',
-    position: Positions.LEFT,
-    scale: {
-      type: ScaleTypes.LINEAR,
-    },
-    title: {},
-    show: true,
-    labels: {
-      show: true,
-      filter: false,
-      truncate: 0,
-    },
-  } as ValueAxis;
 
   beforeEach(() => {
     setParamByIndex = jest.fn();
     changeValueAxis = jest.fn();
-    chart = {
-      show: true,
-      type: ChartTypes.HISTOGRAM,
-      mode: ChartModes.STACKED,
-      data: {
-        label: 'Count',
-        id: '1',
-      },
-      drawLinesBetweenPoints: true,
-      lineWidth: 2,
-      showCircles: true,
-      interpolate: InterpolationModes.LINEAR,
-      valueAxis: 'ValueAxis-1',
-    } as SeriesParam;
+    chart = { ...seriesParam };
 
     defaultProps = {
       index: 0,
@@ -82,7 +53,7 @@ describe('ChartOptions component', () => {
         },
       },
       stateParams: {
-        valueAxes: [axis],
+        valueAxes: [valueAxis],
       },
       setParamByIndex,
       changeValueAxis,
@@ -112,9 +83,10 @@ describe('ChartOptions component', () => {
   it('should call changeValueAxis when valueAxis is changed', () => {
     const comp = mount(<ChartOptions {...defaultProps} />);
     const paramName = 'valueAxis';
-    comp.find({ paramName }).prop('setValue')(paramName, 'new');
+    const value = 'new';
+    comp.find({ paramName }).prop('setValue')(paramName, value);
 
-    expect(changeValueAxis).toBeCalledWith(0, paramName, 'new');
+    expect(changeValueAxis).toBeCalledWith(0, paramName, value);
   });
 
   it('should call setParamByIndex when mode is changed', () => {

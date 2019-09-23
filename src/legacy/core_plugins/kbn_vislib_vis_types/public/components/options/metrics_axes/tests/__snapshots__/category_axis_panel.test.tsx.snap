@@ -58,7 +58,7 @@ exports[`CategoryAxisPanel component should init with the default set of props 1
         "labels": Object {
           "filter": true,
           "show": true,
-          "truncate": 100,
+          "truncate": 0,
         },
         "position": "bottom",
         "scale": Object {
@@ -66,7 +66,9 @@ exports[`CategoryAxisPanel component should init with the default set of props 1
         },
         "show": true,
         "style": Object {},
-        "title": Object {},
+        "title": Object {
+          "text": "",
+        },
         "type": "category",
       }
     }

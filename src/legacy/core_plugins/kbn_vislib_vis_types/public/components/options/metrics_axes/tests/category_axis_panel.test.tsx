@@ -21,8 +21,9 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { CategoryAxisPanel, CategoryAxisPanelProps } from '../category_axis_panel';
 import { Axis } from '../../../../types';
-import { ScaleTypes, Positions, positions, AxisTypes } from '../../../../utils/collections';
+import { Positions, positions } from '../../../../utils/collections';
 import { LabelOptions } from '../label_options';
+import { categoryAxis } from './mocks';
 
 describe('CategoryAxisPanel component', () => {
   let setCategoryAxis: jest.Mock;
@@ -33,22 +34,7 @@ describe('CategoryAxisPanel component', () => {
   beforeEach(() => {
     setCategoryAxis = jest.fn();
     onPositionChanged = jest.fn();
-    axis = {
-      id: 'CategoryAxis-1',
-      type: AxisTypes.CATEGORY,
-      position: Positions.BOTTOM,
-      show: true,
-      style: {},
-      scale: {
-        type: ScaleTypes.LINEAR,
-      },
-      labels: {
-        show: true,
-        filter: true,
-        truncate: 100,
-      },
-      title: {},
-    } as Axis;
+    axis = categoryAxis;
 
     defaultProps = {
       axis,

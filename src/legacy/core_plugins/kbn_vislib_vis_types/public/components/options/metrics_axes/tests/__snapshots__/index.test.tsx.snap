@@ -26,12 +26,22 @@ exports[`MetricsAxisOptions component should init with the default set of props 
       Object {
         "categoryAxes": Array [
           Object {
-            "id": "ValueAxis-1",
-            "name": "LeftAxis-1",
-            "position": "left",
+            "id": "CategoryAxis-1",
+            "labels": Object {
+              "filter": true,
+              "show": true,
+              "truncate": 0,
+            },
+            "position": "bottom",
+            "scale": Object {
+              "type": "linear",
+            },
+            "show": true,
+            "style": Object {},
             "title": Object {
               "text": "",
             },
+            "type": "category",
           },
         ],
         "grid": Object {
@@ -43,6 +53,12 @@ exports[`MetricsAxisOptions component should init with the default set of props 
               "id": "1",
               "label": "Count",
             },
+            "drawLinesBetweenPoints": true,
+            "interpolate": "linear",
+            "lineWidth": 2,
+            "mode": "stacked",
+            "show": true,
+            "showCircles": true,
             "type": "area",
             "valueAxis": "ValueAxis-1",
           },
@@ -50,11 +66,27 @@ exports[`MetricsAxisOptions component should init with the default set of props 
         "valueAxes": Array [
           Object {
             "id": "ValueAxis-1",
+            "labels": Object {
+              "filter": true,
+              "show": true,
+              "truncate": 0,
+            },
             "name": "LeftAxis-1",
             "position": "left",
+            "scale": Object {
+              "boundsMargin": 1,
+              "defaultYExtents": true,
+              "max": 2,
+              "min": 1,
+              "setYExtents": true,
+              "type": "linear",
+            },
+            "show": true,
+            "style": Object {},
             "title": Object {
               "text": "",
             },
+            "type": "value",
           },
         ],
       }
@@ -104,12 +136,22 @@ exports[`MetricsAxisOptions component should init with the default set of props 
       Object {
         "categoryAxes": Array [
           Object {
-            "id": "ValueAxis-1",
-            "name": "LeftAxis-1",
-            "position": "left",
+            "id": "CategoryAxis-1",
+            "labels": Object {
+              "filter": true,
+              "show": true,
+              "truncate": 0,
+            },
+            "position": "bottom",
+            "scale": Object {
+              "type": "linear",
+            },
+            "show": true,
+            "style": Object {},
             "title": Object {
               "text": "",
             },
+            "type": "category",
           },
         ],
         "grid": Object {
@@ -121,6 +163,12 @@ exports[`MetricsAxisOptions component should init with the default set of props 
               "id": "1",
               "label": "Count",
             },
+            "drawLinesBetweenPoints": true,
+            "interpolate": "linear",
+            "lineWidth": 2,
+            "mode": "stacked",
+            "show": true,
+            "showCircles": true,
             "type": "area",
             "valueAxis": "ValueAxis-1",
           },
@@ -128,11 +176,27 @@ exports[`MetricsAxisOptions component should init with the default set of props 
         "valueAxes": Array [
           Object {
             "id": "ValueAxis-1",
+            "labels": Object {
+              "filter": true,
+              "show": true,
+              "truncate": 0,
+            },
             "name": "LeftAxis-1",
             "position": "left",
+            "scale": Object {
+              "boundsMargin": 1,
+              "defaultYExtents": true,
+              "max": 2,
+              "min": 1,
+              "setYExtents": true,
+              "type": "linear",
+            },
+            "show": true,
+            "style": Object {},
             "title": Object {
               "text": "",
             },
+            "type": "value",
           },
         ],
       }
@@ -173,12 +237,22 @@ exports[`MetricsAxisOptions component should init with the default set of props 
     aggsLabels=""
     axis={
       Object {
-        "id": "ValueAxis-1",
-        "name": "LeftAxis-1",
-        "position": "left",
+        "id": "CategoryAxis-1",
+        "labels": Object {
+          "filter": true,
+          "show": true,
+          "truncate": 0,
+        },
+        "position": "bottom",
+        "scale": Object {
+          "type": "linear",
+        },
+        "show": true,
+        "style": Object {},
         "title": Object {
           "text": "",
         },
+        "type": "category",
       }
     }
     onPositionChanged={[Function]}
@@ -189,12 +263,22 @@ exports[`MetricsAxisOptions component should init with the default set of props 
       Object {
         "categoryAxes": Array [
           Object {
-            "id": "ValueAxis-1",
-            "name": "LeftAxis-1",
-            "position": "left",
+            "id": "CategoryAxis-1",
+            "labels": Object {
+              "filter": true,
+              "show": true,
+              "truncate": 0,
+            },
+            "position": "bottom",
+            "scale": Object {
+              "type": "linear",
+            },
+            "show": true,
+            "style": Object {},
             "title": Object {
               "text": "",
             },
+            "type": "category",
           },
         ],
         "grid": Object {
@@ -206,6 +290,12 @@ exports[`MetricsAxisOptions component should init with the default set of props 
               "id": "1",
               "label": "Count",
             },
+            "drawLinesBetweenPoints": true,
+            "interpolate": "linear",
+            "lineWidth": 2,
+            "mode": "stacked",
+            "show": true,
+            "showCircles": true,
             "type": "area",
             "valueAxis": "ValueAxis-1",
           },
@@ -213,11 +303,27 @@ exports[`MetricsAxisOptions component should init with the default set of props 
         "valueAxes": Array [
           Object {
             "id": "ValueAxis-1",
+            "labels": Object {
+              "filter": true,
+              "show": true,
+              "truncate": 0,
+            },
             "name": "LeftAxis-1",
             "position": "left",
+            "scale": Object {
+              "boundsMargin": 1,
+              "defaultYExtents": true,
+              "max": 2,
+              "min": 1,
+              "setYExtents": true,
+              "type": "linear",
+            },
+            "show": true,
+            "style": Object {},
             "title": Object {
               "text": "",
             },
+            "type": "value",
           },
         ],
       }

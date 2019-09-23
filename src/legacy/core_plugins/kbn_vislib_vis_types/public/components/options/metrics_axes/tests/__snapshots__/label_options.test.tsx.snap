@@ -20,12 +20,12 @@ exports[`LabelOptions component should init with the default set of props 1`] = 
     value={true}
   />
   <SwitchOption
-    dataTestSubj="xAxisFilterLabelsCheckbox-undefined"
+    dataTestSubj="xAxisFilterLabelsCheckbox-ValueAxis-1"
     disabled={false}
     label="Filter labels"
     paramName="filter"
     setValue={[Function]}
-    value={false}
+    value={true}
   />
   <EuiFlexGroup
     gutterSize="s"

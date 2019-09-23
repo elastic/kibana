@@ -21,40 +21,22 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { LineOptions, LineOptionsParams } from '../line_options';
-import { SeriesParam } from '../../../../types';
 import { NumberInputOption } from '../../../common';
-import {
-  ChartTypes,
-  ChartModes,
-  InterpolationModes,
-  interpolationModes,
-} from '../../../../utils/collections';
+import { interpolationModes } from '../../../../utils/collections';
+import { seriesParam } from './mocks';
+
+const LINE_WIDTH = 'lineWidth';
+const DRAW_LINES = 'drawLinesBetweenPoints';
 
 describe('LineOptions component', () => {
   let setChart: jest.Mock;
   let defaultProps: LineOptionsParams;
-  const lineWidthParamName = 'lineWidth';
-  let chart: SeriesParam;
 
   beforeEach(() => {
     setChart = jest.fn();
-    chart = {
-      show: true,
-      type: ChartTypes.AREA,
-      mode: ChartModes.STACKED,
-      data: {
-        label: 'Count',
-        id: '1',
-      },
-      drawLinesBetweenPoints: true,
-      lineWidth: 2,
-      showCircles: true,
-      interpolate: InterpolationModes.LINEAR,
-      valueAxis: 'ValueAxis-1',
-    } as SeriesParam;
 
     defaultProps = {
-      chart,
+      chart: { ...seriesParam },
       vis: {
         type: {
           editorConfig: {
@@ -74,25 +56,22 @@ describe('LineOptions component', () => {
 
   it('should set lineWidth as undefined when empty value', () => {
     const comp = mountWithIntl(<LineOptions {...defaultProps} />);
-    comp.find(NumberInputOption).prop('setValue')(lineWidthParamName, '');
+    comp.find(NumberInputOption).prop('setValue')(LINE_WIDTH, '');
 
-    expect(setChart).toBeCalledWith(lineWidthParamName, undefined);
+    expect(setChart).toBeCalledWith(LINE_WIDTH, undefined);
   });
 
   it('should set lineWidth value', () => {
     const comp = mountWithIntl(<LineOptions {...defaultProps} />);
-    comp.find(NumberInputOption).prop('setValue')(lineWidthParamName, 5);
+    comp.find(NumberInputOption).prop('setValue')(LINE_WIDTH, 5);
 
-    expect(setChart).toBeCalledWith(lineWidthParamName, 5);
+    expect(setChart).toBeCalledWith(LINE_WIDTH, 5);
   });
 
   it('should set drawLinesBetweenPoints', () => {
     const comp = shallow(<LineOptions {...defaultProps} />);
-    comp.find({ paramName: 'drawLinesBetweenPoints' }).prop('setValue')(
-      'drawLinesBetweenPoints',
-      false
-    );
+    comp.find({ paramName: DRAW_LINES }).prop('setValue')(DRAW_LINES, false);
 
-    expect(setChart).toBeCalledWith('drawLinesBetweenPoints', false);
+    expect(setChart).toBeCalledWith(DRAW_LINES, false);
   });
 });

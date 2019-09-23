@@ -21,19 +21,14 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { ValueAxesPanel, ValueAxesPanelProps } from '../value_axes_panel';
 import { ValueAxis, SeriesParam } from '../../../../types';
-import {
-  ScaleTypes,
-  Positions,
-  AxisModes,
-  scaleTypes,
-  axisModes,
-  positions,
-} from '../../../../utils/collections';
+import { Positions, scaleTypes, axisModes, positions } from '../../../../utils/collections';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { valueAxis, seriesParam } from './mocks';
 
 describe('ValueAxesPanel component', () => {
   let setParamByIndex: jest.Mock;
   let onValueAxisPositionChanged: jest.Mock;
+  let setMultipleValidity: jest.Mock;
   let addValueAxis: jest.Mock;
   let removeValueAxis: jest.Mock;
   let defaultProps: ValueAxesPanelProps;
@@ -47,50 +42,22 @@ describe('ValueAxesPanel component', () => {
     onValueAxisPositionChanged = jest.fn();
     addValueAxis = jest.fn();
     removeValueAxis = jest.fn();
-    axisLeft = {
-      id: 'ValueAxis-1',
-      position: Positions.LEFT,
-      scale: {
-        mode: AxisModes.NORMAL,
-        type: ScaleTypes.LINEAR,
-      },
-      title: {},
-      show: true,
-      labels: {
-        show: true,
-        filter: false,
-        truncate: 0,
-      },
-    } as ValueAxis;
+    setMultipleValidity = jest.fn();
+    axisLeft = { ...valueAxis };
     axisRight = {
+      ...valueAxis,
       id: 'ValueAxis-2',
       position: Positions.RIGHT,
-      scale: {
-        mode: AxisModes.NORMAL,
-        type: ScaleTypes.LINEAR,
-      },
-      title: {},
-      show: true,
-      labels: {
-        show: true,
-        filter: false,
-        truncate: 0,
-      },
-    } as ValueAxis;
-    seriesParamCount = {
-      valueAxis: 'ValueAxis-1',
-      data: {
-        label: 'Count',
-        id: '1',
-      },
-    } as SeriesParam;
+    };
+    seriesParamCount = { ...seriesParam };
     seriesParamAverage = {
+      ...seriesParam,
       valueAxis: 'ValueAxis-2',
       data: {
         label: 'Average',
         id: '1',
       },
-    } as SeriesParam;
+    };
 
     defaultProps = {
       stateParams: {
@@ -109,6 +76,7 @@ describe('ValueAxesPanel component', () => {
       onValueAxisPositionChanged,
       addValueAxis,
       removeValueAxis,
+      setMultipleValidity,
     } as any;
   });
 
@@ -155,7 +123,7 @@ describe('ValueAxesPanel component', () => {
           .find('.visEditorSidebar__aggGroupAccordionButtonContent span')
           .first()
           .text()
-      ).toBe('Count');
+      ).toBe(seriesParamCount.data.label);
     });
 
     it('should show when multiple series match value axis', () => {
@@ -166,7 +134,7 @@ describe('ValueAxesPanel component', () => {
           .find('.visEditorSidebar__aggGroupAccordionButtonContent span')
           .first()
           .text()
-      ).toBe('Count, Average');
+      ).toBe(`${seriesParamCount.data.label}, ${seriesParamAverage.data.label}`);
     });
 
     it('should not show when no series match value axis', () => {

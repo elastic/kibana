@@ -15,6 +15,7 @@ exports[`CustomExtentsOptions component should init with the default set of prop
     paramName="boundsMargin"
     setValue={[Function]}
     step={0.1}
+    value={1}
   />
   <SwitchOption
     dataTestSubj="yAxisSetYExtents"
@@ -26,11 +27,12 @@ exports[`CustomExtentsOptions component should init with the default set of prop
   <YExtents
     scale={
       Object {
-        "boundsMargin": undefined,
+        "boundsMargin": 1,
         "defaultYExtents": true,
-        "max": undefined,
-        "min": undefined,
+        "max": 2,
+        "min": 1,
         "setYExtents": true,
+        "type": "linear",
       }
     }
     setMultipleValidity={[MockFunction]}

@@ -57,7 +57,6 @@ exports[`ValueAxisOptions component should init with the default set of props 1`
     }
     paramName="mode"
     setValue={[Function]}
-    value="normal"
   />
   <SelectOption
     id="scaleSelectYAxis-ValueAxis-1"
@@ -100,49 +99,87 @@ exports[`ValueAxisOptions component should init with the default set of props 1`
     label="Title"
     paramName="text"
     setValue={[Function]}
+    value=""
   />
   <LabelOptions
     axesName="valueAxes"
     axis={
       Object {
         "id": "ValueAxis-1",
+        "labels": Object {
+          "filter": true,
+          "show": true,
+          "truncate": 0,
+        },
+        "name": "ValueAxis-1",
         "position": "left",
         "scale": Object {
-          "mode": "normal",
+          "boundsMargin": 1,
+          "defaultYExtents": true,
+          "max": 2,
+          "min": 1,
+          "setYExtents": true,
           "type": "linear",
         },
         "show": true,
-        "title": Object {},
+        "style": Object {},
+        "title": Object {
+          "text": "",
+        },
+        "type": "value",
       }
     }
     index={0}
     isCategoryAxisHorizontal={false}
     onValueAxisPositionChanged={[MockFunction]}
+    setMultipleValidity={[MockFunction]}
     setParamByIndex={[MockFunction]}
     stateParams={
       Object {
         "categoryAxes": Array [
           Object {
-            "id": "ValueAxis-1",
-            "position": "left",
+            "id": "CategoryAxis-1",
+            "labels": Object {
+              "filter": true,
+              "show": true,
+              "truncate": 0,
+            },
+            "position": "bottom",
             "scale": Object {
-              "mode": "normal",
               "type": "linear",
             },
             "show": true,
-            "title": Object {},
+            "style": Object {},
+            "title": Object {
+              "text": "",
+            },
+            "type": "category",
           },
         ],
         "valueAxes": Array [
           Object {
             "id": "ValueAxis-1",
+            "labels": Object {
+              "filter": true,
+              "show": true,
+              "truncate": 0,
+            },
+            "name": "ValueAxis-1",
             "position": "left",
             "scale": Object {
-              "mode": "normal",
+              "boundsMargin": 1,
+              "defaultYExtents": true,
+              "max": 2,
+              "min": 1,
+              "setYExtents": true,
               "type": "linear",
             },
             "show": true,
-            "title": Object {},
+            "style": Object {},
+            "title": Object {
+              "text": "",
+            },
+            "type": "value",
           },
         ],
       }
@@ -227,18 +264,33 @@ exports[`ValueAxisOptions component should init with the default set of props 1`
       axis={
         Object {
           "id": "ValueAxis-1",
+          "labels": Object {
+            "filter": true,
+            "show": true,
+            "truncate": 0,
+          },
+          "name": "ValueAxis-1",
           "position": "left",
           "scale": Object {
-            "mode": "normal",
+            "boundsMargin": 1,
+            "defaultYExtents": true,
+            "max": 2,
+            "min": 1,
+            "setYExtents": true,
             "type": "linear",
           },
           "show": true,
-          "title": Object {},
+          "style": Object {},
+          "title": Object {
+            "text": "",
+          },
+          "type": "value",
         }
       }
       index={0}
       isCategoryAxisHorizontal={false}
       onValueAxisPositionChanged={[MockFunction]}
+      setMultipleValidity={[MockFunction]}
       setParamByIndex={[MockFunction]}
       setValueAxis={[Function]}
       setValueAxisScale={[Function]}
@@ -246,26 +298,48 @@ exports[`ValueAxisOptions component should init with the default set of props 1`
         Object {
           "categoryAxes": Array [
             Object {
-              "id": "ValueAxis-1",
-              "position": "left",
+              "id": "CategoryAxis-1",
+              "labels": Object {
+                "filter": true,
+                "show": true,
+                "truncate": 0,
+              },
+              "position": "bottom",
               "scale": Object {
-                "mode": "normal",
                 "type": "linear",
               },
               "show": true,
-              "title": Object {},
+              "style": Object {},
+              "title": Object {
+                "text": "",
+              },
+              "type": "category",
             },
           ],
           "valueAxes": Array [
             Object {
               "id": "ValueAxis-1",
+              "labels": Object {
+                "filter": true,
+                "show": true,
+                "truncate": 0,
+              },
+              "name": "ValueAxis-1",
               "position": "left",
               "scale": Object {
-                "mode": "normal",
+                "boundsMargin": 1,
+                "defaultYExtents": true,
+                "max": 2,
+                "min": 1,
+                "setYExtents": true,
                 "type": "linear",
               },
               "show": true,
-              "title": Object {},
+              "style": Object {},
+              "title": Object {
+                "text": "",
+              },
+              "type": "value",
             },
           ],
         }
