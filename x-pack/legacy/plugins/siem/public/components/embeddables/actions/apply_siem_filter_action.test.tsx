@@ -14,7 +14,6 @@ import {
 } from './apply_siem_filter_action';
 // @ts-ignore Missing type defs as maps moves to Typescript
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../maps/common/constants';
-import { Action } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/actions';
 import {
   EmbeddableInput,
   EmbeddableOutput,
