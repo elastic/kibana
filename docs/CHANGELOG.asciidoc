@@ -148,6 +148,8 @@ Reporting::
 * Truncate base64 urls in logs {pull}41304[#41304]
 * Sanitize 409 error log message {pull}42495[#42495]
 Security::
+* PKI authentication in Kibana via Elasticsearch PKI realm {pull}42606[#42606]
+* OIDC authentication now supports the implicit flow {pull}42069[#42069]
 * Telemetry for csp configuration {pull}43223[#43223]
 * Copy Saved Objects to Spaces UI {pull}39002[#39002]
 * Allow for custom cluster privileges {pull}43817[#43817]
