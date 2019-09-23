@@ -6,12 +6,6 @@
 @import '@elastic/charts/dist/theme';
 @import '@elastic/eui/src/themes/charts/theme';
 
-// Temporary shim to help with EuiFormRow spacing
-// Will move to EUI
-.euiFormRow + .euiButton {
-  margin-top: $euiSize;
-}
-
 // Public UI styles
 @import 'src/legacy/ui/public/index';
 
