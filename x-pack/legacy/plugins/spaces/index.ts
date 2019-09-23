@@ -8,7 +8,6 @@ import * as Rx from 'rxjs';
 import { resolve } from 'path';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
-import { Legacy } from 'kibana';
 import { createOptionalPlugin } from '../../server/lib/optional_plugin';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
@@ -21,11 +20,10 @@ import { plugin } from './server/new_platform';
 import { SecurityPlugin } from '../security';
 import { SpacesServiceSetup } from './server/new_platform/spaces_service/spaces_service';
 import { initSpaceSelectorView } from './server/routes/views';
-import { Space } from './common/model/space';
 
 export interface SpacesPlugin {
   getSpaceId: SpacesServiceSetup['getSpaceId'];
-  getActiveSpace: (request: Legacy.Request) => Promise<Space>;
+  getActiveSpace: SpacesServiceSetup['getActiveSpace'];
   spaceIdToNamespace: SpacesServiceSetup['spaceIdToNamespace'];
   namespaceToSpaceId: SpacesServiceSetup['namespaceToSpaceId'];
   getBasePath: SpacesServiceSetup['getBasePath'];
@@ -186,11 +184,7 @@ export const spaces = (kibana: Record<string, any>) =>
       initSpaceSelectorView(server);
 
       server.expose('getSpaceId', (request: any) => spacesService.getSpaceId(request));
-      server.expose('getActiveSpace', async (request: Legacy.Request) => {
-        const spaceId = spacesService.getSpaceId(request);
-        const spacesClient = await spacesService.scopedClient(request);
-        return spacesClient.get(spaceId);
-      });
+      server.expose('getActiveSpace', spacesService.getActiveSpace);
       server.expose('spaceIdToNamespace', spacesService.spaceIdToNamespace);
       server.expose('namespaceToSpaceId', spacesService.namespaceToSpaceId);
       server.expose('getBasePath', spacesService.getBasePath);
