@@ -77,7 +77,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
       .subscribe(chartsTheme => this.setState({ chartsTheme }));
   }
 
-  componentDidUnmount() {
+  componentWillUnmount() {
     if (this.subscription) {
       this.subscription.unsubscribe();
       this.subscription = undefined;
