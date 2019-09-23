@@ -5,9 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { getTestAlertData } from './utils';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -48,6 +47,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         createdBy: null,
         scheduledTaskId: match.scheduledTaskId,
         updatedBy: null,
+        throttle: '1m',
       });
     });
 
