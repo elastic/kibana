@@ -18,14 +18,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import {
-  EuiSelectable,
-  EuiLoadingContent,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiSelectable, EuiLoadingContent } from '@elastic/eui';
 // Types
 import { sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';

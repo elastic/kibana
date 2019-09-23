@@ -175,6 +175,7 @@ class FilterItemUI extends Component<Props, State> {
               onSubmit={this.onSubmit}
               onCancel={this.closePopover}
               uiSettings={this.props.uiSettings}
+              savedQueryService={this.props.savedQueryService}
             />
           </div>
         ),

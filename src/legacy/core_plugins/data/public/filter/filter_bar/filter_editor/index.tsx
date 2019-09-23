@@ -60,7 +60,6 @@ import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
 import { SavedQueryService } from '../../../search/search_bar/lib/saved_query_service';
-import { SavedQueryEditorUI } from './saved_query_editor';
 import { SavedQuerySingleSelect } from './saved_query_single_select';
 
 export type SavedQueryParamsPartial = Partial<SavedQueryFilterParams>;
@@ -447,6 +446,13 @@ class FilterEditorUI extends Component<Props, State> {
     // console.log('selectedOption:', selectedOption);
     // console.log('savedQueryOptions:', savedQueryOptions);
     // console.log('savedQueries:', savedQueries);
+    const selectedSavedQuery = savedQueries.filter(
+      savedQuery => savedQuery.id === selectedOption.label
+    );
+    this.onSavedQueryChange(selectedSavedQuery[0]);
+    /* TODO: call
+      this.onSavedQueryChange()
+    */
   };
   private renderSavedQueryEditor() {
     /* TODO:
