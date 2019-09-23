@@ -30,7 +30,11 @@ export function MachineLearningJobTypeSelectionProvider({ getService }: FtrProvi
 
     async selectPopulationJob() {
       await testSubjects.clickWhenNotDisabled('mlJobTypeLinkPopulationJob');
-      await testSubjects.existOrFail('mlPageJobWizard');
+      await this.assertPopulationJobWizardOpen();
+    },
+
+    async assertPopulationJobWizardOpen() {
+      await testSubjects.existOrFail('mlPageJobWizard population');
     },
   };
 }

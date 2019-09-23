@@ -55,19 +55,21 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('displays the event rate chart', async () => {
-      await ml.jobWizardCommon.clickUseFullDataButton();
+      await ml.jobWizardCommon.clickUseFullDataButton(
+        'Feb 7, 2016 @ 00:00:00.000',
+        'Feb 11, 2016 @ 23:59:54.000'
+      );
       await ml.jobWizardCommon.assertEventRateChartExists();
     });
 
     it('displays the pick fields step', async () => {
-      await ml.jobWizardCommon.clickNextButton();
-      await ml.jobWizardCommon.assertPickFieldsSectionExists();
+      await ml.jobWizardCommon.advanceToPickFieldsSection();
     });
 
     it('selects detectors and displays detector previews', async () => {
       for (const [index, aggAndFieldIdentifier] of aggAndFieldIdentifiers.entries()) {
         await ml.jobWizardCommon.assertAggAndFieldInputExists();
-        await ml.jobWizardCommon.selectAggAndField(aggAndFieldIdentifier);
+        await ml.jobWizardCommon.selectAggAndField(aggAndFieldIdentifier, false);
         await ml.jobWizardCommon.assertDetectorPreviewExists(aggAndFieldIdentifier, index, 'LINE');
       }
     });
@@ -75,7 +77,6 @@ export default function({ getService }: FtrProviderContext) {
     it('inputs the split field and displays split cards', async () => {
       await ml.jobWizardMultiMetric.assertSplitFieldInputExists();
       await ml.jobWizardMultiMetric.selectSplitField(splitField);
-      await ml.jobWizardMultiMetric.assertSplitFieldSelection(splitField);
 
       await ml.jobWizardMultiMetric.assertDetectorSplitExists(splitField);
       await ml.jobWizardMultiMetric.assertDetectorSplitFrontCardTitle('AAL');
@@ -92,24 +93,20 @@ export default function({ getService }: FtrProviderContext) {
     it('inputs the bucket span', async () => {
       await ml.jobWizardCommon.assertBucketSpanInputExists();
       await ml.jobWizardCommon.setBucketSpan(bucketSpan);
-      await ml.jobWizardCommon.assertBucketSpanValue(bucketSpan);
     });
 
     it('displays the job details step', async () => {
-      await ml.jobWizardCommon.clickNextButton();
-      await ml.jobWizardCommon.assertJobDetailsSectionExists();
+      await ml.jobWizardCommon.advanceToJobDetailsSection();
     });
 
     it('inputs the job id', async () => {
       await ml.jobWizardCommon.assertJobIdInputExists();
       await ml.jobWizardCommon.setJobId(jobId);
-      await ml.jobWizardCommon.assertJobIdValue(jobId);
     });
 
     it('inputs the job description', async () => {
       await ml.jobWizardCommon.assertJobDescriptionInputExists();
       await ml.jobWizardCommon.setJobDescription(jobDescription);
-      await ml.jobWizardCommon.assertJobDescriptionValue(jobDescription);
     });
 
     it('inputs job groups', async () => {
@@ -131,23 +128,19 @@ export default function({ getService }: FtrProviderContext) {
     it('enables the dedicated index switch', async () => {
       await ml.jobWizardCommon.assertDedicatedIndexSwitchExists();
       await ml.jobWizardCommon.activateDedicatedIndexSwitch();
-      await ml.jobWizardCommon.assertDedicatedIndexSwitchCheckedState(true);
     });
 
     it('inputs the model memory limit', async () => {
       await ml.jobWizardCommon.assertModelMemoryLimitInputExists();
       await ml.jobWizardCommon.setModelMemoryLimit(memoryLimit);
-      await ml.jobWizardCommon.assertModelMemoryLimitValue(memoryLimit);
     });
 
     it('displays the validation step', async () => {
-      await ml.jobWizardCommon.clickNextButton();
-      await ml.jobWizardCommon.assertValidationSectionExists();
+      await ml.jobWizardCommon.advanceToValidationSection();
     });
 
     it('displays the summary step', async () => {
-      await ml.jobWizardCommon.clickNextButton();
-      await ml.jobWizardCommon.assertSummarySectionExists();
+      await ml.jobWizardCommon.advanceToSummarySection();
     });
 
     it('creates the job and finishes processing', async () => {
