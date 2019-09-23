@@ -40,8 +40,14 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .expect(200, {
           ...updatedData,
           id: createdAlert.id,
+          alertTypeId: 'test.noop',
+          createdBy: null,
+          enabled: true,
           updatedBy: null,
           apiKeyOwner: null,
+          muted: false,
+          mutedInstanceIds: [],
+          scheduledTaskId: createdAlert.scheduledTaskId,
         });
     });
 

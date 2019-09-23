@@ -60,6 +60,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 throttle: '1m',
                 updatedBy: 'elastic',
                 apiKeyOwner: 'elastic',
+                muted: false,
+                mutedInstanceIds: [],
               });
               break;
             default:

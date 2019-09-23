@@ -48,6 +48,8 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         scheduledTaskId: match.scheduledTaskId,
         updatedBy: null,
         throttle: '1m',
+        muted: false,
+        mutedInstanceIds: [],
       });
     });
 

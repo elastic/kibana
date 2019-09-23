@@ -61,8 +61,14 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 ...updatedData,
                 id: createdAlert.id,
+                alertTypeId: 'test.noop',
+                createdBy: 'elastic',
+                enabled: true,
                 updatedBy: user.username,
                 apiKeyOwner: user.username,
+                muted: false,
+                mutedInstanceIds: [],
+                scheduledTaskId: createdAlert.scheduledTaskId,
               });
               break;
             default:
