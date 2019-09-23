@@ -35,7 +35,7 @@ export function getSuggestions({
 
 function getSuggestion(table: TableSuggestion): VisualizationSuggestion<State> {
   const col = table.columns[0];
-  const title = table.label || col.operation.label;
+  const title = col.operation.label;
 
   return {
     title,
