@@ -1,0 +1,14 @@
+{
+  "baseUrl": "http://localhost:5601",
+  "video": false,
+
+  "trashAssetsBeforeRuns": false,
+  "fileServerFolder": "../",
+  "fixturesFolder": "./fixtures",
+  "integrationFolder": "./integration",
+  "pluginsFile": "./plugins/index.js",
+  "screenshotsFolder": "./screenshots",
+  "supportFile": "./support/index.ts",
+  "videosFolder": "./videos",
+  "useRelativeSnapshots": true
+}
