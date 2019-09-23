@@ -1227,7 +1227,7 @@
           "field": "beats_stats.metrics.apm-server.server.request.count",
           "metricAgg": "max",
           "label": "Requested",
-          "title": "Requests Count Intake API",
+          "title": "Request Count Intake API",
           "description": "HTTP Requests received by server",
           "units": "/m",
           "format": "0,0.[00]",
