@@ -18,50 +18,19 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { EuiSelectable } from '@elastic/eui';
-import { EuiButton } from '@elastic/eui';
+import {
+  EuiSelectable,
+  EuiLoadingContent,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 // Types
 import { sortBy } from 'lodash';
-import { EuiLoadingContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SavedQueryService } from '../../../search/search_bar/lib/saved_query_service';
 import { SavedQuery } from '../../../search/search_bar';
-
-const Options = [
-  {
-    label: 'Titan',
-  },
-  {
-    label: 'Enceladus is disabled',
-    disabled: true,
-  },
-  {
-    label: 'Mimas',
-    checked: 'on',
-  },
-  {
-    label: 'Dione',
-  },
-  {
-    label: 'Iapetus',
-    checked: 'on',
-  },
-  {
-    label: 'Phoebe',
-  },
-  {
-    label: 'Rhea',
-  },
-  {
-    label: "Pandora is one of Saturn's moons, named for a Titaness of Greek mythology",
-  },
-  {
-    label: 'Tethys',
-  },
-  {
-    label: 'Hyperion',
-  },
-];
 
 type OptionCheckedType = 'on' | 'off' | undefined;
 
@@ -76,13 +45,16 @@ interface Option {
 }
 interface Props {
   savedQueryService: SavedQueryService;
-  onChange: (selectedSavedQuery: Option[], savedQueries: SavedQuery[]) => void;
+  onChange: (
+    selectedOption: Option[],
+    savedQueryOptions: Option[],
+    savedQueries: SavedQuery[]
+  ) => void;
 }
 interface State {
   options: Option[];
   savedQueries: SavedQuery[];
   savedQueriesLoaded: boolean;
-  selectedOption: Option[];
 }
 export class SavedQuerySingleSelect extends Component<Props, State> {
   constructor(props: Props) {
@@ -91,7 +63,6 @@ export class SavedQuerySingleSelect extends Component<Props, State> {
       options: [],
       savedQueries: [],
       savedQueriesLoaded: false,
-      selectedOption: [],
     };
   }
   async componentDidMount() {
@@ -127,25 +98,16 @@ export class SavedQuerySingleSelect extends Component<Props, State> {
   };
 
   onSavedQueryChange = (options: Option[]) => {
-    // local to this component: sets the new options when one is selected, it takes two clicks to get the selected one.
+    // options are already updated here, call the onChange handler from the filterEditorUI directly.
     const selectedOption = options.filter(option => option.checked === 'on');
-    // if (selectedOption && selectedOption[0].label) {
     this.setState({
       options,
-      selectedOption,
     });
-    // }
-  };
-
-  onSavedQuerySelected = () => {
-    if (this.state.selectedOption && this.state.savedQueries) {
-      this.props.onChange(this.state.selectedOption, this.state.savedQueries);
-    }
+    this.props.onChange(selectedOption, options, this.state.savedQueries);
   };
 
   render() {
-    const { options, savedQueriesLoaded, selectedOption } = this.state;
-    // console.log(selectedOption);
+    const { options, savedQueriesLoaded } = this.state;
     if (!savedQueriesLoaded || !options.length) {
       return <EuiLoadingContent lines={3} />;
     } else if (savedQueriesLoaded && !options.length) {
@@ -167,13 +129,6 @@ export class SavedQuerySingleSelect extends Component<Props, State> {
           >
             {list => list}
           </EuiSelectable>
-          <EuiButton
-            fill
-            onClick={this.onSavedQuerySelected}
-            isDisabled={!selectedOption || !selectedOption.length}
-          >
-            Save
-          </EuiButton>
         </Fragment>
       );
     }

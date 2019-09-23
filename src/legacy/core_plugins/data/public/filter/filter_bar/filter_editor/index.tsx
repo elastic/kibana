@@ -439,25 +439,30 @@ class FilterEditorUI extends Component<Props, State> {
         );
     }
   }
-  public test = (SQ: any, SQs: any) => {};
+  public onSavedQuerySelected = (
+    selectedOption: any,
+    savedQueryOptions: any,
+    savedQueries: SavedQuery[]
+  ) => {
+    // console.log('selectedOption:', selectedOption);
+    // console.log('savedQueryOptions:', savedQueryOptions);
+    // console.log('savedQueries:', savedQueries);
+  };
   private renderSavedQueryEditor() {
-    // pass along the security-related item of if the user has access to saved objects.
-    // pass along the value as the saved query filter params object (this is where we add the saved query object)
-    // TODO: use the selectable component
+    /* TODO:
+    1. pass along the currently selected saved query from the filter (this.state.params) if a saved query filter is clicked in the filter bar
+      const savedQuery = this.state.selectedSavedQuery;
+      value={this.state.params}
+    2. Change SavedQuerySingleSelect back into a functional component that uses hooks
+    */
     return (
       <div>
         <EuiFlexGroup responsive={false} gutterSize="s">
           <EuiFlexItem>
             <SavedQuerySingleSelect
               savedQueryService={this.props.savedQueryService}
-              onChange={this.test}
+              onChange={this.onSavedQuerySelected}
             />
-            {/* <SavedQueryEditorUI
-              showSaveQuery={this.props.showSaveQuery}
-              value={this.state.params}
-              savedQueryService={this.props.savedQueryService}
-              onChange={this.onSavedQueryChange}
-            /> */}
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
