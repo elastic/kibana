@@ -49,6 +49,7 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
     displayIndices && displayIndices.length > 10 ? displayIndices.length - 10 : 0;
 
   const serializedPolicy = serializePolicy(policy);
+  const { retention: serializedRetention } = serializedPolicy;
 
   const EditStepTooltip = ({ step }: { step: number }) => (
     <EuiToolTip
@@ -274,14 +275,8 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
           </EuiDescriptionList>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </Fragment>
-  );
 
-  const renderRetentionTab = () => {
-    const { retention: serializedRetention } = serializedPolicy;
-
-    if (serializedRetention) {
-      return (
+      {serializedRetention ? (
         <Fragment>
           <EuiSpacer size="m" />
           <EuiTitle size="s">
@@ -334,33 +329,9 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
             )}
           </EuiDescriptionList>
         </Fragment>
-      );
-    }
-    return (
-      <Fragment>
-        <EuiSpacer size="m" />
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="xpack.snapshotRestore.policyForm.stepReview.retentionTab.noRetentionMessage"
-              defaultMessage="Snapshot retention is not configured. {editLink}"
-              values={{
-                editLink: (
-                  <EuiLink onClick={() => updateCurrentStep(3)}>
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.policyForm.stepReview.retentionTab.noRetentionLinkText"
-                      defaultMessage="Edit"
-                    />{' '}
-                    <EuiIcon type="pencil" className="eui-alignTop" />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        </EuiText>
-      </Fragment>
-    );
-  };
+      ) : null}
+    </Fragment>
+  );
 
   const renderRequestTab = () => {
     const endpoint = `PUT _slm/policy/${name}`;
@@ -395,13 +366,6 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
               defaultMessage: 'Summary',
             }),
             content: renderSummaryTab(),
-          },
-          {
-            id: 'retention',
-            name: i18n.translate('xpack.snapshotRestore.policyForm.stepReview.retentionTabTitle', {
-              defaultMessage: 'Retention',
-            }),
-            content: renderRetentionTab(),
           },
           {
             id: 'json',
