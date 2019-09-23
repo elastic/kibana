@@ -14,7 +14,7 @@ import { IEmbeddable } from '../../../../../../../../src/legacy/core_plugins/emb
 
 export const APPLY_SIEM_FILTER_ACTION_ID = 'APPLY_SIEM_FILTER_ACTION_ID';
 
-interface ActionContext {
+export interface ActionContext {
   embeddable: IEmbeddable;
   filters: Filter[];
 }
@@ -48,7 +48,7 @@ export class ApplySiemFilterAction implements IAction<ActionContext> {
 
   public async execute({ embeddable, filters }: ActionContext) {
     if (!filters) {
-      throw new Error('Applying a filter requires a filter as context');
+      throw new TypeError('Applying a filter requires a filter as context');
     }
 
     // Parse queryExpression from queryDSL and apply to SIEM global KQL Bar via redux
