@@ -19,7 +19,7 @@
 
 import { CoreService } from 'src/core/types';
 import { first } from 'rxjs/operators';
-import { KibanaMigrator } from './migrations';
+import { KibanaMigrator, KibanaMigratorContract } from './migrations';
 import { CoreContext } from '../core_context';
 import { LegacyServiceSetup } from '../legacy/legacy_service';
 import { ElasticsearchServiceSetup } from '../elasticsearch';
@@ -38,7 +38,7 @@ export interface SavedObjectsServiceSetup {}
  * @public
  */
 export interface SavedObjectsServiceStart {
-  migrator: Pick<KibanaMigrator, keyof KibanaMigrator>;
+  migrator: KibanaMigratorContract;
 }
 
 /** @internal */
@@ -119,7 +119,7 @@ export class SavedObjectsService
     const skipMigrations = cliArgs.optimize || savedObjectsConfig.skip;
     await this.migrator!.awaitMigration(skipMigrations);
 
-    return { migrator: this.migrator as KibanaMigrator };
+    return { migrator: this.migrator! };
   }
 
   public async stop() {}

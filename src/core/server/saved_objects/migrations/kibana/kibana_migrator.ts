@@ -51,11 +51,11 @@ export interface KibanaMigratorOptions {
   savedObjectValidations: PropertyValidators;
 }
 
+export type KibanaMigratorContract = Pick<KibanaMigrator, keyof KibanaMigrator>;
+
 /**
  * Manages the shape of mappings and documents in the Kibana index.
  *
- * @export
- * @class KibanaMigrator
  */
 export class KibanaMigrator {
   private callCluster: CallCluster;
