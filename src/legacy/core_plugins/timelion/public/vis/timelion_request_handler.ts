@@ -21,6 +21,7 @@
 import { buildEsQuery, getEsQueryConfig, Filter } from '@kbn/es-query';
 // @ts-ignore
 import { timezoneProvider } from 'ui/vis/lib/timezone';
+import { npSetup } from 'ui/new_platform';
 import { KIBANA_CONTEXT_NAME } from 'src/plugins/expressions/public';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { TimeRange } from 'src/plugins/data/public';
@@ -50,8 +51,10 @@ export interface TimelionSuccessResponse {
   type: KIBANA_CONTEXT_NAME;
 }
 
+const { http } = npSetup.core;
+
 export function getTimelionRequestHandler(dependencies: TimelionSetupDependencies) {
-  const { config, $http } = dependencies;
+  const { config } = dependencies;
   const timezone = timezoneProvider(config)();
 
   return ({
@@ -74,17 +77,19 @@ export function getTimelionRequestHandler(dependencies: TimelionSetupDependencie
       const esQueryConfigs = getEsQueryConfig(config);
 
       try {
-        const response = await $http.post('../api/timelion/run', {
-          sheet: [expression],
-          extended: {
-            es: {
-              filter: buildEsQuery(undefined, query, filters, esQueryConfigs),
+        const data = await http.post('../api/timelion/run', {
+          body: JSON.stringify({
+            sheet: [expression],
+            extended: {
+              es: {
+                filter: buildEsQuery(undefined, query, filters, esQueryConfigs),
+              },
             },
-          },
-          time: { ...timeRange, interval: visParams.interval, timezone },
+            time: { ...timeRange, interval: visParams.interval, timezone },
+          }),
         });
 
-        resolve(response.data);
+        resolve(data);
       } catch (e) {
         const err = new Error(e.data.message);
 

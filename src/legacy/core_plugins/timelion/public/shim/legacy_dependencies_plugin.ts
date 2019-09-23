@@ -26,7 +26,6 @@ import { initTimelionLegacyModule } from './timelion_legacy_module';
 
 /** @internal */
 export interface LegacyDependenciesPluginSetup {
-  $http: any;
   config: any;
   createBaseVisualization: Function;
 }
@@ -44,10 +43,7 @@ export class LegacyDependenciesPlugin
   public async setup() {
     initTimelionLegacyModule();
 
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-
     return {
-      $http: $injector.get('$http'),
       config: npSetup.core.uiSettings,
       createBaseVisualization: visFactory.createBaseVisualization,
     } as LegacyDependenciesPluginSetup;
