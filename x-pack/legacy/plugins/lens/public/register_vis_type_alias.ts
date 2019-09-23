@@ -11,6 +11,7 @@ import { BASE_APP_URL, getEditPath } from '../common';
 visualizations.types.visTypeAliasRegistry.add({
   aliasUrl: BASE_APP_URL,
   name: 'lens',
+  isPromoted: true,
   title: i18n.translate('xpack.lens.visTypeAlias.title', {
     defaultMessage: 'Lens Visualizations',
   }),

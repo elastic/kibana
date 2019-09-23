@@ -134,7 +134,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
             <EmbeddablePanel
               data-test-subj="embeddable-panel"
               embeddable={embeddable}
-              getActions={start.getTriggerCompatibleActions}
+              getActions={npStart.plugins.uiActions.getTriggerCompatibleActions}
               getEmbeddableFactory={start.getEmbeddableFactory}
               getAllEmbeddableFactories={start.getEmbeddableFactories}
               notifications={npStart.core.notifications}

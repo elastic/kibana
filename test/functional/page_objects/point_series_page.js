@@ -24,11 +24,11 @@ export function PointSeriesPageProvider({ getService }) {
 
   class PointSeriesVis {
     async clickOptions() {
-      return await find.clickByPartialLinkText('Panel settings');
+      return await testSubjects.click('visEditorTaboptions');
     }
 
     async clickAxisOptions() {
-      return await find.clickByPartialLinkText('Metrics & axes');
+      return await testSubjects.click('visEditorTabadvanced');
     }
 
     async clickAddAxis() {
@@ -50,17 +50,16 @@ export function PointSeriesPageProvider({ getService }) {
     }
 
     async getGridLines() {
-      const gridLines = await find.allByCssSelector('g.grid > path');
-
-      return await Promise.all(gridLines.map(async (gridLine) => {
-        const dAttribute = await gridLine.getAttribute('d');
-
+      const grid = await find.byCssSelector('g.grid');
+      const $ = await grid.parseDomContent();
+      return $('path').toArray().map(line => {
+        const dAttribute = $(line).attr('d');
         const firstPoint = dAttribute.split('L')[0].replace('M', '').split(',');
         return {
           x: parseFloat(firstPoint[0]),
           y: parseFloat(firstPoint[1]),
         };
-      }));
+      });
     }
 
     async toggleGridCategoryLines() {
@@ -69,15 +68,15 @@ export function PointSeriesPageProvider({ getService }) {
 
     async setGridValueAxis(axis) {
       log.debug(`setGridValueAxis(${axis})`);
-      return await find.clickByCssSelector(`select#gridAxis option[value="${axis}"]`);
+      await find.selectValue('select#gridAxis', axis);
     }
 
     async setSeriesAxis(series, axis) {
-      await find.clickByCssSelector(`select#seriesValueAxis${series} option[value="${axis}"]`);
+      await find.selectValue(`select#seriesValueAxis${series}`, axis);
     }
 
     async setSeriesType(series, type) {
-      await find.clickByCssSelector(`select#seriesType${series} option[value="${type}"]`);
+      await find.selectValue(`select#seriesType${series}`, type);
     }
   }
 
