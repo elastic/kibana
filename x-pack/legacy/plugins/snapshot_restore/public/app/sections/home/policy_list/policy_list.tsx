@@ -7,19 +7,20 @@
 import React, { Fragment, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { EuiEmptyPrompt, EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton, EuiCallOut, EuiSpacer, EuiLoadingContent } from '@elastic/eui';
 import { SlmPolicy } from '../../../../../common/types';
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common/constants';
 import { SectionError, SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
-import { useLoadPolicies } from '../../../services/http';
+import { useLoadPolicies, useLoadPolicyStats } from '../../../services/http';
 import { uiMetricService } from '../../../services/ui_metric';
 import { linkToAddPolicy, linkToPolicy } from '../../../services/navigation';
 import { WithPrivileges, NotAuthorizedSection } from '../../../lib/authorization';
 
 import { PolicyDetails } from './policy_details';
 import { PolicyTable } from './policy_table';
+import { PolicyStats } from './policy_stats';
 
 interface MatchParams {
   policyName?: SlmPolicy['name'];
@@ -45,6 +46,8 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     },
     sendRequest: reload,
   } = useLoadPolicies();
+
+  const { data: policyStats } = useLoadPolicyStats();
 
   const openPolicyDetailsUrl = (newPolicyName: SlmPolicy['name']): string => {
     return linkToPolicy(newPolicyName);
@@ -159,6 +162,9 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
             <EuiSpacer />
           </Fragment>
         ) : null}
+
+        {policyStats ? <PolicyStats stats={policyStats} /> : null}
+
         <PolicyTable
           policies={policies || []}
           reload={reload}

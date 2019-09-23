@@ -138,7 +138,6 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
               <EuiFlexItem grow={false}>
                 <EuiStat
                   title={stats.snapshotsTaken}
-                  textAlign="center"
                   description={i18n.translate(
                     'xpack.snapshotRestore.policyDetails.snapshotsTakenStat',
                     {
@@ -151,7 +150,6 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
               <EuiFlexItem grow={false}>
                 <EuiStat
                   title={stats.snapshotsFailed}
-                  textAlign="center"
                   description={i18n.translate(
                     'xpack.snapshotRestore.policyDetails.snapshotsFailedStat',
                     {
@@ -164,7 +162,6 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
               <EuiFlexItem grow={false}>
                 <EuiStat
                   title={stats.snapshotsDeleted}
-                  textAlign="center"
                   description={i18n.translate(
                     'xpack.snapshotRestore.policyDetails.snapshotsDeletedStat',
                     {
@@ -177,7 +174,6 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
               <EuiFlexItem grow={false}>
                 <EuiStat
                   title={stats.snapshotDeletionFailures}
-                  textAlign="center"
                   description={i18n.translate(
                     'xpack.snapshotRestore.policyDetails.snapshotDeletionFailuresStat',
                     {
