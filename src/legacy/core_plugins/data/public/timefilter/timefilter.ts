@@ -144,13 +144,6 @@ export class Timefilter {
     }
   };
 
-  public toggleRefresh = () => {
-    this.setRefreshInterval({
-      pause: !this._refreshInterval.pause,
-      value: this._refreshInterval.value,
-    });
-  };
-
   public createFilter = (indexPattern: IndexPattern, timeRange?: TimeRange) => {
     return getTime(indexPattern, timeRange ? timeRange : this._time, this.getForceNow());
   };
