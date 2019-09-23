@@ -421,6 +421,9 @@ export const ComponentStrings = {
     getClonedWorkpadName: (workpadName: string) =>
       i18n.translate('xpack.canvas.workpadLoader.clonedWorkpadName', {
         defaultMessage: 'Copy of {workpadName}',
+        values: {
+          workpadName,
+        },
         description:
           'This suffix is added to the end of the name of a cloned workpad to indicate that this ' +
           'new workpad is a copy of the original workpad. Example: "Copy of Sales Pitch"',
