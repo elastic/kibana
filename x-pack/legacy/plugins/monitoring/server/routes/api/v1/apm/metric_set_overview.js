@@ -32,7 +32,7 @@ export const metricSet = [
       'apm_server_responses_valid_accepted',
       'apm_server_responses_errors_count',
     ],
-    name: 'apm_server_responses_valid'
+    name: 'apm_server_responses'
   },
   {
     keys: [
@@ -41,7 +41,7 @@ export const metricSet = [
       'apm_acm_responses_valid_ok',
       'apm_acm_responses_errors_count'
     ],
-    name: 'apm_acm_responses_valid'
+    name: 'apm_acm_responses'
   },
   {
     keys: [
