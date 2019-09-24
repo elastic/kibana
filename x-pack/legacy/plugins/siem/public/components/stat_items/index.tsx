@@ -47,24 +47,25 @@ const StatValue = styled(EuiTitle)`
 StatValue.displayName = 'StatValue';
 
 interface StatItem {
-  key: string;
-  description?: string;
-  value: number | undefined | null;
   color?: string;
+  description?: string;
   icon?: IconType;
+  key: string;
   name?: string;
+  value: number | undefined | null;
 }
 
 export interface StatItems {
-  key: string;
-  fields: StatItem[];
+  areachartConfigs?: ChartSeriesConfigs;
+  barchartConfigs?: ChartSeriesConfigs;
   description?: string;
   enableAreaChart?: boolean;
   enableBarChart?: boolean;
+  fields: StatItem[];
   grow?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | true | false | null;
   index: number;
-  areachartConfigs?: ChartSeriesConfigs;
-  barchartConfigs?: ChartSeriesConfigs;
+  key: string;
+  statKey?: string;
 }
 
 export interface StatItemsProps extends StatItems {
@@ -72,8 +73,8 @@ export interface StatItemsProps extends StatItems {
   barChart?: ChartConfigsData[];
   from: number;
   id: string;
-  to: number;
   narrowDateRange: UpdateDateRange;
+  to: number;
 }
 
 export const numberFormatter = (value: string | number): string => value.toLocaleString();
@@ -175,6 +176,7 @@ export const useKpiMatrixStatus = (
           fields: addValueToFields(stat.fields, data),
           id,
           key: `kpi-summary-${stat.key}`,
+          statKey: `${stat.key}`,
           from,
           to,
           narrowDateRange,
@@ -198,8 +200,9 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     grow,
     id,
     index,
-    to,
     narrowDateRange,
+    statKey = 'item',
+    to,
   }) => {
     const [isHover, setIsHover] = useState(false);
     const isBarChartDataAvailable =
@@ -211,7 +214,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
       areaChart.length &&
       areaChart.every(item => item.value != null && item.value.length > 0);
     return (
-      <FlexItem grow={grow}>
+      <FlexItem grow={grow} data-test-subj={`stat-${statKey}`}>
         <EuiPanel onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
           <EuiFlexGroup gutterSize={'none'}>
             <EuiFlexItem>

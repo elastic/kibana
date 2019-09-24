@@ -1,0 +1,6 @@
+{
+  "id": "eui_utils",
+  "version": "kibana",
+  "server": false,
+  "ui": true
+}
