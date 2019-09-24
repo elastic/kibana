@@ -48235,7 +48235,7 @@ function mixinDeep(target, objects) {
  */
 
 function copy(val, key) {
-  if (key === '__proto__') {
+  if (!isValidKey(key)) {
     return;
   }
 
@@ -48257,6 +48257,17 @@ function copy(val, key) {
 function isObject(val) {
   return isExtendable(val) && !Array.isArray(val);
 }
+
+/**
+ * Returns true if `key` is a valid key to use when extending objects.
+ *
+ * @param  {String} `key`
+ * @return {Boolean}
+ */
+
+function isValidKey(key) {
+  return key !== '__proto__' && key !== 'constructor' && key !== 'prototype';
+};
 
 /**
  * Expose `mixinDeep`
