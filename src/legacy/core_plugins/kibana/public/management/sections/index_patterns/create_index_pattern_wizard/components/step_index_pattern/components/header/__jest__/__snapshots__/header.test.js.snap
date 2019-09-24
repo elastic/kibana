@@ -28,6 +28,7 @@ exports[`Header should mark the input as invalid 1`] = `
       >
         <EuiFormRow
           describedByIds={Array []}
+          display="row"
           error={
             Array [
               "Input is invalid",
@@ -137,6 +138,7 @@ exports[`Header should render normally 1`] = `
       >
         <EuiFormRow
           describedByIds={Array []}
+          display="row"
           error={Array []}
           fullWidth={false}
           hasEmptyLabelSpace={false}

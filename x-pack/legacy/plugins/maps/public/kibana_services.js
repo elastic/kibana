@@ -11,8 +11,14 @@ import { setup as data } from '../../../../../src/legacy/core_plugins/data/publi
 export { SearchSource } from 'ui/courier';
 export const indexPatternService = data.indexPatterns.indexPatterns;
 
-
-export async function fetchSearchSourceAndRecordWithInspector({ searchSource, requestId, requestName, requestDesc, inspectorAdapters }) {
+export async function fetchSearchSourceAndRecordWithInspector({
+  searchSource,
+  requestId,
+  requestName,
+  requestDesc,
+  inspectorAdapters,
+  abortSignal,
+}) {
   const inspectorRequest = inspectorAdapters.requests.start(
     requestName,
     { id: requestId, description: requestDesc });
@@ -22,7 +28,7 @@ export async function fetchSearchSourceAndRecordWithInspector({ searchSource, re
     searchSource.getSearchRequestBody().then(body => {
       inspectorRequest.json(body);
     });
-    resp = await searchSource.fetch();
+    resp = await searchSource.fetch({ abortSignal });
     inspectorRequest
       .stats(getResponseInspectorStats(searchSource, resp))
       .ok({ json: resp });

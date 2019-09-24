@@ -26,6 +26,7 @@ import { AddSettingsFlyout } from './AddSettings/AddSettingFlyout';
 import { callApmApi } from '../../../services/rest/callApmApi';
 import { HomeLink } from '../../shared/Links/apm/HomeLink';
 import { SettingsList } from './SettingsList';
+import { useTrackPageview } from '../../../../../infra/public';
 
 export type Config = AgentConfigurationListAPIResponse[0];
 
@@ -39,6 +40,9 @@ export function Settings() {
   );
   const [selectedConfig, setSelectedConfig] = useState<Config | null>(null);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+
+  useTrackPageview({ app: 'apm', path: 'agent_configuration' });
+  useTrackPageview({ app: 'apm', path: 'agent_configuration', delay: 15000 });
 
   const RETURN_TO_OVERVIEW_LINK_LABEL = i18n.translate(
     'xpack.apm.settings.agentConf.returnToOverviewLinkLabel',

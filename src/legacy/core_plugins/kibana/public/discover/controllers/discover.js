@@ -29,6 +29,7 @@ import dateMath from '@elastic/datemath';
 // doc table
 import '../doc_table';
 import { getSort } from '../doc_table/lib/get_sort';
+import { getSortForSearchSource } from '../doc_table/lib/get_sort_for_search_source';
 import * as columnActions from '../doc_table/actions/columns';
 import * as filterActions from '../doc_table/actions/filter';
 
@@ -259,7 +260,7 @@ function discoverController(
       description: i18n.translate('kbn.discover.localMenu.newSearchDescription', {
         defaultMessage: 'New Search',
       }),
-      run: function () { kbnUrl.change('/discover'); },
+      run: function () { $scope.$evalAsync(() => { kbnUrl.change('/discover'); }); },
       testId: 'discoverNewButton',
     };
 
@@ -483,7 +484,7 @@ function discoverController(
 
     const { searchFields, selectFields } = await getSharingDataFields();
     searchSource.setField('fields', searchFields);
-    searchSource.setField('sort', getSort($state.sort, $scope.indexPattern));
+    searchSource.setField('sort', getSortForSearchSource($state.sort, $scope.indexPattern));
     searchSource.setField('highlight', null);
     searchSource.setField('highlightAll', null);
     searchSource.setField('aggs', null);
@@ -886,9 +887,10 @@ function discoverController(
   };
 
   $scope.updateDataSource = Promise.method(function updateDataSource() {
-    $scope.searchSource
+    const { indexPattern, searchSource } = $scope;
+    searchSource
       .setField('size', $scope.opts.sampleSize)
-      .setField('sort', getSort($state.sort, $scope.indexPattern))
+      .setField('sort', getSortForSearchSource($state.sort, indexPattern))
       .setField('query', !$state.query ? null : $state.query)
       .setField('filter', queryFilter.getFilters());
   });

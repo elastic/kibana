@@ -6,15 +6,15 @@ exports[`should not render relation select when geo field is geo_point 1`] = `
     size="s"
   />
   <EuiFormRow
-    compressed={true}
     describedByIds={Array []}
+    display="rowCompressed"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label="Geometry label"
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
+      compressed={true}
       fullWidth={false}
       isLoading={false}
       onChange={[Function]}
@@ -23,8 +23,8 @@ exports[`should not render relation select when geo field is geo_point 1`] = `
   </EuiFormRow>
   <EuiFormRow
     className="mapGeometryFilter__geoFieldSuperSelectWrapper"
-    compressed={true}
     describedByIds={Array []}
+    display="rowCompressed"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label="Filtered field"
@@ -41,7 +41,10 @@ exports[`should not render relation select when geo field is geo_point 1`] = `
       options={
         Array [
           Object {
-            "inputDisplay": <EuiText>
+            "inputDisplay": <EuiText
+              component="span"
+              size="s"
+            >
               <EuiTextColor
                 color="subdued"
               >
@@ -60,6 +63,7 @@ exports[`should not render relation select when geo field is geo_point 1`] = `
     />
   </EuiFormRow>
   <EuiButton
+    fill={true}
     isDisabled={false}
     onClick={[Function]}
     size="s"
@@ -75,15 +79,15 @@ exports[`should not show "within" relation when filter geometry is not closed 1`
     size="s"
   />
   <EuiFormRow
-    compressed={true}
     describedByIds={Array []}
+    display="rowCompressed"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label="Geometry label"
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
+      compressed={true}
       fullWidth={false}
       isLoading={false}
       onChange={[Function]}
@@ -92,8 +96,8 @@ exports[`should not show "within" relation when filter geometry is not closed 1`
   </EuiFormRow>
   <EuiFormRow
     className="mapGeometryFilter__geoFieldSuperSelectWrapper"
-    compressed={true}
     describedByIds={Array []}
+    display="rowCompressed"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label="Filtered field"
@@ -110,7 +114,10 @@ exports[`should not show "within" relation when filter geometry is not closed 1`
       options={
         Array [
           Object {
-            "inputDisplay": <EuiText>
+            "inputDisplay": <EuiText
+              component="span"
+              size="s"
+            >
               <EuiTextColor
                 color="subdued"
               >
@@ -129,15 +136,15 @@ exports[`should not show "within" relation when filter geometry is not closed 1`
     />
   </EuiFormRow>
   <EuiFormRow
-    compressed={true}
     describedByIds={Array []}
+    display="rowCompressed"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label="Spatial relation"
     labelType="label"
   >
     <EuiSelect
-      compressed={false}
+      compressed={true}
       fullWidth={false}
       hasNoInitialSelection={false}
       isLoading={false}
@@ -158,6 +165,7 @@ exports[`should not show "within" relation when filter geometry is not closed 1`
     />
   </EuiFormRow>
   <EuiButton
+    fill={true}
     isDisabled={false}
     onClick={[Function]}
     size="s"
@@ -173,15 +181,15 @@ exports[`should render relation select when geo field is geo_shape 1`] = `
     size="s"
   />
   <EuiFormRow
-    compressed={true}
     describedByIds={Array []}
+    display="rowCompressed"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label="Geometry label"
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
+      compressed={true}
       fullWidth={false}
       isLoading={false}
       onChange={[Function]}
@@ -190,8 +198,8 @@ exports[`should render relation select when geo field is geo_shape 1`] = `
   </EuiFormRow>
   <EuiFormRow
     className="mapGeometryFilter__geoFieldSuperSelectWrapper"
-    compressed={true}
     describedByIds={Array []}
+    display="rowCompressed"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label="Filtered field"
@@ -208,7 +216,10 @@ exports[`should render relation select when geo field is geo_shape 1`] = `
       options={
         Array [
           Object {
-            "inputDisplay": <EuiText>
+            "inputDisplay": <EuiText
+              component="span"
+              size="s"
+            >
               <EuiTextColor
                 color="subdued"
               >
@@ -227,15 +238,15 @@ exports[`should render relation select when geo field is geo_shape 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
-    compressed={true}
     describedByIds={Array []}
+    display="rowCompressed"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label="Spatial relation"
     labelType="label"
   >
     <EuiSelect
-      compressed={false}
+      compressed={true}
       fullWidth={false}
       hasNoInitialSelection={false}
       isLoading={false}
@@ -260,6 +271,7 @@ exports[`should render relation select when geo field is geo_shape 1`] = `
     />
   </EuiFormRow>
   <EuiButton
+    fill={true}
     isDisabled={false}
     onClick={[Function]}
     size="s"

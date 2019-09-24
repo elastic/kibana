@@ -140,7 +140,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
       const indexPatternName = transformConfig.dest.index;
 
       try {
-        const newIndexPattern = await kibanaContext.indexPatterns.get();
+        const newIndexPattern = await kibanaContext.indexPatterns.make();
 
         Object.assign(newIndexPattern, {
           id: '',

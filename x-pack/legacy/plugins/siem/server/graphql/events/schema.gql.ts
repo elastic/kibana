@@ -9,13 +9,6 @@ import gql from 'graphql-tag';
 export const eventsSchema = gql`
   scalar EsValue
 
-  type EventsData {
-    edges: [EcsEdges!]!
-    totalCount: Float!
-    pageInfo: PageInfoPaginated!
-    inspect: Inspect
-  }
-
   type EventsTimelineData {
     edges: [EcsEdges!]!
     totalCount: Float!
@@ -76,14 +69,6 @@ export const eventsSchema = gql`
   }
 
   extend type Source {
-    "Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
-    Events(
-      pagination: PaginationInputPaginated!
-      sortField: SortField!
-      timerange: TimerangeInput
-      filterQuery: String
-      defaultIndex: [String!]!
-    ): EventsData!
     Timeline(
       pagination: PaginationInput!
       sortField: SortField!

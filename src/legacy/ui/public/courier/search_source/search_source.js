@@ -77,7 +77,7 @@ import { normalizeSortRequest } from './_normalize_sort_request';
 
 import { fetchSoon } from '../fetch';
 import { fieldWildcardFilter } from '../../field_wildcard';
-import { getHighlightRequest } from '../../../../../plugins/data/common/highlight';
+import { getHighlightRequest } from '../../../../../plugins/data/common/field_formats';
 import { npSetup } from 'ui/new_platform';
 
 const FIELDS = [

@@ -54,7 +54,6 @@ export {
   getRoutes,
   isFilterable,
   IndexPatternSelect,
-  IndexPatternsProvider, // LEGACY
   validateIndexPattern,
   ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS,
@@ -66,3 +65,5 @@ export {
   mockFields,
   mockIndexPattern,
 } from './index_patterns';
+
+export { TimeHistoryContract, TimefilterContract, getTime, InputTimeRange } from './timefilter';

@@ -12,6 +12,7 @@ import {
   DataFrameTransformEndpointRequest,
   DataFrameTransformEndpointResult,
 } from '../../data_frame/pages/transform_management/components/transform_list/common';
+import { MlSummaryJobs } from '../../../common/types/jobs';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -87,8 +88,12 @@ declare interface Ml {
   getVisualizerFieldStats(obj: object): Promise<any>;
   getVisualizerOverallStats(obj: object): Promise<any>;
 
+  results: {
+    getMaxAnomalyScore: (jobIds: string[], earliestMs: number, latestMs: number) => Promise<any>; // THIS ONE IS RIGHT
+  };
+
   jobs: {
-    jobsSummary(jobIds: string[]): Promise<object>;
+    jobsSummary(jobIds: string[]): Promise<MlSummaryJobs>;
     jobs(jobIds: string[]): Promise<object>;
     groups(): Promise<object>;
     updateGroups(updatedJobs: string[]): Promise<object>;
@@ -125,7 +130,7 @@ declare interface Ml {
       jobId: string,
       start: number,
       end: number
-    ): Promise<{ progress: number; isRunning: boolean }>;
+    ): Promise<{ progress: number; isRunning: boolean; isJobClosed: boolean }>;
   };
 
   estimateBucketSpan(
