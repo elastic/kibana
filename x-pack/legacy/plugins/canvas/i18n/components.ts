@@ -167,8 +167,8 @@ export const ComponentStrings = {
         defaultMessage: 'Name',
       }),
     getSaveButtonLabel: () =>
-      i18n.translate('xpack.canvas.customElementModal.cancelButtonLabel', {
-        defaultMessage: 'Cancel',
+      i18n.translate('xpack.canvas.customElementModal.saveButtonLabel', {
+        defaultMessage: 'Save',
       }),
   },
   ElementConfig: {
