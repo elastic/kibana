@@ -174,6 +174,12 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: AnomalyRecord) {
         })
         .filter(v => v !== null)
         .join(' and ')}'`;
+    })
+    .replace(/\$(\w+)\$/, (match, name: string) => {
+      // Use lodash get to allow nested JSON fields to be retrieved.
+      const tokenValue: string | undefined = _.get(record, name);
+      // If property not found string is not replaced.
+      return tokenValue === undefined ? match : getResultTokenValue(tokenValue);
     });
 }
 
