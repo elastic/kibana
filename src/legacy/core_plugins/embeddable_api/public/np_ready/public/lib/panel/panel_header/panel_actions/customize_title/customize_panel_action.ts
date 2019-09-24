@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Action } from '../../../../actions';
+import { IAction } from 'src/plugins/ui_actions/public';
 import { ViewMode } from '../../../../types';
 import { IEmbeddable } from '../../../../embeddables';
 
@@ -30,11 +30,12 @@ interface ActionContext {
   embeddable: IEmbeddable;
 }
 
-export class CustomizePanelTitleAction extends Action<ActionContext> {
+export class CustomizePanelTitleAction implements IAction<ActionContext> {
   public readonly type = CUSTOMIZE_PANEL_ACTION_ID;
+  public id = CUSTOMIZE_PANEL_ACTION_ID;
+  public order = 10;
 
   constructor(private readonly getDataFromUser: GetUserData) {
-    super(CUSTOMIZE_PANEL_ACTION_ID);
     this.order = 10;
   }
 

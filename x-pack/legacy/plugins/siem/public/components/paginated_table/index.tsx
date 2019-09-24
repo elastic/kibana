@@ -13,7 +13,6 @@ import {
   EuiGlobalToastListToast as Toast,
   EuiLoadingContent,
   EuiPagination,
-  EuiPanel,
   EuiPopover,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
@@ -35,6 +34,7 @@ import { useStateToaster } from '../toasters';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
 import * as i18n from './translations';
+import { Panel } from '../panel';
 
 const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';
 
@@ -218,8 +218,8 @@ export const PaginatedTable = memo<SiemTables>(
 
     return (
       <Panel
-        data-test-subj={`${dataTestSubj}-${loading}`}
-        loading={{ loading }}
+        data-test-subj={`${dataTestSubj}-loading-${loading}`}
+        loading={loading}
         onMouseEnter={() => setShowInspect(true)}
         onMouseLeave={() => setShowInspect(false)}
       >
@@ -292,18 +292,6 @@ export const PaginatedTable = memo<SiemTables>(
 );
 
 PaginatedTable.displayName = 'PaginatedTable';
-
-const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
-  position: relative;
-
-  ${({ loading }) =>
-    loading &&
-    `
-    overflow: hidden;
-  `}
-`;
-
-Panel.displayName = 'Panel';
 
 const BasicTable = styled(EuiBasicTable)`
   tbody {
