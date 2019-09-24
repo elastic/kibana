@@ -2063,10 +2063,6 @@
     },
     "settings": {
       "index": {
-        "lifecycle": {
-          "name": "heartbeat-8.0.0",
-          "rollover_alias": "heartbeat-8.0.0"
-        },
         "mapping": {
           "total_fields": {
             "limit": "10000"
