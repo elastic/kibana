@@ -20,7 +20,7 @@
 import Joi from 'joi';
 import Boom from 'boom';
 import { trimLeft, trimRight } from 'lodash';
-import request from 'request';
+import { request } from './request';
 import * as url from 'url';
 import * as qs from 'querystring';
 
@@ -33,6 +33,28 @@ function toURL(base, path) {
     urlResult.searchParams.append('pretty', 'true');
   }
   return urlResult;
+}
+
+function extendCommaList(obj, property, value) {
+  obj[property] = (obj[property] ? obj[property] + ',' : '') + value;
+}
+
+function getProxyHeaders(req) {
+  const headers = {};
+
+  if (req.info.remotePort && req.info.remoteAddress) {
+    // see https://git.io/vytQ7
+    extendCommaList(headers, 'x-forwarded-for', req.info.remoteAddress);
+    extendCommaList(headers, 'x-forwarded-port', req.info.remotePort);
+    extendCommaList(headers, 'x-forwarded-proto', req.server.info.protocol);
+    extendCommaList(headers, 'x-forwarded-host', req.info.host);
+  }
+
+  const contentType = req.headers['content-type'];
+  if (contentType) {
+    headers['content-type'] = contentType;
+  }
+  return headers;
 }
 
 export const createProxyRoute = ({
@@ -88,11 +110,12 @@ export const createProxyRoute = ({
       // Preserve legacy behaviour of loading in custom headers.
       payload.headers = {
         ...payload.headers,
+        // Ensure proxy headers like 'x-forwarded-for' are on the payload. See `payload.headers` for currently included headers.
+        ...getProxyHeaders(req),
         ...headers,
       };
 
       return new Promise((resolve, reject) => {
-        // Proxy headers like 'x-forwarded-for' come from the payload. See `payload.headers`.
         payload.pipe(
           // We use the request library because Hapi, Axios, and Superagent don't support GET requests
           // with bodies, but ES APIs do. Similarly with DELETE requests with bodies. If we need to

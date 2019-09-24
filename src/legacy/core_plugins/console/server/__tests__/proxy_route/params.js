@@ -20,13 +20,13 @@
 import { Agent } from 'http';
 
 import sinon from 'sinon';
-import Wreck from '@hapi/wreck';
+import * as requestModule from '../../request';
 import expect from '@kbn/expect';
 import { Server } from 'hapi';
 
 import { createProxyRoute } from '../../';
 
-import { createWreckResponseStub } from './stubs';
+import { createResponseStub, readLastHeaders } from './stubs';
 
 describe('Console Proxy Route', () => {
   const sandbox = sinon.createSandbox();
@@ -34,7 +34,7 @@ describe('Console Proxy Route', () => {
   let setup;
 
   beforeEach(() => {
-    sandbox.stub(Wreck, 'request').callsFake(createWreckResponseStub());
+    sandbox.stub(requestModule, 'request').callsFake(createResponseStub());
 
     setup = () => {
       const server = new Server();
@@ -72,6 +72,7 @@ describe('Console Proxy Route', () => {
           const { server } = setup();
           server.route(
             createProxyRoute({
+              baseUrl: 'http://localhost:9200',
               pathFilters: [/^\/foo\//, /^\/bar\//],
             })
           );
@@ -82,7 +83,7 @@ describe('Console Proxy Route', () => {
           });
 
           expect(statusCode).to.be(200);
-          sinon.assert.calledOnce(Wreck.request);
+          sinon.assert.calledOnce(requestModule.request);
         });
       });
       describe('all match', () => {
@@ -90,6 +91,7 @@ describe('Console Proxy Route', () => {
           const { server } = setup();
           server.route(
             createProxyRoute({
+              baseUrl: 'http://localhost:9200',
               pathFilters: [/^\/foo\//, /^\/bar\//],
             })
           );
@@ -100,7 +102,7 @@ describe('Console Proxy Route', () => {
           });
 
           expect(statusCode).to.be(200);
-          sinon.assert.calledOnce(Wreck.request);
+          sinon.assert.calledOnce(requestModule.request);
         });
       });
     });
@@ -111,7 +113,7 @@ describe('Console Proxy Route', () => {
 
         const getConfigForReq = sinon.stub().returns({});
 
-        server.route(createProxyRoute({ getConfigForReq }));
+        server.route(createProxyRoute({ baseUrl: 'http://localhost:9200', getConfigForReq }));
         await server.inject({
           method: 'POST',
           url: '/api/console/proxy?method=HEAD&path=/index/type/id',
@@ -124,15 +126,14 @@ describe('Console Proxy Route', () => {
         expect(args[0])
           .to.have.property('query')
           .eql({ method: 'HEAD', path: '/index/type/id' });
-        expect(args[1]).to.be('/index/type/id?pretty');
+        expect(args[1]).to.be('http://localhost:9200/index/type/id?pretty=true');
       });
 
-      it('sends the returned timeout, rejectUnauthorized, agent, and base headers to Wreck', async () => {
+      it('sends the returned timeout, agent, and base headers to request', async () => {
         const { server } = setup();
 
         const timeout = Math.round(Math.random() * 10000);
         const agent = new Agent();
-        const rejectUnauthorized = !!Math.round(Math.random());
         const headers = {
           foo: 'bar',
           baz: 'bop',
@@ -140,10 +141,10 @@ describe('Console Proxy Route', () => {
 
         server.route(
           createProxyRoute({
+            baseUrl: 'http://localhost:9200',
             getConfigForReq: () => ({
               timeout,
               agent,
-              rejectUnauthorized,
               headers,
             }),
           })
@@ -154,13 +155,13 @@ describe('Console Proxy Route', () => {
           url: '/api/console/proxy?method=HEAD&path=/index/type/id',
         });
 
-        sinon.assert.calledOnce(Wreck.request);
-        const opts = Wreck.request.getCall(0).args[2];
+        sinon.assert.calledOnce(requestModule.request);
+        const opts = requestModule.request.getCall(0).args[0];
         expect(opts).to.have.property('timeout', timeout);
         expect(opts).to.have.property('agent', agent);
-        expect(opts).to.have.property('rejectUnauthorized', rejectUnauthorized);
-        expect(opts.headers).to.have.property('foo', 'bar');
-        expect(opts.headers).to.have.property('baz', 'bop');
+        const lastHeaders = readLastHeaders();
+        expect(lastHeaders).to.have.property('foo', 'bar');
+        expect(lastHeaders).to.have.property('baz', 'bop');
       });
     });
 
