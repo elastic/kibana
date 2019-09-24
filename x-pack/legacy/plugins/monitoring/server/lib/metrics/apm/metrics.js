@@ -150,7 +150,7 @@ export const metrics = {
     title: i18n.translate('xpack.monitoring.metrics.apm.acm.requestsTitle', {
       defaultMessage: 'Requests Count Agent Configuration Management',
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.acm.requests.requestedLabel', {
+    label: i18n.translate('xpack.monitoring.metrics.apm.acm.request.requestedLabel', {
       defaultMessage: 'Requested'
     }),
     description: i18n.translate('xpack.monitoring.metrics.apm.acm.requests.requestedDescription', {
