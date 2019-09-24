@@ -37,8 +37,6 @@ import { notificationRoutes } from '../routes/notification_settings';
 // @ts-ignore: could not find declaration file for module
 import { systemRoutes } from '../routes/system';
 // @ts-ignore: could not find declaration file for module
-import { dataFrameRoutes } from '../routes/data_frame';
-// @ts-ignore: could not find declaration file for module
 import { dataFrameAnalyticsRoutes } from '../routes/data_frame_analytics';
 // @ts-ignore: could not find declaration file for module
 import { dataRecognizer } from '../routes/modules';
@@ -221,7 +219,6 @@ export class Plugin {
     annotationRoutes(routeInitializationDeps);
     jobRoutes(routeInitializationDeps);
     dataFeedRoutes(routeInitializationDeps);
-    dataFrameRoutes(routeInitializationDeps);
     dataFrameAnalyticsRoutes(routeInitializationDeps);
     indicesRoutes(routeInitializationDeps);
     jobValidationRoutes(extendedRouteInitializationDeps);

@@ -5,12 +5,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore no declaration file for module
-export { isRequestTimeout } from '../job_service/error_utils';
 import {
   TransformEndpointRequest,
   TransformEndpointResult,
 } from '../../../../transform/public/app/pages/transform_management/components/transform_list/common';
+
+const REQUEST_TIMEOUT = 'RequestTimeout';
+
+export function isRequestTimeout(error: any) {
+  return error.displayName === REQUEST_TIMEOUT;
+}
 
 interface Params {
   results: TransformEndpointResult;

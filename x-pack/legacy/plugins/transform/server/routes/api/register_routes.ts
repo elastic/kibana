@@ -6,15 +6,9 @@
 import { Router } from '../../../../../server/lib/create_router';
 import { Plugins } from '../../../shim';
 import { registerAppRoutes } from './app';
-// import { registerRepositoriesRoutes } from './repositories';
-// import { registerSnapshotsRoutes } from './snapshots';
-// import { registerRestoreRoutes } from './restore';
-// import { registerPolicyRoutes } from './policy';
+import { registerTransformsRoutes } from './transforms';
 
 export const registerRoutes = (router: Router, plugins: Plugins): void => {
   registerAppRoutes(router, plugins);
-  // registerRepositoriesRoutes(router, plugins);
-  // (router, plugins);
-  // registerRestoreRoutes(router);
-  // registerPolicyRoutes(router);
+  registerTransformsRoutes(router, plugins);
 };

@@ -15,32 +15,32 @@ import {
 
 import { http } from './http_service';
 
-const basePath = chrome.addBasePath('/api/ml');
+const basePath = chrome.addBasePath('/api/transform');
 
 export const api = {
   getTransforms(transformId?: TransformId): Promise<any> {
     const transformIdString = transformId !== undefined ? `/${transformId}` : '';
     return http({
-      url: `${basePath}/_data_frame/transforms${transformIdString}`,
+      url: `${basePath}/transforms${transformIdString}`,
       method: 'GET',
     });
   },
   getTransformsStats(transformId?: TransformId): Promise<any> {
     if (transformId !== undefined) {
       return http({
-        url: `${basePath}/_data_frame/transforms/${transformId}/_stats`,
+        url: `${basePath}/transforms/${transformId}/_stats`,
         method: 'GET',
       });
     }
 
     return http({
-      url: `${basePath}/_data_frame/transforms/_stats`,
+      url: `${basePath}/transforms/_stats`,
       method: 'GET',
     });
   },
   createTransform(transformId: TransformId, transformConfig: any): Promise<any> {
     return http({
-      url: `${basePath}/_data_frame/transforms/${transformId}`,
+      url: `${basePath}/transforms/${transformId}`,
       method: 'PUT',
       data: transformConfig,
     });
@@ -48,7 +48,7 @@ export const api = {
 
   deleteTransforms(transformsInfo: TransformEndpointRequest[]) {
     return http({
-      url: `${basePath}/_data_frame/transforms/delete_transforms`,
+      url: `${basePath}/transforms/delete_transforms`,
       method: 'POST',
       data: {
         transformsInfo,
@@ -57,14 +57,14 @@ export const api = {
   },
   getTransformsPreview(obj: PreviewRequestBody): Promise<any> {
     return http({
-      url: `${basePath}/_data_frame/transforms/_preview`,
+      url: `${basePath}/transforms/_preview`,
       method: 'POST',
       data: obj,
     });
   },
   startTransforms(transformsInfo: TransformEndpointRequest[]) {
     return http({
-      url: `${basePath}/_data_frame/transforms/start_transforms`,
+      url: `${basePath}/transforms/start_transforms`,
       method: 'POST',
       data: {
         transformsInfo,
@@ -73,7 +73,7 @@ export const api = {
   },
   stopTransforms(transformsInfo: TransformEndpointRequest[]) {
     return http({
-      url: `${basePath}/_data_frame/transforms/stop_transforms`,
+      url: `${basePath}/transforms/stop_transforms`,
       method: 'POST',
       data: {
         transformsInfo,
@@ -82,7 +82,7 @@ export const api = {
   },
   getTransformAuditMessages(transformId: TransformId): Promise<any> {
     return http({
-      url: `${basePath}/_data_frame/transforms/${transformId}/messages`,
+      url: `${basePath}/transforms/${transformId}/messages`,
       method: 'GET',
     });
   },

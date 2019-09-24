@@ -4,11 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ML_DF_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
-import { callWithRequestType } from '../../../common/types/kibana';
-import { TransformMessage } from '../../../common/types/audit_message';
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 
+const ML_DF_NOTIFICATION_INDEX_PATTERN = '.data-frame-notifications-1';
 const SIZE = 500;
+
+interface AuditMessageBase {
+  message: string;
+  level: string;
+  timestamp: number;
+  node_name: string;
+  text?: string;
+}
+
+interface TransformMessage extends AuditMessageBase {
+  transform_id: string;
+}
 
 interface Message {
   _index: string;
@@ -23,7 +34,7 @@ interface BoolQuery {
   bool: { [key: string]: any };
 }
 
-export function transformAuditMessagesProvider(callWithRequest: callWithRequestType) {
+export function transformAuditMessagesProvider(callWithRequest: CallCluster) {
   // search for audit messages,
   // transformId is optional. without it, all transforms will be listed.
   async function getTransformAuditMessages(transformId: string) {
