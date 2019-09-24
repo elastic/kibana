@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
 
     // FLAKY: https://github.com/elastic/kibana/issues/40173
     // This test passes locally for LeeDr but fails every time on Jenkins
-    it('compare area chart snapshot', async () => {
+    it.skip('compare area chart snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInLogstashDataRange();
