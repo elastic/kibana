@@ -92,7 +92,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
         const shouldRedirectToSpaceSelector = statusCode === 403 || statusCode === 404;
 
         if (shouldRedirectToSpaceSelector) {
-          log.error(
+          log.debug(
             `Unable to navigate to space "${spaceId}", redirecting to Space Selector. ${error}`
           );
           return response.redirected({
@@ -127,7 +127,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
           const isAvailableInSpace = enabledFeatures.some(feature => feature.app.includes(appId));
 
           if (!isAvailableInSpace) {
-            log.error(`App ${appId} is not enabled within space "${spaceId}".`);
+            log.debug(`App ${appId} is not enabled within space "${spaceId}".`);
             return response.notFound();
           }
         }
