@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ObjectType } from '@kbn/config-schema';
+import { MaybeType, ObjectType, Type, StringType, TypeOf } from '@kbn/config-schema';
 /**
  * The set of common HTTP methods supported by Kibana routing.
  * @public
@@ -93,11 +93,28 @@ export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B exten
 }
 
 /**
+ * Type that represents allowed validations on the request payload.
+ *
+ * @internalRemarks
+ * This currently only supports JSON and string payloads. It would need to be extended to support stream.Readable and
+ * Buffer types.
+ *
+ * @public
+ */
+export type RouteBodySchema<P extends Record<string, Type<any>> = any> =
+  | MaybeType<TypeOf<StringType>>
+  | MaybeType<TypeOf<ObjectType<P>>>;
+
+/**
  * RouteSchemas contains the schemas for validating the different parts of a
  * request.
  * @public
  */
-export interface RouteSchemas<P extends ObjectType, Q extends ObjectType, B extends ObjectType> {
+export interface RouteSchemas<
+  P extends ObjectType,
+  Q extends ObjectType,
+  B extends RouteBodySchema
+> {
   params?: P;
   query?: Q;
   body?: B;

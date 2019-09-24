@@ -24,7 +24,7 @@ import { ObjectType, TypeOf } from '@kbn/config-schema';
 
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { Headers } from './headers';
-import { RouteMethod, RouteSchemas, RouteConfigOptions } from './route';
+import { RouteMethod, RouteSchemas, RouteConfigOptions, RouteBodySchema } from './route';
 import { KibanaSocket, IKibanaSocket } from './socket';
 
 const requestSymbol = Symbol('request');
@@ -56,7 +56,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
    * instance of a KibanaRequest.
    * @internal
    */
-  public static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+  public static from<P extends ObjectType, Q extends ObjectType, B extends RouteBodySchema>(
     req: Request,
     routeSchemas?: RouteSchemas<P, Q, B>,
     withoutSecretHeaders: boolean = true
@@ -77,7 +77,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
    * received in the route handler.
    * @internal
    */
-  private static validate<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+  private static validate<P extends ObjectType, Q extends ObjectType, B extends RouteBodySchema>(
     req: Request,
     routeSchemas: RouteSchemas<P, Q, B> | undefined
   ): {
@@ -103,10 +103,13 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
         ? {}
         : routeSchemas.query.validate(req.query, {}, 'request query');
 
+    // req.payload may be `null`, change this to undefined to be compatible with MaybeType
+    const reqPayload = req.payload === null ? undefined : req.payload;
+
     const body =
       routeSchemas.body === undefined
         ? {}
-        : routeSchemas.body.validate(req.payload, {}, 'request body');
+        : routeSchemas.body.validate(reqPayload, {}, 'request body');
 
     return { query, params, body };
   }

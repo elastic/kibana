@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { schema } from '@kbn/config-schema';
+
 import { KibanaRequest } from './request';
 import { httpServerMock } from '../http_server.mocks';
 
@@ -61,6 +63,166 @@ describe('KibanaRequest', () => {
       expect(kibanaRequest.headers).toEqual({
         custom: 'one',
         authorization: 'token',
+      });
+    });
+  });
+
+  describe('validation', () => {
+    describe('body', () => {
+      it('passes with optional fields object with empty object payload', () => {
+        expect(
+          KibanaRequest.from(httpServerMock.createRawRequest({ payload: {} }), {
+            body: schema.object({ field1: schema.maybe(schema.string()) }),
+          }).body
+        ).toEqual({});
+      });
+
+      it('passes with optional object body and null payload', () => {
+        expect(
+          KibanaRequest.from(httpServerMock.createRawRequest({ payload: null as any }), {
+            body: schema.maybe(schema.object({})),
+          }).body
+        ).toBeUndefined();
+      });
+
+      it('passes with optional string body and null payload', () => {
+        expect(
+          KibanaRequest.from(httpServerMock.createRawRequest({ payload: null as any }), {
+            body: schema.maybe(schema.string()),
+          }).body
+        ).toBeUndefined();
+      });
+
+      it('fails with string body and null payload', () => {
+        expect(() => {
+          KibanaRequest.from(httpServerMock.createRawRequest({ payload: null as any }), {
+            body: schema.string(),
+          });
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"[request body]: expected value of type [string] but got [undefined]"`
+        );
+      });
+
+      it('fails with optional fields object and null payload', () => {
+        expect(() => {
+          KibanaRequest.from(httpServerMock.createRawRequest({ payload: null as any }), {
+            body: schema.object({ field1: schema.maybe(schema.string()) }),
+          });
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"[request body]: expected a plain object value, but found [undefined] instead."`
+        );
+      });
+    });
+
+    describe('query', () => {
+      it('passes with required field and populated query', () => {
+        expect(
+          KibanaRequest.from(
+            httpServerMock.createRawRequest({
+              query: { field1: 'here' },
+            }),
+            {
+              query: schema.object({ field1: schema.string() }),
+            }
+          ).query
+        ).toEqual({ field1: 'here' });
+      });
+
+      it('passes with defaultValue field and empty query', () => {
+        expect(
+          KibanaRequest.from(
+            httpServerMock.createRawRequest({
+              query: {},
+            }),
+            {
+              query: schema.object({ field1: schema.string({ defaultValue: 'default!' }) }),
+            }
+          ).query
+        ).toEqual({ field1: 'default!' });
+      });
+
+      it('passes with optional field and empty query', () => {
+        expect(
+          KibanaRequest.from(
+            httpServerMock.createRawRequest({
+              query: {},
+            }),
+            {
+              query: schema.object({ field1: schema.maybe(schema.string()) }),
+            }
+          ).query
+        ).toEqual({});
+      });
+
+      it('fails with required field and empty query', () => {
+        expect(() =>
+          KibanaRequest.from(
+            httpServerMock.createRawRequest({
+              query: {},
+            }),
+            {
+              query: schema.object({ field1: schema.string() }),
+            }
+          )
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"[request query.field1]: expected value of type [string] but got [undefined]"`
+        );
+      });
+    });
+
+    describe('params', () => {
+      it('passes with required field and populated params', () => {
+        expect(
+          KibanaRequest.from(
+            httpServerMock.createRawRequest({
+              params: { field1: 'here' },
+            }),
+            {
+              params: schema.object({ field1: schema.string() }),
+            }
+          ).params
+        ).toEqual({ field1: 'here' });
+      });
+
+      it('passes with defaultValue field and empty params', () => {
+        expect(
+          KibanaRequest.from(
+            httpServerMock.createRawRequest({
+              params: {},
+            }),
+            {
+              params: schema.object({ field1: schema.string({ defaultValue: 'default!' }) }),
+            }
+          ).params
+        ).toEqual({ field1: 'default!' });
+      });
+
+      it('passes with optional field and empty params', () => {
+        expect(
+          KibanaRequest.from(
+            httpServerMock.createRawRequest({
+              params: {},
+            }),
+            {
+              params: schema.object({ field1: schema.maybe(schema.string()) }),
+            }
+          ).params
+        ).toEqual({});
+      });
+
+      it('fails with required field and empty params', () => {
+        expect(() =>
+          KibanaRequest.from(
+            httpServerMock.createRawRequest({
+              params: {},
+            }),
+            {
+              params: schema.object({ field1: schema.string() }),
+            }
+          )
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"[request params.field1]: expected value of type [string] but got [undefined]"`
+        );
       });
     });
   });

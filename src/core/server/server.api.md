@@ -10,6 +10,7 @@ import { ConfigOptions } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
 import { IncomingHttpHeaders } from 'http';
+import { MaybeType } from '@kbn/config-schema';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { PeerCertificate } from 'tls';
@@ -19,6 +20,7 @@ import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
 import { Server } from 'hapi';
 import { Stream } from 'stream';
+import { StringType } from '@kbn/config-schema';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { Url } from 'url';
@@ -320,7 +322,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     // Warning: (ae-forgotten-export) The symbol "RouteSchemas" needs to be exported by the entry point index.d.ts
     // 
     // @internal
-    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P["type"], Q["type"], B["type"]>;
+    static from<P extends ObjectType, Q extends ObjectType, B extends RouteBodySchema>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P["type"], Q["type"], B["type"]>;
     readonly headers: Headers;
     // (undocumented)
     readonly params: Params;
@@ -610,6 +612,9 @@ export type ResponseHeaders = {
 } & {
     [header: string]: string | string[];
 };
+
+// @public
+export type RouteBodySchema<P extends Record<string, Type<any>> = any> = MaybeType<TypeOf<StringType>> | MaybeType<TypeOf<ObjectType<P>>>;
 
 // @public
 export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType> {

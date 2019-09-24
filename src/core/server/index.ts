@@ -108,6 +108,7 @@ export {
   KibanaResponseFactory,
   RouteConfig,
   IRouter,
+  RouteBodySchema,
   RouteMethod,
   RouteConfigOptions,
   SessionStorage,
