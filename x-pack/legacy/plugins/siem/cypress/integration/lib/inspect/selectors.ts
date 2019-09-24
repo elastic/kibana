@@ -91,7 +91,7 @@ export const INSPECT_BUTTONS_IN_SIEM: InspectButtonMetadata[] = [
   },
   {
     altInspectId: `[data-test-subj="events-viewer-header"] ${INSPECT_BUTTON_ICON}`,
-    id: '[data-test-subj="events-container-false"]',
+    id: '[data-test-subj="events-container-loading-false"]',
     title: 'Events Table',
     url: HOSTS_PAGE_TAB_URLS.events,
   },
