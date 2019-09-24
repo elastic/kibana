@@ -4,25 +4,62 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 // utility functions for handling custom URLs
 
 import _ from 'lodash';
 import moment from 'moment';
 
 import { parseInterval } from '../../common/util/parse_interval';
-import {
-  escapeForElasticsearchQuery,
-  replaceStringTokens } from './string_utils';
+import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils';
 
 // Value of custom_url time_range property indicating drilldown time range is calculated automatically
 // depending on the context in which the URL is being opened.
 const TIME_RANGE_AUTO = 'auto';
 
+export interface UrlConfig {
+  time_range: string;
+  url_name: string;
+  url_value: string;
+}
+
+export interface Influencer {
+  influencer_field_name: string;
+  influencer_field_values: string[];
+}
+
+export interface AnomalyRecord {
+  [key: string]: any;
+  job_id: string;
+  result_type: string;
+  probability: number;
+  multi_bucket_impact: number;
+  record_score: number;
+  initial_record_score: number;
+  bucket_span: number;
+  detector_index: number;
+  is_interim: boolean;
+  timestamp: number;
+  by_field_name: string;
+  by_field_value: string;
+  partition_field_name: string;
+  partition_field_value: string;
+  function: string;
+  function_description: string;
+  typical: number[];
+  actual: number[];
+  influencers: Influencer[];
+  earliest: string;
+  latest: string;
+}
+
 // Replaces the $ delimited tokens in the url_value of the custom URL configuration
 // with values from the supplied document.
-export function replaceTokensInUrlValue(customUrlConfig, jobBucketSpanSecs, doc, timeFieldName) {
+export function replaceTokensInUrlValue(
+  customUrlConfig: UrlConfig,
+  jobBucketSpanSecs: string,
+  doc: AnomalyRecord,
+  timeFieldName: 'timestamp' | string
+) {
   // If urlValue contains $earliest$ and $latest$ tokens, add in times to the test doc.
   const urlValue = customUrlConfig.url_value;
   const timestamp = doc[timeFieldName];
@@ -52,7 +89,7 @@ export function replaceTokensInUrlValue(customUrlConfig, jobBucketSpanSecs, doc,
 
 // Returns the URL to open from the supplied config, with any dollar delimited tokens
 // substituted from the supplied anomaly record.
-export function getUrlForRecord(urlConfig, record) {
+export function getUrlForRecord(urlConfig: UrlConfig, record: AnomalyRecord) {
   if (isKibanaUrl(urlConfig) === true) {
     return buildKibanaUrl(urlConfig, record);
   } else {
@@ -66,7 +103,7 @@ export function getUrlForRecord(urlConfig, record) {
 // object which indicates whether it is opening a Kibana page running on the same server.
 // fullUrl is the complete URL, including the base path, with any dollar delimited tokens
 // from the urlConfig having been substituted with values from an anomaly record.
-export function openCustomUrlWindow(fullUrl, urlConfig) {
+export function openCustomUrlWindow(fullUrl: string, urlConfig: UrlConfig) {
   // Run through a regex to test whether the url_value starts with a protocol scheme.
   if (/^(?:[a-z]+:)?\/\//i.test(urlConfig.url_value) === false) {
     window.open(fullUrl, '_blank');
@@ -83,60 +120,61 @@ export function openCustomUrlWindow(fullUrl, urlConfig) {
 
 // Returns whether the url_value of the supplied config is for
 // a Kibana Discover or Dashboard page running on the same server as this ML plugin.
-function isKibanaUrl(urlConfig) {
+function isKibanaUrl(urlConfig: UrlConfig) {
   const urlValue = urlConfig.url_value;
   return urlValue.startsWith('kibana#/discover') || urlValue.startsWith('kibana#/dashboard');
 }
 
 /**
  * Escape any double quotes in the value for correct use in KQL.
- * @param {string} Input string.
  */
-function escapeForKQL(value) {
+function escapeForKQL(value: string): string {
   return value.replace(/\"/g, '\\"');
 }
 
 // Builds a Kibana dashboard or Discover URL from the supplied config, with any
 // dollar delimited tokens substituted from the supplied anomaly record.
-function buildKibanaUrl(urlConfig, record) {
+function buildKibanaUrl(urlConfig: UrlConfig, record: AnomalyRecord) {
   const urlValue = urlConfig.url_value;
 
-  const queryLanguageEscapeCallback = urlValue.includes('language:lucene') ? escapeForElasticsearchQuery : escapeForKQL;
+  const queryLanguageEscapeCallback = urlValue.includes('language:lucene')
+    ? escapeForElasticsearchQuery
+    : escapeForKQL;
 
   const getResultTokenValue = _.compose(
     queryLanguageEscapeCallback,
     // Kibana URLs used rison encoding, so escape with ! any ! or ' characters
-    v => v.replace(/[!']/g, '!$&'),
+    (v: string): string => v.replace(/[!']/g, '!$&'),
     encodeURIComponent
   );
 
   return String(urlValue)
     .replace('$earliest$', record.earliest)
     .replace('$latest$', record.latest)
-    .replace(/query:'(.+)'/, (match, queryString) => {
-      return 'query:\'' + queryString
+    .replace(/query:'(.+)'/, (match, queryString: string) => {
+      return `query:'${queryString
         .split(/\sand\s/i)
         .map(v => v.split(':')[0])
         .map(name => {
-        // Use lodash get to allow nested JSON fields to be retrieved.
-          const tokenValues = _.get(record, name, null);
-          if (tokenValues === null) {
+          // Use lodash get to allow nested JSON fields to be retrieved.
+          const tokenValues: string[] | undefined = _.get(record, name);
+          if (tokenValues === undefined) {
             return null;
           }
           const result = tokenValues
-            .map(value =>  `${name}:${getResultTokenValue(value)}`)
+            .map(value => `${name}:${getResultTokenValue(value)}`)
             .join(' or ');
           return tokenValues.length > 1 ? `(${result})` : result;
         })
         .filter(v => v !== null)
-        .join(' and ') + '\'';
+        .join(' and ')}'`;
     });
 }
 
 // Returns whether the supplied label is valid for a custom URL.
-export function isValidLabel(label, savedCustomUrls) {
-  let isValid = (label !== undefined) && (label.trim().length > 0);
-  if (isValid === true && (savedCustomUrls !== undefined)) {
+export function isValidLabel(label: string, savedCustomUrls: any[]) {
+  let isValid = label !== undefined && label.trim().length > 0;
+  if (isValid === true && savedCustomUrls !== undefined) {
     // Check the label is unique.
     const existingLabels = savedCustomUrls.map(customUrl => customUrl.url_name);
     isValid = !existingLabels.includes(label);
@@ -144,12 +182,12 @@ export function isValidLabel(label, savedCustomUrls) {
   return isValid;
 }
 
-export function isValidTimeRange(timeRange) {
+export function isValidTimeRange(timeRange: string): boolean {
   // Allow empty timeRange string, which gives the 'auto' behaviour.
-  if ((timeRange === undefined) || (timeRange.length === 0) || (timeRange === TIME_RANGE_AUTO)) {
+  if (timeRange === undefined || timeRange.length === 0 || timeRange === TIME_RANGE_AUTO) {
     return true;
   }
 
   const interval = parseInterval(timeRange);
-  return (interval !== null);
+  return interval !== null;
 }
