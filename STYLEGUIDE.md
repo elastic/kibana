@@ -3,8 +3,7 @@
 This guide applies to all development within the Kibana project and is
 recommended for the development of all Kibana plugins.
 
-- [Architecture](style_guides/architecture_style_guide.md)
-- [JavaScript](style_guides/js_style_guide.md)
+- [JavaScript/TypeScript](style_guides/js_style_guide.md)
 - [React](style_guides/react_style_guide.md)
 - [SASS](https://elastic.github.io/eui/#/guidelines/sass) (maintained in EUI)
 - [HTML](style_guides/html_style_guide.md)
@@ -20,6 +19,11 @@ All filenames should use `snake_case`.
 
 *Wrong:*
   - `src/kibana/IndexPatterns/IndexPattern.js`
+
+## Do not comment out code
+
+We use a version management system. If a line of code is no longer needed,
+remove it, don't simply comment it out.
 
 ## TypeScript vs JavaScript
 
