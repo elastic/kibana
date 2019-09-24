@@ -24,5 +24,5 @@ import { npSetup, npStart } from 'ui/new_platform';
 import { plugin } from '.';
 
 const pluginInstance = plugin({} as any);
-export const setup = pluginInstance.setup(npSetup.core);
+export const setup = pluginInstance.setup(npSetup.core, { uiActions: npSetup.plugins.uiActions });
 export const start = pluginInstance.start(npStart.core);

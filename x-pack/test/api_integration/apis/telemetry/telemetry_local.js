@@ -39,9 +39,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/45983
-  // FLAKY: https://github.com/elastic/kibana/issues/45884
-  describe.skip('/api/telemetry/v2/clusters/_stats with monitoring disabled', () => {
+  describe('/api/telemetry/v2/clusters/_stats with monitoring disabled', () => {
     before('', async () => {
       await esSupertest.put('/_cluster/settings').send(disableCollection).expect(200);
       await new Promise(r => setTimeout(r, 1000));
@@ -89,6 +87,9 @@ export default function ({ getService }) {
       expect(stats.stack_stats.kibana.os.platformReleases[0].count).to.be(1);
 
       expect(stats.stack_stats.xpack.graph).to.be.an('object');
+      expect(stats.stack_stats.xpack.transform).to.be.an('object');
+      expect(stats.stack_stats.xpack.transform.available).to.be.an('boolean');
+      expect(stats.stack_stats.xpack.transform.enabled).to.be.an('boolean');
       expect(stats.stack_stats.xpack.ilm).to.be.an('object');
       expect(stats.stack_stats.xpack.logstash).to.be.an('object');
       expect(stats.stack_stats.xpack.ml).to.be.an('object');
@@ -158,7 +159,7 @@ export default function ({ getService }) {
         'stack_stats.kibana.versions',
         'stack_stats.kibana.visualization',
         'stack_stats.xpack.ccr',
-        'stack_stats.xpack.data_frame',
+        'stack_stats.xpack.transform',
         'stack_stats.xpack.graph',
         'stack_stats.xpack.ilm',
         'stack_stats.xpack.logstash',
