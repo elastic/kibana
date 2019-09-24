@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 export * from './angular';
 export * from './constants';
 export * from './components';
+export * from './errors';
 export * from './shortcuts';
 export * from './units';
 
