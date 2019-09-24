@@ -4,5 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { networkTraffic } from '../../../shared/metrics/snapshot/network_traffic';
-export const tx = networkTraffic('tx', 'kubernetes.pod.network.tx.bytes');
+import { networkTrafficWithInterfaces } from '../../../shared/metrics/snapshot/network_traffic_with_interfaces';
+export const rx = networkTrafficWithInterfaces(
+  'rx',
+  'docker.network.in.bytes',
+  'docker.network.interface'
+);

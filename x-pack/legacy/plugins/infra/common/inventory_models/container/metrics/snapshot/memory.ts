@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { networkTraffic } from '../../../shared/metrics/snapshot/network_traffic';
-export const tx = networkTraffic('tx', 'kubernetes.pod.network.tx.bytes');
+import { SnapshotModel } from '../../../types';
+
+export const memory: SnapshotModel = { memory: { avg: { field: 'docker.memory.usage.pct' } } };

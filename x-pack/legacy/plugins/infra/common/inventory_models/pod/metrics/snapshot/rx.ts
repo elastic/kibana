@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { rate } from '../../../shared/metrics/snapshot/rate';
-export const rx = rate('rx', 'kubernetes.pod.network.rx.bytes');
+import { networkTraffic } from '../../../shared/metrics/snapshot/network_traffic';
+export const rx = networkTraffic('rx', 'kubernetes.pod.network.rx.bytes');

@@ -6,7 +6,7 @@
 
 import { SnapshotModel } from '../../../types';
 
-export const networkTraffic = (
+export const networkTrafficWithInterfaces = (
   id: string,
   metricField: string,
   interfaceField: string

@@ -37,9 +37,12 @@ export const toolbar: InventoryToolbar = [
   },
   {
     type: 'groupBy',
-    options: ['kubernetes.namespace', 'kubernetes.node.name', 'service.type'].map(field => ({
-      text: fieldToName(field),
-      value: field,
-    })),
+    options: [
+      'cloud.availability_zone',
+      'cloud.machine.type',
+      'cloud.project.id',
+      'cloud.provider',
+      'service.type',
+    ].map(field => ({ text: fieldToName(field), value: field })),
   },
 ];

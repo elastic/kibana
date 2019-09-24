@@ -4,5 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { networkTraffic } from './network_traffic';
-export const rx = networkTraffic('rx', 'system.network.in.bytes', 'system.network.name');
+import { networkTrafficWithInterfaces } from '../../../shared/metrics/snapshot/network_traffic_with_interfaces';
+export const rx = networkTrafficWithInterfaces(
+  'rx',
+  'system.network.in.bytes',
+  'system.network.name'
+);
