@@ -31,11 +31,9 @@ const TextAreaArgInput = ({ updateValue, value, confirm, commit, renderError, ar
         />
       </EuiFormRow>
       <EuiSpacer size="s" />
-      <EuiFormRow display="rowCompressed">
-        <EuiButton size="s" onClick={() => commit(value)}>
-          {confirm}
-        </EuiButton>
-      </EuiFormRow>
+      <EuiButton size="s" onClick={() => commit(value)}>
+        {confirm}
+      </EuiButton>
       <EuiSpacer size="xs" />
     </div>
   );

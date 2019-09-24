@@ -101,7 +101,7 @@ export const TextStylePicker = ({
 
   return (
     <div className="canvasTextStylePicker">
-      <EuiFlexGroup gutterSize="m">
+      <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiSelect
             compressed
@@ -117,7 +117,7 @@ export const TextStylePicker = ({
 
       <EuiSpacer size="m" />
 
-      <EuiFlexGroup gutterSize="m" alignItems="center">
+      <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
             options={styleButtons}

@@ -62,7 +62,9 @@ export const SimpleTemplate: FunctionComponent<Props> = props => {
       ) : (
         <Fragment>
           <EuiFlexItem grow={false}>
-            <label htmlFor="series-style">Color&nbsp;</label>
+            <label htmlFor="series-style">
+              <EuiText size="s">Color&nbsp;</EuiText>
+            </label>
           </EuiFlexItem>
           <EuiFlexItem style={{ fontSize: 0 }}>
             <ColorPickerPopover
