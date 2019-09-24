@@ -6,25 +6,16 @@
 
 /* eslint-disable @typescript-eslint/camelcase */
 
-import {
-  Blame,
-  Commit as NodeGitCommit,
-  Diff as NodeGitDiff,
-  Error as NodeGitError,
-  Oid,
-  Repository,
-  Revwalk,
-} from '@elastic/nodegit';
-import { FileItem, LsTreeSummary, simplegit } from '@elastic/simple-git/dist/';
-import { SimpleGit } from '@elastic/simple-git/dist/promise';
+import { FileItem, LsTreeSummary, simplegit, SimpleGit } from '@elastic/simple-git/dist';
 import Boom from 'boom';
-import LruCache from 'lru-cache';
 import * as Path from 'path';
 import * as fs from 'fs';
 import { isBinaryFileSync } from 'isbinaryfile';
+import { BlameSummary, DiffResultTextFile } from '@elastic/simple-git/dist/response';
+import moment from 'moment';
 import { GitBlame } from '../common/git_blame';
 import { CommitDiff, Diff, DiffKind } from '../common/git_diff';
-import { Commit, FileTree, FileTreeItemType, RepositoryUri } from '../model';
+import { FileTree, FileTreeItemType, RepositoryUri } from '../model';
 import { CommitInfo, ReferenceInfo, ReferenceType } from '../model/commit';
 import { detectLanguage } from './utils/detect_language';
 import { FormatParser } from './utils/format_parser';
@@ -36,29 +27,6 @@ export interface Blob {
   isBinary(): boolean;
   content(): Buffer;
   rawsize(): number;
-}
-
-/**
- * do a nodegit operation and check the results. If it throws a not found error or returns null,
- * rethrow a Boom.notFound error.
- * @param func the nodegit operation
- * @param message the message pass to Boom.notFound error
- */
-async function checkExists<R>(func: () => Promise<R>, message: string): Promise<R> {
-  let result: R;
-  try {
-    result = await func();
-  } catch (e) {
-    if (e.errno === NodeGitError.CODE.ENOTFOUND) {
-      throw Boom.notFound(message);
-    } else {
-      throw e;
-    }
-  }
-  if (result == null) {
-    throw Boom.notFound(message);
-  }
-  return result;
 }
 
 function entry2Tree(entry: FileItem, prefixPath: string = ''): FileTree {
@@ -77,33 +45,10 @@ interface Tree {
   oid: string;
 }
 export class GitOperations {
-  private REPO_LRU_CACHE_SIZE = 16;
-  private REPO_MAX_AGE_MS = 60 * 60 * 1000; // 1 hour;
   private repoRoot: string;
-  private repoCache: LruCache<RepositoryUri, Repository>;
 
   constructor(repoRoot: string) {
     this.repoRoot = repoRoot;
-
-    const options = {
-      max: this.REPO_LRU_CACHE_SIZE,
-      maxAge: this.REPO_MAX_AGE_MS,
-      dispose: (repoUri: RepositoryUri, repo: Repository) => {
-        // Clean up the repository before disposing this repo out of the cache.
-        repo.cleanup();
-      },
-    };
-    this.repoCache = new LruCache(options);
-  }
-
-  public cleanRepo(uri: RepositoryUri) {
-    if (this.repoCache.has(uri)) {
-      this.repoCache.del(uri);
-    }
-  }
-
-  public async cleanAllRepo() {
-    this.repoCache.reset();
   }
 
   public async fileContent(uri: RepositoryUri, path: string, revision: string = 'master') {
@@ -130,15 +75,6 @@ export class GitOperations {
     }
   }
 
-  public async getCommit(uri: RepositoryUri, revision: string): Promise<NodeGitCommit> {
-    const info = await this.getCommitOr404(uri, revision);
-    const repo = await this.openRepo(uri);
-    return (await checkExists(
-      () => this.findCommit(repo, info.id),
-      `revision or branch ${revision} not found in ${uri}`
-    )) as NodeGitCommit;
-  }
-
   public async getDefaultBranch(uri: RepositoryUri): Promise<string> {
     const git = await this.openGit(uri);
     return (await git.raw(['symbolic-ref', HEAD, '--short'])).trim();
@@ -154,29 +90,25 @@ export class GitOperations {
   }
 
   public async blame(uri: RepositoryUri, revision: string, path: string): Promise<GitBlame[]> {
-    const repo = await this.openRepo(uri);
-    const newestCommit = (await this.getCommit(uri, revision)).id();
-    const blame = await Blame.file(repo, path, { newestCommit });
+    const git = await this.openGit(uri);
+    // @ts-ignore
+    const blameSummary: BlameSummary = await git.blame(revision, path);
     const results: GitBlame[] = [];
-    for (let i = 0; i < blame.getHunkCount(); i++) {
-      const hunk = blame.getHunkByIndex(i);
-      // @ts-ignore wrong definition in nodegit
-      const commit = await repo.getCommit(hunk.finalCommitId());
+    for (const blame of blameSummary.blames) {
       results.push({
         committer: {
-          // @ts-ignore wrong definition in nodegit
-          name: hunk.finalSignature().name(),
-          // @ts-ignore wrong definition in nodegit
-          email: hunk.finalSignature().email(),
+          name: blame.commit.author!.name,
+          email: blame.commit.author!.email,
         },
-        // @ts-ignore wrong definition in nodegit
-        startLine: hunk.finalStartLineNumber(),
-        // @ts-ignore wrong definition in nodegit
-        lines: hunk.linesInHunk(),
+        startLine: blame.resultLine,
+        lines: blame.lines,
         commit: {
-          id: commit.sha(),
-          message: commit.message(),
-          date: commit.date().toISOString(),
+          id: blame.commit.id!,
+          message: blame.commit.message!,
+          date: moment
+            .unix(blame.commit.author!.time)
+            .utcOffset(blame.commit.author!.tz)
+            .toISOString(true),
         },
       });
     }
@@ -192,21 +124,6 @@ export class GitOperations {
     } else {
       throw Boom.notFound(`repo ${uri} not found`);
     }
-  }
-
-  public async openRepo(uri: RepositoryUri): Promise<Repository> {
-    if (this.repoCache.has(uri)) {
-      const repo = this.repoCache.get(uri) as Repository;
-      return Promise.resolve(repo);
-    }
-
-    const repoDir = this.repoDir(uri);
-    const repo = await checkExists<Repository>(
-      () => Repository.open(repoDir),
-      `repo ${uri} not found`
-    );
-    this.repoCache.set(uri, repo);
-    return Promise.resolve(repo);
   }
 
   private repoDir(uri: RepositoryUri) {
@@ -257,44 +174,6 @@ export class GitOperations {
       default:
         throw new Error('unknown mode: ' + mode);
     }
-  }
-
-  public async iterateCommits(
-    uri: RepositoryUri,
-    startRevision: string,
-    untilRevision?: string
-  ): Promise<Commit[]> {
-    const repository = await this.openRepo(uri);
-    const commit = await this.getCommit(uri, startRevision);
-
-    const revWalk = repository.createRevWalk();
-    revWalk.sorting(Revwalk.SORT.TOPOLOGICAL);
-    revWalk.push(commit.id());
-
-    const commits: NodeGitCommit[] = await revWalk.getCommitsUntil((c: NodeGitCommit) => {
-      // Iterate commits all the way to the oldest one.
-      return true;
-    });
-
-    const res: Commit[] = commits.map(c => {
-      return {
-        repoUri: uri,
-        id: c.sha(),
-        message: c.message(),
-        body: c.body(),
-        date: c.date(),
-        parents: c.parents().map(i => i.tostrS()),
-        author: {
-          name: c.author().name(),
-          email: c.author().email(),
-        },
-        committer: {
-          name: c.committer().name(),
-          email: c.committer().email(),
-        },
-      } as Commit;
-    });
-    return res;
   }
 
   /**
@@ -432,71 +311,84 @@ export class GitOperations {
   }
 
   public async getCommitDiff(uri: string, revision: string): Promise<CommitDiff> {
-    const repo = await this.openRepo(uri);
-    const commit = await this.getCommit(uri, revision);
-    const diffs = await commit.getDiff();
+    const git = await this.openGit(uri);
+    const commit = await this.getCommitOr404(uri, revision);
+    const diffs = await git.diffSummary([revision]);
 
     const commitDiff: CommitDiff = {
-      commit: commitInfo(commit),
-      additions: 0,
-      deletions: 0,
+      commit,
+      additions: diffs.insertions,
+      deletions: diffs.deletions,
       files: [],
     };
-    for (const diff of diffs) {
-      const patches = await diff.patches();
-      for (const patch of patches) {
-        const { total_deletions, total_additions } = patch.lineStats();
-        commitDiff.additions += total_additions;
-        commitDiff.deletions += total_deletions;
-        if (patch.isAdded()) {
-          const path = patch.newFile().path();
-          const modifiedCode = await this.getModifiedCode(commit, path);
-          const language = await detectLanguage(path, modifiedCode);
-          commitDiff.files.push({
-            language,
-            path,
-            modifiedCode,
-            additions: total_additions,
-            deletions: total_deletions,
-            kind: DiffKind.ADDED,
-          });
-        } else if (patch.isDeleted()) {
-          const path = patch.oldFile().path();
-          const originCode = await this.getOriginCode(commit, repo, path);
-          const language = await detectLanguage(path, originCode);
-          commitDiff.files.push({
-            language,
-            path,
-            originCode,
-            kind: DiffKind.DELETED,
-            additions: total_additions,
-            deletions: total_deletions,
-          });
-        } else if (patch.isModified()) {
-          const path = patch.newFile().path();
-          const modifiedCode = await this.getModifiedCode(commit, path);
-          const originPath = patch.oldFile().path();
-          const originCode = await this.getOriginCode(commit, repo, originPath);
-          const language = await detectLanguage(patch.newFile().path(), modifiedCode);
-          commitDiff.files.push({
-            language,
-            path,
-            originPath,
-            originCode,
-            modifiedCode,
-            kind: DiffKind.MODIFIED,
-            additions: total_additions,
-            deletions: total_deletions,
-          });
-        } else if (patch.isRenamed()) {
-          const path = patch.newFile().path();
-          commitDiff.files.push({
-            path,
-            originPath: patch.oldFile().path(),
-            kind: DiffKind.RENAMED,
-            additions: total_additions,
-            deletions: total_deletions,
-          });
+    for (const d of diffs.files) {
+      if (!d.binary) {
+        const diff = d as DiffResultTextFile;
+        const kind = this.diffKind(diff);
+        switch (kind) {
+          case DiffKind.ADDED:
+            {
+              const path = diff.file;
+              const modifiedCode = await this.getModifiedCode(git, commit, path);
+              const language = await detectLanguage(path, modifiedCode);
+              commitDiff.files.push({
+                language,
+                path,
+                modifiedCode,
+                additions: diff.insertions,
+                deletions: diff.deletions,
+                kind,
+              });
+            }
+            break;
+          case DiffKind.DELETED:
+            {
+              const path = diff.file;
+              const originCode = await this.getOriginCode(git, commit, path);
+              const language = await detectLanguage(path, originCode);
+              commitDiff.files.push({
+                language,
+                path,
+                originCode,
+                kind,
+                additions: diff.insertions,
+                deletions: diff.deletions,
+              });
+            }
+            break;
+          case DiffKind.MODIFIED:
+            {
+              // @ts-ignore
+              const path = diff.rename || diff.file;
+              const modifiedCode = await this.getModifiedCode(git, commit, path);
+              const originPath = diff.file;
+              const originCode = await this.getOriginCode(git, commit, originPath);
+              const language = await detectLanguage(path, modifiedCode);
+              commitDiff.files.push({
+                language,
+                path,
+                originPath,
+                originCode,
+                modifiedCode,
+                kind,
+                additions: diff.insertions,
+                deletions: diff.deletions,
+              });
+            }
+            break;
+          case DiffKind.RENAMED:
+            {
+              // @ts-ignore
+              const path = diff.rename || diff.file;
+              commitDiff.files.push({
+                path,
+                originPath: diff.file,
+                kind,
+                additions: diff.insertions,
+                deletions: diff.deletions,
+              });
+            }
+            break;
         }
       }
     }
@@ -504,88 +396,50 @@ export class GitOperations {
   }
 
   public async getDiff(uri: string, oldRevision: string, newRevision: string): Promise<Diff> {
-    const repo = await this.openRepo(uri);
-    const oldCommit = await this.getCommit(uri, oldRevision);
-    const newCommit = await this.getCommit(uri, newRevision);
-    const oldTree = await oldCommit.getTree();
-    const newTree = await newCommit.getTree();
-
-    const diff = await NodeGitDiff.treeToTree(repo, oldTree, newTree);
-
+    const git = await this.openGit(uri);
+    const diff = await git.diffSummary([oldRevision, newRevision]);
     const res: Diff = {
-      additions: 0,
-      deletions: 0,
+      additions: diff.insertions,
+      deletions: diff.deletions,
       files: [],
     };
-    const patches = await diff.patches();
-    for (const patch of patches) {
-      const { total_deletions, total_additions } = patch.lineStats();
-      res.additions += total_additions;
-      res.deletions += total_deletions;
-      if (patch.isAdded()) {
-        const path = patch.newFile().path();
+    diff.files.forEach(d => {
+      if (!d.binary) {
+        const td = d as DiffResultTextFile;
+        const kind = this.diffKind(td);
         res.files.push({
-          path,
-          additions: total_additions,
-          deletions: total_deletions,
-          kind: DiffKind.ADDED,
-        });
-      } else if (patch.isDeleted()) {
-        const path = patch.oldFile().path();
-        res.files.push({
-          path,
-          kind: DiffKind.DELETED,
-          additions: total_additions,
-          deletions: total_deletions,
-        });
-      } else if (patch.isModified()) {
-        const path = patch.newFile().path();
-        const originPath = patch.oldFile().path();
-        res.files.push({
-          path,
-          originPath,
-          kind: DiffKind.MODIFIED,
-          additions: total_additions,
-          deletions: total_deletions,
-        });
-      } else if (patch.isRenamed()) {
-        const path = patch.newFile().path();
-        res.files.push({
-          path,
-          originPath: patch.oldFile().path(),
-          kind: DiffKind.RENAMED,
-          additions: total_additions,
-          deletions: total_deletions,
+          path: d.file,
+          additions: td.insertions,
+          deletions: td.deletions,
+          kind,
         });
       }
-    }
+    });
+
     return res;
   }
 
-  private async getOriginCode(commit: NodeGitCommit, repo: Repository, path: string) {
-    for (const oid of commit.parents()) {
-      const parentCommit = await repo.getCommit(oid);
-      if (parentCommit) {
-        const entry = await parentCommit.getEntry(path);
-        if (entry) {
-          return (await entry.getBlob()).content().toString('utf8');
-        }
-      }
+  private diffKind(diff: DiffResultTextFile) {
+    let kind: DiffKind = DiffKind.MODIFIED;
+    if (diff.changes === diff.insertions) {
+      kind = DiffKind.ADDED;
+    } else if (diff.changes === diff.deletions) {
+      kind = DiffKind.DELETED;
+      // @ts-ignore
+    } else if (diff.rename) {
+      kind = DiffKind.RENAMED;
     }
-    return '';
+    return kind;
   }
 
-  private async getModifiedCode(commit: NodeGitCommit, path: string) {
-    const entry = await commit.getEntry(path);
-    return (await entry.getBlob()).content().toString('utf8');
+  private async getOriginCode(git: SimpleGit, commit: CommitInfo, path: string) {
+    const buffer: Buffer = await git.binaryCatFile(['blob', `${commit.id}~1:${path}`]);
+    return buffer.toString('utf8');
   }
 
-  private async findCommit(repo: Repository, oid: string): Promise<NodeGitCommit | null> {
-    try {
-      return repo.getCommit(Oid.fromString(oid));
-    } catch (e) {
-      return null;
-    }
+  private async getModifiedCode(git: SimpleGit, commit: CommitInfo, path: string) {
+    const buffer: Buffer = await git.binaryCatFile(['blob', `${commit.id}:${path}`]);
+    return buffer.toString('utf8');
   }
 
   public async getBranchAndTags(repoUri: string): Promise<ReferenceInfo[]> {
@@ -651,7 +505,9 @@ export class GitOperations {
         updated: '%ai',
         message: '%B',
         author: '%an',
+        authorEmail: '%ae',
         committer: '%cn',
+        committerEmail: '%ce',
         id: '%H',
         parents: '%p',
         treeId: '%T',
@@ -695,16 +551,4 @@ export class GitOperations {
     }
     return null;
   }
-}
-
-export function commitInfo(commit: NodeGitCommit): CommitInfo {
-  return {
-    updated: commit.date(),
-    message: commit.message(),
-    author: commit.author().name(),
-    committer: commit.committer().name(),
-    id: commit.sha().substr(0, 7),
-    parents: commit.parents().map(oid => oid.toString().substring(0, 7)),
-    treeId: commit.treeId().tostrS(),
-  };
 }
