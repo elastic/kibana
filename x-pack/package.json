@@ -43,7 +43,7 @@
     "@storybook/addon-storyshots": "^5.1.11",
     "@storybook/react": "^5.1.11",
     "@storybook/theming": "^5.1.11",
-    "@types/angular": "1.6.56",
+    "@types/angular": "^1.6.56",
     "@types/base64-js": "^1.2.5",
     "@types/boom": "^7.2.0",
     "@types/cheerio": "^0.22.10",
