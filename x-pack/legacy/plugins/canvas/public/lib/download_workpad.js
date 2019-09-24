@@ -5,7 +5,7 @@
  */
 import fileSaver from 'file-saver';
 import chrome from 'ui/chrome';
-import { API_ROUTE_SNAPSHOT_RUNTIME_DOWNLOAD } from '../../common/lib/constants';
+import { API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD } from '../../common/lib/constants';
 import { notify } from './notify';
 import * as workpadService from './workpad_service';
 
@@ -34,7 +34,7 @@ export const downloadRenderedWorkpad = async renderedWorkpad => {
 export const downloadEmbedRuntime = async () => {
   try {
     const basePath = chrome.getBasePath();
-    const path = `${basePath}${API_ROUTE_SNAPSHOT_RUNTIME_DOWNLOAD}`;
+    const path = `${basePath}${API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD}`;
     window.open(path);
     return;
   } catch (err) {

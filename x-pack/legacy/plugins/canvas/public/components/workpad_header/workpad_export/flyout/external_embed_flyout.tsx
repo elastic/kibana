@@ -37,7 +37,7 @@ const staticEmbedSteps = (onExport: OnExportFn, onCopy: OnCopyFn, onClose: OnClo
     title: 'Download workpad',
     children: (
       <EuiText size="s">
-        <p>The workpad will be exported as a single JSON file for embedding in another site.</p>
+        <p>The workpad will be exported as a single JSON file for sharing in another site.</p>
         <EuiSpacer size="s" />
         <EuiButton
           onClick={() => {
@@ -55,8 +55,9 @@ const staticEmbedSteps = (onExport: OnExportFn, onCopy: OnCopyFn, onClose: OnClo
     children: (
       <EuiText size="s">
         <p>
-          In order to render the Workpad, you also need to include the Canvas Embed Runtime. You can
-          skip this step if the runtime is already included on your website.
+          In order to render a shareable Workpad, you also need to include the Canvas Shareable
+          Workpad Runtime. You can skip this step if the runtime is already included on your
+          website.
         </p>
         <EuiSpacer size="s" />
         <EuiButton
@@ -76,9 +77,9 @@ const staticEmbedSteps = (onExport: OnExportFn, onCopy: OnCopyFn, onClose: OnClo
       <div>
         <EuiText size="s">
           <p>
-            The Workpad is embedded in the HTML of the site by using an HTML placeholder. Parameters
-            for the runtime are included inline. See the full list of embed parameters below. You
-            can include more than one workpad on the page .
+            The Workpad is placed within the HTML of the site by using an HTML placeholder.
+            Parameters for the runtime are included inline. See the full list of parameters below.
+            You can include more than one workpad on the page.
           </p>
         </EuiText>
         <EuiSpacer size="s" />
@@ -99,22 +100,22 @@ const staticEmbedSteps = (onExport: OnExportFn, onCopy: OnCopyFn, onClose: OnClo
         </Clipboard>
         <EuiSpacer />
         <EuiText>
-          <h4>Embed parameters</h4>
-          <p>There are a number of inline parameters to configure the embedded Workpad.</p>
+          <h4>Parameters</h4>
+          <p>There are a number of inline parameters to configure the shareable Workpad.</p>
         </EuiText>
         <EuiHorizontalRule />
         <EuiDescriptionList>
           <EuiDescriptionListTitle>
-            <EuiCode>kbn-canvas-embed="canvas"</EuiCode> (required)
+            <EuiCode>kbn-canvas-shareable="canvas"</EuiCode> (required)
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
-            The type of embed. In this case, a Canvas Workpad.
+            The type of shareable. In this case, a Canvas Workpad.
           </EuiDescriptionListDescription>
           <EuiDescriptionListTitle>
             <EuiCode>kbn-canvas-url</EuiCode> (required)
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
-            The URL of the Workpad Snapshot JSON file.
+            The URL of the Shareable Workpad JSON file.
           </EuiDescriptionListDescription>
           <EuiDescriptionListTitle>
             <EuiCode>kbn-canvas-height</EuiCode>
@@ -144,24 +145,24 @@ const HTML = `<!-- Include Runtime -->
 <script src="kbnCanvas.js"></script>
 
 <!-- Placeholder -->
-<div kbn-canvas-embed="canvas" kbn-canvas-url="workpad.json" />
+<div kbn-canvas-shareable="canvas" kbn-canvas-url="workpad.json" />
 
 <!-- Call Runtime -->
 <script type="text/javascript">
-  KbnCanvas.embed();
+  KbnCanvas.shareable();
 </script>`;
 
 export const ExternalEmbedFlyout = ({ onCopy, onExport, onClose }: Props) => (
   <EuiFlyout onClose={() => onClose('embed')} maxWidth>
     <EuiFlyoutHeader hasBorder>
       <EuiTitle size="m">
-        <h2 id="flyoutTitle">Embed on a website</h2>
+        <h2 id="flyoutTitle">Share on a website</h2>
       </EuiTitle>
     </EuiFlyoutHeader>
     <EuiFlyoutBody>
       <EuiText size="s">
         <p>
-          Follow these steps to embed a static version of this workpad on an external website. It
+          Follow these steps to share a static version of this workpad on an external website. It
           will be a visual snapshot of the current workpad, and will not have access to live data.
         </p>
       </EuiText>
@@ -170,7 +171,7 @@ export const ExternalEmbedFlyout = ({ onCopy, onExport, onClose }: Props) => (
         size="s"
         title={
           <div>
-            To try embedding, you can{' '}
+            To try sharing, you can{' '}
             <EuiLink
               style={{ textDecoration: 'underline' }}
               onClick={() => {
@@ -179,7 +180,7 @@ export const ExternalEmbedFlyout = ({ onCopy, onExport, onClose }: Props) => (
             >
               download an example ZIP file
             </EuiLink>{' '}
-            containing this workpad, the Canvas runtime, and a sample HTML file.
+            containing this workpad, the Canvas Shareable Workpad runtime, and a sample HTML file.
           </div>
         }
         iconType="iInCircle"

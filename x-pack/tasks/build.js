@@ -25,7 +25,7 @@ export default (gulp, { buildTarget }) => {
       writeTo: process.stdout,
     });
 
-    execa.sync(process.execPath, ['legacy/plugins/canvas/scripts/external_runtime'], {
+    execa.sync(process.execPath, ['legacy/plugins/canvas/scripts/shareable_runtime'], {
       cwd: resolve(__dirname, '..'),
       stdio: ['ignore', 'inherit', 'inherit'],
       buffer: false,

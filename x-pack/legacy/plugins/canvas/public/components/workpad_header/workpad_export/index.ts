@@ -26,10 +26,10 @@ import {
 import { WorkpadExport as Component, Props as ComponentProps } from './workpad_export';
 import { getPdfUrl, createPdf } from './utils';
 import { State, CanvasWorkpad } from '../../../../types';
-import { CanvasRenderedWorkpad } from '../../../../external_runtime/types';
+import { CanvasRenderedWorkpad } from '../../../../shareable_runtime/types';
 // @ts-ignore Untyped local.
 import { fetch, arrayBufferFetch } from '../../../../common/lib/fetch';
-import { API_ROUTE_SNAPSHOT_ZIP } from '../../../../common/lib/constants';
+import { API_ROUTE_SHAREABLE_ZIP } from '../../../../common/lib/constants';
 
 import { ComponentStrings } from '../../../../i18n';
 const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
@@ -114,7 +114,7 @@ export const WorkpadExport = compose<ComponentProps, {}>(
           case 'zip':
             const basePath = chrome.getBasePath();
             arrayBufferFetch
-              .post(`${basePath}${API_ROUTE_SNAPSHOT_ZIP}`, JSON.stringify(renderedWorkpad))
+              .post(`${basePath}${API_ROUTE_SHAREABLE_ZIP}`, JSON.stringify(renderedWorkpad))
               .then(blob => downloadZippedEmbed(blob.data));
             return;
           default:
