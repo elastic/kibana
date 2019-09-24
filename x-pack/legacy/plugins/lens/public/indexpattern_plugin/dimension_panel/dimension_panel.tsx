@@ -104,89 +104,91 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
   }
 
   return (
-    <ChildDragDropProvider {...props.dragDropContext}>
-      <DragDrop
-        className="lnsIndexPatternDimensionPanel"
-        data-test-subj="indexPattern-dropTarget"
-        droppable={canHandleDrop()}
-        onDrop={droppedItem => {
-          if (!isDraggedField(droppedItem) || !hasOperationForField(droppedItem.field)) {
-            // TODO: What do we do if we couldn't find a column?
-            return;
-          }
+    <div className="lnsIndexPatternDimensionPanelWrapper">
+      <ChildDragDropProvider {...props.dragDropContext}>
+        <DragDrop
+          className="lnsIndexPatternDimensionPanel"
+          data-test-subj="indexPattern-dropTarget"
+          droppable={canHandleDrop()}
+          onDrop={droppedItem => {
+            if (!isDraggedField(droppedItem) || !hasOperationForField(droppedItem.field)) {
+              // TODO: What do we do if we couldn't find a column?
+              return;
+            }
 
-          const operationsForNewField =
-            operationFieldSupportMatrix.operationByField[droppedItem.field.name];
+            const operationsForNewField =
+              operationFieldSupportMatrix.operationByField[droppedItem.field.name];
 
-          // We need to check if dragging in a new field, was just a field change on the same
-          // index pattern and on the same operations (therefore checking if the new field supports
-          // our previous operation)
-          const hasFieldChanged =
-            selectedColumn &&
-            hasField(selectedColumn) &&
-            selectedColumn.sourceField !== droppedItem.field.name &&
-            operationsForNewField &&
-            operationsForNewField.includes(selectedColumn.operationType);
+            // We need to check if dragging in a new field, was just a field change on the same
+            // index pattern and on the same operations (therefore checking if the new field supports
+            // our previous operation)
+            const hasFieldChanged =
+              selectedColumn &&
+              hasField(selectedColumn) &&
+              selectedColumn.sourceField !== droppedItem.field.name &&
+              operationsForNewField &&
+              operationsForNewField.includes(selectedColumn.operationType);
 
-          // If only the field has changed use the onFieldChange method on the operation to get the
-          // new column, otherwise use the regular buildColumn to get a new column.
-          const newColumn = hasFieldChanged
-            ? changeField(selectedColumn, currentIndexPattern, droppedItem.field)
-            : buildColumn({
-                columns: props.state.layers[props.layerId].columns,
-                indexPattern: currentIndexPattern,
-                layerId,
-                suggestedPriority: props.suggestedPriority,
-                field: droppedItem.field,
-              });
-
-          props.setState(
-            changeColumn({
-              state: props.state,
-              layerId,
-              columnId: props.columnId,
-              newColumn,
-              // If the field has changed, the onFieldChange method needs to take care of everything including moving
-              // over params. If we create a new column above we want changeColumn to move over params.
-              keepParams: !hasFieldChanged,
-            })
-          );
-        }}
-      >
-        <PopoverEditor
-          {...props}
-          currentIndexPattern={currentIndexPattern}
-          selectedColumn={selectedColumn}
-          operationFieldSupportMatrix={operationFieldSupportMatrix}
-        />
-        {selectedColumn && (
-          <EuiButtonIcon
-            data-test-subj="indexPattern-dimensionPopover-remove"
-            iconType="cross"
-            iconSize="s"
-            size="s"
-            color="danger"
-            aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
-              defaultMessage: 'Remove configuration',
-            })}
-            title={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
-              defaultMessage: 'Remove configuration',
-            })}
-            onClick={() => {
-              props.setState(
-                deleteColumn({
-                  state: props.state,
+            // If only the field has changed use the onFieldChange method on the operation to get the
+            // new column, otherwise use the regular buildColumn to get a new column.
+            const newColumn = hasFieldChanged
+              ? changeField(selectedColumn, currentIndexPattern, droppedItem.field)
+              : buildColumn({
+                  columns: props.state.layers[props.layerId].columns,
+                  indexPattern: currentIndexPattern,
                   layerId,
-                  columnId: props.columnId,
-                })
-              );
-              if (props.onRemove) {
-                props.onRemove(props.columnId);
-              }
-            }}
+                  suggestedPriority: props.suggestedPriority,
+                  field: droppedItem.field,
+                });
+
+            props.setState(
+              changeColumn({
+                state: props.state,
+                layerId,
+                columnId: props.columnId,
+                newColumn,
+                // If the field has changed, the onFieldChange method needs to take care of everything including moving
+                // over params. If we create a new column above we want changeColumn to move over params.
+                keepParams: !hasFieldChanged,
+              })
+            );
+          }}
+        >
+          <PopoverEditor
+            {...props}
+            currentIndexPattern={currentIndexPattern}
+            selectedColumn={selectedColumn}
+            operationFieldSupportMatrix={operationFieldSupportMatrix}
           />
-        )}
-      </DragDrop>
-    </ChildDragDropProvider>
+          {selectedColumn && (
+            <EuiButtonIcon
+              data-test-subj="indexPattern-dimensionPopover-remove"
+              iconType="cross"
+              iconSize="s"
+              size="s"
+              color="danger"
+              aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
+                defaultMessage: 'Remove configuration',
+              })}
+              title={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
+                defaultMessage: 'Remove configuration',
+              })}
+              onClick={() => {
+                props.setState(
+                  deleteColumn({
+                    state: props.state,
+                    layerId,
+                    columnId: props.columnId,
+                  })
+                );
+                if (props.onRemove) {
+                  props.onRemove(props.columnId);
+                }
+              }}
+            />
+          )}
+        </DragDrop>
+      </ChildDragDropProvider>
+    </div>
   );
 });
