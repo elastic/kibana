@@ -6,7 +6,25 @@
 
 import { shallow, ShallowWrapper } from 'enzyme';
 import * as React from 'react';
-import { ChartHolder, getChartHeight, getChartWidth } from './common';
+import {
+  ChartHolder,
+  getChartHeight,
+  getChartWidth,
+  WrappedByAutoSizer,
+  defaultChartHeight,
+  getSeriesStyle,
+  SeriesType,
+  getTheme,
+} from './common';
+import 'jest-styled-components';
+import { mergeWithDefaultTheme, LIGHT_THEME } from '@elastic/charts';
+
+jest.mock('@elastic/charts', () => {
+  return {
+    getSpecId: jest.fn(() => {}),
+    mergeWithDefaultTheme: jest.fn(),
+  };
+});
 
 describe('ChartHolder', () => {
   let shallowWrapper: ShallowWrapper;
@@ -32,6 +50,53 @@ describe('ChartHolder', () => {
   });
 });
 
+describe('WrappedByAutoSizer', () => {
+  it('should render correct default height', () => {
+    const wrapper = shallow(<WrappedByAutoSizer />);
+    expect(wrapper).toHaveStyleRule('height', defaultChartHeight);
+  });
+
+  it('should render correct given height', () => {
+    const wrapper = shallow(<WrappedByAutoSizer height="100px" />);
+    expect(wrapper).toHaveStyleRule('height', '100px');
+  });
+});
+
+describe('getSeriesStyle', () => {
+  it('should not create style mapping if color is not given', () => {
+    const mockSeriesKey = 'mockSeriesKey';
+    const color = '';
+    const customSeriesColors = getSeriesStyle(mockSeriesKey, color, SeriesType.BAR);
+    expect(customSeriesColors).toBeUndefined();
+  });
+
+  it('should create correct style mapping for series of a chart', () => {
+    const mockSeriesKey = 'mockSeriesKey';
+    const color = 'red';
+    const customSeriesColors = getSeriesStyle(mockSeriesKey, color, SeriesType.BAR);
+    const expectedKey = { colorValues: [mockSeriesKey] };
+    customSeriesColors!.forEach((value, key) => {
+      expect(JSON.stringify(key)).toEqual(JSON.stringify(expectedKey));
+      expect(value).toEqual(color);
+    });
+  });
+});
+
+describe('getTheme', () => {
+  it('should merge custom theme with default theme', () => {
+    const defaultTheme = {
+      chartMargins: { bottom: 0, left: 0, right: 0, top: 4 },
+      chartPaddings: { bottom: 0, left: 0, right: 0, top: 0 },
+      scales: {
+        barsPadding: 0.5,
+      },
+    };
+    getTheme();
+    expect((mergeWithDefaultTheme as jest.Mock).mock.calls[0][0]).toMatchObject(defaultTheme);
+    expect((mergeWithDefaultTheme as jest.Mock).mock.calls[0][1]).toEqual(LIGHT_THEME);
+  });
+});
+
 describe('getChartHeight', () => {
   it('should render customHeight', () => {
     const height = getChartHeight(10, 100);
@@ -45,7 +110,7 @@ describe('getChartHeight', () => {
 
   it('should render defaultChartHeight if no custom data is given', () => {
     const height = getChartHeight();
-    expect(height).toEqual('100%');
+    expect(height).toEqual(defaultChartHeight);
   });
 });
 
@@ -62,6 +127,6 @@ describe('getChartWidth', () => {
 
   it('should render defaultChartHeight if no custom data is given', () => {
     const height = getChartWidth();
-    expect(height).toEqual('100%');
+    expect(height).toEqual(defaultChartHeight);
   });
 });
