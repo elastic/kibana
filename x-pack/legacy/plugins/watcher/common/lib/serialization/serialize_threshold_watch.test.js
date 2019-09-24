@@ -222,4 +222,93 @@ describe('serializeThresholdWatch', () => {
       },
     });
   });
+
+  it('excludes metadata when includeMetadata is false', () => {
+    expect(serializeThresholdWatch({
+      triggerIntervalSize: 10,
+      triggerIntervalUnit: 's',
+      index: 'myIndex',
+      timeWindowSize: 20,
+      timeWindowUnit: 's',
+      timeField: 'myTimeField',
+      aggType: 'myAggType',
+      aggField: 'myAggField',
+      termField: 'myTermField',
+      termSize: 30,
+      termOrder: 40,
+      thresholdComparator: 'between',
+      hasTermsAgg: true,
+      threshold: 50,
+      actions: [],
+      includeMetadata: false,
+    })).toEqual({
+      trigger: {
+        schedule: {
+          interval: '10s',
+        },
+      },
+      input: {
+        search: {
+          request: {
+            body: {
+              size: 0,
+              query: {
+                bool: {
+                  filter: {
+                    range: {
+                      myTimeField: {
+                        gte: '{{ctx.trigger.scheduled_time}}||-20s',
+                        lte: '{{ctx.trigger.scheduled_time}}',
+                        format: 'strict_date_optional_time||epoch_millis',
+                      },
+                    },
+                  },
+                },
+              },
+              aggs: {
+                bucketAgg: {
+                  terms: {
+                    field: 'myTermField',
+                    size: 30,
+                    order: {
+                      metricAgg: 40,
+                    },
+                  },
+                  aggs: {
+                    metricAgg: {
+                      myAggType: {
+                        field: 'myAggField',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            indices: [
+              'myIndex',
+            ],
+          },
+        },
+      },
+      condition: {
+        script: {
+          // eslint-disable-next-line max-len
+          source: 'ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets; for (int i = 0; i < arr.length; i++) { if (arr[i][\'metricAgg\'].value >= params.threshold[0] && arr[i][\'metricAgg\'].value <= params.threshold[1]) { return true; } } return false;',
+          params: {
+            threshold: 50,
+          },
+        },
+      },
+      transform: {
+        script: {
+          // eslint-disable-next-line max-len
+          source: 'HashMap result = new HashMap(); ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets; ArrayList filteredHits = new ArrayList(); for (int i = 0; i < arr.length; i++) { HashMap filteredHit = new HashMap(); filteredHit.key = arr[i].key; filteredHit.value = arr[i][\'metricAgg\'].value; if (filteredHit.value >= params.threshold[0] && filteredHit.value <= params.threshold[1]) { filteredHits.add(filteredHit); } } result.results = filteredHits; return result;',
+          params: {
+            threshold: 50,
+          },
+        },
+      },
+      actions: {},
+    });
+  });
 });

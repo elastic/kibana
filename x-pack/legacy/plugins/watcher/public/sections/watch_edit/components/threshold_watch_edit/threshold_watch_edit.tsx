@@ -221,6 +221,14 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
     defaultMessage: 'AND',
   });
 
+  // Users might edit the request for use outside of the Watcher app. If they do make changes to it,
+  // we have no guarantee it will still be compatible with the threshold alert form, so we strip
+  // the metadata to avoid potential conflicts.
+  const requestPreviewWatchData = {
+    ...watch.upstreamJson,
+    includeMetadata: false,
+  };
+
   return (
     <EuiPageContent>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
@@ -940,7 +948,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
       {isRequestVisible ? (
         <RequestFlyout
           id={watch.id}
-          payload={serializeThresholdWatch(watch.upstreamJson)}
+          payload={serializeThresholdWatch(requestPreviewWatchData)}
           close={() => setIsRequestVisible(false)}
         />
       ) : null}

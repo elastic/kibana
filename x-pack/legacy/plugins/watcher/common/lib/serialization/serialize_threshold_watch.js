@@ -31,14 +31,19 @@ export function serializeThresholdWatch({
   hasTermsAgg,
   threshold,
   actions,
+  includeMetadata = true,
 }) {
+
   const serializedWatch = {
     trigger: buildTrigger(triggerIntervalSize, triggerIntervalUnit),
     input: buildInput({ index, timeWindowSize, timeWindowUnit, timeField, aggType, aggField, termField, termSize, termOrder }),
     condition: buildCondition({ aggType, thresholdComparator, hasTermsAgg, threshold }),
     transform: buildTransform({ aggType, thresholdComparator, hasTermsAgg, threshold }),
     actions: buildActions(actions),
-    metadata: {
+  };
+
+  if (includeMetadata) {
+    serializedWatch.metadata = {
       xpack: {
         type: WATCH_TYPES.THRESHOLD,
       },
@@ -56,11 +61,11 @@ export function serializeThresholdWatch({
         timeWindowUnit,
         threshold,
       }),
-    },
-  };
+    };
 
-  if (name) {
-    serializedWatch.metadata.name = name;
+    if (name) {
+      serializedWatch.metadata.name = name;
+    }
   }
 
   return serializedWatch;
