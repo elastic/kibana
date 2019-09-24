@@ -25,11 +25,11 @@ import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../..
 // its type will get propagated to everything else
 const internalOperationDefinitions = [
   termsOperation,
-  cardinalityOperation,
   dateHistogramOperation,
   minOperation,
   maxOperation,
   averageOperation,
+  cardinalityOperation,
   sumOperation,
   countOperation,
   filterRatioOperation,
