@@ -9,7 +9,9 @@ import {
   CoreStart,
   ElasticsearchServiceSetup,
   HttpServiceSetup,
+  PluginInitializerContext,
 } from 'src/core/server';
+import { IntegrationsManagerConfig } from './config.schema';
 import { PLUGIN } from '../common/constants';
 import { fetchList } from './registry';
 import { routes } from './routes';
@@ -19,9 +21,6 @@ export interface CoreSetup {
   http: HttpServiceSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginInitializerContext {}
-
 export type PluginSetup = ReturnType<Plugin['setup']>;
 export type PluginStart = ReturnType<Plugin['start']>;
 export interface PluginContext {
@@ -29,7 +28,14 @@ export interface PluginContext {
 }
 
 export class Plugin {
-  constructor(initializerContext: PluginInitializerContext) {}
+  // XXXSKH: why the trailing $ again?
+  // XXXSKH: what type should this be? VScode finds Observable<Readonly<{ registryUrl: string; }>>, what do I do with that?
+  config$: IntegrationsManagerConfig;
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config$ = initializerContext.config.create<IntegrationsManagerConfig>();
+    // or if config is optional:
+    this.config$ = initializerContext.config.createIfExists<IntegrationsManagerConfig>();
+  }
   public setup(core: CoreSetup) {
     const { http, elasticsearch } = core;
     const { server } = http;

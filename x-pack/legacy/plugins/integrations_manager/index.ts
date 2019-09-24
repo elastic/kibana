@@ -5,15 +5,19 @@
  */
 
 import { resolve } from 'path';
+import JoiNamespace from 'joi';
+import { defer } from 'rxjs';
 import { LegacyPluginInitializer, LegacyPluginOptions } from 'src/legacy/types';
-import KbnServer, { Server } from 'src/legacy/server/kbn_server';
+import KbnServer from 'src/legacy/server/kbn_server';
+import { PluginInitializerContext } from 'src/core/server';
 import { Feature } from '../../../plugins/features/server/feature';
 import { PLUGIN } from './common/constants';
 import manifest from './kibana.json';
-import { CoreSetup, Plugin as ServerPlugin, PluginInitializerContext } from './server/plugin';
+import { CoreSetup, Plugin as ServerPlugin } from './server/plugin';
 import { mappings, savedObjectSchemas } from './server/saved_objects';
 
 const ROOT = `plugins/${PLUGIN.ID}`;
+const CONFIG_ROOT = `xpack.${PLUGIN.ID}`;
 
 const feature: Feature = {
   id: PLUGIN.ID,
@@ -64,9 +68,13 @@ const pluginOptions: LegacyPluginOptions = {
   },
   configPrefix: PLUGIN.CONFIG_PREFIX,
   publicDir: resolve(__dirname, 'public'),
-  config: undefined,
+  config(Joi: typeof JoiNamespace) {
+    return getConfigSchema(Joi);
+  },
   deprecations: undefined,
   preInit: undefined,
+  // XXXSKH: any? what is this really? neither Server from hapi.js nor KbnServer seems to have a .config() on it so
+  // I left it as any for now, but ugh.
   init(server: Server) {
     server.plugins.xpack_main.registerFeature(feature);
 
@@ -74,13 +82,32 @@ const pluginOptions: LegacyPluginOptions = {
     // `kbnServer.server` is the same hapi instance
     // `kbnServer.newPlatform` has important values
     const kbnServer = (server as unknown) as KbnServer;
-    const initializerContext: PluginInitializerContext = {};
+
+    const getConfig$ = <T>() => defer<T>(async () => await server.config().get(CONFIG_ROOT));
+
+    const initializerContext = ({
+      config: {
+        create: getConfig$,
+        createIfExists: getConfig$,
+      },
+    } as unknown) as PluginInitializerContext;
+
     const coreSetup: CoreSetup = kbnServer.newPlatform.setup.core;
 
     new ServerPlugin(initializerContext).setup(coreSetup);
   },
   postInit: undefined,
   isEnabled: false,
+};
+
+export const getConfigSchema = (Joi: typeof JoiNamespace) => {
+  const IntegrationsManagerConfigSchema = Joi.object({
+    registryUrl: Joi.string()
+      .uri()
+      .default(),
+  }).default();
+
+  return IntegrationsManagerConfigSchema;
 };
 
 export const integrationsManager: LegacyPluginInitializer = kibana =>
