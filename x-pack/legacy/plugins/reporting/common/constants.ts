@@ -24,6 +24,7 @@ export const WHITELISTED_JOB_CONTENT_TYPES = [
 
 export const KBN_SCREENSHOT_HEADER_BLACKLIST = [
   'accept-encoding',
+  'connection',
   'content-length',
   'content-type',
   'host',

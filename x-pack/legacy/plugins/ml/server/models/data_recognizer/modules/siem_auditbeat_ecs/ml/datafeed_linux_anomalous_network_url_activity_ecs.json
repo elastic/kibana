@@ -1,0 +1,25 @@
+{
+    "job_id": "JOB_ID",
+    "indices": [
+      "INDEX_PATTERN_NAME"
+    ],
+    "query": {
+        "bool":{
+          "filter": [
+            {"exists": {"field": "destination.ip"}},
+            {"terms": {"process.name": ["curl", "wget"]}}
+          ],
+          "must_not":[
+            {
+              "bool":{
+                "should":[
+                    {"term":{"destination.ip": "::1"}},
+                    {"term":{"destination.ip": "127.0.0.1"}},
+                    {"term":{"destination.ip":"169.254.169.254"}}
+                  ]
+                }
+              }
+            ]
+        }
+      }
+    }

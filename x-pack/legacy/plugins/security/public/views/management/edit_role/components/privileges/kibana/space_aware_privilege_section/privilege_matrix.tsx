@@ -24,7 +24,7 @@ import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { SpaceAvatar } from '../../../../../../../../../spaces/public/components';
-import { Feature } from '../../../../../../../../../xpack_main/types';
+import { Feature } from '../../../../../../../../../../../plugins/features/server';
 import { FeaturesPrivileges, Role } from '../../../../../../../../common/model';
 import { CalculatedPrivilege } from '../../../../../../../lib/kibana_privilege_calculator';
 import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';

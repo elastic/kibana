@@ -24,18 +24,42 @@ import {
 } from '@elastic/eui';
 
 import { NavigationMenu } from '../../../components/navigation_menu/navigation_menu';
-import { useRefreshTransformList } from '../../common';
+import { useRefreshTransformList, DataFrameTransformListRow } from '../../common';
 import { CreateTransformButton } from './components/create_transform_button';
 import { DataFrameTransformList } from './components/transform_list';
 import { RefreshTransformListButton } from './components/refresh_transform_list_button';
+import { TransformStatsBar } from '../transform_management/components/transform_list/transforms_stats_bar';
+import { getTransformsFactory } from './services/transform_service';
+import { useRefreshInterval } from './components/transform_list/use_refresh_interval';
 
 export const Page: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [transformsLoading, setTransformsLoading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [blockRefresh, setBlockRefresh] = useState(false);
+  const [transforms, setTransforms] = useState<DataFrameTransformListRow[]>([]);
+  const [errorMessage, setErrorMessage] = useState<any>(undefined);
   const { refresh } = useRefreshTransformList({ isLoading: setIsLoading });
+
+  const getTransforms = getTransformsFactory(
+    setTransforms,
+    setErrorMessage,
+    setIsInitialized,
+    blockRefresh
+  );
+
+  // Subscribe to the refresh observable to trigger reloading the transform list.
+  useRefreshTransformList({
+    isLoading: setTransformsLoading,
+    onRefresh: () => getTransforms(true),
+  });
+  // Call useRefreshInterval() after the subscription above is set up.
+  useRefreshInterval(setBlockRefresh);
 
   return (
     <Fragment>
       <NavigationMenu tabId="data_frames" />
+      <TransformStatsBar transformsList={transforms} />
       <EuiPage data-test-subj="mlPageDataFrame">
         <EuiPageBody>
           <EuiPageContentHeader>
@@ -77,7 +101,12 @@ export const Page: FC = () => {
           <EuiPageContentBody>
             <EuiSpacer size="l" />
             <EuiPanel>
-              <DataFrameTransformList />
+              <DataFrameTransformList
+                transforms={transforms}
+                isInitialized={isInitialized}
+                errorMessage={errorMessage}
+                transformsLoading={transformsLoading}
+              />
             </EuiPanel>
           </EuiPageContentBody>
         </EuiPageBody>

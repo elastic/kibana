@@ -5,14 +5,14 @@
  */
 
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
-import { LevelLogger as Logger } from '../../../../server/lib/level_logger';
+import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
 import { TimeRange } from './types';
 
 export const getTimeRange = async (
   browser: HeadlessBrowser,
   layout: LayoutInstance,
-  logger: Logger
+  logger: LevelLogger
 ): Promise<TimeRange | null> => {
   logger.debug('getting timeRange');
 

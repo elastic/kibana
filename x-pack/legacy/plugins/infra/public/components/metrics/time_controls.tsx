@@ -4,22 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import dateMath from '@elastic/datemath';
 import { EuiSuperDatePicker, OnRefreshChangeProps, OnTimeChangeProps } from '@elastic/eui';
-import moment from 'moment';
 import React from 'react';
 import euiStyled from '../../../../../common/eui_styled_components';
-import { InfraTimerangeInput } from '../../graphql/types';
-
-const EuiSuperDatePickerAbsoluteFormat = 'YYYY-MM-DDTHH:mm:ss.sssZ';
+import { MetricsTimeInput } from '../../containers/metrics/with_metrics_time';
 
 interface MetricsTimeControlsProps {
-  currentTimeRange: InfraTimerangeInput;
+  currentTimeRange: MetricsTimeInput;
   isLiveStreaming?: boolean;
   refreshInterval?: number | null;
-  onChangeTimeRange: (time: InfraTimerangeInput) => void;
+  onChangeTimeRange: (time: MetricsTimeInput) => void;
   setRefreshInterval: (refreshInterval: number) => void;
   setAutoReload: (isAutoReloading: boolean) => void;
+  onRefresh: () => void;
 }
 
 export class MetricsTimeControls extends React.Component<MetricsTimeControlsProps> {
@@ -28,28 +25,24 @@ export class MetricsTimeControls extends React.Component<MetricsTimeControlsProp
     return (
       <MetricsTimeControlsContainer>
         <EuiSuperDatePicker
-          start={moment(currentTimeRange.from).format(EuiSuperDatePickerAbsoluteFormat)}
-          end={moment(currentTimeRange.to).format(EuiSuperDatePickerAbsoluteFormat)}
+          start={currentTimeRange.from}
+          end={currentTimeRange.to}
           isPaused={!isLiveStreaming}
           refreshInterval={refreshInterval ? refreshInterval : 0}
           onTimeChange={this.handleTimeChange}
           onRefreshChange={this.handleRefreshChange}
+          onRefresh={this.props.onRefresh}
         />
       </MetricsTimeControlsContainer>
     );
   }
 
   private handleTimeChange = ({ start, end }: OnTimeChangeProps) => {
-    const parsedStart = dateMath.parse(start);
-    const parsedEnd = dateMath.parse(end, { roundUp: true });
-
-    if (parsedStart && parsedEnd) {
-      this.props.onChangeTimeRange({
-        from: parsedStart.valueOf(),
-        to: parsedEnd.valueOf(),
-        interval: '>=1m',
-      });
-    }
+    this.props.onChangeTimeRange({
+      from: start,
+      to: end,
+      interval: '>=1m',
+    });
   };
 
   private handleRefreshChange = ({ isPaused, refreshInterval }: OnRefreshChangeProps) => {

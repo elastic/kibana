@@ -15,6 +15,7 @@ export const getTemplate = ({
   settings,
   aliases,
   mappings,
+  isManaged = false,
 }: Partial<Template> = {}): Template => ({
   name,
   version,
@@ -23,4 +24,5 @@ export const getTemplate = ({
   settings,
   aliases,
   mappings,
+  isManaged,
 });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { useState } from 'react';
 import moment from 'moment-timezone';
 
 import { i18n } from '@kbn/i18n';
@@ -18,8 +18,6 @@ import {
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
-  EuiInMemoryTableProps,
   EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
@@ -30,14 +28,12 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
-// TODO EUI's types for EuiInMemoryTable is missing these props
-interface ExpandableTableProps extends EuiInMemoryTableProps {
-  compressed: boolean;
-  itemIdToExpandedRowMap: ItemIdToExpandedRowMap;
-  isExpandable: boolean;
-}
-
-const ExpandableTable = (EuiInMemoryTable as any) as FunctionComponent<ExpandableTableProps>;
+import {
+  ColumnType,
+  MlInMemoryTableBasic,
+  SortingPropType,
+  SORT_DIRECTION,
+} from '../../../../../components/ml_in_memory_table';
 
 import { KBN_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 import { Dictionary } from '../../../../../../common/types/common';
@@ -60,23 +56,6 @@ import { SOURCE_INDEX_STATUS, useSourceIndexData } from './use_source_index_data
 type ItemIdToExpandedRowMap = Dictionary<JSX.Element>;
 
 const CELL_CLICK_ENABLED = false;
-
-// Defining our own ENUM here.
-// EUI's SortDirection wasn't usable as a union type
-// required for the Sorting interface.
-enum SORT_DIRECTON {
-  ASC = 'asc',
-  DESC = 'desc',
-}
-
-interface Sorting {
-  sort: {
-    field: string;
-    direction: SORT_DIRECTON.ASC | SORT_DIRECTON.DESC;
-  };
-}
-
-type TableSorting = Sorting | boolean;
 
 interface SourceIndexPreviewTitle {
   indexPatternTitle: string;
@@ -204,13 +183,13 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     docFieldsCount = docFields.length;
   }
 
-  const columns = selectedFields.map(k => {
-    const column = {
+  const columns: ColumnType[] = selectedFields.map(k => {
+    const column: ColumnType = {
       field: `_source["${k}"]`,
       name: k,
       sortable: true,
       truncateText: true,
-    } as Dictionary<any>;
+    };
 
     const field = indexPattern.fields.find(f => f.name === k);
 
@@ -310,13 +289,13 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     return column;
   });
 
-  let sorting: TableSorting = false;
+  let sorting: SortingPropType = false;
 
   if (columns.length > 0) {
     sorting = {
       sort: {
-        field: columns[0].field,
-        direction: SORT_DIRECTON.ASC,
+        field: `_source["${selectedFields[0]}"]`,
+        direction: SORT_DIRECTION.ASC,
       },
     };
   }
@@ -425,8 +404,9 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
       {status !== SOURCE_INDEX_STATUS.LOADING && (
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
-      {clearTable === false && (
-        <ExpandableTable
+      {clearTable === false && columns.length > 0 && sorting !== false && (
+        <MlInMemoryTableBasic
+          allowNeutralSort={false}
           compressed
           items={tableItems}
           columns={columns}

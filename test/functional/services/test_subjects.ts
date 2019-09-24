@@ -30,7 +30,6 @@ interface ExistsOptions {
 export function TestSubjectsProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
-  const browser = getService('browser');
   const find = getService('find');
   const config = getService('config');
 
@@ -96,7 +95,7 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
         log.debug(`TestSubjects.doubleClick(${selector})`);
         const element = await this.find(selector, timeout);
         await element.moveMouseTo();
-        await browser.doubleClick(element);
+        await element.doubleClick();
       });
     }
 
@@ -163,6 +162,10 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
         await input.clearValue();
         await input.type(text);
       });
+    }
+
+    public async selectValue(selector: string, value: string): Promise<void> {
+      await find.selectValue(`[data-test-subj="${selector}"]`, value);
     }
 
     public async isEnabled(selector: string): Promise<boolean> {

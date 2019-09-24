@@ -40,6 +40,12 @@
       },
       "apiKey": {
         "type": "binary"
+      },
+      "apiKeyOwner": {
+        "type": "keyword"
+      },
+      "throttle": {
+        "type": "keyword"
       }
     }
   }

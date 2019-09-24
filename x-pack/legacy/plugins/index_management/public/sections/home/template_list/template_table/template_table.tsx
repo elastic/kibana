@@ -134,6 +134,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           onClick: ({ name }: Template) => {
             editTemplate(name);
           },
+          enabled: ({ isManaged }: Template) => !isManaged,
         },
         {
           name: i18n.translate('xpack.idxMgmt.templateList.table.actionCloneTitle', {
@@ -161,6 +162,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
             setTemplatesToDelete([name]);
           },
           isPrimary: true,
+          enabled: ({ isManaged }: Template) => !isManaged,
         },
       ],
     },
@@ -180,6 +182,14 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
 
   const selectionConfig = {
     onSelectionChange: setSelection,
+    selectable: ({ isManaged }: Template) => !isManaged,
+    selectableMessage: (selectable: boolean) => {
+      if (!selectable) {
+        return i18n.translate('xpack.idxMgmt.templateList.table.deleteManagedTemplateTooltip', {
+          defaultMessage: 'You cannot delete a managed template.',
+        });
+      }
+    },
   };
 
   const searchConfig = {

@@ -18,18 +18,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Action, ActionContext } from '../../../actions';
+import { IAction } from '../../../../../../../../../../plugins/ui_actions/public';
 import { Start as InspectorStartContract } from '../../../../../../../../../../plugins/inspector/public';
+import { IEmbeddable } from '../../../embeddables';
 
 export const INSPECT_PANEL_ACTION_ID = 'openInspector';
 
-export class InspectPanelAction extends Action {
-  public readonly type = INSPECT_PANEL_ACTION_ID;
+interface ActionContext {
+  embeddable: IEmbeddable;
+}
 
-  constructor(private readonly inspector: InspectorStartContract) {
-    super(INSPECT_PANEL_ACTION_ID);
-    this.order = 20;
-  }
+export class InspectPanelAction implements IAction<ActionContext> {
+  public readonly type = INSPECT_PANEL_ACTION_ID;
+  public readonly id = INSPECT_PANEL_ACTION_ID;
+  public order = 10;
+
+  constructor(private readonly inspector: InspectorStartContract) {}
 
   public getDisplayName() {
     return i18n.translate('embeddableApi.panel.inspectPanel.displayName', {

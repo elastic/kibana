@@ -21,8 +21,9 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects }: FtrProviderContext) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const { visualBuilder, timePicker } = getPageObjects(['visualBuilder', 'timePicker']);
+  const retry = getService('retry');
 
   async function cleanupMarkdownData(variableName: 'variable' | 'label', checkedValue: string) {
     await visualBuilder.markdownSwitchSubTab('data');
@@ -113,21 +114,24 @@ export default function({ getPageObjects }: FtrProviderContext) {
         await cleanupMarkdownData(VARIABLE, VARIABLE);
       });
 
-      it('series length should be 2 after cloning', async () => {
+      it('series count should be 2 after cloning', async () => {
         await visualBuilder.markdownSwitchSubTab('data');
         await visualBuilder.cloneSeries();
-        const seriesLength = (await visualBuilder.getSeries()).length;
 
-        expect(seriesLength).to.be.equal(2);
+        retry.try(async function seriesCountCheck() {
+          const seriesLength = (await visualBuilder.getSeries()).length;
+          expect(seriesLength).to.be.equal(2);
+        });
       });
 
-      it('aggregation length should be 2 after cloning', async () => {
+      it('aggregation count should be 2 after cloning', async () => {
         await visualBuilder.markdownSwitchSubTab('data');
-
         await visualBuilder.createNewAgg();
-        const aggregationLength = await visualBuilder.getAggregationCount();
 
-        expect(aggregationLength).to.be.equal(2);
+        retry.try(async function aggregationCountCheck() {
+          const aggregationLength = await visualBuilder.getAggregationCount();
+          expect(aggregationLength).to.be.equal(2);
+        });
       });
     });
   });

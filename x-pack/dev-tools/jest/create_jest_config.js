@@ -44,8 +44,9 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       '^.+\\.html?$': 'jest-raw-loader',
     },
     transformIgnorePatterns: [
-      // ignore all node_modules except @elastic/eui which requires babel transforms to handle dynamic import()
-      '[/\\\\]node_modules(?![\\/\\\\]@elastic[\\/\\\\]eui)[/\\\\].+\\.js$',
+      // ignore all node_modules except @elastic/eui and monaco-editor which both require babel transforms to handle dynamic import()
+      // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
+      '[/\\\\]node_modules(?![\\/\\\\]@elastic[\\/\\\\]eui)(?![\\/\\\\]monaco-editor)[/\\\\].+\\.js$',
     ],
     snapshotSerializers: [`${kibanaDirectory}/node_modules/enzyme-to-json/serializer`],
     reporters: [

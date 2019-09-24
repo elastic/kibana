@@ -31,7 +31,7 @@ import { toastNotifications } from 'ui/notify';
 import { timefilter } from 'ui/timefilter';
 
 uiRoutes
-  .when('/jobs/new_job/simple/recognize', {
+  .when('/jobs/new_job/recognize', {
     template,
     k7Breadcrumbs: getCreateRecognizerJobBreadcrumbs,
     resolve: {

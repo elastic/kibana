@@ -60,7 +60,7 @@ class EssqlDatasource extends PureComponent {
         <EuiTextArea
           placeholder={this.defaultQuery}
           isInvalid={isInvalid}
-          className="canvasTextArea--code"
+          className="canvasTextArea__code"
           value={this.getQuery()}
           onChange={this.onChange}
         />

@@ -15,16 +15,18 @@ import {
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
-  EuiInMemoryTableProps,
   EuiPanel,
   EuiProgress,
   EuiText,
   EuiTitle,
-  SortDirection,
 } from '@elastic/eui';
 
-import { Dictionary, dictionaryToArray } from '../../../../../../common/types/common';
+import {
+  ColumnType,
+  MlInMemoryTableBasic,
+  SORT_DIRECTION,
+} from '../../../../../components/ml_in_memory_table';
+import { dictionaryToArray } from '../../../../../../common/types/common';
 import { ES_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 
@@ -41,13 +43,6 @@ import {
 
 import { getPivotPreviewDevConsoleStatement } from './common';
 import { PIVOT_PREVIEW_STATUS, usePivotPreviewData } from './use_pivot_preview_data';
-
-// TODO EUI's types for EuiInMemoryTable is missing these props
-interface CompressedTableProps extends EuiInMemoryTableProps {
-  compressed: boolean;
-}
-
-const CompressedTable = (EuiInMemoryTable as any) as SFC<CompressedTableProps>;
 
 function sortColumns(groupByArr: PivotGroupByConfig[]) {
   return (a: string, b: string) => {
@@ -234,43 +229,41 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
   const columnKeys = getFlattenedFields(dataFramePreviewData[0]);
   columnKeys.sort(sortColumns(groupByArr));
 
-  const columns = columnKeys
-    .filter(k => typeof dataFramePreviewMappings.properties[k] !== 'undefined')
-    .map(k => {
-      const column: Dictionary<any> = {
-        field: k,
-        name: k,
-        sortable: true,
-        truncateText: true,
-      };
-      if (typeof dataFramePreviewMappings.properties[k] !== 'undefined') {
-        const esFieldType = dataFramePreviewMappings.properties[k].type;
-        switch (esFieldType) {
-          case ES_FIELD_TYPES.BOOLEAN:
-            column.dataType = 'boolean';
-            break;
-          case ES_FIELD_TYPES.DATE:
-            column.align = 'right';
-            column.render = (d: any) => formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
-            break;
-          case ES_FIELD_TYPES.BYTE:
-          case ES_FIELD_TYPES.DOUBLE:
-          case ES_FIELD_TYPES.FLOAT:
-          case ES_FIELD_TYPES.HALF_FLOAT:
-          case ES_FIELD_TYPES.INTEGER:
-          case ES_FIELD_TYPES.LONG:
-          case ES_FIELD_TYPES.SCALED_FLOAT:
-          case ES_FIELD_TYPES.SHORT:
-            column.dataType = 'number';
-            break;
-          case ES_FIELD_TYPES.KEYWORD:
-          case ES_FIELD_TYPES.TEXT:
-            column.dataType = 'string';
-            break;
-        }
+  const columns = columnKeys.map(k => {
+    const column: ColumnType = {
+      field: k,
+      name: k,
+      sortable: true,
+      truncateText: true,
+    };
+    if (typeof dataFramePreviewMappings.properties[k] !== 'undefined') {
+      const esFieldType = dataFramePreviewMappings.properties[k].type;
+      switch (esFieldType) {
+        case ES_FIELD_TYPES.BOOLEAN:
+          column.dataType = 'boolean';
+          break;
+        case ES_FIELD_TYPES.DATE:
+          column.align = 'right';
+          column.render = (d: any) => formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
+          break;
+        case ES_FIELD_TYPES.BYTE:
+        case ES_FIELD_TYPES.DOUBLE:
+        case ES_FIELD_TYPES.FLOAT:
+        case ES_FIELD_TYPES.HALF_FLOAT:
+        case ES_FIELD_TYPES.INTEGER:
+        case ES_FIELD_TYPES.LONG:
+        case ES_FIELD_TYPES.SCALED_FLOAT:
+        case ES_FIELD_TYPES.SHORT:
+          column.dataType = 'number';
+          break;
+        case ES_FIELD_TYPES.KEYWORD:
+        case ES_FIELD_TYPES.TEXT:
+          column.dataType = 'string';
+          break;
       }
-      return column;
-    });
+    }
+    return column;
+  });
 
   if (columns.length === 0) {
     return null;
@@ -279,7 +272,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
   const sorting = {
     sort: {
       field: columns[0].field,
-      direction: SortDirection.ASC,
+      direction: SORT_DIRECTION.ASC,
     },
   };
 
@@ -290,8 +283,9 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
       {status !== PIVOT_PREVIEW_STATUS.LOADING && (
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
-      {dataFramePreviewData.length > 0 && clearTable === false && (
-        <CompressedTable
+      {dataFramePreviewData.length > 0 && clearTable === false && columns.length > 0 && (
+        <MlInMemoryTableBasic
+          allowNeutralSort={false}
           compressed
           items={dataFramePreviewData}
           columns={columns}

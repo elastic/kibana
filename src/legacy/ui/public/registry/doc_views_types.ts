@@ -31,13 +31,27 @@ export type AngularController = (scope: AngularScope) => void;
 
 export type ElasticSearchHit = Record<string, string | number | Record<string, unknown>>;
 
+export interface FieldMapping {
+  filterable?: boolean;
+  scripted?: boolean;
+  rowCount?: number;
+  type: string;
+  name: string;
+}
+
+export type DocViewFilterFn = (
+  mapping: FieldMapping | string | undefined,
+  value: unknown,
+  mode: '+' | '-'
+) => void;
+
 export interface DocViewRenderProps {
-  columns: string[];
-  filter: (field: string, value: string | number, operation: string) => void;
+  columns?: string[];
+  filter?: DocViewFilterFn;
   hit: ElasticSearchHit;
   indexPattern: IndexPattern;
-  onAddColumn: (columnName: string) => void;
-  onRemoveColumn: (columnName: string) => void;
+  onAddColumn?: (columnName: string) => void;
+  onRemoveColumn?: (columnName: string) => void;
 }
 export type DocViewRenderFn = (
   domeNode: HTMLDivElement,

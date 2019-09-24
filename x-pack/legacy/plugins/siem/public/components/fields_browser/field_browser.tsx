@@ -24,19 +24,13 @@ import { FieldBrowserProps, OnFieldSelected, OnHideFieldBrowser } from './types'
 import { Header } from './header';
 import { CategoriesPane } from './categories_pane';
 import { FieldsPane } from './fields_pane';
-
-const TOP_OFFSET = 267;
-
-const FieldsBrowserContainer = styled.div<{
-  top: number;
-  width: number;
-}>`
+const FieldsBrowserContainer = styled.div<{ width: number }>`
   background-color: ${props => props.theme.eui.euiColorLightestShade};
   border: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};
   border-radius: 4px;
   padding: 8px 8px 16px 8px;
   position: absolute;
-  ${({ top }) => `top: ${top}px`};
+  top: 25px;
   ${({ width }) => `width: ${width}px`};
   z-index: 9990;
 `;
@@ -51,7 +45,13 @@ PanesFlexGroup.displayName = 'PanesFlexGroup';
 
 type Props = Pick<
   FieldBrowserProps,
-  'browserFields' | 'height' | 'onFieldSelected' | 'onUpdateColumns' | 'timelineId' | 'width'
+  | 'browserFields'
+  | 'isEventViewer'
+  | 'height'
+  | 'onFieldSelected'
+  | 'onUpdateColumns'
+  | 'timelineId'
+  | 'width'
 > & {
   /**
    * The current timeline column headers
@@ -118,6 +118,7 @@ export class FieldsBrowser extends React.PureComponent<Props> {
       browserFields,
       filteredBrowserFields,
       searchInput,
+      isEventViewer,
       isSearching,
       onCategorySelected,
       onFieldSelected,
@@ -135,14 +136,11 @@ export class FieldsBrowser extends React.PureComponent<Props> {
         onOutsideClick={onFieldSelected != null ? noop : onOutsideClick}
         isDisabled={false}
       >
-        <FieldsBrowserContainer
-          data-test-subj="fields-browser-container"
-          top={TOP_OFFSET}
-          width={width}
-        >
+        <FieldsBrowserContainer data-test-subj="fields-browser-container" width={width}>
           <Header
             data-test-subj="header"
             filteredBrowserFields={filteredBrowserFields}
+            isEventViewer={isEventViewer}
             isSearching={isSearching}
             onOutsideClick={onOutsideClick}
             onSearchInputChange={this.onInputChange}

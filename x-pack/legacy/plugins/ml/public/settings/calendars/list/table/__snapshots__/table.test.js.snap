@@ -69,14 +69,10 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
         "filters": Array [],
         "toolsRight": Array [
           <EuiButton
-            color="primary"
             data-test-subj="mlCalendarButtonCreate"
-            fill={false}
             href="undefined/app/ml#/settings/calendars_list/new_calendar"
-            iconSide="left"
             isDisabled={false}
             size="s"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="New"
@@ -86,13 +82,10 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
           </EuiButton>,
           <EuiButton
             color="danger"
-            fill={false}
-            iconSide="left"
             iconType="trash"
             isDisabled={true}
             onClick={[Function]}
             size="s"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Delete"

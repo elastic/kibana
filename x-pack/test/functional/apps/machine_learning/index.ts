@@ -10,9 +10,9 @@ export default function({ loadTestFile }: FtrProviderContext) {
     this.tags('ciGroup3');
 
     loadTestFile(require.resolve('./feature_controls'));
-
-    // FLAKY: https://github.com/elastic/kibana/issues/43017
-    // loadTestFile(require.resolve('./pages'));
-    // loadTestFile(require.resolve('./create_single_metric_job'));
+    loadTestFile(require.resolve('./pages'));
+    loadTestFile(require.resolve('./create_single_metric_job'));
+    loadTestFile(require.resolve('./create_multi_metric_job'));
+    loadTestFile(require.resolve('./create_population_job'));
   });
 }

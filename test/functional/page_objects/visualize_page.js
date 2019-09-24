@@ -481,11 +481,15 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async toggleOpenEditor(index, toState = 'true') {
       // index, see selectYAxisAggregation
-      const toggle = await find.byCssSelector(`button[aria-controls="visEditorAggAccordion${index}"]`);
+      await this.toggleAccordion(`visEditorAggAccordion${index}`, toState);
+    }
+
+    async toggleAccordion(id, toState = 'true') {
+      const toggle = await find.byCssSelector(`button[aria-controls="${id}"]`);
       const toggleOpen = await toggle.getAttribute('aria-expanded');
-      log.debug(`toggle ${index} expand = ${toggleOpen}`);
+      log.debug(`toggle ${id} expand = ${toggleOpen}`);
       if (toggleOpen !== toState) {
-        log.debug(`toggle ${index} click()`);
+        log.debug(`toggle ${id} click()`);
         await toggle.click();
       }
     }
@@ -514,34 +518,13 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       customLabel.type(label);
     }
 
-    async setAxisExtents(min, max, axis = 'LeftAxis-1') {
-      const axisOptions = await find.byCssSelector(`div[aria-label="Toggle ${axis} options"]`);
-      const isOpen = await axisOptions.getAttribute('aria-expanded');
-      if (isOpen === 'false') {
-        log.debug(`click to open ${axis} options`);
-        await axisOptions.click();
-      }
-      // it would be nice to get the correct axis by name like "LeftAxis-1"
-      // instead of an incremented index, but this link isn't under the div above
-      const advancedLink =
-        await find.byCssSelector(`#axisOptionsValueAxis-1 .visEditorSidebar__advancedLinkIcon`);
+    async setAxisExtents(min, max, axisId = 'ValueAxis-1') {
+      await this.toggleAccordion(`yAxisAccordion${axisId}`);
+      await this.toggleAccordion(`yAxisOptionsAccordion${axisId}`);
 
-      const advancedLinkState = await advancedLink.getAttribute('type');
-      if (advancedLinkState.includes('arrowRight')) {
-        await advancedLink.moveMouseTo();
-        log.debug('click advancedLink');
-        await advancedLink.click();
-      }
-      const checkbox = await find.byCssSelector('input[ng-model="axis.scale.setYExtents"]');
-      const checkboxState = await checkbox.getAttribute('class');
-      if (checkboxState.includes('ng-empty')) {
-        await checkbox.moveMouseTo();
-        await checkbox.click();
-      }
-      const maxField = await find.byCssSelector('[ng-model="axis.scale.max"]');
-      await maxField.type(max);
-      const minField = await find.byCssSelector('[ng-model="axis.scale.min"]');
-      await minField.type(min);
+      await testSubjects.click('yAxisSetYExtents');
+      await testSubjects.setValue('yAxisYExtentsMax', max);
+      await testSubjects.setValue('yAxisYExtentsMin', min);
 
     }
 
@@ -563,9 +546,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async selectAggregateWith(fieldValue) {
-      const sortSelect = await testSubjects.find(`visDefaultEditorAggregateWith`);
-      const sortMetric = await sortSelect.findByCssSelector(`option[value="${fieldValue}"]`);
-      await sortMetric.click();
+      await testSubjects.selectValue('visDefaultEditorAggregateWith', fieldValue);
     }
 
     async getInterval() {
@@ -595,12 +576,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async setSize(newValue, aggId) {
-      const dataTestSubj = aggId ? `visEditorAggAccordion${aggId} sizeParamEditor` : 'sizeParamEditor';
+      const dataTestSubj = aggId ? `visEditorAggAccordion${aggId} > sizeParamEditor` : 'sizeParamEditor';
       await testSubjects.setValue(dataTestSubj, String(newValue));
     }
 
     async toggleDisabledAgg(agg) {
-      await testSubjects.click(`visEditorAggAccordion${agg} toggleDisableAggregationBtn`);
+      await testSubjects.click(`visEditorAggAccordion${agg} > ~toggleDisableAggregationBtn`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -610,11 +591,11 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async toggleOtherBucket(agg = 2) {
-      return await testSubjects.click(`visEditorAggAccordion${agg} otherBucketSwitch`);
+      return await testSubjects.click(`visEditorAggAccordion${agg} > otherBucketSwitch`);
     }
 
     async toggleMissingBucket(agg = 2) {
-      return await testSubjects.click(`visEditorAggAccordion${agg} missingBucketSwitch`);
+      return await testSubjects.click(`visEditorAggAccordion${agg} > missingBucketSwitch`);
     }
 
     async isApplyEnabled() {
@@ -699,18 +680,18 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async selectChartMode(mode) {
-      const selector = await find.byCssSelector(`#seriesMode0 > option[label="${mode}"]`);
+      const selector = await find.byCssSelector(`#seriesMode0 > option[value="${mode}"]`);
       await selector.click();
     }
 
     async selectYAxisScaleType(axisId, scaleType) {
       const selectElement = await testSubjects.find(`scaleSelectYAxis-${axisId}`);
-      const selector = await selectElement.findByCssSelector(`option[label="${scaleType}"]`);
+      const selector = await selectElement.findByCssSelector(`option[value="${scaleType}"]`);
       await selector.click();
     }
 
     async selectYAxisMode(mode) {
-      const selector = await find.byCssSelector(`#valueAxisMode0 > option[label="${mode}"]`);
+      const selector = await find.byCssSelector(`#valueAxisMode0 > option[value="${mode}"]`);
       await selector.click();
     }
 
@@ -1187,7 +1168,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await retry.try(async () => {
         const table = await testSubjects.find('tableVis');
         const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
-        await browser.moveMouseTo(cell);
+        await cell.moveMouseTo();
         const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
         await filterBtn.click();
       });
@@ -1273,7 +1254,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async removeDimension(agg) {
-      await testSubjects.click(`visEditorAggAccordion${agg} removeDimensionBtn`);
+      await testSubjects.click(`visEditorAggAccordion${agg} > removeDimensionBtn`);
     }
 
     async setFilterParams({ aggNth = 0, indexPattern, field }) {

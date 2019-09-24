@@ -169,8 +169,11 @@ class SearchPage extends React.PureComponent<Props, State> {
           <h1>
             <FormattedMessage
               id="xpack.code.searchPage.showingResultsTitle"
-              defaultMessage="Showing {from} - {to} of {total} results."
-              values={{ from, to, total }}
+              defaultMessage="Showing {from} - {to} of {total} {total, plural,
+                one {result}
+                other {results}
+              }."
+              values={{ from: from + 1, to, total }}
             />
           </h1>
         </EuiTitle>
@@ -193,8 +196,11 @@ class SearchPage extends React.PureComponent<Props, State> {
             <h1>
               <FormattedMessage
                 id="xpack.code.searchPage.showingResultsTitle"
-                defaultMessage="Showing {from} - {to} of {total} results."
-                values={{ from, to, total }}
+                defaultMessage="Showing {from} - {to} of {total} {total, plural,
+                  one {result}
+                  other {results}
+                }."
+                values={{ from: from + 1, to, total }}
               />
             </h1>
           </EuiTitle>
@@ -214,6 +220,13 @@ class SearchPage extends React.PureComponent<Props, State> {
 
     return (
       <div className="codeContainer__root">
+        <SearchBar
+          searchOptions={this.props.searchOptions}
+          query={this.props.query}
+          onSearchScopeChanged={this.props.onSearchScopeChanged}
+          enableSubmitWhenOptionsChanged={true}
+          ref={(element: any) => (this.searchBar = element)}
+        />
         <div className="codeContainer__rootInner">
           <SideBar
             query={this.props.query}
@@ -225,16 +238,7 @@ class SearchPage extends React.PureComponent<Props, State> {
             onLanguageFilterToggled={this.onLanguageFilterToggled}
             onRepositoryFilterToggled={this.onRepositoryFilterToggled}
           />
-          <div className="codeContainer__search--main">
-            <SearchBar
-              searchOptions={this.props.searchOptions}
-              query={this.props.query}
-              onSearchScopeChanged={this.props.onSearchScopeChanged}
-              enableSubmitWhenOptionsChanged={true}
-              ref={(element: any) => (this.searchBar = element)}
-            />
-            {mainComp}
-          </div>
+          <div className="codeContainer__search--main">{mainComp}</div>
         </div>
       </div>
     );

@@ -18,11 +18,11 @@ describe('RedirectToLogs component', () => {
     ).dive();
 
     expect(component).toMatchInlineSnapshot(`
-<Redirect
-  push={false}
-  to="/logs?logFilter=(expression:'',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
-/>
-`);
+      <Redirect
+        push={false}
+        to="/logs/stream?logFilter=(expression:'',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
+      />
+    `);
   });
 
   it('renders a redirect with the correct user-defined filter', () => {
@@ -33,11 +33,11 @@ describe('RedirectToLogs component', () => {
     ).dive();
 
     expect(component).toMatchInlineSnapshot(`
-<Redirect
-  push={false}
-  to="/logs?logFilter=(expression:'FILTER_FIELD:FILTER_VALUE',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
-/>
-`);
+      <Redirect
+        push={false}
+        to="/logs/stream?logFilter=(expression:'FILTER_FIELD:FILTER_VALUE',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
+      />
+    `);
   });
 
   it('renders a redirect with the correct custom source id', () => {
@@ -46,11 +46,11 @@ describe('RedirectToLogs component', () => {
     ).dive();
 
     expect(component).toMatchInlineSnapshot(`
-<Redirect
-  push={false}
-  to="/logs?logFilter=(expression:'',kind:kuery)&sourceId=SOME-OTHER-SOURCE"
-/>
-`);
+      <Redirect
+        push={false}
+        to="/logs/stream?logFilter=(expression:'',kind:kuery)&sourceId=SOME-OTHER-SOURCE"
+      />
+    `);
   });
 });
 

@@ -21,16 +21,16 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
-import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
+import { UiSettingsClientContract, SavedObjectsClientContract, CoreStart } from 'src/core/public';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 import { SearchBar, SearchBarProps } from '../../../../core_plugins/data/public';
-import { createSavedQueryService } from '../../../data/public/search/search_bar/lib/saved_query_service';
 
 type Props = Partial<SearchBarProps> & {
   name: string;
   uiSettings: UiSettingsClientContract;
   savedObjectsClient: SavedObjectsClientContract;
+  toasts: CoreStart['notifications']['toasts'];
   config?: TopNavMenuData[];
   showSearchBar?: boolean;
 };
@@ -58,16 +58,15 @@ export function TopNavMenu(props: Props) {
 
   function renderSearchBar() {
     // Validate presense of all required fields
-    if (!props.showSearchBar) return;
-
-    const savedQueryService = createSavedQueryService(props.savedObjectsClient);
-
+    if (!props.showSearchBar || !props.savedObjectsClient || !props.http) return;
     return (
       <SearchBar
+        savedObjectsClient={props.savedObjectsClient}
+        http={props.http}
         query={props.query}
         filters={props.filters}
+        toasts={props.toasts}
         uiSettings={props.uiSettings}
-        savedQueryService={savedQueryService}
         showQueryBar={props.showQueryBar}
         showQueryInput={props.showQueryInput}
         showFilterBar={props.showFilterBar}

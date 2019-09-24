@@ -7,13 +7,16 @@
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { ml } from '../../../../../services/ml_api_service';
-import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../../common';
 import {
   DataFrameTransformListRow,
+  refreshTransformList$,
+  REFRESH_TRANSFORM_LIST_STATE,
+} from '../../../../common';
+import {
   DataFrameTransformEndpointRequest,
   DataFrameTransformEndpointResult,
 } from '../../components/transform_list/common';
-// @ts-ignore no declaration file
+
 import { mlMessageBarService } from '../../../../../../public/components/messagebar/messagebar_service';
 
 export const deleteTransforms = async (dataFrames: DataFrameTransformListRow[]) => {
@@ -31,7 +34,7 @@ export const deleteTransforms = async (dataFrames: DataFrameTransformListRow[]) 
       if (results[transformId].success === true) {
         toastNotifications.addSuccess(
           i18n.translate('xpack.ml.dataframe.transformList.deleteTransformSuccessMessage', {
-            defaultMessage: 'Data frame transform {transformId} deleted successfully.',
+            defaultMessage: 'Request to delete data frame transform {transformId} acknowledged.',
             values: { transformId },
           })
         );

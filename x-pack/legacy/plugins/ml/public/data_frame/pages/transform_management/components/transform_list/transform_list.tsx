@@ -16,13 +16,21 @@ import {
   EuiEmptyPrompt,
   EuiPopover,
   EuiTitle,
-  SortDirection,
 } from '@elastic/eui';
 
 import {
+  OnTableChangeArg,
+  SortDirection,
+  SORT_DIRECTION,
+} from '../../../../../components/ml_in_memory_table';
+
+import {
   DataFrameTransformId,
+  DataFrameTransformListRow,
   moveToDataFrameWizard,
-  useRefreshTransformList,
+  DATA_FRAME_MODE,
+  DATA_FRAME_TRANSFORM_LIST_COLUMN,
+  DATA_FRAME_TRANSFORM_STATE,
 } from '../../../../common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 import { getTaskStateBadge } from './columns';
@@ -30,20 +38,10 @@ import { DeleteAction } from './action_delete';
 import { StartAction } from './action_start';
 import { StopAction } from './action_stop';
 
-import {
-  DataFrameTransformListColumn,
-  DataFrameTransformListRow,
-  ItemIdToExpandedRowMap,
-  DATA_FRAME_TRANSFORM_STATE,
-  DATA_FRAME_MODE,
-  Query,
-  Clause,
-} from './common';
-import { getTransformsFactory } from '../../services/transform_service';
+import { ItemIdToExpandedRowMap, Query, Clause } from './common';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
 import { ProgressBar, TransformTable } from './transform_table';
-import { useRefreshInterval } from './use_refresh_interval';
 
 function getItemIdToExpandedRowMap(
   itemIds: DataFrameTransformId[],
@@ -69,46 +67,40 @@ function stringMatch(str: string | undefined, substr: string) {
   );
 }
 
-export const DataFrameTransformList: SFC = () => {
-  const [isInitialized, setIsInitialized] = useState(false);
+interface Props {
+  isInitialized: boolean;
+  transforms: DataFrameTransformListRow[];
+  errorMessage: any;
+  transformsLoading: boolean;
+}
+
+export const DataFrameTransformList: SFC<Props> = ({
+  isInitialized,
+  transforms,
+  errorMessage,
+  transformsLoading,
+}) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [blockRefresh, setBlockRefresh] = useState(false);
   const [filterActive, setFilterActive] = useState(false);
 
-  const [transforms, setTransforms] = useState<DataFrameTransformListRow[]>([]);
   const [filteredTransforms, setFilteredTransforms] = useState<DataFrameTransformListRow[]>([]);
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<DataFrameTransformId[]>([]);
 
   const [transformSelection, setTransformSelection] = useState<DataFrameTransformListRow[]>([]);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
-  const [errorMessage, setErrorMessage] = useState<any>(undefined);
   const [searchError, setSearchError] = useState<any>(undefined);
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
-  const [sortField, setSortField] = useState<string>(DataFrameTransformListColumn.id);
-  const [sortDirection, setSortDirection] = useState<string>(SortDirection.ASC);
+  const [sortField, setSortField] = useState<string>(DATA_FRAME_TRANSFORM_LIST_COLUMN.ID);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
   const disabled =
     !checkPermission('canCreateDataFrame') ||
     !checkPermission('canPreviewDataFrame') ||
     !checkPermission('canStartStopDataFrame');
-
-  const getTransforms = getTransformsFactory(
-    setTransforms,
-    setErrorMessage,
-    setIsInitialized,
-    blockRefresh
-  );
-  // Subscribe to the refresh observable to trigger reloading the transform list.
-  useRefreshTransformList({
-    isLoading: setIsLoading,
-    onRefresh: () => getTransforms(true),
-  });
-  // Call useRefreshInterval() after the subscription above is set up.
-  useRefreshInterval(setBlockRefresh);
 
   const onQueryChange = ({ query, error }: { query: Query; error: any }) => {
     if (error) {
@@ -188,13 +180,13 @@ export const DataFrameTransformList: SFC = () => {
   // Before the transforms have been loaded for the first time, display the loading indicator only.
   // Otherwise a user would see 'No data frame transforms found' during the initial loading.
   if (!isInitialized) {
-    return <ProgressBar isLoading={isLoading} />;
+    return <ProgressBar isLoading={isLoading || transformsLoading} />;
   }
 
   if (typeof errorMessage !== 'undefined') {
     return (
       <Fragment>
-        <ProgressBar isLoading={isLoading} />
+        <ProgressBar isLoading={isLoading || transformsLoading} />
         <EuiCallOut
           title={i18n.translate('xpack.ml.dataFrame.list.errorPromptTitle', {
             defaultMessage: 'An error occurred getting the data frame transform list.',
@@ -211,7 +203,7 @@ export const DataFrameTransformList: SFC = () => {
   if (transforms.length === 0) {
     return (
       <Fragment>
-        <ProgressBar isLoading={isLoading} />
+        <ProgressBar isLoading={isLoading || transformsLoading} />
         <EuiEmptyPrompt
           title={
             <h2>
@@ -348,11 +340,8 @@ export const DataFrameTransformList: SFC = () => {
 
   const onTableChange = ({
     page = { index: 0, size: 10 },
-    sort = { field: DataFrameTransformListColumn.id, direction: SortDirection.ASC },
-  }: {
-    page: { index: number; size: number };
-    sort: { field: string; direction: string };
-  }) => {
+    sort = { field: DATA_FRAME_TRANSFORM_LIST_COLUMN.ID, direction: SORT_DIRECTION.ASC },
+  }: OnTableChangeArg) => {
     const { index, size } = page;
     setPageIndex(index);
     setPageSize(size);
@@ -368,8 +357,9 @@ export const DataFrameTransformList: SFC = () => {
 
   return (
     <Fragment>
-      <ProgressBar isLoading={isLoading} />
+      <ProgressBar isLoading={isLoading || transformsLoading} />
       <TransformTable
+        allowNeutralSort={false}
         className="mlTransformTable"
         columns={columns}
         error={searchError}
@@ -377,9 +367,9 @@ export const DataFrameTransformList: SFC = () => {
         isExpandable={true}
         isSelectable={false}
         items={filterActive ? filteredTransforms : transforms}
-        itemId={DataFrameTransformListColumn.id}
+        itemId={DATA_FRAME_TRANSFORM_LIST_COLUMN.ID}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        onChange={onTableChange}
+        onTableChange={onTableChange}
         pagination={pagination}
         selection={selection}
         sorting={sorting}

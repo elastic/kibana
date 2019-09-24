@@ -11,9 +11,12 @@ export interface ExistingJobsAndGroups {
 
 declare interface JobService {
   currentJob: any;
+  createResultsUrlForJobs: () => string;
   tempJobCloningObjects: {
     job: any;
     skipTimeRangeStep: boolean;
+    start?: number;
+    end?: number;
   };
   skipTimeRangeStep: boolean;
   saveNewJob(job: any): Promise<any>;

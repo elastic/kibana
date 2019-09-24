@@ -31,15 +31,16 @@ export const createGenericAuditRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, children }) => (
-    <Row>
+  renderRow: ({ browserFields, data, children, timelineId }) => (
+    <Row className="euiTableRow">
       {children}
       <RowRendererContainer>
         <AuditdGenericDetails
           browserFields={browserFields}
           data={data}
-          contextId={actionName}
+          contextId={`${actionName}-${timelineId}`}
           text={text}
+          timelineId={timelineId}
         />
       </RowRendererContainer>
     </Row>
@@ -65,16 +66,17 @@ export const createGenericFileRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, children }) => (
-    <Row>
+  renderRow: ({ browserFields, data, children, timelineId }) => (
+    <Row className="euiTableRow">
       {children}
       <RowRendererContainer>
         <AuditdGenericFileDetails
           browserFields={browserFields}
           data={data}
-          contextId={actionName}
+          contextId={`${actionName}-${timelineId}`}
           text={text}
           fileIcon={fileIcon}
+          timelineId={timelineId}
         />
       </RowRendererContainer>
     </Row>
