@@ -12742,16 +12742,16 @@ gaze@^1.0.0, gaze@^1.1.0:
   dependencies:
     globule "^1.0.0"
 
-geckodriver@1.13.0:
-  version "1.13.0"
-  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.13.0.tgz#65b5733b8005d686d77ce3c989f4b9cce8d0a05a"
-  integrity sha512-0fP5GbWvXPVOEyID5x71ts5D7LA/RskxvfsZZK1T/hNPWA/vUpeE1d6K7y84IrejULjQV+ERSvRTYhXn8aISTQ==
+geckodriver@^1.18.0:
+  version "1.18.0"
+  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.18.0.tgz#a4d9b0504be26ed933d7be208b06b15833e32415"
+  integrity sha512-PFBq5UsngfLrxmNqnynix4rQgOkOWCKl3I3PlXCROiTQKSE2znIK9MnEUNQznzxNOPMRt1RGGy2cinIARSRvKQ==
   dependencies:
     adm-zip "0.4.11"
     bluebird "3.4.6"
     got "5.6.0"
     https-proxy-agent "2.2.1"
-    tar "4.0.2"
+    tar "4.4.2"
 
 generate-function@^2.0.0:
   version "2.3.1"
