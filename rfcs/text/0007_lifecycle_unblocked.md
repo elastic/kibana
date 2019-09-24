@@ -194,11 +194,22 @@ Effectively do what we've always been doing. We can improve on the status quo
 by logging detailed diagnostic info on any plugins that appear to be blocking
 startup.
 
+A parallel can be drawn between Kibana's async plugin initialization and the TC39
+proposal for [top-level await](https://github.com/tc39/proposal-top-level-await).
+> enables modules to act as big async functions: With top-level await,
+> ECMAScript Modules (ESM) can await resources, causing other modules who
+> import them to wait before they start evaluating their body
+
+They believe the benefits outweigh the risk of modules blocking loading since:
+ - [developer education should result in correct usage](https://github.com/tc39/proposal-top-level-await#will-top-level-await-cause-developers-to-make-their-code-block-longer-than-it-should)
+ - [there are existing unavoidable ways in which modules could block loading such as infinite loops or recursion](https://github.com/tc39/proposal-top-level-await#does-top-level-await-increase-the-risk-of-deadlocks)
+
+
 Drawbacks:
 1. Since plugins load serially, even if they don't block startup, all the
-   delays could add up and potentially make startup very slow.
-2. This opens up the potential for a third-party plugin to effectively "break"
-   kibana which creates a bad user experience.
+   delays add up and increase the startup time.
+2. This opens up the potential for a bug in Elastic or third-party plugins to
+   effectively "break" kibana which creates a bad user experience.
 
 # Adoption strategy (WIP)
 
