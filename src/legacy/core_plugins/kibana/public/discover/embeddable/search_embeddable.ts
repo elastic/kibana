@@ -102,7 +102,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   private inspectorAdaptors: Adapters;
   private searchScope?: SearchScope;
   private panelTitle: string = '';
-  private filtersSearchSource: SearchSource;
+  private filtersSearchSource?: SearchSource;
   private searchInstance?: JQLite;
   private autoRefreshFetchSubscription?: Subscription;
   private subscription?: Subscription;
@@ -337,8 +337,8 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     searchScope.sharedItemTitle = this.panelTitle;
 
     if (isFetchRequired) {
-      this.filtersSearchSource.setField('filter', this.input.filters);
-      this.filtersSearchSource.setField('query', this.input.query);
+      this.filtersSearchSource!.setField('filter', this.input.filters);
+      this.filtersSearchSource!.setField('query', this.input.query);
 
       this.fetch();
 

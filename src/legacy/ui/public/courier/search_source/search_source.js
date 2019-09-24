@@ -75,10 +75,10 @@ import { buildEsQuery, getEsQueryConfig, filterMatchesIndex } from '@kbn/es-quer
 
 import { normalizeSortRequest } from './_normalize_sort_request';
 
-import { FetchSoonProvider } from '../fetch';
+import { fetchSoon } from '../fetch';
 import { fieldWildcardFilter } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../../plugins/data/common/highlight';
-import chrome from '../../chrome';
+import { npSetup } from 'ui/new_platform';
 
 const FIELDS = [
   'type',
@@ -111,249 +111,247 @@ function isIndexPattern(val) {
   return Boolean(val && typeof val.title === 'string');
 }
 
-const config = chrome.getUiSettingsClient();
+const config = npSetup.core.uiSettings;
 const getConfig = (...args) => config.get(...args);
 const forIp = Symbol('for which index pattern?');
 
-export function SearchSourceProvider(Private) {
-  const fetchSoon = Private(FetchSoonProvider);
-  class SearchSource {
-    constructor(initialFields) {
-      this._id = _.uniqueId('data_source');
+export class SearchSource {
+  constructor(initialFields) {
+    this._id = _.uniqueId('data_source');
 
-      this._searchStrategyId = undefined;
-      this._fields = parseInitialFields(initialFields);
-      this._parent = undefined;
+    this._searchStrategyId = undefined;
+    this._fields = parseInitialFields(initialFields);
+    this._parent = undefined;
 
-      this.history = [];
-      this._requestStartHandlers = [];
-      this._inheritOptions = {};
+    this.history = [];
+    this._requestStartHandlers = [];
+    this._inheritOptions = {};
 
-      this._filterPredicates = [
-        (filter) => {
+    this._filterPredicates = [
+      (filter) => {
         // remove null/undefined filters
-          return filter;
-        },
-        (filter) => {
-          const disabled = _.get(filter, 'meta.disabled');
-          return disabled === undefined || disabled === false;
-        },
-        (filter, data) => {
-          const index = data.index || this.getField('index');
-          return !config.get('courier:ignoreFilterIfFieldNotInIndex') || filterMatchesIndex(filter, index);
-        }
-      ];
-    }
+        return filter;
+      },
+      (filter) => {
+        const disabled = _.get(filter, 'meta.disabled');
+        return disabled === undefined || disabled === false;
+      },
+      (filter, data) => {
+        const index = data.index || this.getField('index');
+        return !config.get('courier:ignoreFilterIfFieldNotInIndex') || filterMatchesIndex(filter, index);
+      }
+    ];
+  }
 
-    /*****
+  /*****
      * PUBLIC API
      *****/
 
-    setPreferredSearchStrategyId(searchStrategyId) {
-      this._searchStrategyId = searchStrategyId;
+  setPreferredSearchStrategyId(searchStrategyId) {
+    this._searchStrategyId = searchStrategyId;
+  }
+
+  getPreferredSearchStrategyId() {
+    return this._searchStrategyId;
+  }
+
+  setFields(newFields) {
+    this._fields = newFields;
+    return this;
+  }
+
+  setField(field, value) {
+    if (!FIELDS.includes(field)) {
+      throw new Error(`Can't set field '${field}' on SearchSource. Acceptable fields are: ${FIELDS.join(', ')}.`);
     }
 
-    getPreferredSearchStrategyId() {
-      return this._searchStrategyId;
-    }
+    if (field === 'index') {
+      const fields = this._fields;
 
-    setFields(newFields) {
-      this._fields = newFields;
-      return this;
-    }
-
-    setField = (field, value) => {
-      if (!FIELDS.includes(field)) {
-        throw new Error(`Can't set field '${field}' on SearchSource. Acceptable fields are: ${FIELDS.join(', ')}.`);
+      const hasSource = fields.source;
+      const sourceCameFromIp = hasSource && fields.source.hasOwnProperty(forIp);
+      const sourceIsForOurIp = sourceCameFromIp && fields.source[forIp] === fields.index;
+      if (sourceIsForOurIp) {
+        delete fields.source;
       }
 
-      if (field === 'index') {
-        const fields = this._fields;
-
-        const hasSource = fields.source;
-        const sourceCameFromIp = hasSource && fields.source.hasOwnProperty(forIp);
-        const sourceIsForOurIp = sourceCameFromIp && fields.source[forIp] === fields.index;
-        if (sourceIsForOurIp) {
-          delete fields.source;
-        }
-
-        if (value === null || value === undefined) {
-          delete fields.index;
-          return this;
-        }
-
-        if (!isIndexPattern(value)) {
-          throw new TypeError('expected indexPattern to be an IndexPattern duck.');
-        }
-
-        fields[field] = value;
-        if (!fields.source) {
-          // imply source filtering based on the index pattern, but allow overriding
-          // it by simply setting another field for "source". When index is changed
-          fields.source = function () {
-            return value.getSourceFiltering();
-          };
-          fields.source[forIp] = value;
-        }
-
+      if (value === null || value === undefined) {
+        delete fields.index;
         return this;
       }
 
-      if (value == null) {
-        delete this._fields[field];
-        return this;
+      if (!isIndexPattern(value)) {
+        throw new TypeError('expected indexPattern to be an IndexPattern duck.');
       }
 
-      this._fields[field] = value;
+      fields[field] = value;
+      if (!fields.source) {
+        // imply source filtering based on the index pattern, but allow overriding
+        // it by simply setting another field for "source". When index is changed
+        fields.source = function () {
+          return value.getSourceFiltering();
+        };
+        fields.source[forIp] = value;
+      }
+
       return this;
-    };
-
-    getId() {
-      return this._id;
     }
 
-    getFields() {
-      return _.clone(this._fields);
+    if (value == null) {
+      delete this._fields[field];
+      return this;
     }
 
-    /**
-     * Get fields from the fields
-     */
-    getField = field => {
-      if (!FIELDS.includes(field)) {
-        throw new Error(`Can't get field '${field}' from SearchSource. Acceptable fields are: ${FIELDS.join(', ')}.`);
-      }
+    this._fields[field] = value;
+    return this;
+  }
 
-      let searchSource = this;
+  getId() {
+    return this._id;
+  }
 
-      while (searchSource) {
-        const value = searchSource._fields[field];
-        if (value !== void 0) {
-          return value;
-        }
+  getFields() {
+    return _.clone(this._fields);
+  }
 
-        searchSource = searchSource.getParent();
-      }
-    };
+  /**
+   * Get fields from the fields
+   */
+  getField(field) {
+    if (!FIELDS.includes(field)) {
+      throw new Error(`Can't get field '${field}' from SearchSource. Acceptable fields are: ${FIELDS.join(', ')}.`);
+    }
 
-    /**
-     * Get the field from our own fields, don't traverse up the chain
-     */
-    getOwnField(field) {
-      if (!FIELDS.includes(field)) {
-        throw new Error(`Can't get field '${field}' from SearchSource. Acceptable fields are: ${FIELDS.join(', ')}.`);
-      }
+    let searchSource = this;
 
-      const value = this._fields[field];
+    while (searchSource) {
+      const value = searchSource._fields[field];
       if (value !== void 0) {
         return value;
       }
+
+      searchSource = searchSource.getParent();
+    }
+  }
+
+  /**
+     * Get the field from our own fields, don't traverse up the chain
+     */
+  getOwnField(field) {
+    if (!FIELDS.includes(field)) {
+      throw new Error(`Can't get field '${field}' from SearchSource. Acceptable fields are: ${FIELDS.join(', ')}.`);
     }
 
-    create() {
-      return new SearchSource();
+    const value = this._fields[field];
+    if (value !== void 0) {
+      return value;
     }
+  }
 
-    createCopy() {
-      const json = angular.toJson(this._fields);
-      const newSearchSource = new SearchSource(json);
-      // when serializing the internal fields we lose the internal classes used in the index
-      // pattern, so we have to set it again to workaround this behavior
-      newSearchSource.setField('index', this.getField('index'));
-      newSearchSource.setParent(this.getParent());
-      return newSearchSource;
-    }
+  create() {
+    return new SearchSource();
+  }
 
-    createChild(options = {}) {
-      const childSearchSource = new SearchSource();
-      childSearchSource.setParent(this, options);
-      return childSearchSource;
-    }
+  createCopy() {
+    const json = angular.toJson(this._fields);
+    const newSearchSource = new SearchSource(json);
+    // when serializing the internal fields we lose the internal classes used in the index
+    // pattern, so we have to set it again to workaround this behavior
+    newSearchSource.setField('index', this.getField('index'));
+    newSearchSource.setParent(this.getParent());
+    return newSearchSource;
+  }
 
-    /**
+  createChild(options = {}) {
+    const childSearchSource = new SearchSource();
+    childSearchSource.setParent(this, options);
+    return childSearchSource;
+  }
+
+  /**
      * Set a searchSource that this source should inherit from
      * @param  {SearchSource} searchSource - the parent searchSource
      * @return {this} - chainable
      */
-    setParent(parent, options = {}) {
-      this._parent = parent;
-      this._inheritOptions = options;
-      return this;
-    }
+  setParent(parent, options = {}) {
+    this._parent = parent;
+    this._inheritOptions = options;
+    return this;
+  }
 
-    /**
+  /**
      * Get the parent of this SearchSource
      * @return {undefined|searchSource}
      */
-    getParent() {
-      return this._parent || undefined;
-    }
+  getParent() {
+    return this._parent || undefined;
+  }
 
-    /**
+  /**
      * Fetch this source and reject the returned Promise on error
      *
      * @async
      */
-    async fetch(options) {
-      const searchRequest = await this._flatten();
-      await this.requestIsStarting(searchRequest, options);
-      return fetchSoon.fetch(searchRequest, {
-        ...(this._searchStrategyId && { searchStrategyId: this._searchStrategyId }),
-        ...options,
-      });
-    }
+  async fetch(options) {
+    const searchRequest = await this._flatten();
+    await this.requestIsStarting(searchRequest, options);
+    return fetchSoon(searchRequest, {
+      ...(this._searchStrategyId && { searchStrategyId: this._searchStrategyId }),
+      ...options,
+    });
+  }
 
-    /**
+  /**
      *  Add a handler that will be notified whenever requests start
      *  @param  {Function} handler
      *  @return {undefined}
      */
-    onRequestStart(handler) {
-      this._requestStartHandlers.push(handler);
-    }
+  onRequestStart(handler) {
+    this._requestStartHandlers.push(handler);
+  }
 
-    /**
+  /**
      *  Called by requests of this search source when they are started
      *  @param  {Courier.Request} request
      *  @param options
      *  @return {Promise<undefined>}
      */
-    requestIsStarting(request, options) {
-      this.activeFetchCount = (this.activeFetchCount || 0) + 1;
-      this.history = [request];
+  requestIsStarting(request, options) {
+    this.activeFetchCount = (this.activeFetchCount || 0) + 1;
+    this.history = [request];
 
-      const handlers = [...this._requestStartHandlers];
-      // If callparentStartHandlers has been set to true, we also call all
-      // handlers of parent search sources.
-      if (this._inheritOptions.callParentStartHandlers) {
-        let searchSource = this.getParent();
-        while (searchSource) {
-          handlers.push(...searchSource._requestStartHandlers);
-          searchSource = searchSource.getParent();
-        }
+    const handlers = [...this._requestStartHandlers];
+    // If callparentStartHandlers has been set to true, we also call all
+    // handlers of parent search sources.
+    if (this._inheritOptions.callParentStartHandlers) {
+      let searchSource = this.getParent();
+      while (searchSource) {
+        handlers.push(...searchSource._requestStartHandlers);
+        searchSource = searchSource.getParent();
       }
-
-      return Promise.all(handlers.map(fn => fn(this, request, options)));
     }
 
-    async getSearchRequestBody() {
-      const searchRequest = await this._flatten();
-      return searchRequest.body;
-    }
+    return Promise.all(handlers.map(fn => fn(this, request, options)));
+  }
 
-    /**
+  async getSearchRequestBody() {
+    const searchRequest = await this._flatten();
+    return searchRequest.body;
+  }
+
+  /**
      * Completely destroy the SearchSource.
      * @return {undefined}
      */
-    destroy() {
-      this._requestStartHandlers.length = 0;
-    }
+  destroy() {
+    this._requestStartHandlers.length = 0;
+  }
 
-    /******
+  /******
      * PRIVATE APIS
      ******/
 
-    /**
+  /**
      * Used to merge properties into the data within ._flatten().
      * The data is passed in and modified by the function
      *
@@ -362,191 +360,188 @@ export function SearchSourceProvider(Private) {
      * @param  {*} key - The key of `val`
      * @return {undefined}
      */
-    _mergeProp(data, val, key) {
-      if (typeof val === 'function') {
-        const source = this;
-        return Promise.resolve(val(this))
-          .then(function (newVal) {
-            return source._mergeProp(data, newVal, key);
-          });
-      }
+  _mergeProp(data, val, key) {
+    if (typeof val === 'function') {
+      const source = this;
+      return Promise.resolve(val(this))
+        .then(function (newVal) {
+          return source._mergeProp(data, newVal, key);
+        });
+    }
 
-      if (val == null || !key || !_.isString(key)) return;
+    if (val == null || !key || !_.isString(key)) return;
 
-      switch (key) {
-        case 'filter':
-          let filters = Array.isArray(val) ? val : [val];
+    switch (key) {
+      case 'filter':
+        let filters = Array.isArray(val) ? val : [val];
 
-          filters = filters.filter(filter => {
-            return this._filterPredicates.every(predicate => predicate(filter, data));
-          });
+        filters = filters.filter(filter => {
+          return this._filterPredicates.every(predicate => predicate(filter, data));
+        });
 
-          data.filters = [...(data.filters || []), ...filters];
-          return;
-        case 'index':
-        case 'type':
-        case 'id':
-        case 'highlightAll':
-          if (key && data[key] == null) {
-            data[key] = val;
-          }
-          return;
-        case 'searchAfter':
-          key = 'search_after';
-          addToBody();
-          break;
-        case 'source':
-          key = '_source';
-          addToBody();
-          break;
-        case 'sort':
-          val = normalizeSortRequest(val, this.getField('index'), config.get('sort:options'));
-          addToBody();
-          break;
-        case 'query':
-          data.query = (data.query || []).concat(val);
-          break;
-        case 'fields':
-          data[key] = _.uniq([...(data[key] || []), ...val]);
-          break;
-        default:
-          addToBody();
-      }
-
-      /**
-       * Add the key and val to the body of the request
-       */
-      function addToBody() {
-        data.body = data.body || {};
-        // ignore if we already have a value
-        if (data.body[key] == null) {
-          data.body[key] = val;
+        data.filters = [...(data.filters || []), ...filters];
+        return;
+      case 'index':
+      case 'type':
+      case 'id':
+      case 'highlightAll':
+        if (key && data[key] == null) {
+          data[key] = val;
         }
-      }
+        return;
+      case 'searchAfter':
+        key = 'search_after';
+        addToBody();
+        break;
+      case 'source':
+        key = '_source';
+        addToBody();
+        break;
+      case 'sort':
+        val = normalizeSortRequest(val, this.getField('index'), config.get('sort:options'));
+        addToBody();
+        break;
+      case 'query':
+        data.query = (data.query || []).concat(val);
+        break;
+      case 'fields':
+        data[key] = _.uniq([...(data[key] || []), ...val]);
+        break;
+      default:
+        addToBody();
     }
 
     /**
+       * Add the key and val to the body of the request
+       */
+    function addToBody() {
+      data.body = data.body || {};
+      // ignore if we already have a value
+      if (data.body[key] == null) {
+        data.body[key] = val;
+      }
+    }
+  }
+
+  /**
      * Walk the inheritance chain of a source and return it's
      * flat representation (taking into account merging rules)
      * @returns {Promise}
      * @resolved {Object|null} - the flat data of the SearchSource
      */
-    _flatten() {
-      // the merged data of this dataSource and it's ancestors
-      const flatData = {};
+  _flatten() {
+    // the merged data of this dataSource and it's ancestors
+    const flatData = {};
 
-      // function used to write each property from each data object in the chain to flat data
-      const root = this;
+    // function used to write each property from each data object in the chain to flat data
+    const root = this;
 
-      // start the chain at this source
-      let current = this;
+    // start the chain at this source
+    let current = this;
 
-      // call the ittr and return it's promise
-      return (function ittr() {
-        // iterate the _fields object (not array) and
-        // pass each key:value pair to source._mergeProp. if _mergeProp
-        // returns a promise, then wait for it to complete and call _mergeProp again
-        return Promise.all(_.map(current._fields, function ittr(value, key) {
-          if (value instanceof Promise) {
-            return value.then(function (value) {
-              return ittr(value, key);
-            });
-          }
-
-          const prom = root._mergeProp(flatData, value, key);
-          return prom instanceof Promise ? prom : null;
-        }))
-          .then(function () {
-            // move to this sources parent
-            const parent = current.getParent();
-            // keep calling until we reach the top parent
-            if (parent) {
-              current = parent;
-              return ittr();
-            }
+    // call the ittr and return it's promise
+    return (function ittr() {
+      // iterate the _fields object (not array) and
+      // pass each key:value pair to source._mergeProp. if _mergeProp
+      // returns a promise, then wait for it to complete and call _mergeProp again
+      return Promise.all(_.map(current._fields, function ittr(value, key) {
+        if (value instanceof Promise) {
+          return value.then(function (value) {
+            return ittr(value, key);
           });
-      }())
+        }
+
+        const prom = root._mergeProp(flatData, value, key);
+        return prom instanceof Promise ? prom : null;
+      }))
         .then(function () {
-          // This is down here to prevent the circular dependency
-          flatData.body = flatData.body || {};
-
-          const computedFields = flatData.index.getComputedFields();
-          flatData.body.stored_fields = computedFields.storedFields;
-          flatData.body.script_fields = flatData.body.script_fields || {};
-          flatData.body.docvalue_fields = flatData.body.docvalue_fields || [];
-
-          _.extend(flatData.body.script_fields, computedFields.scriptFields);
-          flatData.body.docvalue_fields = _.union(flatData.body.docvalue_fields, computedFields.docvalueFields);
-
-          if (flatData.body._source) {
-            // exclude source fields for this index pattern specified by the user
-            const filter = fieldWildcardFilter(flatData.body._source.excludes, config.get('metaFields'));
-            flatData.body.docvalue_fields = flatData.body.docvalue_fields.filter(
-              docvalueField => filter(docvalueField.field)
-            );
+          // move to this sources parent
+          const parent = current.getParent();
+          // keep calling until we reach the top parent
+          if (parent) {
+            current = parent;
+            return ittr();
           }
+        });
+    }())
+      .then(function () {
+        // This is down here to prevent the circular dependency
+        flatData.body = flatData.body || {};
 
-          // if we only want to search for certain fields
-          const fields = flatData.fields;
-          if (fields) {
-            // filter out the docvalue_fields, and script_fields to only include those that we are concerned with
-            flatData.body.docvalue_fields = _.intersection(flatData.body.docvalue_fields, fields);
-            flatData.body.script_fields = _.pick(flatData.body.script_fields, fields);
+        const computedFields = flatData.index.getComputedFields();
+        flatData.body.stored_fields = computedFields.storedFields;
+        flatData.body.script_fields = flatData.body.script_fields || {};
+        flatData.body.docvalue_fields = flatData.body.docvalue_fields || [];
 
-            // request the remaining fields from both stored_fields and _source
-            const remainingFields = _.difference(fields, _.keys(flatData.body.script_fields));
-            flatData.body.stored_fields = remainingFields;
-            _.set(flatData.body, '_source.includes', remainingFields);
+        _.extend(flatData.body.script_fields, computedFields.scriptFields);
+        flatData.body.docvalue_fields = _.union(flatData.body.docvalue_fields, computedFields.docvalueFields);
+
+        if (flatData.body._source) {
+          // exclude source fields for this index pattern specified by the user
+          const filter = fieldWildcardFilter(flatData.body._source.excludes, config.get('metaFields'));
+          flatData.body.docvalue_fields = flatData.body.docvalue_fields.filter(
+            docvalueField => filter(docvalueField.field)
+          );
+        }
+
+        // if we only want to search for certain fields
+        const fields = flatData.fields;
+        if (fields) {
+          // filter out the docvalue_fields, and script_fields to only include those that we are concerned with
+          flatData.body.docvalue_fields = _.intersection(flatData.body.docvalue_fields, fields);
+          flatData.body.script_fields = _.pick(flatData.body.script_fields, fields);
+
+          // request the remaining fields from both stored_fields and _source
+          const remainingFields = _.difference(fields, _.keys(flatData.body.script_fields));
+          flatData.body.stored_fields = remainingFields;
+          _.set(flatData.body, '_source.includes', remainingFields);
+        }
+
+        const esQueryConfigs = getEsQueryConfig(config);
+        flatData.body.query = buildEsQuery(flatData.index, flatData.query, flatData.filters, esQueryConfigs);
+
+        if (flatData.highlightAll != null) {
+          if (flatData.highlightAll && flatData.body.query) {
+            flatData.body.highlight = getHighlightRequest(flatData.body.query, getConfig);
           }
+          delete flatData.highlightAll;
+        }
 
-          const esQueryConfigs = getEsQueryConfig(config);
-          flatData.body.query = buildEsQuery(flatData.index, flatData.query, flatData.filters, esQueryConfigs);
-
-          if (flatData.highlightAll != null) {
-            if (flatData.highlightAll && flatData.body.query) {
-              flatData.body.highlight = getHighlightRequest(flatData.body.query, getConfig);
-            }
-            delete flatData.highlightAll;
-          }
-
-          /**
+        /**
            * Translate a filter into a query to support es 3+
            * @param  {Object} filter - The filter to translate
            * @return {Object} the query version of that filter
            */
-          const translateToQuery = function (filter) {
-            if (!filter) return;
+        const translateToQuery = function (filter) {
+          if (!filter) return;
 
-            if (filter.query) {
-              return filter.query;
+          if (filter.query) {
+            return filter.query;
+          }
+
+          return filter;
+        };
+
+        // re-write filters within filter aggregations
+        (function recurse(aggBranch) {
+          if (!aggBranch) return;
+          Object.keys(aggBranch).forEach(function (id) {
+            const agg = aggBranch[id];
+
+            if (agg.filters) {
+              // translate filters aggregations
+              const filters = agg.filters.filters;
+
+              Object.keys(filters).forEach(function (filterId) {
+                filters[filterId] = translateToQuery(filters[filterId]);
+              });
             }
 
-            return filter;
-          };
+            recurse(agg.aggs || agg.aggregations);
+          });
+        }(flatData.body.aggs || flatData.body.aggregations));
 
-          // re-write filters within filter aggregations
-          (function recurse(aggBranch) {
-            if (!aggBranch) return;
-            Object.keys(aggBranch).forEach(function (id) {
-              const agg = aggBranch[id];
-
-              if (agg.filters) {
-                // translate filters aggregations
-                const filters = agg.filters.filters;
-
-                Object.keys(filters).forEach(function (filterId) {
-                  filters[filterId] = translateToQuery(filters[filterId]);
-                });
-              }
-
-              recurse(agg.aggs || agg.aggregations);
-            });
-          }(flatData.body.aggs || flatData.body.aggregations));
-
-          return flatData;
-        });
-    }
+        return flatData;
+      });
   }
-
-  return SearchSource;
 }

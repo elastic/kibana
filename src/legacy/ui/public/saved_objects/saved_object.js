@@ -34,7 +34,7 @@ import _ from 'lodash';
 import { InvalidJSONProperty, SavedObjectNotFound } from '../errors';
 import { expandShorthand } from '../utils/mapping_setup';
 
-import { SearchSourceProvider } from '../courier/search_source';
+import { SearchSource } from '../courier';
 import { findObjectByTitle } from './find_object_by_title';
 import { SavedObjectsClientProvider } from './saved_objects_client_provider';
 import { migrateLegacyQuery } from '../utils/migrate_legacy_query';
@@ -68,7 +68,6 @@ function isErrorNonFatal(error) {
 
 export function SavedObjectProvider(Promise, Private, confirmModalPromise, indexPatterns) {
   const savedObjectsClient = Private(SavedObjectsClientProvider);
-  const SearchSource = Private(SearchSourceProvider);
 
   /**
    * The SavedObject class is a base class for saved objects loaded from the server and

@@ -22,8 +22,7 @@ import ngMock from 'ng_mock';
 import moment from 'moment';
 import * as _ from 'lodash';
 
-import { createIndexPatternsStub, createSearchSourceStubProvider } from './_stubs';
-import { SearchSourceProvider } from 'ui/courier';
+import { createIndexPatternsStub, createContextSearchSourceStub } from './_stubs';
 
 import { fetchContextProvider } from '../context';
 
@@ -37,15 +36,14 @@ describe('context app', function () {
 
   describe('function fetchSuccessors', function () {
     let fetchSuccessors;
-    let getSearchSourceStub;
+    let searchSourceStub;
 
     beforeEach(ngMock.module(function createServiceStubs($provide) {
       $provide.value('indexPatterns', createIndexPatternsStub());
     }));
 
     beforeEach(ngMock.inject(function createPrivateStubs(Private) {
-      getSearchSourceStub = createSearchSourceStubProvider([], '@timestamp');
-      Private.stub(SearchSourceProvider, getSearchSourceStub);
+      searchSourceStub = createContextSearchSourceStub([], '@timestamp');
 
       fetchSuccessors = (indexPatternId, timeField, sortDir, timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size) => {
         const anchor = {
@@ -68,8 +66,11 @@ describe('context app', function () {
       };
     }));
 
+    afterEach(() => {
+      searchSourceStub._restore();
+    });
+
     it('should perform exactly one query when enough hits are returned', function () {
-      const searchSourceStub = getSearchSourceStub();
       searchSourceStub._stubHits = [
         searchSourceStub._createStubHit(MS_PER_DAY * 5000),
         searchSourceStub._createStubHit(MS_PER_DAY * 4000),
@@ -96,7 +97,6 @@ describe('context app', function () {
     });
 
     it('should perform multiple queries with the last being unrestricted when too few hits are returned', function () {
-      const searchSourceStub = getSearchSourceStub();
       searchSourceStub._stubHits = [
         searchSourceStub._createStubHit(MS_PER_DAY * 3010),
         searchSourceStub._createStubHit(MS_PER_DAY * 3002),
@@ -133,7 +133,6 @@ describe('context app', function () {
     });
 
     it('should perform multiple queries until the expected hit count is returned', function () {
-      const searchSourceStub = getSearchSourceStub();
       searchSourceStub._stubHits = [
         searchSourceStub._createStubHit(MS_PER_DAY * 3000),
         searchSourceStub._createStubHit(MS_PER_DAY * 3000 - 1),
@@ -187,8 +186,6 @@ describe('context app', function () {
     });
 
     it('should configure the SearchSource to not inherit from the implicit root', function () {
-      const searchSourceStub = getSearchSourceStub();
-
       return fetchSuccessors(
         'INDEX_PATTERN_ID',
         '@timestamp',
@@ -208,8 +205,6 @@ describe('context app', function () {
     });
 
     it('should set the tiebreaker sort order to the same as the time field', function () {
-      const searchSourceStub = getSearchSourceStub();
-
       return fetchSuccessors(
         'INDEX_PATTERN_ID',
         '@timestamp',

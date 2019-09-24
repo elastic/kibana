@@ -17,4 +17,25 @@
  * under the License.
  */
 
-export type SearchSource = any;
+export declare class SearchSource {
+  setPreferredSearchStrategyId: (searchStrategyId: string) => void;
+  getPreferredSearchStrategyId: () => string;
+  setFields: (newFields: any) => SearchSource;
+  setField: (field: string, value: any) => SearchSource;
+  getId: () => string;
+  getFields: () => any;
+  getField: (field: string) => any;
+  getOwnField: () => any;
+  create: () => SearchSource;
+  createCopy: () => SearchSource;
+  createChild: (options?: any) => SearchSource;
+  setParent: (parent: SearchSource | boolean) => SearchSource;
+  getParent: () => SearchSource | undefined;
+  fetch: (options: any) => Promise<any>;
+  onRequestStart: (
+    handler: (searchSource: SearchSource, request: any, options: any) => void
+  ) => void;
+  getSearchRequestBody: () => any;
+  destroy: () => void;
+  history: any[];
+}

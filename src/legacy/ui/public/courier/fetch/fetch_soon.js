@@ -19,15 +19,20 @@
 
 import { callClient } from './call_client';
 import { npSetup } from 'ui/new_platform';
+import chrome from '../../chrome';
 
 const config = npSetup.core.uiSettings;
 const esShardTimeout = npSetup.core.injectedMetadata.getInjectedVar('esShardTimeout');
+
 /**
- * This is usually the right fetch provider to use, rather than FetchNowProvider, as this class introduces
- * a slight delay in the request process to allow multiple requests to queue up (e.g. when a dashboard
- * is loading).
+ * This function introduces a slight delay in the request process to allow multiple requests to queue
+ * up (e.g. when a dashboard is loading).
  */
-export function FetchSoonProvider(es) {
+export async function fetchSoon(request, options) {
+  const delay = config.get('courier:batchSearches') ? 50 : 0;
+  return delayedFetch(request, options, delay);
+}
+
 /**
    * Delays executing a function for a given amount of time, and returns a promise that resolves
    * with the result.
@@ -35,42 +40,38 @@ export function FetchSoonProvider(es) {
    * @param ms The number of milliseconds to wait
    * @return Promise<any> A promise that resolves with the result of executing the function
    */
-  function delay(fn, ms) {
-    return new Promise(resolve => {
-      setTimeout(() => resolve(fn()), ms);
-    });
-  }
+function delay(fn, ms) {
+  return new Promise(resolve => {
+    setTimeout(() => resolve(fn()), ms);
+  });
+}
 
-  // The current batch/queue of requests to fetch
-  let requestsToFetch = [];
-  let requestOptions = [];
+// The current batch/queue of requests to fetch
+let requestsToFetch = [];
+let requestOptions = [];
 
-  // The in-progress fetch (if there is one)
-  let fetchInProgress = null;
+// The in-progress fetch (if there is one)
+let fetchInProgress = null;
 
-  /**
+/**
    * Delay fetching for a given amount of time, while batching up the requests to be fetched.
    * Returns a promise that resolves with the response for the given request.
    * @param request The request to fetch
    * @param ms The number of milliseconds to wait (and batch requests)
    * @return Promise<SearchResponse> The response for the given request
    */
-  async function delayedFetch(request, options, ms) {
-    const i = requestsToFetch.length;
-    requestsToFetch = [...requestsToFetch, request];
-    requestOptions = [...requestOptions, options];
-    const responses = await (fetchInProgress = fetchInProgress || delay(() => {
-      const response = callClient(requestsToFetch, requestOptions, { es, config, esShardTimeout });
-      requestsToFetch = [];
-      requestOptions = [];
-      fetchInProgress = null;
-      return response;
-    }, ms));
-    return responses[i];
-  }
-
-  this.fetch = (request, options) => {
-    const delay = config.get('courier:batchSearches') ? 50 : 0;
-    return delayedFetch(request, options, delay);
-  };
+async function delayedFetch(request, options, ms) {
+  const $injector = await chrome.dangerouslyGetActiveInjector();
+  const es = $injector.get('es');
+  const i = requestsToFetch.length;
+  requestsToFetch = [...requestsToFetch, request];
+  requestOptions = [...requestOptions, options];
+  const responses = await (fetchInProgress = fetchInProgress || delay(() => {
+    const response = callClient(requestsToFetch, requestOptions, { es, config, esShardTimeout });
+    requestsToFetch = [];
+    requestOptions = [];
+    fetchInProgress = null;
+    return response;
+  }, ms));
+  return responses[i];
 }

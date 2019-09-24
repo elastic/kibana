@@ -34,7 +34,7 @@ import { AggConfigs } from './agg_configs';
 import { PersistedState } from '../persisted_state';
 import { FilterBarQueryFilterProvider } from '../filter_manager/query_filter';
 import { updateVisualizationConfig } from './vis_update';
-import { SearchSourceProvider } from '../courier/search_source';
+import { SearchSource } from '../courier';
 import { SavedObjectsClientProvider } from '../saved_objects';
 
 import { timefilter } from '../timefilter';
@@ -43,7 +43,6 @@ import '../directives/bind';
 export function VisProvider(Private, indexPatterns, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const SearchSource = Private(SearchSourceProvider);
   const savedObjectsClient = Private(SavedObjectsClientProvider);
 
   class Vis extends EventEmitter {
