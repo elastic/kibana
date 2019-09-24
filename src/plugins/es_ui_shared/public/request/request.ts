@@ -27,7 +27,7 @@ export interface SendRequestConfig {
 
 export interface SendRequestResponse {
   data: any;
-  error: Error;
+  error: Error | null;
 }
 
 export interface UseRequestConfig extends SendRequestConfig {
@@ -41,13 +41,13 @@ export interface UseRequestResponse {
   isLoading: boolean;
   error: null | unknown;
   data: any;
-  sendRequest: (...args: any[]) => Promise<any>;
+  sendRequest: (...args: any[]) => Promise<SendRequestResponse>;
 }
 
 export const sendRequest = async (
   httpClient: ng.IHttpService,
   { path, method, body }: SendRequestConfig
-): Promise<Partial<SendRequestResponse>> => {
+): Promise<SendRequestResponse> => {
   try {
     const response = await (httpClient as any)[method](path, body);
 
@@ -55,9 +55,10 @@ export const sendRequest = async (
       throw new Error(response.statusText);
     }
 
-    return { data: response.data };
+    return { data: response.data, error: null };
   } catch (e) {
     return {
+      data: null,
       error: e.response ? e.response : e,
     };
   }
@@ -120,7 +121,7 @@ export const useRequest = (
     // If an outdated request has resolved, DON'T update state, but DO allow the processData handler
     // to execute side effects like update telemetry.
     if (isOutdatedRequest) {
-      return;
+      return { data: null, error: null };
     }
 
     setError(responseError);
@@ -131,6 +132,8 @@ export const useRequest = (
     // If we're on an interval, we need to schedule the next request. This also allows us to reset
     // the interval if the user has manually requested the data, to avoid doubled-up requests.
     scheduleRequest();
+
+    return { data: serializedResponseData, error: responseError };
   };
 
   useEffect(() => {
