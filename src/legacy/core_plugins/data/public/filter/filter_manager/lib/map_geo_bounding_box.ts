@@ -41,7 +41,7 @@ const getFormattedValue = (params: any, key: string, indexPattern?: IndexPattern
       };
 };
 
-function getParams(filter: GeoBoundingBoxFilter, indexPattern?: IndexPattern) {
+const getParams = (filter: GeoBoundingBoxFilter, indexPattern?: IndexPattern) => {
   const key = Object.keys(filter.geo_bounding_box).filter(k => k !== 'ignore_unmapped')[0];
   const params = filter.geo_bounding_box[key];
   const { topLeft, bottomRight } = getFormattedValue(params, key, indexPattern);
@@ -61,8 +61,11 @@ export const mapGeoBoundingBox = (indexPatterns: IndexPatterns) => {
     }
 
     try {
-      const index = filter.meta.index || '';
-      const indexPattern = await indexPatterns.get(index);
+      let indexPattern;
+
+      if (filter.meta.index) {
+        indexPattern = await indexPatterns.get(filter.meta.index);
+      }
 
       return getParams(filter, indexPattern);
     } catch (error) {

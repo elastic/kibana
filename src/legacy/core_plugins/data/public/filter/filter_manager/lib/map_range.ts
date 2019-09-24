@@ -68,7 +68,11 @@ export const mapRange = (indexPatterns: IndexPatterns) => {
     }
 
     try {
-      const indexPattern = await indexPatterns.get(filter.meta.index || '');
+      let indexPattern;
+
+      if (filter.meta.index) {
+        indexPattern = await indexPatterns.get(filter.meta.index);
+      }
 
       return getParams(filter, indexPattern);
     } catch (error) {

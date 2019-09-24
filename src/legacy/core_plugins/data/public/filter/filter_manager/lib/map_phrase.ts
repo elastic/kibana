@@ -59,8 +59,11 @@ export const mapPhrase = (indexPatterns: IndexPatterns) => {
     }
 
     try {
-      const index = filter.meta.index || '';
-      const indexPattern = await indexPatterns.get(index);
+      let indexPattern;
+
+      if (filter.meta.index) {
+        indexPattern = await indexPatterns.get(filter.meta.index);
+      }
 
       return getParams(filter, indexPattern);
     } catch (error) {
