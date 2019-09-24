@@ -91,7 +91,6 @@ export class GitOperations {
 
   public async blame(uri: RepositoryUri, revision: string, path: string): Promise<GitBlame[]> {
     const git = await this.openGit(uri);
-    // @ts-ignore
     const blameSummary: BlameSummary = await git.blame(revision, path);
     const results: GitBlame[] = [];
     for (const blame of blameSummary.blames) {
@@ -358,7 +357,6 @@ export class GitOperations {
             break;
           case DiffKind.MODIFIED:
             {
-              // @ts-ignore
               const path = diff.rename || diff.file;
               const modifiedCode = await this.getModifiedCode(git, commit, path);
               const originPath = diff.file;
@@ -378,7 +376,6 @@ export class GitOperations {
             break;
           case DiffKind.RENAMED:
             {
-              // @ts-ignore
               const path = diff.rename || diff.file;
               commitDiff.files.push({
                 path,
@@ -425,7 +422,6 @@ export class GitOperations {
       kind = DiffKind.ADDED;
     } else if (diff.changes === diff.deletions) {
       kind = DiffKind.DELETED;
-      // @ts-ignore
     } else if (diff.rename) {
       kind = DiffKind.RENAMED;
     }
