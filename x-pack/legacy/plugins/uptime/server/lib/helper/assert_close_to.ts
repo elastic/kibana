@@ -6,6 +6,6 @@
 
 export const assertCloseTo = (actual: number, expected: number, precision: number) => {
   if (Math.abs(expected - actual) > precision) {
-    throw new Error(`expected [${actual}] to be within ${precision} of ${actual}`);
+    throw new Error(`expected [${expected}] to be within ${precision} of ${actual}`);
   }
 };
