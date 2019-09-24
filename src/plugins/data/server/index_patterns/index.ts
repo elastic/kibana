@@ -17,12 +17,4 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/server';
-import { DataServerPlugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DataServerPlugin(initializerContext);
-}
-
-export { DataServerPlugin as Plugin };
-export { IndexPatternsService, FieldDescriptor } from './index_patterns';
+export { IndexPatternsService, FieldDescriptor } from './service';

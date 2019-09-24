@@ -24,7 +24,7 @@ import {
   KibanaRequest,
   RequestHandlerContext,
   APICaller,
-} from '../../../core/server';
+} from '../../../../core/server';
 import { IndexPatternsService } from './service';
 
 export function registerRoutes(core: InternalCoreSetup) {

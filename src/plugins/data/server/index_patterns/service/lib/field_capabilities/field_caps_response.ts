@@ -18,9 +18,9 @@
  */
 
 import { uniq } from 'lodash';
-import { FieldDescriptor } from '../..';
+import { castEsToKbnFieldTypeName } from '../../../../../../../legacy/utils';
 import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
-import { castEsToKbnFieldTypeName } from '../../../../../../plugins/data/common';
+import { FieldDescriptor } from '../..';
 
 interface FieldCapObject {
   type: string;

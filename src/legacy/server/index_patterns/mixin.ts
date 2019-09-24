@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import { IndexPatternsService } from './service';
+import { IndexPatternsService } from '../../../plugins/data/server';
 import KbnServer from '../kbn_server';
 import { APICaller } from '../../../core/server';
 import { Legacy } from '../../../../kibana';
-import { registerRoutes } from './routes';
 
 export function indexPatternsMixin(kbnServer: KbnServer, server: Legacy.Server) {
   /**
@@ -47,8 +46,6 @@ export function indexPatternsMixin(kbnServer: KbnServer, server: Legacy.Server) 
       callWithRequest(request, endpoint, params, options);
     return server.indexPatternsServiceFactory({ callCluster });
   });
-
-  registerRoutes(kbnServer.newPlatform.setup.core);
 }
 
 export type IndexPatternsServiceFactory = (args: {
