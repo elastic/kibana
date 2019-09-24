@@ -108,6 +108,7 @@ export function getScaleType(metadata: OperationMetadata | null, defaultScale: S
   switch (metadata.dataType) {
     case 'boolean':
     case 'string':
+    case 'ip':
       return ScaleType.Ordinal;
     case 'date':
       return ScaleType.Time;

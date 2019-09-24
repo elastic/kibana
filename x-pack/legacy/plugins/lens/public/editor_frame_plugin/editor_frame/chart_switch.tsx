@@ -176,8 +176,9 @@ export function ChartSwitch(props: Props) {
     <EuiPopover
       id="lnsChartSwitchPopover"
       ownFocus
-      initialFocus=".lnsChartSwitchPopoverPanel"
-      panelClassName="lnsChartSwitchPopoverPanel"
+      initialFocus=".lnsChartSwitch__popoverPanel"
+      panelClassName="lnsChartSwitch__popoverPanel"
+      panelPaddingSize="s"
       button={
         <EuiButtonEmpty
           size="xs"
@@ -224,7 +225,7 @@ export function ChartSwitch(props: Props) {
             }
             betaBadgeIconType={v.selection.dataLoss !== 'nothing' ? 'alert' : undefined}
           >
-            <EuiIcon type={v.icon || 'empty'} />
+            <EuiIcon type={v.icon || 'empty'} size="l" />
           </EuiKeyPadMenuItemButton>
         ))}
       </EuiKeyPadMenu>
@@ -232,7 +233,7 @@ export function ChartSwitch(props: Props) {
   );
 
   return (
-    <div className="lnsSidebar__header">
+    <div className="lnsChartSwitch__header">
       <EuiTitle size="xs">
         <h3>
           <VisualizationSummary {...props} /> {popover}

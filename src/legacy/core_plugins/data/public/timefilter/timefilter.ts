@@ -19,26 +19,13 @@
 
 import _ from 'lodash';
 import { Subject, BehaviorSubject } from 'rxjs';
-import moment, { Moment } from 'moment';
+import moment from 'moment';
 import { RefreshInterval, TimeRange } from 'src/plugins/data/public';
-import { IndexPattern } from 'src/legacy/core_plugins/data/public';
-import { TimeHistory } from './time_history';
+import { IndexPattern, TimeHistoryContract } from '../index';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
 import { parseQueryString } from './lib/parse_querystring';
 import { calculateBounds, getTime } from './get_time';
-
-export interface TimefilterConfig {
-  timeDefaults: TimeRange;
-  refreshIntervalDefaults: RefreshInterval;
-}
-
-// Timefilter accepts moment input but always returns string output
-export type InputTimeRange =
-  | TimeRange
-  | {
-      from: Moment;
-      to: Moment;
-    };
+import { TimefilterConfig, InputTimeRange } from './types';
 
 export class Timefilter {
   // Fired when isTimeRangeSelectorEnabled \ isAutoRefreshSelectorEnabled are toggled
@@ -53,38 +40,46 @@ export class Timefilter {
 
   private _time: TimeRange;
   private _refreshInterval!: RefreshInterval;
-  private _history: TimeHistory;
+  private _history: TimeHistoryContract;
 
-  public isTimeRangeSelectorEnabled: boolean = false;
-  public isAutoRefreshSelectorEnabled: boolean = false;
+  private _isTimeRangeSelectorEnabled: boolean = false;
+  private _isAutoRefreshSelectorEnabled: boolean = false;
 
-  constructor(config: TimefilterConfig, timeHistory: TimeHistory) {
+  constructor(config: TimefilterConfig, timeHistory: TimeHistoryContract) {
     this._history = timeHistory;
     this._time = config.timeDefaults;
     this.setRefreshInterval(config.refreshIntervalDefaults);
   }
 
-  getEnabledUpdated$ = () => {
+  public isTimeRangeSelectorEnabled() {
+    return this._isTimeRangeSelectorEnabled;
+  }
+
+  public isAutoRefreshSelectorEnabled() {
+    return this._isAutoRefreshSelectorEnabled;
+  }
+
+  public getEnabledUpdated$ = () => {
     return this.enabledUpdated$.asObservable();
   };
 
-  getTimeUpdate$ = () => {
+  public getTimeUpdate$ = () => {
     return this.timeUpdate$.asObservable();
   };
 
-  getRefreshIntervalUpdate$ = () => {
+  public getRefreshIntervalUpdate$ = () => {
     return this.refreshIntervalUpdate$.asObservable();
   };
 
-  getAutoRefreshFetch$ = () => {
+  public getAutoRefreshFetch$ = () => {
     return this.autoRefreshFetch$.asObservable();
   };
 
-  getFetch$ = () => {
+  public getFetch$ = () => {
     return this.fetch$.asObservable();
   };
 
-  getTime = (): TimeRange => {
+  public getTime = (): TimeRange => {
     const { from, to } = this._time;
     return {
       ...this._time,
@@ -100,7 +95,7 @@ export class Timefilter {
    * @property {string|moment} time.from
    * @property {string|moment} time.to
    */
-  setTime = (time: InputTimeRange) => {
+  public setTime = (time: InputTimeRange) => {
     // Object.assign used for partially composed updates
     const newTime = Object.assign(this.getTime(), time);
     if (areTimeRangesDifferent(this.getTime(), newTime)) {
@@ -114,7 +109,7 @@ export class Timefilter {
     }
   };
 
-  getRefreshInterval = () => {
+  public getRefreshInterval = () => {
     return _.clone(this._refreshInterval);
   };
 
@@ -124,7 +119,7 @@ export class Timefilter {
    * @property {number} time.value Refresh interval in milliseconds. Positive integer
    * @property {boolean} time.pause
    */
-  setRefreshInterval = (refreshInterval: Partial<RefreshInterval>) => {
+  public setRefreshInterval = (refreshInterval: Partial<RefreshInterval>) => {
     const prevRefreshInterval = this.getRefreshInterval();
     const newRefreshInterval = { ...prevRefreshInterval, ...refreshInterval };
     // If the refresh interval is <= 0 handle that as a paused refresh
@@ -149,22 +144,65 @@ export class Timefilter {
     }
   };
 
-  toggleRefresh = () => {
-    this.setRefreshInterval({
-      pause: !this._refreshInterval.pause,
-      value: this._refreshInterval.value,
-    });
-  };
-
-  createFilter = (indexPattern: IndexPattern, timeRange?: TimeRange) => {
+  public createFilter = (indexPattern: IndexPattern, timeRange?: TimeRange) => {
     return getTime(indexPattern, timeRange ? timeRange : this._time, this.getForceNow());
   };
 
-  getBounds = () => {
+  public getBounds = () => {
     return this.calculateBounds(this._time);
   };
 
-  getForceNow = () => {
+  public calculateBounds = (timeRange: TimeRange) => {
+    return calculateBounds(timeRange, { forceNow: this.getForceNow() });
+  };
+
+  public getActiveBounds = () => {
+    if (this.isTimeRangeSelectorEnabled) {
+      return this.getBounds();
+    }
+  };
+
+  /**
+   * Show the time bounds selector part of the time filter
+   */
+  public enableTimeRangeSelector = () => {
+    this._isTimeRangeSelectorEnabled = true;
+    this.enabledUpdated$.next(true);
+  };
+
+  /**
+   * Hide the time bounds selector part of the time filter
+   */
+  public disableTimeRangeSelector = () => {
+    this._isTimeRangeSelectorEnabled = false;
+    this.enabledUpdated$.next(false);
+  };
+
+  /**
+   * Show the auto refresh part of the time filter
+   */
+  public enableAutoRefreshSelector = () => {
+    this._isAutoRefreshSelectorEnabled = true;
+    this.enabledUpdated$.next(true);
+  };
+
+  /**
+   * Hide the auto refresh part of the time filter
+   */
+  public disableAutoRefreshSelector = () => {
+    this._isAutoRefreshSelectorEnabled = false;
+    this.enabledUpdated$.next(false);
+  };
+
+  /**
+   * Added to allow search_poll to trigger an auto refresh event.
+   * Before this change, search_poll used to access a now private member of this instance.
+   */
+  public notifyShouldFetch = () => {
+    this.autoRefreshFetch$.next();
+  };
+
+  private getForceNow = () => {
     const forceNow = parseQueryString().forceNow as string;
     if (!forceNow) {
       return;
@@ -176,50 +214,6 @@ export class Timefilter {
     }
     return new Date(ticks);
   };
-
-  calculateBounds = (timeRange: TimeRange) => {
-    return calculateBounds(timeRange, { forceNow: this.getForceNow() });
-  };
-
-  getActiveBounds = () => {
-    if (this.isTimeRangeSelectorEnabled) {
-      return this.getBounds();
-    }
-  };
-
-  /**
-   * Show the time bounds selector part of the time filter
-   */
-  enableTimeRangeSelector = () => {
-    this.isTimeRangeSelectorEnabled = true;
-    this.enabledUpdated$.next(true);
-  };
-
-  /**
-   * Hide the time bounds selector part of the time filter
-   */
-  disableTimeRangeSelector = () => {
-    this.isTimeRangeSelectorEnabled = false;
-    this.enabledUpdated$.next(false);
-  };
-
-  /**
-   * Show the auto refresh part of the time filter
-   */
-  enableAutoRefreshSelector = () => {
-    this.isAutoRefreshSelectorEnabled = true;
-    this.enabledUpdated$.next(true);
-  };
-
-  /**
-   * Hide the auto refresh part of the time filter
-   */
-  disableAutoRefreshSelector = () => {
-    this.isAutoRefreshSelectorEnabled = false;
-    this.enabledUpdated$.next(false);
-  };
-
-  notifyShouldFetch = () => {
-    this.autoRefreshFetch$.next();
-  };
 }
+
+export type TimefilterContract = PublicMethodsOf<Timefilter>;
