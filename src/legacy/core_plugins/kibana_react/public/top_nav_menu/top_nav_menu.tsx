@@ -21,7 +21,7 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
-import { UiSettingsClientContract, SavedObjectsClientContract, CoreStart } from 'src/core/public';
+import { UiSettingsClientContract, CoreStart } from 'src/core/public';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 import { SearchBar, SearchBarProps } from '../../../../core_plugins/data/public';
@@ -30,8 +30,9 @@ import { KibanaContextProvider } from '../../../../../plugins/kibana_react/publi
 type Props = Partial<SearchBarProps> & {
   name: string;
   uiSettings: UiSettingsClientContract;
-  savedObjectsClient: SavedObjectsClientContract;
-  toasts: CoreStart['notifications']['toasts'];
+  savedObjects: CoreStart['savedObjects'];
+  notifications: CoreStart['notifications'];
+  http: CoreStart['http'];
   config?: TopNavMenuData[];
   showSearchBar?: boolean;
 };
@@ -59,20 +60,21 @@ export function TopNavMenu(props: Props) {
 
   function renderSearchBar() {
     // Validate presense of all required fields
-    if (!props.showSearchBar || !props.savedObjectsClient || !props.http) return;
+    if (!props.showSearchBar || !props.savedObjects || !props.http) return;
     return (
       <KibanaContextProvider
         services={{
           uiSettings: props.uiSettings,
+          http: props.http,
+          notifications: props.notifications,
+          savedObjects: props.savedObjects,
         }}
       >
         <SearchBar
-          savedObjectsClient={props.savedObjectsClient}
-          http={props.http}
+          notifications={props.notifications}
+          savedObjects={props.savedObjects}
           query={props.query}
           filters={props.filters}
-          toasts={props.toasts}
-          uiSettings={props.uiSettings}
           showQueryBar={props.showQueryBar}
           showQueryInput={props.showQueryInput}
           showFilterBar={props.showFilterBar}

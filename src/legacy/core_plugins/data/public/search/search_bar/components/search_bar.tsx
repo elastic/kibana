@@ -25,14 +25,7 @@ import ResizeObserver from 'resize-observer-polyfill';
 import { Storage } from 'ui/storage';
 import { get, isEqual } from 'lodash';
 
-import { toastNotifications } from 'ui/notify';
-
-import {
-  CoreStart,
-  UiSettingsClientContract,
-  SavedObjectsClientContract,
-  HttpServiceBase,
-} from 'src/core/public';
+import { CoreStart } from 'src/core/public';
 import { IndexPattern, Query, FilterBar } from '../../../../../data/public';
 import { QueryBarTopRow } from '../../../query';
 import { SavedQuery, SavedQueryAttributes } from '../index';
@@ -53,11 +46,8 @@ interface DateRange {
 export interface SearchBarProps {
   appName: string;
   intl: InjectedIntl;
-  toasts: CoreStart['notifications']['toasts'];
-  uiSettings: UiSettingsClientContract;
-  savedObjectsClient: SavedObjectsClientContract;
   indexPatterns?: IndexPattern[];
-  http: HttpServiceBase;
+
   // Query bar
   showQueryBar?: boolean;
   showQueryInput?: boolean;
@@ -84,10 +74,13 @@ export interface SearchBarProps {
   onSavedQueryUpdated?: (savedQuery: SavedQuery) => void;
   onClearSavedQuery?: () => void;
   customSubmitButton?: React.ReactNode;
+
+  // TODO: deprecate
+  savedObjects: CoreStart['savedObjects'];
+  notifications: CoreStart['notifications'];
 }
 
 interface State {
-  savedQueryService: SavedQueryService;
   isFiltersVisible: boolean;
   showSaveQueryModal: boolean;
   showSaveNewQueryModal: boolean;
@@ -105,6 +98,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     showDatePicker: true,
     showAutoRefreshOnly: false,
   };
+
+  private savedQueryService!: SavedQueryService;
 
   public filterBarRef: Element | null = null;
   public filterBarWrapperRef: Element | null = null;
@@ -176,7 +171,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     query: this.props.query ? { ...this.props.query } : undefined,
     dateRangeFrom: get(this.props, 'dateRangeFrom', 'now-15m'),
     dateRangeTo: get(this.props, 'dateRangeTo', 'now'),
-    savedQueryService: createSavedQueryService(this.props.savedObjectsClient),
   };
 
   public isDirty = () => {
@@ -250,14 +244,16 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     try {
       let response;
       if (this.props.savedQuery && !saveAsNew) {
-        response = await this.state.savedQueryService.saveQuery(savedQueryAttributes, {
+        response = await this.savedQueryService.saveQuery(savedQueryAttributes, {
           overwrite: true,
         });
       } else {
-        response = await this.state.savedQueryService.saveQuery(savedQueryAttributes);
+        response = await this.savedQueryService.saveQuery(savedQueryAttributes);
       }
 
-      toastNotifications.addSuccess(`Your query "${response.attributes.title}" was saved`);
+      this.props.notifications.toasts.addSuccess(
+        `Your query "${response.attributes.title}" was saved`
+      );
 
       this.setState({
         showSaveQueryModal: false,
@@ -268,7 +264,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         this.props.onSaved(response);
       }
     } catch (error) {
-      toastNotifications.addDanger(`An error occured while saving your query: ${error.message}`);
+      this.props.notifications.toasts.addDanger(
+        `An error occured while saving your query: ${error.message}`
+      );
       throw error;
     }
   };
@@ -337,6 +335,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       this.setFilterBarHeight();
       this.ro.observe(this.filterBarRef);
     }
+    if (this.props.savedObjects) {
+      this.savedQueryService = createSavedQueryService(this.props.savedObjects!.client);
+    }
   }
 
   public componentDidUpdate() {
@@ -347,12 +348,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   public render() {
-    // This is needed, as kbn-top-nav might render before npSetup.core.uiSettings is set.
-    // This won't be needed when it's loaded exclusively with React.
-    if (!this.props.uiSettings) {
-      return null;
-    }
-
     const savedQueryManagement = this.state.query && this.props.onClearSavedQuery && (
       <SavedQueryManagementComponent
         showSaveQuery={this.props.showSaveQuery}
@@ -360,7 +355,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onSave={this.onInitiateSave}
         onSaveAsNew={this.onInitiateSaveNew}
         onLoad={this.onLoadSavedQuery}
-        savedQueryService={this.state.savedQueryService}
+        savedQueryService={this.savedQueryService}
         onClearSavedQuery={this.props.onClearSavedQuery}
       ></SavedQueryManagementComponent>
     );
@@ -369,10 +364,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     if (this.shouldRenderQueryBar()) {
       queryBar = (
         <QueryBarTopRow
-          toasts={this.props.toasts}
-          http={this.props.http}
-          uiSettings={this.props.uiSettings}
-          savedObjectsClient={this.props.savedObjectsClient}
           query={this.state.query}
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}
@@ -434,7 +425,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         {this.state.showSaveQueryModal ? (
           <SaveQueryForm
             savedQuery={this.props.savedQuery ? this.props.savedQuery.attributes : undefined}
-            savedQueryService={this.state.savedQueryService}
+            savedQueryService={this.savedQueryService}
             onSave={this.onSave}
             onClose={() => this.setState({ showSaveQueryModal: false })}
             showFilterOption={this.props.showFilterBar}
@@ -443,7 +434,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         ) : null}
         {this.state.showSaveNewQueryModal ? (
           <SaveQueryForm
-            savedQueryService={this.state.savedQueryService}
+            savedQueryService={this.savedQueryService}
             onSave={savedQueryMeta => this.onSave(savedQueryMeta, true)}
             onClose={() => this.setState({ showSaveNewQueryModal: false })}
             showFilterOption={this.props.showFilterBar}

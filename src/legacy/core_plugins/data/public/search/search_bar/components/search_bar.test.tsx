@@ -96,13 +96,11 @@ describe('SearchBar', () => {
   it('Should render query bar when no options provided (in reality - timepicker)', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
-        savedObjectsClient={startMock.savedObjects.client}
-        uiSettings={startMock.uiSettings}
-        toasts={startMock.notifications.toasts}
+        savedObjects={startMock.savedObjects}
+        notifications={startMock.notifications}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
-        http={startMock.http}
       />
     );
 
@@ -114,13 +112,11 @@ describe('SearchBar', () => {
   it('Should render empty when timepicker is off and no options provided', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
-        savedObjectsClient={startMock.savedObjects.client}
-        uiSettings={startMock.uiSettings}
-        toasts={startMock.notifications.toasts}
+        savedObjects={startMock.savedObjects}
+        notifications={startMock.notifications}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
-        http={startMock.http}
         showDatePicker={false}
       />
     );
@@ -133,13 +129,11 @@ describe('SearchBar', () => {
   it('Should render filter bar, when required fields are provided', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
-        savedObjectsClient={startMock.savedObjects.client}
-        uiSettings={startMock.uiSettings}
-        toasts={startMock.notifications.toasts}
+        savedObjects={startMock.savedObjects}
+        notifications={startMock.notifications}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
-        http={startMock.http}
         filters={[]}
         onFiltersUpdated={noop}
         showDatePicker={false}
@@ -154,13 +148,11 @@ describe('SearchBar', () => {
   it('Should NOT render filter bar, if disabled', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
-        savedObjectsClient={startMock.savedObjects.client}
-        uiSettings={startMock.uiSettings}
-        toasts={startMock.notifications.toasts}
+        savedObjects={startMock.savedObjects}
+        notifications={startMock.notifications}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
-        http={startMock.http}
         showFilterBar={false}
         filters={[]}
         onFiltersUpdated={noop}
@@ -176,13 +168,11 @@ describe('SearchBar', () => {
   it('Should render query bar, when required fields are provided', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
-        savedObjectsClient={startMock.savedObjects.client}
-        uiSettings={startMock.uiSettings}
-        toasts={startMock.notifications.toasts}
+        savedObjects={startMock.savedObjects}
+        notifications={startMock.notifications}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
-        http={startMock.http}
         screenTitle={'test screen'}
         store={createMockStorage()}
         onQuerySubmit={noop}
@@ -198,13 +188,11 @@ describe('SearchBar', () => {
   it('Should NOT render query bar, if disabled', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
-        uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
-        toasts={startMock.notifications.toasts}
+        savedObjects={startMock.savedObjects}
+        notifications={startMock.notifications}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
-        http={startMock.http}
         screenTitle={'test screen'}
         store={createMockStorage()}
         onQuerySubmit={noop}
@@ -221,13 +209,11 @@ describe('SearchBar', () => {
   it('Should render query bar and filter bar', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
-        uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
-        toasts={startMock.notifications.toasts}
+        savedObjects={startMock.savedObjects}
+        notifications={startMock.notifications}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
-        http={startMock.http}
         screenTitle={'test screen'}
         store={createMockStorage()}
         onQuerySubmit={noop}

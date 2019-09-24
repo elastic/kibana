@@ -22,8 +22,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import { TopNavMenu } from '../../../core_plugins/kibana_react/public';
 import { Storage } from 'ui/storage';
-import chrome from 'ui/chrome';
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
 
 const module = uiModules.get('kibana');
@@ -49,16 +48,18 @@ module.directive('kbnTopNav', () => {
       child.setAttribute('http', 'http');
       child.setAttribute('store', 'store');
       child.setAttribute('ui-settings', 'uiSettings');
-      child.setAttribute('saved-objects-client', 'savedObjectsClient');
+      child.setAttribute('saved-objects', 'savedObjects');
+      child.setAttribute('notifications', 'notifications');
 
       // Append helper directive
       elem.append(child);
 
       const linkFn = ($scope, _, $attr) => {
         $scope.store = localStorage;
-        $scope.http = npSetup.core.http;
-        $scope.uiSettings = npSetup.core.uiSettings;
-        $scope.savedObjectsClient = chrome.getSavedObjectsClient();
+        $scope.http = npStart.core.http;
+        $scope.uiSettings = npStart.core.uiSettings;
+        $scope.savedObjects = npStart.core.savedObjects;
+        $scope.notifications = npStart.core.notifications;
 
         // Watch config changes
         $scope.$watch(() => {
@@ -100,7 +101,8 @@ module.directive('kbnTopNavHelper', (reactDirective) => {
       ['savedQuery', { watchDepth: 'reference' }],
       ['store', { watchDepth: 'reference' }],
       ['uiSettings', { watchDepth: 'reference' }],
-      ['savedObjectsClient', { watchDepth: 'reference' }],
+      ['savedObjects', { watchDepth: 'reference' }],
+      ['notifications', { watchDepth: 'reference' }],
       ['intl', { watchDepth: 'reference' }],
       ['store', { watchDepth: 'reference' }],
       ['http', { watchDepth: 'reference' }],

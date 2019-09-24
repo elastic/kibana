@@ -57,9 +57,10 @@ describe('TopNavMenu', () => {
     const component = shallowWithIntl(
       <TopNavMenu
         name="test"
-        toasts={startMock.notifications.toasts}
+        notifications={startMock.notifications}
         uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
+        savedObjects={startMock.savedObjects}
+        http={startMock.http}
       />
     );
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
@@ -70,9 +71,10 @@ describe('TopNavMenu', () => {
     const component = shallowWithIntl(
       <TopNavMenu
         name="test"
-        toasts={startMock.notifications.toasts}
+        notifications={startMock.notifications}
         uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
+        savedObjects={startMock.savedObjects}
+        http={startMock.http}
         config={[menuItems[0]]}
       />
     );
@@ -84,9 +86,10 @@ describe('TopNavMenu', () => {
     const component = shallowWithIntl(
       <TopNavMenu
         name="test"
-        toasts={startMock.notifications.toasts}
+        notifications={startMock.notifications}
         uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
+        savedObjects={startMock.savedObjects}
+        http={startMock.http}
         config={menuItems}
       />
     );
@@ -98,9 +101,9 @@ describe('TopNavMenu', () => {
     const component = shallowWithIntl(
       <TopNavMenu
         name="test"
-        toasts={startMock.notifications.toasts}
+        notifications={startMock.notifications}
         uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
+        savedObjects={startMock.savedObjects}
         http={startMock.http}
         showSearchBar={true}
       />

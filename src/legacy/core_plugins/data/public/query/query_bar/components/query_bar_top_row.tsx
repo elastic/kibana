@@ -20,7 +20,7 @@
 import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
 
 import classNames from 'classnames';
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Storage } from 'ui/storage';
 import { timeHistory } from 'ui/timefilter';
 
@@ -32,15 +32,10 @@ import { EuiSuperUpdateButton } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { documentationLinks } from 'ui/documentation_links';
 import { PersistedLog } from 'ui/persisted_log';
-import {
-  UiSettingsClientContract,
-  SavedObjectsClientContract,
-  Toast,
-  CoreStart,
-  HttpServiceBase,
-} from 'src/core/public';
+import { Toast } from 'src/core/public';
 import { IndexPattern } from '../../../index_patterns';
 import { QueryBarInput } from './query_bar_input';
+import { useKibana } from '../../../../../../../plugins/kibana_react/public';
 
 import { getQueryLog } from '../lib/get_query_log';
 import { Query } from '../index';
@@ -71,55 +66,46 @@ interface Props {
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   customSubmitButton?: any;
   isDirty: boolean;
-  toasts: CoreStart['notifications']['toasts'];
-  uiSettings: UiSettingsClientContract;
-  savedObjectsClient: SavedObjectsClientContract;
-  http: HttpServiceBase;
 }
 
-interface State {
-  isDateRangeInvalid: boolean;
-}
+function QueryBarTopRowUI(props: Props) {
+  const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
 
-export class QueryBarTopRowUI extends Component<Props, State> {
-  public static defaultProps = {
-    showQueryInput: true,
-    showDatePicker: true,
-    showAutoRefreshOnly: false,
-  };
+  const kibana = useKibana();
+  const { uiSettings, http, notifications, savedObjects } = kibana.services;
 
-  public state = {
-    isDateRangeInvalid: false,
-  };
+  const queryLanguage = props.query && props.query.language;
+  let persistedLog: PersistedLog | undefined;
 
-  public inputRef: HTMLInputElement | null = null;
+  useEffect(() => {
+    if (!props.query) return;
+    persistedLog = getQueryLog(uiSettings!, props.appName, props.query.language);
+  }, [queryLanguage]);
 
-  private persistedLog: PersistedLog | undefined;
-
-  public onClickSubmitButton = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (this.persistedLog && this.props.query) {
-      this.persistedLog.add(this.props.query.query);
+  function onClickSubmitButton(event: React.MouseEvent<HTMLButtonElement>) {
+    if (persistedLog && props.query) {
+      persistedLog.add(props.query.query);
     }
     event.preventDefault();
-    this.onSubmit({ query: this.props.query, dateRange: this.getDateRange() });
-  };
+    onSubmit({ query: props.query, dateRange: getDateRange() });
+  }
 
-  public getDateRange() {
-    const defaultTimeSetting = this.props.uiSettings.get('timepicker:timeDefaults');
+  function getDateRange() {
+    const defaultTimeSetting = uiSettings!.get('timepicker:timeDefaults');
     return {
-      from: this.props.dateRangeFrom || defaultTimeSetting.from,
-      to: this.props.dateRangeTo || defaultTimeSetting.to,
+      from: props.dateRangeFrom || defaultTimeSetting.from,
+      to: props.dateRangeTo || defaultTimeSetting.to,
     };
   }
 
-  public onQueryChange = (query: Query) => {
-    this.props.onChange({
+  function onQueryChange(query: Query) {
+    props.onChange({
       query,
-      dateRange: this.getDateRange(),
+      dateRange: getDateRange(),
     });
-  };
+  }
 
-  public onTimeChange = ({
+  function onTimeChange({
     start,
     end,
     isInvalid,
@@ -129,140 +115,94 @@ export class QueryBarTopRowUI extends Component<Props, State> {
     end: string;
     isInvalid: boolean;
     isQuickSelection: boolean;
-  }) => {
-    this.setState(
-      {
-        isDateRangeInvalid: isInvalid,
+  }) {
+    setIsDateRangeInvalid(isInvalid);
+    const retVal = {
+      query: props.query,
+      dateRange: {
+        from: start,
+        to: end,
       },
-      () => {
-        const retVal = {
-          query: this.props.query,
-          dateRange: {
-            from: start,
-            to: end,
-          },
-        };
+    };
 
-        if (isQuickSelection) {
-          this.props.onSubmit(retVal);
-        } else {
-          this.props.onChange(retVal);
-        }
-      }
-    );
-  };
-
-  public onSubmit = ({ query, dateRange }: { query?: Query; dateRange: DateRange }) => {
-    this.handleLuceneSyntaxWarning();
-    timeHistory.add(dateRange);
-
-    this.props.onSubmit({ query, dateRange });
-  };
-
-  private onInputSubmit = (query: Query) => {
-    this.onSubmit({
-      query,
-      dateRange: this.getDateRange(),
-    });
-  };
-
-  public componentDidMount() {
-    if (!this.props.query) return;
-    this.persistedLog = getQueryLog(
-      this.props.uiSettings,
-      this.props.appName,
-      this.props.query.language
-    );
-  }
-
-  public componentDidUpdate(prevProps: Props) {
-    if (!this.props.query || !prevProps.query) return;
-    if (prevProps.query.language !== this.props.query.language) {
-      this.persistedLog = getQueryLog(
-        this.props.uiSettings,
-        this.props.appName,
-        this.props.query.language
-      );
+    if (isQuickSelection) {
+      props.onSubmit(retVal);
+    } else {
+      props.onChange(retVal);
     }
   }
 
-  public render() {
-    const classes = classNames('kbnQueryBar', {
-      'kbnQueryBar--withDatePicker': this.props.showDatePicker,
-    });
+  function onSubmit({ query, dateRange }: { query?: Query; dateRange: DateRange }) {
+    handleLuceneSyntaxWarning();
+    timeHistory.add(dateRange);
 
-    return (
-      <EuiFlexGroup
-        className={classes}
-        responsive={!!this.props.showDatePicker}
-        gutterSize="s"
-        justifyContent="flexEnd"
-      >
-        {this.renderQueryInput()}
-        <EuiFlexItem grow={false}>{this.renderUpdateButton()}</EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    props.onSubmit({ query, dateRange });
   }
 
-  private renderQueryInput() {
-    if (!this.shouldRenderQueryInput()) return;
+  function onInputSubmit(query: Query) {
+    onSubmit({
+      query,
+      dateRange: getDateRange(),
+    });
+  }
+
+  function renderQueryInput() {
+    if (!shouldRenderQueryInput()) return;
     return (
       <EuiFlexItem>
         <QueryBarInput
-          appName={this.props.appName}
-          disableAutoFocus={this.props.disableAutoFocus}
-          indexPatterns={this.props.indexPatterns!}
-          prepend={this.props.prepend}
-          query={this.props.query!}
-          screenTitle={this.props.screenTitle}
-          store={this.props.store!}
-          onChange={this.onQueryChange}
-          onSubmit={this.onInputSubmit}
-          persistedLog={this.persistedLog}
-          uiSettings={this.props.uiSettings}
-          savedObjectsClient={this.props.savedObjectsClient}
-          http={this.props.http}
+          appName={props.appName}
+          disableAutoFocus={props.disableAutoFocus}
+          indexPatterns={props.indexPatterns!}
+          prepend={props.prepend}
+          query={props.query!}
+          screenTitle={props.screenTitle}
+          store={props.store!}
+          onChange={onQueryChange}
+          onSubmit={onInputSubmit}
+          persistedLog={persistedLog}
+          uiSettings={uiSettings!}
+          savedObjectsClient={savedObjects!.client}
+          http={http!}
         />
       </EuiFlexItem>
     );
   }
 
-  private shouldRenderDatePicker() {
-    return this.props.showDatePicker || this.props.showAutoRefreshOnly;
+  function shouldRenderDatePicker(): boolean {
+    return Boolean(props.showDatePicker || props.showAutoRefreshOnly);
   }
 
-  private shouldRenderQueryInput() {
-    return (
-      this.props.showQueryInput && this.props.indexPatterns && this.props.query && this.props.store
-    );
+  function shouldRenderQueryInput(): boolean {
+    return Boolean(props.showQueryInput && props.indexPatterns && props.query && props.store);
   }
 
-  private renderUpdateButton() {
-    const button = this.props.customSubmitButton ? (
-      React.cloneElement(this.props.customSubmitButton, { onClick: this.onClickSubmitButton })
+  function renderUpdateButton() {
+    const button = props.customSubmitButton ? (
+      React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
     ) : (
       <EuiSuperUpdateButton
-        needsUpdate={this.props.isDirty}
-        isDisabled={this.state.isDateRangeInvalid}
-        onClick={this.onClickSubmitButton}
+        needsUpdate={props.isDirty}
+        isDisabled={isDateRangeInvalid}
+        onClick={onClickSubmitButton}
         data-test-subj="querySubmitButton"
       />
     );
 
-    if (!this.shouldRenderDatePicker()) {
+    if (!shouldRenderDatePicker()) {
       return button;
     }
 
     return (
       <EuiFlexGroup responsive={false} gutterSize="s">
-        {this.renderDatePicker()}
+        {renderDatePicker()}
         <EuiFlexItem grow={false}>{button}</EuiFlexItem>
       </EuiFlexGroup>
     );
   }
 
-  private renderDatePicker() {
-    if (!this.shouldRenderDatePicker()) {
+  function renderDatePicker() {
+    if (!shouldRenderDatePicker()) {
       return null;
     }
 
@@ -275,7 +215,7 @@ export class QueryBarTopRowUI extends Component<Props, State> {
         };
       });
 
-    const commonlyUsedRanges = this.props.uiSettings
+    const commonlyUsedRanges = uiSettings!
       .get('timepicker:quickRanges')
       .map(({ from, to, display }: { from: string; to: string; display: string }) => {
         return {
@@ -288,33 +228,33 @@ export class QueryBarTopRowUI extends Component<Props, State> {
     return (
       <EuiFlexItem className="kbnQueryBar__datePickerWrapper">
         <EuiSuperDatePicker
-          start={this.props.dateRangeFrom}
-          end={this.props.dateRangeTo}
-          isPaused={this.props.isRefreshPaused}
-          refreshInterval={this.props.refreshInterval}
-          onTimeChange={this.onTimeChange}
-          onRefreshChange={this.props.onRefreshChange}
+          start={props.dateRangeFrom}
+          end={props.dateRangeTo}
+          isPaused={props.isRefreshPaused}
+          refreshInterval={props.refreshInterval}
+          onTimeChange={onTimeChange}
+          onRefreshChange={props.onRefreshChange}
           showUpdateButton={false}
           recentlyUsedRanges={recentlyUsedRanges}
           commonlyUsedRanges={commonlyUsedRanges}
-          dateFormat={this.props.uiSettings.get('dateFormat')}
-          isAutoRefreshOnly={this.props.showAutoRefreshOnly}
+          dateFormat={uiSettings!.get('dateFormat')}
+          isAutoRefreshOnly={props.showAutoRefreshOnly}
         />
       </EuiFlexItem>
     );
   }
 
-  private handleLuceneSyntaxWarning() {
-    if (!this.props.query) return;
-    const { intl, store, toasts } = this.props;
-    const { query, language } = this.props.query;
+  function handleLuceneSyntaxWarning() {
+    if (!props.query) return;
+    const { intl, store } = props;
+    const { query, language } = props.query;
     if (
       language === 'kuery' &&
       typeof query === 'string' &&
       (!store || !store.get('kibana.luceneSyntaxWarningOptOut')) &&
       doesKueryExpressionHaveLuceneSyntaxError(query)
     ) {
-      const toast = toasts.addWarning({
+      const toast = notifications!.toasts.addWarning({
         title: intl.formatMessage({
           id: 'data.query.queryBar.luceneSyntaxWarningTitle',
           defaultMessage: 'Lucene syntax warning',
@@ -340,7 +280,7 @@ export class QueryBarTopRowUI extends Component<Props, State> {
             </p>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiButton size="s" onClick={() => this.onLuceneSyntaxWarningOptOut(toast)}>
+                <EuiButton size="s" onClick={() => onLuceneSyntaxWarningOptOut(toast)}>
                   <FormattedMessage
                     id="data.query.queryBar.luceneSyntaxWarningOptOutText"
                     defaultMessage="Don't show again"
@@ -354,11 +294,33 @@ export class QueryBarTopRowUI extends Component<Props, State> {
     }
   }
 
-  private onLuceneSyntaxWarningOptOut(toast: Toast) {
-    if (!this.props.store) return;
-    this.props.store.set('kibana.luceneSyntaxWarningOptOut', true);
-    this.props.toasts.remove(toast);
+  function onLuceneSyntaxWarningOptOut(toast: Toast) {
+    if (!props.store) return;
+    props.store.set('kibana.luceneSyntaxWarningOptOut', true);
+    notifications!.toasts.remove(toast);
   }
+
+  const classes = classNames('kbnQueryBar', {
+    'kbnQueryBar--withDatePicker': props.showDatePicker,
+  });
+
+  return (
+    <EuiFlexGroup
+      className={classes}
+      responsive={!!props.showDatePicker}
+      gutterSize="s"
+      justifyContent="flexEnd"
+    >
+      {renderQueryInput()}
+      <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
 }
+
+QueryBarTopRowUI.defaultProps = {
+  showQueryInput: true,
+  showDatePicker: true,
+  showAutoRefreshOnly: false,
+};
 
 export const QueryBarTopRow = injectI18n(QueryBarTopRowUI);
