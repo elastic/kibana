@@ -1,0 +1,21 @@
+.lnsConfigPanel__panel {
+  margin-bottom: $euiSizeS;
+}
+
+.lnsConfigPanel__axis {
+  background: $euiColorLightestShade;
+  padding: $euiSizeS;
+  border-radius: $euiBorderRadius;
+
+  // Add margin to the top of the next same panel
+  & + & {
+    margin-top: $euiSizeS;
+  }
+}
+
+.lnsConfigPanel__addLayerBtn {
+  color: transparentize($euiColorMediumShade, .3);
+  // sass-lint:disable-block no-important
+  box-shadow: none !important;
+  border: 1px dashed currentColor;
+}

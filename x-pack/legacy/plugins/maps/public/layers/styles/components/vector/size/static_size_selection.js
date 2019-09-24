@@ -10,8 +10,7 @@ import { staticSizeShape } from '../style_option_shapes';
 import { ValidatedRange } from '../../../../../components/validated_range';
 
 export function StaticSizeSelection({ onChange, styleOptions }) {
-
-  const onSizeChange = (size) => {
+  const onSizeChange = size => {
     onChange({ size });
   };
 
@@ -22,12 +21,13 @@ export function StaticSizeSelection({ onChange, styleOptions }) {
       value={styleOptions.size}
       onChange={onSizeChange}
       showInput
-      showRange
+      showLabels
+      compressed
     />
   );
 }
 
 StaticSizeSelection.propTypes = {
   styleOptions: staticSizeShape.isRequired,
-  onChange: PropTypes.func.isRequired
+  onChange: PropTypes.func.isRequired,
 };

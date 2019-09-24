@@ -20,18 +20,6 @@
 /* eslint-disable max-classes-per-file */
 import { i18n } from '@kbn/i18n';
 
-export class IncompatibleActionError extends Error {
-  code = 'INCOMPATIBLE_ACTION';
-
-  constructor() {
-    super(
-      i18n.translate('embeddableApi.errors.incompatibleAction', {
-        defaultMessage: 'Action is incompatible',
-      })
-    );
-  }
-}
-
 export class PanelNotFoundError extends Error {
   code = 'PANEL_NOT_FOUND';
 

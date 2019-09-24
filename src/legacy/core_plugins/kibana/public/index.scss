@@ -1,10 +1,10 @@
 @import 'src/legacy/ui/public/styles/styling_constants';
 
-// Temporary shim to help with EuiFormRow spacing
-// Will move to EUI
-.euiFormRow + .euiButton {
-  margin-top: $euiSize;
-}
+// Elastic charts
+@import '@elastic/eui/src/components/tool_tip/variables';
+@import '@elastic/eui/src/components/tool_tip/mixins';
+@import '@elastic/charts/dist/theme';
+@import '@elastic/eui/src/themes/charts/theme';
 
 // Public UI styles
 @import 'src/legacy/ui/public/index';
