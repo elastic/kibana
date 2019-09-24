@@ -2,13 +2,14 @@
   "type": "doc",
   "value": {
     "id": "agents:agent1",
-    "index": ".kibana-fleet",
+    "index": ".kibana",
     "source": {
       "type": "agents",
       "agents": {
         "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiQUNDRVNTX1RPS0VOIiwiYWdlbnRJZCI6ImIzNWQ2ZDIwLWQwYTAtMTFlOS1iNTkwLThiMGEzYWY4NzUwZCIsImNvbmZpZyI6eyJpZCI6ImNvbmZpZzEiLCJzaGFyZWRJZCI6ImNvbmZpZzEifSwiaWF0IjoxNTY3NzcyNDIzfQ.UQJjI9Ki6JL3iX6zMGhd-LFZynq8a6-Fti1qcq9poFQ",
         "active": true,
         "shared_id": "agent1_filebeat",
+        "policy_id": "1",
         "type": "PERMANENT",
         "local_metadata": "{}",
         "user_provided_metadata": "{}",
@@ -33,7 +34,7 @@
   "type": "doc",
   "value": {
     "id": "agents:agent2",
-    "index": ".kibana-fleet",
+    "index": ".kibana",
     "source": {
       "type": "agents",
       "agents": {
@@ -54,7 +55,7 @@
   "type": "doc",
   "value": {
     "id": "agents:agent3",
-    "index": ".kibana-fleet",
+    "index": ".kibana",
     "source": {
       "type": "agents",
       "agents": {
@@ -75,7 +76,7 @@
   "type": "doc",
   "value": {
     "id": "agents:agent4",
-    "index": ".kibana-fleet",
+    "index": ".kibana",
     "source": {
       "type": "agents",
       "agents": {
@@ -96,7 +97,7 @@
   "type": "doc",
   "value": {
     "id": "tokens:f2e6bcd8-e68c-4da8-826e-ae6f5c1def4e",
-    "index": ".kibana-fleet",
+    "index": ".kibana",
     "source": {
       "tokens" : {
         "created_at" : "2019-09-16T19:31:48.500Z",

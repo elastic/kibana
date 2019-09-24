@@ -132,7 +132,6 @@ describe('Token Lib', () => {
       expect(persistedToken).toMatchObject({
         tokenHash,
         policy_id: 'policy_id',
-        policy_shared_id: 'policy_shared_id',
       });
     });
   });
