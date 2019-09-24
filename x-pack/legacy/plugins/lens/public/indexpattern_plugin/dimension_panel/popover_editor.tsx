@@ -125,14 +125,14 @@ export function PopoverEditor(props: PopoverEditorProps) {
         items: getOperationTypes().map(({ operationType, compatibleWithCurrentField }) => ({
           name: operationPanels[operationType].displayName,
           id: operationType as string,
-          className: classNames('lnsConfigPanel__operation', {
-            'lnsConfigPanel__operation--selected': Boolean(
+          className: classNames('lnsPopoverEditor__operation', {
+            'lnsPopoverEditor__operation--selected': Boolean(
               incompatibleSelectedOperationType === operationType ||
                 (!incompatibleSelectedOperationType &&
                   selectedColumn &&
                   selectedColumn.operationType === operationType)
             ),
-            'lnsConfigPanel__operation--incompatible': !compatibleWithCurrentField,
+            'lnsPopoverEditor__operation--incompatible': !compatibleWithCurrentField,
           }),
           'data-test-subj': `lns-indexPatternDimension${
             compatibleWithCurrentField ? '' : 'Incompatible'
@@ -202,14 +202,12 @@ export function PopoverEditor(props: PopoverEditorProps) {
   return (
     <EuiPopover
       id={columnId}
-      className="lnsConfigPanel__summaryPopover"
-      anchorClassName={
-        selectedColumn ? 'lnsConfigPanel__summaryPopoverAnchor' : 'lnsConfigPanel__summaryLink'
-      }
+      className="lnsPopoverEditor"
+      anchorClassName={selectedColumn ? 'lnsPopoverEditor__anchor' : 'lnsPopoverEditor__link'}
       button={
         selectedColumn ? (
           <EuiLink
-            className="lnsConfigPanel__summaryLink"
+            className="lnsPopoverEditor__link"
             onClick={() => {
               setPopoverOpen(!isPopoverOpen);
             }}
@@ -316,10 +314,10 @@ export function PopoverEditor(props: PopoverEditorProps) {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={null} className={classNames('lnsConfigPanel__summaryPopoverLeft')}>
+              <EuiFlexItem grow={null} className={classNames('lnsPopoverEditor__left')}>
                 <EuiSideNav items={getSideNavItems()} />
               </EuiFlexItem>
-              <EuiFlexItem grow={true} className="lnsConfigPanel__summaryPopoverRight">
+              <EuiFlexItem grow={true} className="lnsPopoverEditor__right">
                 {incompatibleSelectedOperationType && selectedColumn && (
                   <EuiCallOut
                     data-test-subj="indexPattern-invalid-operation"

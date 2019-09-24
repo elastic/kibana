@@ -41,7 +41,7 @@ describe('src/dev/npm/installed_packages', () => {
           includeDev: true,
         }),
       ]);
-    }, 30 * 1000);
+    }, 60 * 1000);
 
     it('reads all installed packages of a module', () => {
       expect(fixture1Packages).toEqual([
@@ -80,7 +80,7 @@ describe('src/dev/npm/installed_packages', () => {
       expect(tags).toEqual(uniq(tags));
     });
 
-    it('does not include root package in the list', async () => {
+    it('does not include root package in the list', () => {
       if (kibanaPackages.find(pkg => pkg.name === 'kibana')) {
         throw new Error('Expected getInstalledPackages(kibana) to not include kibana pkg');
       }
