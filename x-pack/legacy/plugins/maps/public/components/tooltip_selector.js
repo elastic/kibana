@@ -4,33 +4,57 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Component } from 'react';
 import {
-  EuiFormRow
+  EuiTitle,
+  EuiTextAlign,
+  EuiSpacer,
 } from '@elastic/eui';
-import { MultiFieldSelect } from './multi_field_select';
-import { i18n } from '@kbn/i18n';
+import { AddTooltipFieldPopover } from './add_tooltip_field_popover';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-export class TooltipSelector extends React.Component {
+
+export class TooltipSelector extends Component {
+
+  _addProperty = (propertyName) => {
+    //const property = { name: propertyName };
+    const property = propertyName;
+    if (!this.props.tooltipProperties) {
+      this.props.onChange([property]);
+    } else {
+      this.props.onChange([...this.props.tooltipProperties, property]);
+    }
+  }
+
+  _renderProperties() {
+    console.log(this.props.tooltipProperties);
+    if (!this.props.tooltipProperties) {
+      return null;
+    }
+
+    return this.props.tooltipProperties.join(',');
+  }
+
   render() {
     return (
-      <EuiFormRow
-        label={
-          i18n.translate('xpack.maps.tooltipSelectorLabel', {
-            defaultMessage: `Fields to display in tooltip`
-          })
-        }
-      >
-        <MultiFieldSelect
-          placeholder={i18n.translate('xpack.maps.tooltipSelectorPlaceholder', {
-            defaultMessage: `Select fields`
-          })
-          }
-          value={this.props.value}
-          onChange={this.props.onChange}
-          fields={this.props.fields}
-        />
-      </EuiFormRow>
+      <div>
+        <EuiTitle size="xxs">
+          <h6>
+            <FormattedMessage id="xpack.maps.tooltipSelectorLabel" defaultMessage="Fields to display in tooltip" />
+          </h6>
+        </EuiTitle>
+        <EuiSpacer size="xs" />
+
+        {this._renderProperties()}
+        <EuiSpacer size="xs" />
+
+        <EuiTextAlign textAlign="center">
+          <AddTooltipFieldPopover
+            onSelect={this._addProperty}
+            fields={this.props.fields}
+          />
+        </EuiTextAlign>
+      </div>
     );
   }
 }

@@ -211,7 +211,7 @@ export class UpdateSourceEditor extends Component {
     return (
       <Fragment>
         <TooltipSelector
-          value={this.props.tooltipProperties}
+          tooltipProperties={this.props.tooltipProperties}
           onChange={this._onTooltipPropertiesChange}
           fields={this.state.tooltipFields}
         />
