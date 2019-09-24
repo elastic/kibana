@@ -17,7 +17,7 @@ function getIconForDataType(dataType: string) {
   const icons: Partial<Record<string, UnwrapArray<typeof ICON_TYPES>>> = {
     boolean: 'invert',
     date: 'calendar',
-    ip: 'compute',
+    ip: 'storage',
   };
   return icons[dataType] || ICON_TYPES.find(t => t === dataType) || 'empty';
 }

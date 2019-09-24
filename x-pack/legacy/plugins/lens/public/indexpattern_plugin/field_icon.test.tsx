@@ -17,38 +17,38 @@ import { FieldIcon } from './field_icon';
 describe('FieldIcon', () => {
   it('should render icons', () => {
     expect(shallow(<FieldIcon type="boolean" />)).toMatchInlineSnapshot(`
-            <EuiIcon
-              className="lnsFieldListPanel__fieldIcon lnsFieldListPanel__fieldIcon--boolean"
-              color="#F37020"
-              type="invert"
-            />
-        `);
+                  <EuiIcon
+                    className="lnsFieldListPanel__fieldIcon lnsFieldListPanel__fieldIcon--boolean"
+                    color="#F37020"
+                    type="invert"
+                  />
+            `);
     expect(shallow(<FieldIcon type="date" />)).toMatchInlineSnapshot(`
-            <EuiIcon
-              className="lnsFieldListPanel__fieldIcon lnsFieldListPanel__fieldIcon--date"
-              color="#B0916F"
-              type="calendar"
-            />
-        `);
+                  <EuiIcon
+                    className="lnsFieldListPanel__fieldIcon lnsFieldListPanel__fieldIcon--date"
+                    color="#B0916F"
+                    type="calendar"
+                  />
+            `);
     expect(shallow(<FieldIcon type="number" />)).toMatchInlineSnapshot(`
-            <EuiIcon
-              className="lnsFieldListPanel__fieldIcon lnsFieldListPanel__fieldIcon--number"
-              color="#1EA593"
-              type="number"
-            />
-        `);
+                  <EuiIcon
+                    className="lnsFieldListPanel__fieldIcon lnsFieldListPanel__fieldIcon--number"
+                    color="#1EA593"
+                    type="number"
+                  />
+            `);
     expect(shallow(<FieldIcon type="string" />)).toMatchInlineSnapshot(`
-            <EuiIcon
-              className="lnsFieldListPanel__fieldIcon lnsFieldListPanel__fieldIcon--string"
-              color="#FCA5D3"
-              type="string"
-            />
-        `);
+                  <EuiIcon
+                    className="lnsFieldListPanel__fieldIcon lnsFieldListPanel__fieldIcon--string"
+                    color="#FCA5D3"
+                    type="string"
+                  />
+            `);
     expect(shallow(<FieldIcon type="ip" />)).toMatchInlineSnapshot(`
       <EuiIcon
         className="lnsFieldListPanel__fieldIcon lnsFieldListPanel__fieldIcon--ip"
-        color="#E49E29"
-        type="compute"
+        color="#7B000B"
+        type="storage"
       />
     `);
   });
