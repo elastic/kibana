@@ -9,16 +9,16 @@ import { CANVAS, JSON, KIBANA, PDF, POST, URL } from './constants';
 
 export const ComponentStrings = {
   App: {
-    getLoadErrorTitle: () =>
-      i18n.translate('xpack.canvas.app.loadErrorTitle', {
-        defaultMessage: 'Canvas failed to load :(',
-      }),
     getLoadErrorMessage: (error: string) =>
       i18n.translate('xpack.canvas.app.loadErrorMessage', {
         defaultMessage: 'Message: {error}',
         values: {
           error,
         },
+      }),
+    getLoadErrorTitle: () =>
+      i18n.translate('xpack.canvas.app.loadErrorTitle', {
+        defaultMessage: 'Canvas failed to load',
       }),
     getLoadingMessage: () =>
       i18n.translate('xpack.canvas.app.loadingMessage', {
@@ -33,6 +33,12 @@ export const ComponentStrings = {
     getTitleText: () =>
       i18n.translate('xpack.canvas.embedObject.titleText', {
         defaultMessage: 'Embed Object',
+      }),
+  },
+  ArgAddPopover: {
+    getAddAriaLabel: () =>
+      i18n.translate('xpack.canvas.argAddPopover.addAriaLabel', {
+        defaultMessage: 'Add argument',
       }),
   },
   Asset: {
