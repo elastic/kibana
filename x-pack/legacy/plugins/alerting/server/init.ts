@@ -27,6 +27,7 @@ import {
   updateAlertRoute,
   enableAlertRoute,
   disableAlertRoute,
+  updateApiKeyRoute,
 } from './routes';
 
 // Extend PluginProperties to indicate which plugins are guaranteed to exist
@@ -125,6 +126,7 @@ export function init(server: Server) {
   server.route(updateAlertRoute);
   server.route(enableAlertRoute);
   server.route(disableAlertRoute);
+  server.route(updateApiKeyRoute);
 
   // Expose functions
   server.decorate('request', 'getAlertsClient', function() {

@@ -7,7 +7,7 @@
 import Joi from 'joi';
 import Hapi from 'hapi';
 import { AlertAction } from '../types';
-import { SECONDS_REGEX, MINUTES_REGEX, HOURS_REGEX, DAYS_REGEX } from '../lib';
+import { getDurationSchema } from '../lib';
 
 interface UpdateRequest extends Hapi.Request {
   params: {
@@ -18,13 +18,14 @@ interface UpdateRequest extends Hapi.Request {
     interval: string;
     actions: AlertAction[];
     alertTypeParams: Record<string, any>;
+    throttle: string | null;
   };
 }
 
 export const updateAlertRoute = {
   method: 'PUT',
   path: '/api/alert/{id}',
-  config: {
+  options: {
     tags: ['access:alerting-all'],
     validate: {
       options: {
@@ -32,22 +33,10 @@ export const updateAlertRoute = {
       },
       payload: Joi.object()
         .keys({
-          interval: Joi.alternatives()
-            .try(
-              Joi.string()
-                .regex(SECONDS_REGEX, 'seconds')
-                .required(),
-              Joi.string()
-                .regex(MINUTES_REGEX, 'minutes')
-                .required(),
-              Joi.string()
-                .regex(HOURS_REGEX, 'hours')
-                .required(),
-              Joi.string()
-                .regex(DAYS_REGEX, 'days')
-                .required()
-            )
-            .required(),
+          throttle: getDurationSchema()
+            .required()
+            .allow(null),
+          interval: getDurationSchema().required(),
           alertTypeParams: Joi.object().required(),
           actions: Joi.array()
             .items(
