@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose } from '../lib/compose/kibana_compose';
-import { startApp } from './start_app';
-startApp(compose());
+import { PluginInitializerContext } from 'src/core/public';
+import { KueryAutocompletePlugin as Plugin } from './plugin';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
+}

@@ -101,6 +101,7 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
     <PaginatedTable
       activePage={activePage}
       columns={getUncommonColumnsCurated(type)}
+      dataTestSubj={`table-${tableType}`}
       headerCount={totalCount}
       headerTitle={i18n.UNCOMMON_PROCESSES}
       headerUnit={i18n.UNIT(totalCount)}
