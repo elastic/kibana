@@ -26,7 +26,7 @@ export type PluginSetup = ReturnType<Plugin['setup']>;
 export type PluginStart = ReturnType<Plugin['start']>;
 export interface PluginContext {
   esClient: ClusterClient;
-  config: IntegrationsManagerConfig;
+  getConfig: () => IntegrationsManagerConfig;
 }
 
 const DEFAULT_CONFIG: IntegrationsManagerConfig = {
@@ -42,9 +42,8 @@ export class Plugin {
     this.config$ = initializerContext.config.create<IntegrationsManagerConfig>();
     this.config$.subscribe(configValue => {
       this.config = {
-        ...DEFAULT_CONFIG,
-        enabled: configValue.enabled,
-        registryUrl: configValue.registryUrl,
+        enabled: configValue.enabled ? configValue.enabled : DEFAULT_CONFIG.enabled,
+        registryUrl: configValue.registryUrl ? configValue.registryUrl : DEFAULT_CONFIG.registryUrl,
       };
     });
   }
@@ -53,7 +52,9 @@ export class Plugin {
     const { server } = http;
     const pluginContext: PluginContext = {
       esClient: elasticsearch.createClient(PLUGIN.ID),
-      config: this.config,
+      getConfig: () => {
+        return this.config;
+      },
     };
 
     // make pluginContext entries available to handlers via h.context
