@@ -5,6 +5,7 @@
  */
 
 import boom from 'boom';
+import Joi from 'joi';
 import { Request, ResponseToolkit } from 'hapi';
 import rison from 'rison-node';
 import { API_BASE_URL } from '../../common/constants';
@@ -14,7 +15,7 @@ import { HandlerErrorFunction, HandlerFunction } from './types';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
-export function registerGenerate(
+export function registerGenerateFromJobParams(
   server: KbnServer,
   handler: HandlerFunction,
   handleError: HandlerErrorFunction
@@ -25,16 +26,48 @@ export function registerGenerate(
   server.route({
     path: `${BASE_GENERATE}/{exportType}`,
     method: 'POST',
-    config: getRouteConfig(request => request.params.exportType),
+    config: {
+      ...getRouteConfig(request => request.params.exportType),
+      validate: {
+        params: Joi.object({
+          exportType: Joi.string().required(),
+        }).required(),
+        payload: Joi.object({
+          jobParams: Joi.string()
+            .optional()
+            .default(null),
+        }).allow(null), // allow optional payload
+        query: Joi.object({
+          jobParams: Joi.string().default(null),
+        }).default(),
+      },
+    },
     handler: async (request: Request, h: ResponseToolkit) => {
+      let jobParamsRison: string | null;
+
+      if (request.payload) {
+        const { jobParams: jobParamsPayload } = request.payload as { jobParams: string };
+        jobParamsRison = jobParamsPayload;
+      } else {
+        const { jobParams: queryJobParams } = request.query as { jobParams: string };
+        if (queryJobParams) {
+          jobParamsRison = queryJobParams;
+        } else {
+          jobParamsRison = null;
+        }
+      }
+
+      if (!jobParamsRison) {
+        throw boom.badRequest('A jobParams RISON string is required');
+      }
+
       const { exportType } = request.params;
       let response;
       try {
-        // @ts-ignore
-        const jobParams = rison.decode(request.query.jobParams);
+        const jobParams = rison.decode(jobParamsRison);
         response = await handler(exportType, jobParams, request, h);
       } catch (err) {
-        throw handleError(exportType, err);
+        throw boom.badRequest(`invalid rison: ${jobParamsRison}`);
       }
       return response;
     },
