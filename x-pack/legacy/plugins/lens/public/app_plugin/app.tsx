@@ -159,7 +159,7 @@ export function App({
   return (
     <I18nProvider>
       <div className="lnsApp">
-        <div className="lnsAppHeader">
+        <div className="lnsApp__header">
           <TopNavMenu
             name="lens"
             config={[
@@ -259,7 +259,7 @@ export function App({
 
         {(!state.isLoading || state.persistedDoc) && (
           <NativeRenderer
-            className="lnsAppFrame"
+            className="lnsApp__frame"
             render={editorFrame.mount}
             nativeProps={{
               dateRange: state.dateRange,

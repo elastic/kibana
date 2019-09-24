@@ -116,7 +116,7 @@ describe('Lens App', () => {
       Array [
         Array [
           <div
-            class="lnsAppFrame"
+            class="lnsApp__frame"
           />,
           Object {
             "dateRange": Object {
