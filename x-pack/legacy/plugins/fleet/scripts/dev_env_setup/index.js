@@ -4,8 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const INDEX_NAMES = {
-  FLEET: '.kibana-fleet',
-};
-
-export const POLICY_NAMES = {};
+require('../../../../../../src/setup_node_env');
+require('./script');

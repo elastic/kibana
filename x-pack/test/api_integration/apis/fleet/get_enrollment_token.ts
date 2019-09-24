@@ -22,34 +22,20 @@ export default function({ getService }: FtrProviderContext) {
 
     it('should allow to get an enrollment token', async () => {
       const { body: apiResponse } = await supertest
-        .get(`/api/policy/policy:1/enrollment-tokens?regenerate=false`)
+        .get(`/api/fleet/policies/policy:1/enrollment-tokens?regenerate=false`)
         .expect(200);
 
       expect(apiResponse.success).to.eql(true);
-      expect(apiResponse.item).to.have.keys(
-        'id',
-        'type',
-        'token',
-        'type',
-        'policy_id',
-        'policy_shared_id'
-      );
+      expect(apiResponse.item).to.have.keys('id', 'type', 'token', 'type', 'policy_id');
     });
 
     it('should allow to regenerate an enrollment token', async () => {
       const { body: apiResponse } = await supertest
-        .get(`/api/policy/policy:1/enrollment-tokens?regenerate=true`)
+        .get(`/api/fleet/policies/policy:1/enrollment-tokens?regenerate=true`)
         .expect(200);
 
       expect(apiResponse.success).to.eql(true);
-      expect(apiResponse.item).to.have.keys(
-        'id',
-        'type',
-        'token',
-        'type',
-        'policy_id',
-        'policy_shared_id'
-      );
+      expect(apiResponse.item).to.have.keys('id', 'type', 'token', 'type', 'policy_id');
     });
   });
 }

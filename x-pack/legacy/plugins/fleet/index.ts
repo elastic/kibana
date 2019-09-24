@@ -7,7 +7,7 @@
 import * as Joi from 'joi';
 import { resolve } from 'path';
 // import { i18n } from '@kbn/i18n';
-import { PLUGIN, INDEX_NAMES } from './common/constants';
+import { PLUGIN } from './common/constants';
 import { CONFIG_PREFIX } from './common/constants/plugin';
 import { initServerWithKibana } from './server/kibana.index';
 import { mappings } from './server/mappings';
@@ -20,7 +20,7 @@ export const config = Joi.object({
 export function fleet(kibana: any) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'encrypted_saved_objects'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'encrypted_saved_objects', 'ingest'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       // app: {
@@ -36,11 +36,13 @@ export function fleet(kibana: any) {
       savedObjectSchemas: {
         agents: {
           isNamespaceAgnostic: true,
-          indexPattern: INDEX_NAMES.FLEET,
+          // TODO https://github.com/elastic/kibana/issues/46373
+          // indexPattern: INDEX_NAMES.FLEET,
         },
         tokens: {
           isNamespaceAgnostic: true,
-          indexPattern: INDEX_NAMES.FLEET,
+          // TODO https://github.com/elastic/kibana/issues/46373
+          // indexPattern: INDEX_NAMES.FLEET,
         },
       },
       mappings,

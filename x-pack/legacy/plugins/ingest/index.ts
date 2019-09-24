@@ -9,7 +9,8 @@ import { PLUGIN } from './common/constants';
 import { CONFIG_PREFIX } from './common/constants/plugin';
 import { initServerWithKibana } from './server/kibana.index';
 import { mappings } from './server/mappings';
-import { INDEX_NAMES } from './common/constants';
+// TODO https://github.com/elastic/kibana/issues/46373
+// import { INDEX_NAMES } from './common/constants';
 
 export const config = Joi.object({
   enabled: Joi.boolean().default(true),
@@ -26,11 +27,11 @@ export function ingest(kibana: any) {
       savedObjectSchemas: {
         policies: {
           isNamespaceAgnostic: true,
-          indexPattern: INDEX_NAMES.INGEST,
+          // indexPattern: INDEX_NAMES.INGEST,
         },
         inputs: {
           isNamespaceAgnostic: true,
-          indexPattern: INDEX_NAMES.INGEST,
+          // indexPattern: INDEX_NAMES.INGEST,
         },
       },
       mappings,

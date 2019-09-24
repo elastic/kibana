@@ -81,7 +81,7 @@ export class TokenLib {
    */
   public async generateEnrolmentToken(
     user: FrameworkUser,
-    policy: { id: string; sharedId: string },
+    policy: { id: string },
     expire?: string
   ): Promise<string> {
     const encryptionKey = this.frameworkLib.getSetting('encryptionKey');
@@ -118,12 +118,13 @@ export class TokenLib {
   ): Promise<Token | null> {
     let token = await this.adapter.getByPolicyId(user, policyId);
 
-    if (regenerate && token) {
+    if (regenerate) {
       const policy = {
-        id: token.policy_id,
-        sharedId: token.policy_shared_id,
+        id: policyId,
       };
-      await this.adapter.delete(user, token.id);
+      if (token) {
+        await this.adapter.delete(user, token.id);
+      }
       await this.generateEnrolmentToken(user, policy);
       token = await this.adapter.getByPolicyId(user, policyId);
     }
