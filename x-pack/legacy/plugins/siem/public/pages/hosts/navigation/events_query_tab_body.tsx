@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { StatefulEventsViewer } from '../../../components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
 import { manageQuery } from '../../../components/page/manage_query';
@@ -47,6 +48,7 @@ export const EventsQueryTabBody = ({
           />
         )}
       </EventsOverTimeQuery>
+      <EuiSpacer size="l" />
       <StatefulEventsViewer
         end={endDate}
         id={HOSTS_PAGE_TIMELINE_ID}
