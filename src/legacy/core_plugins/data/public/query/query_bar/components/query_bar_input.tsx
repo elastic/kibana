@@ -44,6 +44,8 @@ import { SuggestionsComponent } from './typeahead/suggestions_component';
 import { getQueryLog } from '../lib/get_query_log';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 
+// todo: related to https://github.com/elastic/kibana/pull/45762/files
+// Will be refactored after merge of related PR
 const getAutocompleteProvider = (language: string) =>
   npStart.plugins.data.autocomplete.getProvider(language);
 
