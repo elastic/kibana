@@ -416,7 +416,7 @@ export const metrics = {
     })
   }),
   apm_acm_responses_errors_unauthorized: new ApmEventsRateClusterMetric({
-    field: 'beats_stats.metrics.apm-server.acm.response.errors.forbidden',
+    field: 'beats_stats.metrics.apm-server.acm.response.errors.unauthorized',
     title: i18n.translate('xpack.monitoring.metrics.apm.acm.responseErrors.acmUnauthorizedTitle', {
       defaultMessage: 'Unauthorized'
     }),
