@@ -50,7 +50,6 @@ export function send(method, path, data) {
     dataType: 'text', // disable automatic guessing
   };
 
-
   $.ajax(options).then(
     function (data, textStatus, jqXHR) {
       wrappedDfd.resolveWith(this, [data, textStatus, jqXHR]);

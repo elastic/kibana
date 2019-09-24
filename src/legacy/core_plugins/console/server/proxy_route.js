@@ -21,21 +21,22 @@ import Joi from 'joi';
 import Boom from 'boom';
 import { trimLeft, trimRight } from 'lodash';
 import request from 'request';
-import { parse } from 'querystring';
+import util from 'util';
+import * as url from 'url';
+import * as qs from 'querystring';
 
-function resolveUri(base, path) {
-  let pathToUse = `${trimRight(base, '/')}/${trimLeft(path, '/')}`;
-  const questionMarkIndex = pathToUse.indexOf('?');
-  // no query string in pathToUse, append '?pretty'
-  if (questionMarkIndex === -1) {
-    pathToUse = `${pathToUse}?pretty`;
-  } else {
-    // pathToUse has query string, append '&pretty'
-    pathToUse = `${pathToUse}&pretty`;
-  } // appending pretty here to have Elasticsearch do the JSON formatting, as doing
+const requestP = util.promisify(request);
+
+function toURL(base, path) {
+  const urlResult = new url.URL(`${trimRight(base, '/')}/${trimLeft(path, '/')}`);
+
+  // appending pretty here to have Elasticsearch do the JSON formatting, as doing
   // in JS can lead to data loss (7.0 will get munged into 7, thus losing indication of
   // measurement precision)
-  return pathToUse;
+  if (!urlResult.searchParams.get('pretty')) {
+    urlResult.searchParams.append('pretty', 'true');
+  }
+  return urlResult;
 }
 
 function extendCommaList(obj, property, value) {
@@ -100,56 +101,50 @@ export const createProxyRoute = ({
     handler: async (req, h) => {
       const { payload, query } = req;
       const { path, method } = query;
-      const uri = resolveUri(baseUrl, path);
+      const uri = toURL(baseUrl, path);
 
       // Because this can technically be provided by a settings-defined proxy config, we need to
       // preserve these property names to maintain BWC.
-      const { timeout, rejectUnauthorized, agent, headers } = getConfigForReq(req, uri);
+      const { timeout, agent, headers } = getConfigForReq(req, uri.toString());
 
-      return await new Promise((resolve) => {
-        const pathParts = path.split('?'); // TODO: Ensure this only has 2 parts
-        const requestHeaders = {
-          ...headers,
-          ...getProxyHeaders(req),
-        };
+      const requestHeaders = {
+        ...headers,
+        ...getProxyHeaders(req),
+      };
 
-        // We use the request library because Hapi, Axios, and Superagent don't support GET requests
-        // with bodies, but ES APIs do. Similarly with DELETE requests with bodiese. If we need to
-        // deprecate use of this library, we can also solve this issue with Node's http library.
-        // See #39170 for details.
-        request({
-          method,
-          uri,
-          timeout,
-          qs: parse(pathParts[1] || ''),
-          headers: requestHeaders,
-          body: payload ? JSON.stringify(payload) : undefined,
-          // agentOptions,
-        }, (error, response, body) => {
-          const {
-            statusCode,
-            statusMessage,
-            headers: { warning },
-          } = response;
-
-          let result;
-
-          if (method.toUpperCase() !== 'HEAD') {
-            result = h
-              .response(body)
-              .code(statusCode)
-              .header('warning', warning);
-          } else {
-            result = h
-              .response(`${statusCode} - ${statusMessage}`)
-              .code(statusCode)
-              .type('text/plain')
-              .header('warning', warning);
-          }
-
-          resolve(result);
-        });
+      // We use the request library because Hapi, Axios, and Superagent don't support GET requests
+      // with bodies, but ES APIs do. Similarly with DELETE requests with bodies. If we need to
+      // deprecate use of this library, we can also solve this issue with Node's http library.
+      // See #39170 for details.
+      const esResponse = await requestP({
+        method,
+        uri: uri.toString(),
+        timeout,
+        qs: qs.parse(uri.query || ''),
+        headers: requestHeaders,
+        body: payload ? JSON.stringify(payload) : undefined,
+        agent,
       });
+
+      const {
+        statusCode,
+        statusMessage,
+        headers: { warning },
+        body,
+      } = esResponse;
+
+      if (method.toUpperCase() !== 'HEAD') {
+        return h
+          .response(body)
+          .code(statusCode)
+          .header('warning', warning);
+      }
+
+      return h
+        .response(`${statusCode} - ${statusMessage}`)
+        .code(statusCode)
+        .type('text/plain')
+        .header('warning', warning);
     },
   },
 });
