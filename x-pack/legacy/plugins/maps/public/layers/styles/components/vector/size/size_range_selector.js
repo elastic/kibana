@@ -23,10 +23,11 @@ export function SizeRangeSelector({ minSize, maxSize, onChange, ...rest }) {
       max={DEFAULT_MAX_SIZE}
       step={1}
       value={[minSize, maxSize]}
-      showInput
+      showInput="inputWithPopover"
       showRange
       onChange={onSizeChange}
       allowEmptyRange={false}
+      append="px"
       {...rest}
     />
   );

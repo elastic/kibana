@@ -23,6 +23,7 @@ export function StaticSizeSelection({ onChange, styleOptions }) {
       showInput
       showLabels
       compressed
+      append="px"
     />
   );
 }
