@@ -28,10 +28,10 @@ interface ActionProps {
   commitId: string;
 }
 
-const copyLabel = i18n.translate('xpack.code.commits.copyCommitSha', {
+const copyLabel = i18n.translate('xpack.code.commits.copyCommitAriaLabel', {
   defaultMessage: 'Copy the full commit ID',
 });
-const revisionLinkLabel = i18n.translate('xpack.code.commits.revisionLink', {
+const revisionLinkLabel = i18n.translate('xpack.code.commits.revisionLinkAriaLabel', {
   defaultMessage: 'View the project at this commit',
 });
 
@@ -85,7 +85,7 @@ export const Commit = (props: Props) => {
           <EuiText size="xs" className="commit__metadata">
             <EuiTextColor color="subdued">
               <FormattedMessage
-                id="xpack.code.commits.committedOnBy"
+                id="xpack.code.commits.committedDescription"
                 defaultMessage="Committed on {date} by {committer}"
                 values={{ committer, date }}
               />

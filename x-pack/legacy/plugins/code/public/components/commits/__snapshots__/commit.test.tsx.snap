@@ -61,7 +61,7 @@ This is the description",
                   >
                     <FormattedMessage
                       defaultMessage="Committed on {date} by {committer}"
-                      id="xpack.code.commits.committedOnBy"
+                      id="xpack.code.commits.committedDescription"
                       values={
                         Object {
                           "committer": "committer",
