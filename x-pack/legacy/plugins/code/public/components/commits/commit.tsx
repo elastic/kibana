@@ -20,6 +20,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { CommitInfo } from '../../../model/commit';
 import { MAIN_ROOT } from '../routes';
 import { PathTypes } from '../../common/types';
+import { parseCommitMessage } from '../../../common/commit_utils';
 
 const COMMIT_ID_LENGTH = 8;
 
@@ -68,8 +69,7 @@ interface Props {
 export const Commit = (props: Props) => {
   const { date, commit, repoUri } = props;
   const { message, committer, id } = commit;
-  const [title, ...rawDescription] = message.split('\n');
-  const description = rawDescription.join('\n').trim();
+  const { summary, body } = parseCommitMessage(message);
   const commitId = id
     .split('')
     .slice(0, COMMIT_ID_LENGTH)
@@ -80,7 +80,7 @@ export const Commit = (props: Props) => {
       <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
         <div className="eui-textTruncate">
           <EuiTitle size="xs">
-            <h4>{title}</h4>
+            <h4>{summary}</h4>
           </EuiTitle>
           <EuiText size="xs" className="commit__metadata">
             <EuiTextColor color="subdued">
@@ -92,7 +92,7 @@ export const Commit = (props: Props) => {
             </EuiTextColor>
           </EuiText>
           <EuiText size="m">
-            <p className="eui-textTruncate">{description}</p>
+            <p className="eui-textTruncate">{body}</p>
           </EuiText>
         </div>
         <CommitActions repoUri={repoUri} commitId={commitId} />
