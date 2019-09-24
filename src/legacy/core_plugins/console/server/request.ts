@@ -17,21 +17,13 @@
  * under the License.
  */
 
-let headers;
-export function readLastHeaders() {
-  return headers;
-}
+import requestLib from 'request';
+import util from 'util';
 
-export function createResponseStub(response) {
-  return async (args) => {
-    headers = args.headers;
-    return {
-      headers: args.headers,
-      statusCode: 200,
-      statusMessage: 'OK',
-      'content-type': 'text-plain',
-      'content-length': String(response ? response.length : 0),
-      body: response
-    };
-  };
-}
+// Separate module for easier mocking during testing.
+
+// We use the request library because Hapi, Axios, and Superagent don't support GET requests
+// with bodies, but ES APIs do. Similarly with DELETE requests with bodies. If we need to
+// deprecate use of this library, we can also solve this issue with Node's http library.
+// See #39170 for details.
+export const request = util.promisify(requestLib);

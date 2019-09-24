@@ -66,10 +66,6 @@ export const createProxyRoute = ({
   method: 'POST',
   config: {
     tags: ['access:console'],
-    payload: {
-      output: 'stream',
-      parse: false,
-    },
     validate: {
       query: Joi.object()
         .keys({
@@ -97,71 +93,51 @@ export const createProxyRoute = ({
       },
     ],
 
-    handler: (req, h) => {
+    handler: async (req, h) => {
       const { payload, query } = req;
       const { path, method } = query;
-      console.log(query);
       const uri = toURL(baseUrl, path);
 
       // Because this can technically be provided by a settings-defined proxy config, we need to
       // preserve these property names to maintain BWC.
       const { timeout, agent, headers } = getConfigForReq(req, uri.toString());
 
-      // Preserve legacy behaviour of loading in custom headers.
-      payload.headers = {
-        ...payload.headers,
-        // Ensure proxy headers like 'x-forwarded-for' are on the payload. See `payload.headers` for currently included headers.
-        ...getProxyHeaders(req),
+      const requestHeaders = {
         ...headers,
+        ...getProxyHeaders(req),
       };
 
-      return new Promise((resolve, reject) => {
-        payload.pipe(
-          // We use the request library because Hapi, Axios, and Superagent don't support GET requests
-          // with bodies, but ES APIs do. Similarly with DELETE requests with bodies. If we need to
-          // deprecate use of this library, we can also solve this issue with Node's http library.
-          // See #39170 for details.
-          request({
-            method,
-            uri: uri.toString(),
-            timeout,
-            qs: qs.parse(uri.searchParams.toString() || ''),
-            agent,
-            gzip: true,
-          },
-          (error, response) => {
-            if (error) {
-              reject(error);
-              return;
-            }
-            const {
-              statusCode,
-              statusMessage,
-              headers: responseHeaders,
-              body,
-            } = response;
-
-            const { warning } = responseHeaders;
-
-            if (method.toUpperCase() !== 'HEAD') {
-              resolve(
-                h
-                  .response(body)
-                  .code(statusCode)
-                  .type(responseHeaders['content-type'] || 'text/plain')
-                  .header('warning', warning)
-              );
-            } else {
-              resolve(
-                h
-                  .response(`${statusCode} - ${statusMessage}`)
-                  .code(statusCode)
-                  .type('text/plain')
-                  .header('warning', warning)
-              );
-            }
-          }));
+      const esResponse = await request({
+        method,
+        headers: requestHeaders,
+        uri: uri.toString(),
+        timeout,
+        body: payload ? JSON.stringify(payload) : undefined,
+        qs: qs.parse(uri.searchParams.toString() || ''),
+        agent,
       });
+
+      const {
+        statusCode,
+        statusMessage,
+        headers: responseHeaders,
+        body,
+      } = esResponse;
+
+      const { warning } = responseHeaders;
+
+      if (method.toUpperCase() !== 'HEAD') {
+        return h
+          .response(body)
+          .code(statusCode)
+          .type(responseHeaders['content-type'] || 'text/plain')
+          .header('warning', warning);
+      }
+      return h
+        .response(`${statusCode} - ${statusMessage}`)
+        .code(statusCode)
+        .type('text/plain')
+        .header('warning', warning);
     },
   },
 });
