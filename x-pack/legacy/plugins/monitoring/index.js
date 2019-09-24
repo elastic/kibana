@@ -5,11 +5,11 @@
  */
 
 import { resolve } from 'path';
-import { postInit } from './init';
 import { config } from './config';
 import { deprecations } from './deprecations';
 import { getUiExports } from './ui_exports';
 import { Plugin } from './server/plugin';
+import { initInfraSource } from './server/lib/logs/init_infra_source';
 
 /**
  * Invokes plugin modules to instantiate the Monitoring plugin for Kibana
@@ -84,6 +84,7 @@ export const monitoring = (kibana) => new kibana.Plugin({
   deprecations,
   uiExports: getUiExports(),
   postInit(server) {
-    postInit(server);
+    const serverConfig = server.config();
+    initInfraSource(serverConfig, server.plugins.infra);
   },
 });
