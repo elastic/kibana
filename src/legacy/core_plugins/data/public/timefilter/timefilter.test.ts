@@ -17,26 +17,6 @@
  * under the License.
  */
 
-import './timefilter.test.mocks';
-
-jest.mock('ui/chrome', () => ({
-  getBasePath: () => `/some/base/path`,
-  getUiSettingsClient: () => {
-    return {
-      get: (key: string) => {
-        switch (key) {
-          case 'timepicker:timeDefaults':
-            return { from: 'now-15m', to: 'now' };
-          case 'timepicker:refreshIntervalDefaults':
-            return { pause: false, value: 0 };
-          default:
-            throw new Error(`Unexpected config key: ${key}`);
-        }
-      },
-    };
-  },
-}));
-
 jest.mock('./lib/parse_querystring', () => ({
   parseQueryString: () => {
     return {
@@ -50,9 +30,18 @@ jest.mock('./lib/parse_querystring', () => ({
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { timefilter } from 'ui/timefilter';
+import { Timefilter } from './timefilter';
 import { Subscription } from 'rxjs';
 import { TimeRange, RefreshInterval } from 'src/plugins/data/public';
+
+import { timefilterServiceMock } from './timefilter_service.mock';
+const timefilterSetupMock = timefilterServiceMock.createSetupContract();
+
+const timefilterConfig = {
+  timeDefaults: { from: 'now-15m', to: 'now' },
+  refreshIntervalDefaults: { pause: false, value: 0 },
+};
+const timefilter = new Timefilter(timefilterConfig, timefilterSetupMock.history);
 
 function stubNowTime(nowTime: any) {
   // @ts-ignore
@@ -242,13 +231,13 @@ describe('isTimeRangeSelectorEnabled', () => {
 
   test('should emit updated when disabled', () => {
     timefilter.disableTimeRangeSelector();
-    expect(timefilter.isTimeRangeSelectorEnabled).to.be(false);
+    expect(timefilter.isTimeRangeSelectorEnabled()).to.be(false);
     expect(update.called).to.be(true);
   });
 
   test('should emit updated when enabled', () => {
     timefilter.enableTimeRangeSelector();
-    expect(timefilter.isTimeRangeSelectorEnabled).to.be(true);
+    expect(timefilter.isTimeRangeSelectorEnabled()).to.be(true);
     expect(update.called).to.be(true);
   });
 });
@@ -268,13 +257,13 @@ describe('isAutoRefreshSelectorEnabled', () => {
 
   test('should emit updated when disabled', () => {
     timefilter.disableAutoRefreshSelector();
-    expect(timefilter.isAutoRefreshSelectorEnabled).to.be(false);
+    expect(timefilter.isAutoRefreshSelectorEnabled()).to.be(false);
     expect(update.called).to.be(true);
   });
 
   test('should emit updated when enabled', () => {
     timefilter.enableAutoRefreshSelector();
-    expect(timefilter.isAutoRefreshSelectorEnabled).to.be(true);
+    expect(timefilter.isAutoRefreshSelectorEnabled()).to.be(true);
     expect(update.called).to.be(true);
   });
 });
