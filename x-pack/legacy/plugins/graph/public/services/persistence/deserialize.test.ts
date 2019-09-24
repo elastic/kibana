@@ -156,12 +156,12 @@ describe('deserialize', () => {
           "type": "string",
         },
         Object {
-          "color": "#8ee684",
+          "color": "#FCA5D3",
           "hopSize": 5,
           "icon": Object {
             "class": "fa-folder-open-o",
             "code": "",
-            "label": "folder open",
+            "label": "Folder open",
             "patterns": Array [
               /category/i,
               /folder/i,

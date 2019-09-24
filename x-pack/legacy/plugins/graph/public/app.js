@@ -16,11 +16,11 @@ import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 
 import 'ui/autoload/all';
-// TODO: remove ui imports completely (move tDelete o plugins)
 import 'ui/kbn_top_nav';
 import 'ui/directives/saved_object_finder';
 import 'ui/directives/input_focus';
 import 'ui/saved_objects/ui/saved_object_save_as_checkbox';
+import 'uiExports/autocompleteProviders';
 import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
@@ -56,9 +56,12 @@ import {
 } from './helpers/as_observable';
 import {
   createGraphStore,
-  selectedFieldsSelector,
-  datasourceSelector,
+  loadFields,
+  fieldsSelector,
   requestDatasource,
+  datasourceSelector,
+  selectedFieldsSelector,
+  liveResponseFieldsSelector
 } from './state_management';
 
 import './angular/directives/graph_inspect';
@@ -103,6 +106,8 @@ app.directive('graphApp', function (reactDirective) {
     ['onQuerySubmit', { watchDepth: 'reference' }],
     ['savedObjects', { watchDepth: 'reference' }],
     ['uiSettings', { watchDepth: 'reference' }],
+    ['http', { watchDepth: 'reference' }],
+    ['initialQuery', { watchDepth: 'reference' }],
     ['overlays', { watchDepth: 'reference' }]
   ]);
 });

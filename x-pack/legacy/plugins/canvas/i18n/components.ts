@@ -8,6 +8,23 @@ import { i18n } from '@kbn/i18n';
 import { CANVAS, JSON, KIBANA, PDF, POST, URL } from './constants';
 
 export const ComponentStrings = {
+  App: {
+    getLoadErrorTitle: () =>
+      i18n.translate('xpack.canvas.app.loadErrorTitle', {
+        defaultMessage: 'Canvas failed to load :(',
+      }),
+    getLoadErrorMessage: (error: string) =>
+      i18n.translate('xpack.canvas.app.loadErrorMessage', {
+        defaultMessage: 'Message: {error}',
+        values: {
+          error,
+        },
+      }),
+    getLoadingMessage: () =>
+      i18n.translate('xpack.canvas.app.loadingMessage', {
+        defaultMessage: 'Canvas is loading',
+      }),
+  },
   AddEmbeddableFlyout: {
     getNoItemsText: () =>
       i18n.translate('xpack.canvas.embedObject.noMatchingObjectsMessage', {
@@ -92,6 +109,26 @@ export const ComponentStrings = {
         },
       }),
   },
+  AssetPicker: {
+    getAssetAltText: () =>
+      i18n.translate('xpack.canvas.assetpicker.assetAltText', {
+        defaultMessage: 'Asset thumbnail',
+      }),
+  },
+  ColorManager: {
+    getAddAriaLabel: () =>
+      i18n.translate('xpack.canvas.colorManager.addAriaLabel', {
+        defaultMessage: 'Add Color',
+      }),
+    getCodePlaceholder: () =>
+      i18n.translate('xpack.canvas.colorManager.codePlaceholder', {
+        defaultMessage: 'Color code',
+      }),
+    getRemoveAriaLabel: () =>
+      i18n.translate('xpack.canvas.colorManager.removeAriaLabel', {
+        defaultMessage: 'Remove Color',
+      }),
+  },
   HelpMenu: {
     getHelpMenuDescription: () =>
       i18n.translate('xpack.canvas.helpMenu.description', {
@@ -126,6 +163,12 @@ export const ComponentStrings = {
     getFlyoutCloseButtonAriaLabel: () =>
       i18n.translate('xpack.canvas.keyboardShortcutsDoc.flyout.closeButtonAriaLabel', {
         defaultMessage: 'Closes keyboard shortcuts reference',
+      }),
+  },
+  WorkpadCreate: {
+    getWorkpadCreateButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadCreate.createButtonLabel', {
+        defaultMessage: 'Create workpad',
       }),
   },
   WorkpadHeader: {
@@ -372,6 +415,208 @@ export const ComponentStrings = {
     getZoomResetText: () =>
       i18n.translate('xpack.canvas.workpadHeaderWorkpadZoom.zoomPrecentageValue', {
         defaultMessage: 'Reset',
+      }),
+  },
+  WorkpadLoader: {
+    getClonedWorkpadName: (workpadName: string) =>
+      i18n.translate('xpack.canvas.workpadLoader.clonedWorkpadName', {
+        defaultMessage: 'Copy of {workpadName}',
+        values: {
+          workpadName,
+        },
+        description:
+          'This suffix is added to the end of the name of a cloned workpad to indicate that this ' +
+          'new workpad is a copy of the original workpad. Example: "Copy of Sales Pitch"',
+      }),
+    getCloneToolTip: () =>
+      i18n.translate('xpack.canvas.workpadLoader.cloneTooltip', {
+        defaultMessage: 'Clone workpad',
+      }),
+    getCreateWorkpadLoadingDescription: () =>
+      i18n.translate('xpack.canvas.workpadLoader.createWorkpadLoadingDescription', {
+        defaultMessage: 'Creating workpad...',
+        description:
+          'This message appears while the user is waiting for a new workpad to be created',
+      }),
+    getDeleteButtonAriaLabel: (numberOfWorkpads: number) =>
+      i18n.translate('xpack.canvas.workpadLoader.deleteButtonAriaLabel', {
+        defaultMessage: 'Delete {numberOfWorkpads} workpads',
+        values: {
+          numberOfWorkpads,
+        },
+      }),
+    getDeleteButtonLabel: (numberOfWorkpads: number) =>
+      i18n.translate('xpack.canvas.workpadLoader.deleteButtonLabel', {
+        defaultMessage: 'Delete ({numberOfWorkpads})',
+        values: {
+          numberOfWorkpads,
+        },
+      }),
+    getDeleteMultipleWorkpadModalTitle: (numberOfWorkpads: string) =>
+      i18n.translate('xpack.canvas.workpadLoader.deleteMultipleWorkpadsModalTitle', {
+        defaultMessage: 'Delete {numberOfWorkpads} workpads?',
+        values: {
+          numberOfWorkpads,
+        },
+      }),
+    getDeleteSingleWorkpadModalTitle: (workpadName: string) =>
+      i18n.translate('xpack.canvas.workpadLoader.deleteSingleWorkpadModalTitle', {
+        defaultMessage: `Delete workpad '{workpadName}'?`,
+        values: {
+          workpadName,
+        },
+      }),
+    getDeleteModalConfirmButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadLoader.deleteModalConfirmButtonLabel', {
+        defaultMessage: 'Delete',
+      }),
+    getDeleteModalDescription: () =>
+      i18n.translate('xpack.canvas.workpadLoader.deleteModalDescription', {
+        defaultMessage: `You can't recover deleted workpads.`,
+      }),
+    getEmptyPromptTitle: () =>
+      i18n.translate('xpack.canvas.workpadLoader.emptyPromptTitle', {
+        defaultMessage: 'Add your first workpad',
+      }),
+    getEmptyPromptGettingStartedDescription: () =>
+      i18n.translate('xpack.canvas.workpadLoader.emptyPromptGettingStartedDescription', {
+        defaultMessage:
+          'Create a new workpad, start from a template, or import a workpad {JSON} file by dropping it here.',
+        values: {
+          JSON,
+        },
+      }),
+    getEmptyPromptNewUserDescription: () =>
+      i18n.translate('xpack.canvas.workpadLoader.emptyPromptNewUserDescription', {
+        defaultMessage: 'New to {CANVAS}?',
+        values: {
+          CANVAS,
+        },
+      }),
+    getExportButtonAriaLabel: (numberOfWorkpads: number) =>
+      i18n.translate('xpack.canvas.workpadLoader.exportButtonAriaLabel', {
+        defaultMessage: 'Export {numberOfWorkpads} workpads',
+        values: {
+          numberOfWorkpads,
+        },
+      }),
+    getExportButtonLabel: (numberOfWorkpads: number) =>
+      i18n.translate('xpack.canvas.workpadLoader.exportButtonLabel', {
+        defaultMessage: 'Export ({numberOfWorkpads})',
+        values: {
+          numberOfWorkpads,
+        },
+      }),
+    getExportToolTip: () =>
+      i18n.translate('xpack.canvas.workpadLoader.exportTooltip', {
+        defaultMessage: 'Export workpad',
+      }),
+    getFetchLoadingDescription: () =>
+      i18n.translate('xpack.canvas.workpadLoader.fetchLoadingDescription', {
+        defaultMessage: 'Fetching workpads...',
+        description:
+          'This message appears while the user is waiting for their list of workpads to load',
+      }),
+    getFilePickerPlaceholder: () =>
+      i18n.translate('xpack.canvas.workpadLoader.filePickerPlaceholder', {
+        defaultMessage: 'Import workpad {JSON} file',
+        values: {
+          JSON,
+        },
+      }),
+    getLoadWorkpadArialLabel: (workpadName: string) =>
+      i18n.translate('xpack.canvas.workpadLoader.loadWorkpadArialLabel', {
+        defaultMessage: `Load workpad '{workpadName}'`,
+        values: {
+          workpadName,
+        },
+      }),
+    getNoPermissionToCloneToolTip: () =>
+      i18n.translate('xpack.canvas.workpadLoader.noPermissionToCloneToolTip', {
+        defaultMessage: `You don't have permission to clone workpads`,
+      }),
+    getNoPermissionToCreateToolTip: () =>
+      i18n.translate('xpack.canvas.workpadLoader.noPermissionToCreateToolTip', {
+        defaultMessage: `You don't have permission to create workpads`,
+      }),
+    getNoPermissionToDeleteToolTip: () =>
+      i18n.translate('xpack.canvas.workpadLoader.noPermissionToDeleteToolTip', {
+        defaultMessage: `You don't have permission to delete workpads`,
+      }),
+    getNoPermissionToUploadToolTip: () =>
+      i18n.translate('xpack.canvas.workpadLoader.noPermissionToUploadToolTip', {
+        defaultMessage: `You don't have permission to upload workpads`,
+      }),
+    getSampleDataLinkLabel: () =>
+      i18n.translate('xpack.canvas.workpadLoader.sampleDataLinkLabel', {
+        defaultMessage: 'Add your first workpad',
+      }),
+    getTableCreatedColumnTitle: () =>
+      i18n.translate('xpack.canvas.workpadLoader.table.createdColumnTitle', {
+        defaultMessage: 'Created',
+        description: 'This column in the table contains the date/time the workpad was created.',
+      }),
+    getTableNameColumnTitle: () =>
+      i18n.translate('xpack.canvas.workpadLoader.table.nameColumnTitle', {
+        defaultMessage: 'Workpad name',
+      }),
+    getTableUpdatedColumnTitle: () =>
+      i18n.translate('xpack.canvas.workpadLoader.table.updatedColumnTitle', {
+        defaultMessage: 'Updated',
+        description:
+          'This column in the table contains the date/time the workpad was last updated.',
+      }),
+  },
+  WorkpadManager: {
+    getModalTitle: () =>
+      i18n.translate('xpack.canvas.workpadManager.modalTitle', {
+        defaultMessage: '{CANVAS} workpads',
+        values: {
+          CANVAS,
+        },
+      }),
+    getMyWorkpadsTabLabel: () =>
+      i18n.translate('xpack.canvas.workpadManager.myWorkpadsTabLabel', {
+        defaultMessage: 'My workpads',
+      }),
+    getWorkpadTemplatesTabLabel: () =>
+      i18n.translate('xpack.canvas.workpadManager.workpadTemplatesTabLabel', {
+        defaultMessage: 'Templates',
+        description: 'The label for the tab that displays a list of designed workpad templates.',
+      }),
+  },
+  WorkpadSearch: {
+    getWorkpadSearchPlaceholder: () =>
+      i18n.translate('xpack.canvas.workpadSearch.searchPlaceholder', {
+        defaultMessage: 'Find workpad',
+      }),
+  },
+  WorkpadTemplates: {
+    getTableDescriptionColumnTitle: () =>
+      i18n.translate('xpack.canvas.workpadTemplates.table.descriptionColumnTitle', {
+        defaultMessage: 'Description',
+      }),
+    getTableNameColumnTitle: () =>
+      i18n.translate('xpack.canvas.workpadTemplates.table.nameColumnTitle', {
+        defaultMessage: 'Template name',
+      }),
+    getTableTagsColumnTitle: () =>
+      i18n.translate('xpack.canvas.workpadTemplates.table.tagsColumnTitle', {
+        defaultMessage: 'Tags',
+        description:
+          'This column contains relevant tags that indicate what type of template ' +
+          'is displayed. For example: "report", "presentation", etc.',
+      }),
+    getTemplateSearchPlaceholder: () =>
+      i18n.translate('xpack.canvas.workpadTemplate.searchPlaceholder', {
+        defaultMessage: 'Find template',
+      }),
+    getCloneTemplateLinkAriaLabel: (templateName: string) =>
+      i18n.translate('xpack.canvas.workpadTemplate.cloneTemplateLinkAriaLabel', {
+        defaultMessage: `Clone workpad template '{templateName}'`,
+        values: {
+          templateName,
+        },
       }),
   },
 };

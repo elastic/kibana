@@ -1,30 +1,18 @@
-.gphFieldEditorBadge {
-  padding-left: 0;
+.gphFieldEditor__badge {
+  @include gphFieldBadgeSize;
 }
 
-.gphFieldEditorBadge--disabled {
+.gphFieldEditor__badge--disabled,
+.gphFieldEditor__badge--disabled:focus {
   opacity: 0.7;
   text-decoration: line-through;
 }
 
-.gphFieldEditorBadge__color {
-  display: inline-flex;
-  width: $euiSizeL;
-  height: $euiSizeL;
-  align-items: center;
-  justify-content: center;
-
-  margin: $euiSizeXS;
-  padding: 0;
-
-  text-align: center;
+.gphFieldEditor__badgeIcon {
+  width: auto;
+  margin-right: $euiSizeXS;
 }
 
-.gphFieldEditorBadge__icon--dark {
-  color: $euiColorEmptyShade;
-}
-
-.gphFieldEditorBadge__icon--light {
-  color: $euiColorDarkestShade;
-
+.gphFieldEditor__displayForm {
+  padding: $euiSizeS;
 }

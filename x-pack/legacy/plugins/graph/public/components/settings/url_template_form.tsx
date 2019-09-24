@@ -23,6 +23,7 @@ import { LegacyIcon } from '../legacy_icon';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
 import { urlTemplateIconChoices } from '../../helpers/style_choices';
 import { isUrlTemplateValid, isKibanaUrl, replaceKibanaUrlParam } from '../../helpers/url_template';
+import { isEqual } from '../helpers';
 
 export interface NewFormProps {
   onSubmit: (template: UrlTemplate) => void;
@@ -41,10 +42,6 @@ export type UrlTemplateFormProps = NewFormProps | UpdateFormProps;
 
 function isUpdateForm(props: UrlTemplateFormProps): props is UpdateFormProps {
   return 'initialTemplate' in props;
-}
-
-function isEqual(a: UrlTemplate, b: UrlTemplate) {
-  return (Object.keys(a) as Array<keyof UrlTemplate>).every(key => a[key] === b[key]);
 }
 
 export function UrlTemplateForm(props: UrlTemplateFormProps) {

@@ -5,102 +5,107 @@
  */
 
 import React, { useState, useEffect, ReactNode } from 'react';
-import {
-  EuiPopover,
-  EuiButtonEmpty,
-  EuiSelectable,
-  EuiButton,
-  EuiText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPopover, EuiSelectable, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import classNames from 'classnames';
 import { WorkspaceField } from '../../types';
 
 import { FieldIcon } from './field_icon';
 
 export interface FieldPickerProps {
-  allFields: WorkspaceField[];
+  fieldMap: Record<string, WorkspaceField>;
   selectField: (fieldName: string) => void;
   deselectField: (fieldName: string) => void;
 }
 
-export function FieldPicker(props: FieldPickerProps) {
+export function FieldPicker({ fieldMap, selectField, deselectField }: FieldPickerProps) {
   const [open, setOpen] = useState(false);
 
-  const unselectedFields = props.allFields.filter(field => !field.selected);
-  const hasSelectedFields = unselectedFields.length < props.allFields.length;
+  const allFields = Object.values(fieldMap);
+  const unselectedFields = allFields.filter(field => !field.selected);
+  const hasSelectedFields = unselectedFields.length < allFields.length;
 
-  const [fieldOptions, setFieldOptions] = useState(toOptions(unselectedFields));
+  const hasFields = allFields.length > 0;
+
+  const [fieldOptions, setFieldOptions] = useState(toOptions(allFields));
 
   useEffect(() => {
-    setFieldOptions(toOptions(unselectedFields));
-  }, [props.allFields]);
+    if (!open) {
+      // only update the field options if the popover is not open currently.
+      // This is necessary because EuiSelectable assumes options don't change
+      // on their own.
+      setFieldOptions(toOptions(allFields));
+    }
+  }, [fieldMap]);
 
-  const allFieldsUnselected = fieldOptions.every(option => option.checked !== 'on');
+  const badgeDescription = hasSelectedFields
+    ? i18n.translate('xpack.graph.bar.pickMoreFieldsLabel', {
+        defaultMessage: 'Add more fields',
+      })
+    : i18n.translate('xpack.graph.bar.pickFieldsLabel', {
+        defaultMessage: 'Add fields',
+      });
 
   return (
     <EuiPopover
       id="graphFieldPicker"
       anchorPosition="downLeft"
       ownFocus
+      panelPaddingSize="none"
       button={
-        // TODO disable as long as no datasource is picked
-        <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={() => setOpen(true)}>
-          {hasSelectedFields
-            ? i18n.translate('xpack.graph.bar.pickMoreFieldsLabel', {
-                defaultMessage: 'Select more fields',
-              })
-            : i18n.translate('xpack.graph.bar.pickFieldsLabel', {
-                defaultMessage: 'Select fields',
-              })}
-        </EuiButtonEmpty>
+        <EuiBadge
+          className={classNames('gphFieldPicker__button', {
+            'gphFieldPicker__button--disabled': !hasFields,
+          })}
+          color="hollow"
+          iconType="plusInCircleFilled"
+          aria-disabled={!hasFields}
+          onClick={() => {
+            if (hasFields) {
+              setOpen(true);
+            }
+          }}
+          onClickAriaLabel={badgeDescription}
+        >
+          {badgeDescription}
+        </EuiBadge>
       }
       isOpen={open}
       closePopover={() => setOpen(false)}
-      panelClassName="gphFieldPickerList"
+      panelClassName="gphFieldPicker__popoverPanel"
     >
-      <EuiText size="xs">
-        {i18n.translate('xpack.graph.fieldManager.updateFieldsDescription', {
-          defaultMessage:
-            'Select the fields you want to explore. Each field will be a separate vertex type',
-        })}
-      </EuiText>
-      <EuiSpacer size="s" />
-      <EuiSelectable
-        searchProps={{
-          placeholder: i18n.translate('xpack.graph.fieldManager.fieldSearchPlaceholder', {
-            defaultMessage: 'Filter fields',
-          }),
-        }}
-        searchable
-        options={fieldOptions}
-        onChange={setFieldOptions}
-      >
-        {(list, search) => (
-          <>
-            {search}
-            {list}
-          </>
-        )}
-      </EuiSelectable>
-      <EuiButton
-        data-test-subj="graphFieldPickerAdd"
-        fill
-        fullWidth
-        disabled={allFieldsUnselected}
-        onClick={() => {
-          setOpen(false);
-          fieldOptions.forEach((option, index) => {
-            if (option.checked === 'on') {
-              props.selectField(unselectedFields[index].name);
-            }
-          });
-        }}
-      >
-        {i18n.translate('xpack.graph.fieldManager.addFieldsLabel', {
-          defaultMessage: 'Add fields',
-        })}
-      </EuiButton>
+      {open && (
+        <EuiSelectable
+          searchProps={{
+            placeholder: i18n.translate('xpack.graph.fieldManager.fieldSearchPlaceholder', {
+              defaultMessage: 'Filter fields',
+            }),
+            compressed: true,
+          }}
+          listProps={{
+            className: 'gphFieldPicker__selectableList',
+          }}
+          searchable
+          options={fieldOptions}
+          onChange={newOptions => {
+            newOptions.forEach(option => {
+              if (option.checked === 'on' && !fieldMap[option.label].selected) {
+                selectField(option.label);
+              } else if (option.checked !== 'on' && fieldMap[option.label].selected) {
+                deselectField(option.label);
+              }
+            });
+            setFieldOptions(newOptions);
+          }}
+        >
+          {(list, search) => (
+            <>
+              {search}
+              {list}
+            </>
+          )}
+        </EuiSelectable>
+      )}
     </EuiPopover>
   );
 }
@@ -111,5 +116,6 @@ function toOptions(
   return fields.map(field => ({
     label: field.name,
     prepend: <FieldIcon type={field.type} />,
+    checked: field.selected ? 'on' : undefined,
   }));
 }

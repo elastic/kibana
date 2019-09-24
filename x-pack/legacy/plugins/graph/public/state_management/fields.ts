@@ -13,6 +13,11 @@ import { GraphState, GraphStoreDependencies } from './store';
 import { reset } from './global';
 import { setDatasource } from './datasource';
 import { matchesOne, InferActionType } from './helpers';
+import actionCreatorFactory from 'typescript-fsa';
+import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
+import { createSelector } from 'reselect';
+import { WorkspaceField } from '../types';
+import { GraphState } from './store';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/fields');
 
@@ -50,7 +55,11 @@ export const fieldsReducer = reducerWithInitialState(initialFields)
   })
   .build();
 
-export const fieldsSelector = (state: GraphState) => Object.values(state.fields);
+export const fieldMapSelector = (state: GraphState) => state.fields;
+export const fieldsSelector = createSelector(
+  fieldMapSelector,
+  fields => Object.values(fields)
+);
 export const selectedFieldsSelector = createSelector(
   fieldsSelector,
   fields => fields.filter(field => field.selected)

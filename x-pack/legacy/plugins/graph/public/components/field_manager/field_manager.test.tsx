@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { EuiColorPicker, EuiSelectable } from '@elastic/eui';
+import React, { ReactElement } from 'react';
+import { EuiColorPicker, EuiSelectable, EuiContextMenu, EuiPopover, EuiButton } from '@elastic/eui';
 import { FieldPicker } from './field_picker';
 import { FieldEditor } from './field_editor';
 import { GraphStore, createGraphStore, loadFields } from '../../state_management';
@@ -20,7 +20,7 @@ describe('field_manager', () => {
   let dispatchSpy: jest.Mock;
 
   beforeEach(() => {
-    store = createGraphStore();
+    store = createGraphStore({} as any);
     store.dispatch(
       loadFields([
         {
@@ -81,18 +81,22 @@ describe('field_manager', () => {
 
   it('should select fields from picker', () => {
     const fieldPicker = instance.find(FieldPicker).dive();
+
+    act(() => {
+      (fieldPicker.find(EuiPopover).prop('button')! as ReactElement).props.onClick();
+    });
+
+    fieldPicker.update();
+
     expect(
       fieldPicker
         .find(EuiSelectable)
         .prop('options')
         .map((option: { label: string }) => option.label)
-    ).toEqual(['field3']);
+    ).toEqual(['field1', 'field2', 'field3']);
 
     act(() => {
       fieldPicker.find(EuiSelectable).prop('onChange')([{ checked: 'on', label: 'field3' }]);
-    });
-    act(() => {
-      fieldPicker.find('[data-test-subj="graphFieldPickerAdd"]').simulate('click');
     });
 
     expect(dispatchSpy).toHaveBeenCalledWith({
@@ -110,8 +114,8 @@ describe('field_manager', () => {
         .find(FieldEditor)
         .at(0)
         .dive()
-        .find('[data-test-subj="graphFieldEditorRemove"]')
-        .simulate('click');
+        .find(EuiContextMenu)
+        .prop('panels')![0].items![2].onClick!({} as any);
     });
 
     expect(dispatchSpy).toHaveBeenCalledWith({
@@ -124,18 +128,16 @@ describe('field_manager', () => {
   });
 
   it('should disable field', () => {
-    const firstFieldEditor = instance
+    const toggleItem = instance
       .find(FieldEditor)
       .at(0)
-      .dive();
-    expect(
-      firstFieldEditor.find('[data-test-subj="graphFieldEditorDisable"]').prop('checked')
-    ).toEqual(false);
-    act(() => {
-      firstFieldEditor.find('[data-test-subj="graphFieldEditorDisable"]').prop('onChange')!(
-        {} as React.MouseEvent
-      );
-    });
+      .dive()
+      .find(EuiContextMenu)
+      .prop('panels')![0].items![1];
+
+    expect(toggleItem.name).toEqual('Temporarily disable');
+
+    toggleItem.onClick!({} as any);
 
     expect(dispatchSpy).toHaveBeenCalledWith({
       type: 'x-pack/graph/fields/UPDATE_FIELD_PROPERTIES',
@@ -155,24 +157,22 @@ describe('field_manager', () => {
         .find(FieldEditor)
         .at(0)
         .dive()
-        .find('[data-test-subj="graphFieldEditorDisable"]')
-        .prop('checked')
-    ).toEqual(true);
+        .find(EuiContextMenu)
+        .prop('panels')![0].items![1].name
+    ).toEqual('Enable');
   });
 
   it('should enable field', () => {
-    const secondFieldEditor = instance
+    const toggleItem = instance
       .find(FieldEditor)
       .at(1)
-      .dive();
-    expect(
-      secondFieldEditor.find('[data-test-subj="graphFieldEditorDisable"]').prop('checked')
-    ).toEqual(true);
-    act(() => {
-      secondFieldEditor.find('[data-test-subj="graphFieldEditorDisable"]').prop('onChange')!(
-        {} as React.MouseEvent
-      );
-    });
+      .dive()
+      .find(EuiContextMenu)
+      .prop('panels')![0].items![1];
+
+    expect(toggleItem.name).toEqual('Enable');
+
+    toggleItem.onClick!({} as any);
 
     expect(dispatchSpy).toHaveBeenCalledWith({
       type: 'x-pack/graph/fields/UPDATE_FIELD_PROPERTIES',
@@ -190,30 +190,39 @@ describe('field_manager', () => {
     expect(
       instance
         .find(FieldEditor)
-        .at(0)
-        .dive()
-        .find('[data-test-subj="graphFieldEditorDisable"]')
-        .prop('checked')
-    ).toEqual(false);
-  });
-
-  it('should update color', () => {
-    act(() => {
-      instance
-        .find(FieldEditor)
         .at(1)
         .dive()
+        .find(EuiContextMenu)
+        .prop('panels')![0].items![1].name
+    ).toEqual('Temporarily disable');
+  });
+
+  it('should change color', () => {
+    const fieldEditor = instance
+      .find(FieldEditor)
+      .at(1)
+      .dive();
+
+    const getDisplayForm = () =>
+      shallow(fieldEditor.find(EuiContextMenu).prop('panels')![1].content as ReactElement);
+
+    act(() => {
+      getDisplayForm()
         .find(EuiColorPicker)
-        .prop('onChange')('#ddd');
+        .prop('onChange')!('#aaa');
     });
+    fieldEditor.update();
+    getDisplayForm()
+      .find(EuiButton)
+      .prop('onClick')!({} as any);
 
     expect(dispatchSpy).toHaveBeenCalledWith({
       type: 'x-pack/graph/fields/UPDATE_FIELD_PROPERTIES',
       payload: {
         fieldName: 'field2',
-        fieldProperties: {
-          color: '#ddd',
-        },
+        fieldProperties: expect.objectContaining({
+          color: '#aaa',
+        }),
       },
     });
   });
