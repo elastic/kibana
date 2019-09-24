@@ -11127,8 +11127,6 @@
     "xpack.spaces.spaceSelector.findSpacePlaceholder": "スペースを検索",
     "xpack.spaces.spaceSelector.noSpacesMatchSearchCriteriaDescription": "検索条件に一致するスペースがありません",
     "xpack.spaces.spaceSelector.selectSpacesTitle": "スペースの選択",
-    "xpack.spaces.spacesManager.unableToChangeSpaceWarningDescription": "後程再試行してください",
-    "xpack.spaces.spacesManager.unableToChangeSpaceWarningTitle": "スペースを変更できません",
     "xpack.spaces.spacesTitle": "スペース",
     "xpack.spaces.management.copyToSpace.actionDescription": "この保存されたオブジェクトを 1 つまたは複数のスペースにコピーします。",
     "xpack.spaces.management.copyToSpace.actionTitle": "スペースにコピー",

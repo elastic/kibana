@@ -11129,8 +11129,6 @@
     "xpack.spaces.spaceSelector.findSpacePlaceholder": "查找工作区",
     "xpack.spaces.spaceSelector.noSpacesMatchSearchCriteriaDescription": "没有匹配搜索条件的空间",
     "xpack.spaces.spaceSelector.selectSpacesTitle": "选择您的空间",
-    "xpack.spaces.spacesManager.unableToChangeSpaceWarningDescription": "请稍后重试",
-    "xpack.spaces.spacesManager.unableToChangeSpaceWarningTitle": "无法更改空间",
     "xpack.spaces.spacesTitle": "工作区",
     "xpack.spaces.management.copyToSpace.actionDescription": "将此已保存对象复制到一个或多个工作区",
     "xpack.spaces.management.copyToSpace.actionTitle": "复制到工作区",
