@@ -86,7 +86,7 @@ export function prependKibanaContext(
         arguments: {
           timeRange: timeRange ? [JSON.stringify(timeRange)] : [],
           query: query ? [JSON.stringify(query)] : [],
-          filters: filters ? [JSON.stringify(filters)] : undefined,
+          filters: filters ? [JSON.stringify(filters)] : ['[]'],
         },
       },
       ...parsedExpression.chain,

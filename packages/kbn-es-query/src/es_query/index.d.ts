@@ -18,3 +18,14 @@
  */
 
 export function buildQueryFromFilters(filters: unknown[], indexPattern: unknown): unknown;
+export function buildEsQuery(
+  indexPattern: unknown,
+  queries: unknown,
+  filters: unknown,
+  config?: {
+    allowLeadingWildcards: boolean;
+    queryStringOptions: unknown;
+    ignoreFilterIfFieldNotInIndex: boolean;
+    dateFormatTZ?: string | null;
+  }
+): unknown;

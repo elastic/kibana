@@ -67,6 +67,7 @@ export function IndexPatternDataPanel({
   dragDropContext,
   core,
   query,
+  filters,
   dateRange,
 }: DatasourceDataPanelProps<IndexPatternPrivateState>) {
   const { indexPatterns, currentIndexPatternId } = state;
@@ -118,6 +119,7 @@ export function IndexPatternDataPanel({
       indexPatterns={indexPatterns}
       query={query}
       dateRange={dateRange}
+      filters={filters}
       dragDropContext={dragDropContext}
       showEmptyFields={state.showEmptyFields}
       onToggleEmptyFields={onToggleEmptyFields}

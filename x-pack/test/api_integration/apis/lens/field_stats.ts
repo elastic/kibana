@@ -35,8 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
           .post('/api/lens/index_stats/logstash/field')
           .set(COMMON_HEADERS)
           .send({
-            query: { match_all: {} },
-            filters: [],
+            dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
             timeFieldName: '@timestamp',
@@ -53,8 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
           .post('/api/lens/index_stats/logstash-2015.09.22/field')
           .set(COMMON_HEADERS)
           .send({
-            query: { match_all: {} },
-            filters: [],
+            dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
             timeFieldName: '@timestamp',
@@ -165,8 +163,7 @@ export default ({ getService }: FtrProviderContext) => {
           .post('/api/lens/index_stats/logstash-2015.09.22/field')
           .set(COMMON_HEADERS)
           .send({
-            query: { match_all: {} },
-            filters: [],
+            dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
             timeFieldName: '@timestamp',
@@ -203,8 +200,7 @@ export default ({ getService }: FtrProviderContext) => {
           .post('/api/lens/index_stats/logstash-2015.09.22/field')
           .set(COMMON_HEADERS)
           .send({
-            query: { match_all: {} },
-            filters: [],
+            dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
             timeFieldName: '@timestamp',
@@ -271,17 +267,11 @@ export default ({ getService }: FtrProviderContext) => {
           .post('/api/lens/index_stats/logstash-2015.09.22/field')
           .set(COMMON_HEADERS)
           .send({
-            query: { match_all: {} },
-            filters: [
-              {
-                match_all: {},
-                meta: { type: 'match_all' },
+            dslQuery: {
+              bool: {
+                filter: [{ match: { 'geo.src': 'US' } }],
               },
-              {
-                exists: { field: 'bytes' },
-                meta: { type: 'exists' },
-              },
-            ],
+            },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
             timeFieldName: '@timestamp',
@@ -292,99 +282,7 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        expect(body).to.eql({
-          totalDocuments: 4633,
-          sampledDocuments: 4633,
-          sampledValues: 4633,
-          histogram: {
-            buckets: [
-              {
-                count: 705,
-                key: 0,
-              },
-              {
-                count: 898,
-                key: 1999,
-              },
-              {
-                count: 885,
-                key: 3998,
-              },
-              {
-                count: 970,
-                key: 5997,
-              },
-              {
-                count: 939,
-                key: 7996,
-              },
-              {
-                count: 44,
-                key: 9995,
-              },
-              {
-                count: 43,
-                key: 11994,
-              },
-              {
-                count: 43,
-                key: 13993,
-              },
-              {
-                count: 57,
-                key: 15992,
-              },
-              {
-                count: 49,
-                key: 17991,
-              },
-            ],
-          },
-          topValues: {
-            buckets: [
-              {
-                count: 147,
-                key: 0,
-              },
-              {
-                count: 5,
-                key: 3954,
-              },
-              {
-                count: 5,
-                key: 6497,
-              },
-              {
-                count: 4,
-                key: 1840,
-              },
-              {
-                count: 4,
-                key: 4206,
-              },
-              {
-                count: 4,
-                key: 4328,
-              },
-              {
-                count: 4,
-                key: 4669,
-              },
-              {
-                count: 4,
-                key: 5846,
-              },
-              {
-                count: 4,
-                key: 5863,
-              },
-              {
-                count: 4,
-                key: 6631,
-              },
-            ],
-          },
-        });
+        expect(body.totalDocuments).to.eql(425);
       });
     });
   });

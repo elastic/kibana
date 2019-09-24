@@ -24,8 +24,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
         }),
         body: schema.object(
           {
-            query: schema.object({}, { allowUnknowns: true }),
-            filters: schema.arrayOf(schema.object({}, { allowUnknowns: true })),
+            dslQuery: schema.object({}, { allowUnknowns: true }),
             fromDate: schema.string(),
             toDate: schema.string(),
             timeFieldName: schema.string(),
@@ -44,12 +43,12 @@ export async function initFieldsRoute(setup: CoreSetup) {
     },
     async (context, req, res) => {
       const requestClient = context.core.elasticsearch.dataClient;
-      const { fromDate, toDate, timeFieldName, field, query } = req.body;
+      const { fromDate, toDate, timeFieldName, field, dslQuery } = req.body;
 
       try {
-        const filters = {
+        const query = {
           bool: {
-            filter: req.body.filters.concat([
+            filter: [
               {
                 range: {
                   [timeFieldName]: {
@@ -58,8 +57,8 @@ export async function initFieldsRoute(setup: CoreSetup) {
                   },
                 },
               },
-              query,
-            ]),
+              dslQuery,
+            ],
           },
         };
 
@@ -67,7 +66,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
           requestClient.callAsCurrentUser('search', {
             index: req.params.indexPatternTitle,
             body: {
-              query: filters,
+              query,
               aggs,
             },
             // The hits total changed in 7.0 from number to object, unless this flag is set

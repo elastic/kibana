@@ -33,7 +33,7 @@ import {
   niceTimeFormatter,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { Filter, toElasticsearchQuery, buildQueryFromFilters } from '@kbn/es-query';
+import { Filter, buildEsQuery } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/common';
 // @ts-ignore
 import { fieldFormats } from '../../../../../../src/legacy/ui/public/registry/field_formats';
@@ -111,8 +111,7 @@ export function FieldItem(props: FieldItemProps) {
     core.http
       .post(`/api/lens/index_stats/${indexPattern.title}/field`, {
         body: JSON.stringify({
-          query: toElasticsearchQuery(query, indexPattern),
-          filters: buildQueryFromFilters(filters, indexPattern),
+          dslQuery: buildEsQuery(indexPattern, query, filters),
           fromDate: dateRange.fromDate,
           toDate: dateRange.toDate,
           timeFieldName: indexPattern.timeFieldName,
