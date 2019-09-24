@@ -24,12 +24,16 @@ import moment from 'moment';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
 import { Paginate } from '../paginate';
+import { ComponentStrings } from '../../../i18n';
+import { AdvancedSettings } from '../../lib/kibana_advanced_settings';
 import { WorkpadDropzone } from './workpad_dropzone';
 import { WorkpadCreate } from './workpad_create';
 import { WorkpadSearch } from './workpad_search';
 import { uploadWorkpad } from './upload_workpad';
 
-const formatDate = date => date && moment(date).format('MMM D, YYYY @ h:mma');
+const { WorkpadLoader: strings } = ComponentStrings;
+
+const formatDate = date => date && moment(date).format(AdvancedSettings.get('dateFormat'));
 
 const getDisplayName = (name, workpad, loadedWorkpad) => {
   const workpadName = name.length ? name : <em>{workpad.id}</em>;
@@ -147,22 +151,24 @@ export class WorkpadLoader extends React.PureComponent {
         render: workpad => (
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiToolTip content="Export">
+              <EuiToolTip content={strings.getExportToolTip()}>
                 <EuiButtonIcon
                   iconType="exportAction"
                   onClick={() => this.props.downloadWorkpad(workpad.id)}
-                  aria-label="Export workpad"
+                  aria-label={strings.getExportToolTip()}
                 />
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip
-                content={canUserWrite ? 'Clone' : `You don't have permission to clone workpads`}
+                content={
+                  canUserWrite ? strings.getCloneToolTip() : strings.getNoPermissionToCloneToolTip()
+                }
               >
                 <EuiButtonIcon
                   iconType="copy"
                   onClick={() => this.cloneWorkpad(workpad)}
-                  aria-label="Clone Workpad"
+                  aria-label={strings.getCloneToolTip()}
                   disabled={!canUserWrite}
                 />
               </EuiToolTip>
@@ -175,7 +181,7 @@ export class WorkpadLoader extends React.PureComponent {
     const columns = [
       {
         field: 'name',
-        name: 'Workpad name',
+        name: strings.getTableNameColumnTitle(),
         sortable: true,
         dataType: 'string',
         render: (name, workpad) => {
@@ -186,7 +192,7 @@ export class WorkpadLoader extends React.PureComponent {
               data-test-subj="canvasWorkpadLoaderWorkpad"
               name="loadWorkpad"
               params={{ id: workpad.id }}
-              aria-label={`Load workpad ${workpadName}`}
+              aria-label={strings.getLoadWorkpadArialLabel()}
             >
               {workpadName}
             </Link>
@@ -195,7 +201,7 @@ export class WorkpadLoader extends React.PureComponent {
       },
       {
         field: '@created',
-        name: 'Created',
+        name: strings.getTableCreatedColumnTitle(),
         sortable: true,
         dataType: 'date',
         width: '20%',
@@ -203,7 +209,7 @@ export class WorkpadLoader extends React.PureComponent {
       },
       {
         field: '@timestamp',
-        name: 'Updated',
+        name: strings.getTableUpdatedColumnTitle(),
         sortable: true,
         dataType: 'date',
         width: '20%',
@@ -227,18 +233,15 @@ export class WorkpadLoader extends React.PureComponent {
     const emptyTable = (
       <EuiEmptyPrompt
         iconType="importAction"
-        title={<h2>Add your first workpad</h2>}
+        title={<h2>{strings.getEmptyPromptTitle()}</h2>}
         titleSize="s"
         body={
           <Fragment>
+            <p>{strings.getEmptyPromptGettingStartedDescription()}</p>
             <p>
-              Create a new workpad, start from a template, or import a workpad JSON file by dropping
-              it here.
-            </p>
-            <p>
-              New to Canvas?{' '}
+              {strings.getEmptyPromptNewUserDescription()}{' '}
               <EuiLink href="kibana#/home/tutorial_directory/sampleData">
-                Try the sample data workpads
+                {strings.getSampleDataLinkLabel()}
               </EuiLink>
               .
             </p>
@@ -298,14 +301,20 @@ export class WorkpadLoader extends React.PureComponent {
         iconType="trash"
         onClick={this.openRemoveConfirm}
         disabled={!canUserWrite}
+        aria-label={strings.getDeleteButtonAriaLabel(selectedWorkpads.length)}
       >
-        {`Delete (${selectedWorkpads.length})`}
+        {strings.getDeleteButtonLabel(selectedWorkpads.length)}
       </EuiButton>
     );
 
     const downloadButton = (
-      <EuiButton color="secondary" onClick={this.downloadWorkpads} iconType="exportAction">
-        {`Export (${selectedWorkpads.length})`}
+      <EuiButton
+        color="secondary"
+        onClick={this.downloadWorkpads}
+        iconType="exportAction"
+        aria-label={strings.getExportButtonAriaLabel(selectedWorkpads.length)}
+      >
+        {strings.getExportButtonLabel(selectedWorkpads.length)}
       </EuiButton>
     );
 
@@ -314,7 +323,7 @@ export class WorkpadLoader extends React.PureComponent {
         display="default"
         compressed
         className="canvasWorkpad__upload--compressed"
-        initialPromptText="Import workpad JSON file"
+        initialPromptText={strings.getFilePickerPlaceholder()}
         onChange={([file]) => uploadWorkpad(file, this.onUpload)}
         accept="application/json"
         disabled={createPending || !canUserWrite}
@@ -323,33 +332,27 @@ export class WorkpadLoader extends React.PureComponent {
 
     if (!canUserWrite) {
       createButton = (
-        <EuiToolTip content="You don't have permission to create workpads">
-          {createButton}
-        </EuiToolTip>
+        <EuiToolTip content={strings.getNoPermissionToCreateToolTip()}>{createButton}</EuiToolTip>
       );
       deleteButton = (
-        <EuiToolTip content="You don't have permission to delete workpads">
-          {deleteButton}
-        </EuiToolTip>
+        <EuiToolTip content={strings.getNoPermissionToDeleteToolTip()}>{deleteButton}</EuiToolTip>
       );
       uploadButton = (
-        <EuiToolTip content="You don't have permission to upload workpads">
-          {uploadButton}
-        </EuiToolTip>
+        <EuiToolTip content={strings.getNoPermissionToUploadToolTip()}>{uploadButton}</EuiToolTip>
       );
     }
 
     const modalTitle =
       selectedWorkpads.length === 1
-        ? `Delete workpad '${selectedWorkpads[0].name}'?`
-        : `Delete ${selectedWorkpads.length} workpads?`;
+        ? strings.getDeleteSingleWorkpadModalTitle(selectedWorkpads[0].name)
+        : strings.getDeleteMultipleWorkpadModalTitle(selectedWorkpads.length);
 
     const confirmModal = (
       <ConfirmModal
         isOpen={deletingWorkpad}
         title={modalTitle}
-        message="You can't recover deleted workpads."
-        confirmButtonText="Delete"
+        message={strings.getDeleteModalDescription()}
+        confirmButtonText={strings.getDeleteModalConfirmButtonLabel()}
         onConfirm={this.removeWorkpads}
         onCancel={this.closeRemoveConfirm}
       />
@@ -395,10 +398,12 @@ export class WorkpadLoader extends React.PureComponent {
 
             <EuiSpacer />
 
-            {createPending && <div style={{ width: '100%' }}>Creating Workpad...</div>}
+            {createPending && (
+              <div style={{ width: '100%' }}>{strings.getCreateWorkpadLoadingDescription()}</div>
+            )}
 
             {!createPending && isLoading && (
-              <div style={{ width: '100%' }}>Fetching Workpads...</div>
+              <div style={{ width: '100%' }}>{strings.getFetchLoadingDescription()}</div>
             )}
 
             {!createPending && !isLoading && this.renderWorkpadTable(pagination)}
