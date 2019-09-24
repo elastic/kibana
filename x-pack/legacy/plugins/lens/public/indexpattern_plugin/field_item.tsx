@@ -100,7 +100,8 @@ export function FieldItem(props: FieldItemProps) {
       (field.type !== 'number' &&
         field.type !== 'string' &&
         field.type !== 'date' &&
-        field.type !== 'boolean')
+        field.type !== 'boolean' &&
+        field.type !== 'ip')
     ) {
       return;
     }
@@ -150,13 +151,13 @@ export function FieldItem(props: FieldItemProps) {
           value={{ field, indexPatternId: indexPattern.id } as DraggedField}
           data-test-subj="lnsFieldListPanelField"
           draggable
-          className={`lnsFieldListPanel__field lnsFieldListPanel__field-btn-${
-            field.type
-          } lnsFieldListPanel__field--${exists ? 'exists' : 'missing'}`}
+          className={`lnsFieldItem lnsFieldItem--${field.type} lnsFieldItem--${
+            exists ? 'exists' : 'missing'
+          }`}
         >
           <EuiKeyboardAccessible>
             <div
-              className="lnsFieldListPanel__fieldInfo"
+              className="lnsFieldItem__info"
               data-test-subj={`lnsFieldListPanelField-${field.name}`}
               onClick={() => {
                 togglePopover();
@@ -177,7 +178,7 @@ export function FieldItem(props: FieldItemProps) {
             >
               <FieldIcon type={field.type as DataType} />
 
-              <span className="lnsFieldListPanel__fieldName" title={field.name}>
+              <span className="lnsFieldItem__name" title={field.name}>
                 {wrappableHighlightableFieldName}
               </span>
             </div>
