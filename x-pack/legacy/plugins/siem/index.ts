@@ -23,6 +23,10 @@ import {
   DEFAULT_FROM,
   DEFAULT_TO,
 } from './common/constants';
+import {
+  alwaysFiringAlertType,
+  rateLimitedActionType,
+} from './server/lib/detection_engine/alerts/always_firing';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function siem(kibana: any) {
@@ -30,7 +34,7 @@ export function siem(kibana: any) {
     id: APP_ID,
     configPrefix: 'xpack.siem',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch'],
+    require: ['kibana', 'elasticsearch', 'alerting', 'actions'],
     uiExports: {
       app: {
         description: i18n.translate('xpack.siem.securityDescription', {
@@ -115,6 +119,15 @@ export function siem(kibana: any) {
       mappings: savedObjectMappings,
     },
     init(server: Server) {
+      console.log('server.plugins.alerting', server.plugins.alerting);
+      if (server.plugins.alerting != null) {
+        console.log('...I have found alerting and should be ok to run...');
+        server.plugins.alerting.registerType(alwaysFiringAlertType);
+      }
+      if (server.plugins.actions != null) {
+        console.log('...I have found actions and should be ok to run...');
+        server.plugins.actions.registerType(rateLimitedActionType);
+      }
       server.injectUiAppVars('siem', async () => server.getInjectedUiAppVars('kibana'));
       initServerWithKibana(server);
     },
