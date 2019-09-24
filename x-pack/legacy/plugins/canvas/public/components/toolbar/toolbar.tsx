@@ -18,6 +18,8 @@ import {
 } from '@elastic/eui';
 import { CanvasElement } from '../../../types';
 
+import { ComponentStrings } from '../../../i18n';
+
 // @ts-ignore untyped local
 import { Navbar } from '../navbar';
 // @ts-ignore untyped local
@@ -27,6 +29,8 @@ import { PageManager } from '../page_manager';
 // @ts-ignore untyped local
 import { Expression } from '../expression';
 import { Tray } from './tray';
+
+const { Toolbar: strings } = ComponentStrings;
 
 enum TrayType {
   pageManager = 'pageManager',
@@ -84,7 +88,7 @@ export const Toolbar = (props: Props) => {
         <WorkpadManager onClose={closeWorkpadManager} />
         <EuiModalFooter>
           <EuiButton size="s" onClick={closeWorkpadManager}>
-            Close
+            {strings.getWorkpadManagerCloseButtonLabel()}
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>
@@ -113,13 +117,12 @@ export const Toolbar = (props: Props) => {
               onClick={previousPage}
               iconType="arrowLeft"
               disabled={selectedPageNumber <= 1}
-              aria-label="Previous Page"
+              aria-label={strings.getPreviousPageAriaLabel()}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty color="text" onClick={() => showHideTray(TrayType.pageManager)}>
-              Page {selectedPageNumber}
-              {totalPages > 1 ? ` of ${totalPages}` : null}
+              {strings.getPageButtonLabel(selectedPageNumber, totalPages)}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -128,7 +131,7 @@ export const Toolbar = (props: Props) => {
               onClick={nextPage}
               iconType="arrowRight"
               disabled={selectedPageNumber >= totalPages}
-              aria-label="Next Page"
+              aria-label={strings.getNextPageAriaLabel()}
             />
           </EuiFlexItem>
           <EuiFlexItem />
@@ -139,7 +142,7 @@ export const Toolbar = (props: Props) => {
                 iconType="editorCodeBlock"
                 onClick={() => showHideTray(TrayType.expression)}
               >
-                Expression editor
+                {strings.getEditorButtonLabel()}
               </EuiButtonEmpty>
             </EuiFlexItem>
           )}
