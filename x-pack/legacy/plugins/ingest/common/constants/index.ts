@@ -7,3 +7,4 @@
 export { INDEX_NAMES } from './index_names';
 export { PLUGIN } from './plugin';
 export const BASE_PATH = '/ingest';
+export const DEFAULT_POLICY_ID = 'default';
