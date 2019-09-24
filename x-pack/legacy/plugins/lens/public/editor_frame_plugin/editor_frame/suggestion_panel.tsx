@@ -132,7 +132,7 @@ const SuggestionPreview = ({
             withLabel={Boolean(showTitleAsLabel)}
           />
         ) : (
-          <span className="lnsSidebar__suggestionIcon">
+          <span className="lnsSuggestionPanel__suggestionIcon">
             <EuiIcon size="xxl" type={preview.icon} />
           </span>
         )}
@@ -242,10 +242,10 @@ export function SuggestionPanel({
   };
 
   return (
-    <div className="lnsSuggestionsPanel">
+    <div className="lnsSuggestionPanel">
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <EuiTitle className="lnsSuggestionsPanel__title" size="xxs">
+          <EuiTitle className="lnsSuggestionPanel__title" size="xxs">
             <h3>
               <FormattedMessage
                 id="xpack.lens.editorFrame.suggestionPanelTitle"
@@ -273,7 +273,7 @@ export function SuggestionPanel({
         )}
       </EuiFlexGroup>
 
-      <div className="lnsSuggestionsPanel__suggestions">
+      <div className="lnsSuggestionPanel__suggestions">
         {currentVisualizationId && (
           <SuggestionPreview
             preview={{
