@@ -26,10 +26,9 @@ export class Plugin {
         }
         return config.get(configKey);
       })();
-      const kibanaVars = await core.getInjectedUiAppVars('kibana');
 
       return {
-        ...kibanaVars,
+        ...plugins.kibana.injectedUiAppVars,
         kbnIndex: config.get('kibana.index'),
         serverFunctions: serverFunctions.toArray(),
         basePath,
@@ -37,7 +36,7 @@ export class Plugin {
       };
     });
 
-    plugins.xpackMain.registerFeature({
+    plugins.features.registerFeature({
       id: 'canvas',
       name: 'Canvas',
       icon: 'canvasApp',

@@ -9,7 +9,7 @@ import { Plugin } from './server/plugin';
 import { createSetupShim } from './server/shim';
 
 export const init = async function(server: Legacy.Server) {
-  const { coreSetup, pluginsSetup } = createSetupShim(server);
+  const { coreSetup, pluginsSetup } = await createSetupShim(server);
   const serverPlugin = new Plugin();
 
   serverPlugin.setup(coreSetup, pluginsSetup);
