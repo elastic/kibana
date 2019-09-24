@@ -71,6 +71,7 @@ export const destroyIndexPatternList = () => {
 const indexPatternsResolutions = {
   indexPatterns: function (Private) {
     const savedObjectsClient = Private(SavedObjectsClientProvider);
+
     return savedObjectsClient.find({
       type: 'index-pattern',
       fields: ['title', 'type'],
