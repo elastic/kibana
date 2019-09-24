@@ -38,31 +38,33 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await es.indices.delete({ index: authorizationIndex });
     });
 
-    async function createIndexRecordAction(spaceId: string) {
-      const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(spaceId)}/api/action`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          description: 'My action',
-          actionTypeId: 'test.index-record',
-          config: {
-            unencrypted: `This value shouldn't get encrypted`,
-          },
-          secrets: {
-            encrypted: 'This value should be encrypted',
-          },
-        })
-        .expect(200);
-      objectRemover.add(spaceId, createdAction.id, 'action');
-      return createdAction;
-    }
-
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
+
       describe(scenario.id, () => {
+        let indexRecordActionId: string;
+
+        before(async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              description: 'My action',
+              actionTypeId: 'test.index-record',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            })
+            .expect(200);
+          objectRemover.add(space.id, createdAction.id, 'action');
+          indexRecordActionId = createdAction.id;
+        });
+
         it('should schedule task, run alert and schedule actions when appropriate', async () => {
           const reference = `create-test-1:${user.username}`;
-          const createdAction = await createIndexRecordAction(space.id);
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
@@ -78,7 +80,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 actions: [
                   {
                     group: 'default',
-                    id: createdAction.id,
+                    id: indexRecordActionId,
                     params: {
                       index: ES_TEST_INDEX_NAME,
                       reference,
@@ -423,7 +425,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         it('should throttle alerts when appropriate', async () => {
           const reference = `create-test-5:${user.username}`;
-          const createdAction = await createIndexRecordAction(space.id);
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
@@ -440,7 +441,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 actions: [
                   {
                     group: 'default',
-                    id: createdAction.id,
+                    id: indexRecordActionId,
                     params: {
                       index: ES_TEST_INDEX_NAME,
                       reference,
@@ -479,7 +480,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         it('should not throttle when changing groups', async () => {
           const reference = `create-test-6:${user.username}`;
-          const createdAction = await createIndexRecordAction(space.id);
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
@@ -497,7 +497,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 actions: [
                   {
                     group: 'default',
-                    id: createdAction.id,
+                    id: indexRecordActionId,
                     params: {
                       index: ES_TEST_INDEX_NAME,
                       reference,
@@ -506,7 +506,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   },
                   {
                     group: 'other',
-                    id: createdAction.id,
+                    id: indexRecordActionId,
                     params: {
                       index: ES_TEST_INDEX_NAME,
                       reference,
@@ -549,7 +549,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         it('should reset throttle window when not firing', async () => {
           const reference = `create-test-7:${user.username}`;
-          const createdAction = await createIndexRecordAction(space.id);
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
@@ -567,7 +566,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 actions: [
                   {
                     group: 'default',
-                    id: createdAction.id,
+                    id: indexRecordActionId,
                     params: {
                       index: ES_TEST_INDEX_NAME,
                       reference,
@@ -606,7 +605,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         it(`shouldn't schedule actions when alert is muted`, async () => {
           const reference = `create-test-8:${user.username}`;
-          const createdAction = await createIndexRecordAction(space.id);
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
@@ -623,7 +621,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 actions: [
                   {
                     group: 'default',
-                    id: createdAction.id,
+                    id: indexRecordActionId,
                     params: {
                       index: ES_TEST_INDEX_NAME,
                       reference,
@@ -672,7 +670,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         it(`shouldn't schedule actions when alert instance is muted`, async () => {
           const reference = `create-test-9:${user.username}`;
-          const createdAction = await createIndexRecordAction(space.id);
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
@@ -689,7 +686,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 actions: [
                   {
                     group: 'default',
-                    id: createdAction.id,
+                    id: indexRecordActionId,
                     params: {
                       index: ES_TEST_INDEX_NAME,
                       reference,
@@ -740,7 +737,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         it(`should unmute all instances when unmuting an alert`, async () => {
           const reference = `create-test-10:${user.username}`;
-          const createdAction = await createIndexRecordAction(space.id);
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
@@ -757,7 +753,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 actions: [
                   {
                     group: 'default',
-                    id: createdAction.id,
+                    id: indexRecordActionId,
                     params: {
                       index: ES_TEST_INDEX_NAME,
                       reference,
