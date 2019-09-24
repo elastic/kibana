@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface Policy {
-  id: string;
-}
+import { FullPolicyFile as BaseFullPolicyFile } from '../../../../../ingest/server/libs/adapters/policy/adapter_types';
+
+export type FullPolicyFile = BaseFullPolicyFile;
 
 export interface IngestPlugin {
-  getFull(id: string): Promise<Policy>;
+  getFull(id: string): Promise<FullPolicyFile>;
 }
 
 export interface PolicyAdapter {
-  getFullPolicy(id: string): Promise<Policy>;
+  getFullPolicy(id: string): Promise<FullPolicyFile>;
 }

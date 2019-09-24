@@ -68,6 +68,7 @@ export default function({ getService }: FtrProviderContext) {
       expect(apiResponse.action).to.be('checkin');
       expect(apiResponse.success).to.be(true);
       expect(apiResponse.actions).to.have.length(1);
+      expect(apiResponse.policy).to.have.keys(['name', 'data_sources']);
     });
   });
 }
