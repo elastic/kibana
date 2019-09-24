@@ -153,8 +153,7 @@ class FieldFormatRegistry {
    */
 
   getByFieldType(fieldType) {
-    return this.fieldFormats
-      .values()
+    return [ ...this.fieldFormats.values()]
       .filter(format => format.fieldType.indexOf(fieldType) !== -1);
   }
 
@@ -179,7 +178,8 @@ class FieldFormatRegistry {
   }
 
   register = (module) => {
-    this.fieldFormats.set(module.id, module(FieldFormat));
+    const fieldFormatInstance = module(FieldFormat);
+    this.fieldFormats.set(fieldFormatInstance.id, fieldFormatInstance);
     return this;
   };
 }
