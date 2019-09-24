@@ -37,6 +37,7 @@ export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   savedObjectsClient: SavedObjectsClientContract;
   layerId: string;
   http: HttpServiceBase;
+  uniqueLabel: string;
 };
 
 export interface OperationFieldSupportMatrix {
