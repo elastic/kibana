@@ -61,7 +61,6 @@ class FieldFormatRegistry {
    * @return {Function}
    */
   getType = (formatId) => {
-    // return this.byId[formatId];
     return this.fieldFormats.find(format => format.id === formatId);
   };
   /**

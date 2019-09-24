@@ -24,7 +24,7 @@ jest.mock('../../registry/field_formats', () => {
   return { fieldFormats: {
     getType: id => {
       if(id === '1') { return jest.fn(); }
-      if(id === '1') { return jest.fn(); }
+      if(id === 'agg_1') { return jest.fn(); }
     }
   }
   };
