@@ -53,9 +53,10 @@ export interface TimelionPluginStartDependencies {
   __LEGACY: LegacyDependenciesPlugin;
 }
 
+/** @private */
 interface TimelionVisualizationDependencies {
   uiSettings: UiSettingsClientContract;
-  http?: HttpSetup;
+  http: HttpSetup;
 }
 
 /** @internal */
