@@ -1,0 +1,39 @@
+.lnsInnerIndexPatternDataPanel {
+  width: 100%;
+  height: 100%;
+  padding: $euiSize 0 0 $euiSize;
+}
+
+.lnsInnerIndexPatternDataPanel__header {
+  display: flex;
+  align-items: center;
+  height: $euiSize * 3;
+  margin-top: -$euiSizeS;
+
+
+  & > .lnsInnerIndexPatternDataPanel__changeLink {
+    flex: 0 0 auto;
+    margin: 0 $euiSize;
+  }
+}
+
+.lnsInnerIndexPatternDataPanel__filterWrapper {
+  flex-grow: 0;
+}
+
+.lnsInnerIndexPatternDataPanel__listWrapper {
+  @include euiOverflowShadow;
+  @include euiScrollBar;
+  margin-top: 2px; // form control shadow
+  position: relative;
+  flex-grow: 1;
+  overflow: auto;
+}
+
+.lnsInnerIndexPatternDataPanel__list {
+  padding-top: $euiSizeS;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
