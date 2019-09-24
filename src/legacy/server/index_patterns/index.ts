@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore no types
 export { indexPatternsMixin } from './mixin';
 export { IndexPatternsService, FieldDescriptor } from './service';
 export { IndexPatternsServiceFactory } from './mixin';
