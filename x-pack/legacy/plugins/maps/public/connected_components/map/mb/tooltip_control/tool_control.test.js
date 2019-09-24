@@ -20,6 +20,14 @@ const mockLayer = {
   getMbLayerIds: () => { return [mbLayerId]; },
   getId: () => { return layerId; },
   canShowTooltip: () => { return true; },
+  getFeatureById: () => {
+    return {
+      geometry: {
+        type: 'Point',
+        coordinates: [102.0, 0.5]
+      }
+    };
+  },
 };
 
 const mockMbMapHandlers = {};
@@ -245,7 +253,7 @@ describe('TooltipControl', () => {
 
       sinon.assert.notCalled(clearTooltipStateStub);
       sinon.assert.calledWith(setTooltipStateStub, {
-        features: [{ geometry: { coordinates: [100, 30], type: 'Point' }, id: 1, layerId: 'tfi3f' }],
+        features: [{ id: 1, layerId: 'tfi3f' }],
         location: [100, 30],
         type: 'LOCKED'
       });

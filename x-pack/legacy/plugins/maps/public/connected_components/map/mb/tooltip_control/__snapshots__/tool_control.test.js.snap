@@ -42,7 +42,9 @@ exports[`TooltipControl render tooltipState is provided should render tooltip po
         },
       ]
     }
+    getLayerName={[Function]}
     isLocked={false}
+    loadFeatureGeometry={[Function]}
     loadFeatureProperties={[Function]}
   >
     Custom tooltip content
@@ -105,7 +107,9 @@ exports[`TooltipControl render tooltipState is provided should render tooltip po
           Object {},
         ]
       }
+      getLayerName={[Function]}
       isLocked={false}
+      loadFeatureGeometry={[Function]}
       loadFeatureProperties={[Function]}
     />
   </EuiText>
