@@ -20,6 +20,9 @@ import { Paginate } from '../paginate';
 import { TagList } from '../tag_list';
 import { getTagsFilter } from '../../lib/get_tags_filter';
 import { extractSearch } from '../../lib/extract_search';
+import { ComponentStrings } from '../../../i18n';
+
+const { WorkpadTemplates: strings } = ComponentStrings;
 
 export class WorkpadTemplates extends React.PureComponent {
   static propTypes = {
@@ -56,17 +59,17 @@ export class WorkpadTemplates extends React.PureComponent {
     const columns = [
       {
         field: 'name',
-        name: 'Template Name',
+        name: strings.getTableNameColumnTitle(),
         sortable: true,
         width: '30%',
         dataType: 'string',
         render: (name, template) => {
-          const templateName = template.name.length ? template.name : <em>{template.id}</em>;
+          const templateName = name.length ? name : <em>{template.id}</em>;
 
           return (
             <EuiButtonEmpty
               onClick={() => this.cloneTemplate(template)}
-              aria-label={`Clone workpad template "${templateName}"`}
+              aria-label={strings.getCloneTemplateLinkAriaLabel(templateName)}
               type="link"
             >
               {templateName}
@@ -76,14 +79,14 @@ export class WorkpadTemplates extends React.PureComponent {
       },
       {
         field: 'help',
-        name: 'Description',
+        name: strings.getTableDescriptionColumnTitle(),
         sortable: false,
         dataType: 'string',
         width: '30%',
       },
       {
         field: 'tags',
-        name: 'Tags',
+        name: strings.getTableTagsColumnTitle(),
         sortable: false,
         dataType: 'string',
         width: '30%',
@@ -127,7 +130,7 @@ export class WorkpadTemplates extends React.PureComponent {
       <EuiSearchBar
         defaultQuery={searchTerm}
         box={{
-          placeholder: 'Find template',
+          placeholder: strings.getTemplateSearchPlaceholder(),
           incremental: true,
         }}
         filters={filters}
@@ -149,7 +152,7 @@ export class WorkpadTemplates extends React.PureComponent {
       const lowercaseSearch = searchTerm.toLowerCase();
       const textMatch = lowercaseSearch
         ? name.toLowerCase().indexOf(lowercaseSearch) > -1 ||
-          help.toLowerCase().indexOf(lowercaseSearch) > -1
+        help.toLowerCase().indexOf(lowercaseSearch) > -1
         : true;
 
       return tagMatch && textMatch;
