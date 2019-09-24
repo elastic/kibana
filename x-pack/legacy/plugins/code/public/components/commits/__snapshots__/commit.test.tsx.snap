@@ -161,12 +161,12 @@ This is the description",
               <EuiButtonEmpty
                 aria-label="View the project at this commit"
                 className="commit__diff-link"
-                href="#/github.com/elastic/code/tree/4ba67b8"
+                href="#/github.com/elastic/code/commit/4ba67b8"
               >
                 <a
                   aria-label="View the project at this commit"
                   className="euiButtonEmpty euiButtonEmpty--primary commit__diff-link"
-                  href="#/github.com/elastic/code/tree/4ba67b8"
+                  href="#/github.com/elastic/code/commit/4ba67b8"
                   rel="noreferrer"
                 >
                   <span
@@ -190,13 +190,13 @@ This is the description",
               </EuiButtonEmpty>
               <EuiButtonIcon
                 aria-label="View the project at this commit"
-                href="#/github.com/elastic/code/tree/4ba67b8"
+                href="#/github.com/elastic/code/commit/4ba67b8"
                 iconType="editorCodeBlock"
               >
                 <a
                   aria-label="View the project at this commit"
                   className="euiButtonIcon euiButtonIcon--primary"
-                  href="#/github.com/elastic/code/tree/4ba67b8"
+                  href="#/github.com/elastic/code/commit/4ba67b8"
                   rel="noreferrer"
                 >
                   <EuiIcon

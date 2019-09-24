@@ -19,9 +19,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CommitInfo } from '../../../model/commit';
-import { PathTypes } from '../../common/types';
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { parseCommitMessage } from '../../../common/commit_utils';
+import { PathTypes } from '../../common/types';
 
 const COMMIT_ID_LENGTH = 8;
 
@@ -55,7 +55,7 @@ const revisionLinkLabel = i18n.translate('xpack.code.commits.revisionLinkAriaLab
 });
 
 const CommitActions = ({ commitId, repoUri }: ActionProps) => {
-  const revisionPath = `#/${repoUri}/${PathTypes.tree}/${commitId}`;
+  const revisionPath = `#/${repoUri}/commit/${commitId}`;
 
   return (
     <div className="commit__actions">

@@ -1,4 +1,5 @@
 .codeContainer__monaco {
+  .monaco-diff-editor .cursors-layer > .cursor,
   .monaco-editor .cursors-layer > .cursor {
     display: none !important;
   }
@@ -7,6 +8,7 @@
     display: none !important;
   }
 
+  .monaco-diff-editor.mac .margin-view-overlays .line-numbers,
   .monaco-editor.mac .margin-view-overlays .line-numbers {
     cursor: pointer;
     color: $euiColorMediumShade;
@@ -24,5 +26,19 @@
 
   span.mtk29 {
     color: $euiColorAccent;
+  }
+
+  .diagonal-fill {
+    background: none;
+  }
+
+  .monaco-diff-editor .line-insert,
+  .monaco-diff-editor .char-insert {
+    background-color: rgba(0, 179, 164, 0.1);
+  }
+
+  .monaco-diff-editor .line-delete,
+  .monaco-diff-editor .char-delete {
+    background-color: rgba(189, 39, 30, 0.07);
   }
 }
