@@ -39,9 +39,11 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
       >
         <EuiFlexItem
           className="sc-ifAKCX cFdETZ"
+          data-test-subj="stat-item"
         >
           <div
             className="euiFlexItem sc-ifAKCX cFdETZ"
+            data-test-subj="stat-item"
           >
             <EuiPanel
               onMouseEnter={[Function]}
@@ -221,7 +223,7 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                                               —
                                             </span>
                                           </EmptyWrapper>
-
+                                           
                                         </p>
                                       </EuiTitle>
                                     </StatValue>
@@ -291,9 +293,11 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
       >
         <EuiFlexItem
           className="sc-ifAKCX cFdETZ"
+          data-test-subj="stat-item"
         >
           <div
             className="euiFlexItem sc-ifAKCX cFdETZ"
+            data-test-subj="stat-item"
           >
             <EuiPanel
               onMouseEnter={[Function]}
@@ -474,7 +478,7 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                                               —
                                             </span>
                                           </EmptyWrapper>
-
+                                           
                                         </p>
                                       </EuiTitle>
                                     </StatValue>
@@ -613,9 +617,11 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
     >
       <EuiFlexItem
         className="sc-ifAKCX cFdETZ"
+        data-test-subj="stat-item"
       >
         <div
           className="euiFlexItem sc-ifAKCX cFdETZ"
+          data-test-subj="stat-item"
         >
           <EuiPanel
             onMouseEnter={[Function]}
@@ -834,7 +840,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                         data-test-subj="stat-title"
                                       >
                                         1,714
-
+                                         
                                         Source
                                       </p>
                                     </EuiTitle>
@@ -925,7 +931,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                         data-test-subj="stat-title"
                                       >
                                         2,359
-
+                                         
                                         Dest.
                                       </p>
                                     </EuiTitle>
