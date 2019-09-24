@@ -141,7 +141,8 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: AnomalyRecord) {
     ? escapeForElasticsearchQuery
     : escapeForKQL;
 
-  const getResultTokenValue = _.compose(
+  // Compose callback for characters escaping and encoding.
+  const getResultTokenValue: (v: string) => string = _.compose(
     queryLanguageEscapeCallback,
     // Kibana URLs used rison encoding, so escape with ! any ! or ' characters
     (v: string): string => v.replace(/[!']/g, '!$&'),
@@ -153,7 +154,9 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: AnomalyRecord) {
     .replace('$latest$', record.latest)
     .replace(/query:'(.+)'/, (match, queryString: string) => {
       return `query:'${queryString
+        // Split query string by AND operator.
         .split(/\sand\s/i)
+        // Get property name from `influencerField:$influencerField$` string.
         .map(v => v.split(':')[0])
         .map(name => {
           // Use lodash get to allow nested JSON fields to be retrieved.
@@ -161,6 +164,9 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: AnomalyRecord) {
           if (tokenValues === undefined) {
             return null;
           }
+          // Create a pair ``influencerField:value`.
+          // In cases where there are multiple influencer field values for an anomaly
+          // combine values with OR operator e.g. `influencerField:value or influencerField:another_value`.
           const result = tokenValues
             .map(value => `${name}:${getResultTokenValue(value)}`)
             .join(' or ');
