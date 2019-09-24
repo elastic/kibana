@@ -29,9 +29,9 @@ remove it, don't simply comment it out.
 We are gradually moving the Kibana code base over to Prettier. All TypeScript code
 and some JavaScript code (check `.eslintrc.js`) is using Prettier to format code. You
 can run `node script/eslint --fix` to fix linting issues and apply Prettier formatting.
-We recommend you're enabling running ESLint via your IDE.
+We recommend you to enable running ESLint via your IDE.
 
-Whenever possible we are trying to use Prettier and linting for setting style guides.
+Whenever possible we are trying to use Prettier and linting over written style guide rules.
 Consider every linting rule and every Prettier rule to be also part of our style guide
 and disable them only in exceptional cases and ideally leave a comment why they are
 disabled at that specific place.
@@ -687,96 +687,6 @@ Name action functions in the form of a strong verb and passed properties in the 
 ```jsx
 <sort-button onClick={action.sort}/>
 <pagerButton onPageNext={action.turnToNextPage} />
-```
-
-### Avoid creating a function and passing that as a property, in render functions.
-
-Best (relies on [stage 2 proposal](https://github.com/tc39/proposal-class-public-fields)):
-```
-export class ClickCounter extends React.Component {
-  state = { clickCount: 0 };
-
-  // This syntax ensures `this` is bound within handleClick
-  onClick = () => {
-    this.setState(prevState => { clickCount: prevState.clickCount + 1 });
-  }
-
-  render() {
-    return <button className="kuiButton" onClick={this.onClick} />
-  }
-}
-```
-Good:
-```
-export class ClickCounter extends React.Component {
-  constructor() {
-    this.state = { clickCount: 0 };
-    this.onClick = this.onClick.bind(this);
-  }
-
-  onClick() {
-    this.setState(prevState => { clickCount: prevState.clickCount + 1 });
-  }
-
-  render() {
-    return <button className="kuiButton" onClick={this.onClick} />
-  }
-}
-```
-
-Bad:
-```
-export class ClickCounter extends React.Component {
-  state = { clickCount: 0 };
-
-  onClick() {
-    this.setState(prevState => { clickCount: prevState.clickCount + 1 });
-  }
-
-  render() {
-    return <button className="kuiButton" onClick={() => this.onClick()} />
-  }
-}
-```
-
-Also Bad:
-```
-  render() {
-    return <button className="kuiButton" onClick={this.onClick.bind(this)} />
-  }
-```
-
-Background: https://facebook.github.io/react/docs/handling-events.html
-There is also an eslint rule we should be able to turn on for this.
-
-### Prefer primitives over objects when storing in state.
-Good:
-```
-this.setState({
-  currentPage: 0,
-  selectedIds: []
-});
-```
-
-Discouraged:
-```
-this.setState({
-  pager: new Pager(),
-  selectedIds: new SelectedIds()
-});
-```
-
-### Favor spread operators
-```
-render() {
-  return <button className="kuiButton" {...this.props} />
-}
-```
-```
-export function Button({ className, ...rest }) {
-  const classNames = classNames('KuiButton', className);
-  return <button className={classNames} {...rest} />
-};
 ```
 
 ## Attribution	
