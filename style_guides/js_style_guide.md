@@ -15,64 +15,6 @@ see `.eslintrc.js` in the root of the Kibana repo. This also means that if you
 get ESLint errors related to Prettier, run `node scripts/eslint --fix` from the
 root of the Kibana repo to fix these.
 
-## 2 Spaces for indention
-
-Use 2 spaces for indenting your code and swear an oath to never mix tabs and
-spaces - a special kind of hell is awaiting you otherwise.
-
-## Newlines
-
-Use UNIX-style newlines (`\n`), and a newline character as the last character
-of a file. Windows-style newlines (`\r\n`) are forbidden inside any repository.
-
-## No trailing whitespace
-
-Just like you brush your teeth after every meal, you clean up any trailing
-whitespace in your JS files before committing. Otherwise the rotten smell of
-careless neglect will eventually drive away contributors and/or co-workers.
-
-## Use Semicolons
-
-According to [scientific research][hnsemicolons], the usage of semicolons is
-a core value of our community. Consider the points of [the opposition][], but
-be a traditionalist when it comes to abusing error correction mechanisms for
-cheap syntactic pleasures.
-
-[the opposition]: http://blog.izs.me/post/2353458699/an-open-letter-to-javascript-leaders-regarding
-[hnsemicolons]: http://news.ycombinator.com/item?id=1547647
-
-## 100 characters per line
-
-You should limit your lines to 100 chars. Prettier will check for that line width where enabled.
-
-## Use `const` for variables
-
-Your variable references should rarely be mutable, so use `const` for almost
-everything. If you absolutely *must* mutate a reference, use `let`.
-
-```js
-// good
-const foo = 'bar';
-
-// if absolutely necessary, OK
-let foo;
-
-// bad
-var foo = 'bar';
-```
-
-## Use single quotes for fixed strings
-
-Use single quotes, unless you are writing JSON.
-
-```js
-// good
-const foo = 'bar';
-
-// bad
-const foo = "bar";
-```
-
 ## Use template strings to interpolate variables into strings
 
 ```js
@@ -81,19 +23,6 @@ const foo = `Hello, ${name}`;
 
 // bad
 const foo = 'Hello, ' + name;
-```
-
-## Use template strings to avoid escaping single quotes
-
-Because readability is paramount.
-
-```js
-// good
-const foo = `You won't believe this.`;
-
-// bad
-const foo = 'You won\'t believe this.';
-const foo = "You won't believe this.";
 ```
 
 ## Use object destructuring
@@ -136,41 +65,6 @@ const first = arr[0];
 const second = arr[1];
 ```
 
-## Opening braces go on the same line
-
-Your opening braces go on the same line as the statement.
-
-```js
-// good
-if (true) {
-  console.log('winning');
-}
-
-// bad
-if (true)
-{
-  console.log('losing');
-}
-```
-
-Also, notice the use of whitespace before and after the condition statement.
-
-## Always use braces for conditionals and loops
-
-```js
-// good
-if (err) {
-  return cb(err);
-}
-
-// bad
-if (err) cb(err);
-
-// bad
-if (err)
-  return cb(err);
-```
-
 ## Declare one variable per line, wherever it makes the most sense
 
 This makes it easier to re-order the lines. However, ignore
@@ -188,33 +82,6 @@ const keys = ['foo', 'bar'],
 ```
 
 [crockfordconvention]: http://javascript.crockford.com/code.html
-
-## Use lowerCamelCase for variables, properties and function names
-
-Variables, properties and function names should use `lowerCamelCase`.  They
-should also be descriptive. Single character variables and uncommon
-abbreviations should generally be avoided.
-
-```js
-// good
-const adminUser = getAdmin();
-
-// bad
-const admin_user = getAdmin();
-```
-
-## Use UpperCamelCase for class names (constructors)
-
-Class names should be capitalized using `UpperCamelCase`.
-
-```js
-// good
-class BankAccount {}
-
-// bad
-class bank_account {}
-class bankAccount {}
-```
 
 ## Prefix private class methods with an underscore
 
@@ -248,49 +115,6 @@ if (width < minWidth) {
 if (width < 300) {
   ...
 }
-```
-
-## Object properties and functions
-
-Use object method shorthand syntax for functions on objects:
-
-```js
-// good
-const foo = {
-  bar() {
-    ...
-  }
-};
-
-// bad
-const foo = {
-  bar: function () {
-    ...
-  }
-};
-```
-
-Use property value shorthand syntax for properties that share a name with a
-variable. And put them at the beginning:
-
-```js
-const bar = true;
-
-// good
-const foo = {
-  bar
-};
-
-// bad
-const foo = {
-  bar: bar
-};
-
-// also bad (bar should be first)
-const foo = {
-  baz: false,
-  bar
-};
 ```
 
 ## Modules
