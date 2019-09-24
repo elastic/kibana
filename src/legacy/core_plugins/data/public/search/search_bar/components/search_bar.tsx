@@ -191,13 +191,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     );
   };
 
-  private getFilterUpdateFunction() {
-    if (this.props.showFilterBar && this.props.onFiltersUpdated) {
-      return this.props.onFiltersUpdated;
-    }
-    return (filters: Filter[]) => {};
-  }
-
   private shouldRenderQueryBar() {
     const showDatePicker = this.props.showDatePicker || this.props.showAutoRefreshOnly;
     const showQueryInput =
@@ -424,9 +417,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           >
             <FilterBar
               className="globalFilterGroup__filterBar"
-              uiSettings={this.props.uiSettings}
               filters={this.props.filters!}
-              onFiltersUpdated={this.getFilterUpdateFunction()}
+              onFiltersUpdated={this.props.onFiltersUpdated}
               indexPatterns={this.props.indexPatterns!}
             />
           </div>
