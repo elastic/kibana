@@ -326,7 +326,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             <EuiTitle size="xxs" className="eui-textTruncate">
               <h4 title={currentIndexPattern.title}>{currentIndexPattern.title} </h4>
             </EuiTitle>
-            <div>
+            <div className="lnsInnerIndexPatternDataPanel__changeLink">
               <ChangeIndexPattern
                 data-test-subj="indexPattern-switcher"
                 trigger={{
