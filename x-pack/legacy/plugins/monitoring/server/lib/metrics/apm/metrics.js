@@ -270,7 +270,7 @@ export const metrics = {
   apm_server_responses_errors_toolarge: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.toolarge',
     title: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrorsTitle', {
-      defaultMessage: 'Response Errors Intake API'
+      defaultMessage: 'Too large'
     }),
     label: i18n.translate('xpack.monitoring.metrics.apm.sever.responseErrors.tooLargeLabelTitle', {
       defaultMessage: 'Too large'
