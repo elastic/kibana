@@ -25,6 +25,7 @@ import Boom from 'boom';
 import { setupVersionCheck } from './version_check';
 import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupBasePathProvider } from './setup_base_path_provider';
+import { setupDefaultRouteProvider } from './setup_default_route_provider';
 import { setupXsrf } from './xsrf';
 
 export default async function (kbnServer, server, config) {
@@ -32,6 +33,8 @@ export default async function (kbnServer, server, config) {
   server = kbnServer.server;
 
   setupBasePathProvider(kbnServer);
+
+  setupDefaultRouteProvider(kbnServer);
 
   await registerHapiPlugins(server);
 
@@ -87,16 +90,7 @@ export default async function (kbnServer, server, config) {
     path: '/',
     method: 'GET',
     async handler(req, h) {
-      const basePath = req.getBasePath();
-      const uiSettingsService = req.getUiSettingsService();
-
-      const defaultRouteSetting = await uiSettingsService.get('defaultRoute');
-      if (defaultRouteSetting && defaultRouteSetting.startsWith('/')) {
-        return h.redirect(`${basePath}${defaultRouteSetting}`);
-      }
-
-      const fallbackRoute = (await uiSettingsService.getDefaults()).defaultRoute.value;
-      return h.redirect(`${basePath}${fallbackRoute}`);
+      return h.redirect(req.getDefaultRoute());
     }
   });
 

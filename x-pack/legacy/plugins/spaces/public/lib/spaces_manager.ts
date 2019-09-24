@@ -3,21 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
 import { EventEmitter } from 'events';
 import { kfetch } from 'ui/kfetch';
 import { SavedObjectsManagementRecord } from 'ui/management/saved_objects_management';
 import { Space } from '../../common/model/space';
 import { GetSpacePurpose } from '../../common/model/types';
 import { CopySavedObjectsToSpaceResponse } from './copy_saved_objects_to_space/types';
+import { addSpaceIdToPath } from '../../server/lib/spaces_url_parser';
+import { ENTER_SPACE_PATH } from '../../common/constants';
 
 export class SpacesManager extends EventEmitter {
-  private spaceSelectorURL: string;
-
-  constructor(spaceSelectorURL: string) {
+  constructor(private readonly serverBasePath: string) {
     super();
-    this.spaceSelectorURL = spaceSelectorURL;
   }
 
   public async getSpaces(purpose?: GetSpacePurpose): Promise<Space[]> {
@@ -89,36 +86,14 @@ export class SpacesManager extends EventEmitter {
   }
 
   public async changeSelectedSpace(space: Space) {
-    await kfetch({
-      pathname: `/api/spaces/v1/space/${encodeURIComponent(space.id)}/select`,
-      method: 'POST',
-    })
-      .then(response => {
-        if (response.location) {
-          window.location = response.location;
-        } else {
-          this._displayError();
-        }
-      })
-      .catch(() => this._displayError());
+    window.location.href = addSpaceIdToPath(this.serverBasePath, space.id, ENTER_SPACE_PATH);
   }
 
   public redirectToSpaceSelector() {
-    window.location.href = this.spaceSelectorURL;
+    window.location.href = `${this.serverBasePath}/spaces/space_selector`;
   }
 
   public async requestRefresh() {
     this.emit('request_refresh');
-  }
-
-  public _displayError() {
-    toastNotifications.addDanger({
-      title: i18n.translate('xpack.spaces.spacesManager.unableToChangeSpaceWarningTitle', {
-        defaultMessage: 'Unable to change your Space',
-      }),
-      text: i18n.translate('xpack.spaces.spacesManager.unableToChangeSpaceWarningDescription', {
-        defaultMessage: 'please try again later',
-      }),
-    });
   }
 }

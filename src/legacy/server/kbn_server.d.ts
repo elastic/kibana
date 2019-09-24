@@ -78,6 +78,7 @@ declare module 'hapi' {
   interface Request {
     getSavedObjectsClient(options?: SavedObjectsClientProviderOptions): SavedObjectsClientContract;
     getBasePath(): string;
+    getDefaultRoute(): Promise<string>;
     getUiSettingsService(): any;
     getCapabilities(): Promise<Capabilities>;
   }

@@ -21,3 +21,5 @@ export const MAX_SPACE_INITIALS = 2;
  * @type {string}
  */
 export const KIBANA_SPACES_STATS_TYPE = 'spaces';
+
+export const ENTER_SPACE_PATH = '/spaces/enter';
