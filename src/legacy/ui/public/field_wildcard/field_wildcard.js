@@ -35,7 +35,7 @@ export function fieldWildcardMatcher(globs = [], metaFields) {
 }
 
 // Note that this will return an essentially noop function if globs is undefined.
-export function fieldWildcardFilter(globs = [], metaFields) {
+export function fieldWildcardFilter(globs = [], metaFields = []) {
   const matcher = fieldWildcardMatcher(globs, metaFields);
   return function filter(val) {
     return !matcher(val);
