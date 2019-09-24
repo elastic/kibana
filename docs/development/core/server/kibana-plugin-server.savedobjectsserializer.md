@@ -14,7 +14,7 @@ export declare class SavedObjectsSerializer
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(schema)](./kibana-plugin-server.savedobjectsserializer.(constructor).md) |  | Constructs a new instance of the <code>SavedObjectsSerializer</code> class |
+|  [(constructor)(schema)](./kibana-plugin-server.savedobjectsserializer._constructor_.md) |  | Constructs a new instance of the <code>SavedObjectsSerializer</code> class |
 
 ## Methods
 

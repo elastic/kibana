@@ -44,6 +44,12 @@ jest.mock('./utils', () => ({
     });
   })),
 }));
+jest.mock('ui/timefilter', () => ({
+  timefilter: {
+    disableTimeRangeSelector: jest.fn(),
+    disableAutoRefreshSelector: jest.fn(),
+  }
+}));
 
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
