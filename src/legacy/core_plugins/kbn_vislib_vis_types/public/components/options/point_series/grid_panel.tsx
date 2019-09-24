@@ -85,7 +85,7 @@ function GridPanel({ stateParams, setValue, hasHistogramAgg }: VisOptionsProps<B
         }
         value={stateParams.grid.categoryLines}
         setValue={setGrid}
-        dataTestSubj="showCategoryLines"
+        data-test-subj="showCategoryLines"
       />
 
       <SelectOption

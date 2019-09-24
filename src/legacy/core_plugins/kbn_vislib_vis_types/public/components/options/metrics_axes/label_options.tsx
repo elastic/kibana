@@ -80,7 +80,9 @@ function LabelOptions({ stateParams, setValue, axis, axesName, index }: LabelOpt
       />
 
       <SwitchOption
-        dataTestSubj={`${axesName === 'valueAxes' ? 'y' : 'x'}AxisFilterLabelsCheckbox-${axis.id}`}
+        data-test-subj={`${axesName === 'valueAxes' ? 'y' : 'x'}AxisFilterLabelsCheckbox-${
+          axis.id
+        }`}
         disabled={!axis.labels.show}
         label={i18n.translate(
           'kbnVislibVisTypes.controls.pointSeries.categoryAxis.filterLabelsLabel',

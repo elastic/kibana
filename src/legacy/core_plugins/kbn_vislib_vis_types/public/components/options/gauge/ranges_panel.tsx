@@ -119,7 +119,7 @@ function RangesPanel({
       />
 
       <SwitchOption
-        dataTestSubj="gaugePercentageMode"
+        data-test-subj="gaugePercentageMode"
         label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.percentageModeLabel', {
           defaultMessage: 'Percentage mode',
         })}

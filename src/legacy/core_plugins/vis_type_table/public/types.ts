@@ -48,7 +48,7 @@ export interface TableVisParams {
     direction: string | null;
   };
   showTotal: boolean;
-  totalFunc: string;
+  totalFunc: AggTypes;
   percentageCol: string;
   dimensions: Dimensions;
 }

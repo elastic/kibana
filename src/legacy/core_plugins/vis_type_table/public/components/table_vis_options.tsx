@@ -61,11 +61,12 @@ function TableOptions({
   useEffect(() => {
     if (
       !percentageColumns.find(({ value }) => value === stateParams.percentageCol) &&
-      percentageColumns[0]
+      percentageColumns[0] &&
+      percentageColumns[0].value !== stateParams.percentageCol
     ) {
       setValue('percentageCol', percentageColumns[0].value);
     }
-  }, [percentageColumns, stateParams.percentageCol]);
+  }, [aggs, aggsLabels, percentageColumns, stateParams.percentageCol]);
 
   return (
     <EuiPanel paddingSize="s">
@@ -87,6 +88,7 @@ function TableOptions({
         setValue={setValue}
       />
 
+      <EuiSpacer size="xs" />
       <SwitchOption
         label={i18n.translate('visTypeTable.params.showMetricsLabel', {
           defaultMessage: 'Show metrics for every bucket/level',
@@ -120,6 +122,7 @@ function TableOptions({
         setValue={setValue}
       />
 
+      <EuiSpacer size="xs" />
       <SelectOption
         label={i18n.translate('visTypeTable.params.totalFunctionLabel', {
           defaultMessage: 'Total function',
@@ -139,6 +142,7 @@ function TableOptions({
         paramName="percentageCol"
         value={stateParams.percentageCol}
         setValue={setValue}
+        id="datatableVisualizationPercentageCol"
       />
     </EuiPanel>
   );

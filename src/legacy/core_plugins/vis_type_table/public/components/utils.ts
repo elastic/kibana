@@ -29,7 +29,10 @@ import { AggTypes, Dimensions } from '../types';
  * @param {Object} obj.metrics
  * @returns {Boolean}
  */
-function isNumeric(type: AggTypes, { buckets = [], metrics = [] }: Dimensions = {} as Dimensions) {
+function isNumeric(
+  type: AggTypes,
+  { buckets, metrics }: Dimensions = { buckets: [], metrics: [] }
+) {
   const dimension =
     buckets.find(({ aggType }) => aggType === type) ||
     metrics.find(({ aggType }) => aggType === type);
