@@ -17,7 +17,10 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { IAction } from 'src/plugins/ui_actions/public';
+import {
+  IAction,
+  IncompatibleActionError,
+} from '../../../../../../../../../../plugins/ui_actions/public';
 import { ContainerInput, IContainer } from '../../../containers';
 import { ViewMode, GetEmbeddableFactory, GetEmbeddableFactories } from '../../../types';
 import { NotificationsStart } from '../../../../../../../../../../core/public';
@@ -67,7 +70,8 @@ export class ChangeViewAction implements IAction<ActionContext> {
     const isPanelExpanded =
       embeddable.parent &&
       hasExpandedPanelInput(embeddable.parent) &&
-      embeddable.parent.getInput().expandedPanelId === embeddable.id;
+      embeddable.parent.getInput().expandedPanelId === embeddable.id &&
+      embeddable.parent.type === 'dashboard';
 
     return Boolean(
       embeddable.parent && embeddable.getInput().viewMode === ViewMode.EDIT && !isPanelExpanded
@@ -75,6 +79,10 @@ export class ChangeViewAction implements IAction<ActionContext> {
   }
 
   public async execute({ embeddable }: ActionContext) {
+    if (!embeddable.parent || !(await this.isCompatible({ embeddable }))) {
+      throw new IncompatibleActionError();
+    }
+
     if (embeddable.parent) {
       const view = embeddable;
       const dash = embeddable.parent;

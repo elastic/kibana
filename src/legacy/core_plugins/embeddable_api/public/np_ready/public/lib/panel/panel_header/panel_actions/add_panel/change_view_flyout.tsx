@@ -21,14 +21,7 @@ import React from 'react';
 import { CoreSetup } from 'src/core/public';
 import { DashboardPanelState } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
 
-import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  // @ts-ignore
-  EuiSuperSelect,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 
 import { IContainer } from '../../../../containers';
 import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
