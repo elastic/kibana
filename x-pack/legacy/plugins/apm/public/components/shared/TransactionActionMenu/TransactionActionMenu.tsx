@@ -118,7 +118,10 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
       ),
       condition: true,
       path: `/link-to/logs`,
-      query: { time, filter: `trace.id:${transaction.trace.id}` }
+      query: {
+        time,
+        filter: `trace.id:"${transaction.trace.id}" OR ${transaction.trace.id}`
+      }
     },
     {
       icon: 'infraApp',
@@ -210,18 +213,16 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
     }
   ]
     .filter(({ condition }) => condition)
-    .map(({ icon, key, child, condition }) =>
-      condition ? (
-        <EuiContextMenuItem icon={icon} key={key}>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem>{child}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="popout" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiContextMenuItem>
-      ) : null
-    );
+    .map(({ icon, key, child }) => (
+      <EuiContextMenuItem icon={icon} key={key}>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>{child}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="popout" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiContextMenuItem>
+    ));
 
   return (
     <EuiPopover

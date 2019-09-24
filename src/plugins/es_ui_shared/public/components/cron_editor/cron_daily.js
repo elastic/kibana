@@ -20,30 +20,16 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSelect,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 
-export const CronDaily = ({
-  minute,
-  minuteOptions,
-  hour,
-  hourOptions,
-  onChange,
-}) => (
+export const CronDaily = ({ minute, minuteOptions, hour, hourOptions, onChange }) => (
   <Fragment>
     <EuiFormRow
-      label={(
-        <FormattedMessage
-          id="esUi.cronEditor.cronDaily.fieldTimeLabel"
-          defaultMessage="Time"
-        />
-      )}
+      label={
+        <FormattedMessage id="esUi.cronEditor.cronDaily.fieldTimeLabel" defaultMessage="Time" />
+      }
       fullWidth
       data-test-subj="cronFrequencyConfiguration"
     >
@@ -52,18 +38,14 @@ export const CronDaily = ({
           <EuiSelect
             options={hourOptions}
             value={hour}
+            aria-label={i18n.translate('esUi.cronEditor.cronDaily.hourSelectLabel', {
+              defaultMessage: 'Hour',
+            })}
             onChange={e => onChange({ hour: e.target.value })}
             fullWidth
-            prepend={(
-              <EuiText size="xs">
-                <strong>
-                  <FormattedMessage
-                    id="esUi.cronEditor.cronDaily.fieldHour.textAtLabel"
-                    defaultMessage="At"
-                  />
-                </strong>
-              </EuiText>
-            )}
+            prepend={i18n.translate('esUi.cronEditor.cronDaily.fieldHour.textAtLabel', {
+              defaultMessage: 'At',
+            })}
             data-test-subj="cronFrequencyDailyHourSelect"
           />
         </EuiFlexItem>
@@ -72,15 +54,12 @@ export const CronDaily = ({
           <EuiSelect
             options={minuteOptions}
             value={minute}
+            aria-label={i18n.translate('esUi.cronEditor.cronDaily.minuteSelectLabel', {
+              defaultMessage: 'Minute',
+            })}
             onChange={e => onChange({ minute: e.target.value })}
             fullWidth
-            prepend={(
-              <EuiText size="xs">
-                <strong>
-                  :
-                </strong>
-              </EuiText>
-            )}
+            prepend=":"
             data-test-subj="cronFrequencyDailyMinuteSelect"
           />
         </EuiFlexItem>

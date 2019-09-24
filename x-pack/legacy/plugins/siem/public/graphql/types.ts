@@ -111,8 +111,6 @@ export interface Source {
   status: SourceStatus;
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
-  /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
-  Events: EventsData;
 
   Timeline: TimelineData;
 
@@ -339,20 +337,36 @@ export interface Inspect {
   response: string[];
 }
 
-export interface EventsData {
-  edges: EcsEdges[];
+export interface TimelineData {
+  edges: TimelineEdges[];
 
   totalCount: number;
 
-  pageInfo: PageInfoPaginated;
+  pageInfo: PageInfo;
 
   inspect?: Inspect | null;
 }
 
-export interface EcsEdges {
-  node: Ecs;
+export interface TimelineEdges {
+  node: TimelineItem;
 
   cursor: CursorType;
+}
+
+export interface TimelineItem {
+  _id: string;
+
+  _index?: string | null;
+
+  data: TimelineNonEcsData[];
+
+  ecs: Ecs;
+}
+
+export interface TimelineNonEcsData {
+  field: string;
+
+  value?: ToStringArray | null;
 }
 
 export interface Ecs {
@@ -805,38 +819,6 @@ export interface SshEcsFields {
   method?: ToStringArray | null;
 
   signature?: ToStringArray | null;
-}
-
-export interface TimelineData {
-  edges: TimelineEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfo;
-
-  inspect?: Inspect | null;
-}
-
-export interface TimelineEdges {
-  node: TimelineItem;
-
-  cursor: CursorType;
-}
-
-export interface TimelineItem {
-  _id: string;
-
-  _index?: string | null;
-
-  data: TimelineNonEcsData[];
-
-  ecs: Ecs;
-}
-
-export interface TimelineNonEcsData {
-  field: string;
-
-  value?: ToStringArray | null;
 }
 
 export interface PageInfo {
@@ -1511,6 +1493,12 @@ export interface ResponseFavoriteTimeline {
   favorite?: FavoriteTimelineResult[] | null;
 }
 
+export interface EcsEdges {
+  node: Ecs;
+
+  cursor: CursorType;
+}
+
 export interface EventsTimelineData {
   edges: EcsEdges[];
 
@@ -1587,12 +1575,6 @@ export interface PaginationInputPaginated {
   querySize: number;
 }
 
-export interface SortField {
-  sortFieldId: string;
-
-  direction: Direction;
-}
-
 export interface PaginationInput {
   /** The limit parameter allows you to configure the maximum amount of items to be returned */
   limit: number;
@@ -1600,6 +1582,12 @@ export interface PaginationInput {
   cursor?: string | null;
   /** The tiebreaker parameter allow to be more precise to fetch the next item */
   tiebreaker?: string | null;
+}
+
+export interface SortField {
+  sortFieldId: string;
+
+  direction: Direction;
 }
 
 export interface LastTimeDetails {
@@ -1813,17 +1801,6 @@ export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
 
   pagination: PaginationInputPaginated;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface EventsSourceArgs {
-  pagination: PaginationInputPaginated;
-
-  sortField: SortField;
-
-  timerange?: TimerangeInput | null;
 
   filterQuery?: string | null;
 
@@ -2436,172 +2413,6 @@ export namespace GetDomainsQuery {
     dsl: string[];
 
     response: string[];
-  };
-}
-
-export namespace GetEventsQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    pagination: PaginationInputPaginated;
-    sortField: SortField;
-    filterQuery?: string | null;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    Events: Events;
-  };
-
-  export type Events = {
-    __typename?: 'EventsData';
-
-    totalCount: number;
-
-    pageInfo: PageInfo;
-
-    inspect?: Inspect | null;
-
-    edges: Edges[];
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-
-  export type Edges = {
-    __typename?: 'EcsEdges';
-
-    node: Node;
-  };
-
-  export type Node = {
-    __typename?: 'ECS';
-
-    _id: string;
-
-    _index?: string | null;
-
-    timestamp?: Date | null;
-
-    event?: Event | null;
-
-    host?: Host | null;
-
-    message?: ToStringArray | null;
-
-    source?: _Source | null;
-
-    destination?: Destination | null;
-
-    suricata?: Suricata | null;
-
-    user?: User | null;
-
-    zeek?: Zeek | null;
-  };
-
-  export type Event = {
-    __typename?: 'EventEcsFields';
-
-    action?: ToStringArray | null;
-
-    category?: ToStringArray | null;
-
-    dataset?: ToStringArray | null;
-
-    id?: ToStringArray | null;
-
-    module?: ToStringArray | null;
-
-    severity?: ToNumberArray | null;
-  };
-
-  export type Host = {
-    __typename?: 'HostEcsFields';
-
-    name?: ToStringArray | null;
-
-    ip?: ToStringArray | null;
-
-    id?: ToStringArray | null;
-  };
-
-  export type _Source = {
-    __typename?: 'SourceEcsFields';
-
-    ip?: ToStringArray | null;
-
-    port?: ToNumberArray | null;
-  };
-
-  export type Destination = {
-    __typename?: 'DestinationEcsFields';
-
-    ip?: ToStringArray | null;
-
-    port?: ToNumberArray | null;
-  };
-
-  export type Suricata = {
-    __typename?: 'SuricataEcsFields';
-
-    eve?: Eve | null;
-  };
-
-  export type Eve = {
-    __typename?: 'SuricataEveData';
-
-    proto?: ToStringArray | null;
-
-    flow_id?: ToNumberArray | null;
-
-    alert?: Alert | null;
-  };
-
-  export type Alert = {
-    __typename?: 'SuricataAlertData';
-
-    signature?: ToStringArray | null;
-
-    signature_id?: ToNumberArray | null;
-  };
-
-  export type User = {
-    __typename?: 'UserEcsFields';
-
-    name?: ToStringArray | null;
-  };
-
-  export type Zeek = {
-    __typename?: 'ZeekEcsFields';
-
-    session_id?: ToStringArray | null;
   };
 }
 

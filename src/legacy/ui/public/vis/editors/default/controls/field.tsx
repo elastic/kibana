@@ -110,6 +110,7 @@ function FieldParamEditor({
       compressed
     >
       <EuiComboBox
+        compressed
         placeholder={i18n.translate('common.ui.aggTypes.field.selectFieldPlaceholder', {
           defaultMessage: 'Select a field',
         })}

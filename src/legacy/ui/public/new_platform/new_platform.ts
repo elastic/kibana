@@ -16,21 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { IUiActionsStart, IUiActionsSetup } from 'src/plugins/ui_actions/public';
 import { LegacyCoreSetup, LegacyCoreStart } from '../../../../core/public';
 import { Plugin as DataPlugin } from '../../../../plugins/data/public';
+import { Plugin as ExpressionsPlugin } from '../../../../plugins/expressions/public';
 import {
   Setup as InspectorSetup,
   Start as InspectorStart,
 } from '../../../../plugins/inspector/public';
+import { EuiUtilsStart } from '../../../../plugins/eui_utils/public';
 
 export interface PluginsSetup {
   data: ReturnType<DataPlugin['setup']>;
+  expressions: ReturnType<ExpressionsPlugin['setup']>;
   inspector: InspectorSetup;
+  uiActions: IUiActionsSetup;
 }
 
 export interface PluginsStart {
   data: ReturnType<DataPlugin['start']>;
+  eui_utils: EuiUtilsStart;
+  expressions: ReturnType<ExpressionsPlugin['start']>;
   inspector: InspectorStart;
+  uiActions: IUiActionsStart;
 }
 
 export const npSetup = {

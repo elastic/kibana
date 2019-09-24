@@ -29,7 +29,7 @@ export default function manageRepositoriesFunctionalTests({
 
   describe('History', function() {
     this.tags('smoke');
-    const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
+    const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
 
     describe('browser history can go back while exploring code app', () => {
       let driver: any;
@@ -50,7 +50,7 @@ export default function manageRepositoriesFunctionalTests({
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await esArchiver.unload('code/repositories/typescript_node_starter');
         await repoUnload(
           'github.com/elastic/TypeScript-Node-Starter',

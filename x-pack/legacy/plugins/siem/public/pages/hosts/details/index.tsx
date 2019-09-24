@@ -24,7 +24,6 @@ import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '.
 import { scoreIntervalToDateTime } from '../../../components/ml/score/score_interval_to_datetime';
 import { KpiHostDetailsQuery } from '../../../containers/kpi_host_details';
 import { hostToCriteria } from '../../../components/ml/criteria/host_to_criteria';
-import { navTabsHostDetails } from '../hosts_navigations';
 import { SiemNavigation } from '../../../components/navigation';
 import { HostsQueryProps } from '../hosts';
 import { SpyRoute } from '../../../utils/route/spy_routes';
@@ -33,12 +32,13 @@ import { manageQuery } from '../../../components/page/manage_query';
 import { HostOverview } from '../../../components/page/hosts/host_overview';
 import { KpiHostsComponent } from '../../../components/page/hosts';
 
-import { HostDetailsComponentProps } from './type';
+import { HostDetailsComponentProps } from './types';
 import { getFilterQuery, type, makeMapStateToProps } from './utils';
 import { MlCapabilitiesContext } from '../../../components/ml/permissions/ml_capabilities_provider';
 import { hasMlUserPermissions } from '../../../components/ml/permissions/has_ml_user_permissions';
 
 export { HostDetailsBody } from './body';
+import { navTabsHostDetails } from './nav_tabs';
 
 const HostOverviewManage = manageQuery(HostOverview);
 const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
@@ -61,7 +61,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
             indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
                 <FiltersGlobal>
-                  <HostsKql indexPattern={indexPattern} type={type} />
+                  <HostsKql indexPattern={indexPattern} setQuery={setQuery} type={type} />
                 </FiltersGlobal>
 
                 <HeaderPage
@@ -130,14 +130,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
                       setQuery={setQuery}
                       to={to}
                       narrowDateRange={(min: number, max: number) => {
-                        /**
-                         * Using setTimeout here because of this issue:
-                         * https://github.com/elastic/elastic-charts/issues/360
-                         * Need to remove the setTimeout here after this issue is fixed.
-                         * */
-                        setTimeout(() => {
-                          setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-                        }, 500);
+                        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
                       }}
                     />
                   )}

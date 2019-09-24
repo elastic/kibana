@@ -11,10 +11,10 @@ import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { deleteTimelineMutation } from '../../containers/timeline/delete/persist.gql_query';
-import { AllTimelinesVariables } from '../../containers/timeline/all';
+import { AllTimelinesVariables, AllTimelinesQuery } from '../../containers/timeline/all';
 
 import { allTimelinesQuery } from '../../containers/timeline/all/index.gql_query';
-import { DeleteTimelineMutation, SortFieldTimeline } from '../../graphql/types';
+import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../graphql/types';
 import { State, timelineSelectors } from '../../store';
 import {
   createTimeline as dispatchCreateNewTimeline,
@@ -40,9 +40,8 @@ import {
   OpenTimelineDispatchProps,
   OpenTimelineReduxProps,
 } from './types';
-import { AllTimelinesQuery } from '../../containers/timeline/all';
-import { Direction } from '../../graphql/types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
+import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 
 export interface OpenTimelineState {
   /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
@@ -365,8 +364,17 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  createNewTimeline: dispatchCreateNewTimeline,
-  updateIsLoading: dispatchUpdateIsLoading,
+  createNewTimeline: ({
+    id,
+    columns,
+    show,
+  }: {
+    id: string;
+    columns: ColumnHeader[];
+    show?: boolean;
+  }) => dispatch(dispatchCreateNewTimeline({ id, columns, show })),
+  updateIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) =>
+    dispatch(dispatchUpdateIsLoading({ id, isLoading })),
   updateTimeline: dispatchUpdateTimeline(dispatch),
 });
 
