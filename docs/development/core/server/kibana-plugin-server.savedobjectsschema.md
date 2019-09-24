@@ -14,7 +14,7 @@ export declare class SavedObjectsSchema
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(schemaDefinition)](./kibana-plugin-server.savedobjectsschema.(constructor).md) |  | Constructs a new instance of the <code>SavedObjectsSchema</code> class |
+|  [(constructor)(schemaDefinition)](./kibana-plugin-server.savedobjectsschema._constructor_.md) |  | Constructs a new instance of the <code>SavedObjectsSchema</code> class |
 
 ## Methods
 
