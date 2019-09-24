@@ -202,7 +202,7 @@ describe('AreaChartWithCustomPrompt', () => {
         },
       ],
     ],
-  ])('renders areachart', data => {
+  ] as Array<[ChartConfigsData[]]>)('renders areachart', data => {
     beforeAll(() => {
       shallowWrapper = shallow(<AreaChartWithCustomPrompt height={100} width={120} data={data} />);
     });
@@ -213,44 +213,40 @@ describe('AreaChartWithCustomPrompt', () => {
     });
   });
 
-  const table: Array<ChartConfigsData[] | [] | null | undefined> = [
+  describe.each([
     null,
     [],
     [
-      [
-        {
-          key: 'uniqueSourceIpsHistogram',
-          value: null,
-          color: '#DB1374',
-        },
-        {
-          key: 'uniqueDestinationIpsHistogram',
-          value: null,
-          color: '#490092',
-        },
-      ],
+      {
+        key: 'uniqueSourceIpsHistogram',
+        value: null,
+        color: '#DB1374',
+      },
+      {
+        key: 'uniqueDestinationIpsHistogram',
+        value: null,
+        color: '#490092',
+      },
     ],
     [
-      [
-        {
-          key: 'uniqueSourceIpsHistogram',
-          value: [
-            { x: new Date('2019-05-03T13:00:00.000Z').valueOf() },
-            { x: new Date('2019-05-04T01:00:00.000Z').valueOf() },
-            { x: new Date('2019-05-04T13:00:00.000Z').valueOf() },
-          ],
-          color: '#DB1374',
-        },
-        {
-          key: 'uniqueDestinationIpsHistogram',
-          value: [
-            { x: new Date('2019-05-03T13:00:00.000Z').valueOf() },
-            { x: new Date('2019-05-04T01:00:00.000Z').valueOf() },
-            { x: new Date('2019-05-04T13:00:00.000Z').valueOf() },
-          ],
-          color: '#490092',
-        },
-      ],
+      {
+        key: 'uniqueSourceIpsHistogram',
+        value: [
+          { x: new Date('2019-05-03T13:00:00.000Z').valueOf() },
+          { x: new Date('2019-05-04T01:00:00.000Z').valueOf() },
+          { x: new Date('2019-05-04T13:00:00.000Z').valueOf() },
+        ],
+        color: '#DB1374',
+      },
+      {
+        key: 'uniqueDestinationIpsHistogram',
+        value: [
+          { x: new Date('2019-05-03T13:00:00.000Z').valueOf() },
+          { x: new Date('2019-05-04T01:00:00.000Z').valueOf() },
+          { x: new Date('2019-05-04T13:00:00.000Z').valueOf() },
+        ],
+        color: '#490092',
+      },
     ],
     [
       [
@@ -275,28 +271,28 @@ describe('AreaChartWithCustomPrompt', () => {
       ],
     ],
     [
-      {
-        key: 'uniqueSourceIpsHistogram',
-        value: [
-          { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 580213 },
-          { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: {} },
-          { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
-        ],
-        color: '#DB1374',
-      },
-      {
-        key: 'uniqueDestinationIpsHistogram',
-        value: [
-          { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
-          { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
-          { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
-        ],
-        color: '#490092',
-      },
+      [
+        {
+          key: 'uniqueSourceIpsHistogram',
+          value: [
+            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 580213 },
+            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: {} },
+            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
+          ],
+          color: '#DB1374',
+        },
+        {
+          key: 'uniqueDestinationIpsHistogram',
+          value: [
+            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
+            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
+            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
+          ],
+          color: '#490092',
+        },
+      ],
     ],
-  ] as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-  describe.each(table)('renders prompt', data => {
+  ] as Array<[ChartConfigsData[] | null | undefined]>)('renders prompt', data => {
     beforeAll(() => {
       shallowWrapper = shallow(<AreaChartWithCustomPrompt height={100} width={120} data={data} />);
     });
