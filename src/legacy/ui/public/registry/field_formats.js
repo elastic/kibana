@@ -20,22 +20,14 @@
 import _ from 'lodash';
 import chrome from '../chrome';
 import { FieldFormat } from '../../../../plugins/data/common/field_formats';
-// import { IndexedArray } from '../indexed_array';
 
 class FieldFormatRegistry {
   constructor() {
-    /*
-    super({
-      group: ['fieldType'],
-      index: ['id']
-    });
-    */
     this.fieldFormats = [];
 
     this._uiSettings = chrome.getUiSettingsClient();
     this.getConfig = (...args) => this._uiSettings.get(...args);
     this._defaultMap = [];
-    // this._providers = [];
     this.init();
   }
 
@@ -156,6 +148,17 @@ class FieldFormatRegistry {
   }
 
   /**
+   * Get filtered list of field formats by format type
+   *
+   * @param  {String} fieldType
+   * @return {FieldFormat[]}
+   */
+
+  getByFieldType(fieldType) {
+    return this.fieldFormats.filter(format => format.fieldType.indexOf(fieldType) !== -1);
+  }
+
+  /**
    * Get the default fieldFormat instance for a field format.
    * It's a memoized function that builds and reads a cache
    *
@@ -164,7 +167,6 @@ class FieldFormatRegistry {
    * @return {FieldFormat}
    */
   getDefaultInstance = _.memoize(this.getDefaultInstancePlain, this.getDefaultInstanceCacheResolver);
-
 
   parseDefaultTypeMap(value) {
     this._defaultMap = value;
@@ -175,11 +177,6 @@ class FieldFormatRegistry {
       }
     });
   }
-
-  /*
-  name = 'fieldFormats';
-  displayName = '[registry ' + this.name + ']';
-  */
 
   register = (module) => {
     this.fieldFormats.push(module(FieldFormat));

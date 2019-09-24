@@ -141,11 +141,9 @@ export class FieldEditorComponent extends PureComponent {
     field.type = fieldTypes.includes(field.type) ? field.type : fieldTypes[0];
 
     const DefaultFieldFormat = fieldFormats.getDefaultType(field.type, field.esTypes);
-    // console.log(fieldFormats);
-    // debugger;
     const fieldTypeFormats = [
       getDefaultFormat(DefaultFieldFormat),
-      ...fieldFormats.byFieldType[field.type],
+      ...fieldFormats.getByFieldType(field.type),
     ];
 
     this.setState({
