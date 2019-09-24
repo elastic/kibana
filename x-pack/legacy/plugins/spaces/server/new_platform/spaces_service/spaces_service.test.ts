@@ -174,7 +174,7 @@ describe('SpacesService', () => {
   });
 
   describe('#getActiveSpace', () => {
-    it('returns the space id for the default space', async () => {
+    it('returns the default space when in the default space', async () => {
       const spacesServiceSetup = await createService();
       const request = {
         url: { path: 'app/kibana' },
@@ -189,7 +189,7 @@ describe('SpacesService', () => {
       });
     });
 
-    it('returns the space id for the current (non-default) space', async () => {
+    it('returns the space for the current (non-default) space', async () => {
       const spacesServiceSetup = await createService();
       const request = {
         url: { path: '/s/foo/app/kibana' },
