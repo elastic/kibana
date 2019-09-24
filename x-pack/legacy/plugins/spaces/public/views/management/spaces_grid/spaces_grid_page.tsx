@@ -256,7 +256,7 @@ class SpacesGridPageUI extends Component<Props, State> {
     const { intl } = this.props;
     return [
       {
-        field: 'spaceIcon',
+        field: 'initials',
         name: '',
         width: '50px',
         render: (value: string, record: Space) => (
@@ -300,7 +300,9 @@ class SpacesGridPageUI extends Component<Props, State> {
           id: 'xpack.spaces.management.spacesGridPage.featuresColumnName',
           defaultMessage: 'Features',
         }),
-        sortable: true,
+        sortable: (space: Space) => {
+          return getEnabledFeatures(this.state.features, space).length;
+        },
         render: (disabledFeatures: string[], record: Space) => {
           const enabledFeatureCount = getEnabledFeatures(this.state.features, record).length;
           if (enabledFeatureCount === this.state.features.length) {
