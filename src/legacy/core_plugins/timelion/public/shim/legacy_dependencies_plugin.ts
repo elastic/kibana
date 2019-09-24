@@ -21,7 +21,6 @@ import chrome from 'ui/chrome';
 import { Plugin } from 'kibana/public';
 // @ts-ignore
 import { visFactory } from 'ui/vis/vis_factory';
-import { npStart } from 'ui/new_platform';
 import { initTimelionLegacyModule } from './timelion_legacy_module';
 
 /** @internal */
@@ -52,7 +51,6 @@ export class LegacyDependenciesPlugin
     return {
       $rootScope: $injector.get('$rootScope'),
       $compile: $injector.get('$compile'),
-      config: npStart.core.uiSettings,
     } as LegacyDependenciesPluginStart;
   }
 }

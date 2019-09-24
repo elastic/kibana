@@ -53,20 +53,18 @@ export interface TimelionPluginStartDependencies {
   __LEGACY: LegacyDependenciesPlugin;
 }
 
-interface DependenciesPluginSetup {
+interface TimelionVisualizationDependencies {
   uiSettings: UiSettingsClientContract;
-  http: HttpSetup;
-}
-
-interface DependenciesPluginStart {
-  uiSettings: UiSettingsClientContract;
+  http?: HttpSetup;
 }
 
 /** @internal */
-export type TimelionSetupDependencies = DependenciesPluginSetup & LegacyDependenciesPluginSetup;
+export type TimelionSetupDependencies = TimelionVisualizationDependencies &
+  LegacyDependenciesPluginSetup;
 
 /** @internal */
-export type TimelionStartDependencies = DependenciesPluginStart & LegacyDependenciesPluginStart;
+export type TimelionStartDependencies = TimelionVisualizationDependencies &
+  LegacyDependenciesPluginStart;
 
 /** @internal */
 export class TimelionPlugin
