@@ -424,7 +424,7 @@ export const metrics = {
       defaultMessage: 'Unauthorized'
     }),
     description: i18n.translate('xpack.monitoring.metrics.apm.acm.responseErrors.acmForbiddenDescription', {
-      defaultMessage: 'Forbidden HTTP Requests rejected'
+      defaultMessage: 'Unauthorized HTTP Requests rejected'
     })
   }),
   apm_acm_responses_errors_unavailable: new ApmEventsRateClusterMetric({
