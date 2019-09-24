@@ -177,7 +177,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     return (
       <EuiFlexGroup
         gutterSize="m"
-        className="lnsIndexPatternDataPanel"
+        className="lnsInnerIndexPatternDataPanel"
         direction="column"
         responsive={false}
       >
@@ -328,17 +328,17 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     <ChildDragDropProvider {...dragDropContext}>
       <EuiFlexGroup
         gutterSize="none"
-        className="lnsIndexPatternDataPanel"
+        className="lnsInnerIndexPatternDataPanel"
         direction="column"
         responsive={false}
       >
         <EuiFlexItem grow={null}>
-          <div className="lnsIndexPatternDataPanel__header">
+          <div className="lnsInnerIndexPatternDataPanel__header">
             {!showIndexPatternSwitcher ? (
               <>
                 <EuiTitle size="xxs">
                   <h4
-                    className="lnsIndexPatternDataPanel__header"
+                    className="lnsInnerIndexPatternDataPanel__header"
                     title={currentIndexPattern.title}
                   >
                     {currentIndexPattern.title}{' '}
@@ -346,7 +346,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 </EuiTitle>
                 <EuiButtonEmpty
                   data-test-subj="indexPattern-switch-link"
-                  className="lnsIndexPatternDataPanel__changeLink"
+                  className="lnsInnerIndexPatternDataPanel__changeLink"
                   onClick={() => setShowIndexPatternSwitcher(true)}
                   size="xs"
                 >
@@ -403,7 +403,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         <EuiFlexItem>
           <EuiFlexGroup
             gutterSize="s"
-            className="lnsIndexPatternDataPanel__filter-wrapper"
+            className="lnsInnerIndexPatternDataPanel__filterWrapper"
             responsive={false}
           >
             <EuiFlexItem grow={true}>
@@ -516,7 +516,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             </EuiFlexItem>
           </EuiFlexGroup>
           <div
-            className="lnsFieldListPanel__list-wrapper"
+            className="lnsInnerIndexPatternDataPanel__listWrapper"
             ref={el => {
               if (el && !el.dataset.dynamicScroll) {
                 el.dataset.dynamicScroll = 'true';
@@ -525,18 +525,21 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             }}
             onScroll={lazyScroll}
           >
-            <div className="lnsFieldListPanel__list">
+            <div className="lnsInnerIndexPatternDataPanel__list">
               {localState.isLoading && <EuiLoadingSpinner />}
 
               {paginatedFields.map(field => {
                 const overallField = fieldByName[field.name];
                 return (
                   <FieldItem
+                    core={core}
                     indexPattern={currentIndexPattern}
                     key={field.name}
                     field={field}
                     highlight={localState.nameFilter.toLowerCase()}
                     exists={overallField ? !!overallField.exists : false}
+                    dateRange={dateRange}
+                    query={query}
                   />
                 );
               })}

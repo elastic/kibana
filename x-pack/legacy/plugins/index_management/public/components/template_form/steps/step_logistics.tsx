@@ -3,52 +3,100 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState } from 'react';
-import {
-  EuiComboBox,
-  EuiComboBoxOptionProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiButtonEmpty,
-  EuiSpacer,
-  EuiDescribedFormGroup,
-  EuiFormRow,
-  EuiFieldText,
-  EuiFieldNumber,
-} from '@elastic/eui';
+import React, { useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Template } from '../../../../common/types';
-import { INVALID_INDEX_PATTERN_CHARS } from '../../../../common/constants';
+import {
+  useForm,
+  Form,
+  UseField,
+} from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+import { FormRow } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/components';
 import { templatesDocumentationLink } from '../../../lib/documentation_links';
 import { StepProps } from '../types';
+import { schemas } from '../template_form_schemas';
 
-const indexPatternInvalidCharacters = INVALID_INDEX_PATTERN_CHARS.join(' ');
+const i18n = {
+  name: {
+    title: (
+      <FormattedMessage
+        id="xpack.idxMgmt.templateForm.stepLogistics.nameTitle"
+        defaultMessage="Name"
+      />
+    ),
+    description: (
+      <FormattedMessage
+        id="xpack.idxMgmt.templateForm.stepLogistics.nameDescription"
+        defaultMessage="A unique identifier for this template."
+      />
+    ),
+  },
+  indexPatterns: {
+    title: (
+      <FormattedMessage
+        id="xpack.idxMgmt.templateForm.stepLogistics.indexPatternsTitle"
+        defaultMessage="Index patterns"
+      />
+    ),
+    description: (
+      <FormattedMessage
+        id="xpack.idxMgmt.templateForm.stepLogistics.indexPatternsDescription"
+        defaultMessage="The index patterns to apply to the template."
+      />
+    ),
+  },
+  order: {
+    title: (
+      <FormattedMessage
+        id="xpack.idxMgmt.templateForm.stepLogistics.orderTitle"
+        defaultMessage="Merge order"
+      />
+    ),
+    description: (
+      <FormattedMessage
+        id="xpack.idxMgmt.templateForm.stepLogistics.orderDescription"
+        defaultMessage="The merge order when multiple templates match an index."
+      />
+    ),
+  },
+  version: {
+    title: (
+      <FormattedMessage
+        id="xpack.idxMgmt.templateForm.stepLogistics.versionTitle"
+        defaultMessage="Version"
+      />
+    ),
+    description: (
+      <FormattedMessage
+        id="xpack.idxMgmt.templateForm.stepLogistics.versionDescription"
+        defaultMessage="A number that identifies the template to external management systems."
+      />
+    ),
+  },
+};
 
 export const StepLogistics: React.FunctionComponent<StepProps> = ({
   template,
-  updateTemplate,
-  errors,
   isEditing,
+  setDataGetter,
+  onStepValidityChange,
 }) => {
-  const { name, order, version, indexPatterns } = template;
-  const { name: nameError, indexPatterns: indexPatternsError } = errors;
-
-  // hooks
-  const [allIndexPatterns, setAllIndexPatterns] = useState<Template['indexPatterns']>([]);
-  const [touchedFields, setTouchedFields] = useState({
-    name: false,
-    indexPatterns: false,
+  const { form } = useForm({
+    schema: schemas.logistics,
+    defaultValue: template,
+    options: { stripEmptyFields: false },
   });
 
-  const indexPatternOptions = indexPatterns
-    ? indexPatterns.map(pattern => ({ label: pattern, value: pattern }))
-    : [];
+  useEffect(() => {
+    onStepValidityChange(form.isValid);
+  }, [form.isValid]);
 
-  const { name: isNameTouched, indexPatterns: isIndexPatternsTouched } = touchedFields;
+  useEffect(() => {
+    setDataGetter(form.submit);
+  }, [form]);
 
   return (
-    <div data-test-subj="stepLogistics">
+    <Form form={form} data-test-subj="stepLogistics">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle>
@@ -78,197 +126,54 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
       </EuiFlexGroup>
       <EuiSpacer size="l" />
       {/* Name */}
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.idxMgmt.templateForm.stepLogistics.nameTitle"
-                defaultMessage="Name"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.idxMgmt.templateForm.stepLogistics.nameDescription"
-            defaultMessage="A unique identifier for this template."
-          />
-        }
-        idAria="stepLogisticsNameDescription"
-        fullWidth
-      >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.idxMgmt.templateForm.stepLogistics.fieldNameLabel"
-              defaultMessage="Name"
-            />
-          }
-          isInvalid={isNameTouched && Boolean(nameError)}
-          error={nameError}
-          fullWidth
-        >
-          <EuiFieldText
-            value={name}
-            readOnly={isEditing}
-            onBlur={() => setTouchedFields(prevTouched => ({ ...prevTouched, name: true }))}
-            data-test-subj="nameInput"
-            onChange={e => {
-              updateTemplate({ name: e.target.value });
-            }}
-            fullWidth
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+      <UseField
+        path="name"
+        component={FormRow}
+        componentProps={{
+          title: i18n.name.title,
+          titleTag: 'h3',
+          description: i18n.name.description,
+          idAria: 'stepLogisticsNameDescription',
+          euiFieldProps: { disabled: isEditing },
+          ['data-test-subj']: 'nameField',
+        }}
+      />
       {/* Index patterns */}
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.idxMgmt.templateForm.stepLogistics.indexPatternsTitle"
-                defaultMessage="Index patterns"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.idxMgmt.templateForm.stepLogistics.indexPatternsDescription"
-            defaultMessage="The index patterns to apply to the template."
-          />
-        }
-        idAria="stepLogisticsIndexPatternsDescription"
-        fullWidth
-      >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.idxMgmt.templateForm.stepLogistics.fieldIndexPatternsLabel"
-              defaultMessage="Index patterns"
-            />
-          }
-          helpText={
-            <FormattedMessage
-              id="xpack.idxMgmt.templateForm.stepLogistics.fieldIndexPatternsHelpText"
-              defaultMessage="Spaces and the characters {invalidCharactersList} are not allowed."
-              values={{
-                invalidCharactersList: <strong>{indexPatternInvalidCharacters}</strong>,
-              }}
-            />
-          }
-          isInvalid={isIndexPatternsTouched && Boolean(indexPatternsError)}
-          error={indexPatternsError}
-          fullWidth
-        >
-          <EuiComboBox
-            noSuggestions
-            fullWidth
-            data-test-subj="indexPatternsComboBox"
-            selectedOptions={indexPatternOptions}
-            onBlur={() =>
-              setTouchedFields(prevTouched => ({ ...prevTouched, indexPatterns: true }))
-            }
-            onChange={(selectedPattern: EuiComboBoxOptionProps[]) => {
-              const newIndexPatterns = selectedPattern.map(({ value }) => value as string);
-              updateTemplate({ indexPatterns: newIndexPatterns });
-            }}
-            onCreateOption={(selectedPattern: string) => {
-              if (!selectedPattern.trim().length) {
-                return;
-              }
-
-              const newIndexPatterns = [...indexPatterns, selectedPattern];
-
-              setAllIndexPatterns([...allIndexPatterns, selectedPattern]);
-              updateTemplate({ indexPatterns: newIndexPatterns });
-            }}
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+      <UseField
+        path="indexPatterns"
+        component={FormRow}
+        componentProps={{
+          title: i18n.indexPatterns.title,
+          titleTag: 'h3',
+          description: i18n.indexPatterns.description,
+          idAria: 'stepLogisticsIndexPatternsDescription',
+          ['data-test-subj']: 'indexPatternsField',
+        }}
+      />
       {/* Order */}
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.idxMgmt.templateForm.stepLogistics.orderTitle"
-                defaultMessage="Merge order"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.idxMgmt.templateForm.stepLogistics.orderDescription"
-            defaultMessage="The merge order when multiple templates match an index."
-          />
-        }
-        idAria="stepLogisticsOrderDescription"
-        fullWidth
-      >
-        <EuiFormRow
-          fullWidth
-          label={
-            <FormattedMessage
-              id="xpack.idxMgmt.templateForm.stepLogistics.fieldOrderLabel"
-              defaultMessage="Order (optional)"
-            />
-          }
-        >
-          <EuiFieldNumber
-            fullWidth
-            value={order}
-            onChange={e => {
-              const value = e.target.value;
-              updateTemplate({ order: value === '' ? value : Number(value) });
-            }}
-            data-test-subj="orderInput"
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>{' '}
+      <UseField
+        path="order"
+        component={FormRow}
+        componentProps={{
+          title: i18n.order.title,
+          titleTag: 'h3',
+          description: i18n.order.description,
+          idAria: 'stepLogisticsOrderDescription',
+          ['data-test-subj']: 'orderField',
+        }}
+      />
       {/* Version */}
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.idxMgmt.templateForm.stepLogistics.versionTitle"
-                defaultMessage="Version"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.idxMgmt.templateForm.stepLogistics.versionDescription"
-            defaultMessage="A number that identifies the template to external management systems."
-          />
-        }
-        idAria="stepLogisticsVersionDescription"
-        fullWidth
-      >
-        <EuiFormRow
-          fullWidth
-          label={
-            <FormattedMessage
-              id="xpack.idxMgmt.templateForm.stepLogistics.fieldVersionLabel"
-              defaultMessage="Version (optional)"
-            />
-          }
-        >
-          <EuiFieldNumber
-            fullWidth
-            value={version}
-            onChange={e => {
-              const value = e.target.value;
-              updateTemplate({ version: value === '' ? value : Number(value) });
-            }}
-            data-test-subj="versionInput"
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
-    </div>
+      <UseField
+        path="version"
+        component={FormRow}
+        componentProps={{
+          title: i18n.version.title,
+          titleTag: 'h3',
+          description: i18n.version.description,
+          idAria: 'stepLogisticsVersionDescription',
+          euiFieldProps: { ['data-test-subj']: 'versionField' },
+        }}
+      />
+    </Form>
   );
 };
