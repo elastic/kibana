@@ -117,6 +117,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
           type,
           DomainsTableId
         )}
+        dataTestSubj={`table-${tableType}`}
         showMorePagesIndicator={showMorePagesIndicator}
         headerCount={totalCount}
         headerSupplement={

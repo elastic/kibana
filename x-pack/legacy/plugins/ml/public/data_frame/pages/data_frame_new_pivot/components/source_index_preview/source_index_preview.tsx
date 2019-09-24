@@ -30,10 +30,10 @@ import {
 
 import {
   ColumnType,
-  MlInMemoryTable,
+  MlInMemoryTableBasic,
   SortingPropType,
   SORT_DIRECTION,
-} from '../../../../../../common/types/eui/in_memory_table';
+} from '../../../../../components/ml_in_memory_table';
 
 import { KBN_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 import { Dictionary } from '../../../../../../common/types/common';
@@ -405,7 +405,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
       {clearTable === false && columns.length > 0 && sorting !== false && (
-        <MlInMemoryTable
+        <MlInMemoryTableBasic
           allowNeutralSort={false}
           compressed
           items={tableItems}

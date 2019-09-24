@@ -115,6 +115,35 @@ describe('ContextContainer', () => {
       });
     });
 
+    it('exposes all core context to all providers regardless of registration order', async () => {
+      expect.assertions(4);
+
+      const contextContainer = new ContextContainer<MyContext, string>(plugins, coreId);
+      contextContainer
+        .registerContext(pluginA, 'ctxFromA', context => {
+          expect(context).toEqual({ core1: 'core', core2: 101 });
+          return `aString ${context.core1} ${context.core2}`;
+        })
+        .registerContext(coreId, 'core1', () => 'core')
+        .registerContext(coreId, 'core2', () => 101)
+        .registerContext(pluginB, 'ctxFromB', context => {
+          expect(context).toEqual({ core1: 'core', core2: 101, ctxFromA: 'aString core 101' });
+          return 277;
+        });
+
+      const rawHandler1 = jest.fn<string, []>(() => 'handler1');
+      const handler1 = contextContainer.createHandler(pluginB, rawHandler1);
+
+      expect(await handler1()).toEqual('handler1');
+
+      expect(rawHandler1).toHaveBeenCalledWith({
+        core1: 'core',
+        core2: 101,
+        ctxFromA: 'aString core 101',
+        ctxFromB: 277,
+      });
+    });
+
     it('exposes all core context to core providers', async () => {
       expect.assertions(4);
       const contextContainer = new ContextContainer<MyContext, string>(plugins, coreId);

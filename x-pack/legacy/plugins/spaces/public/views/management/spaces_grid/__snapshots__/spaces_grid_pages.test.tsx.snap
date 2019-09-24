@@ -145,6 +145,7 @@ Array [
     <EuiAvatar
       color="#461A0A"
       data-test-subj="space-avatar-default"
+      imageUrl=""
       initials="D"
       initialsLength={2}
       name="Default"
@@ -186,6 +187,7 @@ Array [
     <EuiAvatar
       color="#BFA180"
       data-test-subj="space-avatar-custom-1"
+      imageUrl=""
       initials="C1"
       initialsLength={2}
       name="Custom 1"
@@ -230,6 +232,7 @@ Array [
     <EuiAvatar
       color="#ABCDEF"
       data-test-subj="space-avatar-custom-2"
+      imageUrl=""
       initials="LG"
       initialsLength={2}
       name="Custom 2"

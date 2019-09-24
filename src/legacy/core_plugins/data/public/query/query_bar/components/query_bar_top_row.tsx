@@ -21,24 +21,27 @@ import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
 
 import classNames from 'classnames';
 import React, { Component } from 'react';
+
 import { Storage } from 'ui/storage';
-import { timeHistory } from 'ui/timefilter';
+import { documentationLinks } from 'ui/documentation_links';
+import { PersistedLog } from 'ui/persisted_log';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSuperDatePicker } from '@elastic/eui';
-
 // @ts-ignore
 import { EuiSuperUpdateButton } from '@elastic/eui';
-
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { documentationLinks } from 'ui/documentation_links';
-import { Toast, toastNotifications } from 'ui/notify';
-import { PersistedLog } from 'ui/persisted_log';
-import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
+import {
+  UiSettingsClientContract,
+  SavedObjectsClientContract,
+  Toast,
+  CoreStart,
+  HttpServiceBase,
+} from 'src/core/public';
 import { IndexPattern } from '../../../index_patterns';
 import { QueryBarInput } from './query_bar_input';
-
 import { getQueryLog } from '../lib/get_query_log';
 import { Query } from '../index';
+import { TimeHistoryContract } from '../../../timefilter';
 
 interface DateRange {
   from: string;
@@ -66,8 +69,11 @@ interface Props {
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   customSubmitButton?: any;
   isDirty: boolean;
+  toasts: CoreStart['notifications']['toasts'];
   uiSettings: UiSettingsClientContract;
   savedObjectsClient: SavedObjectsClientContract;
+  http: HttpServiceBase;
+  timeHistory?: TimeHistoryContract;
 }
 
 interface State {
@@ -147,7 +153,10 @@ export class QueryBarTopRowUI extends Component<Props, State> {
 
   public onSubmit = ({ query, dateRange }: { query?: Query; dateRange: DateRange }) => {
     this.handleLuceneSyntaxWarning();
-    timeHistory.add(dateRange);
+
+    if (this.props.timeHistory) {
+      this.props.timeHistory.add(dateRange);
+    }
 
     this.props.onSubmit({ query, dateRange });
   };
@@ -214,6 +223,7 @@ export class QueryBarTopRowUI extends Component<Props, State> {
           persistedLog={this.persistedLog}
           uiSettings={this.props.uiSettings}
           savedObjectsClient={this.props.savedObjectsClient}
+          http={this.props.http}
         />
       </EuiFlexItem>
     );
@@ -258,14 +268,17 @@ export class QueryBarTopRowUI extends Component<Props, State> {
       return null;
     }
 
-    const recentlyUsedRanges = timeHistory
-      .get()
-      .map(({ from, to }: { from: string; to: string }) => {
-        return {
-          start: from,
-          end: to,
-        };
-      });
+    let recentlyUsedRanges;
+    if (this.props.timeHistory) {
+      recentlyUsedRanges = this.props.timeHistory
+        .get()
+        .map(({ from, to }: { from: string; to: string }) => {
+          return {
+            start: from,
+            end: to,
+          };
+        });
+    }
 
     const commonlyUsedRanges = this.props.uiSettings
       .get('timepicker:quickRanges')
@@ -298,7 +311,7 @@ export class QueryBarTopRowUI extends Component<Props, State> {
 
   private handleLuceneSyntaxWarning() {
     if (!this.props.query) return;
-    const { intl, store } = this.props;
+    const { intl, store, toasts } = this.props;
     const { query, language } = this.props.query;
     if (
       language === 'kuery' &&
@@ -306,7 +319,7 @@ export class QueryBarTopRowUI extends Component<Props, State> {
       (!store || !store.get('kibana.luceneSyntaxWarningOptOut')) &&
       doesKueryExpressionHaveLuceneSyntaxError(query)
     ) {
-      const toast = toastNotifications.addWarning({
+      const toast = toasts.addWarning({
         title: intl.formatMessage({
           id: 'data.query.queryBar.luceneSyntaxWarningTitle',
           defaultMessage: 'Lucene syntax warning',
@@ -349,9 +362,8 @@ export class QueryBarTopRowUI extends Component<Props, State> {
   private onLuceneSyntaxWarningOptOut(toast: Toast) {
     if (!this.props.store) return;
     this.props.store.set('kibana.luceneSyntaxWarningOptOut', true);
-    toastNotifications.remove(toast);
+    this.props.toasts.remove(toast);
   }
 }
 
-// @ts-ignore
 export const QueryBarTopRow = injectI18n(QueryBarTopRowUI);

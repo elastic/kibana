@@ -4,9 +4,7 @@
 <titleabbrev>Shorten URL</titleabbrev>
 ++++
 
-Convert a {kib} URL into a token.
-
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Convert a {kib} URL into a token.
 
 [[url-shortening-api-request]]
 ==== Request

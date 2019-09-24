@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AggConfig } from 'ui/vis/agg_config';
+import { AggConfig } from 'ui/agg_types/agg_config';
 
 export function isStringType(type: AggConfig): boolean;
 export function isType(type: string): (agg: AggConfig) => boolean;
