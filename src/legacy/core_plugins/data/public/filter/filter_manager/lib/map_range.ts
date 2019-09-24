@@ -18,7 +18,7 @@
  */
 
 import { Filter, RangeFilter, FILTERS, isRangeFilter, isScriptedRangeFilter } from '@kbn/es-query';
-import { get } from 'lodash';
+import { get, has } from 'lodash';
 import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
 import { IndexPatterns, IndexPattern } from '../../../index_patterns';
 
@@ -32,8 +32,11 @@ function getParams(filter: RangeFilter, indexPattern?: IndexPattern) {
     ? get(filter, 'script.script.params')
     : getRangeByKey(filter, key);
 
-  const left = params.gte || params.gt || -Infinity;
-  const right = params.lte || params.lt || Infinity;
+  let left = has(params, 'gte') ? params.gte : params.gt;
+  if (left == null) left = -Infinity;
+
+  let right = has(params, 'lte') ? params.lte : params.lt;
+  if (right == null) right = Infinity;
 
   let value = `${left} to ${right}`;
 
