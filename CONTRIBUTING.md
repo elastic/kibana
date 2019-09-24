@@ -319,11 +319,13 @@ Note that for VSCode, to enable "live" linting of TypeScript (and other) file ty
     ]
 ```
 
-`eslint`  can automatically fix trivial lint errors when you save a file by adding this line in your setting.
+`eslint` can automatically fix trivial lint errors when you save a file by adding this line in your setting.
 
 ```json
   "eslint.autoFixOnSave": true,
 ```
+
+It is **not** recommended to use `prettier` plugin on Kibana project. Because settings are in `eslintrc.js` file and it is applied to too many files that shouldn't be prettier-ized. 
 
 ### Internationalization
 
