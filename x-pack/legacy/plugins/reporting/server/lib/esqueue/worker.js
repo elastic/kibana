@@ -60,6 +60,8 @@ function getLogger(opts, id, logLevel) {
           `The entire error message length is: ${errLength} characters.`,
           tags
         );
+      } else {
+        logger(errString, tags);
       }
       return;
     }
@@ -88,7 +90,8 @@ export class Worker extends events.EventEmitter {
     this.checkSize = opts.size || 10;
 
     this.debug = getLogger(opts, this.id, 'debug');
-    this.warn = getLogger(opts, this.id, 'warn');
+    this.warn = getLogger(opts, this.id, 'warning');
+    this.error = getLogger(opts, this.id, 'error');
     this.info = getLogger(opts, this.id, 'info');
 
     this._running = true;
@@ -205,7 +208,7 @@ export class Worker extends events.EventEmitter {
       })
       .catch((err) => {
         if (err.statusCode === 409) return true;
-        this.warn(`_failJob failed to update job ${job._id}`, err);
+        this.error(`_failJob failed to update job ${job._id}`, err);
         this.emit(constants.EVENT_WORKER_FAIL_UPDATE_ERROR, this._formatErrorParams(err, job));
         return false;
       });
@@ -297,7 +300,7 @@ export class Worker extends events.EventEmitter {
         })
         .catch((err) => {
           if (err.statusCode === 409) return false;
-          this.warn(`Failure saving job output ${job._id}`, err);
+          this.error(`Failure saving job output ${job._id}`, err);
           this.emit(constants.EVENT_WORKER_JOB_UPDATE_ERROR, this._formatErrorParams(err, job));
           return this._failJob(job, (err.message) ? err.message : false);
         });
@@ -323,7 +326,7 @@ export class Worker extends events.EventEmitter {
         }
       }
 
-      this.warn(`Failure occurred on job ${job._id}`, jobErr);
+      this.error(`Failure occurred on job ${job._id}`, jobErr);
       this.emit(constants.EVENT_WORKER_JOB_EXECUTION_ERROR, this._formatErrorParams(jobErr, job));
       return this._failJob(job, (jobErr.toString) ? jobErr.toString() : false);
     });
@@ -382,7 +385,7 @@ export class Worker extends events.EventEmitter {
         return this._performJob(claimedJob);
       })
       .catch((err) => {
-        this.warn('Error claiming jobs', err);
+        this.error('Error claiming jobs', err);
         return Promise.reject(err);
       });
   }
@@ -436,7 +439,7 @@ export class Worker extends events.EventEmitter {
       // ignore missing indices errors
         if (err && err.status === 404) return [];
 
-        this.warn('job querying failed', err);
+        this.error('job querying failed', err);
         this.emit(constants.EVENT_WORKER_JOB_SEARCH_ERROR, this._formatErrorParams(err));
         throw err;
       });

@@ -21,7 +21,7 @@ import _ from 'lodash';
 import expect from '@kbn/expect';
 import chrome from 'ui/chrome';
 import { fieldFormats } from 'ui/registry/field_formats';
-import { FieldFormat } from '../../../../../ui/field_formats/field_format';
+import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
 
 const config = chrome.getUiSettingsClient();
 
