@@ -14,12 +14,13 @@ export interface LegacyIconProps {
   selected?: boolean;
   onClick?: () => void;
   asListIcon?: boolean;
+  className?: string;
 }
 
 export function LegacyIcon(props: LegacyIconProps) {
   const icon = (
     <i
-      className={classNames('fa', 'gphLegacyIcon', {
+      className={classNames('fa', props.className, 'gphLegacyIcon', {
         selectedNode: props.selected,
         gphNode__text: !props.onClick,
         'gphNode__text--lowOpacity': !props.onClick,
