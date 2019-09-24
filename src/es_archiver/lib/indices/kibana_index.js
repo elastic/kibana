@@ -80,14 +80,16 @@ export async function migrateKibanaIndex({ client, log, kibanaPluginIds }) {
   const kibanaVersion = await loadKibanaVersion();
 
   const config = {
-    'migrations.scrollDuration': '5m',
-    'migrations.batchSize': 100,
-    'migrations.pollInterval': 100,
     'xpack.task_manager.index': '.kibana_task_manager',
   };
 
   const migratorOptions = {
     config: { get: path => config[path] },
+    savedObjectsConfig: {
+      'scrollDuration': '5m',
+      'batchSize': 100,
+      'pollInterval': 100,
+    },
     kibanaConfig: {
       index: '.kibana',
     },
