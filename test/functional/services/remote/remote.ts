@@ -47,7 +47,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   log.info(`Remote initialized: ${caps.get('browserName')} ${browserVersion}`);
 
   const coveragePrefix = 'coveragejson:';
-  const coverageDir = resolve(__dirname, '../../../../target/coverage');
+  const coverageDir = resolve(__dirname, '../../../../target/kibana-coverage/functional');
   let coverageCounter = 1;
   let logSubscription: undefined | Rx.Subscription;
 
@@ -67,7 +67,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
       driver,
       logging.Type.BROWSER,
       config.get('browser.logPollingMs'),
-      lifecycle.cleanup$
+      lifecycle.cleanup$ as any
     )
       .pipe(
         mergeMap(logEntry => {
