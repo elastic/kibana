@@ -40,11 +40,11 @@ export const EventsQueryTabBody = ({
             id={id}
             inspect={inspect}
             loading={loading}
-            updateDateRange={updateDateRange}
             refetch={refetch}
             setQuery={setQuery}
             startDate={startDate}
             totalCount={totalCount}
+            updateDateRange={updateDateRange}
           />
         )}
       </EventsOverTimeQuery>
