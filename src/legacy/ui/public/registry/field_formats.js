@@ -18,7 +18,7 @@
  */
 
 import { memoize, forOwn, isFunction } from 'lodash';
-chrome from '../chrome';
+import chrome from '../chrome';
 import { FieldFormat } from '../../../../plugins/data/common/field_formats';
 
 class FieldFormatRegistry {
