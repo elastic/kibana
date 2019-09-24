@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CSS, URL, MARKDOWN } from '../../i18n';
+import { BOOLEAN_FALSE, BOOLEAN_TRUE, CSS, URL, MARKDOWN, HTML, HEX, RGB } from '../../i18n';
 
 export const ArgumentStrings = {
   FilterGroup: {
@@ -326,7 +326,12 @@ export const ViewStrings = {
       }),
     getValueColorHelp: () =>
       i18n.translate('xpack.canvas.uis.views.progress.args.valueColorLabel', {
-        defaultMessage: 'Accepts HEX, RGB or HTML Color names',
+        defaultMessage: 'Accepts {hex}, {rgb} or {html} Color names',
+        values: {
+          html: HTML,
+          hex: HEX,
+          rgb: RGB,
+        },
       }),
     getValueWeightDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.progress.args.valueWeightTitle', {
@@ -358,7 +363,11 @@ export const ViewStrings = {
       }),
     getLabelHelp: () =>
       i18n.translate('xpack.canvas.uis.views.progress.args.labelArgLabel', {
-        defaultMessage: `Set true/false to show/hide label or provide a string to display as the label`,
+        defaultMessage: `Set {true}/{false} to show/hide label or provide a string to display as the label`,
+        values: {
+          true: BOOLEAN_TRUE,
+          false: BOOLEAN_FALSE,
+        },
       }),
     getFontDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.progress.args.fontTitle', {
@@ -515,7 +524,10 @@ export const ViewStrings = {
       }),
     getMaintainAspectHelp: () =>
       i18n.translate('xpack.canvas.uis.views.shape.args.maintainAspectLabel', {
-        defaultMessage: `Select 'true' to maintain aspect ratio`,
+        defaultMessage: `Select '{true}' to maintain aspect ratio`,
+        values: {
+          true: BOOLEAN_TRUE,
+        },
       }),
   },
   Table: {
