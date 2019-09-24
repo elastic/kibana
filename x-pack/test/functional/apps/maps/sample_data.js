@@ -11,7 +11,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
   const screenshot = getService('screenshots');
 
   // FLAKY: https://github.com/elastic/kibana/issues/38137
-  describe.skip('maps loaded from sample data', () => {
+  describe.only('maps loaded from sample data', () => {
 
     // Sample data is shifted to be relative to current time
     // This means that a static timerange will return different documents
