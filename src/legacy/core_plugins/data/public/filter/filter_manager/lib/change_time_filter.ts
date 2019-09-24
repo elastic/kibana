@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import { RangeFilter, Filter } from '@kbn/es-query';
+import { Filter, isRangeFilter } from '@kbn/es-query';
 import { timefilter } from 'ui/timefilter';
 import moment from 'moment';
-
-export const isRangeFilter = (filter: any): filter is RangeFilter => filter && filter.range;
 
 export const changeTimeFilter = (filter: Filter) => {
   if (isRangeFilter(filter)) {

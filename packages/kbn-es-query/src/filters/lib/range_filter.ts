@@ -56,8 +56,7 @@ const hasRangeKeys = (params: RangeFilterParams) =>
     keys(params).find((key: string) => ['gte', 'gt', 'lte', 'lt', 'from', 'to'].includes(key))
   );
 
-export const isRangeFilter = (filter: any): filter is RangeFilter =>
-  filter && filter.range && hasRangeKeys(filter.range);
+export const isRangeFilter = (filter: any): filter is RangeFilter => filter && filter.range;
 
 export const isScriptedRangeFilter = (filter: any): filter is RangeFilter => {
   const params: RangeFilterParams = get(filter, 'script.script.params', {});
