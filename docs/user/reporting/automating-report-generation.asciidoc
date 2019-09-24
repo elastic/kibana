@@ -15,16 +15,16 @@ URL**, which is the URL to queue a report for generation.
 To get the URL for triggering PDF report generation during a given time period:
 
 . Load the saved object in the Visualize editor, or load a Dashboard.
-. Use the time picker to specify a relative or absolute time period.
-. Click *Share* in the {kib} toolbar.
+. To specify a relative or absolute time period, use the time filter.
+. In the {kib} toolbar, click *Share*.
 . Select *PDF Reports*.
 . Click **Copy POST URL**.
 
 To get the URL for triggering CSV report generation during a given time period:
 
-. Load a saved search in Discover.
-. Use the time picker to specify a relative or absolute time period.
-. Click *Share* in the {kib} toolbar.
+. Load the saved search in Discover.
+. To specify a relative or absolute time period, use the time filter.
+. In the {kib} toolbar, click *Share*.
 . Select *CSV Reports*.
 . Click **Copy POST URL**.
 

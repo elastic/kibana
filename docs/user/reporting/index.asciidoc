@@ -45,17 +45,15 @@ image:user/reporting/images/share-button.png["Reporting Button",link="share-butt
 
 . Depending on the {kib} application, choose the appropriate options:
 
-.. If you're on Discover:
-  ... Select *CSV Reports*
+. If you're on Discover, select *CSV Reports*, then click *Generate CSV*.
 
-  ... Click the *Generate CSV* button.
+. If you're on Visualize or Dashboard:
 
-.. If you're on Visualize or Dashboard:
-  ... Select *PDF Reports*
+.. Select *PDF Reports*
 
-  ... Dashboard only: Choose to enable *Optimize for printing* layout mode. For an explanation of the different layout modes, see <<pdf-layout-modes, PDF Layout Modes>>.
+.. Dashboard only: Choose to enable *Optimize for printing* layout mode. For an explanation of the different layout modes, see <<pdf-layout-modes, PDF Layout Modes>>.
 
-  ... Click the *Generate PDF* button.
+.. Click *Generate PDF*.
 
 [float]
 == Automatically generate reports
