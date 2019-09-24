@@ -152,10 +152,10 @@ module.exports = {
                   '!src/core/server/*.test.mocks.ts',
 
                   'src/plugins/**/public/**/*',
-                  '!src/plugins/**/public/index*',
+                  '!src/plugins/**/public/index.{ts,tsx}',
 
                   'src/plugins/**/server/**/*',
-                  '!src/plugins/**/server/index*',
+                  '!src/plugins/**/server/index.{ts,tsx}',
                 ],
                 allowSameFolder: true,
               },
