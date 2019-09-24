@@ -208,6 +208,12 @@ export const ComponentStrings = {
         defaultMessage: 'Closes keyboard shortcuts reference',
       }),
   },
+  ToolbarTray: {
+    getCloseTrayAriaLabel: () =>
+      i18n.translate('xpack.canvas.toolbarTray.closeTrayAriaLabel', {
+        defaultMessage: 'Close tray',
+      }),
+  },
   WorkpadCreate: {
     getWorkpadCreateButtonLabel: () =>
       i18n.translate('xpack.canvas.workpadCreate.createButtonLabel', {
