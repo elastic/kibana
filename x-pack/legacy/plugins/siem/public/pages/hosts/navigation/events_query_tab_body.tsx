@@ -7,20 +7,54 @@
 import React from 'react';
 import { StatefulEventsViewer } from '../../../components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
+import { manageQuery } from '../../../components/page/manage_query';
+import { EventsOverTimeHistogram } from '../../../components/page/hosts/events_over_time';
+import { EventsOverTimeQuery } from '../../../containers/events/events_over_time';
+import { hostsModel } from '../../../store/hosts';
 
 const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
+const EventsOverTimeManage = manageQuery(EventsOverTimeHistogram);
 
 export const EventsQueryTabBody = ({
   endDate,
   kqlQueryExpression,
   startDate,
-}: HostsComponentsQueryProps) => (
-  <StatefulEventsViewer
-    end={endDate}
-    id={HOSTS_PAGE_TIMELINE_ID}
-    kqlQueryExpression={kqlQueryExpression}
-    start={startDate}
-  />
-);
+  setQuery,
+  filterQuery,
+  updateDateRange = () => {},
+}: HostsComponentsQueryProps) => {
+  return (
+    <>
+      <EventsOverTimeQuery
+        endDate={endDate}
+        filterQuery={filterQuery}
+        sourceId="default"
+        startDate={startDate}
+        type={hostsModel.HostsType.page}
+      >
+        {({ eventsOverTime, loading, id, inspect, refetch, totalCount }) => (
+          <EventsOverTimeManage
+            data={eventsOverTime!}
+            endDate={endDate}
+            id={id}
+            inspect={inspect}
+            loading={loading}
+            updateDateRange={updateDateRange}
+            refetch={refetch}
+            setQuery={setQuery}
+            startDate={startDate}
+            totalCount={totalCount}
+          />
+        )}
+      </EventsOverTimeQuery>
+      <StatefulEventsViewer
+        end={endDate}
+        id={HOSTS_PAGE_TIMELINE_ID}
+        kqlQueryExpression={kqlQueryExpression}
+        start={startDate}
+      />
+    </>
+  );
+};
 
 EventsQueryTabBody.displayName = 'EventsQueryTabBody';
