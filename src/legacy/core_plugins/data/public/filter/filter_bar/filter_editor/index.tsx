@@ -87,6 +87,7 @@ interface State {
   isSavedQueryEditorOpen: boolean;
   isRegularEditorOpen: boolean;
   isNewFilter: boolean;
+  selectedSavedQuery?: SavedQuery[];
 }
 
 class FilterEditorUI extends Component<Props, State> {
@@ -104,6 +105,7 @@ class FilterEditorUI extends Component<Props, State> {
       isSavedQueryEditorOpen: this.isSavedQueryFilterType(),
       isRegularEditorOpen: this.isRegularFilterType(),
       isNewFilter: !props.filter.meta.type,
+      // selectedSavedQuery: this.getSavedQueryFromFilter(),
     };
   }
 
@@ -438,18 +440,14 @@ class FilterEditorUI extends Component<Props, State> {
         );
     }
   }
-  public onSavedQuerySelected = (
-    selectedOption: any,
-    savedQueryOptions: any,
-    savedQueries: SavedQuery[]
-  ) => {
+  // TODO: fix type
+  public onSavedQuerySelected = (selectedOption: any, savedQueries: SavedQuery[]) => {
     // console.log('selectedOption:', selectedOption);
-    // console.log('savedQueryOptions:', savedQueryOptions);
     // console.log('savedQueries:', savedQueries);
     const selectedSavedQuery = savedQueries.filter(
-      savedQuery => savedQuery.id === selectedOption.label
+      savedQuery => savedQuery.id === selectedOption[0].label
     );
-    this.onSavedQueryChange(selectedSavedQuery[0]);
+    this.onSavedQueryChange(selectedSavedQuery, selectedOption, savedQueries);
     /* TODO: call
       this.onSavedQueryChange()
     */
@@ -532,6 +530,16 @@ class FilterEditorUI extends Component<Props, State> {
     return getOperatorFromFilter(this.props.filter);
   }
 
+  /* private getSavedQueryFromFilter = async () => {
+    if (this.isSavedQueryFilterType()) {
+      const savedQueryId = this.props.filter.meta.key;
+      const allSavedQueries = await this.props.savedQueryService.getAllSavedQueries();
+      const fullSavedQuery = allSavedQueries.filter(savedQuery => savedQuery.id === savedQueryId);
+      return fullSavedQuery;
+    }
+  };
+  */
+
   private isFilterValid() {
     const {
       isCustomEditorOpen,
@@ -590,8 +598,18 @@ class FilterEditorUI extends Component<Props, State> {
     this.setState({ params });
   };
 
-  private onSavedQueryChange = (params: SavedQuery) => {
-    this.setState({ params });
+  private onSavedQueryChange = (
+    selectedSavedQuery: SavedQuery[],
+    selectedOption: any,
+    savedQueries: SavedQuery[]
+  ) => {
+    // set the selected saved query to the params?
+    const params =
+      get(this.state.selectedSavedQuery && this.state.selectedSavedQuery[0], 'id') ===
+      get(selectedSavedQuery[0], 'id')
+        ? this.state.params
+        : selectedSavedQuery[0].id;
+    this.setState({ selectedSavedQuery, params });
   };
 
   private onQueryDslChange = (queryDsl: string) => {
@@ -635,18 +653,8 @@ class FilterEditorUI extends Component<Props, State> {
       );
       this.props.onSubmit(filter);
     } else if (indexPattern && isSavedQueryEditorOpen) {
-      const esQueryConfig = {
-        allowLeadingWildcards: this.props.uiSettings.get('query:allowLeadingWildcards'),
-        queryStringOptions: this.props.uiSettings.get('query:queryString:options'),
-        dateFormatTZ: this.props.uiSettings.get('dateFormat:tz'),
-      };
-      const savedQueryParams = {
-        savedQuery: this.state.params,
-        indexPattern,
-        esQueryConfig,
-      };
       // TODO: first convert the timefilter on the saved query before building the filter. We don't have access to any of the timefilter methods in the package
-      const filter = buildSavedQueryFilter(savedQueryParams);
+      const filter = buildSavedQueryFilter(this.state.params);
       this.props.onSubmit(filter);
     }
   };

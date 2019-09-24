@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import { migrateFilter } from './migrate_filter';
 import { filterMatchesIndex } from './filter_matches_index';
+import { buildEsQuery } from './build_es_query';
 
 /**
  * Create a filter that can be reversed for filters with negate set
@@ -40,11 +41,38 @@ const filterNegate = function (reverse) {
  * @param  {Object} filter - The filter to translate
  * @return {Object} the query version of that filter
  */
-const translateToQuery = function (filter) {
+const translateToQuery = function (filter, {
+  indexPattern,
+  allowLeadingWildcards = true,
+  queryStringOptions = {},
+  dateFormatTZ = null,
+  ignoreFilterIfFieldNotInIndex = false,
+  allSavedQueries = [],
+}) {
   if (!filter) return;
 
   if (filter.query) {
     return filter.query;
+  }
+  if (filter.meta && filter.meta.type && filter.meta.type === 'savedQuery') {
+    // do stuff: generate raw dsl that's done in the savedQuery filter constructor at the moment
+    const savedQuery = allSavedQueries.find((savedQuery) => filter.meta.key === savedQuery.id);
+    const query = _.get(savedQuery, 'attributes.query');
+    const filters = _.get(savedQuery, 'attributes.filters', []);
+    const convertedQuery = buildEsQuery(
+      indexPattern,
+      [query],
+      filters,
+      { allowLeadingWildcards, queryStringOptions, dateFormatTZ, ignoreFilterIfFieldNotInIndex });
+    filter.query = { ...convertedQuery };
+
+    // timefilter addition
+    // TODO: should we also handle the refresh interval part of the timefilter?
+    // const convertedTimeFilter = get(params, 'savedQuery.attributes.timefilter', null); // should already be an EsQuery
+    // if (convertedTimeFilter) {
+    //   const filtersWithTimefilter = [...convertedQuery.bool.filter, convertedTimeFilter];
+    //   filter.query.bool.filter = [...filtersWithTimefilter];
+    // }
   }
 
   return filter;
@@ -59,13 +87,22 @@ const cleanFilter = function (filter) {
   return _.omit(filter, ['meta', '$state']);
 };
 
-export function buildQueryFromFilters(filters = [], indexPattern, ignoreFilterIfFieldNotInIndex) {
+export function buildQueryFromFilters(
+  filters = [],
+  indexPattern,
+  ignoreFilterIfFieldNotInIndex,
+  allowLeadingWildcards,
+  queryStringOptions,
+  dateFormatTZ,
+  allSavedQueries) {
   return {
     must: [],
     filter: filters
       .filter(filterNegate(false))
       .filter(filter => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
-      .map(translateToQuery)
+      .map((filter) => translateToQuery(
+        filter,
+        { indexPattern, allowLeadingWildcards, queryStringOptions, dateFormatTZ, ignoreFilterIfFieldNotInIndex, allSavedQueries }))
       .map(cleanFilter)
       .map(filter => {
         return migrateFilter(filter, indexPattern);
@@ -74,7 +111,9 @@ export function buildQueryFromFilters(filters = [], indexPattern, ignoreFilterIf
     must_not: filters
       .filter(filterNegate(true))
       .filter(filter => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
-      .map(translateToQuery)
+      .map((filter) => translateToQuery(
+        filter,
+        { indexPattern, allowLeadingWildcards, queryStringOptions, dateFormatTZ, ignoreFilterIfFieldNotInIndex, allSavedQueries }))
       .map(cleanFilter)
       .map(filter => {
         return migrateFilter(filter, indexPattern);

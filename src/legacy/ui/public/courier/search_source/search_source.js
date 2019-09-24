@@ -76,6 +76,7 @@ import { buildEsQuery, getEsQueryConfig, filterMatchesIndex } from '@kbn/es-quer
 import { createDefer } from 'ui/promises';
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { SearchRequestProvider } from '../fetch/request';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 import { searchRequestQueue } from '../search_request_queue';
 import { FetchSoonProvider } from '../fetch';
@@ -118,6 +119,7 @@ export function SearchSourceProvider(Promise, Private, config) {
   const normalizeSortRequest = Private(NormalizeSortRequestProvider);
   const fetchSoon = Private(FetchSoonProvider);
   const { fieldWildcardFilter } = Private(FieldWildcardProvider);
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
   const getConfig = (...args) => config.get(...args);
 
   const forIp = Symbol('for which index pattern?');
@@ -546,7 +548,7 @@ export function SearchSourceProvider(Promise, Private, config) {
             }
           });
       }())
-        .then(function () {
+        .then(async function () {
           // This is down here to prevent the circular dependency
           flatData.body = flatData.body || {};
 
@@ -580,7 +582,13 @@ export function SearchSourceProvider(Promise, Private, config) {
           }
 
           const esQueryConfigs = getEsQueryConfig(config);
-          flatData.body.query = buildEsQuery(flatData.index, flatData.query, flatData.filters, esQueryConfigs);
+          const allSavedQueries = await savedObjectsClient.find({ type: 'query', perPage: 10000 });
+          flatData.body.query = buildEsQuery(
+            flatData.index,
+            flatData.query,
+            flatData.filters,
+            esQueryConfigs,
+            allSavedQueries.savedObjects);
 
           if (flatData.highlightAll != null) {
             if (flatData.highlightAll && flatData.body.query) {

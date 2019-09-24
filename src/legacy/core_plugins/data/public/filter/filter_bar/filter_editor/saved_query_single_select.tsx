@@ -38,11 +38,7 @@ interface Option {
 }
 interface Props {
   savedQueryService: SavedQueryService;
-  onChange: (
-    selectedOption: Option[],
-    savedQueryOptions: Option[],
-    savedQueries: SavedQuery[]
-  ) => void;
+  onChange: (selectedOption: Option[], savedQueries: SavedQuery[]) => void;
 }
 interface State {
   options: Option[];
@@ -96,7 +92,7 @@ export class SavedQuerySingleSelect extends Component<Props, State> {
     this.setState({
       options,
     });
-    this.props.onChange(selectedOption, options, this.state.savedQueries);
+    this.props.onChange(selectedOption, this.state.savedQueries); // pass up the full saved query object to the editor
   };
 
   render() {

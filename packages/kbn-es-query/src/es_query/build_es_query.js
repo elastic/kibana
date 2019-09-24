@@ -39,7 +39,8 @@ export function buildEsQuery(
     queryStringOptions: {},
     ignoreFilterIfFieldNotInIndex: false,
     dateFormatTZ: null,
-  }) {
+  },
+  allSavedQueries = []) {
   queries = Array.isArray(queries) ? queries : [queries];
   filters = Array.isArray(filters) ? filters : [filters];
 
@@ -47,7 +48,14 @@ export function buildEsQuery(
   const queriesByLanguage = groupBy(validQueries, 'language');
   const kueryQuery = buildQueryFromKuery(indexPattern, queriesByLanguage.kuery, config.allowLeadingWildcards, config.dateFormatTZ);
   const luceneQuery = buildQueryFromLucene(queriesByLanguage.lucene, config.queryStringOptions, config.dateFormatTZ);
-  const filterQuery = buildQueryFromFilters(filters, indexPattern, config.ignoreFilterIfFieldNotInIndex);
+  const filterQuery = buildQueryFromFilters(
+    filters,
+    indexPattern,
+    config.ignoreFilterIfFieldNotInIndex,
+    config.allowLeadingWildcards,
+    config.queryStringOptions,
+    config.dateFormatTZ,
+    allSavedQueries);
 
   return {
     bool: {

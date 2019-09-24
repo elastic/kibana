@@ -16,44 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { buildEsQuery } from '../es_query';
-import { get } from 'lodash';
-/* Creates a filter from a saved query.
-  The saved query's time filter is already parsed
-  params = { savedQueryWithTimefilterAsEsQuery, esQueryConfig }
-  esQueryConfig obtained from chrome:
-    ```
-    import chrome from 'ui/chrome';
-    const config = chrome.getUiSettingsClient();
-    const esQueryConfigs = getEsQueryConfig(uiSettings);
-    ```
-  indexPattern has to be passed in too, looks like it has to be part of the params
-*/
 
-
-export function buildSavedQueryFilter(params) {
+export function buildSavedQueryFilter(savedQueryId) {
   const filter = {
     meta: {
       type: 'savedQuery',
-      key: params.savedQuery.id,
-      value: params.savedQuery.attributes.title,
-      params,
+      key: savedQueryId,
     }
   };
-
-  const query = get(params, 'savedQuery.attributes.query');
-  const filters = get(params, 'savedQuery.attributes.filters', []);
-  const esQueryConfig = get(params, 'esQueryConfig', { allowLeadingWildcards: true, queryStringOptions: {}, dateFormatTZ: null });
-  const indexPattern = get(params, 'indexPattern');
-  const convertedQuery = buildEsQuery(indexPattern, query, filters, esQueryConfig);
-  filter.query = { ...convertedQuery };
-
-  // timefilter addition
-  // TODO: should we also handle the refresh interval part of the timefilter?
-  const convertedTimeFilter = get(params, 'savedQuery.attributes.timefilter', null); // should already be an EsQuery
-  if (convertedTimeFilter) {
-    const filtersWithTimefilter = [...convertedQuery.bool.filter, convertedTimeFilter];
-    filter.query.bool.filter = [...filtersWithTimefilter];
-  }
   return filter;
 }
