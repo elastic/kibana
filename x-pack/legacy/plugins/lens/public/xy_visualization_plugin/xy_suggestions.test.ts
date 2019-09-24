@@ -380,6 +380,45 @@ describe('xy_suggestions', () => {
     });
   });
 
+  test('overwrites column to dimension mappings if a date dimension is added', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
+    const currentState: XYState = {
+      isHorizontal: false,
+      legend: { isVisible: true, position: 'bottom' },
+      preferredSeriesType: 'bar',
+      layers: [
+        {
+          accessors: ['price', 'quantity'],
+          layerId: 'first',
+          seriesType: 'bar',
+          splitAccessor: 'dummyCol',
+          xAccessor: 'product',
+        },
+      ],
+    };
+    const [suggestion, ...rest] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), numCol('quantity'), strCol('product'), dateCol('timestamp')],
+        layerId: 'first',
+        changeType: 'extended',
+      },
+      state: currentState,
+    });
+
+    expect(rest).toHaveLength(0);
+    expect(suggestion.state).toEqual({
+      ...currentState,
+      layers: [
+        {
+          ...currentState.layers[0],
+          xAccessor: 'timestamp',
+          splitAccessor: 'product',
+        },
+      ],
+    });
+  });
+
   test('handles two numeric values', () => {
     (generateId as jest.Mock).mockReturnValueOnce('ddd');
     const [suggestion] = getSuggestions({
