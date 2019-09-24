@@ -277,6 +277,15 @@ export class TooltipControl extends React.Component {
     });
   };
 
+  _getLayerName = async (layerId) => {
+    const layer = this._findLayerById(layerId);
+    if (!layer) {
+      return null;
+    }
+
+    return layer.getDisplayName();
+  }
+
   _renderTooltipContent = () => {
     const publicProps = {
       addFilters: this.props.addFilters,
@@ -285,6 +294,7 @@ export class TooltipControl extends React.Component {
       isLocked: this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED,
       loadFeatureProperties: this._loadFeatureProperties,
       loadFeatureGeometry: this._loadFeatureGeometry,
+      getLayerName: this._getLayerName,
     };
 
     if (this.props.renderTooltipContent) {

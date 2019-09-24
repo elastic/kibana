@@ -46,7 +46,9 @@ const mapEmbeddable = await factory.createFromState(state, input, parent);
  * @param {function} closeTooltip
  * @param {Array} features - Vector features at tooltip location.
  * @param {boolean} isLocked
- * @param {function} loadFeatureProperties - Loads feature properties. Call with { layerId, featureId }. Returns Promise.
+ * @param {function} getLayerName - Get layer name. Call with (layerId). Returns Promise.
+ * @param {function} loadFeatureProperties - Loads feature properties. Call with ({ layerId, featureId }). Returns Promise.
+ * @param {function} loadFeatureGeometry - Loads feature geometry. Call with ({ layerId, featureId }). Returns geojson geometry object { type, coordinates }.
  *
  * @return {Component} A React Component.
  */
