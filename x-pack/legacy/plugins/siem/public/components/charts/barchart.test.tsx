@@ -209,7 +209,7 @@ describe.each([
   });
 });
 
-describe.each([
+const table: Array<[ChartConfigsData[] | undefined | null]> = [
   [],
   null,
   [
@@ -271,7 +271,9 @@ describe.each([
       },
     ],
   ],
-])('renders prompt', (data: ChartConfigsData[] | [] | null | undefined) => {
+] as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+describe.each(table)('renders prompt for charts with [%s]', data => {
   let shallowWrapper: ShallowWrapper;
   beforeAll(() => {
     shallowWrapper = shallow(<BarChartWithCustomPrompt height={100} width={120} data={data} />);
