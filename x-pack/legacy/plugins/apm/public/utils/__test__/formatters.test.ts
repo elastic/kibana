@@ -8,7 +8,8 @@ import {
   asPercent,
   asTime,
   getFixedByteFormatter,
-  asDynamicBytes
+  asDynamicBytes,
+  timeSerieTickFormatter
 } from '../formatters';
 
 describe('formatters', () => {
@@ -127,6 +128,284 @@ describe('formatters', () => {
         expect(formatInTB(tb)).toEqual('1.0 TB');
         expect(formatInTB(null)).toEqual('');
         expect(formatInTB(NaN)).toEqual('');
+      });
+    });
+  });
+  describe('tick formatter for time series', () => {
+    describe('normal time ranges', () => {
+      it('millisecond', () => {
+        const ticks = [
+          new Date('2019-09-02T08:41:42.225'),
+          new Date('2019-09-02T08:41:42.250'),
+          new Date('2019-09-02T08:41:42.275'),
+          new Date('2019-09-02T08:41:42.300'),
+          new Date('2019-09-02T08:41:42.325')
+        ];
+
+        const formatter = timeSerieTickFormatter(ticks);
+        expect(ticks.map(formatter)).toEqual([
+          '.225',
+          '.250',
+          '.275',
+          '.300',
+          '.325'
+        ]);
+      });
+      it('seconds', () => {
+        const ticks = [
+          new Date('2019-09-02T08:41:42.225'),
+          new Date('2019-09-02T08:41:43.250'),
+          new Date('2019-09-02T08:41:44.275'),
+          new Date('2019-09-02T08:41:45.300'),
+          new Date('2019-09-02T08:41:46.325')
+        ];
+        const expected = ["42''", "43''", "44''", "45''", "46''"];
+
+        const formatter = timeSerieTickFormatter(ticks);
+        expect(ticks.map(formatter)).toEqual(expected);
+      });
+      it('minutes', () => {
+        const ticks = [
+          new Date('2019-09-02T08:41:42.225'),
+          new Date('2019-09-02T08:42:43.250'),
+          new Date('2019-09-02T08:43:44.275'),
+          new Date('2019-09-02T08:44:45.300'),
+          new Date('2019-09-02T08:45:46.325')
+        ];
+        const expected = ["41'", "42'", "43'", "44'", "45'"];
+
+        const formatter = timeSerieTickFormatter(ticks);
+        expect(ticks.map(formatter)).toEqual(expected);
+      });
+      it('hours', () => {
+        const ticks = [
+          new Date('2019-09-02T08:41:42.225'),
+          new Date('2019-09-02T09:42:43.250'),
+          new Date('2019-09-02T10:43:44.275'),
+          new Date('2019-09-02T11:44:45.300'),
+          new Date('2019-09-02T12:45:46.325')
+        ];
+        const expected = ['08', '09', '10', '11', '12'];
+
+        const formatter = timeSerieTickFormatter(ticks);
+        expect(ticks.map(formatter)).toEqual(expected);
+      });
+      it('days', () => {
+        const ticks = [
+          new Date('2019-09-02T08:41:42.225'),
+          new Date('2019-09-03T09:42:43.250'),
+          new Date('2019-09-04T10:43:44.275'),
+          new Date('2019-09-05T11:44:45.300'),
+          new Date('2019-09-06T12:45:46.325')
+        ];
+        const expected = ['2nd', '3rd', '4th', '5th', '6th'];
+
+        const formatter = timeSerieTickFormatter(ticks);
+        expect(ticks.map(formatter)).toEqual(expected);
+      });
+      it('months', () => {
+        const ticks = [
+          new Date('2019-07-02T08:41:42.225'),
+          new Date('2019-08-03T09:42:43.250'),
+          new Date('2019-09-04T10:43:44.275'),
+          new Date('2019-10-05T11:44:45.300'),
+          new Date('2019-11-06T12:45:46.325')
+        ];
+        const expected = ['Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
+
+        const formatter = timeSerieTickFormatter(ticks);
+        expect(ticks.map(formatter)).toEqual(expected);
+      });
+      it('years', () => {
+        const ticks = [
+          new Date('2019-07-02T08:41:42.225'),
+          new Date('2020-08-03T09:42:43.250'),
+          new Date('2021-09-04T10:43:44.275'),
+          new Date('2022-10-05T11:44:45.300'),
+          new Date('2023-11-06T12:45:46.325')
+        ];
+        const expected = ['2019', '2020', '2021', '2022', '2023'];
+
+        const formatter = timeSerieTickFormatter(ticks);
+        expect(ticks.map(formatter)).toEqual(expected);
+      });
+    });
+    describe('only one change', () => {
+      it('years', () => {
+        const ticks = [
+          new Date('2019-07-02T08:41:42.225'),
+          new Date('2019-08-03T09:42:43.250'),
+          new Date('2019-09-04T10:43:44.275'),
+          new Date('2020-01-05T11:44:45.300'),
+          new Date('2020-02-06T12:45:46.325')
+        ];
+        const expected = ['Jul', 'Aug', 'Sep', 'Jan', 'Feb'];
+
+        const formatter = timeSerieTickFormatter(ticks);
+        expect(ticks.map(formatter)).toEqual(expected);
+      });
+      it('months', () => {
+        const ticks = [
+          new Date('2019-08-02T08:41:42.225'),
+          new Date('2019-08-03T09:42:43.250'),
+          new Date('2019-08-04T10:43:44.275'),
+          new Date('2019-09-05T11:44:45.300'),
+          new Date('2019-09-06T12:45:46.325')
+        ];
+        const expected = ['2nd', '3rd', '4th', '5th', '6th'];
+
+        const formatter = timeSerieTickFormatter(ticks);
+        expect(ticks.map(formatter)).toEqual(expected);
+      });
+      it('days', () => {
+        const ticks = [
+          new Date('2019-07-02T08:41:42.225'),
+          new Date('2019-07-02T09:42:43.250'),
+          new Date('2019-07-02T10:43:44.275'),
+          new Date('2019-07-03T11:44:45.300'),
+          new Date('2019-07-03T12:45:46.325')
+        ];
+        const expected = ['08', '09', '10', '11', '12'];
+
+        const formatter = timeSerieTickFormatter(ticks);
+        expect(ticks.map(formatter)).toEqual(expected);
+      });
+      it('hours', () => {
+        const ticks = [
+          new Date('2019-07-02T08:41:42.225'),
+          new Date('2019-07-02T08:42:43.250'),
+          new Date('2019-07-02T09:43:44.275'),
+          new Date('2019-07-02T09:44:45.300'),
+          new Date('2019-07-02T09:45:46.325')
+        ];
+        const expected = ["41'", "42'", "43'", "44'", "45'"];
+
+        const formatter = timeSerieTickFormatter(ticks);
+        expect(ticks.map(formatter)).toEqual(expected);
+      });
+      it('minutes', () => {
+        const ticks = [
+          new Date('2019-07-02T08:01:02.225'),
+          new Date('2019-07-02T08:01:43.250'),
+          new Date('2019-07-02T08:02:44.275'),
+          new Date('2019-07-02T08:02:45.300'),
+          new Date('2019-07-02T08:02:46.325')
+        ];
+        const expected = ["2''", "43''", "44''", "45''", "46''"];
+
+        const formatter = timeSerieTickFormatter(ticks);
+        expect(ticks.map(formatter)).toEqual(expected);
+      });
+      it('seconds', () => {
+        const ticks = [
+          new Date('2019-07-02T08:01:02.225'),
+          new Date('2019-07-02T08:01:02.250'),
+          new Date('2019-07-02T08:01:03.275'),
+          new Date('2019-07-02T08:01:03.300'),
+          new Date('2019-07-02T08:01:03.325')
+        ];
+        const expected = ['.225', '.250', '.275', '.300', '.325'];
+
+        const formatter = timeSerieTickFormatter(ticks);
+        expect(ticks.map(formatter)).toEqual(expected);
+      });
+    });
+    describe('duplicate label', () => {
+      it('years', () => {
+        const ticks = [
+          new Date('2019-07-02T08:41:42.225'),
+          new Date('2019-08-03T09:42:43.250'),
+          new Date('2021-09-04T10:43:44.275'),
+          new Date('2022-10-05T11:44:45.300'),
+          new Date('2023-11-06T12:45:46.325')
+        ];
+        const expected = [
+          '2019 Jul',
+          '2019 Aug',
+          '2021 Sep',
+          '2022 Oct',
+          '2023 Nov'
+        ];
+
+        const formatter = timeSerieTickFormatter(ticks);
+        expect(ticks.map(formatter)).toEqual(expected);
+      });
+      it('months', () => {
+        const ticks = [
+          new Date('2019-07-02T08:41:42.225'),
+          new Date('2019-08-03T09:42:43.250'),
+          new Date('2019-08-04T10:43:44.275'),
+          new Date('2019-10-05T11:44:45.300'),
+          new Date('2019-11-01T12:45:46.325')
+        ];
+        const expected = [
+          'Jul 2nd',
+          'Aug 3rd',
+          'Aug 4th',
+          'Oct 5th',
+          'Nov 1st'
+        ];
+
+        const formatter = timeSerieTickFormatter(ticks);
+        expect(ticks.map(formatter)).toEqual(expected);
+      });
+      it('days', () => {
+        const ticks = [
+          new Date('2019-07-02T08:41:42.225'),
+          new Date('2019-07-02T09:42:43.250'),
+          new Date('2019-07-04T10:43:44.275'),
+          new Date('2019-07-05T11:44:45.300'),
+          new Date('2019-07-06T12:45:46.325')
+        ];
+        const expected = ['2nd 08', '2nd 09', '4th 10', '5th 11', '6th 12'];
+
+        const formatter = timeSerieTickFormatter(ticks);
+        expect(ticks.map(formatter)).toEqual(expected);
+      });
+      it('hours', () => {
+        const ticks = [
+          new Date('2019-07-02T08:41:42.225'),
+          new Date('2019-07-02T08:42:43.250'),
+          new Date('2019-07-02T10:43:44.275'),
+          new Date('2019-07-02T11:44:45.300'),
+          new Date('2019-07-02T12:05:46.325')
+        ];
+        const expected = ['08:41', '08:42', '10:43', '11:44', '12:05'];
+
+        const formatter = timeSerieTickFormatter(ticks);
+        expect(ticks.map(formatter)).toEqual(expected);
+      });
+      it('minutes', () => {
+        const ticks = [
+          new Date('2019-07-02T08:01:02.225'),
+          new Date('2019-07-02T08:01:43.250'),
+          new Date('2019-07-02T08:43:44.275'),
+          new Date('2019-07-02T08:44:45.300'),
+          new Date('2019-07-02T08:45:46.325')
+        ];
+        const expected = [
+          "1' 2''",
+          "1' 43''",
+          "43' 44''",
+          "44' 45''",
+          "45' 46''"
+        ];
+
+        const formatter = timeSerieTickFormatter(ticks);
+        expect(ticks.map(formatter)).toEqual(expected);
+      });
+      it('seconds', () => {
+        const ticks = [
+          new Date('2019-07-02T08:01:02.225'),
+          new Date('2019-07-02T08:01:02.250'),
+          new Date('2019-07-02T08:01:44.275'),
+          new Date('2019-07-02T08:01:45.300'),
+          new Date('2019-07-02T08:01:46.325')
+        ];
+        const expected = ['2.225', '2.250', '44.275', '45.300', '46.325'];
+
+        const formatter = timeSerieTickFormatter(ticks);
+        expect(ticks.map(formatter)).toEqual(expected);
       });
     });
   });

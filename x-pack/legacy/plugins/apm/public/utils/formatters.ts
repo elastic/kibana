@@ -7,6 +7,7 @@
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
+import moment from 'moment';
 import { NOT_AVAILABLE_LABEL } from '../../common/i18n';
 
 const HOURS_CUT_OFF = 3600000000; // 1 hour (in microseconds)
@@ -245,3 +246,51 @@ export const getFixedByteFormatter = memoize((max: number) => {
 
   return bailIfNumberInvalid(formatter);
 });
+
+function twoWithSameFormat(ticks: Date[], format: string) {
+  return ticks
+    .map(t => moment(t).format(format))
+    .reduce((acc, val) => ({ same: acc.same || acc.prev === val, prev: val }), {
+      same: false
+    }).same;
+}
+
+function extracted(max: Date, min: Date, ticks: Date[]) {
+  const momentMax = moment(max);
+  const momentMin = moment(min);
+  const monthChanges = momentMax.diff(momentMin, 'months', true);
+  const yearChanges = momentMax.diff(momentMin, 'years', true);
+  const dayChanges = momentMax.diff(momentMin, 'days', true);
+  const hourChanges = momentMax.diff(momentMin, 'hours', true);
+  const minuteChanges = momentMax.diff(momentMin, 'minutes', true);
+  const secondChanges = momentMax.diff(momentMin, 'seconds', true);
+
+  const twoWithSameYear = twoWithSameFormat(ticks, 'YYYY');
+  const twoWithSameMonth = twoWithSameFormat(ticks, 'YYYY MMM');
+  const twoWithSameDay = twoWithSameFormat(ticks, 'MMM D');
+  const twoWithSameHour = twoWithSameFormat(ticks, 'D H');
+  const twoWithSameMinute = twoWithSameFormat(ticks, 'H m');
+  const twoWithSameSecond = twoWithSameFormat(ticks, 'm s');
+
+  if (secondChanges < 2) return '.SSS';
+  if (twoWithSameSecond) return 's.SSS';
+  if (minuteChanges < 2) return "s''";
+  if (twoWithSameMinute) return "m' s''";
+  if (hourChanges < 2) return "m'";
+  if (twoWithSameHour) return 'HH:mm';
+  if (dayChanges < 2) return 'HH';
+  if (twoWithSameDay) return 'Do HH';
+  if (monthChanges < 2) return 'Do';
+  if (twoWithSameMonth) return 'MMM Do';
+  if (yearChanges < 2) return 'MMM';
+  if (twoWithSameYear) return 'YYYY MMM';
+  return 'YYYY';
+}
+
+export const timeSerieTickFormatter = (ticks: Date[]) => {
+  const min = ticks[0];
+  const max = ticks[ticks.length - 1];
+
+  const format = extracted(max, min, ticks);
+  return (d: Date) => moment(d).format(format);
+};

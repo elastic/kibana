@@ -10,6 +10,7 @@ import React from 'react';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
+import { timeSerieTickFormatter } from '../../../../utils/formatters';
 
 interface IBucket {
   key: number;
@@ -69,6 +70,11 @@ export function ErrorDistribution({ distribution, title }: Props) {
     );
   }
 
+  const tickValues = buckets
+    ? [...buckets.map(d => d.x0), buckets[buckets.length - 1].x]
+    : [];
+  const formatter = timeSerieTickFormatter(tickValues.map(x => new Date(x)));
+
   return (
     <div>
       <EuiTitle size="xs">
@@ -79,9 +85,8 @@ export function ErrorDistribution({ distribution, title }: Props) {
         xType="time"
         buckets={buckets}
         bucketSize={distribution.bucketSize}
-        tickValues={
-          buckets && [...buckets.map(d => d.x0), buckets[buckets.length - 1].x]
-        }
+        tickValues={tickValues}
+        formatX={formatter}
         formatYShort={(value: number) =>
           i18n.translate('xpack.apm.errorGroupDetails.occurrencesShortLabel', {
             defaultMessage: '{occCount} occ.',
