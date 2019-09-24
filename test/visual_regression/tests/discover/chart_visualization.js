@@ -48,6 +48,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('query', function () {
+      this.tags(['skipFirefox']);
+
       it('should show bars in the correct time zone', async function () {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
