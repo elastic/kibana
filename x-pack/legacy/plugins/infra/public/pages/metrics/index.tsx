@@ -141,15 +141,12 @@ export const MetricDetail = withMetricPageProviders(
               />
               <WithMetricsTimeUrlState />
               <DocumentTitle
-                title={i18n.translate(
-                  'xpack.infra.metricDetailPage.documentTitle',
-                  {
-                    defaultMessage: 'Infrastructure | Metrics | {name}',
-                  },
-                  {
+                title={i18n.translate('xpack.infra.metricDetailPage.documentTitle', {
+                  defaultMessage: 'Infrastructure | Metrics | {name}',
+                  values: {
                     name,
-                  }
-                )}
+                  },
+                })}
               />
               <DetailPageContent data-test-subj="infraMetricsPage">
                 <WithMetrics
