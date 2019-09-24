@@ -20,11 +20,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { serializeJsonWatch } from '../../../../../common/lib/serialization';
 import { ErrableFormRow, SectionError } from '../../../../components';
 import { putWatchApiUrl } from '../../../../lib/documentation_links';
 import { onWatchSave } from '../../watch_edit_actions';
 import { WatchContext } from '../../watch_context';
 import { goToWatchList } from '../../../../lib/navigation';
+import { RequestFlyout } from '../request_flyout';
 
 export const JsonWatchEditForm = () => {
   const { watch, setWatchProperty } = useContext(WatchContext);
@@ -33,6 +35,7 @@ export const JsonWatchEditForm = () => {
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
 
   const [serverError, setServerError] = useState<{
     data: { nessage: string; error: string };
@@ -176,55 +179,80 @@ export const JsonWatchEditForm = () => {
 
         <EuiSpacer />
 
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="saveWatchButton"
-              fill
-              color="secondary"
-              type="submit"
-              iconType="check"
-              isLoading={isSaving}
-              isDisabled={hasErrors}
-              onClick={async () => {
-                setIsSaving(true);
-                const savedWatch = await onWatchSave(watch);
-                if (savedWatch && savedWatch.error) {
-                  const { data } = savedWatch.error;
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexGroup gutterSize="m" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="saveWatchButton"
+                fill
+                color="secondary"
+                type="submit"
+                iconType="check"
+                isLoading={isSaving}
+                isDisabled={hasErrors}
+                onClick={async () => {
+                  setIsSaving(true);
+                  const savedWatch = await onWatchSave(watch);
+                  if (savedWatch && savedWatch.error) {
+                    const { data } = savedWatch.error;
+                    setIsSaving(false);
 
-                  setIsSaving(false);
+                    if (data && data.error === 'validation') {
+                      return setValidationError(data.message);
+                    }
 
-                  if (data && data.error === 'validation') {
-                    return setValidationError(data.message);
+                    return setServerError(savedWatch.error);
                   }
+                }}
+              >
+                {watch.isNew ? (
+                  <FormattedMessage
+                    id="xpack.watcher.sections.watchEdit.json.createButtonLabel"
+                    defaultMessage="Create watch"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.watcher.sections.watchEdit.json.saveButtonLabel"
+                    defaultMessage="Save watch"
+                  />
+                )}
+              </EuiButton>
+            </EuiFlexItem>
 
-                  return setServerError(savedWatch.error);
-                }
-              }}
-            >
-              {watch.isNew ? (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty data-test-subj="btnCancelWatch" onClick={() => goToWatchList()}>
+                {i18n.translate('xpack.watcher.sections.watchEdit.json.cancelButtonLabel', {
+                  defaultMessage: 'Cancel',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={() => setIsRequestVisible(!isRequestVisible)}>
+              {isRequestVisible ? (
                 <FormattedMessage
-                  id="xpack.watcher.sections.watchEdit.json.createButtonLabel"
-                  defaultMessage="Create watch"
+                  id="xpack.watcher.sections.watchEdit.json.hideRequestButtonLabel"
+                  defaultMessage="Hide request"
                 />
               ) : (
                 <FormattedMessage
-                  id="xpack.watcher.sections.watchEdit.json.saveButtonLabel"
-                  defaultMessage="Save watch"
+                  id="xpack.watcher.sections.watchEdit.json.showRequestButtonLabel"
+                  defaultMessage="Show request"
                 />
               )}
-            </EuiButton>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty data-test-subj="btnCancelWatch" onClick={() => goToWatchList()}>
-              {i18n.translate('xpack.watcher.sections.watchEdit.json.cancelButtonLabel', {
-                defaultMessage: 'Cancel',
-              })}
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiForm>
+
+      {isRequestVisible ? (
+        <RequestFlyout
+          id={watch.id}
+          payload={serializeJsonWatch(watch.name, watch.watch)}
+          close={() => setIsRequestVisible(false)}
+        />
+      ) : null}
     </Fragment>
   );
 };
