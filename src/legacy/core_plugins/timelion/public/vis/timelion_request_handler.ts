@@ -55,7 +55,7 @@ const { http, uiSettings } = npSetup.core;
 export function getTimelionRequestHandler() {
   const timezone = timezoneProvider(uiSettings)();
 
-  return ({
+  return async function({
     timeRange,
     filters,
     query,
@@ -66,41 +66,35 @@ export function getTimelionRequestHandler() {
     query: Query;
     visParams: VisParams;
     forceFetch?: boolean;
-  }) => {
-    return new Promise(async (resolve, reject) => {
-      const expression = visParams.expression;
+  }): Promise<TimelionSuccessResponse | void> {
+    const expression = visParams.expression;
 
-      if (!expression) return;
+    if (!expression) return;
 
-      const esQueryConfigs = getEsQueryConfig(uiSettings);
+    const esQueryConfigs = getEsQueryConfig(uiSettings);
 
-      try {
-        const data = await http.post('../api/timelion/run', {
-          body: JSON.stringify({
-            sheet: [expression],
-            extended: {
-              es: {
-                filter: buildEsQuery(undefined, query, filters, esQueryConfigs),
-              },
+    try {
+      return await http.post('../api/timelion/run', {
+        body: JSON.stringify({
+          sheet: [expression],
+          extended: {
+            es: {
+              filter: buildEsQuery(undefined, query, filters, esQueryConfigs),
             },
-            time: { ...timeRange, interval: visParams.interval, timezone },
-          }),
-        });
+          },
+          time: { ...timeRange, interval: visParams.interval, timezone },
+        }),
+      });
+    } catch (e) {
+      const err = new Error(e.data.message);
 
-        resolve(data);
-      } catch (e) {
-        const err = new Error(e.data.message);
+      err.stack = e.data.stack;
 
-        err.stack = e.data.stack;
-
-        toastNotifications.addError(err, {
-          title: i18n.translate('timelion.requestHandlerErrorTitle', {
-            defaultMessage: 'Timelion request error',
-          }),
-        });
-
-        reject(err);
-      }
-    });
+      toastNotifications.addError(err, {
+        title: i18n.translate('timelion.requestHandlerErrorTitle', {
+          defaultMessage: 'Timelion request error',
+        }),
+      });
+    }
   };
 }
