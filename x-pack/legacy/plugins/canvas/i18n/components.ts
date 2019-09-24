@@ -18,7 +18,7 @@ export const ComponentStrings = {
       }),
     getLoadErrorTitle: () =>
       i18n.translate('xpack.canvas.app.loadErrorTitle', {
-        defaultMessage: 'Canvas failed to load :(',
+        defaultMessage: 'Canvas failed to load',
       }),
     getLoadingMessage: () =>
       i18n.translate('xpack.canvas.app.loadingMessage', {
@@ -38,7 +38,7 @@ export const ComponentStrings = {
   ArgAddPopover: {
     getAddAriaLabel: () =>
       i18n.translate('xpack.canvas.argAddPopover.addAriaLabel', {
-        defaultMessage: 'Add Argument',
+        defaultMessage: 'Add argument',
       }),
   },
   Asset: {
