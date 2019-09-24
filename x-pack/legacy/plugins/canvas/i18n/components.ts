@@ -169,7 +169,7 @@ export const ComponentStrings = {
       }),
     getModalTitle: () =>
       i18n.translate('xpack.canvas.datasourceDatasourcePreview.modalTitle', {
-        defaultMessage: 'Datasource Preview',
+        defaultMessage: 'Datasource preview',
       }),
   },
   HelpMenu: {

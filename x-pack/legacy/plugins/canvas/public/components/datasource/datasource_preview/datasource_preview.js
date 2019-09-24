@@ -22,6 +22,7 @@ import { Error } from '../../error';
 
 import { ComponentStrings } from '../../../../i18n';
 const { DatasourceDatasourcePreview: strings } = ComponentStrings;
+const { DatasourceDatasourceComponent: datasourceStrings } = ComponentStrings;
 
 export const DatasourcePreview = ({ done, datatable }) => (
   <EuiOverlayMask>
@@ -36,14 +37,7 @@ export const DatasourcePreview = ({ done, datatable }) => (
               id="xpack.canvas.datasourceDatasourcePreview.modalDescription"
               defaultMessage="Click {saveLabel} in the sidebar to use this data."
               values={{
-                saveLabel: (
-                  <strong>
-                    <FormattedMessage
-                      id="xpack.canvas.datasourceDatasourcePreview.modalSaveDescription"
-                      defaultMessage="Save"
-                    />
-                  </strong>
-                ),
+                saveLabel: <strong>{datasourceStrings.getSaveButtonLabel()}</strong>,
               }}
             />
           </p>
