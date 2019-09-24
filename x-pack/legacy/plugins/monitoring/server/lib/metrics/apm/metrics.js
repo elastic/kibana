@@ -360,7 +360,7 @@ export const metrics = {
       defaultMessage: 'Forbidden'
     }),
     description: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.forbiddenDescription', {
-      defaultMessage: 'Forbidden HTTP Requests rejected - CORS violation, disabled enpoint'
+      defaultMessage: 'Forbidden HTTP Requests'
     })
   }),
   apm_server_responses_errors_concurrency: new ApmEventsRateClusterMetric({
