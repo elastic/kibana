@@ -11,6 +11,7 @@ export enum LanguageServerStatus {
   INSTALLING,
   READY, // installed but not running
   RUNNING,
+  LAUNCH_FAILED,
 }
 
 export interface LanguageServer {

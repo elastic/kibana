@@ -69,9 +69,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('infraLogsPage');
-          await testSubjects.existOrFail('logsViewSetupInstructionsButton');
-          await testSubjects.existOrFail('configureSourceButton');
+          await testSubjects.existOrFail('~infraLogsPage');
+          await testSubjects.existOrFail('~logsViewSetupInstructionsButton');
+          await testSubjects.existOrFail('~configureSourceButton');
         });
 
         it(`doesn't show read-only badge`, async () => {
@@ -134,9 +134,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('infraLogsPage');
-          await testSubjects.existOrFail('logsViewSetupInstructionsButton');
-          await testSubjects.missingOrFail('configureSourceButton');
+          await testSubjects.existOrFail('~infraLogsPage');
+          await testSubjects.existOrFail('~logsViewSetupInstructionsButton');
+          await testSubjects.missingOrFail('~configureSourceButton');
         });
 
         it(`shows read-only badge`, async () => {
@@ -198,7 +198,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('infraNotFoundPage');
+        await testSubjects.existOrFail('~infraNotFoundPage');
       });
     });
   });

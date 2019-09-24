@@ -4,14 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertType } from '../types';
 import { createExecutionHandler } from './create_execution_handler';
 
+const alertType: AlertType = {
+  id: 'test',
+  name: 'Test',
+  actionGroups: ['default', 'other-group'],
+  executor: jest.fn(),
+};
+
 const createExecutionHandlerParams = {
+  log: jest.fn(),
   executeAction: jest.fn(),
   spaceId: 'default',
+  alertId: '1',
   apiKey: 'MTIzOmFiYw==',
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
   getBasePath: jest.fn().mockReturnValue(undefined),
+  alertType,
   actions: [
     {
       id: '1',
@@ -29,66 +40,101 @@ beforeEach(() => jest.resetAllMocks());
 
 test('calls executeAction per selected action', async () => {
   const executionHandler = createExecutionHandler(createExecutionHandlerParams);
-  await executionHandler('default', {}, {});
+  await executionHandler({
+    actionGroup: 'default',
+    state: {},
+    context: {},
+    alertInstanceId: '2',
+  });
   expect(createExecutionHandlerParams.executeAction).toHaveBeenCalledTimes(1);
   expect(createExecutionHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      Object {
-        "apiKey": "MTIzOmFiYw==",
-        "id": "1",
-        "params": Object {
-          "contextVal": "My  goes here",
-          "foo": true,
-          "stateVal": "My  goes here",
-        },
-        "spaceId": "default",
-      },
-    ]
-  `);
+        Array [
+          Object {
+            "apiKey": "MTIzOmFiYw==",
+            "id": "1",
+            "params": Object {
+              "contextVal": "My  goes here",
+              "foo": true,
+              "stateVal": "My  goes here",
+            },
+            "spaceId": "default",
+          },
+        ]
+    `);
 });
 
 test('limits executeAction per action group', async () => {
   const executionHandler = createExecutionHandler(createExecutionHandlerParams);
-  await executionHandler('other-group', {}, {});
+  await executionHandler({
+    actionGroup: 'other-group',
+    state: {},
+    context: {},
+    alertInstanceId: '2',
+  });
   expect(createExecutionHandlerParams.executeAction).toMatchInlineSnapshot(`[MockFunction]`);
 });
 
 test('context attribute gets parameterized', async () => {
   const executionHandler = createExecutionHandler(createExecutionHandlerParams);
-  await executionHandler('default', { value: 'context-val' }, {});
+  await executionHandler({
+    actionGroup: 'default',
+    context: { value: 'context-val' },
+    state: {},
+    alertInstanceId: '2',
+  });
   expect(createExecutionHandlerParams.executeAction).toHaveBeenCalledTimes(1);
   expect(createExecutionHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      Object {
-        "apiKey": "MTIzOmFiYw==",
-        "id": "1",
-        "params": Object {
-          "contextVal": "My context-val goes here",
-          "foo": true,
-          "stateVal": "My  goes here",
-        },
-        "spaceId": "default",
-      },
-    ]
-  `);
+        Array [
+          Object {
+            "apiKey": "MTIzOmFiYw==",
+            "id": "1",
+            "params": Object {
+              "contextVal": "My context-val goes here",
+              "foo": true,
+              "stateVal": "My  goes here",
+            },
+            "spaceId": "default",
+          },
+        ]
+    `);
 });
 
 test('state attribute gets parameterized', async () => {
   const executionHandler = createExecutionHandler(createExecutionHandlerParams);
-  await executionHandler('default', {}, { value: 'state-val' });
+  await executionHandler({
+    actionGroup: 'default',
+    context: {},
+    state: { value: 'state-val' },
+    alertInstanceId: '2',
+  });
   expect(createExecutionHandlerParams.executeAction).toHaveBeenCalledTimes(1);
   expect(createExecutionHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      Object {
-        "apiKey": "MTIzOmFiYw==",
-        "id": "1",
-        "params": Object {
-          "contextVal": "My  goes here",
-          "foo": true,
-          "stateVal": "My state-val goes here",
-        },
-        "spaceId": "default",
-      },
-    ]
-  `);
+        Array [
+          Object {
+            "apiKey": "MTIzOmFiYw==",
+            "id": "1",
+            "params": Object {
+              "contextVal": "My  goes here",
+              "foo": true,
+              "stateVal": "My state-val goes here",
+            },
+            "spaceId": "default",
+          },
+        ]
+    `);
+});
+
+test(`logs an error when action group isn't part of actionGroups available for the alertType`, async () => {
+  const executionHandler = createExecutionHandler(createExecutionHandlerParams);
+  const result = await executionHandler({
+    actionGroup: 'invalid-group',
+    context: {},
+    state: {},
+    alertInstanceId: '2',
+  });
+  expect(result).toBeUndefined();
+  expect(createExecutionHandlerParams.log).toHaveBeenCalledWith(
+    ['error', 'alerting'],
+    'Invalid action group "invalid-group" for alert "test".'
+  );
 });
