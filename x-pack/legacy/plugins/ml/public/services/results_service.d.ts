@@ -20,7 +20,13 @@ declare interface MlResultsService {
   getScheduledEventsByBucket: () => Promise<any>;
   getTopInfluencers: () => Promise<any>;
   getTopInfluencerValues: () => Promise<any>;
-  getOverallBucketScores: () => Promise<any>;
+  getOverallBucketScores: (
+    jobIds: any,
+    topN: any,
+    earliestMs: any,
+    latestMs: any,
+    interval?: any
+  ) => Promise<any>;
   getInfluencerValueMaxScoreByTime: () => Promise<any>;
   getRecordInfluencers: () => Promise<any>;
   getRecordsForInfluencer: () => Promise<any>;
