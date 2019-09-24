@@ -1,3 +1,10 @@
 {
-  "monitorStates": null
+  "monitorStates": {
+    "prevPagePagination": null,
+    "nextPagePagination": null,
+    "totalSummaryCount": {
+      "count": 2000
+    },
+    "summaries": []
+  }
 }
