@@ -11,8 +11,9 @@ import {
   fieldToName,
 } from '../intl_strings';
 import { InfraSnapshotMetricType } from '../../graphql/types';
+import { InventoryToolbar } from '../types';
 
-export const toolbar = [
+export const toolbar: InventoryToolbar = [
   {
     type: 'metric',
     options: [

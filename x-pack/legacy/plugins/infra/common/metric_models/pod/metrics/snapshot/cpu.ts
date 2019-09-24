@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const cpu = {
+import { SnapshotModel } from '../../../types';
+
+export const cpu: SnapshotModel = {
   cpu: {
     avg: {
       field: 'kubernetes.pod.cpu.usage.node.pct',

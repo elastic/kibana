@@ -5,7 +5,6 @@
  */
 
 import * as rt from 'io-ts';
-import { metrics } from './metrics';
 import { EuiTheme } from '../../../../common/eui_styled_components';
 
 export const ItemTypeRT = rt.keyof({
@@ -33,7 +32,7 @@ export const InventoryFormatterTypeRT = rt.keyof({
 });
 export type InventoryItemType = rt.TypeOf<typeof ItemTypeRT>;
 
-export const InventoryMetricRT = rt.keyof(metrics.tsvb);
+export const InventoryMetricRT = rt.string;
 export type InventoryMetric = rt.TypeOf<typeof InventoryMetricRT>;
 
 export const SeriesOverridesRT = rt.intersection([
@@ -192,3 +191,106 @@ export type TSVBMetricModelCreator = (
   indexPattern: string | string[],
   interval: string
 ) => TSVBMetricModel;
+
+export const SnapshotModelMetricAggRT = rt.record(
+  rt.string,
+  rt.union([
+    rt.undefined,
+    rt.type({
+      field: rt.string,
+    }),
+  ])
+);
+
+export const SnapshotModelBucketScriptRT = rt.type({
+  bucket_script: rt.intersection([
+    rt.type({
+      buckets_path: rt.record(rt.string, rt.union([rt.undefined, rt.string])),
+      script: rt.type({
+        source: rt.string,
+        lang: rt.keyof({ painless: null, expression: null }),
+      }),
+    }),
+    rt.partial({ gap_policy: rt.keyof({ skip: null, insert_zeros: null }) }),
+  ]),
+});
+
+export const SnapshotModelCumulativeSumRT = rt.type({
+  cumulative_sum: rt.type({
+    buckets_path: rt.string,
+  }),
+});
+
+export const SnapshotModelDerivativeRT = rt.type({
+  derivative: rt.type({
+    buckets_path: rt.string,
+    gap_policy: rt.keyof({ skip: null, insert_zeros: null }),
+    unit: rt.string,
+  }),
+});
+
+export const SnapshotModelSumBucketRT = rt.type({
+  sum_bucket: rt.type({
+    buckets_path: rt.string,
+  }),
+});
+
+interface SnapshotTermsWithAggregation {
+  terms: { field: string };
+  aggregations: SnapshotModel;
+}
+
+export const SnapshotTermsWithAggregationRT: rt.Type<SnapshotTermsWithAggregation> = rt.recursion(
+  'SnapshotModelRT',
+  () =>
+    rt.type({
+      terms: rt.type({ field: rt.string }),
+      aggregations: SnapshotModelRT,
+    })
+);
+
+export const SnapshotModelAggregationRT = rt.union([
+  SnapshotModelMetricAggRT,
+  SnapshotModelBucketScriptRT,
+  SnapshotModelCumulativeSumRT,
+  SnapshotModelDerivativeRT,
+  SnapshotModelSumBucketRT,
+  SnapshotTermsWithAggregationRT,
+]);
+
+export const SnapshotModelRT = rt.record(
+  rt.string,
+  rt.union([rt.undefined, SnapshotModelAggregationRT])
+);
+export type SnapshotModel = rt.TypeOf<typeof SnapshotModelRT>;
+
+export const InventoryToolbarMericRT = rt.type({
+  type: rt.literal('metric'),
+  options: rt.array(rt.type({ text: rt.string, value: rt.string })),
+});
+
+export const InventoryToolbarGroupByRT = rt.type({
+  type: rt.literal('groupBy'),
+  options: rt.array(rt.type({ text: rt.string, value: rt.string })),
+});
+
+export const InventoryToolbarItemRT = rt.union([
+  InventoryToolbarMericRT,
+  InventoryToolbarGroupByRT,
+]);
+
+export const InventoryToolbarRT = rt.array(InventoryToolbarItemRT);
+export type InventoryToolbar = rt.TypeOf<typeof InventoryToolbarRT>;
+
+export interface InventoryMetrics {
+  tsvb: { [name: string]: TSVBMetricModelCreator };
+  snapshot?: { [name: string]: SnapshotModel };
+}
+
+export interface InventoryModel {
+  id: string;
+  requiredModules: string[];
+  layout: InventoryDetailLayoutCreator;
+  toolbar: InventoryToolbar;
+  metrics: InventoryMetrics;
+}

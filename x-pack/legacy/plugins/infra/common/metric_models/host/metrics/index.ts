@@ -24,8 +24,9 @@ import { hostK8sCpuCap } from './tsvb/host_k8s_cpu_cap';
 import { hostK8sPodCap } from './tsvb/host_k8s_pod_cap';
 import { hostK8sDiskCap } from './tsvb/host_k8s_disk_cap';
 import { hostK8sMemoryCap } from './tsvb/host_k8s_memory_cap';
+import { InventoryMetrics } from '../../types';
 
-export const metrics = {
+export const metrics: InventoryMetrics = {
   tsvb: {
     hostSystemOverview,
     hostCpuUsage,

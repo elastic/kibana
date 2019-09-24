@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const networkTraffic = (id: string, metricField: string, interfaceField: string) => ({
+import { SnapshotModel } from '../../../types';
+
+export const networkTraffic = (
+  id: string,
+  metricField: string,
+  interfaceField: string
+): SnapshotModel => ({
   [`${id}_interfaces`]: {
     terms: { field: interfaceField },
     aggregations: {

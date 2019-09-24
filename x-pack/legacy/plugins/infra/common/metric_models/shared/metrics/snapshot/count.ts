@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const count = {
+import { SnapshotModel } from '../../../types';
+
+export const count: SnapshotModel = {
   count: {
     bucket_script: {
       buckets_path: { count: '_count' },

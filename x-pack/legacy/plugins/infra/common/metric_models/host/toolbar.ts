@@ -13,8 +13,9 @@ import {
   fieldToName,
 } from '../intl_strings';
 import { InfraSnapshotMetricType } from '../../graphql/types';
+import { InventoryToolbar } from '../types';
 
-export const toolbar = [
+export const toolbar: InventoryToolbar = [
   {
     type: 'metric',
     options: [
@@ -52,6 +53,6 @@ export const toolbar = [
       'cloud.project.id',
       'cloud.provider',
       'service.type',
-    ].map(fieldToName),
+    ].map(field => ({ text: fieldToName(field), value: field })),
   },
 ];

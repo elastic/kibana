@@ -15,8 +15,9 @@ import { awsDiskioOps } from './tsvb/aws_diskio_ops';
 import { awsNetworkBytes } from './tsvb/aws_network_bytes';
 import { awsNetworkPackets } from './tsvb/aws_network_packets';
 import { awsOverview } from './tsvb/aws_overview';
+import { InventoryMetrics } from '../../types';
 
-export const metrics = {
+export const metrics: InventoryMetrics = {
   tsvb: {
     nginxActiveConnections,
     nginxHits,

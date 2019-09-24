@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const load = { load: { avg: { field: 'system.load.5' } } };
+import { SnapshotModel } from '../../../types';
+
+export const load: SnapshotModel = { load: { avg: { field: 'system.load.5' } } };

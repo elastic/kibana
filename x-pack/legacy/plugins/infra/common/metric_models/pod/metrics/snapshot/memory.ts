@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const memory = { memory: { avg: { field: 'kubernetes.pod.memory.usage.node.pct' } } };
+import { SnapshotModel } from '../../../types';
+
+export const memory: SnapshotModel = {
+  memory: { avg: { field: 'kubernetes.pod.memory.usage.node.pct' } },
+};

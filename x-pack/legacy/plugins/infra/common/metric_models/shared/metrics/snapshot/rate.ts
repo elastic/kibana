@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const rate = (id: string, field: string) => {
+import { SnapshotModel } from '../../../types';
+
+export const rate = (id: string, field: string): SnapshotModel => {
   return {
     [`${id}_max`]: { max: { field } },
     [`${id}_deriv`]: {
