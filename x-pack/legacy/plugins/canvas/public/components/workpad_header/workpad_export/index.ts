@@ -66,7 +66,8 @@ export const WorkpadExport = compose<ComponentProps, {}>(
       enabled,
       getExportUrl: type => {
         if (type === 'pdf') {
-          return getAbsoluteUrl(getPdfUrl(workpad, { pageCount }));
+          const { createPdfUri } = getPdfUrl(workpad, { pageCount });
+          return getAbsoluteUrl(createPdfUri);
         }
 
         throw new Error(strings.getUnknownExportErrorMessage(type));
