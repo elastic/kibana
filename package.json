@@ -83,7 +83,9 @@
     "**/@types/angular": "^1.6.56",
     "**/typescript": "3.5.3",
     "**/cypress/lodash": "4.17.13",
-    "**/isomorphic-git/**/base64-js": "^1.2.1"
+    "**/isomorphic-git/**/base64-js": "^1.2.1",
+    "**/babel-plugin-inline-react-svg/svgo/js-yaml": "^3.13.1",
+    "**/load-grunt-config/js-yaml": "^3.13.1"
   },
   "workspaces": {
     "packages": [

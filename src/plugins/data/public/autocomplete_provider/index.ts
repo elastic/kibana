@@ -16,22 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { AutocompleteProvider } from './types';
 
-import _ from 'lodash';
+export class AutocompleteProviderRegister {
+  private readonly registeredProviders: Map<string, AutocompleteProvider> = new Map();
 
-export async function extractTimeFilter(indexPatterns, filters) {
-  // Assume all the index patterns are the same since they will be added
-  // from the same visualization.
-  const id = _.get(filters, '[0].meta.index');
-  if (id == null) return;
+  /** @public **/
+  public addProvider(language: string, provider: AutocompleteProvider): void {
+    if (language && provider) {
+      this.registeredProviders.set(language, provider);
+    }
+  }
 
-  const indexPattern = await indexPatterns.get(id);
+  /** @public **/
+  public getProvider(language: string): AutocompleteProvider | undefined {
+    return this.registeredProviders.get(language);
+  }
 
-  const filter = _.find(filters, function (obj) {
-    const key = _.keys(obj.range)[0];
-    return key === indexPattern.timeFieldName;
-  });
-  if (filter && filter.range) {
-    return filter;
+  /** @internal **/
+  public clearProviders(): void {
+    this.registeredProviders.clear();
   }
 }

@@ -17,12 +17,15 @@
  * under the License.
  */
 
-import { chromeServiceMock } from '../../../../../../../../core/public/mocks';
+import moment from 'moment';
+import _ from 'lodash';
+import { TimefilterContract } from '../../../timefilter';
 
-jest.doMock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      chrome: chromeServiceMock.createStartContract(),
-    },
-  },
-}));
+export function changeTimeFilter(timefilter: TimefilterContract, filter: any) {
+  const key = _.keys(filter.range)[0];
+  const values = filter.range[key];
+  timefilter.setTime({
+    from: moment(values.gt || values.gte),
+    to: moment(values.lt || values.lte),
+  });
+}
