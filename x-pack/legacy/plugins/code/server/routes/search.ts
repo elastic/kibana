@@ -10,7 +10,6 @@ import { RequestFacade, RequestQueryFacade } from '../../';
 import {
   CommitSearchRequest,
   DocumentSearchRequest,
-  IntegrationsSearchResult,
   RepositorySearchRequest,
   ResolveSnippetsIntegrationRequest,
   SymbolSearchRequest,
