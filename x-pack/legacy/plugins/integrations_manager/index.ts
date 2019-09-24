@@ -72,8 +72,8 @@ const pluginOptions: LegacyPluginOptions = {
   },
   deprecations: undefined,
   preInit: undefined,
-  // XXXSKH: any? what is this really? neither Server from hapi.js nor KbnServer seems to have a .config() on it so
-  // I left it as any for now, but ugh.
+  // yes, any. See https://github.com/elastic/kibana/blob/master/x-pack/legacy/plugins/infra/server/lib/adapters/configuration/kibana_configuration_adapter.ts#L49-L58
+  // for a way around it, but this is Legacy Platform and I'm not sure these hoops are worth jumping through.
   init(server: any) {
     server.plugins.xpack_main.registerFeature(feature);
 
