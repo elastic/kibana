@@ -111,6 +111,13 @@ The following style guide rules apply for working with TypeScript/JavaScript fil
 Whenever possible, write code in TypeScript instead of JavaScript, especially if it's new code. 
 Check out [TYPESCRIPT.md](TYPESCRIPT.md) for help with this process.
 
+### Prefer modern JavaScript/TypeScript syntax
+
+You should prefer modern language features in a lot of cases, e.g.:
+
+* Prefer `class` over `prototype` inheritance
+* Prefer template strings over string concatenation
+
 ### Avoid mutability and state
 
 Wherever possible, do not rely on mutable state. This means you should not
@@ -131,14 +138,37 @@ function addBar(foos, foo) {
 }
 ```
 
-### Use template strings to interpolate variables into strings
+### Return/throw early from functions
+
+To avoid deep nesting of if-statements, always return a function's value as early
+as possible. And where possible, do any assertions first:
 
 ```js
 // good
-const foo = `Hello, ${name}`;
+function doStuff(val) {
+  if (val > 100) {
+    throw new Error('Too big');
+  }
+
+  if (val < 0) {
+    return false;
+  }
+
+  // ... stuff
+}
 
 // bad
-const foo = 'Hello, ' + name;
+function doStuff(val) {
+  if (val >= 0) {
+    if (val < 100) {
+      // ... stuff
+    } else {
+      throw new Error('Too big');
+    }
+  } else {
+    return false;
+  }
+}
 ```
 
 ### Use object destructuring
@@ -183,9 +213,8 @@ const second = arr[1];
 
 ### Declare one variable per line, wherever it makes the most sense
 
-This makes it easier to re-order the lines. However, ignore
-[Crockford][crockfordconvention] when it comes to declaring variables deeper
-inside a function, just put the declarations wherever they make sense.
+This makes it easier to re-order the lines. However, declari variables
+wherever it makes sense (not necessairly on the top of a function).
 
 ```js
 // good
@@ -196,8 +225,6 @@ const values = [23, 42];
 const keys = ['foo', 'bar'],
       values = [23, 42];
 ```
-
-[crockfordconvention]: http://javascript.crockford.com/code.html
 
 ### Prefix private class methods with an underscore `JS only`
 
@@ -347,28 +374,6 @@ object in parentheses rather than using an explicit return:
 }
 ```
 
-### Object / Array creation
-
-Use trailing commas and put *short* declarations on a single line. Only quote
-keys when your interpreter complains:
-
-```js
-// good
-const a = ['hello', 'world'];
-const b = {
-  good: 'code',
-  'is generally': 'pretty'
-};
-
-// bad
-const a = [
-  'hello', 'world'
-];
-const b = {'good': 'code'
-        , is generally: 'pretty'
-        };
-```
-
 ### Object / Array iterations, transformations and operations
 
 Use native methods to iterate and transform arrays and objects where possible.
@@ -395,7 +400,7 @@ for (let i = 0; i < users.length; i++) {
 }
 ```
 
-### Use the spread operator (...) for copying arrays
+### Use the spread operator (`...`) for copying arrays
 
 This helps with expressiveness and readability.
 
@@ -540,39 +545,6 @@ function foo(options = {}, bar) {
 }
 ```
 
-### Return/throw early from functions
-
-To avoid deep nesting of if-statements, always return a function's value as early
-as possible. And where possible, do any assertions first:
-
-```js
-// good
-function doStuff(val) {
-  if (val > 100) {
-    throw new Error('Too big');
-  }
-
-  if (val < 0) {
-    return false;
-  }
-
-  // ... stuff
-}
-
-// bad
-function doStuff(val) {
-  if (val >= 0) {
-    if (val < 100) {
-      // ... stuff
-    } else {
-      throw new Error('Too big');
-    }
-  } else {
-    return false;
-  }
-}
-```
-
 ### Use thunks to create closures, where possible
 
 For trivial examples (like the one that follows), thunks will seem like
@@ -652,38 +624,6 @@ if (isSessionValid) {
 }
 ```
 
-### Classes/Constructors and Inheritance
-
-If you must use a constructor, then use the native `class` syntax. *Never* use
-third party "class" utilities, and never mutate prototypes.
-
-```js
-// best (no local state at all)
-function addUser(users, user) {
-  return [...users, user];
-}
-const users = addUser([], { name: 'foo' });
-
-// good
-class Users {
-  add(user) {
-    ...
-  }
-}
-const users = new Users();
-users.add({ name: 'foo' });
-
-// bad
-function Users() {
-  ...
-}
-Users.prototype.add = function () {
-  ...
-};
-const users = new Users();
-users.add({ name: 'foo' });
-```
-
 ### Do not alias `this`
 
 Try not to rely on `this` at all, but if you must, then use arrow functions
@@ -709,7 +649,7 @@ class Users {
 }
 ```
 
-## Getters and Setters
+### Getters and Setters
 
 Feel free to use getters that are free from [side effects][sideeffect], like
 providing a length property for a collection class.
@@ -718,7 +658,7 @@ Do not use setters, they cause more problems than they can solve.
 
 [sideeffect]: http://en.wikipedia.org/wiki/Side_effect_(computer_science)
 
-# React
+## React
 
 The following style guide rules are specific for working with the React framework.
 
@@ -839,6 +779,9 @@ export function Button({ className, ...rest }) {
 };
 ```
 
-## General Guidelines
-### Prefer pure functions when possible
-Pure functions are easier to understand. We don't want to have to think about side effects or mutated state. When invoking a pure function, all we have to think about is what goes in and what comes out.
+## Attribution	
+
+Parts of the JavaScript style guide were initially forked from the 
+[node style guide](https://github.com/felixge/node-style-guide) created by [Felix Geisendörfer](http://felixge.de/) which is	
+licensed under the [CC BY-SA 3.0](http://creativecommons.org/licenses/by-sa/3.0/)	
+license.
