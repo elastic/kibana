@@ -356,7 +356,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
           d3.select(this)
             .on('mouseover', label => {
               mlChartTooltipService.show(`${mlEscape(swimlaneData.fieldName)}: ${mlEscape(label)}`, this, {
-                x: 170,
+                x: laneLabelWidth,
                 y: 20
               });
             })
