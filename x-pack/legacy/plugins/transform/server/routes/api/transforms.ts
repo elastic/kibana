@@ -129,7 +129,7 @@ async function deleteTransforms(
             transformId,
             force: true,
             waitForCompletion: true,
-          });
+          } as StartStopOptions);
         } catch (e) {
           if (isRequestTimeout(e)) {
             return fillResultsWithTimeouts({
@@ -194,7 +194,7 @@ async function startTransforms(
           transformInfo.state !== undefined
             ? transformInfo.state === TRANSFORM_STATE.FAILED
             : false,
-      });
+      } as StartStopOptions);
       results[transformId] = { success: true };
     } catch (e) {
       if (isRequestTimeout(e)) {
@@ -239,7 +239,7 @@ async function stopTransforms(
             ? transformInfo.state === TRANSFORM_STATE.FAILED
             : false,
         waitForCompletion: true,
-      });
+      } as StartStopOptions);
       results[transformId] = { success: true };
     } catch (e) {
       if (isRequestTimeout(e)) {
