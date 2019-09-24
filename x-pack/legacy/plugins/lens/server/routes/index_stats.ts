@@ -9,10 +9,7 @@ import { get } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { SearchResponse } from 'elasticsearch';
 import { CoreSetup } from 'src/core/server';
-import {
-  IndexPatternsService,
-  FieldDescriptor,
-} from '../../../../../../src/legacy/server/index_patterns/service';
+import { IndexPatternsFetcher, FieldDescriptor } from '../../../../../../src/plugins/data/server';
 
 type Document = Record<string, unknown>;
 
@@ -45,7 +42,7 @@ export async function initStatsRoute(setup: CoreSetup) {
     async (context, req, res) => {
       const requestClient = context.core.elasticsearch.dataClient;
 
-      const indexPatternsService = new IndexPatternsService(requestClient.callAsCurrentUser);
+      const indexPatternsService = new IndexPatternsFetcher(requestClient.callAsCurrentUser);
 
       const { fromDate, toDate, timeZone, timeFieldName, fields, size } = req.body;
 

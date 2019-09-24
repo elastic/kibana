@@ -26,7 +26,7 @@ import {
   createNoMatchingIndicesError,
   isNoMatchingIndicesError,
   convertEsError
-} from '../../../../../src/legacy/server/index_patterns/service/lib/errors';
+} from '../../../../../src/plugins/data/server/index_patterns/fetcher/lib/errors';
 
 import {
   getIndexNotFoundError,

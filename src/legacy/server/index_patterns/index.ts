@@ -19,7 +19,7 @@
 
 export { indexPatternsMixin } from './mixin';
 export {
-  IndexPatternsService,
+  IndexPatternsFetcher,
   FieldDescriptor,
-} from '../../../plugins/data/server/index_patterns/service';
+} from '../../../plugins/data/server/index_patterns/fetcher';
 export { IndexPatternsServiceFactory } from './mixin';

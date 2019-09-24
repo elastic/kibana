@@ -25,4 +25,8 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { DataServerPlugin as Plugin };
-export { IndexPatternsService, FieldDescriptor } from './index_patterns';
+export {
+  IndexPatternsFetcher,
+  FieldDescriptor,
+  shouldReadFieldFromDocValues,
+} from './index_patterns';

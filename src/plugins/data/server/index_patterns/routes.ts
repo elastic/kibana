@@ -20,19 +20,19 @@
 import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
 import {
-  InternalCoreSetup,
   KibanaRequest,
   RequestHandlerContext,
   APICaller,
+  CoreSetup,
 } from '../../../../core/server';
-import { IndexPatternsService } from './service';
+import { IndexPatternsFetcher } from './fetcher';
 
-export function registerRoutes(core: InternalCoreSetup) {
-  const getIndexPatternsService = async (request: KibanaRequest): Promise<IndexPatternsService> => {
-    const client = await core.elasticsearch.dataClient$.pipe(first()).toPromise();
+export function registerRoutes(http: CoreSetup['http'], elasticsearch: CoreSetup['elasticsearch']) {
+  const getIndexPatternsFetcher = async (request: KibanaRequest): Promise<IndexPatternsFetcher> => {
+    const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
     const callCluster: APICaller = (endpoint, params, options) =>
       client.asScoped(request).callAsCurrentUser(endpoint, params, options);
-    return new Promise(resolve => resolve(new IndexPatternsService(callCluster)));
+    return new Promise(resolve => resolve(new IndexPatternsFetcher(callCluster)));
   };
 
   const parseMetaFields = (metaFields: string | string[]) => {
@@ -45,7 +45,7 @@ export function registerRoutes(core: InternalCoreSetup) {
     return parsedFields;
   };
 
-  const router = core.http.createRouter('/api/index_patterns');
+  const router = http.createRouter();
   router.get(
     {
       path: '/_fields_for_wildcard',
@@ -59,7 +59,7 @@ export function registerRoutes(core: InternalCoreSetup) {
       },
     },
     async (context: RequestHandlerContext, request: any, response: any) => {
-      const indexPatterns = await getIndexPatternsService(request);
+      const indexPatterns = await getIndexPatternsFetcher(request);
       const { pattern, meta_fields: metaFields } = request.query;
 
       let parsedFields: string[] = [];
@@ -102,7 +102,7 @@ export function registerRoutes(core: InternalCoreSetup) {
       },
     },
     async (context: RequestHandlerContext, request: any, response: any) => {
-      const indexPatterns = await getIndexPatternsService(request);
+      const indexPatterns = await getIndexPatternsFetcher(request);
       const { pattern, interval, look_back: lookBack, meta_fields: metaFields } = request.query;
 
       let parsedFields: string[] = [];

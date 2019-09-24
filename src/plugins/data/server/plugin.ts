@@ -18,10 +18,20 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { IndexPatternsService } from './index_patterns';
 
 export class DataServerPlugin implements Plugin {
+  private readonly indexPatterns = new IndexPatternsService();
+
   constructor(initializerContext: PluginInitializerContext) {}
-  public setup(core: CoreSetup) {}
+
+  public setup(core: CoreSetup) {
+    this.indexPatterns.setup({
+      http: core.http,
+      elasticsearch: core.elasticsearch,
+    });
+  }
+
   public start(core: CoreStart) {}
   public stop() {}
 }

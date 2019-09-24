@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export * from './index_patterns_service';
+export * from './index_patterns_fetcher';
+export { shouldReadFieldFromDocValues } from './lib';

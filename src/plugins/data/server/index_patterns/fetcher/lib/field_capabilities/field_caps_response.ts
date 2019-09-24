@@ -20,7 +20,7 @@
 import { uniq } from 'lodash';
 import { castEsToKbnFieldTypeName } from '../../../../../../../legacy/utils';
 import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
-import { FieldDescriptor } from '../..';
+import { FieldDescriptor } from '../../../fetcher';
 
 interface FieldCapObject {
   type: string;

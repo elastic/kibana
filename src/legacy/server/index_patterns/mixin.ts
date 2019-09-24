@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IndexPatternsService } from '../../../plugins/data/server';
+import { IndexPatternsFetcher } from '../../../plugins/data/server';
 import KbnServer from '../kbn_server';
 import { APICaller } from '../../../core/server';
 import { Legacy } from '../../../../kibana';
@@ -30,7 +30,7 @@ export function indexPatternsMixin(kbnServer: KbnServer, server: Legacy.Server) 
    *  @type {IndexPatternsService}
    */
   server.decorate('server', 'indexPatternsServiceFactory', ({ callCluster }) => {
-    return new IndexPatternsService(callCluster);
+    return new IndexPatternsFetcher(callCluster);
   });
 
   /**
@@ -50,4 +50,4 @@ export function indexPatternsMixin(kbnServer: KbnServer, server: Legacy.Server) 
 
 export type IndexPatternsServiceFactory = (args: {
   callCluster: (endpoint: string, clientParams: any, options: any) => Promise<any>;
-}) => IndexPatternsService;
+}) => IndexPatternsFetcher;

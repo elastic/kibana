@@ -17,14 +17,6 @@
  * under the License.
  */
 
-import { IndexPatternsFetcher } from '../../../../../plugins/data/server/';
-export const getIndexPatternService = {
-  assign: 'indexPatternsService',
-  method(req) {
-    const dataCluster = req.server.plugins.elasticsearch.getCluster('data');
-    const callDataCluster = (...args) => {
-      return dataCluster.callWithRequest(req, ...args);
-    };
-    return new IndexPatternsFetcher(callDataCluster);
-  },
-};
+export { getFieldCapabilities } from './field_capabilities';
+export { FieldCapsResponse } from './field_caps_response';
+export { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';

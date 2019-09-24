@@ -17,36 +17,18 @@
  * under the License.
  */
 
-import { merge } from 'lodash';
-import { FieldDescriptor } from '../../index_patterns_service';
+import { CoreSetup } from 'kibana/server';
+import { registerRoutes } from './routes';
 
-const OVERRIDES: Record<string, Partial<FieldDescriptor>> = {
-  _source: { type: '_source' },
-  _index: { type: 'string' },
-  _type: { type: 'string' },
-  _id: { type: 'string' },
-  _timestamp: {
-    type: 'date',
-    searchable: true,
-    aggregatable: true,
-  },
-  _score: {
-    type: 'number',
-    searchable: false,
-    aggregatable: false,
-  },
-};
+interface SetupDependencies {
+  http: CoreSetup['http'];
+  elasticsearch: CoreSetup['elasticsearch'];
+}
 
-/**
- *  Merge overrides for specific metaFields
- *
- *  @param  {FieldDescriptor} field
- *  @return {FieldDescriptor}
- */
-export function mergeOverrides(field: FieldDescriptor): FieldDescriptor {
-  if (OVERRIDES.hasOwnProperty(field.name)) {
-    return merge(field, OVERRIDES[field.name]);
-  } else {
-    return field;
+export class IndexPatternsService {
+  public setup({ http, elasticsearch }: SetupDependencies) {
+    registerRoutes(http, elasticsearch);
   }
+
+  public start() {}
 }

@@ -23,7 +23,7 @@ import { APICaller } from 'src/core/server';
 import { callFieldCapsApi } from '../es_api';
 import { FieldCapsResponse, readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';
-import { FieldDescriptor } from '../../index_patterns_service';
+import { FieldDescriptor } from '../../index_patterns_fetcher';
 
 export function concatIfUniq<T>(arr: T[], value: T) {
   return arr.includes(value) ? arr : arr.concat(value);

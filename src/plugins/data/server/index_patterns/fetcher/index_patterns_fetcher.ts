@@ -32,7 +32,7 @@ export interface FieldDescriptor {
   subType?: string;
 }
 
-export class IndexPatternsService {
+export class IndexPatternsFetcher {
   private _callDataCluster: APICaller;
 
   constructor(callDataCluster: APICaller) {
