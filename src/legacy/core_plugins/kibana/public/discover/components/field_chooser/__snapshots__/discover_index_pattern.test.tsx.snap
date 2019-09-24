@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DiscoverIndexPattern A single index pattern is just displayed 1`] = `
+<EuiFlexGroup
+  className="index-pattern-selection"
+  gutterSize="none"
+  responsive={false}
+>
+  <EuiFlexItem
+    className="eui-textTruncate"
+  >
+    <EuiToolTip
+      content="test1"
+      delay="regular"
+      position="top"
+    >
+      <EuiTitle
+        className="eui-textTruncate"
+        size="xxs"
+      >
+        <h2
+          title="test1"
+        >
+          test1
+        </h2>
+      </EuiTitle>
+    </EuiToolTip>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`DiscoverIndexPattern Invalid props dont cause an exception: "" 1`] = `""`;

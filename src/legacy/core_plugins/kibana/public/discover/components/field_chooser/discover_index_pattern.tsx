@@ -17,61 +17,75 @@
  * under the License.
  */
 import React, { useState } from 'react';
-import { EuiComboBox, EuiToolTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import { SavedObject } from 'kibana/server';
+import { DiscoverIndexPatternTitle } from './discover_index_pattern_title';
 
-interface Props {
+export interface DiscoverIndexPatternProps {
   indexPatternList: SavedObject[];
   selectedIndexPattern: SavedObject;
   setIndexPattern: (id: string) => void;
 }
+
+/**
+ * Component allows you to select an index pattern in discovers side bar
+ */
 export function DiscoverIndexPattern({
   indexPatternList,
   selectedIndexPattern,
   setIndexPattern,
-}: Props) {
-  if (indexPatternList.length === 0 || !selectedIndexPattern) {
+}: DiscoverIndexPatternProps) {
+  if (!indexPatternList || indexPatternList.length === 0 || !selectedIndexPattern) {
     // just in case, shouldn't happen
     return null;
-  } else if (indexPatternList.length === 1) {
-    return (
-      <div className="index-pattern">
-        <h2 className="index-pattern-label">{selectedIndexPattern.attributes.title}</h2>
-      </div>
-    );
   }
   const [selected, setSelected] = useState(selectedIndexPattern);
-
+  const [showCombo, setShowCombo] = useState(false);
   const options = indexPatternList.map(entity => ({
     value: entity.id,
-    label: entity.attributes.title,
+    label: entity.attributes!.title,
   }));
+  const selectedOptions = selected
+    ? [{ value: selected.id, label: selected.attributes.title }]
+    : [];
+
+  const findIndexPattern = (id?: string) => indexPatternList.find(entity => entity.id === id);
+
+  if (!showCombo) {
+    return (
+      <DiscoverIndexPatternTitle
+        onChange={() => setShowCombo(true)}
+        changeable={indexPatternList.length > 1}
+        title={selected.attributes ? selected.attributes.title : ''}
+      />
+    );
+  }
 
   return (
-    <EuiFlexGroup gutterSize="none" direction="column" responsive={false}>
-      <EuiFlexItem>
-        <EuiToolTip content={selected.attributes.title}>
-          <EuiComboBox
-            className="index-pattern-selection"
-            data-test-subj="index-pattern-selection"
-            fullWidth={true}
-            isClearable={false}
-            onChange={choices => {
-              const newSelected =
-                choices[0] && indexPatternList.find(entity => entity.id === choices[0].value);
-              if (newSelected) {
-                setSelected(newSelected);
-                setIndexPattern!(newSelected.id);
-              }
-            }}
-            options={options}
-            selectedOptions={
-              selected ? [{ value: selected.id, label: selected.attributes.title }] : []
-            }
-            singleSelection={{ asPlainText: true }}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiComboBox
+      compressed={true}
+      className="index-pattern-selection"
+      data-test-subj="index-pattern-selection"
+      fullWidth={true}
+      isClearable={false}
+      onBlur={() => setShowCombo(false)}
+      onChange={choices => {
+        const newSelected = choices[0] && findIndexPattern(choices[0].value);
+        if (newSelected) {
+          setSelected(newSelected);
+          setIndexPattern!(newSelected.id);
+        }
+        setShowCombo(false);
+      }}
+      inputRef={el => {
+        // auto focus input element when combo box is displayed
+        if (el) {
+          el.focus();
+        }
+      }}
+      options={options}
+      selectedOptions={selectedOptions}
+      singleSelection={{ asPlainText: true }}
+    />
   );
 }

@@ -272,6 +272,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async selectIndexPattern(indexPattern) {
+      await find.clickByCssSelector('indexPattern-switch-link');
       await comboBox.set('index-pattern-selection', indexPattern);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }

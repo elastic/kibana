@@ -83,9 +83,12 @@
       border: 1px solid transparent;
 
       .sidebar-list-header-label {
-        font-size: $euiFontSizeS;
+        padding-left: $euiSizeS;
+        font-size: $euiFontSizeXS;
         line-height: $euiLineHeight;
         font-weight: $euiFontWeightBold;
+        color: $euiColorDarkShade;
+        border-bottom: 1px solid $euiColorLightShade;
       }
     }
 
