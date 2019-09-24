@@ -406,13 +406,13 @@ export const metrics = {
   apm_acm_responses_errors_forbidden: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.acm.response.errors.forbidden',
     title: i18n.translate('xpack.monitoring.metrics.apm.acm.responseErrors.acmForbiddenTitle', {
-      defaultMessage: 'Response Errors Agent Configuration Management'
+      defaultMessage: 'Forbidden HTTP requests'
     }),
     label: i18n.translate('xpack.monitoring.metrics.apm.acm.responseErrors.acmForbiddenLabel', {
       defaultMessage: 'Forbidden'
     }),
     description: i18n.translate('xpack.monitoring.metrics.apm.acm.responseErrors.acmForbiddenDescription', {
-      defaultMessage: 'Forbidden HTTP Requests rejected - CORS violation, disabled enpoint'
+      defaultMessage: 'Forbidden HTTP Requests rejected'
     })
   }),
   apm_acm_responses_errors_unauthorized: new ApmEventsRateClusterMetric({
