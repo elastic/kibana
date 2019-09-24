@@ -8,6 +8,12 @@ discover-app {
   }
 }
 
+.dscHistogram {
+  display: flex;
+  height: 200px;
+  padding: $euiSizeS;
+}
+
 // SASSTODO: replace the margin-top value with a variable
 .dscSidebar__listHeader {
   margin-top: 5px;
