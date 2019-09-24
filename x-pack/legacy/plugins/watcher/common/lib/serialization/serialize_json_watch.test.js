@@ -29,4 +29,15 @@ describe('serializeJsonWatch', () => {
       },
     });
   });
+
+  it('respects provided metadata', () => {
+    expect(serializeJsonWatch(undefined, { metadata: { foo: 'bar' } })).toEqual({
+      metadata: {
+        foo: 'bar',
+        xpack: {
+          type: 'json',
+        },
+      },
+    });
+  });
 });
