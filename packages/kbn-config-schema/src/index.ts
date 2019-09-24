@@ -54,7 +54,7 @@ import {
   URIType,
 } from './types';
 
-export { ObjectType, TypeOf, Type };
+export { MaybeType, ObjectType, StringType, TypeOf, Type };
 export { ByteSizeValue } from './byte_size_value';
 
 function any(options?: TypeOptions<any>) {

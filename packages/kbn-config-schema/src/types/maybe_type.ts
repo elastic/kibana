@@ -25,7 +25,7 @@ export class MaybeType<V> extends Type<V | undefined> {
       type
         .getSchema()
         .optional()
-        .default()
+        .default(() => undefined, 'undefined')
     );
   }
 }

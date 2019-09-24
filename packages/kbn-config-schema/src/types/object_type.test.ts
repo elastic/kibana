@@ -39,6 +39,11 @@ test('fails if missing required value', () => {
   expect(() => type.validate(value)).toThrowErrorMatchingSnapshot();
 });
 
+test('fails if undefined', () => {
+  const type = schema.object({ field1: schema.maybe(schema.string()) });
+  expect(() => type.validate(undefined)).toThrow();
+});
+
 test('returns value if undefined string with default', () => {
   const type = schema.object({
     name: schema.string({ defaultValue: 'test' }),
@@ -74,18 +79,28 @@ test('defined object within object', () => {
   });
 });
 
-test('undefined object within object', () => {
+test('empty object within object', () => {
   const type = schema.object({
     foo: schema.object({
       bar: schema.string({ defaultValue: 'hello world' }),
     }),
   });
 
-  expect(type.validate({})).toEqual({
+  expect(type.validate({ foo: {} })).toEqual({
     foo: {
       bar: 'hello world',
     },
   });
+});
+
+test('fails if undefined object within object', () => {
+  const type = schema.object({
+    foo: schema.object({
+      bar: schema.string({ defaultValue: 'hello world' }),
+    }),
+  });
+
+  expect(() => type.validate({})).toThrowErrorMatchingSnapshot();
 });
 
 test('object within object with required', () => {

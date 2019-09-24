@@ -12,6 +12,8 @@ exports[`fails if key does not exist in schema 1`] = `"[bar]: definition for thi
 
 exports[`fails if missing required value 1`] = `"[name]: expected value of type [string] but got [undefined]"`;
 
+exports[`fails if undefined object within object 1`] = `"[foo]: expected a plain object value, but found [undefined] instead."`;
+
 exports[`handles oneOf 1`] = `
 "[key]: types that failed validation:
 - [key.0]: expected value of type [string] but got [number]"

@@ -29,6 +29,11 @@ test('returns undefined if undefined', () => {
   expect(type.validate(undefined)).toEqual(undefined);
 });
 
+test('returns undefined if undefined object', () => {
+  const type = schema.maybe(schema.object({}));
+  expect(type.validate(undefined)).toEqual(undefined);
+});
+
 test('returns undefined even if contained type has a default value', () => {
   const type = schema.maybe(
     schema.string({

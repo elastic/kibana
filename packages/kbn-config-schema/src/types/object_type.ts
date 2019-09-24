@@ -48,8 +48,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
     const schema = internals
       .object()
       .keys(schemaKeys)
-      .optional()
-      .default()
+      .default(() => undefined, 'undefined')
       .unknown(Boolean(allowUnknowns));
 
     super(schema, typeOptions);

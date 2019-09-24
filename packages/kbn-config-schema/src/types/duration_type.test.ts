@@ -85,7 +85,7 @@ describe('#defaultValue', () => {
         source: duration({ defaultValue: 600 }),
         target: duration({ defaultValue: siblingRef('source') }),
         fromContext: duration({ defaultValue: contextRef('val') }),
-      }).validate(undefined, { val: momentDuration(700, 'ms') })
+      }).validate({}, { val: momentDuration(700, 'ms') })
     ).toMatchInlineSnapshot(`
 Object {
   "fromContext": "PT0.7S",
@@ -99,7 +99,7 @@ Object {
         source: duration({ defaultValue: '1h' }),
         target: duration({ defaultValue: siblingRef('source') }),
         fromContext: duration({ defaultValue: contextRef('val') }),
-      }).validate(undefined, { val: momentDuration(2, 'hour') })
+      }).validate({}, { val: momentDuration(2, 'hour') })
     ).toMatchInlineSnapshot(`
 Object {
   "fromContext": "PT2H",
@@ -113,7 +113,7 @@ Object {
         source: duration({ defaultValue: momentDuration(1, 'hour') }),
         target: duration({ defaultValue: siblingRef('source') }),
         fromContext: duration({ defaultValue: contextRef('val') }),
-      }).validate(undefined, { val: momentDuration(2, 'hour') })
+      }).validate({}, { val: momentDuration(2, 'hour') })
     ).toMatchInlineSnapshot(`
 Object {
   "fromContext": "PT2H",
