@@ -4,16 +4,50 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import {
+  EuiPageContent,
+  EuiTitle,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { useCore } from './app_context';
+import { CloudMigrator } from './components';
 
 export const App = () => {
-  const {
-    api: { cluster },
-  } = useCore();
+  const { i18n } = useCore();
 
-  const { data, error, isLoading } = cluster.state.get();
+  const renderPageHeader = () => (
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <EuiTitle size="l">
+          <h1>
+            {i18n.translate('xpack.cloudMigration.appTitle', {
+              defaultMessage: 'Elastic cloud migration',
+            })}
+          </h1>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText>
+          <p>
+            {i18n.translate('xpack.cloudMigration.appDescription', {
+              defaultMessage:
+                'Migrate your on prem cluster to Elastic cloud and let us manage it meanwhile you are busy creating value to your customers.',
+            })}
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 
-  // console.log('DATA', data, 'ERROR', error, 'IS LOADING', isLoading);
-  return <h1>Cloud migration Plugin!...</h1>;
+  return (
+    <EuiPageContent>
+      {renderPageHeader()}
+      <EuiSpacer size="l" />
+      <CloudMigrator />
+    </EuiPageContent>
+  );
 };

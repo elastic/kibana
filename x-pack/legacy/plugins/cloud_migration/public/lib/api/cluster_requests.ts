@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useRequest } from '../../shared_imports';
-
-import { UseRequestResponse } from '../../shared_imports';
+import { useRequest, sendRequest, SendRequestResponse } from '../../shared_imports';
 
 export interface ClusterRequests {
   state: {
-    get: () => UseRequestResponse;
+    get: () => Promise<SendRequestResponse>;
   };
 }
 
@@ -20,7 +18,7 @@ export const initClusterRequests = (
 ): ClusterRequests => ({
   state: {
     get: () =>
-      useRequest(client, {
+      sendRequest(client, {
         path: `${basePath}/cluster/state`,
         method: 'get',
       }),
