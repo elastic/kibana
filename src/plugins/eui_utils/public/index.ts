@@ -17,12 +17,7 @@
  * under the License.
  */
 
-const autocompleteProviders = new Map();
+import { EuiUtils } from './eui_utils';
 
-export function addAutocompleteProvider(language, provider) {
-  autocompleteProviders.set(language, provider);
-}
-
-export function getAutocompleteProvider(language) {
-  return autocompleteProviders.get(language);
-}
+export const plugin = () => new EuiUtils();
+export type EuiUtilsStart = ReturnType<EuiUtils['start']>;
