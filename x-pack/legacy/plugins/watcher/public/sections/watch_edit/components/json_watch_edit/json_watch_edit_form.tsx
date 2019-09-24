@@ -80,6 +80,7 @@ export const JsonWatchEditForm = () => {
             <EuiSpacer />
           </Fragment>
         )}
+
         <EuiFormRow
           id="watchName"
           label={i18n.translate('xpack.watcher.sections.watchEdit.json.form.watchNameLabel', {
@@ -102,6 +103,7 @@ export const JsonWatchEditForm = () => {
             }}
           />
         </EuiFormRow>
+
         <ErrableFormRow
           id="watchId"
           label={i18n.translate('xpack.watcher.sections.watchEdit.json.form.watchIDLabel', {
@@ -127,7 +129,9 @@ export const JsonWatchEditForm = () => {
             }}
           />
         </ErrableFormRow>
+
         <EuiSpacer size="s" />
+
         <ErrableFormRow
           id="watchJson"
           label={
@@ -169,6 +173,9 @@ export const JsonWatchEditForm = () => {
             }}
           />
         </ErrableFormRow>
+
+        <EuiSpacer />
+
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -208,6 +215,7 @@ export const JsonWatchEditForm = () => {
               )}
             </EuiButton>
           </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty data-test-subj="btnCancelWatch" onClick={() => goToWatchList()}>
               {i18n.translate('xpack.watcher.sections.watchEdit.json.cancelButtonLabel', {
