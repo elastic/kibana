@@ -113,6 +113,7 @@ class SpacesGridPageUI extends Component<Props, State> {
           columns={this.getColumnConfig()}
           hasActions
           pagination={true}
+          sorting={true}
           search={{
             box: {
               placeholder: intl.formatMessage({
@@ -255,10 +256,9 @@ class SpacesGridPageUI extends Component<Props, State> {
     const { intl } = this.props;
     return [
       {
-        field: 'name',
+        field: 'spaceIcon',
         name: '',
         width: '50px',
-        sortable: true,
         render: (value: string, record: Space) => (
           <EuiLink
             onClick={() => {
