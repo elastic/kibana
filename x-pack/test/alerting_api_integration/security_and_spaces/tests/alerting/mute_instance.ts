@@ -62,7 +62,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
           }
         });
 
-        it('should handle mute alert instance request appropriately when muting an instance already muted', async () => {
+        it('should handle mute alert instance request appropriately and not duplicate mutedInstanceIds when muting an instance already muted', async () => {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')

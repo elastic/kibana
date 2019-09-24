@@ -657,7 +657,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(204, '');
-              // Wait until alerts scheduled actions twice to ensure actions had a chance to execute once
+              // Wait until alerts schedule actions twice to ensure actions had a chance to skip execution once
               await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
               const executedActionsResult = await esTestIndexTool.search(
                 'action:test.index-record',
@@ -732,6 +732,91 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 reference
               );
               expect(executedActionsResult.hits.total.value).to.eql(0);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it(`should unmute all instances when unmuting an alert`, async () => {
+          const reference = `create-test-10:${user.username}`;
+          const createdAction = await createIndexRecordAction(space.id);
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(
+              getTestAlertData({
+                enabled: false,
+                interval: '1s',
+                alertTypeId: 'test.always-firing',
+                alertTypeParams: {
+                  index: ES_TEST_INDEX_NAME,
+                  reference,
+                },
+                actions: [
+                  {
+                    group: 'default',
+                    id: createdAction.id,
+                    params: {
+                      index: ES_TEST_INDEX_NAME,
+                      reference,
+                      message: 'from:default',
+                    },
+                  },
+                ],
+              })
+            );
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'superuser at space1':
+              // Mute the alert instance "1" that "test.always-firing" always schedules actions for
+              await supertestWithoutAuth
+                .post(
+                  `${getUrlPrefix(space.id)}/api/alert/${response.body.id}/alert_instance/1/_mute`
+                )
+                .set('kbn-xsrf', 'foo')
+                .auth(user.username, user.password)
+                .expect(204, '');
+              // Mute the alert
+              await supertestWithoutAuth
+                .post(
+                  `${getUrlPrefix(space.id)}/api/alert/${response.body.id}/alert_instance/1/_mute`
+                )
+                .set('kbn-xsrf', 'foo')
+                .auth(user.username, user.password)
+                .expect(204, '');
+              // Unmute the alert
+              await supertestWithoutAuth
+                .post(
+                  `${getUrlPrefix(space.id)}/api/alert/${response.body.id}/alert_instance/1/_unmute`
+                )
+                .set('kbn-xsrf', 'foo')
+                .auth(user.username, user.password)
+                .expect(204, '');
+              await supertestWithoutAuth
+                .post(`${getUrlPrefix(space.id)}/api/alert/${response.body.id}/_enable`)
+                .set('kbn-xsrf', 'foo')
+                .auth(user.username, user.password)
+                .expect(204, '');
+              // Wait until alerts scheduled actions twice to ensure actions had a chance to execute once
+              await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
+              const executedActionsResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+              expect(executedActionsResult.hits.total.value).to.eql(1);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

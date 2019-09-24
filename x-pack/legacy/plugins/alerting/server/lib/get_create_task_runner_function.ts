@@ -129,7 +129,6 @@ export function getCreateTaskRunnerFunction({
             const alertInstance = alertInstances[alertInstanceId];
             if (alertInstance.hasScheduledActions(throttle)) {
               if (muted || mutedInstanceIds.includes(alertInstanceId)) {
-                // TODO: Only log the activity, skip executing actions
                 return;
               }
               const { actionGroup, context, state } = alertInstance.getSechduledActionOptions()!;
