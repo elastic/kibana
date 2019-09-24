@@ -17,62 +17,51 @@
  * under the License.
  */
 import React from 'react';
+import { palettes, EuiIcon } from '@elastic/eui';
+import { IconSize } from '@elastic/eui/src/components/icon/icon';
+
+function stringToNum(s: string) {
+  return Array.from(s).reduce((acc, ch) => acc + ch.charCodeAt(0), 1);
+}
+
+// default => a unknown datatype, we could also use 'document'
+const defaultIcon = 'questionInCircle';
+
+const typeToIconMap: Record<string, string> = {
+  boolean: 'invert',
+  conflict: 'alert', // icon for an index pattern mapping conflict in discover
+  date: 'calendar',
+  geo_point: 'globe',
+  geo_shape: 'globe',
+  ip: 'storage',
+  murmur3: 'document', // is a plugin's data type https://www.elastic.co/guide/en/elasticsearch/plugins/current/mapper-murmur3-usage.html
+  number: 'number',
+  source: 'editorCodeBlock',
+  string: 'string',
+};
+
+export function getColorForDataType(type: string) {
+  const { colors } = palettes.euiPaletteColorBlind;
+  const colorIndex = stringToNum(type) % colors.length;
+  return colors[colorIndex];
+}
 
 interface Props {
   type: string;
   label: string;
+  size?: IconSize;
+  useColor?: boolean;
 }
 
-export function FieldNameIcon({ type, label }: Props) {
-  switch (type) {
-    case 'boolean':
-      return <span aria-label={label} className="dscField__icon kuiIcon fa-adjust"></span>;
+export function FieldNameIcon({ type, label = '', size = 's', useColor = false }: Props) {
+  const usedIconType = typeToIconMap[type] || defaultIcon;
 
-    case 'conflict':
-      return <span aria-label={label} className="dscField__icon kuiIcon fa-warning"></span>;
-
-    case 'date':
-      return <span aria-label={label} className="dscField__icon kuiIcon fa-clock-o"></span>;
-
-    case 'geo_point':
-      return <span aria-label={label} className="dscField__icon kuiIcon fa-globe"></span>;
-
-    case 'geo_shape':
-      return <span aria-label={label} className="dscField__icon kuiIcon fa-globe"></span>;
-
-    case 'ip':
-      return <span aria-label={label} className="dscField__icon kuiIcon fa-laptop"></span>;
-
-    case 'murmur3':
-      return (
-        <span aria-label={label} className="dscField__icon">
-          <strong aria-hidden="true">h</strong>
-        </span>
-      );
-
-    case 'number':
-      return (
-        <span aria-label={label} className="dscField__icon">
-          <strong aria-hidden="true">#</strong>
-        </span>
-      );
-
-    case 'source':
-      // Note that this type is currently not provided, type for _source is undefined
-      return <span aria-label={label} className="dscField__icon kuiIcon fa-file-text-o"></span>;
-
-    case 'string':
-      return (
-        <span aria-label={label} className="dscField__icon">
-          <strong aria-hidden="true">t</strong>
-        </span>
-      );
-
-    default:
-      return (
-        <span aria-label={label} className="dscField__icon">
-          <strong aria-hidden="true">?</strong>
-        </span>
-      );
-  }
+  return (
+    <EuiIcon
+      type={usedIconType}
+      aria-label={label ? label : type}
+      size={size as IconSize}
+      color={useColor ? getColorForDataType(usedIconType) : undefined}
+    />
+  );
 }
