@@ -18,7 +18,7 @@ const DemodataDatasource = () => (
     <h3>{strings.getHeading()}</h3>
     <p>
       <FormattedMessage
-        id="xpack.canvas.uis.dataSources.demoData.body"
+        id="xpack.canvas.uis.dataSources.demoDataDescription"
         defaultMessage="This data source is connected to every {canvas} element by default. Its purpose is to give you some playground data to get started. The demo set contains 4 strings, 3 numbers and a date. Feel free to experiment and, when you're ready, click {clickText} above to connect to your own data."
         values={{
           canvas: CANVAS,
