@@ -22,23 +22,21 @@ import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
 import classNames from 'classnames';
 import React, { useState, useEffect } from 'react';
 import { Storage } from 'ui/storage';
-import { timeHistory } from 'ui/timefilter';
-
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSuperDatePicker } from '@elastic/eui';
-
-// @ts-ignore
-import { EuiSuperUpdateButton } from '@elastic/eui';
-
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { documentationLinks } from 'ui/documentation_links';
 import { PersistedLog } from 'ui/persisted_log';
+
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSuperDatePicker } from '@elastic/eui';
+// @ts-ignore
+import { EuiSuperUpdateButton } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
-import { IndexPattern } from '../../../index_patterns';
-import { QueryBarInput } from './query_bar_input';
 import { useKibana } from '../../../../../../../plugins/kibana_react/public';
 
+import { IndexPattern } from '../../../index_patterns';
+import { QueryBarInput } from './query_bar_input';
 import { getQueryLog } from '../lib/get_query_log';
 import { Query } from '../index';
+import { TimeHistoryContract } from '../../../timefilter';
 
 interface DateRange {
   from: string;
@@ -66,6 +64,7 @@ interface Props {
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   customSubmitButton?: any;
   isDirty: boolean;
+  timeHistory?: TimeHistoryContract;
 }
 
 function QueryBarTopRowUI(props: Props) {
@@ -134,7 +133,10 @@ function QueryBarTopRowUI(props: Props) {
 
   function onSubmit({ query, dateRange }: { query?: Query; dateRange: DateRange }) {
     handleLuceneSyntaxWarning();
-    timeHistory.add(dateRange);
+
+    if (props.timeHistory) {
+      props.timeHistory.add(dateRange);
+    }
 
     props.onSubmit({ query, dateRange });
   }
@@ -206,14 +208,17 @@ function QueryBarTopRowUI(props: Props) {
       return null;
     }
 
-    const recentlyUsedRanges = timeHistory
-      .get()
-      .map(({ from, to }: { from: string; to: string }) => {
-        return {
-          start: from,
-          end: to,
-        };
-      });
+    let recentlyUsedRanges;
+    if (props.timeHistory) {
+      recentlyUsedRanges = props.timeHistory
+        .get()
+        .map(({ from, to }: { from: string; to: string }) => {
+          return {
+            start: from,
+            end: to,
+          };
+        });
+    }
 
     const commonlyUsedRanges = uiSettings!
       .get('timepicker:quickRanges')

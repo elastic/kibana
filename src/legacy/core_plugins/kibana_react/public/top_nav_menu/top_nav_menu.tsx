@@ -24,17 +24,24 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { UiSettingsClientContract, CoreStart } from 'src/core/public';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
-import { SearchBar, SearchBarProps } from '../../../../core_plugins/data/public';
 import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
+import {
+  SearchBar,
+  SearchBarProps,
+  TimeHistoryContract,
+} from '../../../../core_plugins/data/public';
 
 type Props = Partial<SearchBarProps> & {
   name: string;
-  uiSettings: UiSettingsClientContract;
-  savedObjects: CoreStart['savedObjects'];
-  notifications: CoreStart['notifications'];
-  http: CoreStart['http'];
   config?: TopNavMenuData[];
   showSearchBar?: boolean;
+
+  // Search Bar dependencies
+  uiSettings?: UiSettingsClientContract;
+  savedObjects?: CoreStart['savedObjects'];
+  notifications?: CoreStart['notifications'];
+  timeHistory?: TimeHistoryContract;
+  http?: CoreStart['http'];
 };
 
 /*
@@ -60,7 +67,14 @@ export function TopNavMenu(props: Props) {
 
   function renderSearchBar() {
     // Validate presense of all required fields
-    if (!props.showSearchBar || !props.savedObjects || !props.http) return;
+    if (
+      !props.showSearchBar ||
+      !props.savedObjects ||
+      !props.http ||
+      !props.notifications ||
+      !props.timeHistory
+    )
+      return;
     return (
       <KibanaContextProvider
         services={{
@@ -73,6 +87,7 @@ export function TopNavMenu(props: Props) {
         <SearchBar
           notifications={props.notifications}
           savedObjects={props.savedObjects}
+          timeHistory={props.timeHistory}
           query={props.query}
           filters={props.filters}
           showQueryBar={props.showQueryBar}

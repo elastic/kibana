@@ -30,6 +30,13 @@ import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
 const startMock = coreMock.createStart();
 
+import { timefilterServiceMock } from '../../../timefilter/timefilter_service.mock';
+const timefilterSetupMock = timefilterServiceMock.createSetupContract();
+
+timefilterSetupMock.history.get.mockImplementation(() => {
+  return [];
+});
+
 startMock.uiSettings.get.mockImplementation((key: string) => {
   switch (key) {
     case 'timepicker:quickRanges':
@@ -99,6 +106,15 @@ describe('QueryBarTopRowTopRow', () => {
     notifications: startMock.notifications,
     http: startMock.http,
   };
+  const defaultOptions = {
+    appName: 'discover',
+    screenTitle: 'Another Screen',
+    onSubmit: noop,
+    onChange: noop,
+    store: createMockStorage(),
+    intl: null as any,
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -108,15 +124,12 @@ describe('QueryBarTopRowTopRow', () => {
       <I18nProvider>
         <KibanaContextProvider services={services}>
           <QueryBarTopRow.WrappedComponent
+            {...defaultOptions}
             query={kqlQuery}
-            onSubmit={noop}
-            appName={'discover'}
             screenTitle={'Another Screen'}
-            indexPatterns={[mockIndexPattern]}
-            store={createMockStorage()}
-            intl={null as any}
-            onChange={noop}
             isDirty={false}
+            indexPatterns={[mockIndexPattern]}
+            timeHistory={timefilterSetupMock.history}
           />
         </KibanaContextProvider>
       </I18nProvider>
@@ -131,15 +144,12 @@ describe('QueryBarTopRowTopRow', () => {
       <I18nProvider>
         <KibanaContextProvider services={services}>
           <QueryBarTopRow.WrappedComponent
+            {...defaultOptions}
             query={kqlQuery}
-            onSubmit={noop}
-            appName={'discover'}
             screenTitle={'Another Screen'}
             indexPatterns={[mockIndexPattern]}
-            store={createMockStorage()}
+            timeHistory={timefilterSetupMock.history}
             disableAutoFocus={true}
-            intl={null as any}
-            onChange={noop}
             isDirty={false}
           />
         </KibanaContextProvider>
@@ -154,12 +164,9 @@ describe('QueryBarTopRowTopRow', () => {
       <I18nProvider>
         <KibanaContextProvider services={services}>
           <QueryBarTopRow.WrappedComponent
-            onSubmit={noop}
-            onChange={noop}
+            {...defaultOptions}
             isDirty={false}
-            appName={'discover'}
-            store={createMockStorage()}
-            intl={null as any}
+            timeHistory={timefilterSetupMock.history}
           />
         </KibanaContextProvider>
       </I18nProvider>
@@ -174,13 +181,10 @@ describe('QueryBarTopRowTopRow', () => {
       <I18nProvider>
         <KibanaContextProvider services={services}>
           <QueryBarTopRow.WrappedComponent
-            onSubmit={noop}
-            onChange={noop}
+            {...defaultOptions}
             isDirty={false}
-            appName={'discover'}
-            store={createMockStorage()}
-            intl={null as any}
             showDatePicker={false}
+            timeHistory={timefilterSetupMock.history}
           />
         </KibanaContextProvider>
       </I18nProvider>
@@ -195,16 +199,13 @@ describe('QueryBarTopRowTopRow', () => {
       <I18nProvider>
         <KibanaContextProvider services={services}>
           <QueryBarTopRow.WrappedComponent
-            onSubmit={noop}
-            onChange={noop}
+            {...defaultOptions}
             isDirty={false}
-            appName={'discover'}
             screenTitle={'Another Screen'}
-            store={createMockStorage()}
-            intl={null as any}
             showDatePicker={true}
             dateRangeFrom={'now-7d'}
             dateRangeTo={'now'}
+            timeHistory={timefilterSetupMock.history}
           />
         </KibanaContextProvider>
       </I18nProvider>
@@ -220,15 +221,12 @@ describe('QueryBarTopRowTopRow', () => {
         <KibanaContextProvider services={services}>
           <QueryBarTopRow.WrappedComponent
             query={kqlQuery}
-            onSubmit={noop}
-            onChange={noop}
+            {...defaultOptions}
             isDirty={false}
-            appName={'discover'}
             screenTitle={'Another Screen'}
             indexPatterns={[mockIndexPattern]}
-            store={createMockStorage()}
-            intl={null as any}
             showDatePicker={false}
+            timeHistory={timefilterSetupMock.history}
           />
         </KibanaContextProvider>
       </I18nProvider>
@@ -244,16 +242,13 @@ describe('QueryBarTopRowTopRow', () => {
         <KibanaContextProvider services={services}>
           <QueryBarTopRow.WrappedComponent
             query={kqlQuery}
-            onSubmit={noop}
-            onChange={noop}
+            {...defaultOptions}
             isDirty={false}
-            appName={'discover'}
             screenTitle={'Another Screen'}
             indexPatterns={[mockIndexPattern]}
-            store={createMockStorage()}
-            intl={null as any}
             showQueryInput={false}
             showDatePicker={false}
+            timeHistory={timefilterSetupMock.history}
           />
         </KibanaContextProvider>
       </I18nProvider>
@@ -268,14 +263,11 @@ describe('QueryBarTopRowTopRow', () => {
       <I18nProvider>
         <KibanaContextProvider services={services}>
           <QueryBarTopRow.WrappedComponent
-            onSubmit={noop}
-            onChange={noop}
+            {...defaultOptions}
             isDirty={false}
-            appName={'discover'}
             screenTitle={'Another Screen'}
-            store={createMockStorage()}
-            intl={null as any}
             showDatePicker={false}
+            timeHistory={timefilterSetupMock.history}
           />
         </KibanaContextProvider>
       </I18nProvider>
