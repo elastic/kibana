@@ -436,7 +436,7 @@ export const metrics = {
       defaultMessage: 'Unavailable'
     }),
     description: i18n.translate('xpack.monitoring.metrics.acm.apm.responseErrors.acmUnavailableDescription', {
-      defaultMessage: 'Unavailable HTTP Responses'
+      defaultMessage: 'Unavailable HTTP Responses. Possible misconfiguration, or unavailable/unsupported version of Kibana.'
     })
   }),
   apm_acm_responses_errors_method: new ApmEventsRateClusterMetric({
