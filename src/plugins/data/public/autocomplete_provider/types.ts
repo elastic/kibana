@@ -17,11 +17,9 @@
  * under the License.
  */
 
-/**
- * WARNING: these typings are incomplete
- */
 import { StaticIndexPattern } from 'ui/index_patterns';
 
+/** @public **/
 export type AutocompleteProvider = (args: {
   config: {
     get(configKey: string): any;
@@ -30,12 +28,14 @@ export type AutocompleteProvider = (args: {
   boolFilter?: any;
 }) => GetSuggestions;
 
+/** @public **/
 export type GetSuggestions = (args: {
   query: string;
   selectionStart: number;
   selectionEnd: number;
 }) => Promise<AutocompleteSuggestion[]>;
 
+/** @public **/
 export type AutocompleteSuggestionType =
   | 'field'
   | 'value'
@@ -43,6 +43,7 @@ export type AutocompleteSuggestionType =
   | 'conjunction'
   | 'recentSearch';
 
+/** @public **/
 export interface AutocompleteSuggestion {
   description?: string;
   end: number;
@@ -50,7 +51,3 @@ export interface AutocompleteSuggestion {
   text: string;
   type: AutocompleteSuggestionType;
 }
-
-export function addAutocompleteProvider(language: string, provider: AutocompleteProvider): void;
-
-export function getAutocompleteProvider(language: string): AutocompleteProvider | undefined;

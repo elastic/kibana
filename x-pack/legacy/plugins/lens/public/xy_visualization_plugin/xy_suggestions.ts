@@ -21,8 +21,9 @@ import { generateId } from '../id_generator';
 const columnSortOrder = {
   date: 0,
   string: 1,
-  boolean: 2,
-  number: 3,
+  ip: 2,
+  boolean: 3,
+  number: 4,
 };
 
 function getIconForSeries(type: SeriesType): EuiIconType {
