@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { npStart } from 'ui/new_platform';
 import { ErrorGroupDetails } from '../../ErrorGroupDetails';
 import { ServiceDetails } from '../../ServiceDetails';
 import { TransactionDetails } from '../../TransactionDetails';
@@ -138,6 +139,16 @@ export const routes: BreadcrumbRoute[] = [
     },
     name: RouteName.SERVICE_NODE_METRICS
   },
+  // service map
+  {
+    exact: true,
+    path: '/services/:serviceName/service-map',
+    component: () => <ServiceDetails tab="service-map" />,
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
+      defaultMessage: 'Service Map'
+    }),
+    name: RouteName.SINGLE_SERVICE_MAP
+  },
   {
     exact: true,
     path: '/services/:serviceName/transactions/view',
@@ -149,3 +160,26 @@ export const routes: BreadcrumbRoute[] = [
     name: RouteName.TRANSACTION_NAME
   }
 ];
+
+if (npStart.core.injectedMetadata.getInjectedVar('apmServiceMapEnabled')) {
+  routes.push(
+    {
+      exact: true,
+      path: '/service-map',
+      component: () => <Home tab="service-map" />,
+      breadcrumb: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
+        defaultMessage: 'Service Map'
+      }),
+      name: RouteName.SERVICE_MAP
+    },
+    {
+      exact: true,
+      path: '/services/:serviceName/service-map',
+      component: () => <ServiceDetails tab="service-map" />,
+      breadcrumb: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
+        defaultMessage: 'Service Map'
+      }),
+      name: RouteName.SINGLE_SERVICE_MAP
+    }
+  );
+}

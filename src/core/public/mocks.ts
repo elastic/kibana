@@ -18,11 +18,12 @@
  */
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
-import { CoreSetup, CoreStart, PluginInitializerContext } from '.';
+import { CoreSetup, LegacyCoreStart, PluginInitializerContext } from '.';
 import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
 import { i18nServiceMock } from './i18n/i18n_service.mock';
+import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
 import { notificationServiceMock } from './notifications/notifications_service.mock';
 import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
@@ -58,12 +59,13 @@ function createCoreSetupMock() {
 }
 
 function createCoreStartMock() {
-  const mock: MockedKeys<CoreStart> = {
+  const mock: MockedKeys<LegacyCoreStart> = {
     application: applicationServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract(),
     i18n: i18nServiceMock.createStartContract(),
+    injectedMetadata: injectedMetadataServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),

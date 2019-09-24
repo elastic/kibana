@@ -653,6 +653,14 @@
         packageNames: [
           'fancy-log',
           '@types/fancy-log',
+        ]
+      },
+      {
+        groupSlug: 'cytoscape',
+        groupName: 'cytoscape related packages',
+        packageNames: [
+          'cytoscape',
+          '@types/cytoscape',
         ],
       },
       {
