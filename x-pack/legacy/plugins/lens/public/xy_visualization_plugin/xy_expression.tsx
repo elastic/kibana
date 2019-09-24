@@ -161,7 +161,7 @@ export function XYChart({
   }
 
   return (
-    <Chart className="lnsChart">
+    <Chart className="lnsXyExpression__chart">
       <Settings
         showLegend={legend.isVisible}
         legendPosition={legend.position}

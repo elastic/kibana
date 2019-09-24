@@ -16,7 +16,7 @@ export declare class KibanaRequest<Params = unknown, Query = unknown, Body = unk
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(request, params, query, body, withoutSecretHeaders)](./kibana-plugin-server.kibanarequest.(constructor).md) |  | Constructs a new instance of the <code>KibanaRequest</code> class |
+|  [(constructor)(request, params, query, body, withoutSecretHeaders)](./kibana-plugin-server.kibanarequest._constructor_.md) |  | Constructs a new instance of the <code>KibanaRequest</code> class |
 
 ## Properties
 
