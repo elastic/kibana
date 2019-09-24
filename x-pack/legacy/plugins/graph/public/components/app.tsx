@@ -10,7 +10,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { FieldManagerProps, FieldManager } from './field_manager';
 import { SearchBarProps, SearchBar } from './search_bar';
 import { GuidancePanel } from './guidance_panel';
-import { fieldsSelector, selectedFieldsSelector } from '../state_management';
+import { selectedFieldsSelector } from '../state_management';
 import { openSourceModal } from '../services/source_modal';
 
 export interface GraphAppProps extends FieldManagerProps, SearchBarProps {

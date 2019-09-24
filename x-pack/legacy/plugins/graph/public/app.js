@@ -274,10 +274,6 @@ app.controller('graphuiPlugin', function (
   $scope.allSavingDisabled = $scope.graphSavePolicy === 'none';
   $scope.searchTerm = '';
 
-  $scope.pluginDependencies = npStart.core;
-
-  $scope.loading = false;
-
   $scope.reduxDispatch = (action) => {
     store.dispatch(action);
 
