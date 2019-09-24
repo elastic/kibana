@@ -42,8 +42,8 @@ export class Timefilter {
   private _refreshInterval!: RefreshInterval;
   private _history: TimeHistoryContract;
 
-  private isTimeRangeSelectorEnabled: boolean = false;
-  private isAutoRefreshSelectorEnabled: boolean = false;
+  private _isTimeRangeSelectorEnabled: boolean = false;
+  private _isAutoRefreshSelectorEnabled: boolean = false;
 
   constructor(config: TimefilterConfig, timeHistory: TimeHistoryContract) {
     this._history = timeHistory;
@@ -51,12 +51,12 @@ export class Timefilter {
     this.setRefreshInterval(config.refreshIntervalDefaults);
   }
 
-  public getIsTimeRangeSelectorEnabled() {
-    return this.isTimeRangeSelectorEnabled;
+  public isTimeRangeSelectorEnabled() {
+    return this._isTimeRangeSelectorEnabled;
   }
 
-  public getIsAutoRefreshSelectorEnabled() {
-    return this.isAutoRefreshSelectorEnabled;
+  public isAutoRefreshSelectorEnabled() {
+    return this._isAutoRefreshSelectorEnabled;
   }
 
   public getEnabledUpdated$ = () => {
@@ -166,7 +166,7 @@ export class Timefilter {
    * Show the time bounds selector part of the time filter
    */
   public enableTimeRangeSelector = () => {
-    this.isTimeRangeSelectorEnabled = true;
+    this._isTimeRangeSelectorEnabled = true;
     this.enabledUpdated$.next(true);
   };
 
@@ -174,7 +174,7 @@ export class Timefilter {
    * Hide the time bounds selector part of the time filter
    */
   public disableTimeRangeSelector = () => {
-    this.isTimeRangeSelectorEnabled = false;
+    this._isTimeRangeSelectorEnabled = false;
     this.enabledUpdated$.next(false);
   };
 
@@ -182,7 +182,7 @@ export class Timefilter {
    * Show the auto refresh part of the time filter
    */
   public enableAutoRefreshSelector = () => {
-    this.isAutoRefreshSelectorEnabled = true;
+    this._isAutoRefreshSelectorEnabled = true;
     this.enabledUpdated$.next(true);
   };
 
@@ -190,7 +190,7 @@ export class Timefilter {
    * Hide the auto refresh part of the time filter
    */
   public disableAutoRefreshSelector = () => {
-    this.isAutoRefreshSelectorEnabled = false;
+    this._isAutoRefreshSelectorEnabled = false;
     this.enabledUpdated$.next(false);
   };
 

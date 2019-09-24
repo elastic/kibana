@@ -22,8 +22,8 @@ describe('MonitoringViewBaseTableController', function () {
     timefilter = {
       enableTimeRangeSelector: spy(),
       enableAutoRefreshSelector: spy(),
-      getIsTimeRangeSelectorEnabled: () => true,
-      getIsAutoRefreshSelectorEnabled: () => true,
+      isTimeRangeSelectorEnabled: () => true,
+      isAutoRefreshSelectorEnabled: () => true,
     };
     titleService = spy();
     executorService = {
@@ -76,8 +76,8 @@ describe('MonitoringViewBaseTableController', function () {
   });
 
   it('enables timepicker', () => {
-    expect(timefilter.getIsTimeRangeSelectorEnabled()).to.be(true);
-    expect(timefilter.getIsAutoRefreshSelectorEnabled()).to.be(true);
+    expect(timefilter.isTimeRangeSelectorEnabled()).to.be(true);
+    expect(timefilter.isAutoRefreshSelectorEnabled()).to.be(true);
   });
 
   it('sets page title', () => {

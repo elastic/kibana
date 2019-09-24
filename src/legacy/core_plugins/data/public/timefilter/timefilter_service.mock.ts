@@ -23,8 +23,8 @@ export type TimefilterServiceClientContract = PublicMethodsOf<TimefilterService>
 
 const createSetupContractMock = () => {
   const timefilterMock: jest.Mocked<TimefilterContract> = {
-    getIsAutoRefreshSelectorEnabled: jest.fn(),
-    getIsTimeRangeSelectorEnabled: jest.fn(),
+    isAutoRefreshSelectorEnabled: jest.fn(),
+    isTimeRangeSelectorEnabled: jest.fn(),
     getEnabledUpdated$: jest.fn(),
     getTimeUpdate$: jest.fn(),
     getRefreshIntervalUpdate$: jest.fn(),

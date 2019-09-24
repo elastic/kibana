@@ -124,8 +124,8 @@ describe('MonitoringViewBaseController', function () {
 
   describe('time filter', () => {
     it('enables timepicker and auto refresh #1', () => {
-      expect(timefilter.getIsTimeRangeSelectorEnabled()).to.be(true);
-      expect(timefilter.getIsAutoRefreshSelectorEnabled()).to.be(true);
+      expect(timefilter.isTimeRangeSelectorEnabled()).to.be(true);
+      expect(timefilter.isAutoRefreshSelectorEnabled()).to.be(true);
     });
 
     it('enables timepicker and auto refresh #2', () => {
@@ -135,8 +135,8 @@ describe('MonitoringViewBaseController', function () {
       };
       ctrl = new MonitoringViewBaseController(opts);
 
-      expect(timefilter.getIsTimeRangeSelectorEnabled()).to.be(true);
-      expect(timefilter.getIsAutoRefreshSelectorEnabled()).to.be(true);
+      expect(timefilter.isTimeRangeSelectorEnabled()).to.be(true);
+      expect(timefilter.isAutoRefreshSelectorEnabled()).to.be(true);
     });
 
     it('disables timepicker and enables auto refresh', () => {
@@ -146,8 +146,8 @@ describe('MonitoringViewBaseController', function () {
       };
       ctrl = new MonitoringViewBaseController(opts);
 
-      expect(timefilter.getIsTimeRangeSelectorEnabled()).to.be(false);
-      expect(timefilter.getIsAutoRefreshSelectorEnabled()).to.be(true);
+      expect(timefilter.isTimeRangeSelectorEnabled()).to.be(false);
+      expect(timefilter.isAutoRefreshSelectorEnabled()).to.be(true);
     });
 
     it('enables timepicker and disables auto refresh', () => {
@@ -157,8 +157,8 @@ describe('MonitoringViewBaseController', function () {
       };
       ctrl = new MonitoringViewBaseController(opts);
 
-      expect(timefilter.getIsTimeRangeSelectorEnabled()).to.be(true);
-      expect(timefilter.getIsAutoRefreshSelectorEnabled()).to.be(false);
+      expect(timefilter.isTimeRangeSelectorEnabled()).to.be(true);
+      expect(timefilter.isAutoRefreshSelectorEnabled()).to.be(false);
     });
 
     it('disables timepicker and auto refresh', () => {
@@ -171,8 +171,8 @@ describe('MonitoringViewBaseController', function () {
       };
       ctrl = new MonitoringViewBaseController(opts);
 
-      expect(timefilter.getIsTimeRangeSelectorEnabled()).to.be(false);
-      expect(timefilter.getIsAutoRefreshSelectorEnabled()).to.be(false);
+      expect(timefilter.isTimeRangeSelectorEnabled()).to.be(false);
+      expect(timefilter.isAutoRefreshSelectorEnabled()).to.be(false);
     });
 
     it('disables timepicker and auto refresh', (done) => {

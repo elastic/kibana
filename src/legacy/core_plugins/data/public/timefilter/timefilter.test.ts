@@ -231,13 +231,13 @@ describe('isTimeRangeSelectorEnabled', () => {
 
   test('should emit updated when disabled', () => {
     timefilter.disableTimeRangeSelector();
-    expect(timefilter.getIsTimeRangeSelectorEnabled()).to.be(false);
+    expect(timefilter.isTimeRangeSelectorEnabled()).to.be(false);
     expect(update.called).to.be(true);
   });
 
   test('should emit updated when enabled', () => {
     timefilter.enableTimeRangeSelector();
-    expect(timefilter.getIsTimeRangeSelectorEnabled()).to.be(true);
+    expect(timefilter.isTimeRangeSelectorEnabled()).to.be(true);
     expect(update.called).to.be(true);
   });
 });
@@ -257,13 +257,13 @@ describe('isAutoRefreshSelectorEnabled', () => {
 
   test('should emit updated when disabled', () => {
     timefilter.disableAutoRefreshSelector();
-    expect(timefilter.getIsAutoRefreshSelectorEnabled()).to.be(false);
+    expect(timefilter.isAutoRefreshSelectorEnabled()).to.be(false);
     expect(update.called).to.be(true);
   });
 
   test('should emit updated when enabled', () => {
     timefilter.enableAutoRefreshSelector();
-    expect(timefilter.getIsAutoRefreshSelectorEnabled()).to.be(true);
+    expect(timefilter.isAutoRefreshSelectorEnabled()).to.be(true);
     expect(update.called).to.be(true);
   });
 });
