@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { keys, find } from 'lodash';
-import { Filter, RangeFilter, isRangeFilter } from '@kbn/es-query';
+import { keys, find, get } from 'lodash';
+import { Filter, isRangeFilter } from '@kbn/es-query';
 import { IndexPatterns } from '../../../index_patterns';
 
 export async function extractTimeFilter(indexPatterns: IndexPatterns, filters: Filter[]) {
   // Assume all the index patterns are the same since they will be added
   // from the same visualization.
-  const id: string = _.get(filters, '[0].meta.index');
+  const id: string = get(filters, '[0].meta.index');
   if (id == null) return;
 
   const indexPattern = await indexPatterns.get(id);
@@ -37,5 +37,5 @@ export async function extractTimeFilter(indexPatterns: IndexPatterns, filters: F
     }
 
     return Boolean(key && key === indexPattern.timeFieldName);
-  }) as RangeFilter;
+  });
 }
