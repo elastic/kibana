@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
+  EuiIcon,
 } from '@elastic/eui';
 import { get } from 'lodash';
 import styled from 'styled-components';
@@ -69,9 +70,12 @@ export const MonitorListDrawer = ({ summary }: MonitorListDrawerProps) => {
       <ContainerDiv>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiLink href={monitorUrl}>{monitorUrl}</EuiLink>
+            <EuiLink href={monitorUrl}>
+              {monitorUrl}
+              <EuiIcon size="s" type="popout" color="subbdued" />
+            </EuiLink>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiButton size="s">Actions</EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
