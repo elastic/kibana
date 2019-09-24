@@ -46,6 +46,8 @@ export function registerRoutes(http: CoreSetup['http'], elasticsearch: CoreSetup
   };
 
   const router = http.createRouter();
+  router.routerPath = '/api/index_patterns';
+
   router.get(
     {
       path: '/_fields_for_wildcard',
