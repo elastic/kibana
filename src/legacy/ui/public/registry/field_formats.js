@@ -17,14 +17,13 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { memoize, forOwn, isFunction } from 'lodash';
 import chrome from '../chrome';
 import { FieldFormat } from '../../../../plugins/data/common/field_formats';
 
 class FieldFormatRegistry {
   constructor() {
-    this.fieldFormats = [];
-
+    this.fieldFormats = new Map();
     this._uiSettings = chrome.getUiSettingsClient();
     this.getConfig = (...args) => this._uiSettings.get(...args);
     this._defaultMap = [];
@@ -61,7 +60,7 @@ class FieldFormatRegistry {
    * @return {Function}
    */
   getType = (formatId) => {
-    return this.fieldFormats.find(format => format.id === formatId);
+    return this.fieldFormats.get(formatId);
   };
   /**
    * Get the default FieldFormat type (class) for
@@ -108,8 +107,8 @@ class FieldFormatRegistry {
    * @param  {String} formatId
    * @return {FieldFormat}
    */
-  getInstance = _.memoize(function (formatId) {
-    const FieldFormat = this.fieldFormats.getType(formatId);
+  getInstance = memoize(function (formatId) {
+    const FieldFormat = this.getType(formatId);
     if (!FieldFormat) {
       throw new Error(`Field Format '${formatId}' not found!`);
     }
@@ -154,7 +153,9 @@ class FieldFormatRegistry {
    */
 
   getByFieldType(fieldType) {
-    return this.fieldFormats.filter(format => format.fieldType.indexOf(fieldType) !== -1);
+    return this.fieldFormats
+      .values()
+      .filter(format => format.fieldType.indexOf(fieldType) !== -1);
   }
 
   /**
@@ -165,20 +166,20 @@ class FieldFormatRegistry {
    * @param  {String[]} esTypes
    * @return {FieldFormat}
    */
-  getDefaultInstance = _.memoize(this.getDefaultInstancePlain, this.getDefaultInstanceCacheResolver);
+  getDefaultInstance = memoize(this.getDefaultInstancePlain, this.getDefaultInstanceCacheResolver);
 
   parseDefaultTypeMap(value) {
     this._defaultMap = value;
-    _.forOwn(this, function (fn) {
-      if (_.isFunction(fn) && fn.cache) {
+    forOwn(this, function (fn) {
+      if (isFunction(fn) && fn.cache) {
         // clear all memoize caches
-        fn.cache = new _.memoize.Cache();
+        fn.cache = new memoize.Cache();
       }
     });
   }
 
   register = (module) => {
-    this.fieldFormats.push(module(FieldFormat));
+    this.fieldFormats.set(module.id, module(FieldFormat));
     return this;
   };
 }
