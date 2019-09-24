@@ -427,7 +427,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
   };
 
   // metadata.branch corresponds to the version used in documentation links.
-  const docsUrl = `https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/data-frame-transform-pivot.html`;
+  const docsUrl = `https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/transform-pivot.html`;
   const advancedEditorHelpText = (
     <Fragment>
       {i18n.translate('xpack.ml.dataframe.stepDefineForm.advancedEditorHelpText', {
