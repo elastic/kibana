@@ -439,18 +439,27 @@ app.controller('graphuiPlugin', function (
   };
 
   $scope.fillWorkspace = async () => {
-    initWorkspaceIfRequired();
-    const fields = selectedFieldsSelector(store.getState());
-    const topTermNodes = await fetchTopNodes(
-      npStart.core.http.post,
-      $scope.selectedIndex.title,
-      fields
-    );
-    $scope.workspace.mergeGraph({
-      nodes: topTermNodes,
-      edges: []
-    });
-    $scope.workspace.fillInGraph(fields.length * 10);
+    try {
+      const fields = selectedFieldsSelector(store.getState());
+      const topTermNodes = await fetchTopNodes(
+        npStart.core.http.post,
+        $scope.selectedIndex.title,
+        fields
+      );
+      initWorkspaceIfRequired();
+      $scope.workspace.mergeGraph({
+        nodes: topTermNodes,
+        edges: []
+      });
+      $scope.workspace.fillInGraph(fields.length * 10);
+    } catch (e) {
+      toastNotifications.addDanger({
+        title: i18n.translate(
+          'xpack.graph.fillWorkspaceError',
+          { defaultMessage: 'Fetching top terms failed: {message}', values: { message: e.message } }
+        ),
+      });
+    }
   };
 
   $scope.submit = function (searchTerm) {
