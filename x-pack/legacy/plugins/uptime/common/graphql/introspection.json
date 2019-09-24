@@ -2772,6 +2772,14 @@
             "type": { "kind": "OBJECT", "name": "StateUrl", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "error",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Error", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,

@@ -51,12 +51,12 @@ export const MonitorListDrawer = ({ summary }: MonitorListDrawerProps) => {
       downLocations.push(check.monitor);
     }
   });
-  const displayMonitorStatus = (locations: CheckMonitor[], color: string) => {
+  const displayMonitorStatus = (locations: CheckMonitor[], color: string, titleTxt: string) => {
     return (
       <>
         <EuiText size="s">
           <EuiHealth color={color} />
-          Up in{' '}
+          {titleTxt} in{' '}
           {locations.map((location, index) => (index ? ', ' : '') + (location.name || location.ip))}
         </EuiText>
         <EuiSpacer size="s" />
@@ -80,8 +80,8 @@ export const MonitorListDrawer = ({ summary }: MonitorListDrawerProps) => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        {downLocations.length > 0 && displayMonitorStatus(downLocations, danger)}
-        {upLocations.length > 0 && displayMonitorStatus(upLocations, success)}
+        {downLocations.length > 0 && displayMonitorStatus(downLocations, danger, 'Down')}
+        {upLocations.length > 0 && displayMonitorStatus(upLocations, success, 'Up')}
       </ContainerDiv>
     );
   } else {

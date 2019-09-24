@@ -97,6 +97,10 @@ query MonitorStates($dateRangeStart: String!, $dateRangeEnd: String!, $filters: 
           domain
         }
         timestamp
+        error {
+          type
+          message
+        }
       }
     }
   }

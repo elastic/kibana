@@ -306,6 +306,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                         Collection podUids = new HashSet();
                         Collection containerIds = new HashSet();
                         Collection tls = new HashSet();
+                        Map error = new HashMap();
                         String name = null; 
                         for (state in states) {
                           result.putAll(state.globals);
@@ -338,6 +339,9 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                             }
                             if (check.tls != null) {
                               tls.add(check.tls);
+                            }
+                            if(check.error != null){
+                              error = check.error;
                             }
                           }
                         }
@@ -379,7 +383,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                           result.tls = new HashMap();
                           result.tls = tls;
                         }
-      
+                        result.error = error;
                         return result;
                         `,
                 },
