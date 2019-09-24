@@ -25,17 +25,19 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const esArchiver = getService('esArchiver');
 
   describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
+      await esArchiver.load('dashboard/current/kibana');
       // We use a really small window to minimize differences across os's and browsers.
       await browser.setScreenshotSize(1000, 500);
     });
 
     after(async function () {
       await browser.setWindowSize(1300, 900);
-      const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
-      await PageObjects.dashboard.deleteDashboard('area', id);
+      // const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+      // await PageObjects.dashboard.deleteDashboard('area', id);
     });
 
     it('compare TSVB snapshot', async () => {
@@ -59,6 +61,8 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       expect(percentDifference).to.be.lessThan(0.02);
     });
 
+    // FLAKY: https://github.com/elastic/kibana/issues/40173
+    // This test passes locally for LeeDr but fails every time on Jenkins
     it('compare area chart snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
