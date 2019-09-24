@@ -19,7 +19,7 @@ import { WithWaffleOptions } from '../../../containers/waffle/with_waffle_option
 import { WithWaffleTime } from '../../../containers/waffle/with_waffle_time';
 import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocompletion';
 import { WithSource } from '../../../containers/with_source';
-import { SavedViewsToolbarControls } from '../../../components/waffle/saved_views_toolbar_items';
+import { SavedViewsToolbarControls } from '../../../components/saved_view/toolbar_control';
 import { WithWaffleViewState } from '../../../containers/waffle/with_waffle_view_state';
 
 export const SnapshotToolbar = injectI18n(({ intl }) => (
@@ -119,6 +119,7 @@ export const SnapshotToolbar = injectI18n(({ intl }) => (
                         defaultViewState={defaultViewState}
                         viewState={viewState}
                         onViewChange={onViewChange}
+                        viewType={'INVENTORY_VIEW'}
                       />
                     )}
                   </WithWaffleViewState>

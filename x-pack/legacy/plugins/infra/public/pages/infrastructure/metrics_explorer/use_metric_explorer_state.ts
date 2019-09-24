@@ -11,8 +11,19 @@ import {
   MetricsExplorerAggregation,
 } from '../../../../server/routes/metrics_explorer/types';
 import { useMetricsExplorerData } from '../../../containers/metrics_explorer/use_metrics_explorer_data';
-import { MetricsExplorerOptionsContainer } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
+import {
+  MetricsExplorerOptionsContainer,
+  MetricsExplorerChartOptions,
+  MetricsExplorerTimeOptions,
+  MetricsExplorerOptions,
+} from '../../../containers/metrics_explorer/use_metrics_explorer_options';
 import { SourceQuery } from '../../../graphql/types';
+
+export interface MetricExplorerViewState {
+  chartOptions: MetricsExplorerChartOptions;
+  currentTimerange: MetricsExplorerTimeOptions;
+  options: MetricsExplorerOptions;
+}
 
 export const useMetricsExplorerState = (
   source: SourceQuery.Query['source']['configuration'],
@@ -21,6 +32,7 @@ export const useMetricsExplorerState = (
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [afterKey, setAfterKey] = useState<string | null>(null);
   const {
+    defaultViewState,
     options,
     currentTimerange,
     chartOptions,
@@ -100,6 +112,18 @@ export const useMetricsExplorerState = (
     [options]
   );
 
+  const onViewStateChange = useCallback((vs: MetricExplorerViewState) => {
+    if (vs.chartOptions) {
+      setChartOptions(vs.chartOptions);
+    }
+    if (vs.currentTimerange) {
+      setTimeRange(vs.currentTimerange);
+    }
+    if (vs.options) {
+      setOptions(vs.options);
+    }
+  }, []);
+
   return {
     loading,
     error,
@@ -115,5 +139,7 @@ export const useMetricsExplorerState = (
     handleTimeChange,
     handleRefresh,
     handleLoadMore: setAfterKey,
+    defaultViewState,
+    onViewStateChange,
   };
 };

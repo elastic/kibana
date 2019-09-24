@@ -23,6 +23,8 @@ import { MetricsExplorerMetrics } from './metrics';
 import { MetricsExplorerGroupBy } from './group_by';
 import { MetricsExplorerAggregationPicker } from './aggregation';
 import { MetricsExplorerChartOptions as MetricsExplorerChartOptionsComponent } from './chart_options';
+import { SavedViewsToolbarControls } from '../saved_view/toolbar_control';
+import { MetricExplorerViewState } from '../../pages/infrastructure/metrics_explorer/use_metric_explorer_state';
 
 interface Props {
   intl: InjectedIntl;
@@ -30,6 +32,7 @@ interface Props {
   timeRange: MetricsExplorerTimeOptions;
   options: MetricsExplorerOptions;
   chartOptions: MetricsExplorerChartOptions;
+  defaultViewState: MetricExplorerViewState;
   onRefresh: () => void;
   onTimeChange: (start: string, end: string) => void;
   onGroupByChange: (groupBy: string | null) => void;
@@ -37,6 +40,7 @@ interface Props {
   onMetricsChange: (metrics: MetricsExplorerMetric[]) => void;
   onAggregationChange: (aggregation: MetricsExplorerAggregation) => void;
   onChartOptionsChange: (chartOptions: MetricsExplorerChartOptions) => void;
+  onViewStateChange: (vs: MetricExplorerViewState) => void;
 }
 
 export const MetricsExplorerToolbar = injectI18n(
@@ -52,6 +56,8 @@ export const MetricsExplorerToolbar = injectI18n(
     onAggregationChange,
     chartOptions,
     onChartOptionsChange,
+    defaultViewState,
+    onViewStateChange,
   }: Props) => {
     const isDefaultOptions =
       options.aggregation === MetricsExplorerAggregation.avg && options.metrics.length === 0;
@@ -109,6 +115,16 @@ export const MetricsExplorerToolbar = injectI18n(
             <MetricsExplorerChartOptionsComponent
               onChange={onChartOptionsChange}
               chartOptions={chartOptions}
+            />
+            <SavedViewsToolbarControls
+              defaultViewState={defaultViewState}
+              viewState={{
+                options,
+                chartOptions,
+                currentTimerange: timeRange,
+              }}
+              viewType={'METRIC_EXPLORER_VIEW'}
+              onViewChange={onViewStateChange}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false} style={{ marginRight: 5 }}>

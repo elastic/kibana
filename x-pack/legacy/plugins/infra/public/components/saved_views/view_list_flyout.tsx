@@ -17,24 +17,30 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { WaffleViewState, SavedView } from '../../containers/waffle/with_waffle_view_state';
+import { SavedView } from '../../hooks/use_saved_view';
 
-interface Props {
-  views: SavedView[];
+interface Props<ViewState> {
+  views: Array<SavedView<ViewState>>;
   loading: boolean;
   close(): void;
-  setView(vs: WaffleViewState): void;
+  setView(viewState: ViewState): void;
   deleteView(id: string): void;
 }
 
-export const SavedViewListFlyout = ({ close, views, setView, deleteView, loading }: Props) => {
+export function SavedViewListFlyout<ViewState>({
+  close,
+  views,
+  setView,
+  deleteView,
+  loading,
+}: Props<ViewState>) {
   const columns = [
     {
       field: 'name',
       name: i18n.translate('xpack.infra.openView.columnNames.name', { defaultMessage: 'Name' }),
       sortable: true,
       truncateText: true,
-      render: (name: string, item: WaffleViewState) => {
+      render: (name: string, item: SavedView<ViewState>) => {
         return (
           <EuiButtonEmpty
             onClick={() => {
@@ -61,7 +67,7 @@ export const SavedViewListFlyout = ({ close, views, setView, deleteView, loading
           }),
           icon: 'trash',
           color: 'danger',
-          available: (item: SavedView) => !item.isDefault,
+          available: (item: SavedView<ViewState>) => !item.isDefault,
           onClick: useCallback(e => deleteView(e.id), []),
         },
       ],
@@ -96,4 +102,4 @@ export const SavedViewListFlyout = ({ close, views, setView, deleteView, loading
       </EuiModalFooter>
     </EuiFlyout>
   );
-};
+}

@@ -11,23 +11,23 @@ import { useFindSavedObject } from './use_find_saved_object';
 import { useCreateSavedObject } from './use_create_saved_object';
 import { useDeleteSavedObject } from './use_delete_saved_object';
 
-interface SavedView {
+export type SavedView<ViewState> = ViewState & {
   name: string;
   id: string;
   isDefault?: boolean;
-  [p: string]: any;
-}
+};
 
-export interface SavedViewSavedObject extends SavedObjectAttributes {
+export interface SavedViewSavedObject<ViewState> extends SavedObjectAttributes {
   type: string;
   data: {
     name: string;
-    [p: string]: any;
-  };
+  } & ViewState;
 }
 
 export const useSavedView = <ViewState>(defaultViewState: ViewState, viewType: string) => {
-  const { data, loading, find, error } = useFindSavedObject<SavedViewSavedObject>('config');
+  const { data, loading, find, error } = useFindSavedObject<SavedViewSavedObject<ViewState>>(
+    'config'
+  );
   const { create } = useCreateSavedObject('config');
   const { deleteObject, deletedId } = useDeleteSavedObject('config');
   const deleteView = useCallback((id: string) => deleteObject(id), []);
@@ -38,7 +38,7 @@ export const useSavedView = <ViewState>(defaultViewState: ViewState, viewType: s
 
   const savedObjects = data ? data.savedObjects : [];
   const views = useMemo(() => {
-    const items: SavedView[] = [
+    const items: Array<SavedView<ViewState>> = [
       {
         name: i18n.translate('xpack.infra.savedView.defaultViewName', {
           defaultMessage: 'Default View',

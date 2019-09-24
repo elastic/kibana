@@ -42,6 +42,8 @@ export const MetricsExplorerPage = injectI18n(
       handleTimeChange,
       handleRefresh,
       handleLoadMore,
+      defaultViewState,
+      onViewStateChange,
     } = useMetricsExplorerState(source, derivedIndexPattern);
 
     useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
@@ -74,6 +76,8 @@ export const MetricsExplorerPage = injectI18n(
           onMetricsChange={handleMetricsChange}
           onAggregationChange={handleAggregationChange}
           onChartOptionsChange={setChartOptions}
+          onViewStateChange={onViewStateChange}
+          defaultViewState={defaultViewState}
         />
         {error ? (
           <NoData

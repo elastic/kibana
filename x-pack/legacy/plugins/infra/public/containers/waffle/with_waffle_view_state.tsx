@@ -129,9 +129,3 @@ export interface WaffleViewState {
   autoReload?: ReturnType<typeof waffleTimeSelectors.selectIsAutoReloading>;
   filterQuery?: ReturnType<typeof waffleFilterSelectors.selectWaffleFilterQuery>;
 }
-
-export interface SavedView extends WaffleViewState {
-  name: string;
-  id: string;
-  isDefault?: boolean;
-}

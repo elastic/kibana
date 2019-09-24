@@ -7,20 +7,20 @@
 import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import React, { useCallback, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SavedViewListFlyout } from './saved_view_list_flyout';
-import { SavedViewCreateModal } from './saved_view_create_modal';
-import { WaffleViewState } from '../../containers/waffle/with_waffle_view_state';
+import { SavedViewListFlyout } from './view_list_flyout';
+import { SavedViewCreateModal } from './create_modal';
 import { useSavedView } from '../../hooks/use_saved_view';
-interface Props {
-  viewState: WaffleViewState;
-  defaultViewState: WaffleViewState;
-  onViewChange(viewState: WaffleViewState): void;
+interface Props<ViewState> {
+  viewType: string;
+  viewState: ViewState;
+  defaultViewState: ViewState;
+  onViewChange(viewState: ViewState): void;
 }
 
-export const SavedViewsToolbarControls = (props: Props) => {
+export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
   const { views, saveView, loading, deletedId, deleteView, find } = useSavedView(
     props.defaultViewState,
-    'INVENTORY_VIEW'
+    props.viewType
   );
   const [modalOpen, setModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -68,7 +68,7 @@ export const SavedViewsToolbarControls = (props: Props) => {
 
       {createModalOpen && <SavedViewCreateModal close={closeCreateModal} save={save} />}
       {modalOpen && (
-        <SavedViewListFlyout
+        <SavedViewListFlyout<ViewState>
           loading={loading}
           views={views}
           deleteView={deleteView}
@@ -78,4 +78,4 @@ export const SavedViewsToolbarControls = (props: Props) => {
       )}
     </>
   );
-};
+}
