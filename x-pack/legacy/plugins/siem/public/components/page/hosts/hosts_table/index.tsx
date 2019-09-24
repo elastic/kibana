@@ -131,7 +131,7 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
       <PaginatedTable
         activePage={activePage}
         columns={this.memoizedColumns(type, indexPattern)}
-        dataTestSubj="all-hosts"
+        dataTestSubj={`table-${tableType}`}
         headerCount={totalCount}
         headerTitle={i18n.HOSTS}
         headerUnit={i18n.UNIT(totalCount)}
