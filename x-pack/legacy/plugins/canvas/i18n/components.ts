@@ -9,16 +9,16 @@ import { CANVAS, JSON, KIBANA, PDF, POST, URL } from './constants';
 
 export const ComponentStrings = {
   App: {
-    getLoadErrorTitle: () =>
-      i18n.translate('xpack.canvas.app.loadErrorTitle', {
-        defaultMessage: 'Canvas failed to load :(',
-      }),
     getLoadErrorMessage: (error: string) =>
       i18n.translate('xpack.canvas.app.loadErrorMessage', {
         defaultMessage: 'Message: {error}',
         values: {
           error,
         },
+      }),
+    getLoadErrorTitle: () =>
+      i18n.translate('xpack.canvas.app.loadErrorTitle', {
+        defaultMessage: 'Canvas failed to load',
       }),
     getLoadingMessage: () =>
       i18n.translate('xpack.canvas.app.loadingMessage', {
@@ -33,6 +33,12 @@ export const ComponentStrings = {
     getTitleText: () =>
       i18n.translate('xpack.canvas.embedObject.titleText', {
         defaultMessage: 'Embed Object',
+      }),
+  },
+  ArgAddPopover: {
+    getAddAriaLabel: () =>
+      i18n.translate('xpack.canvas.argAddPopover.addAriaLabel', {
+        defaultMessage: 'Add argument',
       }),
   },
   Asset: {
@@ -127,6 +133,49 @@ export const ComponentStrings = {
     getRemoveAriaLabel: () =>
       i18n.translate('xpack.canvas.colorManager.removeAriaLabel', {
         defaultMessage: 'Remove Color',
+      }),
+  },
+  DatasourceDatasourceComponent: {
+    getChangeButtonLabel: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourceComponent.changeButtonLabel', {
+        defaultMessage: 'Change your data source',
+      }),
+    getPreviewButtonLabel: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourceComponent.previewButtonLabel', {
+        defaultMessage: 'Preview',
+      }),
+    getSaveButtonLabel: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourceComponent.saveButtonLabel', {
+        defaultMessage: 'Save',
+      }),
+  },
+  DatasourceNoDatasource: {
+    getPanelDescription: () =>
+      i18n.translate('xpack.canvas.datasourceNoDatasource.panelDescription', {
+        defaultMessage:
+          "This element does not have an attached data source. This is usually because the element is an image or other static asset. If that's not the case you might want to check your expression to make sure it is not malformed.",
+      }),
+    getPanelTitle: () =>
+      i18n.translate('xpack.canvas.datasourceNoDatasource.panelTitle', {
+        defaultMessage: 'No data source present',
+      }),
+  },
+  DatasourceDatasourcePreview: {
+    getEmptyFirstLineDescription: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourcePreview.emptyFirstLineDescription', {
+        defaultMessage: "We couldn't find any documents matching your search criteria.",
+      }),
+    getEmptySecondLineDescription: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourcePreview.emptySecondLineDescription', {
+        defaultMessage: 'Check your datasource settings and try again.',
+      }),
+    getEmptyTitle: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourcePreview.emptyTitle', {
+        defaultMessage: 'No documents found',
+      }),
+    getModalTitle: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourcePreview.modalTitle', {
+        defaultMessage: 'Datasource preview',
       }),
   },
   HelpMenu: {

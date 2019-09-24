@@ -4,15 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { PropTypes } from 'prop-types';
+import React, { MouseEvent } from 'react';
+import PropTypes from 'prop-types';
 import { EuiButtonIcon } from '@elastic/eui';
-import { Popover } from '../popover';
+// @ts-ignore untyped local
+import { Popover, PopoverChildrenProps } from '../popover';
+// @ts-ignore untyped local
 import { ArgAdd } from '../arg_add';
+// @ts-ignore untyped local
+import { Arg } from '../../expression_types/arg';
 
-export const ArgAddPopover = ({ options }) => {
-  const button = handleClick => (
-    <EuiButtonIcon iconType="plusInCircle" aria-label="Add Argument" onClick={handleClick} />
+import { ComponentStrings } from '../../../i18n';
+
+const { ArgAddPopover: strings } = ComponentStrings;
+
+interface ArgOptions {
+  arg: Arg;
+  onValueAdd: () => void;
+}
+
+interface Props {
+  options: ArgOptions[];
+}
+
+export const ArgAddPopover = ({ options }: Props) => {
+  const button = (handleClick: (ev: MouseEvent) => void) => (
+    <EuiButtonIcon
+      iconType="plusInCircle"
+      aria-label={strings.getAddAriaLabel()}
+      onClick={handleClick}
+    />
   );
 
   return (
@@ -22,7 +43,7 @@ export const ArgAddPopover = ({ options }) => {
       panelPaddingSize="none"
       button={button}
     >
-      {({ closePopover }) =>
+      {({ closePopover }: PopoverChildrenProps) =>
         options.map(opt => (
           <ArgAdd
             key={`${opt.arg.name}-add`}

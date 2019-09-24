@@ -101,7 +101,8 @@ export function FieldItem(props: FieldItemProps) {
       (field.type !== 'number' &&
         field.type !== 'string' &&
         field.type !== 'date' &&
-        field.type !== 'boolean')
+        field.type !== 'boolean' &&
+        field.type !== 'ip')
     ) {
       return;
     }
