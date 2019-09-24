@@ -13,6 +13,7 @@ import {
   HttpServiceSetup,
   CoreSetup,
   SavedObjectsService,
+  SavedObjectsErrorHelpers,
 } from '../../../../../../../src/core/server';
 import {
   elasticsearchServiceMock,
@@ -144,9 +145,7 @@ describe('onPostAuthInterceptor', () => {
 
     const savedObjectsService = {
       SavedObjectsClient: {
-        errors: {
-          isNotFoundError: (e: Error) => e.message === 'space not found',
-        },
+        errors: SavedObjectsErrorHelpers,
       },
       getSavedObjectsRepository: jest.fn().mockImplementation(() => {
         return {
@@ -156,7 +155,7 @@ describe('onPostAuthInterceptor', () => {
               if (space) {
                 return space;
               }
-              throw new Error('space not found');
+              throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
             }
           },
           create: () => null,
@@ -195,7 +194,7 @@ describe('onPostAuthInterceptor', () => {
         }
         const space = availableSpaces.find(s => s.id === spaceId);
         if (!space) {
-          throw new Error('space not found');
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError('space', spaceId);
         }
         return Promise.resolve(convertSavedObjectToSpace(space));
       },
@@ -341,12 +340,12 @@ describe('onPostAuthInterceptor', () => {
     });
 
     expect(response.body).toMatchInlineSnapshot(`
-            Object {
-              "error": "Unauthorized",
-              "message": "missing credendials",
-              "statusCode": 401,
-            }
-        `);
+                        Object {
+                          "error": "Unauthorized",
+                          "message": "missing credendials",
+                          "statusCode": 401,
+                        }
+                `);
 
     expect(spacesService.scopedClient).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -380,12 +379,12 @@ describe('onPostAuthInterceptor', () => {
     });
 
     expect(response.body).toMatchInlineSnapshot(`
-            Object {
-              "error": "Unauthorized",
-              "message": "missing credendials",
-              "statusCode": 401,
-            }
-        `);
+      Object {
+        "error": "Unauthorized",
+        "message": "missing credendials",
+        "statusCode": 401,
+      }
+    `);
 
     expect(spacesService.scopedClient).toHaveBeenCalledWith(
       expect.objectContaining({
