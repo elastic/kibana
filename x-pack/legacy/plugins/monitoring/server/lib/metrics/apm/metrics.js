@@ -423,7 +423,7 @@ export const metrics = {
     label: i18n.translate('xpack.monitoring.metrics.apm.acm.responseErrors.acmUnauthorizedLabel', {
       defaultMessage: 'Unauthorized'
     }),
-    description: i18n.translate('xpack.monitoring.metrics.apm.acm.responseErrors.acmForbiddenDescription', {
+    description: i18n.translate('xpack.monitoring.metrics.apm.acm.responseErrors.acmUnauthorizedDescription', {
       defaultMessage: 'Unauthorized HTTP Requests rejected'
     })
   }),
