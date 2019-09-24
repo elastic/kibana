@@ -58,6 +58,7 @@ interface Props {
   prepend?: React.ReactNode;
   persistedLog?: PersistedLog;
   bubbleSubmitEvent?: boolean;
+  placeholder?: string;
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
   onChange?: (query: Query) => void;
   onSubmit?: (query: Query) => void;
@@ -471,10 +472,13 @@ export class QueryBarInputUI extends Component<Props, State> {
           <div role="search">
             <div className="kuiLocalSearchAssistedInput">
               <EuiFieldText
-                placeholder={this.props.intl.formatMessage({
-                  id: 'data.query.queryBar.searchInputPlaceholder',
-                  defaultMessage: 'Search',
-                })}
+                placeholder={
+                  this.props.placeholder ||
+                  this.props.intl.formatMessage({
+                    id: 'data.query.queryBar.searchInputPlaceholder',
+                    defaultMessage: 'Search',
+                  })
+                }
                 value={this.getQueryString()}
                 onKeyDown={this.onKeyDown}
                 onKeyUp={this.onKeyUp}
