@@ -76,6 +76,21 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
   );
 };
 
+export function toPreviewExpression(state: State, frame: FramePublicAPI) {
+  return toExpression(
+    {
+      ...state,
+      layers: state.layers.map(layer => ({ ...layer, hide: true })),
+      // hide legend for preview
+      legend: {
+        ...state.legend,
+        isVisible: false,
+      },
+    },
+    frame
+  );
+}
+
 export function getScaleType(metadata: OperationMetadata | null, defaultScale: ScaleType) {
   if (!metadata) {
     return defaultScale;

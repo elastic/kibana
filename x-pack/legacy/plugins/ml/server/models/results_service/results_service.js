@@ -200,6 +200,73 @@ export function resultsServiceProvider(callWithRequest) {
 
   }
 
+  // Returns the maximum anomaly_score for result_type:bucket over jobIds for the interval passed in
+  async function getMaxAnomalyScore(jobIds = [], earliestMs, latestMs) {
+    // Build the criteria to use in the bool filter part of the request.
+    // Adds criteria for the time range plus any specified job IDs.
+    const boolCriteria = [
+      {
+        range: {
+          timestamp: {
+            gte: earliestMs,
+            lte: latestMs,
+            format: 'epoch_millis'
+          }
+        }
+      }
+    ];
+
+    if (jobIds.length > 0) {
+      let jobIdFilterStr = '';
+      jobIds.forEach((jobId, i) => {
+        if (i > 0) {
+          jobIdFilterStr += ' OR ';
+        }
+        jobIdFilterStr += 'job_id:';
+        jobIdFilterStr += jobId;
+      });
+      boolCriteria.push({
+        query_string: {
+          analyze_wildcard: false,
+          query: jobIdFilterStr
+        }
+      });
+    }
+
+    const query =  {
+      size: 0,
+      index: ML_RESULTS_INDEX_PATTERN,
+      body: {
+        query: {
+          bool: {
+            filter: [{
+              query_string: {
+                query: 'result_type:bucket',
+                analyze_wildcard: false
+              }
+            }, {
+              bool: {
+                must: boolCriteria
+              }
+            }]
+          }
+        },
+        aggs: {
+          max_score: {
+            max: {
+              field: 'anomaly_score'
+            }
+          }
+        }
+      }
+    };
+
+    const resp = await callWithRequest('search', query);
+    const maxScore = _.get(resp, ['aggregations', 'max_score', 'value'], null);
+
+    return maxScore;
+  }
+
   // Obtains the latest bucket result timestamp by job ID.
   // Returns data over all jobs unless an optional list of job IDs of interest is supplied.
   // Returned response consists of latest bucket timestamps (ms since Jan 1 1970) against job ID
@@ -342,6 +409,7 @@ export function resultsServiceProvider(callWithRequest) {
     getCategoryDefinition,
     getCategoryExamples,
     getLatestBucketTimestampByJob,
+    getMaxAnomalyScore
   };
 
 }

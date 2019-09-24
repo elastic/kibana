@@ -76,7 +76,12 @@ export function InnerWorkspacePanel({
 
   function onDrop() {
     if (suggestionForDraggedField) {
-      switchToSuggestion(framePublicAPI, dispatch, suggestionForDraggedField);
+      switchToSuggestion(
+        framePublicAPI,
+        dispatch,
+        suggestionForDraggedField,
+        'SWITCH_VISUALIZATION'
+      );
     }
   }
 
@@ -152,7 +157,7 @@ export function InnerWorkspacePanel({
     } else {
       return (
         <ExpressionRendererComponent
-          className="lnsExpressionOutput"
+          className="lnsExpressionRenderer"
           expression={expression!}
           onRenderFailure={(e: unknown) => {
             setExpressionError(e);

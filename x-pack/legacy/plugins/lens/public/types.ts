@@ -271,11 +271,6 @@ export interface VisualizationSuggestion<T = unknown> {
    */
   state: T;
   /**
-   * The expression of the preview of the chart rendered if the suggestion is advertised to the user.
-   * If there is no expression provided, the preview icon is used.
-   */
-  previewExpression?: Ast | string;
-  /**
    * An EUI icon type shown instead of the preview expression.
    */
   previewIcon: string;
@@ -322,6 +317,12 @@ export interface Visualization<T = unknown, P = unknown> {
   renderConfigPanel: (domElement: Element, props: VisualizationProps<T>) => void;
 
   toExpression: (state: T, frame: FramePublicAPI) => Ast | string | null;
+
+  /**
+   * Epression to render a preview version of the chart in very constraint space.
+   * If there is no expression provided, the preview icon is used.
+   */
+  toPreviewExpression?: (state: T, frame: FramePublicAPI) => Ast | string | null;
 
   // The frame will call this function on all visualizations when the table changes, or when
   // rendering additional ways of using the data
