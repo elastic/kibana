@@ -14,6 +14,7 @@ import { FieldEditor } from './field_editor';
 import {
   selectedFieldsSelector,
   fieldsSelector,
+  fieldMapSelector,
   updateFieldProperties,
   selectField,
   deselectField,
@@ -25,6 +26,7 @@ export type UpdateableFieldProperties = 'hopSize' | 'lastValidHopSize' | 'color'
 
 function FieldManagerComponent(props: {
   allFields: WorkspaceField[];
+  fieldMap: Record<string, WorkspaceField>;
   selectedFields: WorkspaceField[];
   updateFieldProperties: (props: {
     fieldName: string;
@@ -51,6 +53,7 @@ function FieldManagerComponent(props: {
 
 export const FieldManager = connect(
   (state: GraphState) => ({
+    fieldMap: fieldMapSelector(state),
     allFields: fieldsSelector(state),
     selectedFields: selectedFieldsSelector(state),
   }),

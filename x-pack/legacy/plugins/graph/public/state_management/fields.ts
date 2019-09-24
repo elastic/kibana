@@ -13,11 +13,6 @@ import { GraphState, GraphStoreDependencies } from './store';
 import { reset } from './global';
 import { setDatasource } from './datasource';
 import { matchesOne, InferActionType } from './helpers';
-import actionCreatorFactory from 'typescript-fsa';
-import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
-import { createSelector } from 'reselect';
-import { WorkspaceField } from '../types';
-import { GraphState } from './store';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/fields');
 

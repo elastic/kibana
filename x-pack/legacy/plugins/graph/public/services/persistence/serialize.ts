@@ -17,7 +17,7 @@ import {
   Workspace,
   AdvancedSettings,
 } from '../../types';
-import { DatasourceState, IndexpatternDatasource } from '../../state_management';
+import { IndexpatternDatasource } from '../../state_management';
 
 function serializeNode(
   { data, scaledSize, parent, x, y, label, color }: WorkspaceNode,

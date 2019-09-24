@@ -5,16 +5,15 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { Storage } from 'ui/storage';
 import { CoreStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import { IndexPatternSavedObject } from '../types';
 import { I18nProvider } from '@kbn/i18n/react';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { IndexPatternSavedObject, IndexPatternProvider } from '../types';
 import {
   QueryBarInput,
   Query,
@@ -33,9 +32,10 @@ const localStorage = new Storage(window.localStorage);
 export interface SearchBarProps {
   isLoading: boolean;
   initialQuery?: string;
-  currentIndexPattern?: IndexpatternDatasource;
+  currentDatasource?: IndexpatternDatasource;
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
   onQuerySubmit: (query: string) => void;
+  indexPatternProvider: IndexPatternProvider;
   savedObjects: CoreStart['savedObjects'];
   uiSettings: CoreStart['uiSettings'];
   http: CoreStart['http'];
@@ -60,7 +60,7 @@ function queryToString(query: Query, indexPattern: IndexPattern) {
 
 export function SearchBarComponent(props: SearchBarProps) {
   const {
-    currentIndexPattern,
+    currentDatasource,
     onQuerySubmit,
     isLoading,
     onIndexPatternSelected,
@@ -68,8 +68,24 @@ export function SearchBarComponent(props: SearchBarProps) {
     savedObjects,
     http,
     initialQuery,
+    indexPatternProvider,
   } = props;
   const [query, setQuery] = useState<Query>({ language: 'kuery', query: initialQuery || '' });
+  const [currentIndexPattern, setCurrentIndexPattern] = useState<IndexPattern | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    async function fetchPattern() {
+      if (currentDatasource) {
+        setCurrentIndexPattern(await indexPatternProvider.get(currentDatasource.id));
+      } else {
+        setCurrentIndexPattern(undefined);
+      }
+    }
+    fetchPattern();
+  }, [currentDatasource]);
+
   return (
     <I18nProvider>
       <form

@@ -50,6 +50,7 @@ import gws from './angular/graph_client_workspace.js';
 import { SavedWorkspacesProvider } from './angular/services/saved_workspaces';
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
 import { openSourceModal } from './services/source_modal';
+import { createCachedIndexPatterProvider } from './services/index_pattern_cache';
 import { urlTemplateRegex } from  './helpers/url_template';
 import {
   asAngularSyncedObservable,
@@ -284,9 +285,11 @@ app.controller('graphuiPlugin', function (
       });
   };
 
+  $scope.indexPatternProvider = createCachedIndexPatterProvider($route.current.locals.GetIndexPatternProvider.get);
+
   const store = createGraphStore({
     basePath: chrome.getBasePath(),
-    indexPatternProvider: $route.current.locals.GetIndexPatternProvider,
+    indexPatternProvider: $scope.indexPatternProvider,
     indexPatterns: $route.current.locals.indexPatterns,
     createWorkspace: (indexPattern) => {
       const options = {
