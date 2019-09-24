@@ -42,12 +42,10 @@ export function ChangeIndexPattern({
     layer ? layer.indexPatternId : currentIndexPatternId
   );
 
-  const indexPatternList = Object.values(indexPatterns)
-    // .filter(indexPattern => indexPattern.id !== layer.indexPatternId)
-    .map(indexPattern => ({
-      ...indexPattern,
-      isTransferable: layer ? isLayerTransferable(layer, indexPattern) : undefined,
-    }));
+  const indexPatternList = Object.values(indexPatterns).map(indexPattern => ({
+    ...indexPattern,
+    isTransferable: layer ? isLayerTransferable(layer, indexPattern) : undefined,
+  }));
 
   const createTrigger = function() {
     const { label, ...rest } = trigger;

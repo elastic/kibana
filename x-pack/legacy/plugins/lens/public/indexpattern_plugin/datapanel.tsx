@@ -67,21 +67,20 @@ export function IndexPatternDataPanel({
   dateRange,
 }: DatasourceDataPanelProps<IndexPatternPrivateState>) {
   const { indexPatterns, currentIndexPatternId } = state;
-  const [showIndexPatternSwitcher, setShowIndexPatternSwitcher] = useState(false);
 
   const onChangeIndexPattern = useCallback(
     (newIndexPattern: string) => {
-      setState({
-        ...state,
-        layers: isSingleEmptyLayer(state.layers)
-          ? mapValues(state.layers, layer =>
+      setState(prevState => ({
+        ...prevState,
+        layers: isSingleEmptyLayer(prevState.layers)
+          ? mapValues(prevState.layers, layer =>
               updateLayerIndexPattern(layer, indexPatterns[newIndexPattern])
             )
-          : state.layers,
+          : prevState.layers,
         currentIndexPatternId: newIndexPattern,
-      });
+      }));
     },
-    [state, setState]
+    [setState]
   );
 
   const updateFieldsWithCounts = useCallback(
@@ -105,12 +104,10 @@ export function IndexPatternDataPanel({
 
   const onToggleEmptyFields = useCallback(() => {
     setState(prevState => ({ ...prevState, showEmptyFields: !prevState.showEmptyFields }));
-  }, [state, setState]);
+  }, [setState]);
 
   return (
     <MemoizedDataPanel
-      showIndexPatternSwitcher={showIndexPatternSwitcher}
-      setShowIndexPatternSwitcher={setShowIndexPatternSwitcher}
       currentIndexPatternId={currentIndexPatternId}
       indexPatterns={indexPatterns}
       query={query}
@@ -119,8 +116,7 @@ export function IndexPatternDataPanel({
       showEmptyFields={state.showEmptyFields}
       onToggleEmptyFields={onToggleEmptyFields}
       core={core}
-      // only pass in the state change callback if it's actually needed to avoid re-renders
-      onChangeIndexPattern={showIndexPatternSwitcher ? onChangeIndexPattern : undefined}
+      onChangeIndexPattern={onChangeIndexPattern}
       updateFieldsWithCounts={
         !indexPatterns[currentIndexPatternId].hasExistence ? updateFieldsWithCounts : undefined
       }
@@ -149,8 +145,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   query,
   dateRange,
   dragDropContext,
-  showIndexPatternSwitcher,
-  setShowIndexPatternSwitcher,
   onChangeIndexPattern,
   updateFieldsWithCounts,
   showEmptyFields,
@@ -163,11 +157,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   query: Query;
   core: DatasourceDataPanelProps['core'];
   dragDropContext: DragContextState;
-  showIndexPatternSwitcher: boolean;
-  setShowIndexPatternSwitcher: (show: boolean) => void;
   showEmptyFields: boolean;
   onToggleEmptyFields: () => void;
-  onChangeIndexPattern?: (newId: string) => void;
+  onChangeIndexPattern: (newId: string) => void;
   updateFieldsWithCounts?: (indexPatternId: string, fields: IndexPattern['fields']) => void;
 }) {
   if (Object.keys(indexPatterns).length === 0) {
@@ -346,7 +338,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 currentIndexPatternId={currentIndexPatternId}
                 indexPatterns={indexPatterns}
                 onChangeIndexPattern={(newId: string) => {
-                  if (onChangeIndexPattern) onChangeIndexPattern(newId);
+                  onChangeIndexPattern(newId);
 
                   setLocalState(s => ({
                     ...s,
