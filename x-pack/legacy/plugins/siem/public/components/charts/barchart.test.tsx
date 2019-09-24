@@ -7,15 +7,16 @@
 import { shallow, ShallowWrapper } from 'enzyme';
 import * as React from 'react';
 
-import { BarChartBaseComponent, BarChartWithCustomPrompt } from './barchart';
-import { ChartConfigsData, ChartHolder } from './common';
+import { BarChartBaseComponent, BarChartWithCustomPrompt, BarChart } from './barchart';
+import { ChartSeriesData, ChartHolder } from './common';
 import { BarSeries, ScaleType, Axis } from '@elastic/charts';
 
 jest.mock('@elastic/charts');
-
+const customHeight = '100px';
+const customWidth = '120px';
 describe('BarChartBaseComponent', () => {
   let shallowWrapper: ShallowWrapper;
-  const mockBarChartData: ChartConfigsData[] = [
+  const mockBarChartData: ChartSeriesData[] = [
     {
       key: 'uniqueSourceIps',
       value: [{ y: 1714, x: 'uniqueSourceIps', g: 'uniqueSourceIps' }],
@@ -31,7 +32,7 @@ describe('BarChartBaseComponent', () => {
   describe('render', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
-        <BarChartBaseComponent height={100} width={120} data={mockBarChartData} />
+        <BarChartBaseComponent height={customHeight} width={customWidth} data={mockBarChartData} />
       );
     });
 
@@ -54,7 +55,12 @@ describe('BarChartBaseComponent', () => {
 
     beforeAll(() => {
       shallowWrapper = shallow(
-        <BarChartBaseComponent height={100} width={120} data={mockBarChartData} configs={configs} />
+        <BarChartBaseComponent
+          height={customHeight}
+          width={customWidth}
+          data={mockBarChartData}
+          configs={configs}
+        />
       );
     });
 
@@ -103,7 +109,7 @@ describe('BarChartBaseComponent', () => {
   describe('render with default configs if no customized configs given', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
-        <BarChartBaseComponent height={100} width={120} data={mockBarChartData} />
+        <BarChartBaseComponent height={customHeight} width={customWidth} data={mockBarChartData} />
       );
     });
 
@@ -198,7 +204,11 @@ describe.each([
   describe('renders barchart', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
-        <BarChartWithCustomPrompt height={100} width={120} data={mockBarChartData} />
+        <BarChartWithCustomPrompt
+          height={customHeight}
+          width={customWidth}
+          data={mockBarChartData}
+        />
       );
     });
 
@@ -271,14 +281,49 @@ describe.each([
       },
     ],
   ],
-])('renders prompt', (data: ChartConfigsData[] | [] | null | undefined) => {
+])('renders prompt', (data: ChartSeriesData[] | [] | null | undefined) => {
   let shallowWrapper: ShallowWrapper;
   beforeAll(() => {
-    shallowWrapper = shallow(<BarChartWithCustomPrompt height={100} width={120} data={data} />);
+    shallowWrapper = shallow(
+      <BarChartWithCustomPrompt height={customHeight} width={customWidth} data={data} />
+    );
   });
 
   it('render Chart Holder', () => {
     expect(shallowWrapper.find(BarChartBaseComponent)).toHaveLength(0);
     expect(shallowWrapper.find(ChartHolder)).toHaveLength(1);
+  });
+});
+
+describe('BarChart', () => {
+  let shallowWrapper: ShallowWrapper;
+  const mockConfig = {
+    series: {
+      xScaleType: ScaleType.Time,
+      yScaleType: ScaleType.Linear,
+      stackAccessors: ['g'],
+    },
+    axis: {
+      xTickFormatter: jest.fn(),
+      yTickFormatter: jest.fn(),
+      tickSize: 8,
+    },
+    customHeight: 324,
+  };
+
+  it('should render if data exist', () => {
+    const mockData = [
+      { key: 'uniqueSourceIps', value: [{ y: 100, x: 100, g: 'group' }], color: '#DB1374' },
+    ];
+    shallowWrapper = shallow(<BarChart configs={mockConfig} barChart={mockData} />);
+    expect(shallowWrapper.find('AutoSizer')).toHaveLength(1);
+    expect(shallowWrapper.find('ChartHolder')).toHaveLength(0);
+  });
+
+  it('should render a chartHolder if no data given', () => {
+    const mockData = [{ key: 'uniqueSourceIps', value: [], color: '#DB1374' }];
+    shallowWrapper = shallow(<BarChart configs={mockConfig} barChart={mockData} />);
+    expect(shallowWrapper.find('AutoSizer')).toHaveLength(0);
+    expect(shallowWrapper.find('ChartHolder')).toHaveLength(1);
   });
 });
