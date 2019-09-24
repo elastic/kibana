@@ -63,7 +63,7 @@ export type TimelionSetupDependencies = TimelionVisualizationDependencies &
   LegacyDependenciesPluginSetup;
 
 /** @internal */
-export type TimelionStartDependencies = TimelionVisualizationDependencies &
+export type TimelionStartDependencies = Pick<TimelionVisualizationDependencies, 'uiSettings'> &
   LegacyDependenciesPluginStart;
 
 /** @internal */
