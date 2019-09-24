@@ -133,7 +133,7 @@ export const JsonWatchEditForm = () => {
           />
         </ErrableFormRow>
 
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
 
         <ErrableFormRow
           id="watchJson"
