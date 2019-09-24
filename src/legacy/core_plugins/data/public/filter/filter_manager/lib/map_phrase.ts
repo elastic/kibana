@@ -18,11 +18,15 @@
  */
 
 import { get } from 'lodash';
-import { PhraseFilter, Filter } from '@kbn/es-query';
+import {
+  PhraseFilter,
+  Filter,
+  FILTERS,
+  isPhraseFilter,
+  isScriptedPhraseFilter,
+} from '@kbn/es-query';
 import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
 import { IndexPatterns, IndexPattern } from '../../../index_patterns';
-
-const TYPE = 'phrase';
 
 const getScriptedPhraseValue = (filter: PhraseFilter) =>
   get(filter, ['script', 'script', 'params', 'value']);
@@ -36,21 +40,21 @@ const getFormattedValue = (value: any, key: string, indexPattern?: IndexPattern)
 
 const getParams = (filter: PhraseFilter, indexPattern?: IndexPattern) => {
   const scriptedPhraseValue = getScriptedPhraseValue(filter);
-  const isScriptedPhraseFilter = Boolean(scriptedPhraseValue);
-  const key = isScriptedPhraseFilter ? filter.meta.field || '' : Object.keys(filter.query.match)[0];
+  const isScriptedFilter = Boolean(scriptedPhraseValue);
+  const key = isScriptedFilter ? filter.meta.field || '' : Object.keys(filter.query.match)[0];
   const query = scriptedPhraseValue || get(filter, ['query', 'match', key, 'query']);
   const params = { query };
 
   return {
     key,
     params,
-    type: TYPE,
+    type: FILTERS.PHRASE,
     value: getFormattedValue(query, key, indexPattern),
   };
 };
 
 export const isMapPhraseFilter = (filter: any): filter is PhraseFilter =>
-  filter && ((filter.query && filter.query.match) || getScriptedPhraseValue(filter));
+  isPhraseFilter(filter) || isScriptedPhraseFilter(filter);
 
 export const mapPhrase = (indexPatterns: IndexPatterns) => {
   return async (filter: Filter) => {

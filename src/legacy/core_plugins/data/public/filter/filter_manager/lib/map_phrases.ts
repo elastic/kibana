@@ -17,19 +17,14 @@
  * under the License.
  */
 
-import { Filter, PhrasesFilter } from '@kbn/es-query';
-
-const TYPE = 'phrases';
-
-export const isPhrasesFilter = (filter: any): filter is PhrasesFilter =>
-  filter && filter.type === TYPE;
+import { Filter, isPhrasesFilter } from '@kbn/es-query';
 
 export const mapPhrases = async (filter: Filter) => {
-  const { type, key, value, params } = filter.meta;
-
   if (!isPhrasesFilter(filter)) {
     throw filter;
-  } else {
-    return { type, key, value, params };
   }
+
+  const { type, key, value, params } = filter.meta;
+
+  return { type, key, value, params };
 };

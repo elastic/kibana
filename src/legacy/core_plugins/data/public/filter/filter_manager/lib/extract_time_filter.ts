@@ -18,7 +18,7 @@
  */
 
 import { get, keys, find } from 'lodash';
-import { Filter, RangeFilter } from '@kbn/es-query';
+import { Filter, RangeFilter, isRangeFilter } from '@kbn/es-query';
 import { IndexPatterns } from '../../../index_patterns';
 
 export const extractTimeFilter = async (indexPatterns: IndexPatterns, filters: Filter[]) => {
@@ -31,13 +31,14 @@ export const extractTimeFilter = async (indexPatterns: IndexPatterns, filters: F
   }
 
   const indexPattern = await indexPatterns.get(id);
-  const rangeFilter = find(filters, (obj: RangeFilter) => {
-    const key = keys(obj.range)[0];
 
-    return key === indexPattern.timeFieldName;
+  return find(filters, (obj: Filter) => {
+    let key;
+
+    if (isRangeFilter(obj)) {
+      key = keys(obj.range)[0];
+    }
+
+    return Boolean(key && key === indexPattern.timeFieldName);
   }) as RangeFilter;
-
-  if (rangeFilter && rangeFilter.range) {
-    return rangeFilter;
-  }
 };

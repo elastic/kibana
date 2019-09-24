@@ -25,3 +25,5 @@ export type MissingFilter = Filter & {
   meta: MissingFilterMeta;
   missing: any;
 };
+
+export const isMissingFilter = (filter: any): filter is MissingFilter => filter && filter.missing;

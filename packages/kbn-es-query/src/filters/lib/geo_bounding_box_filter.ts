@@ -30,3 +30,6 @@ export type GeoBoundingBoxFilter = Filter & {
   meta: GeoBoundingBoxFilterMeta;
   geo_bounding_box: any;
 };
+
+export const isGeoBoundingBoxFilter = (filter: any): filter is GeoBoundingBoxFilter =>
+  filter && filter.geo_bounding_box;

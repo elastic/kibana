@@ -17,14 +17,9 @@
  * under the License.
  */
 import { get } from 'lodash';
-import { GeoBoundingBoxFilter, Filter } from '@kbn/es-query';
+import { GeoBoundingBoxFilter, Filter, FILTERS, isGeoBoundingBoxFilter } from '@kbn/es-query';
 import { IndexPatterns, IndexPattern } from '../../../index_patterns';
 import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
-
-const TYPE = 'geo_bounding_box';
-
-export const isGeoBoundingBoxFilter = (filter: any): filter is GeoBoundingBoxFilter =>
-  filter && filter.geo_bounding_box;
 
 const getFormattedValue = (params: any, key: string, indexPattern?: IndexPattern) => {
   const formatter: any =
@@ -49,10 +44,10 @@ const getParams = (filter: GeoBoundingBoxFilter, indexPattern?: IndexPattern) =>
   return {
     key,
     params,
-    type: TYPE,
+    type: FILTERS.GEO_BOUNDING_BOX,
     value: topLeft + ' to ' + bottomRight,
   };
-}
+};
 
 export const mapGeoBoundingBox = (indexPatterns: IndexPatterns) => {
   return async (filter: Filter) => {

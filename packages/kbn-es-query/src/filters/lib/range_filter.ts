@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { get, keys } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
 
 interface FilterRange {
@@ -43,5 +43,24 @@ export type RangeFilterMeta = FilterMeta & {
 
 export type RangeFilter = Filter & {
   meta: RangeFilterMeta;
+  script?: {
+    script: {
+      params: any;
+    };
+  };
   range: { [key: string]: RangeFilterParams };
+};
+
+const hasRangeKeys = (params: RangeFilterParams) =>
+  Boolean(
+    keys(params).find((key: string) => ['gte', 'gt', 'lte', 'lt', 'from', 'to'].includes(key))
+  );
+
+export const isRangeFilter = (filter: any): filter is RangeFilter =>
+  filter && filter.range && hasRangeKeys(filter.range);
+
+export const isScriptedRangeFilter = (filter: any): filter is RangeFilter => {
+  const params: RangeFilterParams = get(filter, 'script.script.params', {});
+
+  return hasRangeKeys(params);
 };

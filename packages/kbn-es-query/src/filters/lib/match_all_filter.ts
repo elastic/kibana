@@ -28,3 +28,6 @@ export type MatchAllFilter = Filter & {
   meta: MatchAllFilterMeta;
   match_all: any;
 };
+
+export const isMatchAllFilter = (filter: any): filter is MatchAllFilter =>
+  filter && filter.match_all;

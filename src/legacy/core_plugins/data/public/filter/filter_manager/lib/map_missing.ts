@@ -16,17 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Filter, MissingFilter } from '@kbn/es-query';
-
-const TYPE = 'missing';
-
-export const isMissingFilter = (filter: any): filter is MissingFilter => filter && filter.missing;
+import { Filter, FILTERS, isMissingFilter } from '@kbn/es-query';
 
 export const mapMissing = async (filter: Filter) => {
   if (isMissingFilter(filter)) {
     return {
-      type: TYPE,
-      value: TYPE,
+      type: FILTERS.MISSING,
+      value: FILTERS.MISSING,
       key: filter.missing.field,
     };
   }

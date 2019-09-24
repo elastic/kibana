@@ -29,3 +29,5 @@ export type ExistsFilter = Filter & {
   meta: ExistsFilterMeta;
   exists?: FilterExistsProperty;
 };
+
+export const isExistsFilter = (filter: any): filter is ExistsFilter => filter && filter.exists;

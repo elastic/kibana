@@ -17,18 +17,14 @@
  * under the License.
  */
 
-import { ExistsFilter, Filter } from '@kbn/es-query';
+import { Filter, isExistsFilter, FILTERS } from '@kbn/es-query';
 import { get } from 'lodash';
-
-const TYPE = 'exists';
-
-export const isExistsFilter = (filter: any): filter is ExistsFilter => filter && filter.exists;
 
 export const mapExists = async (filter: Filter) => {
   if (isExistsFilter(filter)) {
     return {
-      type: TYPE,
-      value: TYPE,
+      type: FILTERS.EXISTS,
+      value: FILTERS.EXISTS,
       key: get(filter, 'exists.field'),
     };
   }

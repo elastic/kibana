@@ -17,17 +17,15 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
+import { Filter, FILTERS } from '@kbn/es-query';
 import { find, keys, get } from 'lodash';
-
-const TYPE = 'custom';
 
 export const mapDefault = async (filter: Filter) => {
   const metaProperty = /(^\$|meta)/;
   const key = find(keys(filter), item => !item.match(metaProperty));
 
   if (key) {
-    const type = TYPE;
+    const type = FILTERS.CUSTOM;
     const value = JSON.stringify(get(filter, key, {}));
 
     return { type, key, value };

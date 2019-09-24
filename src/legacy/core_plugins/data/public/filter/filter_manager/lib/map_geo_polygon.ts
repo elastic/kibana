@@ -17,15 +17,11 @@
  * under the License.
  */
 import { get } from 'lodash';
-import { GeoPolygonFilter, Filter } from '@kbn/es-query';
+import { GeoPolygonFilter, Filter, FILTERS, isGeoPolygonFilter } from '@kbn/es-query';
 import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
 import { IndexPatterns, IndexPattern } from '../../../index_patterns';
 
-const TYPE = 'geo_polygon';
 const POINTS_SEPARATOR = ', ';
-
-export const isGeoPolygonFilter = (filter: any): filter is GeoPolygonFilter =>
-  filter && filter.geo_polygon;
 
 const getFormattedValue = (value: any, key: string, indexPattern?: IndexPattern) => {
   const formatter: any =
@@ -41,7 +37,7 @@ function getParams(filter: GeoPolygonFilter, indexPattern?: IndexPattern) {
   return {
     key,
     params,
-    type: TYPE,
+    type: FILTERS.GEO_POLYGON,
     value: (params.points || [])
       .map((point: string) => getFormattedValue(point, key, indexPattern))
       .join(POINTS_SEPARATOR),

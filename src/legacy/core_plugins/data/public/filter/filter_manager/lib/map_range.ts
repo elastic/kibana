@@ -17,27 +17,18 @@
  * under the License.
  */
 
-import { Filter, RangeFilter } from '@kbn/es-query';
+import { Filter, RangeFilter, FILTERS, isRangeFilter, isScriptedRangeFilter } from '@kbn/es-query';
 import { get } from 'lodash';
 import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
 import { IndexPatterns, IndexPattern } from '../../../index_patterns';
 
-const TYPE = 'range';
-
 const getFirstRangeKey = (filter: RangeFilter) => filter.range && Object.keys(filter.range)[0];
 const getRangeByKey = (filter: RangeFilter, key: string) => get(filter, ['range', key]);
-const isScriptedRange = (filter: Filter) => {
-  const params = get(filter, ['script', 'script', 'params'], {});
-
-  return Boolean(
-    Object.keys(params).find((key: string) => ['gte', 'gt', 'lte', 'lt'].includes(key))
-  );
-};
 
 function getParams(filter: RangeFilter, indexPattern?: IndexPattern) {
-  const isScriptedRangeFilter = isScriptedRange(filter);
-  const key: string = (isScriptedRangeFilter ? filter.meta.field : getFirstRangeKey(filter)) || '';
-  const params: any = isScriptedRangeFilter
+  const isScriptedRange = isScriptedRangeFilter(filter);
+  const key: string = (isScriptedRange ? filter.meta.field : getFirstRangeKey(filter)) || '';
+  const params: any = isScriptedRange
     ? get(filter, 'script.script.params')
     : getRangeByKey(filter, key);
   const left = params.gte || params.gt || -Infinity;
@@ -55,11 +46,11 @@ function getParams(filter: RangeFilter, indexPattern?: IndexPattern) {
     value = `${convert(left)} to ${convert(right)}`;
   }
 
-  return { type: TYPE, key, value, params };
+  return { type: FILTERS.RANGE, key, value, params };
 }
 
 export const isMapRangeFilter = (filter: any): filter is RangeFilter =>
-  filter && (filter.range || isScriptedRange(filter));
+  isRangeFilter(filter) || isScriptedRangeFilter(filter);
 
 export const mapRange = (indexPatterns: IndexPatterns) => {
   return async (filter: Filter) => {

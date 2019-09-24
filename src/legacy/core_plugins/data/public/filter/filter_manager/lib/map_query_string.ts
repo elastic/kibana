@@ -16,17 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { QueryStringFilter, Filter } from '@kbn/es-query';
-
-const TYPE = 'query_string';
-
-export const isQueryStringFilter = (filter: any): filter is QueryStringFilter =>
-  filter && filter.query && filter.query.query_string;
+import { Filter, FILTERS, isQueryStringFilter } from '@kbn/es-query';
 
 export const mapQueryString = async (filter: Filter) => {
   if (isQueryStringFilter(filter)) {
     return {
-      type: TYPE,
+      type: FILTERS.QUERY_STRING,
       key: 'query',
       value: filter.query.query_string.query,
     };

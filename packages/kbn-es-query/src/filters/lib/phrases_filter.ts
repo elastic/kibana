@@ -27,3 +27,6 @@ export type PhrasesFilterMeta = FilterMeta & {
 export type PhrasesFilter = Filter & {
   meta: PhrasesFilterMeta;
 };
+
+export const isPhrasesFilter = (filter: any): filter is PhrasesFilter =>
+  filter && filter.type === 'phrases';

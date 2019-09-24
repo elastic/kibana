@@ -29,3 +29,6 @@ export type GeoPolygonFilter = Filter & {
   meta: GeoPolygonFilterMeta;
   geo_polygon: any;
 };
+
+export const isGeoPolygonFilter = (filter: any): filter is GeoPolygonFilter =>
+  filter && filter.geo_polygon;

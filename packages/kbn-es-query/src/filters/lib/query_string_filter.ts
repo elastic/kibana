@@ -29,3 +29,6 @@ export type QueryStringFilter = Filter & {
     };
   };
 };
+
+export const isQueryStringFilter = (filter: any): filter is QueryStringFilter =>
+  filter && filter.query && filter.query.query_string;
