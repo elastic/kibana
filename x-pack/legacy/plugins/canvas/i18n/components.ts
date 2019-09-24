@@ -129,6 +129,49 @@ export const ComponentStrings = {
         defaultMessage: 'Remove Color',
       }),
   },
+  DatasourceDatasourceComponent: {
+    getChangeButtonLabel: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourceComponent.changeButtonLabel', {
+        defaultMessage: 'Change your data source',
+      }),
+    getPreviewButtonLabel: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourceComponent.previewButtonLabel', {
+        defaultMessage: 'Preview',
+      }),
+    getSaveButtonLabel: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourceComponent.saveButtonLabel', {
+        defaultMessage: 'Save',
+      }),
+  },
+  DatasourceNoDatasource: {
+    getPanelDescription: () =>
+      i18n.translate('xpack.canvas.datasourceNoDatasource.panelDescription', {
+        defaultMessage:
+          "This element does not have an attached data source. This is usually because the element is an image or other static asset. If that's not the case you might want to check your expression to make sure it is not malformed.",
+      }),
+    getPanelTitle: () =>
+      i18n.translate('xpack.canvas.datasourceNoDatasource.panelTitle', {
+        defaultMessage: 'No data source present',
+      }),
+  },
+  DatasourceDatasourcePreview: {
+    getEmptyFirstLineDescription: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourcePreview.emptyFirstLineDescription', {
+        defaultMessage: "We couldn't find any documents matching your search criteria.",
+      }),
+    getEmptySecondLineDescription: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourcePreview.emptySecondLineDescription', {
+        defaultMessage: 'Check your datasource settings and try again.',
+      }),
+    getEmptyTitle: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourcePreview.emptyTitle', {
+        defaultMessage: 'No documents found',
+      }),
+    getModalTitle: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourcePreview.modalTitle', {
+        defaultMessage: 'Datasource preview',
+      }),
+  },
   HelpMenu: {
     getHelpMenuDescription: () =>
       i18n.translate('xpack.canvas.helpMenu.description', {
