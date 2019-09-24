@@ -87,7 +87,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
 
         const requiresAuthChallenge =
           wrappedError.output.statusCode === 401 &&
-          Object.keys(wrappedError.output.headers).find(
+          Object.keys(wrappedError.output.headers).some(
             header => header.toLowerCase() === 'www-authenticate'
           );
 
