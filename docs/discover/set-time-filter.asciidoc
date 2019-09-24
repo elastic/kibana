@@ -3,7 +3,7 @@
 You can
 set a time filter if your index contains time-based events and a time-field is
 configured for the selected index pattern.
-By default the time filter is set to the last 15 minutes. You can use the time
+By default, the time filter is set to the last 15 minutes. You can use the time
 picker to change the time filter, or select a specific time 
 range in the histogram.
 
@@ -17,7 +17,7 @@ dropdown image:infrastructure/images/time-filter-calendar.png[].
 [role="screenshot"]
 image::images/Timepicker-View.png[Time picker menu]
 
-You can choose from:
+With the time picker, you can choose from:
 
 * *Quick select* to choose a recent time range, and use the back and forward arrows to move through the time ranges.
 * *Commonly used* to choose a time range from options such as *Last 15 minutes*, *Today*, and *Week to date*.
