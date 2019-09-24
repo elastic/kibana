@@ -22,7 +22,6 @@ import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment-timezone';
 import { timefilter } from 'ui/timefilter';
-import { npSetup } from 'ui/new_platform';
 // @ts-ignore
 import observeResize from '../../lib/observe_resize';
 // @ts-ignore
@@ -33,10 +32,9 @@ import { xaxisFormatterProvider } from './xaxis_formatter';
 import { generateTicksProvider } from './tick_generator';
 
 const DEBOUNCE_DELAY = 50;
-const { uiSettings } = npSetup.core;
 
 export function timechartFn(dependencies: TimelionStartDependencies) {
-  const { $rootScope, $compile } = dependencies;
+  const { $rootScope, $compile, uiSettings } = dependencies;
   return function() {
     return {
       help: 'Draw a timeseries chart',

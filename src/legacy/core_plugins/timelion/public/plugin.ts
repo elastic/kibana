@@ -22,6 +22,8 @@ import {
   LegacyCoreStart,
   Plugin,
   PluginInitializerContext,
+  UiSettingsClientContract,
+  HttpSetup,
 } from 'kibana/public';
 import { Plugin as ExpressionsPlugin } from 'src/plugins/expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public/np_ready';
@@ -33,12 +35,6 @@ import {
   LegacyDependenciesPluginSetup,
   LegacyDependenciesPluginStart,
 } from './shim';
-
-/** @internal */
-export { LegacyDependenciesPluginStart as TimelionStartDependencies };
-
-/** @internal */
-export { LegacyDependenciesPluginSetup as TimelionSetupDependencies };
 
 /** @internal */
 export interface TimelionPluginSetupDependencies {
@@ -57,6 +53,21 @@ export interface TimelionPluginStartDependencies {
   __LEGACY: LegacyDependenciesPlugin;
 }
 
+interface DependenciesPluginSetup {
+  uiSettings: UiSettingsClientContract;
+  http: HttpSetup;
+}
+
+interface DependenciesPluginStart {
+  uiSettings: UiSettingsClientContract;
+}
+
+/** @internal */
+export type TimelionSetupDependencies = DependenciesPluginSetup & LegacyDependenciesPluginSetup;
+
+/** @internal */
+export type TimelionStartDependencies = DependenciesPluginStart & LegacyDependenciesPluginStart;
+
 /** @internal */
 export class TimelionPlugin
   implements
@@ -68,15 +79,23 @@ export class TimelionPlugin
   }
 
   public async setup(core: CoreSetup, plugins: TimelionPluginSetupDependencies) {
-    const dependencies: LegacyDependenciesPluginSetup = await plugins.__LEGACY.setup();
-    plugins.expressions.registerFunction(() => getTimelionVisualizationConfig());
+    const dependencies: TimelionSetupDependencies = {
+      uiSettings: core.uiSettings,
+      http: core.http,
+      ...(await plugins.__LEGACY.setup()),
+    };
+
+    plugins.expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
     plugins.visualizations.types.registerVisualization(() =>
       getTimelionVisualization(dependencies)
     );
   }
 
   public async start(core: CoreStart & LegacyCoreStart, plugins: TimelionPluginStartDependencies) {
-    const dependencies: LegacyDependenciesPluginStart = await plugins.__LEGACY.start();
+    const dependencies: TimelionStartDependencies = {
+      uiSettings: core.uiSettings,
+      ...(await plugins.__LEGACY.start()),
+    };
     const timelionUiEnabled = core.injectedMetadata.getInjectedVar('timelionUiEnabled');
 
     if (timelionUiEnabled === false) {

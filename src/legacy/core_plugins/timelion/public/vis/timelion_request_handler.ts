@@ -21,13 +21,13 @@
 import { buildEsQuery, getEsQueryConfig, Filter } from '@kbn/es-query';
 // @ts-ignore
 import { timezoneProvider } from 'ui/vis/lib/timezone';
-import { npSetup } from 'ui/new_platform';
 import { KIBANA_CONTEXT_NAME } from 'src/plugins/expressions/public';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { TimeRange } from 'src/plugins/data/public';
 import { VisParams } from 'ui/vis';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
+import { TimelionSetupDependencies } from '../plugin';
 
 interface Stats {
   cacheCount: number;
@@ -50,9 +50,8 @@ export interface TimelionSuccessResponse {
   type: KIBANA_CONTEXT_NAME;
 }
 
-const { http, uiSettings } = npSetup.core;
-
-export function getTimelionRequestHandler() {
+export function getTimelionRequestHandler(dependencies: TimelionSetupDependencies) {
+  const { uiSettings, http } = dependencies;
   const timezone = timezoneProvider(uiSettings)();
 
   return async function({
