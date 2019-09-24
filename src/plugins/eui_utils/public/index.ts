@@ -17,16 +17,7 @@
  * under the License.
  */
 
-import moment from 'moment';
-import _ from 'lodash';
-import { timefilter } from 'ui/timefilter';
+import { EuiUtils } from './eui_utils';
 
-export function changeTimeFilter(filter) {
-  const key = _.keys(filter.range)[0];
-  const values = filter.range[key];
-  timefilter.setTime({
-    from: moment(values.gt || values.gte),
-    to: moment(values.lt || values.lte),
-    mode: 'absolute',
-  });
-}
+export const plugin = () => new EuiUtils();
+export type EuiUtilsStart = ReturnType<EuiUtils['start']>;

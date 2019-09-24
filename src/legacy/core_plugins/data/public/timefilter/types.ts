@@ -16,13 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Moment } from 'moment';
+import { RefreshInterval, TimeRange } from 'src/plugins/data/public';
 
-import { chromeServiceMock } from '../../../../../../../../core/public/mocks';
+export interface TimefilterConfig {
+  timeDefaults: TimeRange;
+  refreshIntervalDefaults: RefreshInterval;
+}
 
-jest.doMock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      chrome: chromeServiceMock.createStartContract(),
-    },
-  },
-}));
+// Timefilter accepts moment input but always returns string output
+export type InputTimeRange =
+  | TimeRange
+  | {
+      from: Moment;
+      to: Moment;
+    };
+
+export interface TimeRangeBounds {
+  min: Moment | undefined;
+  max: Moment | undefined;
+}
