@@ -20,7 +20,7 @@ export class JsonIndexFilePicker extends Component {
 
   state = {
     fileUploadError: '',
-    fileParsingProgress: '',
+    percentageProcessed: 0,
   };
 
   async componentDidMount() {
@@ -34,7 +34,7 @@ export class JsonIndexFilePicker extends Component {
   _fileHandler = fileList => {
     const fileArr = Array.from(fileList);
     this.props.resetFileAndIndexSettings();
-    this.setState({ fileUploadError: '' });
+    this.setState({ fileUploadError: '', percentageProcessed: 0 });
     if (fileArr.length === 0) { // Remove
       return;
     }
@@ -89,17 +89,22 @@ export class JsonIndexFilePicker extends Component {
     return splitNameArr[0];
   }
 
+  setFileProgress = ({ bytesProcessed, totalBytes }) => {
+    const percentageProcessed = parseInt((100 * bytesProcessed) / totalBytes);
+    if (percentageProcessed > (this.state.percentageProcessed + 3)) {
+      this.setState({ percentageProcessed });
+    }
+  }
+
   async _parseFile(file) {
     const {
       setFileRef, setParsedFile, resetFileAndIndexSettings, onFileUpload, transformDetails
     } = this.props;
     // Parse file
-    this.setState({ fileParsingProgress: i18n.translate(
-      'xpack.fileUpload.jsonIndexFilePicker.parsingFile',
-      { defaultMessage: 'Parsing file...' })
-    });
+
+    // TODO: Allow this to be interrupted
     const parsedFileResult = await parseFile(
-      file, transformDetails, onFileUpload
+      file, transformDetails, onFileUpload, this.setFileProgress
     ).catch(err => {
       if (this._isMounted) {
         this.setState({
@@ -118,7 +123,7 @@ export class JsonIndexFilePicker extends Component {
     if (!this._isMounted) {
       return;
     }
-    this.setState({ fileParsingProgress: '' });
+    this.setState({ percentageProcessed: 0 });
     if (!parsedFileResult) {
       resetFileAndIndexSettings();
       return;
@@ -128,11 +133,23 @@ export class JsonIndexFilePicker extends Component {
   }
 
   render() {
-    const { fileParsingProgress, fileUploadError } = this.state;
+    const {
+      fileUploadError,
+      percentageProcessed
+    } = this.state;
 
     return (
       <Fragment>
-        {fileParsingProgress ? <EuiProgress size="xs" color="accent" position="absolute" /> : null}
+        {percentageProcessed
+          ? <EuiProgress
+            value={percentageProcessed}
+            max={100}
+            size="xs"
+            color="accent"
+            position="absolute"
+          />
+          : null
+        }
         <EuiFormRow
           label={
             <FormattedMessage
@@ -143,8 +160,14 @@ export class JsonIndexFilePicker extends Component {
           isInvalid={fileUploadError !== ''}
           error={[fileUploadError]}
           helpText={
-            fileParsingProgress ? (
-              fileParsingProgress
+            percentageProcessed ? (
+              i18n.translate(
+                'xpack.fileUpload.jsonIndexFilePicker.parsingFile', {
+                  defaultMessage: '{percentageProcessed}% of file parsed...',
+                  values: {
+                    percentageProcessed
+                  }
+                })
             ) : (
               <span>
                 {i18n.translate('xpack.fileUpload.jsonIndexFilePicker.formatsAccepted', {

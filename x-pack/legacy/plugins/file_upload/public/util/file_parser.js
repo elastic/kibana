@@ -7,29 +7,66 @@
 import _ from 'lodash';
 import { geoJsonCleanAndValidate } from './geo_json_clean_and_validate';
 import { i18n } from '@kbn/i18n';
+const oboe = require('oboe');
 
-export async function readFile(file) {
-  const readPromise = new Promise((resolve, reject) => {
+const FILE_BUFFER = 1024 * 50;
+let fileReader;
+
+const readSlice = (file, start, stop) => {
+  const blob = file.slice(start, stop);
+  fileReader.readAsBinaryString(blob);
+};
+
+const fileHandler = (file, chunkHandler, cleanAndValidate, fileBuffer = FILE_BUFFER) => {
+  const oboeStream = oboe();
+  let start;
+  let stop = fileBuffer;
+  fileReader = new FileReader();
+
+  fileReader.onloadend = ({ target: { readyState, result } }) => {
+    if (readyState === FileReader.DONE) {
+      chunkHandler({
+        bytesProcessed: stop || file.size,
+        totalBytes: file.size
+      });
+      oboeStream.emit('data', result);
+      if (!stop) {
+        return;
+      }
+
+      start = stop;
+      const newStop = stop + fileBuffer;
+      // Check EOF
+      stop = newStop > file.size ? undefined : newStop;
+      readSlice(file, start, stop);
+    }
+  };
+
+  const filePromise = new Promise((resolve, reject) => {
     if (!file) {
       reject(new Error(i18n.translate(
         'xpack.fileUpload.fileParser.noFileProvided', {
           defaultMessage: 'Error, no file provided',
         })));
     }
-    const fr = new window.FileReader();
-    fr.onload = e => resolve(e.target.result);
-    fr.onerror = () => {
-      fr.abort();
+    fileReader.onerror = () => {
+      fileReader.abort();
       reject(new Error(i18n.translate(
         'xpack.fileUpload.fileParser.errorReadingFile', {
           defaultMessage: 'Error reading file',
         })));
     };
-    fr.readAsText(file);
+    oboeStream.node({
+      'features.*': function (feature) {
+        const cleanFeature = cleanAndValidate(feature);
+        return cleanFeature;
+      }
+    });
+    oboeStream.done(parsedGeojson => resolve(parsedGeojson));
   });
-
-  return await readPromise;
-}
+  readSlice(file, start, stop);
+  return filePromise;
+};
 
 export function jsonPreview(json, previewFunction) {
   // Call preview (if any)
@@ -39,7 +76,8 @@ export function jsonPreview(json, previewFunction) {
   }
 }
 
-export async function parseFile(file, transformDetails, previewCallback = null) {
+export async function parseFile(file, transformDetails, previewCallback = null,
+  onChunkParse) {
   let cleanAndValidate;
   if (typeof transformDetails === 'object') {
     cleanAndValidate = transformDetails.cleanAndValidate;
@@ -56,15 +94,13 @@ export async function parseFile(file, transformDetails, previewCallback = null) 
               values: { transformDetails }
             })
         );
-        return;
     }
   }
 
-  const rawResults = await readFile(file);
-  const parsedJson = JSON.parse(rawResults);
-  const jsonResult = cleanAndValidate(parsedJson);
-  jsonPreview(jsonResult, previewCallback);
+  const parsedJson = await fileHandler(file, onChunkParse, cleanAndValidate);
+  // Stream to both parseFile caller and preview callback
+  // const jsonResult = cleanAndValidate(parsedJson);
+  jsonPreview(parsedJson, previewCallback);
 
-  return jsonResult;
+  return parsedJson;
 }
-
