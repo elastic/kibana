@@ -13,7 +13,7 @@ export TEST_BROWSER_HEADLESS=1
 if [[ -z "$IS_PIPELINE_JOB" ]] ; then
   echo " -> Ensuring all functional tests are in a ciGroup"
   cd "$XPACK_DIR"
-  node scripts/functional_tests
+  # node scripts/functional_tests
     # --include-tag ciGroup1 \
     # --include-tag ciGroup2 \
     # --include-tag ciGroup3 \
