@@ -10,6 +10,9 @@ import { get } from 'lodash';
 import { getType } from '@kbn/interpreter/common';
 import { PalettePicker } from '../../../public/components/palette_picker';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { ArgumentStrings } from '../../strings';
+
+const { Palette: strings } = ArgumentStrings;
 
 const PaletteArgInput = ({ onValueChange, argValue, renderError }) => {
   // Why is this neccesary? Does the dialog really need to know what parameter it is setting?
@@ -69,8 +72,8 @@ PaletteArgInput.propTypes = {
 
 export const palette = () => ({
   name: 'palette',
-  displayName: 'Color palette',
-  help: 'Choose a color palette',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   default:
     '{palette #882E72 #B178A6 #D6C1DE #1965B0 #5289C7 #7BAFDE #4EB265 #90C987 #CAE0AB #F7EE55 #F6C141 #F1932D #E8601C #DC050C}',
   simpleTemplate: templateFromReactComponent(PaletteArgInput),
