@@ -322,7 +322,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         responsive={false}
       >
         <EuiFlexItem grow={null}>
-          <div className="lnsIndexPatternDataPanel__header">
+          <div className="lnsInnerIndexPatternDataPanel__header">
             <EuiTitle size="xxs" className="eui-textTruncate">
               <h4 title={currentIndexPattern.title}>{currentIndexPattern.title} </h4>
             </EuiTitle>
