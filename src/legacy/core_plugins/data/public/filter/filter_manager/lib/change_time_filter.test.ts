@@ -16,57 +16,42 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import './change_time_filter.test.mocks';
-import { RangeFilter, buildRangeFilter } from '@kbn/es-query';
-import { timefilter } from 'ui/timefilter';
+import expect from '@kbn/expect';
 import { changeTimeFilter } from './change_time_filter';
+import { TimeRange } from 'src/plugins/data/public';
+import { timefilterServiceMock } from '../../../timefilter/timefilter_service.mock';
 
-jest.mock(
-  'ui/chrome',
-  () => ({
-    getBasePath: () => `/some/base/path`,
-    getUiSettingsClient: () => {
-      return {
-        get: (key: string) => {
-          switch (key) {
-            case 'timepicker:timeDefaults':
-              return { from: 'now-15m', to: 'now' };
-            case 'timepicker:refreshIntervalDefaults':
-              return { pause: false, value: 0 };
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        },
-      };
-    },
-  }),
-  { virtual: true }
-);
+const timefilterMock = timefilterServiceMock.createSetupContract();
+const timefilter = timefilterMock.timefilter;
 
-describe('changeTimeFilter()', () => {
-  test('should change the timefilter to match the range gt/lt', () => {
-    const gt = 1488559600000;
-    const lt = 1488646000000;
-    const filter: RangeFilter = buildRangeFilter({ name: '@timestamp' }, { gt, lt }, 'index');
+let _time: TimeRange | undefined;
+timefilter.setTime.mockImplementation((time: any) => {
+  _time = {
+    from: time.from.toISOString(),
+    to: time.to.toISOString(),
+  };
+});
+timefilter.getTime.mockImplementation(() => {
+  return _time!;
+});
 
-    changeTimeFilter(filter);
+describe('changeTimeFilter()', function() {
+  const gt = 1388559600000;
+  const lt = 1388646000000;
 
-    const time = timefilter.getTime();
-
-    expect(time.from).toBe(new Date(gt).toISOString());
-    expect(time.to).toBe(new Date(lt).toISOString());
+  test('should change the timefilter to match the range gt/lt', function() {
+    const filter = { range: { '@timestamp': { gt, lt } } };
+    changeTimeFilter(timefilter, filter);
+    const { to, from } = timefilter.getTime();
+    expect(to).to.be(new Date(lt).toISOString());
+    expect(from).to.be(new Date(gt).toISOString());
   });
 
-  test('should change the timefilter to match the range gte/lte', () => {
-    const gte = 1588559600000;
-    const lte = 1588646000000;
-    const filter: RangeFilter = buildRangeFilter({ name: '@timestamp' }, { gte, lte }, 'index');
-
-    changeTimeFilter(filter);
-
-    const time = timefilter.getTime();
-
-    expect(time.from).toBe(new Date(gte).toISOString());
-    expect(time.to).toBe(new Date(lte).toISOString());
+  test('should change the timefilter to match the range gte/lte', function() {
+    const filter = { range: { '@timestamp': { gte: gt, lte: lt } } };
+    changeTimeFilter(timefilter, filter);
+    const { to, from } = timefilter.getTime();
+    expect(to).to.be(new Date(lt).toISOString());
+    expect(from).to.be(new Date(gt).toISOString());
   });
 });

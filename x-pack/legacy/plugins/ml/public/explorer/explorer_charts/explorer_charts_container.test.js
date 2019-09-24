@@ -37,31 +37,7 @@ jest.mock('ui/chrome',
     getBasePath: () => {
       return '<basepath>';
     },
-    getUiSettingsClient: () => {
-      return {
-        get: (key) => {
-          switch (key) {
-            case 'timepicker:timeDefaults':
-              return { from: 'now-15m', to: 'now', mode: 'quick' };
-            case 'timepicker:refreshIntervalDefaults':
-              return { pause: false, value: 0 };
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        }
-      };
-    },
   }), { virtual: true });
-
-import moment from 'moment';
-import { timefilter } from 'ui/timefilter';
-
-timefilter.enableTimeRangeSelector();
-timefilter.enableAutoRefreshSelector();
-timefilter.setTime({
-  from: moment(seriesConfig.selectedEarliest).toISOString(),
-  to: moment(seriesConfig.selectedLatest).toISOString()
-});
 
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';

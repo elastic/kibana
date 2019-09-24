@@ -17,21 +17,15 @@
  * under the License.
  */
 
-import { Filter, isRangeFilter } from '@kbn/es-query';
-import { timefilter } from 'ui/timefilter';
 import moment from 'moment';
+import _ from 'lodash';
+import { TimefilterContract } from '../../../timefilter';
 
-export const changeTimeFilter = (filter: Filter) => {
-  if (isRangeFilter(filter)) {
-    const firstRange: string = Object.keys(filter.range)[0];
-    const values = filter.range[firstRange];
-
-    if (values) {
-      timefilter.setTime({
-        from: moment(values.gt || values.gte),
-        to: moment(values.lt || values.lte),
-        mode: 'absolute',
-      });
-    }
-  }
-};
+export function changeTimeFilter(timefilter: TimefilterContract, filter: any) {
+  const key = _.keys(filter.range)[0];
+  const values = filter.range[key];
+  timefilter.setTime({
+    from: moment(values.gt || values.gte),
+    to: moment(values.lt || values.lte),
+  });
+}
