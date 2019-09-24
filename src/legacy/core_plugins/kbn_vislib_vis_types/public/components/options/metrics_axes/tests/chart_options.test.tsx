@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import { ChartOptions, ChartOptionsParams } from '../chart_options';
 import { SeriesParam } from '../../../../types';
 import { LineOptions } from '../line_options';
@@ -81,7 +81,7 @@ describe('ChartOptions component', () => {
   });
 
   it('should call changeValueAxis when valueAxis is changed', () => {
-    const comp = mount(<ChartOptions {...defaultProps} />);
+    const comp = shallow(<ChartOptions {...defaultProps} />);
     const paramName = 'valueAxis';
     const value = 'new';
     comp.find({ paramName }).prop('setValue')(paramName, value);
@@ -90,7 +90,7 @@ describe('ChartOptions component', () => {
   });
 
   it('should call setParamByIndex when mode is changed', () => {
-    const comp = mount(<ChartOptions {...defaultProps} />);
+    const comp = shallow(<ChartOptions {...defaultProps} />);
     const paramName = 'mode';
     comp.find({ paramName }).prop('setValue')(paramName, ChartModes.NORMAL);
 

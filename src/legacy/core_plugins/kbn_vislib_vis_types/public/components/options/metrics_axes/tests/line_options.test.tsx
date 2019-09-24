@@ -19,7 +19,6 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { LineOptions, LineOptionsParams } from '../line_options';
 import { NumberInputOption } from '../../../common';
 import { interpolationModes } from '../../../../utils/collections';
@@ -55,14 +54,14 @@ describe('LineOptions component', () => {
   });
 
   it('should set lineWidth as undefined when empty value', () => {
-    const comp = mountWithIntl(<LineOptions {...defaultProps} />);
+    const comp = shallow(<LineOptions {...defaultProps} />);
     comp.find(NumberInputOption).prop('setValue')(LINE_WIDTH, '');
 
     expect(setChart).toBeCalledWith(LINE_WIDTH, undefined);
   });
 
   it('should set lineWidth value', () => {
-    const comp = mountWithIntl(<LineOptions {...defaultProps} />);
+    const comp = shallow(<LineOptions {...defaultProps} />);
     comp.find(NumberInputOption).prop('setValue')(LINE_WIDTH, 5);
 
     expect(setChart).toBeCalledWith(LINE_WIDTH, 5);

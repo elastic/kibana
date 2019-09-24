@@ -19,7 +19,6 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { LabelOptions, LabelOptionsProps } from '../label_options';
 import { TruncateLabelsOption } from '../../../common';
 import { valueAxis, categoryAxis } from './mocks';
@@ -72,7 +71,7 @@ describe('LabelOptions component', () => {
   });
 
   it('should set rotate as number', () => {
-    const comp = mountWithIntl(<LabelOptions {...defaultProps} />);
+    const comp = shallow(<LabelOptions {...defaultProps} />);
     comp.find({ paramName: ROTATE }).prop('setValue')(ROTATE, '5');
 
     const newAxes = [{ ...categoryAxis, labels: { ...categoryAxis.labels, rotate: 5 } }];
@@ -80,7 +79,7 @@ describe('LabelOptions component', () => {
   });
 
   it('should set filter value', () => {
-    const comp = mountWithIntl(<LabelOptions {...defaultProps} />);
+    const comp = shallow(<LabelOptions {...defaultProps} />);
     expect(defaultProps.stateParams.categoryAxes[0].labels.filter).toBeTruthy();
     comp.find({ paramName: FILTER }).prop('setValue')(FILTER, false);
 

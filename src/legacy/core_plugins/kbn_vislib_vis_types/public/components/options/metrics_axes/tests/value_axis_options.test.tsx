@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import { ValueAxisOptions, ValueAxisOptionsParams } from '../value_axis_options';
 import { Axis } from '../../../../types';
 import { TextInputOption } from '../../../common';
@@ -82,7 +82,7 @@ describe('ValueAxisOptions component', () => {
 
   it('should hide options when axis.show is false', () => {
     defaultProps.axis.show = false;
-    const comp = mount(<ValueAxisOptions {...defaultProps} />);
+    const comp = shallow(<ValueAxisOptions {...defaultProps} />);
 
     expect(comp.find(TextInputOption).exists()).toBeFalsy();
     expect(comp.find(LabelOptions).exists()).toBeFalsy();
@@ -98,14 +98,10 @@ describe('ValueAxisOptions component', () => {
     options.forEach(({ value, disabled }) => {
       switch (value) {
         case Positions.LEFT:
-          expect(disabled).toBeFalsy();
-          break;
         case Positions.RIGHT:
           expect(disabled).toBeFalsy();
           break;
         case Positions.TOP:
-          expect(disabled).toBeTruthy();
-          break;
         case Positions.BOTTOM:
           expect(disabled).toBeTruthy();
           break;
@@ -123,14 +119,10 @@ describe('ValueAxisOptions component', () => {
     options.forEach(({ value, disabled }) => {
       switch (value) {
         case Positions.LEFT:
-          expect(disabled).toBeTruthy();
-          break;
         case Positions.RIGHT:
           expect(disabled).toBeTruthy();
           break;
         case Positions.TOP:
-          expect(disabled).toBeFalsy();
-          break;
         case Positions.BOTTOM:
           expect(disabled).toBeFalsy();
           break;

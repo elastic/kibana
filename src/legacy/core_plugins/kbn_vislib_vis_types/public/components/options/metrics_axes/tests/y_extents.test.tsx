@@ -89,7 +89,7 @@ describe('YExtents component', () => {
 
   it('should call setScale with input number', () => {
     const inputNumber = 5;
-    const comp = mount(<YExtents {...defaultProps} />);
+    const comp = shallow(<YExtents {...defaultProps} />);
     const inputProps = comp
       .find(NumberInputOption)
       .first()
@@ -100,7 +100,7 @@ describe('YExtents component', () => {
   });
 
   it('should call setScale with null when input is empty', () => {
-    const comp = mount(<YExtents {...defaultProps} />);
+    const comp = shallow(<YExtents {...defaultProps} />);
     const inputProps = comp
       .find(NumberInputOption)
       .first()
