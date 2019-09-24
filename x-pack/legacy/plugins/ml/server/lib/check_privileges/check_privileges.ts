@@ -129,7 +129,7 @@ function setFullGettingPrivileges(
     privileges.canFindFileStructure = true;
   }
 
-  // Data Frame Transforms
+  // Transforms
   if (
     forceTrue ||
     (cluster['cluster:monitor/data_frame/get'] && cluster['cluster:monitor/data_frame/stats/get'])
@@ -234,7 +234,7 @@ function setFullActionPrivileges(
     privileges.canDeleteFilter = true;
   }
 
-  // Data Frame Transforms
+  // Transforms
   if (forceTrue || cluster['cluster:admin/data_frame/put']) {
     privileges.canCreateTransform = true;
   }
@@ -294,7 +294,7 @@ function setBasicGettingPrivileges(
     privileges.canFindFileStructure = true;
   }
 
-  // Data Frame Transforms
+  // Transforms
   if (
     forceTrue ||
     (cluster['cluster:monitor/data_frame/get'] && cluster['cluster:monitor/data_frame/stats/get'])
@@ -308,7 +308,7 @@ function setBasicActionPrivileges(
   privileges: Privileges,
   forceTrue = false
 ) {
-  // Data Frame Transforms
+  // Transforms
   if (forceTrue || cluster['cluster:admin/data_frame/put']) {
     privileges.canCreateTransform = true;
   }

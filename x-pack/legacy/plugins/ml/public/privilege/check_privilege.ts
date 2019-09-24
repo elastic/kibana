@@ -115,8 +115,8 @@ export function checkCreateTransformPrivilege(kbnUrl: any): Promise<Privileges> 
       ) {
         return resolve(privileges);
       } else {
-        // if the user has no permission to create a data frame transform,
-        // redirect them back to the Data Frame Transforms Management page
+        // if the user has no permission to create a transform,
+        // redirect them back to the Transforms Management page
         kbnUrl.redirect('/data_frames');
         return reject();
       }

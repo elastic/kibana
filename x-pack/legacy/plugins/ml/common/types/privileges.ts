@@ -65,7 +65,7 @@ export function getDefaultPrivileges(): Privileges {
     canDeleteFilter: false,
     // File Data Visualizer
     canFindFileStructure: false,
-    // Data Frame Transforms
+    // Transforms
     canGetTransform: false,
     canDeleteTransform: false,
     canPreviewTransform: false,
