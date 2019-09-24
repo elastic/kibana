@@ -24,7 +24,7 @@
 
 import { Logger } from 'src/core/server/logging';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
-import { MappingProperties, SavedObjectsMapping } from '../../mappings';
+import { MappingProperties, SavedObjectsMapping, IndexMapping } from '../../mappings';
 import { SavedObjectsSchema, SavedObjectsSchemaDefinition } from '../../schema';
 import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator, PropertyValidators } from '../../validation';
@@ -51,11 +51,10 @@ export interface KibanaMigratorOptions {
   savedObjectValidations: PropertyValidators;
 }
 
-export type KibanaMigratorContract = Pick<KibanaMigrator, keyof KibanaMigrator>;
+export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
 
 /**
  * Manages the shape of mappings and documents in the Kibana index.
- *
  */
 export class KibanaMigrator {
   private callCluster: CallCluster;
@@ -71,7 +70,6 @@ export class KibanaMigrator {
 
   /**
    * Creates an instance of KibanaMigrator.
-   *
    */
   constructor({
     callCluster,
@@ -105,10 +103,11 @@ export class KibanaMigrator {
    * Migrates the mappings and documents in the Kibana index. This will run only
    * once and subsequent calls will return the result of the original call.
    *
-   * @returns
-   * @memberof KibanaMigrator
+   * @returns - A promise which resolves once all migrations have been applied.
+   *    The promise resolves with an array of migration statuses, one for each
+   *    elasticsearch index which was migrated.
    */
-  public awaitMigration(skipMigrations: boolean = false) {
+  public awaitMigration(skipMigrations: boolean = false): Promise<Array<{ status: string }>> {
     if (this.migrationResult === undefined) {
       this.migrationResult = this.runMigrations(skipMigrations);
     }
@@ -158,19 +157,16 @@ export class KibanaMigrator {
   /**
    * Gets all the index mappings defined by Kibana's enabled plugins.
    *
-   * @returns
-   * @memberof KibanaMigrator
    */
-  public getActiveMappings() {
+  public getActiveMappings(): IndexMapping {
     return buildActiveMappings({ properties: this.mappingProperties });
   }
 
   /**
    * Migrates an individual doc to the latest version, as defined by the plugin migrations.
    *
-   * @param {RawSavedObjectDoc} doc
-   * @returns {RawSavedObjectDoc}
-   * @memberof KibanaMigrator
+   * @param doc - The saved object to migrate
+   * @returns `doc` with all registered migrations applied.
    */
   public migrateDocument(doc: RawSavedObjectDoc): RawSavedObjectDoc {
     return this.documentMigrator.migrate(doc);

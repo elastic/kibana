@@ -31,6 +31,6 @@ export { SavedObjectsSerializer, RawDoc as SavedObjectsRawDoc } from './serializ
 
 export { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';
 
-export { SavedObjectsService } from './saved_objects_service';
+export { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects_service';
 
 export { config } from './saved_objects_config';

@@ -292,7 +292,7 @@ export interface InternalCoreSetup {
     http: HttpServiceSetup;
 }
 
-// @public (undocumented)
+// @internal (undocumented)
 export interface InternalCoreStart {
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsServiceStart" needs to be exported by the entry point index.d.ts
     // 
@@ -393,6 +393,8 @@ export interface LegacyServiceSetupDeps {
 
 // @public @deprecated (undocumented)
 export interface LegacyServiceStartDeps {
+    // Warning: (ae-incompatible-release-tags) The symbol "core" is marked as @public, but its signature references "InternalCoreStart" which is marked as @internal
+    // 
     // (undocumented)
     core: InternalCoreStart & {
         plugins: PluginsServiceStart;

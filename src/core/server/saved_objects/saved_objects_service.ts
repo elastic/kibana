@@ -19,7 +19,7 @@
 
 import { CoreService } from 'src/core/types';
 import { first } from 'rxjs/operators';
-import { KibanaMigrator, KibanaMigratorContract } from './migrations';
+import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
 import { LegacyServiceSetup } from '../legacy/legacy_service';
 import { ElasticsearchServiceSetup } from '../elasticsearch';
@@ -38,7 +38,7 @@ export interface SavedObjectsServiceSetup {}
  * @public
  */
 export interface SavedObjectsServiceStart {
-  migrator: KibanaMigratorContract;
+  migrator: IKibanaMigrator;
 }
 
 /** @internal */

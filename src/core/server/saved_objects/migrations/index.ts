@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { KibanaMigrator, KibanaMigratorContract } from './kibana';
+export { KibanaMigrator, IKibanaMigrator } from './kibana';

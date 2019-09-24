@@ -55,7 +55,7 @@ import {
 } from './http';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
-import { SavedObjectsServiceStart } from './saved_objects/saved_objects_service';
+import { SavedObjectsServiceStart } from './saved_objects';
 
 export { bootstrap } from './bootstrap';
 export { ConfigPath, ConfigService } from './config';
@@ -231,7 +231,7 @@ export interface InternalCoreSetup {
 }
 
 /**
- * @public
+ * @internal
  */
 export interface InternalCoreStart {
   savedObjects: SavedObjectsServiceStart;
