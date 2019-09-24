@@ -498,6 +498,14 @@
         ],
       },
       {
+        groupSlug: 'pngjs',
+        groupName: 'pngjs related packages',
+        packageNames: [
+          'pngjs',
+          '@types/pngjs',
+        ],
+      },
+      {
         groupSlug: 'podium',
         groupName: 'podium related packages',
         packageNames: [
@@ -711,14 +719,6 @@
         packageNames: [
           'papaparse',
           '@types/papaparse',
-        ],
-      },
-      {
-        groupSlug: 'pngjs',
-        groupName: 'pngjs related packages',
-        packageNames: [
-          'pngjs',
-          '@types/pngjs',
         ],
       },
       {
