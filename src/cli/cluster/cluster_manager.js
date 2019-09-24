@@ -125,6 +125,7 @@ export default class ClusterManager {
               resolve(path, 'scripts'),
               resolve(path, 'docs'),
               resolve(path, 'legacy/plugins/siem/cypress'),
+              resolve(path, 'legacy/plugins/apm/cypress'),
               resolve(path, 'x-pack/legacy/plugins/canvas/canvas_plugin_src') // prevents server from restarting twice for Canvas plugin changes
             ),
           []
@@ -188,7 +189,7 @@ export default class ClusterManager {
       cwd: fromRoot('.'),
       ignored: [
         /[\\\/](\..*|node_modules|bower_components|public|__[a-z0-9_]+__|coverage)[\\\/]/,
-        /\.test\.js$/,
+        /\.test\.(js|ts)$/,
         ...extraIgnores,
         'plugins/java_languageserver'
       ],

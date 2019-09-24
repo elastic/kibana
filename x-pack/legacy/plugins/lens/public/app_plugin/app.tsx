@@ -156,7 +156,7 @@ export function App({
   return (
     <I18nProvider>
       <div className="lnsApp">
-        <div className="lnsAppHeader">
+        <div className="lnsApp__header">
           <nav>
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
@@ -229,6 +229,7 @@ export function App({
             dateRangeTo={
               state.localQueryBarState.dateRange && state.localQueryBarState.dateRange.to
             }
+            toasts={core.notifications.toasts}
             uiSettings={core.uiSettings}
             savedObjectsClient={savedObjectsClient}
             http={core.http}
@@ -237,7 +238,7 @@ export function App({
 
         {(!state.isLoading || state.persistedDoc) && (
           <NativeRenderer
-            className="lnsAppFrame"
+            className="lnsApp__frame"
             render={editorFrame.mount}
             nativeProps={{
               dateRange: state.dateRange,
