@@ -254,6 +254,7 @@ export function App({
             uiSettings={core.uiSettings}
             savedObjectsClient={savedObjectsClient}
             http={core.http}
+            timeHistory={data.timefilter.history}
           />
         </div>
 
@@ -272,7 +273,7 @@ export function App({
                 lastKnownDocRef.current = doc;
 
                 if (!_.isEqual(state.persistedDoc, doc)) {
-                  setState({ ...state, isDirty: true });
+                  setState(s => ({ ...s, isDirty: true }));
                 }
 
                 Promise.all(

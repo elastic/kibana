@@ -149,7 +149,9 @@ describe('workspace_panel', () => {
           },
           Object {
             "arguments": Object {
-              "filters": Array [],
+              "filters": Array [
+                "[]",
+              ],
               "query": Array [
                 "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
               ],
@@ -239,39 +241,39 @@ describe('workspace_panel', () => {
     expect(
       (instance.find(expressionRendererMock).prop('expression') as Ast).chain[2].arguments.tables
     ).toMatchInlineSnapshot(`
-                  Array [
-                    Object {
-                      "chain": Array [
-                        Object {
-                          "arguments": Object {},
-                          "function": "datasource",
-                          "type": "function",
-                        },
-                      ],
-                      "type": "expression",
-                    },
-                    Object {
-                      "chain": Array [
-                        Object {
-                          "arguments": Object {},
-                          "function": "datasource2",
-                          "type": "function",
-                        },
-                      ],
-                      "type": "expression",
-                    },
-                    Object {
-                      "chain": Array [
-                        Object {
-                          "arguments": Object {},
-                          "function": "datasource2",
-                          "type": "function",
-                        },
-                      ],
-                      "type": "expression",
-                    },
-                  ]
-            `);
+                                    Array [
+                                      Object {
+                                        "chain": Array [
+                                          Object {
+                                            "arguments": Object {},
+                                            "function": "datasource",
+                                            "type": "function",
+                                          },
+                                        ],
+                                        "type": "expression",
+                                      },
+                                      Object {
+                                        "chain": Array [
+                                          Object {
+                                            "arguments": Object {},
+                                            "function": "datasource2",
+                                            "type": "function",
+                                          },
+                                        ],
+                                        "type": "expression",
+                                      },
+                                      Object {
+                                        "chain": Array [
+                                          Object {
+                                            "arguments": Object {},
+                                            "function": "datasource2",
+                                            "type": "function",
+                                          },
+                                        ],
+                                        "type": "expression",
+                                      },
+                                    ]
+                        `);
   });
 
   it('should run the expression again if the date range changes', async () => {

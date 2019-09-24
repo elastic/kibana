@@ -112,7 +112,7 @@ export function FieldItem(props: FieldItemProps) {
       .post(`/api/lens/index_stats/${indexPattern.title}/field`, {
         body: JSON.stringify({
           query: toElasticsearchQuery(query, indexPattern),
-          filters: buildQueryFromFilters(query, indexPattern),
+          filters: buildQueryFromFilters(filters, indexPattern),
           fromDate: dateRange.fromDate,
           toDate: dateRange.toDate,
           timeFieldName: indexPattern.timeFieldName,

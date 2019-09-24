@@ -63,6 +63,7 @@ describe('Lens App', () => {
             }),
           },
         },
+        timefilter: { history: {} },
       },
       store: {
         get: jest.fn(),

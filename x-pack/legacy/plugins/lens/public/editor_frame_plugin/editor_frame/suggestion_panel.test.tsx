@@ -287,7 +287,7 @@ describe('suggestion_panel', () => {
           },
           Object {
             "arguments": Object {
-              "filters": Array [],
+              "filters": undefined,
               "query": Array [
                 "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
               ],
