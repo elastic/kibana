@@ -76,17 +76,15 @@ const find = (
 export const calculateAuto = {
   near: find(
     revRoundingRules,
-    function near(bound, interval, target) {
+    (bound, interval, target) => {
       if (bound > target) return interval;
     },
     true
   ),
-
-  lessThan: find(revRoundingRules, function lessThan(_bound, interval, target) {
+  lessThan: find(revRoundingRules, (_bound, interval, target) => {
     if (interval < target) return interval;
   }),
-
-  atLeast: find(revRoundingRules, function atLeast(_bound, interval, target) {
+  atLeast: find(revRoundingRules, (_bound, interval, target) => {
     if (interval <= target) return interval;
   }),
 };
