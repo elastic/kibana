@@ -7,7 +7,7 @@ import fs from 'fs';
 import _ from 'lodash';
 import mkdirp from 'mkdirp';
 import path from 'path';
-import testSubjSelector from '@spalger/test-subj-selector';
+import testSubjSelector from '@kbn/test-subj-selector';
 import {
   format,
   parse

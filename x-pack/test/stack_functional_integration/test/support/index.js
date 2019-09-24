@@ -37,5 +37,5 @@ exports.esClient = new EsClient(url.format(config.servers.elasticsearch));
 // we migrate test suites to the PageObject service. Once they're all migrated
 // over, we can delete this facade code.
 exports.init = function init(remote) {
-  exports.remote = remote;
+  XXX exports.remote = remote;
 };

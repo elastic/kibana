@@ -1,7 +1,7 @@
-import { config } from '../';
+import { config } from '../index';
 import {
   Log,
-} from './';
+} from './index';
 
 export default (function () {
   const util = require('util');

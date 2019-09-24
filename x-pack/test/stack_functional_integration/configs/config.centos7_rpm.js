@@ -24,17 +24,17 @@
 // } from './services';
 
 export default async function ({ readConfigFile }) {
-  const defaultConfig = await readConfigFile(require.resolve('../functional/config'));
+  const defaultConfig = await readConfigFile(require.resolve('../../functional/config'));
   // const commonConfig = await readConfigFile(require.resolve('../common/config'));
   // const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
     ...defaultConfig.getAll(),
     junit: {
-      reportName: 'Stack Functional Integration Tests'
+      reportName: 'Stack Functional Integration Tests - Centos 7 RPM'
     },
     testFiles: [
-      require.resolve('./test/functional/apps/telemetry'),
+      require.resolve('../test/functional/apps/telemetry'),
       // require.resolve('./test/functional/apps/metricbeat'),
       // require.resolve('./test/functional/apps/filebeat'),
       // require.resolve('./test/functional/apps/packetbeat'),
@@ -43,21 +43,29 @@ export default async function ({ readConfigFile }) {
     // services: {
       // es: commonConfig.get('services.es'),
       // esArchiver: commonConfig.get('services.esArchiver'),
-      // retry: commonConfig.get('services.retry'),
+      // retry: commonConfig.get('services.retry'),d
       // supertest: KibanaSupertestProvider,
       // supertestWithoutAuth: KibanaSupertestWithoutAuthProvider,
       // esSupertest: ElasticsearchSupertestProvider,
     // },
-    // servers: commonConfig.get('servers'),
-    // esTestCluster: commonConfig.get('esTestCluster'),
-    kbnTestServer: {
-      ...defaultConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...defaultConfig.get('kbnTestServer.serverArgs'),
-        '--optimize.enabled=true',
-        '--elasticsearch.healthCheck.delay=3600000',
-        '--server.xsrf.disableProtection=true',
-      ],
+    // servers: defaultConfig.get('servers'),
+    //
+    // esTestCluster: defaultConfig.get('esTestCluster'),
+    //
+    // kbnTestServer: {
+    //   ...commonConfig.get('kbnTestServer'),
+    //   serverArgs: [
+    //     ...commonConfig.get('kbnTestServer.serverArgs'),
+    //     '--optimize.enabled=true',
+    //     '--elasticsearch.healthCheck.delay=3600000',
+    //     '--server.xsrf.disableProtection=true',
+    //   ],
+    // },
+    apps: {
+      monitoring: {
+        pathname: '/app/monitoring',
+        // hash: '',
+      }
     },
   };
 }

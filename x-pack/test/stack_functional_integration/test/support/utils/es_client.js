@@ -2,7 +2,7 @@
 import {
   Log,
   Try,
-} from './';
+} from './index';
 
 export default (function () {
 

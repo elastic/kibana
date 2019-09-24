@@ -1,7 +1,7 @@
 define(function (require) {
   var bdd = require('intern!bdd');
   var expect = require('intern/dojo/node!expect.js');
-  var config = require('intern').config;
+  var config = require('x-pack/test/stack_functional_integration/test/intern').config;
   var url = require('intern/dojo/node!url');
   var _ = require('intern/dojo/node!lodash');
   var Common = require('../../../../kibana/test/support/pages/common');

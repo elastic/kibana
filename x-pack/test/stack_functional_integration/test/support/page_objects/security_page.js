@@ -3,9 +3,9 @@ import { map as mapAsync } from 'bluebird';
 
 import {
   defaultFindTimeout,
-} from '../';
+} from '../index';
 
-import PageObjects from './';
+import PageObjects from './index';
 
 export default class SecurityPage {
 
@@ -248,7 +248,7 @@ export default class SecurityPage {
       return PageObjects.common.sleep(1000);
     });
   }
-  
+
   deleteUser(username) {
     let alertText;
     PageObjects.common.debug('Delete user ' + username);

@@ -1,8 +1,8 @@
 import {
   defaultFindTimeout,
-} from '../';
+} from '../index';
 
-import PageObjects from './';
+import PageObjects from './index';
 
 export default class ConsolePage {
 

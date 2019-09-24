@@ -1,13 +1,13 @@
 
 import {
   defaultFindTimeout,
-} from '../';
+} from '../index';
 
 import {
   config
 } from '../index';
 
-import PageObjects from './';
+import PageObjects from './index';
 
 export default class ShieldPage {
 
@@ -48,7 +48,7 @@ export default class ShieldPage {
     await PageObjects.common.sleep(1001);
 
     // for left navigation
-	
+
     await PageObjects.common.findTestSubject('userMenuButton')
     .click();
 	    await PageObjects.common.sleep(500);

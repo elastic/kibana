@@ -4,9 +4,9 @@ import expect from 'expect.js';
 
 import {
   defaultFindTimeout,
-} from '../';
+} from '../index';
 
-import PageObjects from './';
+import PageObjects from './index';
 
 export default class SettingsPage {
 
