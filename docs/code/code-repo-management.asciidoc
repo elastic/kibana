@@ -7,7 +7,7 @@ image::images/code-repo-management.png[]
 
 [float]
 ==== Add and delete a repo
-The <<code-import-first-repo, Import your first repository>> page provides step-by-step instructions for adding a GitHub repo to *Code*.  You can fine tune the hostname of the git clone URL in your `kibana.yml` file.
+The <<code-import-first-repo, Import your first repository>> page provides step-by-step instructions for adding a GitHub repo to *Code*.  You can fine-tune the hostname of the git clone URL in your `kibana.yml` file.
 
 For security reasons, Code allows only a few <<#clone-url-management, trusted hostnames>>, such as github.com. To clone private repositories <<#clone-private-repo-with-ssh-key, add an SSH key>>.
 
@@ -15,13 +15,13 @@ To delete a repository, find the go to the **Repositories** tab, find the name o
 
 [float]
 ==== Clone private repo with SSH key
-Clones of private repos requires an SSH key for authentication. The username associated with your host must have write access to the repository you want to clone.
+Clones of private repos require an SSH key for authentication. The username associated with your host must have write access to the repository you want to clone.
 
 The following section provides links for generating your ssh key through GitHub. If you already have an SSH key added through your host, skip to step 4.
 
 1. https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key[Generate an ssh key].
 
-2. https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#adding-your-ssh-key-to-the-ssh-agent[Add the ssh key to your ssh agent.]
+2. https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#adding-your-ssh-key-to-the-ssh-agent[Add the ssh key to your ssh-agent.]
 
 3. https://help.github.com/en/articles/adding-a-new-ssh-key-to-your-github-account[Add the ssh key to your host].
 
@@ -33,9 +33,9 @@ To delete a repository, find the go to the **Repositories** tab, find the name o
 
 [float]
 ==== Reindex a repo
-*Code* automatically reindexes an imported repo at set intervals, but in some cases you might need to manually refresh the index. For example, you might refresh an index  after a new language server is installed. Or, you might want to immediately update the index to the HEAD revision. Click *Reindex* to initiate a reindex.
+*Code* automatically reindexes an imported repo at set intervals, but in some cases, you might need to refresh the index manually. For example, you might refresh an index after a new language server installs. Or, you might want to update the index to the HEAD revision immediately. Click *Reindex* to initiate a reindex.
 
-In some cases you might need to manually refresh the index besides automatic indexing. For example, you might refresh an index  after a new language server is installed. Or, you might want to immediately update the index to the HEAD revision. Click *Reindex* to initiate a reindex.
+In some cases, you might need to refresh the index besides automatic indexing manually. For example, you might refresh an index after a new language server installs. Or, you might want to update the index to the HEAD revision immediately. Click *Reindex* to initiate a reindex.
 
 [float]
 ==== Clone URL management
@@ -65,13 +65,13 @@ xpack.code.security.gitProtocolWhitelist: [ "https" ]
 
 [float]
 ==== Clone private repo with SSH key
-Clones of private repos requires an SSH key for authentication. The username associated with your host must have write access to the repository you want to clone.
+Clones of private repos require an SSH key for authentication. The username associated with your host must have write access to the repository you want to clone.
 
 The following section provides links for generating your ssh key through GitHub. If you already have an SSH key added through your host, skip to step 4.
 
 1. https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key[Generate an ssh key].
 
-2. https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#adding-your-ssh-key-to-the-ssh-agent[Add the ssh key to your ssh agent.]
+2. https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#adding-your-ssh-key-to-the-ssh-agent[Add the ssh key to your ssh-agent.]
 
 3. https://help.github.com/en/articles/adding-a-new-ssh-key-to-your-github-account[Add the ssh key to your host].
 
@@ -84,6 +84,6 @@ You can now copy private Git repositories into Code.
 Consider the following limitations before cloning repositories:
 
 - Only Git is supported. Other version control systems such as Mercurial and SVN are not supported.
-- Your disk might not have enough space to clone repositories due to {kib} watermark settings. To update you're watermark settings, contact your system administrator and request additional disk space.
+- Your disk might not have enough space to clone repositories due to {kib} watermark settings. To update your watermark settings, contact your system administrator and request additional disk space.
 
 include::code-install-lang-server.asciidoc[]
