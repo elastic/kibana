@@ -15,7 +15,7 @@ export interface ChromeBreadcrumb
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [data-test-subj](./kibana-plugin-public.chromebreadcrumb.data-test-subj.md) | <code>string</code> |  |
+|  ["data-test-subj"](./kibana-plugin-public.chromebreadcrumb._data-test-subj_.md) | <code>string</code> |  |
 |  [href](./kibana-plugin-public.chromebreadcrumb.href.md) | <code>string</code> |  |
 |  [onClick](./kibana-plugin-public.chromebreadcrumb.onclick.md) | <code>MouseEventHandler&lt;HTMLButtonElement&gt;</code> |  |
 |  [text](./kibana-plugin-public.chromebreadcrumb.text.md) | <code>string</code> |  |
