@@ -14,8 +14,12 @@ import { PolicyFile, DatasourceInput, BackupPolicyFile } from './adapter_types';
 export class PolicyAdapter {
   constructor(private readonly so: SODatabaseAdapter) {}
 
-  public async create(policy: NewPolicyFile): Promise<PolicyFile> {
-    const newSo = await this.so.create<PolicyFile>('policies', (policy as any) as PolicyFile);
+  public async create(policy: NewPolicyFile, options?: { id?: string }): Promise<PolicyFile> {
+    const newSo = await this.so.create<PolicyFile>(
+      'policies',
+      (policy as any) as PolicyFile,
+      options
+    );
 
     return {
       id: newSo.id,

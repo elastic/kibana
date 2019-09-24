@@ -15,3 +15,7 @@ export const initServerWithKibana = (hapiServer: any) => {
 
   initRestApi(hapiServer, libs);
 };
+
+export function postInit(server: any) {
+  server.plugins.ingest.policy.ensureDefaultPolicy();
+}

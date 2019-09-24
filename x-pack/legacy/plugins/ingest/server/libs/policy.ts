@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { assign, omit } from 'lodash';
 import uuidv4 from 'uuid/v4';
 import { PolicyAdapter } from './adapters/policy/default';
@@ -258,7 +259,36 @@ export class PolicyLib {
       shared_id: newPolicyInfo.shared_id,
     };
   }
-
+  public async ensureDefaultPolicy() {
+    try {
+      await this.adapter.get('default');
+    } catch (err) {
+      if (!err.isBoom || err.output.statusCode !== 404) {
+        throw err;
+      }
+      const info = this.libs.framework.info;
+      if (info === null) {
+        throw new Error('Could not get version information about Kibana from xpack');
+      }
+      const newDefaultPolicy: NewPolicyFile = {
+        name: 'Default Policy',
+        description: 'default policy create by kibana (not possible to delete)',
+        status: 'active',
+        monitoring_enabled: true,
+        shared_id: 'default',
+        version: 0,
+        agent_version: info.kibana.version,
+        data_sources: [],
+        created_on: new Date().toISOString(),
+        created_by: 'kibana',
+        updated_on: new Date().toISOString(),
+        updated_by: 'kibana',
+      };
+      await this.adapter.create(newDefaultPolicy, {
+        id: 'default',
+      });
+    }
+  }
   /**
    * request* because in the future with an approval flow it will not directly make the change
    */
