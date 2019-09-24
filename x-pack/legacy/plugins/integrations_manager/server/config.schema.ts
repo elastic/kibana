@@ -7,6 +7,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 export const config = {
   schema: schema.object({
+    enabled: schema.boolean(),
     registryUrl: schema.string(),
   }),
 };

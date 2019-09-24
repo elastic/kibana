@@ -17,7 +17,6 @@ import { CoreSetup, Plugin as ServerPlugin } from './server/plugin';
 import { mappings, savedObjectSchemas } from './server/saved_objects';
 
 const ROOT = `plugins/${PLUGIN.ID}`;
-const CONFIG_ROOT = `xpack.${PLUGIN.ID}`;
 
 const feature: Feature = {
   id: PLUGIN.ID,
@@ -75,7 +74,7 @@ const pluginOptions: LegacyPluginOptions = {
   preInit: undefined,
   // XXXSKH: any? what is this really? neither Server from hapi.js nor KbnServer seems to have a .config() on it so
   // I left it as any for now, but ugh.
-  init(server: Server) {
+  init(server: any) {
     server.plugins.xpack_main.registerFeature(feature);
 
     // convert hapi instance to KbnServer
@@ -83,7 +82,8 @@ const pluginOptions: LegacyPluginOptions = {
     // `kbnServer.newPlatform` has important values
     const kbnServer = (server as unknown) as KbnServer;
 
-    const getConfig$ = <T>() => defer<T>(async () => await server.config().get(CONFIG_ROOT));
+    const getConfig$ = <T>() =>
+      defer<T>(async () => await server.config().get(PLUGIN.CONFIG_PREFIX));
 
     const initializerContext = ({
       config: {
@@ -102,6 +102,7 @@ const pluginOptions: LegacyPluginOptions = {
 
 export const getConfigSchema = (Joi: typeof JoiNamespace) => {
   const IntegrationsManagerConfigSchema = Joi.object({
+    enabled: Joi.boolean().default(true),
     registryUrl: Joi.string()
       .uri()
       .default(),

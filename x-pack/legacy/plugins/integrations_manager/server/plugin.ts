@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Observable } from 'rxjs';
 import {
   ClusterClient,
   CoreStart,
@@ -25,22 +26,34 @@ export type PluginSetup = ReturnType<Plugin['setup']>;
 export type PluginStart = ReturnType<Plugin['start']>;
 export interface PluginContext {
   esClient: ClusterClient;
+  config: IntegrationsManagerConfig;
 }
 
+const DEFAULT_CONFIG: IntegrationsManagerConfig = {
+  enabled: true,
+  registryUrl: 'http://integrations-registry.app.elstc.co',
+};
+
 export class Plugin {
-  // XXXSKH: why the trailing $ again?
-  // XXXSKH: what type should this be? VScode finds Observable<Readonly<{ registryUrl: string; }>>, what do I do with that?
-  config$: IntegrationsManagerConfig;
+  public config$: Observable<IntegrationsManagerConfig>;
+  public config: IntegrationsManagerConfig = DEFAULT_CONFIG;
+
   constructor(initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<IntegrationsManagerConfig>();
-    // or if config is optional:
-    this.config$ = initializerContext.config.createIfExists<IntegrationsManagerConfig>();
+    this.config$.subscribe(configValue => {
+      this.config = {
+        ...DEFAULT_CONFIG,
+        enabled: configValue.enabled,
+        registryUrl: configValue.registryUrl,
+      };
+    });
   }
   public setup(core: CoreSetup) {
     const { http, elasticsearch } = core;
     const { server } = http;
     const pluginContext: PluginContext = {
       esClient: elasticsearch.createClient(PLUGIN.ID),
+      config: this.config,
     };
 
     // make pluginContext entries available to handlers via h.context
