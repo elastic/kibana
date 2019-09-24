@@ -23,29 +23,31 @@ export function GraphApp(props: GraphAppProps) {
 
   return (
     <I18nProvider>
-      <div className="gphGraph__bar">
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem>
-            <SearchBar {...props} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <FieldManager {...props} pickerOpen={pickerOpen} setPickerOpen={setPickerOpen} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
-      {!props.isInitialized && (
-        <GuidancePanel
-          hasDatasource={Boolean(props.currentIndexPattern)}
-          hasFields={selectedFieldsSelector(props.state).length > 0}
-          onFillWorkspace={props.onFillWorkspace}
-          onOpenFieldPicker={() => {
-            setPickerOpen(true);
-          }}
-          onOpenDatasourcePicker={() => {
-            openSourceModal(props, props.onIndexPatternSelected);
-          }}
-        />
-      )}
+      <>
+        <div className="gphGraph__bar">
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem>
+              <SearchBar {...props} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <FieldManager {...props} pickerOpen={pickerOpen} setPickerOpen={setPickerOpen} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+        {!props.isInitialized && (
+          <GuidancePanel
+            hasDatasource={Boolean(props.currentIndexPattern)}
+            hasFields={selectedFieldsSelector(props.state).length > 0}
+            onFillWorkspace={props.onFillWorkspace}
+            onOpenFieldPicker={() => {
+              setPickerOpen(true);
+            }}
+            onOpenDatasourcePicker={() => {
+              openSourceModal(props, props.onIndexPatternSelected);
+            }}
+          />
+        )}
+      </>
     </I18nProvider>
   );
 }

@@ -62,14 +62,17 @@ export function GuidancePanel(props: GuidancePanelProps) {
               <ul className="gphGuidancePanel__list">
                 <ListItem disabled={false}>
                   <FormattedMessage
-                    id="xpack.graph.guidancePanel.datasource.item"
+                    id="xpack.graph.guidancePanel.datasourceItem.description"
                     defaultMessage="Choose an {indexpattern} above"
                     values={{
                       indexpattern: (
                         <EuiLink onClick={onOpenDatasourcePicker}>
-                          {i18n.translate('xpack.graph.guidancePanel.datasource.indexpattern', {
-                            defaultMessage: 'index pattern',
-                          })}
+                          {i18n.translate(
+                            'xpack.graph.guidancePanel.datasourceItem.indexPatternButtonLabel',
+                            {
+                              defaultMessage: 'index pattern',
+                            }
+                          )}
                         </EuiLink>
                       ),
                     }}
@@ -77,14 +80,17 @@ export function GuidancePanel(props: GuidancePanelProps) {
                 </ListItem>
                 <ListItem disabled={!hasDatasource}>
                   <FormattedMessage
-                    id="xpack.graph.guidancePanel.fields.item"
+                    id="xpack.graph.guidancePanel.fieldsItem.description"
                     defaultMessage="{fields} to explore"
                     values={{
                       fields: (
                         <EuiLink onClick={onOpenFieldPicker}>
-                          {i18n.translate('xpack.graph.guidancePanel.fields.selectfields', {
-                            defaultMessage: 'Select fields',
-                          })}
+                          {i18n.translate(
+                            'xpack.graph.guidancePanel.fieldsItem.fieldsButtonLabel',
+                            {
+                              defaultMessage: 'Select fields',
+                            }
+                          )}
                         </EuiLink>
                       ),
                     }}
@@ -92,14 +98,17 @@ export function GuidancePanel(props: GuidancePanelProps) {
                 </ListItem>
                 <ListItem disabled={!hasFields}>
                   <FormattedMessage
-                    id="xpack.graph.guidancePanel.nodes.item"
-                    defaultMessage=" It's time to search for something you are interested in in the search bar above! You can also try our suggestion to {topTerms}"
+                    id="xpack.graph.guidancePanel.nodesItem.description"
+                    defaultMessage="Search for something in the search bar above to begin exploration. If you don't know where to start, you can also {topTerms}"
                     values={{
                       topTerms: (
                         <EuiLink onClick={onFillWorkspace}>
-                          {i18n.translate('xpack.graph.guidancePanel.nodes.topTerms', {
-                            defaultMessage: 'show top terms and correlations among them',
-                          })}
+                          {i18n.translate(
+                            'xpack.graph.guidancePanel.nodesItem.topTermsButtonLabel',
+                            {
+                              defaultMessage: 'show correlations of the top terms',
+                            }
+                          )}
                         </EuiLink>
                       ),
                     }}
