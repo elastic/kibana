@@ -19,6 +19,9 @@ const sortByLabel  = (a, b) => {
   return 0;
 };
 
+const ENTRY_KEY_INDEX = 0;
+const ENTRY_VALUE_INDEX = 1;
+
 export class AddTooltipFieldPopover extends Component {
 
   state = {
@@ -93,16 +96,30 @@ export class AddTooltipFieldPopover extends Component {
         }
       });
 
+    const fieldTypeEntries = [...fieldsByTypeMap.entries()];
     const options = [];
-    [...fieldsByTypeMap.entries()].sort(sortByLabel).forEach(entry => {
-      const fieldType = entry[0];
-      const fieldTypeOptions = entry[1];
-      options.push({
-        label: fieldType,
-        isGroupLabel: true
-      });
-      options.push(...fieldTypeOptions);
-    });
+    if (fieldTypeEntries.length === 1) {
+      // Field list only contains a single type, no need to display type headers
+      options.push(...fieldTypeEntries[0][ENTRY_VALUE_INDEX].sort(sortByLabel));
+    } else {
+      fieldTypeEntries
+        .sort((a, b) => {
+          console.log('a', a);
+          console.log('b', b);
+          if (a[ENTRY_KEY_INDEX] < b[ENTRY_KEY_INDEX]) return -1;
+          if (a[ENTRY_KEY_INDEX] > b[ENTRY_KEY_INDEX]) return 1;
+          return 0;
+        })
+        .forEach(entry => {
+          const fieldType = entry[ENTRY_KEY_INDEX];
+          const fieldTypeOptions = entry[ENTRY_VALUE_INDEX].sort(sortByLabel);
+          options.push({
+            label: fieldType,
+            isGroupLabel: true
+          });
+          options.push(...fieldTypeOptions);
+        });
+    }
 
     return (
       <EuiSelectable

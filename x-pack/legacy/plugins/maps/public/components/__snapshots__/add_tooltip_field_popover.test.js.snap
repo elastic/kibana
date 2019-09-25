@@ -30,10 +30,6 @@ exports[`Should remove selected fields from selectable 1`] = `
     options={
       Array [
         Object {
-          "isGroupLabel": true,
-          "label": "date",
-        },
-        Object {
           "label": "@timestamp",
           "value": "@timestamp",
         },
@@ -78,6 +74,14 @@ exports[`Should render 1`] = `
       Array [
         Object {
           "isGroupLabel": true,
+          "label": "date",
+        },
+        Object {
+          "label": "@timestamp",
+          "value": "@timestamp",
+        },
+        Object {
+          "isGroupLabel": true,
           "label": "string",
         },
         Object {
@@ -87,14 +91,6 @@ exports[`Should render 1`] = `
         Object {
           "label": "prop2",
           "value": "prop2",
-        },
-        Object {
-          "isGroupLabel": true,
-          "label": "date",
-        },
-        Object {
-          "label": "@timestamp",
-          "value": "@timestamp",
         },
       ]
     }
