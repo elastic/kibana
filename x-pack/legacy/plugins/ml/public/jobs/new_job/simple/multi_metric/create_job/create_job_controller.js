@@ -21,7 +21,7 @@ import uiRoutes from 'ui/routes';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
-import { MlTimeBuckets } from 'plugins/ml/util/ml_time_buckets';
+import { TimeBuckets } from 'plugins/ml/util/time_buckets';
 import { getCreateMultiMetricJobBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
 import { filterAggTypes } from 'plugins/ml/jobs/new_job/simple/components/utils/filter_agg_types';
 import { validateJob } from 'plugins/ml/jobs/new_job/simple/components/utils/validate_job';
@@ -292,7 +292,7 @@ module
       }
 
       const bounds = timefilter.getActiveBounds();
-      $scope.formConfig.chartInterval = new MlTimeBuckets();
+      $scope.formConfig.chartInterval = new TimeBuckets();
       $scope.formConfig.chartInterval.setBarTarget(BAR_TARGET);
       $scope.formConfig.chartInterval.setMaxBars(MAX_BARS);
       $scope.formConfig.chartInterval.setInterval('auto');
