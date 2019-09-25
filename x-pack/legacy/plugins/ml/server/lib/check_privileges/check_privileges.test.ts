@@ -104,7 +104,7 @@ describe('check_privileges', () => {
       );
       const { capabilities } = await getPrivileges();
       const count = Object.keys(capabilities).length;
-      expect(count).toBe(27);
+      expect(count).toBe(22);
       done();
     });
   });
