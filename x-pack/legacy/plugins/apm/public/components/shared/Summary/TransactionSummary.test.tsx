@@ -5,12 +5,12 @@
  */
 
 import { shallow } from 'enzyme';
-import { TraceSummary } from '.';
 import React from 'react';
-import { Transaction } from '../../../../../../typings/es_schemas/ui/Transaction';
+import { TransactionSummary } from './TransactionSummary';
+import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import * as exampleTransactions from './__fixtures__/transactions';
 
-describe('TraceSummary', () => {
+describe('TransactionSummary', () => {
   describe('render', () => {
     const transaction: Transaction = exampleTransactions.httpOk;
 
@@ -21,7 +21,9 @@ describe('TraceSummary', () => {
     };
 
     it('renders', () => {
-      expect(() => shallow(<TraceSummary {...props} />)).not.toThrowError();
+      expect(() =>
+        shallow(<TransactionSummary {...props} />)
+      ).not.toThrowError();
     });
   });
 });
