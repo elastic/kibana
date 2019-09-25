@@ -3,7 +3,7 @@
 This guide applies to all development within the Kibana project and is
 recommended for the development of all Kibana plugins.
 
-Besides the content in this style guide also the following style guides apply
+Besides the content in this style guide, the following style guides may also apply
 to all development within the Kibana project. Please make sure to also read them:
 
 - [Accessibility style guide](style_guides/accessibility_guide.md)
