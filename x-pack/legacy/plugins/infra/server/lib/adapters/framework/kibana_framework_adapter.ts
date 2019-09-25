@@ -154,7 +154,13 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
   }
 
   public getSpaceId(request: InfraFrameworkRequest): string {
-    return this.server.plugins.spaces.getSpaceId(request[internalInfraFrameworkRequest]);
+    const spacesPlugin = this.server.plugins.spaces;
+
+    if (spacesPlugin && typeof spacesPlugin.getSpaceId === 'function') {
+      return spacesPlugin.getSpaceId(request[internalInfraFrameworkRequest]);
+    } else {
+      return 'default';
+    }
   }
 
   public getSavedObjectsService() {

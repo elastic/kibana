@@ -89,17 +89,20 @@ export type HttpHandler = (path: string, options?: HttpFetchOptions) => Promise<
 export type HttpBody = BodyInit | null | any;
 /** @public */
 export interface HttpResponse {
-  request: Request;
+  request?: Request;
   response?: Response;
   body?: HttpBody;
 }
 /** @public */
-export interface HttpErrorResponse extends HttpResponse {
+export interface HttpErrorResponse {
   error: Error | HttpFetchError;
+  request?: Request;
+  response?: Response;
+  body?: HttpBody;
 }
 /** @public */
 export interface HttpErrorRequest {
-  request?: Request;
+  request: Request;
   error: Error;
 }
 /** @public */
