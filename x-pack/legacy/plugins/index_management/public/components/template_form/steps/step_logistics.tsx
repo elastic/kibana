@@ -10,12 +10,19 @@ import { i18n } from '@kbn/i18n';
 import {
   useForm,
   Form,
-  UseField,
+  getUseField,
 } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
-import { FormRow } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/components';
+import {
+  getFormRow,
+  Field,
+} from '../../../../../../../../src/plugins/es_ui_shared/static/forms/components';
 import { templatesDocumentationLink } from '../../../lib/documentation_links';
 import { StepProps } from '../types';
 import { schemas } from '../template_form_schemas';
+
+// Create or Form components with partial props that are common to all instances
+const UseField = getUseField({ component: Field });
+const FormRow = getFormRow({ titleTag: 'h4' });
 
 const fieldsMeta = {
   name: {
@@ -116,7 +123,7 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
       </EuiFlexGroup>
       <EuiSpacer size="l" />
       {/* Name */}
-      <FormRow title={name.title} description={name.description} titleTag="h3" idAria={name.idAria}>
+      <FormRow title={name.title} description={name.description} idAria={name.idAria}>
         <UseField
           path="name"
           componentProps={{
@@ -130,7 +137,6 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
       <FormRow
         title={indexPatterns.title}
         description={indexPatterns.description}
-        titleTag="h3"
         idAria={indexPatterns.idAria}
       >
         <UseField
@@ -142,12 +148,7 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
         />
       </FormRow>
       {/* Order */}
-      <FormRow
-        title={order.title}
-        description={order.description}
-        titleTag="h3"
-        idAria={order.idAria}
-      >
+      <FormRow title={order.title} description={order.description} idAria={order.idAria}>
         <UseField
           path="order"
           componentProps={{
@@ -157,12 +158,7 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
         />
       </FormRow>
       {/* Version */}
-      <FormRow
-        title={version.title}
-        description={version.description}
-        titleTag="h3"
-        idAria={version.idAria}
-      >
+      <FormRow title={version.title} description={version.description} idAria={version.idAria}>
         <UseField
           path="version"
           componentProps={{
