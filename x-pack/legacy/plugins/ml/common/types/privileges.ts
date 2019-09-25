@@ -28,12 +28,6 @@ export interface Privileges {
   canDeleteFilter: boolean;
   // File Data Visualizer
   canFindFileStructure: boolean;
-  // Transforms
-  canGetTransform: boolean;
-  canDeleteTransform: boolean;
-  canPreviewTransform: boolean;
-  canCreateTransform: boolean;
-  canStartStopTransform: boolean;
   // Data Frame Analytics
   canGetDataFrameAnalytics: boolean;
   canDeleteDataFrameAnalytics: boolean;
@@ -65,12 +59,6 @@ export function getDefaultPrivileges(): Privileges {
     canDeleteFilter: false,
     // File Data Visualizer
     canFindFileStructure: false,
-    // Transforms
-    canGetTransform: false,
-    canDeleteTransform: false,
-    canPreviewTransform: false,
-    canCreateTransform: false,
-    canStartStopTransform: false,
     // Data Frame Analytics
     canGetDataFrameAnalytics: false,
     canDeleteDataFrameAnalytics: false,

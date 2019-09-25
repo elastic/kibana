@@ -8,7 +8,7 @@ import React, { useContext } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { EuiPageContent } from '@elastic/eui';
 
-import { APP_REQUIRED_CLUSTER_PRIVILEGES } from '../../common/constants';
+import { APP_GET_TRANSFORM_CLUSTER_PRIVILEGES } from '../../common/constants';
 import { SectionLoading, SectionError } from './components';
 import { BASE_PATH, DEFAULT_SECTION } from './constants';
 import { useAppDependencies } from './index';
@@ -35,7 +35,9 @@ export const App: React.FunctionComponent = () => {
       error={apiError}
     />
   ) : (
-    <WithPrivileges privileges={APP_REQUIRED_CLUSTER_PRIVILEGES.map(name => `cluster.${name}`)}>
+    <WithPrivileges
+      privileges={APP_GET_TRANSFORM_CLUSTER_PRIVILEGES.map(name => `cluster.${name}`)}
+    >
       {({ isLoading, hasPrivileges, privilegesMissing }) =>
         isLoading ? (
           <SectionLoading>
@@ -67,7 +69,7 @@ export const App: React.FunctionComponent = () => {
               message={
                 <FormattedMessage
                   id="xpack.transform.app.deniedPrivilegeDescription"
-                  defaultMessage="To use Transform, you must have {privilegesCount,
+                  defaultMessage="To use Transforms, you must have {privilegesCount,
                     plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
                   values={{
                     missingPrivileges: privilegesMissing.cluster!.join(', '),

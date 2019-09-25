@@ -4,24 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC } from 'react';
+import React, { useContext, SFC } from 'react';
 
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  checkPermission,
-  createPermissionFailureMessage,
-} from '../../../../../../../ml/public/privilege/check_privilege';
+  createCapabilityFailureMessage,
+  AuthorizationContext,
+} from '../../../../lib/authorization';
 
 import { moveToTransformWizard } from '../../../../common';
 
 export const CreateTransformButton: SFC = () => {
+  const { capabilities } = useContext(AuthorizationContext);
+
   const disabled =
-    !checkPermission('canCreateTransform') ||
-    !checkPermission('canPreviewTransform') ||
-    !checkPermission('canStartStopTransform');
+    !capabilities.canCreateTransform ||
+    !capabilities.canPreviewTransform ||
+    !capabilities.canStartStopTransform;
 
   const button = (
     <EuiButton
@@ -41,7 +43,7 @@ export const CreateTransformButton: SFC = () => {
 
   if (disabled) {
     return (
-      <EuiToolTip position="top" content={createPermissionFailureMessage('canCreateTransform')}>
+      <EuiToolTip position="top" content={createCapabilityFailureMessage('canCreateTransform')}>
         {button}
       </EuiToolTip>
     );

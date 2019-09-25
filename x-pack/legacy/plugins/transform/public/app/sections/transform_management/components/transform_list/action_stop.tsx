@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
 import { TransformListRow, TRANSFORM_STATE } from '../../../../common';
 import {
-  checkPermission,
-  createPermissionFailureMessage,
-} from '../../../../../../../ml/public/privilege/check_privilege';
+  createCapabilityFailureMessage,
+  AuthorizationContext,
+} from '../../../../lib/authorization';
 import { stopTransforms } from '../../services/transform_service';
 
 interface StopActionProps {
@@ -22,7 +22,7 @@ interface StopActionProps {
 
 export const StopAction: FC<StopActionProps> = ({ items, forceDisable }) => {
   const isBulkAction = items.length > 1;
-  const canStartStopTransform: boolean = checkPermission('canStartStopTransform');
+  const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
   const buttonStopText = i18n.translate('xpack.transform.transformList.stopActionName', {
     defaultMessage: 'Stop',
   });
@@ -72,7 +72,7 @@ export const StopAction: FC<StopActionProps> = ({ items, forceDisable }) => {
         position="top"
         content={
           !canStartStopTransform
-            ? createPermissionFailureMessage('canStartStopTransform')
+            ? createCapabilityFailureMessage('canStartStopTransform')
             : stoppedTransformMessage
         }
       >

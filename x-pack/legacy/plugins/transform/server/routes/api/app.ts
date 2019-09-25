@@ -5,11 +5,7 @@
  */
 import { Router, RouterRouteHandler } from '../../../../../server/lib/create_router';
 import { wrapCustomError } from '../../../../../server/lib/create_router/error_wrappers';
-import {
-  APP_REQUIRED_CLUSTER_PRIVILEGES,
-  APP_RESTORE_INDEX_PRIVILEGES,
-  APP_SLM_CLUSTER_PRIVILEGES,
-} from '../../../common/constants';
+import { APP_CLUSTER_PRIVILEGES, APP_INDEX_PRIVILEGES } from '../../../common/constants';
 // NOTE: now we import it from our "public" folder, but when the Authorisation lib
 // will move to the "es_ui_shared" plugin, it will be imported from its "static" folder
 import { Privileges } from '../../../public/app/lib/authorization';
@@ -66,7 +62,7 @@ export const getPrivilegesHandler: RouterRouteHandler = async (
       path: '/_security/user/_has_privileges',
       method: 'POST',
       body: {
-        cluster: [...APP_REQUIRED_CLUSTER_PRIVILEGES, ...APP_SLM_CLUSTER_PRIVILEGES],
+        cluster: APP_CLUSTER_PRIVILEGES,
       },
     }
   );
@@ -87,7 +83,7 @@ export const getPrivilegesHandler: RouterRouteHandler = async (
       return true;
     }
 
-    const indexHasAllPrivileges = APP_RESTORE_INDEX_PRIVILEGES.every(privilege =>
+    const indexHasAllPrivileges = APP_INDEX_PRIVILEGES.every(privilege =>
       privileges.includes(privilege)
     );
 
@@ -96,7 +92,7 @@ export const getPrivilegesHandler: RouterRouteHandler = async (
 
   // If they don't, return list of required index privileges
   if (!oneIndexWithAllPrivileges) {
-    privilegesResult.missingPrivileges.index = [...APP_RESTORE_INDEX_PRIVILEGES];
+    privilegesResult.missingPrivileges.index = [...APP_INDEX_PRIVILEGES];
   }
 
   return privilegesResult;

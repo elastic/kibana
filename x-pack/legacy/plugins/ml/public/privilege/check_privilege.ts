@@ -88,42 +88,6 @@ export function checkFindFileStructurePrivilege(kbnUrl: any): Promise<Privileges
   });
 }
 
-export function checkGetTransformsPrivilege(kbnUrl: any): Promise<Privileges> {
-  return new Promise((resolve, reject) => {
-    getPrivileges().then(({ capabilities }) => {
-      privileges = capabilities;
-      // the minimum privilege for using ML with a basic license is being able to use the data frames.
-      // all other functionality is controlled by the return privileges object
-      if (privileges.canGetTransform) {
-        return resolve(privileges);
-      } else {
-        kbnUrl.redirect('/data_frames/access-denied');
-        return reject();
-      }
-    });
-  });
-}
-
-export function checkCreateTransformPrivilege(kbnUrl: any): Promise<Privileges> {
-  return new Promise((resolve, reject) => {
-    getPrivileges().then(({ capabilities }) => {
-      privileges = capabilities;
-      if (
-        privileges.canCreateTransform &&
-        privileges.canPreviewTransform &&
-        privileges.canStartStopTransform
-      ) {
-        return resolve(privileges);
-      } else {
-        // if the user has no permission to create a transform,
-        // redirect them back to the Transforms Management page
-        kbnUrl.redirect('/data_frames');
-        return reject();
-      }
-    });
-  });
-}
-
 // check the privilege type and the license to see whether a user has permission to access a feature.
 // takes the name of the privilege variable as specified in get_privileges.js
 export function checkPermission(privilegeType: keyof Privileges) {
@@ -167,18 +131,6 @@ export function createPermissionFailureMessage(privilegeType: keyof Privileges) 
   } else if (privilegeType === 'canForecastJob') {
     message = i18n.translate('xpack.ml.privilege.noPermission.runForecastsTooltip', {
       defaultMessage: 'You do not have permission to run forecasts.',
-    });
-  } else if (privilegeType === 'canCreateTransform') {
-    message = i18n.translate('xpack.ml.privilege.noPermission.createTransformTooltip', {
-      defaultMessage: 'You do not have permission to create transforms.',
-    });
-  } else if (privilegeType === 'canStartStopTransform') {
-    message = i18n.translate('xpack.ml.privilege.noPermission.startOrStopTransformTooltip', {
-      defaultMessage: 'You do not have permission to start or stop transforms.',
-    });
-  } else if (privilegeType === 'canDeleteTransform') {
-    message = i18n.translate('xpack.ml.privilege.noPermission.deleteTransformTooltip', {
-      defaultMessage: 'You do not have permission to delete transforms.',
     });
   }
   return i18n.translate('xpack.ml.privilege.pleaseContactAdministratorTooltip', {

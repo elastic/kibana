@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useState } from 'react';
+import React, { Fragment, SFC, useContext, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -32,7 +32,7 @@ import {
   TRANSFORM_LIST_COLUMN,
   TRANSFORM_STATE,
 } from '../../../../common';
-import { checkPermission } from '../../../../../../../ml/public/privilege/check_privilege';
+import { AuthorizationContext } from '../../../../lib/authorization';
 import { getTaskStateBadge } from './columns';
 import { DeleteAction } from './action_delete';
 import { StartAction } from './action_start';
@@ -97,10 +97,11 @@ export const TransformList: SFC<Props> = ({
   const [sortField, setSortField] = useState<string>(TRANSFORM_LIST_COLUMN.ID);
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
+  const { capabilities } = useContext(AuthorizationContext);
   const disabled =
-    !checkPermission('canCreateTransform') ||
-    !checkPermission('canPreviewTransform') ||
-    !checkPermission('canStartStopTransform');
+    !capabilities.canCreateTransform ||
+    !capabilities.canPreviewTransform ||
+    !capabilities.canStartStopTransform;
 
   const onQueryChange = ({ query, error }: { query: Query; error: any }) => {
     if (error) {

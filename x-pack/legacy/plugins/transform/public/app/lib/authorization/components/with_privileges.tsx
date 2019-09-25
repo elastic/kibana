@@ -6,7 +6,8 @@
 
 import { useContext } from 'react';
 
-import { AuthorizationContext, MissingPrivileges } from './authorization_provider';
+import { AuthorizationContext } from './authorization_provider';
+import { hasPrivilegeFactory, toArray, MissingPrivileges, Privilege } from './common';
 
 interface Props {
   /**
@@ -22,11 +23,6 @@ interface Props {
   }) => JSX.Element;
 }
 
-type Privilege = [string, string];
-
-const toArray = (value: string | string[]): string[] =>
-  Array.isArray(value) ? (value as string[]) : ([value] as string[]);
-
 export const WithPrivileges = ({ privileges: requiredPrivileges, children }: Props) => {
   const { isLoading, privileges } = useContext(AuthorizationContext);
 
@@ -39,25 +35,8 @@ export const WithPrivileges = ({ privileges: requiredPrivileges, children }: Pro
     return [section, privilege];
   });
 
-  const hasPrivileges = isLoading
-    ? false
-    : privilegesToArray.every(privilege => {
-        const [section, requiredPrivilege] = privilege;
-        if (!privileges.missingPrivileges[section]) {
-          // if the section does not exist in our missingPriviledges, everything is OK
-          return true;
-        }
-        if (privileges.missingPrivileges[section]!.length === 0) {
-          return true;
-        }
-        if (requiredPrivilege === '*') {
-          // If length > 0 and we require them all... KO
-          return false;
-        }
-        // If we require _some_ privilege, we make sure that the one
-        // we require is *not* in the missingPrivilege array
-        return !privileges.missingPrivileges[section]!.includes(requiredPrivilege);
-      });
+  const hasPrivilege = hasPrivilegeFactory(privileges);
+  const hasPrivileges = isLoading ? false : privilegesToArray.every(hasPrivilege);
 
   const privilegesMissing = privilegesToArray.reduce(
     (acc, [section, privilege]) => {

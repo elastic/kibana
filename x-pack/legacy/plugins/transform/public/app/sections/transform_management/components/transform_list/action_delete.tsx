@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useState } from 'react';
+import React, { Fragment, FC, useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
@@ -17,9 +17,9 @@ import {
 import { deleteTransforms } from '../../services/transform_service';
 
 import {
-  checkPermission,
-  createPermissionFailureMessage,
-} from '../../../../../../../ml/public/privilege/check_privilege';
+  createCapabilityFailureMessage,
+  AuthorizationContext,
+} from '../../../../lib/authorization';
 
 import { TransformListRow, TRANSFORM_STATE } from '../../../../common';
 
@@ -33,7 +33,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
 
   const disabled = items.some((i: TransformListRow) => i.stats.state !== TRANSFORM_STATE.STOPPED);
 
-  const canDeleteTransform: boolean = checkPermission('canDeleteTransform');
+  const { canDeleteTransform } = useContext(AuthorizationContext).capabilities;
 
   const [isModalVisible, setModalVisible] = useState(false);
 
@@ -100,7 +100,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
     if (disabled) {
       content = isBulkAction === true ? bulkDeleteButtonDisabledText : deleteButtonDisabledText;
     } else {
-      content = createPermissionFailureMessage('canStartStopTransform');
+      content = createCapabilityFailureMessage('canDeleteTransform');
     }
 
     deleteButton = (

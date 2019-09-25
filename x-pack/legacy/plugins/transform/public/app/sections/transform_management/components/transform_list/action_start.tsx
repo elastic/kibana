@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useState } from 'react';
+import React, { Fragment, FC, useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
@@ -17,9 +17,9 @@ import {
 import { startTransforms } from '../../services/transform_service';
 
 import {
-  checkPermission,
-  createPermissionFailureMessage,
-} from '../../../../../../../ml/public/privilege/check_privilege';
+  createCapabilityFailureMessage,
+  AuthorizationContext,
+} from '../../../../lib/authorization';
 
 import { TransformListRow, isCompletedBatchTransform, TRANSFORM_STATE } from '../../../../common';
 
@@ -30,7 +30,7 @@ interface StartActionProps {
 
 export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
   const isBulkAction = items.length > 1;
-  const canStartStopTransform: boolean = checkPermission('canStartStopTransform');
+  const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
 
   const [isModalVisible, setModalVisible] = useState(false);
 
@@ -104,7 +104,7 @@ export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
   if (actionIsDisabled) {
     let content;
     if (!canStartStopTransform) {
-      content = createPermissionFailureMessage('canStartStopTransform');
+      content = createCapabilityFailureMessage('canStartStopTransform');
     } else if (completedBatchTransform) {
       content = completedBatchTransformMessage;
     } else if (startedTransform) {

@@ -129,14 +129,6 @@ function setFullGettingPrivileges(
     privileges.canFindFileStructure = true;
   }
 
-  // Transforms
-  if (
-    forceTrue ||
-    (cluster['cluster:monitor/data_frame/get'] && cluster['cluster:monitor/data_frame/stats/get'])
-  ) {
-    privileges.canGetTransform = true;
-  }
-
   // Data Frame Analytics
   if (
     forceTrue ||
@@ -234,28 +226,6 @@ function setFullActionPrivileges(
     privileges.canDeleteFilter = true;
   }
 
-  // Transforms
-  if (forceTrue || cluster['cluster:admin/data_frame/put']) {
-    privileges.canCreateTransform = true;
-  }
-
-  if (forceTrue || cluster['cluster:admin/data_frame/delete']) {
-    privileges.canDeleteTransform = true;
-  }
-
-  if (forceTrue || cluster['cluster:admin/data_frame/preview']) {
-    privileges.canPreviewTransform = true;
-  }
-
-  if (
-    forceTrue ||
-    (cluster['cluster:admin/data_frame/start'] &&
-      cluster['cluster:admin/data_frame/start_task'] &&
-      cluster['cluster:admin/data_frame/stop'])
-  ) {
-    privileges.canStartStopTransform = true;
-  }
-
   // Data Frame Analytics
   if (
     forceTrue ||
@@ -293,40 +263,10 @@ function setBasicGettingPrivileges(
   if (forceTrue || cluster['cluster:monitor/xpack/ml/findfilestructure']) {
     privileges.canFindFileStructure = true;
   }
-
-  // Transforms
-  if (
-    forceTrue ||
-    (cluster['cluster:monitor/data_frame/get'] && cluster['cluster:monitor/data_frame/stats/get'])
-  ) {
-    privileges.canGetTransform = true;
-  }
 }
 
 function setBasicActionPrivileges(
   cluster: ClusterPrivilege = {},
   privileges: Privileges,
   forceTrue = false
-) {
-  // Transforms
-  if (forceTrue || cluster['cluster:admin/data_frame/put']) {
-    privileges.canCreateTransform = true;
-  }
-
-  if (forceTrue || cluster['cluster:admin/data_frame/delete']) {
-    privileges.canDeleteTransform = true;
-  }
-
-  if (forceTrue || cluster['cluster:admin/data_frame/preview']) {
-    privileges.canPreviewTransform = true;
-  }
-
-  if (
-    forceTrue ||
-    (cluster['cluster:admin/data_frame/start'] &&
-      cluster['cluster:admin/data_frame/start_task'] &&
-      cluster['cluster:admin/data_frame/stop'])
-  ) {
-    privileges.canStartStopTransform = true;
-  }
-}
+) {}

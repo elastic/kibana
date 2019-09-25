@@ -6,6 +6,7 @@
 
 import React, { createContext } from 'react';
 import { useRequest } from '../../../services/http/use_request';
+import { hasPrivilegeFactory, Capabilities, Privileges } from './common';
 
 interface Authorization {
   isLoading: boolean;
@@ -17,16 +18,16 @@ interface Authorization {
     };
   } | null;
   privileges: Privileges;
+  capabilities: Capabilities;
 }
 
-export interface Privileges {
-  hasAllPrivileges: boolean;
-  missingPrivileges: MissingPrivileges;
-}
-
-export interface MissingPrivileges {
-  [key: string]: string[] | undefined;
-}
+const initialCapabalities: Capabilities = {
+  canGetTransform: false,
+  canDeleteTransform: false,
+  canPreviewTransform: false,
+  canCreateTransform: false,
+  canStartStopTransform: false,
+};
 
 const initialValue: Authorization = {
   isLoading: true,
@@ -35,6 +36,7 @@ const initialValue: Authorization = {
     hasAllPrivileges: true,
     missingPrivileges: {},
   },
+  capabilities: initialCapabalities,
 };
 
 export const AuthorizationContext = createContext<Authorization>(initialValue);
@@ -53,8 +55,38 @@ export const AuthorizationProvider = ({ privilegesEndpoint, children }: Props) =
   const value = {
     isLoading,
     privileges: isLoading ? { hasAllPrivileges: true, missingPrivileges: {} } : privilegesData,
+    capabilities: initialCapabalities,
     apiError: error ? error : null,
   };
+
+  const hasPrivilege = hasPrivilegeFactory(value.privileges);
+
+  if (
+    hasPrivilege(['cluster', 'cluster:monitor/data_frame/get']) &&
+    hasPrivilege(['cluster', 'cluster:monitor/data_frame/stats/get'])
+  ) {
+    value.capabilities.canGetTransform = true;
+  }
+
+  if (hasPrivilege(['cluster', 'cluster:admin/data_frame/put'])) {
+    value.capabilities.canCreateTransform = true;
+  }
+
+  if (hasPrivilege(['cluster', 'cluster:admin/data_frame/delete'])) {
+    value.capabilities.canDeleteTransform = true;
+  }
+
+  if (hasPrivilege(['cluster', 'cluster:admin/data_frame/preview'])) {
+    value.capabilities.canPreviewTransform = true;
+  }
+
+  if (
+    hasPrivilege(['cluster', 'cluster:admin/data_frame/start']) &&
+    hasPrivilege(['cluster', 'cluster:admin/data_frame/start_task']) &&
+    hasPrivilege(['cluster', 'cluster:admin/data_frame/stop'])
+  ) {
+    value.capabilities.canStartStopTransform = true;
+  }
 
   return <AuthorizationContext.Provider value={value}>{children}</AuthorizationContext.Provider>;
 };
