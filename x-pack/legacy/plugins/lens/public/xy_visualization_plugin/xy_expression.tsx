@@ -17,6 +17,7 @@ import {
   BarSeries,
   Position,
 } from '@elastic/charts';
+import { npStart } from 'ui/new_platform';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { EuiIcon, EuiText, IconType } from '@elastic/eui';
@@ -183,6 +184,7 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
         legendPosition={legend.position}
         showLegendDisplayValue={false}
         rotation={isHorizontal ? 90 : 0}
+        theme={npStart.plugins.eui_utils.useChartsTheme()}
       />
 
       <Axis
