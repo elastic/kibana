@@ -22,6 +22,7 @@ export function buildSavedQueryFilter(savedQueryId) {
     meta: {
       type: 'savedQuery',
       key: savedQueryId,
+      params: savedQueryId
     }
   };
   return filter;

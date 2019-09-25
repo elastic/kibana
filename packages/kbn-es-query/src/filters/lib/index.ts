@@ -29,7 +29,7 @@ import { PhraseFilter } from './phrase_filter';
 import { PhrasesFilter } from './phrases_filter';
 import { QueryStringFilter } from './query_string_filter';
 import { RangeFilter } from './range_filter';
-import { SavedQueryFilter, SavedQueryFilterParams } from './saved_query_filter';
+import { SavedQueryFilter, SavedQueryFilterMeta } from './saved_query_filter';
 
 export {
   CustomFilter,
@@ -41,7 +41,7 @@ export {
   QueryStringFilter,
   RangeFilter,
   SavedQueryFilter,
-  SavedQueryFilterParams,
+  SavedQueryFilterMeta,
 };
 
 // Any filter associated with a field (used in the filter bar/editor)

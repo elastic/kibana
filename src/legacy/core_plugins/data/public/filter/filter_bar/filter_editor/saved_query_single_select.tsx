@@ -27,7 +27,7 @@ import { SavedQuery } from '../../../search/search_bar';
 
 type OptionCheckedType = 'on' | 'off' | undefined;
 
-interface Option {
+export interface Option {
   label: string;
   checked?: OptionCheckedType;
   disabled?: boolean;

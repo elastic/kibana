@@ -33,7 +33,7 @@ import {
   EuiTabs,
   EuiTab,
 } from '@elastic/eui';
-import { FieldFilter, Filter, buildSavedQueryFilter } from '@kbn/es-query';
+import { FieldFilter, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
@@ -54,13 +54,14 @@ import {
   getOperatorOptions,
   getQueryDslFromFilter,
   isFilterValid,
+  buildFilterFromSavedQuery,
 } from './lib/filter_editor_utils';
 import { Operator } from './lib/filter_operators';
 import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
 import { SavedQueryService } from '../../../search/search_bar/lib/saved_query_service';
-import { SavedQuerySingleSelect } from './saved_query_single_select';
+import { SavedQuerySingleSelect, Option } from './saved_query_single_select';
 
 export type SavedQueryParamsPartial = Partial<SavedQueryFilterParams>;
 
@@ -441,20 +442,15 @@ class FilterEditorUI extends Component<Props, State> {
     }
   }
   // TODO: fix type
-  public onSavedQuerySelected = (selectedOption: any, savedQueries: SavedQuery[]) => {
-    // console.log('selectedOption:', selectedOption);
-    // console.log('savedQueries:', savedQueries);
+  public onSavedQuerySelected = (selectedOption: Option[], savedQueries: SavedQuery[]) => {
     const selectedSavedQuery = savedQueries.filter(
       savedQuery => savedQuery.id === selectedOption[0].label
     );
     this.onSavedQueryChange(selectedSavedQuery, selectedOption, savedQueries);
-    /* TODO: call
-      this.onSavedQueryChange()
-    */
   };
   private renderSavedQueryEditor() {
     /* TODO:
-    1. pass along the currently selected saved query from the filter (this.state.params) if a saved query filter is clicked in the filter bar
+    1. pass along the currently selected saved query name from the filter params (this.state.params) if a saved query filter is clicked in the filter bar
       const savedQuery = this.state.selectedSavedQuery;
       value={this.state.params}
     2. Change SavedQuerySingleSelect back into a functional component that uses hooks
@@ -543,10 +539,12 @@ class FilterEditorUI extends Component<Props, State> {
   private isFilterValid() {
     const {
       isCustomEditorOpen,
+      isSavedQueryEditorOpen,
       queryDsl,
       selectedIndexPattern: indexPattern,
       selectedField: field,
       selectedOperator: operator,
+      selectedSavedQuery,
       params,
     } = this.state;
 
@@ -556,6 +554,8 @@ class FilterEditorUI extends Component<Props, State> {
       } catch (e) {
         return false;
       }
+    } else if (isSavedQueryEditorOpen) {
+      return selectedSavedQuery && selectedSavedQuery[0].id === params;
     }
 
     return isFilterValid(indexPattern, field, operator, params);
@@ -598,11 +598,7 @@ class FilterEditorUI extends Component<Props, State> {
     this.setState({ params });
   };
 
-  private onSavedQueryChange = (
-    selectedSavedQuery: SavedQuery[],
-    selectedOption: any,
-    savedQueries: SavedQuery[]
-  ) => {
+  private onSavedQueryChange = (selectedSavedQuery: SavedQuery[], savedQueries: SavedQuery[]) => {
     // set the selected saved query to the params?
     const params =
       get(this.state.selectedSavedQuery && this.state.selectedSavedQuery[0], 'id') ===
@@ -653,8 +649,12 @@ class FilterEditorUI extends Component<Props, State> {
       );
       this.props.onSubmit(filter);
     } else if (indexPattern && isSavedQueryEditorOpen) {
-      // TODO: first convert the timefilter on the saved query before building the filter. We don't have access to any of the timefilter methods in the package
-      const filter = buildSavedQueryFilter(this.state.params);
+      const filter = buildFilterFromSavedQuery(
+        this.props.filter.meta.disabled,
+        params,
+        alias,
+        $state.store
+      );
       this.props.onSubmit(filter);
     }
   };

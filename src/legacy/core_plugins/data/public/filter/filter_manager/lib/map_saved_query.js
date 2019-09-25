@@ -22,7 +22,7 @@ export async function mapSavedQuery(filter) {
   if (!filter.meta || filter.meta.type !== 'savedQuery') {
     throw filter;
   } else {
-    const { type, key, value, params } = filter.meta;
-    return { type, key, value, params };
+    const { type, key, params } = filter.meta;
+    return { type, key, params };
   }
 }

@@ -58,4 +58,4 @@ export function buildRangeFilter(
   formattedValue?: string
 ): RangeFilter;
 
-export function buildSavedQueryFilter(params: SavedQueryFilterParams): SavedQueryFilter;
+export function buildSavedQueryFilter(params: string): SavedQueryFilter;

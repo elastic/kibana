@@ -23,6 +23,7 @@ import {
   buildPhraseFilter,
   buildPhrasesFilter,
   buildRangeFilter,
+  buildSavedQueryFilter,
   FieldFilter,
   Filter,
   FilterMeta,
@@ -80,9 +81,10 @@ export function getFilterParams(filter: Filter) {
         to: (filter as RangeFilter).meta.params.lt,
       };
     case 'savedQuery':
-      return {
-        savedQuery: (filter as SavedQueryFilter).meta.params.savedQuery,
-      };
+      return (filter as SavedQueryFilter).meta.params;
+    // return {
+    //   savedQuery: (filter as SavedQueryFilter).meta.params.savedQuery,
+    // };
   }
 }
 
@@ -179,6 +181,19 @@ export function buildCustomFilter(
 ): Filter {
   const meta: FilterMeta = { index, type: 'custom', disabled, negate, alias };
   const filter: Filter = { ...queryDsl, meta };
+  filter.$state = { store };
+  return filter;
+}
+
+export function buildFilterFromSavedQuery(
+  disabled: boolean,
+  params: string,
+  alias: string | null,
+  store: FilterStateStore
+): Filter {
+  const filter = buildSavedQueryFilter(params);
+  filter.meta.disabled = disabled;
+  filter.meta.alias = alias;
   filter.$state = { store };
   return filter;
 }

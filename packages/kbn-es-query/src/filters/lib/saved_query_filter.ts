@@ -18,60 +18,9 @@
  */
 
 import { Filter, FilterMeta } from './meta_filter';
-import { RangeFilterParams } from './range_filter';
-
-interface Query {
-  query: string | { [key: string]: any };
-  language: string;
-}
-
-interface TimeRange {
-  timestamp: RangeFilterParams;
-  format: string;
-  from?: string;
-  to?: string;
-}
-
-export interface SavedQuery {
-  id: string;
-  attributes: SavedQueryAttributes;
-}
-
-interface EsQueryConfig {
-  allowLeadingWildcards: boolean;
-  queryStringOptions: { [key: string]: any };
-  dateFormatTZ: string | null;
-}
-interface IndexPattern {
-  id?: string;
-  title: string;
-  url?: string;
-  active?: boolean;
-  default?: boolean;
-  tag?: string[];
-  sort?: string;
-}
-
-interface SavedQueryAttributes {
-  title: string;
-  description: string;
-  query: Query;
-  filters?: Filter[];
-  timefilter?: SavedQueryTimeFilterConverted;
-}
-
-interface SavedQueryTimeFilterConverted {
-  range?: TimeRange;
-}
-
-export interface SavedQueryFilterParams {
-  savedQuery?: SavedQuery;
-  esQueryConfig: EsQueryConfig;
-  indexPattern: IndexPattern;
-}
 
 export type SavedQueryFilterMeta = FilterMeta & {
-  params: SavedQueryFilterParams;
+  params: string[]; // The saved query id
 };
 
 export type SavedQueryFilter = Filter & {
