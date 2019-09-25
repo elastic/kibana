@@ -11,54 +11,12 @@ import moment from 'moment';
 
 import { parseInterval } from '../../common/util/parse_interval';
 import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils';
+import { UrlConfig, KibanaUrlConfig } from '../../common/types/custom_urls';
+import { AnomalyRecordSource, AnomalyRecordDoc } from '../../common/types/anomalies';
 
 // Value of custom_url time_range property indicating drilldown time range is calculated automatically
 // depending on the context in which the URL is being opened.
 const TIME_RANGE_AUTO = 'auto';
-
-export interface UrlConfig {
-  url_name: string;
-  url_value: string;
-}
-
-export interface KibanaUrlConfig extends UrlConfig {
-  time_range: string;
-}
-
-export interface Influencer {
-  influencer_field_name: string;
-  influencer_field_values: string[];
-}
-
-export interface AnomalyRecordDoc {
-  [key: string]: any;
-  job_id: string;
-  result_type: string;
-  probability: number;
-  record_score: number;
-  initial_record_score: number;
-  bucket_span: number;
-  detector_index: number;
-  is_interim?: boolean;
-  timestamp: number;
-  partition_field_name?: string;
-  partition_field_value?: string | number;
-  function: string;
-  function_description: string;
-  typical: number[];
-  actual: number[];
-  influencers: Influencer[];
-  by_field_name?: string;
-  by_field_value?: string;
-  multi_bucket_impact?: number;
-  over_field_name?: string;
-  over_field_value?: string;
-}
-
-export interface AnomalyRecordSource extends AnomalyRecordDoc {
-  earliest: string;
-  latest: string;
-}
 
 // Replaces the $ delimited tokens in the url_value of the custom URL configuration
 // with values from the supplied document.

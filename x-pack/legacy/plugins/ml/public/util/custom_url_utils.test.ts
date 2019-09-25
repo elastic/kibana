@@ -11,11 +11,9 @@ import {
   getUrlForRecord,
   isValidLabel,
   isValidTimeRange,
-  AnomalyRecordSource,
-  AnomalyRecordDoc,
-  UrlConfig,
-  KibanaUrlConfig,
 } from './custom_url_utils';
+import { AnomalyRecordDoc, AnomalyRecordSource } from '../../common/types/anomalies';
+import { KibanaUrlConfig, UrlConfig } from '../../common/types/custom_urls';
 
 describe('ML - custom URL utils', () => {
   const TEST_DOC: AnomalyRecordDoc = {
