@@ -5,8 +5,8 @@
  */
 
 import _ from 'lodash';
-import Boom from 'boom';
-import Joi from 'joi';
+import Boom from '@hapi/boom';
+import Joi from '@hapi/joi';
 import { getClient } from '../../../../../../server/lib/get_client_shield';
 import { userSchema } from '../../../lib/user_schema';
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';

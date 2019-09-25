@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import boom from 'boom';
+import boom from '@hapi/boom';
 import { omit } from 'lodash';
 import {
   CANVAS_TYPE,

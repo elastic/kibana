@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Boom from 'boom';
-import { Server } from 'hapi';
+import Boom from '@hapi/boom';
+import { Server } from '@hapi/hapi';
 import { RawKibanaPrivileges } from '../../../../../common/model';
 import { initGetPrivilegesApi } from './get';
 import { AuthorizationService } from '../../../../lib/authorization/service';

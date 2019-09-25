@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { GLOBAL_RESOURCE, RESERVED_PRIVILEGES_APPLICATION_WILDCARD } from '../../../../../common/constants';
 import { wrapError } from '../../../../../../../../plugins/security/server';
 import { PrivilegeSerializer, ResourceSerializer } from '../../../../lib/authorization';

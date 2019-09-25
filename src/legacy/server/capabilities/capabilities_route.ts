@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import Joi from 'joi';
-import { Server } from 'hapi';
+import Joi from '@hapi/joi';
+import { Server } from '@hapi/hapi';
 
 import { Capabilities } from '../../../core/public';
 import { CapabilitiesModifier } from './capabilities_mixin';

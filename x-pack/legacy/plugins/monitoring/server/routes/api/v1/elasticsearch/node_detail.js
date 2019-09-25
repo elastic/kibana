@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getNodeSummary } from '../../../../lib/elasticsearch/nodes';
 import { getShardStats, getShardAllocation } from '../../../../lib/elasticsearch/shards';

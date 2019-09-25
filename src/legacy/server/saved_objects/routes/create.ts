@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
-import Joi from 'joi';
+import Hapi from '@hapi/hapi';
+import Joi from '@hapi/joi';
 import { SavedObjectAttributes, SavedObjectsClient } from 'src/core/server';
 import { Prerequisites, SavedObjectReference, WithoutQueryAndParams } from './types';
 

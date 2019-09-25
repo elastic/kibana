@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Joi from 'joi';
-import { boomify, notFound } from 'boom';
+import Joi from '@hapi/joi';
+import { boomify, notFound } from '@hapi/boom';
 import { first } from 'lodash';
 import { InfraBackendLibs } from '../lib/infra_types';
 import { InfraWrappableRequest } from '../lib/adapters/framework';

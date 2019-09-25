@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 
 async function findAll(savedObjectsClient, findOptions, page = 1, allObjects = []) {
   const objects = await savedObjectsClient.find({

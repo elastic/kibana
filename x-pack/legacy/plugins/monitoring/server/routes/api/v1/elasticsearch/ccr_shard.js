@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import moment from 'moment';
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { getMetrics } from '../../../../lib/details/get_metrics';

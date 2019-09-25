@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
-import Joi from 'joi';
+import { Request } from '@hapi/hapi';
+import Joi from '@hapi/joi';
 import { KbnServer } from '../../../types';
 // @ts-ignore
 import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';

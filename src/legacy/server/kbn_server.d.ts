@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ResponseObject, Server } from 'hapi';
+import { ResponseObject, Server } from '@hapi/hapi';
 import { UnwrapPromise } from '@kbn/utility-types';
 
 import { SavedObjectsClientProviderOptions } from 'src/core/server';
@@ -121,7 +121,7 @@ export default class KbnServer {
 }
 
 // Re-export commonly used hapi types.
-export { Server, Request, ResponseToolkit } from 'hapi';
+export { Server, Request, ResponseToolkit } from '@hapi/hapi';
 
 // Re-export commonly accessed api types.
 export { IndexPatternsService } from './index_patterns';

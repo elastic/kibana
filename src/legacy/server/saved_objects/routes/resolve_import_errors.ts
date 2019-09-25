@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import Boom from 'boom';
-import Hapi from 'hapi';
-import Joi from 'joi';
+import Boom from '@hapi/boom';
+import Hapi from '@hapi/hapi';
+import Joi from '@hapi/joi';
 import { extname } from 'path';
 import { Readable } from 'stream';
 import { SavedObjectsClientContract } from 'src/core/server';

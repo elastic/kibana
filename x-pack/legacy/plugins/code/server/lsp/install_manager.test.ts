@@ -6,7 +6,7 @@
 /* eslint-disable no-console */
 
 import fs from 'fs';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import os from 'os';
 import path from 'path';
 import rimraf from 'rimraf';

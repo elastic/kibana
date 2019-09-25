@@ -5,8 +5,8 @@
  */
 
 import { runHttpQuery } from 'apollo-server-core';
-import { Plugin, ResponseToolkit } from 'hapi';
-import { Request, Server } from 'hapi';
+import { Plugin, ResponseToolkit } from '@hapi/hapi';
+import { Request, Server } from '@hapi/hapi';
 import { DEFAULT_GRAPHQL_PATH } from '../../../graphql';
 import { UMHapiGraphQLPluginOptions } from './adapter_types';
 

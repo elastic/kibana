@@ -18,7 +18,7 @@
  */
 
 import { Url } from 'url';
-import { Request } from 'hapi';
+import { Request } from '@hapi/hapi';
 
 import { ObjectType, TypeOf } from '@kbn/config-schema';
 

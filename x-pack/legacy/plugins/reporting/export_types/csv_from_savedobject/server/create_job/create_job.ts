@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { notFound, notImplemented } from 'boom';
-import { Request } from 'hapi';
+import { notFound, notImplemented } from '@hapi/boom';
+import { Request } from '@hapi/hapi';
 import { get } from 'lodash';
 
 import { PLUGIN_ID, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';

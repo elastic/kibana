@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Request, Server } from 'hapi';
+import { Request, Server } from '@hapi/hapi';
 
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';

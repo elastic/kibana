@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import { sampleDataSchema } from './data_set_schema';
 import {
   createListRoute,

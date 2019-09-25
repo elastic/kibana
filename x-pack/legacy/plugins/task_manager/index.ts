@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Root } from 'joi';
+import { Root } from '@hapi/joi';
 import { Legacy } from 'kibana';
 import { Plugin, PluginSetupContract } from './plugin';
 import { SavedObjectsSerializer, SavedObjectsSchema } from '../../../../src/core/server';

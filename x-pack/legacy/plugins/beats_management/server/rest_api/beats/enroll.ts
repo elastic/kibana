@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import { omit } from 'lodash';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { BaseReturnType, ReturnTypeCreate } from '../../../common/return_types';

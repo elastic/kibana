@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Request, Server } from 'hapi';
+import { Request, Server } from '@hapi/hapi';
 import { PLUGIN } from '../common/constants';
 import { KibanaTelemetryAdapter } from './lib/adapters/telemetry';
 import { compose } from './lib/compose/kibana';

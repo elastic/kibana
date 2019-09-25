@@ -18,7 +18,7 @@
  */
 
 import schemaProvider from './schema';
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import { set } from 'lodash';
 
 describe('Config schema', function () {

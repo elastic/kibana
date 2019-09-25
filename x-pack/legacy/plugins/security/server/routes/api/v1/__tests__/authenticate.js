@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import Boom from 'boom';
-import Joi from 'joi';
+import Boom from '@hapi/boom';
+import Joi from '@hapi/joi';
 import sinon from 'sinon';
 
 import { serverFixture } from '../../../../lib/__tests__/__fixtures__/server';

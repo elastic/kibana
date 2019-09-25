@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
+import { Request } from '@hapi/hapi';
 import util from 'util';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { ServiceHandlerAdapter, ServiceRegisterOptions } from '../service_handler_adapter';
 import { ResourceLocator } from '../resource_locator';
 import {

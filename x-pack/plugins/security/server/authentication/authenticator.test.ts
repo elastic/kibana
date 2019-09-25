@@ -6,7 +6,7 @@
 
 jest.mock('./providers/basic', () => ({ BasicAuthenticationProvider: jest.fn() }));
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { SessionStorage } from '../../../../../src/core/server';
 
 import {

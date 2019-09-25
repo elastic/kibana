@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { registerCapabilitiesRoute } from './capabilities_route';
 import { Capabilities } from '../../../core/public';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Stream } from 'stream';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import supertest from 'supertest';
 import { BehaviorSubject } from 'rxjs';

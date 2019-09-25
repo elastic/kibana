@@ -19,7 +19,7 @@
 
 import { createHash } from 'crypto';
 import { props, reduce as reduceAsync } from 'bluebird';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { resolve } from 'path';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';

@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import Boom from 'boom';
-import { Request } from 'hapi';
+import Boom from '@hapi/boom';
+import { Request } from '@hapi/hapi';
 import { clusterClientMock } from './core_service.test.mocks';
 
 import * as kbnTestServer from '../../../../test_utils/kbn_server';

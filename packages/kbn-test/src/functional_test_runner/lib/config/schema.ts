@@ -19,7 +19,7 @@
 
 import { dirname, resolve } from 'path';
 
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 
 // valid pattern for ID
 // enforced camel-case identifiers for consistency

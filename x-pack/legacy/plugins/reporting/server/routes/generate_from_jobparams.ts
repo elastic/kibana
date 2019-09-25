@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import boom from 'boom';
-import Joi from 'joi';
-import { Request, ResponseToolkit } from 'hapi';
+import boom from '@hapi/boom';
+import Joi from '@hapi/joi';
+import { Request, ResponseToolkit } from '@hapi/hapi';
 import rison from 'rison-node';
 import { API_BASE_URL } from '../../common/constants';
 import { KbnServer } from '../../types';

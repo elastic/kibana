@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import { findRelationships } from '../../../../lib/management/saved_objects/relationships';
 
 export function registerRelationships(server) {

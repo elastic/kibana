@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 /**
  * Wraps an error thrown by the ES JS client into a Boom error response and returns it

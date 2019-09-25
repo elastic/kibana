@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 
 import { createDashboardModeRequestInterceptor } from '../dashboard_mode_request_interceptor';
 

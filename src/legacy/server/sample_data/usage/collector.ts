@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import * as Hapi from 'hapi';
+import * as Hapi from '@hapi/hapi';
 import { fetchProvider } from './collector_fetch';
 
 interface KbnServer extends Hapi.Server {

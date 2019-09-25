@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi, { Schema } from 'joi';
+import Joi, { Schema } from '@hapi/joi';
 export const dateValidation = Joi.alternatives()
   .try(Joi.date().iso(), Joi.number())
   .required();

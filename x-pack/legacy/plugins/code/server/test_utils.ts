@@ -5,7 +5,7 @@
  */
 
 import fs from 'fs';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import * as os from 'os';
 import path from 'path';
 

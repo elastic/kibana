@@ -5,7 +5,7 @@
  */
 
 import t from 'io-ts';
-import { Request, ResponseToolkit } from 'hapi';
+import { Request, ResponseToolkit } from '@hapi/hapi';
 import { InternalCoreSetup } from 'src/core/server';
 import { KFetchOptions } from 'ui/kfetch';
 import { PickByValue, Optional } from 'utility-types';

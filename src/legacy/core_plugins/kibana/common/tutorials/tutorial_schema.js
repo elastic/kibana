@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import { PARAM_TYPES } from './param_types';
 import { TUTORIAL_CATEGORY } from './tutorial_category';
 

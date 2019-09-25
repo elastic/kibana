@@ -18,8 +18,8 @@
  */
 
 import { resolve } from 'path';
-import JoiNamespace from 'joi';
-import { Server } from 'hapi';
+import JoiNamespace from '@hapi/joi';
+import { Server } from '@hapi/hapi';
 import { Legacy } from '../../../../kibana';
 import { registerUiMetricRoute } from './server/routes/api/ui_metric';
 

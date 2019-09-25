@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import Joi from 'joi';
+import Boom from '@hapi/boom';
+import Joi from '@hapi/joi';
 import { schema } from '@kbn/config-schema';
 import { canRedirectRequest, wrapError, OIDCAuthenticationFlow } from '../../../../../../../plugins/security/server';
 import { KibanaRequest } from '../../../../../../../../src/core/server';
@@ -123,7 +123,7 @@ export function initAuthenticateApi({ authc: { login, logout }, config }, server
       return prepareCustomResourceResponse(
         h.response(`
           window.location.replace(
-            '${server.config().get('server.basePath')}/api/security/v1/oidc?authenticationResponseURI=' + 
+            '${server.config().get('server.basePath')}/api/security/v1/oidc?authenticationResponseURI=' +
               encodeURIComponent(window.location.href)
           );
         `),

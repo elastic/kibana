@@ -6,8 +6,8 @@
 
 import { GraphQLOptions } from 'apollo-server-core';
 import { GraphQLSchema } from 'graphql';
-import { Lifecycle, ResponseToolkit } from 'hapi';
-import { RouteOptions } from 'hapi';
+import { Lifecycle, ResponseToolkit } from '@hapi/hapi';
+import { RouteOptions } from '@hapi/hapi';
 
 export interface UMFrameworkRequest {
   user: string;

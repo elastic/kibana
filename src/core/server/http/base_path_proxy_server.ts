@@ -18,7 +18,7 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { Server, Request } from 'hapi';
+import { Server, Request } from '@hapi/hapi';
 import Url from 'url';
 import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
 import { sample } from 'lodash';
@@ -68,7 +68,7 @@ export class BasePathProxyServer {
 
     // Register hapi plugin that adds proxying functionality. It can be configured
     // through the route configuration object (see { handler: { proxy: ... } }).
-    await this.server.register({ plugin: require('h2o2') });
+    await this.server.register({ plugin: require('@hapi/h2o2') });
 
     if (this.httpConfig.ssl.enabled) {
       const tlsOptions = serverOptions.tls as TlsOptions;

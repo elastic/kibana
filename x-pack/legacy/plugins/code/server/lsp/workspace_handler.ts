@@ -13,7 +13,7 @@ import {
   // @ts-ignore
   Worktree,
 } from '@elastic/nodegit';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import del from 'del';
 import fs from 'fs';
 import { delay } from 'lodash';

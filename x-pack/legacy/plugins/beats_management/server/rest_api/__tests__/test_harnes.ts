@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { badRequest } from 'boom';
+import { badRequest } from '@hapi/boom';
 import { readFile } from 'fs';
 // @ts-ignore
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 import { resolve } from 'path';
 import { promisify } from 'util';
 import { BeatTag, CMBeat } from '../../../common/domain_types';

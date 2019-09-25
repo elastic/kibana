@@ -6,7 +6,7 @@
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
-import { Lifecycle, ResponseToolkit } from 'hapi';
+import { Lifecycle, ResponseToolkit } from '@hapi/hapi';
 import * as t from 'io-ts';
 import { LicenseType } from '../../../../common/constants/security';
 

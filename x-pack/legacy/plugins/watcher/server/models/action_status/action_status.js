@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { badImplementation, badRequest } from 'boom';
+import { badImplementation, badRequest } from '@hapi/boom';
 import { getMoment } from '../../../common/lib/get_moment';
 import { ACTION_STATES } from '../../../common/constants';
 import { i18n } from '@kbn/i18n';

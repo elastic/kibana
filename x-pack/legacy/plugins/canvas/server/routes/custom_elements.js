@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import boom from 'boom';
+import boom from '@hapi/boom';
 import { omit } from 'lodash';
 import { API_ROUTE_CUSTOM_ELEMENT, CUSTOM_ELEMENT_TYPE } from '../../common/lib/constants';
 import { getId } from '../../public/lib/get_id';

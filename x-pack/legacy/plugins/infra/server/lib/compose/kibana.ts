@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 
 import { InfraKibanaConfigurationAdapter } from '../adapters/configuration/kibana_configuration_adapter';
 import { FrameworkFieldsAdapter } from '../adapters/fields/framework_fields_adapter';

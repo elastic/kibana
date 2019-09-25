@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import Joi from 'joi';
-import { RequestQuery } from 'hapi';
+import Boom from '@hapi/boom';
+import Joi from '@hapi/joi';
+import { RequestQuery } from '@hapi/hapi';
 import { GetSpacePurpose } from '../../../../common/model/types';
 import { Space } from '../../../../common/model/space';
 import { wrapError } from '../../../lib/errors';

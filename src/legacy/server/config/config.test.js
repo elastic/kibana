@@ -19,7 +19,7 @@
 
 import { Config } from './config';
 import _ from 'lodash';
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 
 /**
  * Plugins should defined a config method that takes a joi object. By default

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request, ResponseToolkit } from 'hapi';
+import { Request, ResponseToolkit } from '@hapi/hapi';
 import { getAllHandler } from './get_route';
 
 describe('[API Routes] Remote Clusters getAllHandler()', () => {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { omit } from 'lodash';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { Projection } from '../../../../common/projections/typings';
 import { UIFilters } from '../../../../typings/ui-filters';
 import { getUiFiltersES } from '../../helpers/convert_ui_filters/get_ui_filters_es';

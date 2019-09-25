@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Request } from 'hapi';
+import { Request } from '@hapi/hapi';
 import { XPackFeature } from '../../../../xpack_main/xpack_main';
 
 export interface AuthorizationMode {

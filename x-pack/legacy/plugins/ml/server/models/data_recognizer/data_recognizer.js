@@ -7,7 +7,7 @@
 
 
 import fs from 'fs';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import numeral from '@elastic/numeral';
 import { idx } from '@kbn/elastic-idx';
 import { merge } from 'lodash';

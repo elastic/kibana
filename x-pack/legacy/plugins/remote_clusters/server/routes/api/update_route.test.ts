@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request, ResponseToolkit } from 'hapi';
+import { Request, ResponseToolkit } from '@hapi/hapi';
 import { wrapCustomError } from '../../../../../server/lib/create_router';
 import { updateHandler } from './update_route';
 

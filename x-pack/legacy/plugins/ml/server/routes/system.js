@@ -14,7 +14,7 @@ import { spacesUtilsProvider } from '../lib/spaces_utils';
 import { mlLog } from '../client/log';
 
 import { wrapError } from '../client/errors';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import { isSecurityDisabled } from '../lib/security_utils';
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 
 const scope = 'perf-testing';
 export function initRoutes(server, performanceState) {

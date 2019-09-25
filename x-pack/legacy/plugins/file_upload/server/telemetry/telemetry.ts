@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import _ from 'lodash';
 import { callWithInternalUserFactory } from '../client/call_with_internal_user_factory';
 

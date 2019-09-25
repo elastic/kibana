@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { defaultValidationErrorHandler } from '../../../../core/server/http/http_tools';
 

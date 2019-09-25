@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import Boom from 'boom';
-import Joi from 'joi';
+import Boom from '@hapi/boom';
+import Joi from '@hapi/joi';
 import { usage } from '../usage';
 import { loadData } from './lib/load_data';
 import { createIndexName } from './lib/create_index_name';

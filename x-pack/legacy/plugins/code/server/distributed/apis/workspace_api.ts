@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { ServiceHandlerFor } from '../service_definition';
 import { WorkspaceHandler } from '../../lsp/workspace_handler';
 import { RepoConfig } from '../../../model';

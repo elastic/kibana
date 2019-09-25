@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const Boom = require('boom');
+const Boom = require('@hapi/boom');
 
 export function routePreCheckLicense(server) {
   const xpackMainPlugin = server.plugins.xpack_main;

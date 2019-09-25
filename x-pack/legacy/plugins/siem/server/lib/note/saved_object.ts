@@ -5,7 +5,7 @@
  */
 
 import { failure } from 'io-ts/lib/PathReporter';
-import { RequestAuth } from 'hapi';
+import { RequestAuth } from '@hapi/hapi';
 import { Legacy } from 'kibana';
 import { getOr } from 'lodash/fp';
 import uuid from 'uuid';

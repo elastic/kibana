@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 import { SavedObjectsClientContract } from 'src/core/server';
 
 export interface SavedObjectReference {

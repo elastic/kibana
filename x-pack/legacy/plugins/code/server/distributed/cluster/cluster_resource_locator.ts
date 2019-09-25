@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
-import Boom from 'boom';
+import { Request } from '@hapi/hapi';
+import Boom from '@hapi/boom';
 import { Endpoint, ResourceLocator } from '../resource_locator';
 import { ClusterService } from './cluster_service';
 import { LocalEndpoint } from '../local_endpoint';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 import { alertsClientMock } from '../alerts_client.mock';
 import { alertTypeRegistryMock } from '../alert_type_registry.mock';
 

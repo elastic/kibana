@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { actionsClientMock } from '../actions_client.mock';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';

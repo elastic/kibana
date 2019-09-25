@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { serializeProvider, API_ROUTE } from '../../common';
 import { createHandlers } from '../lib/create_handlers';
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 
 /**
  * Register the Canvas function endopints.

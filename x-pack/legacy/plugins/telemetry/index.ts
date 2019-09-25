@@ -5,8 +5,8 @@
  */
 
 import { resolve } from 'path';
-import JoiNamespace from 'joi';
-import { Server } from 'hapi';
+import JoiNamespace from '@hapi/joi';
+import { Server } from '@hapi/hapi';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import mappings from './mappings.json';

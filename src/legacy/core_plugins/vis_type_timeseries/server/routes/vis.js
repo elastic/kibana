@@ -18,7 +18,7 @@
  */
 
 import { getVisData } from '../lib/get_vis_data';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 export const visDataRoutes = server => {
   server.route({

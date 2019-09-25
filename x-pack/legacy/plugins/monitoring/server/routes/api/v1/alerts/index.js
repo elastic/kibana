@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import { alertsClusterSearch } from '../../../../cluster_alerts/alerts_cluster_search';
 import { checkLicense } from '../../../../cluster_alerts/check_license';
 import { getClusterLicense } from '../../../../lib/cluster/get_cluster_license';

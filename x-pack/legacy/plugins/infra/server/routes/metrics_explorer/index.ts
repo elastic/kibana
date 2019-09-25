@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { boomify } from 'boom';
+import { boomify } from '@hapi/boom';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { getGroupings } from './lib/get_groupings';
 import { populateSeriesWithTSVBData } from './lib/populate_series_with_tsvb_data';

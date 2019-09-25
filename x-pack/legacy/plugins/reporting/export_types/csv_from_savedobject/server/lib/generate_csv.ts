@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { badRequest } from 'boom';
-import { Request } from 'hapi';
+import { badRequest } from '@hapi/boom';
+import { Request } from '@hapi/hapi';
 import { KbnServer, Logger } from '../../../../types';
 import { SearchPanel, VisPanel, JobParamsPanelCsv } from '../../types';
 import { FakeRequest } from '../../types';

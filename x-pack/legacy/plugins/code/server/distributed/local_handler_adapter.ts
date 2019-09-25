@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
+import { Request } from '@hapi/hapi';
 import { ServiceHandlerAdapter } from './service_handler_adapter';
 import { ServiceDefinition, ServiceHandlerFor, ServiceMethodMap } from './service_definition';
 import { Endpoint, ResourceLocator } from './resource_locator';

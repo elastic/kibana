@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { boomify } from 'boom';
+import { boomify } from '@hapi/boom';
 import { KIBANA_SETTINGS_TYPE } from '../../../../../monitoring/common/constants';
 import { getKibanaInfoForStats } from '../../../../../monitoring/server/kibana_monitoring/lib';
 

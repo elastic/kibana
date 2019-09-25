@@ -6,8 +6,8 @@
 
 import Wreck from '@hapi/wreck';
 import util from 'util';
-import Boom from 'boom';
-import { Request } from 'hapi';
+import Boom from '@hapi/boom';
+import { Request } from '@hapi/hapi';
 import * as http from 'http';
 import {
   DEFAULT_SERVICE_OPTION,

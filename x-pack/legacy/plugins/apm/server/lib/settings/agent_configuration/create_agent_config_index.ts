@@ -5,7 +5,7 @@
  */
 
 import { InternalCoreSetup } from 'src/core/server';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 export async function createApmAgentConfigurationIndex(
   core: InternalCoreSetup

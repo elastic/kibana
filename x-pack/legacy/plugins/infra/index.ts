@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import JoiNamespace from 'joi';
+import JoiNamespace from '@hapi/joi';
 import { resolve } from 'path';
 
 import { getConfigSchema, initServerWithKibana } from './server/kibana.index';

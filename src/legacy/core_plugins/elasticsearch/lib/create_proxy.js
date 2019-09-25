@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import { abortableRequestHandler } from './abortable_request_handler';
 import { handleESError } from './handle_es_error';
 

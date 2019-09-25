@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 
 const STUB_CONFIG_SCHEMA = Joi.object().keys({
   enabled: Joi.valid(false).default(false)

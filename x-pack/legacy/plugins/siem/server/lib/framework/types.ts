@@ -6,7 +6,7 @@
 
 import { IndicesGetMappingParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
-import { RequestAuth } from 'hapi';
+import { RequestAuth } from '@hapi/hapi';
 import { Legacy } from 'kibana';
 
 import { ESQuery } from '../../../common/typed_json';

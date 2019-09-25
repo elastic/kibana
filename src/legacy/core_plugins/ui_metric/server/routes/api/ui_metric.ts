@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import Joi from 'joi';
-import Boom from 'boom';
+import Joi from '@hapi/joi';
+import Boom from '@hapi/boom';
 import { Report } from '@kbn/analytics';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 
 export async function storeReport(server: any, report: Report) {
   const { getSavedObjectsRepository } = server.savedObjects;

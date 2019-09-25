@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import {
   AnySchema,
   JoiRoot,
@@ -26,7 +26,7 @@ import {
   State,
   ValidationErrorItem,
   ValidationOptions,
-} from 'joi';
+} from '@hapi/joi';
 import { isPlainObject } from 'lodash';
 import { isDuration } from 'moment';
 import { ByteSizeValue, ensureByteSizeValue } from '../byte_size_value';

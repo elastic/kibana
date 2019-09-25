@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Server, Request } from 'hapi';
+import { Server, Request } from '@hapi/hapi';
 
 import { Capabilities } from '../../../core/public';
 import KbnServer from '../kbn_server';

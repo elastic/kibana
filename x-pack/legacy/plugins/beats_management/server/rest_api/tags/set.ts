@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import { get } from 'lodash';
 import { REQUIRED_LICENSES } from '../../../common/constants';
 import { BeatTag } from '../../../common/domain_types';

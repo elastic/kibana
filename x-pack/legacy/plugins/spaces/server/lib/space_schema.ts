@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import { MAX_SPACE_INITIALS } from '../../common/constants';
 
 export const SPACE_ID_REGEX = /^[a-z0-9_\-]+$/;

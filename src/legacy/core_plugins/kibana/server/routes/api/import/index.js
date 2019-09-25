@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import { importDashboards } from '../../../lib/import/import_dashboards';
 
 export function importApi(server) {

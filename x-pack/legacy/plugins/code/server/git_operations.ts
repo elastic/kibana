@@ -15,7 +15,7 @@ import {
   Repository,
   Revwalk,
 } from '@elastic/nodegit';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import LruCache from 'lru-cache';
 import * as Path from 'path';
 import * as fs from 'fs';

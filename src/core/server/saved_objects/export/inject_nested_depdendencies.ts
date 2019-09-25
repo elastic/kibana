@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { SavedObject, SavedObjectsClientContract } from '../types';
 
 export function getObjectReferencesToFetch(savedObjectsMap: Map<string, SavedObject>) {

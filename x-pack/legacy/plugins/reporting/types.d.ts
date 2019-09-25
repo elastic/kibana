@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
+import { Request } from '@hapi/hapi';
 
 interface UiSettings {
   get: (value: string) => string;

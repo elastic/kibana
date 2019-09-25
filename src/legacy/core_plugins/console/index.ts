@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { first } from 'rxjs/operators';
 import { resolve, join, sep } from 'path';
 import url from 'url';

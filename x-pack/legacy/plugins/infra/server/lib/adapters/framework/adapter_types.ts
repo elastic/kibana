@@ -6,7 +6,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
-import { Lifecycle, ResponseToolkit, RouteOptions } from 'hapi';
+import { Lifecycle, ResponseToolkit, RouteOptions } from '@hapi/hapi';
 import { Legacy } from 'kibana';
 
 import { KibanaConfig } from 'src/legacy/server/kbn_server';

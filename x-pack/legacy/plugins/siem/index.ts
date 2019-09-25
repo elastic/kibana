@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 
 import { initServerWithKibana } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';

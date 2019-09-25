@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 export function promiseTimeout<T>(ms: number, promise: Promise<T>): Promise<T> {
   const boom = Boom.gatewayTimeout('Timed out in ' + ms + 'ms.');

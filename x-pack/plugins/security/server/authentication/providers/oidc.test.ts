@@ -5,7 +5,7 @@
  */
 
 import sinon from 'sinon';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';

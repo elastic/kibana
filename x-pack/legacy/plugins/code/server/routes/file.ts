@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import { RequestFacade, RequestQueryFacade, ResponseToolkitFacade } from '../../';
 import { DEFAULT_TREE_CHILDREN_LIMIT } from '../git_operations';

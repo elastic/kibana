@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestQuery, ResponseToolkit, RouteOptions, ServerRoute } from 'hapi';
-import JoiNamespace from 'joi';
+import { RequestQuery, ResponseToolkit, RouteOptions, ServerRoute } from '@hapi/hapi';
+import JoiNamespace from '@hapi/joi';
 import { Legacy } from 'kibana';
 import moment from 'moment';
 import { resolve } from 'path';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Request } from 'hapi';
+import { Request } from '@hapi/hapi';
 
 import { Capabilities } from '../../../core/public';
 import { mergeCapabilities } from './merge_capabilities';

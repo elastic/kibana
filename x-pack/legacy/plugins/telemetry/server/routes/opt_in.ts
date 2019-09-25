@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
-import { boomify } from 'boom';
+import Joi from '@hapi/joi';
+import { boomify } from '@hapi/boom';
 import { CoreSetup } from 'src/core/server';
 
 export function registerOptInRoutes(core: CoreSetup) {

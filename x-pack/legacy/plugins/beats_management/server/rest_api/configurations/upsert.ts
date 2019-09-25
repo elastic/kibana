@@ -10,7 +10,7 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import { isLeft } from 'fp-ts/lib/Either';
 import { REQUIRED_LICENSES } from '../../../common/constants';
 import {

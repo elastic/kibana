@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 
 const dataIndexSchema = Joi.object({
   id: Joi.string().regex(/^[a-zA-Z0-9-]+$/).required(),

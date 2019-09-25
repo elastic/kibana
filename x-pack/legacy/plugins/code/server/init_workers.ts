@@ -5,7 +5,7 @@
  */
 
 import checkDiskSpace from 'check-disk-space';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 
 import { IndexerType } from '../model';
 import { DiskWatermarkService } from './disk_watermark';

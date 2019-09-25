@@ -5,7 +5,7 @@
  */
 
 import { GraphQLSchema } from 'graphql';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import {
   UMBackendFrameworkAdapter,
   UMFrameworkRequest,

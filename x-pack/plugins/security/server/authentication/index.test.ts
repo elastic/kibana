@@ -7,7 +7,7 @@
 jest.mock('./api_keys');
 jest.mock('./authenticator');
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { errors } from 'elasticsearch';
 import { first } from 'rxjs/operators';
 

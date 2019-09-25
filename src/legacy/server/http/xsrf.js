@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { badRequest } from 'boom';
+import { badRequest } from '@hapi/boom';
 
 export function setupXsrf(server, config) {
   const disabled = config.get('server.xsrf.disableProtection');

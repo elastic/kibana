@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 import { createMockServer } from './_mock_server';
 import { createBulkCreateRoute } from './bulk_create';
 // Disable lint errors for imports from src/core/* until SavedObjects migration is complete

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import { API_BASE_PATH } from '../../../common/constants';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 
 async function handleRequest(request) {
   const { changes } = request.payload;

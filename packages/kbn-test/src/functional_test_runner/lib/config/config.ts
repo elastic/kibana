@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Schema } from 'joi';
+import { Schema } from '@hapi/joi';
 import { cloneDeep, get, has } from 'lodash';
 
 // @ts-ignore internal lodash module is not typed

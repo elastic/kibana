@@ -5,7 +5,7 @@
  */
 
 import { createHash } from 'crypto';
-import { Request } from 'hapi';
+import { Request } from '@hapi/hapi';
 import stringify from 'json-stable-stringify';
 
 import { ReindexSavedObject } from '../../../common/types';

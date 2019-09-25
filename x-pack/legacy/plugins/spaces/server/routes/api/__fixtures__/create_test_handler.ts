@@ -5,7 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { Legacy } from 'kibana';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchServiceMock, coreMock } from 'src/core/server/mocks';

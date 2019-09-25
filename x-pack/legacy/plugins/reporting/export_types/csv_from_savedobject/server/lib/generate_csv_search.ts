@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
+import { Request } from '@hapi/hapi';
 
 // @ts-ignore no module definition
 import { buildEsQuery } from '@kbn/es-query';

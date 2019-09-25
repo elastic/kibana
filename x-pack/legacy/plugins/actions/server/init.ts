@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 import { Legacy } from 'kibana';
 import { TaskManager } from '../../task_manager';
 import { ActionsClient } from './actions_client';

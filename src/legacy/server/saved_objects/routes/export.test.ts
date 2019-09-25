@@ -21,7 +21,7 @@ jest.mock('../../../../core/server/saved_objects/export', () => ({
   getSortedObjectsForExport: jest.fn(),
 }));
 
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 // Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import * as exportMock from '../../../../core/server/saved_objects/export';

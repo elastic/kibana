@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 import { values } from 'lodash';
 import { MetricsExplorerColor } from '../../../common/color_palette';
 import { MetricsExplorerAggregation } from './types';

@@ -20,7 +20,7 @@
 import sinon from 'sinon';
 import Wreck from '@hapi/wreck';
 import expect from '@kbn/expect';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 
 import { createProxyRoute } from '../../';
 

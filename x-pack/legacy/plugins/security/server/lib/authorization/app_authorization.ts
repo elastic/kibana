@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { Request, ResponseToolkit, Server } from 'hapi';
+import Boom from '@hapi/boom';
+import { Request, ResponseToolkit, Server } from '@hapi/hapi';
 import { flatten } from 'lodash';
 import { XPackMainPlugin } from '../../../../xpack_main/xpack_main';
 import { AuthorizationService } from './service';

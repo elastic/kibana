@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import { usage } from '../usage';
 import { createIndexName } from './lib/create_index_name';
 

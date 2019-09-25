@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
-import Hapi from 'hapi';
+import Joi from '@hapi/joi';
+import Hapi from '@hapi/hapi';
 
 interface SlackRequest extends Hapi.Request {
   payload: {

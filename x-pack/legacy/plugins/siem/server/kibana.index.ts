@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';

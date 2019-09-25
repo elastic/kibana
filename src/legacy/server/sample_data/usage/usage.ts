@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import * as Hapi from 'hapi';
+import * as Hapi from '@hapi/hapi';
 
 const SAVED_OBJECT_ID = 'sample-data-telemetry';
 

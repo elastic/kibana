@@ -18,7 +18,7 @@
  */
 
 import expect from '@kbn/expect';
-const Joi = require('joi');
+import Joi from '@hapi/joi';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

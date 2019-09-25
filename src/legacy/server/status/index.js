@@ -21,7 +21,7 @@ import ServerStatus from './server_status';
 import { Metrics } from './lib/metrics';
 import { registerStatusPage, registerStatusApi, registerStatsApi } from './routes';
 import { getOpsStatsCollector } from './collectors';
-import Oppsy from 'oppsy';
+import Oppsy from '@hapi/oppsy';
 import { cloneDeep } from 'lodash';
 import { getOSInfo } from './lib/get_os_info';
 

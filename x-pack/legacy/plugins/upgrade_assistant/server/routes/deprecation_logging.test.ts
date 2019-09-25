@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 
 jest.mock('../lib/es_version_precheck');
 import { registerDeprecationLoggingRoutes } from './deprecation_logging';

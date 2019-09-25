@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestAuth } from 'hapi';
+import { RequestAuth } from '@hapi/hapi';
 import { getOr } from 'lodash/fp';
 import { SavedTimeline } from './types';
 

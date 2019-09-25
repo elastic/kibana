@@ -5,7 +5,7 @@
  */
 
 import fileType from 'file-type';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { Commit, Oid, Revwalk } from '@elastic/nodegit';
 import { commitInfo, GitOperations } from '../../git_operations';
 import { FileTree } from '../../../model';

@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Hapi from 'hapi';
-import Boom from 'boom';
+import Hapi from '@hapi/hapi';
+import Boom from '@hapi/boom';
 import { initGetRolesApi } from './get';
 
 const application = 'kibana-.kibana';

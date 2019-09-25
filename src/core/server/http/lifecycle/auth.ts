@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Lifecycle, Request, ResponseToolkit } from 'hapi';
+import { Lifecycle, Request, ResponseToolkit } from '@hapi/hapi';
 import { Logger } from '../../logging';
 import {
   HapiResponseAdapter,

@@ -5,7 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
-import { Root } from 'joi';
+import { Root } from '@hapi/joi';
 import mappings from './mappings.json';
 import { init } from './server';
 

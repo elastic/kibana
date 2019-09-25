@@ -10,7 +10,7 @@
  * rescheduling, middleware application, etc.
  */
 
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import { intervalFromDate, intervalFromNow } from './lib/intervals';
 import { Logger } from './types';
 import { BeforeRunFunction } from './lib/middleware';

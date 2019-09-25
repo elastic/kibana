@@ -19,7 +19,7 @@
 
 import { Observable, Subscription } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 
 import { LoggerFactory } from '../logging';
 import { CoreService } from '../../types';

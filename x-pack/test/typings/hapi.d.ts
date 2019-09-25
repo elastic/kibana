@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import 'hapi';
+import '@hapi/hapi';
 
 import { CloudPlugin } from '../../legacy/plugins/cloud';
 import { EncryptedSavedObjectsPlugin } from '../../legacy/plugins/encrypted_saved_objects';

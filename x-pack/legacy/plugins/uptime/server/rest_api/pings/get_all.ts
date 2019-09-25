@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import { PingResults } from '../../../common/graphql/types';
 import { UMServerLibs } from '../../lib/lib';
 

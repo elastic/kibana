@@ -25,7 +25,7 @@
  * decided to go with this approach at the time of development.
  */
 
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import { injectMetaAttributes } from '../../../../lib/management/saved_objects/inject_meta_attributes';
 
 export function registerFind(server) {

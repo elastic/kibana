@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import { wrapError } from '../../../../../../../../plugins/security/server';
 
 export function initDeleteRolesApi(server, callWithRequest, routePreCheckLicenseFn) {

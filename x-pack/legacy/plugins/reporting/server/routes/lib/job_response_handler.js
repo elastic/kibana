@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import boom from 'boom';
+import boom from '@hapi/boom';
 import { oncePerServer } from '../../lib/once_per_server';
 import { jobsQueryFactory } from '../../lib/jobs_query';
 import { WHITELISTED_JOB_CONTENT_TYPES } from '../../../common/constants';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { AlertType } from '../types';
 
 export function validateAlertTypeParams<T extends Record<string, any>>(

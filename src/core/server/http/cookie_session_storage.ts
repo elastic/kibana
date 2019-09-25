@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Request, Server } from 'hapi';
-import hapiAuthCookie from 'hapi-auth-cookie';
+import { Request, Server } from '@hapi/hapi';
+import hapiAuthCookie from '@hapi/cookie';
 
 import { KibanaRequest, ensureRawRequest } from './router';
 import { SessionStorageFactory, SessionStorage } from './session_storage';

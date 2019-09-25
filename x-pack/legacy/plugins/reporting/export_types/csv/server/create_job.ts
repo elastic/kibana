@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
+import { Request } from '@hapi/hapi';
 import { oncePerServer } from '../../../server/lib/once_per_server';
 import { cryptoFactory } from '../../../server/lib/crypto';
 import { KbnServer, ConditionalHeaders, CreateJobFactory } from '../../../types';

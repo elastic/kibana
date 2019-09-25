@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import _ from 'lodash';
 import override from './override';
 import createDefaultSchema from './schema';

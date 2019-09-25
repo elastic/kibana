@@ -60,7 +60,7 @@
  * given an empty migrationVersion property {} if no such property exists.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import _ from 'lodash';
 import cloneDeep from 'lodash.clonedeep';
 import Semver from 'semver';

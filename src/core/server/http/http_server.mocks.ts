@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Request } from 'hapi';
+import { Request } from '@hapi/hapi';
 import { merge } from 'lodash';
 import { Socket } from 'net';
 

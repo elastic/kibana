@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { Request, RouteOptionsPreObject } from 'hapi';
+import Boom from '@hapi/boom';
+import { Request, RouteOptionsPreObject } from '@hapi/hapi';
 import { uniq } from 'lodash';
 import { SemVer } from 'semver';
 

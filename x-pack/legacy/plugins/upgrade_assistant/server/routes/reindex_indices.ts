@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { Server } from 'hapi';
+import Boom from '@hapi/boom';
+import { Server } from '@hapi/hapi';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { SavedObjectsClientContract } from 'src/core/server';

@@ -5,7 +5,7 @@
  */
 
 import { writeFileSync, unlinkSync } from 'fs';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { resolve } from 'path';
 import { tmpdir } from 'os';
 import {

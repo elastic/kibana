@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
-import { boomify, badRequest } from 'boom';
+import { Request } from '@hapi/hapi';
+import { boomify, badRequest } from '@hapi/boom';
 import { Legacy } from 'kibana';
 
 const SAVED_OBJECT_WITH_SECRET_TYPE = 'saved-object-with-secret';

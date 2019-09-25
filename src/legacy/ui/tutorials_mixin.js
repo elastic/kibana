@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import { tutorialSchema } from '../core_plugins/kibana/common/tutorials/tutorial_schema';
 
 export function tutorialsMixin(kbnServer, server) {

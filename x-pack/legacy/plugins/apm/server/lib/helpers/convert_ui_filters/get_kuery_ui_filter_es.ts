@@ -5,7 +5,7 @@
  */
 
 import { ESFilter } from 'elasticsearch';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { idx } from '@kbn/elastic-idx';
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import { ISavedObject } from '../../../../public/services/rest/savedObjects';

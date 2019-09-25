@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { ESFilter } from 'elasticsearch';
 import { UIFilters } from '../../../../typings/ui-filters';
 import { getEnvironmentUiFilterES } from './get_environment_ui_filter_es';

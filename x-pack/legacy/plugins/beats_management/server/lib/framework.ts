@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResponseObject, ResponseToolkit } from 'hapi';
+import { ResponseObject, ResponseToolkit } from '@hapi/hapi';
 import { difference } from 'lodash';
 import { BaseReturnType } from '../../common/return_types';
 import {

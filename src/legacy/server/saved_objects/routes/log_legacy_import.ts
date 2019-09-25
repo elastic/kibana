@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 
 export const createLogLegacyImportRoute = () => ({
   path: '/api/saved_objects/_log_legacy_import',

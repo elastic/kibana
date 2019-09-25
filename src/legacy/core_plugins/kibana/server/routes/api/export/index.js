@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import moment from 'moment';
 
 import { exportDashboards } from '../../../lib/export/export_dashboards';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
+import { Request } from '@hapi/hapi';
 import { i18n } from '@kbn/i18n';
 
 import { cryptoFactory, LevelLogger, oncePerServer } from '../../../server/lib';

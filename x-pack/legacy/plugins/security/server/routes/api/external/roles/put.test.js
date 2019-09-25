@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-import Boom from 'boom';
+import Hapi from '@hapi/hapi';
+import Boom from '@hapi/boom';
 import { initPutRolesApi } from './put';
 import { defaultValidationErrorHandler } from '../../../../../../../../../src/core/server/http/http_tools';
 import { GLOBAL_RESOURCE } from '../../../../../common/constants';

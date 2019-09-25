@@ -5,7 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import moment from 'moment';
 import { getESClient } from './es_client';
 import { getUiFiltersES } from './convert_ui_filters/get_ui_filters_es';
