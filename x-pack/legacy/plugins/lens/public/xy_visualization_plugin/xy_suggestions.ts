@@ -120,7 +120,14 @@ function getBucketMappings(table: TableSuggestion, currentState?: State) {
   const currentXColumnIndex = prioritizedBuckets.findIndex(
     ({ columnId }) => columnId === currentLayer.xAccessor
   );
-  if (currentXColumnIndex) {
+  if (
+    currentXColumnIndex > -1 &&
+    // make sure time gets mapped to x dimension even when changing current bucket/dimension mapping
+    !(
+      prioritizedBuckets[currentXColumnIndex].operation.dataType !== 'date' &&
+      prioritizedBuckets[0].operation.dataType === 'date'
+    )
+  ) {
     const [x] = prioritizedBuckets.splice(currentXColumnIndex, 1);
     prioritizedBuckets.unshift(x);
   }
@@ -128,7 +135,7 @@ function getBucketMappings(table: TableSuggestion, currentState?: State) {
   const currentSplitColumnIndex = prioritizedBuckets.findIndex(
     ({ columnId }) => columnId === currentLayer.splitAccessor
   );
-  if (currentSplitColumnIndex) {
+  if (currentSplitColumnIndex > -1) {
     const [splitBy] = prioritizedBuckets.splice(currentSplitColumnIndex, 1);
     prioritizedBuckets.push(splitBy);
   }
@@ -267,25 +274,24 @@ function getSeriesType(
   changeType: TableChangeType
 ): SeriesType {
   const defaultType = 'bar_stacked';
-  const preferredSeriesType = (currentState && currentState.preferredSeriesType) || defaultType;
-  const isDateCompatible =
-    preferredSeriesType === 'area' ||
-    preferredSeriesType === 'line' ||
-    preferredSeriesType === 'area_stacked';
+
+  const oldLayer = getExistingLayer(currentState, layerId);
+  const oldLayerSeriesType = oldLayer ? oldLayer.seriesType : false;
+
+  const closestSeriesType =
+    oldLayerSeriesType || (currentState && currentState.preferredSeriesType) || defaultType;
+
+  // Attempt to keep the seriesType consistent on initial add of a layer
+  // Ordinal scales should always use a bar because there is no interpolation between buckets
+  if (xValue.operation.scale && xValue.operation.scale === 'ordinal') {
+    return closestSeriesType.startsWith('bar') ? closestSeriesType : defaultType;
+  }
 
   if (changeType === 'initial') {
     return defaultType;
   }
 
-  const oldLayer = getExistingLayer(currentState, layerId);
-
-  return (
-    (oldLayer && oldLayer.seriesType) ||
-    (currentState && currentState.preferredSeriesType) ||
-    defaultType
-  );
-
-  return isDateCompatible ? defaultType : preferredSeriesType;
+  return closestSeriesType !== defaultType ? closestSeriesType : defaultType;
 }
 
 function getSuggestionTitle(

@@ -39,6 +39,7 @@
 }
 
 .lnsSuggestionPanel__chartWrapper {
+  display: flex;
   height: $lnsSuggestionHeight - $euiSize;
   pointer-events: none;
   margin: 0 $euiSizeS;
@@ -46,6 +47,10 @@
 
 .lnsSuggestionPanel__chartWrapper--withLabel {
   height: $lnsSuggestionHeight - $euiSizeL;
+}
+
+.lnsSuggestionPanel__chartWrapper > * {
+  flex: 1;
 }
 
 .lnsSuggestionPanel__buttonLabel {
