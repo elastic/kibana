@@ -6,24 +6,26 @@
 
 import React from 'react';
 import { shallow, mount } from 'enzyme';
-import { HttpInfo } from './HttpInfo';
-import * as exampleTransactions from './__fixtures__/transactions';
 import { palettes } from '@elastic/eui';
-import { cloneDeep, set } from 'lodash';
+import { HttpInfoSummaryItem } from './';
+import * as exampleTransactions from '../__fixtures__/transactions';
 
-describe('HttpInfo', () => {
+describe('HttpInfoSummaryItem', () => {
   describe('render', () => {
     const transaction = exampleTransactions.httpOk;
     const url = 'https://example.com';
-    const props = { transaction, url };
+    const method = 'get';
+    const props = { transaction, url, method, status: 200 };
 
     it('renders', () => {
-      expect(() => shallow(<HttpInfo {...props} />)).not.toThrowError();
+      expect(() =>
+        shallow(<HttpInfoSummaryItem {...props} />)
+      ).not.toThrowError();
     });
 
     describe('with status code 200', () => {
       it('shows a success color', () => {
-        const wrapper = mount(<HttpInfo {...props} />);
+        const wrapper = mount(<HttpInfoSummaryItem {...props} />);
 
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
           palettes.euiPaletteForStatus.colors[0]
@@ -33,10 +35,9 @@ describe('HttpInfo', () => {
 
     describe('with status code 301', () => {
       it('shows a warning color', () => {
-        const p = cloneDeep(props);
-        set(p, 'transaction.http.response.status_code', 301);
+        const p = { ...props, status: 301 };
 
-        const wrapper = mount(<HttpInfo {...p} />);
+        const wrapper = mount(<HttpInfoSummaryItem {...p} />);
 
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
           palettes.euiPaletteForStatus.colors[4]
@@ -46,10 +47,9 @@ describe('HttpInfo', () => {
 
     describe('with status code 404', () => {
       it('shows a error color', () => {
-        const p = cloneDeep(props);
-        set(p, 'transaction.http.response.status_code', 404);
+        const p = { ...props, status: 404 };
 
-        const wrapper = mount(<HttpInfo {...p} />);
+        const wrapper = mount(<HttpInfoSummaryItem {...p} />);
 
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
           palettes.euiPaletteForStatus.colors[9]
@@ -59,10 +59,9 @@ describe('HttpInfo', () => {
 
     describe('with status code 502', () => {
       it('shows a error color', () => {
-        const p = cloneDeep(props);
-        set(p, 'transaction.http.response.status_code', 502);
+        const p = { ...props, status: 502 };
 
-        const wrapper = mount(<HttpInfo {...p} />);
+        const wrapper = mount(<HttpInfoSummaryItem {...p} />);
 
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
           palettes.euiPaletteForStatus.colors[9]
@@ -72,10 +71,9 @@ describe('HttpInfo', () => {
 
     describe('with some other status code', () => {
       it('shows the default color', () => {
-        const p = cloneDeep(props);
-        set(p, 'transaction.http.response.status_code', 700);
+        const p = { ...props, status: 700 };
 
-        const wrapper = mount(<HttpInfo {...p} />);
+        const wrapper = mount(<HttpInfoSummaryItem {...p} />);
 
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
           'default'

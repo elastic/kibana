@@ -267,16 +267,25 @@ function getSeriesType(
   changeType: TableChangeType
 ): SeriesType {
   const defaultType = 'bar_stacked';
+  const preferredSeriesType = (currentState && currentState.preferredSeriesType) || defaultType;
+  const isDateCompatible =
+    preferredSeriesType === 'area' ||
+    preferredSeriesType === 'line' ||
+    preferredSeriesType === 'area_stacked';
+
   if (changeType === 'initial') {
     return defaultType;
-  } else {
-    const oldLayer = getExistingLayer(currentState, layerId);
-    return (
-      (oldLayer && oldLayer.seriesType) ||
-      (currentState && currentState.preferredSeriesType) ||
-      defaultType
-    );
   }
+
+  const oldLayer = getExistingLayer(currentState, layerId);
+
+  return (
+    (oldLayer && oldLayer.seriesType) ||
+    (currentState && currentState.preferredSeriesType) ||
+    defaultType
+  );
+
+  return isDateCompatible ? defaultType : preferredSeriesType;
 }
 
 function getSuggestionTitle(
