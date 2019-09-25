@@ -106,7 +106,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
   return (
     <ChildDragDropProvider {...props.dragDropContext}>
       <DragDrop
-        className="lnsConfigPanel__summary"
+        className="lnsIndexPatternDimensionPanel"
         data-test-subj="indexPattern-dropTarget"
         droppable={canHandleDrop()}
         onDrop={droppedItem => {
