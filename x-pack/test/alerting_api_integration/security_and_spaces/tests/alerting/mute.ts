@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import { AlertUtils, getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -21,6 +21,8 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
+      const alertUtils = new AlertUtils({ user, space, supertestWithoutAuth });
+
       describe(scenario.id, () => {
         it('should handle mute alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
@@ -30,10 +32,7 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'alert');
 
-          const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}/_mute_all`)
-            .set('kbn-xsrf', 'foo')
-            .auth(user.username, user.password);
+          const response = await alertUtils.getMuteRequest(createdAlert.id);
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':

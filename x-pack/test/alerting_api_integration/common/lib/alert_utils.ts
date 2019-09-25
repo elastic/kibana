@@ -13,8 +13,15 @@ export interface AlertUtilsOpts {
   user?: User;
   space: Space;
   supertestWithoutAuth: any;
-  indexRecordActionId: string;
-  objectRemover: ObjectRemover;
+  indexRecordActionId?: string;
+  objectRemover?: ObjectRemover;
+}
+
+export interface CreateAlwaysFiringActionOpts {
+  indexRecordActionId?: string;
+  objectRemover?: ObjectRemover;
+  overwrites?: Record<string, any>;
+  reference: string;
 }
 
 export class AlertUtils {
@@ -22,8 +29,8 @@ export class AlertUtils {
   private readonly user?: User;
   private readonly space: Space;
   private readonly supertestWithoutAuth: any;
-  private readonly indexRecordActionId: string;
-  private readonly objectRemover: ObjectRemover;
+  private readonly indexRecordActionId?: string;
+  private readonly objectRemover?: ObjectRemover;
 
   constructor({
     indexRecordActionId,
@@ -45,71 +52,124 @@ export class AlertUtils {
     );
   }
 
-  public async enable(alertId: string) {
-    let request = this.supertestWithoutAuth
+  public getEnableRequest(alertId: string) {
+    const request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}/_enable`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
-      request = request.auth(this.user.username, this.user.password);
+      return request.auth(this.user.username, this.user.password);
     }
-    await request.expect(204, '');
+    return request;
   }
 
-  public async disable(alertId: string) {
-    let request = this.supertestWithoutAuth
+  public getDisableRequest(alertId: string) {
+    const request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}/_disable`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
-      request = request.auth(this.user.username, this.user.password);
+      return request.auth(this.user.username, this.user.password);
     }
-    await request.expect(204, '');
+    return request;
   }
 
-  public async mute(alertId: string) {
-    let request = this.supertestWithoutAuth
+  public getMuteRequest(alertId: string) {
+    const request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}/_mute_all`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
-      request = request.auth(this.user.username, this.user.password);
+      return request.auth(this.user.username, this.user.password);
     }
-    await request.expect(204, '');
+    return request;
   }
 
-  public async unmute(alertId: string) {
-    let request = this.supertestWithoutAuth
+  public getUnmuteRequest(alertId: string) {
+    const request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}/_unmute_all`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
-      request = request.auth(this.user.username, this.user.password);
+      return request.auth(this.user.username, this.user.password);
     }
-    await request.expect(204, '');
+    return request;
   }
 
-  public async muteInstance(alertId: string, instanceId: string) {
-    let request = this.supertestWithoutAuth
+  public getMuteInstanceRequest(alertId: string, instanceId: string) {
+    const request = this.supertestWithoutAuth
       .post(
         `${getUrlPrefix(this.space.id)}/api/alert/${alertId}/alert_instance/${instanceId}/_mute`
       )
       .set('kbn-xsrf', 'foo');
     if (this.user) {
-      request = request.auth(this.user.username, this.user.password);
+      return request.auth(this.user.username, this.user.password);
     }
-    await request.expect(204, '');
+    return request;
   }
 
-  public async unmuteInstance(alertId: string, instanceId: string) {
-    let request = this.supertestWithoutAuth
+  public getUnmuteInstanceRequest(alertId: string, instanceId: string) {
+    const request = this.supertestWithoutAuth
       .post(
         `${getUrlPrefix(this.space.id)}/api/alert/${alertId}/alert_instance/${instanceId}/_unmute`
       )
       .set('kbn-xsrf', 'foo');
     if (this.user) {
-      request = request.auth(this.user.username, this.user.password);
+      return request.auth(this.user.username, this.user.password);
     }
-    await request.expect(204, '');
+    return request;
   }
 
-  public async createAlwaysFiringAction(reference: string, overwrites = {}) {
+  public getUpdateApiKeyRequest(alertId: string) {
+    const request = this.supertestWithoutAuth
+      .post(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}/_update_api_key`)
+      .set('kbn-xsrf', 'foo');
+    if (this.user) {
+      return request.auth(this.user.username, this.user.password);
+    }
+    return request;
+  }
+
+  public async enable(alertId: string) {
+    await this.getEnableRequest(alertId).expect(204, '');
+  }
+
+  public async disable(alertId: string) {
+    await this.getDisableRequest(alertId).expect(204, '');
+  }
+
+  public async mute(alertId: string) {
+    await this.getMuteRequest(alertId).expect(204, '');
+  }
+
+  public async unmute(alertId: string) {
+    await this.getUnmuteRequest(alertId).expect(204, '');
+  }
+
+  public async muteInstance(alertId: string, instanceId: string) {
+    await this.getMuteInstanceRequest(alertId, instanceId).expect(204, '');
+  }
+
+  public async unmuteInstance(alertId: string, instanceId: string) {
+    await this.getUnmuteInstanceRequest(alertId, instanceId).expect(204, '');
+  }
+
+  public async updateApiKey(alertId: string) {
+    await this.getUpdateApiKeyRequest(alertId).expect(204, '');
+  }
+
+  public async createAlwaysFiringAction({
+    objectRemover,
+    overwrites = {},
+    indexRecordActionId,
+    reference,
+  }: CreateAlwaysFiringActionOpts) {
+    const objRemover = objectRemover || this.objectRemover;
+    const actionId = indexRecordActionId || this.indexRecordActionId;
+
+    if (!objRemover) {
+      throw new Error('objectRemover is required');
+    }
+    if (!actionId) {
+      throw new Error('indexRecordActionId is required ');
+    }
+
     let request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/api/alert`)
       .set('kbn-xsrf', 'foo');
@@ -140,7 +200,7 @@ export class AlertUtils {
       ...overwrites,
     });
     if (response.statusCode === 200) {
-      this.objectRemover.add(this.space.id, response.body.id, 'alert');
+      objRemover.add(this.space.id, response.body.id, 'alert');
     }
     return response;
   }

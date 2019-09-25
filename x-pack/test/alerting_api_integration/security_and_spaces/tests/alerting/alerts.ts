@@ -74,7 +74,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         it('should schedule task, run alert and schedule actions when appropriate', async () => {
           const reference = alertUtils.generateReference();
-          const response = await alertUtils.createAlwaysFiringAction(reference);
+          const response = await alertUtils.createAlwaysFiringAction({ reference });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -408,8 +408,11 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         it('should throttle alerts when appropriate', async () => {
           const reference = alertUtils.generateReference();
-          const response = await alertUtils.createAlwaysFiringAction(reference, {
-            interval: '1s',
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            overwrites: {
+              interval: '1s',
+            },
           });
 
           switch (scenario.id) {
@@ -440,33 +443,36 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         it('should not throttle when changing groups', async () => {
           const reference = alertUtils.generateReference();
-          const response = await alertUtils.createAlwaysFiringAction(reference, {
-            interval: '1s',
-            alertTypeParams: {
-              index: ES_TEST_INDEX_NAME,
-              reference,
-              groupsToScheduleActionsInSeries: ['default', 'other'],
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            overwrites: {
+              interval: '1s',
+              alertTypeParams: {
+                index: ES_TEST_INDEX_NAME,
+                reference,
+                groupsToScheduleActionsInSeries: ['default', 'other'],
+              },
+              actions: [
+                {
+                  group: 'default',
+                  id: indexRecordActionId,
+                  params: {
+                    index: ES_TEST_INDEX_NAME,
+                    reference,
+                    message: 'from:default',
+                  },
+                },
+                {
+                  group: 'other',
+                  id: indexRecordActionId,
+                  params: {
+                    index: ES_TEST_INDEX_NAME,
+                    reference,
+                    message: 'from:other',
+                  },
+                },
+              ],
             },
-            actions: [
-              {
-                group: 'default',
-                id: indexRecordActionId,
-                params: {
-                  index: ES_TEST_INDEX_NAME,
-                  reference,
-                  message: 'from:default',
-                },
-              },
-              {
-                group: 'other',
-                id: indexRecordActionId,
-                params: {
-                  index: ES_TEST_INDEX_NAME,
-                  reference,
-                  message: 'from:other',
-                },
-              },
-            ],
           });
 
           switch (scenario.id) {
@@ -501,12 +507,15 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         it('should reset throttle window when not firing', async () => {
           const reference = alertUtils.generateReference();
-          const response = await alertUtils.createAlwaysFiringAction(reference, {
-            interval: '1s',
-            alertTypeParams: {
-              index: ES_TEST_INDEX_NAME,
-              reference,
-              groupsToScheduleActionsInSeries: ['default', null, 'default'],
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            overwrites: {
+              interval: '1s',
+              alertTypeParams: {
+                index: ES_TEST_INDEX_NAME,
+                reference,
+                groupsToScheduleActionsInSeries: ['default', null, 'default'],
+              },
             },
           });
 
@@ -538,9 +547,12 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         it(`shouldn't schedule actions when alert is muted`, async () => {
           const reference = alertUtils.generateReference();
-          const response = await alertUtils.createAlwaysFiringAction(reference, {
-            enabled: false,
-            interval: '1s',
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            overwrites: {
+              enabled: false,
+              interval: '1s',
+            },
           });
 
           switch (scenario.id) {
@@ -573,9 +585,12 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         it(`shouldn't schedule actions when alert instance is muted`, async () => {
           const reference = alertUtils.generateReference();
-          const response = await alertUtils.createAlwaysFiringAction(reference, {
-            enabled: false,
-            interval: '1s',
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            overwrites: {
+              enabled: false,
+              interval: '1s',
+            },
           });
 
           switch (scenario.id) {
@@ -608,9 +623,12 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         it(`should unmute all instances when unmuting an alert`, async () => {
           const reference = alertUtils.generateReference();
-          const response = await alertUtils.createAlwaysFiringAction(reference, {
-            enabled: false,
-            interval: '1s',
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            overwrites: {
+              enabled: false,
+              interval: '1s',
+            },
           });
 
           switch (scenario.id) {

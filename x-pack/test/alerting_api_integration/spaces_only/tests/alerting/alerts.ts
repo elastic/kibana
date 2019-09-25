@@ -65,7 +65,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
     it('should schedule task, run alert and schedule actions', async () => {
       const reference = alertUtils.generateReference();
-      const response = await alertUtils.createAlwaysFiringAction(reference);
+      const response = await alertUtils.createAlwaysFiringAction({ reference });
 
       expect(response.statusCode).to.eql(200);
       const alertTestRecord = (await esTestIndexTool.waitForDocs(
