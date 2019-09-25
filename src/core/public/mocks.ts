@@ -41,7 +41,7 @@ export { overlayServiceMock } from './overlays/overlay_service.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 
 function createCoreSetupMock({ basePath = '' } = {}) {
-  const mock: MockedKeys<CoreSetup> = {
+  const mock = {
     application: applicationServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
@@ -54,7 +54,7 @@ function createCoreSetupMock({ basePath = '' } = {}) {
 }
 
 function createCoreStartMock({ basePath = '' } = {}) {
-  const mock: MockedKeys<CoreStart> = {
+  const mock = {
     application: applicationServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
