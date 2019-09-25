@@ -95,7 +95,7 @@ export const Commit = (props: Props) => {
     <EuiPanel className="code-timeline__commit--root">
       <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
         <div className="eui-textTruncate">
-          <EuiTitle size="xxs">
+          <EuiTitle size="xxs" className="eui-textTruncate">
             <h4>{summary}</h4>
           </EuiTitle>
           <EuiText size="xs" className="commit__metadata">

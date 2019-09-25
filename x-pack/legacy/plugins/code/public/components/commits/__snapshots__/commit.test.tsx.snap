@@ -38,10 +38,11 @@ This is the description",
             className="eui-textTruncate"
           >
             <EuiTitle
+              className="eui-textTruncate"
               size="xxs"
             >
               <h4
-                className="euiTitle euiTitle--xxsmall"
+                className="euiTitle euiTitle--xxsmall eui-textTruncate"
               >
                 This is my commit message
               </h4>
