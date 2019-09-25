@@ -137,7 +137,7 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
             defaultMessage: 'Percentage mode',
           })}
           paramName="percentageMode"
-          value={stateParams.percentageMode}
+          value={stateParams.setColorRange ? false : stateParams.percentageMode}
           setValue={setValue}
         />
         <EuiSpacer size="s" />

@@ -48,7 +48,7 @@ function ColorSchemaOptions({
   uiState,
   setValue,
 }: ColorSchemaOptionsProps) {
-  const [isCustomColors, setIsCustomColors] = useState(false);
+  const [isCustomColors, setIsCustomColors] = useState(() => !!uiState.get('vis.colors'));
 
   useEffect(() => {
     uiState.on('colorChanged', () => {
@@ -79,7 +79,7 @@ function ColorSchemaOptions({
         helpText={i18n.translate(
           'kbnVislibVisTypes.controls.colorSchema.howToChangeColorsDescription',
           {
-            defaultMessage: 'Note: colors can be changed in the legend.',
+            defaultMessage: 'Individual colors can be changed in the legend.',
           }
         )}
         label={i18n.translate('kbnVislibVisTypes.controls.colorSchema.colorSchemaLabel', {
