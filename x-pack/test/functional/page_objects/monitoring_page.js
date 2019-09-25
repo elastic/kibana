@@ -8,8 +8,13 @@ export function MonitoringPageProvider({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'header']);
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-
+  const find = getService('find');
   return new class MonitoringPage {
+    async getWelcome() {
+      const el = await find.byCssSelector('.euiCallOut--primary', 10000 * 10);
+      return await el.getVisibleText();
+    }
+
     async navigateTo() {
       await PageObjects.common.navigateToApp('monitoring');
     }
