@@ -172,6 +172,26 @@ ruleTester.run('@kbn/eslint/no-restricted-paths', rule, {
         },
       ],
     },
+
+    {
+      code: 'import { X } from "./index_patterns"',
+      filename: path.join(__dirname, './files/no_restricted_paths/server/b.js'),
+      options: [
+        {
+          basePath: __dirname,
+          zones: [
+            {
+              target: ['files/no_restricted_paths/(public|server)/**/*'],
+              from: [
+                'files/no_restricted_paths/server/**/*',
+                '!files/no_restricted_paths/server/index.{ts,tsx}',
+              ],
+              allowSameFolder: true,
+            },
+          ],
+        },
+      ],
+    },
   ],
 
   invalid: [
