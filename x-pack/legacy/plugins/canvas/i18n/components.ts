@@ -414,7 +414,7 @@ export const ComponentStrings = {
         defaultMessage: 'Copied reporting configuration to clipboard',
       }),
     getCopyShareConfigMessage: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.copyReportingConfigMessage', {
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.copyShareConfigMessage', {
         defaultMessage: 'Copied share markup to clipboard',
       }),
     getExportPDFErrorTitle: (workpadName: string) =>
