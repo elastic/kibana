@@ -16,9 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { IScope } from 'angular';
+
 import { IUiActionsStart, IUiActionsSetup } from 'src/plugins/ui_actions/public';
 import { Start as EmbeddableStart, Setup as EmbeddableSetup } from 'src/plugins/embeddable/public';
-import { LegacyCoreSetup, LegacyCoreStart } from '../../../../core/public';
+import { LegacyCoreSetup, LegacyCoreStart, App } from '../../../../core/public';
 import { Plugin as DataPlugin } from '../../../../plugins/data/public';
 import { Plugin as ExpressionsPlugin } from '../../../../plugins/expressions/public';
 import {
@@ -68,6 +70,21 @@ export function __reset__() {
 export function __setup__(coreSetup: LegacyCoreSetup, plugins: PluginsSetup) {
   npSetup.core = coreSetup;
   npSetup.plugins = plugins;
+
+  // Setup compatibility layer for AppService in legacy platform
+  npSetup.core.application.register = (app: App) => {
+    require('ui/chrome').setRootController(app.id, ($scope: IScope, $element: JQLite) => {
+      const element = $element[0];
+
+      // Root controller cannot return a Promise so use an internal async function and call it
+      (async () => {
+        const unmount = await app.mount({ core: npStart.core }, { element, appBasePath: '' });
+        $scope.$on('$destroy', () => {
+          unmount();
+        });
+      })();
+    });
+  };
 }
 
 export function __start__(coreStart: LegacyCoreStart, plugins: PluginsStart) {
