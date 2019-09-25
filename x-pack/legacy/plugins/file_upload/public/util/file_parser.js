@@ -10,36 +10,27 @@ import { i18n } from '@kbn/i18n';
 const oboe = require('oboe');
 
 const FILE_BUFFER = 1024 * 50;
+
 let fileReader;
+let oboeStream;
+const fileHandler = (
+  file, chunkHandler, cleanAndValidate, getFileParseActive, fileBuffer = FILE_BUFFER
+) => {
 
-const readSlice = (file, start, stop) => {
-  const blob = file.slice(start, stop);
-  fileReader.readAsBinaryString(blob);
-};
-
-const fileHandler = (file, chunkHandler, cleanAndValidate, fileBuffer = FILE_BUFFER) => {
-  const oboeStream = oboe();
+  if (fileReader) {
+    fileReader.abort();
+  }
+  if (oboeStream) {
+    oboeStream.abort();
+  }
+  fileReader = new FileReader();
+  oboeStream = oboe();
   let start;
   let stop = fileBuffer;
-  fileReader = new FileReader();
 
-  fileReader.onloadend = ({ target: { readyState, result } }) => {
-    if (readyState === FileReader.DONE) {
-      chunkHandler({
-        bytesProcessed: stop || file.size,
-        totalBytes: file.size
-      });
-      oboeStream.emit('data', result);
-      if (!stop) {
-        return;
-      }
-
-      start = stop;
-      const newStop = stop + fileBuffer;
-      // Check EOF
-      stop = newStop > file.size ? undefined : newStop;
-      readSlice(file, start, stop);
-    }
+  const readSlice = (file, start, stop) => {
+    const blob = file.slice(start, stop);
+    fileReader.readAsBinaryString(blob);
   };
 
   const filePromise = new Promise((resolve, reject) => {
@@ -49,6 +40,30 @@ const fileHandler = (file, chunkHandler, cleanAndValidate, fileBuffer = FILE_BUF
           defaultMessage: 'Error, no file provided',
         })));
     }
+
+    fileReader.onloadend = ({ target: { readyState, result } }) => {
+      if (readyState === FileReader.DONE) {
+        chunkHandler({
+          bytesProcessed: stop || file.size,
+          totalBytes: file.size
+        });
+        if (!getFileParseActive() || !result) {
+          oboeStream.abort();
+          resolve(null);
+          return;
+        }
+        oboeStream.emit('data', result);
+        if (!stop) {
+          return;
+        }
+
+        start = stop;
+        const newStop = stop + fileBuffer;
+        // Check EOF
+        stop = newStop > file.size ? undefined : newStop;
+        readSlice(file, start, stop);
+      }
+    };
     fileReader.onerror = () => {
       fileReader.abort();
       reject(new Error(i18n.translate(
@@ -76,8 +91,9 @@ export function jsonPreview(json, previewFunction) {
   }
 }
 
-export async function parseFile(file, transformDetails, previewCallback = null,
-  onChunkParse) {
+export async function parseFile(
+  file, transformDetails, previewCallback = null, onChunkParse, getFileParseActive
+) {
   let cleanAndValidate;
   if (typeof transformDetails === 'object') {
     cleanAndValidate = transformDetails.cleanAndValidate;
@@ -97,7 +113,7 @@ export async function parseFile(file, transformDetails, previewCallback = null,
     }
   }
 
-  const parsedJson = await fileHandler(file, onChunkParse, cleanAndValidate);
+  const parsedJson = await fileHandler(file, onChunkParse, cleanAndValidate, getFileParseActive);
   // Stream to both parseFile caller and preview callback
   // const jsonResult = cleanAndValidate(parsedJson);
   jsonPreview(parsedJson, previewCallback);
