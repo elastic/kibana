@@ -6,6 +6,7 @@
 
 import { Legacy } from 'kibana';
 import { ENTER_SPACE_PATH } from '../../../common/constants';
+import { wrapError } from '../../lib/errors';
 
 export function initEnterSpaceView(server: Legacy.Server) {
   server.route({
@@ -16,6 +17,7 @@ export function initEnterSpaceView(server: Legacy.Server) {
         return h.redirect(await request.getDefaultRoute());
       } catch (e) {
         server.log(['spaces', 'error'], `Error navigating to space: ${e}`);
+        return wrapError(e);
       }
     },
   });

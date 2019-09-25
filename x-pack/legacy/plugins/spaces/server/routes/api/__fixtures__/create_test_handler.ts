@@ -18,7 +18,6 @@ import { createSpaces } from './create_spaces';
 import { ExternalRouteDeps } from '../external';
 import { SpacesService } from '../../../new_platform/spaces_service';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
-import { InternalRouteDeps } from '../v1';
 import { LegacyAPI } from '../../../new_platform/plugin';
 
 interface KibanaServer extends Legacy.Server {
@@ -73,9 +72,7 @@ async function readStreamToCompletion(stream: Readable) {
   return (createPromiseFromStreams([stream, createConcatStream([])]) as unknown) as any[];
 }
 
-export function createTestHandler(
-  initApiFn: (deps: ExternalRouteDeps & InternalRouteDeps) => void
-) {
+export function createTestHandler(initApiFn: (deps: ExternalRouteDeps) => void) {
   const teardowns: TeardownFn[] = [];
 
   const spaces = createSpaces();
@@ -248,7 +245,6 @@ export function createTestHandler(
     });
 
     initApiFn({
-      getLegacyAPI: () => legacyAPI,
       routePreCheckLicenseFn: pre,
       savedObjects: server.savedObjects,
       spacesService,
