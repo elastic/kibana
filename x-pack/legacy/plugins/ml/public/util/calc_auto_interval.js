@@ -6,7 +6,7 @@
 
 
 
-// Based on Kibana ui/time_buckets/calc_auto_interval.js but with
+// Based on the original Kibana ui/time_buckets/calc_auto_interval.js but with
 // a few modifications:
 //   - edit to the near rule, so that it returns either the
 //    upper or lower rule bound, depending on which is closest to the
