@@ -52,7 +52,7 @@ export class PipelineListing extends Component {
           defaultMessage: 'Events Emitted Rate'
         }),
         field: 'latestThroughput',
-        sortable: true,
+        sortable: false,
         render: (value, pipeline) => {
           const throughput = pipeline.metrics.throughput;
           return (
@@ -86,7 +86,7 @@ export class PipelineListing extends Component {
           defaultMessage: 'Number of Nodes'
         }),
         field: 'latestNodesCount',
-        sortable: true,
+        sortable: false,
         render: (value, pipeline) => {
           const nodesCount = pipeline.metrics.nodesCount;
           return (

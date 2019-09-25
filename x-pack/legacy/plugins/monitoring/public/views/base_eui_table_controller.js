@@ -36,10 +36,7 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
    *
    */
   constructor(args) {
-    super({
-      ...args,
-      fetchDataImmediately: false
-    });
+    super(args);
     const { storageKey, $injector } = args;
     const storage = $injector.get('localStorage');
 

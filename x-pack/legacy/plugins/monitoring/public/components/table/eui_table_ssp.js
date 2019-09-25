@@ -20,7 +20,7 @@ export function EuiMonitoringSSPTable({
   ...props
 }) {
   const [isLoading, setIsLoading] = React.useState(false);
-  const [queryText, setQueryText] = React.useState(null);
+  const [queryText, setQueryText] = React.useState('');
   const [page, setPage] = React.useState({
     index: props.pagination.pageIndex,
     size: props.pagination.pageSize

@@ -74,7 +74,8 @@ uiRoutes
           getPageData,
           reactNodeId: 'monitoringLogstashPipelinesApp',
           $scope,
-          $injector
+          $injector,
+          fetchDataImmediately: false // We want to apply pagination before sending the first request
         });
 
         const $route = $injector.get('$route');
