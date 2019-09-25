@@ -12,6 +12,7 @@ import initStoryshots, { multiSnapshotWithOptions } from '@storybook/addon-story
 import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
 import { addSerializer } from 'jest-specific-snapshot';
 
+// Several of the renderers, used by the runtime, use jQuery.
 import jquery from 'jquery';
 global.$ = jquery;
 global.jQuery = jquery;
@@ -66,8 +67,8 @@ jest.mock(
 );
 
 // This element uses a `ref` and cannot be rendered by Jest snapshots.
-import { RenderedElement } from '../external_runtime/components/rendered_element';
-jest.mock('../external_runtime/components/rendered_element');
+import { RenderedElement } from '../shareable_runtime/components/rendered_element';
+jest.mock('../shareable_runtime/components/rendered_element');
 RenderedElement.mockImplementation(() => 'RenderedElement');
 
 addSerializer(styleSheetSerializer);

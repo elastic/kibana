@@ -17,6 +17,12 @@
  * under the License.
  */
 
+/**
+ * This proxy allows for CSS Modules to be interpreted properly by
+ * Jest.  Given a CSS Module class `thisClass`, we'd expect it to
+ * be obfuscated at runtime.  With this mock, `thisClass` will be
+ * returned.  This allows for consistent enzyme and snapshot tests.
+ */
 module.exports = new Proxy(
   {},
   {

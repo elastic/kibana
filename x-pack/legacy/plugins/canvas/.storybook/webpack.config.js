@@ -57,6 +57,7 @@ module.exports = async ({ config }) => {
     ],
   });
 
+  // Enable SASS, but exclude CSS Modules in Storybook
   config.module.rules.push({
     test: /\.scss$/,
     exclude: /\.module.(s(a|c)ss)$/,
@@ -73,6 +74,7 @@ module.exports = async ({ config }) => {
     ],
   });
 
+  // Enable CSS Modules in Storybook
   config.module.rules.push({
     test: /\.module\.s(a|c)ss$/,
     loader: [
@@ -97,6 +99,7 @@ module.exports = async ({ config }) => {
     ],
   });
 
+  // Ensure jQuery is global for Storybook, specifically for the runtime.
   config.plugins.push(
     new webpack.ProvidePlugin({
       $: 'jquery',
@@ -156,7 +159,7 @@ module.exports = async ({ config }) => {
     })
   );
 
-  // Tell Webpack about the extensions
+  // Tell Webpack about relevant extensions
   config.resolve.extensions.push('.ts', '.tsx', '.scss');
 
   // Alias imports to either a mock or the proper module or directory.
