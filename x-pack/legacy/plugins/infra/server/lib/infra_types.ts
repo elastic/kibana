@@ -5,7 +5,7 @@
  */
 
 import { InfraSourceConfiguration } from '../../public/graphql/types';
-import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from './adapters/framework';
+import { InfraFrameworkRequest } from './adapters/framework';
 import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraLogEntriesDomain } from './domains/log_entries_domain';
 import { InfraMetricsDomain } from './domains/metrics_domain';
@@ -14,6 +14,7 @@ import { InfraSnapshot } from './snapshot';
 import { InfraSources } from './sources';
 import { InfraSourceStatus } from './source_status';
 import { InfraConfig } from '../new_platform_config.schema';
+import { InfraKibanaBackendFrameworkAdapter } from './adapters/framework/kibana_framework_adapter';
 
 export interface InfraDomainLibs {
   fields: InfraFieldsDomain;
@@ -23,7 +24,7 @@ export interface InfraDomainLibs {
 
 export interface InfraBackendLibs extends InfraDomainLibs {
   configuration: InfraConfig;
-  framework: InfraBackendFrameworkAdapter;
+  framework: InfraKibanaBackendFrameworkAdapter;
   logAnalysis: InfraLogAnalysis;
   snapshot: InfraSnapshot;
   sources: InfraSources;
