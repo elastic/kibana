@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import expect from '@kbn/expect';
+import { Filter } from '@kbn/es-query';
 import { changeTimeFilter } from './change_time_filter';
 import { TimeRange } from 'src/plugins/data/public';
 import { timefilterServiceMock } from '../../../timefilter/timefilter_service.mock';
@@ -25,6 +25,7 @@ const timefilterMock = timefilterServiceMock.createSetupContract();
 const timefilter = timefilterMock.timefilter;
 
 let _time: TimeRange | undefined;
+
 timefilter.setTime.mockImplementation((time: any) => {
   _time = {
     from: time.from.toISOString(),
@@ -35,23 +36,27 @@ timefilter.getTime.mockImplementation(() => {
   return _time!;
 });
 
-describe('changeTimeFilter()', function() {
+describe('changeTimeFilter()', () => {
   const gt = 1388559600000;
   const lt = 1388646000000;
 
-  test('should change the timefilter to match the range gt/lt', function() {
-    const filter = { range: { '@timestamp': { gt, lt } } };
-    changeTimeFilter(timefilter, filter);
+  test('should change the timefilter to match the range gt/lt', () => {
+    const filter: any = { range: { '@timestamp': { gt, lt } } };
+    changeTimeFilter(timefilter, filter as Filter);
+
     const { to, from } = timefilter.getTime();
-    expect(to).to.be(new Date(lt).toISOString());
-    expect(from).to.be(new Date(gt).toISOString());
+
+    expect(to).toBe(new Date(lt).toISOString());
+    expect(from).toBe(new Date(gt).toISOString());
   });
 
-  test('should change the timefilter to match the range gte/lte', function() {
-    const filter = { range: { '@timestamp': { gte: gt, lte: lt } } };
-    changeTimeFilter(timefilter, filter);
+  test('should change the timefilter to match the range gte/lte', () => {
+    const filter: any = { range: { '@timestamp': { gte: gt, lte: lt } } };
+    changeTimeFilter(timefilter, filter as Filter);
+
     const { to, from } = timefilter.getTime();
-    expect(to).to.be(new Date(lt).toISOString());
-    expect(from).to.be(new Date(gt).toISOString());
+
+    expect(to).toBe(new Date(lt).toISOString());
+    expect(from).toBe(new Date(gt).toISOString());
   });
 });
