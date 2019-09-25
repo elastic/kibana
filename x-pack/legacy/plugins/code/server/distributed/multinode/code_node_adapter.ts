@@ -75,7 +75,7 @@ export class CodeNodeAdapter implements ServiceHandlerAdapter {
         path,
         handler: async (req: Request) => {
           const { context, params } = req.payload as RequestPayload;
-          this.log.debug(`Receiving RPC call ${req.url.path} ${util.inspect(params)}`);
+          this.log.debug(`Receiving RPC call ${req.url.pathname} ${util.inspect(params)}`);
           const endpoint: Endpoint = {
             toContext(): RequestContext {
               return context;

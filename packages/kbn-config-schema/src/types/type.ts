@@ -91,7 +91,7 @@ export abstract class Type<V> {
   protected handleError(
     type: string,
     context: Record<string, any>,
-    path: string[]
+    path: Array<string | number>
   ): string | SchemaTypeError | void {
     return undefined;
   }

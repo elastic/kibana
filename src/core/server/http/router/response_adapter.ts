@@ -123,7 +123,8 @@ export class HapiResponseAdapter {
     });
 
     error.output.payload.message = getErrorMessage(payload);
-    error.output.payload.attributes = getErrorAttributes(payload);
+    // Boom.output.payload is type limited to the default properties
+    (error.output.payload as any).attributes = getErrorAttributes(payload);
 
     const headers = kibanaResponse.options.headers;
     if (headers) {

@@ -14,7 +14,7 @@ import { ActionsPlugin, ActionsClient } from '../../legacy/plugins/actions';
 import { TaskManager } from '../../legacy/plugins/task_manager';
 import { AlertingPlugin, AlertsClient } from '../../legacy/plugins/alerting';
 
-declare module 'hapi' {
+declare module '@hapi/hapi' {
   interface Request {
     getActionsClient?: () => ActionsClient;
     getAlertsClient?: () => AlertsClient;

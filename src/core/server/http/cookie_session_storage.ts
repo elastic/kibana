@@ -58,7 +58,7 @@ class ScopedCookieSessionStorage<T extends Record<string, any>> implements Sessi
       const session = await this.server.auth.test('security-cookie', this.request);
       // A browser can send several cookies, if it's not an array, just return the session value
       if (!Array.isArray(session)) {
-        return session as T;
+        return (session as unknown) as T;
       }
 
       // If we have an array with one value, we're good also
@@ -103,7 +103,9 @@ export async function createCookieSessionStorageFactory<T>(
   server.auth.strategy('security-cookie', 'cookie', {
     cookie: cookieOptions.name,
     password: cookieOptions.encryptionKey,
-    validateFunc: async (req, session: T) => ({ valid: await cookieOptions.validate(session) }),
+    validateFunc: async (req: Request, session: T) => ({
+      valid: await cookieOptions.validate(session),
+    }),
     isSecure: cookieOptions.isSecure,
     path: basePath,
     clearInvalid: true,

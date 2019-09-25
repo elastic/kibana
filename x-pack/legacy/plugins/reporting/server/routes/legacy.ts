@@ -29,7 +29,7 @@ export function registerLegacy(
       method: 'POST',
       config: getStaticFeatureConfig(getRouteConfig, exportTypeId),
       handler: async (request: Request, h: ResponseToolkit) => {
-        const message = `The following URL is deprecated and will stop working in the next major version: ${request.url.path}`;
+        const message = `The following URL is deprecated and will stop working in the next major version: ${request.url.pathname}`;
         server.log(['warning', 'reporting', 'deprecation'], message);
 
         try {

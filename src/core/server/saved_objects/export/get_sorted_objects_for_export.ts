@@ -60,7 +60,8 @@ async function fetchObjectsToExport({
     const erroredObjects = bulkGetResult.saved_objects.filter(obj => !!obj.error);
     if (erroredObjects.length) {
       const err = Boom.badRequest();
-      err.output.payload.attributes = {
+      // Boom.output.payload is type limited to the default properties
+      (err.output.payload as any).attributes = {
         objects: erroredObjects,
       };
       throw err;

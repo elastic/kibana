@@ -154,7 +154,8 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
       path: request.path,
       method: request.method,
       options: {
-        authRequired: request.route.settings.auth !== false,
+        // type def limits settings.auth to AuthSettings | undefined
+        authRequired: (request.route.settings.auth as any) !== false,
         tags: request.route.settings.tags || [],
       },
     };

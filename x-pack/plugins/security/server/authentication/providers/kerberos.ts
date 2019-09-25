@@ -330,7 +330,9 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    * @param error Error to extract challenges from.
    */
   private getNegotiateChallenge(error: ElasticsearchError) {
-    const challenges = ([] as string[]).concat(error.output.headers[WWWAuthenticateHeaderName]);
+    const challenges = ([] as string[]).concat(
+      error.output.headers[WWWAuthenticateHeaderName] || []
+    );
 
     const negotiateChallenge = challenges.find(challenge =>
       challenge.toLowerCase().startsWith('negotiate')

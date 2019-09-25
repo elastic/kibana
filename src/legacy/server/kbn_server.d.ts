@@ -50,7 +50,7 @@ export interface UiApp {
 }
 
 // Extend the defaults with the plugins and server methods we need.
-declare module 'hapi' {
+declare module '@hapi/hapi' {
   interface PluginProperties {
     elasticsearch: ElasticsearchPlugin;
     kibana: any;

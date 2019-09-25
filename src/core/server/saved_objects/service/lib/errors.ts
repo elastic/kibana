@@ -166,8 +166,11 @@ export class SavedObjectsErrorHelpers {
 
   public static createEsAutoCreateIndexError() {
     const error = Boom.serverUnavailable('Automatic index creation failed');
-    error.output.payload.attributes = error.output.payload.attributes || {};
-    error.output.payload.attributes.code = 'ES_AUTO_CREATE_INDEX_ERROR';
+    // Boom.output.payload is type limited to the default properties
+    (error.output.payload as any).attributes = {
+      ...(error.output.payload as any).attributes,
+      code: 'ES_AUTO_CREATE_INDEX_ERROR',
+    };
 
     return decorate(error, CODE_ES_AUTO_CREATE_INDEX_ERROR, 503);
   }
