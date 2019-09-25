@@ -1,0 +1,8 @@
+{
+  "id": "endpoint",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["x-pack", "endpoint"],
+  "server": true,
+  "ui": true
+}
