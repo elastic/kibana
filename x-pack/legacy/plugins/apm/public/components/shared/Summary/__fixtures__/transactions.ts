@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Transaction } from '../../../../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 
 export const httpOk: Transaction = {
   '@timestamp': '0',
