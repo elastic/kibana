@@ -25,17 +25,16 @@ import { EuiFieldText, EuiOutsideClickDetector, PopoverAnchorPosition } from '@e
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { debounce, compact, isEqual, omit } from 'lodash';
 import { PersistedLog } from 'ui/persisted_log';
-import { Storage } from 'ui/storage';
 import { npStart } from 'ui/new_platform';
-import {
-  UiSettingsClientContract,
-  SavedObjectsClientContract,
-  HttpServiceBase,
-} from 'src/core/public';
+
 import {
   AutocompleteSuggestion,
   AutocompleteSuggestionType,
 } from '../../../../../../../plugins/data/public';
+import {
+  withKibana,
+  KibanaReactContextValue,
+} from '../../../../../../../plugins/kibana_react/public';
 import { IndexPattern, StaticIndexPattern } from '../../../index_patterns';
 import { Query } from '../index';
 import { fromUser, matchPairs, toUser } from '../lib';
@@ -43,6 +42,7 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 import { getQueryLog } from '../lib/get_query_log';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
+import { IDataPluginServices } from '../../../types';
 
 // todo: related to https://github.com/elastic/kibana/pull/45762/files
 // Will be refactored after merge of related PR
@@ -50,12 +50,9 @@ const getAutocompleteProvider = (language: string) =>
   npStart.plugins.data.autocomplete.getProvider(language);
 
 interface Props {
-  uiSettings: UiSettingsClientContract;
-  indexPatterns: Array<IndexPattern | string>;
-  savedObjectsClient: SavedObjectsClientContract;
-  http: HttpServiceBase;
-  store: Storage;
+  kibana: KibanaReactContextValue<IDataPluginServices>;
   intl: InjectedIntl;
+  indexPatterns: Array<IndexPattern | string>;
   query: Query;
   appName: string;
   disableAutoFocus?: boolean;
@@ -107,6 +104,7 @@ export class QueryBarInputUI extends Component<Props, State> {
   public inputRef: HTMLInputElement | null = null;
 
   private persistedLog: PersistedLog | undefined;
+  private services!: IDataPluginServices;
   private componentIsUnmounting = false;
 
   private getQueryString = () => {
@@ -122,9 +120,9 @@ export class QueryBarInputUI extends Component<Props, State> {
     ) as IndexPattern[];
 
     const objectPatternsFromStrings = (await fetchIndexPatterns(
-      this.props.savedObjectsClient,
+      this.services.savedObjects!.client,
       stringPatterns,
-      this.props.uiSettings
+      this.services.uiSettings!
     )) as IndexPattern[];
 
     this.setState({
@@ -137,7 +135,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       return;
     }
 
-    const uiSettings = this.props.uiSettings;
+    const uiSettings = this.services.uiSettings;
     const language = this.props.query.language;
     const queryString = this.getQueryString();
 
@@ -369,11 +367,11 @@ export class QueryBarInputUI extends Component<Props, State> {
     // Send telemetry info every time the user opts in or out of kuery
     // As a result it is important this function only ever gets called in the
     // UI component's change handler.
-    this.props.http.post('/api/kibana/kql_opt_in_telemetry', {
+    this.services.http.post('/api/kibana/kql_opt_in_telemetry', {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
-    this.props.store.set('kibana.userQueryLanguage', language);
+    this.services.store.set('kibana.userQueryLanguage', language);
 
     const newQuery = { query: '', language };
     this.onChange(newQuery);
@@ -399,6 +397,8 @@ export class QueryBarInputUI extends Component<Props, State> {
   };
 
   public componentDidMount() {
+    this.services = this.props.kibana.services;
+
     const parsedQuery = fromUser(toUser(this.props.query.query));
     if (!isEqual(this.props.query.query, parsedQuery)) {
       this.onChange({ ...this.props.query, query: parsedQuery });
@@ -406,7 +406,7 @@ export class QueryBarInputUI extends Component<Props, State> {
 
     this.persistedLog = this.props.persistedLog
       ? this.props.persistedLog
-      : getQueryLog(this.props.uiSettings, this.props.appName, this.props.query.language);
+      : getQueryLog(this.services.uiSettings, this.props.appName, this.props.query.language);
 
     this.fetchIndexPatterns().then(this.updateSuggestions);
   }
@@ -419,7 +419,7 @@ export class QueryBarInputUI extends Component<Props, State> {
 
     this.persistedLog = this.props.persistedLog
       ? this.props.persistedLog
-      : getQueryLog(this.props.uiSettings, this.props.appName, this.props.query.language);
+      : getQueryLog(this.services.uiSettings, this.props.appName, this.props.query.language);
 
     if (!isEqual(prevProps.indexPatterns, this.props.indexPatterns)) {
       this.fetchIndexPatterns().then(this.updateSuggestions);
@@ -449,19 +449,17 @@ export class QueryBarInputUI extends Component<Props, State> {
     const rest = omit(this.props, [
       'indexPatterns',
       'intl',
+      'kibana',
       'query',
       'appName',
       'disableAutoFocus',
       'screenTitle',
       'prepend',
-      'store',
       'persistedLog',
       'bubbleSubmitEvent',
       'languageSwitcherPopoverAnchorPosition',
       'onChange',
       'onSubmit',
-      'uiSettings',
-      'savedObjectsClient',
     ]);
 
     return (
@@ -548,4 +546,4 @@ export class QueryBarInputUI extends Component<Props, State> {
   }
 }
 
-export const QueryBarInput = injectI18n(QueryBarInputUI);
+export const QueryBarInput = injectI18n(withKibana(QueryBarInputUI));

@@ -21,27 +21,17 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
-import { UiSettingsClientContract, CoreStart } from 'src/core/public';
+import { Storage } from 'ui/storage';
+import { npStart } from 'ui/new_platform';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
-import {
-  SearchBar,
-  SearchBarProps,
-  TimeHistoryContract,
-} from '../../../../core_plugins/data/public';
+import { SearchBar, SearchBarProps } from '../../../../core_plugins/data/public';
 
 type Props = Partial<SearchBarProps> & {
   name: string;
   config?: TopNavMenuData[];
   showSearchBar?: boolean;
-
-  // Search Bar dependencies
-  uiSettings?: UiSettingsClientContract;
-  savedObjects?: CoreStart['savedObjects'];
-  notifications?: CoreStart['notifications'];
-  timeHistory?: TimeHistoryContract;
-  http?: CoreStart['http'];
 };
 
 /*
@@ -67,26 +57,18 @@ export function TopNavMenu(props: Props) {
 
   function renderSearchBar() {
     // Validate presense of all required fields
-    if (
-      !props.showSearchBar ||
-      !props.savedObjects ||
-      !props.http ||
-      !props.notifications ||
-      !props.timeHistory
-    )
-      return;
+    if (!props.showSearchBar || !props.timeHistory) return;
     return (
       <KibanaContextProvider
         services={{
-          uiSettings: props.uiSettings,
-          http: props.http,
-          notifications: props.notifications,
-          savedObjects: props.savedObjects,
+          uiSettings: npStart.core.uiSettings,
+          http: npStart.core.http,
+          notifications: npStart.core.notifications,
+          savedObjects: npStart.core.savedObjects,
+          store: new Storage(window.localStorage),
         }}
       >
         <SearchBar
-          notifications={props.notifications}
-          savedObjects={props.savedObjects}
           timeHistory={props.timeHistory}
           query={props.query}
           filters={props.filters}
@@ -105,7 +87,6 @@ export function TopNavMenu(props: Props) {
           onRefreshChange={props.onRefreshChange}
           refreshInterval={props.refreshInterval}
           indexPatterns={props.indexPatterns}
-          store={props.store}
           savedQuery={props.savedQuery}
           showSaveQuery={props.showSaveQuery}
           onClearSavedQuery={props.onClearSavedQuery}

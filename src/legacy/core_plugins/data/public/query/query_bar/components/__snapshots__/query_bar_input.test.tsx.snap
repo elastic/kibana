@@ -1,63 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAutoFocus prop is true 1`] = `
-<QueryBarInputUI
-  appName="discover"
-  disableAutoFocus={true}
-  http={
-    Object {
-      "addLoadingCount": [MockFunction],
-      "basePath": Object {
-        "get": [MockFunction],
-        "prepend": [MockFunction],
-        "remove": [MockFunction],
-      },
-      "delete": [MockFunction],
-      "fetch": [MockFunction],
-      "get": [MockFunction],
-      "getLoadingCount$": [MockFunction],
-      "head": [MockFunction],
-      "intercept": [MockFunction],
-      "options": [MockFunction],
-      "patch": [MockFunction],
-      "post": [MockFunction],
-      "put": [MockFunction],
-      "removeAllInterceptors": [MockFunction],
-      "stop": [MockFunction],
-    }
-  }
-  indexPatterns={
-    Array [
+<I18nProvider>
+  <IntlProvider
+    defaultLocale="en"
+    formats={
       Object {
-        "fields": Array [
-          Object {
-            "aggregatable": true,
-            "esTypes": Array [
-              "integer",
-            ],
-            "filterable": true,
-            "name": "response",
-            "searchable": true,
-            "type": "number",
-          },
-        ],
-        "id": "1234",
-        "title": "logstash-*",
-      },
-    ]
-  }
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -132,381 +80,710 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
             "minute": "numeric",
           },
         },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
-  onSubmit={[Function]}
-  query={
-    Object {
-      "language": "kuery",
-      "query": "response:200",
-    }
-  }
-  savedObjectsClient={
-    Object {
-      "bulkCreate": [MockFunction],
-      "bulkGet": [MockFunction],
-      "create": [MockFunction],
-      "delete": [MockFunction],
-      "find": [MockFunction],
-      "get": [MockFunction],
-      "update": [MockFunction],
-    }
-  }
-  screenTitle="Another Screen"
-  store={
-    Object {
-      "clear": [MockFunction],
-      "get": [MockFunction],
-      "remove": [MockFunction],
-      "set": [MockFunction],
-      "store": Object {
-        "clear": [MockFunction],
-        "getItem": [MockFunction],
-        "key": [MockFunction],
-        "length": 0,
-        "removeItem": [MockFunction],
-        "setItem": [MockFunction],
-      },
-    }
-  }
-  uiSettings={
-    Object {
-      "get": [MockFunction] {
-        "calls": Array [
-          Array [
-            "history:limit",
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-        ],
-      },
-      "get$": [MockFunction],
-      "getAll": [MockFunction],
-      "getSaved$": [MockFunction],
-      "getUpdate$": [MockFunction],
-      "getUpdateErrors$": [MockFunction],
-      "isCustom": [MockFunction],
-      "isDeclared": [MockFunction],
-      "isDefault": [MockFunction],
-      "isOverridden": [MockFunction],
-      "overrideLocalDefault": [MockFunction],
-      "remove": [MockFunction],
-      "set": [MockFunction],
-      "stop": [MockFunction],
-    }
-  }
->
-  <EuiOutsideClickDetector
-    onOutsideClick={[Function]}
-  >
-    <div
-      aria-controls="kbnTypeahead__items"
-      aria-expanded={false}
-      aria-haspopup="true"
-      aria-owns="kbnTypeahead__items"
-      onMouseDown={[Function]}
-      onMouseUp={[Function]}
-      onTouchEnd={[Function]}
-      onTouchStart={[Function]}
-      role="combobox"
-      style={
-        Object {
-          "position": "relative",
-        }
       }
-    >
-      <div
-        role="search"
-      >
-        <div
-          className="kuiLocalSearchAssistedInput"
-        >
-          <EuiFieldText
-            append={
-              <QueryLanguageSwitcher
-                language="kuery"
-                onSelectLanguage={[Function]}
-              />
-            }
-            aria-activedescendant=""
-            aria-autocomplete="list"
-            aria-controls="kbnTypeahead__items"
-            aria-label="You are on search box of Another Screen page. Start typing to search and filter the discover"
-            autoComplete="off"
-            autoFocus={false}
-            compressed={false}
-            data-test-subj="queryInput"
-            fullWidth={true}
-            http={
-              Object {
-                "addLoadingCount": [MockFunction],
-                "basePath": Object {
-                  "get": [MockFunction],
-                  "prepend": [MockFunction],
-                  "remove": [MockFunction],
-                },
-                "delete": [MockFunction],
-                "fetch": [MockFunction],
+    }
+    locale="en"
+    messages={Object {}}
+    textComponent={Symbol(react.fragment)}
+  >
+    <PseudoLocaleWrapper>
+      <Provider
+        services={
+          Object {
+            "http": Object {
+              "addLoadingCount": [MockFunction],
+              "basePath": Object {
                 "get": [MockFunction],
-                "getLoadingCount$": [MockFunction],
-                "head": [MockFunction],
-                "intercept": [MockFunction],
-                "options": [MockFunction],
-                "patch": [MockFunction],
-                "post": [MockFunction],
-                "put": [MockFunction],
-                "removeAllInterceptors": [MockFunction],
-                "stop": [MockFunction],
+                "prepend": [MockFunction],
+                "remove": [MockFunction],
+              },
+              "delete": [MockFunction],
+              "fetch": [MockFunction],
+              "get": [MockFunction],
+              "getLoadingCount$": [MockFunction],
+              "head": [MockFunction],
+              "intercept": [MockFunction],
+              "options": [MockFunction],
+              "patch": [MockFunction],
+              "post": [MockFunction],
+              "put": [MockFunction],
+              "removeAllInterceptors": [MockFunction],
+              "stop": [MockFunction],
+            },
+            "notifications": Object {
+              "toasts": Object {
+                "add": [MockFunction],
+                "addDanger": [MockFunction],
+                "addError": [MockFunction],
+                "addSuccess": [MockFunction],
+                "addWarning": [MockFunction],
+                "get$": [MockFunction],
+                "remove": [MockFunction],
+              },
+            },
+            "savedObjects": Object {
+              "client": Object {
+                "bulkCreate": [MockFunction],
+                "bulkGet": [MockFunction],
+                "create": [MockFunction],
+                "delete": [MockFunction],
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "update": [MockFunction],
+              },
+            },
+            "store": Object {
+              "clear": [MockFunction],
+              "get": [MockFunction],
+              "remove": [MockFunction],
+              "set": [MockFunction],
+              "store": Object {
+                "clear": [MockFunction],
+                "getItem": [MockFunction],
+                "key": [MockFunction],
+                "length": 0,
+                "removeItem": [MockFunction],
+                "setItem": [MockFunction],
+              },
+            },
+            "uiSettings": Object {
+              "get": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "history:limit",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
+              "get$": [MockFunction],
+              "getAll": [MockFunction],
+              "getSaved$": [MockFunction],
+              "getUpdate$": [MockFunction],
+              "getUpdateErrors$": [MockFunction],
+              "isCustom": [MockFunction],
+              "isDeclared": [MockFunction],
+              "isDefault": [MockFunction],
+              "isOverridden": [MockFunction],
+              "overrideLocalDefault": [MockFunction],
+              "remove": [MockFunction],
+              "set": [MockFunction],
+              "stop": [MockFunction],
+            },
+          }
+        }
+      >
+        <InjectIntl(enhancedType)
+          appName="test"
+          disableAutoFocus={true}
+          indexPatterns={
+            Array [
+              Object {
+                "fields": Array [
+                  Object {
+                    "aggregatable": true,
+                    "esTypes": Array [
+                      "integer",
+                    ],
+                    "filterable": true,
+                    "name": "response",
+                    "searchable": true,
+                    "type": "number",
+                  },
+                ],
+                "id": "1234",
+                "title": "logstash-*",
+              },
+            ]
+          }
+          intl={null}
+          onSubmit={[Function]}
+          query={
+            Object {
+              "language": "kuery",
+              "query": "response:200",
+            }
+          }
+          screenTitle="Another Screen"
+        >
+          <enhancedType
+            appName="test"
+            disableAutoFocus={true}
+            indexPatterns={
+              Array [
+                Object {
+                  "fields": Array [
+                    Object {
+                      "aggregatable": true,
+                      "esTypes": Array [
+                        "integer",
+                      ],
+                      "filterable": true,
+                      "name": "response",
+                      "searchable": true,
+                      "type": "number",
+                    },
+                  ],
+                  "id": "1234",
+                  "title": "logstash-*",
+                },
+              ]
+            }
+            intl={
+              Object {
+                "defaultFormats": Object {},
+                "defaultLocale": "en",
+                "formatDate": [Function],
+                "formatHTMLMessage": [Function],
+                "formatMessage": [Function],
+                "formatNumber": [Function],
+                "formatPlural": [Function],
+                "formatRelative": [Function],
+                "formatTime": [Function],
+                "formats": Object {
+                  "date": Object {
+                    "full": Object {
+                      "day": "numeric",
+                      "month": "long",
+                      "weekday": "long",
+                      "year": "numeric",
+                    },
+                    "long": Object {
+                      "day": "numeric",
+                      "month": "long",
+                      "year": "numeric",
+                    },
+                    "medium": Object {
+                      "day": "numeric",
+                      "month": "short",
+                      "year": "numeric",
+                    },
+                    "short": Object {
+                      "day": "numeric",
+                      "month": "numeric",
+                      "year": "2-digit",
+                    },
+                  },
+                  "number": Object {
+                    "currency": Object {
+                      "style": "currency",
+                    },
+                    "percent": Object {
+                      "style": "percent",
+                    },
+                  },
+                  "relative": Object {
+                    "days": Object {
+                      "units": "day",
+                    },
+                    "hours": Object {
+                      "units": "hour",
+                    },
+                    "minutes": Object {
+                      "units": "minute",
+                    },
+                    "months": Object {
+                      "units": "month",
+                    },
+                    "seconds": Object {
+                      "units": "second",
+                    },
+                    "years": Object {
+                      "units": "year",
+                    },
+                  },
+                  "time": Object {
+                    "full": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                      "timeZoneName": "short",
+                    },
+                    "long": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                      "timeZoneName": "short",
+                    },
+                    "medium": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                    },
+                    "short": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                    },
+                  },
+                },
+                "formatters": Object {
+                  "getDateTimeFormat": [Function],
+                  "getMessageFormat": [Function],
+                  "getNumberFormat": [Function],
+                  "getPluralFormat": [Function],
+                  "getRelativeFormat": [Function],
+                },
+                "locale": "en",
+                "messages": Object {},
+                "now": [Function],
+                "onError": [Function],
+                "textComponent": Symbol(react.fragment),
+                "timeZone": null,
               }
             }
-            inputRef={[Function]}
-            isLoading={false}
-            onChange={[Function]}
-            onClick={[Function]}
-            onKeyDown={[Function]}
-            onKeyUp={[Function]}
-            placeholder="Search"
-            role="textbox"
-            spellCheck={false}
-            type="text"
-            value="response:200"
-          >
-            <EuiFormControlLayout
-              append={
-                <QueryLanguageSwitcher
-                  language="kuery"
-                  onSelectLanguage={[Function]}
-                />
+            onSubmit={[Function]}
+            query={
+              Object {
+                "language": "kuery",
+                "query": "response:200",
               }
-              compressed={false}
-              fullWidth={true}
-              isLoading={false}
+            }
+            screenTitle="Another Screen"
+          >
+            <QueryBarInputUI
+              appName="test"
+              disableAutoFocus={true}
+              indexPatterns={
+                Array [
+                  Object {
+                    "fields": Array [
+                      Object {
+                        "aggregatable": true,
+                        "esTypes": Array [
+                          "integer",
+                        ],
+                        "filterable": true,
+                        "name": "response",
+                        "searchable": true,
+                        "type": "number",
+                      },
+                    ],
+                    "id": "1234",
+                    "title": "logstash-*",
+                  },
+                ]
+              }
+              intl={
+                Object {
+                  "defaultFormats": Object {},
+                  "defaultLocale": "en",
+                  "formatDate": [Function],
+                  "formatHTMLMessage": [Function],
+                  "formatMessage": [Function],
+                  "formatNumber": [Function],
+                  "formatPlural": [Function],
+                  "formatRelative": [Function],
+                  "formatTime": [Function],
+                  "formats": Object {
+                    "date": Object {
+                      "full": Object {
+                        "day": "numeric",
+                        "month": "long",
+                        "weekday": "long",
+                        "year": "numeric",
+                      },
+                      "long": Object {
+                        "day": "numeric",
+                        "month": "long",
+                        "year": "numeric",
+                      },
+                      "medium": Object {
+                        "day": "numeric",
+                        "month": "short",
+                        "year": "numeric",
+                      },
+                      "short": Object {
+                        "day": "numeric",
+                        "month": "numeric",
+                        "year": "2-digit",
+                      },
+                    },
+                    "number": Object {
+                      "currency": Object {
+                        "style": "currency",
+                      },
+                      "percent": Object {
+                        "style": "percent",
+                      },
+                    },
+                    "relative": Object {
+                      "days": Object {
+                        "units": "day",
+                      },
+                      "hours": Object {
+                        "units": "hour",
+                      },
+                      "minutes": Object {
+                        "units": "minute",
+                      },
+                      "months": Object {
+                        "units": "month",
+                      },
+                      "seconds": Object {
+                        "units": "second",
+                      },
+                      "years": Object {
+                        "units": "year",
+                      },
+                    },
+                    "time": Object {
+                      "full": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                        "second": "numeric",
+                        "timeZoneName": "short",
+                      },
+                      "long": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                        "second": "numeric",
+                        "timeZoneName": "short",
+                      },
+                      "medium": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                        "second": "numeric",
+                      },
+                      "short": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                      },
+                    },
+                  },
+                  "formatters": Object {
+                    "getDateTimeFormat": [Function],
+                    "getMessageFormat": [Function],
+                    "getNumberFormat": [Function],
+                    "getPluralFormat": [Function],
+                    "getRelativeFormat": [Function],
+                  },
+                  "locale": "en",
+                  "messages": Object {},
+                  "now": [Function],
+                  "onError": [Function],
+                  "textComponent": Symbol(react.fragment),
+                  "timeZone": null,
+                }
+              }
+              kibana={
+                Object {
+                  "notifications": Object {
+                    "toasts": Object {
+                      "danger": [Function],
+                      "show": [Function],
+                      "success": [Function],
+                      "warning": [Function],
+                    },
+                  },
+                  "overlays": Object {
+                    "openFlyout": [Function],
+                    "openModal": [Function],
+                  },
+                  "services": Object {
+                    "http": Object {
+                      "addLoadingCount": [MockFunction],
+                      "basePath": Object {
+                        "get": [MockFunction],
+                        "prepend": [MockFunction],
+                        "remove": [MockFunction],
+                      },
+                      "delete": [MockFunction],
+                      "fetch": [MockFunction],
+                      "get": [MockFunction],
+                      "getLoadingCount$": [MockFunction],
+                      "head": [MockFunction],
+                      "intercept": [MockFunction],
+                      "options": [MockFunction],
+                      "patch": [MockFunction],
+                      "post": [MockFunction],
+                      "put": [MockFunction],
+                      "removeAllInterceptors": [MockFunction],
+                      "stop": [MockFunction],
+                    },
+                    "notifications": Object {
+                      "toasts": Object {
+                        "add": [MockFunction],
+                        "addDanger": [MockFunction],
+                        "addError": [MockFunction],
+                        "addSuccess": [MockFunction],
+                        "addWarning": [MockFunction],
+                        "get$": [MockFunction],
+                        "remove": [MockFunction],
+                      },
+                    },
+                    "savedObjects": Object {
+                      "client": Object {
+                        "bulkCreate": [MockFunction],
+                        "bulkGet": [MockFunction],
+                        "create": [MockFunction],
+                        "delete": [MockFunction],
+                        "find": [MockFunction],
+                        "get": [MockFunction],
+                        "update": [MockFunction],
+                      },
+                    },
+                    "store": Object {
+                      "clear": [MockFunction],
+                      "get": [MockFunction],
+                      "remove": [MockFunction],
+                      "set": [MockFunction],
+                      "store": Object {
+                        "clear": [MockFunction],
+                        "getItem": [MockFunction],
+                        "key": [MockFunction],
+                        "length": 0,
+                        "removeItem": [MockFunction],
+                        "setItem": [MockFunction],
+                      },
+                    },
+                    "uiSettings": Object {
+                      "get": [MockFunction] {
+                        "calls": Array [
+                          Array [
+                            "history:limit",
+                          ],
+                        ],
+                        "results": Array [
+                          Object {
+                            "type": "return",
+                            "value": undefined,
+                          },
+                        ],
+                      },
+                      "get$": [MockFunction],
+                      "getAll": [MockFunction],
+                      "getSaved$": [MockFunction],
+                      "getUpdate$": [MockFunction],
+                      "getUpdateErrors$": [MockFunction],
+                      "isCustom": [MockFunction],
+                      "isDeclared": [MockFunction],
+                      "isDefault": [MockFunction],
+                      "isOverridden": [MockFunction],
+                      "overrideLocalDefault": [MockFunction],
+                      "remove": [MockFunction],
+                      "set": [MockFunction],
+                      "stop": [MockFunction],
+                    },
+                  },
+                }
+              }
+              onSubmit={[Function]}
+              query={
+                Object {
+                  "language": "kuery",
+                  "query": "response:200",
+                }
+              }
+              screenTitle="Another Screen"
             >
-              <div
-                className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+              <EuiOutsideClickDetector
+                onOutsideClick={[Function]}
               >
                 <div
-                  className="euiFormControlLayout__childrenWrapper"
+                  aria-controls="kbnTypeahead__items"
+                  aria-expanded={false}
+                  aria-haspopup="true"
+                  aria-owns="kbnTypeahead__items"
+                  onMouseDown={[Function]}
+                  onMouseUp={[Function]}
+                  onTouchEnd={[Function]}
+                  onTouchStart={[Function]}
+                  role="combobox"
+                  style={
+                    Object {
+                      "position": "relative",
+                    }
+                  }
                 >
-                  <EuiValidatableControl>
-                    <input
-                      aria-activedescendant=""
-                      aria-autocomplete="list"
-                      aria-controls="kbnTypeahead__items"
-                      aria-label="You are on search box of Another Screen page. Start typing to search and filter the discover"
-                      autoComplete="off"
-                      autoFocus={false}
-                      className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
-                      data-test-subj="queryInput"
-                      http={
-                        Object {
-                          "addLoadingCount": [MockFunction],
-                          "basePath": Object {
-                            "get": [MockFunction],
-                            "prepend": [MockFunction],
-                            "remove": [MockFunction],
-                          },
-                          "delete": [MockFunction],
-                          "fetch": [MockFunction],
-                          "get": [MockFunction],
-                          "getLoadingCount$": [MockFunction],
-                          "head": [MockFunction],
-                          "intercept": [MockFunction],
-                          "options": [MockFunction],
-                          "patch": [MockFunction],
-                          "post": [MockFunction],
-                          "put": [MockFunction],
-                          "removeAllInterceptors": [MockFunction],
-                          "stop": [MockFunction],
+                  <div
+                    role="search"
+                  >
+                    <div
+                      className="kuiLocalSearchAssistedInput"
+                    >
+                      <EuiFieldText
+                        append={
+                          <QueryLanguageSwitcher
+                            language="kuery"
+                            onSelectLanguage={[Function]}
+                          />
                         }
-                      }
-                      onChange={[Function]}
-                      onClick={[Function]}
-                      onKeyDown={[Function]}
-                      onKeyUp={[Function]}
-                      placeholder="Search"
-                      role="textbox"
-                      spellCheck={false}
-                      type="text"
-                      value="response:200"
-                    />
-                  </EuiValidatableControl>
-                  <EuiFormControlLayoutIcons
-                    isLoading={false}
+                        aria-activedescendant=""
+                        aria-autocomplete="list"
+                        aria-controls="kbnTypeahead__items"
+                        aria-label="You are on search box of Another Screen page. Start typing to search and filter the test"
+                        autoComplete="off"
+                        autoFocus={false}
+                        compressed={false}
+                        data-test-subj="queryInput"
+                        fullWidth={true}
+                        inputRef={[Function]}
+                        isLoading={false}
+                        onChange={[Function]}
+                        onClick={[Function]}
+                        onKeyDown={[Function]}
+                        onKeyUp={[Function]}
+                        placeholder="Search"
+                        role="textbox"
+                        spellCheck={false}
+                        type="text"
+                        value="response:200"
+                      >
+                        <EuiFormControlLayout
+                          append={
+                            <QueryLanguageSwitcher
+                              language="kuery"
+                              onSelectLanguage={[Function]}
+                            />
+                          }
+                          compressed={false}
+                          fullWidth={true}
+                          isLoading={false}
+                        >
+                          <div
+                            className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+                          >
+                            <div
+                              className="euiFormControlLayout__childrenWrapper"
+                            >
+                              <EuiValidatableControl>
+                                <input
+                                  aria-activedescendant=""
+                                  aria-autocomplete="list"
+                                  aria-controls="kbnTypeahead__items"
+                                  aria-label="You are on search box of Another Screen page. Start typing to search and filter the test"
+                                  autoComplete="off"
+                                  autoFocus={false}
+                                  className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
+                                  data-test-subj="queryInput"
+                                  onChange={[Function]}
+                                  onClick={[Function]}
+                                  onKeyDown={[Function]}
+                                  onKeyUp={[Function]}
+                                  placeholder="Search"
+                                  role="textbox"
+                                  spellCheck={false}
+                                  type="text"
+                                  value="response:200"
+                                />
+                              </EuiValidatableControl>
+                              <EuiFormControlLayoutIcons
+                                isLoading={false}
+                              />
+                            </div>
+                            <QueryLanguageSwitcher
+                              className="euiFormControlLayout__append"
+                              key="0/.0"
+                              language="kuery"
+                              onSelectLanguage={[Function]}
+                            >
+                              <EuiPopover
+                                anchorClassName="euiFormControlLayout__append"
+                                anchorPosition="downRight"
+                                button={
+                                  <EuiButtonEmpty
+                                    className="euiFormControlLayout__append"
+                                    onClick={[Function]}
+                                    size="xs"
+                                  >
+                                    <FormattedMessage
+                                      defaultMessage="KQL"
+                                      id="data.query.queryBar.kqlLanguageName"
+                                      values={Object {}}
+                                    />
+                                  </EuiButtonEmpty>
+                                }
+                                closePopover={[Function]}
+                                display="inlineBlock"
+                                hasArrow={true}
+                                id="popover"
+                                isOpen={false}
+                                ownFocus={true}
+                                panelPaddingSize="m"
+                                withTitle={true}
+                              >
+                                <EuiOutsideClickDetector
+                                  isDisabled={true}
+                                  onOutsideClick={[Function]}
+                                >
+                                  <div
+                                    className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle"
+                                    id="popover"
+                                    onKeyDown={[Function]}
+                                    onMouseDown={[Function]}
+                                    onMouseUp={[Function]}
+                                    onTouchEnd={[Function]}
+                                    onTouchStart={[Function]}
+                                  >
+                                    <div
+                                      className="euiPopover__anchor euiFormControlLayout__append"
+                                    >
+                                      <EuiButtonEmpty
+                                        className="euiFormControlLayout__append"
+                                        onClick={[Function]}
+                                        size="xs"
+                                      >
+                                        <button
+                                          className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__append"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <span
+                                            className="euiButtonEmpty__content"
+                                          >
+                                            <span
+                                              className="euiButtonEmpty__text"
+                                            >
+                                              <FormattedMessage
+                                                defaultMessage="KQL"
+                                                id="data.query.queryBar.kqlLanguageName"
+                                                values={Object {}}
+                                              >
+                                                KQL
+                                              </FormattedMessage>
+                                            </span>
+                                          </span>
+                                        </button>
+                                      </EuiButtonEmpty>
+                                    </div>
+                                  </div>
+                                </EuiOutsideClickDetector>
+                              </EuiPopover>
+                            </QueryLanguageSwitcher>
+                          </div>
+                        </EuiFormControlLayout>
+                      </EuiFieldText>
+                    </div>
+                  </div>
+                  <SuggestionsComponent
+                    index={null}
+                    loadMore={[Function]}
+                    onClick={[Function]}
+                    onMouseEnter={[Function]}
+                    show={false}
+                    suggestions={Array []}
                   />
                 </div>
-                <QueryLanguageSwitcher
-                  className="euiFormControlLayout__append"
-                  key="0/.0"
-                  language="kuery"
-                  onSelectLanguage={[Function]}
-                >
-                  <EuiPopover
-                    anchorClassName="euiFormControlLayout__append"
-                    anchorPosition="downRight"
-                    button={
-                      <EuiButtonEmpty
-                        className="euiFormControlLayout__append"
-                        onClick={[Function]}
-                        size="xs"
-                      >
-                        <FormattedMessage
-                          defaultMessage="KQL"
-                          id="data.query.queryBar.kqlLanguageName"
-                          values={Object {}}
-                        />
-                      </EuiButtonEmpty>
-                    }
-                    closePopover={[Function]}
-                    display="inlineBlock"
-                    hasArrow={true}
-                    id="popover"
-                    isOpen={false}
-                    ownFocus={true}
-                    panelPaddingSize="m"
-                    withTitle={true}
-                  >
-                    <EuiOutsideClickDetector
-                      isDisabled={true}
-                      onOutsideClick={[Function]}
-                    >
-                      <div
-                        className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle"
-                        id="popover"
-                        onKeyDown={[Function]}
-                        onMouseDown={[Function]}
-                        onMouseUp={[Function]}
-                        onTouchEnd={[Function]}
-                        onTouchStart={[Function]}
-                      >
-                        <div
-                          className="euiPopover__anchor euiFormControlLayout__append"
-                        >
-                          <EuiButtonEmpty
-                            className="euiFormControlLayout__append"
-                            onClick={[Function]}
-                            size="xs"
-                          >
-                            <button
-                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__append"
-                              onClick={[Function]}
-                              type="button"
-                            >
-                              <span
-                                className="euiButtonEmpty__content"
-                              >
-                                <span
-                                  className="euiButtonEmpty__text"
-                                >
-                                  <FormattedMessage
-                                    defaultMessage="KQL"
-                                    id="data.query.queryBar.kqlLanguageName"
-                                    values={Object {}}
-                                  >
-                                    KQL
-                                  </FormattedMessage>
-                                </span>
-                              </span>
-                            </button>
-                          </EuiButtonEmpty>
-                        </div>
-                      </div>
-                    </EuiOutsideClickDetector>
-                  </EuiPopover>
-                </QueryLanguageSwitcher>
-              </div>
-            </EuiFormControlLayout>
-          </EuiFieldText>
-        </div>
-      </div>
-      <SuggestionsComponent
-        index={null}
-        loadMore={[Function]}
-        onClick={[Function]}
-        onMouseEnter={[Function]}
-        show={false}
-        suggestions={Array []}
-      />
-    </div>
-  </EuiOutsideClickDetector>
-</QueryBarInputUI>
+              </EuiOutsideClickDetector>
+            </QueryBarInputUI>
+          </enhancedType>
+        </InjectIntl(enhancedType)>
+      </Provider>
+    </PseudoLocaleWrapper>
+  </IntlProvider>
+</I18nProvider>
 `;
 
 exports[`QueryBarInput Should pass the query language to the language switcher 1`] = `
-<QueryBarInputUI
-  appName="discover"
-  http={
-    Object {
-      "addLoadingCount": [MockFunction],
-      "basePath": Object {
-        "get": [MockFunction],
-        "prepend": [MockFunction],
-        "remove": [MockFunction],
-      },
-      "delete": [MockFunction],
-      "fetch": [MockFunction],
-      "get": [MockFunction],
-      "getLoadingCount$": [MockFunction],
-      "head": [MockFunction],
-      "intercept": [MockFunction],
-      "options": [MockFunction],
-      "patch": [MockFunction],
-      "post": [MockFunction],
-      "put": [MockFunction],
-      "removeAllInterceptors": [MockFunction],
-      "stop": [MockFunction],
-    }
-  }
-  indexPatterns={
-    Array [
+<I18nProvider>
+  <IntlProvider
+    defaultLocale="en"
+    formats={
       Object {
-        "fields": Array [
-          Object {
-            "aggregatable": true,
-            "esTypes": Array [
-              "integer",
-            ],
-            "filterable": true,
-            "name": "response",
-            "searchable": true,
-            "type": "number",
-          },
-        ],
-        "id": "1234",
-        "title": "logstash-*",
-      },
-    ]
-  }
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -581,381 +858,707 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
             "minute": "numeric",
           },
         },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
-  onSubmit={[Function]}
-  query={
-    Object {
-      "language": "lucene",
-      "query": "response:200",
-    }
-  }
-  savedObjectsClient={
-    Object {
-      "bulkCreate": [MockFunction],
-      "bulkGet": [MockFunction],
-      "create": [MockFunction],
-      "delete": [MockFunction],
-      "find": [MockFunction],
-      "get": [MockFunction],
-      "update": [MockFunction],
-    }
-  }
-  screenTitle="Another Screen"
-  store={
-    Object {
-      "clear": [MockFunction],
-      "get": [MockFunction],
-      "remove": [MockFunction],
-      "set": [MockFunction],
-      "store": Object {
-        "clear": [MockFunction],
-        "getItem": [MockFunction],
-        "key": [MockFunction],
-        "length": 0,
-        "removeItem": [MockFunction],
-        "setItem": [MockFunction],
-      },
-    }
-  }
-  uiSettings={
-    Object {
-      "get": [MockFunction] {
-        "calls": Array [
-          Array [
-            "history:limit",
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-        ],
-      },
-      "get$": [MockFunction],
-      "getAll": [MockFunction],
-      "getSaved$": [MockFunction],
-      "getUpdate$": [MockFunction],
-      "getUpdateErrors$": [MockFunction],
-      "isCustom": [MockFunction],
-      "isDeclared": [MockFunction],
-      "isDefault": [MockFunction],
-      "isOverridden": [MockFunction],
-      "overrideLocalDefault": [MockFunction],
-      "remove": [MockFunction],
-      "set": [MockFunction],
-      "stop": [MockFunction],
-    }
-  }
->
-  <EuiOutsideClickDetector
-    onOutsideClick={[Function]}
-  >
-    <div
-      aria-controls="kbnTypeahead__items"
-      aria-expanded={false}
-      aria-haspopup="true"
-      aria-owns="kbnTypeahead__items"
-      onMouseDown={[Function]}
-      onMouseUp={[Function]}
-      onTouchEnd={[Function]}
-      onTouchStart={[Function]}
-      role="combobox"
-      style={
-        Object {
-          "position": "relative",
-        }
       }
-    >
-      <div
-        role="search"
-      >
-        <div
-          className="kuiLocalSearchAssistedInput"
-        >
-          <EuiFieldText
-            append={
-              <QueryLanguageSwitcher
-                language="lucene"
-                onSelectLanguage={[Function]}
-              />
-            }
-            aria-activedescendant=""
-            aria-autocomplete="list"
-            aria-controls="kbnTypeahead__items"
-            aria-label="You are on search box of Another Screen page. Start typing to search and filter the discover"
-            autoComplete="off"
-            autoFocus={true}
-            compressed={false}
-            data-test-subj="queryInput"
-            fullWidth={true}
-            http={
-              Object {
-                "addLoadingCount": [MockFunction],
-                "basePath": Object {
-                  "get": [MockFunction],
-                  "prepend": [MockFunction],
-                  "remove": [MockFunction],
-                },
-                "delete": [MockFunction],
-                "fetch": [MockFunction],
+    }
+    locale="en"
+    messages={Object {}}
+    textComponent={Symbol(react.fragment)}
+  >
+    <PseudoLocaleWrapper>
+      <Provider
+        services={
+          Object {
+            "http": Object {
+              "addLoadingCount": [MockFunction],
+              "basePath": Object {
                 "get": [MockFunction],
-                "getLoadingCount$": [MockFunction],
-                "head": [MockFunction],
-                "intercept": [MockFunction],
-                "options": [MockFunction],
-                "patch": [MockFunction],
-                "post": [MockFunction],
-                "put": [MockFunction],
-                "removeAllInterceptors": [MockFunction],
-                "stop": [MockFunction],
+                "prepend": [MockFunction],
+                "remove": [MockFunction],
+              },
+              "delete": [MockFunction],
+              "fetch": [MockFunction],
+              "get": [MockFunction],
+              "getLoadingCount$": [MockFunction],
+              "head": [MockFunction],
+              "intercept": [MockFunction],
+              "options": [MockFunction],
+              "patch": [MockFunction],
+              "post": [MockFunction],
+              "put": [MockFunction],
+              "removeAllInterceptors": [MockFunction],
+              "stop": [MockFunction],
+            },
+            "notifications": Object {
+              "toasts": Object {
+                "add": [MockFunction],
+                "addDanger": [MockFunction],
+                "addError": [MockFunction],
+                "addSuccess": [MockFunction],
+                "addWarning": [MockFunction],
+                "get$": [MockFunction],
+                "remove": [MockFunction],
+              },
+            },
+            "savedObjects": Object {
+              "client": Object {
+                "bulkCreate": [MockFunction],
+                "bulkGet": [MockFunction],
+                "create": [MockFunction],
+                "delete": [MockFunction],
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "update": [MockFunction],
+              },
+            },
+            "store": Object {
+              "clear": [MockFunction],
+              "get": [MockFunction],
+              "remove": [MockFunction],
+              "set": [MockFunction],
+              "store": Object {
+                "clear": [MockFunction],
+                "getItem": [MockFunction],
+                "key": [MockFunction],
+                "length": 0,
+                "removeItem": [MockFunction],
+                "setItem": [MockFunction],
+              },
+            },
+            "uiSettings": Object {
+              "get": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "history:limit",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
+              "get$": [MockFunction],
+              "getAll": [MockFunction],
+              "getSaved$": [MockFunction],
+              "getUpdate$": [MockFunction],
+              "getUpdateErrors$": [MockFunction],
+              "isCustom": [MockFunction],
+              "isDeclared": [MockFunction],
+              "isDefault": [MockFunction],
+              "isOverridden": [MockFunction],
+              "overrideLocalDefault": [MockFunction],
+              "remove": [MockFunction],
+              "set": [MockFunction],
+              "stop": [MockFunction],
+            },
+          }
+        }
+      >
+        <InjectIntl(enhancedType)
+          appName="test"
+          indexPatterns={
+            Array [
+              Object {
+                "fields": Array [
+                  Object {
+                    "aggregatable": true,
+                    "esTypes": Array [
+                      "integer",
+                    ],
+                    "filterable": true,
+                    "name": "response",
+                    "searchable": true,
+                    "type": "number",
+                  },
+                ],
+                "id": "1234",
+                "title": "logstash-*",
+              },
+            ]
+          }
+          intl={null}
+          onSubmit={[Function]}
+          query={
+            Object {
+              "language": "lucene",
+              "query": "response:200",
+            }
+          }
+          screenTitle="Another Screen"
+        >
+          <enhancedType
+            appName="test"
+            indexPatterns={
+              Array [
+                Object {
+                  "fields": Array [
+                    Object {
+                      "aggregatable": true,
+                      "esTypes": Array [
+                        "integer",
+                      ],
+                      "filterable": true,
+                      "name": "response",
+                      "searchable": true,
+                      "type": "number",
+                    },
+                  ],
+                  "id": "1234",
+                  "title": "logstash-*",
+                },
+              ]
+            }
+            intl={
+              Object {
+                "defaultFormats": Object {},
+                "defaultLocale": "en",
+                "formatDate": [Function],
+                "formatHTMLMessage": [Function],
+                "formatMessage": [Function],
+                "formatNumber": [Function],
+                "formatPlural": [Function],
+                "formatRelative": [Function],
+                "formatTime": [Function],
+                "formats": Object {
+                  "date": Object {
+                    "full": Object {
+                      "day": "numeric",
+                      "month": "long",
+                      "weekday": "long",
+                      "year": "numeric",
+                    },
+                    "long": Object {
+                      "day": "numeric",
+                      "month": "long",
+                      "year": "numeric",
+                    },
+                    "medium": Object {
+                      "day": "numeric",
+                      "month": "short",
+                      "year": "numeric",
+                    },
+                    "short": Object {
+                      "day": "numeric",
+                      "month": "numeric",
+                      "year": "2-digit",
+                    },
+                  },
+                  "number": Object {
+                    "currency": Object {
+                      "style": "currency",
+                    },
+                    "percent": Object {
+                      "style": "percent",
+                    },
+                  },
+                  "relative": Object {
+                    "days": Object {
+                      "units": "day",
+                    },
+                    "hours": Object {
+                      "units": "hour",
+                    },
+                    "minutes": Object {
+                      "units": "minute",
+                    },
+                    "months": Object {
+                      "units": "month",
+                    },
+                    "seconds": Object {
+                      "units": "second",
+                    },
+                    "years": Object {
+                      "units": "year",
+                    },
+                  },
+                  "time": Object {
+                    "full": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                      "timeZoneName": "short",
+                    },
+                    "long": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                      "timeZoneName": "short",
+                    },
+                    "medium": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                    },
+                    "short": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                    },
+                  },
+                },
+                "formatters": Object {
+                  "getDateTimeFormat": [Function],
+                  "getMessageFormat": [Function],
+                  "getNumberFormat": [Function],
+                  "getPluralFormat": [Function],
+                  "getRelativeFormat": [Function],
+                },
+                "locale": "en",
+                "messages": Object {},
+                "now": [Function],
+                "onError": [Function],
+                "textComponent": Symbol(react.fragment),
+                "timeZone": null,
               }
             }
-            inputRef={[Function]}
-            isLoading={false}
-            onChange={[Function]}
-            onClick={[Function]}
-            onKeyDown={[Function]}
-            onKeyUp={[Function]}
-            placeholder="Search"
-            role="textbox"
-            spellCheck={false}
-            type="text"
-            value="response:200"
-          >
-            <EuiFormControlLayout
-              append={
-                <QueryLanguageSwitcher
-                  language="lucene"
-                  onSelectLanguage={[Function]}
-                />
+            onSubmit={[Function]}
+            query={
+              Object {
+                "language": "lucene",
+                "query": "response:200",
               }
-              compressed={false}
-              fullWidth={true}
-              isLoading={false}
+            }
+            screenTitle="Another Screen"
+          >
+            <QueryBarInputUI
+              appName="test"
+              indexPatterns={
+                Array [
+                  Object {
+                    "fields": Array [
+                      Object {
+                        "aggregatable": true,
+                        "esTypes": Array [
+                          "integer",
+                        ],
+                        "filterable": true,
+                        "name": "response",
+                        "searchable": true,
+                        "type": "number",
+                      },
+                    ],
+                    "id": "1234",
+                    "title": "logstash-*",
+                  },
+                ]
+              }
+              intl={
+                Object {
+                  "defaultFormats": Object {},
+                  "defaultLocale": "en",
+                  "formatDate": [Function],
+                  "formatHTMLMessage": [Function],
+                  "formatMessage": [Function],
+                  "formatNumber": [Function],
+                  "formatPlural": [Function],
+                  "formatRelative": [Function],
+                  "formatTime": [Function],
+                  "formats": Object {
+                    "date": Object {
+                      "full": Object {
+                        "day": "numeric",
+                        "month": "long",
+                        "weekday": "long",
+                        "year": "numeric",
+                      },
+                      "long": Object {
+                        "day": "numeric",
+                        "month": "long",
+                        "year": "numeric",
+                      },
+                      "medium": Object {
+                        "day": "numeric",
+                        "month": "short",
+                        "year": "numeric",
+                      },
+                      "short": Object {
+                        "day": "numeric",
+                        "month": "numeric",
+                        "year": "2-digit",
+                      },
+                    },
+                    "number": Object {
+                      "currency": Object {
+                        "style": "currency",
+                      },
+                      "percent": Object {
+                        "style": "percent",
+                      },
+                    },
+                    "relative": Object {
+                      "days": Object {
+                        "units": "day",
+                      },
+                      "hours": Object {
+                        "units": "hour",
+                      },
+                      "minutes": Object {
+                        "units": "minute",
+                      },
+                      "months": Object {
+                        "units": "month",
+                      },
+                      "seconds": Object {
+                        "units": "second",
+                      },
+                      "years": Object {
+                        "units": "year",
+                      },
+                    },
+                    "time": Object {
+                      "full": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                        "second": "numeric",
+                        "timeZoneName": "short",
+                      },
+                      "long": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                        "second": "numeric",
+                        "timeZoneName": "short",
+                      },
+                      "medium": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                        "second": "numeric",
+                      },
+                      "short": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                      },
+                    },
+                  },
+                  "formatters": Object {
+                    "getDateTimeFormat": [Function],
+                    "getMessageFormat": [Function],
+                    "getNumberFormat": [Function],
+                    "getPluralFormat": [Function],
+                    "getRelativeFormat": [Function],
+                  },
+                  "locale": "en",
+                  "messages": Object {},
+                  "now": [Function],
+                  "onError": [Function],
+                  "textComponent": Symbol(react.fragment),
+                  "timeZone": null,
+                }
+              }
+              kibana={
+                Object {
+                  "notifications": Object {
+                    "toasts": Object {
+                      "danger": [Function],
+                      "show": [Function],
+                      "success": [Function],
+                      "warning": [Function],
+                    },
+                  },
+                  "overlays": Object {
+                    "openFlyout": [Function],
+                    "openModal": [Function],
+                  },
+                  "services": Object {
+                    "http": Object {
+                      "addLoadingCount": [MockFunction],
+                      "basePath": Object {
+                        "get": [MockFunction],
+                        "prepend": [MockFunction],
+                        "remove": [MockFunction],
+                      },
+                      "delete": [MockFunction],
+                      "fetch": [MockFunction],
+                      "get": [MockFunction],
+                      "getLoadingCount$": [MockFunction],
+                      "head": [MockFunction],
+                      "intercept": [MockFunction],
+                      "options": [MockFunction],
+                      "patch": [MockFunction],
+                      "post": [MockFunction],
+                      "put": [MockFunction],
+                      "removeAllInterceptors": [MockFunction],
+                      "stop": [MockFunction],
+                    },
+                    "notifications": Object {
+                      "toasts": Object {
+                        "add": [MockFunction],
+                        "addDanger": [MockFunction],
+                        "addError": [MockFunction],
+                        "addSuccess": [MockFunction],
+                        "addWarning": [MockFunction],
+                        "get$": [MockFunction],
+                        "remove": [MockFunction],
+                      },
+                    },
+                    "savedObjects": Object {
+                      "client": Object {
+                        "bulkCreate": [MockFunction],
+                        "bulkGet": [MockFunction],
+                        "create": [MockFunction],
+                        "delete": [MockFunction],
+                        "find": [MockFunction],
+                        "get": [MockFunction],
+                        "update": [MockFunction],
+                      },
+                    },
+                    "store": Object {
+                      "clear": [MockFunction],
+                      "get": [MockFunction],
+                      "remove": [MockFunction],
+                      "set": [MockFunction],
+                      "store": Object {
+                        "clear": [MockFunction],
+                        "getItem": [MockFunction],
+                        "key": [MockFunction],
+                        "length": 0,
+                        "removeItem": [MockFunction],
+                        "setItem": [MockFunction],
+                      },
+                    },
+                    "uiSettings": Object {
+                      "get": [MockFunction] {
+                        "calls": Array [
+                          Array [
+                            "history:limit",
+                          ],
+                        ],
+                        "results": Array [
+                          Object {
+                            "type": "return",
+                            "value": undefined,
+                          },
+                        ],
+                      },
+                      "get$": [MockFunction],
+                      "getAll": [MockFunction],
+                      "getSaved$": [MockFunction],
+                      "getUpdate$": [MockFunction],
+                      "getUpdateErrors$": [MockFunction],
+                      "isCustom": [MockFunction],
+                      "isDeclared": [MockFunction],
+                      "isDefault": [MockFunction],
+                      "isOverridden": [MockFunction],
+                      "overrideLocalDefault": [MockFunction],
+                      "remove": [MockFunction],
+                      "set": [MockFunction],
+                      "stop": [MockFunction],
+                    },
+                  },
+                }
+              }
+              onSubmit={[Function]}
+              query={
+                Object {
+                  "language": "lucene",
+                  "query": "response:200",
+                }
+              }
+              screenTitle="Another Screen"
             >
-              <div
-                className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+              <EuiOutsideClickDetector
+                onOutsideClick={[Function]}
               >
                 <div
-                  className="euiFormControlLayout__childrenWrapper"
+                  aria-controls="kbnTypeahead__items"
+                  aria-expanded={false}
+                  aria-haspopup="true"
+                  aria-owns="kbnTypeahead__items"
+                  onMouseDown={[Function]}
+                  onMouseUp={[Function]}
+                  onTouchEnd={[Function]}
+                  onTouchStart={[Function]}
+                  role="combobox"
+                  style={
+                    Object {
+                      "position": "relative",
+                    }
+                  }
                 >
-                  <EuiValidatableControl>
-                    <input
-                      aria-activedescendant=""
-                      aria-autocomplete="list"
-                      aria-controls="kbnTypeahead__items"
-                      aria-label="You are on search box of Another Screen page. Start typing to search and filter the discover"
-                      autoComplete="off"
-                      autoFocus={true}
-                      className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
-                      data-test-subj="queryInput"
-                      http={
-                        Object {
-                          "addLoadingCount": [MockFunction],
-                          "basePath": Object {
-                            "get": [MockFunction],
-                            "prepend": [MockFunction],
-                            "remove": [MockFunction],
-                          },
-                          "delete": [MockFunction],
-                          "fetch": [MockFunction],
-                          "get": [MockFunction],
-                          "getLoadingCount$": [MockFunction],
-                          "head": [MockFunction],
-                          "intercept": [MockFunction],
-                          "options": [MockFunction],
-                          "patch": [MockFunction],
-                          "post": [MockFunction],
-                          "put": [MockFunction],
-                          "removeAllInterceptors": [MockFunction],
-                          "stop": [MockFunction],
+                  <div
+                    role="search"
+                  >
+                    <div
+                      className="kuiLocalSearchAssistedInput"
+                    >
+                      <EuiFieldText
+                        append={
+                          <QueryLanguageSwitcher
+                            language="lucene"
+                            onSelectLanguage={[Function]}
+                          />
                         }
-                      }
-                      onChange={[Function]}
-                      onClick={[Function]}
-                      onKeyDown={[Function]}
-                      onKeyUp={[Function]}
-                      placeholder="Search"
-                      role="textbox"
-                      spellCheck={false}
-                      type="text"
-                      value="response:200"
-                    />
-                  </EuiValidatableControl>
-                  <EuiFormControlLayoutIcons
-                    isLoading={false}
+                        aria-activedescendant=""
+                        aria-autocomplete="list"
+                        aria-controls="kbnTypeahead__items"
+                        aria-label="You are on search box of Another Screen page. Start typing to search and filter the test"
+                        autoComplete="off"
+                        autoFocus={true}
+                        compressed={false}
+                        data-test-subj="queryInput"
+                        fullWidth={true}
+                        inputRef={[Function]}
+                        isLoading={false}
+                        onChange={[Function]}
+                        onClick={[Function]}
+                        onKeyDown={[Function]}
+                        onKeyUp={[Function]}
+                        placeholder="Search"
+                        role="textbox"
+                        spellCheck={false}
+                        type="text"
+                        value="response:200"
+                      >
+                        <EuiFormControlLayout
+                          append={
+                            <QueryLanguageSwitcher
+                              language="lucene"
+                              onSelectLanguage={[Function]}
+                            />
+                          }
+                          compressed={false}
+                          fullWidth={true}
+                          isLoading={false}
+                        >
+                          <div
+                            className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+                          >
+                            <div
+                              className="euiFormControlLayout__childrenWrapper"
+                            >
+                              <EuiValidatableControl>
+                                <input
+                                  aria-activedescendant=""
+                                  aria-autocomplete="list"
+                                  aria-controls="kbnTypeahead__items"
+                                  aria-label="You are on search box of Another Screen page. Start typing to search and filter the test"
+                                  autoComplete="off"
+                                  autoFocus={true}
+                                  className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
+                                  data-test-subj="queryInput"
+                                  onChange={[Function]}
+                                  onClick={[Function]}
+                                  onKeyDown={[Function]}
+                                  onKeyUp={[Function]}
+                                  placeholder="Search"
+                                  role="textbox"
+                                  spellCheck={false}
+                                  type="text"
+                                  value="response:200"
+                                />
+                              </EuiValidatableControl>
+                              <EuiFormControlLayoutIcons
+                                isLoading={false}
+                              />
+                            </div>
+                            <QueryLanguageSwitcher
+                              className="euiFormControlLayout__append"
+                              key="0/.0"
+                              language="lucene"
+                              onSelectLanguage={[Function]}
+                            >
+                              <EuiPopover
+                                anchorClassName="euiFormControlLayout__append"
+                                anchorPosition="downRight"
+                                button={
+                                  <EuiButtonEmpty
+                                    className="euiFormControlLayout__append"
+                                    onClick={[Function]}
+                                    size="xs"
+                                  >
+                                    <FormattedMessage
+                                      defaultMessage="Lucene"
+                                      id="data.query.queryBar.luceneLanguageName"
+                                      values={Object {}}
+                                    />
+                                  </EuiButtonEmpty>
+                                }
+                                closePopover={[Function]}
+                                display="inlineBlock"
+                                hasArrow={true}
+                                id="popover"
+                                isOpen={false}
+                                ownFocus={true}
+                                panelPaddingSize="m"
+                                withTitle={true}
+                              >
+                                <EuiOutsideClickDetector
+                                  isDisabled={true}
+                                  onOutsideClick={[Function]}
+                                >
+                                  <div
+                                    className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle"
+                                    id="popover"
+                                    onKeyDown={[Function]}
+                                    onMouseDown={[Function]}
+                                    onMouseUp={[Function]}
+                                    onTouchEnd={[Function]}
+                                    onTouchStart={[Function]}
+                                  >
+                                    <div
+                                      className="euiPopover__anchor euiFormControlLayout__append"
+                                    >
+                                      <EuiButtonEmpty
+                                        className="euiFormControlLayout__append"
+                                        onClick={[Function]}
+                                        size="xs"
+                                      >
+                                        <button
+                                          className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__append"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <span
+                                            className="euiButtonEmpty__content"
+                                          >
+                                            <span
+                                              className="euiButtonEmpty__text"
+                                            >
+                                              <FormattedMessage
+                                                defaultMessage="Lucene"
+                                                id="data.query.queryBar.luceneLanguageName"
+                                                values={Object {}}
+                                              >
+                                                Lucene
+                                              </FormattedMessage>
+                                            </span>
+                                          </span>
+                                        </button>
+                                      </EuiButtonEmpty>
+                                    </div>
+                                  </div>
+                                </EuiOutsideClickDetector>
+                              </EuiPopover>
+                            </QueryLanguageSwitcher>
+                          </div>
+                        </EuiFormControlLayout>
+                      </EuiFieldText>
+                    </div>
+                  </div>
+                  <SuggestionsComponent
+                    index={null}
+                    loadMore={[Function]}
+                    onClick={[Function]}
+                    onMouseEnter={[Function]}
+                    show={false}
+                    suggestions={Array []}
                   />
                 </div>
-                <QueryLanguageSwitcher
-                  className="euiFormControlLayout__append"
-                  key="0/.0"
-                  language="lucene"
-                  onSelectLanguage={[Function]}
-                >
-                  <EuiPopover
-                    anchorClassName="euiFormControlLayout__append"
-                    anchorPosition="downRight"
-                    button={
-                      <EuiButtonEmpty
-                        className="euiFormControlLayout__append"
-                        onClick={[Function]}
-                        size="xs"
-                      >
-                        <FormattedMessage
-                          defaultMessage="Lucene"
-                          id="data.query.queryBar.luceneLanguageName"
-                          values={Object {}}
-                        />
-                      </EuiButtonEmpty>
-                    }
-                    closePopover={[Function]}
-                    display="inlineBlock"
-                    hasArrow={true}
-                    id="popover"
-                    isOpen={false}
-                    ownFocus={true}
-                    panelPaddingSize="m"
-                    withTitle={true}
-                  >
-                    <EuiOutsideClickDetector
-                      isDisabled={true}
-                      onOutsideClick={[Function]}
-                    >
-                      <div
-                        className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle"
-                        id="popover"
-                        onKeyDown={[Function]}
-                        onMouseDown={[Function]}
-                        onMouseUp={[Function]}
-                        onTouchEnd={[Function]}
-                        onTouchStart={[Function]}
-                      >
-                        <div
-                          className="euiPopover__anchor euiFormControlLayout__append"
-                        >
-                          <EuiButtonEmpty
-                            className="euiFormControlLayout__append"
-                            onClick={[Function]}
-                            size="xs"
-                          >
-                            <button
-                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__append"
-                              onClick={[Function]}
-                              type="button"
-                            >
-                              <span
-                                className="euiButtonEmpty__content"
-                              >
-                                <span
-                                  className="euiButtonEmpty__text"
-                                >
-                                  <FormattedMessage
-                                    defaultMessage="Lucene"
-                                    id="data.query.queryBar.luceneLanguageName"
-                                    values={Object {}}
-                                  >
-                                    Lucene
-                                  </FormattedMessage>
-                                </span>
-                              </span>
-                            </button>
-                          </EuiButtonEmpty>
-                        </div>
-                      </div>
-                    </EuiOutsideClickDetector>
-                  </EuiPopover>
-                </QueryLanguageSwitcher>
-              </div>
-            </EuiFormControlLayout>
-          </EuiFieldText>
-        </div>
-      </div>
-      <SuggestionsComponent
-        index={null}
-        loadMore={[Function]}
-        onClick={[Function]}
-        onMouseEnter={[Function]}
-        show={false}
-        suggestions={Array []}
-      />
-    </div>
-  </EuiOutsideClickDetector>
-</QueryBarInputUI>
+              </EuiOutsideClickDetector>
+            </QueryBarInputUI>
+          </enhancedType>
+        </InjectIntl(enhancedType)>
+      </Provider>
+    </PseudoLocaleWrapper>
+  </IntlProvider>
+</I18nProvider>
 `;
 
 exports[`QueryBarInput Should render the given query 1`] = `
-<QueryBarInputUI
-  appName="discover"
-  http={
-    Object {
-      "addLoadingCount": [MockFunction],
-      "basePath": Object {
-        "get": [MockFunction],
-        "prepend": [MockFunction],
-        "remove": [MockFunction],
-      },
-      "delete": [MockFunction],
-      "fetch": [MockFunction],
-      "get": [MockFunction],
-      "getLoadingCount$": [MockFunction],
-      "head": [MockFunction],
-      "intercept": [MockFunction],
-      "options": [MockFunction],
-      "patch": [MockFunction],
-      "post": [MockFunction],
-      "put": [MockFunction],
-      "removeAllInterceptors": [MockFunction],
-      "stop": [MockFunction],
-    }
-  }
-  indexPatterns={
-    Array [
+<I18nProvider>
+  <IntlProvider
+    defaultLocale="en"
+    formats={
       Object {
-        "fields": Array [
-          Object {
-            "aggregatable": true,
-            "esTypes": Array [
-              "integer",
-            ],
-            "filterable": true,
-            "name": "response",
-            "searchable": true,
-            "type": "number",
-          },
-        ],
-        "id": "1234",
-        "title": "logstash-*",
-      },
-    ]
-  }
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -1030,320 +1633,697 @@ exports[`QueryBarInput Should render the given query 1`] = `
             "minute": "numeric",
           },
         },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
-  onSubmit={[Function]}
-  query={
-    Object {
-      "language": "kuery",
-      "query": "response:200",
-    }
-  }
-  savedObjectsClient={
-    Object {
-      "bulkCreate": [MockFunction],
-      "bulkGet": [MockFunction],
-      "create": [MockFunction],
-      "delete": [MockFunction],
-      "find": [MockFunction],
-      "get": [MockFunction],
-      "update": [MockFunction],
-    }
-  }
-  screenTitle="Another Screen"
-  store={
-    Object {
-      "clear": [MockFunction],
-      "get": [MockFunction],
-      "remove": [MockFunction],
-      "set": [MockFunction],
-      "store": Object {
-        "clear": [MockFunction],
-        "getItem": [MockFunction],
-        "key": [MockFunction],
-        "length": 0,
-        "removeItem": [MockFunction],
-        "setItem": [MockFunction],
-      },
-    }
-  }
-  uiSettings={
-    Object {
-      "get": [MockFunction] {
-        "calls": Array [
-          Array [
-            "history:limit",
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-        ],
-      },
-      "get$": [MockFunction],
-      "getAll": [MockFunction],
-      "getSaved$": [MockFunction],
-      "getUpdate$": [MockFunction],
-      "getUpdateErrors$": [MockFunction],
-      "isCustom": [MockFunction],
-      "isDeclared": [MockFunction],
-      "isDefault": [MockFunction],
-      "isOverridden": [MockFunction],
-      "overrideLocalDefault": [MockFunction],
-      "remove": [MockFunction],
-      "set": [MockFunction],
-      "stop": [MockFunction],
-    }
-  }
->
-  <EuiOutsideClickDetector
-    onOutsideClick={[Function]}
-  >
-    <div
-      aria-controls="kbnTypeahead__items"
-      aria-expanded={false}
-      aria-haspopup="true"
-      aria-owns="kbnTypeahead__items"
-      onMouseDown={[Function]}
-      onMouseUp={[Function]}
-      onTouchEnd={[Function]}
-      onTouchStart={[Function]}
-      role="combobox"
-      style={
-        Object {
-          "position": "relative",
-        }
       }
-    >
-      <div
-        role="search"
-      >
-        <div
-          className="kuiLocalSearchAssistedInput"
-        >
-          <EuiFieldText
-            append={
-              <QueryLanguageSwitcher
-                language="kuery"
-                onSelectLanguage={[Function]}
-              />
-            }
-            aria-activedescendant=""
-            aria-autocomplete="list"
-            aria-controls="kbnTypeahead__items"
-            aria-label="You are on search box of Another Screen page. Start typing to search and filter the discover"
-            autoComplete="off"
-            autoFocus={true}
-            compressed={false}
-            data-test-subj="queryInput"
-            fullWidth={true}
-            http={
-              Object {
-                "addLoadingCount": [MockFunction],
-                "basePath": Object {
-                  "get": [MockFunction],
-                  "prepend": [MockFunction],
-                  "remove": [MockFunction],
-                },
-                "delete": [MockFunction],
-                "fetch": [MockFunction],
+    }
+    locale="en"
+    messages={Object {}}
+    textComponent={Symbol(react.fragment)}
+  >
+    <PseudoLocaleWrapper>
+      <Provider
+        services={
+          Object {
+            "http": Object {
+              "addLoadingCount": [MockFunction],
+              "basePath": Object {
                 "get": [MockFunction],
-                "getLoadingCount$": [MockFunction],
-                "head": [MockFunction],
-                "intercept": [MockFunction],
-                "options": [MockFunction],
-                "patch": [MockFunction],
-                "post": [MockFunction],
-                "put": [MockFunction],
-                "removeAllInterceptors": [MockFunction],
-                "stop": [MockFunction],
+                "prepend": [MockFunction],
+                "remove": [MockFunction],
+              },
+              "delete": [MockFunction],
+              "fetch": [MockFunction],
+              "get": [MockFunction],
+              "getLoadingCount$": [MockFunction],
+              "head": [MockFunction],
+              "intercept": [MockFunction],
+              "options": [MockFunction],
+              "patch": [MockFunction],
+              "post": [MockFunction],
+              "put": [MockFunction],
+              "removeAllInterceptors": [MockFunction],
+              "stop": [MockFunction],
+            },
+            "notifications": Object {
+              "toasts": Object {
+                "add": [MockFunction],
+                "addDanger": [MockFunction],
+                "addError": [MockFunction],
+                "addSuccess": [MockFunction],
+                "addWarning": [MockFunction],
+                "get$": [MockFunction],
+                "remove": [MockFunction],
+              },
+            },
+            "savedObjects": Object {
+              "client": Object {
+                "bulkCreate": [MockFunction],
+                "bulkGet": [MockFunction],
+                "create": [MockFunction],
+                "delete": [MockFunction],
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "update": [MockFunction],
+              },
+            },
+            "store": Object {
+              "clear": [MockFunction],
+              "get": [MockFunction],
+              "remove": [MockFunction],
+              "set": [MockFunction],
+              "store": Object {
+                "clear": [MockFunction],
+                "getItem": [MockFunction],
+                "key": [MockFunction],
+                "length": 0,
+                "removeItem": [MockFunction],
+                "setItem": [MockFunction],
+              },
+            },
+            "uiSettings": Object {
+              "get": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "history:limit",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
+              "get$": [MockFunction],
+              "getAll": [MockFunction],
+              "getSaved$": [MockFunction],
+              "getUpdate$": [MockFunction],
+              "getUpdateErrors$": [MockFunction],
+              "isCustom": [MockFunction],
+              "isDeclared": [MockFunction],
+              "isDefault": [MockFunction],
+              "isOverridden": [MockFunction],
+              "overrideLocalDefault": [MockFunction],
+              "remove": [MockFunction],
+              "set": [MockFunction],
+              "stop": [MockFunction],
+            },
+          }
+        }
+      >
+        <InjectIntl(enhancedType)
+          appName="test"
+          indexPatterns={
+            Array [
+              Object {
+                "fields": Array [
+                  Object {
+                    "aggregatable": true,
+                    "esTypes": Array [
+                      "integer",
+                    ],
+                    "filterable": true,
+                    "name": "response",
+                    "searchable": true,
+                    "type": "number",
+                  },
+                ],
+                "id": "1234",
+                "title": "logstash-*",
+              },
+            ]
+          }
+          intl={null}
+          onSubmit={[Function]}
+          query={
+            Object {
+              "language": "kuery",
+              "query": "response:200",
+            }
+          }
+          screenTitle="Another Screen"
+        >
+          <enhancedType
+            appName="test"
+            indexPatterns={
+              Array [
+                Object {
+                  "fields": Array [
+                    Object {
+                      "aggregatable": true,
+                      "esTypes": Array [
+                        "integer",
+                      ],
+                      "filterable": true,
+                      "name": "response",
+                      "searchable": true,
+                      "type": "number",
+                    },
+                  ],
+                  "id": "1234",
+                  "title": "logstash-*",
+                },
+              ]
+            }
+            intl={
+              Object {
+                "defaultFormats": Object {},
+                "defaultLocale": "en",
+                "formatDate": [Function],
+                "formatHTMLMessage": [Function],
+                "formatMessage": [Function],
+                "formatNumber": [Function],
+                "formatPlural": [Function],
+                "formatRelative": [Function],
+                "formatTime": [Function],
+                "formats": Object {
+                  "date": Object {
+                    "full": Object {
+                      "day": "numeric",
+                      "month": "long",
+                      "weekday": "long",
+                      "year": "numeric",
+                    },
+                    "long": Object {
+                      "day": "numeric",
+                      "month": "long",
+                      "year": "numeric",
+                    },
+                    "medium": Object {
+                      "day": "numeric",
+                      "month": "short",
+                      "year": "numeric",
+                    },
+                    "short": Object {
+                      "day": "numeric",
+                      "month": "numeric",
+                      "year": "2-digit",
+                    },
+                  },
+                  "number": Object {
+                    "currency": Object {
+                      "style": "currency",
+                    },
+                    "percent": Object {
+                      "style": "percent",
+                    },
+                  },
+                  "relative": Object {
+                    "days": Object {
+                      "units": "day",
+                    },
+                    "hours": Object {
+                      "units": "hour",
+                    },
+                    "minutes": Object {
+                      "units": "minute",
+                    },
+                    "months": Object {
+                      "units": "month",
+                    },
+                    "seconds": Object {
+                      "units": "second",
+                    },
+                    "years": Object {
+                      "units": "year",
+                    },
+                  },
+                  "time": Object {
+                    "full": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                      "timeZoneName": "short",
+                    },
+                    "long": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                      "timeZoneName": "short",
+                    },
+                    "medium": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                    },
+                    "short": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                    },
+                  },
+                },
+                "formatters": Object {
+                  "getDateTimeFormat": [Function],
+                  "getMessageFormat": [Function],
+                  "getNumberFormat": [Function],
+                  "getPluralFormat": [Function],
+                  "getRelativeFormat": [Function],
+                },
+                "locale": "en",
+                "messages": Object {},
+                "now": [Function],
+                "onError": [Function],
+                "textComponent": Symbol(react.fragment),
+                "timeZone": null,
               }
             }
-            inputRef={[Function]}
-            isLoading={false}
-            onChange={[Function]}
-            onClick={[Function]}
-            onKeyDown={[Function]}
-            onKeyUp={[Function]}
-            placeholder="Search"
-            role="textbox"
-            spellCheck={false}
-            type="text"
-            value="response:200"
-          >
-            <EuiFormControlLayout
-              append={
-                <QueryLanguageSwitcher
-                  language="kuery"
-                  onSelectLanguage={[Function]}
-                />
+            onSubmit={[Function]}
+            query={
+              Object {
+                "language": "kuery",
+                "query": "response:200",
               }
-              compressed={false}
-              fullWidth={true}
-              isLoading={false}
+            }
+            screenTitle="Another Screen"
+          >
+            <QueryBarInputUI
+              appName="test"
+              indexPatterns={
+                Array [
+                  Object {
+                    "fields": Array [
+                      Object {
+                        "aggregatable": true,
+                        "esTypes": Array [
+                          "integer",
+                        ],
+                        "filterable": true,
+                        "name": "response",
+                        "searchable": true,
+                        "type": "number",
+                      },
+                    ],
+                    "id": "1234",
+                    "title": "logstash-*",
+                  },
+                ]
+              }
+              intl={
+                Object {
+                  "defaultFormats": Object {},
+                  "defaultLocale": "en",
+                  "formatDate": [Function],
+                  "formatHTMLMessage": [Function],
+                  "formatMessage": [Function],
+                  "formatNumber": [Function],
+                  "formatPlural": [Function],
+                  "formatRelative": [Function],
+                  "formatTime": [Function],
+                  "formats": Object {
+                    "date": Object {
+                      "full": Object {
+                        "day": "numeric",
+                        "month": "long",
+                        "weekday": "long",
+                        "year": "numeric",
+                      },
+                      "long": Object {
+                        "day": "numeric",
+                        "month": "long",
+                        "year": "numeric",
+                      },
+                      "medium": Object {
+                        "day": "numeric",
+                        "month": "short",
+                        "year": "numeric",
+                      },
+                      "short": Object {
+                        "day": "numeric",
+                        "month": "numeric",
+                        "year": "2-digit",
+                      },
+                    },
+                    "number": Object {
+                      "currency": Object {
+                        "style": "currency",
+                      },
+                      "percent": Object {
+                        "style": "percent",
+                      },
+                    },
+                    "relative": Object {
+                      "days": Object {
+                        "units": "day",
+                      },
+                      "hours": Object {
+                        "units": "hour",
+                      },
+                      "minutes": Object {
+                        "units": "minute",
+                      },
+                      "months": Object {
+                        "units": "month",
+                      },
+                      "seconds": Object {
+                        "units": "second",
+                      },
+                      "years": Object {
+                        "units": "year",
+                      },
+                    },
+                    "time": Object {
+                      "full": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                        "second": "numeric",
+                        "timeZoneName": "short",
+                      },
+                      "long": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                        "second": "numeric",
+                        "timeZoneName": "short",
+                      },
+                      "medium": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                        "second": "numeric",
+                      },
+                      "short": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                      },
+                    },
+                  },
+                  "formatters": Object {
+                    "getDateTimeFormat": [Function],
+                    "getMessageFormat": [Function],
+                    "getNumberFormat": [Function],
+                    "getPluralFormat": [Function],
+                    "getRelativeFormat": [Function],
+                  },
+                  "locale": "en",
+                  "messages": Object {},
+                  "now": [Function],
+                  "onError": [Function],
+                  "textComponent": Symbol(react.fragment),
+                  "timeZone": null,
+                }
+              }
+              kibana={
+                Object {
+                  "notifications": Object {
+                    "toasts": Object {
+                      "danger": [Function],
+                      "show": [Function],
+                      "success": [Function],
+                      "warning": [Function],
+                    },
+                  },
+                  "overlays": Object {
+                    "openFlyout": [Function],
+                    "openModal": [Function],
+                  },
+                  "services": Object {
+                    "http": Object {
+                      "addLoadingCount": [MockFunction],
+                      "basePath": Object {
+                        "get": [MockFunction],
+                        "prepend": [MockFunction],
+                        "remove": [MockFunction],
+                      },
+                      "delete": [MockFunction],
+                      "fetch": [MockFunction],
+                      "get": [MockFunction],
+                      "getLoadingCount$": [MockFunction],
+                      "head": [MockFunction],
+                      "intercept": [MockFunction],
+                      "options": [MockFunction],
+                      "patch": [MockFunction],
+                      "post": [MockFunction],
+                      "put": [MockFunction],
+                      "removeAllInterceptors": [MockFunction],
+                      "stop": [MockFunction],
+                    },
+                    "notifications": Object {
+                      "toasts": Object {
+                        "add": [MockFunction],
+                        "addDanger": [MockFunction],
+                        "addError": [MockFunction],
+                        "addSuccess": [MockFunction],
+                        "addWarning": [MockFunction],
+                        "get$": [MockFunction],
+                        "remove": [MockFunction],
+                      },
+                    },
+                    "savedObjects": Object {
+                      "client": Object {
+                        "bulkCreate": [MockFunction],
+                        "bulkGet": [MockFunction],
+                        "create": [MockFunction],
+                        "delete": [MockFunction],
+                        "find": [MockFunction],
+                        "get": [MockFunction],
+                        "update": [MockFunction],
+                      },
+                    },
+                    "store": Object {
+                      "clear": [MockFunction],
+                      "get": [MockFunction],
+                      "remove": [MockFunction],
+                      "set": [MockFunction],
+                      "store": Object {
+                        "clear": [MockFunction],
+                        "getItem": [MockFunction],
+                        "key": [MockFunction],
+                        "length": 0,
+                        "removeItem": [MockFunction],
+                        "setItem": [MockFunction],
+                      },
+                    },
+                    "uiSettings": Object {
+                      "get": [MockFunction] {
+                        "calls": Array [
+                          Array [
+                            "history:limit",
+                          ],
+                        ],
+                        "results": Array [
+                          Object {
+                            "type": "return",
+                            "value": undefined,
+                          },
+                        ],
+                      },
+                      "get$": [MockFunction],
+                      "getAll": [MockFunction],
+                      "getSaved$": [MockFunction],
+                      "getUpdate$": [MockFunction],
+                      "getUpdateErrors$": [MockFunction],
+                      "isCustom": [MockFunction],
+                      "isDeclared": [MockFunction],
+                      "isDefault": [MockFunction],
+                      "isOverridden": [MockFunction],
+                      "overrideLocalDefault": [MockFunction],
+                      "remove": [MockFunction],
+                      "set": [MockFunction],
+                      "stop": [MockFunction],
+                    },
+                  },
+                }
+              }
+              onSubmit={[Function]}
+              query={
+                Object {
+                  "language": "kuery",
+                  "query": "response:200",
+                }
+              }
+              screenTitle="Another Screen"
             >
-              <div
-                className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+              <EuiOutsideClickDetector
+                onOutsideClick={[Function]}
               >
                 <div
-                  className="euiFormControlLayout__childrenWrapper"
+                  aria-controls="kbnTypeahead__items"
+                  aria-expanded={false}
+                  aria-haspopup="true"
+                  aria-owns="kbnTypeahead__items"
+                  onMouseDown={[Function]}
+                  onMouseUp={[Function]}
+                  onTouchEnd={[Function]}
+                  onTouchStart={[Function]}
+                  role="combobox"
+                  style={
+                    Object {
+                      "position": "relative",
+                    }
+                  }
                 >
-                  <EuiValidatableControl>
-                    <input
-                      aria-activedescendant=""
-                      aria-autocomplete="list"
-                      aria-controls="kbnTypeahead__items"
-                      aria-label="You are on search box of Another Screen page. Start typing to search and filter the discover"
-                      autoComplete="off"
-                      autoFocus={true}
-                      className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
-                      data-test-subj="queryInput"
-                      http={
-                        Object {
-                          "addLoadingCount": [MockFunction],
-                          "basePath": Object {
-                            "get": [MockFunction],
-                            "prepend": [MockFunction],
-                            "remove": [MockFunction],
-                          },
-                          "delete": [MockFunction],
-                          "fetch": [MockFunction],
-                          "get": [MockFunction],
-                          "getLoadingCount$": [MockFunction],
-                          "head": [MockFunction],
-                          "intercept": [MockFunction],
-                          "options": [MockFunction],
-                          "patch": [MockFunction],
-                          "post": [MockFunction],
-                          "put": [MockFunction],
-                          "removeAllInterceptors": [MockFunction],
-                          "stop": [MockFunction],
+                  <div
+                    role="search"
+                  >
+                    <div
+                      className="kuiLocalSearchAssistedInput"
+                    >
+                      <EuiFieldText
+                        append={
+                          <QueryLanguageSwitcher
+                            language="kuery"
+                            onSelectLanguage={[Function]}
+                          />
                         }
-                      }
-                      onChange={[Function]}
-                      onClick={[Function]}
-                      onKeyDown={[Function]}
-                      onKeyUp={[Function]}
-                      placeholder="Search"
-                      role="textbox"
-                      spellCheck={false}
-                      type="text"
-                      value="response:200"
-                    />
-                  </EuiValidatableControl>
-                  <EuiFormControlLayoutIcons
-                    isLoading={false}
+                        aria-activedescendant=""
+                        aria-autocomplete="list"
+                        aria-controls="kbnTypeahead__items"
+                        aria-label="You are on search box of Another Screen page. Start typing to search and filter the test"
+                        autoComplete="off"
+                        autoFocus={true}
+                        compressed={false}
+                        data-test-subj="queryInput"
+                        fullWidth={true}
+                        inputRef={[Function]}
+                        isLoading={false}
+                        onChange={[Function]}
+                        onClick={[Function]}
+                        onKeyDown={[Function]}
+                        onKeyUp={[Function]}
+                        placeholder="Search"
+                        role="textbox"
+                        spellCheck={false}
+                        type="text"
+                        value="response:200"
+                      >
+                        <EuiFormControlLayout
+                          append={
+                            <QueryLanguageSwitcher
+                              language="kuery"
+                              onSelectLanguage={[Function]}
+                            />
+                          }
+                          compressed={false}
+                          fullWidth={true}
+                          isLoading={false}
+                        >
+                          <div
+                            className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+                          >
+                            <div
+                              className="euiFormControlLayout__childrenWrapper"
+                            >
+                              <EuiValidatableControl>
+                                <input
+                                  aria-activedescendant=""
+                                  aria-autocomplete="list"
+                                  aria-controls="kbnTypeahead__items"
+                                  aria-label="You are on search box of Another Screen page. Start typing to search and filter the test"
+                                  autoComplete="off"
+                                  autoFocus={true}
+                                  className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
+                                  data-test-subj="queryInput"
+                                  onChange={[Function]}
+                                  onClick={[Function]}
+                                  onKeyDown={[Function]}
+                                  onKeyUp={[Function]}
+                                  placeholder="Search"
+                                  role="textbox"
+                                  spellCheck={false}
+                                  type="text"
+                                  value="response:200"
+                                />
+                              </EuiValidatableControl>
+                              <EuiFormControlLayoutIcons
+                                isLoading={false}
+                              />
+                            </div>
+                            <QueryLanguageSwitcher
+                              className="euiFormControlLayout__append"
+                              key="0/.0"
+                              language="kuery"
+                              onSelectLanguage={[Function]}
+                            >
+                              <EuiPopover
+                                anchorClassName="euiFormControlLayout__append"
+                                anchorPosition="downRight"
+                                button={
+                                  <EuiButtonEmpty
+                                    className="euiFormControlLayout__append"
+                                    onClick={[Function]}
+                                    size="xs"
+                                  >
+                                    <FormattedMessage
+                                      defaultMessage="KQL"
+                                      id="data.query.queryBar.kqlLanguageName"
+                                      values={Object {}}
+                                    />
+                                  </EuiButtonEmpty>
+                                }
+                                closePopover={[Function]}
+                                display="inlineBlock"
+                                hasArrow={true}
+                                id="popover"
+                                isOpen={false}
+                                ownFocus={true}
+                                panelPaddingSize="m"
+                                withTitle={true}
+                              >
+                                <EuiOutsideClickDetector
+                                  isDisabled={true}
+                                  onOutsideClick={[Function]}
+                                >
+                                  <div
+                                    className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle"
+                                    id="popover"
+                                    onKeyDown={[Function]}
+                                    onMouseDown={[Function]}
+                                    onMouseUp={[Function]}
+                                    onTouchEnd={[Function]}
+                                    onTouchStart={[Function]}
+                                  >
+                                    <div
+                                      className="euiPopover__anchor euiFormControlLayout__append"
+                                    >
+                                      <EuiButtonEmpty
+                                        className="euiFormControlLayout__append"
+                                        onClick={[Function]}
+                                        size="xs"
+                                      >
+                                        <button
+                                          className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__append"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <span
+                                            className="euiButtonEmpty__content"
+                                          >
+                                            <span
+                                              className="euiButtonEmpty__text"
+                                            >
+                                              <FormattedMessage
+                                                defaultMessage="KQL"
+                                                id="data.query.queryBar.kqlLanguageName"
+                                                values={Object {}}
+                                              >
+                                                KQL
+                                              </FormattedMessage>
+                                            </span>
+                                          </span>
+                                        </button>
+                                      </EuiButtonEmpty>
+                                    </div>
+                                  </div>
+                                </EuiOutsideClickDetector>
+                              </EuiPopover>
+                            </QueryLanguageSwitcher>
+                          </div>
+                        </EuiFormControlLayout>
+                      </EuiFieldText>
+                    </div>
+                  </div>
+                  <SuggestionsComponent
+                    index={null}
+                    loadMore={[Function]}
+                    onClick={[Function]}
+                    onMouseEnter={[Function]}
+                    show={false}
+                    suggestions={Array []}
                   />
                 </div>
-                <QueryLanguageSwitcher
-                  className="euiFormControlLayout__append"
-                  key="0/.0"
-                  language="kuery"
-                  onSelectLanguage={[Function]}
-                >
-                  <EuiPopover
-                    anchorClassName="euiFormControlLayout__append"
-                    anchorPosition="downRight"
-                    button={
-                      <EuiButtonEmpty
-                        className="euiFormControlLayout__append"
-                        onClick={[Function]}
-                        size="xs"
-                      >
-                        <FormattedMessage
-                          defaultMessage="KQL"
-                          id="data.query.queryBar.kqlLanguageName"
-                          values={Object {}}
-                        />
-                      </EuiButtonEmpty>
-                    }
-                    closePopover={[Function]}
-                    display="inlineBlock"
-                    hasArrow={true}
-                    id="popover"
-                    isOpen={false}
-                    ownFocus={true}
-                    panelPaddingSize="m"
-                    withTitle={true}
-                  >
-                    <EuiOutsideClickDetector
-                      isDisabled={true}
-                      onOutsideClick={[Function]}
-                    >
-                      <div
-                        className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle"
-                        id="popover"
-                        onKeyDown={[Function]}
-                        onMouseDown={[Function]}
-                        onMouseUp={[Function]}
-                        onTouchEnd={[Function]}
-                        onTouchStart={[Function]}
-                      >
-                        <div
-                          className="euiPopover__anchor euiFormControlLayout__append"
-                        >
-                          <EuiButtonEmpty
-                            className="euiFormControlLayout__append"
-                            onClick={[Function]}
-                            size="xs"
-                          >
-                            <button
-                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__append"
-                              onClick={[Function]}
-                              type="button"
-                            >
-                              <span
-                                className="euiButtonEmpty__content"
-                              >
-                                <span
-                                  className="euiButtonEmpty__text"
-                                >
-                                  <FormattedMessage
-                                    defaultMessage="KQL"
-                                    id="data.query.queryBar.kqlLanguageName"
-                                    values={Object {}}
-                                  >
-                                    KQL
-                                  </FormattedMessage>
-                                </span>
-                              </span>
-                            </button>
-                          </EuiButtonEmpty>
-                        </div>
-                      </div>
-                    </EuiOutsideClickDetector>
-                  </EuiPopover>
-                </QueryLanguageSwitcher>
-              </div>
-            </EuiFormControlLayout>
-          </EuiFieldText>
-        </div>
-      </div>
-      <SuggestionsComponent
-        index={null}
-        loadMore={[Function]}
-        onClick={[Function]}
-        onMouseEnter={[Function]}
-        show={false}
-        suggestions={Array []}
-      />
-    </div>
-  </EuiOutsideClickDetector>
-</QueryBarInputUI>
+              </EuiOutsideClickDetector>
+            </QueryBarInputUI>
+          </enhancedType>
+        </InjectIntl(enhancedType)>
+      </Provider>
+    </PseudoLocaleWrapper>
+  </IntlProvider>
+</I18nProvider>
 `;

@@ -22,10 +22,8 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
-import { Storage } from 'ui/storage';
 import { get, isEqual } from 'lodash';
 
-import { CoreStart } from 'src/core/public';
 import { TimeRange } from 'src/plugins/data/common/types';
 import { IndexPattern, Query, FilterBar } from '../../../../../data/public';
 import { QueryBarTopRow } from '../../../query';
@@ -35,10 +33,15 @@ import { SavedQueryManagementComponent } from './saved_query_management/saved_qu
 import { SavedQueryService } from '../lib/saved_query_service';
 import { createSavedQueryService } from '../lib/saved_query_service';
 import { TimeHistoryContract } from '../../../timefilter';
+import {
+  withKibana,
+  KibanaReactContextValue,
+} from '../../../../../../../plugins/kibana_react/public';
+import { IDataPluginServices } from '../../../types';
 
 interface SearchBarInjectedDeps {
+  kibana: KibanaReactContextValue<IDataPluginServices>;
   intl: InjectedIntl;
-  store?: Storage;
   timeHistory: TimeHistoryContract;
   // Filter bar
   onFiltersUpdated?: (filters: Filter[]) => void;
@@ -50,10 +53,6 @@ interface SearchBarInjectedDeps {
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   isRefreshPaused?: boolean;
   refreshInterval?: number;
-
-  // TODO: deprecate by using context
-  savedObjects: CoreStart['savedObjects'];
-  notifications: CoreStart['notifications'];
 }
 
 export interface SearchBarOwnProps {
@@ -101,7 +100,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   private savedQueryService!: SavedQueryService;
-
+  private services!: IDataPluginServices;
   public filterBarRef: Element | null = null;
   public filterBarWrapperRef: Element | null = null;
 
@@ -252,7 +251,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         response = await this.savedQueryService.saveQuery(savedQueryAttributes);
       }
 
-      this.props.notifications.toasts.addSuccess(
+      this.services.notifications.toasts.addSuccess(
         `Your query "${response.attributes.title}" was saved`
       );
 
@@ -265,7 +264,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         this.props.onSaved(response);
       }
     } catch (error) {
-      this.props.notifications.toasts.addDanger(
+      this.services.notifications.toasts.addDanger(
         `An error occured while saving your query: ${error.message}`
       );
       throw error;
@@ -336,8 +335,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       this.setFilterBarHeight();
       this.ro.observe(this.filterBarRef);
     }
-    if (this.props.savedObjects) {
-      this.savedQueryService = createSavedQueryService(this.props.savedObjects!.client);
+    this.services = this.props.kibana.services;
+    if (this.services.savedObjects) {
+      this.savedQueryService = createSavedQueryService(this.services.savedObjects.client);
     }
   }
 
@@ -371,7 +371,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           onSubmit={this.onQueryBarSubmit}
           appName={this.props.appName}
           indexPatterns={this.props.indexPatterns}
-          store={this.props.store}
           prepend={this.props.showFilterBar ? savedQueryManagement : undefined}
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
@@ -448,4 +447,4 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 }
 
-export const SearchBar = injectI18n(SearchBarUI);
+export const SearchBar = injectI18n(withKibana(SearchBarUI));

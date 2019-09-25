@@ -47,7 +47,6 @@ interface Props {
   appName: string;
   screenTitle?: string;
   indexPatterns?: Array<IndexPattern | string>;
-  store?: Storage;
   intl: InjectedIntl;
   prepend?: React.ReactNode;
   showQueryInput?: boolean;
@@ -66,8 +65,8 @@ interface Props {
 function QueryBarTopRowUI(props: Props) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
 
-  const kibana = useKibana();
-  const { uiSettings, http, notifications, savedObjects } = kibana.services;
+  const kibana = useKibana<{ store: Storage }>();
+  const { uiSettings, notifications, store } = kibana.services;
 
   const queryLanguage = props.query && props.query.language;
   let persistedLog: PersistedLog | undefined;
@@ -155,13 +154,9 @@ function QueryBarTopRowUI(props: Props) {
           prepend={props.prepend}
           query={props.query!}
           screenTitle={props.screenTitle}
-          store={props.store!}
           onChange={onQueryChange}
           onSubmit={onInputSubmit}
           persistedLog={persistedLog}
-          uiSettings={uiSettings!}
-          savedObjectsClient={savedObjects!.client}
-          http={http!}
         />
       </EuiFlexItem>
     );
@@ -172,7 +167,7 @@ function QueryBarTopRowUI(props: Props) {
   }
 
   function shouldRenderQueryInput(): boolean {
-    return Boolean(props.showQueryInput && props.indexPatterns && props.query && props.store);
+    return Boolean(props.showQueryInput && props.indexPatterns && props.query && store);
   }
 
   function renderUpdateButton() {
@@ -247,7 +242,7 @@ function QueryBarTopRowUI(props: Props) {
 
   function handleLuceneSyntaxWarning() {
     if (!props.query) return;
-    const { intl, store } = props;
+    const { intl } = props;
     const { query, language } = props.query;
     if (
       language === 'kuery' &&
@@ -296,8 +291,8 @@ function QueryBarTopRowUI(props: Props) {
   }
 
   function onLuceneSyntaxWarningOptOut(toast: Toast) {
-    if (!props.store) return;
-    props.store.set('kibana.luceneSyntaxWarningOptOut', true);
+    if (!store) return;
+    store.set('kibana.luceneSyntaxWarningOptOut', true);
     notifications!.toasts.remove(toast);
   }
 
