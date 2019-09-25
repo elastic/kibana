@@ -45,7 +45,6 @@ export default function({ getService }: FtrProviderContext) {
     after(async () => {
       await esArchiver.unload('ml/farequote');
       await ml.api.cleanMlIndices();
-      await ml.api.cleanDataframeIndices();
     });
 
     it('loads the job management page', async () => {
