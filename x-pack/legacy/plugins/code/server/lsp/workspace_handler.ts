@@ -9,7 +9,6 @@ import del from 'del';
 import fs from 'fs';
 import { delay } from 'lodash';
 import path from 'path';
-import { promisify } from 'util';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { Hover, Location, TextDocumentPositionParams } from 'vscode-languageserver';
 
@@ -19,7 +18,7 @@ import { SimpleGit } from '@elastic/simple-git/dist/promise';
 import { simplegit } from '@elastic/simple-git/dist';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { parseLspUrl } from '../../common/uri_util';
-import { LspRequest, WorkerReservedProgress } from '../../model';
+import { FileTreeItemType, LspRequest, WorkerReservedProgress } from '../../model';
 import { GitOperations, HEAD } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
@@ -33,8 +32,6 @@ interface Worktree {
 }
 
 export const MAX_RESULT_COUNT = 20;
-
-const mkdirAsync = promisify(fs.mkdir);
 
 export class WorkspaceHandler {
   private revisionMap: { [uri: string]: string } = {};
@@ -423,14 +420,8 @@ export class WorkspaceHandler {
         return false;
       }
       const entry = tree.entries[0];
-      switch (entry.mode) {
-        case '040000': // folder
-        case '100644': // file
-        case '100755': // executable file
-          return true;
-        default:
-          return false;
-      }
+      const type = GitOperations.mode2type(entry.mode);
+      return type === FileTreeItemType.File || type === FileTreeItemType.Directory;
     } catch (e) {
       // filePath may not exists
       return false;

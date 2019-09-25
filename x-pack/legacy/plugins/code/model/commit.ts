@@ -8,9 +8,9 @@ export interface CommitInfo {
   updated: Date;
   message: string;
   committer: string;
-  committerEmail: string;
+  committerEmail?: string;
   author: string;
-  authorEmail: string;
+  authorEmail?: string;
   id: string;
   parents: string[];
   treeId: string;

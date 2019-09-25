@@ -7,6 +7,7 @@
 import { ResponseError } from 'vscode-jsonrpc';
 import fs from 'fs';
 import path from 'path';
+import { promisify } from 'util';
 import { isBinaryFile } from 'isbinaryfile';
 import { ProgressReporter } from '.';
 import { TEXT_FILE_LIMIT } from '../../common/file';
@@ -37,6 +38,9 @@ import {
   getSymbolIndexCreationRequest,
 } from './index_creation_request';
 import { ALL_RESERVED, DocumentIndexName, ReferenceIndexName, SymbolIndexName } from './schema';
+
+const state = promisify(fs.stat);
+const readFile = promisify(fs.readFile);
 
 export class LspIndexer extends AbstractIndexer {
   public type: IndexerType = IndexerType.LSP;
@@ -215,7 +219,7 @@ export class LspIndexer extends AbstractIndexer {
   protected async getFileSource(request: LspIndexRequest): Promise<string> {
     const { filePath } = request;
     const fullPath = path.join(this.workspaceDir, filePath);
-    const fileStat = await fs.promises.stat(fullPath);
+    const fileStat = await state(fullPath);
     const fileSize = fileStat.size;
     if (fileSize > TEXT_FILE_LIMIT) {
       throw new Error(this.FILE_OVERSIZE_ERROR_MSG);
@@ -224,7 +228,7 @@ export class LspIndexer extends AbstractIndexer {
     if (bin) {
       throw new Error(this.BINARY_FILE_ERROR_MSG);
     }
-    return fs.promises.readFile(fullPath, { encoding: 'utf8' });
+    return readFile(fullPath, { encoding: 'utf8' }) as Promise<string>;
   }
 
   protected async execLspIndexing(

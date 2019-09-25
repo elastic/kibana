@@ -143,10 +143,15 @@ export class GitOperations {
     return (await ls.allFiles()).length;
   }
 
-  public async iterateRepo(uri: RepositoryUri, revision: string) {
+  public async *iterateRepo(uri: RepositoryUri, revision: string) {
     const git = await this.openGit(uri);
     const ls = new LsTreeSummary(git, revision, '.', { showSize: true, recursive: true });
-    return ls.iterator();
+    for await (const file of ls.iterator()) {
+      const type = GitOperations.mode2type(file.mode);
+      if (type === FileTreeItemType.File) {
+        yield file;
+      }
+    }
   }
 
   public async readTree(git: SimpleGit, oid: string, path: string = '.'): Promise<Tree> {
@@ -158,7 +163,7 @@ export class GitOperations {
     } as Tree;
   }
 
-  static mode2type(mode: string): FileTreeItemType {
+  public static mode2type(mode: string): FileTreeItemType {
     switch (mode) {
       case '100755':
       case '100644':

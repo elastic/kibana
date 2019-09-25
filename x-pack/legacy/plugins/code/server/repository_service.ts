@@ -67,9 +67,7 @@ export class RepositoryService {
           await this.remove(repo.uri);
         }
       } else {
-        const parentDir = path.dirname(localPath);
-        // on windows, git clone will failed if parent folder is not exists;
-        await mkdirAsync(parentDir, { recursive: true });
+        await mkdirAsync(localPath, { recursive: true });
       }
       // Go head with the actual clone.
       const git = await this.gitOps.openGit(repo.uri, false);
