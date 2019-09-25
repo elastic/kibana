@@ -4,6 +4,7 @@
 
 # App
 /x-pack/legacy/plugins/lens/ @elastic/kibana-app
+/x-pack/legacy/plugins/graph/ @elastic/kibana-app
 
 # App Architecture
 /src/plugins/data/ @elastic/kibana-app-arch

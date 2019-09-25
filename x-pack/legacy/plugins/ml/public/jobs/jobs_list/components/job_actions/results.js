@@ -18,7 +18,7 @@ import chrome from 'ui/chrome';
 import { mlJobService } from '../../../../services/job_service';
 import { injectI18n } from '@kbn/i18n/react';
 
-function getLink(location, jobs) {
+export function getLink(location, jobs) {
   const resultsPageUrl = mlJobService.createResultsUrlForJobs(jobs, location);
   return `${chrome.getBasePath()}/app/${resultsPageUrl}`;
 }

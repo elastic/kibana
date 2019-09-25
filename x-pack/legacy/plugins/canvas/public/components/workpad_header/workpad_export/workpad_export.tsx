@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, MouseEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiContextMenu, EuiIcon } from '@elastic/eui';
 // @ts-ignore Untyped local
@@ -112,7 +112,7 @@ export const WorkpadExport: FunctionComponent<Props> = ({
     ],
   });
 
-  const exportControl = (togglePopover: () => void) => (
+  const exportControl = (togglePopover: (ev: MouseEvent) => void) => (
     <EuiButtonIcon
       iconType="share"
       aria-label={strings.getShareWorkpadMessage()}

@@ -48,7 +48,6 @@ export interface BrowserConfig {
     server: string;
     bypass?: string[];
   };
-  verboseLogging?: boolean;
 }
 
 export interface ElementPosition {
