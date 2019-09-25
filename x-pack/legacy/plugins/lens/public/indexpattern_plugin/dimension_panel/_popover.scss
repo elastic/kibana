@@ -13,6 +13,8 @@
   width: 100%;
   display: flex;
   align-items: center;
+  padding: $euiSizeS;
+  min-height: $euiSizeXXL;
 }
 
 .lnsPopoverEditor__left,
