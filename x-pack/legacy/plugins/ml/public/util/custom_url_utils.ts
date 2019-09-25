@@ -17,9 +17,12 @@ import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils
 const TIME_RANGE_AUTO = 'auto';
 
 export interface UrlConfig {
-  time_range: string;
   url_name: string;
   url_value: string;
+}
+
+export interface KibanaUrlConfig extends UrlConfig {
+  time_range: string;
 }
 
 export interface Influencer {
@@ -27,27 +30,32 @@ export interface Influencer {
   influencer_field_values: string[];
 }
 
-export interface AnomalyRecord {
+export interface AnomalyRecordDoc {
   [key: string]: any;
   job_id: string;
   result_type: string;
   probability: number;
-  multi_bucket_impact: number;
   record_score: number;
   initial_record_score: number;
   bucket_span: number;
   detector_index: number;
-  is_interim: boolean;
+  is_interim?: boolean;
   timestamp: number;
-  by_field_name: string;
-  by_field_value: string;
-  partition_field_name: string;
-  partition_field_value: string;
+  partition_field_name?: string;
+  partition_field_value?: string | number;
   function: string;
   function_description: string;
   typical: number[];
   actual: number[];
   influencers: Influencer[];
+  by_field_name?: string;
+  by_field_value?: string;
+  multi_bucket_impact?: number;
+  over_field_name?: string;
+  over_field_value?: string;
+}
+
+export interface AnomalyRecordSource extends AnomalyRecordDoc {
   earliest: string;
   latest: string;
 }
@@ -55,15 +63,17 @@ export interface AnomalyRecord {
 // Replaces the $ delimited tokens in the url_value of the custom URL configuration
 // with values from the supplied document.
 export function replaceTokensInUrlValue(
-  customUrlConfig: UrlConfig,
-  jobBucketSpanSecs: string,
-  doc: AnomalyRecord,
+  customUrlConfig: UrlConfig | KibanaUrlConfig,
+  jobBucketSpanSecs: number,
+  doc: AnomalyRecordDoc,
   timeFieldName: 'timestamp' | string
 ) {
   // If urlValue contains $earliest$ and $latest$ tokens, add in times to the test doc.
   const urlValue = customUrlConfig.url_value;
   const timestamp = doc[timeFieldName];
-  const timeRangeInterval = parseInterval(customUrlConfig.time_range);
+  const timeRangeInterval =
+    'time_range' in customUrlConfig ? parseInterval(customUrlConfig.time_range) : null;
+  const record = { ...doc } as AnomalyRecordSource;
   if (urlValue.includes('$earliest$')) {
     const earliestMoment = moment(timestamp);
     if (timeRangeInterval !== null) {
@@ -71,7 +81,7 @@ export function replaceTokensInUrlValue(
     } else {
       earliestMoment.subtract(jobBucketSpanSecs, 's');
     }
-    doc.earliest = earliestMoment.toISOString();
+    record.earliest = earliestMoment.toISOString();
   }
 
   if (urlValue.includes('$latest$')) {
@@ -81,15 +91,15 @@ export function replaceTokensInUrlValue(
     } else {
       latestMoment.add(jobBucketSpanSecs, 's');
     }
-    doc.latest = latestMoment.toISOString();
+    record.latest = latestMoment.toISOString();
   }
 
-  return getUrlForRecord(customUrlConfig, doc);
+  return getUrlForRecord(customUrlConfig, record);
 }
 
 // Returns the URL to open from the supplied config, with any dollar delimited tokens
 // substituted from the supplied anomaly record.
-export function getUrlForRecord(urlConfig: UrlConfig, record: AnomalyRecord) {
+export function getUrlForRecord(urlConfig: UrlConfig, record: AnomalyRecordSource) {
   if (isKibanaUrl(urlConfig) === true) {
     return buildKibanaUrl(urlConfig, record);
   } else {
@@ -134,7 +144,7 @@ function escapeForKQL(value: string): string {
 
 // Builds a Kibana dashboard or Discover URL from the supplied config, with any
 // dollar delimited tokens substituted from the supplied anomaly record.
-function buildKibanaUrl(urlConfig: UrlConfig, record: AnomalyRecord) {
+function buildKibanaUrl(urlConfig: UrlConfig, record: AnomalyRecordSource) {
   const urlValue = urlConfig.url_value;
 
   const queryLanguageEscapeCallback = urlValue.includes('language:lucene')
@@ -142,7 +152,7 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: AnomalyRecord) {
     : escapeForKQL;
 
   // Compose callback for characters escaping and encoding.
-  const getResultTokenValue: (v: string) => string = _.compose(
+  const getResultTokenValue: (v: string) => string = _.flow(
     queryLanguageEscapeCallback,
     // Kibana URLs used rison encoding, so escape with ! any ! or ' characters
     (v: string): string => v.replace(/[!']/g, '!$&'),
@@ -168,7 +178,7 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: AnomalyRecord) {
           // In cases where there are multiple influencer field values for an anomaly
           // combine values with OR operator e.g. `influencerField:value or influencerField:another_value`.
           const result = tokenValues
-            .map(value => `${name}:${getResultTokenValue(value)}`)
+            .map(value => `${name}:"${getResultTokenValue(value)}"`)
             .join(' or ');
           return tokenValues.length > 1 ? `(${result})` : result;
         })
