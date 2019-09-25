@@ -18,7 +18,6 @@
  */
 
 import { createFailError } from '@kbn/dev-utils';
-import _ from 'lodash';
 import {
   I18nConfig,
   matchEntriesWithExctractors,
@@ -43,7 +42,7 @@ export async function extractUntrackedMessagesTask({
   reporter: any;
 }) {
   const inputPaths = Array.isArray(path) ? path : [path || './'];
-  const availablePaths = _.flatten(Object.values(config.paths));
+  const availablePaths = Object.values(config.paths).flat();
   const ignore = availablePaths.concat([
     '**/build/**',
     '**/webpackShims/**',
