@@ -7,9 +7,9 @@
 import Slapshot from '@mattapperson/slapshot';
 import { SavedObject } from 'src/core/server';
 import { TokenAdapter } from './default';
-import { SODatabaseAdapter as SODatabaseAdapterType } from '../saved_objets_database/adapter_types';
-import { SODatabaseAdapter } from '../saved_objets_database/default';
-import { MemorizeSODatabaseAdapter } from '../saved_objets_database/memorize_adapter';
+import { SODatabaseAdapter as SODatabaseAdapterType } from '../saved_objects_database/adapter_types';
+import { SODatabaseAdapter } from '../saved_objects_database/default';
+import { MemorizeSODatabaseAdapter } from '../saved_objects_database/memorize_adapter';
 import { Token, TokenType } from './adapter_types';
 import { EncryptedSavedObjects } from '../encrypted_saved_objects/default';
 import { MemorizeEncryptedSavedObjects } from '../encrypted_saved_objects/memorize_adapter';

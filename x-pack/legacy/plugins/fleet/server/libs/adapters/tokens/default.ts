@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 import { SavedObject } from 'src/core/server';
-import { SODatabaseAdapter } from '../saved_objets_database/adapter_types';
+import { SODatabaseAdapter } from '../saved_objects_database/adapter_types';
 import { TokenType, Token, TokenAdapter as TokenAdapterType } from './adapter_types';
 import { EncryptedSavedObjects } from '../encrypted_saved_objects/default';
 import { FrameworkUser } from '../framework/adapter_types';

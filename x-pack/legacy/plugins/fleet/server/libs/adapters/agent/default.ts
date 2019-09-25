@@ -13,7 +13,7 @@ import {
   SortOptions,
   SavedObjectAgentAttributes,
 } from './adapter_type';
-import { SODatabaseAdapter } from '../saved_objets_database/adapter_types';
+import { SODatabaseAdapter } from '../saved_objects_database/adapter_types';
 import { FrameworkUser } from '../framework/adapter_types';
 
 export class AgentAdapter implements AgentAdapterType {
