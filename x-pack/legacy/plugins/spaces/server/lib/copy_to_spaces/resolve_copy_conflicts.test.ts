@@ -139,43 +139,43 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
     });
 
     expect(result).toMatchInlineSnapshot(`
-                                                      Object {
-                                                        "destination1": Object {
-                                                          "errors": undefined,
-                                                          "success": true,
-                                                          "successCount": 3,
-                                                        },
-                                                        "destination2": Object {
-                                                          "errors": undefined,
-                                                          "success": true,
-                                                          "successCount": 3,
-                                                        },
-                                                      }
-                                    `);
+      Object {
+        "destination1": Object {
+          "errors": undefined,
+          "success": true,
+          "successCount": 3,
+        },
+        "destination2": Object {
+          "errors": undefined,
+          "success": true,
+          "successCount": 3,
+        },
+      }
+    `);
 
     expect((savedObjectsService.importExport.getSortedObjectsForExport as jest.Mock).mock.calls)
       .toMatchInlineSnapshot(`
-                  Array [
-                    Array [
-                      Object {
-                        "exportSizeLimit": 1000,
-                        "includeReferencesDeep": true,
-                        "namespace": "sourceSpace",
-                        "objects": Array [
-                          Object {
-                            "id": "my-dashboard",
-                            "type": "dashboard",
-                          },
-                        ],
-                        "savedObjectsClient": null,
-                        "types": Array [
-                          "dashboard",
-                          "visualization",
-                        ],
-                      },
-                    ],
-                  ]
-            `);
+      Array [
+        Array [
+          Object {
+            "exportSizeLimit": 1000,
+            "includeReferencesDeep": true,
+            "namespace": "sourceSpace",
+            "objects": Array [
+              Object {
+                "id": "my-dashboard",
+                "type": "dashboard",
+              },
+            ],
+            "savedObjectsClient": null,
+            "types": Array [
+              "dashboard",
+              "visualization",
+            ],
+          },
+        ],
+      ]
+    `);
 
     expect((savedObjectsService.importExport.resolveImportErrors as jest.Mock).mock.calls)
       .toMatchInlineSnapshot(`
@@ -376,26 +376,26 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
     });
 
     expect(result).toMatchInlineSnapshot(`
-                        Object {
-                          "failure-space": Object {
-                            "errors": Array [
-                              [Error: Some error occurred!],
-                            ],
-                            "success": false,
-                            "successCount": 0,
-                          },
-                          "marketing": Object {
-                            "errors": undefined,
-                            "success": true,
-                            "successCount": 3,
-                          },
-                          "non-existent-space": Object {
-                            "errors": undefined,
-                            "success": true,
-                            "successCount": 3,
-                          },
-                        }
-                `);
+      Object {
+        "failure-space": Object {
+          "errors": Array [
+            [Error: Some error occurred!],
+          ],
+          "success": false,
+          "successCount": 0,
+        },
+        "marketing": Object {
+          "errors": undefined,
+          "success": true,
+          "successCount": 3,
+        },
+        "non-existent-space": Object {
+          "errors": undefined,
+          "success": true,
+          "successCount": 3,
+        },
+      }
+    `);
   });
 
   it(`handles stream read errors`, async () => {
