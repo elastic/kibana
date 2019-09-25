@@ -6,7 +6,12 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import {
+  ESTestIndexTool,
+  ES_TEST_INDEX_NAME,
+  getUrlPrefix,
+  ObjectRemover,
+} from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -14,75 +19,24 @@ export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
+  const retry = getService('retry');
+  const esTestIndexTool = new ESTestIndexTool(es, retry);
 
-  const esTestIndexName = '.kibaka-alerting-test-data';
   const authorizationIndex = '.kibana-test-authorization';
 
   describe('execute', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
-      await es.indices.delete({ index: esTestIndexName, ignore: [404] });
-      await es.indices.create({
-        index: esTestIndexName,
-        body: {
-          mappings: {
-            properties: {
-              source: {
-                type: 'keyword',
-              },
-              reference: {
-                type: 'keyword',
-              },
-              params: {
-                enabled: false,
-                type: 'object',
-              },
-              config: {
-                enabled: false,
-                type: 'object',
-              },
-              state: {
-                enabled: false,
-                type: 'object',
-              },
-            },
-          },
-        },
-      });
+      await esTestIndexTool.destroy();
+      await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
     });
     after(async () => {
-      await es.indices.delete({ index: esTestIndexName });
+      await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
       await objectRemover.removeAll();
     });
-
-    async function getTestIndexDoc(source: string, reference: string) {
-      const searchResult = await es.search({
-        index: esTestIndexName,
-        body: {
-          query: {
-            bool: {
-              must: [
-                {
-                  term: {
-                    source,
-                  },
-                },
-                {
-                  term: {
-                    reference,
-                  },
-                },
-              ],
-            },
-          },
-        },
-      });
-      expect(searchResult.hits.total.value).to.eql(1);
-      return searchResult.hits.hits[0];
-    }
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
@@ -112,7 +66,7 @@ export default function({ getService }: FtrProviderContext) {
             .send({
               params: {
                 reference,
-                index: esTestIndexName,
+                index: ES_TEST_INDEX_NAME,
                 message: 'Testing 123',
               },
             });
@@ -132,11 +86,16 @@ export default function({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.be.an('object');
-              const indexedRecord = await getTestIndexDoc('action:test.index-record', reference);
+              const searchResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+              expect(searchResult.hits.total.value).to.eql(1);
+              const indexedRecord = searchResult.hits.hits[0];
               expect(indexedRecord._source).to.eql({
                 params: {
                   reference,
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   message: 'Testing 123',
                 },
                 config: {
@@ -179,7 +138,7 @@ export default function({ getService }: FtrProviderContext) {
             .send({
               params: {
                 reference,
-                index: esTestIndexName,
+                index: ES_TEST_INDEX_NAME,
                 message: 'Testing 123',
               },
             });
@@ -247,7 +206,7 @@ export default function({ getService }: FtrProviderContext) {
             .send({
               params: {
                 reference,
-                index: esTestIndexName,
+                index: ES_TEST_INDEX_NAME,
                 message: 'Testing 123',
               },
             });
@@ -267,11 +226,16 @@ export default function({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.be.an('object');
-              const indexedRecord = await getTestIndexDoc('action:test.index-record', reference);
+              const searchResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+              expect(searchResult.hits.total.value).to.eql(1);
+              const indexedRecord = searchResult.hits.hits[0];
               expect(indexedRecord._source).to.eql({
                 params: {
                   reference,
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   message: 'Testing 123',
                 },
                 config: {
@@ -429,6 +393,7 @@ export default function({ getService }: FtrProviderContext) {
 
         it('should handle execute request appropriately and have proper callCluster and savedObjectsClient authorization', async () => {
           let indexedRecord: any;
+          let searchResult: any;
           const reference = `actions-execute-3:${user.username}`;
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/action`)
@@ -449,7 +414,7 @@ export default function({ getService }: FtrProviderContext) {
                 callClusterAuthorizationIndex: authorizationIndex,
                 savedObjectsClientType: 'dashboard',
                 savedObjectsClientId: '1',
-                index: esTestIndexName,
+                index: ES_TEST_INDEX_NAME,
                 reference,
               },
             });
@@ -467,7 +432,9 @@ export default function({ getService }: FtrProviderContext) {
             case 'global_read at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
-              indexedRecord = await getTestIndexDoc('action:test.authorization', reference);
+              searchResult = await esTestIndexTool.search('action:test.authorization', reference);
+              expect(searchResult.hits.total.value).to.eql(1);
+              indexedRecord = searchResult.hits.hits[0];
               expect(indexedRecord._source.state).to.eql({
                 callClusterSuccess: false,
                 savedObjectsClientSuccess: false,
@@ -486,7 +453,9 @@ export default function({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
-              indexedRecord = await getTestIndexDoc('action:test.authorization', reference);
+              searchResult = await esTestIndexTool.search('action:test.authorization', reference);
+              expect(searchResult.hits.total.value).to.eql(1);
+              indexedRecord = searchResult.hits.hits[0];
               expect(indexedRecord._source.state).to.eql({
                 callClusterSuccess: true,
                 savedObjectsClientSuccess: false,
