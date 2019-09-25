@@ -24,12 +24,17 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { UiSettingsClientContract, SavedObjectsClientContract, CoreStart } from 'src/core/public';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
-import { SearchBar, SearchBarProps } from '../../../../core_plugins/data/public';
+import {
+  SearchBar,
+  SearchBarProps,
+  TimeHistoryContract,
+} from '../../../../core_plugins/data/public';
 
 type Props = Partial<SearchBarProps> & {
   name: string;
   uiSettings: UiSettingsClientContract;
   savedObjectsClient: SavedObjectsClientContract;
+  timeHistory: TimeHistoryContract;
   toasts: CoreStart['notifications']['toasts'];
   config?: TopNavMenuData[];
   showSearchBar?: boolean;
@@ -58,9 +63,11 @@ export function TopNavMenu(props: Props) {
 
   function renderSearchBar() {
     // Validate presense of all required fields
-    if (!props.showSearchBar || !props.savedObjectsClient || !props.http) return;
+    if (!props.showSearchBar || !props.savedObjectsClient || !props.timeHistory || !props.http)
+      return;
     return (
       <SearchBar
+        timeHistory={props.timeHistory}
         savedObjectsClient={props.savedObjectsClient}
         http={props.http}
         query={props.query}

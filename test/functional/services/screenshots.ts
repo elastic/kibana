@@ -40,7 +40,9 @@ export async function ScreenshotsProvider({ getService }: FtrProviderContext) {
   const SESSION_DIRECTORY = resolve(config.get('screenshots.directory'), 'session');
   const FAILURE_DIRECTORY = resolve(config.get('screenshots.directory'), 'failure');
   const BASELINE_DIRECTORY = resolve(config.get('screenshots.directory'), 'baseline');
-  await del([SESSION_DIRECTORY, FAILURE_DIRECTORY]);
+  if (!process.env.IS_PIPELINE_JOB) {
+    await del([SESSION_DIRECTORY, FAILURE_DIRECTORY]);
+  }
 
   class Screenshots {
     /**

@@ -56,7 +56,7 @@ export function ExpressionWrapper({
         </EuiFlexGroup>
       ) : (
         <ExpressionRendererComponent
-          className="lnsExpressionOutput"
+          className="lnsExpressionRenderer"
           expression={expression}
           onRenderFailure={(e: unknown) => {
             setExpressionError(e);

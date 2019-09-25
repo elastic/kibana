@@ -27,18 +27,21 @@ describe('serialize', () => {
           icon: { class: 'a', code: '', label: '' },
           name: 'field1',
           selected: true,
+          type: 'string',
         },
         {
           color: 'black',
           icon: { class: 'b', code: '', label: '' },
           name: 'field2',
           selected: true,
+          type: 'string',
         },
         {
           color: 'black',
           icon: { class: 'c', code: '', label: '' },
           name: 'field3',
           selected: false,
+          type: 'string',
         },
       ],
       selectedFields: [
@@ -47,12 +50,14 @@ describe('serialize', () => {
           icon: { class: 'a', code: '', label: '' },
           name: 'field1',
           selected: true,
+          type: 'string',
         },
         {
           color: 'black',
           icon: { class: 'b', code: '', label: '' },
           name: 'field2',
           selected: true,
+          type: 'string',
         },
       ],
       selectedIndex: {

@@ -32,7 +32,7 @@ import { VisProvider } from '../../../vis';
 import { getVisualizeLoader } from '../visualize_loader';
 import { EmbeddedVisualizeHandler } from '../embedded_visualize_handler';
 import { Inspector } from '../../../inspector/inspector';
-import { dispatchRenderComplete } from '../../../render_complete';
+import { dispatchRenderComplete } from '../../../../../../plugins/kibana_utils/public';
 import { PipelineDataLoader } from '../pipeline_data_loader';
 import { PersistedState } from '../../../persisted_state';
 import { DataAdapter, RequestAdapter } from '../../../inspector/adapters';
@@ -154,7 +154,7 @@ describe('visualize loader', () => {
 
       it('should render the visualize element', () => {
         const container = newContainer();
-        loader.embedVisualizationWithSavedObject(container[0], createSavedObject(), { });
+        loader.embedVisualizationWithSavedObject(container[0], createSavedObject(), {});
         expect(container.find('[data-test-subj="visualizationLoader"]').length).to.be(1);
       });
 
@@ -162,7 +162,7 @@ describe('visualize loader', () => {
         const container = newContainer();
         const savedObject = createSavedObject();
         const paramsBefore = cloneDeep(vis.params);
-        loader.embedVisualizationWithSavedObject(container[0], savedObject, { });
+        loader.embedVisualizationWithSavedObject(container[0], savedObject, {});
         const paramsAfter = cloneDeep(vis.params);
         expect(paramsBefore).to.eql(paramsAfter);
       });
@@ -332,8 +332,8 @@ describe('visualize loader', () => {
           });
 
           it('should allow adding custom inspector adapters via the custom key', () => {
-            const Foodapter =  class {};
-            const Bardapter = class {};
+            const Foodapter = class { };
+            const Bardapter = class { };
             const savedObj = createSavedObject();
             savedObj.vis.type.inspectorAdapters = {
               custom: { foo: Foodapter, bar: Bardapter }
@@ -344,7 +344,7 @@ describe('visualize loader', () => {
           });
 
           it('should not share adapter instances between vis instances', () => {
-            const Foodapter = class {};
+            const Foodapter = class { };
             const savedObj1 = createSavedObject();
             const savedObj2 = createSavedObject();
             savedObj1.vis.type.inspectorAdapters = { custom: { foo: Foodapter } };
