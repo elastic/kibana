@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { singleLineScript } from '../lib/single_line_script';
+import { singleLineScript } from './single_line_script';
 import { COMPARATORS } from '../../../../common/constants';
 const { BETWEEN } = COMPARATORS;
 /*
 watch.transform.script.inline
  */
-function buildInline({ aggType, hasTermsAgg, thresholdComparator }) {
+function buildInline(aggType, thresholdComparator, hasTermsAgg) {
   let script = '';
 
   if (aggType === 'count' && !hasTermsAgg) {
@@ -119,7 +119,7 @@ function buildInline({ aggType, hasTermsAgg, thresholdComparator }) {
 /*
 watch.transform.script.params
  */
-function buildParams({ threshold }) {
+function buildParams(threshold) {
   return {
     threshold
   };
@@ -128,11 +128,11 @@ function buildParams({ threshold }) {
 /*
 watch.transform
  */
-export function buildTransform(watch) {
+export function buildTransform({ aggType, thresholdComparator, hasTermsAgg, threshold }) {
   return {
     script: {
-      source: buildInline(watch),
-      params: buildParams(watch)
+      source: buildInline(aggType, thresholdComparator, hasTermsAgg),
+      params: buildParams(threshold)
     }
   };
 }
