@@ -19,6 +19,7 @@ This is the description",
   }
   date="10/10/2020"
   repoUri="github.com/elastic/code"
+  showRepoLink={false}
 >
   <EuiPanel
     className="code-timeline__commit--root"

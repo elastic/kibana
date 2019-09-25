@@ -23,7 +23,12 @@ describe('Commit component', () => {
       treeId: '96440ceb55e04a99d33c1c8ee021400a680fbf74',
     };
     const wrapper = mount(
-      <Commit commit={commitInfo} date="10/10/2020" repoUri="github.com/elastic/code" />
+      <Commit
+        showRepoLink={false}
+        commit={commitInfo}
+        date="10/10/2020"
+        repoUri="github.com/elastic/code"
+      />
     );
 
     expect(toJson(wrapper)).toMatchSnapshot();
