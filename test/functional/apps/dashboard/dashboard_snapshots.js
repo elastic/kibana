@@ -28,7 +28,6 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
 
   describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
-      // await esArchiver.load('dashboard/current/kibana');
       // We use a really small window to minimize differences across os's and browsers.
       await browser.setScreenshotSize(1000, 500);
     });
