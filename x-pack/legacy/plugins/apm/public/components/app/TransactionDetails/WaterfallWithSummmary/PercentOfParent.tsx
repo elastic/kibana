@@ -9,28 +9,30 @@ import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 import { asPercent } from '../../../../utils/formatters';
 
-interface PercentOfTraceProps {
+interface PercentOfParentProps {
   duration: number;
   totalDuration?: number;
+  parentType: 'trace' | 'transaction';
 }
 
-export function PercentOfTrace({
+export function PercentOfParent({
   duration,
-  totalDuration
-}: PercentOfTraceProps) {
+  totalDuration,
+  parentType
+}: PercentOfParentProps) {
   totalDuration = totalDuration || duration;
   const isOver100 = duration > totalDuration;
-  const percentOfTrace = isOver100
+  const percentOfParent = isOver100
     ? '>100%'
     : asPercent(duration, totalDuration, '');
 
-  const percentOfTraceText = i18n.translate(
-    'xpack.apm.transactionDetails.percentOfTrace',
-    {
-      defaultMessage: '{value} of trace',
-      values: { value: percentOfTrace }
-    }
-  );
+  const percentOfParentText = i18n.translate('xpack.apm.percentOfParent', {
+    defaultMessage:
+      '({value} of {parentType, select, transaction { transaction } trace {trace} })',
+    values: { value: percentOfParent, parentType }
+  });
+
+  const childType = parentType === 'trace' ? 'transaction' : 'span';
 
   return (
     <>
@@ -40,14 +42,18 @@ export function PercentOfTrace({
             'xpack.apm.transactionDetails.percentOfTraceLabelExplanation',
             {
               defaultMessage:
-                'The % of trace exceeds 100% because this transaction takes longer than the root transaction.'
+                'The % of {parentType, select, transaction {transaction} trace {trace} } exceeds 100% because this {childType, select, span {span} transaction {transaction} } takes longer than the root transaction.',
+              values: {
+                parentType,
+                childType
+              }
             }
           )}
         >
-          <>{percentOfTraceText}</>
+          <>{percentOfParentText}</>
         </EuiToolTip>
       ) : (
-        `(${percentOfTraceText})`
+        percentOfParentText
       )}
     </>
   );
