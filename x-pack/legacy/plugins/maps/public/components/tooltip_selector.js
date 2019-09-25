@@ -5,6 +5,7 @@
  */
 
 import React, { Component } from 'react';
+import classNames from 'classnames';
 import {
   EuiButtonIcon,
   EuiDragDropContext,
@@ -81,7 +82,7 @@ export class TooltipSelector extends Component {
     return (
       <EuiDragDropContext onDragEnd={this._onDragEnd}>
         <EuiDroppable droppableId="mapLayerTOC" spacing="none">
-          {() => (
+          {(provided, snapshot) => (
             this.props.tooltipProperties.map((propertyName, idx) => (
               <EuiDraggable
                 spacing="none"
@@ -91,8 +92,13 @@ export class TooltipSelector extends Component {
                 customDragHandle={true}
                 disableInteractiveElementBlocking // Allows button to be drag handle
               >
-                {(provided) => (
-                  <div className="mapTooltipSelector__propertyRow">
+                {(provided, state) => (
+                  <div
+                    className={classNames('mapTooltipSelector__propertyRow', {
+                      'mapTooltipSelector__propertyRow-isDragging': state.isDragging,
+                      'mapTooltipSelector__propertyRow-isDraggingOver': snapshot.isDraggingOver
+                    })}
+                  >
                     <EuiText className="mapTooltipSelector__propertyContent">
                       {this._getPropertyLabel(propertyName)}
                     </EuiText>

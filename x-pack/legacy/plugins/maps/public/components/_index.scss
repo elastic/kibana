@@ -35,6 +35,16 @@
   }
 }
 
+.mapTooltipSelector__propertyRow-isDragging {
+  @include euiBottomShadowMedium;
+}
+
+.mapTooltipSelector__propertyRow-isDraggingOver {
+  background-color: $euiColorEmptyShade;
+  // Don't allow interaction events while layer is being re-ordered
+  pointer-events: none !important;
+}
+
 .mapTooltipSelector__propertyContent {
   overflow: hidden;
   flex-grow: 1;
