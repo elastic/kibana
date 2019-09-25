@@ -405,6 +405,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         <EuiFlexItem>
           <div className="lnsInnerIndexPatternDataPanel__filterWrapper">
             <EuiFormControlLayout
+              icon="search"
               clear={{
                 title: i18n.translate('xpack.lens.indexPatterns.clearFiltersLabel', {
                   defaultMessage: 'Clear name and type filters',
@@ -422,10 +423,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               }}
             >
               <input
-                className="euiFieldText"
+                className="euiFieldText lnsInnerIndexPatternDataPanel__textField"
                 data-test-subj="lnsIndexPatternFieldSearch"
                 placeholder={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
-                  defaultMessage: 'Search fields',
+                  defaultMessage: 'Search for fields',
                   description:
                     'Search the list of fields in the index pattern for the provided text',
                 })}
