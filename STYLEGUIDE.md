@@ -211,21 +211,6 @@ const first = arr[0];
 const second = arr[1];
 ```
 
-### Declare one variable per line, wherever it makes the most sense
-
-This makes it easier to re-order the lines. However, declari variables
-wherever it makes sense (not necessairly on the top of a function).
-
-```js
-// good
-const keys = ['foo', 'bar'];
-const values = [23, 42];
-
-// bad
-const keys = ['foo', 'bar'],
-      values = [23, 42];
-```
-
 ### Prefix private class methods with an underscore `JS only`
 
 Identifying private class methods makes it easier to differentiate a class's public and internal

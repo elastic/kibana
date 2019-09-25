@@ -142,6 +142,7 @@ module.exports = {
           'no-var': 'error',
           'object-curly-spacing': 'error',
           'object-shorthand': 'error',
+          'one-var': [ 'error', 'never' ],
           'prefer-const': 'error',
           'quotes': ['error', 'double', { 'avoidEscape': true }],
           'quote-props': ['error', 'consistent-as-needed'],
