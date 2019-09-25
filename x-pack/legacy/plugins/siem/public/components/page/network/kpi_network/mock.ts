@@ -217,6 +217,7 @@ export const mockEnableChartsData = {
   grow: 2,
   id: 'statItem',
   index: 4,
+  statKey: 'UniqueIps',
   to: 1560837600000,
   narrowDateRange: mockNarrowDateRange,
 };
