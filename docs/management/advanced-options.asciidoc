@@ -186,7 +186,7 @@ Refresh the page to apply the changes.
 
 [horizontal]
 `courier:batchSearches`:: When disabled, dashboard panels will load individually, and search requests will be
-terminated when users navigate away or update the query. When disabled, dashboard panels will load altogether
+terminated when users navigate away or update the query. When enabled, dashboard panels will load altogether
 when all of the data has been loaded.
 `courier:customRequestPreference`:: {ref}/search-request-body.html#request-body-search-preference[Request preference] 
 to use when `courier:setRequestPreference` is set to "custom".
