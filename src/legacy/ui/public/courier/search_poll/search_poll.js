@@ -28,41 +28,41 @@ export class SearchPoll {
     this._timerId = null;
   }
 
-    setIntervalInMs = intervalInMs => {
-      this._intervalInMs = _.parseInt(intervalInMs);
-    };
+  setIntervalInMs = intervalInMs => {
+    this._intervalInMs = _.parseInt(intervalInMs);
+  };
 
-    resume = () => {
-      this._isPolling = true;
-      this.resetTimer();
-    };
+  resume = () => {
+    this._isPolling = true;
+    this.resetTimer();
+  };
 
-    pause = () => {
-      this._isPolling = false;
-      this.clearTimer();
-    };
+  pause = () => {
+    this._isPolling = false;
+    this.clearTimer();
+  };
 
-    resetTimer = () => {
-      // Cancel the pending search and schedule a new one.
-      this.clearTimer();
+  resetTimer = () => {
+    // Cancel the pending search and schedule a new one.
+    this.clearTimer();
 
-      if (this._isPolling) {
-        this._timerId = setTimeout(this._search, this._intervalInMs);
-      }
-    };
+    if (this._isPolling) {
+      this._timerId = setTimeout(this._search, this._intervalInMs);
+    }
+  };
 
-    clearTimer = () => {
-      // Cancel the pending search, if there is one.
-      if (this._timerId) {
-        clearTimeout(this._timerId);
-        this._timerId = null;
-      }
-    };
+  clearTimer = () => {
+    // Cancel the pending search, if there is one.
+    if (this._timerId) {
+      clearTimeout(this._timerId);
+      this._timerId = null;
+    }
+  };
 
-    _search = () => {
-      // Schedule another search.
-      this.resetTimer();
+  _search = () => {
+    // Schedule another search.
+    this.resetTimer();
 
-      timefilter.notifyShouldFetch();
-    };
+    timefilter.notifyShouldFetch();
+  };
 }

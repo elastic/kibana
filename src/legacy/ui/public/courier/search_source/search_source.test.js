@@ -17,4 +17,291 @@
  * under the License.
  */
 
+import { SearchSource } from '../search_source';
 
+let mockConfig = {};
+
+jest.mock('ui/new_platform', () => ({
+  npSetup: {
+    core: {
+      uiSettings: {
+        get: key => mockConfig[key]
+      },
+      injectedMetadata: {
+        getInjectedVar: () => 0,
+      }
+    }
+  }
+}));
+
+jest.mock('../fetch', () => ({
+  fetchSoon: jest.fn(),
+}));
+
+const indexPattern = { title: 'foo' };
+const indexPattern2 = { title: 'foo' };
+
+describe('SearchSource', function () {
+  describe('#setField()', function () {
+    it('sets the value for the property', function () {
+      const searchSource = new SearchSource();
+      searchSource.setField('aggs', 5);
+      expect(searchSource.getField('aggs')).toBe(5);
+    });
+
+    it('throws an error if the property is not accepted', function () {
+      const searchSource = new SearchSource();
+      expect(() => searchSource.setField('index', 5)).toThrow();
+    });
+  });
+
+  describe('#getField()', function () {
+    it('gets the value for the property', function () {
+      const searchSource = new SearchSource();
+      searchSource.setField('aggs', 5);
+      expect(searchSource.getField('aggs')).toBe(5);
+    });
+
+    it('throws an error if the property is not accepted', function () {
+      const searchSource = new SearchSource();
+      expect(() => searchSource.getField('unacceptablePropName')).toThrow();
+    });
+  });
+
+  describe(`#setField('index')`, function () {
+    describe('auto-sourceFiltering', function () {
+      describe('new index pattern assigned', function () {
+        it('generates a searchSource filter', function () {
+          const searchSource = new SearchSource();
+          expect(searchSource.getField('index')).toBe(undefined);
+          expect(searchSource.getField('source')).toBe(undefined);
+          searchSource.setField('index', indexPattern);
+          expect(searchSource.getField('index')).toBe(indexPattern);
+          expect(typeof searchSource.getField('source')).toBe('function');
+        });
+
+        it('removes created searchSource filter on removal', function () {
+          const searchSource = new SearchSource();
+          searchSource.setField('index', indexPattern);
+          searchSource.setField('index', null);
+          expect(searchSource.getField('index')).toBe(undefined);
+          expect(searchSource.getField('source')).toBe(undefined);
+        });
+      });
+
+      describe('new index pattern assigned over another', function () {
+        it('replaces searchSource filter with new', function () {
+          const searchSource = new SearchSource();
+          searchSource.setField('index', indexPattern);
+          const searchSourceFilter1 = searchSource.getField('source');
+          searchSource.setField('index', indexPattern2);
+          expect(searchSource.getField('index')).toBe(indexPattern2);
+          expect(typeof searchSource.getField('source')).toBe('function');
+          expect(searchSource.getField('source')).not.toBe(searchSourceFilter1);
+        });
+
+        it('removes created searchSource filter on removal', function () {
+          const searchSource = new SearchSource();
+          searchSource.setField('index', indexPattern);
+          searchSource.setField('index', indexPattern2);
+          searchSource.setField('index', null);
+          expect(searchSource.getField('index')).toBe(undefined);
+          expect(searchSource.getField('source')).toBe(undefined);
+        });
+      });
+
+      describe('ip assigned before custom searchSource filter', function () {
+        it('custom searchSource filter becomes new searchSource', function () {
+          const searchSource = new SearchSource();
+          const football = {};
+          searchSource.setField('index', indexPattern);
+          expect(typeof searchSource.getField('source')).toBe('function');
+          searchSource.setField('source', football);
+          expect(searchSource.getField('index')).toBe(indexPattern);
+          expect(searchSource.getField('source')).toBe(football);
+        });
+
+        it('custom searchSource stays after removal', function () {
+          const searchSource = new SearchSource();
+          const football = {};
+          searchSource.setField('index', indexPattern);
+          searchSource.setField('source', football);
+          searchSource.setField('index', null);
+          expect(searchSource.getField('index')).toBe(undefined);
+          expect(searchSource.getField('source')).toBe(football);
+        });
+      });
+
+      describe('ip assigned after custom searchSource filter', function () {
+        it('leaves the custom filter in place', function () {
+          const searchSource = new SearchSource();
+          const football = {};
+          searchSource.setField('source', football);
+          searchSource.setField('index', indexPattern);
+          expect(searchSource.getField('index')).toBe(indexPattern);
+          expect(searchSource.getField('source')).toBe(football);
+        });
+
+        it('custom searchSource stays after removal', function () {
+          const searchSource = new SearchSource();
+          const football = {};
+          searchSource.setField('source', football);
+          searchSource.setField('index', indexPattern);
+          searchSource.setField('index', null);
+          expect(searchSource.getField('index')).toBe(undefined);
+          expect(searchSource.getField('source')).toBe(football);
+        });
+      });
+    });
+  });
+
+  describe('#onRequestStart()', () => {
+    it('should be called when starting a request', async () => {
+      const searchSource = new SearchSource();
+      const fn = jest.fn();
+      searchSource.onRequestStart(fn);
+      const request = {};
+      const options = {};
+      searchSource.requestIsStarting(request, options);
+      expect(fn).toBeCalledWith(searchSource, request, options);
+    });
+
+    it('should not be called on parent searchSource', async () => {
+      const parent = new SearchSource();
+      const searchSource = new SearchSource().setParent(parent);
+
+      const fn = jest.fn();
+      searchSource.onRequestStart(fn);
+      const parentFn = jest.fn();
+      parent.onRequestStart(parentFn);
+      const request = {};
+      const options = {};
+      searchSource.requestIsStarting(request, options);
+
+      expect(fn).toBeCalledWith(searchSource, request, options);
+      expect(parentFn).not.toBeCalled();
+    });
+
+    it('should be called on parent searchSource if callParentStartHandlers is true', async () => {
+      const parent = new SearchSource();
+      const searchSource = new SearchSource().setParent(parent, { callParentStartHandlers: true });
+
+      const fn = jest.fn();
+      searchSource.onRequestStart(fn);
+      const parentFn = jest.fn();
+      parent.onRequestStart(parentFn);
+      const request = {};
+      const options = {};
+      searchSource.requestIsStarting(request, options);
+
+      expect(fn).toBeCalledWith(searchSource, request, options);
+      expect(parentFn).toBeCalledWith(searchSource, request, options);
+    });
+  });
+
+  describe('#_mergeProp', function () {
+    describe('filter', function () {
+      let previousMockConfig;
+      let searchSource;
+      let state;
+
+      beforeEach(function () {
+        previousMockConfig = mockConfig;
+        searchSource = new SearchSource();
+        state = {};
+      });
+
+      afterEach(() => {
+        mockConfig = previousMockConfig;
+      });
+
+      [null, undefined].forEach(falsyValue => {
+        it(`ignores ${falsyValue} filter`, function () {
+          searchSource._mergeProp(state, falsyValue, 'filter');
+          expect(state.filters).toBe(undefined);
+        });
+      });
+
+      [false, 0, '', NaN].forEach(falsyValue => {
+        it(`doesn't add ${falsyValue} filter`, function () {
+          searchSource._mergeProp(state, falsyValue, 'filter');
+          expect(state.filters).toEqual([]);
+        });
+      });
+
+      it('adds "meta.disabled: undefined" filter', function () {
+        const filter = {
+          meta: {}
+        };
+        searchSource._mergeProp(state, filter, 'filter');
+        expect(state.filters).toEqual([filter]);
+      });
+
+      it('adds "meta.disabled: false" filter', function () {
+        const filter = {
+          meta: {
+            disabled: false
+          }
+        };
+        searchSource._mergeProp(state, filter, 'filter');
+        expect(state.filters).toEqual([filter]);
+      });
+
+      it(`doesn't add "meta.disabled: true" filter`, function () {
+        const filter = {
+          meta: {
+            disabled: true
+          }
+        };
+        searchSource._mergeProp(state, filter, 'filter');
+        expect(state.filters).toEqual([]);
+      });
+
+      describe('when courier:ignoreFilterIfFieldNotInIndex is false', function () {
+        it('adds filter for non-existent field', function () {
+          mockConfig = { 'courier:ignoreFilterIfFieldNotInIndex': false };
+          const filter = {
+            meta: {
+              key: 'bar'
+            }
+          };
+          state.index = {
+            fields: []
+          };
+          searchSource._mergeProp(state, filter, 'filter');
+          expect(state.filters).toEqual([ filter ]);
+        });
+      });
+
+      describe('when courier:ignoreFilterIfFieldNotInIndex is true', function () {
+        it(`doesn't add filter for non-existent field`, function () {
+          mockConfig = { 'courier:ignoreFilterIfFieldNotInIndex': true };
+          const filter = {
+            meta: {
+              key: 'bar'
+            }
+          };
+          state.index = {
+            fields: []
+          };
+          searchSource._mergeProp(state, filter, 'filter');
+          expect(state.filters).toEqual([]);
+        });
+
+        it(`adds filter for existent field`, function () {
+          mockConfig = { 'courier:ignoreFilterIfFieldNotInIndex': true };
+          const filter = {
+            meta: {
+              key: 'bar'
+            }
+          };
+          state.index = {
+            fields: [{ name: 'bar' }]
+          };
+          searchSource._mergeProp(state, filter, 'filter');
+          expect(state.filters).toEqual([ filter ]);
+        });
+      });
+    });
+  });
+});
