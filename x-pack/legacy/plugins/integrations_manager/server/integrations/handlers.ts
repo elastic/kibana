@@ -44,15 +44,13 @@ type AssetRequestParams = PackageRequest['params'] & {
 };
 
 export async function handleGetCategories(req: Request, extra: Extra) {
-  return getCategories(extra.context.getConfig().registryUrl);
+  return getCategories();
 }
 
 export async function handleGetList(req: ListIntegrationsRequest, extra: Extra) {
   const savedObjectsClient = getClient(req);
-  const { registryUrl } = extra.context.getConfig();
   const integrationList = await getIntegrations({
     savedObjectsClient,
-    registryUrl,
     category: req.query.category,
   });
 
@@ -62,15 +60,13 @@ export async function handleGetList(req: ListIntegrationsRequest, extra: Extra) 
 export async function handleGetInfo(req: PackageRequest, extra: Extra) {
   const { pkgkey } = req.params;
   const savedObjectsClient = getClient(req);
-  const { registryUrl } = extra.context.getConfig();
-  const integrationInfo = await getIntegrationInfo({ savedObjectsClient, pkgkey, registryUrl });
+  const integrationInfo = await getIntegrationInfo({ savedObjectsClient, pkgkey });
 
   return integrationInfo;
 }
 
 export async function handleRequestInstall(req: InstallAssetRequest, extra: Extra) {
   const { pkgkey, asset } = req.params;
-  const { registryUrl } = extra.context.getConfig();
   if (!asset) throw new Error('Unhandled empty/default asset case');
 
   const savedObjectsClient = getClient(req);
@@ -78,7 +74,6 @@ export async function handleRequestInstall(req: InstallAssetRequest, extra: Extr
   const object = await installIntegration({
     savedObjectsClient,
     pkgkey,
-    registryUrl,
     asset,
     callCluster,
   });

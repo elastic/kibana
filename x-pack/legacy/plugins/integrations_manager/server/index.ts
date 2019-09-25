@@ -6,7 +6,7 @@
 import { Plugin, IntegrationsManagerPluginInitializerContext } from './plugin';
 
 // Kibana NP needs config to be exported from here, see https://github.com/elastic/kibana/pull/45299/files#r323254805
-import { config } from './config.schema';
+import { config } from './config';
 export { config };
 
 export function plugin(initializerContext: IntegrationsManagerPluginInitializerContext) {

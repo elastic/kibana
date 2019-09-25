@@ -14,16 +14,14 @@ import { getObjects } from './get_objects';
 export async function installIntegration(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-  registryUrl: string;
   asset: AssetType;
   callCluster: CallESAsCurrentUser;
 }) {
-  const { savedObjectsClient, pkgkey, registryUrl, asset, callCluster } = options;
+  const { savedObjectsClient, pkgkey, asset, callCluster } = options;
   // install any assets (in ES, as Saved Objects, etc) as required. Get references to them
   const toSave = await installAssets({
     savedObjectsClient,
     pkgkey,
-    registryUrl,
     asset,
     callCluster,
   });
@@ -47,17 +45,16 @@ export async function installIntegration(options: {
 export async function installAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-  registryUrl: string;
   asset: AssetType;
   callCluster: CallESAsCurrentUser;
 }) {
-  const { savedObjectsClient, pkgkey, registryUrl, asset, callCluster } = options;
+  const { savedObjectsClient, pkgkey, asset, callCluster } = options;
   if (assetUsesObjects(asset)) {
     const references = await installObjects({ savedObjectsClient, pkgkey, asset });
     return references;
   }
   if (asset === 'ingest-pipeline') {
-    const references = await installPipelines({ callCluster, pkgkey, registryUrl });
+    const references = await installPipelines({ callCluster, pkgkey });
     return references;
   }
 
@@ -109,15 +106,13 @@ async function installObjects({
 async function installPipelines({
   callCluster,
   pkgkey,
-  registryUrl,
 }: {
   callCluster: CallESAsCurrentUser;
   pkgkey: string;
-  registryUrl: string;
 }) {
   const isPipeline = ({ path }: Registry.ArchiveEntry) =>
     Registry.pathParts(path).type === 'ingest-pipeline';
-  const paths = await Registry.getArchiveInfo(pkgkey, registryUrl, isPipeline);
+  const paths = await Registry.getArchiveInfo(pkgkey, isPipeline);
   const installationPromises = paths.map(path => installPipeline({ callCluster, path }));
   const references = await Promise.all(installationPromises);
 

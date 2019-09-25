@@ -17,6 +17,7 @@ import { cacheGet, cacheSet } from './cache';
 import { ArchiveEntry, untarBuffer } from './extract';
 import { fetchUrl, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
+import { integrationsManagerConfigStore } from '../config';
 
 export { ArchiveEntry } from './extract';
 
@@ -24,8 +25,10 @@ export interface SearchParams {
   category?: CategoryId;
 }
 
-export async function fetchList(registryUrl: string, params?: SearchParams): Promise<RegistryList> {
-  const url = new URL(`${registryUrl}/search`);
+// const { registryUrl } = integrationsManagerConfigStore.getConfig();
+
+export async function fetchList(params?: SearchParams): Promise<RegistryList> {
+  const url = new URL(`${integrationsManagerConfigStore.getConfig().registryUrl}/search`);
   if (params && params.category) {
     url.searchParams.set('category', params.category);
   }
@@ -33,17 +36,20 @@ export async function fetchList(registryUrl: string, params?: SearchParams): Pro
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-export async function fetchInfo(key: string, registryUrl: string): Promise<RegistryPackage> {
-  return fetchUrl(`${registryUrl}/package/${key}`).then(JSON.parse);
+export async function fetchInfo(key: string): Promise<RegistryPackage> {
+  return fetchUrl(`${integrationsManagerConfigStore.getConfig().registryUrl}/package/${key}`).then(
+    JSON.parse
+  );
 }
 
-export async function fetchCategories(registryUrl: string): Promise<CategorySummaryList> {
-  return fetchUrl(`${registryUrl}/categories`).then(JSON.parse);
+export async function fetchCategories(): Promise<CategorySummaryList> {
+  return fetchUrl(`${integrationsManagerConfigStore.getConfig().registryUrl}/categories`).then(
+    JSON.parse
+  );
 }
 
 export async function getArchiveInfo(
   pkgkey: string,
-  registryUrl: string,
   filter = (entry: ArchiveEntry): boolean => true
 ): Promise<string[]> {
   // assume .tar.gz for now. add support for .zip if/when we need it
@@ -59,7 +65,7 @@ export async function getArchiveInfo(
     }
   };
 
-  await extract(key, registryUrl, filter, onEntry);
+  await extract(key, filter, onEntry);
 
   return paths;
 }
@@ -73,19 +79,18 @@ export function pathParts(path: string): AssetParts {
 
 async function extract(
   key: string,
-  registryUrl: string,
   filter = (entry: ArchiveEntry): boolean => true,
   onEntry: (entry: ArchiveEntry) => void
 ) {
-  const archiveBuffer = await getOrFetchArchiveBuffer(key, registryUrl);
+  const archiveBuffer = await getOrFetchArchiveBuffer(key);
 
   return untarBuffer(archiveBuffer, filter, onEntry);
 }
 
-async function getOrFetchArchiveBuffer(key: string, registryUrl: string): Promise<Buffer> {
+async function getOrFetchArchiveBuffer(key: string): Promise<Buffer> {
   let buffer = cacheGet(key);
   if (!buffer) {
-    buffer = await fetchArchiveBuffer(key, registryUrl);
+    buffer = await fetchArchiveBuffer(key);
     cacheSet(key, buffer);
   }
 
@@ -96,8 +101,10 @@ async function getOrFetchArchiveBuffer(key: string, registryUrl: string): Promis
   }
 }
 
-async function fetchArchiveBuffer(key: string, registryUrl: string): Promise<Buffer> {
-  return getResponseStream(`${registryUrl}/package/${key}`).then(streamToBuffer);
+async function fetchArchiveBuffer(key: string): Promise<Buffer> {
+  return getResponseStream(
+    `${integrationsManagerConfigStore.getConfig().registryUrl}/package/${key}`
+  ).then(streamToBuffer);
 }
 
 export function getAsset(key: string) {

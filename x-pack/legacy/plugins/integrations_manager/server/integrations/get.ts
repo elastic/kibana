@@ -16,24 +16,21 @@ function nameAsTitle(name: string) {
   return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();
 }
 
-export async function getCategories(registryUrl: string) {
-  return Registry.fetchCategories(registryUrl);
+export async function getCategories() {
+  return Registry.fetchCategories();
 }
 
 export async function getIntegrations(
   options: {
     savedObjectsClient: SavedObjectsClientContract;
-    registryUrl: string;
   } & Registry.SearchParams
 ) {
-  const { savedObjectsClient, registryUrl } = options;
-  const registryItems = await Registry.fetchList(registryUrl, { category: options.category }).then(
-    items => {
-      return items.map(item =>
-        Object.assign({}, item, { title: item.title || nameAsTitle(item.name) })
-      );
-    }
-  );
+  const { savedObjectsClient } = options;
+  const registryItems = await Registry.fetchList({ category: options.category }).then(items => {
+    return items.map(item =>
+      Object.assign({}, item, { title: item.title || nameAsTitle(item.name) })
+    );
+  });
   const searchObjects = registryItems.map(({ name, version }) => ({
     type: SAVED_OBJECT_TYPE,
     id: `${name}-${version}`,
@@ -54,13 +51,12 @@ export async function getIntegrations(
 export async function getIntegrationInfo(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-  registryUrl: string;
 }) {
-  const { savedObjectsClient, pkgkey, registryUrl } = options;
+  const { savedObjectsClient, pkgkey } = options;
   const [item, savedObject, paths] = await Promise.all([
-    Registry.fetchInfo(pkgkey, registryUrl),
+    Registry.fetchInfo(pkgkey),
     getInstallationObject({ savedObjectsClient, pkgkey }),
-    Registry.getArchiveInfo(pkgkey, registryUrl),
+    Registry.getArchiveInfo(pkgkey),
   ]);
 
   // add properties that aren't (or aren't yet) on Registry response

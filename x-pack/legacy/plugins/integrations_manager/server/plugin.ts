@@ -12,7 +12,7 @@ import {
   HttpServiceSetup,
   PluginInitializerContext,
 } from 'src/core/server';
-import { IntegrationsManagerConfig } from './config.schema';
+import { IntegrationsManagerConfigSchema, integrationsManagerConfigStore } from './config';
 import { PLUGIN } from '../common/constants';
 import { fetchList } from './registry';
 import { routes } from './routes';
@@ -28,25 +28,15 @@ export type PluginSetup = ReturnType<Plugin['setup']>;
 export type PluginStart = ReturnType<Plugin['start']>;
 export interface PluginContext {
   esClient: ClusterClient;
-  getConfig: () => IntegrationsManagerConfig;
 }
 
-const DEFAULT_CONFIG: IntegrationsManagerConfig = {
-  enabled: true,
-  registryUrl: 'http://integrations-registry.app.elstc.co',
-};
-
 export class Plugin {
-  public config$: Observable<IntegrationsManagerConfig>;
-  public config: IntegrationsManagerConfig = DEFAULT_CONFIG;
+  public config$: Observable<IntegrationsManagerConfigSchema>;
 
   constructor(initializerContext: IntegrationsManagerPluginInitializerContext) {
-    this.config$ = initializerContext.config.create<IntegrationsManagerConfig>();
+    this.config$ = initializerContext.config.create<IntegrationsManagerConfigSchema>();
     this.config$.subscribe(configValue => {
-      this.config = {
-        enabled: configValue.enabled ? configValue.enabled : DEFAULT_CONFIG.enabled,
-        registryUrl: configValue.registryUrl ? configValue.registryUrl : DEFAULT_CONFIG.registryUrl,
-      };
+      integrationsManagerConfigStore.updateConfig(configValue);
     });
   }
   public setup(core: CoreSetup) {
@@ -54,9 +44,6 @@ export class Plugin {
     const { server } = http;
     const pluginContext: PluginContext = {
       esClient: elasticsearch.createClient(PLUGIN.ID),
-      getConfig: () => {
-        return this.config;
-      },
     };
 
     // make pluginContext entries available to handlers via h.context
