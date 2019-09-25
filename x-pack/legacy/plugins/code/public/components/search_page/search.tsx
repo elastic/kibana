@@ -22,6 +22,8 @@ import { CodeResult } from './code_result';
 import { EmptyPlaceholder } from './empty_placeholder';
 import { Pagination } from './pagination';
 import { SideBar } from './side_bar';
+import { trackCodeUiMetric, METRIC_TYPE } from '../../services/ui_metric';
+import { CodeUIUsageMetrics } from '../../../model/usage_telemetry_metrics';
 
 interface Props {
   searchOptions: SearchOptions;
@@ -49,6 +51,8 @@ class SearchPage extends React.PureComponent<Props, State> {
   public searchBar: any = null;
 
   public componentDidMount() {
+    // track search page load count
+    trackCodeUiMetric(METRIC_TYPE.LOADED, CodeUIUsageMetrics.SEARCH_PAGE_LOAD_COUNT);
     chrome.breadcrumbs.push({ text: `Search` });
   }
 
