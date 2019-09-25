@@ -4,13 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Policy } from '../adapters/policy/adapter_type';
+import { FullPolicyFile } from '../adapters/policy/adapter_type';
 
 /**
  * Mocked policy lib for test purpropse
  */
 export class PolicyLib {
-  public async getFullPolicy(policyId: string): Promise<Policy> {
-    return { id: policyId };
+  public async getFullPolicy(policyId: string): Promise<FullPolicyFile> {
+    return ({
+      id: policyId,
+      data_sources: [],
+      name: 'Policy 1',
+      updated_by: 'johndoe',
+      updated_on: '2019-09-23T20:46:42+0000',
+      version: 0,
+      created_by: 'johndoe',
+      created_on: '2019-09-23T20:46:42+0000',
+    } as unknown) as FullPolicyFile;
   }
 }

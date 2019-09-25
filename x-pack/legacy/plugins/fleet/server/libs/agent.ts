@@ -18,7 +18,7 @@ import {
 } from './adapters/agent/adapter_type';
 import { TokenLib } from './token';
 import { PolicyLib } from './policy';
-import { Policy } from './adapters/policy/adapter_type';
+import { FullPolicyFile } from './adapters/policy/adapter_type';
 import { FrameworkUser } from './adapters/framework/adapter_types';
 
 export class AgentLib {
@@ -119,7 +119,7 @@ export class AgentLib {
     agentId: string,
     events: AgentEvent[],
     localMetadata?: any
-  ): Promise<{ actions: AgentAction[]; policy: Policy }> {
+  ): Promise<{ actions: AgentAction[]; policy: FullPolicyFile }> {
     const agent = await this.agentAdater.getById(user, agentId);
 
     if (!agent || !agent.active) {

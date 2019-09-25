@@ -98,7 +98,6 @@ describe('Token Lib', () => {
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
       const res = await tokens.verify(getUser(), 'iamnotavalidtoken');
-
       expect(res).toMatchObject({
         valid: false,
         reason: 'jwt malformed',

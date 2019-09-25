@@ -12,14 +12,13 @@ import { SODatabaseAdapter } from '../adapters/saved_objets_database/default';
 import { TokenAdapter } from '../adapters/tokens/default';
 import { FrameworkAdapter } from '../adapters/framework/default';
 import { PolicyLib } from '../policy';
-import { InMemoryPolicyAdapter } from '../adapters/policy/in_memory';
 import { EncryptedSavedObjects } from '../adapters/encrypted_saved_objects/default';
 import { FleetServerLib } from '../types';
+import { PolicyAdapter } from '../adapters/policy/default';
 
 export function compose(server: any): FleetServerLib {
   const frameworkAdapter = new FrameworkAdapter(server);
-  // TODO replace with real adapter when ingest plugin exists
-  const policyAdapter = new InMemoryPolicyAdapter();
+  const policyAdapter = new PolicyAdapter(server.plugins.ingest.policy);
 
   const framework = new FrameworkLib(frameworkAdapter);
   const soDatabaseAdapter = new SODatabaseAdapter(
