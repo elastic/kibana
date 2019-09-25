@@ -185,10 +185,9 @@ Refresh the page to apply the changes.
 === Search settings
 
 [horizontal]
-`courier:batchSearches`:: Determines whether to send multiple concurrent search requests (such as from a dashboard from
-multiple panels) as a single `_msearch` request, or multiple `_search` requests. Note that cancellation of queries (for
-example, when a user navigates away from the page before the search has returned) is only supported when using the
-`_search` Elasticsearch endpoint.
+`courier:batchSearches`:: When disabled, dashboard panels will load individually, and search requests will be
+terminated when users navigate away or update the query. When disabled, dashboard panels will load altogether
+when all of the data has been loaded.
 `courier:customRequestPreference`:: {ref}/search-request-body.html#request-body-search-preference[Request preference] 
 to use when `courier:setRequestPreference` is set to "custom".
 `courier:ignoreFilterIfFieldNotInIndex`:: Skips filters that apply to fields that don't exist in the index for a visualization. 
