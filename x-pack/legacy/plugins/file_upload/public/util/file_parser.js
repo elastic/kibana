@@ -11,32 +11,50 @@ const oboe = require('oboe');
 
 const FILE_BUFFER = 1024 * 50;
 
-let fileReader;
+const readSlice = (fileReader, file, start, stop) => {
+  const blob = file.slice(start, stop);
+  fileReader.readAsBinaryString(blob);
+};
+
+const createOboeStreamAndPatterns = cleanAndValidate => {
+  const oboeStream = oboe();
+  oboeStream.node({
+    'features.*': function (feature) {
+      const cleanFeature = cleanAndValidate(feature);
+      return cleanFeature;
+    }
+  });
+  return oboeStream;
+};
+
+let previousFileReader;
 const fileHandler = (
-  file, chunkHandler, cleanAndValidate, getFileParseActive, fileBuffer = FILE_BUFFER
+  file, chunkHandler, cleanAndValidate, getFileParseActive,
+  fileReader = new FileReader(), fileBuffer = FILE_BUFFER
 ) => {
 
-  const oboeStream = oboe();
-  if (fileReader) {
-    fileReader.abort();
+  if (!file) {
+    return Promise.reject(
+      new Error(
+        i18n.translate('xpack.fileUpload.fileParser.noFileProvided', {
+          defaultMessage: 'Error, no file provided',
+        })
+      )
+    );
   }
-  fileReader = new FileReader();
+
+  const oboeStream = createOboeStreamAndPatterns(cleanAndValidate);
+
+  // Halt any previous file reading activity
+  if (previousFileReader) {
+    previousFileReader.abort();
+  }
+
   let start;
   let stop = fileBuffer;
-
-  const readSlice = (file, start, stop) => {
-    const blob = file.slice(start, stop);
-    fileReader.readAsBinaryString(blob);
-  };
+  previousFileReader = fileReader;
 
   const filePromise = new Promise((resolve, reject) => {
-    if (!file) {
-      reject(new Error(i18n.translate(
-        'xpack.fileUpload.fileParser.noFileProvided', {
-          defaultMessage: 'Error, no file provided',
-        })));
-    }
-
     fileReader.onloadend = ({ target: { readyState, result } }) => {
       if (readyState === FileReader.DONE) {
         chunkHandler({
@@ -57,25 +75,20 @@ const fileHandler = (
         const newStop = stop + fileBuffer;
         // Check EOF
         stop = newStop > file.size ? undefined : newStop;
-        readSlice(file, start, stop);
+        readSlice(fileReader, file, start, stop);
       }
     };
     fileReader.onerror = () => {
       fileReader.abort();
+      oboeStream.abort();
       reject(new Error(i18n.translate(
         'xpack.fileUpload.fileParser.errorReadingFile', {
           defaultMessage: 'Error reading file',
         })));
     };
-    oboeStream.node({
-      'features.*': function (feature) {
-        const cleanFeature = cleanAndValidate(feature);
-        return cleanFeature;
-      }
-    });
     oboeStream.done(parsedGeojson => resolve(parsedGeojson));
   });
-  readSlice(file, start, stop);
+  readSlice(fileReader, file, start, stop);
   return filePromise;
 };
 
@@ -109,7 +122,9 @@ export async function parseFile(
     }
   }
 
-  const parsedJson = await fileHandler(file, onChunkParse, cleanAndValidate, getFileParseActive);
+  const parsedJson = await fileHandler(
+    file, onChunkParse, cleanAndValidate, getFileParseActive
+  );
   // Stream to both parseFile caller and preview callback
   // const jsonResult = cleanAndValidate(parsedJson);
   jsonPreview(parsedJson, previewCallback);
