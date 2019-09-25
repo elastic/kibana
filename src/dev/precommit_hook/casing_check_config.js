@@ -43,7 +43,7 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/docs/**/*',
   'src/legacy/ui/public/assets/fonts/**/*',
   'packages/kbn-utility-types/test-d/**/*',
-  'Jenkinsfile',
+  '**/Jenkinsfile*',
   'Dockerfile*',
 
   // Files in this directory must match a pre-determined name in some cases.
