@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DataType } from '../../../types';
 import { OperationDefinition } from '.';
 import { FieldBasedIndexPatternColumn } from './column_types';
 
@@ -53,7 +52,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
   buildColumn({ suggestedPriority, field }) {
     return {
       label: ofName(field.name),
-      dataType: field.type as DataType,
+      dataType: 'number',
       operationType: OPERATION_TYPE,
       scale: SCALE,
       suggestedPriority,

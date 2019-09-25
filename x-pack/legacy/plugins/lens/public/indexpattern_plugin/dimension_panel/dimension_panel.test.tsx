@@ -955,6 +955,12 @@ describe('IndexPatternDimensionPanel', () => {
                 searchable: true,
                 type: 'number',
               },
+              {
+                aggregatable: true,
+                name: 'mystring',
+                searchable: true,
+                type: 'string',
+              },
             ],
           },
         },
@@ -1025,7 +1031,7 @@ describe('IndexPatternDimensionPanel', () => {
             ...dragDropContext,
             dragging: {
               indexPatternId: 'foo',
-              field: { type: 'number', name: 'bar', aggregatable: true },
+              field: { type: 'string', name: 'mystring', aggregatable: true },
             },
           }}
           state={dragDropState()}
@@ -1133,6 +1139,54 @@ describe('IndexPatternDimensionPanel', () => {
               col2: expect.objectContaining({
                 dataType: 'number',
                 sourceField: 'bar',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('selects the specific operation that was valid on drop', () => {
+      const dragging = {
+        field: { type: 'string', name: 'mystring', aggregatable: true },
+        indexPatternId: 'foo',
+      };
+      const testState = dragDropState();
+      wrapper = shallow(
+        <IndexPatternDimensionPanel
+          {...defaultProps}
+          dragDropContext={{
+            ...dragDropContext,
+            dragging,
+          }}
+          state={testState}
+          columnId={'col2'}
+          filterOperations={op => op.isBucketed}
+          layerId="myLayer"
+        />
+      );
+
+      act(() => {
+        const onDrop = wrapper
+          .find('[data-test-subj="indexPattern-dropTarget"]')
+          .first()
+          .prop('onDrop') as DropHandler;
+
+        onDrop(dragging);
+      });
+
+      expect(setState).toBeCalledTimes(1);
+      expect(setState).toHaveBeenCalledWith({
+        ...testState,
+        layers: {
+          myLayer: {
+            ...testState.layers.myLayer,
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              ...testState.layers.myLayer.columns,
+              col2: expect.objectContaining({
+                dataType: 'string',
+                sourceField: 'mystring',
               }),
             },
           },

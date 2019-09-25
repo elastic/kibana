@@ -133,6 +133,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
           const newColumn = hasFieldChanged
             ? changeField(selectedColumn, currentIndexPattern, droppedItem.field)
             : buildColumn({
+                op: operationsForNewField ? operationsForNewField[0] : undefined,
                 columns: props.state.layers[props.layerId].columns,
                 indexPattern: currentIndexPattern,
                 layerId,
