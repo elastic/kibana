@@ -25,7 +25,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
             } else {
               buildXpack()
             }
-          }, getWorkerMap(params.NUMBER_EXECUTIONS, worker))
+          }, getWorkerMap(params.NUMBER_EXECUTIONS.toInteger(), worker))()
         }
       }
     }
@@ -274,7 +274,7 @@ def getWorkerFromParams(isXpack, job, ciGroup) {
   if (!isXpack) {
     if (job == 'firefoxSmoke') {
       return getPostBuildWorker('firefoxSmoke', { runbld './test/scripts/jenkins_firefox_smoke.sh' })
-    } else if(JOB == 'visualRegression') {
+    } else if(job == 'visualRegression') {
       return getPostBuildWorker('visualRegression', { runbld './test/scripts/jenkins_visual_regression.sh' })
     } else {
       return getOssCiGroupWorker(ciGroup)
@@ -283,7 +283,7 @@ def getWorkerFromParams(isXpack, job, ciGroup) {
 
   if (job == 'firefoxSmoke') {
     return getPostBuildWorker('xpack-firefoxSmoke', { runbld './test/scripts/jenkins_xpack_firefox_smoke.sh' })
-  } else if(JOB == 'visualRegression') {
+  } else if(job == 'visualRegression') {
     return getPostBuildWorker('xpack-visualRegression', { runbld './test/scripts/jenkins_xpack_visual_regression.sh' })
   } else {
     return getXpackCiGroupWorker(ciGroup)
@@ -292,7 +292,7 @@ def getWorkerFromParams(isXpack, job, ciGroup) {
 
 def getWorkerMap(numberOfExecutions, worker, maxWorkers = 14) {
   def workerMap = [:]
-  def numberOfWorkers = min(numberOfExecutions, maxWorkers)
+  def numberOfWorkers = Math.min(numberOfExecutions, maxWorkers)
 
   for(def i = 1; i <= numberOfWorkers; i++) {
     workerMap["worker-${i}"] = { workerNumber ->
