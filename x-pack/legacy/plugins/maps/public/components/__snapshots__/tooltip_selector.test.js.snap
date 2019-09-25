@@ -1,20 +1,57 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`TooltipSelector should create eui row component 1`] = `
-<EuiFormRow
-  describedByIds={Array []}
-  display="row"
-  fullWidth={false}
-  hasEmptyLabelSpace={false}
-  label="Fields to display in tooltip"
-  labelType="label"
->
-  <MultiFieldSelect
-    fields={Array []}
-    filterField={[Function]}
-    onChange={[Function]}
-    placeholder="Select fields"
-    value={Array []}
+exports[`TooltipSelector should render component 1`] = `
+<div>
+  <EuiTitle
+    size="xxs"
+  >
+    <h6>
+      <FormattedMessage
+        defaultMessage="Fields to display in tooltip"
+        id="xpack.maps.tooltipSelectorLabel"
+        values={Object {}}
+      />
+    </h6>
+  </EuiTitle>
+  <EuiSpacer
+    size="xs"
   />
-</EuiFormRow>
+  <EuiDragDropContext
+    onDragEnd={[Function]}
+  >
+    <EuiDroppable
+      droppableId="mapLayerTOC"
+      spacing="none"
+    >
+      <Component />
+    </EuiDroppable>
+  </EuiDragDropContext>
+  <EuiTextAlign
+    textAlign="center"
+  >
+    <AddTooltipFieldPopover
+      fields={
+        Array [
+          Object {
+            "label": "ISO 3166-1 alpha-2 code",
+            "name": "iso2",
+            "type": "string",
+          },
+          Object {
+            "name": "iso3",
+            "type": "string",
+          },
+        ]
+      }
+      onSelect={[Function]}
+      selectedFields={
+        Array [
+          Object {
+            "name": "iso2",
+          },
+        ]
+      }
+    />
+  </EuiTextAlign>
+</div>
 `;
