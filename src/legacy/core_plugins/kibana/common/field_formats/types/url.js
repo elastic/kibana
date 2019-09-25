@@ -135,7 +135,6 @@ export function createUrlFormat(FieldFormat) {
           }
 
           let prefix = '';
-          const basePath = parsedUrl.basePath || parsedUrl.pathname;
           /**
            * This code attempts to convert a relative url into a kibana absolute url
            *
@@ -153,12 +152,14 @@ export function createUrlFormat(FieldFormat) {
               prefix = `${parsedUrl.origin}${parsedUrl.pathname}`;
             }
             // Handle urls like: `/app/kibana` or `/xyz/app/kibana`
-            else if (url.indexOf(basePath || '/') === 0) {
+            else if (url.indexOf(parsedUrl.basePath || '/') === 0) {
               prefix = `${parsedUrl.origin}`;
             }
             // Handle urls like: `../app/kibana`
             else {
-              prefix = `${parsedUrl.origin}${basePath || ''}/app/`;
+              const prefixEnd = url[0] === '/' ? '' : '/';
+
+              prefix = `${parsedUrl.origin}${parsedUrl.basePath || ''}/app${prefixEnd}`;
             }
           }
 

@@ -27,10 +27,8 @@ describe('UrlFormat', function () {
 
   it('outputs a simple <a> tab by default', function () {
     const url = new UrlFormat();
-    const parsedUrl = {};
-    const converter = url.getConverterFor('html');
 
-    expect(converter('http://elastic.co', null, null, parsedUrl))
+    expect(url.convert('http://elastic.co', 'html'))
       .to.be('<span ng-non-bindable><a href="http://elastic.co" target="_blank" rel="noopener noreferrer">http://elastic.co</a></span>');
   });
 
@@ -51,10 +49,7 @@ describe('UrlFormat', function () {
   describe('url template', function () {
     it('accepts a template', function () {
       const url = new UrlFormat({ urlTemplate: 'http://{{ value }}' });
-      const parsedUrl = {};
-      const converter = url.getConverterFor('html');
-
-      expect(converter('url', null, null, parsedUrl))
+      expect(url.convert('url', 'html'))
         .to.be('<span ng-non-bindable><a href="http://url" target="_blank" rel="noopener noreferrer">http://url</a></span>');
     });
 
@@ -67,10 +62,7 @@ describe('UrlFormat', function () {
   describe('label template', function () {
     it('accepts a template', function () {
       const url = new UrlFormat({ labelTemplate: 'extension: {{ value }}', urlTemplate: 'http://www.{{value}}.com' });
-      const parsedUrl = {};
-      const converter = url.getConverterFor('html');
-
-      expect(converter('php', null, null, parsedUrl))
+      expect(url.convert('php', 'html'))
         .to.be('<span ng-non-bindable><a href="http://www.php.com" target="_blank" rel="noopener noreferrer">extension: php</a></span>');
     });
 
@@ -171,10 +163,12 @@ describe('UrlFormat', function () {
 
     it('should fail gracefully if there are no parsedUrl provided', function () {
       const url = new UrlFormat();
-      const converter = url.getConverterFor('html');
 
-      expect(converter('../app/kibana', null, null, null))
+      expect(url.convert('../app/kibana', 'html'))
         .to.be('<span ng-non-bindable>../app/kibana</span>');
+
+      expect(url.convert('http://www.elastic.co', 'html'))
+        .to.be('<span ng-non-bindable><a href="http://www.elastic.co" target="_blank" rel="noopener noreferrer">http://www.elastic.co</a></span>');
     });
 
     it('should support multiple types of relative urls', function () {
