@@ -18,9 +18,6 @@ import {
 import { get } from 'lodash';
 import styled from 'styled-components';
 import { MonitorSummary, CheckMonitor } from '../../../../common/graphql/types';
-import { toCondensedCheck } from './to_condensed_check';
-import { CondensedCheckList } from './condensed_check_list';
-import { CLIENT_DEFAULTS } from '../../../../common/constants';
 import { UptimeSettingsContext } from '../../../contexts';
 
 const ContainerDiv = styled.div`
@@ -63,28 +60,24 @@ export const MonitorListDrawer = ({ summary }: MonitorListDrawerProps) => {
       </>
     );
   };
-  if (summary.state.checks.length < CLIENT_DEFAULTS.CONDENSED_CHECK_LIMIT) {
-    const monitorUrl: string | undefined = get(summary.state.url, 'full', undefined);
+  const monitorUrl: string | undefined = get(summary.state.url, 'full', undefined);
 
-    return (
-      <ContainerDiv>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiLink href={monitorUrl}>
-              {monitorUrl}
-              <EuiIcon size="s" type="popout" color="subbdued" />
-            </EuiLink>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton size="s">Actions</EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        {downLocations.length > 0 && displayMonitorStatus(downLocations, danger, 'Down')}
-        {upLocations.length > 0 && displayMonitorStatus(upLocations, success, 'Up')}
-      </ContainerDiv>
-    );
-  } else {
-    return <CondensedCheckList condensedChecks={toCondensedCheck(summary.state.checks)} />;
-  }
+  return (
+    <ContainerDiv>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiLink href={monitorUrl}>
+            {monitorUrl}
+            <EuiIcon size="s" type="popout" color="subbdued" />
+          </EuiLink>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton size="s">Actions</EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      {downLocations.length > 0 && displayMonitorStatus(downLocations, danger, 'Down')}
+      {upLocations.length > 0 && displayMonitorStatus(upLocations, success, 'Up')}
+    </ContainerDiv>
+  );
 };
