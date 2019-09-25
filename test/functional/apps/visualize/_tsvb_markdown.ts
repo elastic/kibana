@@ -38,8 +38,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     });
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/46085
-  describe.skip('visual builder', function describeIndexTests() {
+  describe('visual builder', function describeIndexTests() {
     describe('markdown', () => {
       before(async () => {
         await visualBuilder.resetPage();

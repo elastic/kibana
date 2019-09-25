@@ -86,7 +86,7 @@ const SuggestionPreview = ({
         onClick={onSelect}
       >
         {expressionError ? (
-          <div className="lnsSidebar__suggestionIcon">
+          <div className="lnsSuggestionPanel__suggestionIcon">
             <EuiIconTip
               size="xl"
               color="danger"
@@ -101,8 +101,8 @@ const SuggestionPreview = ({
           </div>
         ) : preview.expression ? (
           <ExpressionRendererComponent
-            className={classNames('lnsSuggestionChartWrapper', {
-              'lnsSuggestionChartWrapper--withLabel': showTitleAsLabel,
+            className={classNames('lnsSuggestionPanel__chartWrapper', {
+              'lnsSuggestionPanel__chartWrapper--withLabel': showTitleAsLabel,
             })}
             expression={preview.expression}
             onRenderFailure={(e: unknown) => {
@@ -112,7 +112,7 @@ const SuggestionPreview = ({
             }}
           />
         ) : (
-          <span className="lnsSidebar__suggestionIcon">
+          <span className="lnsSuggestionPanel__suggestionIcon">
             <EuiIcon size="xxl" type={preview.icon} />
           </span>
         )}
@@ -226,10 +226,10 @@ export function InnerSuggestionPanel({
   };
 
   return (
-    <div className="lnsSuggestionsPanel">
+    <div className="lnsSuggestionPanel">
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <EuiTitle className="lnsSuggestionsPanel__title" size="xxs">
+          <EuiTitle className="lnsSuggestionPanel__title" size="xxs">
             <h3>
               <FormattedMessage
                 id="xpack.lens.editorFrame.suggestionPanelTitle"
@@ -257,7 +257,7 @@ export function InnerSuggestionPanel({
         )}
       </EuiFlexGroup>
 
-      <div className="lnsSuggestionsPanel__suggestions">
+      <div className="lnsSuggestionPanel__suggestions">
         {currentVisualizationId && (
           <SuggestionPreview
             preview={{
