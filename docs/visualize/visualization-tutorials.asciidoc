@@ -1,7 +1,7 @@
 [[visualization-tutorials]]
 == Visualization tutorials
 
-Ready to create a visualization? Following these tutorials:
+Ready to create a visualization? Create a visualization on your own, or use the following tutorials:
 
 * <<area-chart-tutorial, Area chart>>
 * <<controls-tutorial, Controls>>
@@ -101,17 +101,27 @@ Mellori’s section.
 [[gauge-tutorial]]
 === Gauge tutorial
 
+Short description.
+
 [[goal-tutorial]]
 === Goal tutorial
+
+Short description.
 
 [[bar-chart-tutorial]]
 === Bar chart tutorial
 
+Short description.
+
 [[line-chart-tutorial]]
 === Line chart tutorial
 
+Short description.
+
 [[markdown-tutorial]]
 === Markdown tutorial
+
+Short description.
 
 [[metric-tutorial]]
 === Metric tutorial
@@ -121,11 +131,17 @@ Mellori's section.
 [[pie-chart-tutorial]]
 === Pie chart tutorial
 
+Short description.
+
 [[tsvb-tutorial]]
 === TSVB tutorial
 
+Short description.
+
 [[tag-cloud-tutorial]]
 === Tag cloud tutorial
+
+Short descrption.
 
 [[timelion-tutorials]]
 == Timelion tutorials

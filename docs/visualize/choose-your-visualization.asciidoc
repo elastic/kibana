@@ -3,6 +3,7 @@
 
 Choose from a variety of visualizations to best display your data.
 
+[float]
 [[area-chart]]
 === Area chart
 
@@ -17,12 +18,10 @@ With area charts, you can:
 * Compare two or more quantities 
 
 * Display the magnitude of trends
- 
-[role="screenshot"]
-include::images/visualize-area-chart.png[Area chart with Flights Delay Type sample data]
 
 Ready to create an area chart? Check out the <<area-chart-tutorial, area chart example>>.
 
+[float]
 [[visualize-controls]]
 === Controls
 experimental[]
@@ -45,6 +44,7 @@ image::images/visualize-controls.png[Controls with Flights Controls sample data]
 
 Ready to add Controls to your dashboard? Check out the <<controls-tutorial, Controls example>>.
 
+[float]
 [[visualize-coordinate-map]]
 === Coordinate map
 
@@ -57,6 +57,7 @@ coordinate map.
 [role="screenshot"]
 image::images/visualize-coordinate-map.png[]
 
+[float]
 [[visualize-data-table]]
 === Data table
 
@@ -68,6 +69,7 @@ Data tables display your raw data in a tabular format.
 
 Ready to create a data table? Check out the <<data-table-tutorial, data example>>.
 
+[float]
 [[visualize-gauge]]
 === Gauge
 
@@ -86,6 +88,7 @@ image::images/visualize-gauge.png[Gauge with Flights Total Flight Cancellations 
 
 Ready to create a gauge visualization? Check out the <<gauge-tutorial, gauge example>>.
 
+[float]
 [[visualize-goal]]
 === Goal
 
@@ -96,6 +99,7 @@ image::images/visualize-goal.png[Goal with eCommerce Orders sample data]
 
 Ready to create a goal visualization? Check out the <<goal-tutorial, goal example>>.
 
+[float]
 [[visualize-heat-map]]
 === Heat map
 
@@ -124,6 +128,7 @@ image::images/visualize-bar-chart.png[Vertical bar chart with Flights Delay Buck
 
 Ready to create a bar chart? Check out the <<bar-chart-tutorial, bar chart example>>.
 
+[float]
 [[visualize-line-chart]]
 === Line chart
 
@@ -142,6 +147,7 @@ image::images/visualize-line-chart.png[Line chart with eCommerce Sales by Catego
 
 Ready to create a line chart? Check out the <<line-chart-tutorial, line chart example>>.
 
+[float]
 [[visualize-maps-app]]
 === Maps
 
@@ -154,6 +160,7 @@ NOTE: Since the Maps application provides you with more functionality and is eas
 [role="screenshot"]
 image::maps/images/sample_data_web_logs.png[]
 
+[float]
 [[visualize-markdown]]
 === Markdown
 
@@ -173,6 +180,7 @@ image::images/visualize-markdown.png[Markdown with Flights Markdown Instructions
 
 Ready to use the Markdown widget? Check out the <<markdown-tutorial, Markdown widget example>>.
 
+[float]
 [[visualize-metric]]
 === Metric
 
@@ -180,11 +188,9 @@ Mellori's section.
 
 The metric visualization displays a single numeric value for an aggregation.
 
-[role="screenshot"]
-include::images/visualize-metric.png[Metric with Flights Average Ticket Price sample data]
-
 Ready to create a metric visualization? Check out the <<metric-tutorial, metric example>>.
 
+[float]
 [[visualize-pie-chart]]
 === Pie chart
 
@@ -198,11 +204,9 @@ With pie charts, you can:
 
 * Show percentage or proportional data
 
-[role="screenshot"]
-include::images/visualize-pie-chart.png[Pie chart with Flights Airline Carrier sample data]
-
 Ready to create a pie chart? Check out the <<pie-chart-tutorial, pie chart example>>.
 
+[float]
 [[visualize-region-map]]
 === Region map
 
@@ -213,6 +217,7 @@ NOTE: Since the Maps application provides you with more functionality and is eas
 [role="screenshot"]
 image::images/visualize-region-map.png[Region map with Flights Origin Country Ticket Prices sample data]
 
+[float]
 [[visualize-tsvb]]
 === TSVB
 
@@ -256,6 +261,7 @@ image:images/tsvb-table.png["Table visualization"]
 
 Ready to create a TSVB visualization? Check out the <<tsvb-tutorial, TSVB tutorial>>.
 
+[float]
 [[visualize-tag-cloud]]
 === Tag cloud
 
@@ -274,6 +280,7 @@ image::images/visualize-tag-cloud.png[Tag cloud with Flights Destination Weather
 
 Ready to create a tag cloud? Check out the <<tag-cloud-tutorial, tag cloud example>>.
 
+[float]
 [[visualize-timelion]]
 === Timelion
 
@@ -289,9 +296,4 @@ For example, Timelion enables you to easily get the answers to questions like:
 * <<timelion-conditional-intro, How much memory is my system actually using?>>
 
 [role="screenshot"]
-image::images/timlion-customize04.png[]
-
---
-
-include::vega.asciidoc[]
-
+image::images/timelion-customize04.png[]

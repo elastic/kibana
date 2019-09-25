@@ -19,8 +19,10 @@ With *Visualize*, you can:
 
 --
 
-include::visualize/choose-your-data.asciidoc[]
+include::{kib-repo-dir}/visualize/choose-your-data.asciidoc[]
 
-include::visualize/choose-your-visualization.asciidoc[]
+include::{kib-repo-dir}/visualize/choose-your-visualization.asciidoc[]
 
-include::visualize/create-visualization.asciidoc[]
+include::{kib-repo-dir}/visualize/create-visualization.asciidoc[]
+
+include::{kib-repo-dir}/visualize/visualization-tutorials.asciidoc[]

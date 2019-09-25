@@ -23,7 +23,7 @@ NOTE: {kib} supports Vega 4.3 and Vega-Lite 2.6.
 NOTE: In Vega, it is possible to dynamically load data, e.g. by setting signals as data URLs. This is not supported in {kib} as all data is fetched at once prior to passing it to the Vega renderer.
 
 [[vega-quick-demo]]
-=== Vega tutorial
+==== Vega tutorial
 
 [float]
 [[vega-before-you-begin]]
@@ -237,10 +237,10 @@ These signals can be used in the graph, or can be updated to modify the
 positioning of the map.
 
 [[vega-debugging]]
-==== Debugging
+=== Debugging
 
 [[vega-browser-debugging-console]]
-===== Browser Debugging console
+==== Browser Debugging console
 
 Use browser debugging tools (e.g. F12 or Ctrl+Shift+J in Chrome) to
 inspect the `VEGA_DEBUG` variable:
@@ -253,7 +253,7 @@ of Vega-Lite, this is the output of the Vega-Lite compiler.
 Vega-Lite compilation.
 
 [[vega-data]]
-===== Data
+==== Data
 
 If you are using Elasticsearch query, make sure your resulting data is
 what you expected. The easiest way to view it is by using "networking"
@@ -275,23 +275,23 @@ to your kibana.yml file.
 
 [[vega-notes]]
 [[vega-useful-links]]
-==== Useful Links
+=== Useful Links
 
-===== Vega Editor
+==== Vega Editor
 The https://vega.github.io/editor/[Vega Editor] includes examples for Vega & Vega-Lite, but does not support any 
 {kib}-specific features like {es} requests and interactive base maps.
 
-===== Vega-Lite resources
+==== Vega-Lite resources
 * https://vega.github.io/vega-lite/tutorials/getting_started.html[Tutorials]
 * https://vega.github.io/vega-lite/docs/[Docs]
 * https://vega.github.io/vega-lite/examples/[Examples]
 
-===== Vega resources 
+==== Vega resources 
 * https://vega.github.io/vega/tutorials/[Tutorials]
 * https://vega.github.io/vega/docs/[Docs]
 * https://vega.github.io/vega/examples/[Examples]
 
-===== Elastic blog posts
+==== Elastic blog posts
 * https://www.elastic.co/blog/getting-started-with-vega-visualizations-in-kibana[Getting Started with Vega Visualizations in Kibana]
 * https://www.elastic.co/blog/custom-vega-visualizations-in-kibana[Custom Vega Visualizations in Kibana]  
 * https://www.elastic.co/blog/sankey-visualization-with-vega-in-kibana[Sankey Visualization with Vega in Kibana]
@@ -336,10 +336,10 @@ additional configuration options.
 ----
 
 [[vega-sizing-and-positioning]]
-==== Sizing and positioning
+=== Sizing and positioning
 
 [[vega-and-vegalite]]
-===== Vega and Vega-Lite
+==== Vega and Vega-Lite
 
 By default, Kibana Vega graphs will use
 `autosize = { type: 'fit', contains: 'padding' }` layout model for Vega
@@ -348,7 +348,7 @@ and Vega-Lite graphs. The `fit` model uses all available space, ignores
 override this behaviour by specifying a different `autosize` value.
 
 [[vega-on-a-map]]
-===== Vega on a map
+==== Vega on a map
 
 All Vega graphs will ignore `autosize`, `width`, `height`, and `padding`
 values, using `fit` model with zero padding.

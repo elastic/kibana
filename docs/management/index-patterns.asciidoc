@@ -62,7 +62,7 @@ For a walkthrough of creating an index pattern and visualizing the data,
 see <<getting-started, Getting Started>>. 
 
 [float]
-[configure-rollup-index-pattern]
+[[configure-rollup-index-pattern]]
 ==== Rollup index pattern
 
 If a rollup index is detected in the cluster, clicking *Create index pattern* 

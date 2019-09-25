@@ -83,7 +83,7 @@ For for more information about the Lucene query string sytax, refer to <<lucene-
 [[timelion-data-source]]
 ==== Connect to Timelion
 
-Use <<timelion,Timelion>> queries to use your time series data. 
+Use <<visualize-timelion,Timelion>> queries to use your time series data. 
 
 . Click *Timelion*.
 
