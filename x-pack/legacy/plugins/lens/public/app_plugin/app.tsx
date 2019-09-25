@@ -9,15 +9,15 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Storage } from 'ui/storage';
-import { CoreStart, SavedObjectsClientContract } from 'src/core/public';
+import { CoreStart } from 'src/core/public';
 import {
   DataSetup,
   IndexPattern as IndexPatternInstance,
   SavedQuery,
+  Query,
 } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
 import { TopNavMenu } from '../../../../../../src/legacy/core_plugins/kibana_react/public';
-import { Query } from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
@@ -25,7 +25,6 @@ import { NativeRenderer } from '../native_renderer';
 interface State {
   isLoading: boolean;
   isDirty: boolean;
-  // indexPatternTitles: string[];
   indexPatterns: IndexPatternInstance[];
   persistedDoc?: Document;
 
@@ -47,7 +46,6 @@ export function App({
   docId,
   docStorage,
   redirectTo,
-  savedObjectsClient,
 }: {
   editorFrame: EditorFrameInstance;
   core: CoreStart;
@@ -56,7 +54,6 @@ export function App({
   docId?: string;
   docStorage: SavedObjectStore;
   redirectTo: (id?: string) => void;
-  savedObjectsClient: SavedObjectsClientContract;
 }) {
   const timeDefaults = core.uiSettings.get('timepicker:timeDefaults');
   const language =
@@ -65,7 +62,6 @@ export function App({
   const [state, setState] = useState<State>({
     isLoading: !!docId,
     isDirty: false,
-    // indexPatternTitles: [],
     indexPatterns: [],
 
     query: { query: '', language },
@@ -77,6 +73,17 @@ export function App({
   });
 
   const lastKnownDocRef = useRef<Document | undefined>(undefined);
+
+  useEffect(() => {
+    const subscription = data.filter.filterManager.getUpdates$().subscribe({
+      next: () => {
+        setState({ ...state, filters: data.filter.filterManager.getFilters() });
+      },
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
@@ -212,7 +219,7 @@ export function App({
             }}
             filters={state.filters}
             onFiltersUpdated={filters => {
-              setState({ ...state, filters });
+              data.filter.filterManager.setFilters(filters);
             }}
             appName={'lens'}
             indexPatterns={state.indexPatterns}
@@ -227,14 +234,15 @@ export function App({
               setState({ ...state, savedQuery });
             }}
             onSavedQueryUpdated={savedQuery => {
+              data.filter.filterManager.setFilters(savedQuery.attributes.filters || state.filters);
               setState({
                 ...state,
                 savedQuery,
-                filters: savedQuery.attributes.filters || state.filters,
                 query: savedQuery.attributes.query,
               });
             }}
             onClearSavedQuery={() => {
+              data.filter.filterManager.removeAll();
               setState({
                 ...state,
                 savedQuery: undefined,
@@ -252,7 +260,7 @@ export function App({
             dateRangeTo={state.dateRange.toDate}
             toasts={core.notifications.toasts}
             uiSettings={core.uiSettings}
-            savedObjectsClient={savedObjectsClient}
+            savedObjectsClient={core.savedObjects.client}
             http={core.http}
             timeHistory={data.timefilter.history}
           />

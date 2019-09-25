@@ -5,26 +5,24 @@
  */
 
 import { Registry } from '@kbn/interpreter/target/common';
-import { CoreSetup } from 'src/core/public';
+import { CoreSetup, CoreStart } from 'src/core/public';
 // The following dependencies on ui/* and src/legacy/core_plugins must be mocked when testing
 import chrome, { Chrome } from 'ui/chrome';
 import { Storage } from 'ui/storage';
-import { npSetup } from 'ui/new_platform';
+import { npSetup, npStart } from 'ui/new_platform';
 import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/public';
 import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import { getIndexPatternDatasource } from './indexpattern';
 import { renameColumns } from './rename_columns';
 import { calculateFilterRatio } from './filter_ratio';
-import { setup as dataSetup } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 
 // TODO these are intermediary types because interpreter is not typed yet
 // They can get replaced by references to the real interfaces as soon as they
 // are available
 
-export interface IndexPatternDatasourcePluginPlugins {
+export interface IndexPatternDatasourceSetupPlugins {
   chrome: Chrome;
   interpreter: InterpreterSetup;
-  data: typeof dataSetup;
 }
 
 export interface InterpreterSetup {
@@ -37,17 +35,9 @@ export interface InterpreterSetup {
 class IndexPatternDatasourcePlugin {
   constructor() {}
 
-  setup(core: CoreSetup, { interpreter, data }: IndexPatternDatasourcePluginPlugins) {
+  setup(core: CoreSetup, { interpreter }: IndexPatternDatasourceSetupPlugins) {
     interpreter.functionsRegistry.register(() => renameColumns);
     interpreter.functionsRegistry.register(() => calculateFilterRatio);
-    return getIndexPatternDatasource({
-      core,
-      chrome,
-      interpreter,
-      data,
-      storage: new Storage(localStorage),
-      savedObjectsClient: chrome.getSavedObjectsClient(),
-    });
   }
 
   stop() {}
@@ -55,12 +45,18 @@ class IndexPatternDatasourcePlugin {
 
 const plugin = new IndexPatternDatasourcePlugin();
 
-export const indexPatternDatasourceSetup = () =>
+export const indexPatternDatasourceSetup = () => {
   plugin.setup(npSetup.core, {
     chrome,
     interpreter: {
       functionsRegistry,
     },
-    data: dataSetup,
   });
+
+  return getIndexPatternDatasource({
+    core: npStart.core,
+    chrome,
+    storage: new Storage(localStorage),
+  });
+};
 export const indexPatternDatasourceStop = () => plugin.stop();

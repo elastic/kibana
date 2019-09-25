@@ -44,10 +44,10 @@ export class AppPlugin {
     const editorFrameSetupInterface = editorFrameSetup();
     this.store = new SavedObjectIndexStore(chrome!.getSavedObjectsClient());
 
-    editorFrameSetupInterface.registerDatasource('indexpattern', indexPattern);
     editorFrameSetupInterface.registerVisualization(xyVisualization);
     editorFrameSetupInterface.registerVisualization(datatableVisualization);
     editorFrameSetupInterface.registerVisualization(metricVisualization);
+    editorFrameSetupInterface.registerDatasource('indexpattern', indexPattern);
   }
 
   start(core: CoreStart, plugins: { data: DataSetup }) {
@@ -68,7 +68,6 @@ export class AppPlugin {
           data={plugins.data}
           editorFrame={this.instance!}
           store={new Storage(localStorage)}
-          savedObjectsClient={chrome.getSavedObjectsClient()}
           docId={routeProps.match.params.id}
           docStorage={store}
           redirectTo={id => {

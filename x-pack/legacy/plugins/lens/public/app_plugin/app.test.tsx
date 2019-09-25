@@ -38,6 +38,31 @@ function createMockFrame(): jest.Mocked<EditorFrameInstance> {
   };
 }
 
+function createMockFilterManager() {
+  const unsubscribe = jest.fn();
+
+  let subscriber: () => void;
+  let filters: unknown = [];
+
+  return {
+    getUpdates$: () => ({
+      subscribe: ({ next }: { next: () => void }) => {
+        subscriber = next;
+        return unsubscribe;
+      },
+    }),
+    setFilters: (newFilters: unknown[]) => {
+      filters = newFilters;
+      subscriber();
+    },
+    getFilters: () => filters,
+    removeAll: () => {
+      filters = [];
+      subscriber();
+    },
+  };
+}
+
 describe('Lens App', () => {
   let frame: jest.Mocked<EditorFrameInstance>;
   let core: ReturnType<typeof coreMock['createStart']>;
@@ -64,6 +89,9 @@ describe('Lens App', () => {
           },
         },
         timefilter: { history: {} },
+        filter: {
+          filterManager: createMockFilterManager(),
+        },
       },
       store: {
         get: jest.fn(),
