@@ -21,6 +21,8 @@ export interface StartObject {
 
 export class Plugin {
   constructor(
+    // @ts-ignore this is added to satisfy the New Platform typing constraint,
+    // but we're not leveraging any of its functionality yet.
     private readonly initializerContext: PluginInitializerContext,
     private readonly chrome: Chrome
   ) {
