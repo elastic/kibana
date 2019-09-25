@@ -91,7 +91,7 @@ describe('check_privileges', () => {
   describe('getPrivileges() - right number of capabilities', () => {
     test('es capabilities count', async done => {
       const count = mlPrivileges.cluster.length;
-      expect(count).toBe(35);
+      expect(count).toBe(27);
       done();
     });
 
