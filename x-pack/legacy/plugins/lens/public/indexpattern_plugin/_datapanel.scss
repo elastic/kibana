@@ -24,7 +24,6 @@
 .lnsInnerIndexPatternDataPanel__listWrapper {
   @include euiOverflowShadow;
   @include euiScrollBar;
-  margin-top: 2px; // form control shadow
   position: relative;
   flex-grow: 1;
   overflow: auto;
@@ -37,3 +36,9 @@
   left: 0;
   right: 0;
 }
+
+.lnsInnerIndexPatternDataPanel__filterButton {
+  width: 100%;
+  color: $euiColorPrimary;
+}
+
