@@ -38,6 +38,7 @@ function renderBadges(badges: IAction[], embeddable: IEmbeddable) {
   return badges.map(badge => (
     <EuiBadge
       key={badge.id}
+      className="embPanel__headerBadge"
       iconType={badge.getIconType({ embeddable })}
       onClick={() => badge.execute({ embeddable })}
       onClickAriaLabel={badge.getDisplayName({ embeddable })}
@@ -107,15 +108,20 @@ export function PanelHeader({
           }
         )}
       >
-        {showTitle ? `${title} ` : ''}
-        {renderBadges(badges, embeddable)}
-        {viewDescr !== '' ? (
-          <EuiToolTip content={viewDescr} delay="regular" position="right">
-            <EuiIcon type="iInCircle" />
-          </EuiToolTip>
+        {showTitle || viewDescr ? (
+          <span className="embPanel__titleInner">
+            <span className="embPanel__titleText">{title}</span>
+
+            {viewDescr !== '' && (
+              <EuiToolTip content={viewDescr} delay="regular" position="right">
+                <EuiIcon type="iInCircle" />
+              </EuiToolTip>
+            )}
+          </span>
         ) : (
-          ''
+          undefined
         )}
+        {renderBadges(badges, embeddable)}
       </div>
 
       <PanelOptionsMenu

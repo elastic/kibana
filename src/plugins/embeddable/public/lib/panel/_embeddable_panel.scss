@@ -38,13 +38,27 @@
 }
 
 .embPanel__title {
-  @include euiTextTruncate;
   @include euiTitle('xxxs');
+  overflow: hidden;
   line-height: 1.5;
   flex-grow: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
 
   &:not(:empty) {
-    padding: ($euiSizeXS * 1.5) $euiSizeS 0;
+    line-height: $euiSizeL;
+    padding-left: $euiSizeS;
+  }
+
+  .embPanel__titleInner {
+    overflow: hidden;
+    display: flex;
+    padding-right: $euiSizeS;
+  }
+
+  .embPanel__titleText {
+    @include euiTextTruncate;
   }
 }
 
@@ -69,7 +83,7 @@
   */
 
 .embPanel__optionsMenuButton {
-  background-color: transparentize($euiColorDarkestShade, .9);
+  background-color: transparentize($euiColorDarkestShade, 0.9);
   border-bottom-right-radius: 0;
   border-top-left-radius: 0;
 
@@ -78,8 +92,7 @@
   }
 }
 
-.embPanel
-.embPanel__optionsMenuButton {
+.embPanel .embPanel__optionsMenuButton {
   opacity: 0; /* 1 */
 
   &:focus {
@@ -87,8 +100,8 @@
   }
 }
 
-.embPanel__optionsMenuPopover[class*="-isOpen"],
-.embPanel:hover  {
+.embPanel__optionsMenuPopover[class*='-isOpen'],
+.embPanel:hover {
   .embPanel__optionsMenuButton {
     opacity: 1;
   }
