@@ -19,7 +19,7 @@
 
 import { noOpSearchStrategy } from './no_op_search_strategy';
 
-const searchStrategies = [];
+export const searchStrategies = [];
 
 export const addSearchStrategy = searchStrategy => {
   if (searchStrategies.includes(searchStrategy)) {
@@ -29,7 +29,7 @@ export const addSearchStrategy = searchStrategy => {
   searchStrategies.push(searchStrategy);
 };
 
-const getSearchStrategyByViability = indexPattern => {
+export const getSearchStrategyByViability = indexPattern => {
   return searchStrategies.find(searchStrategy => {
     return searchStrategy.isViable(indexPattern);
   });

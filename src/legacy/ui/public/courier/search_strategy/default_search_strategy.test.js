@@ -28,9 +28,7 @@ function getConfigStub(config = {}) {
 }
 
 describe('defaultSearchStrategy', function () {
-
   describe('search', function () {
-
     let searchArgs;
 
     beforeEach(() => {
@@ -76,7 +74,5 @@ describe('defaultSearchStrategy', function () {
       await search(searchArgs);
       expect(searchArgs.es.msearch.mock.calls[0][0]).toHaveProperty('ignore_throttled', false);
     });
-
   });
-
 });
