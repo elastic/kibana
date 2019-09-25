@@ -1247,3 +1247,35 @@ describe('update()', () => {
     );
   });
 });
+
+describe('updateApiKey()', () => {
+  test('updates the API key for the alert', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        interval: '10s',
+        alertTypeId: '2',
+        enabled: true,
+      },
+      references: [],
+    });
+    alertsClientParams.createAPIKey.mockResolvedValueOnce({
+      created: true,
+      result: { id: '123', api_key: 'abc' },
+    });
+
+    await alertsClient.updateApiKey({ id: '1' });
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        apiKeyOwner: 'elastic',
+        updatedBy: 'elastic',
+      },
+      { references: [] }
+    );
+  });
+});
