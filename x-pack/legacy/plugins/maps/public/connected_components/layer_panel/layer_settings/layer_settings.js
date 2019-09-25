@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { ValidatedRange } from '../../../components/validated_range';
@@ -53,12 +54,14 @@ export function LayerSettings(props) {
         min={MIN_ZOOM}
         max={MAX_ZOOM}
         value={[props.minZoom, props.maxZoom]}
-        showInput
+        showInput="inputWithPopover"
         showRange
         showLabels
         onChange={onZoomChange}
         allowEmptyRange={false}
         compressed
+        prepend={<EuiIcon type="magnifyWithMinus" />}
+        append={<EuiIcon type="magnifyWithPlus" />}
       />
     );
   };
