@@ -116,7 +116,10 @@ Check out [TYPESCRIPT.md](TYPESCRIPT.md) for help with this process.
 You should prefer modern language features in a lot of cases, e.g.:
 
 * Prefer `class` over `prototype` inheritance
+* Prefer arrow function over function expressions
+* Prefer arrow function over storing `this` (no `const self = this;`)
 * Prefer template strings over string concatenation
+* Prefer the spread operator (`[...arr]`) to copy over `.slice()`
 
 ### Avoid mutability and state
 
@@ -324,41 +327,6 @@ const myFunc = function () {
 };
 ```
 
-### Arrow functions
-
-If you must use a function expression, then use an arrow function:
-
-```js
-// good
-[1, 2, 3].map((n) => {
-  const m = doSomething(n);
-  return m - n;
-});
-
-// bad
-[1, 2, 3].map(function (n) {
-  const m = doSomething(n);
-  return m - n;
-});
-```
-
-If your arrow function is only returning an object literal, then wrap the
-object in parentheses rather than using an explicit return:
-
-```js
-// good
-() => ({
-  foo: 'bar'
-})
-
-// bad
-() => {
-  return {
-    foo: 'bar'
-  };
-}
-```
-
 ### Object / Array iterations, transformations and operations
 
 Use native methods to iterate and transform arrays and objects where possible.
@@ -383,20 +351,6 @@ const userNames = [];
 for (let i = 0; i < users.length; i++) {
   userNames.push(users[i].name);
 }
-```
-
-### Use the spread operator (`...`) for copying arrays
-
-This helps with expressiveness and readability.
-
-```js
-const arr = [1, 2, 3];
-
-// good
-const arrCopy = [...arr];
-
-// bad
-const arrCopy = arr.slice();
 ```
 
 ### Only use ternary operators for small, simple code
@@ -594,31 +548,6 @@ const isSessionValid = (session.expires < Date.now());
 // If the session is valid
 if (isSessionValid) {
   ...
-}
-```
-
-### Do not alias `this`
-
-Try not to rely on `this` at all, but if you must, then use arrow functions
-instead of aliasing it.
-
-```js
-// good
-class Users {
-  add(user) {
-    return createUser(user)
-      .then(response => this.users.push(response.user));
-  }
-}
-
-// bad
-class Users {
-  add(user) {
-    const self = this;
-    return createUser(user).then(function (response) {
-      self.users.push(response.user);
-    });
-  }
 }
 ```
 
