@@ -1,28 +1,26 @@
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
-import {
-  bdd
-} from '../../../support';
+export default function ({ getService, getPageObjects }) {
+  const log = getService('log');
+  const retry = getService('retry');
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
 
-import PageObjects from '../../../support/page_objects';
-
-bdd.describe('check packetbeat', function () {
-  bdd.before(function () {
-    PageObjects.common.debug('navigateToApp Discover');
-    //return PageObjects.common.navigateToApp('discover');
-  });
-
-  bdd.it('packetbeat- should have hit count GT 0', async function () {
-    //await PageObjects.common.navigateToApp('discover');
-	   // await PageObjects.header.clickDiscover();
-    await PageObjects.discover.selectIndexPattern('packetbeat-*');
-    await PageObjects.common.tryForTime(40000, async () => {
-      await PageObjects.header.setQuickSpan('Today');
+  describe('check packetbeat', function() {
+    before(function() {
+      log.debug('navigateToApp Discover');
     });
-    await PageObjects.common.tryForTime(40000, async () => {
-      const hitCount = await PageObjects.discover.getHitCount();
-      expect(hitCount).to.be.greaterThan('0');
-    });
-  });
 
-});
+    it('packetbeat- should have hit count GT 0', async function() {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.selectIndexPattern('packetbeat-*');
+      // await PageObjects.common.tryForTime(40000, async () => {
+      //   await PageObjects.header.setQuickSpan('Today');
+      // });
+      await retry.try(async function () {
+        const hitCount = parseInt(await PageObjects.discover.getHitCount());
+        expect(hitCount).to.be.greaterThan(0);
+      });
+    });
+
+  });
+}

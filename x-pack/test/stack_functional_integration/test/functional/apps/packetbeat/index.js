@@ -1,8 +1,6 @@
-import { bdd, defaultTimeout, esClient, common } from '../../../support';
 
-bdd.describe('packetbeat app', function () {
-  this.timeout = defaultTimeout;
-
-  require('./_packetbeat');
-
-});
+export default function ({ loadTestFile }) {
+  describe('packetbeat app', function() {
+    loadTestFile(require.resolve('./_packetbeat'));
+  });
+}

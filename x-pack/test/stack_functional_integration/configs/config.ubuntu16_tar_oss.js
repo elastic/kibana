@@ -32,7 +32,7 @@ export default async function ({ readConfigFile }) {
       // require.resolve('../test/functional/apps/telemetry'),
       require.resolve('../test/functional/apps/metricbeat'),
       require.resolve('../test/functional/apps/filebeat'),
-      // require.resolve('./test/functional/apps/packetbeat'),
+      require.resolve('../test/functional/apps/packetbeat'),
       // require.resolve('./test/functional/apps/monitoring'),
     ],
     servers: serverConfig.servers,
