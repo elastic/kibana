@@ -119,10 +119,10 @@ export class TooltipSelector extends Component {
                         iconType="grab"
                         color="subdued"
                         title={i18n.translate('xpack.maps.tooltipSelector.grabButtonTitle', {
-                          defaultMessage: 'Reorder tooltip properties'
+                          defaultMessage: 'Reorder property'
                         })}
                         aria-label={i18n.translate('xpack.maps.tooltipSelector.grabButtonAriaLabel', {
-                          defaultMessage: 'Reorder tooltip properties'
+                          defaultMessage: 'Reorder property'
                         })}
                         {...provided.dragHandleProps}
                       />
