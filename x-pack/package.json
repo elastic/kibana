@@ -174,7 +174,7 @@
     "tree-kill": "^1.1.0",
     "ts-loader": "^6.0.4",
     "typescript": "3.5.3",
-    "vinyl-fs": "^3.0.2",
+    "vinyl-fs": "^3.0.3",
     "xml-crypto": "^1.4.0",
     "yargs": "4.8.1"
   },
