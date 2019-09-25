@@ -10,7 +10,7 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { px, units } from '../../../../public/style/variables';
 
 interface Props {
-  items: React.ReactElement[];
+  items: Array<React.ReactElement | null | undefined>;
 }
 
 // TODO: Light/Dark theme (@see https://github.com/elastic/kibana/issues/44840)
@@ -30,9 +30,11 @@ const Item = styled(EuiFlexItem)`
 `;
 
 const Summary = ({ items }: Props) => {
+  const filteredItems = items.filter(Boolean) as React.ReactElement[];
+
   return (
     <EuiFlexGrid gutterSize="s">
-      {items.map((item, index) => (
+      {filteredItems.map((item, index) => (
         <Item key={index} grow={false}>
           {item}
         </Item>

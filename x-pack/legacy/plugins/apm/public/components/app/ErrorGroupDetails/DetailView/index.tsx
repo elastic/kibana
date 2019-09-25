@@ -11,7 +11,8 @@ import {
   EuiTab,
   EuiTabs,
   EuiTitle,
-  EuiIcon
+  EuiIcon,
+  EuiToolTip
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
@@ -111,17 +112,24 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
       </HeaderContainer>
 
       <Summary
-        items={
-          [
-            <TimestampSummaryItem time={error.timestamp.us / 1000} />,
-            errorUrl && method ? (
-              <HttpInfoSummaryItem
-                url={errorUrl}
-                method={method}
-                status={status}
-              />
-            ) : null,
-            transaction && (
+        items={[
+          <TimestampSummaryItem time={error.timestamp.us / 1000} />,
+          errorUrl && method ? (
+            <HttpInfoSummaryItem
+              url={errorUrl}
+              method={method}
+              status={status}
+            />
+          ) : null,
+          transaction && (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.apm.errorGroupDetails.relatedTransactionSample',
+                {
+                  defaultMessage: 'Related transaction sample'
+                }
+              )}
+            >
               <TransactionDetailLink
                 traceId={transaction.trace.id}
                 transactionId={transaction.transaction.id}
@@ -134,9 +142,9 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
                   {transaction.transaction.name}
                 </TransactionLinkName>
               </TransactionDetailLink>
-            )
-          ].filter(Boolean) as React.ReactElement[]
-        }
+            </EuiToolTip>
+          )
+        ]}
       />
 
       <EuiSpacer />

@@ -8,11 +8,11 @@ import React from 'react';
 import { EuiToolTip, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-interface ResultProps {
-  result: string;
+interface Props {
+  transactionResult: string;
 }
 
-export function ResultSummaryItem({ result }: ResultProps) {
+export function TransactionResultSummaryItem({ transactionResult }: Props) {
   return (
     <EuiToolTip
       content={i18n.translate('xpack.apm.transactionDetails.resultLabel', {
@@ -20,7 +20,7 @@ export function ResultSummaryItem({ result }: ResultProps) {
       })}
     >
       <EuiBadge color="default" title={undefined}>
-        {result}
+        {transactionResult}
       </EuiBadge>
     </EuiToolTip>
   );

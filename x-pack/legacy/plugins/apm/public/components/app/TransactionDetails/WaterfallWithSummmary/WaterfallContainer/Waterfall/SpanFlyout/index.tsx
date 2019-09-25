@@ -53,7 +53,7 @@ function formatType(type: string) {
   }
 }
 
-function formatSubtype(subtype: string) {
+function formatSubtype(subtype: string | undefined) {
   switch (subtype) {
     case 'mysql':
       return 'MySQL';
@@ -65,12 +65,10 @@ function formatSubtype(subtype: string) {
 function getSpanTypes(span: Span) {
   const { type, subtype, action } = span.span;
 
-  const [primaryType, subtypeFromType, actionFromType] = type.split('.'); // This is to support 6.x data
-
   return {
-    spanType: formatType(primaryType),
-    spanSubtype: formatSubtype(subtype || subtypeFromType),
-    spanAction: action || actionFromType
+    spanType: formatType(type),
+    spanSubtype: formatSubtype(subtype),
+    spanAction: action
   };
 }
 
