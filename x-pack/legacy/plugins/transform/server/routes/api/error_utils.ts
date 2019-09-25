@@ -27,9 +27,12 @@ interface Params {
 export function fillResultsWithTimeouts({ results, id, items, action }: Params) {
   const extra =
     items.length - Object.keys(results).length > 1
-      ? i18n.translate('xpack.ml.models.transformService.allOtherRequestsCancelledDescription', {
-          defaultMessage: 'All other requests cancelled.',
-        })
+      ? i18n.translate(
+          'xpack.transform.models.transformService.allOtherRequestsCancelledDescription',
+          {
+            defaultMessage: 'All other requests cancelled.',
+          }
+        )
       : '';
 
   const error = {
@@ -38,7 +41,7 @@ export function fillResultsWithTimeouts({ results, id, items, action }: Params) 
         root_cause: [
           {
             reason: i18n.translate(
-              'xpack.ml.models.transformService.requestToActionTimedOutErrorMessage',
+              'xpack.transform.models.transformService.requestToActionTimedOutErrorMessage',
               {
                 defaultMessage: `Request to {action} '{id}' timed out. {extra}`,
                 values: {
