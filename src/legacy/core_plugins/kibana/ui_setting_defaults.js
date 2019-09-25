@@ -426,8 +426,8 @@ export function getUiSettingDefaults() {
       type: 'boolean',
       description: i18n.translate('kbn.advancedSettings.courier.batchSearchesText', {
         defaultMessage:
-          `When disabled, dashboard panels will load individually instead of altogether, and search requests will be terminated
-           when users navigate away or update the query. When disabled, dashboard panels will load altogether when all of the
+          `When disabled, dashboard panels will load individually, and search requests will be terminated when users
+           navigate away or update the query. When disabled, dashboard panels will load altogether when all of the
            data has been loaded.`,
       }),
       category: ['search'],
