@@ -71,14 +71,25 @@ export class AddTooltipFieldPopover extends Component {
     const fieldsByTypeMap = new Map();
 
     this.props.fields
+      .filter(field => {
+        // remove selected fields
+        const isFieldSelected = !!this.props.selectedFields.find(selectedField => {
+          return field.name === selectedField.name;
+        });
+        return !isFieldSelected;
+      })
       .forEach(field => {
         const fieldLabel = 'label' in field ? field.label : field.name;
+        const option = {
+          value: field.name,
+          label: fieldLabel,
+        };
         if (fieldsByTypeMap.has(field.type)) {
           const fieldsList = fieldsByTypeMap.get(field.type);
-          fieldsList.push({ value: field.name, label: fieldLabel });
+          fieldsList.push(option);
           fieldsByTypeMap.set(field.type, fieldsList);
         } else {
-          fieldsByTypeMap.set(field.type, [{ value: field.name, label: fieldLabel }]);
+          fieldsByTypeMap.set(field.type, [option]);
         }
       });
 

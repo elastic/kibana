@@ -1,0 +1,107 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Should remove selected fields from selectable 1`] = `
+<EuiPopover
+  anchorPosition="leftCenter"
+  button={
+    <EuiButtonEmpty
+      iconType="plusInCircleFilled"
+      isDisabled={false}
+      onClick={[Function]}
+      size="xs"
+    >
+      <FormattedMessage
+        defaultMessage="Add tooltip field"
+        id="xpack.maps.tooltipSelector.addFieldLabel"
+        values={Object {}}
+      />
+    </EuiButtonEmpty>
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="addTooltipFieldPopover"
+  isOpen={false}
+  ownFocus={false}
+  panelPaddingSize="m"
+>
+  <EuiSelectable
+    onChange={[Function]}
+    options={
+      Array [
+        Object {
+          "isGroupLabel": true,
+          "label": "date",
+        },
+        Object {
+          "label": "@timestamp",
+          "value": "@timestamp",
+        },
+      ]
+    }
+    searchable={true}
+    singleSelection={false}
+  >
+    <Component />
+  </EuiSelectable>
+</EuiPopover>
+`;
+
+exports[`Should render 1`] = `
+<EuiPopover
+  anchorPosition="leftCenter"
+  button={
+    <EuiButtonEmpty
+      iconType="plusInCircleFilled"
+      isDisabled={false}
+      onClick={[Function]}
+      size="xs"
+    >
+      <FormattedMessage
+        defaultMessage="Add tooltip field"
+        id="xpack.maps.tooltipSelector.addFieldLabel"
+        values={Object {}}
+      />
+    </EuiButtonEmpty>
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="addTooltipFieldPopover"
+  isOpen={false}
+  ownFocus={false}
+  panelPaddingSize="m"
+>
+  <EuiSelectable
+    onChange={[Function]}
+    options={
+      Array [
+        Object {
+          "isGroupLabel": true,
+          "label": "string",
+        },
+        Object {
+          "label": "custom label for prop1",
+          "value": "prop1",
+        },
+        Object {
+          "label": "prop2",
+          "value": "prop2",
+        },
+        Object {
+          "isGroupLabel": true,
+          "label": "date",
+        },
+        Object {
+          "label": "@timestamp",
+          "value": "@timestamp",
+        },
+      ]
+    }
+    searchable={true}
+    singleSelection={false}
+  >
+    <Component />
+  </EuiSelectable>
+</EuiPopover>
+`;

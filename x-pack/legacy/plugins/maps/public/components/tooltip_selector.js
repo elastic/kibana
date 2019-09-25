@@ -119,6 +119,13 @@ export class TooltipSelector extends Component {
   }
 
   render() {
+
+    const selectedFields = this.props.tooltipProperties
+      ? this.props.tooltipProperties.map(propertyName => {
+        return { name: propertyName };
+      })
+      : [];
+
     return (
       <div>
         <EuiTitle size="xxs">
@@ -134,6 +141,7 @@ export class TooltipSelector extends Component {
           <AddTooltipFieldPopover
             onSelect={this._addProperty}
             fields={this.props.fields}
+            selectedFields={selectedFields}
           />
         </EuiTextAlign>
       </div>
