@@ -13,65 +13,28 @@ import {
   getUrlPrefix,
   getTestAlertData,
   ObjectRemover,
+  AlertUtils,
 } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const retry = getService('retry');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
   describe('alerts', () => {
+    let alertUtils: AlertUtils;
+    let indexRecordActionId: string;
     const authorizationIndex = '.kibana-test-authorization';
-    const objectRemover = new ObjectRemover(supertest);
+    const objectRemover = new ObjectRemover(supertestWithoutAuth);
 
     before(async () => {
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
-    });
-    afterEach(() => objectRemover.removeAll());
-    after(async () => {
-      await esTestIndexTool.destroy();
-      await es.indices.delete({ index: authorizationIndex });
-    });
-
-    async function searchTestIndexDocs(source: string, reference: string) {
-      return await es.search({
-        index: ES_TEST_INDEX_NAME,
-        body: {
-          query: {
-            bool: {
-              must: [
-                {
-                  term: {
-                    source,
-                  },
-                },
-                {
-                  term: {
-                    reference,
-                  },
-                },
-              ],
-            },
-          },
-        },
-      });
-    }
-
-    async function waitForTestIndexDocs(source: string, reference: string, numDocs: number = 1) {
-      return await retry.try(async () => {
-        const searchResult = await searchTestIndexDocs(source, reference);
-        expect(searchResult.hits.total.value).to.eql(numDocs);
-        return searchResult.hits.hits;
-      });
-    }
-
-    async function createIndexRecordAction(spaceId: string) {
-      const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(spaceId)}/api/action`)
+      const { body: createdAction } = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           description: 'My action',
@@ -84,43 +47,28 @@ export default function alertTests({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      objectRemover.add(spaceId, createdAction.id, 'action');
-      return createdAction;
-    }
+      indexRecordActionId = createdAction.id;
+      alertUtils = new AlertUtils({
+        space: Spaces.space1,
+        supertestWithoutAuth,
+        indexRecordActionId,
+        objectRemover,
+      });
+    });
+    afterEach(() => objectRemover.removeAll());
+    after(async () => {
+      await esTestIndexTool.destroy();
+      await es.indices.delete({ index: authorizationIndex });
+      objectRemover.add(Spaces.space1.id, indexRecordActionId, 'action');
+      await objectRemover.removeAll();
+    });
 
     it('should schedule task, run alert and schedule actions', async () => {
-      const reference = `create-test-1:${Spaces.space1.id}`;
-      const createdAction = await createIndexRecordAction(Spaces.space1.id);
-
-      const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestAlertData({
-            interval: '1m',
-            alertTypeId: 'test.always-firing',
-            alertTypeParams: {
-              index: ES_TEST_INDEX_NAME,
-              reference,
-            },
-            actions: [
-              {
-                group: 'default',
-                id: createdAction.id,
-                params: {
-                  index: ES_TEST_INDEX_NAME,
-                  reference,
-                  message:
-                    'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
-                },
-              },
-            ],
-          })
-        );
+      const reference = alertUtils.generateReference();
+      const response = await alertUtils.createAlwaysFiringAction(reference);
 
       expect(response.statusCode).to.eql(200);
-      objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
-      const alertTestRecord = (await waitForTestIndexDocs(
+      const alertTestRecord = (await esTestIndexTool.waitForDocs(
         'alert:test.always-firing',
         reference
       ))[0];
@@ -133,7 +81,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           reference,
         },
       });
-      const actionTestRecord = (await waitForTestIndexDocs(
+      const actionTestRecord = (await esTestIndexTool.waitForDocs(
         'action:test.index-record',
         reference
       ))[0];
@@ -160,7 +108,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       // We have to provide the test.rate-limit the next runAt, for testing purposes
       const retryDate = new Date(Date.now() + 60000);
 
-      const { body: createdAction } = await supertest
+      const { body: createdAction } = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
         .set('kbn-xsrf', 'foo')
         .send({
@@ -171,8 +119,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
 
-      const reference = `create-test-2:${Spaces.space1.id}`;
-      const response = await supertest
+      const reference = alertUtils.generateReference();
+      const response = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
         .set('kbn-xsrf', 'foo')
         .send(
@@ -240,8 +188,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
     });
 
     it('should have proper callCluster and savedObjectsClient authorization for alert type executor', async () => {
-      const reference = `create-test-3:${Spaces.space1.id}`;
-      const response = await supertest
+      const reference = alertUtils.generateReference();
+      const response = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
         .set('kbn-xsrf', 'foo')
         .send(
@@ -259,7 +207,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       expect(response.statusCode).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
-      const alertTestRecord = (await waitForTestIndexDocs(
+      const alertTestRecord = (await esTestIndexTool.waitForDocs(
         'alert:test.authorization',
         reference
       ))[0];
@@ -277,8 +225,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
     });
 
     it('should have proper callCluster and savedObjectsClient authorization for action type executor', async () => {
-      const reference = `create-test-4:${Spaces.space1.id}`;
-      const { body: createdAction } = await supertest
+      const reference = alertUtils.generateReference();
+      const { body: createdAction } = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
         .set('kbn-xsrf', 'foo')
         .send({
@@ -287,7 +235,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         })
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
-      const response = await supertest
+      const response = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
         .set('kbn-xsrf', 'foo')
         .send(
@@ -315,7 +263,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       expect(response.statusCode).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
-      const actionTestRecord = (await waitForTestIndexDocs(
+      const actionTestRecord = (await esTestIndexTool.waitForDocs(
         'action:test.authorization',
         reference
       ))[0];
