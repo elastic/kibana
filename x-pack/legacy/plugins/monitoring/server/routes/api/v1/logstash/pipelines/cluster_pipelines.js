@@ -5,61 +5,16 @@
  */
 
 import Joi from 'joi';
-import moment from 'moment';
 import { get, sortByOrder } from 'lodash';
 import { getClusterStatus } from '../../../../../lib/logstash/get_cluster_status';
 import { getPipelines, processPipelinesAPIResponse } from '../../../../../lib/logstash/get_pipelines';
 import { handleError } from '../../../../../lib/errors';
 import { prefixIndexPattern } from '../../../../../lib/ccs_utils';
 import { INDEX_PATTERN_LOGSTASH } from '../../../../../../common/constants';
-import { createQuery } from '../../../../../lib/create_query';
-import { LogstashMetric } from '../../../../../lib/metrics';
+import { getLogstashPipelineIds } from '../../../../../lib/logstash/get_pipeline_ids';
+import { filter } from '../../../../../lib/pagination/filter';
+import { paginate } from '../../../../../lib/pagination/paginate';
 
-async function getLogstashPipelineIds(req, logstashIndexPattern, size) {
-  const start = moment.utc(req.payload.timeRange.min).valueOf();
-  const end = moment.utc(req.payload.timeRange.max).valueOf();
-
-  const params = {
-    index: logstashIndexPattern,
-    size: 0,
-    ignoreUnavailable: true,
-    filterPath: [
-      'aggregations.nested_context'
-    ],
-    body: {
-      query: createQuery({
-        start,
-        end,
-        metric: LogstashMetric.getMetricFields(),
-        clusterUuid: req.params.clusterUuid,
-      }),
-      aggs: {
-        nested_context: {
-          nested: {
-            path: 'logstash_stats.pipelines'
-          },
-          aggs: {
-            pipelines: {
-              terms: {
-                field: 'logstash_stats.pipelines.id',
-                size,
-              }
-            }
-          }
-        }
-      }
-    }
-  };
-
-
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params);
-}
-
-function paginate({ size,  index }, data) {
-  const start = index * size;
-  return data.slice(start, Math.min(data.length, start + size));
-}
 
 /**
  * Retrieve pipelines for a cluster
@@ -86,13 +41,14 @@ export function logstashClusterPipelinesRoute(server) {
           sort: Joi.object({
             field: Joi.string().required(),
             direction: Joi.string().required()
-          }).optional()
+          }).optional(),
+          queryText: Joi.string().default('').allow('').optional(),
         })
       }
     },
     handler: async (req) => {
       const config = server.config();
-      const { ccs, pagination, sort } = req.payload;
+      const { ccs, pagination, sort, queryText } = req.payload;
       const clusterUuid = req.params.clusterUuid;
       const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
 
@@ -102,9 +58,10 @@ export function logstashClusterPipelinesRoute(server) {
       // Manually apply pagination/sorting/filtering concerns
 
       // Filtering
+      const filteredPipelines = filter(pipelines, queryText, ['id']);
 
       // Sorting
-      const sortedPipelines = sortByOrder(pipelines, pipeline => pipeline[sort.field], sort.direction);
+      const sortedPipelines = sortByOrder(filteredPipelines, pipeline => pipeline[sort.field], sort.direction);
 
       // Pagination
       const pageOfPipelines = paginate(pagination, sortedPipelines);
@@ -121,14 +78,16 @@ export function logstashClusterPipelinesRoute(server) {
       ];
 
       try {
-        const pipelineData = sortByOrder(
-          await getPipelines(req, lsIndexPattern, pipelineIds, metricSet),
+        const pipelineData = await getPipelines(req, lsIndexPattern, pipelineIds, metricSet);
+        // We need to re-sort because the data from above comes back in random order
+        const pipelinesResponse = sortByOrder(
+          pipelineData,
           pipeline => pipeline[sort.field],
           sort.direction
         );
         const response = await processPipelinesAPIResponse(
           {
-            pipelines: pipelineData,
+            pipelines: pipelinesResponse,
             clusterStatus: await getClusterStatus(req, lsIndexPattern, { clusterUuid })
           },
           throughputMetric,

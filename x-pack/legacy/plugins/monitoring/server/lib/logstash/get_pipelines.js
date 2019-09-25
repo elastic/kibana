@@ -77,10 +77,10 @@ export async function processPipelinesAPIResponse(response, throughputMetricKey,
 export async function getPipelines(req, logstashIndexPattern, pipelineIds, metricSet) {
   checkParam(logstashIndexPattern, 'logstashIndexPattern in logstash/getPipelines');
   checkParam(metricSet, 'metricSet in logstash/getPipelines');
-  checkParam(pipelineIds, 'pipelineIds in logstash/getPipelines');
 
-  const filters = [
-    {
+  const filters = [];
+  if (pipelineIds) {
+    filters.push({
       nested: {
         path: 'logstash_stats.pipelines',
         query: {
@@ -89,8 +89,8 @@ export async function getPipelines(req, logstashIndexPattern, pipelineIds, metri
           }
         }
       }
-    }
-  ];
+    });
+  }
 
   const metricsResponse = await getMetrics(req, logstashIndexPattern, metricSet, filters);
   return _handleResponse(metricsResponse, pipelineIds);

@@ -91,13 +91,32 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
     };
   }
 
+  setQueryText(queryText) {
+    this.queryText = queryText;
+  }
+
   getPaginationRouteOptions() {
     return {
       pagination: {
         size: this.pagination.pageSize,
         index: this.pagination.pageIndex
       },
-      ...this.sorting
+      ...this.sorting,
+      queryText: this.queryText,
+    };
+  }
+
+  getPaginationTableProps(pagination) {
+    return {
+      sorting: this.sorting,
+      pagination: pagination,
+      onTableChange: this.onTableChange,
+      fetchMoreData: async ({ page, sort, queryText }) => {
+        this.setPagination(page);
+        this.setSorting(sort);
+        this.setQueryText(queryText);
+        this.updateData();
+      }
     };
   }
 }

@@ -150,7 +150,7 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
     : [];
 
   const clusterPipelineNodesCount = isInCodePath(codePaths, [CODE_PATH_LOGSTASH])
-    ? await getPipelines(req, lsIndexPattern, [], ['logstash_cluster_pipeline_nodes_count'])
+    ? await getPipelines(req, lsIndexPattern, null, ['logstash_cluster_pipeline_nodes_count'])
     : [];
 
   // add the logstash data to each cluster
