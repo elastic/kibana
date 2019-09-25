@@ -27,7 +27,7 @@ import styled from 'styled-components';
 import { KpiHostsData, KpiNetworkData } from '../../graphql/types';
 import { AreaChart } from '../charts/areachart';
 import { BarChart } from '../charts/barchart';
-import { ChartConfigsData, ChartData, ChartSeriesConfigs, UpdateDateRange } from '../charts/common';
+import { ChartSeriesData, ChartData, ChartSeriesConfigs, UpdateDateRange } from '../charts/common';
 import { getEmptyTagValue } from '../empty_value';
 
 import { InspectButton } from '../inspect';
@@ -47,37 +47,39 @@ const StatValue = styled(EuiTitle)`
 StatValue.displayName = 'StatValue';
 
 interface StatItem {
-  key: string;
-  description?: string;
-  value: number | undefined | null;
   color?: string;
+  description?: string;
   icon?: IconType;
+  key: string;
   name?: string;
+  value: number | undefined | null;
 }
 
 export interface StatItems {
-  key: string;
-  fields: StatItem[];
+  areachartConfigs?: ChartSeriesConfigs;
+  barchartConfigs?: ChartSeriesConfigs;
   description?: string;
   enableAreaChart?: boolean;
   enableBarChart?: boolean;
+  fields: StatItem[];
   grow?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | true | false | null;
   index: number;
-  areachartConfigs?: ChartSeriesConfigs;
-  barchartConfigs?: ChartSeriesConfigs;
+  key: string;
+  statKey?: string;
 }
 
 export interface StatItemsProps extends StatItems {
-  areaChart?: ChartConfigsData[];
-  barChart?: ChartConfigsData[];
+  areaChart?: ChartSeriesData[];
+  barChart?: ChartSeriesData[];
   from: number;
   id: string;
-  to: number;
   narrowDateRange: UpdateDateRange;
+  to: number;
 }
 
 export const numberFormatter = (value: string | number): string => value.toLocaleString();
 const statItemBarchartRotation: Rotation = 90;
+const statItemChartCustomHeight = 74;
 
 export const areachartConfigs = (config?: {
   xTickFormatter: (value: number) => string;
@@ -94,6 +96,7 @@ export const areachartConfigs = (config?: {
   settings: {
     onBrushEnd: getOr(() => {}, 'onBrushEnd', config),
   },
+  customHeight: statItemChartCustomHeight,
 });
 
 export const barchartConfigs = (config?: { onElementClick?: ElementClickListener }) => ({
@@ -108,6 +111,7 @@ export const barchartConfigs = (config?: { onElementClick?: ElementClickListener
     onElementClick: getOr(() => {}, 'onElementClick', config),
     rotation: statItemBarchartRotation,
   },
+  customHeight: statItemChartCustomHeight,
 });
 
 export const addValueToFields = (
@@ -118,7 +122,7 @@ export const addValueToFields = (
 export const addValueToAreaChart = (
   fields: StatItem[],
   data: KpiHostsData | KpiNetworkData
-): ChartConfigsData[] =>
+): ChartSeriesData[] =>
   fields
     .filter(field => get(`${field.key}Histogram`, data) != null)
     .map(field => ({
@@ -130,9 +134,9 @@ export const addValueToAreaChart = (
 export const addValueToBarChart = (
   fields: StatItem[],
   data: KpiHostsData | KpiNetworkData
-): ChartConfigsData[] => {
+): ChartSeriesData[] => {
   if (fields.length === 0) return [];
-  return fields.reduce((acc: ChartConfigsData[], field: StatItem, idx: number) => {
+  return fields.reduce((acc: ChartSeriesData[], field: StatItem, idx: number) => {
     const { key, color } = field;
     const y: number | null = getOr(null, key, data);
     const x: string = get(`${idx}.name`, fields) || getOr('', `${idx}.description`, fields);
@@ -175,6 +179,7 @@ export const useKpiMatrixStatus = (
           fields: addValueToFields(stat.fields, data),
           id,
           key: `kpi-summary-${stat.key}`,
+          statKey: `${stat.key}`,
           from,
           to,
           narrowDateRange,
@@ -198,8 +203,9 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     grow,
     id,
     index,
-    to,
     narrowDateRange,
+    statKey = 'item',
+    to,
   }) => {
     const [isHover, setIsHover] = useState(false);
     const isBarChartDataAvailable =
@@ -211,7 +217,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
       areaChart.length &&
       areaChart.every(item => item.value != null && item.value.length > 0);
     return (
-      <FlexItem grow={grow}>
+      <FlexItem grow={grow} data-test-subj={`stat-${statKey}`}>
         <EuiPanel onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
           <EuiFlexGroup gutterSize={'none'}>
             <EuiFlexItem>

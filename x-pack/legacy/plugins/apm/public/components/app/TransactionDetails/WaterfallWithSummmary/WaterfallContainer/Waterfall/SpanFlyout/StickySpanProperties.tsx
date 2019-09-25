@@ -6,68 +6,63 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { SERVICE_NAME } from '../../../../../../../../../../../plugins/licensing/server/constants';
+import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
 import {
-  SPAN_ACTION,
-  SPAN_DURATION,
   SPAN_NAME,
-  SPAN_SUBTYPE,
-  SPAN_TYPE
+  TRANSACTION_NAME
 } from '../../../../../../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../../../common/i18n';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
-import { asMillis, asPercent } from '../../../../../../../utils/formatters';
 import { StickyProperties } from '../../../../../../shared/StickyProperties';
-
-function formatType(type: string) {
-  switch (type) {
-    case 'db':
-      return 'DB';
-    case 'hard-navigation':
-      return i18n.translate(
-        'xpack.apm.transactionDetails.spanFlyout.spanType.navigationTimingLabel',
-        {
-          defaultMessage: 'Navigation timing'
-        }
-      );
-    default:
-      return type;
-  }
-}
-
-function formatSubtype(subtype: string) {
-  switch (subtype) {
-    case 'mysql':
-      return 'MySQL';
-    default:
-      return subtype;
-  }
-}
-
-function getSpanTypes(span: Span) {
-  const { type, subtype, action } = span.span;
-
-  const [primaryType, subtypeFromType, actionFromType] = type.split('.'); // This is to support 6.x data
-
-  return {
-    spanType: formatType(primaryType),
-    spanSubtype: formatSubtype(subtype || subtypeFromType),
-    spanAction: action || actionFromType
-  };
-}
+import { TransactionOverviewLink } from '../../../../../../shared/Links/apm/TransactionOverviewLink';
+import { TransactionDetailLink } from '../../../../../../shared/Links/apm/TransactionDetailLink';
 
 interface Props {
   span: Span;
-  totalDuration?: number;
+  transaction?: Transaction;
 }
 
-export function StickySpanProperties({ span, totalDuration }: Props) {
-  if (!totalDuration) {
-    return null;
-  }
-
+export function StickySpanProperties({ span, transaction }: Props) {
   const spanName = span.span.name;
-  const spanDuration = span.span.duration.us;
-  const { spanType, spanSubtype, spanAction } = getSpanTypes(span);
+  const transactionStickyProperties = transaction
+    ? [
+        {
+          label: i18n.translate('xpack.apm.transactionDetails.serviceLabel', {
+            defaultMessage: 'Service'
+          }),
+          fieldName: SERVICE_NAME,
+          val: (
+            <TransactionOverviewLink serviceName={transaction.service.name}>
+              {transaction.service.name}
+            </TransactionOverviewLink>
+          ),
+          width: '25%'
+        },
+        {
+          label: i18n.translate(
+            'xpack.apm.transactionDetails.transactionLabel',
+            {
+              defaultMessage: 'Transaction'
+            }
+          ),
+          fieldName: TRANSACTION_NAME,
+          val: (
+            <TransactionDetailLink
+              serviceName={transaction.service.name}
+              transactionId={transaction.transaction.id}
+              traceId={transaction.trace.id}
+              transactionName={transaction.transaction.name}
+              transactionType={transaction.transaction.type}
+            >
+              {transaction.transaction.name}
+            </TransactionDetailLink>
+          ),
+          width: '25%'
+        }
+      ]
+    : [];
+
   const stickyProperties = [
     {
       label: i18n.translate(
@@ -79,72 +74,10 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
       fieldName: SPAN_NAME,
       val: spanName || NOT_AVAILABLE_LABEL,
       truncated: true,
-      width: '50%'
+      width: '25%'
     },
-    {
-      fieldName: SPAN_DURATION,
-      label: i18n.translate(
-        'xpack.apm.transactionDetails.spanFlyout.durationLabel',
-        {
-          defaultMessage: 'Duration'
-        }
-      ),
-      val: asMillis(spanDuration),
-      width: '50%'
-    },
-    {
-      label: i18n.translate(
-        'xpack.apm.transactionDetails.spanFlyout.percentOfTransactionLabel',
-        {
-          defaultMessage: '% of transaction'
-        }
-      ),
-      val: asPercent(spanDuration, totalDuration),
-      width: '50%'
-    },
-    {
-      fieldName: SPAN_TYPE,
-      label: i18n.translate(
-        'xpack.apm.transactionDetails.spanFlyout.typeLabel',
-        {
-          defaultMessage: 'Type'
-        }
-      ),
-      val: spanType,
-      truncated: true,
-      width: '15%'
-    }
+    ...transactionStickyProperties
   ];
-
-  if (spanSubtype) {
-    stickyProperties.push({
-      fieldName: SPAN_SUBTYPE,
-      label: i18n.translate(
-        'xpack.apm.transactionDetails.spanFlyout.subtypeLabel',
-        {
-          defaultMessage: 'Subtype'
-        }
-      ),
-      val: spanSubtype,
-      truncated: true,
-      width: '15%'
-    });
-  }
-
-  if (spanAction) {
-    stickyProperties.push({
-      fieldName: SPAN_ACTION,
-      label: i18n.translate(
-        'xpack.apm.transactionDetails.spanFlyout.actionLabel',
-        {
-          defaultMessage: 'Action'
-        }
-      ),
-      val: spanAction,
-      truncated: true,
-      width: '15%'
-    });
-  }
 
   return <StickyProperties stickyProperties={stickyProperties} />;
 }

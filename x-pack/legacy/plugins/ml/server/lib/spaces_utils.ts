@@ -5,8 +5,7 @@
  */
 
 import { Request } from 'hapi';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { getActiveSpace } from '../../../spaces/server/lib/get_active_space';
+import { SpacesPlugin } from '../../../spaces';
 import { Space } from '../../../spaces/common/model/space';
 
 interface GetActiveSpaceResponse {
@@ -14,17 +13,12 @@ interface GetActiveSpaceResponse {
   space?: Space;
 }
 
-export function spacesUtilsProvider(spacesPlugin: any, request: Request, config: KibanaConfig) {
+export function spacesUtilsProvider(spacesPlugin: SpacesPlugin, request: Request) {
   async function activeSpace(): Promise<GetActiveSpaceResponse> {
-    const spacesClient = await spacesPlugin.getScopedSpacesClient(request);
     try {
       return {
         valid: true,
-        space: await getActiveSpace(
-          spacesClient,
-          request.getBasePath(),
-          config.get('server.basePath')
-        ),
+        space: await spacesPlugin.getActiveSpace(request),
       };
     } catch (e) {
       return {
