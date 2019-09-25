@@ -45,18 +45,8 @@ export class HeadlessChromiumDriver {
     logger.info(`opening url ${url}`);
     await this.page.setRequestInterception(true);
     let interceptedCount = 0;
-
-    this.page.on('request', interceptedRequest => {
+    this.page.on('request', (interceptedRequest: any) => {
       let isData = false;
-      let interceptedUrl = interceptedRequest.url();
-
-      // This really should never happen, but if we're tricked
-      // into loading from the local file-system then something fishy is happening
-      if (interceptedUrl.startsWith('file://')) {
-        logger.error(`Got request for page "${interceptedUrl}", aborting`);
-        return interceptedRequest.abort();
-      }
-
       if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedRequest.url())) {
         logger.debug(`Using custom headers for ${interceptedRequest.url()}`);
         interceptedRequest.continue({
@@ -66,6 +56,8 @@ export class HeadlessChromiumDriver {
           },
         });
       } else {
+        let interceptedUrl = interceptedRequest.url();
+
         if (interceptedUrl.startsWith('data:')) {
           // `data:image/xyz;base64` can be very long URLs
           interceptedUrl = interceptedUrl.substring(0, 100) + '[truncated]';
@@ -76,15 +68,6 @@ export class HeadlessChromiumDriver {
         interceptedRequest.continue();
       }
       interceptedCount = interceptedCount + (isData ? 0 : 1);
-    });
-
-    // This really should never happen, but if we're tricked
-    // into loading anything from here something very fishy is going on
-    this.page.on('response', response => {
-      if (response.remoteAddress().ip === '169.254.169.254') {
-        this.page.browser().close();
-        throw new Error('Saw response from bogon IP 169.254.169.254');
-      }
     });
 
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
