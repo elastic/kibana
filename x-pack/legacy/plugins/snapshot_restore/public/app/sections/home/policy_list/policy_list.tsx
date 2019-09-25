@@ -7,31 +7,19 @@
 import React, { Fragment, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import {
-  EuiEmptyPrompt,
-  EuiButton,
-  EuiCallOut,
-  EuiPanel,
-  EuiSpacer,
-  EuiLoadingContent,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { SlmPolicy } from '../../../../../common/types';
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common/constants';
 import { SectionError, SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
-import {
-  useLoadPolicies,
-  useLoadPolicyStats,
-  useLoadRetentionSettings,
-} from '../../../services/http';
+import { useLoadPolicies, useLoadRetentionSettings } from '../../../services/http';
 import { uiMetricService } from '../../../services/ui_metric';
 import { linkToAddPolicy, linkToPolicy } from '../../../services/navigation';
 import { WithPrivileges, NotAuthorizedSection } from '../../../lib/authorization';
 
 import { PolicyDetails } from './policy_details';
 import { PolicyTable } from './policy_table';
-import { PolicyStats } from './policy_stats';
 import { PolicyRetentionSchedule } from './policy_retention_schedule';
 
 interface MatchParams {
@@ -59,12 +47,10 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     sendRequest: reload,
   } = useLoadPolicies();
 
-  // Load SLM policy statistics
-  const { data: policyStats } = useLoadPolicyStats();
-
   // Load retention cluster settings
   const {
     isLoading: isLoadingRetentionSettings,
+    error: retentionSettingsError,
     data: retentionSettings,
     sendRequest: reloadRetentionSettings,
   } = useLoadRetentionSettings();
@@ -160,6 +146,8 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
   } else {
     const policySchedules = policies.map((policy: SlmPolicy) => policy.schedule);
     const hasDuplicateSchedules = policySchedules.length > new Set(policySchedules).size;
+    const hasRetention = Boolean(policies.find((policy: SlmPolicy) => policy.retention));
+
     content = (
       <Fragment>
         {hasDuplicateSchedules ? (
@@ -183,22 +171,14 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
           </Fragment>
         ) : null}
 
-        {isLoadingRetentionSettings ? (
-          <EuiPanel>
-            <EuiLoadingContent lines={1} />;
-          </EuiPanel>
-        ) : null}
-
-        {retentionSettings ? (
+        {hasRetention ? (
           <PolicyRetentionSchedule
             retentionSettings={retentionSettings}
             onRetentionScheduleUpdated={reloadRetentionSettings}
+            isLoading={isLoadingRetentionSettings}
+            error={retentionSettingsError}
           />
         ) : null}
-
-        <EuiSpacer />
-
-        {policyStats ? <PolicyStats stats={policyStats} /> : null}
 
         <PolicyTable
           policies={policies || []}

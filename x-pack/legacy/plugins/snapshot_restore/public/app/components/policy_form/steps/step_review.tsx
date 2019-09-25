@@ -68,6 +68,7 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
 
   const renderSummaryTab = () => (
     <Fragment>
+      {/* Logistics summary */}
       <EuiSpacer size="m" />
       <EuiTitle size="s">
         <h3>
@@ -132,6 +133,8 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
+
+      {/* Snapshot settings summary */}
       <EuiTitle size="s">
         <h3>
           <FormattedMessage
@@ -276,6 +279,7 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
+      {/* Retention summary */}
       {serializedRetention ? (
         <Fragment>
           <EuiSpacer size="m" />
@@ -296,7 +300,7 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
                 <EuiDescriptionListTitle>
                   <FormattedMessage
                     id="xpack.snapshotRestore.policyForm.stepReview.retentionTab.expireAfterLabel"
-                    defaultMessage="Expire after"
+                    defaultMessage="Delete after"
                   />
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>

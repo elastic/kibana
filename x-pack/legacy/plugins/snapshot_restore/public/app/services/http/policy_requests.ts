@@ -108,10 +108,3 @@ export const updateRetentionSchedule = (retentionSchedule: string) => {
   trackUiMetric(UIM_POLICY_RETENTION_SETTINGS_UPDATE);
   return result;
 };
-
-export const useLoadPolicyStats = () => {
-  return useRequest({
-    path: httpService.addBasePath(`${API_BASE_PATH}policies/stats`),
-    method: 'get',
-  });
-};

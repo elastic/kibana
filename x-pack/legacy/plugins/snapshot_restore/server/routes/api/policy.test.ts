@@ -12,7 +12,6 @@ import {
   createHandler,
   updateHandler,
   getIndicesHandler,
-  getStatsHandler,
   updateRetentionSettingsHandler,
 } from './policy';
 
@@ -358,58 +357,6 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
       const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
       await expect(
         updateRetentionSettingsHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
-      ).rejects.toThrow();
-    });
-  });
-
-  describe('getStatsHandler()', () => {
-    it('should return SLM stats from ES', async () => {
-      const mockEsResponse = {
-        retention_runs: 13,
-        retention_failed: 0,
-        retention_timed_out: 0,
-        retention_deletion_time: '1.4s',
-        retention_deletion_time_millis: 1404,
-        policy_metrics: {
-          'daily-snapshots2': {
-            snapshots_taken: 7,
-            snapshots_failed: 0,
-            snapshots_deleted: 6,
-            snapshot_deletion_failures: 0,
-          },
-          'daily-snapshots': {
-            snapshots_taken: 12,
-            snapshots_failed: 0,
-            snapshots_deleted: 12,
-            snapshot_deletion_failures: 6,
-          },
-        },
-        total_snapshots_taken: 19,
-        total_snapshots_failed: 0,
-        total_snapshots_deleted: 18,
-        total_snapshot_deletion_failures: 0,
-      };
-      const callWithRequest = jest.fn().mockReturnValueOnce(mockEsResponse);
-      const expectedResponse = {
-        retentionRuns: 13,
-        retentionFailed: 0,
-        retentionTimedOut: 0,
-        retentionDeletionTime: '1.4s',
-        retentionDeletionTimeMillis: 1404,
-        totalSnapshotsTaken: 19,
-        totalSnapshotsFailed: 0,
-        totalSnapshotsDeleted: 18,
-        totalSnapshotDeletionFailures: 0,
-      };
-      await expect(
-        getStatsHandler(mockRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(expectedResponse);
-    });
-
-    it('should throw if ES error', async () => {
-      const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
-      await expect(
-        getStatsHandler(mockRequest, callWithRequest, mockResponseToolkit)
       ).rejects.toThrow();
     });
   });

@@ -134,7 +134,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
       {stats && (
         <Fragment>
           <EuiPanel>
-            <EuiFlexGroup justifyContent="spaceAround">
+            <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiStat
                   title={stats.snapshotsTaken}
@@ -144,19 +144,20 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
                       defaultMessage: 'Snapshots',
                     }
                   )}
-                  titleSize="xxs"
+                  titleSize="s"
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiStat
                   title={stats.snapshotsFailed}
+                  titleColor={stats.snapshotsFailed > 0 ? 'danger' : 'default'}
                   description={i18n.translate(
                     'xpack.snapshotRestore.policyDetails.snapshotsFailedStat',
                     {
                       defaultMessage: 'Failures',
                     }
                   )}
-                  titleSize="xxs"
+                  titleSize="s"
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -168,19 +169,20 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
                       defaultMessage: 'Deletions',
                     }
                   )}
-                  titleSize="xxs"
+                  titleSize="s"
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiStat
                   title={stats.snapshotDeletionFailures}
+                  titleColor={stats.snapshotDeletionFailures > 0 ? 'danger' : 'default'}
                   description={i18n.translate(
                     'xpack.snapshotRestore.policyDetails.snapshotDeletionFailuresStat',
                     {
                       defaultMessage: 'Deletion failures',
                     }
                   )}
-                  titleSize="xxs"
+                  titleSize="s"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -395,7 +397,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
                 <EuiDescriptionListTitle>
                   <FormattedMessage
                     id="xpack.snapshotRestore.policyDetails.expireAfterLabel"
-                    defaultMessage="Expire after"
+                    defaultMessage="Delete after"
                   />
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>

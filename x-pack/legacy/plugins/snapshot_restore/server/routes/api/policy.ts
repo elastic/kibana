@@ -8,8 +8,8 @@ import {
   wrapCustomError,
   wrapEsError,
 } from '../../../../../server/lib/create_router/error_wrappers';
-import { SlmPolicyEs, SlmPolicy, SlmPolicyPayload, SlmPolicyStats } from '../../../common/types';
-import { deserializePolicy, serializePolicy, deserializePolicyStats } from '../../../common/lib';
+import { SlmPolicyEs, SlmPolicy, SlmPolicyPayload } from '../../../common/types';
+import { deserializePolicy, serializePolicy } from '../../../common/lib';
 import { Plugins } from '../../../shim';
 
 let callWithInternalUser: any;
@@ -25,7 +25,6 @@ export function registerPolicyRoutes(router: Router, plugins: Plugins) {
   router.get('policies/indices', getIndicesHandler);
   router.get('policies/retention_settings', getRetentionSettingsHandler);
   router.put('policies/retention_settings', updateRetentionSettingsHandler);
-  router.get('policies/stats', getStatsHandler);
 }
 
 export const getAllHandler: RouterRouteHandler = async (
@@ -202,16 +201,4 @@ export const updateRetentionSettingsHandler: RouterRouteHandler = async (req, ca
       },
     },
   });
-};
-
-export const getStatsHandler: RouterRouteHandler = async (
-  _req,
-  callWithRequest
-): Promise<SlmPolicyStats> => {
-  // Get SLM stats
-  const stats = await callWithRequest('slm.stats', {
-    human: true,
-  });
-
-  return deserializePolicyStats(stats);
 };

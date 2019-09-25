@@ -85,28 +85,3 @@ export interface SlmPolicyEs {
     snapshot_deletion_failures: number;
   };
 }
-
-export interface SlmPolicyStats {
-  retentionRuns: number;
-  retentionFailed: number;
-  retentionTimedOut: number;
-  retentionDeletionTime: string;
-  retentionDeletionTimeMillis: number;
-  totalSnapshotsTaken: number;
-  totalSnapshotsFailed: number;
-  totalSnapshotsDeleted: number;
-  totalSnapshotDeletionFailures: number;
-}
-
-export interface SlmPolicyStatsEs {
-  retention_runs: number;
-  retention_failed: number;
-  retention_timed_out: number;
-  retention_deletion_time: string;
-  retention_deletion_time_millis: number;
-  policy_metrics: object;
-  total_snapshots_taken: number;
-  total_snapshots_failed: number;
-  total_snapshots_deleted: number;
-  total_snapshot_deletion_failures: number;
-}

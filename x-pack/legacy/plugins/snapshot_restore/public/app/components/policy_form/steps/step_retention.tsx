@@ -81,7 +81,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
         label={
           <FormattedMessage
             id="xpack.snapshotRestore.policyForm.stepRetention.expireAfterLabel"
-            defaultMessage="Expire after"
+            defaultMessage="Delete after"
           />
         }
         describedByIds={['expirationDescription']}
@@ -143,55 +143,61 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
       idAria="countDescription"
       fullWidth
     >
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.snapshotRestore.policyForm.stepRetention.minCountLabel"
-            defaultMessage="Min count"
-          />
-        }
-        describedByIds={['countDescription']}
-        isInvalid={touched.minCount && Boolean(errors.minCount)}
-        error={errors.minCount}
-        fullWidth
-      >
-        <EuiFieldNumber
-          fullWidth
-          value={retention.minCount || ''}
-          onBlur={() => setTouched({ ...touched, minCount: true })}
-          onChange={e => {
-            const value = e.target.value;
-            updatePolicyRetention({
-              minCount: value !== '' ? Number(value) : value,
-            });
-          }}
-          data-test-subj="minCountInput"
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.snapshotRestore.policyForm.stepRetention.maxCountLabel"
-            defaultMessage="Max count"
-          />
-        }
-        describedByIds={['countDescription']}
-        error={errors.maxCount}
-        fullWidth
-      >
-        <EuiFieldNumber
-          fullWidth
-          value={retention.maxCount || ''}
-          onBlur={() => setTouched({ ...touched, maxCount: true })}
-          onChange={e => {
-            const value = e.target.value;
-            updatePolicyRetention({
-              maxCount: value !== '' ? Number(value) : value,
-            });
-          }}
-          data-test-subj="maxCountInput"
-        />
-      </EuiFormRow>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepRetention.minCountLabel"
+                defaultMessage="Mininum"
+              />
+            }
+            describedByIds={['countDescription']}
+            isInvalid={touched.minCount && Boolean(errors.minCount)}
+            error={errors.minCount}
+            fullWidth
+          >
+            <EuiFieldNumber
+              fullWidth
+              value={retention.minCount || ''}
+              onBlur={() => setTouched({ ...touched, minCount: true })}
+              onChange={e => {
+                const value = e.target.value;
+                updatePolicyRetention({
+                  minCount: value !== '' ? Number(value) : value,
+                });
+              }}
+              data-test-subj="minCountInput"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepRetention.maxCountLabel"
+                defaultMessage="Maximum"
+              />
+            }
+            describedByIds={['countDescription']}
+            error={errors.maxCount}
+            fullWidth
+          >
+            <EuiFieldNumber
+              fullWidth
+              value={retention.maxCount || ''}
+              onBlur={() => setTouched({ ...touched, maxCount: true })}
+              onChange={e => {
+                const value = e.target.value;
+                updatePolicyRetention({
+                  maxCount: value !== '' ? Number(value) : value,
+                });
+              }}
+              data-test-subj="maxCountInput"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiDescribedFormGroup>
   );
 
