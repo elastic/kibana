@@ -12,19 +12,15 @@ const oboe = require('oboe');
 const FILE_BUFFER = 1024 * 50;
 
 let fileReader;
-let oboeStream;
 const fileHandler = (
   file, chunkHandler, cleanAndValidate, getFileParseActive, fileBuffer = FILE_BUFFER
 ) => {
 
+  const oboeStream = oboe();
   if (fileReader) {
     fileReader.abort();
   }
-  if (oboeStream) {
-    oboeStream.abort();
-  }
   fileReader = new FileReader();
-  oboeStream = oboe();
   let start;
   let stop = fileBuffer;
 
