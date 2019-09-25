@@ -1,5 +1,5 @@
 // short-version can be:    8, 7, 6, etc.
-:short-version:   8
+:short-version:   7
 
 include::{asciidoc-dir}/../../shared/versions/stack/{source_branch}.asciidoc[]
 include::{asciidoc-dir}/../../shared/attributes.asciidoc[]
