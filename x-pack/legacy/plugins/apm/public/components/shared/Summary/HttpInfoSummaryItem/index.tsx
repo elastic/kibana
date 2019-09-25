@@ -8,10 +8,8 @@ import React from 'react';
 import { EuiToolTip, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { idx } from '@kbn/elastic-idx/target';
 import { palettes } from '@elastic/eui';
-import { Transaction } from '../../../../../../typings/es_schemas/ui/Transaction';
-import { units, px, truncate, unit } from '../../../../../style/variables';
+import { units, px, truncate, unit } from '../../../../style/variables';
 import { statusCodes } from './statusCodes';
 
 const statusColors = {
@@ -58,7 +56,8 @@ const Url = styled('span')`
   ${truncate(px(unit * 24))};
 `;
 interface HttpInfoProps {
-  transaction: Transaction;
+  method: string;
+  status?: number;
   url: string;
 }
 
@@ -66,12 +65,7 @@ const Span = styled('span')`
   white-space: nowrap;
 `;
 
-export function HttpInfo({ transaction, url }: HttpInfoProps) {
-  const method = (
-    idx(transaction, _ => _.http.request.method) || ''
-  ).toUpperCase();
-  const status = idx(transaction, _ => _.http.response.status_code);
-
+export function HttpInfoSummaryItem({ status, method, url }: HttpInfoProps) {
   const methodLabel = i18n.translate(
     'xpack.apm.transactionDetails.requestMethodLabel',
     {
@@ -83,7 +77,7 @@ export function HttpInfo({ transaction, url }: HttpInfoProps) {
     <Span>
       <HttpInfoBadge title={undefined}>
         <EuiToolTip content={methodLabel}>
-          <strong>{method}</strong>
+          <>{method.toUpperCase()}</>
         </EuiToolTip>{' '}
         <EuiToolTip content={url}>
           <Url>{url}</Url>
