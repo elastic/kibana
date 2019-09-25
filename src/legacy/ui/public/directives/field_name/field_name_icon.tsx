@@ -20,48 +20,44 @@ import React from 'react';
 import { palettes, EuiIcon } from '@elastic/eui';
 import { IconSize } from '@elastic/eui/src/components/icon/icon';
 
-function stringToNum(s: string) {
-  return Array.from(s).reduce((acc, ch) => acc + ch.charCodeAt(0), 1);
+interface IconMapEntry {
+  icon: string;
+  color: string;
 }
-
-// default => a unknown datatype, we could also use 'document'
-const defaultIcon = 'questionInCircle';
-
-const typeToIconMap: Record<string, string> = {
-  boolean: 'invert',
-  conflict: 'alert', // icon for an index pattern mapping conflict in discover
-  date: 'calendar',
-  geo_point: 'globe',
-  geo_shape: 'globe',
-  ip: 'storage',
-  murmur3: 'document', // is a plugin's data type https://www.elastic.co/guide/en/elasticsearch/plugins/current/mapper-murmur3-usage.html
-  number: 'number',
-  source: 'editorCodeBlock',
-  string: 'string',
-};
-
-export function getColorForDataType(type: string) {
-  const { colors } = palettes.euiPaletteColorBlind;
-  const colorIndex = stringToNum(type) % colors.length;
-  return colors[colorIndex];
-}
-
 interface Props {
   type: string;
   label: string;
   size?: IconSize;
   useColor?: boolean;
 }
+const { colors } = palettes.euiPaletteColorBlind;
+// default => a unknown datatype
+const defaultIcon = { icon: 'questionInCircle', color: colors[0] };
+
+const typeToEuiIconMap: Record<string, IconMapEntry> = {
+  boolean: { icon: 'invert', color: colors[5] },
+  // icon for an index pattern mapping conflict in discover
+  conflict: { icon: 'alert', color: colors[8] },
+  date: { icon: 'calendar', color: colors[7] },
+  geo_point: { icon: 'globe', color: colors[2] },
+  geo_shape: { icon: 'globe', color: colors[2] },
+  ip: { icon: 'storage', color: colors[8] },
+  // is a plugin's data type https://www.elastic.co/guide/en/elasticsearch/plugins/current/mapper-murmur3-usage.html
+  murmur3: { icon: 'document', color: colors[1] },
+  number: { icon: 'number', color: colors[0] },
+  _source: { icon: 'editorCodeBlock', color: colors[3] },
+  string: { icon: 'string', color: colors[4] },
+};
 
 export function FieldNameIcon({ type, label = '', size = 's', useColor = false }: Props) {
-  const usedIconType = typeToIconMap[type] || defaultIcon;
+  const euiIcon = typeToEuiIconMap[type] || defaultIcon;
 
   return (
     <EuiIcon
-      type={usedIconType}
-      aria-label={label ? label : type}
+      type={euiIcon.icon}
+      aria-label={label || type}
       size={size as IconSize}
-      color={useColor ? getColorForDataType(usedIconType) : undefined}
+      color={useColor || type === 'conflict' ? euiIcon.color : undefined}
     />
   );
 }
