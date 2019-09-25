@@ -296,7 +296,7 @@
     "@types/cheerio": "^0.22.10",
     "@types/chromedriver": "^2.38.0",
     "@types/classnames": "^2.2.3",
-    "@types/d3": "^3.5.41",
+    "@types/d3": "^3.5.43",
     "@types/dedent": "^0.7.0",
     "@types/delete-empty": "^2.0.0",
     "@types/elasticsearch": "^5.0.33",
