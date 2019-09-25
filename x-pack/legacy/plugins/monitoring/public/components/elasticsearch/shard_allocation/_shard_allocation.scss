@@ -25,23 +25,32 @@ monitoring-shard-allocation {
   }
 
   .monChild {
-    float: left;
-    align-self: center;
-    background-color: $euiColorLightestShade;
-    margin: $euiSizeS;
-    border: 1px solid $euiColorMediumShade;
-    border-radius: $euiSizeXS;
+    // float: left;
+    // align-self: center;
+    // background-color: $euiColorLightestShade;
+    // margin: $euiSizeS;
+    padding: 0 $euiSizeS;
+    // border: 1px solid $euiColorMediumShade;
+    // border-radius: $euiSizeXS;
 
-    &.index {
-      border-left: $euiSizeXS solid $euiColorSuccess;
+    // &.index {
+    //   border-left: $euiSizeXS solid $euiColorSuccess;
 
-      &.red {
-        border-left: $euiSizeXS solid $euiColorDanger;
-      }
+    //   &.red {
+    //     border-left: $euiSizeXS solid $euiColorDanger;
+    //   }
 
-      &.yellow {
-        border-left: $euiSizeXS solid $euiColorWarning;
-      }
+    //   &.yellow {
+    //     border-left: $euiSizeXS solid $euiColorWarning;
+    //   }
+    // }
+
+    .shardLegendItem {
+      align-items: center;
+    }
+
+    .monHealth {
+      margin-left: auto;
     }
 
     .monTitle {
@@ -79,10 +88,10 @@ monitoring-shard-allocation {
   }
 
   .shard {
-    align-self: center;
-    padding: $euiSizeXS $euiSizeS;
+    // align-self: center;
+    // padding: $euiSizeXS $euiSizeS;
     font-size: $euiSizeM;
-    position: relative;
-    display: inline-block;
+    // position: relative;
+    // display: inline-block;
   }
 }

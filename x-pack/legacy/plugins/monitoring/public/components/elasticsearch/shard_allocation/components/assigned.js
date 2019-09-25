@@ -9,7 +9,44 @@ import React from 'react';
 import { Shard } from './shard';
 import { calculateClass } from '../lib/calculate_class';
 import { generateQueryAndLink } from '../lib/generate_query_and_link';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiKeyboardAccessible } from '@elastic/eui';
+import {
+  EuiFlexGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiKeyboardAccessible,
+} from '@elastic/eui';
+
+function getColor(classes) {
+  const classList = classes.split(' ');
+
+  if (classList.includes('emergency')) {
+    return 'danger';
+  }
+
+  if (classList.includes('unassigned')) {
+    if (classList.includes('replica')) {
+      return 'warning';
+    }
+    return 'danger';
+  }
+
+  if (classList.includes('relocating')) {
+    return 'accent';
+  }
+
+  if (classList.includes('initializing')) {
+    return 'default';
+  }
+
+  if (classList.includes('primary')) {
+    return 'primary';
+  }
+
+  if (classList.includes('replica')) {
+    return 'secondary';
+  }
+}
 
 function sortByName(item) {
   if (item.type === 'node') {
@@ -18,10 +55,19 @@ function sortByName(item) {
   return [item.name];
 }
 
+const colorToColorTypeMap = {
+  green: 'success',
+  yellow: 'warning',
+  red: 'danger',
+};
+
 export class Assigned extends React.Component {
   createShard = shard => {
     const type = shard.primary ? 'primary' : 'replica';
     const key = `${shard.index}.${shard.node}.${type}.${shard.state}.${shard.shard}`;
+    const classes = calculateClass(shard);
+    const color = getColor(classes);
+    console.log(color, 'COLOR');
     return <Shard shard={shard} key={key} />;
   };
 
@@ -49,21 +95,25 @@ export class Assigned extends React.Component {
     const master =
       data.node_type === 'master' ? <EuiIcon type="starFilledSpace" color="primary" /> : null;
     const shards = sortBy(data.children, 'shard').map(this.createShard);
+    const status = shardStats ? shardStats.status : undefined;
     return (
       <EuiFlexItem
-        grow={false}
+        // grow={false}
         className={calculateClass(data, initialClasses.join(' '))}
         key={key}
         data-test-subj={`clusterView-Assigned-${key}`}
         data-status={shardStats && shardStats.status}
       >
-        <EuiFlexGroup>
+        <EuiFlexGroup className="shardLegendItem" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="none">{shards}</EuiFlexGroup>
+          </EuiFlexItem>
           <EuiFlexItem grow={false} className="monTitle eui-textNoWrap">
             {name}
             {master}
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="s">{shards}</EuiFlexGroup>
+          <EuiFlexItem className="monHealth" grow={false}>
+            <EuiIcon type="dot" color={colorToColorTypeMap[status]} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -74,9 +124,9 @@ export class Assigned extends React.Component {
     const data = sortBy(this.props.data, sortByName).map(this.createChild);
     return (
       <td>
-        <EuiFlexGroup wrap className="monChildren">
+        <EuiFlexGrid columns={3} className="monChildren">
           {data}
-        </EuiFlexGroup>
+        </EuiFlexGrid>
       </td>
     );
   }

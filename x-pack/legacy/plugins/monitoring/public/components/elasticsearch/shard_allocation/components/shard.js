@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import React from 'react';
 import { calculateClass } from '../lib/calculate_class';
 import { vents } from '../lib/vents';
@@ -44,9 +42,12 @@ function getColor(classes) {
 }
 
 export class Shard extends React.Component {
-  static displayName = i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.shardDisplayName', {
-    defaultMessage: 'Shard',
-  });
+  static displayName = i18n.translate(
+    'xpack.monitoring.elasticsearch.shardAllocation.shardDisplayName',
+    {
+      defaultMessage: 'Shard',
+    }
+  );
   state = { tooltipVisible: false };
 
   componentDidMount() {
@@ -55,13 +56,13 @@ export class Shard extends React.Component {
     const self = this;
     if (shard.tooltip_message) {
       key = this.generateKey();
-      vents.on(key, function (action) {
+      vents.on(key, function(action) {
         self.setState({ tooltipVisible: action === 'show' });
       });
     }
   }
 
-  generateKey = (relocating) => {
+  generateKey = relocating => {
     const shard = this.props.shard;
     const shardType = shard.primary ? 'primary' : 'replica';
     const additionId = shard.state === 'UNASSIGNED' ? Math.random() : '';
@@ -78,9 +79,9 @@ export class Shard extends React.Component {
     }
   }
 
-  toggle = (event) => {
+  toggle = event => {
     if (this.props.shard.tooltip_message) {
-      const action = (event.type === 'mouseenter') ? 'show' : 'hide';
+      const action = event.type === 'mouseenter' ? 'show' : 'hide';
       const key = this.generateKey(true);
       this.setState({ tooltipVisible: action === 'show' });
       vents.trigger(key, action);
@@ -93,15 +94,15 @@ export class Shard extends React.Component {
     const color = getColor(classes);
     const classification = classes + ' ' + shard.shard;
 
-    let shardUi = (
-      <EuiBadge color={color}>
-        {shard.shard}
-      </EuiBadge>
-    );
+    let shardUi = <EuiBadge color={color}>{shard.shard}</EuiBadge>;
 
     if (this.state.tooltipVisible) {
       shardUi = (
-        <EuiToolTip content={this.props.shard.tooltip_message} position="bottom" data-test-subj="shardTooltip">
+        <EuiToolTip
+          content={this.props.shard.tooltip_message}
+          position="bottom"
+          data-test-subj="shardTooltip"
+        >
           <p>{shardUi}</p>
         </EuiToolTip>
       );
