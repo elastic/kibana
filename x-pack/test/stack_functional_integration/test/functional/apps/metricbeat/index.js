@@ -1,8 +1,8 @@
-import { bdd, defaultTimeout, esClient, common } from '../../../support';
 
-bdd.describe('metricbeat app', function () {
-  this.timeout = defaultTimeout;
+export default function ({ loadTestFile }) {
+  describe('metricbeat app', function () {
+    // this.timeout = defaultTimeout;
 
-  require('./_metricbeat');
-
-});
+    loadTestFile(require.resolve('./_metricbeat'));
+  });
+}

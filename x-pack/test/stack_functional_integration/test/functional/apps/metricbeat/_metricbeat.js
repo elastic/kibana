@@ -1,27 +1,23 @@
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
-import {
-  bdd
-} from '../../../support';
+export default function ({ getService, getPageObjects }) {
+  const log = getService('log');
+  const retry = getService('retry');
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
 
-import PageObjects from '../../../support/page_objects';
+  describe('check metricbeat', function () {
 
-bdd.describe('check metricbeat', function () {
-  bdd.before(function () {
-    PageObjects.common.debug('navigateToApp Discover');
-    //return PageObjects.common.navigateToApp('discover');
-  });
-
-  bdd.it('metricbeat- should have hit count GT 0', async function () {
-    await PageObjects.common.navigateToApp('discover');
-    await PageObjects.discover.selectIndexPattern('metricbeat-*');
-    await PageObjects.common.tryForTime(40000, async () => {
-      await PageObjects.header.setQuickSpan('Today');
-    });
-    await PageObjects.common.tryForTime(40000, async () => {
-      const hitCount = await PageObjects.discover.getHitCount();
-      expect(hitCount).to.be.greaterThan('0');
+    it('metricbeat- should have hit count GT 0', async function () {
+      log.debug('navigateToApp Discover');
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.selectIndexPattern('metricbeat-*');
+      // await retry.try(async function() {
+      //   await PageObjects.header.setQuickSpan('Today');
+      // });
+      await retry.try(async function () {
+        const hitCount = parseInt(await PageObjects.discover.getHitCount());
+        expect(hitCount).to.be.greaterThan(0);
+      });
     });
   });
-
-});
+}

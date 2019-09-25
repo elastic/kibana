@@ -17,18 +17,11 @@
  * under the License.
  */
 
-// import {
-//   KibanaSupertestProvider,
-//   KibanaSupertestWithoutAuthProvider,
-//   ElasticsearchSupertestProvider,
-// } from './services';
 
 const serverConfig = require('../test/server_config');
 
 export default async function ({ readConfigFile }) {
   const defaultConfig = await readConfigFile(require.resolve('../../functional/config'));
-  // const commonConfig = await readConfigFile(require.resolve('../common/config'));
-  // const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
     ...defaultConfig.getAll(),
