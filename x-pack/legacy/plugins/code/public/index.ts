@@ -5,15 +5,8 @@
  */
 
 import { PluginInitializerContext } from 'src/core/public';
-import { npStart } from 'ui/new_platform';
 import { Plugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new Plugin(initializerContext);
 }
-
-export * from './shared';
-
-// This is the shim to legacy platform
-const p = plugin({} as PluginInitializerContext);
-p.start(npStart.core);

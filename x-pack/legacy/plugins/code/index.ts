@@ -29,11 +29,11 @@ export const code = (kibana: any) =>
     publicDir: resolve(__dirname, 'public'),
 
     uiExports: {
-      app: {
-        title: APP_TITLE,
-        main: 'plugins/code/index',
-        euiIconType: 'codeApp',
-      },
+      // app: {
+      //   title: APP_TITLE,
+      //   main: 'plugins/code/index',
+      //   euiIconType: 'codeApp',
+      // },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       injectDefaultVars(server: ServerFacade) {
         const config = server.config();
