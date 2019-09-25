@@ -17,6 +17,8 @@ import { PLUGIN } from '../common/constants';
 import { fetchList } from './registry';
 import { routes } from './routes';
 
+export { PluginInitializerContext } from 'src/core/server';
+
 export interface CoreSetup {
   elasticsearch: ElasticsearchServiceSetup;
   http: HttpServiceSetup;
