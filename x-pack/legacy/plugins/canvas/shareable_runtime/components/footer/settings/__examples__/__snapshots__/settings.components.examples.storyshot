@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots shareable/Settings/components AutoplaySettings, autoplay disabled 1`] = `
+exports[`Storyshots shareables/Settings/components AutoplaySettings, autoplay disabled 1`] = `
 <div
   style={
     Object {
@@ -162,7 +162,7 @@ exports[`Storyshots shareable/Settings/components AutoplaySettings, autoplay dis
 </div>
 `;
 
-exports[`Storyshots shareable/Settings/components AutoplaySettings, autoplay enabled 1`] = `
+exports[`Storyshots shareables/Settings/components AutoplaySettings, autoplay enabled 1`] = `
 <div
   style={
     Object {
@@ -324,7 +324,7 @@ exports[`Storyshots shareable/Settings/components AutoplaySettings, autoplay ena
 </div>
 `;
 
-exports[`Storyshots shareable/Settings/components ToolbarSettings, autohide disabled 1`] = `
+exports[`Storyshots shareables/Settings/components ToolbarSettings, autohide disabled 1`] = `
 <div
   style={
     Object {
@@ -401,7 +401,7 @@ exports[`Storyshots shareable/Settings/components ToolbarSettings, autohide disa
 </div>
 `;
 
-exports[`Storyshots shareable/Settings/components ToolbarSettings, autohide enabled 1`] = `
+exports[`Storyshots shareables/Settings/components ToolbarSettings, autohide enabled 1`] = `
 <div
   style={
     Object {
