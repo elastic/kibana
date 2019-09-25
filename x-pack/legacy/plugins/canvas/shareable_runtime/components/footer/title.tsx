@@ -8,10 +8,13 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 
 interface Props {
+  /**
+   * The title of the workpad being shared.
+   */
   title: string;
 }
 /**
- * The title of the workpad displayed in the right-hand of the footer.
+ * The title of the workpad displayed in the left-hand of the footer.
  */
 export const Title = ({ title }: Props) => (
   <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">

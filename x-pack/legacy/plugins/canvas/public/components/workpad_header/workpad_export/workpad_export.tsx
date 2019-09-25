@@ -11,17 +11,17 @@ import { EuiButtonIcon, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { Popover } from '../../popover';
 import { DisabledPanel } from './disabled_panel';
 import { PDFPanel } from './pdf_panel';
-import { ExternalEmbedFlyout } from './flyout/external_embed_flyout';
+import { ShareWebsiteFlyout } from './flyout/share_website_flyout';
 
 import { ComponentStrings } from '../../../../i18n';
 const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
 
 type ClosePopoverFn = () => void;
 
-type CopyTypes = 'pdf' | 'reportingConfig' | 'embed';
-type ExportTypes = 'pdf' | 'json' | 'embed' | 'runtime' | 'zip';
+type CopyTypes = 'pdf' | 'reportingConfig' | 'share';
+type ExportTypes = 'pdf' | 'json' | 'share' | 'shareRuntime' | 'shareZip';
 type ExportUrlTypes = 'pdf';
-type CloseTypes = 'embed';
+type CloseTypes = 'share';
 
 export type OnCopyFn = (type: CopyTypes) => void;
 export type OnExportFn = (type: ExportTypes) => void;
@@ -51,7 +51,7 @@ export const WorkpadExport: FunctionComponent<Props> = ({
   const [showFlyout, setShowFlyout] = useState(false);
 
   const onClose = (type: CloseTypes) => {
-    if (type === 'embed') {
+    if (type === 'share') {
       setShowFlyout(false);
     }
   };
@@ -120,7 +120,7 @@ export const WorkpadExport: FunctionComponent<Props> = ({
         },
       },
       {
-        name: 'Embed on a website',
+        name: strings.getShareWebsiteTitle(),
         icon: <EuiIcon type="globe" size="m" />,
         onClick: () => {
           setShowFlyout(true);
@@ -139,7 +139,7 @@ export const WorkpadExport: FunctionComponent<Props> = ({
   );
 
   const flyout = showFlyout ? (
-    <ExternalEmbedFlyout onClose={onClose} onCopy={onCopy} onExport={onExport} />
+    <ShareWebsiteFlyout onClose={onClose} onCopy={onCopy} onExport={onExport} />
   ) : null;
 
   return (

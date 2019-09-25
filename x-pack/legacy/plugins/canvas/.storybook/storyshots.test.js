@@ -60,7 +60,7 @@ jest.mock(
 
 // Disabling this test due to https://github.com/elastic/eui/issues/2242
 jest.mock(
-  '../public/components/workpad_header/workpad_export/flyout/__examples__/external_embed_flyout.examples',
+  '../public/components/workpad_header/workpad_export/flyout/__examples__/share_website_flyout.examples',
   () => {
     return 'Disabled Panel';
   }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server, RouteOptions } from 'hapi';
+import { Server } from 'hapi';
 import archiver from 'archiver';
 
 import {
@@ -19,10 +19,6 @@ import {
   SHAREABLE_RUNTIME_SRC,
 } from '../../shareable_runtime/constants';
 
-const PUBLIC_OPTIONS: RouteOptions = {
-  auth: false,
-};
-
 export function shareableWorkpads(server: Server) {
   // get runtime
   server.route({
@@ -31,7 +27,6 @@ export function shareableWorkpads(server: Server) {
     handler: {
       file: SHAREABLE_RUNTIME_FILE,
     },
-    options: PUBLIC_OPTIONS,
   });
 
   // download runtime
@@ -44,7 +39,6 @@ export function shareableWorkpads(server: Server) {
       file.type('application/octet-stream');
       return file;
     },
-    options: PUBLIC_OPTIONS,
   });
 
   server.route({

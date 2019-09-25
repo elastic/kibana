@@ -11,7 +11,7 @@ import { action } from '@storybook/addon-actions';
 import { Title } from '../title';
 import { PageControls } from '../page_controls';
 
-storiesOf('shareable/Footer/components', module)
+storiesOf('shareables/Footer/components', module)
   .add('Title', () => (
     <div style={{ background: '#333', padding: 10 }}>
       <Title title="This is a test title." />
