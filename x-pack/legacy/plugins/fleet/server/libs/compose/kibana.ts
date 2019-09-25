@@ -8,7 +8,7 @@ import { TokenLib } from '../token';
 import { AgentLib } from '../agent';
 import { FrameworkLib } from '../framework';
 import { AgentAdapter } from '../adapters/agent/default';
-import { SODatabaseAdapter } from '../adapters/saved_objets_database/default';
+import { SODatabaseAdapter } from '../adapters/saved_objects_database/default';
 import { TokenAdapter } from '../adapters/tokens/default';
 import { FrameworkAdapter } from '../adapters/framework/default';
 import { PolicyLib } from '../policy';

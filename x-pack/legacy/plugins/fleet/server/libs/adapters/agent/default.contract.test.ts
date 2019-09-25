@@ -8,9 +8,9 @@ import Slapshot from '@mattapperson/slapshot';
 import moment from 'moment';
 import { SavedObject } from 'src/core/server';
 import { AgentAdapter } from './default';
-import { SODatabaseAdapter as SODatabaseAdapterType } from '../saved_objets_database/adapter_types';
-import { SODatabaseAdapter } from '../saved_objets_database/default';
-import { MemorizeSODatabaseAdapter } from '../saved_objets_database/memorize_adapter';
+import { SODatabaseAdapter as SODatabaseAdapterType } from '../saved_objects_database/adapter_types';
+import { SODatabaseAdapter } from '../saved_objects_database/default';
+import { MemorizeSODatabaseAdapter } from '../saved_objects_database/memorize_adapter';
 import { Agent, SortOptions } from './adapter_type';
 import { FrameworkUser, internalAuthData } from '../framework/adapter_types';
 
