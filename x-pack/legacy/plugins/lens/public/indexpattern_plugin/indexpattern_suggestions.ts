@@ -530,7 +530,7 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
 }
 
 function getMetricSuggestionTitle(layer: IndexPatternLayer, onlyMetric: boolean) {
-  const { operationType, label } = Object.values(layer.columns)[0];
+  const { operationType, label } = layer.columns[layer.columnOrder[0]];
   return i18n.translate('xpack.lens.indexpattern.suggestions.overallLabel', {
     defaultMessage: '{operation} overall',
     values: {
