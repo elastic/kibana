@@ -18,7 +18,13 @@ interface Props {
 
 export const CommitGroup = (props: Props) => {
   const commitList = props.commits.map(commit => (
-    <Commit commit={commit} key={commit.id} date={props.date} repoUri={props.repoUri} />
+    <Commit
+      commit={commit}
+      key={commit.id}
+      date={props.date}
+      repoUri={props.repoUri}
+      showRepoLink={false}
+    />
   ));
 
   return (

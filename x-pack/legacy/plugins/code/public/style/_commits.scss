@@ -13,6 +13,10 @@
   margin-bottom: $euiSizeXS;
 }
 
+.commit__inline-separator {
+  margin: 0 $euiSizeS;
+}
+
 .commit__diff-link {
   @include euiCodeFont;
 }

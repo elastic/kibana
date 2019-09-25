@@ -9,6 +9,7 @@ import {
   EuiButtonIcon,
   EuiButtonEmpty,
   EuiFlexGroup,
+  EuiLink,
   EuiPanel,
   EuiText,
   EuiTextColor,
@@ -20,9 +21,27 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { CommitInfo } from '../../../model/commit';
 import { MAIN_ROOT } from '../routes';
 import { PathTypes } from '../../common/types';
+import { RepositoryUtils } from '../../../common/repository_utils';
 import { parseCommitMessage } from '../../../common/commit_utils';
 
 const COMMIT_ID_LENGTH = 8;
+
+const RepoLink = ({ repoUri }: { repoUri: string }) => {
+  const repoOrg = RepositoryUtils.orgNameFromUri(repoUri);
+  const repoName = RepositoryUtils.repoNameFromUri(repoUri);
+  const repoPath = `#/${repoUri}`;
+
+  return (
+    <>
+      <EuiLink href={repoPath}>
+        {repoOrg} / {repoName}
+      </EuiLink>
+      <EuiTextColor color="subdued" className="commit__inline-separator">
+        •
+      </EuiTextColor>
+    </>
+  );
+};
 
 interface ActionProps {
   repoUri: string;
@@ -64,16 +83,14 @@ interface Props {
   commit: CommitInfo;
   date: string;
   repoUri: string;
+  showRepoLink: boolean;
 }
 
 export const Commit = (props: Props) => {
-  const { date, commit, repoUri } = props;
+  const { date, commit, repoUri, showRepoLink } = props;
   const { message, committer, id } = commit;
   const { summary, body } = parseCommitMessage(message);
-  const commitId = id
-    .split('')
-    .slice(0, COMMIT_ID_LENGTH)
-    .join('');
+  const commitId = id.substring(0, COMMIT_ID_LENGTH);
 
   return (
     <EuiPanel className="code-timeline__commit--root">
@@ -83,6 +100,7 @@ export const Commit = (props: Props) => {
             <h4>{summary}</h4>
           </EuiTitle>
           <EuiText size="xs" className="commit__metadata">
+            {showRepoLink && <RepoLink repoUri={repoUri} />}
             <EuiTextColor color="subdued">
               <FormattedMessage
                 id="xpack.code.commits.committedDescription"
