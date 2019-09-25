@@ -413,18 +413,6 @@ const foo = (a === b) ? 1 : 2;
 const foo = (a === b) ? 1 : (a === c) ? 2 : 3;
 ```
 
-### Do not extend built-in prototypes
-
-Do not extend the prototype of native JavaScript objects. Your future self will
-be forever grateful.
-
-```js
-// bad
-Array.prototype.empty = function () {
-  return !this.length;
-}
-```
-
 ### Use descriptive conditions
 
 Any non-trivial conditions should be converted to functions or assigned to

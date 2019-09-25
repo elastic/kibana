@@ -129,6 +129,7 @@ module.exports = {
           'no-console': 'error',
           'no-debugger': 'error',
           'no-empty': 'error',
+          'no-extend-native': 'error',
           'no-eval': 'error',
           'no-multiple-empty-lines': 'error',
           'no-new-wrappers': 'error',
