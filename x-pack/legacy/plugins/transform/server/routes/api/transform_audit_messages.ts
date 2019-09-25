@@ -6,29 +6,10 @@
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 
+import { AuditMessage } from '../../../common/types/messages';
+
 const ML_DF_NOTIFICATION_INDEX_PATTERN = '.data-frame-notifications-1';
 const SIZE = 500;
-
-interface AuditMessageBase {
-  message: string;
-  level: string;
-  timestamp: number;
-  node_name: string;
-  text?: string;
-}
-
-interface TransformMessage extends AuditMessageBase {
-  transform_id: string;
-}
-
-interface Message {
-  _index: string;
-  _type: string;
-  _id: string;
-  _score: null | number;
-  _source: TransformMessage;
-  sort?: any;
-}
 
 interface BoolQuery {
   bool: { [key: string]: any };
@@ -88,7 +69,7 @@ export function transformAuditMessagesProvider(callWithRequest: CallCluster) {
 
       let messages = [];
       if (resp.hits.total !== 0) {
-        messages = resp.hits.hits.map((hit: Message) => hit._source);
+        messages = resp.hits.hits.map((hit: AuditMessage) => hit._source);
         messages.reverse();
       }
       return messages;

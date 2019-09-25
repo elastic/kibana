@@ -10,3 +10,4 @@ export const ML_ANNOTATIONS_INDEX_PATTERN = '.ml-annotations-6';
 
 export const ML_RESULTS_INDEX_PATTERN = '.ml-anomalies-*';
 export const ML_NOTIFICATION_INDEX_PATTERN = '.ml-notifications*';
+export const ML_DF_NOTIFICATION_INDEX_PATTERN = '.data-frame-notifications-1';

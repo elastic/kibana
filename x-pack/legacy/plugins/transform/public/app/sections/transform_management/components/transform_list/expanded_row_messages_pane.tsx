@@ -14,7 +14,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { api } from '../../../../services/api_service';
 // @ts-ignore
 import { JobIcon } from '../../../../../../../ml/public/components/job_message_icon';
-import { TransformMessage } from '../../../../../../../ml/common/types/audit_message';
+import { TransformMessage } from '../../../../../../common/types/messages';
 import { useRefreshTransformList } from '../../../../common';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
