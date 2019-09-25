@@ -157,7 +157,7 @@ export function InnerWorkspacePanel({
     } else {
       return (
         <ExpressionRendererComponent
-          className="lnsExpressionOutput"
+          className="lnsExpressionRenderer"
           expression={expression!}
           onRenderFailure={(e: unknown) => {
             setExpressionError(e);

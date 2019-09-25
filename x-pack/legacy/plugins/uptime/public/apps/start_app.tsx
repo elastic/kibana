@@ -10,7 +10,6 @@ import 'ui/autoload/all';
 import 'ui/autoload/styles';
 import 'ui/courier';
 import 'ui/persisted_log';
-import 'uiExports/autocompleteProviders';
 import { createApolloClient } from '../lib/adapters/framework/apollo_client_adapter';
 import { UMFrontendLibs } from '../lib/lib';
 import { UptimeApp } from '../uptime_app';
