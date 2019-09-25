@@ -13,7 +13,7 @@
     "typescript": "3.5.3"
   },
   "peerDependencies": {
-    "joi": "^13.7.0",
+    "@hapi/joi": "^15.1.1",
     "moment": "^2.20.1",
     "type-detect": "^4.0.8"
   }
