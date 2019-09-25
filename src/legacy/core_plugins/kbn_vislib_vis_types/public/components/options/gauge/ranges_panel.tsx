@@ -36,7 +36,7 @@ function RangesPanel({
   uiState,
   vis,
 }: GaugeOptionsInternalProps) {
-  const [isCustomColors, setIsCustomColors] = useState(false);
+  const [isCustomColors, setIsCustomColors] = useState(() => !!uiState.get('vis.colors'));
 
   useEffect(() => {
     uiState.on('colorChanged', () => {
