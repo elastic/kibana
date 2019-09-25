@@ -24,7 +24,7 @@ kibana-visualRegression*)
 kibana-firefoxSmoke*)
   ./test/scripts/jenkins_firefox_smoke.sh
   ;;
-x-pack-intake)
+x-pack-intake*)
   ./test/scripts/jenkins_xpack.sh
   ;;
 x-pack-ciGroup*)
