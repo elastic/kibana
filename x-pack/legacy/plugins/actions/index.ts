@@ -28,7 +28,11 @@ export function actions(kibana: any) {
         .keys({
           enabled: Joi.boolean().default(false),
           whitelistedHosts: Joi.array()
-            .items(Joi.string().hostname())
+            .items(
+              Joi.string()
+                .hostname()
+                .allow('*')
+            )
             .sparse(false)
             .default([]),
         })
