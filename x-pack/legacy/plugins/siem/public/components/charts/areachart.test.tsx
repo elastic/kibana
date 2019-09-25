@@ -7,15 +7,16 @@
 import { ShallowWrapper, shallow } from 'enzyme';
 import * as React from 'react';
 
-import { AreaChartBaseComponent, AreaChartWithCustomPrompt } from './areachart';
-import { ChartConfigsData, ChartHolder } from './common';
+import { AreaChartBaseComponent, AreaChartWithCustomPrompt, AreaChart } from './areachart';
+import { ChartHolder, ChartSeriesData } from './common';
 import { ScaleType, AreaSeries, Axis } from '@elastic/charts';
 
 jest.mock('@elastic/charts');
-
+const customHeight = '100px';
+const customWidth = '120px';
 describe('AreaChartBaseComponent', () => {
   let shallowWrapper: ShallowWrapper;
-  const mockAreaChartData: ChartConfigsData[] = [
+  const mockAreaChartData: ChartSeriesData[] = [
     {
       key: 'uniqueSourceIpsHistogram',
       value: [
@@ -39,7 +40,11 @@ describe('AreaChartBaseComponent', () => {
   describe('render', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
-        <AreaChartBaseComponent height={100} width={120} data={mockAreaChartData} />
+        <AreaChartBaseComponent
+          height={customHeight}
+          width={customWidth}
+          data={mockAreaChartData}
+        />
       );
     });
 
@@ -65,8 +70,8 @@ describe('AreaChartBaseComponent', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
         <AreaChartBaseComponent
-          height={100}
-          width={120}
+          height={customHeight}
+          width={customWidth}
           data={mockAreaChartData}
           configs={configs}
         />
@@ -118,7 +123,11 @@ describe('AreaChartBaseComponent', () => {
   describe('render with default configs if no customized configs given', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
-        <AreaChartBaseComponent height={100} width={120} data={mockAreaChartData} />
+        <AreaChartBaseComponent
+          height={customHeight}
+          width={customWidth}
+          data={mockAreaChartData}
+        />
       );
     });
 
@@ -202,9 +211,11 @@ describe('AreaChartWithCustomPrompt', () => {
         },
       ],
     ],
-  ] as Array<[ChartConfigsData[]]>)('renders areachart', data => {
+  ] as Array<[ChartSeriesData[]]>)('renders areachart', data => {
     beforeAll(() => {
-      shallowWrapper = shallow(<AreaChartWithCustomPrompt height={100} width={120} data={data} />);
+      shallowWrapper = shallow(
+        <AreaChartWithCustomPrompt height={customHeight} width={customWidth} data={data} />
+      );
     });
 
     it('render AreaChartBaseComponent', () => {
@@ -292,14 +303,49 @@ describe('AreaChartWithCustomPrompt', () => {
         },
       ],
     ],
-  ] as Array<[ChartConfigsData[] | null | undefined]>)('renders prompt', data => {
+  ] as Array<[ChartSeriesData[] | null | undefined]>)('renders prompt', data => {
     beforeAll(() => {
-      shallowWrapper = shallow(<AreaChartWithCustomPrompt height={100} width={120} data={data} />);
+      shallowWrapper = shallow(
+        <AreaChartWithCustomPrompt height={customHeight} width={customWidth} data={data} />
+      );
     });
 
     it('render Chart Holder', () => {
       expect(shallowWrapper.find(AreaChartBaseComponent)).toHaveLength(0);
       expect(shallowWrapper.find(ChartHolder)).toHaveLength(1);
     });
+  });
+});
+
+describe('AreaChart', () => {
+  let shallowWrapper: ShallowWrapper;
+  const mockConfig = {
+    series: {
+      xScaleType: ScaleType.Time,
+      yScaleType: ScaleType.Linear,
+      stackAccessors: ['g'],
+    },
+    axis: {
+      xTickFormatter: jest.fn(),
+      yTickFormatter: jest.fn(),
+      tickSize: 8,
+    },
+    customHeight: 324,
+  };
+
+  it('should render if data exist', () => {
+    const mockData = [
+      { key: 'uniqueSourceIps', value: [{ y: 100, x: 100, g: 'group' }], color: '#DB1374' },
+    ];
+    shallowWrapper = shallow(<AreaChart configs={mockConfig} areaChart={mockData} />);
+    expect(shallowWrapper.find('AutoSizer')).toHaveLength(1);
+    expect(shallowWrapper.find('ChartHolder')).toHaveLength(0);
+  });
+
+  it('should render a chartHolder if no data given', () => {
+    const mockData = [{ key: 'uniqueSourceIps', value: [], color: '#DB1374' }];
+    shallowWrapper = shallow(<AreaChart configs={mockConfig} areaChart={mockData} />);
+    expect(shallowWrapper.find('AutoSizer')).toHaveLength(0);
+    expect(shallowWrapper.find('ChartHolder')).toHaveLength(1);
   });
 });
