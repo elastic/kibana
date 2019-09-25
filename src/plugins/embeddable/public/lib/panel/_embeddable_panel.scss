@@ -7,6 +7,12 @@
   min-height: $euiSizeL + 2px; // + 2px to account for border
   position: relative;
 
+  &-isLoading {
+    // completely center the loading indicator
+    justify-content: center;
+    align-items: center;
+  }
+
   // SASSTODO: The inheritence factor stemming from embeddables makes this class hard to change
   .embPanel__content {
     display: flex;
@@ -19,12 +25,6 @@
   // but it MIGHT be fixing IE
   .embPanel__content--fullWidth {
     width: 100%;
-  }
-
-  .embPanel__content-isLoading {
-    // completely center the loading indicator
-    justify-content: center;
-    align-items: center;
   }
 }
 
