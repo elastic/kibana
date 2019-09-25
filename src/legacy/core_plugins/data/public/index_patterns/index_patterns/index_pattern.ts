@@ -141,7 +141,7 @@ export class IndexPattern implements StaticIndexPattern {
   }
 
   private initFields(input?: any) {
-    const newValue = input || this.fields;
+    const newValue = input || (this.fields && this.fields.getArray());
     this.fields = new FieldList(this, newValue, this.shortDotsEnable, this.notifications);
   }
 
@@ -212,15 +212,18 @@ export class IndexPattern implements StaticIndexPattern {
     // Date value returned in "_source" could be in any number of formats
     // Use a docvalue for each date field to ensure standardized formats when working with date fields
     // indexPattern.flattenHit will override "_source" values when the same field is also defined in "fields"
-    const docvalueFields = reject(this.fields.byType.date, 'scripted').map((dateField: any) => {
-      return {
-        field: dateField.name,
-        format:
-          dateField.esTypes && dateField.esTypes.indexOf('date_nanos') !== -1
-            ? 'strict_date_time'
-            : 'date_time',
-      };
-    });
+    // todo - use array instead of map?
+    const docvalueFields = reject(this.fields.getByType('date'), 'scripted').map(
+      (dateField: any) => {
+        return {
+          field: dateField.name,
+          format:
+            dateField.esTypes && dateField.esTypes.indexOf('date_nanos') !== -1
+              ? 'strict_date_time'
+              : 'date_time',
+        };
+      }
+    );
 
     each(this.getScriptedFields(), function(field) {
       scriptFields[field.name] = {
@@ -276,6 +279,7 @@ export class IndexPattern implements StaticIndexPattern {
       throw new DuplicateField(name);
     }
 
+<<<<<<< HEAD
     this.fields.push(
       new Field(
         this,
@@ -292,26 +296,31 @@ export class IndexPattern implements StaticIndexPattern {
         false,
         this.notifications
       )
+=======
+    this.fields.add(
+      new Field(this, {
+        name,
+        script,
+        fieldType,
+        scripted: true,
+        lang,
+        aggregatable: true,
+        filterable: true,
+        searchable: true,
+      })
+>>>>>>> partial progress
     );
 
     await this.save();
   }
 
-  removeScriptedField(name: string) {
-    const fieldIndex = _.findIndex(this.fields, {
-      name,
-      scripted: true,
-    });
-
-    if (fieldIndex > -1) {
-      this.fields.splice(fieldIndex, 1);
-      delete this.fieldFormatMap[name];
-      return this.save();
-    }
+  removeScriptedField(field: FieldType) {
+    this.fields.remove(field);
+    return this.save();
   }
 
   async popularizeField(fieldName: string, unit = 1) {
-    const field = this.fields.byName[fieldName];
+    const field = this.fields.getByName(fieldName);
     if (!field) {
       return;
     }
@@ -324,11 +333,11 @@ export class IndexPattern implements StaticIndexPattern {
   }
 
   getNonScriptedFields() {
-    return _.where(this.fields, { scripted: false });
+    return this.fields.where({ scripted: false });
   }
 
   getScriptedFields() {
-    return _.where(this.fields, { scripted: true });
+    return this.fields.where({ scripted: true });
   }
 
   isTimeBased(): boolean {
@@ -345,13 +354,13 @@ export class IndexPattern implements StaticIndexPattern {
   }
 
   getTimeField() {
-    if (!this.timeFieldName || !this.fields || !this.fields.byName) return;
-    return this.fields.byName[this.timeFieldName];
+    if (!this.timeFieldName || !this.fields || !this.fields.getByName) return;
+    return this.fields.getByName(this.timeFieldName);
   }
 
   getFieldByName(name: string): Field | void {
-    if (!this.fields || !this.fields.byName) return;
-    return this.fields.byName[name];
+    if (!this.fields || !this.fields.getByName) return;
+    return this.fields.getByName(name);
   }
 
   isWildcard() {

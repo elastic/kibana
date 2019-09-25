@@ -17,24 +17,55 @@
  * under the License.
  */
 
-import { IndexedArray } from 'ui/indexed_array';
 import { NotificationsSetup } from 'kibana/public';
+import { findIndex, where } from 'lodash';
 import { IndexPattern } from '../index_patterns';
-import { Field, FieldSpec } from './field';
+import { Field, FieldType, FieldSpec } from './field';
 
-export class FieldList extends IndexedArray<Field> {
-  constructor(
-    indexPattern: IndexPattern,
-    specs: FieldSpec[],
-    shortDotsEnable = false,
-    notifications: NotificationsSetup
-  ) {
-    super({
-      index: ['name'],
-      group: ['type'],
-      initialSet: specs.map(function(field) {
-        return new Field(indexPattern, field, shortDotsEnable, notifications);
-      }),
-    });
+type FieldMap = Map<Field['name'], Field>;
+
+export class FieldList {
+  private fields: FieldType[] = [];
+  private byName: FieldMap = new Map();
+  private groups: Map<Field['type'], FieldMap> = new Map();
+  private indexPattern: IndexPattern;
+  private shortDotsEnable: boolean;
+  private notifications: NotificationsSetup;
+  constructor(indexPattern: IndexPattern, specs: FieldSpec[], shortDotsEnable = false, notifications: NotificationsSetup) {
+    this.indexPattern = indexPattern;
+    this.shortDotsEnable = shortDotsEnable;
+    this.notifications = notifications;
+    specs.map(field => this.add(field));
   }
+
+  getArray = () => [...this.fields];
+  getByName = (name: Field['name']) => this.byName.get(name); // not used??
+  getByType = (type: Field['type']) => [...(this.groups.get(type) || new Map()).values()];
+  getByIndex = (index: number) => this.fields[index];
+  add = (field: FieldSpec) => {
+    const newField = new Field(this.indexPattern, field, this.shortDotsEnable, this.notifications);
+    this.fields.push(newField);
+    this.byName.set(newField.name, newField);
+
+    // add to group, for speed
+    if (typeof this.groups.get(field.type) === 'undefined') {
+      this.groups.set(field.type, new Map());
+    }
+    (this.groups.get(field.type) as FieldMap).set(newField.name, newField);
+  };
+
+  every = this.fields.every;
+  forEach = this.fields.forEach;
+  filter = this.fields.filter;
+
+  where = (clause: {}) => where(this.fields, clause);
+  length = () => this.fields.length;
+  remove = (field: FieldType) => {
+    // maybe this just needs to take name
+    (this.groups.get(field.type) as FieldMap).delete(field.name);
+    this.byName.delete(field.name);
+
+    const fieldIndex = findIndex(this.fields, { name: field.name });
+    this.fields.splice(fieldIndex, 1);
+  };
 }
