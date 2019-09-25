@@ -275,8 +275,8 @@ export class PolicyLib {
         throw new Error('Could not get version information about Kibana from xpack');
       }
       const newDefaultPolicy: NewPolicyFile = {
-        name: 'Default Policy',
-        description: 'default policy create by kibana (not possible to delete)',
+        name: 'Default policy',
+        description: 'Default policy created by Kibana',
         status: 'active',
         monitoring_enabled: true,
         shared_id: DEFAULT_POLICY_ID,
