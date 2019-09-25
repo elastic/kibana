@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as Rx from 'rxjs';
+import Boom from 'boom';
 import { Legacy } from 'kibana';
 // @ts-ignore
 import { kibanaTestUser } from '@kbn/test';
@@ -12,6 +13,7 @@ import {
   HttpServiceSetup,
   CoreSetup,
   SavedObjectsService,
+  SavedObjectsErrorHelpers,
 } from '../../../../../../src/core/server';
 import {
   elasticsearchServiceMock,
@@ -105,7 +107,7 @@ describe('onPostAuthInterceptor', () => {
   async function request(
     path: string,
     availableSpaces: any[],
-    testOptions = { simulateGetSpacesFailure: false }
+    testOptions = { simulateGetSpacesFailure: false, simulateGetSingleSpaceFailure: false }
   ) {
     const { http } = await root.setup();
 
@@ -142,9 +144,7 @@ describe('onPostAuthInterceptor', () => {
 
     const savedObjectsService = {
       SavedObjectsClient: {
-        errors: {
-          isNotFoundError: (e: Error) => e.message === 'space not found',
-        },
+        errors: SavedObjectsErrorHelpers,
       },
       getSavedObjectsRepository: jest.fn().mockImplementation(() => {
         return {
@@ -154,7 +154,7 @@ describe('onPostAuthInterceptor', () => {
               if (space) {
                 return space;
               }
-              throw new Error('space not found');
+              throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
             }
           },
           create: () => null,
@@ -183,14 +183,17 @@ describe('onPostAuthInterceptor', () => {
     spacesService.scopedClient = jest.fn().mockResolvedValue({
       getAll() {
         if (testOptions.simulateGetSpacesFailure) {
-          throw new Error('unknown error retrieving all spaces');
+          throw Boom.unauthorized('missing credendials', 'Protected Elasticsearch');
         }
         return Promise.resolve(availableSpaces.map(convertSavedObjectToSpace));
       },
       get(spaceId: string) {
+        if (testOptions.simulateGetSingleSpaceFailure) {
+          throw Boom.unauthorized('missing credendials', 'Protected Elasticsearch');
+        }
         const space = availableSpaces.find(s => s.id === spaceId);
         if (!space) {
-          throw new Error('space not found');
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError('space', spaceId);
         }
         return Promise.resolve(convertSavedObjectToSpace(space));
       },
@@ -313,7 +316,7 @@ describe('onPostAuthInterceptor', () => {
     }, 30000);
   });
 
-  it('handles space retrieval errors gracefully', async () => {
+  it('handles space retrieval errors gracefully when requesting the root, responding with headers returned from ES', async () => {
     const spaces = [
       {
         id: 'a-space',
@@ -326,14 +329,59 @@ describe('onPostAuthInterceptor', () => {
 
     const { response, spacesService } = await request('/', spaces, {
       simulateGetSpacesFailure: true,
+      simulateGetSingleSpaceFailure: false,
     });
 
-    expect(response.status).toEqual(500);
+    expect(response.status).toEqual(401);
+
+    expect(response.header).toMatchObject({
+      'www-authenticate': `Protected Elasticsearch error="missing credendials"`,
+    });
+
+    expect(response.body).toMatchInlineSnapshot(`
+                        Object {
+                          "error": "Unauthorized",
+                          "message": "missing credendials",
+                          "statusCode": 401,
+                        }
+                `);
+
+    expect(spacesService.scopedClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          authorization: headers.authorization,
+        }),
+      })
+    );
+  });
+
+  it('handles space retrieval errors gracefully when requesting an app, responding with headers returned from ES', async () => {
+    const spaces = [
+      {
+        id: 'a-space',
+        type: 'space',
+        attributes: {
+          name: 'a space',
+        },
+      },
+    ];
+
+    const { response, spacesService } = await request('/app/kibana', spaces, {
+      simulateGetSpacesFailure: false,
+      simulateGetSingleSpaceFailure: true,
+    });
+
+    expect(response.status).toEqual(401);
+
+    expect(response.header).toMatchObject({
+      'www-authenticate': `Protected Elasticsearch error="missing credendials"`,
+    });
+
     expect(response.body).toMatchInlineSnapshot(`
       Object {
-        "error": "Internal Server Error",
-        "message": "An internal server error occurred",
-        "statusCode": 500,
+        "error": "Unauthorized",
+        "message": "missing credendials",
+        "statusCode": 401,
       }
     `);
 

@@ -7,7 +7,7 @@ import * as Rx from 'rxjs';
 import { SpacesService } from './spaces_service';
 import { coreMock, elasticsearchServiceMock } from 'src/core/server/mocks';
 import { SpacesAuditLogger } from '../lib/audit_logger';
-import { KibanaRequest, SavedObjectsService } from 'src/core/server';
+import { KibanaRequest, SavedObjectsService, SavedObjectsErrorHelpers } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { getSpaceIdFromPath } from '../lib/spaces_url_parser';
 import { LegacyAPI } from '../plugin';
@@ -29,7 +29,30 @@ const createService = async (serverBasePath: string = '') => {
       serverBasePath,
     },
     savedObjects: ({
-      getSavedObjectsRepository: jest.fn().mockReturnValue(null),
+      getSavedObjectsRepository: jest.fn().mockReturnValue({
+        get: jest.fn().mockImplementation((type, id) => {
+          if (type === 'space' && id === 'foo') {
+            return Promise.resolve({
+              id: 'space:foo',
+              attributes: {
+                name: 'Foo Space',
+                disabledFeatures: [],
+              },
+            });
+          }
+          if (type === 'space' && id === 'default') {
+            return Promise.resolve({
+              id: 'space:default',
+              attributes: {
+                name: 'Default Space',
+                disabledFeatures: [],
+                _reserved: true,
+              },
+            });
+          }
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+        }),
+      }),
     } as unknown) as SavedObjectsService,
   } as LegacyAPI;
 
@@ -147,6 +170,48 @@ describe('SpacesService', () => {
     it('returns the space id for the given namespace', async () => {
       const spacesServiceSetup = await createService();
       expect(spacesServiceSetup.namespaceToSpaceId('foo')).toEqual('foo');
+    });
+  });
+
+  describe('#getActiveSpace', () => {
+    it('returns the default space when in the default space', async () => {
+      const spacesServiceSetup = await createService();
+      const request = {
+        url: { path: 'app/kibana' },
+      } as KibanaRequest;
+
+      const activeSpace = await spacesServiceSetup.getActiveSpace(request);
+      expect(activeSpace).toEqual({
+        id: 'space:default',
+        name: 'Default Space',
+        disabledFeatures: [],
+        _reserved: true,
+      });
+    });
+
+    it('returns the space for the current (non-default) space', async () => {
+      const spacesServiceSetup = await createService();
+      const request = {
+        url: { path: '/s/foo/app/kibana' },
+      } as KibanaRequest;
+
+      const activeSpace = await spacesServiceSetup.getActiveSpace(request);
+      expect(activeSpace).toEqual({
+        id: 'space:foo',
+        name: 'Foo Space',
+        disabledFeatures: [],
+      });
+    });
+
+    it('propagates errors from the repository', async () => {
+      const spacesServiceSetup = await createService();
+      const request = {
+        url: { path: '/s/unknown-space/app/kibana' },
+      } as KibanaRequest;
+
+      expect(spacesServiceSetup.getActiveSpace(request)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Saved object [space/unknown-space] not found"`
+      );
     });
   });
 });

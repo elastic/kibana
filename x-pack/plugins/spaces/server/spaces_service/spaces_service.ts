@@ -16,6 +16,7 @@ import { ConfigType } from '../config';
 import { getSpaceIdFromPath, addSpaceIdToPath } from '../lib/spaces_url_parser';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { spaceIdToNamespace, namespaceToSpaceId } from '../lib/utils/namespace';
+import { Space } from '../../common/model/space';
 
 type RequestFacade = KibanaRequest | Legacy.Request;
 
@@ -31,6 +32,8 @@ export interface SpacesServiceSetup {
   spaceIdToNamespace(spaceId: string): string | undefined;
 
   namespaceToSpaceId(namespace: string | undefined): string;
+
+  getActiveSpace(request: RequestFacade): Promise<Space>;
 }
 
 interface SpacesServiceDeps {
@@ -66,6 +69,43 @@ export class SpacesService {
       return spaceId;
     };
 
+    const getScopedClient = async (request: RequestFacade) => {
+      return combineLatest(elasticsearch.adminClient$, config$)
+        .pipe(
+          map(([clusterClient, config]) => {
+            const internalRepository = this.getLegacyAPI().savedObjects.getSavedObjectsRepository(
+              clusterClient.callAsInternalUser,
+              ['space']
+            );
+
+            const callCluster = clusterClient.asScoped(request).callAsCurrentUser;
+
+            const callWithRequestRepository = this.getLegacyAPI().savedObjects.getSavedObjectsRepository(
+              callCluster,
+              ['space']
+            );
+
+            const security = getSecurity();
+
+            const authorization = security.isEnabled ? security.authorization : null;
+
+            return new SpacesClient(
+              getSpacesAuditLogger(),
+              (message: string) => {
+                this.log.debug(message);
+              },
+              authorization,
+              callWithRequestRepository,
+              config,
+              internalRepository,
+              request
+            );
+          }),
+          take(1)
+        )
+        .toPromise();
+    };
+
     return {
       getSpaceId,
       getBasePath: (spaceId: string) => {
@@ -81,41 +121,11 @@ export class SpacesService {
       },
       spaceIdToNamespace,
       namespaceToSpaceId,
-      scopedClient: async (request: RequestFacade) => {
-        return combineLatest(elasticsearch.adminClient$, config$)
-          .pipe(
-            map(([clusterClient, config]) => {
-              const internalRepository = this.getLegacyAPI().savedObjects.getSavedObjectsRepository(
-                clusterClient.callAsInternalUser,
-                ['space']
-              );
-
-              const callCluster = clusterClient.asScoped(request).callAsCurrentUser;
-
-              const callWithRequestRepository = this.getLegacyAPI().savedObjects.getSavedObjectsRepository(
-                callCluster,
-                ['space']
-              );
-
-              const security = getSecurity();
-
-              const authorization = security.isEnabled ? security.authorization : null;
-
-              return new SpacesClient(
-                getSpacesAuditLogger(),
-                (message: string) => {
-                  this.log.debug(message);
-                },
-                authorization,
-                callWithRequestRepository,
-                config,
-                internalRepository,
-                request
-              );
-            }),
-            take(1)
-          )
-          .toPromise();
+      scopedClient: getScopedClient,
+      getActiveSpace: async (request: RequestFacade) => {
+        const spaceId = getSpaceId(request);
+        const spacesClient = await getScopedClient(request);
+        return spacesClient.get(spaceId);
       },
     };
   }

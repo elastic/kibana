@@ -10,7 +10,7 @@ import { ResponseError, CustomHttpResponseOptions } from 'src/core/server';
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
   const boom = isBoom(error) ? error : boomify(error);
   return {
-    body: boom.output.payload,
+    body: boom,
     headers: boom.output.headers,
     statusCode: boom.output.statusCode,
   };
