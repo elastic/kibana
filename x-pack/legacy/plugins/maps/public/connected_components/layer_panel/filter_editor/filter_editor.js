@@ -23,7 +23,8 @@ import { i18n } from '@kbn/i18n';
 import { indexPatternService } from '../../../kibana_services';
 import { Storage } from 'ui/storage';
 
-import { SearchBar } from 'plugins/data';
+import { start as data } from '../../../../../../../../src/legacy/core_plugins/data/public/legacy';
+const { SearchBar } = data.ui;
 
 import { npStart } from 'ui/new_platform';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';

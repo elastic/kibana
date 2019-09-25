@@ -30,6 +30,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSuperDatePicker } fro
 import { EuiSuperUpdateButton } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
+import { TimeRange } from 'src/plugins/data/public';
 import { useKibana } from '../../../../../../../plugins/kibana_react/public';
 
 import { IndexPattern } from '../../../index_patterns';
@@ -38,15 +39,10 @@ import { getQueryLog } from '../lib/get_query_log';
 import { Query } from '../index';
 import { TimeHistoryContract } from '../../../timefilter';
 
-interface DateRange {
-  from: string;
-  to: string;
-}
-
 interface Props {
   query?: Query;
-  onSubmit: (payload: { dateRange: DateRange; query?: Query }) => void;
-  onChange: (payload: { dateRange: DateRange; query?: Query }) => void;
+  onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
+  onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
   disableAutoFocus?: boolean;
   appName: string;
   screenTitle?: string;
@@ -131,7 +127,7 @@ function QueryBarTopRowUI(props: Props) {
     }
   }
 
-  function onSubmit({ query, dateRange }: { query?: Query; dateRange: DateRange }) {
+  function onSubmit({ query, dateRange }: { query?: Query; dateRange: TimeRange }) {
     handleLuceneSyntaxWarning();
 
     if (props.timeHistory) {

@@ -18,12 +18,15 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { SearchService, SearchSetup } from './search';
+import { SearchService, SearchSetup, createSearchBar } from './search';
 import { QueryService, QuerySetup } from './query';
 import { FilterService, FilterSetup } from './filter';
 import { TimefilterService, TimefilterSetup } from './timefilter';
 import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
-import { LegacyDependenciesPluginSetup } from './shim/legacy_dependencies_plugin';
+import {
+  LegacyDependenciesPluginSetup,
+  LegacyDependenciesPluginStart,
+} from './shim/legacy_dependencies_plugin';
 
 /**
  * Interface for any dependencies on other plugins' `setup` contracts.
@@ -32,6 +35,10 @@ import { LegacyDependenciesPluginSetup } from './shim/legacy_dependencies_plugin
  */
 export interface DataPluginSetupDependencies {
   __LEGACY: LegacyDependenciesPluginSetup;
+}
+
+export interface DataPluginStartDependencies {
+  __LEGACY: LegacyDependenciesPluginStart;
 }
 
 /**
@@ -96,9 +103,19 @@ export class DataPlugin implements Plugin<DataSetup, {}, DataPluginSetupDependen
     return this.setupApi;
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, { __LEGACY }: DataPluginStartDependencies) {
+    const SearchBar = createSearchBar({
+      core,
+      storage: __LEGACY.storage,
+      timefilter: this.setupApi.timefilter,
+      filterManager: this.setupApi.filter.filterManager,
+    });
+
     return {
       ...this.setupApi!,
+      ui: {
+        SearchBar,
+      },
     };
   }
 

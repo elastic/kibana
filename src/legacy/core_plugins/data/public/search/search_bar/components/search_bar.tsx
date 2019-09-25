@@ -26,6 +26,7 @@ import { Storage } from 'ui/storage';
 import { get, isEqual } from 'lodash';
 
 import { CoreStart } from 'src/core/public';
+import { TimeRange } from 'src/plugins/data/common/types';
 import { IndexPattern, Query, FilterBar } from '../../../../../data/public';
 import { QueryBarTopRow } from '../../../query';
 import { SavedQuery, SavedQueryAttributes } from '../index';
@@ -35,52 +36,50 @@ import { SavedQueryService } from '../lib/saved_query_service';
 import { createSavedQueryService } from '../lib/saved_query_service';
 import { TimeHistoryContract } from '../../../timefilter';
 
-interface DateRange {
-  from: string;
-  to: string;
-}
-
-/**
- * NgReact lib requires that changes to the props need to be made in the directive config as well
- * See [search_bar\directive\index.js] file
- */
-export interface SearchBarProps {
-  appName: string;
+interface SearchBarInjectedDeps {
   intl: InjectedIntl;
-  indexPatterns?: IndexPattern[];
-
-  // Query bar
-  showQueryBar?: boolean;
-  showQueryInput?: boolean;
-  screenTitle?: string;
   store?: Storage;
-  query?: Query;
-  savedQuery?: SavedQuery;
-  onQuerySubmit?: (payload: { dateRange: DateRange; query?: Query }) => void;
   timeHistory: TimeHistoryContract;
   // Filter bar
-  showFilterBar?: boolean;
-  filters?: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
+  filters?: Filter[];
   // Date picker
-  showDatePicker?: boolean;
   dateRangeFrom?: string;
   dateRangeTo?: string;
   // Autorefresh
+  onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   isRefreshPaused?: boolean;
   refreshInterval?: number;
-  showAutoRefreshOnly?: boolean;
-  showSaveQuery?: boolean;
-  onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
-  onSaved?: (savedQuery: SavedQuery) => void;
-  onSavedQueryUpdated?: (savedQuery: SavedQuery) => void;
-  onClearSavedQuery?: () => void;
-  customSubmitButton?: React.ReactNode;
 
-  // TODO: deprecate
+  // TODO: deprecate by using context
   savedObjects: CoreStart['savedObjects'];
   notifications: CoreStart['notifications'];
 }
+
+export interface SearchBarOwnProps {
+  appName: string;
+  indexPatterns?: IndexPattern[];
+  customSubmitButton?: React.ReactNode;
+  screenTitle?: string;
+
+  // Togglers
+  showQueryBar?: boolean;
+  showQueryInput?: boolean;
+  showFilterBar?: boolean;
+  showDatePicker?: boolean;
+  showAutoRefreshOnly?: boolean;
+  showSaveQuery?: boolean;
+
+  // Query bar - should be in SearchBarInjectedDeps
+  query?: Query;
+  savedQuery?: SavedQuery;
+  onQuerySubmit?: (payload: { dateRange: TimeRange; query?: Query }) => void;
+  onSaved?: (savedQuery: SavedQuery) => void;
+  onSavedQueryUpdated?: (savedQuery: SavedQuery) => void;
+  onClearSavedQuery?: () => void;
+}
+
+export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
 
 interface State {
   isFiltersVisible: boolean;
@@ -285,7 +284,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     });
   };
 
-  public onQueryBarChange = (queryAndDateRange: { dateRange: DateRange; query?: Query }) => {
+  public onQueryBarChange = (queryAndDateRange: { dateRange: TimeRange; query?: Query }) => {
     this.setState({
       query: queryAndDateRange.query,
       dateRangeFrom: queryAndDateRange.dateRange.from,
@@ -293,7 +292,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     });
   };
 
-  public onQueryBarSubmit = (queryAndDateRange: { dateRange?: DateRange; query?: Query }) => {
+  public onQueryBarSubmit = (queryAndDateRange: { dateRange?: TimeRange; query?: Query }) => {
     this.setState(
       {
         query: queryAndDateRange.query,

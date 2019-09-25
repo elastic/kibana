@@ -18,3 +18,4 @@
  */
 
 export * from './search_bar';
+export * from './bind_search_bar';

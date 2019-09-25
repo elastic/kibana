@@ -14,12 +14,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SearchBar } from 'plugins/data';
-import { Storage } from 'ui/storage';
 import { npStart } from 'ui/new_platform';
 import { KibanaContextProvider } from '../../../../../../../../../src/plugins/kibana_react/public';
 
+import { Storage } from 'ui/storage';
 const localStorage = new Storage(window.localStorage);
-
 export class WhereExpression extends Component {
 
   state = {
@@ -82,10 +81,7 @@ export class WhereExpression extends Component {
           </EuiFormHelpText>
 
           <KibanaContextProvider
-            services={{
-              uiSettings: uiSettings,
-              savedObjects: npStart.core.savedObjects,
-            }}
+            services={{ ...npStart.core }}
           >
             <SearchBar
               showFilterBar={false}
