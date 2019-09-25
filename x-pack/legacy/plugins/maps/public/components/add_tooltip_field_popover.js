@@ -99,13 +99,12 @@ export class AddTooltipFieldPopover extends Component {
     const fieldTypeEntries = [...fieldsByTypeMap.entries()];
     const options = [];
     if (fieldTypeEntries.length === 1) {
-      // Field list only contains a single type, no need to display type headers
+      // Field list only contains a single type, no need to display group label for type header
       options.push(...fieldTypeEntries[0][ENTRY_VALUE_INDEX].sort(sortByLabel));
     } else {
+      // Display group label per type header
       fieldTypeEntries
         .sort((a, b) => {
-          console.log('a', a);
-          console.log('b', b);
           if (a[ENTRY_KEY_INDEX] < b[ENTRY_KEY_INDEX]) return -1;
           if (a[ENTRY_KEY_INDEX] > b[ENTRY_KEY_INDEX]) return 1;
           return 0;
