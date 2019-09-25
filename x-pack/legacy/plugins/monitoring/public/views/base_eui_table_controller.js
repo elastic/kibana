@@ -80,12 +80,14 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
   }
 
   setSorting(sort) {
-    this.sorting = sort || {
-      sort: {
-        field: 'name',
-        direction: EUI_SORT_ASCENDING
-      }
-    };
+    this.sorting = sort || { sort: {} };
+
+    if (!this.sorting.sort.field) {
+      this.sorting.sort.field = 'name';
+    }
+    if (!this.sorting.sort.direction) {
+      this.sorting.sort.direction = EUI_SORT_ASCENDING;
+    }
   }
 
   setQueryText(queryText) {
