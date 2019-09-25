@@ -6,14 +6,16 @@ Code starts with an overview of your repositories.  You can then use the UI to a
 image::images/code-repo-management.png[]
 
 [float]
+[[add-delete-a-repo]]
 ==== Add and delete a repo
 The <<code-import-first-repo, Import your first repository>> page provides step-by-step instructions for adding a GitHub repo to *Code*.  You can fine-tune the hostname of the git clone URL in your `kibana.yml` file.
 
-For security reasons, Code allows only a few <<clone-url-management, trusted hostnames>>, such as github.com. To clone private repositories see <<clone-private-repo-with-an-ssh-key, add an SSH key>>.
+For security reasons, Code allows only a few <<clone-url-management,trusted hostnames>>, such as github.com. To clone private repositories see <<clone-private-repo,add an SSH key>>.
 
 To delete a repository, go to the **Repositories** tab, find the name of the repo, and click *Delete*.
 
 [float]
+[[clone-private-repo]]
 ==== Clone private repo with an SSH key
 Clones of private repos require an SSH key for authentication. The username associated with your host must have write access to the repository you want to clone.
 
@@ -32,10 +34,12 @@ You can now copy private Git repositories into Code.
 To delete a repository, find the go to the **Repositories** tab, find the name of the repo and click *Delete*.
 
 [float]
+[[reindex-a-repo]]
 ==== Reindex a repo
 *Code* automatically reindexes an imported repo at set intervals, but in some cases, you might need to refresh the index manually. For example, you might refresh an index after a new language server installs. Or, you might want to update the index to the HEAD revision immediately. Click *Reindex* to initiate a reindex.
 
 [float]
+[[clone-url-management]]
 ==== Clone URL management
 For security reasons, *Code* only allows the following hostnames in the git clone URL by default:
 
@@ -62,6 +66,7 @@ xpack.code.security.gitProtocolWhitelist: [ "https" ]
 ----
 
 [float]
+[[limitations]]
 ==== Limitations
 Consider the following limitations before cloning repositories:
 
