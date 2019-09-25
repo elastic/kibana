@@ -33,6 +33,18 @@ const isAggRemovable = (agg: AggConfig, group: AggConfig[]) => {
   return metricCount > agg.schema.min;
 };
 
+const canAggBeDisabled = (agg: AggConfig, group: AggConfig[]) => {
+  const enabledAggsCount = reduce(
+    group,
+    (count, aggregation: AggConfig) => {
+      return aggregation.enabled ? ++count : count;
+    },
+    0
+  );
+
+  return enabledAggsCount !== 1;
+};
+
 const calcAggIsTooLow = (agg: AggConfig, aggIndex: number, group: AggConfig[]) => {
   if (!agg.schema.mustBeFirst) {
     return false;
@@ -59,4 +71,4 @@ function isInvalidAggsTouched(aggsState: AggsState) {
   return invalidAggs.every(agg => agg.touched);
 }
 
-export { isAggRemovable, calcAggIsTooLow, isInvalidAggsTouched };
+export { isAggRemovable, calcAggIsTooLow, isInvalidAggsTouched, canAggBeDisabled };

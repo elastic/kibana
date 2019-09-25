@@ -32,7 +32,12 @@ import { aggGroupNamesMap, AggGroupNames } from '../agg_groups';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
 import { DefaultEditorAggCommonProps } from './agg_common_props';
-import { isInvalidAggsTouched, isAggRemovable, calcAggIsTooLow } from './agg_group_helper';
+import {
+  isInvalidAggsTouched,
+  isAggRemovable,
+  calcAggIsTooLow,
+  canAggBeDisabled,
+} from './agg_group_helper';
 import { aggGroupReducer, initAggsState, AGGS_ACTION_KEYS } from './agg_group_state';
 import { Schema } from '../schemas';
 
@@ -158,6 +163,9 @@ function DefaultEditorAggGroup({
                     isDraggable={stats.count > 1}
                     isLastBucket={groupName === AggGroupNames.Buckets && index === group.length - 1}
                     isRemovable={isAggRemovable(agg, group)}
+                    canBeDisabled={
+                      groupName === AggGroupNames.Metrics ? canAggBeDisabled(agg, group) : true
+                    }
                     lastParentPipelineAggTitle={lastParentPipelineAggTitle}
                     metricAggs={metricAggs}
                     state={state}

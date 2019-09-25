@@ -24,6 +24,7 @@ import 'ui/directives/css_truncate';
 import { uiModules } from '../../../modules';
 import sidebarTemplate from './sidebar.html';
 import { move } from '../../../utils/collection';
+import { AggGroupNames } from './agg_groups';
 
 uiModules.get('app/visualize').directive('visEditorSidebar', function () {
   return {
@@ -76,6 +77,21 @@ uiModules.get('app/visualize').directive('visEditorSidebar', function () {
         }
 
         aggs.splice(index, 1);
+
+        if (agg.schema.group === AggGroupNames.Metrics) {
+          const metrics = $scope.state.aggs.bySchemaGroup(AggGroupNames.Metrics);
+          const enabledAggsCount = _.reduce(
+            metrics,
+            (count, aggregation) => {
+              return aggregation.enabled ? ++count : count;
+            },
+            0
+          );
+
+          if (!enabledAggsCount && metrics.length) {
+            metrics[0].enabled = true;
+          }
+        }
       };
 
       $scope.onToggleEnableAgg = (agg, isEnable) => {
