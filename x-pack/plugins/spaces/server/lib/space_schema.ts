@@ -5,19 +5,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import typeDetect from 'type-detect';
 import { MAX_SPACE_INITIALS } from '../../common';
 
 export const SPACE_ID_REGEX = /^[a-z0-9_\-]+$/;
 
 export const spaceSchema = schema.object({
-  id: schema.any({
+  id: schema.string({
     validate: value => {
-      const valueType = typeDetect(value);
-      if (valueType !== 'string') {
-        return `expected value of type [string] but got [${valueType}]`;
-      }
-
       if (!SPACE_ID_REGEX.test(value)) {
         return `must be lower case, a-z, 0-9, '_', and '-' are allowed`;
       }
@@ -27,13 +21,8 @@ export const spaceSchema = schema.object({
   description: schema.maybe(schema.string()),
   initials: schema.maybe(schema.string({ maxLength: MAX_SPACE_INITIALS })),
   color: schema.maybe(
-    schema.any({
+    schema.string({
       validate: value => {
-        const valueType = typeDetect(value);
-        if (valueType !== 'string') {
-          return `expected value of type [string] but got [${valueType}]`;
-        }
-
         if (!/^#[a-zA-Z0-9]{6}$/.test(value)) {
           return `must be a 6 digit hex color, starting with a #`;
         }

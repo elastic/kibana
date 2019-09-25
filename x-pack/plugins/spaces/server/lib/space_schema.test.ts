@@ -12,14 +12,14 @@ const defaultProperties = {
 };
 
 describe('#id', () => {
-  test('is optional', () => {
+  test('is required', () => {
     expect(() =>
       spaceSchema.validate({
         ...defaultProperties,
         id: undefined,
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[id]: expected value of type [any] but got [undefined]"`
+      `"[id]: expected value of type [string] but got [undefined]"`
     );
   });
 
@@ -66,6 +66,56 @@ describe('#id', () => {
       });
     }
   );
+});
+
+describe('#disabledFeatures', () => {
+  test('is optional', () => {
+    expect(() =>
+      spaceSchema.validate({
+        ...defaultProperties,
+        disabledFeatures: undefined,
+      })
+    ).not.toThrowError();
+  });
+
+  test('defaults to an empty array', () => {
+    const result = spaceSchema.validate({
+      ...defaultProperties,
+      disabledFeatures: undefined,
+    });
+    expect(result.disabledFeatures).toEqual([]);
+  });
+
+  test('must be an array if provided', () => {
+    expect(() =>
+      spaceSchema.validate({
+        ...defaultProperties,
+        disabledFeatures: 'foo',
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[disabledFeatures]: expected value of type [array] but got [string]"`
+    );
+  });
+
+  test('allows an array of strings', () => {
+    expect(() =>
+      spaceSchema.validate({
+        ...defaultProperties,
+        disabledFeatures: ['foo', 'bar'],
+      })
+    ).not.toThrowError();
+  });
+
+  test('does not allow an array containing non-string elements', () => {
+    expect(() =>
+      spaceSchema.validate({
+        ...defaultProperties,
+        disabledFeatures: ['foo', true],
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[disabledFeatures.1]: expected value of type [string] but got [boolean]"`
+    );
+  });
 });
 
 describe('#color', () => {
