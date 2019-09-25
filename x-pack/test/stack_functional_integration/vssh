@@ -1,2 +1,0 @@
-echo "ssh'ing to VM `grep "VM=" qa/envvars.sh | head -n1 | cut -f2 -d=`"
-vagrant ssh `grep "VM=" qa/envvars.sh | head -n1 | cut -f2 -d=`
