@@ -31,7 +31,7 @@ export default async function ({ readConfigFile }) {
     testFiles: [
       // require.resolve('../test/functional/apps/telemetry'),
       require.resolve('../test/functional/apps/metricbeat'),
-      // require.resolve('./test/functional/apps/filebeat'),
+      require.resolve('../test/functional/apps/filebeat'),
       // require.resolve('./test/functional/apps/packetbeat'),
       // require.resolve('./test/functional/apps/monitoring'),
     ],

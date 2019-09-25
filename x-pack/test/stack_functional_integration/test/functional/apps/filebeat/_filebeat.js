@@ -1,28 +1,25 @@
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
-import {
-  bdd
-} from '../../../support';
+export default function ({ getService, getPageObjects }) {
+  describe('check filebeat', function () {
+    const log = getService('log');
+    const retry = getService('retry');
+    const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
 
-import PageObjects from '../../../support/page_objects';
-
-bdd.describe('check filebeat', function () {
-  bdd.before(function () {
-    PageObjects.common.debug('navigateToApp Discover');
-    //return PageObjects.common.navigateToApp('discover');
-  });
-
-  bdd.it('filebeat- should have hit count GT 0', async function () {
-	   //  await PageObjects.header.clickDiscover();
-    //await PageObjects.common.navigateToApp('discover');
-    await PageObjects.discover.selectIndexPattern('filebeat-*');
-    await PageObjects.common.tryForTime(40000, async () => {
-      await PageObjects.header.setQuickSpan('Today');
+    before(function () {
+      log.debug('navigateToApp Discover');
     });
-    await PageObjects.common.tryForTime(40000, async () => {
-      const hitCount = await PageObjects.discover.getHitCount();
-      expect(hitCount).to.be.greaterThan('0');
+
+    it('filebeat- should have hit count GT 0', async function () {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.selectIndexPattern('filebeat-*');
+      // await PageObjects.common.tryForTime(40000, async () => {
+      //   await PageObjects.header.setQuickSpan('Today');
+      // });
+      await retry.try(async function () {
+        const hitCount = parseInt(await PageObjects.discover.getHitCount());
+        expect(hitCount).to.be.greaterThan(0);
+      });
     });
   });
-
-});
+}
