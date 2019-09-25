@@ -6,7 +6,7 @@
 
 import { resolve } from 'path';
 import JoiNamespace from 'joi';
-import { defer } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { LegacyPluginInitializer, LegacyPluginOptions } from 'src/legacy/types';
 import KbnServer from 'src/legacy/server/kbn_server';
 import { Feature } from '../../../plugins/features/server/feature';
@@ -85,8 +85,8 @@ const pluginOptions: LegacyPluginOptions = {
     // `kbnServer.newPlatform` has important values
     const kbnServer = (server as unknown) as KbnServer;
 
-    const getConfig$ = <T>() =>
-      defer<T>(async () => await server.config().get(PLUGIN.CONFIG_PREFIX));
+    const getConfig$ = () =>
+      new BehaviorSubject(server.config().get(PLUGIN.CONFIG_PREFIX)).asObservable();
 
     const initializerContext: IntegrationsManagerPluginInitializerContext = {
       config: {
