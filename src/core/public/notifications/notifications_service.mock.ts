@@ -23,10 +23,8 @@ import {
 } from './notifications_service';
 import { toastsServiceMock } from './toasts/toasts_service.mock';
 
-type DeeplyMocked<T> = { [P in keyof T]: jest.Mocked<T[P]> };
-
 const createSetupContractMock = () => {
-  const setupContract: DeeplyMocked<NotificationsSetup> = {
+  const setupContract: DeeplyMockedKeys<NotificationsSetup> = {
     // we have to suppress type errors until decide how to mock es6 class
     toasts: toastsServiceMock.createSetupContract(),
   };
@@ -34,7 +32,7 @@ const createSetupContractMock = () => {
 };
 
 const createStartContractMock = () => {
-  const startContract: DeeplyMocked<NotificationsStart> = {
+  const startContract: DeeplyMockedKeys<NotificationsStart> = {
     // we have to suppress type errors until decide how to mock es6 class
     toasts: toastsServiceMock.createStartContract(),
   };

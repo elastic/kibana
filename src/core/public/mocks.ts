@@ -18,7 +18,7 @@
  */
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
-import { CoreSetup, CoreStart, PluginInitializerContext } from '.';
+import { CoreSetup, CoreStart, PluginInitializerContext, NotificationsSetup } from '.';
 import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
@@ -41,8 +41,7 @@ export { overlayServiceMock } from './overlays/overlay_service.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 
 function createCoreSetupMock({ basePath = '' } = {}) {
-  const mock: Omit<MockedKeys<CoreSetup>, 'notification'> &
-    Pick<DeeplyMockedKeys<CoreSetup>, 'notifications'> = {
+  const mock: MockedKeys<CoreSetup> & { notifications: DeeplyMockedKeys<NotificationsSetup> } = {
     application: applicationServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
@@ -55,8 +54,7 @@ function createCoreSetupMock({ basePath = '' } = {}) {
 }
 
 function createCoreStartMock({ basePath = '' } = {}) {
-  const mock: Omit<MockedKeys<CoreStart>, 'notification'> &
-    Pick<DeeplyMockedKeys<CoreStart>, 'notifications'> = {
+  const mock: MockedKeys<CoreStart> & { notifications: DeeplyMockedKeys<NotificationsSetup> } = {
     application: applicationServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
