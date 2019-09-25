@@ -270,7 +270,7 @@ export class LogstashPipelineThroughputMetric extends LogstashMetric {
       derivative: false
     });
 
-    this.dateHistogramSubAggs = {
+    this.getDateHistogramSubAggs = ({ pageOfPipelines }) => ({
       pipelines_nested: {
         nested: {
           path: 'logstash_stats.pipelines'
@@ -279,7 +279,7 @@ export class LogstashPipelineThroughputMetric extends LogstashMetric {
           by_pipeline_id: {
             terms: {
               field: 'logstash_stats.pipelines.id',
-              size: 1000
+              include: pageOfPipelines.map(pipeline => pipeline.id),
             },
             aggs: {
               throughput: {
@@ -290,7 +290,7 @@ export class LogstashPipelineThroughputMetric extends LogstashMetric {
               by_pipeline_hash: {
                 terms: {
                   field: 'logstash_stats.pipelines.hash',
-                  size: 1000
+                  include: pageOfPipelines.map(pipeline => pipeline.hash),
                 },
                 aggs: {
                   throughput: {
@@ -301,7 +301,7 @@ export class LogstashPipelineThroughputMetric extends LogstashMetric {
                   by_ephemeral_id: {
                     terms: {
                       field: 'logstash_stats.pipelines.ephemeral_id',
-                      size: 1000
+                      include: pageOfPipelines.map(pipeline => pipeline.ephemeral_id),
                     },
                     aggs: {
                       events_stats: {
@@ -326,7 +326,7 @@ export class LogstashPipelineThroughputMetric extends LogstashMetric {
           }
         }
       }
-    };
+    });
 
     this.calculation = (bucket, _key, _metric, bucketSizeInSeconds) => {
       const pipelineThroughputs = {};
@@ -353,24 +353,30 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
       derivative: false
     });
 
-    this.dateHistogramSubAggs = {
-      pipelines_nested: {
-        nested: {
-          path: 'logstash_stats.pipelines'
-        },
-        aggs: {
-          by_pipeline_id: {
-            terms: {
-              field: 'logstash_stats.pipelines.id',
-              size: 1000
-            },
-            aggs: {
-              to_root: {
-                reverse_nested: {},
-                aggs: {
-                  node_count: {
-                    cardinality: {
-                      field: this.field
+    this.getDateHistogramSubAggs = ({ pageOfPipelines }) => {
+      const termAggExtras = {};
+      if (pageOfPipelines) {
+        termAggExtras.include = pageOfPipelines.map(pipeline => pipeline.id);
+      }
+      return {
+        pipelines_nested: {
+          nested: {
+            path: 'logstash_stats.pipelines'
+          },
+          aggs: {
+            by_pipeline_id: {
+              terms: {
+                field: 'logstash_stats.pipelines.id',
+                ...termAggExtras
+              },
+              aggs: {
+                to_root: {
+                  reverse_nested: {},
+                  aggs: {
+                    node_count: {
+                      cardinality: {
+                        field: this.field
+                      }
                     }
                   }
                 }
@@ -378,7 +384,7 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
             }
           }
         }
-      }
+      };
     };
 
     this.calculation = bucket => {

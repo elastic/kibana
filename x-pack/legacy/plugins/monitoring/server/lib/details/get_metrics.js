@@ -11,7 +11,7 @@ import { checkParam } from '../error_missing_required';
 import { getSeries } from './get_series';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
 
-export function getMetrics(req, indexPattern, metricSet = [], filters = []) {
+export function getMetrics(req, indexPattern, metricSet = [], filters = [], metricOptions = {}) {
   checkParam(indexPattern, 'indexPattern in details/getMetrics');
   checkParam(metricSet, 'metricSet in details/getMetrics');
 
@@ -33,7 +33,7 @@ export function getMetrics(req, indexPattern, metricSet = [], filters = []) {
     }
 
     return Promise.map(metricNames, metricName => {
-      return getSeries(req, indexPattern, metricName, filters, { min, max, bucketSize });
+      return getSeries(req, indexPattern, metricName, metricOptions, filters, { min, max, bucketSize });
     });
   })
     .then(rows => {

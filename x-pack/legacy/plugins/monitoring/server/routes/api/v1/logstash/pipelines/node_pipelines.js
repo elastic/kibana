@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import { get, sortByOrder } from 'lodash';
+import { sortByOrder } from 'lodash';
 import { getNodeInfo } from '../../../../../lib/logstash/get_node_info';
 import { getPipelines, processPipelinesAPIResponse } from '../../../../../lib/logstash/get_pipelines';
 import { handleError } from '../../../../../lib/errors';
@@ -52,8 +52,7 @@ export function logstashNodePipelinesRoute(server) {
       const { clusterUuid, logstashUuid } = req.params;
       const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
 
-      const rawPipelines = await getLogstashPipelineIds(req, lsIndexPattern, config.get('xpack.monitoring.max_bucket_size'));
-      const pipelines = get(rawPipelines, 'aggregations.nested_context.pipelines.buckets', []).map(bucket => ({ id: bucket.key }));
+      const pipelines = await getLogstashPipelineIds(req, lsIndexPattern);
 
       // Manually apply pagination/sorting/filtering concerns
 
@@ -76,8 +75,12 @@ export function logstashNodePipelinesRoute(server) {
         nodesCountMetric
       ];
 
+      const metricOptions = {
+        pageOfPipelines,
+      };
+
       try {
-        const pipelineData = await getPipelines(req, lsIndexPattern, pipelineIds, metricSet);
+        const pipelineData = await getPipelines(req, lsIndexPattern, pipelineIds, metricSet, metricOptions);
         // We need to re-sort because the data from above comes back in random order
         const pipelinesResponse = sortByOrder(
           pipelineData,

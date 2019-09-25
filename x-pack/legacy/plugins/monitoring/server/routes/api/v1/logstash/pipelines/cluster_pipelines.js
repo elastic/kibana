@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import { get, sortByOrder } from 'lodash';
+import { sortByOrder } from 'lodash';
 import { getClusterStatus } from '../../../../../lib/logstash/get_cluster_status';
 import { getPipelines, processPipelinesAPIResponse } from '../../../../../lib/logstash/get_pipelines';
 import { handleError } from '../../../../../lib/errors';
@@ -52,8 +52,7 @@ export function logstashClusterPipelinesRoute(server) {
       const clusterUuid = req.params.clusterUuid;
       const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
 
-      const rawPipelines = await getLogstashPipelineIds(req, lsIndexPattern, config.get('xpack.monitoring.max_bucket_size'));
-      const pipelines = get(rawPipelines, 'aggregations.nested_context.pipelines.buckets', []).map(bucket => ({ id: bucket.key }));
+      const pipelines = await getLogstashPipelineIds(req, lsIndexPattern);
 
       // Manually apply pagination/sorting/filtering concerns
 
@@ -61,7 +60,7 @@ export function logstashClusterPipelinesRoute(server) {
       const filteredPipelines = filter(pipelines, queryText, ['id']);
 
       // Sorting
-      const sortedPipelines = sortByOrder(filteredPipelines, pipeline => pipeline[sort.field], sort.direction);
+      const sortedPipelines = sort ? sortByOrder(filteredPipelines, pipeline => pipeline[sort.field], sort.direction) : filteredPipelines;
 
       // Pagination
       const pageOfPipelines = paginate(pagination, sortedPipelines);
@@ -77,14 +76,18 @@ export function logstashClusterPipelinesRoute(server) {
         nodesCountMetric
       ];
 
+      const metricOptions = {
+        pageOfPipelines,
+      };
+
       try {
-        const pipelineData = await getPipelines(req, lsIndexPattern, pipelineIds, metricSet);
+        const pipelineData = await getPipelines(req, lsIndexPattern, pipelineIds, metricSet, metricOptions);
         // We need to re-sort because the data from above comes back in random order
-        const pipelinesResponse = sortByOrder(
+        const pipelinesResponse = sort ? sortByOrder(
           pipelineData,
           pipeline => pipeline[sort.field],
           sort.direction
-        );
+        ) : pipelineData;
         const response = await processPipelinesAPIResponse(
           {
             pipelines: pipelinesResponse,

@@ -70,18 +70,27 @@ function createMetricAggs(metric) {
   return metric.aggs;
 }
 
-function fetchSeries(req, indexPattern, metric, min, max, bucketSize, filters) {
+function fetchSeries(req, indexPattern, metric, metricOptions, min, max, bucketSize, filters) {
   // if we're using a derivative metric, offset the min (also @see comment on offsetMinForDerivativeMetric function)
   const adjustedMin = metric.derivative ? offsetMinForDerivativeMetric(min, bucketSize) : min;
 
-  const dateHistogramSubAggs = metric.dateHistogramSubAggs || {
-    metric: {
-      [metric.metricAgg]: {
-        field: metric.field
-      }
-    },
-    ...createMetricAggs(metric)
-  };
+  let dateHistogramSubAggs = null;
+  if (metric.getDateHistogramSubAggs) {
+    dateHistogramSubAggs = metric.getDateHistogramSubAggs(metricOptions);
+  }
+  else if (metric.dateHistogramSubAggs) {
+    dateHistogramSubAggs = metric.dateHistogramSubAggs;
+  }
+  else {
+    dateHistogramSubAggs = {
+      metric: {
+        [metric.metricAgg]: {
+          field: metric.field
+        }
+      },
+      ...createMetricAggs(metric)
+    };
+  }
 
   const params = {
     index: indexPattern,
@@ -184,7 +193,6 @@ function handleSeries(metric, min, max, bucketSizeInSeconds, response) {
   const lastUsableBucketIndex = findLastUsableBucketIndex(buckets, max, firstUsableBucketIndex, bucketSizeInSeconds * 1000);
   let data = [];
 
-
   if (firstUsableBucketIndex <= lastUsableBucketIndex) {
     // map buckets to values for charts
     const key = derivative ? 'metric_deriv.normalized_value' : 'metric.value';
@@ -217,14 +225,14 @@ function handleSeries(metric, min, max, bucketSizeInSeconds, response) {
  * @param {Array} filters Any filters that should be applied to the query.
  * @return {Promise} The object response containing the {@code timeRange}, {@code metric}, and {@code data}.
  */
-export async function getSeries(req, indexPattern, metricName, filters, { min, max, bucketSize }) {
+export async function getSeries(req, indexPattern, metricName, metricOptions, filters, { min, max, bucketSize }) {
   checkParam(indexPattern, 'indexPattern in details/getSeries');
 
   const metric = metrics[metricName];
   if (!metric) {
     throw new Error(`Not a valid metric: ${metricName}`);
   }
-  const response = await fetchSeries(req, indexPattern, metric, min, max, bucketSize, filters);
+  const response = await fetchSeries(req, indexPattern, metric, metricOptions, min, max, bucketSize, filters);
 
   return handleSeries(metric, min, max, bucketSize, response);
 }

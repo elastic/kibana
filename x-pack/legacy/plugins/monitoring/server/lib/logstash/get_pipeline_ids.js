@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import moment from 'moment';
+import { get } from 'lodash';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 
-export async function getLogstashPipelineIds(req, logstashIndexPattern, size) {
+export async function getLogstashPipelineIds(req, logstashIndexPattern) {
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
 
@@ -16,7 +17,7 @@ export async function getLogstashPipelineIds(req, logstashIndexPattern, size) {
     size: 0,
     ignoreUnavailable: true,
     filterPath: [
-      'aggregations.nested_context'
+      'aggregations.nested_context.composite_data.buckets'
     ],
     body: {
       query: createQuery({
@@ -31,10 +32,31 @@ export async function getLogstashPipelineIds(req, logstashIndexPattern, size) {
             path: 'logstash_stats.pipelines'
           },
           aggs: {
-            pipelines: {
-              terms: {
-                field: 'logstash_stats.pipelines.id',
-                size,
+            composite_data: {
+              composite: {
+                sources: [
+                  {
+                    id: {
+                      terms: {
+                        field: 'logstash_stats.pipelines.id',
+                      }
+                    }
+                  },
+                  {
+                    hash: {
+                      terms: {
+                        field: 'logstash_stats.pipelines.hash',
+                      }
+                    }
+                  },
+                  {
+                    ephemeral_id: {
+                      terms: {
+                        field: 'logstash_stats.pipelines.ephemeral_id',
+                      }
+                    }
+                  }
+                ]
               }
             }
           }
@@ -44,5 +66,6 @@ export async function getLogstashPipelineIds(req, logstashIndexPattern, size) {
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params);
+  const response = await callWithRequest(req, 'search', params);
+  return get(response, 'aggregations.nested_context.composite_data.buckets', []).map(bucket => bucket.key);
 }
