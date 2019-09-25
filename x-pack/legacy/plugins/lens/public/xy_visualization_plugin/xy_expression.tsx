@@ -177,10 +177,13 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
     }
   }
 
+  const chartHasMoreThanOneSeries =
+    layers.length > 1 || data.tables[Object.keys(data.tables)[0]].columns.length > 2;
+
   return (
     <Chart>
       <Settings
-        showLegend={legend.isVisible}
+        showLegend={legend.isVisible ? chartHasMoreThanOneSeries : legend.isVisible}
         legendPosition={legend.position}
         showLegendDisplayValue={false}
         rotation={isHorizontal ? 90 : 0}
