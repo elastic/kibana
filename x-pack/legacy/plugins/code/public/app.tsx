@@ -12,8 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import moment from 'moment';
 import { CoreStart } from 'src/core/public';
-import 'ui/autoload/all';
-import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
