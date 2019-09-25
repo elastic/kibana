@@ -22,20 +22,18 @@ import { mapSavedQuery } from '../map_saved_query';
 
 describe('Filter Bar Directive', function () {
   describe('mapSavedQuery', function () {
-    it('should return the type, key, value, params for a saved query filter type', function (done) {
+    it('should return the type, key, params for a saved query filter type', function (done) {
       const filter = {
         meta: {
           type: 'savedQuery',
           key: 'foo',
-          value: 'foo',
-          params: {},
+          params: 'foo',
         }
       };
       mapSavedQuery(filter).then(function (result) {
         expect(result).to.have.property('key', 'foo');
         expect(result).to.have.property('type', 'savedQuery');
-        expect(result).to.have.property('value', 'foo');
-        expect(result).to.have.property('params');
+        expect(result).to.have.property('params', 'foo');
         done();
       });
     });
@@ -45,21 +43,12 @@ describe('Filter Bar Directive', function () {
         meta: {
           type: 'savedQuery',
           key: 'foo',
-          value: 'foo',
-          params: {
-            savedQuery: {
-              id: 'foo',
-              attributes: {}
-            },
-            esQueryConfig: {},
-            indexPattern: {},
-          },
+          params: 'foo',
         }
       };
       mapSavedQuery(filter).then(function (result) {
         expect(result).to.have.property('type', 'savedQuery');
-        expect(result.params.savedQuery).to.have.property('id', 'foo');
-        // add expectation for the other two items in params.
+        expect(result.params).to.eql('foo');
         done();
       });
     });

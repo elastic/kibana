@@ -21,7 +21,6 @@ import { cloneDeep } from 'lodash';
 import expect from '@kbn/expect';
 import { FilterStateStore } from '@kbn/es-query';
 import { buildSavedQueryFilter } from '../saved_query';
-import indexPattern from '../../__fixtures__/index_pattern_response.json';
 import filterSkeleton from '../../__fixtures__/filter_skeleton';
 
 let expected;
@@ -35,7 +34,7 @@ describe('Filter Manager', function () {
       expect(buildSavedQueryFilter).to.be.a(Function);
     });
 
-    it('should return a query filter, filters and time filter when passed a saved query', function () {
+    it('should return a saved query filter when passed a saved query id', function () {
       const savedQueryTestItem = {
         id: 'foo',
         attributes: {
@@ -73,199 +72,8 @@ describe('Filter Manager', function () {
           }
         }
       };
-      const testArgs = {
-        params: {
-          indexPattern: indexPattern,
-          savedQuery: savedQueryTestItem,
-          esQueryConfig: { allowLeadingWildcards: true, queryStringOptions: {}, dateFormatTZ: null }
-        },
-      };
-      expected = {
-        meta: {
-          type: 'savedQuery',
-          key: 'foo',
-          value: 'foo',
-          params: {
-            esQueryConfig: {
-              allowLeadingWildcards: true,
-              dateFormatTZ: null,
-              queryStringOptions: {},
-            },
-            savedQuery: savedQueryTestItem,
-            indexPattern: indexPattern
-          }
-        },
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  minimum_should_match: 1,
-                  should: [
-                    {
-                      match: {
-                        'response': 200
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                match_phrase: {
-                  'extension.keyword': {
-                    'query': 'css'
-                  }
-                }
-              },
-              {
-                range: {
-                  timestamp: {
-                    gte: '1940-02-01T00:00:00.000Z',
-                    lte: '2000-02-01T00:00:00.000Z',
-                    format: 'strict_date_optional_time'
-                  }
-                }
-              }
-            ],
-            must: [],
-            must_not: [],
-            should: [],
-          }
-        }
-      };
-      const actual = buildSavedQueryFilter(testArgs.params);
-      expect(actual).to.eql(expected);
-    });
-    it('should return a query filter when passed a saved query containing only a query', () => {
-      const savedQueryTestItem = {
-        id: 'foo',
-        attributes: {
-          title: 'foo',
-          description: 'bar',
-          query: {
-            language: 'kuery',
-            query: 'response:200'
-          }
-        }
-      };
-      const testArgs = {
-        params: {
-          indexPattern: indexPattern,
-          savedQuery: savedQueryTestItem,
-          esQueryConfig: { allowLeadingWildcards: true, queryStringOptions: {}, dateFormatTZ: null }
-        },
-      };
-      expected = {
-        meta: {
-          type: 'savedQuery',
-          key: 'foo',
-          value: 'foo',
-          params: {
-            esQueryConfig: {
-              allowLeadingWildcards: true,
-              dateFormatTZ: null,
-              queryStringOptions: {},
-            },
-            savedQuery: savedQueryTestItem,
-            indexPattern: indexPattern,
-          }
-        },
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  minimum_should_match: 1,
-                  should: [
-                    {
-                      match: {
-                        'response': 200
-                      }
-                    }
-                  ]
-                }
-              }
-            ],
-            must: [],
-            must_not: [],
-            should: [],
-          }
-        }
-      };
-      const actual = buildSavedQueryFilter(testArgs.params);
-      expect(actual).to.eql(expected);
-    });
-    it('should return a query filter when passed a saved query not containing a query', () => {
-      const savedQueryTestItem = {
-        id: 'foo',
-        attributes: {
-          title: 'foo',
-          description: 'bar',
-          query: {
-            language: 'kuery',
-            query: '',
-          },
-          filters: [
-            {
-              query: {
-                match_phrase: {
-                  'extension.keyword': {
-                    'query': 'css'
-                  }
-                }
-              },
-              $state: { store: FilterStateStore.APP_STATE },
-              meta: {
-                disabled: false,
-                negate: false,
-                alias: null,
-              },
-            },
-          ]
-        }
-      };
-      const testArgs = {
-        params: {
-          indexPattern: indexPattern,
-          savedQuery: savedQueryTestItem,
-          esQueryConfig: { allowLeadingWildcards: true, queryStringOptions: {}, dateFormatTZ: null }
-        },
-      };
-      expected = {
-        meta: {
-          type: 'savedQuery',
-          key: 'foo',
-          value: 'foo',
-          params: {
-            esQueryConfig: {
-              allowLeadingWildcards: true,
-              dateFormatTZ: null,
-              queryStringOptions: {},
-            },
-            savedQuery: savedQueryTestItem,
-            indexPattern: indexPattern,
-          }
-        },
-        query: {
-          bool: {
-            filter: [
-              {
-                match_all: {}
-              },
-              {
-                match_phrase: {
-                  'extension.keyword': {
-                    'query': 'css'
-                  }
-                }
-              }
-            ],
-            must: [],
-            must_not: [],
-            should: [],
-          }
-        }
-      };
+      const testArgs = savedQueryTestItem.id;
+      expected = { meta: { type: 'savedQuery', key: 'foo', params: 'foo' } };
       const actual = buildSavedQueryFilter(testArgs.params);
       expect(actual).to.eql(expected);
     });

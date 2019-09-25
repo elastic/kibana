@@ -29,6 +29,7 @@ import { buildQueryFromLucene } from './from_lucene';
  * @param config - an objects with query:allowLeadingWildcards and query:queryString:options UI
  * settings in form of { allowLeadingWildcards, queryStringOptions }
  * config contains dateformat:tz
+ * @param allSavedQueries - an array of saved queries from which filters are built. Used in buildQueryFromFilters
  */
 export function buildEsQuery(
   indexPattern,
