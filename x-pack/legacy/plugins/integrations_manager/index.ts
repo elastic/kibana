@@ -9,11 +9,14 @@ import JoiNamespace from 'joi';
 import { defer } from 'rxjs';
 import { LegacyPluginInitializer, LegacyPluginOptions } from 'src/legacy/types';
 import KbnServer from 'src/legacy/server/kbn_server';
-import { PluginInitializerContext } from 'src/core/server';
 import { Feature } from '../../../plugins/features/server/feature';
 import { PLUGIN } from './common/constants';
 import manifest from './kibana.json';
-import { CoreSetup, Plugin as ServerPlugin } from './server/plugin';
+import {
+  CoreSetup,
+  Plugin as ServerPlugin,
+  IntegrationsManagerPluginInitializerContext,
+} from './server/plugin';
 import { mappings, savedObjectSchemas } from './server/saved_objects';
 
 const ROOT = `plugins/${PLUGIN.ID}`;
@@ -85,12 +88,12 @@ const pluginOptions: LegacyPluginOptions = {
     const getConfig$ = <T>() =>
       defer<T>(async () => await server.config().get(PLUGIN.CONFIG_PREFIX));
 
-    const initializerContext = ({
+    const initializerContext: IntegrationsManagerPluginInitializerContext = {
       config: {
         create: getConfig$,
         createIfExists: getConfig$,
       },
-    } as unknown) as PluginInitializerContext;
+    };
 
     const coreSetup: CoreSetup = kbnServer.newPlatform.setup.core;
 

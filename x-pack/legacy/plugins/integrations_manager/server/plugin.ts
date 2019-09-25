@@ -17,7 +17,7 @@ import { PLUGIN } from '../common/constants';
 import { fetchList } from './registry';
 import { routes } from './routes';
 
-export { PluginInitializerContext } from 'src/core/server';
+export type IntegrationsManagerPluginInitializerContext = Pick<PluginInitializerContext, 'config'>;
 
 export interface CoreSetup {
   elasticsearch: ElasticsearchServiceSetup;
@@ -40,7 +40,7 @@ export class Plugin {
   public config$: Observable<IntegrationsManagerConfig>;
   public config: IntegrationsManagerConfig = DEFAULT_CONFIG;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: IntegrationsManagerPluginInitializerContext) {
     this.config$ = initializerContext.config.create<IntegrationsManagerConfig>();
     this.config$.subscribe(configValue => {
       this.config = {
