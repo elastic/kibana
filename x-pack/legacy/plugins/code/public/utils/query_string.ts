@@ -17,7 +17,7 @@ function encodeQueryComponent(val: string, pctEncodeSpaces = false) {
     .replace(/%20/g, pctEncodeSpaces ? '%20' : '+');
 }
 
-function tryDecodeURIComponent(value) {
+function tryDecodeURIComponent(value: string) {
   try {
     return decodeURIComponent(value);
   } catch (e) {} // eslint-disable-line no-empty

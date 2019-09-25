@@ -9,7 +9,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import querystring from 'querystring';
 import React from 'react';
 import { connect } from 'react-redux';
-import chrome from 'ui/chrome';
 import url from 'url';
 import { npStart } from 'ui/new_platform';
 
