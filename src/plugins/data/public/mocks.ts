@@ -21,13 +21,24 @@ import { Plugin } from '.';
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
 
+const autocompleteMock: any = {
+  addProvider: jest.fn(),
+  getProvider: jest.fn(),
+  clearProviders: jest.fn(),
+};
+
 const createSetupContract = (): Setup => {
-  const setupContract: Setup = {};
+  const setupContract: Setup = {
+    autocomplete: autocompleteMock as Setup['autocomplete'],
+  };
+
   return setupContract;
 };
 
 const createStartContract = (): Start => {
-  const startContract: Start = undefined;
+  const startContract: Start = {
+    autocomplete: autocompleteMock as Start['autocomplete'],
+  };
   return startContract;
 };
 
