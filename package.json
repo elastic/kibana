@@ -82,7 +82,9 @@
     "**/@types/hapi": "^17.0.18",
     "**/typescript": "3.5.3",
     "**/cypress/lodash": "4.17.13",
-    "**/isomorphic-git/**/base64-js": "^1.2.1"
+    "**/isomorphic-git/**/base64-js": "^1.2.1",
+    "**/babel-plugin-inline-react-svg/svgo/js-yaml": "^3.13.1",
+    "**/load-grunt-config/js-yaml": "^3.13.1"
   },
   "workspaces": {
     "packages": [
@@ -385,13 +387,13 @@
     "exit-hook": "^2.2.0",
     "faker": "1.1.0",
     "fetch-mock": "^7.3.9",
-    "geckodriver": "1.16.2",
+    "geckodriver": "^1.18.0",
     "getopts": "^2.2.4",
     "grunt": "1.0.4",
     "grunt-available-tasks": "^0.6.3",
     "grunt-cli": "^1.2.0",
     "grunt-contrib-watch": "^1.1.0",
-    "grunt-karma": "2.0.0",
+    "grunt-karma": "^3.0.2",
     "grunt-peg": "^2.0.1",
     "grunt-run": "0.8.1",
     "gulp-babel": "^8.0.0",
@@ -417,7 +419,7 @@
     "karma-safari-launcher": "1.0.0",
     "license-checker": "^16.0.0",
     "listr": "^0.14.1",
-    "load-grunt-config": "0.19.2",
+    "load-grunt-config": "^3.0.1",
     "mocha": "3.5.3",
     "multistream": "^2.1.1",
     "murmurhash3js": "3.0.1",

@@ -68,6 +68,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
         const wrappedError = wrapError(error);
         return response.customError({
           body: wrappedError,
+          headers: wrappedError.output.headers,
           statusCode: wrappedError.output.statusCode,
         });
       }
@@ -82,14 +83,31 @@ export function initSpacesOnPostAuthRequestInterceptor({
 
         space = await spacesClient.get(spaceId);
       } catch (error) {
-        log.error(
-          `Unable to navigate to space "${spaceId}", redirecting to Space Selector. ${error}`
-        );
-        // Space doesn't exist, or user not authorized for space, or some other issue retrieving the active space.
-        const result = response.redirected({
-          headers: { location: getSpaceSelectorUrl(serverBasePath) },
-        });
-        return result;
+        const wrappedError = wrapError(error);
+
+        const statusCode = wrappedError.output.statusCode;
+
+        // If user is not authorized, or the space cannot be found, allow them to select another space
+        // by redirecting to the space selector.
+        const shouldRedirectToSpaceSelector = statusCode === 403 || statusCode === 404;
+
+        if (shouldRedirectToSpaceSelector) {
+          log.debug(
+            `Unable to navigate to space "${spaceId}", redirecting to Space Selector. ${error}`
+          );
+          return response.redirected({
+            headers: {
+              location: getSpaceSelectorUrl(serverBasePath),
+            },
+          });
+        } else {
+          log.error(`Unable to navigate to space "${spaceId}". ${error}`);
+          return response.customError({
+            body: wrappedError,
+            headers: wrappedError.output.headers,
+            statusCode: wrappedError.output.statusCode,
+          });
+        }
       }
 
       // Verify application is available in this space
@@ -109,7 +127,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
           const isAvailableInSpace = enabledFeatures.some(feature => feature.app.includes(appId));
 
           if (!isAvailableInSpace) {
-            log.error(`App ${appId} is not enabled within space "${spaceId}".`);
+            log.debug(`App ${appId} is not enabled within space "${spaceId}".`);
             return response.notFound();
           }
         }
