@@ -5,5 +5,7 @@
  */
 
 import { host } from './host';
+import { pod } from './pod';
+import { container } from './container';
 
-export const models = [host];
+export const models = [host, pod, container];
