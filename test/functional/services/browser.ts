@@ -21,8 +21,7 @@ import { cloneDeep } from 'lodash';
 import { IKey, logging } from 'selenium-webdriver';
 import { takeUntil } from 'rxjs/operators';
 
-import { PNG } from 'pngjs';
-import Jimp from 'jimp';
+import Jimp, { Bitmap } from 'jimp';
 import { modifyUrl } from '../../../src/core/utils';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -121,6 +120,16 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
+     * Gets a screenshot of the focused window and returns it as a Bitmap object
+     */
+    public async getScreenshotAsBitmap(): Promise<Bitmap> {
+      const screenshot = await this.takeScreenshot();
+      const buffer = Buffer.from(screenshot.toString(), 'base64');
+      const session = (await Jimp.read(buffer)).clone();
+      return session.bitmap;
+    }
+
+    /**
      * Sets the dimensions of a window to get the right size screenshot.
      *
      * @param {number} width
@@ -132,51 +141,35 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       // We really want to set the Kibana app to a specific size without regard to the browser chrome (borders)
       // But that means we first need to figure out the display scaling factor.
       // NOTE: None of this is required when running Chrome headless because there's no scaling and no borders.
-      await (driver.manage().window() as any).setRect({ width: 1200, height: 800 });
-      const screenshot = await driver.takeScreenshot();
-      const buffer = Buffer.from(screenshot.toString(), 'base64');
-      const src = PNG.sync.read(buffer);
-      const session = (await Jimp.read(src)).clone();
+      await this.setWindowSize(1200, 800);
+      const bitmap1 = await this.getScreenshotAsBitmap();
       log.debug(
-        '======browser======== actual initial screenshot size width=' +
-          `${session.bitmap.width} ,height=${session.bitmap.height}`
+        `======browser======== actual initial screenshot size width=${bitmap1.width}, height=${bitmap1.height}`
       );
 
       // drasticly change the window size so we can calculate the scaling
-      await (driver.manage().window() as any).setRect({ width: 600, height: 400 });
-      const screenshot2 = await driver.takeScreenshot();
-      const buffer2 = Buffer.from(screenshot2.toString(), 'base64');
-      const src2 = PNG.sync.read(buffer2);
-      const session2 = (await Jimp.read(src2)).clone();
+      await this.setWindowSize(600, 400);
+      const bitmap2 = await this.getScreenshotAsBitmap();
       log.debug(
-        '======browser======== actual second screenshot size width=' +
-          `${session2.bitmap.width} ,height=${session2.bitmap.height}`
+        `======browser======== actual second screenshot size width= ${bitmap2.width}, height=${bitmap2.height}`
       );
 
-      const xScaling = (session.bitmap.width - session2.bitmap.width) / 600;
-      const yScaling = (session.bitmap.height - session2.bitmap.height) / 400;
-      const xBorder = Math.round(600 - session2.bitmap.width / xScaling);
-      const yBorder = Math.round(400 - session2.bitmap.height / yScaling);
+      const xScaling = (bitmap1.width - bitmap2.width) / 600;
+      const yScaling = (bitmap1.height - bitmap2.height) / 400;
+      const xBorder = Math.round(600 - bitmap2.width / xScaling);
+      const yBorder = Math.round(400 - bitmap2.height / yScaling);
       log.debug(
-        '======browser======== calculated values xBorder=' +
-          `${xBorder}, yBorder=${yBorder}, xScaling=${xScaling}, yScaling=${yScaling}`
+        `======browser======== calculated values xBorder= ${xBorder}, yBorder=${yBorder}, xScaling=${xScaling}, yScaling=${yScaling}`
       );
       log.debug(
-        '======browser======== setting browser size to' + `${width + xBorder} x ${height + yBorder}`
+        `======browser======== setting browser size to ${width + xBorder} x ${height + yBorder}`
       );
-      await (driver.manage().window() as any).setRect({
-        width: width + xBorder,
-        height: height + yBorder,
-      });
+      await this.setWindowSize(width + xBorder, height + yBorder);
 
-      const screenshot3 = await driver.takeScreenshot();
-      const buffer3 = Buffer.from(screenshot3.toString(), 'base64');
-      const src3 = PNG.sync.read(buffer3);
-      const session3 = (await Jimp.read(src3)).clone();
+      const bitmap3 = await this.getScreenshotAsBitmap();
       // when there is display scaling this won't show the expected size.  It will show expected size * scaling factor
       log.debug(
-        '======browser======== final screenshot size width=' +
-          `${session3.bitmap.width} ,height=${session3.bitmap.height}`
+        `======browser======== final screenshot size width=${bitmap3.width}, height=${bitmap3.height}`
       );
     }
 
