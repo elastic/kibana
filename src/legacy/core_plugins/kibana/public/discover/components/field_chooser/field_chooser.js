@@ -22,6 +22,8 @@ import { i18n } from '@kbn/i18n';
 import 'ui/directives/field_name';
 import './discover_field';
 import 'ui/angular_ui_select';
+//import './discover_index_pattern_directive';
+import './discover_field_search_directive';
 import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
@@ -47,15 +49,9 @@ app.directive('discFieldChooser', function ($location, config, $route) {
     },
     template: fieldChooserTemplate,
     link: function ($scope) {
-      $scope.$parent.$watch('showFilter', () =>{
-        $scope.toggleFieldFilterButtonAriaLabel = $scope.$parent.showFilter
-          ? i18n.translate('kbn.discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
-            defaultMessage: 'Hide field settings',
-          })
-          : i18n.translate('kbn.discover.fieldChooser.toggleFieldFilterButtonShowAriaLabel', {
-            defaultMessage: 'Show field settings',
-          });
-      });
+
+      $scope.showFilter = false;
+      $scope.toggleShowFilter = () =>  $scope.showFilter = !$scope.showFilter;
 
       $scope.selectedIndexPattern = $scope.indexPatternList.find(
         (pattern) => pattern.id === $scope.indexPattern.id
@@ -81,7 +77,8 @@ app.directive('discFieldChooser', function ($location, config, $route) {
         ],
         defaults: {
           missing: true,
-          type: 'any'
+          type: 'any',
+          name: ''
         },
         boolOpts: [
           { label: 'any', value: undefined },
@@ -96,7 +93,18 @@ app.directive('discFieldChooser', function ($location, config, $route) {
           filter.vals = _.clone(filter.defaults);
         },
         isFieldSelected: function (field) {
-          return field.display;
+          const matchFilter = (filter.vals.type === 'any' || field.type === filter.vals.type);
+          const isAggregatable = (filter.vals.aggregatable == null || field.aggregatable === filter.vals.aggregatable);
+          const isSearchable = (filter.vals.searchable == null || field.searchable === filter.vals.searchable);
+          const scriptedOrMissing = (!filter.vals.missing || field.scripted || field.rowCount > 0);
+          const matchName = (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1);
+
+          return field.display
+            && matchFilter
+            && isAggregatable
+            && isSearchable
+            && scriptedOrMissing
+            && matchName;
         },
         isFieldFiltered: function (field) {
           const matchFilter = (filter.vals.type === 'any' || field.type === filter.vals.type);
@@ -121,6 +129,10 @@ app.directive('discFieldChooser', function ($location, config, $route) {
             return filter.vals[prop] !== filter.defaults[prop];
           });
         }
+      };
+
+      $scope.setFilterValue = (name, value) => {
+        filter.vals[name] = value;
       };
 
       // set the initial values to the defaults
