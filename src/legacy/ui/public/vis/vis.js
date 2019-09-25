@@ -29,6 +29,7 @@
 
 import { EventEmitter } from 'events';
 import _ from 'lodash';
+import '../render_complete/directive';
 import { VisTypesRegistryProvider } from '../registry/vis_types';
 import { AggConfigs } from '../agg_types/agg_configs';
 import { PersistedState } from '../persisted_state';

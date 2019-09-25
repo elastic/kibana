@@ -1286,7 +1286,7 @@ describe('editor_frame', () => {
       );
     });
 
-    it('should switch to best suggested visualization regardless extension on field drop', async () => {
+    it('should use the currently selected visualization if possible on field drop', async () => {
       const suggestionVisState = {};
       const instance = mount(
         <EditorFrame
@@ -1334,7 +1334,7 @@ describe('editor_frame', () => {
             },
           }}
           initialDatasourceId="testDatasource"
-          initialVisualizationId="testVis"
+          initialVisualizationId="testVis2"
           ExpressionRenderer={expressionRendererMock}
         />
       );
@@ -1352,6 +1352,100 @@ describe('editor_frame', () => {
       });
 
       expect(mockVisualization2.renderConfigPanel).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          state: suggestionVisState,
+        })
+      );
+    });
+
+    it('should use the highest priority suggestion available', async () => {
+      const suggestionVisState = {};
+      const mockVisualization3 = {
+        ...createMockVisualization(),
+        id: 'testVis3',
+        visualizationTypes: [
+          {
+            icon: 'empty',
+            id: 'testVis3',
+            label: 'TEST3',
+          },
+        ],
+        getSuggestions: () => [
+          {
+            score: 0.9,
+            state: suggestionVisState,
+            title: 'Suggestion3',
+            previewIcon: 'empty',
+          },
+          {
+            score: 0.7,
+            state: {},
+            title: 'Suggestion4',
+            previewIcon: 'empty',
+          },
+        ],
+      };
+      const instance = mount(
+        <EditorFrame
+          {...getDefaultProps()}
+          visualizationMap={{
+            testVis: {
+              ...mockVisualization,
+              getSuggestions: () => [
+                {
+                  score: 0.2,
+                  state: {},
+                  title: 'Suggestion1',
+                  previewIcon: 'empty',
+                },
+                {
+                  score: 0.6,
+                  state: {},
+                  title: 'Suggestion2',
+                  previewIcon: 'empty',
+                },
+              ],
+            },
+            testVis2: {
+              ...mockVisualization2,
+              getSuggestions: () => [],
+            },
+            testVis3: {
+              ...mockVisualization3,
+            },
+          }}
+          datasourceMap={{
+            testDatasource: {
+              ...mockDatasource,
+              getDatasourceSuggestionsForField: () => [generateSuggestion()],
+              getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
+              renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
+                if (dragging !== 'draggedField') {
+                  setDragging('draggedField');
+                }
+              },
+            },
+          }}
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis2"
+          ExpressionRenderer={expressionRendererMock}
+        />
+      );
+
+      await waitForPromises();
+
+      // TODO why is this necessary?
+      instance.update();
+
+      act(() => {
+        instance.find(DragDrop).prop('onDrop')!({
+          indexPatternId: '1',
+          field: {},
+        });
+      });
+
+      expect(mockVisualization3.renderConfigPanel).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({
           state: suggestionVisState,
