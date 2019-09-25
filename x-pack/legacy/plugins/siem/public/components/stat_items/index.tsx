@@ -27,7 +27,7 @@ import styled from 'styled-components';
 import { KpiHostsData, KpiNetworkData } from '../../graphql/types';
 import { AreaChart } from '../charts/areachart';
 import { BarChart } from '../charts/barchart';
-import { ChartConfigsData, ChartData, ChartSeriesConfigs, UpdateDateRange } from '../charts/common';
+import { ChartSeriesData, ChartData, ChartSeriesConfigs, UpdateDateRange } from '../charts/common';
 import { getEmptyTagValue } from '../empty_value';
 
 import { InspectButton } from '../inspect';
@@ -69,8 +69,8 @@ export interface StatItems {
 }
 
 export interface StatItemsProps extends StatItems {
-  areaChart?: ChartConfigsData[];
-  barChart?: ChartConfigsData[];
+  areaChart?: ChartSeriesData[];
+  barChart?: ChartSeriesData[];
   from: number;
   id: string;
   narrowDateRange: UpdateDateRange;
@@ -79,6 +79,7 @@ export interface StatItemsProps extends StatItems {
 
 export const numberFormatter = (value: string | number): string => value.toLocaleString();
 const statItemBarchartRotation: Rotation = 90;
+const statItemChartCustomHeight = 74;
 
 export const areachartConfigs = (config?: {
   xTickFormatter: (value: number) => string;
@@ -95,6 +96,7 @@ export const areachartConfigs = (config?: {
   settings: {
     onBrushEnd: getOr(() => {}, 'onBrushEnd', config),
   },
+  customHeight: statItemChartCustomHeight,
 });
 
 export const barchartConfigs = (config?: { onElementClick?: ElementClickListener }) => ({
@@ -109,6 +111,7 @@ export const barchartConfigs = (config?: { onElementClick?: ElementClickListener
     onElementClick: getOr(() => {}, 'onElementClick', config),
     rotation: statItemBarchartRotation,
   },
+  customHeight: statItemChartCustomHeight,
 });
 
 export const addValueToFields = (
@@ -119,7 +122,7 @@ export const addValueToFields = (
 export const addValueToAreaChart = (
   fields: StatItem[],
   data: KpiHostsData | KpiNetworkData
-): ChartConfigsData[] =>
+): ChartSeriesData[] =>
   fields
     .filter(field => get(`${field.key}Histogram`, data) != null)
     .map(field => ({
@@ -131,9 +134,9 @@ export const addValueToAreaChart = (
 export const addValueToBarChart = (
   fields: StatItem[],
   data: KpiHostsData | KpiNetworkData
-): ChartConfigsData[] => {
+): ChartSeriesData[] => {
   if (fields.length === 0) return [];
-  return fields.reduce((acc: ChartConfigsData[], field: StatItem, idx: number) => {
+  return fields.reduce((acc: ChartSeriesData[], field: StatItem, idx: number) => {
     const { key, color } = field;
     const y: number | null = getOr(null, key, data);
     const x: string = get(`${idx}.name`, fields) || getOr('', `${idx}.description`, fields);
