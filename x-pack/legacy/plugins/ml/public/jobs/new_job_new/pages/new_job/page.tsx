@@ -63,8 +63,22 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     if (skipTimeRangeStep === false) {
       jobCreator.jobId = '';
     }
+
     mlJobService.tempJobCloningObjects.skipTimeRangeStep = false;
     mlJobService.tempJobCloningObjects.job = undefined;
+
+    if (
+      mlJobService.tempJobCloningObjects.start !== undefined &&
+      mlJobService.tempJobCloningObjects.end !== undefined
+    ) {
+      // auto select the start and end dates for the time range picker
+      jobCreator.setTimeRange(
+        mlJobService.tempJobCloningObjects.start,
+        mlJobService.tempJobCloningObjects.end
+      );
+      mlJobService.tempJobCloningObjects.start = undefined;
+      mlJobService.tempJobCloningObjects.end = undefined;
+    }
   } else {
     jobCreator.bucketSpan = DEFAULT_BUCKET_SPAN;
 
@@ -78,6 +92,12 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
     if (isSingleMetricJobCreator(jobCreator) === true) {
       jobCreator.modelPlot = true;
+    }
+
+    if (kibanaContext.currentSavedSearch.id !== undefined) {
+      // Jobs created from saved searches cannot be cloned in the wizard as the
+      // ML job config holds no reference to the saved search ID.
+      jobCreator.createdBy = null;
     }
   }
 
@@ -103,7 +123,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
   return (
     <Fragment>
-      <EuiPage style={{ backgroundColor: '#FFF' }} data-test-subj="mlPageJobWizard">
+      <EuiPage style={{ backgroundColor: 'inherit' }} data-test-subj="mlPageJobWizard">
         <EuiPageBody>
           <EuiPageContentBody>
             <Wizard

@@ -5,7 +5,7 @@
  */
 
 /** The `All Hosts` widget on the `Hosts` page */
-export const ALL_HOSTS_WIDGET = '[data-test-subj="all-hosts"]';
+export const ALL_HOSTS_WIDGET = '[data-test-subj="table-allHosts-loading-false"]';
 
 /** A single draggable host in the `All Hosts` widget on the `Hosts` page */
 export const ALL_HOSTS_WIDGET_HOST = '[data-react-beautiful-dnd-drag-handle]';

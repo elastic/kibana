@@ -11,7 +11,7 @@ import { TabNavigation } from './';
 import { TabNavigationProps } from './types';
 import { navTabs, SiemPageName } from '../../../pages/home/home_navigations';
 import { HostsTableType } from '../../../store/hosts/model';
-import { navTabsHostDetails } from '../../../pages/hosts/hosts_navigations';
+import { navTabsHostDetails } from '../../../pages/hosts/details/nav_tabs';
 import { CONSTANTS } from '../../url_state/constants';
 import { RouteSpyState } from '../../../utils/route/types';
 
@@ -95,13 +95,14 @@ describe('Tab Navigation', () => {
   });
 
   describe('Table Navigation', () => {
+    const mockHasMlUserPermissions = true;
     const mockProps: TabNavigationProps & RouteSpyState = {
       pageName: 'hosts',
       pathName: '/hosts',
       detailName: undefined,
       search: '',
       tabName: HostsTableType.authentications,
-      navTabs: navTabsHostDetails(hostName),
+      navTabs: navTabsHostDetails(hostName, mockHasMlUserPermissions),
       [CONSTANTS.timerange]: {
         global: {
           [CONSTANTS.timerange]: {

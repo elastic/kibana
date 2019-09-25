@@ -24,4 +24,3 @@ export * from './actions';
 export * from './triggers';
 export * from './containers';
 export * from './panel';
-export * from './context_menu_actions';

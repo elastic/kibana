@@ -154,12 +154,11 @@ export class FeatureTooltip extends React.Component {
         showFilterButtons={this.props.showFilterButtons}
         onCloseTooltip={this._onCloseTooltip}
         addFilters={this.props.addFilters}
-        reevaluateTooltipPosition={this.props.reevaluateTooltipPosition}
       />
     );
   }
 
-  _renderActions(feature, geoFields) {
+  _renderActions(geoFields) {
     if (!this.props.isLocked || geoFields.length === 0) {
       return null;
     }
@@ -270,22 +269,22 @@ export class FeatureTooltip extends React.Component {
     });
   }
 
-  _filterGeoFields(feature) {
-    if (!feature) {
+  _filterGeoFields(featureGeometry) {
+    if (!featureGeometry) {
       return [];
     }
 
     // line geometry can only create filters for geo_shape fields.
-    if (feature.geometry.type === GEO_JSON_TYPE.LINE_STRING
-      || feature.geometry.type === GEO_JSON_TYPE.MULTI_LINE_STRING) {
+    if (featureGeometry.type === GEO_JSON_TYPE.LINE_STRING
+      || featureGeometry.type === GEO_JSON_TYPE.MULTI_LINE_STRING) {
       return this.props.geoFields.filter(({ geoFieldType }) => {
         return geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE;
       });
     }
 
     // TODO support geo distance filters for points
-    if (feature.geometry.type === GEO_JSON_TYPE.POINT
-      || feature.geometry.type === GEO_JSON_TYPE.MULTI_POINT) {
+    if (featureGeometry.type === GEO_JSON_TYPE.POINT
+      || featureGeometry.type === GEO_JSON_TYPE.MULTI_POINT) {
       return [];
     }
 
@@ -342,17 +341,20 @@ export class FeatureTooltip extends React.Component {
   render() {
     const filteredFeatures = this._filterFeatures();
     const currentFeature = filteredFeatures[this.state.pageNumber];
-    const filteredGeoFields = this._filterGeoFields(currentFeature);
+    const currentFeatureGeometry = this.props.loadFeatureGeometry({
+      layerId: currentFeature.layerId,
+      featureId: currentFeature.id
+    });
+    const filteredGeoFields = this._filterGeoFields(currentFeatureGeometry);
 
-    if (this.state.view === VIEWS.GEOMETRY_FILTER_VIEW) {
+    if (this.state.view === VIEWS.GEOMETRY_FILTER_VIEW && currentFeatureGeometry) {
       return (
         <FeatureGeometryFilterForm
           onClose={this._onCloseTooltip}
           showPropertiesView={this._showPropertiesView}
-          feature={currentFeature}
+          geometry={currentFeatureGeometry}
           geoFields={filteredGeoFields}
           addFilters={this.props.addFilters}
-          reevaluateTooltipPosition={this.props.reevaluateTooltipPosition}
         />
       );
     }
@@ -361,7 +363,7 @@ export class FeatureTooltip extends React.Component {
       <Fragment>
         {this._renderHeader()}
         {this._renderProperties(currentFeature)}
-        {this._renderActions(currentFeature, filteredGeoFields)}
+        {this._renderActions(filteredGeoFields)}
         {this._renderFooter(filteredFeatures)}
       </Fragment>
     );

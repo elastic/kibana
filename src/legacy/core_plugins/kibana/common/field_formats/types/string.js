@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { asPrettyString } from '../../utils/as_pretty_string';
+import { asPrettyString } from '../../../../../../plugins/data/common/field_formats';
 import { shortenDottedString } from '../../utils/shorten_dotted_string';
 
 const TRANSFORM_OPTIONS = [

@@ -12,14 +12,13 @@ import { ColorGradient } from '../color_gradient';
 import {
   DEFAULT_RGB_HEATMAP_COLOR_RAMP,
   DEFAULT_HEATMAP_COLOR_RAMP_NAME,
-  HEATMAP_COLOR_RAMP_LABEL
+  HEATMAP_COLOR_RAMP_LABEL,
 } from './heatmap_constants';
 
 export function HeatmapStyleEditor({ colorRampName, onHeatmapColorChange }) {
-
-  const onColorRampChange = (selectedColorRampName) => {
+  const onColorRampChange = selectedColorRampName => {
     onHeatmapColorChange({
-      colorRampName: selectedColorRampName
+      colorRampName: selectedColorRampName,
     });
   };
 
@@ -27,18 +26,19 @@ export function HeatmapStyleEditor({ colorRampName, onHeatmapColorChange }) {
     {
       value: DEFAULT_HEATMAP_COLOR_RAMP_NAME,
       text: DEFAULT_HEATMAP_COLOR_RAMP_NAME,
-      inputDisplay: <ColorGradient colorRamp={DEFAULT_RGB_HEATMAP_COLOR_RAMP}/>
+      inputDisplay: <ColorGradient colorRamp={DEFAULT_RGB_HEATMAP_COLOR_RAMP} />,
     },
-    ...COLOR_GRADIENTS
+    ...COLOR_GRADIENTS,
   ];
 
   return (
-    <EuiFormRow label={HEATMAP_COLOR_RAMP_LABEL}>
+    <EuiFormRow label={HEATMAP_COLOR_RAMP_LABEL} display="rowCompressed">
       <EuiSuperSelect
         options={colorRampOptions}
         onChange={onColorRampChange}
         valueOfSelected={colorRampName}
         hasDividers={true}
+        compressed
       />
     </EuiFormRow>
   );

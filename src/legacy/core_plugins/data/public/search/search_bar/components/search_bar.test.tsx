@@ -25,10 +25,19 @@ import { IndexPattern } from '../../../index_patterns';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 const startMock = coreMock.createStart();
 
+import { timefilterServiceMock } from '../../../timefilter/timefilter_service.mock';
+const timefilterSetupMock = timefilterServiceMock.createSetupContract();
+
 jest.mock('../../../../../data/public', () => {
   return {
     FilterBar: () => <div className="filterBar"></div>,
-    QueryBar: () => <div className="queryBar"></div>,
+    QueryBarInput: () => <div className="queryBar"></div>,
+  };
+});
+
+jest.mock('../../../query/query_bar', () => {
+  return {
+    QueryBarTopRow: () => <div className="queryBar"></div>,
   };
 });
 
@@ -92,9 +101,12 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         savedObjectsClient={startMock.savedObjects.client}
         uiSettings={startMock.uiSettings}
+        timeHistory={timefilterSetupMock.history}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
       />
     );
 
@@ -108,9 +120,12 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         savedObjectsClient={startMock.savedObjects.client}
         uiSettings={startMock.uiSettings}
+        timeHistory={timefilterSetupMock.history}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         showDatePicker={false}
       />
     );
@@ -125,9 +140,12 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         savedObjectsClient={startMock.savedObjects.client}
         uiSettings={startMock.uiSettings}
+        timeHistory={timefilterSetupMock.history}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         filters={[]}
         onFiltersUpdated={noop}
         showDatePicker={false}
@@ -144,9 +162,12 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         savedObjectsClient={startMock.savedObjects.client}
         uiSettings={startMock.uiSettings}
+        timeHistory={timefilterSetupMock.history}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         showFilterBar={false}
         filters={[]}
         onFiltersUpdated={noop}
@@ -164,9 +185,12 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         savedObjectsClient={startMock.savedObjects.client}
         uiSettings={startMock.uiSettings}
+        timeHistory={timefilterSetupMock.history}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         screenTitle={'test screen'}
         store={createMockStorage()}
         onQuerySubmit={noop}
@@ -184,9 +208,12 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        timeHistory={timefilterSetupMock.history}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         screenTitle={'test screen'}
         store={createMockStorage()}
         onQuerySubmit={noop}
@@ -203,11 +230,14 @@ describe('SearchBar', () => {
   it('Should render query bar and filter bar', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
+        timeHistory={timefilterSetupMock.history}
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         screenTitle={'test screen'}
         store={createMockStorage()}
         onQuerySubmit={noop}

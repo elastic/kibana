@@ -50,7 +50,7 @@ export class CtagsLauncher extends AbstractLauncher {
     return CTAGS_LANG_DETACH_PORT;
   }
 
-  async spawnProcess(installationPath: string, port: number, log: Logger) {
+  async spawnProcess(port: number, log: Logger) {
     if (!this.embed) {
       this.embed = new EmbedCtagServer(port, log);
     }

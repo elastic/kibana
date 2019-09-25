@@ -17,4 +17,6 @@
  * under the License.
  */
 
+export * from './field_formats/types';
 export * from './timefilter/types';
+export * from './query/types';

@@ -52,3 +52,18 @@ export function getSpaceInitials(space: Partial<Space> = {}) {
 
   return words.map(word => word.substring(0, 1)).join('');
 }
+
+/**
+ * Determines the avatar image for the provided space.
+ *
+ * @param {Space} space
+ */
+export function getSpaceImageUrl(space: Partial<Space> = {}) {
+  const { imageUrl } = space;
+
+  if (imageUrl) {
+    return imageUrl;
+  }
+
+  return '';
+}

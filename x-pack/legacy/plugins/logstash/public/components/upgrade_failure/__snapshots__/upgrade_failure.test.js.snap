@@ -122,8 +122,6 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
     >
       <EuiPanel
         className="euiPageContent"
-        grow={true}
-        hasShadow={false}
         paddingSize="l"
       >
         <div
@@ -276,12 +274,8 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                         className="euiFlexItem euiFlexItem--flexGrowZero"
                       >
                         <EuiButton
-                          color="primary"
                           fill={true}
-                          iconSide="left"
                           onClick={[MockFunction]}
-                          size="m"
-                          type="button"
                         >
                           <button
                             className="euiButton euiButton--primary euiButton--fill"
@@ -309,9 +303,7 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                       >
                         <EuiButtonEmpty
                           color="primary"
-                          iconSide="left"
                           onClick={[MockFunction]}
-                          type="button"
                         >
                           <button
                             className="euiButtonEmpty euiButtonEmpty--primary"
@@ -471,8 +463,6 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
     >
       <EuiPanel
         className="euiPageContent"
-        grow={true}
-        hasShadow={false}
         paddingSize="l"
       >
         <div
@@ -625,12 +615,8 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                         className="euiFlexItem euiFlexItem--flexGrowZero"
                       >
                         <EuiButton
-                          color="primary"
                           fill={true}
-                          iconSide="left"
                           onClick={[MockFunction]}
-                          size="m"
-                          type="button"
                         >
                           <button
                             className="euiButton euiButton--primary euiButton--fill"
@@ -658,9 +644,7 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                       >
                         <EuiButtonEmpty
                           color="primary"
-                          iconSide="left"
                           onClick={[MockFunction]}
-                          type="button"
                         >
                           <button
                             className="euiButtonEmpty euiButtonEmpty--primary"
@@ -820,8 +804,6 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
     >
       <EuiPanel
         className="euiPageContent"
-        grow={true}
-        hasShadow={false}
         paddingSize="l"
       >
         <div
@@ -974,12 +956,8 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                         className="euiFlexItem euiFlexItem--flexGrowZero"
                       >
                         <EuiButton
-                          color="primary"
                           fill={true}
-                          iconSide="left"
                           onClick={[MockFunction]}
-                          size="m"
-                          type="button"
                         >
                           <button
                             className="euiButton euiButton--primary euiButton--fill"
@@ -1007,9 +985,7 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                       >
                         <EuiButtonEmpty
                           color="primary"
-                          iconSide="left"
                           onClick={[MockFunction]}
-                          type="button"
                         >
                           <button
                             className="euiButtonEmpty euiButtonEmpty--primary"

@@ -18,7 +18,6 @@
  */
 
 import 'ui/registry/field_formats';
-import 'uiExports/autocompleteProviders';
 import 'uiExports/contextMenuActions';
 import 'uiExports/devTools';
 import 'uiExports/docViews';
@@ -33,8 +32,6 @@ import 'uiExports/savedObjectTypes';
 import 'uiExports/search';
 import 'uiExports/shareContextMenuExtensions';
 import 'uiExports/visEditorTypes';
-import 'uiExports/visRequestHandlers';
-import 'uiExports/visResponseHandlers';
 import 'uiExports/visTypes';
 import 'uiExports/visualize';
 

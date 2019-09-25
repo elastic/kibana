@@ -3,231 +3,23 @@
   <kbn-top-nav name="workspacesTopNav" config="topNavMenu">
   </kbn-top-nav>
 
-  <div class="gphGraph__menus" ng-show="menus.showSettings">
-    <graph-settings ng-show="menus.showSettings"></graph-settings>
-  </div>
-    
-  <div class="gphGraph__bar">
-    <div class="gphGraph__flexGroup">
-      <!-- Select index pattern. -->
-      <select class="form-control gphIndexSelect" name="mySelect" ng-change="uiSelectIndex()" ng-class="{'gphIndexSelect-unselected':selectedIndex === null}"
-        ng-options="option.attributes.title for option in indices" ng-model="grr.proposedIndex">
-        <option
-          value=""
-          i18n-id="xpack.graph.topNavMenu.selectIndexPatternOptionLabel"
-          i18n-default-message="Select index pattern…"
-        ></option>
-      </select>
-
-      <!-- Added fields. -->
-      <span
-        class="gphNoUserSelect"
-        ng-repeat="f in selectedFields"
-        ng-attr-tooltip="{{ ::'xpack.graph.topNavMenu.addedFieldTooltip' | i18n: {
-          defaultMessage: 'Shift + click to toggle if search returns {fName}',
-          values: { fName: f.name }
-        } }}"
-      >
-        <svg class="gphNode" width="30" height="30" ng-click="clickVertexFieldIcon(f, $event)" ng-class="{'gphNode-disabled':f.hopSize<=0}">
-          <circle class="gphNode__circle" r="13" cx="15" cy="15" ng-class="{selectedNode:currentlyDisplayedKey === 'fieldConfig'&&f === selectedFieldConfig}"
-            ng-attr-style="fill:{{f.color}}" />
-          <text ng-if="f.icon" class="gphNode__text fa" text-anchor="middle" x="15" y="20">
-            {{f.icon.code}}
-          </text>
-        </svg>
-      </span>
-
-      <!-- Add field button. -->
-      <span
-        class="gphNoUserSelect"
-        ng-attr-tooltip="{{ ::'xpack.graph.topNavMenu.addFieldButtonTooltip' | i18n: { defaultMessage: 'Add a field source for vertices' } }}"
-      >
-        <button
-          class="gphAddButton"
-          ng-disabled="selectedIndex === null"
-          aria-label="{{ ::'xpack.graph.topNavMenu.addFieldButtonAriaLabel' | i18n: { defaultMessage: 'Add a field' } }}"
-          id="addVertexFieldButton"
-          ng-class="{'gphAddButton-focus':selectedIndex !== null&&selectedFields.length === 0}"
-          ng-click="toggleShowAdvancedFieldsConfig()"
-        >
-          <span aria-hidden="true" class="kuiIcon fa-plus"></span>
-        </button>
-      </span>
-
-      <!-- Search. -->
-      <form ng-submit="submit()" name="graphBasicSearch" class="gphGraph__flexGroupFiller" style="width: 100%">
-        <div class="kuiLocalSearch">
-          <input name="searchTerm" type="text" class="kuiLocalSearchInput" ng-model="grr.searchTerm" ng-disabled="liveResponseFields.length === 0"
-            ng-focus="kbnTopNav.close()" placeholder="foo AND bar NOT baz" autocomplete="off">
-          <button
-            class="kuiLocalSearchButton"
-            type="submit"
-            ng-disabled="liveResponseFields.length === 0"
-            aria-label="{{ ::'xpack.graph.topNavMenu.searchButtonAriaLabel' | i18n: { defaultMessage: 'Search' } }}"
-          >
-            <span aria-hidden="true" class="kuiIcon fa-search"></span>
-          </button>
-        </div>
-      </form>
-    </div>
+  <div class="gphGraph__menus" ng-show="menus.showInspect">
+    <graph-inspect ng-show="menus.showInspect"></graph-inspect>
   </div>
 
-  <div class="config" ng-show="currentlyDisplayedKey === 'fields'" data-test-subj="fieldSelectionList">
-    <div class="config">
-      <div class="container-fluid">
-        <label
-          i18n-id="xpack.graph.queryConfig.addFieldLabel"
-          i18n-default-message="Add a field source for vertices"
-        ></label>
-        <form>
-          <div class="input-group form-group" style="width:100%">
-            <span class="input-group-addon">
-              <span class="kuiIcon fa-search"></span>
-            </span>
-            <input
-              input-focus ng-model="fieldNamesFilterString"
-              placeholder="{{ ::'xpack.graph.queryConfig.filterPlaceholder' | i18n: { defaultMessage: 'Filter…' } }}"
-              ng-change="filterFieldsKeyDown()"
-              class="form-control"
-              name="filter"
-              type="text"
-              autocomplete="off" />
-          </div>
-        </form>
-
-        <select class="kuiVerticalRhythm gphFieldList" id="fieldList" size="7" ng-options="item as item.name for item in filteredFields"
-          ng-dblclick="addFieldToSelection()" ng-model="selectedField"></select>
-
-        <div class="kuiVerticalRhythm">
-          <!-- TODO look at the field chooser directive in Discover to give type icons etc to
-              field types. This may filter out indexed-only fields though? -->
-          <button
-            ng-disabled="!selectedField"
-            ng-click="addFieldToSelection()"
-            class="kuiButton kuiButton--primary"
-            i18n-id="xpack.graph.queryConfig.addFieldButtonLabel"
-            i18n-default-message="Add"
-          ></button>
-        </div>
-      </div>
-
-      <button
-        class="kuiLocalDropdownCloseButton"
-        ng-click="kbnTopNav.close()"
-        aria-label="{{ ::'xpack.graph.queryConfig.closeConfigButtonAriaLabel' | i18n: { defaultMessage: 'Close' } }}"
-      >
-        <span class="kuiIcon fa-chevron-circle-up"></span>
-      </button>
-    </div>
-  </div>
-
-  <div class="config" ng-show="currentlyDisplayedKey === 'fieldConfig' && selectedFieldConfig">
-    <div class="config">
-      <div class="container-fluid">
-
-        <div>
-          <form class="form-horizontal">
-
-            <div class="form-group">
-              <div class="col-sm-offset-4 col-sm-8">
-                <strong>{{selectedFieldConfig.name}}</strong>
-              </div>
-            </div>
-
-            <div class="form-group form-group-sm gphFormGroup--small">
-              <label
-                for="colorPicker"
-                class="col-sm-4 control-label"
-                i18n-id="xpack.graph.queryConfig.colorPickerLabel"
-                i18n-default-message="Color"
-              ></label>
-              <div class="col-sm-6">
-                <span id="colorPicker">
-                  <span ng-repeat="c in colors" ng-click="applyColor(selectedFieldConfig,c)" ng-class="c === selectedFieldConfig.color ? 'fa-circle-o' : 'fa-circle'"
-                    ng-style="{color: c}" class="kuiIcon gphColorPicker__color">
-                  </span>
-                </span>
-              </div>
-            </div>
-
-            <div class="form-group form-group-sm gphFormGroup--small">
-              <label
-                for="iconPicker"
-                class="col-sm-4 control-label"
-                i18n-id="xpack.graph.queryConfig.iconPickerLabel"
-                i18n-default-message="Icon"
-              ></label>
-              <div class="col-sm-6">
-                <span class="gphIconPicker">
-                  <span ng-repeat="i in iconChoices" ng-click="applyIcon(selectedFieldConfig,i)" ng-class="{selectedNode:i==selectedFieldConfig.icon}"
-                    class="kuiIcon gphIconPicker__icon gphNoUserSelect">
-                    {{i.code}}</span>
-                </span>
-              </div>
-            </div>
-
-            <div class="form-group form-group-sm gphFormGroup--small">
-              <label
-                for="qHopSize"
-                class="col-sm-4 control-label"
-                i18n-id="xpack.graph.queryConfig.maxTermsInputLabel"
-                i18n-default-message="Max terms per hop"
-              ></label>
-              <div class="col-sm-6">
-                <input ng-change="selectedFieldConfigHopSizeChanged()" type="number" class="input-sm" min="0" max="100"
-                  step="1" id="qHopSize" ng-model="selectedFieldConfig.hopSize">
-                <div class="help-block">
-                  <div class="euiText">
-                    <p
-                      i18n-id="xpack.graph.queryConfig.maxTermsInputDescription"
-                      i18n-default-message="Controls the number of terms returned each search step."
-                    ></p>
-                  </div>
-
-                  <div class="hintbox">
-                    <span class="kuiIcon fa-info text-info"></span>
-                    {{
-                      ::'xpack.graph.queryConfig.maxTermsHelpText' | i18n: {
-                        defaultMessage: 'Shift-clicking the field icons in the menu bar provides a quick way to toggle this number to zero and back'
-                      }
-                    }}
-                  </div>
-
-                </div>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <div class="col-sm-offset-4 col-sm-8">
-                <div>
-                  <button
-                    ng-click="removeVertexFieldSelection()"
-                    class="kuiButton kuiButton--danger"
-                    i18n-id="xpack.graph.queryConfig.removeFieldButtonLabel"
-                    i18n-default-message="Remove"
-                  ></button>
-                </div>
-              </div>
-            </div>
-
-          </form>
-
-        </div>
-
-
-      </div>
-
-      <div
-        class="kuiLocalDropdownCloseButton"
-        aria-label="{{ ::'xpack.graph.queryConfig.closeAriaLabel' | i18n: { defaultMessage: 'close' } }}"
-        ng-click="kbnTopNav.close()"
-      >
-        <span class="kuiIcon fa-chevron-circle-up"></span>
-      </div>
-
-    </div>
-  </div>
-
+  <graph-app
+    current-index-pattern="selectedIndex"
+    on-index-pattern-selected="uiSelectIndex"
+    on-query-submit="submit"
+    saved-objects="pluginDependencies.savedObjects"
+    ui-settings="pluginDependencies.uiSettings"
+    http="pluginDependencies.http"
+    overlays="pluginDependencies.overlays"
+    is-loading="loading"
+    initial-query="initialQuery"
+    state="reduxState"
+    dispatch="reduxDispatch"
+  ></graph-app>
 
   <div class="gphGraph__container" id="GraphSvgContainer">
     <svg class="gphGraph" width="100%" height="100%" pointer-events="all" id="graphSvg" ng-click="hideAllConfigPanels()">
@@ -326,7 +118,7 @@
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null ||workspace.nodes.length === 0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.removeVerticesButtonTooltip' | i18n: { defaultMessage: 'Remove vertices from workspace' } }}"
-          ng-click="setDetail(null);workspace.deleteSelection();">
+          ng-click="setDetail(null);workspace.deleteSelection();" data-test-subj="graphRemoveSelection">
           <span class="kuiIcon fa-trash"></span>
         </button>
 
@@ -350,13 +142,13 @@
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace.nodes.length === 0" ng-if="workspace.nodes.length === 0||workspace.force === null"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.runLayoutButtonTooltip' | i18n: { defaultMessage: 'Run layout' } }}"
-          ng-click="workspace.runLayout()">
+          ng-click="workspace.runLayout()" data-test-subj="graphResumeLayout">
           <span class="kuiIcon fa-play"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-if="workspace.force !== null&&workspace.nodes.length>0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.pauseLayoutButtonTooltip' | i18n: { defaultMessage: 'Pause layout' } }}"
-          ng-click="workspace.stopLayout()">
+          ng-click="workspace.stopLayout()" data-test-subj="graphPauseLayout">
           <span class="kuiIcon fa-pause"></span>
         </button>
       </div>
@@ -373,7 +165,7 @@
             type="button" class="kuiButton kuiButton--basic kuiButton--small gphVertexSelect__button"
             ng-disabled="workspace.nodes.length === 0" ng-click="setDetail(null);workspace.selectAll()"
             i18n-id="xpack.graph.sidebar.selections.selectAllButtonLabel"
-            i18n-default-message="all"
+            i18n-default-message="all" data-test-subj="graphSelectAll"
           ></button>
 
           <button
@@ -389,7 +181,7 @@
             type="button" class="kuiButton kuiButton--basic kuiButton--small gphVertexSelect__button"
             ng-disabled="workspace.nodes.length === 0" ng-click="setDetail(null);workspace.selectInvert()"
             i18n-id="xpack.graph.sidebar.selections.invertSelectionButtonLabel"
-            i18n-default-message="invert"
+            i18n-default-message="invert" data-test-subj="graphInvertSelection"
           ></button>
 
           <button
@@ -397,7 +189,7 @@
             type="button" class="kuiButton kuiButton--basic kuiButton--small gphVertexSelect__button"
             ng-disabled="workspace.selectedNodes.length === 0" ng-click="setDetail(null);workspace.selectNeighbours()"
             i18n-id="xpack.graph.sidebar.selections.selectNeighboursButtonLabel"
-            i18n-default-message="linked"
+            i18n-default-message="linked" data-test-subj="graphLinkedSelection"
           ></button>
         </div>
 
@@ -560,7 +352,7 @@
           </span>
 
           <!-- Venn diagram of term/shared doc intersections -->
-          <div class="gphLinkSummary__venn" venn="mc"></div>
+          <venn-diagram left-value="mc.v1" right-value="mc.v2" overlap="mc.overlap"></venn-diagram>
 
           <small
             class="gphLinkSummary__term--1"

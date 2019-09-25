@@ -18,6 +18,7 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { dragAndDropActions } from '../../store/drag_and_drop';
 import { DataProvider } from '../timeline/data_providers/data_provider';
+import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../timeline/helpers';
 import { TruncatableText } from '../truncatable_text';
 
 import { getDraggableId, getDroppableId } from './helpers';
@@ -46,16 +47,24 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
         color ${theme.eui.euiAnimSpeedFast} ease;
     }
 
+    .euiBadge,
+    .euiBadge__text {
+      cursor: grab;
+    }
+
     // PAGE DRAGGABLES
 
     ${!isDragging &&
       `
       .euiPageBody & {
+        z-index: ${theme.eui.euiZLevel0} !important;
+      }
+
+      {
         border-radius: 2px;
         padding: 0 4px 0 8px;
         position: relative;
-        z-index: ${theme.eui.euiZLevel0} !important;
-        
+
         &::before {
           background-image: linear-gradient(
               135deg,
@@ -77,7 +86,9 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
         }
       }
 
-      .euiPageBody tr:hover & {
+
+      .${STATEFUL_EVENT_CSS_CLASS_NAME}:hover &,
+      tr:hover & {
         background-color: ${theme.eui.euiColorLightShade};
 
         &::before {
@@ -92,10 +103,12 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
         }
       }
 
-      .euiPageBody &:hover,
-      .euiPageBody &:focus,
-      .euiPageBody tr:hover &:hover,
-      .euiPageBody tr:hover &:focus {
+      &:hover,
+      &:focus,
+      .${STATEFUL_EVENT_CSS_CLASS_NAME}:hover &:hover,
+      .${STATEFUL_EVENT_CSS_CLASS_NAME}:focus &:focus,
+      tr:hover &:hover,
+      tr:hover &:focus {
         background-color: ${theme.eui.euiColorPrimary};
 
         &,
@@ -121,12 +134,6 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
       .euiPageBody & {
         z-index: ${theme.eui.euiZLevel9} !important;
       `}
-
-    // TIMELINE DRAGGABLES
-
-    .timeline-flyout &:hover {
-      background-color: ${theme.eui.euiColorLightShade};
-    }
   `}
 `;
 
@@ -189,7 +196,7 @@ class DraggableWrapperComponent extends React.Component<Props> {
               <Draggable
                 draggableId={getDraggableId(dataProvider.id)}
                 index={0}
-                key={dataProvider.id}
+                key={getDraggableId(dataProvider.id)}
               >
                 {(provided, snapshot) => {
                   return (
@@ -206,13 +213,13 @@ class DraggableWrapperComponent extends React.Component<Props> {
                       {width != null && !snapshot.isDragging ? (
                         <TruncatableText
                           data-test-subj="draggable-truncatable-content"
-                          size="s"
+                          size="xs"
                           width={width}
                         >
                           {render(dataProvider, provided, snapshot)}
                         </TruncatableText>
                       ) : (
-                        <span data-test-subj="draggable-content">
+                        <span data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}>
                           {render(dataProvider, provided, snapshot)}
                         </span>
                       )}

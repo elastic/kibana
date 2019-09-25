@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { DataFrameTransformListRow, DATA_FRAME_TRANSFORM_STATE } from './common';
+import { DataFrameTransformListRow, DATA_FRAME_TRANSFORM_STATE } from '../../../../common';
 import { StartAction } from './action_start';
 import { StopAction } from './action_stop';
 import { DeleteAction } from './action_delete';
