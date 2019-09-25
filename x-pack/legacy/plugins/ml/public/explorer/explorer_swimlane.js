@@ -39,7 +39,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     chartWidth: PropTypes.number.isRequired,
     filterActive: PropTypes.bool,
     maskAll: PropTypes.bool,
-    MlTimeBuckets: PropTypes.func.isRequired,
+    TimeBuckets: PropTypes.func.isRequired,
     swimlaneCellClick: PropTypes.func.isRequired,
     swimlaneData: PropTypes.shape({
       laneLabels: PropTypes.array.isRequired
@@ -248,7 +248,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       chartWidth,
       filterActive,
       maskAll,
-      MlTimeBuckets,
+      TimeBuckets,
       swimlaneCellClick,
       swimlaneData,
       swimlaneType,
@@ -285,7 +285,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       .range([0, xAxisWidth]);
 
     // Get the scaled date format to use for x axis tick labels.
-    const timeBuckets = new MlTimeBuckets();
+    const timeBuckets = new TimeBuckets();
     timeBuckets.setInterval(`${stepSecs}s`);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();
 
@@ -354,8 +354,15 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       .each(function () {
         if (swimlaneData.fieldName !== undefined) {
           d3.select(this)
-            .attr('tooltip-html-unsafe', label => `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(label)}`)
-            .attr('tooltip-placement', 'right')
+            .on('mouseover', label => {
+              mlChartTooltipService.show(`${mlEscape(swimlaneData.fieldName)}: ${mlEscape(label)}`, this, {
+                x: laneLabelWidth,
+                y: 20
+              });
+            })
+            .on('mouseout', () => {
+              mlChartTooltipService.hide();
+            })
             .attr('aria-label', label => `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(label)}`);
         }
       });
