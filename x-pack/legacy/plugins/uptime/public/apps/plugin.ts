@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyCoreStart } from 'src/core/public';
+import { LegacyCoreStart, PluginInitializerContext } from 'src/core/public';
 import { PluginsStart } from 'ui/new_platform/new_platform';
 import { Chrome } from 'ui/chrome';
 import { UMFrontendLibs } from '../lib/lib';
@@ -20,14 +20,15 @@ export interface StartObject {
 }
 
 export class Plugin {
-  private readonly libs: UMFrontendLibs;
-  constructor(private readonly startObject: StartObject, private readonly chrome: Chrome) {
-    this.startObject = startObject;
+  constructor(
+    private readonly initializerContext: PluginInitializerContext,
+    private readonly chrome: Chrome
+  ) {
     this.chrome = chrome;
-    this.libs = { framework: getKibanaFrameworkAdapter(this.startObject.core) };
   }
 
-  public start(): void {
+  public start({ core }: StartObject): void {
+    const libs: UMFrontendLibs = { framework: getKibanaFrameworkAdapter(core) };
     // @ts-ignore improper type description
     this.chrome.setRootTemplate(template);
     const checkForRoot = () => {
@@ -41,7 +42,7 @@ export class Plugin {
       });
     };
     checkForRoot().then(() => {
-      this.libs.framework.render(UptimeApp, createApolloClient);
+      libs.framework.render(UptimeApp, createApolloClient);
     });
   }
 }
