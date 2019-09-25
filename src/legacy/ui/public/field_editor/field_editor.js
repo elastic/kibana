@@ -673,7 +673,7 @@ export class FieldEditorComponent extends PureComponent {
     const { redirectAway } = this.props.helpers;
     const { indexPattern, intl } = this.props;
     const { field } = this.state;
-    const remove = indexPattern.removeScriptedField(field.name);
+    const remove = indexPattern.removeScriptedField(field);
 
     if(remove) {
       remove.then(() => {
