@@ -115,6 +115,12 @@ const initialState: IndexPatternPrivateState = {
           aggregatable: true,
           searchable: true,
         },
+        {
+          name: 'client',
+          type: 'ip',
+          aggregatable: true,
+          searchable: true,
+        },
       ],
     },
     '2': {
@@ -375,6 +381,10 @@ describe('IndexPattern Data Panel', () => {
               name: 'source',
               type: 'string',
             },
+            {
+              name: 'client',
+              type: 'ip',
+            },
           ],
         }),
       });
@@ -423,6 +433,7 @@ describe('IndexPattern Data Panel', () => {
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
         'bytes',
+        'client',
         'memory',
         'source',
         'timestamp',
@@ -487,6 +498,7 @@ describe('IndexPattern Data Panel', () => {
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
         'bytes',
+        'client',
         'memory',
         'source',
         'timestamp',

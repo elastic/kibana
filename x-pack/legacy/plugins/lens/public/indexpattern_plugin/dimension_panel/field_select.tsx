@@ -75,7 +75,7 @@ export function FieldSelect({
         }),
         value: { type: 'document' },
         className: classNames({
-          'lnsConfigPanel__fieldOption--incompatible': !isCurrentOperationApplicableWithoutField,
+          'lnFieldSelect__option--incompatible': !isCurrentOperationApplicableWithoutField,
         }),
         'data-test-subj': `lns-documentOption${
           isCurrentOperationApplicableWithoutField ? '' : 'Incompatible'
@@ -117,8 +117,8 @@ export function FieldSelect({
             label,
             value,
             className: classNames({
-              'lnsConfigPanel__fieldOption--incompatible': !compatible,
-              'lnsConfigPanel__fieldOption--nonExistant': !exists,
+              'lnFieldSelect__option--incompatible': !compatible,
+              'lnFieldSelect__option--nonExistant': !exists,
             }),
             'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${label}`,
           })),
