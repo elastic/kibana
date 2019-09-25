@@ -28,14 +28,18 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }) {
     }
 
     async expectHomePage(spaceId) {
+      return await this.expectRoute(spaceId, `/app/kibana#/home`);
+    }
+
+    async expectRoute(spaceId, route) {
       return await retry.try(async () => {
-        log.debug(`expectHomePage(${spaceId})`);
+        log.debug(`expactRoute(${spaceId}, ${route})`);
         await find.byCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide) ', 20000);
         const url = await browser.getCurrentUrl();
         if (spaceId === 'default') {
-          expect(url).to.contain(`/app/kibana#/home`);
+          expect(url).to.contain(route);
         } else {
-          expect(url).to.contain(`/s/${spaceId}/app/kibana#/home`);
+          expect(url).to.contain(`/s/${spaceId}${route}`);
         }
       });
     }
