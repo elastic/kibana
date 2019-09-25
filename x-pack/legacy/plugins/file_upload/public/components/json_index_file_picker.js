@@ -48,27 +48,10 @@ export class JsonIndexFilePicker extends Component {
       return;
     }
     const file = fileArr[0];
-    let initIndexName;
-    try {
-      initIndexName = this._getIndexName(file);
-    } catch (error) {
-      this.setState({
-        fileUploadError: i18n.translate('xpack.fileUpload.jsonIndexFilePicker.errorGettingIndexName', {
-          defaultMessage: 'Error retrieving index name: {errorMessage}',
-          values: {
-            errorMessage: error.message
-          }
-        })
-      });
-      return;
-    }
-
-    this.props.setIndexName(initIndexName);
-
     this.setState({ fileParseActive: true }, () => this._parseFile(file));
   };
 
-  _getIndexName({ name, size }) {
+  _getDefaultIndexName({ name, size }) {
     if (!name) {
       throw new Error(i18n.translate('xpack.fileUpload.jsonIndexFilePicker.noFileNameError', {
         defaultMessage: 'No file name provided'
@@ -98,6 +81,25 @@ export class JsonIndexFilePicker extends Component {
 
     return splitNameArr[0];
   }
+
+  _setIndexName(file) {
+    let initIndexName;
+    try {
+      initIndexName = this._getDefaultIndexName(file);
+    } catch (error) {
+      this.setState({
+        fileUploadError: i18n.translate('xpack.fileUpload.jsonIndexFilePicker.errorGettingIndexName', {
+          defaultMessage: 'Error retrieving index name: {errorMessage}',
+          values: {
+            errorMessage: error.message
+          }
+        })
+      });
+      return;
+    }
+    this.props.setIndexName(initIndexName);
+  }
+
 
   setFileProgress = ({ bytesProcessed, totalBytes }) => {
     const percentageProcessed = parseInt((100 * bytesProcessed) / totalBytes);
@@ -143,9 +145,13 @@ export class JsonIndexFilePicker extends Component {
       resetFileAndIndexSettings();
       return;
     }
+
+    this._setIndexName(file);
     setFileRef(file);
     setParsedFile(parsedFileResult);
   }
+
+
 
   render() {
     const {
