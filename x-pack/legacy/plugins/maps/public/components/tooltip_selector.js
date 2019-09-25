@@ -31,6 +31,20 @@ const reorder = (list, startIndex, endIndex) => {
 
 export class TooltipSelector extends Component {
 
+  _getPropertyLabel = (propertyName) => {
+    if (!this.props.fields) {
+      return propertyName;
+    }
+
+    const field = this.props.fields.find(field => {
+      return field.name === propertyName;
+    });
+
+    return field && field.label
+      ? field.label
+      : propertyName;
+  }
+
   _addProperty = (propertyName) => {
     const property = propertyName;
     if (!this.props.tooltipProperties) {
@@ -60,7 +74,6 @@ export class TooltipSelector extends Component {
   };
 
   _renderProperties() {
-    console.log(this.props.tooltipProperties);
     if (!this.props.tooltipProperties) {
       return null;
     }
@@ -81,7 +94,7 @@ export class TooltipSelector extends Component {
                 {(provided) => (
                   <div className="mapTooltipSelector__propertyRow">
                     <EuiText className="mapTooltipSelector__propertyContent">
-                      {propertyName}
+                      {this._getPropertyLabel(propertyName)}
                     </EuiText>
                     <div className="mapTooltipSelector__propertyIcons">
                       <EuiButtonIcon
