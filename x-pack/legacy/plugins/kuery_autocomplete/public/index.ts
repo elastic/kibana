@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { chromeServiceMock } from '../../../../../../src/core/public/mocks';
+import { PluginInitializerContext } from 'src/core/public';
+import { KueryAutocompletePlugin as Plugin } from './plugin';
 
-jest.doMock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      chrome: chromeServiceMock.createStartContract(),
-    },
-  },
-}));
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
+}

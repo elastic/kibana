@@ -37,6 +37,14 @@ import { KpiNetworkData, KpiHostsData } from '../../graphql/types';
 const from = new Date('2019-06-15T06:00:00.000Z').valueOf();
 const to = new Date('2019-06-18T06:00:00.000Z').valueOf();
 
+jest.mock('../charts/areachart', () => {
+  return { AreaChart: () => <div className="areachart"></div> };
+});
+
+jest.mock('../charts/barchart', () => {
+  return { BarChart: () => <div className="barchart"></div> };
+});
+
 describe('Stat Items Component', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const state: State = mockGlobalState;
