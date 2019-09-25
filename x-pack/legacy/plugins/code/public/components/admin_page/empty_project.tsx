@@ -9,12 +9,12 @@ import { Link } from 'react-router-dom';
 
 import { EuiButton, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { capabilities } from 'ui/capabilities';
+import { npStart } from 'ui/new_platform';
 
 import { ImportProject } from './import_project';
 
 export const EmptyProject = () => {
-  const isAdmin = capabilities.get().code.admin as boolean;
+  const isAdmin = npStart.core.application.capabilities.get().code.admin as boolean;
   return (
     <div className="codeTab__projects">
       <EuiSpacer size="xl" />
