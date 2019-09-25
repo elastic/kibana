@@ -108,11 +108,9 @@ export class EmailAction extends BaseAction {
         code: ERROR_CODES.ERR_PROP_MISSING,
         message
       });
-
-      json.email = {};
     }
 
-    if (!json.email.to) {
+    if (json.email && !json.email.to) {
       const message = i18n.translate('xpack.watcher.models.emailAction.actionJsonEmailToPropertyMissingBadRequestMessage', {
         defaultMessage: 'JSON argument must contain an {actionJsonEmailTo} property',
         values: {
