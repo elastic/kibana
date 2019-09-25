@@ -9,7 +9,7 @@ import JoiNamespace from 'joi';
 import { resolve } from 'path';
 import { PluginInitializerContext } from 'src/core/server';
 import KbnServer from 'src/legacy/server/kbn_server';
-import { defer } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { getConfigSchema } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 import { plugin } from './server/new_platform_index';
@@ -79,7 +79,7 @@ export function infra(kibana: any) {
       const { core } = newPlatform.setup;
 
       const getConfig$ = <T>() =>
-        defer<T>(async () => await legacyServer.config().get('xpack.infra'));
+        new BehaviorSubject<T>(legacyServer.config().get('xpack.infra')).asObservable();
 
       const initContext = ({
         config: {
