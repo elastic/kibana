@@ -25,8 +25,8 @@ jest.mock('ui/chrome', () => ({
   }),
 }));
 
-jest.mock('../../../util/ml_time_buckets', () => ({
-  MlTimeBuckets: function () {
+jest.mock('../../../util/time_buckets', () => ({
+  TimeBuckets: function () {
     this.setBounds = jest.fn();
     this.setInterval = jest.fn();
     this.getScaledDateFormat = jest.fn();

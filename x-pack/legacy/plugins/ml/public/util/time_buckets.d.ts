@@ -11,7 +11,7 @@ declare interface TimeFilterBounds {
   max: Moment;
 }
 
-export class MlTimeBuckets {
+export class TimeBuckets {
   setBarTarget: (barTarget: number) => void;
   setMaxBars: (maxBars: number) => void;
   setInterval: (interval: string) => void;

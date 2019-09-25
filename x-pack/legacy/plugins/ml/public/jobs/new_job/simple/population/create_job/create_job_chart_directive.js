@@ -17,7 +17,7 @@ import angular from 'angular';
 import moment from 'moment';
 
 import { formatHumanReadableDateTime } from '../../../../../util/date_utils';
-import { MlTimeBuckets } from '../../../../../util/ml_time_buckets';
+import { TimeBuckets } from '../../../../../util/time_buckets';
 import { numTicksForDateFormat } from '../../../../../util/chart_utils';
 import { mlEscape } from '../../../../../util/string_utils';
 import { mlChartTooltipService } from '../../../../../components/chart_tooltip/chart_tooltip_service';
@@ -145,7 +145,7 @@ module.directive('mlPopulationJobChart', function () {
       ]);
 
       // Get the scaled date format to use for x axis tick labels.
-      const timeBuckets = new MlTimeBuckets();
+      const timeBuckets = new TimeBuckets();
       timeBuckets.setInterval('auto');
       if (data.length > 0) {
         const xDomain = chartXScale.domain();

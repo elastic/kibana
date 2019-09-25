@@ -11,7 +11,7 @@ import dateMath from '@elastic/datemath';
 import chrome from 'ui/chrome';
 import { fieldFormats } from 'ui/registry/field_formats';
 
-import { timeBucketsCalcAutoIntervalProvider } from './ml_calc_auto_interval';
+import { timeBucketsCalcAutoIntervalProvider } from './calc_auto_interval';
 import { parseInterval } from '../../common/util/parse_interval';
 
 const unitsDesc = dateMath.unitsDesc;
@@ -28,7 +28,7 @@ const calcAuto = timeBucketsCalcAutoIntervalProvider();
  * describes a timespan that will separate buckets of time,
  * for example the interval between points on a time series chart.
  */
-export function MlTimeBuckets() {
+export function TimeBuckets() {
   this.barTarget = config.get('histogram:barTarget');
   this.maxBars = config.get('histogram:maxBars');
 }
@@ -40,7 +40,7 @@ export function MlTimeBuckets() {
  *
  * @returns {undefined}
  */
-MlTimeBuckets.prototype.setBarTarget = function (bt) {
+TimeBuckets.prototype.setBarTarget = function (bt) {
   this.barTarget = bt;
 };
 
@@ -51,7 +51,7 @@ MlTimeBuckets.prototype.setBarTarget = function (bt) {
  *
  * @returns {undefined}
  */
-MlTimeBuckets.prototype.setMaxBars = function (mb) {
+TimeBuckets.prototype.setMaxBars = function (mb) {
   this.maxBars = mb;
 };
 
@@ -66,7 +66,7 @@ MlTimeBuckets.prototype.setMaxBars = function (mb) {
  *
  * @returns {undefined}
  */
-MlTimeBuckets.prototype.setBounds = function (input) {
+TimeBuckets.prototype.setBounds = function (input) {
   if (!input) return this.clearBounds();
 
   let bounds;
@@ -99,7 +99,7 @@ MlTimeBuckets.prototype.setBounds = function (input) {
  *
  * @return {undefined}
  */
-MlTimeBuckets.prototype.clearBounds = function () {
+TimeBuckets.prototype.clearBounds = function () {
   this._lb = this._ub = null;
 };
 
@@ -108,7 +108,7 @@ MlTimeBuckets.prototype.clearBounds = function () {
  *
  * @return {Boolean}
  */
-MlTimeBuckets.prototype.hasBounds = function () {
+TimeBuckets.prototype.hasBounds = function () {
   return isValidMoment(this._ub) && isValidMoment(this._lb);
 };
 
@@ -124,7 +124,7 @@ MlTimeBuckets.prototype.hasBounds = function () {
  *                      min and max. Each property will be a moment()
  *                      object
  */
-MlTimeBuckets.prototype.getBounds = function () {
+TimeBuckets.prototype.getBounds = function () {
   if (!this.hasBounds()) return;
   return {
     min: this._lb,
@@ -139,7 +139,7 @@ MlTimeBuckets.prototype.getBounds = function () {
  *
  * @return {moment.duration|undefined}
  */
-MlTimeBuckets.prototype.getDuration = function () {
+TimeBuckets.prototype.getDuration = function () {
   if (!this.hasBounds()) return;
   return moment.duration(this._ub - this._lb, 'ms');
 };
@@ -156,7 +156,7 @@ MlTimeBuckets.prototype.getDuration = function () {
  *
  * @param {object|string|moment.duration} input - see desc
  */
-MlTimeBuckets.prototype.setInterval = function (input) {
+TimeBuckets.prototype.setInterval = function (input) {
   // Preserve the original units because they're lost when the interval is converted to a
   // moment duration object.
   this.originalInterval = input;
@@ -223,7 +223,7 @@ MlTimeBuckets.prototype.setInterval = function (input) {
  *
  * @return {[type]} [description]
  */
-MlTimeBuckets.prototype.getInterval = function () {
+TimeBuckets.prototype.getInterval = function () {
   const self = this;
   const duration = self.getDuration();
   return decorateInterval(maybeScaleInterval(readInterval()), duration);
@@ -269,7 +269,7 @@ MlTimeBuckets.prototype.getInterval = function () {
  *
  * @return {moment.duration|undefined}
  */
-MlTimeBuckets.prototype.getIntervalToNearestMultiple = function (divisorSecs) {
+TimeBuckets.prototype.getIntervalToNearestMultiple = function (divisorSecs) {
   const interval = this.getInterval();
   const intervalSecs = interval.asSeconds();
 
@@ -307,7 +307,7 @@ MlTimeBuckets.prototype.getIntervalToNearestMultiple = function (divisorSecs) {
  *
  * @return {string}
  */
-MlTimeBuckets.prototype.getScaledDateFormat = function () {
+TimeBuckets.prototype.getScaledDateFormat = function () {
   const interval = this.getInterval();
   const rules = config.get('dateFormat:scaled');
 
@@ -321,14 +321,14 @@ MlTimeBuckets.prototype.getScaledDateFormat = function () {
   return config.get('dateFormat');
 };
 
-MlTimeBuckets.prototype.getScaledDateFormatter = function () {
+TimeBuckets.prototype.getScaledDateFormatter = function () {
   const DateFieldFormat = fieldFormats.getType('date');
   return new DateFieldFormat({
     pattern: this.getScaledDateFormat()
   }, getConfig);
 };
 
-// Appends some MlTimeBuckets specific properties to the moment.js duration interval.
+// Appends some TimeBuckets specific properties to the moment.js duration interval.
 // Uses the originalDuration from which the time bucket was created to calculate the overflow
 // property (i.e. difference between the supplied duration and the calculated bucket interval).
 function decorateInterval(interval, originalDuration) {

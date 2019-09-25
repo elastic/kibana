@@ -29,7 +29,7 @@ import {
   removeLabelOverlap
 } from '../../util/chart_utils';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
-import { MlTimeBuckets } from '../../util/ml_time_buckets';
+import { TimeBuckets } from '../../util/time_buckets';
 import { mlEscape } from '../../util/string_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
@@ -248,7 +248,7 @@ export const ExplorerChartDistribution = injectI18n(class ExplorerChartDistribut
 
     function drawRareChartAxes() {
       // Get the scaled date format to use for x axis tick labels.
-      const timeBuckets = new MlTimeBuckets();
+      const timeBuckets = new TimeBuckets();
       const bounds = { min: moment(config.plotEarliest), max: moment(config.plotLatest) };
       timeBuckets.setBounds(bounds);
       timeBuckets.setInterval('auto');

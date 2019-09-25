@@ -9,7 +9,7 @@
 import expect from '@kbn/expect';
 import moment from 'moment';
 
-import { timeBucketsCalcAutoIntervalProvider } from '../ml_calc_auto_interval';
+import { timeBucketsCalcAutoIntervalProvider } from '../calc_auto_interval';
 
 
 describe('ML - calc auto intervals', () => {

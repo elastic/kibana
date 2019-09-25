@@ -8,10 +8,10 @@ import './explorer_chart_single_metric.test.mocks';
 import { chartData as mockChartData } from './__mocks__/mock_chart_data';
 import seriesConfig from './__mocks__/mock_series_config_filebeat.json';
 
-// Mock MlTimeBuckets and mlFieldFormatService, they don't play well
+// Mock TimeBuckets and mlFieldFormatService, they don't play well
 // with the jest based test setup yet.
-jest.mock('../../util/ml_time_buckets', () => ({
-  MlTimeBuckets: function () {
+jest.mock('../../util/time_buckets', () => ({
+  TimeBuckets: function () {
     this.setBounds = jest.fn();
     this.setInterval = jest.fn();
     this.getScaledDateFormat = jest.fn();
