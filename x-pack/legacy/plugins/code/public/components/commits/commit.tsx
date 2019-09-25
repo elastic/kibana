@@ -19,7 +19,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CommitInfo } from '../../../model/commit';
-import { MAIN_ROOT } from '../routes';
 import { PathTypes } from '../../common/types';
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { parseCommitMessage } from '../../../common/commit_utils';
@@ -56,11 +55,7 @@ const revisionLinkLabel = i18n.translate('xpack.code.commits.revisionLinkAriaLab
 });
 
 const CommitActions = ({ commitId, repoUri }: ActionProps) => {
-  const revisionUri =
-    '#' +
-    MAIN_ROOT.replace(/:pathType\(.*\)/, PathTypes.tree)
-      .replace(':resource/:org/:repo', repoUri)
-      .replace(':revision', commitId);
+  const revisionPath = `#/${repoUri}/${PathTypes.tree}/${commitId}`;
 
   return (
     <div className="commit__actions">
@@ -69,12 +64,16 @@ const CommitActions = ({ commitId, repoUri }: ActionProps) => {
       </EuiCopy>
       <EuiButtonEmpty
         className="commit__diff-link"
-        href={revisionUri}
+        href={revisionPath}
         aria-label={revisionLinkLabel}
       >
         <EuiText size="s">{commitId}</EuiText>
       </EuiButtonEmpty>
-      <EuiButtonIcon href={revisionUri} aria-label={revisionLinkLabel} iconType="editorCodeBlock" />
+      <EuiButtonIcon
+        href={revisionPath}
+        aria-label={revisionLinkLabel}
+        iconType="editorCodeBlock"
+      />
     </div>
   );
 };
