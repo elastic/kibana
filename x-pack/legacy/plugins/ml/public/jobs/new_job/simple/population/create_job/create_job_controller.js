@@ -20,7 +20,7 @@ import angular from 'angular';
 import uiRoutes from 'ui/routes';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
-import { MlTimeBuckets } from 'plugins/ml/util/ml_time_buckets';
+import { TimeBuckets } from 'plugins/ml/util/time_buckets';
 import { getCreatePopulationJobBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
 import { filterAggTypes } from 'plugins/ml/jobs/new_job/simple/components/utils/filter_agg_types';
 import { validateJob } from 'plugins/ml/jobs/new_job/simple/components/utils/validate_job';
@@ -43,9 +43,10 @@ import { PopulationJobServiceProvider } from './create_job_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import template from './create_job.html';
 import { timefilter } from 'ui/timefilter';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 
 uiRoutes
-  .when('/jobs/new_job/simple/population', {
+  .when('/jobs/new_job_old/population', {
     template,
     k7Breadcrumbs: getCreatePopulationJobBreadcrumbs,
     resolve: {
@@ -138,7 +139,7 @@ module
       bucketSpanValid: true,
       bucketSpanEstimator: { status: 0, message: '' },
       cardinalityValidator: { status: 0, message: '' },
-      aggTypeOptions: filterAggTypes(aggTypes.byType[METRIC_AGG_TYPE]),
+      aggTypeOptions: filterAggTypes(aggTypes[METRIC_AGG_TYPE]),
       fields: [],
       overFields: [],
       splitFields: [],
@@ -301,7 +302,7 @@ module
       }
 
       const bounds = timefilter.getActiveBounds();
-      $scope.formConfig.chartInterval = new MlTimeBuckets();
+      $scope.formConfig.chartInterval = new TimeBuckets();
       $scope.formConfig.chartInterval.setBarTarget(BAR_TARGET);
       $scope.formConfig.chartInterval.setMaxBars(MAX_BARS);
       $scope.formConfig.chartInterval.setInterval('auto');
@@ -737,10 +738,13 @@ module
       preLoadJob($scope, appState);
     });
 
-    $scope.$listenAndDigestAsync(timefilter, 'fetch', $scope.loadVis);
+    const fetchSub = subscribeWithScope($scope, timefilter.getFetch$(), {
+      next: $scope.loadVis
+    });
 
     $scope.$on('$destroy', () => {
       globalForceStop = true;
       angular.element(window).off('resize');
+      fetchSub.unsubscribe();
     });
   });

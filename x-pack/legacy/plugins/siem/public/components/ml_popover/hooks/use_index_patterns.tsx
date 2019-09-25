@@ -4,40 +4,59 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+
 import { getIndexPatterns } from '../api';
-import { KibanaConfigContext } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { useStateToaster } from '../../toasters';
 import { errorToToaster } from '../../ml/api/error_to_toaster';
+import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
+import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 
 import * as i18n from './translations';
+import { IndexPatternSavedObject } from '../types';
 
-type Return = [boolean, string];
+type Return = [boolean, IndexPatternSavedObject[]];
+
+// TODO: Used by more than just ML now -- refactor to shared component https://github.com/elastic/siem-team/issues/448
 
 export const useIndexPatterns = (refreshToggle = false): Return => {
-  const [indexPattern, setIndexPattern] = useState<string>('');
+  const [indexPatterns, setIndexPatterns] = useState<IndexPatternSavedObject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const config = useContext(KibanaConfigContext);
   const [, dispatchToaster] = useStateToaster();
-
-  const fetchFunc = async () => {
-    try {
-      const data = await getIndexPatterns({
-        'kbn-version': config.kbnVersion,
-      });
-
-      setIndexPattern(data);
-      setIsLoading(false);
-    } catch (error) {
-      errorToToaster({ title: i18n.INDEX_PATTERN_FETCH_FAILURE, error, dispatchToaster });
-      setIsLoading(false);
-    }
-  };
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
   useEffect(() => {
+    let isSubscribed = true;
+    const abortCtrl = new AbortController();
     setIsLoading(true);
-    fetchFunc();
+
+    async function fetchIndexPatterns() {
+      try {
+        const data = await getIndexPatterns(
+          {
+            'kbn-version': kbnVersion,
+          },
+          abortCtrl.signal
+        );
+
+        if (isSubscribed) {
+          setIndexPatterns(data);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        if (isSubscribed) {
+          errorToToaster({ title: i18n.INDEX_PATTERN_FETCH_FAILURE, error, dispatchToaster });
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchIndexPatterns();
+    return () => {
+      isSubscribed = false;
+      abortCtrl.abort();
+    };
   }, [refreshToggle]);
 
-  return [isLoading, indexPattern];
+  return [isLoading, indexPatterns];
 };

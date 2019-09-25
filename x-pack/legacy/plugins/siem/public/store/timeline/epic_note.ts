@@ -28,12 +28,13 @@ import {
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { refetchQueries } from './refetch_queries';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
-import { TimelineById } from './types';
+import { ActionTimeline, TimelineById } from './types';
+
 export const timelineNoteActionsType = [addNote.type, addNoteToEvent.type];
 
 export const epicPersistNote = (
   apolloClient: ApolloClient<NormalizedCacheObject>,
-  action: Action,
+  action: ActionTimeline,
   timeline: TimelineById,
   notes: NotesById,
   action$: Observable<Action>,
@@ -52,8 +53,8 @@ export const epicPersistNote = (
         noteId: null,
         version: null,
         note: {
-          eventId: get('payload.eventId', action),
-          note: getNote(get('payload.noteId', action), notes),
+          eventId: action.payload.eventId,
+          note: getNote(action.payload.noteId, notes),
           timelineId: myEpicTimelineId.getTimelineId(),
         },
       },
@@ -62,17 +63,17 @@ export const epicPersistNote = (
   ).pipe(
     withLatestFrom(timeline$, notes$),
     mergeMap(([result, recentTimeline, recentNotes]) => {
-      const noteIdRedux = get('payload.noteId', action);
+      const noteIdRedux = action.payload.noteId;
       const response: ResponseNote = get('data.persistNote', result);
       const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
       return [
         ...callOutMsg,
-        recentTimeline[get('payload.id', action)].savedObjectId == null
+        recentTimeline[action.payload.id].savedObjectId == null
           ? updateTimeline({
-              id: get('payload.id', action),
+              id: action.payload.id,
               timeline: {
-                ...recentTimeline[get('payload.id', action)],
+                ...recentTimeline[action.payload.id],
                 savedObjectId: response.note.timelineId || null,
                 version: response.note.timelineVersion || null,
               },
@@ -94,11 +95,11 @@ export const epicPersistNote = (
           },
         }),
         endTimelineSaving({
-          id: get('payload.id', action),
+          id: action.payload.id,
         }),
       ].filter(item => item != null);
     }),
-    startWith(startTimelineSaving({ id: get('payload.id', action) })),
+    startWith(startTimelineSaving({ id: action.payload.id })),
     takeUntil(
       action$.pipe(
         withLatestFrom(timeline$),

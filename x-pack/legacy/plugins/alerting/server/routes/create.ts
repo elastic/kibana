@@ -7,7 +7,7 @@
 import Hapi from 'hapi';
 import Joi from 'joi';
 import { AlertAction } from '../types';
-import { SECONDS_REGEX, MINUTES_REGEX, HOURS_REGEX, DAYS_REGEX } from '../lib';
+import { getDurationSchema } from '../lib';
 
 interface ScheduleRequest extends Hapi.Request {
   payload: {
@@ -16,6 +16,7 @@ interface ScheduleRequest extends Hapi.Request {
     interval: string;
     actions: AlertAction[];
     alertTypeParams: Record<string, any>;
+    throttle: string | null;
   };
 }
 
@@ -24,6 +25,7 @@ export function createAlertRoute(server: Hapi.Server) {
     method: 'POST',
     path: '/api/alert',
     options: {
+      tags: ['access:alerting-all'],
       validate: {
         options: {
           abortEarly: false,
@@ -32,22 +34,8 @@ export function createAlertRoute(server: Hapi.Server) {
           .keys({
             enabled: Joi.boolean().default(true),
             alertTypeId: Joi.string().required(),
-            interval: Joi.alternatives()
-              .try(
-                Joi.string()
-                  .regex(SECONDS_REGEX, 'seconds (5s)')
-                  .required(),
-                Joi.string()
-                  .regex(MINUTES_REGEX, 'minutes (5m)')
-                  .required(),
-                Joi.string()
-                  .regex(HOURS_REGEX, 'hours (5h)')
-                  .required(),
-                Joi.string()
-                  .regex(DAYS_REGEX, 'days (5d)')
-                  .required()
-              )
-              .required(),
+            throttle: getDurationSchema().default(null),
+            interval: getDurationSchema().required(),
             alertTypeParams: Joi.object().required(),
             actions: Joi.array()
               .items(

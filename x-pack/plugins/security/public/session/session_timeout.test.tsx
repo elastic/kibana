@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NotificationsSetup } from 'src/core/public';
+import { CoreSetup } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionTimeout } from './session_timeout';
 import { createSessionExpiredMock } from './session_expired.mock';
@@ -12,11 +12,14 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 jest.useFakeTimers();
 
-const expectNoWarningToast = (notifications: NotificationsSetup) => {
+const expectNoWarningToast = (notifications: MockedKeys<CoreSetup>['notifications']) => {
   expect(notifications.toasts.add).not.toHaveBeenCalled();
 };
 
-const expectWarningToast = (notifications: NotificationsSetup, toastLifeTimeMS: number = 60000) => {
+const expectWarningToast = (
+  notifications: MockedKeys<CoreSetup>['notifications'],
+  toastLifeTimeMS: number = 60000
+) => {
   expect(notifications.toasts.add).toHaveBeenCalledTimes(1);
   expect(notifications.toasts.add.mock.calls[0]).toMatchInlineSnapshot(`
     Array [

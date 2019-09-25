@@ -4,6 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+type time = string;
+export interface ModelPlotOutputResults {
+  results: Record<time, { actual: number; modelUpper: number | null; modelLower: number | null }>;
+}
+
 declare interface MlResultsService {
   getScoresByBucket: (
     jobIds: string[],
@@ -15,7 +20,13 @@ declare interface MlResultsService {
   getScheduledEventsByBucket: () => Promise<any>;
   getTopInfluencers: () => Promise<any>;
   getTopInfluencerValues: () => Promise<any>;
-  getOverallBucketScores: () => Promise<any>;
+  getOverallBucketScores: (
+    jobIds: any,
+    topN: any,
+    earliestMs: any,
+    latestMs: any,
+    interval?: any
+  ) => Promise<any>;
   getInfluencerValueMaxScoreByTime: () => Promise<any>;
   getRecordInfluencers: () => Promise<any>;
   getRecordsForInfluencer: () => Promise<any>;
@@ -43,7 +54,7 @@ declare interface MlResultsService {
       min: string;
       max: string;
     }
-  ) => Promise<any>;
+  ) => Promise<ModelPlotOutputResults>;
   getRecordMaxScoreByTime: () => Promise<any>;
 }
 

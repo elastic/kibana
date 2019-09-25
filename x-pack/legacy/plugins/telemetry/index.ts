@@ -65,12 +65,9 @@ export const telemetry = (kibana: any) => {
       injectDefaultVars(server: Server) {
         const config = server.config();
         return {
-          telemetryEnabled: getXpackConfigWithDeprecated(config, 'telemetry.enabled'),
           telemetryUrl: getXpackConfigWithDeprecated(config, 'telemetry.url'),
-          spacesEnabled: config.get('xpack.spaces.enabled'),
           telemetryBanner: config.get('xpack.telemetry.banner'),
           telemetryOptedIn: null,
-          activeSpace: null,
         };
       },
       hacks: ['plugins/telemetry/hacks/telemetry_init', 'plugins/telemetry/hacks/telemetry_opt_in'],

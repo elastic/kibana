@@ -12,6 +12,7 @@ import { PageLoading } from 'plugins/monitoring/components';
 import { timefilter } from 'ui/timefilter';
 import { I18nContext } from 'ui/i18n';
 import { PromiseWithCancel } from '../../common/cancel_promise';
+import { updateSetupModeData, getSetupModeState } from '../lib/setup_mode';
 
 /**
  * Class to manage common instantiation behaviors in a view controller
@@ -118,8 +119,13 @@ export class MonitoringViewBaseController {
         this.updateDataPromise = null;
       }
       const _api = apiUrlFn ? apiUrlFn() : api;
-      this.updateDataPromise = new PromiseWithCancel(_getPageData($injector, _api));
-      return this.updateDataPromise.promise().then((pageData) => {
+      const promises = [_getPageData($injector, _api)];
+      const setupMode = getSetupModeState();
+      if (setupMode.enabled) {
+        promises.push(updateSetupModeData());
+      }
+      this.updateDataPromise = new PromiseWithCancel(Promise.all(promises));
+      return this.updateDataPromise.promise().then(([pageData]) => {
         $scope.$apply(() => {
           this._isDataInitialized = true; // render will replace loading screen with the react component
           $scope.pageData = this.data = pageData; // update the view's data with the fetch result

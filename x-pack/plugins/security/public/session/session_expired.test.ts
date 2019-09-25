@@ -28,7 +28,7 @@ it('redirects user to "/logout" when there is no basePath', async () => {
 });
 
 it('redirects user to "/${basePath}/logout" and removes basePath from next parameter when there is a basePath', async () => {
-  const { basePath } = coreMock.createSetup('/foo').http;
+  const { basePath } = coreMock.createSetup({ basePath: '/foo' }).http;
   mockCurrentUrl('/foo/bar?baz=quz#quuz');
   const sessionExpired = new SessionExpired(basePath);
   const newUrlPromise = new Promise<string>(resolve => {

@@ -1,0 +1,28 @@
+{
+  "indices.get_settings": {
+    "url_params": {
+      "master_timeout": "",
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "none",
+        "all"
+      ],
+      "flat_settings": "__flag__",
+      "local": "__flag__",
+      "include_defaults": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_settings",
+      "{indices}/_settings",
+      "{indices}/_settings/{name}",
+      "_settings/{name}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-settings.html"
+  }
+}

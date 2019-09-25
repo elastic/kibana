@@ -17,10 +17,32 @@
     animation: none !important;
   }
 }
+.mlTransformBulkActionItem {
+  display: block;
+  padding: $euiSizeS;
+  width: 100%;
+  text-align: left;
+}
+
+.mlTransformBulkActionsBorder {
+    height: 20px;
+    border-right: $euiBorderThin;
+    width: 1px;
+    display: inline-block;
+    vertical-align: middle;
+    height: 35px;
+    margin: 0px 5px;
+    margin-top: -5px;
+}
+
 .mlTransformProgressBar {
   margin-bottom: $euiSizeM;
 }
 
 .mlTaskStateBadge, .mlTaskModeBadge {
   max-width: 100px;
+}
+
+.mlTransformTable__messagesPaneTable .euiTableCellContent__text {
+  text-align: left;
 }

@@ -52,7 +52,7 @@ export class AbstractLayer {
   }
 
   destroy() {
-    if(this._source) {
+    if (this._source) {
       this._source.destroy();
     }
   }
@@ -119,10 +119,10 @@ export class AbstractLayer {
     };
   }
 
-  getIconAndTooltipContent(zoomLevel) {
+  getIconAndTooltipContent(zoomLevel, isUsingSearch) {
     let icon;
     let tooltipContent = null;
-    let areResultsTrimmed = false;
+    const footnotes = [];
     if (this.hasErrors()) {
       icon = (
         <EuiIcon
@@ -161,15 +161,30 @@ export class AbstractLayer {
       const customIconAndTooltipContent = this.getCustomIconAndTooltipContent();
       if (customIconAndTooltipContent) {
         icon = customIconAndTooltipContent.icon;
-        tooltipContent = customIconAndTooltipContent.tooltipContent;
-        areResultsTrimmed = customIconAndTooltipContent.areResultsTrimmed;
+        if (!customIconAndTooltipContent.areResultsTrimmed) {
+          tooltipContent = customIconAndTooltipContent.tooltipContent;
+        } else {
+          footnotes.push({
+            icon: <EuiIcon color="subdued" type="partial" size="s" />,
+            message: customIconAndTooltipContent.tooltipContent
+          });
+        }
+      }
+
+      if (isUsingSearch && this.getQueryableIndexPatternIds().length) {
+        footnotes.push({
+          icon: <EuiIcon color="subdued" type="filter" size="s" />,
+          message: i18n.translate('xpack.maps.layer.isUsingSearchMsg', {
+            defaultMessage: 'Results narrowed by search bar'
+          })
+        });
       }
     }
 
     return {
       icon,
       tooltipContent,
-      areResultsTrimmed
+      footnotes,
     };
   }
 
@@ -235,6 +250,24 @@ export class AbstractLayer {
   renderSourceSettingsEditor = ({ onChange }) => {
     return this._source.renderSourceSettingsEditor({ onChange });
   };
+
+  getPrevRequestToken(dataId) {
+    const prevDataRequest = this.getDataRequest(dataId);
+    if (!prevDataRequest) {
+      return;
+    }
+
+    return prevDataRequest.getRequestToken();
+  }
+
+  getInFlightRequestTokens() {
+    if (!this._dataRequests) {
+      return [];
+    }
+
+    const requestTokens = this._dataRequests.map(dataRequest => dataRequest.getRequestToken());
+    return _.compact(requestTokens);
+  }
 
   getSourceDataRequest() {
     return this.getDataRequest(SOURCE_DATA_ID_ORIGIN);
@@ -340,6 +373,9 @@ export class AbstractLayer {
   }
 
   renderStyleEditor({ onStyleDescriptorChange }) {
+    if (!this._style) {
+      return null;
+    }
     return this._style.renderEditor({ layer: this, onStyleDescriptorChange });
   }
 
@@ -357,6 +393,10 @@ export class AbstractLayer {
 
   async getOrdinalFields() {
     return [];
+  }
+
+  syncVisibilityWithMb(mbMap, mbLayerId) {
+    mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }
 
 }

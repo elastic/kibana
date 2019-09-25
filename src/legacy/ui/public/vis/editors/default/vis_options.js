@@ -20,6 +20,7 @@
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
 import { VisOptionsReactWrapper } from './vis_options_react_wrapper';
+import { safeMakeLabel } from 'ui/agg_types/agg_utils';
 
 /**
  * This directive sort of "transcludes" in whatever template you pass in via the `editor` attribute.
@@ -31,14 +32,22 @@ uiModules
   .get('app/visualize')
   .directive('visOptionsReactWrapper', reactDirective => reactDirective(wrapInI18nContext(VisOptionsReactWrapper), [
     ['component', { wrapApply: false }],
+    ['aggs', { watchDepth: 'collection' }],
     ['stateParams', { watchDepth: 'collection' }],
     ['vis', { watchDepth: 'collection' }],
+    ['uiState', { watchDepth: 'collection' }],
     ['setValue', { watchDepth: 'reference' }],
+    ['setValidity', { watchDepth: 'reference' }],
+    ['setVisType', { watchDepth: 'reference' }],
+    ['setTouched', { watchDepth: 'reference' }],
     'hasHistogramAgg',
+    'currentTab',
+    'aggsLabels',
   ]))
   .directive('visEditorVisOptions', function ($compile) {
     return {
       restrict: 'E',
+      require: '?^ngModel',
       scope: {
         vis: '=',
         visData: '=',
@@ -48,19 +57,54 @@ uiModules
         editorState: '=',
         onAggParamsChange: '=',
         hasHistogramAgg: '=',
+        currentTab: '=',
       },
-      link: function ($scope, $el) {
+      link: function ($scope, $el, attrs, ngModelCtrl) {
         $scope.setValue = (paramName, value) =>
           $scope.onAggParamsChange($scope.editorState.params, paramName, value);
+
+        $scope.setValidity = isValid => {
+          ngModelCtrl.$setValidity(`visOptions`, isValid);
+        };
+
+        $scope.setTouched = isTouched => {
+          if (isTouched) {
+            ngModelCtrl.$setTouched();
+          } else {
+            ngModelCtrl.$setUntouched();
+          }
+        };
+
+        $scope.setVisType = (type) => {
+          $scope.vis.type.type = type;
+        };
+
+        // since aggs reference isn't changed when an agg is updated, we need somehow to let React component know about it
+        $scope.aggsLabels = '';
+
+        $scope.$watch(() => {
+          return $scope.editorState.aggs.aggs.map(agg => {
+            return safeMakeLabel(agg);
+          }).join();
+        }, value => {
+          $scope.aggsLabels = value;
+        });
 
         const comp = typeof $scope.editor === 'string' ?
           $scope.editor :
           `<vis-options-react-wrapper
             component="editor"
+            aggs="editorState.aggs"
+            aggs-labels="aggsLabels"
             has-histogram-agg="hasHistogramAgg"
+            current-tab="currentTab"
             state-params="editorState.params"
             vis="vis"
-            set-value="setValue">
+            ui-state="uiState"
+            set-value="setValue"
+            set-validity="setValidity"
+            set-vis-type="setVisType"
+            set-touched="setTouched">
           </vis-options-react-wrapper>`;
         const $editor = $compile(comp)($scope);
         $el.append($editor);

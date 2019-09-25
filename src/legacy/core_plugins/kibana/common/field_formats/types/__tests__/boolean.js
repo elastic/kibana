@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import { createBoolFormat } from '../boolean';
-import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
+import { FieldFormat } from '../../../../../../../plugins/data/common/field_formats';
 
 const BoolFormat = createBoolFormat(FieldFormat);
 

@@ -8,21 +8,22 @@ import _ from 'lodash';
 import chrome from 'ui/chrome';
 import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
-import { TileLayer } from '../../tile_layer';
+import { VectorTileLayer } from '../../vector_tile_layer';
 
 import { getEMSClient } from '../../../meta';
 import { EMSTMSCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { EMS_TMS } from '../../../../common/constants';
 
 export class EMSTMSSource extends AbstractTMSSource {
 
-  static type = 'EMS_TMS';
+  static type = EMS_TMS;
   static title = i18n.translate('xpack.maps.source.emsTileTitle', {
-    defaultMessage: 'Tiles'
+    defaultMessage: 'EMS Basemaps'
   });
   static description = i18n.translate('xpack.maps.source.emsTileDescription', {
-    defaultMessage: 'Map tiles from Elastic Maps Service'
+    defaultMessage: 'Tile map service from Elastic Maps Service'
   });
   static icon = 'emsApp';
 
@@ -89,14 +90,14 @@ export class EMSTMSSource extends AbstractTMSSource {
   }
 
   _createDefaultLayerDescriptor(options) {
-    return TileLayer.createDescriptor({
+    return VectorTileLayer.createDescriptor({
       sourceDescriptor: this._descriptor,
       ...options
     });
   }
 
   createDefaultLayer(options) {
-    return new TileLayer({
+    return new VectorTileLayer({
       layerDescriptor: this._createDefaultLayerDescriptor(options),
       source: this
     });
@@ -117,22 +118,26 @@ export class EMSTMSSource extends AbstractTMSSource {
     if (!markdown) {
       return [];
     }
-
-    return markdown.split('|').map((attribution) => {
-      attribution = attribution.trim();
-      //this assumes attribution is plain markdown link
-      const extractLink = /\[(.*)\]\((.*)\)/;
-      const result = extractLink.exec(attribution);
-      return {
-        label: result ? result[1] : null,
-        url: result ? result[2] : null
-      };
-    });
+    return this.convertMarkdownLinkToObjectArr(markdown);
   }
 
   async getUrlTemplate() {
     const emsTMSService = await this._getEMSTMSService();
     return await emsTMSService.getUrlTemplate();
+  }
+
+  getSpriteNamespacePrefix() {
+    return 'ems/' + this._getEmsTileLayerId();
+  }
+
+  async getVectorStyleSheetAndSpriteMeta(isRetina) {
+    const emsTMSService = await this._getEMSTMSService();
+    const styleSheet = await emsTMSService.getVectorStyleSheet();
+    const spriteMeta = await emsTMSService.getSpriteSheetMeta(isRetina);
+    return {
+      vectorStyleSheet: styleSheet,
+      spriteMeta: spriteMeta
+    };
   }
 
   _getEmsTileLayerId() {

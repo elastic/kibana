@@ -19,7 +19,8 @@ export class UnauthorizedResponseHttpInterceptor implements HttpInterceptor {
 
     // if the request was omitting credentials it's to an anonymous endpoint
     // (for example to login) and we don't wish to ever redirect
-    if (httpErrorResponse.request.credentials === 'omit') {
+    // TODO: Why is httpErrorResponse.request potentially undefined?
+    if (httpErrorResponse.request != null && httpErrorResponse.request.credentials === 'omit') {
       return;
     }
 

@@ -14,23 +14,36 @@ import { FileTree as Tree, FileTreeItemType } from '../../../model';
 import { EuiSideNavItem, MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
 import { encodeRevisionString } from '../../../common/uri_util';
+import { trackCodeUiMetric, METRIC_TYPE } from '../../services/ui_metric';
+import { CodeUIUsageMetrics } from '../../../model/usage_telemetry_metrics';
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   node?: Tree;
   isNotFound: boolean;
 }
 
-export class CodeFileTree extends React.Component<Props, { openPaths: string[] }> {
+interface State {
+  closedPaths: string[];
+  openPaths: string[];
+}
+
+export class CodeFileTree extends React.Component<Props, State> {
+  static getDerivedStateFromProps(props: Props, state: State) {
+    return { openPaths: CodeFileTree.getOpenPaths(props.match.params.path || '', state.openPaths) };
+  }
+
   constructor(props: Props) {
     super(props);
     const { path } = props.match.params;
     if (path) {
       this.state = {
         openPaths: CodeFileTree.getOpenPaths(path, []),
+        closedPaths: [],
       };
     } else {
       this.state = {
         openPaths: [],
+        closedPaths: [],
       };
     }
   }
@@ -51,13 +64,18 @@ export class CodeFileTree extends React.Component<Props, { openPaths: string[] }
   };
 
   openTreePath = (path: string) => {
-    this.setState({ openPaths: CodeFileTree.getOpenPaths(path, this.state.openPaths) });
+    const newClosedPaths = this.state.closedPaths.filter(p => !(p === path));
+    this.setState({
+      openPaths: CodeFileTree.getOpenPaths(path, this.state.openPaths),
+      closedPaths: newClosedPaths,
+    });
   };
 
   closeTreePath = (path: string) => {
     const isSubFolder = (p: string) => p.startsWith(path + '/');
     const newOpenPaths = this.state.openPaths.filter(p => !(p === path || isSubFolder(p)));
-    this.setState({ openPaths: newOpenPaths });
+    const newClosedPaths = [...this.state.closedPaths, path];
+    this.setState({ openPaths: newOpenPaths, closedPaths: newClosedPaths });
   };
 
   public onClick = (node: Tree) => {
@@ -85,7 +103,11 @@ export class CodeFileTree extends React.Component<Props, { openPaths: string[] }
 
   public flattenDirectory: (node: Tree) => Tree[] = (node: Tree) => {
     if (node.childrenCount === 1 && node.children![0].type === FileTreeItemType.Directory) {
-      return [node, ...this.flattenDirectory(node.children![0])];
+      if (node.children![0].path === this.props.match.params.path) {
+        return [node, node.children![0]];
+      } else {
+        return [node, ...this.flattenDirectory(node.children![0])];
+      }
     } else {
       return [node];
     }
@@ -105,21 +127,47 @@ export class CodeFileTree extends React.Component<Props, { openPaths: string[] }
 
   public getItemRenderer = (node: Tree, forceOpen: boolean, flattenFrom?: Tree) => () => {
     const className = 'codeFileTree__item kbn-resetFocusState';
-    let bg = null;
-    if (this.props.match.params.path === node.path) {
-      bg = <div ref={el => this.scrollIntoView(el)} className="codeFileTree__node--fullWidth" />;
-    }
     const onClick = () => {
       const path = flattenFrom ? flattenFrom.path! : node.path!;
       this.toggleTree(path);
       this.onClick(node);
+      // track file tree click count
+      trackCodeUiMetric(METRIC_TYPE.COUNT, CodeUIUsageMetrics.FILE_TREE_CLICK_COUNT);
     };
+    const nodeTypeMap = {
+      [FileTreeItemType.Directory]: 'Directory',
+      [FileTreeItemType.File]: 'File',
+      [FileTreeItemType.Link]: 'Link',
+      [FileTreeItemType.Submodule]: 'Submodule',
+    };
+    let bg = (
+      <div
+        tabIndex={0}
+        className="codeFileTree__node--link"
+        data-test-subj={`codeFileTreeNode-${nodeTypeMap[node.type]}-${node.path}`}
+        onClick={onClick}
+        onKeyDown={onClick}
+        role="button"
+      />
+    );
+    if (this.props.match.params.path === node.path) {
+      bg = (
+        <div
+          ref={el => this.scrollIntoView(el)}
+          className="codeFileTree__node--fullWidth"
+          tabIndex={0}
+          data-test-subj={`codeFileTreeNode-${nodeTypeMap[node.type]}-${node.path}`}
+          onClick={onClick}
+          onKeyDown={onClick}
+          role="button"
+        />
+      );
+    }
     switch (node.type) {
       case FileTreeItemType.Directory: {
         return (
           <div className="codeFileTree__node">
             <div
-              data-test-subj={`codeFileTreeNode-Directory-${node.path}`}
               className={className}
               role="button"
               tabIndex={0}
@@ -151,7 +199,6 @@ export class CodeFileTree extends React.Component<Props, { openPaths: string[] }
         return (
           <div className="codeFileTree__node">
             <div
-              data-test-subj={`codeFileTreeNode-Submodule-${node.path}`}
               tabIndex={0}
               onKeyDown={onClick}
               onClick={onClick}
@@ -173,7 +220,6 @@ export class CodeFileTree extends React.Component<Props, { openPaths: string[] }
         return (
           <div className="codeFileTree__node">
             <div
-              data-test-subj={`codeFileTreeNode-Link-${node.path}`}
               tabIndex={0}
               onKeyDown={onClick}
               onClick={onClick}
@@ -195,7 +241,6 @@ export class CodeFileTree extends React.Component<Props, { openPaths: string[] }
         return (
           <div className="codeFileTree__node">
             <div
-              data-test-subj={`codeFileTreeNode-File-${node.path}`}
               tabIndex={0}
               onKeyDown={onClick}
               onClick={onClick}
@@ -268,7 +313,7 @@ export class CodeFileTree extends React.Component<Props, { openPaths: string[] }
 
   private isPathOpen(path: string) {
     if (this.props.isNotFound) return false;
-    return this.state.openPaths.includes(path);
+    return this.state.openPaths.includes(path) && !this.state.closedPaths.includes(path);
   }
 }
 

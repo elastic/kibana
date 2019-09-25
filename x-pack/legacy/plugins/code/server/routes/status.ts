@@ -35,7 +35,7 @@ export function statusRoute(router: CodeServerRouter, codeServices: CodeServices
     const head = await gitService.headRevision(endpoint, { uri: repoUri });
     if (head === commit.id) {
       try {
-        const indexStatus = await repoObjectClient.getRepositoryLspIndexStatus(repoUri);
+        const indexStatus = await repoObjectClient.getRepositoryIndexStatus(repoUri);
         if (indexStatus.progress < 100) {
           report.repoStatus = RepoFileStatus.INDEXING;
         }
@@ -89,6 +89,13 @@ export function statusRoute(router: CodeServerRouter, codeServices: CodeServices
       }
     } else {
       const def = dedicated || generic;
+      if (
+        (await lspService.languageServerStatus(endpoint, { langName: def!.name })) ===
+        LanguageServerStatus.LAUNCH_FAILED
+      ) {
+        report.langServerStatus = RepoFileStatus.LANG_SERVER_LAUNCH_FAILED;
+        return;
+      }
       const state = await lspService.initializeState(endpoint, { repoUri, revision });
       const initState = state[def!.name];
       report.langServerStatus =

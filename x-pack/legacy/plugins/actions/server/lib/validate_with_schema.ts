@@ -47,6 +47,7 @@ function validateWithSchema(
         return actionType.validate.secrets.validate(value);
     }
   } catch (err) {
+    // we can't really i18n this yet, since the err.message isn't i18n'd itself
     throw Boom.badRequest(`error validating ${name}: ${err.message}`);
   }
 

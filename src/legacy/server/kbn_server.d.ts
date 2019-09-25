@@ -24,12 +24,12 @@ import { SavedObjectsClientProviderOptions } from 'src/core/server';
 import {
   ConfigService,
   ElasticsearchServiceSetup,
-  InternalCoreSetup,
-  InternalCoreStart,
   LoggerFactory,
   SavedObjectsClientContract,
   SavedObjectsService,
 } from '../../core/server';
+
+import { LegacyServiceSetupDeps, LegacyServiceStartDeps } from '../../core/server/';
 // Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsManagement } from '../../core/server/saved_objects/management';
@@ -73,6 +73,10 @@ declare module 'hapi' {
     savedObjectsManagement(): SavedObjectsManagement;
     getInjectedUiAppVars: (pluginName: string) => { [key: string]: any };
     getUiNavLinks(): Array<{ _id: string }>;
+    addMemoizedFactoryToRequest: (
+      name: string,
+      factoryFn: (request: Request) => Record<string, any>
+    ) => void;
   }
 
   interface Request {
@@ -95,14 +99,8 @@ export default class KbnServer {
     coreContext: {
       logger: LoggerFactory;
     };
-    setup: {
-      core: InternalCoreSetup;
-      plugins: Record<string, unknown>;
-    };
-    start: {
-      core: InternalCoreStart;
-      plugins: Record<string, unknown>;
-    };
+    setup: LegacyServiceSetupDeps;
+    start: LegacyServiceStartDeps;
     stop: null;
     params: {
       handledConfigPaths: UnwrapPromise<ReturnType<ConfigService['getUsedPaths']>>;

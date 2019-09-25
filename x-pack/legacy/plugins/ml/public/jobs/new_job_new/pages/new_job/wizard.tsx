@@ -7,6 +7,7 @@
 import React, { Fragment, FC, useReducer, useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiStepsHorizontal, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { WIZARD_STEPS } from '../components/step_types';
@@ -17,26 +18,23 @@ import { PickFieldsStep } from '../components/pick_fields_step';
 import { JobDetailsStep } from '../components/job_details_step';
 import { ValidationStep } from '../components/validation_step';
 import { SummaryStep } from '../components/summary_step';
-import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
+import { TimeBuckets } from '../../../../util/time_buckets';
+import { useKibanaContext } from '../../../../contexts/kibana';
 
 import { JobCreatorContext, JobCreatorContextValue } from '../components/job_creator_context';
 import { ExistingJobsAndGroups } from '../../../../services/job_service';
 
-import {
-  SingleMetricJobCreator,
-  MultiMetricJobCreator,
-  PopulationJobCreator,
-} from '../../common/job_creator';
+import { JobCreatorType } from '../../common/job_creator';
 import { ChartLoader } from '../../common/chart_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { newJobCapsService } from '../../../../services/new_job_capabilities_service';
 
 interface Props {
-  jobCreator: SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator;
+  jobCreator: JobCreatorType;
   chartLoader: ChartLoader;
   resultsLoader: ResultsLoader;
-  chartInterval: MlTimeBuckets;
+  chartInterval: TimeBuckets;
   jobValidator: JobValidator;
   existingJobsAndGroups: ExistingJobsAndGroups;
   skipTimeRangeStep: boolean;
@@ -51,6 +49,7 @@ export const Wizard: FC<Props> = ({
   existingJobsAndGroups,
   skipTimeRangeStep = false,
 }) => {
+  const kibanaContext = useKibanaContext();
   const [jobCreatorUpdated, setJobCreatorUpdate] = useReducer<(s: number) => number>(s => s + 1, 0);
   const jobCreatorUpdate = () => setJobCreatorUpdate(jobCreatorUpdated);
 
@@ -87,11 +86,9 @@ export const Wizard: FC<Props> = ({
   );
 
   useEffect(() => {
-    // IIFE to run the validation. the useEffect callback can't be async
-    (async () => {
-      await jobValidator.validate();
+    jobValidator.validate(() => {
       setJobValidatorUpdate(jobValidatorUpdated);
-    })();
+    });
 
     // if the job config has changed, reset the highestStep
     // compare a stringified config to ensure the configs have actually changed
@@ -176,13 +173,36 @@ export const Wizard: FC<Props> = ({
     },
   ];
 
+  function getSummaryStepTitle() {
+    if (kibanaContext.currentSavedSearch.id !== undefined) {
+      return i18n.translate('xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleSavedSearch', {
+        defaultMessage: 'New job from saved search {title}',
+        values: { title: kibanaContext.currentSavedSearch.title },
+      });
+    } else if (kibanaContext.currentIndexPattern.id !== undefined) {
+      return i18n.translate(
+        'xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleIndexPattern',
+        {
+          defaultMessage: 'New job from index pattern {title}',
+          values: { title: kibanaContext.currentIndexPattern.title },
+        }
+      );
+    }
+    return '';
+  }
+
   return (
     <JobCreatorContext.Provider value={jobCreatorContext}>
       <EuiStepsHorizontal steps={stepsConfig} style={{ backgroundColor: 'inherit' }} />
 
       {currentStep === WIZARD_STEPS.TIME_RANGE && (
         <Fragment>
-          <Title data-test-subj="mlJobWizardStepTitleTimeRange">Time range</Title>
+          <Title data-test-subj="mlJobWizardStepTitleTimeRange">
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.stepComponentWrapper.timeRangeTitle"
+              defaultMessage="Time range"
+            />
+          </Title>
           <TimeRangeStep
             isCurrentStep={currentStep === WIZARD_STEPS.TIME_RANGE}
             setCurrentStep={setCurrentStep}
@@ -191,7 +211,12 @@ export const Wizard: FC<Props> = ({
       )}
       {currentStep === WIZARD_STEPS.PICK_FIELDS && (
         <Fragment>
-          <Title data-test-subj="mlJobWizardStepTitlePickFields">Pick fields</Title>
+          <Title data-test-subj="mlJobWizardStepTitlePickFields">
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.stepComponentWrapper.pickFieldsTitle"
+              defaultMessage="Pick fields"
+            />
+          </Title>
           <PickFieldsStep
             isCurrentStep={currentStep === WIZARD_STEPS.PICK_FIELDS}
             setCurrentStep={setCurrentStep}
@@ -200,7 +225,12 @@ export const Wizard: FC<Props> = ({
       )}
       {currentStep === WIZARD_STEPS.JOB_DETAILS && (
         <Fragment>
-          <Title data-test-subj="mlJobWizardStepTitleJobDetails">Job details</Title>
+          <Title data-test-subj="mlJobWizardStepTitleJobDetails">
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.stepComponentWrapper.jobDetailsTitle"
+              defaultMessage="Job details"
+            />
+          </Title>
           <JobDetailsStep
             isCurrentStep={currentStep === WIZARD_STEPS.JOB_DETAILS}
             setCurrentStep={setCurrentStep}
@@ -213,7 +243,12 @@ export const Wizard: FC<Props> = ({
       )}
       {currentStep === WIZARD_STEPS.VALIDATION && (
         <Fragment>
-          <Title data-test-subj="mlJobWizardStepTitleValidation">Validation</Title>
+          <Title data-test-subj="mlJobWizardStepTitleValidation">
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.stepComponentWrapper.validationTitle"
+              defaultMessage="Validation"
+            />
+          </Title>
           <ValidationStep
             isCurrentStep={currentStep === WIZARD_STEPS.VALIDATION}
             setCurrentStep={setCurrentStep}
@@ -222,7 +257,7 @@ export const Wizard: FC<Props> = ({
       )}
       {currentStep === WIZARD_STEPS.SUMMARY && (
         <Fragment>
-          <Title data-test-subj="mlJobWizardStepTitleSummary">Summary</Title>
+          <Title data-test-subj="mlJobWizardStepTitleSummary">{getSummaryStepTitle()}</Title>
           <SummaryStep
             isCurrentStep={currentStep === WIZARD_STEPS.SUMMARY}
             setCurrentStep={setCurrentStep}

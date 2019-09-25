@@ -300,6 +300,8 @@
      * @param {Array.<string>} ids A list of encrypted request tokens returned within SAML
      * preparation response.
      * @param {string} content SAML response returned by identity provider.
+     * @param {string} [realm] Optional string used to identify the name of the OpenID Connect realm
+     * that should be used to authenticate request.
      *
      * @returns {{username: string, access_token: string, expires_in: number}} Object that
      * includes name of the user, access token to use for any consequent requests that
@@ -373,6 +375,8 @@
      * @param {string} nonce The nonce parameter that was returned by Elasticsearch in the
      * preparation response.
      * @param {string} redirect_uri The URL to where the UA was redirected by the OpenID Connect provider.
+     * @param {string} [realm] Optional string used to identify the name of the OpenID Connect realm
+     * that should be used to authenticate request.
      *
      * @returns {{username: string, access_token: string, refresh_token; string, expires_in: number}} Object that
      * includes name of the user, access token to use for any consequent requests that
@@ -391,7 +395,7 @@
      *
      * @param {string} token An access token that was created by authenticating to an OpenID Connect realm and
      * that needs to be invalidated.
-     * @param {string} refres_token A refresh token that was created by authenticating to an OpenID Connect realm and
+     * @param {string} refresh_token A refresh token that was created by authenticating to an OpenID Connect realm and
      * that needs to be invalidated.
      *
      * @returns {{redirect?: string}} If the Elasticsearch OpenID Connect realm configuration and the
@@ -514,6 +518,42 @@
       needBody: true,
       url: {
         fmt: '/_security/api_key',
+      },
+    });
+
+    /**
+     * Invalidates an API key in Elasticsearch.
+     *
+     * @param {string} [id] An API key id.
+     * @param {string} [name] An API key name.
+     * @param {string} [realm_name] The name of an authentication realm.
+     * @param {string} [username] The username of a user.
+     *
+     * NOTE: While all parameters are optional, at least one of them is required.
+     *
+     * @returns {{invalidated_api_keys: string[], previously_invalidated_api_keys: string[], error_count: number, error_details?: object[]}}
+     */
+    shield.invalidateAPIKey = ca({
+      method: 'DELETE',
+      needBody: true,
+      url: {
+        fmt: '/_security/api_key',
+      },
+    });
+
+    /**
+     * Gets an access token in exchange to the certificate chain for the target subject distinguished name.
+     *
+     * @param {string[]} x509_certificate_chain An ordered array of base64-encoded (Section 4 of RFC4648 - not
+     * base64url-encoded) DER PKIX certificate values.
+     *
+     * @returns {{access_token: string, type: string, expires_in: number}}
+     */
+    shield.delegatePKI = ca({
+      method: 'POST',
+      needBody: true,
+      url: {
+        fmt: '/_security/delegate_pki',
       },
     });
   };

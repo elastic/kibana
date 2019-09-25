@@ -33,6 +33,10 @@ export const vislib = () => ({
     defaultMessage: 'Vislib visualization'
   }),
   args: {
+    type: {
+      types: ['string'],
+      default: '""',
+    },
     visConfig: {
       types: ['string', 'null'],
       default: '"{}"',

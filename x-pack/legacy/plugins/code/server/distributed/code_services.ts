@@ -24,6 +24,18 @@ export class CodeServices {
     this.adapter.registerHandler(serviceDefinition, serviceHandler, options);
   }
 
+  public async start() {
+    await this.adapter.start();
+  }
+
+  public async stop() {
+    await this.adapter.stop();
+  }
+
+  public allocate(req: RequestFacade, resource: string): Promise<Endpoint | undefined> {
+    return this.adapter.locator.allocate(req, resource);
+  }
+
   public locate(req: RequestFacade, resource: string): Promise<Endpoint> {
     return this.adapter.locator.locate(req, resource);
   }

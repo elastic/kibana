@@ -7,7 +7,6 @@
 // @ts-ignore
 import contentDisposition from 'content-disposition';
 import * as _ from 'lodash';
-// @ts-ignore
 import { oncePerServer } from '../../lib/once_per_server';
 import { CSV_JOB_TYPE } from '../../../common/constants';
 

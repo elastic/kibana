@@ -19,34 +19,40 @@ class MockLayer {
 
 const MULTI_FEATURE_MULTI_LAYER = [
   {
-    'id': 'feature1',
-    'layerId': 'layer1'
+    id: 'feature1',
+    layerId: 'layer1',
   },
   {
-    'id': 'feature2',
-    'layerId': 'layer1'
+    id: 'feature2',
+    layerId: 'layer1',
   },
   {
-    'id': 'feature1',
-    'layerId': 'layer2'
+    id: 'feature1',
+    layerId: 'layer2',
   }
 ];
 
 const SINGLE_FEATURE = [
   {
-    'id': 'feature1',
-    'layerId': 'layer1'
+    id: 'feature1',
+    layerId: 'layer1',
   }
 ];
 
 const defaultProps = {
   loadFeatureProperties: () => { return []; },
+  loadFeatureGeometry: () => {
+    return {
+      type: 'Point',
+      coordinates: [102.0, 0.5]
+    };
+  },
   findLayerById: (id) => {
     return new MockLayer(id);
   },
   closeTooltip: () => {},
   showFilterButtons: false,
-  isLocked: false
+  isLocked: false,
 };
 
 describe('FeatureTooltip (single)', () => {

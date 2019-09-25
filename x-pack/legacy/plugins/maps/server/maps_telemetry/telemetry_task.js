@@ -27,7 +27,7 @@ export function scheduleTask(server, taskManager) {
           taskType: TELEMETRY_TASK_TYPE,
           state: { stats: {}, runs: 0 },
         });
-      }catch(e) {
+      } catch(e) {
         server.log(['warning', 'maps'], `Error scheduling telemetry task, received ${e.message}`);
       }
     })();
@@ -41,7 +41,6 @@ export function registerMapsTelemetryTask(server) {
       title: 'Maps telemetry fetch task',
       type: TELEMETRY_TASK_TYPE,
       timeout: '1m',
-      numWorkers: 2,
       createTaskRunner: telemetryTaskRunner(server),
     },
   });
@@ -52,32 +51,65 @@ export function telemetryTaskRunner(server) {
   return ({ taskInstance }) => {
     const { state } = taskInstance;
     const prevState = state;
-    let mapsTelemetry = {};
 
     const callCluster = server.plugins.elasticsearch.getCluster('admin')
       .callWithInternalUser;
 
+    let mapsTelemetryTask;
+
     return {
-      async run() {
+      async run({ taskCanceled = false } = {}) {
         try {
-          mapsTelemetry = await getMapsTelemetry(server, callCluster);
+          mapsTelemetryTask = makeCancelable(
+            getMapsTelemetry(server, callCluster),
+            taskCanceled
+          );
         } catch (err) {
           server.log(['warning'], `Error loading maps telemetry: ${err}`);
         } finally {
-          return {
-            state: {
-              runs: state.runs || 0 + 1,
-              stats: mapsTelemetry.attributes || prevState.stats || {},
-            },
-            runAt: getNextMidnight(),
-          };
+          return mapsTelemetryTask
+            .promise
+            .then((mapsTelemetry = {}) => {
+              return {
+                state: {
+                  runs: state.runs || 0 + 1,
+                  stats: mapsTelemetry.attributes || prevState.stats || {},
+                },
+                runAt: getNextMidnight(),
+              };
+            })
+            .catch(errMsg => server.log(['warning'],
+              `Error executing maps telemetry task: ${errMsg}`));
         }
       },
+      async cancel() {
+        if (mapsTelemetryTask) {
+          mapsTelemetryTask.cancel();
+        } else {
+          server.log(['warning'], `Can not cancel "mapsTelemetryTask", it has not been defined`);
+        }
+      }
     };
   };
 }
 
-export function getNextMidnight() {
+function makeCancelable(promise, isCanceled) {
+  const logMsg = 'Maps telemetry task has been cancelled';
+  const wrappedPromise = new Promise((resolve, reject) => {
+    promise
+      .then(val => isCanceled ? reject(logMsg) : resolve(val))
+      .catch(err => isCanceled ? reject(logMsg) : reject(err.message));
+  });
+
+  return {
+    promise: wrappedPromise,
+    cancel() {
+      isCanceled = true;
+    },
+  };
+}
+
+function getNextMidnight() {
   const nextMidnight = new Date();
   nextMidnight.setHours(0, 0, 0, 0);
   nextMidnight.setDate(nextMidnight.getDate() + 1);

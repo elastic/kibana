@@ -168,7 +168,7 @@ Array [
               },
               Object {
                 "term": Object {
-                  "service.environment": "test",
+                  "transaction.type": "request",
                 },
               },
               Object {
@@ -178,11 +178,10 @@ Array [
               },
               Object {
                 "term": Object {
-                  "transaction.type": "request",
+                  "service.environment": "test",
                 },
               },
             ],
-            "must_not": Array [],
             "should": Array [
               Object {
                 "term": Object {

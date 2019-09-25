@@ -24,7 +24,7 @@ import { BasePath } from './base_path_service';
 
 type ServiceSetupMockType = jest.Mocked<HttpSetup>;
 
-const createServiceMock = (basePath?: string): ServiceSetupMockType => ({
+const createServiceMock = ({ basePath = '' } = {}): ServiceSetupMockType => ({
   fetch: jest.fn(),
   get: jest.fn(),
   head: jest.fn(),
@@ -41,22 +41,19 @@ const createServiceMock = (basePath?: string): ServiceSetupMockType => ({
   removeAllInterceptors: jest.fn(),
 });
 
-const createSetupContractMock = createServiceMock;
-const createStartContractMock = createServiceMock;
-
-const createMock = () => {
+const createMock = ({ basePath = '' } = {}) => {
   const mocked: jest.Mocked<Required<HttpService>> = {
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
   };
-  mocked.setup.mockReturnValue(createSetupContractMock());
-  mocked.start.mockReturnValue(createSetupContractMock());
+  mocked.setup.mockReturnValue(createServiceMock({ basePath }));
+  mocked.start.mockReturnValue(createServiceMock({ basePath }));
   return mocked;
 };
 
 export const httpServiceMock = {
   create: createMock,
-  createSetupContract: createSetupContractMock,
-  createStartContract: createStartContractMock,
+  createSetupContract: createServiceMock,
+  createStartContract: createServiceMock,
 };

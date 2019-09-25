@@ -3,11 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import chrome from 'ui/chrome';
+import { SiemRootController } from './start_app';
 
-import 'uiExports/autocompleteProviders';
+import 'uiExports/embeddableFactories';
 
-import { compose } from '../lib/compose/kibana_compose';
-
-import { startApp } from './start_app';
-
-startApp(compose());
+// load the application
+chrome.setRootController('siem', SiemRootController);

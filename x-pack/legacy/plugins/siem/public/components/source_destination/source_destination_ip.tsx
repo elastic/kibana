@@ -131,7 +131,7 @@ export const SourceDestinationIp = pure<SourceDestinationIpProps>(
           alignItems="center"
           data-test-subj={`${type}-ip-group`}
           direction="column"
-          gutterSize="none"
+          gutterSize="xs"
         >
           <EuiFlexItem grow={false}>
             <Label data-test-subj={`${type}-label`}>{label}</Label>

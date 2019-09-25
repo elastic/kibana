@@ -40,11 +40,12 @@ export { notificationServiceMock } from './notifications/notifications_service.m
 export { overlayServiceMock } from './overlays/overlay_service.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 
-function createCoreSetupMock(basePath?: string) {
+function createCoreSetupMock({ basePath = '' } = {}) {
   const mock: MockedKeys<CoreSetup> = {
+    application: applicationServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-    http: httpServiceMock.createSetupContract(basePath),
+    http: httpServiceMock.createSetupContract({ basePath }),
     notifications: notificationServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
   };
@@ -52,12 +53,12 @@ function createCoreSetupMock(basePath?: string) {
   return mock;
 }
 
-function createCoreStartMock(basePath?: string) {
+function createCoreStartMock({ basePath = '' } = {}) {
   const mock: MockedKeys<CoreStart> = {
     application: applicationServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
-    http: httpServiceMock.createStartContract(basePath),
+    http: httpServiceMock.createStartContract({ basePath }),
     i18n: i18nServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),

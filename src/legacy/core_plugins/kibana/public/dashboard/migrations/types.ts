@@ -129,7 +129,7 @@ export interface RawSavedDashboardPanelTo60 {
   readonly size_y?: number;
   readonly row: number;
   readonly col: number;
-  panelIndex: number | string; // earlier versions allowed this to be number or string
+  panelIndex?: number | string; // earlier versions allowed this to be number or string. Some very early versions seem to be missing this entirely
   readonly name: string;
 
   // This is where custom panel titles are stored prior to Embeddable API v2

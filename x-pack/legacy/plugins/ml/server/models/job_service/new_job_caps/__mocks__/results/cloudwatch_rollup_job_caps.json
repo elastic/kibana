@@ -12,10 +12,10 @@
           "min": "avg"
         },
         "fieldIds": [
-          "DiskReadBytes",
-          "NetworkOut",
           "CPUUtilization",
-          "NetworkIn"
+          "DiskReadBytes",
+          "NetworkIn",
+          "NetworkOut"
         ]
       },
       {
@@ -29,10 +29,10 @@
           "min": "avg"
         },
         "fieldIds": [
-          "DiskReadBytes",
-          "NetworkOut",
           "CPUUtilization",
-          "NetworkIn"
+          "DiskReadBytes",
+          "NetworkIn",
+          "NetworkOut"
         ]
       },
       {
@@ -46,10 +46,10 @@
           "min": "avg"
         },
         "fieldIds": [
-          "DiskReadBytes",
-          "NetworkOut",
           "CPUUtilization",
-          "NetworkIn"
+          "DiskReadBytes",
+          "NetworkIn",
+          "NetworkOut"
         ]
       },
       {
@@ -108,8 +108,8 @@
           "min": "min"
         },
         "fieldIds": [
-          "NetworkOut",
-          "NetworkIn"
+          "NetworkIn",
+          "NetworkOut"
         ]
       },
       {
@@ -123,12 +123,24 @@
           "min": "max"
         },
         "fieldIds": [
-          "DiskReadBytes",
-          "CPUUtilization"
+          "CPUUtilization",
+          "DiskReadBytes"
         ]
       }
     ],
     "fields": [
+      {
+        "id": "CPUUtilization",
+        "name": "CPUUtilization",
+        "type": "double",
+        "aggregatable": true,
+        "aggIds": [
+          "mean",
+          "high_mean",
+          "low_mean",
+          "max"
+        ]
+      },
       {
         "id": "DiskReadBytes",
         "name": "DiskReadBytes",
@@ -156,8 +168,8 @@
         ]
       },
       {
-        "id": "NetworkOut",
-        "name": "NetworkOut",
+        "id": "NetworkIn",
+        "name": "NetworkIn",
         "type": "double",
         "aggregatable": true,
         "aggIds": [
@@ -168,20 +180,8 @@
         ]
       },
       {
-        "id": "CPUUtilization",
-        "name": "CPUUtilization",
-        "type": "double",
-        "aggregatable": true,
-        "aggIds": [
-          "mean",
-          "high_mean",
-          "low_mean",
-          "max"
-        ]
-      },
-      {
-        "id": "NetworkIn",
-        "name": "NetworkIn",
+        "id": "NetworkOut",
+        "name": "NetworkOut",
         "type": "double",
         "aggregatable": true,
         "aggIds": [

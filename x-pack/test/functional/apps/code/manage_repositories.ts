@@ -17,8 +17,9 @@ export default function manageRepositoriesFunctionalTests({
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  describe('Manage Repositories', () => {
-    const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
+  describe('Manage Repositories', function() {
+    this.tags('smoke');
+    const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
 
     describe('Manage Repositories', () => {
       before(async () => {
@@ -26,10 +27,9 @@ export default function manageRepositoriesFunctionalTests({
         await PageObjects.common.navigateToApp('code');
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
-      // after(async () => await esArchiver.unload('code'));
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
       });
 
       it('import repository', async () => {
@@ -49,10 +49,6 @@ export default function manageRepositoriesFunctionalTests({
           );
         });
 
-        // Wait for the index to start.
-        await retry.try(async () => {
-          expect(await testSubjects.exists('repositoryIndexOngoing')).to.be(true);
-        });
         // Wait for the index to end.
         await retry.try(async () => {
           expect(await testSubjects.exists('repositoryIndexDone')).to.be(true);
@@ -94,10 +90,6 @@ export default function manageRepositoriesFunctionalTests({
           );
         });
 
-        // Wait for the index to start.
-        await retry.try(async () => {
-          expect(await testSubjects.exists('repositoryIndexOngoing')).to.be(true);
-        });
         // Wait for the index to end.
         await retry.try(async () => {
           expect(await testSubjects.exists('repositoryIndexDone')).to.be(true);

@@ -5,20 +5,26 @@
  */
 
 import { SavedObjectsClientContract, SavedObjectsSerializer } from 'src/core/server';
+import { Logger } from './types';
 import { fillPool } from './lib/fill_pool';
-import { Logger, TaskManagerLogger } from './lib/logger';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
 import { sanitizeTaskDefinitions } from './lib/sanitize_task_definitions';
-import { ConcreteTaskInstance, RunContext, TaskInstance } from './task';
-import { SanitizedTaskDefinition, TaskDefinition, TaskDictionary } from './task';
+import {
+  TaskDefinition,
+  TaskDictionary,
+  ConcreteTaskInstance,
+  RunContext,
+  TaskInstance,
+} from './task';
 import { TaskPoller } from './task_poller';
 import { TaskPool } from './task_pool';
 import { TaskManagerRunner } from './task_runner';
 import { FetchOpts, FetchResult, TaskStore } from './task_store';
 
 export interface TaskManagerOpts {
-  kbnServer: any;
+  logger: Logger;
   config: any;
+  callWithInternalUser: any;
   savedObjectsRepository: SavedObjectsClientContract;
   serializer: SavedObjectsSerializer;
 }
@@ -37,13 +43,15 @@ export interface TaskManagerOpts {
  * The public interface into the task manager system.
  */
 export class TaskManager {
-  private isInitialized = false;
+  private isStarted = false;
   private maxWorkers: number;
-  private overrideNumWorkers: { [taskType: string]: number };
-  private definitions: TaskDictionary<SanitizedTaskDefinition>;
+  private readonly pollerInterval: number;
+  private definitions: TaskDictionary<TaskDefinition>;
   private store: TaskStore;
   private poller: TaskPoller;
   private logger: Logger;
+  private pool: TaskPool;
+  private startQueue: Array<() => void> = [];
   private middleware = {
     beforeSave: async (saveOpts: BeforeSaveMiddlewareParams) => saveOpts,
     beforeRun: async (runOpts: RunContext) => runOpts,
@@ -55,67 +63,84 @@ export class TaskManager {
    * mechanism.
    */
   constructor(opts: TaskManagerOpts) {
-    const { server } = opts.kbnServer;
     this.maxWorkers = opts.config.get('xpack.task_manager.max_workers');
-    this.overrideNumWorkers = opts.config.get('xpack.task_manager.override_num_workers');
+    this.pollerInterval = opts.config.get('xpack.task_manager.poll_interval');
     this.definitions = {};
-
-    const logger = new TaskManagerLogger((...args: any[]) => server.log(...args));
+    this.logger = opts.logger;
 
     /* Kibana UUID needs to be pulled live (not cached), as it takes a long time
      * to initialize, and can change after startup */
     const store = new TaskStore({
       serializer: opts.serializer,
       savedObjectsRepository: opts.savedObjectsRepository,
-      callCluster: server.plugins.elasticsearch.getCluster('admin').callWithInternalUser,
+      callCluster: opts.callWithInternalUser,
       index: opts.config.get('xpack.task_manager.index'),
       maxAttempts: opts.config.get('xpack.task_manager.max_attempts'),
       definitions: this.definitions,
     });
     const pool = new TaskPool({
-      logger,
+      logger: this.logger,
       maxWorkers: this.maxWorkers,
     });
     const createRunner = (instance: ConcreteTaskInstance) =>
       new TaskManagerRunner({
-        logger,
+        logger: this.logger,
         instance,
         store,
         definitions: this.definitions,
         beforeRun: this.middleware.beforeRun,
       });
     const poller = new TaskPoller({
-      logger,
+      logger: this.logger,
       pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
       work(): Promise<void> {
         return fillPool(pool.run, store.fetchAvailableTasks, createRunner);
       },
     });
 
-    this.logger = logger;
+    this.pool = pool;
     this.store = store;
     this.poller = poller;
+  }
 
-    opts.kbnServer.afterPluginsInit(() => {
-      // By this point, the plugins had their chance to register task definitions
-      // and we're good to start doing CRUD actions
-      this.isInitialized = true;
-      const startPoller = async () => {
-        await server.kibanaMigrator.awaitMigration();
-        try {
-          await poller.start();
-        } catch (err) {
-          // FIXME: check the type of error to make sure it's actually an ES error
-          logger.warning(`PollError ${err.message}`);
+  /**
+   * Starts up the task manager and starts picking up tasks.
+   */
+  public start() {
+    this.isStarted = true;
+    // Some calls are waiting until task manager is started
+    this.startQueue.forEach(fn => fn());
+    this.startQueue = [];
+    const startPoller = async () => {
+      try {
+        await this.poller.start();
+      } catch (err) {
+        // FIXME: check the type of error to make sure it's actually an ES error
+        this.logger.warn(`PollError ${err.message}`);
 
-          // rety again to initialize store and poller, using the timing of
-          // task_manager's configurable poll interval
-          const retryInterval = opts.config.get('xpack.task_manager.poll_interval');
-          setTimeout(() => startPoller(), retryInterval);
-        }
-      };
-      startPoller();
-    });
+        // rety again to initialize store and poller, using the timing of
+        // task_manager's configurable poll interval
+        const retryInterval = this.pollerInterval;
+        setTimeout(() => startPoller(), retryInterval);
+      }
+    };
+    startPoller();
+  }
+
+  private async waitUntilStarted() {
+    if (!this.isStarted) {
+      await new Promise(resolve => {
+        this.startQueue.push(resolve);
+      });
+    }
+  }
+
+  /**
+   * Stops the task manager and cancels running tasks.
+   */
+  public stop() {
+    this.poller.stop();
+    this.pool.cancelRunningTasks();
   }
 
   /**
@@ -130,11 +155,7 @@ export class TaskManager {
     }
 
     try {
-      const sanitized = sanitizeTaskDefinitions(
-        taskDefinitions,
-        this.maxWorkers,
-        this.overrideNumWorkers
-      );
+      const sanitized = sanitizeTaskDefinitions(taskDefinitions);
 
       Object.assign(this.definitions, sanitized);
     } catch (e) {
@@ -160,7 +181,7 @@ export class TaskManager {
    * @returns {Promise<ConcreteTaskInstance>}
    */
   public async schedule(taskInstance: TaskInstance, options?: any): Promise<ConcreteTaskInstance> {
-    this.assertInitialized('Tasks cannot be scheduled until after task manager is initialized!');
+    await this.waitUntilStarted();
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...options,
       taskInstance,
@@ -177,7 +198,7 @@ export class TaskManager {
    * @returns {Promise<FetchResult>}
    */
   public async fetch(opts: FetchOpts): Promise<FetchResult> {
-    this.assertInitialized('Tasks cannot be fetched before task manager is initialized!');
+    await this.waitUntilStarted();
     return this.store.fetch(opts);
   }
 
@@ -188,7 +209,7 @@ export class TaskManager {
    * @returns {Promise<RemoveResult>}
    */
   public async remove(id: string): Promise<void> {
-    this.assertInitialized('Tasks cannot be removed before task manager is initialized!');
+    await this.waitUntilStarted();
     return this.store.remove(id);
   }
 
@@ -199,20 +220,8 @@ export class TaskManager {
    * @returns void
    */
   private assertUninitialized(message: string) {
-    if (this.isInitialized) {
+    if (this.isStarted) {
       throw new Error(`Cannot ${message} after the task manager is initialized!`);
-    }
-  }
-
-  /**
-   * Ensures task manager IS already initialized
-   *
-   * @param {string} message shown if task manager is not initialized
-   * @returns void
-   */
-  private assertInitialized(message: string) {
-    if (!this.isInitialized) {
-      throw new Error(`NotInitialized: ${message}`);
     }
   }
 }

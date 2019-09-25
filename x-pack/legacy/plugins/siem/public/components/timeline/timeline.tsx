@@ -7,7 +7,6 @@
 import { EuiFlexGroup } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
@@ -35,7 +34,8 @@ import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header';
 import { calculateBodyHeight, combineQueries } from './helpers';
 import { TimelineRefetch } from './refetch_timeline';
-import { TimelineContext } from './timeline_context';
+import { ManageTimelineContext } from './timeline_context';
+import { TimelineKqlFetch } from './fetch_kql_timeline';
 
 const WrappedByAutoSizer = styled.div`
   width: 100%;
@@ -52,6 +52,8 @@ const TimelineContainer = styled(EuiFlexGroup)`
 `;
 
 TimelineContainer.displayName = 'TimelineContainer';
+
+export const isCompactFooter = (width: number): boolean => width < 600;
 
 interface Props {
   browserFields: BrowserFields;
@@ -82,7 +84,7 @@ interface Props {
 }
 
 /** The parent Timeline component */
-export const Timeline = pure<Props>(
+export const Timeline = React.memo<Props>(
   ({
     browserFields,
     columns,
@@ -146,7 +148,7 @@ export const Timeline = pure<Props>(
                 sort={sort}
               />
             </WrappedByAutoSizer>
-
+            <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
             {combinedQueries != null ? (
               <TimelineQuery
                 id={id}
@@ -169,13 +171,18 @@ export const Timeline = pure<Props>(
                   getUpdatedAt,
                   refetch,
                 }) => (
-                  <TimelineRefetch loading={loading} id={id} inspect={inspect} refetch={refetch}>
-                    <TimelineContext.Provider value={{ isLoading: loading }} />
+                  <ManageTimelineContext loading={loading} width={width}>
+                    <TimelineRefetch
+                      id={id}
+                      inputId="timeline"
+                      inspect={inspect}
+                      loading={loading}
+                      refetch={refetch}
+                    />
                     <StatefulBody
                       browserFields={browserFields}
                       data={events}
                       id={id}
-                      isLoading={loading}
                       height={calculateBodyHeight({
                         flyoutHeight,
                         flyoutHeaderHeight,
@@ -184,7 +191,6 @@ export const Timeline = pure<Props>(
                       })}
                       sort={sort}
                       toggleColumn={toggleColumn}
-                      width={width}
                     />
                     <Footer
                       serverSideEventCount={totalCount}
@@ -200,9 +206,9 @@ export const Timeline = pure<Props>(
                       nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                       tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
                       getUpdatedAt={getUpdatedAt}
-                      width={width}
+                      compact={isCompactFooter(width)}
                     />
-                  </TimelineRefetch>
+                  </ManageTimelineContext>
                 )}
               </TimelineQuery>
             ) : null}

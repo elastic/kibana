@@ -26,13 +26,11 @@ import openRowHtml from './table_row/open.html';
 import detailsHtml from './table_row/details.html';
 import { uiModules } from 'ui/modules';
 import { disableFilter } from '@kbn/es-query';
-import { dispatchRenderComplete } from 'ui/render_complete';
+import { dispatchRenderComplete } from '../../../../../../../plugins/kibana_utils/public';
 import cellTemplateHtml from '../components/table_row/cell.html';
 import truncateByHeightTemplateHtml from '../components/table_row/truncate_by_height.html';
 
 const module = uiModules.get('app/discover');
-
-
 
 // guesstimate at the minimum number of chars wide cells in the table should be
 const MIN_LINE_LENGTH = 20;
@@ -93,18 +91,14 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
 
         // empty the details and rebuild it
         $detailsTr.html(detailsHtml);
-
         $detailsScope.row = $scope.row;
-        $detailsScope.uriEncodedId = encodeURIComponent($detailsScope.row._id);
+        $detailsScope.hit = $scope.row;
+        $detailsScope.uriEncodedId = encodeURIComponent($detailsScope.hit._id);
 
         $compile($detailsTr)($detailsScope);
       };
 
-      $scope.$watchMulti([
-        'indexPattern.timeFieldName',
-        'row.highlight',
-        '[]columns'
-      ], function () {
+      $scope.$watchMulti(['indexPattern.timeFieldName', 'row.highlight', '[]columns'], function () {
         createSummaryRow($scope.row, $scope.row._id);
       });
 
@@ -115,9 +109,8 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
       };
 
       $scope.getContextAppHref = () => {
-        const path = kbnUrl.eval('#/context/{{ indexPattern }}/{{ anchorType }}/{{ anchorId }}', {
+        const path = kbnUrl.eval('#/context/{{ indexPattern }}/{{ anchorId }}', {
           anchorId: $scope.row._id,
-          anchorType: $scope.row._type,
           indexPattern: $scope.indexPattern.id,
         });
         const hash = $httpParamSerializer({
@@ -135,37 +128,38 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
         $scope.flattenedRow = indexPattern.flattenHit(row);
 
         // We just create a string here because its faster.
-        const newHtmls = [
-          openRowHtml
-        ];
+        const newHtmls = [openRowHtml];
 
         const mapping = indexPattern.fields.byName;
         const hideTimeColumn = config.get('doc_table:hideTimeColumn');
         if (indexPattern.timeFieldName && !hideTimeColumn) {
-          newHtmls.push(cellTemplate({
-            timefield: true,
-            formatted: _displayField(row, indexPattern.timeFieldName),
-            filterable: (
-              mapping[indexPattern.timeFieldName].filterable
-              && _.isFunction($scope.filter)
-            ),
-            column: indexPattern.timeFieldName
-          }));
+          newHtmls.push(
+            cellTemplate({
+              timefield: true,
+              formatted: _displayField(row, indexPattern.timeFieldName),
+              filterable:
+                mapping[indexPattern.timeFieldName].filterable && _.isFunction($scope.filter),
+              column: indexPattern.timeFieldName,
+            })
+          );
         }
 
         $scope.columns.forEach(function (column) {
-          const isFilterable = $scope.flattenedRow[column] !== undefined
-            && mapping[column]
-            && mapping[column].filterable
-            && _.isFunction($scope.filter);
+          const isFilterable =
+            $scope.flattenedRow[column] !== undefined &&
+            mapping[column] &&
+            mapping[column].filterable &&
+            _.isFunction($scope.filter);
 
-          newHtmls.push(cellTemplate({
-            timefield: false,
-            sourcefield: (column === '_source'),
-            formatted: _displayField(row, column, true),
-            filterable: isFilterable,
-            column
-          }));
+          newHtmls.push(
+            cellTemplate({
+              timefield: false,
+              sourcefield: column === '_source',
+              formatted: _displayField(row, column, true),
+              filterable: isFilterable,
+              column,
+            })
+          );
         });
 
         let $cells = $el.children();
@@ -213,12 +207,12 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
 
         if (truncate && text.length > MIN_LINE_LENGTH) {
           return truncateByHeightTemplate({
-            body: text
+            body: text,
           });
         }
 
         return text;
       }
-    }
+    },
   };
 });

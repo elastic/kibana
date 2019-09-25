@@ -25,7 +25,6 @@ export class FieldChooser extends Component {
     fields: PropTypes.array.isRequired,
     selectedFields: PropTypes.array.isRequired,
     onSelectField: PropTypes.func.isRequired,
-    columns: PropTypes.array.isRequired,
     prompt: PropTypes.string,
     dataTestSubj: PropTypes.string,
   }
@@ -136,7 +135,6 @@ export class FieldChooser extends Component {
         </EuiFlyout>
       );
     };
-
     return (
       <Fragment>
         <EuiButton

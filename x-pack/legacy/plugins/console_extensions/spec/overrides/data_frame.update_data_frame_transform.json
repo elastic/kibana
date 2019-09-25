@@ -1,0 +1,24 @@
+{
+  "data_frame.update_data_frame_transform": {
+    "data_autocomplete_rules": {
+      "description": "",
+      "dest": {
+        "index": "SOURCE_INDEX_NAME",
+        "pipeline": ""
+      },
+      "frequency": "",
+      "source": {
+        "index": "SOURCE_INDEX_NAME",
+        "query": {
+          "__scope_link": "GLOBAL.query"
+        }
+      },
+      "sync": {
+        "time": {
+          "field":  "FIELD_NAME",
+          "delay": ""
+        }
+      }
+    }
+  }
+}

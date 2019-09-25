@@ -152,7 +152,6 @@
   margin: 0 $euiSize;
   border-radius: $euiSizeXS;
   cursor: pointer;
-  width: calc(100% - $euiSizeXL);
 
   &:hover {
     background: $euiFocusBackgroundColor;
@@ -165,18 +164,18 @@
 
 .codeSearch-suggestion--inner {
   display: flex;
-  align-items: stretch;
   flex-grow: 1;
   align-items: center;
   white-space: nowrap;
 }
 
+.codeSearch__suggestionTextContainer {
+  min-width: 0;
+  flex: 1;
+}
+
 .codeSearch__suggestion-text {
   color: $euiColorFullShade;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 0;
-  flex-basis: auto;
   font-family: $euiCodeFontFamily;
   margin-right: $euiSizeXL;
   width: auto;
@@ -228,10 +227,6 @@
 }
 
 .codeSearch-suggestion__description {
-  flex-grow: 1;
-  flex-basis: 0%;
-  display: flex;
-  flex-direction: column;
   color: $euiColorDarkShade;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -242,9 +237,7 @@
 .codeSearch-suggestion__token {
   color: $euiColorFullShade;
   box-sizing: border-box;
-  flex-grow: 0;
-  flex-basis: auto;
-  width: $euiSizeXL;
+  flex: 0 0 $euiSizeXL;
   height: $euiSizeXL;
   text-align: center;
   overflow: hidden;
@@ -292,4 +285,28 @@
   margin-left: $euiSize;
   border-left: $euiBorderThin;
   width: 300px !important;
+}
+
+.codeBranchSelectorTabs {
+  @include euiScrollBar;
+  max-height: calc(100vh - 19rem);
+  overflow: auto;
+}
+
+.codeBranchSelectorTabContentContainer {
+  padding-top: $euiSizeS;
+}
+
+.codeBranchSelectorPopover {
+  margin-top: $euiSizeXS;
+  padding-top: $euiSizeS !important;
+}
+
+.codeBranchSelectorRevisionItem:hover *,
+.codeBranchSelectorRevisionItem:focus * {
+  text-decoration: none !important;
+  &:focus,
+  &:hover {
+    text-decoration: none !important;
+  }
 }

@@ -23,6 +23,8 @@ import { createStore, networkModel, State } from '../../../../store';
 import { DomainsTable } from '.';
 import { mockDomainsData } from './mock';
 
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+
 describe('Domains Table Component', () => {
   const loadPage = jest.fn();
   const ip = '10.10.10.10';
@@ -45,6 +47,7 @@ describe('Domains Table Component', () => {
             id="domains"
             indexPattern={mockIndexPattern}
             ip={ip}
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -74,6 +77,7 @@ describe('Domains Table Component', () => {
               id="domains"
               indexPattern={mockIndexPattern}
               ip={ip}
+              isInspect={false}
               loading={false}
               loadPage={loadPage}
               showMorePagesIndicator={getOr(

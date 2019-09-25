@@ -9,7 +9,11 @@ import { HttpInterceptor, HttpErrorResponse, HttpResponse } from 'src/core/publi
 import { AnonymousPaths } from '../anonymous_paths';
 import { ISessionTimeout } from './session_timeout';
 
-const isSystemAPIRequest = (request: Request) => {
+const isSystemAPIRequest = (request?: Request) => {
+  if (request == null) {
+    // TODO: How is is request potentially undefined here???
+    return false;
+  }
   return request.headers.has('kbn-system-api');
 };
 

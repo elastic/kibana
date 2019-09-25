@@ -16,91 +16,144 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
+import { colorSchemas } from 'ui/vislib/components/color/truncated_colormaps';
 import { mapToLayerWithId } from './util';
 import { createRegionMapVisualization } from './region_map_visualization';
 import { Status } from 'ui/vis/update_status';
+import { RegionMapOptions } from './components/region_map_options';
 
 import { visFactory } from '../../visualizations/public';
 
 // TODO: reference to TILE_MAP plugin should be removed
-import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
+import { ORIGIN } from '../../tile_map/common/origin';
 
 export function createRegionMapTypeDefinition(dependencies) {
-  const { uiSettings, regionmapsConfig } = dependencies;
-  const RegionMapsVisualization = createRegionMapVisualization(dependencies);
-  const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, ORIGIN.KIBANA_YML));
-  const selectedLayer = vectorLayers[0];
-  const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;
+  const { uiSettings, regionmapsConfig, serviceSettings } = dependencies;
+  const visualization = createRegionMapVisualization(dependencies);
 
   return visFactory.createBaseVisualization({
     name: 'region_map',
     title: i18n.translate('regionMap.mapVis.regionMapTitle', { defaultMessage: 'Region Map' }),
-    description: i18n.translate('regionMap.mapVis.regionMapDescription', { defaultMessage: 'Show metrics on a thematic map. Use one of the \
-provided base maps, or add your own. Darker colors represent higher values.' }),
+    description: i18n.translate('regionMap.mapVis.regionMapDescription', {
+      defaultMessage:
+        'Show metrics on a thematic map. Use one of the \
+provided base maps, or add your own. Darker colors represent higher values.',
+    }),
     icon: 'visMapRegion',
     visConfig: {
       defaults: {
         legendPosition: 'bottomright',
         addTooltip: true,
         colorSchema: 'Yellow to Red',
-        selectedLayer: selectedLayer,
         emsHotLink: '',
-        selectedJoinField: selectedJoinField,
         isDisplayWarning: true,
         wms: uiSettings.get('visualization:tileMap:WMSdefaults'),
         mapZoom: 2,
         mapCenter: [0, 0],
         outlineWeight: 1,
-        showAllShapes: true//still under consideration
-      }
+        showAllShapes: true, //still under consideration
+      },
     },
     requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.DATA, Status.UI_STATE],
-    visualization: RegionMapsVisualization,
+    visualization,
     editorConfig: {
-      optionsTemplate: '<region_map-vis-params></region_map-vis-params>',
+      optionsTemplate: props => (
+        <RegionMapOptions
+          {...props}
+          serviceSettings={serviceSettings}
+        />),
       collections: {
-        legendPositions: [{
-          value: 'bottomleft',
-          text: i18n.translate('regionMap.mapVis.regionMapEditorConfig.bottomLeftText', { defaultMessage: 'bottom left' }),
-        }, {
-          value: 'bottomright',
-          text: i18n.translate('regionMap.mapVis.regionMapEditorConfig.bottomRightText', { defaultMessage: 'bottom right' }),
-        }, {
-          value: 'topleft',
-          text: i18n.translate('regionMap.mapVis.regionMapEditorConfig.topLeftText', { defaultMessage: 'top left' }),
-        }, {
-          value: 'topright',
-          text: i18n.translate('regionMap.mapVis.regionMapEditorConfig.topRightText', { defaultMessage: 'top right' }),
-        }],
-        colorSchemas: Object.values(truncatedColorMaps).map(value => ({ id: value.id, label: value.label })),
-        vectorLayers: vectorLayers,
-        tmsLayers: []
+        colorSchemas,
+        vectorLayers: [],
+        tmsLayers: [],
       },
       schemas: new Schemas([
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n.translate('regionMap.mapVis.regionMapEditorConfig.schemas.metricTitle', { defaultMessage: 'Value' }),
+          title: i18n.translate('regionMap.mapVis.regionMapEditorConfig.schemas.metricTitle', {
+            defaultMessage: 'Value',
+          }),
           min: 1,
           max: 1,
-          aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits',
-            'sum_bucket', 'min_bucket', 'max_bucket', 'avg_bucket'],
-          defaults: [
-            { schema: 'metric', type: 'count' }
-          ]
+          aggFilter: [
+            'count',
+            'avg',
+            'sum',
+            'min',
+            'max',
+            'cardinality',
+            'top_hits',
+            'sum_bucket',
+            'min_bucket',
+            'max_bucket',
+            'avg_bucket',
+          ],
+          defaults: [{ schema: 'metric', type: 'count' }],
         },
         {
           group: 'buckets',
           name: 'segment',
-          title: i18n.translate('regionMap.mapVis.regionMapEditorConfig.schemas.segmentTitle', { defaultMessage: 'Shape field' }),
+          title: i18n.translate('regionMap.mapVis.regionMapEditorConfig.schemas.segmentTitle', {
+            defaultMessage: 'Shape field',
+          }),
           min: 1,
           max: 1,
-          aggFilter: ['terms']
+          aggFilter: ['terms'],
+        },
+      ]),
+    },
+    setup: async (savedVis) => {
+      const vis = savedVis.vis;
+
+      const tmsLayers = await serviceSettings.getTMSServices();
+      vis.type.editorConfig.collections.tmsLayers = tmsLayers;
+      if (!vis.params.wms.selectedTmsLayer && tmsLayers.length) {
+        vis.params.wms.selectedTmsLayer = tmsLayers[0];
+      }
+
+      const vectorLayers = regionmapsConfig.layers.map(
+        mapToLayerWithId.bind(null, ORIGIN.KIBANA_YML)
+      );
+      let selectedLayer = vectorLayers[0];
+      let selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
+      if (regionmapsConfig.includeElasticMapsService) {
+        const layers = await serviceSettings.getFileLayers();
+        const newLayers = layers
+          .map(mapToLayerWithId.bind(null, ORIGIN.EMS))
+          .filter(
+            (layer) =>
+              !vectorLayers.some(vectorLayer => vectorLayer.layerId === layer.layerId)
+          );
+
+        // backfill v1 manifest for now
+        newLayers.forEach((layer) => {
+          if (layer.format === 'geojson') {
+            layer.format = {
+              type: 'geojson',
+            };
+          }
+        });
+
+        vis.type.editorConfig.collections.vectorLayers = [...vectorLayers, ...newLayers];
+
+        [selectedLayer] = vis.type.editorConfig.collections.vectorLayers;
+        selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
+
+        if (selectedLayer && !vis.params.selectedLayer && selectedLayer.isEMS) {
+          vis.params.emsHotLink = await serviceSettings.getEMSHotLink(selectedLayer);
         }
-      ])
-    }
+      }
+
+      if (!vis.params.selectedLayer) {
+        vis.params.selectedLayer = selectedLayer;
+        vis.params.selectedJoinField = selectedJoinField;
+      }
+
+      return savedVis;
+    },
   });
 }

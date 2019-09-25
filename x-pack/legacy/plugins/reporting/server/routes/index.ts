@@ -8,9 +8,8 @@ import boom from 'boom';
 import { Request, ResponseToolkit } from 'hapi';
 import { API_BASE_URL } from '../../common/constants';
 import { KbnServer, Logger } from '../../types';
-// @ts-ignore
 import { enqueueJobFactory } from '../lib/enqueue_job';
-import { registerGenerate } from './generate';
+import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
 import { registerJobs } from './jobs';
@@ -35,7 +34,7 @@ export function registerRoutes(server: KbnServer, logger: Logger) {
     const user = request.pre.user;
     const headers = request.headers;
 
-    const job = await enqueueJob(exportTypeId, jobParams, user, headers, request);
+    const job = await enqueueJob(logger, exportTypeId, jobParams, user, headers, request);
 
     // return the queue's job information
     const jobJson = job.toJSON();
@@ -61,7 +60,7 @@ export function registerRoutes(server: KbnServer, logger: Logger) {
     return err;
   }
 
-  registerGenerate(server, handler, handleError);
+  registerGenerateFromJobParams(server, handler, handleError);
   registerLegacy(server, handler, handleError);
 
   // Register beta panel-action download-related API's

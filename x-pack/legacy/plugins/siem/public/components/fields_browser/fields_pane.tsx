@@ -33,10 +33,7 @@ const NoFieldsFlexGroup = styled(EuiFlexGroup)`
 
 NoFieldsFlexGroup.displayName = 'NoFieldsFlexGroup';
 
-type Props = Pick<
-  FieldBrowserProps,
-  'isLoading' | 'onFieldSelected' | 'onUpdateColumns' | 'timelineId'
-> & {
+type Props = Pick<FieldBrowserProps, 'onFieldSelected' | 'onUpdateColumns' | 'timelineId'> & {
   columnHeaders: ColumnHeader[];
   /**
    * A map of categoryId -> metadata about the fields in that category,
@@ -66,7 +63,6 @@ export const FieldsPane = pure<Props>(
   ({
     columnHeaders,
     filteredBrowserFields,
-    isLoading,
     onCategorySelected,
     onUpdateColumns,
     searchInput,
@@ -87,7 +83,6 @@ export const FieldsPane = pure<Props>(
             categoryId: selectedCategoryId,
             columnHeaders,
             highlight: searchInput,
-            isLoading,
             onUpdateColumns,
             timelineId,
             toggleColumn,

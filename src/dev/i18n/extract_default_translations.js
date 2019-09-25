@@ -26,7 +26,7 @@ import {
 } from './extractors';
 import { globAsync, readFileAsync, normalizePath } from './utils';
 
-import { createFailError, isFailError } from '../run';
+import { createFailError, isFailError } from '@kbn/dev-utils';
 
 function addMessageToMap(targetMap, key, value, reporter) {
   const existingValue = targetMap.get(key);

@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`is rendered 1`] = `
+<ExitFullScreenButtonUi
+  onExitFullScreenMode={[Function]}
+>
+  <div>
+    <EuiScreenReaderOnly>
+      <p
+        aria-live="polite"
+        className="euiScreenReaderOnly"
+      >
+        In full screen mode, press ESC to exit.
+      </p>
+    </EuiScreenReaderOnly>
+    <div
+      className="dshExitFullScreenButton"
+    >
+      <KuiButton
+        aria-label="Exit full screen mode"
+        className="dshExitFullScreenButton__mode"
+        onClick={[Function]}
+        type="hollow"
+      >
+        <button
+          aria-label="Exit full screen mode"
+          className="kuiButton dshExitFullScreenButton__mode"
+          onClick={[Function]}
+          type="hollow"
+        >
+          <ContentWithIcon
+            iconPosition="left"
+          >
+            <span
+              className="kuiButton__inner"
+            >
+              <span>
+                <span
+                  className="dshExitFullScreenButton__logo"
+                  data-test-subj="exitFullScreenModeLogo"
+                />
+                <span
+                  className="dshExitFullScreenButton__text"
+                  data-test-subj="exitFullScreenModeText"
+                >
+                  Exit full screen
+                  <span
+                    className="kuiIcon fa fa-angle-left"
+                  />
+                </span>
+              </span>
+            </span>
+          </ContentWithIcon>
+        </button>
+      </KuiButton>
+    </div>
+  </div>
+</ExitFullScreenButtonUi>
+`;

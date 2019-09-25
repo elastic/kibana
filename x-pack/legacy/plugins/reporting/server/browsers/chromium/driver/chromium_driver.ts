@@ -5,22 +5,17 @@
  */
 
 import open from 'opn';
-// @ts-ignore
-import * as puppeteer from 'puppeteer-core';
 import { parse as parseUrl } from 'url';
+import { Page, SerializableOrJSHandle, EvaluateFn } from 'puppeteer';
 import { ViewZoomWidthHeight } from '../../../../export_types/common/layouts/layout';
+import { LevelLogger } from '../../../../server/lib';
 import {
   ConditionalHeaders,
   ConditionalHeadersConditions,
   ElementPosition,
-  EvalArgs,
-  EvalFn,
-  EvaluateOptions,
-  Logger,
 } from '../../../../types';
 
 export interface ChromiumDriverOptions {
-  logger: Logger;
   inspect: boolean;
 }
 
@@ -31,14 +26,11 @@ interface WaitForSelectorOpts {
 const WAIT_FOR_DELAY_MS: number = 100;
 
 export class HeadlessChromiumDriver {
-  private readonly page: puppeteer.Page;
-  private readonly logger: Logger;
+  private readonly page: Page;
   private readonly inspect: boolean;
 
-  constructor(page: puppeteer.Page, { logger, inspect }: ChromiumDriverOptions) {
+  constructor(page: Page, { inspect }: ChromiumDriverOptions) {
     this.page = page;
-    // @ts-ignore https://github.com/elastic/kibana/issues/32140
-    this.logger = logger.clone(['headless-chromium-driver']);
     this.inspect = inspect;
   }
 
@@ -47,13 +39,16 @@ export class HeadlessChromiumDriver {
     {
       conditionalHeaders,
       waitForSelector,
-    }: { conditionalHeaders: ConditionalHeaders; waitForSelector: string }
+    }: { conditionalHeaders: ConditionalHeaders; waitForSelector: string },
+    logger: LevelLogger
   ) {
-    this.logger.debug(`opening url ${url}`);
+    logger.info(`opening url ${url}`);
     await this.page.setRequestInterception(true);
+    let interceptedCount = 0;
     this.page.on('request', (interceptedRequest: any) => {
+      let isData = false;
       if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedRequest.url())) {
-        this.logger.debug(`Using custom headers for ${interceptedRequest.url()}`);
+        logger.debug(`Using custom headers for ${interceptedRequest.url()}`);
         interceptedRequest.continue({
           headers: {
             ...interceptedRequest.headers(),
@@ -62,13 +57,17 @@ export class HeadlessChromiumDriver {
         });
       } else {
         let interceptedUrl = interceptedRequest.url();
+
         if (interceptedUrl.startsWith('data:')) {
           // `data:image/xyz;base64` can be very long URLs
           interceptedUrl = interceptedUrl.substring(0, 100) + '[truncated]';
+          isData = true;
         }
-        this.logger.debug(`No custom headers for ${interceptedUrl}`);
+
+        logger.debug(`No custom headers for ${interceptedUrl}`);
         interceptedRequest.continue();
       }
+      interceptedCount = interceptedCount + (isData ? 0 : 1);
     });
 
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
@@ -77,7 +76,8 @@ export class HeadlessChromiumDriver {
       await this.launchDebugger();
     }
 
-    await this.waitForSelector(waitForSelector);
+    await this.waitForSelector(waitForSelector, {}, logger);
+    logger.info(`handled ${interceptedCount} page requests`);
   }
 
   public async screenshot(elementPosition: ElementPosition) {
@@ -99,14 +99,18 @@ export class HeadlessChromiumDriver {
     return screenshot.toString('base64');
   }
 
-  public async evaluate({ fn, args = [] }: EvaluateOptions) {
+  public async evaluate({ fn, args = [] }: { fn: EvaluateFn; args: SerializableOrJSHandle[] }) {
     const result = await this.page.evaluate(fn, ...args);
     return result;
   }
 
-  public async waitForSelector(selector: string, opts: WaitForSelectorOpts = {}) {
+  public async waitForSelector(
+    selector: string,
+    opts: WaitForSelectorOpts = {},
+    logger: LevelLogger
+  ) {
     const { silent = false } = opts;
-    this.logger.debug(`waitForSelector ${selector}`);
+    logger.debug(`waitForSelector ${selector}`);
 
     let resp;
     try {
@@ -115,21 +119,29 @@ export class HeadlessChromiumDriver {
       if (!silent) {
         // Provide some troubleshooting info to see if we're on the login page,
         // "Kibana could not load correctly", etc
-        this.logger.error(`waitForSelector ${selector} failed on ${this.page.url()}`);
+        logger.error(`waitForSelector ${selector} failed on ${this.page.url()}`);
         const pageText = await this.evaluate({
           fn: () => document.querySelector('body')!.innerText,
           args: [],
         });
-        this.logger.debug(`Page plain text: ${pageText.replace(/\n/g, '\\n')}`); // replace newline with escaped for single log line
+        logger.debug(`Page plain text: ${pageText.replace(/\n/g, '\\n')}`); // replace newline with escaped for single log line
       }
       throw err;
     }
 
-    this.logger.debug(`waitForSelector ${selector} resolved`);
+    logger.debug(`waitForSelector ${selector} resolved`);
     return resp;
   }
 
-  public async waitFor<T>({ fn, args, toEqual }: { fn: EvalFn<T>; args: EvalArgs; toEqual: T }) {
+  public async waitFor<T>({
+    fn,
+    args,
+    toEqual,
+  }: {
+    fn: EvaluateFn;
+    args: SerializableOrJSHandle[];
+    toEqual: T;
+  }) {
     while (true) {
       const result = await this.evaluate({ fn, args });
       if (result === toEqual) {
@@ -140,8 +152,8 @@ export class HeadlessChromiumDriver {
     }
   }
 
-  public async setViewport({ width, height, zoom }: ViewZoomWidthHeight) {
-    this.logger.debug(`Setting viewport to width: ${width}, height: ${height}, zoom: ${zoom}`);
+  public async setViewport({ width, height, zoom }: ViewZoomWidthHeight, logger: LevelLogger) {
+    logger.debug(`Setting viewport to width: ${width}, height: ${height}, zoom: ${zoom}`);
 
     await this.page.setViewport({
       width: Math.floor(width / zoom),

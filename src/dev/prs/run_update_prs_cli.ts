@@ -25,8 +25,8 @@ import chalk from 'chalk';
 import { first, tap } from 'rxjs/operators';
 import dedent from 'dedent';
 
+import { run, createFlagError } from '@kbn/dev-utils';
 import { getLine$ } from './helpers';
-import { run, createFlagError } from '../run';
 import { Pr } from './pr';
 import { GithubApi } from './github_api';
 

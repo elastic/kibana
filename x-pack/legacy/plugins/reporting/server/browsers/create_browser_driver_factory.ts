@@ -11,10 +11,14 @@ import { ensureBrowserDownloaded } from './download';
 import { installBrowser } from './install';
 import { LevelLogger } from '../lib/level_logger';
 import { KbnServer } from '../../types';
+import { PLUGIN_ID } from '../../common/constants';
+import { HeadlessChromiumDriverFactory } from './chromium/driver_factory';
 
-export async function createBrowserDriverFactory(server: KbnServer) {
+export async function createBrowserDriverFactory(
+  server: KbnServer
+): Promise<HeadlessChromiumDriverFactory> {
   const config = server.config();
-  const logger = LevelLogger.createForServer(server, ['reporting', 'browser-driver']);
+  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'browser-driver']);
 
   const DATA_DIR = config.get('path.data');
   const CAPTURE_CONFIG = config.get('xpack.reporting.capture');
@@ -23,21 +27,17 @@ export async function createBrowserDriverFactory(server: KbnServer) {
   const BROWSER_CONFIG = CAPTURE_CONFIG.browser[BROWSER_TYPE];
   const REPORTING_TIMEOUT = config.get('xpack.reporting.queue.timeout');
 
+  if (BROWSER_CONFIG.disableSandbox) {
+    logger.warning(`Enabling the Chromium sandbox provides an additional layer of protection.`);
+  }
   if (BROWSER_AUTO_DOWNLOAD) {
     await ensureBrowserDownloaded(BROWSER_TYPE);
   }
 
   try {
-    const browser = BROWSERS_BY_TYPE[BROWSER_TYPE];
+    const browser = BROWSERS_BY_TYPE[BROWSER_TYPE]; // NOTE: unecessary indirection: this is always a Chromium browser object, as of PhantomJS removal
     const { binaryPath } = await installBrowser(logger, browser, DATA_DIR);
-    const browserDriverFactory = browser.createDriverFactory(
-      binaryPath,
-      logger,
-      BROWSER_CONFIG,
-      REPORTING_TIMEOUT
-    );
-    logger.debug(`Browser installed at ${browserDriverFactory.binaryPath}`);
-    return browserDriverFactory;
+    return browser.createDriverFactory(binaryPath, logger, BROWSER_CONFIG, REPORTING_TIMEOUT);
   } catch (error) {
     if (error.cause && ['EACCES', 'EEXIST'].includes(error.cause.code)) {
       logger.error(

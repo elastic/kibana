@@ -20,17 +20,33 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { SearchBar } from './search_bar';
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from '../../../index_patterns';
 
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
-const setupMock = coreMock.createSetup();
+const startMock = coreMock.createStart();
+
+import { timefilterServiceMock } from '../../../timefilter/timefilter_service.mock';
+const timefilterSetupMock = timefilterServiceMock.createSetupContract();
 
 jest.mock('../../../../../data/public', () => {
   return {
     FilterBar: () => <div className="filterBar"></div>,
-    QueryBar: () => <div className="queryBar"></div>,
+    QueryBarInput: () => <div className="queryBar"></div>,
   };
 });
+
+jest.mock('../../../query/query_bar', () => {
+  return {
+    QueryBarTopRow: () => <div className="queryBar"></div>,
+  };
+});
+
+jest.mock('ui/notify', () => ({
+  toastNotifications: {
+    addSuccess: () => {},
+    addDanger: () => {},
+  },
+}));
 
 const noop = jest.fn();
 
@@ -83,10 +99,14 @@ describe('SearchBar', () => {
   it('Should render query bar when no options provided (in reality - timepicker)', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
-        uiSettings={setupMock.uiSettings}
+        savedObjectsClient={startMock.savedObjects.client}
+        uiSettings={startMock.uiSettings}
+        timeHistory={timefilterSetupMock.history}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
       />
     );
 
@@ -98,10 +118,14 @@ describe('SearchBar', () => {
   it('Should render empty when timepicker is off and no options provided', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
-        uiSettings={setupMock.uiSettings}
+        savedObjectsClient={startMock.savedObjects.client}
+        uiSettings={startMock.uiSettings}
+        timeHistory={timefilterSetupMock.history}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         showDatePicker={false}
       />
     );
@@ -114,10 +138,14 @@ describe('SearchBar', () => {
   it('Should render filter bar, when required fields are provided', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
-        uiSettings={setupMock.uiSettings}
+        savedObjectsClient={startMock.savedObjects.client}
+        uiSettings={startMock.uiSettings}
+        timeHistory={timefilterSetupMock.history}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         filters={[]}
         onFiltersUpdated={noop}
         showDatePicker={false}
@@ -132,10 +160,14 @@ describe('SearchBar', () => {
   it('Should NOT render filter bar, if disabled', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
-        uiSettings={setupMock.uiSettings}
+        savedObjectsClient={startMock.savedObjects.client}
+        uiSettings={startMock.uiSettings}
+        timeHistory={timefilterSetupMock.history}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         showFilterBar={false}
         filters={[]}
         onFiltersUpdated={noop}
@@ -151,10 +183,14 @@ describe('SearchBar', () => {
   it('Should render query bar, when required fields are provided', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
-        uiSettings={setupMock.uiSettings}
+        savedObjectsClient={startMock.savedObjects.client}
+        uiSettings={startMock.uiSettings}
+        timeHistory={timefilterSetupMock.history}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         screenTitle={'test screen'}
         store={createMockStorage()}
         onQuerySubmit={noop}
@@ -170,10 +206,14 @@ describe('SearchBar', () => {
   it('Should NOT render query bar, if disabled', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
-        uiSettings={setupMock.uiSettings}
+        uiSettings={startMock.uiSettings}
+        savedObjectsClient={startMock.savedObjects.client}
+        timeHistory={timefilterSetupMock.history}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         screenTitle={'test screen'}
         store={createMockStorage()}
         onQuerySubmit={noop}
@@ -190,10 +230,14 @@ describe('SearchBar', () => {
   it('Should render query bar and filter bar', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
-        uiSettings={setupMock.uiSettings}
+        timeHistory={timefilterSetupMock.history}
+        uiSettings={startMock.uiSettings}
+        savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         screenTitle={'test screen'}
         store={createMockStorage()}
         onQuerySubmit={noop}

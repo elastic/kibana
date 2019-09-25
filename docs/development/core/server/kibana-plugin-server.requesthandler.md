@@ -9,7 +9,7 @@ A function executed when route path matched requested resource path. Request han
 <b>Signature:</b>
 
 ```typescript
-export declare type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (context: {}, request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>, response: KibanaResponseFactory) => KibanaResponse<any> | Promise<KibanaResponse<any>>;
+export declare type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (context: RequestHandlerContext, request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>, response: KibanaResponseFactory) => KibanaResponse<any> | Promise<KibanaResponse<any>>;
 ```
 
 ## Example

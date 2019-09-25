@@ -30,6 +30,10 @@ export const SplitFieldSelector: FC = () => {
 
   useEffect(() => {
     jobCreator.setSplitField(splitField);
+    // add the split field to the influencers
+    if (splitField !== null && jobCreator.influencers.includes(splitField.name) === false) {
+      jobCreator.addInfluencer(splitField.name);
+    }
     jobCreatorUpdate();
   }, [splitField]);
 
@@ -44,6 +48,13 @@ export const SplitFieldSelector: FC = () => {
         changeHandler={setSplitField}
         selectedField={splitField}
         isClearable={canClearSelection}
+        testSubject={
+          isMultiMetricJobCreator(jc)
+            ? 'multiMetricSplitFieldSelect'
+            : isPopulationJobCreator(jc)
+            ? 'populationSplitFieldSelect'
+            : undefined
+        }
       />
     </Description>
   );

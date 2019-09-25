@@ -21,7 +21,7 @@ import { RENOVATE_PACKAGE_GROUPS } from './package_groups';
 import { PACKAGE_GLOBS } from './package_globs';
 import { wordRegExp, maybeFlatMap, maybeMap, getTypePackageName } from './utils';
 
-const DEFAULT_LABELS = ['release_note:skip', 'renovate', 'v8.0.0', 'v7.3.0'];
+const DEFAULT_LABELS = ['release_note:skip', 'renovate', 'v8.0.0', 'v7.5.0'];
 
 export const RENOVATE_CONFIG = {
   extends: ['config:base'],
@@ -63,9 +63,9 @@ export const RENOVATE_CONFIG = {
 
   /**
    * Policy for how to modify/update existing ranges
-   * pin = convert ranges to exact versions, e.g. ^1.0.0 -> 1.1.0
+   * bump = e.g. bump the range even if the new version satisifies the existing range, e.g. ^1.0.0 -> ^1.1.0
    */
-  rangeStrategy: 'replace',
+  rangeStrategy: 'bump',
 
   npm: {
     /**
@@ -98,8 +98,9 @@ export const RENOVATE_CONFIG = {
 
   /**
    * Limit the number of active PRs renovate will allow
+   * 0 (default) means no limit
    */
-  prConcurrentLimit: 6,
+  prConcurrentLimit: 0,
 
   /**
    * Disable vulnerability alert handling, we handle that separately

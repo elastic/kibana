@@ -153,6 +153,13 @@ export function cloneJob(jobId) {
         // if the job is from a wizards, i.e. contains a created_by property
         // use tempJobCloningObjects to temporarily store the job
         mlJobService.tempJobCloningObjects.job = job;
+
+        if (job.data_counts.earliest_record_timestamp !== undefined && job.data_counts.latest_record_timestamp !== undefined) {
+          // if the job has run before, use the earliest and latest record timestamp
+          // as the cloned job's time range
+          mlJobService.tempJobCloningObjects.start = job.data_counts.earliest_record_timestamp;
+          mlJobService.tempJobCloningObjects.end = job.data_counts.latest_record_timestamp;
+        }
       } else {
         // otherwise use the currentJob
         mlJobService.currentJob = job;

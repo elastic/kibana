@@ -25,7 +25,12 @@ declare module 'elasticsearch' {
     | 'min'
     | 'percentiles'
     | 'sum'
-    | 'extended_stats';
+    | 'extended_stats'
+    | 'filter'
+    | 'filters'
+    | 'cardinality'
+    | 'sampler'
+    | 'value_count';
 
   type AggOptions = AggregationOptionMap & {
     [key: string]: any;
@@ -40,6 +45,10 @@ declare module 'elasticsearch' {
     };
   };
 
+  type SubAggregation<T> = T extends { aggs: any }
+    ? AggregationResultMap<T['aggs']>
+    : {};
+
   // eslint-disable-next-line @typescript-eslint/prefer-interface
   type BucketAggregation<SubAggregationMap, KeyType = string> = {
     buckets: Array<
@@ -47,10 +56,27 @@ declare module 'elasticsearch' {
         key: KeyType;
         key_as_string: string;
         doc_count: number;
-      } & (SubAggregationMap extends { aggs: any }
-        ? AggregationResultMap<SubAggregationMap['aggs']>
-        : {})
+      } & (SubAggregation<SubAggregationMap>)
     >;
+  };
+
+  type FilterAggregation<SubAggregationMap> = {
+    doc_count: number;
+  } & SubAggregation<SubAggregationMap>;
+
+  // eslint-disable-next-line @typescript-eslint/prefer-interface
+  type FiltersAggregation<SubAggregationMap> = {
+    buckets: Array<
+      {
+        doc_count: number;
+      } & SubAggregation<SubAggregationMap>
+    >;
+  };
+
+  type SamplerAggregation<SubAggregationMap> = SubAggregation<
+    SubAggregationMap
+  > & {
+    doc_count: number;
   };
 
   interface AggregatedValue {
@@ -64,7 +90,9 @@ declare module 'elasticsearch' {
         max: AggregatedValue;
         min: AggregatedValue;
         sum: AggregatedValue;
-        terms: BucketAggregation<AggregationOption[AggregationName]>;
+        value_count: AggregatedValue;
+        // Elasticsearch might return terms with numbers, but this is a more limited type
+        terms: BucketAggregation<AggregationOption[AggregationName], string>;
         date_histogram: BucketAggregation<
           AggregationOption[AggregationName],
           number
@@ -105,6 +133,12 @@ declare module 'elasticsearch' {
             lower: number | null;
           };
         };
+        filter: FilterAggregation<AggregationOption[AggregationName]>;
+        filters: FiltersAggregation<AggregationOption[AggregationName]>;
+        cardinality: {
+          value: number;
+        };
+        sampler: SamplerAggregation<AggregationOption[AggregationName]>;
       }[AggregationType & keyof AggregationOption[AggregationName]];
     }
   >;
@@ -115,7 +149,7 @@ declare module 'elasticsearch' {
   > &
     (SearchParams extends { body: Required<AggregationOptionMap> }
       ? {
-          aggregations: AggregationResultMap<SearchParams['body']['aggs']>;
+          aggregations?: AggregationResultMap<SearchParams['body']['aggs']>;
         }
       : {});
 

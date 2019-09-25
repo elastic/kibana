@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import _ from 'lodash';
 
 import { MAPBOX_STYLES } from './mapbox_styles';
 
@@ -78,15 +79,21 @@ export default function ({ getPageObjects, getService }) {
       const layersForVectorSource = mapboxStyle.layers.filter(mbLayer => {
         return mbLayer.id.startsWith(VECTOR_SOURCE_ID);
       });
+      // Color is dynamically obtained from eui source lib
+      const dynamicColor = layersForVectorSource[0].paint['circle-stroke-color'];
 
       //circle layer for points
-      expect(layersForVectorSource[0]).to.eql(MAPBOX_STYLES.POINT_LAYER);
+      expect(layersForVectorSource[0]).to.eql(
+        _.set(MAPBOX_STYLES.POINT_LAYER, 'paint.circle-stroke-color', dynamicColor)
+      );
 
       //fill layer
       expect(layersForVectorSource[1]).to.eql(MAPBOX_STYLES.FILL_LAYER);
 
       //line layer for borders
-      expect(layersForVectorSource[2]).to.eql(MAPBOX_STYLES.LINE_LAYER);
+      expect(layersForVectorSource[2]).to.eql(
+        _.set(MAPBOX_STYLES.LINE_LAYER, 'paint.line-color', dynamicColor)
+      );
 
     });
 

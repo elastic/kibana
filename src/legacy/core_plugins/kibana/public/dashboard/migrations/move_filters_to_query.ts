@@ -24,7 +24,7 @@ export interface Pre600FilterQuery {
   // pre 6.0.0 global query:queryString:options were stored per dashboard and would
   // be applied even if the setting was subsequently removed from the advanced
   // settings. This is considered a bug, and this migration will fix that behavior.
-  query: { query_string: { query: string } & { [key: string]: unknown } };
+  query: { query_string?: { query: string } & { [key: string]: unknown } };
 }
 
 export interface SearchSourcePre600 {
@@ -41,9 +41,7 @@ export interface SearchSource730 {
 }
 
 function isQueryFilter(filter: Filter | { query: unknown }): filter is Pre600FilterQuery {
-  return (
-    filter.query && !(filter as Filter).meta && (filter as Pre600FilterQuery).query.query_string
-  );
+  return filter.query && !(filter as Filter).meta;
 }
 
 export function moveFiltersToQuery(
@@ -67,7 +65,7 @@ export function moveFiltersToQuery(
   searchSource.filter.forEach(filter => {
     if (isQueryFilter(filter)) {
       searchSource730.query = {
-        query: filter.query.query_string.query,
+        query: filter.query.query_string ? filter.query.query_string.query : '',
         language: 'lucene',
       };
     } else {

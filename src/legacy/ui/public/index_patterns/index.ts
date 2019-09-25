@@ -17,31 +17,45 @@
  * under the License.
  */
 
-export { IndexPatternSelect } from './components/index_pattern_select';
-export { Field, FieldType } from './_field';
-export { FieldList } from './_field_list';
-export { IndexPattern, StaticIndexPattern } from './_index_pattern';
-export { IndexPatterns, IndexPatternsProvider } from './index_patterns';
+/**
+ * Nothing to see here!
+ *
+ * Index Patterns have moved to the data plugin, and are being re-exported
+ * from ui/index_patterns for backwards compatibility.
+ */
 
+import { setup as data } from '../../../core_plugins/data/public/legacy';
+
+export const {
+  FieldList, // only used in Discover and StubIndexPattern
+  flattenHitWrapper,
+  formatHitProvider,
+  IndexPatternSelect, // only used in x-pack/plugin/maps and input control vis
+} = data.indexPatterns;
+
+// static code
 export {
+  CONTAINS_SPACES,
+  getFromSavedObject,
+  getRoutes,
+  isFilterable,
+  validateIndexPattern,
+  ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-} from './constants';
-
-export { validateIndexPattern, CONTAINS_SPACES, ILLEGAL_CHARACTERS } from './validate';
-
-export { getRoutes } from './get_routes';
-export { formatHitProvider } from './_format_hit';
-// @ts-ignore
-export { flattenHitWrapper } from './_flatten_hit.js';
-
-export {
   IndexPatternAlreadyExists,
   IndexPatternMissingIndices,
-  NoDefinedIndexPatterns,
   NoDefaultIndexPattern,
-} from './errors';
+  NoDefinedIndexPatterns,
+  mockFields,
+  mockIndexPattern,
+} from '../../../core_plugins/data/public';
 
-export { mockFields, mockIndexPattern } from './fixtures';
-
-export { getFromSavedObject, isFilterable } from './static_utils';
+// types
+export {
+  Field,
+  FieldType,
+  IndexPattern,
+  IndexPatterns,
+  StaticIndexPattern,
+} from '../../../core_plugins/data/public';

@@ -5,6 +5,7 @@
  */
 
 import React, { FC, useContext, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { SplitFieldSelect } from './split_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -39,6 +40,10 @@ export const ByFieldSelector: FC<Props> = ({ detectorIndex }) => {
 
   useEffect(() => {
     jobCreator.setByField(byField, detectorIndex);
+    // add the by field to the influencers
+    if (byField !== null && jobCreator.influencers.includes(byField.name) === false) {
+      jobCreator.addInfluencer(byField.name);
+    }
     jobCreatorUpdate();
   }, [byField]);
 
@@ -53,6 +58,13 @@ export const ByFieldSelector: FC<Props> = ({ detectorIndex }) => {
       changeHandler={setByField}
       selectedField={byField}
       isClearable={true}
+      testSubject="byFieldSelect"
+      placeholder={i18n.translate(
+        'xpack.ml.newJob.wizard.pickFieldsStep.populationField.placeholder',
+        {
+          defaultMessage: 'Split data',
+        }
+      )}
     />
   );
 };

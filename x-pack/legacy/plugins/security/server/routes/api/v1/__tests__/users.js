@@ -10,7 +10,7 @@ import sinon from 'sinon';
 
 import { serverFixture } from '../../../../lib/__tests__/__fixtures__/server';
 import { requestFixture } from '../../../../lib/__tests__/__fixtures__/request';
-import { AuthenticationResult, BasicCredentials } from '../../../../../../../../plugins/security/server';
+import { AuthenticationResult } from '../../../../../../../../plugins/security/server';
 import { initUsersApi } from '../users';
 import * as ClientShield from '../../../../../../../server/lib/get_client_shield';
 import { KibanaRequest } from '../../../../../../../../../src/core/server';
@@ -71,35 +71,31 @@ describe('User routes', () => {
     });
 
     describe('own password', () => {
-      let getUserStub;
       beforeEach(() => {
         request.params.username = request.auth.credentials.username;
-
-        getUserStub = serverStub.plugins.security.getUser
+        loginStub = loginStub
           .withArgs(
-            sinon.match(BasicCredentials.decorateRequest(request, 'user', 'old-password'))
-          );
+            sinon.match.instanceOf(KibanaRequest),
+            { provider: 'basic', value: { username: 'user', password: 'old-password' }, stateless: true }
+          )
+          .resolves(AuthenticationResult.succeeded({}));
       });
 
       it('returns 403 if old password is wrong.', async () => {
-        getUserStub.returns(Promise.reject(new Error('Something went wrong.')));
+        loginStub.resolves(AuthenticationResult.failed(new Error('Something went wrong.')));
 
-        return changePasswordRoute
-          .handler(request)
-          .catch((response) => {
-            sinon.assert.notCalled(clusterStub.callWithRequest);
-            expect(response.isBoom).to.be(true);
-            expect(response.output.payload).to.eql({
-              statusCode: 403,
-              error: 'Forbidden',
-              message: 'Something went wrong.'
-            });
-          });
+        const response = await changePasswordRoute.handler(request);
+
+        sinon.assert.notCalled(clusterStub.callWithRequest);
+        expect(response.isBoom).to.be(true);
+        expect(response.output.payload).to.eql({
+          statusCode: 403,
+          error: 'Unauthorized',
+          message: 'Something went wrong.'
+        });
       });
 
       it(`returns 401 if user can't authenticate with new password.`, async () => {
-        getUserStub.returns(Promise.resolve({}));
-
         loginStub
           .withArgs(
             sinon.match.instanceOf(KibanaRequest),
@@ -107,24 +103,22 @@ describe('User routes', () => {
           )
           .resolves(AuthenticationResult.failed(new Error('Something went wrong.')));
 
-        return changePasswordRoute
-          .handler(request)
-          .catch((response) => {
-            sinon.assert.calledOnce(clusterStub.callWithRequest);
-            sinon.assert.calledWithExactly(
-              clusterStub.callWithRequest,
-              sinon.match.same(request),
-              'shield.changePassword',
-              { username: 'user', body: { password: 'new-password' } }
-            );
+        const response = await changePasswordRoute.handler(request);
 
-            expect(response.isBoom).to.be(true);
-            expect(response.output.payload).to.eql({
-              statusCode: 401,
-              error: 'Unauthorized',
-              message: 'Something went wrong.'
-            });
-          });
+        sinon.assert.calledOnce(clusterStub.callWithRequest);
+        sinon.assert.calledWithExactly(
+          clusterStub.callWithRequest,
+          sinon.match.same(request),
+          'shield.changePassword',
+          { username: 'user', body: { password: 'new-password' } }
+        );
+
+        expect(response.isBoom).to.be(true);
+        expect(response.output.payload).to.eql({
+          statusCode: 401,
+          error: 'Unauthorized',
+          message: 'Something went wrong.'
+        });
       });
 
       it('returns 500 if password update request fails.', async () => {
@@ -134,23 +128,19 @@ describe('User routes', () => {
             'shield.changePassword',
             { username: 'user', body: { password: 'new-password' } }
           )
-          .returns(Promise.reject(new Error('Request failed.')));
+          .rejects(new Error('Request failed.'));
 
-        return changePasswordRoute
-          .handler(request)
-          .catch((response) => {
-            expect(response.isBoom).to.be(true);
-            expect(response.output.payload).to.eql({
-              statusCode: 500,
-              error: 'Internal Server Error',
-              message: 'An internal server error occurred'
-            });
-          });
+        const response = await changePasswordRoute.handler(request);
+
+        expect(response.isBoom).to.be(true);
+        expect(response.output.payload).to.eql({
+          statusCode: 500,
+          error: 'Internal Server Error',
+          message: 'An internal server error occurred'
+        });
       });
 
       it('successfully changes own password if provided old password is correct.', async () => {
-        getUserStub.returns(Promise.resolve({}));
-
         loginStub
           .withArgs(
             sinon.match.instanceOf(KibanaRequest),
@@ -186,19 +176,17 @@ describe('User routes', () => {
           )
           .returns(Promise.reject(new Error('Request failed.')));
 
-        return changePasswordRoute
-          .handler(request)
-          .catch((response) => {
-            sinon.assert.notCalled(serverStub.plugins.security.getUser);
-            sinon.assert.notCalled(loginStub);
+        const response = await changePasswordRoute.handler(request);
 
-            expect(response.isBoom).to.be(true);
-            expect(response.output.payload).to.eql({
-              statusCode: 500,
-              error: 'Internal Server Error',
-              message: 'An internal server error occurred'
-            });
-          });
+        sinon.assert.notCalled(serverStub.plugins.security.getUser);
+        sinon.assert.notCalled(loginStub);
+
+        expect(response.isBoom).to.be(true);
+        expect(response.output.payload).to.eql({
+          statusCode: 500,
+          error: 'Internal Server Error',
+          message: 'An internal server error occurred'
+        });
       });
 
       it('successfully changes user password.', async () => {

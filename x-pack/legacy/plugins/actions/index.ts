@@ -26,7 +26,15 @@ export function actions(kibana: any) {
     config(Joi: Root) {
       return Joi.object()
         .keys({
-          enabled: Joi.boolean().default(true),
+          enabled: Joi.boolean().default(false),
+          whitelistedHosts: Joi.array()
+            .items(
+              Joi.string()
+                .hostname()
+                .allow('*')
+            )
+            .sparse(false)
+            .default([]),
         })
         .default();
     },

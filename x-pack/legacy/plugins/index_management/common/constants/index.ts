@@ -6,6 +6,7 @@
 
 export { PLUGIN } from './plugin';
 export { BASE_PATH } from './base_path';
+export { INVALID_INDEX_PATTERN_CHARS, INVALID_TEMPLATE_NAME_CHARS } from './invalid_characters';
 export * from './index_statuses';
 
 export {
@@ -45,4 +46,7 @@ export {
   UIM_TEMPLATE_DETAIL_PANEL_SETTINGS_TAB,
   UIM_TEMPLATE_DETAIL_PANEL_MAPPINGS_TAB,
   UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB,
+  UIM_TEMPLATE_CREATE,
+  UIM_TEMPLATE_UPDATE,
+  UIM_TEMPLATE_CLONE,
 } from './ui_metric';

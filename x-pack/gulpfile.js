@@ -12,7 +12,6 @@ const gulp = require('gulp');
 const mocha = require('gulp-mocha');
 const multiProcess = require('gulp-multi-process');
 const fancyLog = require('fancy-log');
-const ansiColors = require('ansi-colors');
 const pkg = require('./package.json');
 
 const buildDir = path.resolve(__dirname, 'build');
@@ -23,7 +22,6 @@ const coverageDir = path.resolve(__dirname, 'coverage');
 const gulpHelpers = {
   buildDir,
   buildTarget,
-  colors: ansiColors,
   coverageDir,
   log: fancyLog,
   mocha,

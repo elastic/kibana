@@ -11,6 +11,9 @@ import { AlertTypeRegistry } from './alert_type_registry';
 export type State = Record<string, any>;
 export type Context = Record<string, any>;
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
+export type GetServicesFunction = (request: any) => Services;
+export type GetBasePathFunction = (spaceId?: string) => string;
+export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
 export type Log = (
   tags: string | string[],
@@ -42,6 +45,7 @@ export interface AlertType {
   validate?: {
     params?: { validate: (object: any) => any };
   };
+  actionGroups: string[];
   executor: ({ services, params, state }: AlertExecutorOptions) => Promise<State | void>;
 }
 
@@ -66,6 +70,11 @@ export interface Alert {
   actions: AlertAction[];
   alertTypeParams: Record<string, any>;
   scheduledTaskId?: string;
+  createdBy: string | null;
+  updatedBy: string | null;
+  apiKey?: string;
+  apiKeyOwner?: string;
+  throttle: string | null;
 }
 
 export interface RawAlert extends SavedObjectAttributes {
@@ -75,6 +84,11 @@ export interface RawAlert extends SavedObjectAttributes {
   actions: RawAlertAction[];
   alertTypeParams: SavedObjectAttributes;
   scheduledTaskId?: string;
+  createdBy: string | null;
+  updatedBy: string | null;
+  apiKey?: string;
+  apiKeyOwner?: string;
+  throttle: string | null;
 }
 
 export interface AlertingPlugin {

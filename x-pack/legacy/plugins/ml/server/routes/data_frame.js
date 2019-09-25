@@ -7,6 +7,7 @@
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 import { transformAuditMessagesProvider } from '../models/data_frame/transform_audit_messages';
+import { transformServiceProvider } from '../models/data_frame';
 
 export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
 
@@ -79,12 +80,13 @@ export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route 
   });
 
   route({
-    method: 'DELETE',
-    path: '/api/ml/_data_frame/transforms/{transformId}',
+    method: 'POST',
+    path: '/api/ml/_data_frame/transforms/delete_transforms',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      const { transformId } = request.params;
-      return callWithRequest('ml.deleteDataFrameTransform', { transformId })
+      const { deleteTransforms } = transformServiceProvider(callWithRequest);
+      const { transformsInfo } = request.payload;
+      return deleteTransforms(transformsInfo)
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -107,18 +109,12 @@ export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route 
 
   route({
     method: 'POST',
-    path: '/api/ml/_data_frame/transforms/{transformId}/_start',
+    path: '/api/ml/_data_frame/transforms/start_transforms',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      const options = {
-        transformId: request.params.transformId
-      };
-
-      if (request.query.force !== undefined) {
-        options.force = request.query.force;
-      }
-
-      return callWithRequest('ml.startDataFrameTransform', options)
+      const { startTransforms } = transformServiceProvider(callWithRequest);
+      const { transformsInfo } = request.payload;
+      return startTransforms(transformsInfo)
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -128,22 +124,12 @@ export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route 
 
   route({
     method: 'POST',
-    path: '/api/ml/_data_frame/transforms/{transformId}/_stop',
+    path: '/api/ml/_data_frame/transforms/stop_transforms',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      const options = {
-        transformId: request.params.transformId
-      };
-
-      if (request.query.force !== undefined) {
-        options.force = request.query.force;
-      }
-
-      if (request.query.wait_for_completion !== undefined) {
-        options.waitForCompletion = request.query.wait_for_completion;
-      }
-
-      return callWithRequest('ml.stopDataFrameTransform', options)
+      const { stopTransforms } = transformServiceProvider(callWithRequest);
+      const { transformsInfo } = request.payload;
+      return stopTransforms(transformsInfo)
         .catch(resp => wrapError(resp));
     },
     config: {

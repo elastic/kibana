@@ -18,7 +18,6 @@
  */
 
 import 'ui/registry/field_formats';
-import 'uiExports/autocompleteProviders';
 import 'uiExports/contextMenuActions';
 import 'uiExports/devTools';
 import 'uiExports/docViews';
@@ -33,18 +32,12 @@ import 'uiExports/savedObjectTypes';
 import 'uiExports/search';
 import 'uiExports/shareContextMenuExtensions';
 import 'uiExports/visEditorTypes';
-import 'uiExports/visRequestHandlers';
-import 'uiExports/visResponseHandlers';
 import 'uiExports/visTypes';
 import 'uiExports/visualize';
 
 import { i18n } from '@kbn/i18n';
 
 import { capabilities } from 'ui/capabilities';
-// @ts-ignore
-import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-// @ts-ignore
-import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 
 import chrome from 'ui/chrome';
 import { getVisualizeLoader } from 'ui/visualize/loader';

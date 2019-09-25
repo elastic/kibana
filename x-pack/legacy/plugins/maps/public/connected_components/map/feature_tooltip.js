@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React, { Fragment } from 'react';
 import {
   EuiButtonIcon,
+  EuiLink,
   EuiPagination,
   EuiSelect,
   EuiIconTip,
@@ -18,22 +20,42 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FeatureProperties } from './feature_properties';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { GEO_JSON_TYPE, ES_GEO_FIELD_TYPE } from '../../../common/constants';
+import { FeatureGeometryFilterForm } from './feature_geometry_filter_form';
 
 const ALL_LAYERS = '_ALL_LAYERS_';
 const DEFAULT_PAGE_NUMBER = 0;
+
+const VIEWS = {
+  PROPERTIES_VIEW: 'PROPERTIES_VIEW',
+  GEOMETRY_FILTER_VIEW: 'GEOMETRY_FILTER_VIEW'
+};
 
 export class FeatureTooltip extends React.Component {
 
   state = {
     uniqueLayers: [],
     pageNumber: DEFAULT_PAGE_NUMBER,
-    layerIdFilter: ALL_LAYERS
+    layerIdFilter: ALL_LAYERS,
+    view: VIEWS.PROPERTIES_VIEW,
   };
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (!_.isEqual(nextProps.anchorLocation, prevState.prevAnchorLocation)) {
+      return {
+        view: VIEWS.PROPERTIES_VIEW, // reset to properties view when tooltip changes location
+        prevAnchorLocation: nextProps.anchorLocation
+      };
+    }
+
+    return null;
+  }
 
   constructor() {
     super();
     this._prevFeatures = null;
   }
+
 
   componentDidMount() {
     this._isMounted = true;
@@ -112,8 +134,15 @@ export class FeatureTooltip extends React.Component {
     }
   };
 
-  _renderProperties(features) {
-    const feature = features[this.state.pageNumber];
+  _showGeometryFilterView = () => {
+    this.setState({ view: VIEWS.GEOMETRY_FILTER_VIEW });
+  }
+
+  _showPropertiesView = () => {
+    this.setState({ view: VIEWS.PROPERTIES_VIEW });
+  }
+
+  _renderProperties(feature) {
     if (!feature) {
       return null;
     }
@@ -125,8 +154,25 @@ export class FeatureTooltip extends React.Component {
         showFilterButtons={this.props.showFilterButtons}
         onCloseTooltip={this._onCloseTooltip}
         addFilters={this.props.addFilters}
-        reevaluateTooltipPosition={this.props.reevaluateTooltipPosition}
       />
+    );
+  }
+
+  _renderActions(geoFields) {
+    if (!this.props.isLocked || geoFields.length === 0) {
+      return null;
+    }
+
+    return (
+      <EuiLink
+        className="mapFeatureTooltip_actionLinks"
+        onClick={this._showGeometryFilterView}
+      >
+        <FormattedMessage
+          id="xpack.maps.tooltip.showGeometryFilterViewLinkLabel"
+          defaultMessage="Filter by geometry"
+        />
+      </EuiLink>
     );
   }
 
@@ -155,7 +201,7 @@ export class FeatureTooltip extends React.Component {
       <EuiSelect
         options={options}
         onChange={this._onLayerChange}
-        valueOfSelected={this.state.layerIdFilter}
+        value={this.state.layerIdFilter}
         compressed
         fullWidth
         aria-label={i18n.translate('xpack.maps.tooltip.layerFilterLabel', {
@@ -179,7 +225,14 @@ export class FeatureTooltip extends React.Component {
             {this._renderLayerFilterBox()}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {this._renderCloseButton()}
+            <EuiButtonIcon
+              onClick={this._onCloseTooltip}
+              iconType="cross"
+              aria-label={i18n.translate('xpack.maps.tooltip.closeAriaLabel', {
+                defaultMessage: 'Close tooltip'
+              })}
+              data-test-subj="mapTooltipCloseButton"
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         {divider}
@@ -200,19 +253,6 @@ export class FeatureTooltip extends React.Component {
     );
   }
 
-  _renderCloseButton() {
-    return (
-      <EuiButtonIcon
-        onClick={this._onCloseTooltip}
-        iconType="cross"
-        aria-label={i18n.translate('xpack.maps.tooltip.closeAriaLabel', {
-          defaultMessage: 'Close tooltip'
-        })}
-        data-test-subj="mapTooltipCloseButton"
-      />
-    );
-  }
-
   _onPageChange = (pageNumber) => {
     this.setState({
       pageNumber: pageNumber,
@@ -227,6 +267,28 @@ export class FeatureTooltip extends React.Component {
     return this.props.features.filter((feature) => {
       return feature.layerId === this.state.layerIdFilter;
     });
+  }
+
+  _filterGeoFields(featureGeometry) {
+    if (!featureGeometry) {
+      return [];
+    }
+
+    // line geometry can only create filters for geo_shape fields.
+    if (featureGeometry.type === GEO_JSON_TYPE.LINE_STRING
+      || featureGeometry.type === GEO_JSON_TYPE.MULTI_LINE_STRING) {
+      return this.props.geoFields.filter(({ geoFieldType }) => {
+        return geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE;
+      });
+    }
+
+    // TODO support geo distance filters for points
+    if (featureGeometry.type === GEO_JSON_TYPE.POINT
+      || featureGeometry.type === GEO_JSON_TYPE.MULTI_POINT) {
+      return [];
+    }
+
+    return this.props.geoFields;
   }
 
   _renderPagination(filteredFeatures) {
@@ -278,10 +340,30 @@ export class FeatureTooltip extends React.Component {
 
   render() {
     const filteredFeatures = this._filterFeatures();
+    const currentFeature = filteredFeatures[this.state.pageNumber];
+    const currentFeatureGeometry = this.props.loadFeatureGeometry({
+      layerId: currentFeature.layerId,
+      featureId: currentFeature.id
+    });
+    const filteredGeoFields = this._filterGeoFields(currentFeatureGeometry);
+
+    if (this.state.view === VIEWS.GEOMETRY_FILTER_VIEW && currentFeatureGeometry) {
+      return (
+        <FeatureGeometryFilterForm
+          onClose={this._onCloseTooltip}
+          showPropertiesView={this._showPropertiesView}
+          geometry={currentFeatureGeometry}
+          geoFields={filteredGeoFields}
+          addFilters={this.props.addFilters}
+        />
+      );
+    }
+
     return (
       <Fragment>
         {this._renderHeader()}
-        {this._renderProperties(filteredFeatures)}
+        {this._renderProperties(currentFeature)}
+        {this._renderActions(filteredGeoFields)}
         {this._renderFooter(filteredFeatures)}
       </Fragment>
     );
