@@ -21,8 +21,9 @@ import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
 import { AggConfig, Vis } from 'ui/vis';
 import { SerializedFieldFormat } from 'src/plugins/expressions/common/expressions/types/common';
-// @ts-ignore
-import { FieldFormat } from '../../../../field_formats/field_format';
+
+import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
+
 // @ts-ignore
 import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
 import chrome from '../../../chrome';
@@ -47,7 +48,7 @@ const getConfig = (...args: any[]): any => config.get(...args);
 const getDefaultFieldFormat = () => ({ convert: identity });
 
 const getFieldFormat = (id: string | undefined, params: object = {}) => {
-  const Format = fieldFormats.byId[id];
+  const Format = fieldFormats.getType(id);
   if (Format) {
     return new Format(params, getConfig);
   } else {

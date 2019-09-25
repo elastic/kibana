@@ -16,17 +16,9 @@ import { GeometryFilterForm } from '../../components/geometry_filter_form';
 
 export class FeatureGeometryFilterForm extends Component {
 
-  componentDidMount() {
-    this.props.reevaluateTooltipPosition();
-  }
-
-  componentDidUpdate() {
-    this.props.reevaluateTooltipPosition();
-  }
-
   _createFilter = ({ geometryLabel, indexPatternId, geoFieldName, geoFieldType, relation }) => {
     const filter = createSpatialFilterWithGeometry({
-      geometry: this.props.feature.geometry,
+      geometry: this.props.geometry,
       geometryLabel,
       indexPatternId,
       geoFieldName,
@@ -69,10 +61,10 @@ export class FeatureGeometryFilterForm extends Component {
           defaultMessage: 'Create filter'
         })}
         geoFields={this.props.geoFields}
-        intitialGeometryLabel={this.props.feature.geometry.type.toLowerCase()}
+        intitialGeometryLabel={this.props.geometry.type.toLowerCase()}
         onSubmit={this._createFilter}
-        isFilterGeometryClosed={this.props.feature.geometry.type !== GEO_JSON_TYPE.LINE_STRING
-          && this.props.feature.geometry.type !== GEO_JSON_TYPE.MULTI_LINE_STRING}
+        isFilterGeometryClosed={this.props.geometry.type !== GEO_JSON_TYPE.LINE_STRING
+          && this.props.geometry.type !== GEO_JSON_TYPE.MULTI_LINE_STRING}
       />
     );
   }

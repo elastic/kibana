@@ -44,4 +44,11 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
       plugin: uptimeGraphQLHapiPlugin,
     });
   }
+
+  public getSavedObjectsClient() {
+    const { SavedObjectsClient, getSavedObjectsRepository } = this.server.savedObjects;
+    const { callWithInternalUser } = this.server.plugins.elasticsearch.getCluster('admin');
+    const internalRepository = getSavedObjectsRepository(callWithInternalUser);
+    return new SavedObjectsClient(internalRepository);
+  }
 }

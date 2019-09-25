@@ -26,7 +26,13 @@ import { Storage } from 'ui/storage';
 import { get, isEqual } from 'lodash';
 
 import { toastNotifications } from 'ui/notify';
-import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
+
+import {
+  CoreStart,
+  UiSettingsClientContract,
+  SavedObjectsClientContract,
+  HttpServiceBase,
+} from 'src/core/public';
 import { IndexPattern, Query, FilterBar } from '../../../../../data/public';
 import { QueryBarTopRow } from '../../../query';
 import { SavedQuery, SavedQueryAttributes } from '../index';
@@ -34,6 +40,7 @@ import { SavedQueryMeta, SaveQueryForm } from './saved_query_management/save_que
 import { SavedQueryManagementComponent } from './saved_query_management/saved_query_management_component';
 import { SavedQueryService } from '../lib/saved_query_service';
 import { createSavedQueryService } from '../lib/saved_query_service';
+import { TimeHistoryContract } from '../../../timefilter';
 
 interface DateRange {
   from: string;
@@ -47,9 +54,11 @@ interface DateRange {
 export interface SearchBarProps {
   appName: string;
   intl: InjectedIntl;
+  toasts: CoreStart['notifications']['toasts'];
   uiSettings: UiSettingsClientContract;
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns?: IndexPattern[];
+  http: HttpServiceBase;
   // Query bar
   showQueryBar?: boolean;
   showQueryInput?: boolean;
@@ -58,6 +67,7 @@ export interface SearchBarProps {
   query?: Query;
   savedQuery?: SavedQuery;
   onQuerySubmit?: (payload: { dateRange: DateRange; query?: Query }) => void;
+  timeHistory: TimeHistoryContract;
   // Filter bar
   showFilterBar?: boolean;
   filters?: Filter[];
@@ -368,6 +378,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     if (this.shouldRenderQueryBar()) {
       queryBar = (
         <QueryBarTopRow
+          toasts={this.props.toasts}
+          http={this.props.http}
+          timeHistory={this.props.timeHistory}
           uiSettings={this.props.uiSettings}
           savedObjectsClient={this.props.savedObjectsClient}
           query={this.state.query}
