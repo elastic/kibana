@@ -29,4 +29,4 @@ export type PhrasesFilter = Filter & {
 };
 
 export const isPhrasesFilter = (filter: any): filter is PhrasesFilter =>
-  filter && filter.type === 'phrases';
+  filter && filter.meta.type === 'phrases';
