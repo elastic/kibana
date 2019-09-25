@@ -426,10 +426,9 @@ export function getUiSettingDefaults() {
       type: 'boolean',
       description: i18n.translate('kbn.advancedSettings.courier.batchSearchesText', {
         defaultMessage:
-          `Determines whether to send multiple concurrent search requests (such as from a dashboard from multiple
-          panels) as a single _msearch request, or multiple _search requests. Note that cancellation of queries (for
-          example, when a user navigates away from the page before the search has returned) is only supported when
-          using the _search Elasticsearch endpoint.`,
+          `When disabled, dashboard panels will load individually instead of altogether, and search requests will be terminated
+           when users navigate away or update the query. When disabled, dashboard panels will load altogether when all of the
+           data has been loaded.`,
       }),
       category: ['search'],
     },
