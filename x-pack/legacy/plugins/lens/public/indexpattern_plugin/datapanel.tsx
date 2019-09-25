@@ -464,8 +464,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 >
                   <FormattedMessage
                     id="xpack.lens.indexPatterns.toggleFiltersPopover"
-                    defaultMessage="Fields list filters {isApplied}"
-                    values={{ isApplied: localState.typeFilter.length ? 'applied' : undefined }}
+                    defaultMessage="Fields filtered"
                   />
                 </EuiFacetButton>
               }
