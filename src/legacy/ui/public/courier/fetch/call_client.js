@@ -19,13 +19,9 @@
 
 import { groupBy } from 'lodash';
 import { getSearchStrategyForSearchRequest, getSearchStrategyById } from '../search_strategy';
-import { toastNotifications } from '../../notify/toasts';
-import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
-import React from 'react';
-import { ShardFailureOpenModalButton } from './components/shard_failure_open_modal_button';
+import { handleResponse } from './handle_response';
 
-export function callClient(searchRequests, requestsOptions = [], { es, config, esShardTimeout }) {
+export function callClient(searchRequests, requestsOptions = [], { es, config, esShardTimeout } = {}) {
   // Correlate the options with the request that they're associated with
   const requestOptionEntries = searchRequests.map((request, i) => [request, requestsOptions[i]]);
   const requestOptionsMap = new Map(requestOptionEntries);
@@ -54,44 +50,4 @@ export function callClient(searchRequests, requestsOptions = [], { es, config, e
   return searchRequests.map(request => requestResponseMap.get(request));
 }
 
-export function handleResponse(request, response) {
-  if (response.timed_out) {
-    toastNotifications.addWarning({
-      title: i18n.translate('common.ui.courier.fetch.requestTimedOutNotificationMessage', {
-        defaultMessage: 'Data might be incomplete because your request timed out',
-      }),
-    });
-  }
 
-  if (response._shards && response._shards.failed) {
-    const title = i18n.translate('common.ui.courier.fetch.shardsFailedNotificationMessage', {
-      defaultMessage: '{shardsFailed} of {shardsTotal} shards failed',
-      values: {
-        shardsFailed: response._shards.failed,
-        shardsTotal: response._shards.total,
-      },
-    });
-    const description = i18n.translate('common.ui.courier.fetch.shardsFailedNotificationDescription', {
-      defaultMessage: 'The data you are seeing might be incomplete or wrong.',
-    });
-
-    const text = (
-      <>
-        {description}
-        <EuiSpacer size="s"/>
-        <ShardFailureOpenModalButton
-          request={request.body}
-          response={response}
-          title={title}
-        />
-      </>
-    );
-
-    toastNotifications.addWarning({
-      title,
-      text,
-    });
-  }
-
-  return response;
-}
