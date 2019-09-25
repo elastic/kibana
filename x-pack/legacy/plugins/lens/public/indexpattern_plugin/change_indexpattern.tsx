@@ -102,7 +102,7 @@ export function ChangeIndexPattern({
             }))}
             onChange={choices => {
               // @ts-ignore
-              const newSelectedID = choices.filter(option => option.checked)[0].id;
+              const newSelectedID = choices.find(({ checked }) => checked)!.id;
               onChangeIndexPattern(newSelectedID);
               setSelectedID(newSelectedID);
               setPopoverIsOpen(false);
