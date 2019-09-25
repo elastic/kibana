@@ -18,19 +18,14 @@
  */
 
 import { callClient } from './call_client';
-import { npSetup } from 'ui/new_platform';
-import chrome from '../../chrome';
-
-const config = npSetup.core.uiSettings;
-const esShardTimeout = npSetup.core.injectedMetadata.getInjectedVar('esShardTimeout');
 
 /**
  * This function introduces a slight delay in the request process to allow multiple requests to queue
  * up (e.g. when a dashboard is loading).
  */
-export async function fetchSoon(request, options) {
+export async function fetchSoon(request, options, { es, config, esShardTimeout }) {
   const delay = config.get('courier:batchSearches') ? 50 : 0;
-  return delayedFetch(request, options, delay);
+  return delayedFetch(request, options, { es, config, esShardTimeout }, delay);
 }
 
 /**
@@ -60,9 +55,7 @@ let fetchInProgress = null;
    * @param ms The number of milliseconds to wait (and batch requests)
    * @return Promise<SearchResponse> The response for the given request
    */
-async function delayedFetch(request, options, ms) {
-  const $injector = await chrome.dangerouslyGetActiveInjector();
-  const es = $injector.get('es');
+async function delayedFetch(request, options, { es, config, esShardTimeout }, ms) {
   const i = requestsToFetch.length;
   requestsToFetch = [...requestsToFetch, request];
   requestOptions = [...requestOptions, options];

@@ -79,6 +79,7 @@ import { fetchSoon } from '../fetch';
 import { fieldWildcardFilter } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../../plugins/data/common/field_formats';
 import { npSetup } from 'ui/new_platform';
+import chrome from '../../chrome';
 
 const FIELDS = [
   'type',
@@ -111,6 +112,7 @@ function isIndexPattern(val) {
   return Boolean(val && typeof val.title === 'string');
 }
 
+const esShardTimeout = npSetup.core.injectedMetadata.getInjectedVar('esShardTimeout');
 const config = npSetup.core.uiSettings;
 const getConfig = (...args) => config.get(...args);
 const forIp = Symbol('for which index pattern?');
@@ -293,12 +295,16 @@ export class SearchSource {
      * @async
      */
   async fetch(options) {
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const es = $injector.get('es');
+
     const searchRequest = await this._flatten();
     await this.requestIsStarting(searchRequest, options);
+
     return fetchSoon(searchRequest, {
       ...(this._searchStrategyId && { searchStrategyId: this._searchStrategyId }),
       ...options,
-    });
+    }, { es, config, esShardTimeout });
   }
 
   /**
@@ -350,6 +356,16 @@ export class SearchSource {
   /******
      * PRIVATE APIS
      ******/
+
+  _getSearchConfig() {
+    return {
+      esShardTimeout,
+      includeFrozen: config.get('search:includeFrozen'),
+      maxConcurrentShardRequests: config.get('courier:maxConcurrentShardRequests'),
+      setRequestPreference: config.get('courier:setRequestPreference'),
+      customRequestPreference: config.get('courier:customRequestPreference'),
+    };
+  }
 
   /**
      * Used to merge properties into the data within ._flatten().
