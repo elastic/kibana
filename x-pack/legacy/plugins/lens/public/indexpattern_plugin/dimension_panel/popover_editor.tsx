@@ -72,6 +72,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
     setState,
     layerId,
     currentIndexPattern,
+    uniqueLabel,
   } = props;
   const { operationByDocument, operationByField, fieldByOperation } = operationFieldSupportMatrix;
   const [isPopoverOpen, setPopoverOpen] = useState(false);
@@ -219,7 +220,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
               defaultMessage: 'Edit configuration',
             })}
           >
-            {selectedColumn.label}
+            {uniqueLabel}
           </EuiLink>
         ) : (
           <>

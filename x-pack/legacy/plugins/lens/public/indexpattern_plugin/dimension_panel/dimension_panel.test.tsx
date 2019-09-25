@@ -122,6 +122,7 @@ describe('IndexPatternDimensionPanel', () => {
       setState,
       columnId: 'col1',
       layerId: 'first',
+      uniqueLabel: 'stuff',
       filterOperations: () => true,
       storage: {} as Storage,
       uiSettings: {} as UiSettingsClientContract,
