@@ -21,6 +21,7 @@ export class JsonIndexFilePicker extends Component {
   state = {
     fileUploadError: '',
     percentageProcessed: 0,
+    fileParseActive: false,
   };
 
   async componentDidMount() {
@@ -31,11 +32,19 @@ export class JsonIndexFilePicker extends Component {
     this._isMounted = false;
   }
 
+  getFileParseActive = () => this._isMounted && this.state.fileParseActive;
+
   _fileHandler = fileList => {
     const fileArr = Array.from(fileList);
     this.props.resetFileAndIndexSettings();
-    this.setState({ fileUploadError: '', percentageProcessed: 0 });
+    this.setState({
+      fileUploadError: '',
+      percentageProcessed: 0,
+    });
     if (fileArr.length === 0) { // Remove
+      this.setState({
+        fileParseActive: false
+      });
       return;
     }
     const file = fileArr[0];
@@ -55,7 +64,8 @@ export class JsonIndexFilePicker extends Component {
     }
 
     this.props.setIndexName(initIndexName);
-    this._parseFile(file);
+
+    this.setState({ fileParseActive: true }, () => this._parseFile(file));
   };
 
   _getIndexName({ name, size }) {
@@ -91,7 +101,11 @@ export class JsonIndexFilePicker extends Component {
 
   setFileProgress = ({ bytesProcessed, totalBytes }) => {
     const percentageProcessed = parseInt((100 * bytesProcessed) / totalBytes);
-    if (percentageProcessed > (this.state.percentageProcessed + 3)) {
+    if (
+      this._isMounted &&
+      this.state.fileParseActive &&
+      percentageProcessed > (this.state.percentageProcessed + 3)
+    ) {
       this.setState({ percentageProcessed });
     }
   }
@@ -102,12 +116,13 @@ export class JsonIndexFilePicker extends Component {
     } = this.props;
     // Parse file
 
-    // TODO: Allow this to be interrupted
     const parsedFileResult = await parseFile(
-      file, transformDetails, onFileUpload, this.setFileProgress
+      file, transformDetails, onFileUpload, this.setFileProgress, this.getFileParseActive
     ).catch(err => {
       if (this._isMounted) {
         this.setState({
+          fileParseActive: false,
+          percentageProcessed: 0,
           fileUploadError: (
             <FormattedMessage
               id="xpack.fileUpload.jsonIndexFilePicker.unableParseFile"
