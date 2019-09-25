@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
@@ -22,10 +21,10 @@ import {
 } from './log_entry_column';
 import { ASSUMED_SCROLLBAR_WIDTH } from './vertical_scroll_panel';
 
-export const LogColumnHeaders = injectI18n<{
+export const LogColumnHeaders: React.FunctionComponent<{
   columnConfigurations: LogColumnConfiguration[];
   columnWidths: LogEntryColumnWidths;
-}>(({ columnConfigurations, columnWidths, intl }) => {
+}> = ({ columnConfigurations, columnWidths }) => {
   return (
     <LogColumnHeadersWrapper>
       {columnConfigurations.map(columnConfiguration => {
@@ -63,7 +62,7 @@ export const LogColumnHeaders = injectI18n<{
       })}
     </LogColumnHeadersWrapper>
   );
-});
+};
 
 const LogColumnHeader: React.FunctionComponent<{
   columnWidth: LogEntryColumnWidth;
