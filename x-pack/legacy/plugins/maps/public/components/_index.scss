@@ -13,3 +13,47 @@
 .mapGeometryFilter__geoFieldItem {
   padding: $euiSizeXS;
 }
+
+.mapTooltipSelector__propertyRow {
+  display: flex;
+
+  &:hover,
+  &:focus,
+  &:focus-within {
+    .mapTooltipSelector__propertyIcons {
+      display: block;
+      animation: mapPropertyIconsBecomeVisible $euiAnimSpeedFast $euiAnimSlightResistance;
+    }
+  }
+
+  .mapTooltipSelector__propertyIcons {
+    &:hover,
+    &:focus {
+      display: block;
+      animation: mapPropertyIconsBecomeVisible $euiAnimSpeedFast $euiAnimSlightResistance;
+    }
+  }
+}
+
+.mapTooltipSelector__propertyContent {
+  overflow: hidden;
+  flex-grow: 1;
+}
+
+.mapTooltipSelector__propertyIcons {
+  flex-shrink: 0;
+  display: none;
+}
+
+.mapTooltipSelector__grab:hover {
+  cursor: grab;
+}
+
+@keyframes mapPropertyIconsBecomeVisible {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}

@@ -210,11 +210,13 @@ export class UpdateSourceEditor extends Component {
 
     return (
       <Fragment>
-        <TooltipSelector
-          tooltipProperties={this.props.tooltipProperties}
-          onChange={this._onTooltipPropertiesChange}
-          fields={this.state.tooltipFields}
-        />
+        <EuiFormRow>
+          <TooltipSelector
+            tooltipProperties={this.props.tooltipProperties}
+            onChange={this._onTooltipPropertiesChange}
+            fields={this.state.tooltipFields}
+          />
+        </EuiFormRow>
 
         <EuiFormRow>
           <EuiSwitch
