@@ -29,7 +29,7 @@ export default function stubbedLogstashIndexPatternService(Private) {
   const fields = mockLogstashFields.map(function (field) {
     const kbnType = getKbnFieldType(field.type);
 
-    if (kbnType.name === 'unknown') {
+    if (!kbnType || kbnType.name === 'unknown') {
       throw new TypeError(`unknown type ${field.type}`);
     }
 
