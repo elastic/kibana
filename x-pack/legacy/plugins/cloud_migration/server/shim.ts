@@ -17,8 +17,8 @@ export interface Core {
     [key: string]: any;
   };
   http: {
-    serverRouter?: {
-      create(basePath: string): Router | null;
+    serverRouter: {
+      create(basePath: string): Router;
     };
   };
 }

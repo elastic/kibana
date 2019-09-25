@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Core, Plugins } from '../shim';
+import { Core, Plugins } from './shim';
 import { API_BASE_PATH } from '../common/constants';
 import { registerRoutes } from './routes/register_routes';
 
