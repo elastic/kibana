@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import {
   TransformEndpointRequest,
   TransformEndpointResult,
-} from '../../../../transform/public/app/pages/transform_management/components/transform_list/common';
+} from '../../../../transform/public/app/sections/transform_management/components/transform_list/common';
 
 const REQUEST_TIMEOUT = 'RequestTimeout';
 

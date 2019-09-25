@@ -11,7 +11,7 @@ import { PreviewRequestBody, TransformId } from '../common';
 import {
   TransformEndpointRequest,
   TransformEndpointResult,
-} from '../pages/transform_management/components/transform_list/common';
+} from '../sections/transform_management/components/transform_list/common';
 
 import { http } from './http_service';
 

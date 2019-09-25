@@ -11,20 +11,10 @@ import { EuiPageContent } from '@elastic/eui';
 import { APP_REQUIRED_CLUSTER_PRIVILEGES } from '../../common/constants';
 import { SectionLoading, SectionError } from './components';
 import { BASE_PATH, DEFAULT_SECTION } from './constants';
-/*
-import {
-  RepositoryAdd,
-  RepositoryEdit,
-  RestoreSnapshot,
-  SnapshotRestoreHome,
-  PolicyAdd,
-  PolicyEdit,
-} from './sections';
-*/
 import { useAppDependencies } from './index';
 import { AuthorizationContext, WithPrivileges, NotAuthorizedSection } from './lib/authorization';
 
-import { Page as TransformManagementPage } from './pages/transform_management/page';
+import { Page as TransformManagement } from './sections/transform_management/page';
 
 export const App: React.FunctionComponent = () => {
   const {
@@ -60,7 +50,7 @@ export const App: React.FunctionComponent = () => {
               <Route
                 exact
                 path={`${BASE_PATH}/transform_management`}
-                component={() => <TransformManagementPage />}
+                component={() => <TransformManagement />}
               />
               <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />
             </Switch>
