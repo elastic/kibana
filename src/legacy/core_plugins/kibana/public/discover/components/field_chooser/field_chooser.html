@@ -90,9 +90,18 @@
     </div>
   </div>
 
-  <div class="sidebar-item dscFieldDetails" ng-show="showFilter" id="discoverFieldFilter" data-test-subj="discoverFieldFilter">
+  <div class="sidebar-item dscFieldDetails" id="discoverFieldFilter" data-test-subj="discoverFieldFilter">
     <form role="form">
       <div class="form-group">
+        <discover-field-search
+          filter="filter"
+          on-change="setFilterValue"
+          on-show-filter="toggleShowFilter"
+          value="filter.vals.name"
+        >
+        </discover-field-search>
+      </div>
+      <div class="form-group" ng-show="showFilter">
         <label
           for="discoverFieldChooserFilterAggregatable"
           i18n-id="kbn.discover.fieldChooser.filter.aggregatableLabel"
@@ -105,7 +114,7 @@
           class="form-control">
         </select>
       </div>
-      <div class="form-group">
+      <div class="form-group" ng-show="showFilter">
         <label
           for="discoverFieldChooserFilterSearchable"
           i18n-id="kbn.discover.fieldChooser.filter.searchableLabel"
@@ -118,7 +127,7 @@
           class="form-control">
         </select>
       </div>
-      <div class="form-group">
+      <div class="form-group"  ng-show="showFilter">
         <label
           for="discoverFieldChooserFilterType"
           i18n-id="kbn.discover.fieldChooser.filter.typeLabel"
@@ -131,20 +140,7 @@
           class="form-control">
         </select>
       </div>
-      <div class="form-group">
-        <label
-          for="discoverFieldChooserFilterFieldName"
-          i18n-id="kbn.discover.fieldChooser.filter.fieldNameLabel"
-          i18n-default-message="Field name"
-        ></label>
-        <input
-          id="discoverFieldChooserFilterFieldName"
-          type="text"
-          class="form-control"
-          ng-model="filter.vals.name"
-        >
-      </div>
-      <div class="form-group">
+      <div class="form-group"  ng-show="showFilter">
         <label for="discoverFieldChooserHideMissingFields">
           <input id="discoverFieldChooserHideMissingFields" type="checkbox" ng-model="filter.vals.missing">
           <span
@@ -154,6 +150,7 @@
         </label>
       </div>
       <button
+        ng-show="showFilter"
         ng-click="filter.reset()"
         ng-disabled="!filter.active"
         class="kuiButton kuiButton--danger kuiButton--fullWidth"
