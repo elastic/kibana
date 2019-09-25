@@ -315,7 +315,6 @@
     "react-dropzone": "^4.2.9",
     "react-fast-compare": "^2.0.4",
     "react-markdown": "^3.4.1",
-    "react-markdown-renderer": "^1.4.0",
     "react-moment-proptypes": "^1.6.0",
     "react-monaco-editor": "~0.27.0",
     "react-portal": "^3.2.0",
