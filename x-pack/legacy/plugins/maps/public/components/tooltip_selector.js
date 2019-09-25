@@ -32,12 +32,21 @@ const reorder = (list, startIndex, endIndex) => {
 export class TooltipSelector extends Component {
 
   _addProperty = (propertyName) => {
-    //const property = { name: propertyName };
     const property = propertyName;
     if (!this.props.tooltipProperties) {
       this.props.onChange([property]);
     } else {
       this.props.onChange([...this.props.tooltipProperties, property]);
+    }
+  }
+
+  _removeProperty = (index) => {
+    if (!this.props.tooltipProperties) {
+      this.props.onChange([]);
+    } else {
+      const tooltipProperties = [...this.props.tooltipProperties];
+      tooltipProperties.splice(index, 1);
+      this.props.onChange(tooltipProperties);
     }
   }
 
@@ -75,6 +84,17 @@ export class TooltipSelector extends Component {
                       {propertyName}
                     </EuiText>
                     <div className="mapTooltipSelector__propertyIcons">
+                      <EuiButtonIcon
+                        iconType="trash"
+                        color="danger"
+                        onClick={this._removeProperty.bind(null, idx)}
+                        title={i18n.translate('xpack.maps.tooltipSelector.trashButtonTitle', {
+                          defaultMessage: 'Remove property'
+                        })}
+                        aria-label={i18n.translate('xpack.maps.tooltipSelector.trashButtonAriaLabel', {
+                          defaultMessage: 'Remove property'
+                        })}
+                      />
                       <EuiButtonIcon
                         className="mapTooltipSelector__grab"
                         iconType="grab"
