@@ -296,7 +296,7 @@ def getWorkerMap(numberOfExecutions, worker, maxWorkers = 14) {
 
   for(def i = 1; i <= numberOfWorkers; i++) {
     workerMap["worker-${i}"] = { workerNumber ->
-      def workerExecutions = Math.floor(numberOfExecutions/numberOfWorkers) + (i <= numberOfExecutions%numberOfWorkers ? 1 : 0)
+      def workerExecutions = numberOfExecutions/numberOfWorkers + (i <= numberOfExecutions%numberOfWorkers ? 1 : 0)
 
       for(j = 0; j < workerExecutions; j++) {
         worker(workerNumber)
