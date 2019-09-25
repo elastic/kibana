@@ -9,7 +9,7 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile }: KibanaFunctionalTestDefaultProviders) => {
   describe('License app', function() {
-    this.tags('ciGroup2');
+    this.tags('ciGroup7');
     loadTestFile(require.resolve('./home_page'));
   });
 };

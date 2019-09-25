@@ -6,7 +6,7 @@
 
 export default function ({ loadTestFile }) {
   describe('security', function () {
-    this.tags('ciGroup1');
+    this.tags('ciGroup6');
 
     loadTestFile(require.resolve('./basic_login'));
     loadTestFile(require.resolve('./index_fields'));

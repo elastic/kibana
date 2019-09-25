@@ -37,7 +37,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('', function() {
-      this.tags('ciGroup3');
+      this.tags('ciGroup9');
 
       loadTestFile(require.resolve('./_embedding_chart'));
       loadTestFile(require.resolve('./_chart_types'));
@@ -47,7 +47,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('', function() {
-      this.tags('ciGroup4');
+      this.tags('ciGroup10');
 
       loadTestFile(require.resolve('./_inspector'));
       loadTestFile(require.resolve('./_experimental_vis'));
@@ -59,7 +59,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('', function() {
-      this.tags('ciGroup5');
+      this.tags('ciGroup11');
 
       loadTestFile(require.resolve('./_line_chart'));
       loadTestFile(require.resolve('./_pie_chart'));
@@ -73,7 +73,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('', function() {
-      this.tags('ciGroup6');
+      this.tags('ciGroup12');
 
       loadTestFile(require.resolve('./_tag_cloud'));
       loadTestFile(require.resolve('./_tile_map'));
