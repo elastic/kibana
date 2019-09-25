@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable ban/ban */
-
 import {
   replaceTokensInUrlValue,
   getUrlForRecord,
@@ -60,6 +58,28 @@ describe('ML - custom URL utils', () => {
       },
     ],
     airline: ['<>:;[}")'],
+  };
+
+  const TEST_RECORD_MULTIPLE_INFLUENCER_VALUES: AnomalyRecordSource = {
+    ...TEST_RECORD,
+    influencers: [
+      {
+        influencer_field_name: 'airline',
+        influencer_field_values: ['AAL', 'AWE'],
+      },
+    ],
+    airline: ['AAL', 'AWE'],
+  };
+
+  const TEST_RECORD_NO_INFLUENCER_VALUES: AnomalyRecordSource = {
+    ...TEST_RECORD,
+    influencers: [
+      {
+        influencer_field_name: 'airline',
+        influencer_field_values: [],
+      },
+    ],
+    airline: null,
   };
 
   const TEST_DASHBOARD_URL: KibanaUrlConfig = {
@@ -124,6 +144,32 @@ describe('ML - custom URL utils', () => {
     test('replaces tokens as expected for a Kibana Discover type URL', () => {
       expect(replaceTokensInUrlValue(TEST_DISCOVER_URL, 300, TEST_DOC, 'timestamp')).toBe(
         "kibana#/discover?_g=(time:(from:'2017-02-09T16:05:00.000Z',mode:absolute,to:'2017-02-09T16:20:00.000Z'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:'airline:\"AAL\"'))"
+      ); // eslint-disable-line max-len
+    });
+
+    test('replaces token with multiple influencer values', () => {
+      expect(
+        replaceTokensInUrlValue(
+          TEST_DISCOVER_URL,
+          300,
+          TEST_RECORD_MULTIPLE_INFLUENCER_VALUES,
+          'timestamp'
+        )
+      ).toBe(
+        "kibana#/discover?_g=(time:(from:'2017-02-09T16:05:00.000Z',mode:absolute,to:'2017-02-09T16:20:00.000Z'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:'(airline:\"AAL\" or airline:\"AWE\")'))"
+      ); // eslint-disable-line max-len
+    });
+
+    test('removes tokens with no influencer values', () => {
+      expect(
+        replaceTokensInUrlValue(
+          TEST_DISCOVER_URL,
+          300,
+          TEST_RECORD_NO_INFLUENCER_VALUES,
+          'timestamp'
+        )
+      ).toBe(
+        "kibana#/discover?_g=(time:(from:'2017-02-09T16:05:00.000Z',mode:absolute,to:'2017-02-09T16:20:00.000Z'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:''))"
       ); // eslint-disable-line max-len
     });
 

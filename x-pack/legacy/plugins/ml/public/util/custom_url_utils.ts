@@ -57,7 +57,10 @@ export function replaceTokensInUrlValue(
 
 // Returns the URL to open from the supplied config, with any dollar delimited tokens
 // substituted from the supplied anomaly record.
-export function getUrlForRecord(urlConfig: UrlConfig, record: AnomalyRecordSource) {
+export function getUrlForRecord(
+  urlConfig: UrlConfig | KibanaUrlConfig,
+  record: AnomalyRecordSource
+) {
   if (isKibanaUrl(urlConfig) === true) {
     return buildKibanaUrl(urlConfig, record);
   } else {
@@ -128,8 +131,8 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: AnomalyRecordSource) {
         .map(v => v.split(':')[0])
         .map(name => {
           // Use lodash get to allow nested JSON fields to be retrieved.
-          const tokenValues: string[] | undefined = _.get(record, name);
-          if (tokenValues === undefined) {
+          const tokenValues: string[] = _.get(record, name) || null;
+          if (tokenValues === null) {
             return null;
           }
           // Create a pair ``influencerField:value`.
