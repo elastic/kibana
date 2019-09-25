@@ -37,6 +37,7 @@ function isSortableByColumn(column: IndexPatternColumn) {
 }
 
 const DEFAULT_SIZE = 3;
+const supportedTypes = new Set(['string', 'boolean', 'ip']);
 
 export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'terms';
@@ -54,11 +55,11 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
   }),
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
-      (type === 'string' || type === 'boolean') &&
+      supportedTypes.has(type) &&
       aggregatable &&
       (!aggregationRestrictions || aggregationRestrictions.terms)
     ) {
-      return { dataType: type, isBucketed: true, scale: 'ordinal' };
+      return { dataType: type as DataType, isBucketed: true, scale: 'ordinal' };
     }
   },
   isTransferable: (column, newIndexPattern) => {
@@ -66,7 +67,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
 
     return Boolean(
       newField &&
-        newField.type === 'string' &&
+        supportedTypes.has(newField.type) &&
         newField.aggregatable &&
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms)
     );

@@ -143,7 +143,6 @@ export class TooltipControl extends React.Component {
         uniqueFeatures.push({
           id: featureId,
           layerId: layerId,
-          geometry: mbFeature.geometry,
         });
       }
     }
@@ -245,6 +244,21 @@ export class TooltipControl extends React.Component {
     return this.props.mbMap.queryRenderedFeatures(mbBbox, { layers: mbLayerIds });
   }
 
+  // Must load original geometry instead of using geometry from mapbox feature.
+  // Mapbox feature geometry is from vector tile and is not the same as the original geometry.
+  _loadFeatureGeometry = ({ layerId, featureId }) => {
+    const tooltipLayer = this._findLayerById(layerId);
+    if (!tooltipLayer) {
+      return null;
+    }
+    const targetFeature = tooltipLayer.getFeatureById(featureId);
+    if (!targetFeature) {
+      return null;
+    }
+
+    return targetFeature.geometry;
+  };
+
   _loadFeatureProperties = async ({ layerId, featureId }) => {
     const tooltipLayer = this._findLayerById(layerId);
     if (!tooltipLayer) {
@@ -295,6 +309,7 @@ export class TooltipControl extends React.Component {
             isLocked={isLocked}
             addFilters={this.props.addFilters}
             geoFields={this.props.geoFields}
+            loadFeatureGeometry={this._loadFeatureGeometry}
           />
         </EuiText>
       </EuiPopover>
