@@ -17,12 +17,22 @@
  * under the License.
  */
 
-const autocompleteProviders = new Map();
+import _ from 'lodash';
+import { IndexPatterns } from '../../../index_patterns';
 
-export function addAutocompleteProvider(language, provider) {
-  autocompleteProviders.set(language, provider);
-}
+export async function extractTimeFilter(indexPatterns: IndexPatterns, filters: any) {
+  // Assume all the index patterns are the same since they will be added
+  // from the same visualization.
+  const id: string = _.get(filters, '[0].meta.index');
+  if (id == null) return;
 
-export function getAutocompleteProvider(language) {
-  return autocompleteProviders.get(language);
+  const indexPattern = await indexPatterns.get(id);
+
+  const filter = _.find(filters, function(obj: any) {
+    const key = _.keys(obj.range)[0];
+    return key === indexPattern.timeFieldName;
+  });
+  if (filter && filter.range) {
+    return filter;
+  }
 }
