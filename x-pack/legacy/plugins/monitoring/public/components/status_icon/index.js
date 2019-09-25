@@ -5,9 +5,7 @@
  */
 
 import React from 'react';
-import {
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 
 export function StatusIcon({ type, label }) {
   const typeToIconMap = {
@@ -18,17 +16,7 @@ export function StatusIcon({ type, label }) {
   };
   const icon = typeToIconMap[type];
 
-  return (
-    <span className="kuiStatusText">
-      <EuiIcon
-        alt={label}
-        size="l"
-        data-test-subj="statusIcon"
-        type="dot"
-        color={icon}
-      />
-    </span>
-  );
+  return <EuiIcon alt={label} size="l" data-test-subj="statusIcon" type="dot" color={icon} />;
 }
 
 StatusIcon.TYPES = {

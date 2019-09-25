@@ -15,16 +15,16 @@ monitoring-shard-allocation {
     display: block;
   }
 
-  .unassigned {
+  .monUnassigned {
     vertical-align: middle;
     width: 150px;
   }
 
-  .children {
+  .monChildren {
     padding-top: $euiSizeL;
   }
 
-  .child {
+  .monChild {
     float: left;
     align-self: center;
     background-color: $euiColorLightestShade;
@@ -44,7 +44,7 @@ monitoring-shard-allocation {
       }
     }
 
-    .title {
+    .monTitle {
       padding: $euiSizeXS $euiSizeS;
       text-align: center;
       font-size: $euiSizeM;
@@ -63,7 +63,7 @@ monitoring-shard-allocation {
       }
     }
 
-    &.unassigned {
+    &.monClusterUnassigned {
       .title {
         display: none;
       }
@@ -81,7 +81,7 @@ monitoring-shard-allocation {
   .shard {
     align-self: center;
     padding: $euiSizeXS $euiSizeS;
-    font: $euiSizeM;
+    font-size: $euiSizeM;
     position: relative;
     display: inline-block;
   }

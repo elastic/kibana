@@ -4,39 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { get, sortBy } from 'lodash';
 import React from 'react';
 import { Shard } from './shard';
 import { calculateClass } from '../lib/calculate_class';
 import { generateQueryAndLink } from '../lib/generate_query_and_link';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiKeyboardAccessible,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiKeyboardAccessible } from '@elastic/eui';
 
 function sortByName(item) {
   if (item.type === 'node') {
-    return [ !item.master, item.name];
+    return [!item.master, item.name];
   }
-  return [ item.name ];
+  return [item.name];
 }
 
 export class Assigned extends React.Component {
-  createShard = (shard) => {
+  createShard = shard => {
     const type = shard.primary ? 'primary' : 'replica';
     const key = `${shard.index}.${shard.node}.${type}.${shard.state}.${shard.shard}`;
-    return (
-      <Shard shard={shard} key={key}/>
-    );
+    return <Shard shard={shard} key={key} />;
   };
 
-  createChild = (data) => {
+  createChild = data => {
     const key = data.id;
-    const initialClasses = ['child'];
+    const initialClasses = ['monChild'];
     const shardStats = get(this.props.shardStats.indices, key);
     if (shardStats) {
       initialClasses.push(shardStats.status);
@@ -55,7 +46,8 @@ export class Assigned extends React.Component {
         </a>
       </EuiKeyboardAccessible>
     );
-    const master = (data.node_type === 'master') ? <EuiIcon type="starFilledSpace" color="primary" /> : null;
+    const master =
+      data.node_type === 'master' ? <EuiIcon type="starFilledSpace" color="primary" /> : null;
     const shards = sortBy(data.children, 'shard').map(this.createShard);
     return (
       <EuiFlexItem
@@ -66,7 +58,10 @@ export class Assigned extends React.Component {
         data-status={shardStats && shardStats.status}
       >
         <EuiFlexGroup>
-          <EuiFlexItem grow={false} className="title eui-textNoWrap">{name}{master}</EuiFlexItem>
+          <EuiFlexItem grow={false} className="monTitle eui-textNoWrap">
+            {name}
+            {master}
+          </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s">{shards}</EuiFlexGroup>
           </EuiFlexItem>
@@ -79,7 +74,7 @@ export class Assigned extends React.Component {
     const data = sortBy(this.props.data, sortByName).map(this.createChild);
     return (
       <td>
-        <EuiFlexGroup wrap className="children">
+        <EuiFlexGroup wrap className="monChildren">
           {data}
         </EuiFlexGroup>
       </td>
