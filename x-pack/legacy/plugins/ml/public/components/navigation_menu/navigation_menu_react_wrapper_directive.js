@@ -11,8 +11,6 @@ import ReactDOM from 'react-dom';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-import 'ui/directives/kbn_href';
-
 import { NavigationMenu } from './navigation_menu';
 
 module.directive('mlNavMenu', function () {
