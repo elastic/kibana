@@ -15,7 +15,7 @@ interface UnmuteRequest extends Hapi.Request {
 export function unmuteAlertRoute(server: Hapi.Server) {
   server.route({
     method: 'POST',
-    path: '/api/alert/{id}/_unmute',
+    path: '/api/alert/{id}/_unmute_all',
     options: {
       tags: ['access:alerting-all'],
       response: {

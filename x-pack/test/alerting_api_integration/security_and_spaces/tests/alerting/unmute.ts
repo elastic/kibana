@@ -31,11 +31,11 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
           objectRemover.add(space.id, createdAlert.id, 'alert');
 
           await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}/_mute`)
+            .post(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}/_mute_all`)
             .set('kbn-xsrf', 'foo');
 
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}/_unmute`)
+            .post(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}/_unmute_all`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password);
 

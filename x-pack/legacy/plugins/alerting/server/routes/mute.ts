@@ -15,7 +15,7 @@ interface MuteRequest extends Hapi.Request {
 export function muteAlertRoute(server: Hapi.Server) {
   server.route({
     method: 'POST',
-    path: '/api/alert/{id}/_mute',
+    path: '/api/alert/{id}/_mute_all',
     options: {
       tags: ['access:alerting-all'],
       response: {

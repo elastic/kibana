@@ -61,7 +61,7 @@ export class AlertUtils {
 
   public async mute(alertId: string) {
     return await this.supertestWithoutAuth
-      .post(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}/_mute`)
+      .post(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}/_mute_all`)
       .set('kbn-xsrf', 'foo')
       .auth(this.user.username, this.user.password)
       .expect(204, '');
@@ -69,7 +69,7 @@ export class AlertUtils {
 
   public async unmute(alertId: string) {
     await this.supertestWithoutAuth
-      .post(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}/_unmute`)
+      .post(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}/_unmute_all`)
       .set('kbn-xsrf', 'foo')
       .auth(this.user.username, this.user.password)
       .expect(204, '');

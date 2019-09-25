@@ -13,7 +13,7 @@ muteAlertRoute(server);
 test('mutes an alert', async () => {
   const request = {
     method: 'POST',
-    url: '/api/alert/1/_mute',
+    url: '/api/alert/1/_mute_all',
   };
 
   const { statusCode } = await server.inject(request);

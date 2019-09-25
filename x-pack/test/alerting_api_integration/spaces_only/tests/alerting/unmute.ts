@@ -27,12 +27,12 @@ export default function createUnmuteTests({ getService }: FtrProviderContext) {
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
 
       await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}/_mute`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}/_mute_all`)
         .set('kbn-xsrf', 'foo')
         .expect(204, '');
 
       await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}/_unmute`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}/_unmute_all`)
         .set('kbn-xsrf', 'foo')
         .expect(204, '');
 

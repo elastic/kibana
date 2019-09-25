@@ -31,7 +31,7 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
           objectRemover.add(space.id, createdAlert.id, 'alert');
 
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}/_mute`)
+            .post(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}/_mute_all`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password);
 
