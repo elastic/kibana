@@ -9,11 +9,13 @@ import { makeApmUsageCollector } from '../lib/apm_telemetry';
 import { CoreSetupWithUsageCollector } from '../lib/apm_telemetry/make_apm_usage_collector';
 import { createApmAgentConfigurationIndex } from '../lib/settings/agent_configuration/create_agent_config_index';
 import { createApmApi } from '../routes/create_apm_api';
+import { registerAlertTypes } from '../lib/alerting/register_alert_types';
 
 export class Plugin {
   public setup(core: InternalCoreSetup) {
     createApmApi().init(core);
     createApmAgentConfigurationIndex(core);
     makeApmUsageCollector(core as CoreSetupWithUsageCollector);
+    registerAlertTypes(core);
   }
 }

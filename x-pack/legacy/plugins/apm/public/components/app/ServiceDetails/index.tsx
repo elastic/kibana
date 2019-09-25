@@ -10,6 +10,7 @@ import { ApmHeader } from '../../shared/ApmHeader';
 import { ServiceDetailTabs } from './ServiceDetailTabs';
 import { ServiceIntegrations } from './ServiceIntegrations';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useCallApmApi } from '../../../hooks/useCallApmApi';
 
 interface Props {
   tab: React.ComponentProps<typeof ServiceDetailTabs>['tab'];
@@ -18,6 +19,7 @@ interface Props {
 export function ServiceDetails({ tab }: Props) {
   const { urlParams } = useUrlParams();
   const { serviceName } = urlParams;
+  const callApmApi = useCallApmApi();
 
   return (
     <div>
@@ -29,7 +31,10 @@ export function ServiceDetails({ tab }: Props) {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <ServiceIntegrations urlParams={urlParams} />
+            <ServiceIntegrations
+              urlParams={urlParams}
+              callApmApi={callApmApi}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </ApmHeader>

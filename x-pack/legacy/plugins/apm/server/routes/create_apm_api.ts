@@ -51,6 +51,7 @@ import {
   serviceNodesLocalFiltersRoute,
   uiFiltersEnvironmentsRoute
 } from './ui_filters';
+import { errorOccurrenceAlertRoute } from './error_occurrence_alert';
 import { createApi } from './create_api';
 import { serviceMapRoute } from './services';
 
@@ -110,7 +111,10 @@ const createApmApi = () => {
     .add(transactionsLocalFiltersRoute)
     .add(serviceNodesLocalFiltersRoute)
     .add(uiFiltersEnvironmentsRoute)
-    .add(serviceMapRoute);
+    .add(serviceMapRoute)
+
+    // alerts
+    .add(errorOccurrenceAlertRoute);
 
   return api;
 };

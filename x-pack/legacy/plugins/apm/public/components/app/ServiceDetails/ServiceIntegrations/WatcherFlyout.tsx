@@ -17,7 +17,6 @@ import {
   EuiForm,
   EuiFormRow,
   EuiLink,
-  EuiRadio,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
@@ -26,15 +25,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { padLeft, range } from 'lodash';
-import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import styled from 'styled-components';
+import { toastNotifications } from 'ui/notify';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { KibanaCoreContext } from '../../../../../../observability/public';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { KibanaLink } from '../../../shared/Links/KibanaLink';
-import { createErrorGroupWatch, Schedule } from './createErrorGroupWatch';
+import { Schedule } from './createErrorGroupWatch';
 import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
+import { createErrorOccurrenceAlert } from './createErrorOccurrenceAlert';
+import { APMClient } from '../../../../services/rest/createCallApmApi';
 
 type ScheduleKey = keyof Schedule;
 
@@ -49,6 +50,7 @@ const SmallInput = styled.div`
 
 interface WatcherFlyoutProps {
   urlParams: IUrlParams;
+  callApmApi: APMClient;
   onClose: () => void;
   isOpen: boolean;
 }
@@ -149,57 +151,32 @@ export class WatcherFlyout extends Component<
   };
 
   public createWatch = () => {
-    const core = this.context;
     const { serviceName } = this.props.urlParams;
 
     if (!serviceName) {
       return;
     }
 
-    const emails = this.state.actions.email
-      ? this.state.emails
-          .split(',')
-          .map(email => email.trim())
-          .filter(email => !!email)
-      : [];
+    const email = this.state.actions.email ? this.state.emails : '';
 
     const slackUrl = this.state.actions.slack ? this.state.slackUrl : '';
 
-    const schedule =
-      this.state.schedule === 'interval'
-        ? {
-            interval: `${this.state.interval.value}${this.state.interval.unit}`
-          }
-        : {
-            daily: { at: `${this.state.daily}` }
-          };
+    const timeRange = {
+      value: this.state.interval.value,
+      unit: this.state.interval.unit
+    };
 
-    const timeRange =
-      this.state.schedule === 'interval'
-        ? {
-            value: this.state.interval.value,
-            unit: this.state.interval.unit
-          }
-        : {
-            value: 24,
-            unit: 'h'
-          };
-
-    const apmIndexPatternTitle = core.injectedMetadata.getInjectedVar(
-      'apmIndexPatternTitle'
-    ) as string;
-
-    return createErrorGroupWatch({
-      emails,
-      schedule,
+    return createErrorOccurrenceAlert({
+      callApmApi: this.props.callApmApi,
+      email,
       serviceName,
       slackUrl,
       threshold: this.state.threshold,
-      timeRange,
-      apmIndexPatternTitle
+      timeRange
     })
-      .then((id: string) => {
+      .then(savedObject => {
         this.props.onClose();
+        const id = 'id' in savedObject ? savedObject.id : NOT_AVAILABLE_LABEL;
         this.addSuccessToast(id);
       })
       .catch(e => {
@@ -210,9 +187,7 @@ export class WatcherFlyout extends Component<
   };
 
   public addErrorToast = () => {
-    const core = this.context;
-
-    core.notifications.toasts.addWarning({
+    toastNotifications.addWarning({
       title: i18n.translate(
         'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreationFailedNotificationTitle',
         {
@@ -234,9 +209,7 @@ export class WatcherFlyout extends Component<
   };
 
   public addSuccessToast = (id: string) => {
-    const core = this.context;
-
-    core.notifications.toasts.addSuccess({
+    toastNotifications.addSuccess({
       title: i18n.translate(
         'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationTitle',
         {
@@ -255,18 +228,16 @@ export class WatcherFlyout extends Component<
               }
             }
           )}{' '}
-          <KibanaCoreContext.Provider value={core}>
-            <KibanaLink
-              path={`/management/elasticsearch/watcher/watches/watch/${id}`}
-            >
-              {i18n.translate(
-                'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationText.viewWatchLinkText',
-                {
-                  defaultMessage: 'View watch'
-                }
-              )}
-            </KibanaLink>
-          </KibanaCoreContext.Provider>
+          <KibanaLink
+            path={`/management/elasticsearch/watcher/watches/watch/${id}`}
+          >
+            {i18n.translate(
+              'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationText.viewWatchLinkText',
+              {
+                defaultMessage: 'View watch'
+              }
+            )}
+          </KibanaLink>
         </p>
       )
     });
@@ -276,20 +247,6 @@ export class WatcherFlyout extends Component<
     if (!this.props.isOpen) {
       return null;
     }
-
-    const dailyTime = this.state.daily;
-    const inputTime = `${dailyTime}Z`; // Add tz to make into UTC
-    const inputFormat = 'HH:mmZ'; // Parse as 24 hour w. tz
-    const dailyTimeFormatted = moment(inputTime, inputFormat).format('HH:mm'); // Format as 24h
-    const dailyTime12HourFormatted = moment(inputTime, inputFormat).format(
-      'hh:mm A (z)'
-    ); // Format as 12h w. tz
-
-    // Generate UTC hours for Daily Report select field
-    const intervalHours = range(24).map(i => {
-      const hour = padLeft(i.toString(), 2, '0');
-      return { value: `${hour}:00`, text: `${hour}:00 UTC` };
-    });
 
     const flyoutBody = (
       <EuiText>
@@ -367,50 +324,6 @@ export class WatcherFlyout extends Component<
               }
             )}
           </EuiText>
-          <EuiSpacer size="m" />
-          <EuiRadio
-            id="daily"
-            label={i18n.translate(
-              'xpack.apm.serviceDetails.enableErrorReportsPanel.dailyReportRadioButtonLabel',
-              {
-                defaultMessage: 'Daily report'
-              }
-            )}
-            onChange={() => this.onChangeSchedule('daily')}
-            checked={this.state.schedule === 'daily'}
-          />
-          <EuiSpacer size="m" />
-          <EuiFormRow
-            helpText={i18n.translate(
-              'xpack.apm.serviceDetails.enableErrorReportsPanel.dailyReportHelpText',
-              {
-                defaultMessage:
-                  'The daily report will be sent at {dailyTimeFormatted} / {dailyTime12HourFormatted}.',
-                values: { dailyTimeFormatted, dailyTime12HourFormatted }
-              }
-            )}
-            compressed
-          >
-            <EuiSelect
-              value={dailyTime}
-              onChange={this.onChangeDailyUnit}
-              options={intervalHours}
-              disabled={this.state.schedule !== 'daily'}
-            />
-          </EuiFormRow>
-          <EuiSpacer size="m" />
-          <EuiRadio
-            id="interval"
-            label={i18n.translate(
-              'xpack.apm.serviceDetails.enableErrorReportsPanel.intervalRadioButtonLabel',
-              {
-                defaultMessage: 'Interval'
-              }
-            )}
-            onChange={() => this.onChangeSchedule('interval')}
-            checked={this.state.schedule === 'interval'}
-          />
-          <EuiSpacer size="m" />
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <SmallInput>

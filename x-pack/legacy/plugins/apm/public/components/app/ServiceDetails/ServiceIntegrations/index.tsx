@@ -19,9 +19,11 @@ import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { MachineLearningFlyout } from './MachineLearningFlyout';
 import { WatcherFlyout } from './WatcherFlyout';
+import { APMClient } from '../../../../services/rest/createCallApmApi';
 
 interface Props {
   urlParams: IUrlParams;
+  callApmApi: APMClient;
 }
 interface State {
   isPopoverOpen: boolean;
@@ -162,6 +164,7 @@ export class ServiceIntegrations extends React.Component<Props, State> {
               urlParams={this.props.urlParams}
             />
             <WatcherFlyout
+              callApmApi={this.props.callApmApi}
               isOpen={this.state.activeFlyout === 'Watcher'}
               onClose={this.closeFlyouts}
               urlParams={this.props.urlParams}

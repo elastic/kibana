@@ -17,7 +17,14 @@ import { plugin } from './server/new-platform/index';
 
 export const apm: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'apm_oss'],
+    require: [
+      'kibana',
+      'elasticsearch',
+      'xpack_main',
+      'apm_oss',
+      'alerting',
+      'actions'
+    ],
     id: 'apm',
     configPrefix: 'xpack.apm',
     publicDir: resolve(__dirname, 'public'),
