@@ -4,49 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import proxyquire from 'proxyquire';
-import expect from '@kbn/expect';
-import sinon from 'sinon';
-
-const actionFromUpstreamJSONMock = sinon.stub();
-const actionFromDownstreamJSONMock = sinon.stub();
-const watchStatusFromUpstreamJSONMock = sinon.stub();
-const watchErrorsFromUpstreamJSONMock = sinon.stub();
-
-class ActionStub {
-  static fromUpstreamJson(...args) {
-    actionFromUpstreamJSONMock(...args);
-    return { foo: 'bar' };
-  }
-
-  static fromDownstreamJson(...args) {
-    actionFromDownstreamJSONMock(...args);
-    return { foo: 'bar' };
-  }
-}
-
-class WatchStatusStub {
-  static fromUpstreamJson(...args) {
-    watchStatusFromUpstreamJSONMock(...args);
-    return { foo: 'bar' };
-  }
-}
-
-class WatchErrorsStub {
-  static fromUpstreamJson(...args) {
-    watchErrorsFromUpstreamJSONMock(...args);
-    return { foo: 'bar' };
-  }
-}
-
-const { BaseWatch } = proxyquire('../base_watch', {
-  '../action': { Action: ActionStub },
-  '../watch_status': { WatchStatus: WatchStatusStub },
-  '../watch_errors': { WatchErrors: WatchErrorsStub },
-});
+import { BaseWatch } from './base_watch';
 
 describe('BaseWatch', () => {
-
   describe('Constructor', () => {
 
     let props;
@@ -71,13 +31,13 @@ describe('BaseWatch', () => {
         'actions'
       ];
 
-      expect(actual).to.eql(expected);
+      expect(actual).toEqual(expected);
     });
 
     it('should default isSystemWatch to false', () => {
       const watch = new BaseWatch(props);
 
-      expect(watch.isSystemWatch).to.be(false);
+      expect(watch.isSystemWatch).toBe(false);
     });
 
     it('populates all expected fields', () => {
@@ -96,7 +56,7 @@ describe('BaseWatch', () => {
         actions: 'baz'
       };
 
-      expect(actual).to.eql(expected);
+      expect(actual).toEqual(expected);
     });
 
   });
@@ -124,7 +84,7 @@ describe('BaseWatch', () => {
         }
       };
 
-      expect(actual).to.eql(expected);
+      expect(actual).toEqual(expected);
     });
 
     it('should only populate the name metadata if a name is defined', () => {
@@ -139,7 +99,7 @@ describe('BaseWatch', () => {
         }
       };
 
-      expect(actual).to.eql(expected);
+      expect(actual).toEqual(expected);
     });
 
   });
@@ -151,7 +111,7 @@ describe('BaseWatch', () => {
       const actual = watch.getVisualizeQuery();
       const expected = {};
 
-      expect(actual).to.eql(expected);
+      expect(actual).toEqual(expected);
     });
 
   });
@@ -163,7 +123,7 @@ describe('BaseWatch', () => {
       const actual = watch.formatVisualizeData();
       const expected = [];
 
-      expect(actual).to.eql(expected);
+      expect(actual).toEqual(expected);
     });
 
   });
@@ -211,7 +171,7 @@ describe('BaseWatch', () => {
         actions: props.actions.map(a => a.downstreamJson)
       };
 
-      expect(actual).to.eql(expected);
+      expect(actual).toEqual(expected);
     });
 
     it('should respect an undefined watchStatus & watchErrors prop', () => {
@@ -231,7 +191,7 @@ describe('BaseWatch', () => {
         actions: props.actions.map(a => a.downstreamJson)
       };
 
-      expect(actual).to.eql(expected);
+      expect(actual).toEqual(expected);
     });
 
   });
@@ -275,7 +235,7 @@ describe('BaseWatch', () => {
         }
       };
 
-      expect(actual).to.eql(expected);
+      expect(actual).toEqual(expected);
     });
 
   });
@@ -284,8 +244,6 @@ describe('BaseWatch', () => {
 
     let downstreamJson;
     beforeEach(() => {
-      actionFromDownstreamJSONMock.resetHistory();
-
       downstreamJson = {
         id: 'my-watch',
         name: 'foo',
@@ -302,45 +260,27 @@ describe('BaseWatch', () => {
         'actions'
       ];
 
-      expect(actual).to.eql(expected);
+      expect(actual).toEqual(expected);
     });
 
     it('should properly map id and name', () => {
       const props = BaseWatch.getPropsFromDownstreamJson(downstreamJson);
-      expect(props.id).to.be('my-watch');
-      expect(props.name).to.be('foo');
+      expect(props.id).toBe('my-watch');
+      expect(props.name).toBe('foo');
     });
 
     it('should return an actions property that is an array', () => {
       const props = BaseWatch.getPropsFromDownstreamJson(downstreamJson);
 
-      expect(Array.isArray(props.actions)).to.be(true);
-      expect(props.actions.length).to.be(0);
+      expect(Array.isArray(props.actions)).toBe(true);
+      expect(props.actions.length).toBe(0);
     });
-
-    it('should call Action.fromUDownstreamJSON for each action', () => {
-      const action0 = { type: 'email', id: 'email1' };
-      const action1 = { type: 'logging', id: 'logging1' };
-
-      downstreamJson.actions.push(action0);
-      downstreamJson.actions.push(action1);
-
-      const props = BaseWatch.getPropsFromDownstreamJson(downstreamJson);
-
-      expect(props.actions.length).to.be(2);
-      expect(actionFromDownstreamJSONMock.calledWith(action0)).to.be(true);
-      expect(actionFromDownstreamJSONMock.calledWith(action1)).to.be(true);
-    });
-
   });
 
   describe('getPropsFromUpstreamJson method', () => {
 
     let upstreamJson;
     beforeEach(() => {
-      actionFromUpstreamJSONMock.resetHistory();
-      watchStatusFromUpstreamJSONMock.resetHistory();
-
       upstreamJson = {
         id: 'my-watch',
         type: 'json',
@@ -363,22 +303,25 @@ describe('BaseWatch', () => {
     it(`throws an error if no 'id' property in json`, () => {
       delete upstreamJson.id;
 
-      expect(BaseWatch.getPropsFromUpstreamJson).withArgs(upstreamJson)
-        .to.throwError(/must contain an id property/i);
+      expect(() => {
+        BaseWatch.getPropsFromUpstreamJson(upstreamJson);
+      }).toThrow(/must contain an id property/i);
     });
 
     it(`throws an error if no 'watchJson' property in json`, () => {
       delete upstreamJson.watchJson;
 
-      expect(BaseWatch.getPropsFromUpstreamJson).withArgs(upstreamJson)
-        .to.throwError(/must contain a watchJson property/i);
+      expect(() => {
+        BaseWatch.getPropsFromUpstreamJson(upstreamJson);
+      }).toThrow(/must contain a watchJson property/i);
     });
 
     it(`throws an error if no 'watchStatusJson' property in json`, () => {
       delete upstreamJson.watchStatusJson;
 
-      expect(BaseWatch.getPropsFromUpstreamJson).withArgs(upstreamJson)
-        .to.throwError(/must contain a watchStatusJson property/i);
+      expect(() => {
+        BaseWatch.getPropsFromUpstreamJson(upstreamJson);
+      }).toThrow(/must contain a watchStatusJson property/i);
     });
 
     it(`should ignore unknown watchJson properties`, () => {
@@ -408,7 +351,7 @@ describe('BaseWatch', () => {
         'throttle_period_in_millis'
       ];
 
-      expect(actual).to.eql(expected);
+      expect(actual).toEqual(expected);
     });
 
     it('should return a valid props object', () => {
@@ -423,69 +366,20 @@ describe('BaseWatch', () => {
         'actions'
       ];
 
-      expect(actual).to.eql(expected);
+      expect(actual).toEqual(expected);
     });
 
     it('should pull name out of metadata', () => {
       const props = BaseWatch.getPropsFromUpstreamJson(upstreamJson);
 
-      expect(props.name).to.be('foo');
+      expect(props.name).toBe('foo');
     });
 
     it('should return an actions property that is an array', () => {
       const props = BaseWatch.getPropsFromUpstreamJson(upstreamJson);
 
-      expect(Array.isArray(props.actions)).to.be(true);
-      expect(props.actions.length).to.be(0);
+      expect(Array.isArray(props.actions)).toBe(true);
+      expect(props.actions.length).toBe(0);
     });
-
-    it('should call Action.fromUpstreamJson for each action', () => {
-      upstreamJson.watchJson.actions = {
-        'my-logging-action': {
-          'logging': {
-            'text': 'foo'
-          }
-        },
-        'my-unknown-action': {
-          'foobar': {}
-        }
-      };
-
-      const props = BaseWatch.getPropsFromUpstreamJson(upstreamJson);
-
-      expect(props.actions.length).to.be(2);
-      expect(actionFromUpstreamJSONMock.calledWith({
-        id: 'my-logging-action',
-        actionJson: {
-          'logging': {
-            'text': 'foo'
-          }
-        }
-      })).to.be(true);
-      expect(actionFromUpstreamJSONMock.calledWith({
-        id: 'my-unknown-action',
-        actionJson: {
-          'foobar': {}
-        }
-      })).to.be(true);
-    });
-
-    it('should call WatchStatus.fromUpstreamJson for the watch status', () => {
-      BaseWatch.getPropsFromUpstreamJson(upstreamJson);
-
-      expect(watchStatusFromUpstreamJSONMock.calledWith({
-        id: 'my-watch',
-        watchStatusJson: {
-          state: {
-            active: true
-          }
-        },
-        watchErrors: {
-          foo: 'bar'
-        }
-      })).to.be(true);
-    });
-
   });
-
 });
