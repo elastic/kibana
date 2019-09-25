@@ -118,3 +118,14 @@ export type LicensingConfigType = TypeOf<typeof schema>;
 export type LicenseType = keyof typeof LICENSE_TYPE;
 /** @public */
 export type LicenseFeatureSerializer = (licensing: ILicense) => any;
+
+/** @public */
+export interface LicensingRequestContext {
+  license: ILicense;
+}
+
+declare module 'kibana/server' {
+  interface RequestHandlerContext {
+    licensing: LicensingRequestContext;
+  }
+}
