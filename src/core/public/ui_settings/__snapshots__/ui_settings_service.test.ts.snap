@@ -20,10 +20,11 @@ exports[`#setup constructs UiSettingsClient and UiSettingsApi: UiSettingsApi arg
             },
           ],
         },
-        "basePath": Object {
-          "get": [MockFunction],
-          "prepend": [MockFunction],
-          "remove": [MockFunction],
+        "basePath": BasePath {
+          "basePath": "",
+          "get": [Function],
+          "prepend": [Function],
+          "remove": [Function],
         },
         "delete": [MockFunction],
         "fetch": [MockFunction],
