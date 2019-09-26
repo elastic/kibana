@@ -437,8 +437,9 @@ export function getUiSettingDefaults() {
       type: 'boolean',
       description: i18n.translate('kbn.advancedSettings.courier.batchSearchesText', {
         defaultMessage:
-          'Batch multiple concurrent searches in a single request. This may improve overall load' +
-          'times, but it also means that no single search request will be returned until the last has completed.',
+          `When disabled, dashboard panels will load individually, and search requests will terminate when users navigate
+           away or update the query. When enabled, dashboard panels will load together when all of the data is loaded, and
+           searches will not terminate.`,
       }),
       category: ['search'],
     },
