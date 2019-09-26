@@ -1,0 +1,24 @@
+[[save-visualize]]
+== Saving Visualizations
+Saving visualizations enables you to reload them in Visualize and use them in
+<<dashboard, dashboards>>.
+
+[float]
+[[visualize-read-only-access]]
+=== [xpack]#Read only access#
+When you have insufficient privileges to save visualizations, the following indicator in Kibana will be
+displayed and the *Save* button won't be visible. For more information on granting access to
+Kibana see <<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::visualize/images/read-only-badge.png[Example of Visualize's read only access indicator in Kibana's header]
+
+[float]
+[[saving-a-visualization]]
+=== Saving a Visualization
+To save the current visualization:
+
+. Click *Save* in the Kibana toolbar.
+. Enter a name for the visualization and click *Save*.
+
+You can import, export and delete saved visualizations from *Management/Kibana/Saved Objects*.

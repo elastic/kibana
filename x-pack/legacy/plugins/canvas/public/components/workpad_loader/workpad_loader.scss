@@ -1,0 +1,25 @@
+.canvasWorkpad__upload--compressed {
+
+  &.euiFilePicker--compressed.euiFilePicker {
+    .euiFilePicker__prompt {
+      height: $euiSizeXXL;
+      padding: $euiSizeM;
+      padding-left: $euiSizeXXL;
+    }
+
+    .euiFilePicker__icon {
+      top: $euiSizeM;
+    }
+  }
+
+  // The file picker input is being used moreso as a button, outside of a form,
+  // and thus the need to override the default max-width of form inputs.
+  // An issue has been opened in EUI to consider creating a button
+  // version of the file picker - https://github.com/elastic/eui/issues/1987
+
+  .euiFilePicker__wrap {
+    @include euiBreakpoint('xs', 's') {
+      max-width: none;
+    }
+  }
+}

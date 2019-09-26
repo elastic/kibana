@@ -18,22 +18,44 @@
  */
 
 import { get } from 'lodash';
+import { DiscoveredPlugin, PluginName } from '../../server';
 import { UiSettingsState } from '../ui_settings';
-import { deepFreeze } from './deep_freeze';
+import { deepFreeze } from '../../utils/';
+import { Capabilities } from '..';
 
+/** @public */
+export interface LegacyNavLink {
+  id: string;
+  title: string;
+  order: number;
+  url: string;
+  icon?: string;
+  euiIconType?: string;
+}
+
+/** @internal */
 export interface InjectedMetadataParams {
   injectedMetadata: {
     version: string;
     buildNumber: number;
+    branch: string;
     basePath: string;
+    csp: {
+      warnLegacyBrowsers: boolean;
+    };
     vars: {
       [key: string]: unknown;
     };
+    uiPlugins: Array<{
+      id: PluginName;
+      plugin: DiscoveredPlugin;
+    }>;
+    capabilities: Capabilities;
+    legacyMode: boolean;
     legacyMetadata: {
       app: unknown;
-      translations: unknown;
       bundleId: string;
-      nav: unknown;
+      nav: LegacyNavLink[];
       version: string;
       branch: string;
       buildNum: number;
@@ -54,20 +76,44 @@ export interface InjectedMetadataParams {
  * server into the page. The metadata is actually defined
  * in the entry file for the bundle containing the new platform
  * and is read from the DOM in most cases.
+ *
+ * @internal
  */
 export class InjectedMetadataService {
-  private state = deepFreeze(this.params.injectedMetadata);
+  private state = deepFreeze(
+    this.params.injectedMetadata
+  ) as InjectedMetadataParams['injectedMetadata'];
 
   constructor(private readonly params: InjectedMetadataParams) {}
 
-  public start() {
+  public start(): InjectedMetadataStart {
+    return this.setup();
+  }
+
+  public setup(): InjectedMetadataSetup {
     return {
       getBasePath: () => {
         return this.state.basePath;
       },
 
       getKibanaVersion: () => {
-        return this.getKibanaVersion();
+        return this.state.version;
+      },
+
+      getCapabilities: () => {
+        return this.state.capabilities;
+      },
+
+      getCspConfig: () => {
+        return this.state.csp;
+      },
+
+      getPlugins: () => {
+        return this.state.uiPlugins;
+      },
+
+      getLegacyMode: () => {
+        return this.state.legacyMode;
       },
 
       getLegacyMetadata: () => {
@@ -81,16 +127,62 @@ export class InjectedMetadataService {
       getInjectedVars: () => {
         return this.state.vars;
       },
+
+      getKibanaBuildNumber: () => {
+        return this.state.buildNumber;
+      },
+
+      getKibanaBranch: () => {
+        return this.state.branch;
+      },
     };
-  }
-
-  public getKibanaVersion() {
-    return this.state.version;
-  }
-
-  public getKibanaBuildNumber() {
-    return this.state.buildNumber;
   }
 }
 
-export type InjectedMetadataStartContract = ReturnType<InjectedMetadataService['start']>;
+/**
+ * Provides access to the metadata injected by the server into the page
+ *
+ * @internal
+ */
+export interface InjectedMetadataSetup {
+  getBasePath: () => string;
+  getKibanaBuildNumber: () => number;
+  getKibanaBranch: () => string;
+  getKibanaVersion: () => string;
+  getCapabilities: () => Capabilities;
+  getCspConfig: () => {
+    warnLegacyBrowsers: boolean;
+  };
+  /**
+   * An array of frontend plugins in topological order.
+   */
+  getPlugins: () => Array<{
+    id: string;
+    plugin: DiscoveredPlugin;
+  }>;
+  /** Indicates whether or not we are rendering a known legacy app. */
+  getLegacyMode: () => boolean;
+  getLegacyMetadata: () => {
+    app: unknown;
+    bundleId: string;
+    nav: LegacyNavLink[];
+    version: string;
+    branch: string;
+    buildNum: number;
+    buildSha: string;
+    basePath: string;
+    serverName: string;
+    devMode: boolean;
+    uiSettings: {
+      defaults: UiSettingsState;
+      user?: UiSettingsState | undefined;
+    };
+  };
+  getInjectedVar: (name: string, defaultValue?: any) => unknown;
+  getInjectedVars: () => {
+    [key: string]: unknown;
+  };
+}
+
+/** @internal */
+export type InjectedMetadataStart = InjectedMetadataSetup;

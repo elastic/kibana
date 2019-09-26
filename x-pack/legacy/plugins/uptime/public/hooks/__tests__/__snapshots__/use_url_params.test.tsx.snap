@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`useUrlParams gets the expected values using the context 1`] = `
+<UseUrlParamsTestComponent
+  hook={[Function]}
+>
+  <div>
+    {"absoluteDateRangeStart":20,"absoluteDateRangeEnd":20,"autorefreshInterval":60000,"autorefreshIsPaused":false,"dateRangeStart":"now-19d","dateRangeEnd":"now-1m","filters":"","search":"","selectedPingStatus":"down","statusFilter":""}
+  </div>
+  <button
+    id="setUrlParams"
+    onClick={[Function]}
+  >
+    Set url params
+  </button>
+  <button
+    id="getUrlParams"
+    onClick={[Function]}
+  >
+    Get url params
+  </button>
+</UseUrlParamsTestComponent>
+`;

@@ -1,8 +1,8 @@
 [role="xpack"]
 [[monitoring-settings-kb]]
-=== Monitoring Settings in Kibana
+=== Monitoring settings in Kibana
 ++++
-<titleabbrev>Monitoring Settings</titleabbrev>
+<titleabbrev>Monitoring settings</titleabbrev>
 ++++
 
 By default, the Monitoring application is enabled, but data collection
@@ -25,21 +25,21 @@ from Logstash, you configure
 in `logstash.yml`.
 
 For more information, see
-{xpack-ref}/xpack-monitoring.html[Monitoring the Elastic Stack].
+{stack-ov}/xpack-monitoring.html[Monitoring the Elastic Stack].
 
 [float]
 [[monitoring-general-settings]]
-==== General Monitoring Settings
+==== General monitoring settings
 
 `xpack.monitoring.enabled`::
-Set to `true` (default) to enable {monitoring} in {kib}. Unlike the
+Set to `true` (default) to enable the {monitor-features} in {kib}. Unlike the
 `xpack.monitoring.ui.enabled` setting, when this setting is `false`, the
 monitoring back-end does not run and {kib} stats are not sent to the monitoring
 cluster.
 
-`xpack.monitoring.elasticsearch.url`::
+`xpack.monitoring.elasticsearch.hosts`::
 Specifies the location of the {es} cluster where your monitoring data is stored.
-By default, this is the same as the `elasticsearch.url`. This setting enables
+By default, this is the same as `elasticsearch.hosts`. This setting enables
 you to use a single {kib} instance to search and visualize data in your
 production cluster as well as monitor data sent to a dedicated monitoring
 cluster.
@@ -54,10 +54,7 @@ Specifies the password that {kib} uses for authentication when it retrieves data
 from the monitoring cluster. If not set, {kib} uses the value of the
 `elasticsearch.password` setting.
 
-`xpack.monitoring.report_stats`::
-deprecated[6.3.0, Use `xpack.xpack_main.telemetry.enabled` instead.]
-
-`xpack.xpack_main.telemetry.enabled`::
+`xpack.telemetry.enabled`::
 Set to `true` (default) to send cluster statistics to Elastic. Reporting your
 cluster statistics helps us improve your user experience. Your data is never
 shared with anyone. Set to `false` to disable statistics reporting from any
@@ -71,7 +68,7 @@ which has a default value of `30000`.
 
 [float]
 [[monitoring-collection-settings]]
-==== Monitoring Collection Settings
+==== Monitoring collection settings
 
 These settings control how data is collected from {kib}.
 
@@ -87,17 +84,16 @@ Defaults to `10000` (10 seconds).
 
 [float]
 [[monitoring-ui-settings]]
-==== Monitoring UI Settings
+==== Monitoring UI settings
 
 These settings adjust how the {kib} Monitoring page displays monitoring data.
 However, the defaults work best in most circumstances. For more information
 about configuring {kib}, see
 {kibana-ref}/settings.html[Setting Kibana Server Properties].
 
-`xpack.monitoring.ui.enabled`::
-Set to `false` to hide the Monitoring UI in {kib}. The monitoring back-end
-continues to run as an agent for sending {kib} stats to the monitoring
-cluster. Defaults to `true`.
+`xpack.monitoring.elasticsearch.logFetchCount`::
+Specifies the number of log entries to display in the Monitoring UI. Defaults to
+`10`. The maximum value is `50`.
 
 `xpack.monitoring.max_bucket_size`::
 Specifies the number of term buckets to return out of the overall terms list when
@@ -112,9 +108,14 @@ represent. Defaults to 10. If you modify the
 `xpack.monitoring.collection.interval` in `elasticsearch.yml`, use the same
 value in this setting.
 
+`xpack.monitoring.ui.enabled`::
+Set to `false` to hide the Monitoring UI in {kib}. The monitoring back-end
+continues to run as an agent for sending {kib} stats to the monitoring
+cluster. Defaults to `true`.
+
 [float]
 [[monitoring-ui-cgroup-settings]]
-===== Monitoring UI Container Settings
+===== Monitoring UI container settings
 
 The Monitoring UI exposes the Cgroup statistics that we collect for you to make
 better decisions about your container performance, rather than guessing based on
@@ -128,6 +129,3 @@ For {es} clusters that are running in containers, this setting changes the
 statistics. It also adds the calculated Cgroup CPU utilization to the
 *Node Overview* page instead of the overall operating system's CPU
 utilization. Defaults to `false`.
-+
-[role="screenshot"]
-image::images/monitoring-containers.png[Elasticsearch Inside a Container]

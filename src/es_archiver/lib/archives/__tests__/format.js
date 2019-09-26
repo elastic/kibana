@@ -20,13 +20,13 @@
 import Stream from 'stream';
 import { createGunzip } from 'zlib';
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import {
   createListStream,
   createPromiseFromStreams,
   createConcatStream,
-} from '../../../../utils';
+} from '../../../../legacy/utils';
 
 import { createFormatArchiveStreams } from '../format';
 

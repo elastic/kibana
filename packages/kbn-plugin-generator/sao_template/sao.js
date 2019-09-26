@@ -27,7 +27,7 @@ const chalk = require('chalk');
 
 const pkg = require('../package.json');
 const kibanaPkgPath = require.resolve('../../../package.json');
-const kibanaPkg = require(kibanaPkgPath);
+const kibanaPkg = require(kibanaPkgPath); // eslint-disable-line import/no-dynamic-require
 
 const KBN_DIR = dirname(kibanaPkgPath);
 
@@ -40,7 +40,7 @@ module.exports = function({ name }) {
       },
       kbnVersion: {
         message: 'What Kibana version are you targeting?',
-        default: kibanaPkg.branch,
+        default: kibanaPkg.version,
       },
       generateApp: {
         type: 'confirm',
@@ -72,6 +72,7 @@ module.exports = function({ name }) {
     filters: {
       'public/**/*': 'generateApp',
       'translations/**/*': 'generateTranslations',
+      '.i18nrc.json': 'generateTranslations',
       'public/hack.js': 'generateHack',
       'server/**/*': 'generateApi',
       'public/app.scss': 'generateScss',
@@ -79,7 +80,8 @@ module.exports = function({ name }) {
     },
     move: {
       gitignore: '.gitignore',
-      eslintrc: '.eslintrc',
+      'eslintrc.js': '.eslintrc.js',
+      'package_template.json': 'package.json',
     },
     data: answers =>
       Object.assign(
@@ -100,7 +102,7 @@ module.exports = function({ name }) {
         cwd: KBN_DIR,
         stdio: 'inherit',
       }).then(() => {
-        const dir = relative(process.cwd(), resolve(KBN_DIR, `../kibana-extra`, snakeCase(name)));
+        const dir = relative(process.cwd(), resolve(KBN_DIR, 'plugins', snakeCase(name)));
 
         log.success(chalk`🎉
 

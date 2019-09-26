@@ -42,9 +42,9 @@ export async function generateNoticeFromSource({ productName, directory, log }) 
     cwd: directory,
     nodir: true,
     ignore: [
-      '{node_modules,build,target,dist,optimize}/**',
+      '{node_modules,build,target,dist,data,built_assets}/**',
       'packages/*/{node_modules,build,target,dist}/**',
-      'x-pack/{node_modules,build,target,dist,optimize}/**',
+      'x-pack/{node_modules,build,target,dist,data}/**',
       'x-pack/packages/*/{node_modules,build,target,dist}/**',
     ]
   };
@@ -64,7 +64,9 @@ export async function generateNoticeFromSource({ productName, directory, log }) 
         let match;
         while ((match = NOTICE_COMMENT_RE.exec(source)) !== null) {
           log.info(`Found @notice comment in ${file.relative}`);
-          noticeComments.push(match[1]);
+          if (!noticeComments.includes(match[1])) {
+            noticeComments.push(match[1]);
+          }
         }
       })
       .on('error', reject)

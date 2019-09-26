@@ -27,11 +27,11 @@
 
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const es = getService('es');
   const retry = getService('retry');
   const scriptedFiledName = 'versionConflictScript';
@@ -41,22 +41,22 @@ export default function ({ getService, getPageObjects }) {
 
   describe('index version conflict', function describeIndexTests() {
     before(async function () {
-      await remote.setWindowSize(1200, 800);
+      await browser.setWindowSize(1200, 800);
       await esArchiver.load('discover');
     });
 
 
     it('Should be able to surface version conflict notification while creating scripted field', async function () {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
-      await PageObjects.settings.clickOnOnlyIndexPattern();
+      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.clickScriptedFieldsTab();
       await PageObjects.settings.clickAddScriptedField();
       await PageObjects.settings.setScriptedFieldName(scriptedFiledName);
       await PageObjects.settings.setScriptedFieldScript(`doc['bytes'].value`);
       const response = await es.update({
         index: '.kibana',
-        type: 'doc',
+        type: '_doc',
         id: 'index-pattern:logstash-*',
         body: {
           'doc': { 'index-pattern': { 'fieldFormatMap': '{"geo.src":{"id":"number"}}' } }
@@ -75,15 +75,15 @@ export default function ({ getService, getPageObjects }) {
     it('Should be able to surface version conflict notification while changing field format', async function () {
       const fieldName = 'geo.srcdest';
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
-      await PageObjects.settings.clickOnOnlyIndexPattern();
+      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickIndexPatternLogstash();
       log.debug('Starting openControlsByName (' + fieldName + ')');
       await PageObjects.settings.openControlsByName(fieldName);
       log.debug('controls are open');
       await PageObjects.settings.setFieldFormat('url');
       const response = await es.update({
         index: '.kibana',
-        type: 'doc',
+        type: '_doc',
         id: 'index-pattern:logstash-*',
         body: {
           'doc': { 'index-pattern': { 'fieldFormatMap': '{"geo.dest":{"id":"number"}}' } }

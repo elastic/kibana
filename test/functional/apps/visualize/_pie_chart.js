@@ -17,16 +17,18 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
+  const pieChart = getService('pieChart');
+  const inspector = getService('inspector');
+  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'timePicker']);
   const fromTime = '2015-09-19 06:31:44.000';
   const toTime = '2015-09-23 18:31:44.000';
 
-  describe('pie chart', async function () {
+  describe('pie chart', function () {
     const vizName1 = 'Visualization PieChart';
     before(async function () {
       log.debug('navigateToApp visualize');
@@ -34,10 +36,9 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickPieChart');
       await PageObjects.visualize.clickPieChart();
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      log.debug('select bucket Split Slices');
-      await PageObjects.visualize.clickBucket('Split Slices');
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      log.debug('select bucket Split slices');
+      await PageObjects.visualize.clickBucket('Split slices');
       log.debug('Click aggregation Histogram');
       await PageObjects.visualize.selectAggregation('Histogram');
       log.debug('Click field memory');
@@ -51,29 +52,19 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Save viz page title is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
-      // sleep a bit before trying to get the pie chart data below
-      await PageObjects.common.sleep(2000);
     });
 
     it('should have inspector enabled', async function () {
-      const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-      expect(spyToggleExists).to.be(true);
+      await inspector.expectIsEnabled();
     });
 
 
     it('should show 10 slices in pie chart', async function () {
-      const expectedPieChartSliceCount = 10;
-
-      const pieData = await PageObjects.visualize.getPieChartData();
-      log.debug('pieData.length = ' + pieData.length);
-      expect(pieData.length).to.be(expectedPieChartSliceCount);
+      pieChart.expectPieSliceCount(10);
     });
 
     it('should show correct data', async function () {
@@ -81,12 +72,9 @@ export default function ({ getService, getPageObjects }) {
         ['160,000', '44'], ['200,000', '40'], ['240,000', '46'], ['280,000', '39'], ['320,000', '40'], ['360,000', '47']
       ];
 
-
-      await PageObjects.visualize.openInspector();
-      await PageObjects.visualize.setInspectorTablePageSize(50);
-      const data =  await PageObjects.visualize.getInspectorTableData();
-      log.debug(data);
-      expect(data).to.eql(expectedTableData);
+      await inspector.open();
+      await inspector.setTablePageSize(50);
+      await inspector.expectTableData(expectedTableData);
     });
 
     describe('other bucket', () => {
@@ -97,44 +85,38 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clickPieChart');
         await PageObjects.visualize.clickPieChart();
         await PageObjects.visualize.clickNewSearch();
-        log.debug(`Set absolute time range from "${fromTime}" to "${toTime}"`);
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        log.debug('select bucket Split Slices');
-        await PageObjects.visualize.clickBucket('Split Slices');
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        log.debug('select bucket Split slices');
+        await PageObjects.visualize.clickBucket('Split slices');
         log.debug('Click aggregation Terms');
         await PageObjects.visualize.selectAggregation('Terms');
         log.debug('Click field machine.os.raw');
         await PageObjects.visualize.selectField('machine.os.raw');
-        await PageObjects.visualize.toggleOtherBucket();
-        await PageObjects.visualize.toggleMissingBucket();
+        await PageObjects.visualize.toggleOtherBucket(2);
+        await PageObjects.visualize.toggleMissingBucket(2);
         log.debug('clickGo');
         await PageObjects.visualize.clickGo();
-        await PageObjects.common.sleep(1003);
-        const pieData = await PageObjects.visualize.getPieChartLabels();
-        log.debug(`pieData.length = ${pieData.length}`);
-        expect(pieData).to.eql(expectedTableData);
+        await pieChart.expectPieChartLabels(expectedTableData);
       });
 
       it('should apply correct filter on other bucket', async () => {
         const expectedTableData = [ 'Missing', 'osx' ];
 
-        await PageObjects.visualize.filterPieSlice('Other');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const pieData = await PageObjects.visualize.getPieChartLabels();
-        log.debug(`pieData.length = ${pieData.length}`);
-        expect(pieData).to.eql(expectedTableData);
+        await pieChart.filterOnPieSlice('Other');
+        await PageObjects.visualize.waitForVisualization();
+        await pieChart.expectPieChartLabels(expectedTableData);
         await filterBar.removeFilter('machine.os.raw');
+        await PageObjects.visualize.waitForVisualization();
       });
 
       it('should apply correct filter on other bucket by clicking on a legend', async () => {
         const expectedTableData = [ 'Missing', 'osx' ];
 
         await PageObjects.visualize.filterLegend('Other');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const pieData = await PageObjects.visualize.getPieChartLabels();
-        log.debug(`pieData.length = ${pieData.length}`);
-        expect(pieData).to.eql(expectedTableData);
+        await PageObjects.visualize.waitForVisualization();
+        await pieChart.expectPieChartLabels(expectedTableData);
         await filterBar.removeFilter('machine.os.raw');
+        await PageObjects.visualize.waitForVisualization();
       });
 
       it('should show two levels of other buckets', async () => {
@@ -144,66 +126,49 @@ export default function ({ getService, getPageObjects }) {
           'Other', 'Other', 'IN', 'CN', 'US', 'ID', 'BR', 'Other' ];
 
         await PageObjects.visualize.toggleOpenEditor(2, 'false');
-        await PageObjects.visualize.clickAddBucket();
-        await PageObjects.visualize.clickBucket('Split Slices');
+        await PageObjects.visualize.clickBucket('Split slices');
         await PageObjects.visualize.selectAggregation('Terms');
         log.debug('Click field geo.src');
         await PageObjects.visualize.selectField('geo.src');
-        await PageObjects.visualize.toggleOtherBucket();
-        await PageObjects.visualize.toggleMissingBucket();
+        await PageObjects.visualize.toggleOtherBucket(3);
+        await PageObjects.visualize.toggleMissingBucket(3);
         log.debug('clickGo');
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const pieData = await PageObjects.visualize.getPieChartLabels();
-        log.debug(`pieData.length = ${pieData.length}`);
-        expect(pieData).to.eql(expectedTableData);
+        await pieChart.expectPieChartLabels(expectedTableData);
       });
     });
 
     describe('disabled aggs', () => {
       before(async () => {
         await PageObjects.visualize.loadSavedVisualization(vizName1);
-        await PageObjects.visualize.waitForVisualization();
-        // sleep a bit before trying to get the pie chart data below
-        await PageObjects.common.sleep(2000);
+        await PageObjects.visualize.waitForRenderingCount();
       });
 
       it('should show correct result with one agg disabled', async () => {
         const expectedTableData =  [ 'win 8', 'win xp', 'win 7', 'ios', 'osx'  ];
 
-        await PageObjects.visualize.clickAddBucket();
-        await PageObjects.visualize.clickBucket('Split Slices');
+        await PageObjects.visualize.clickBucket('Split slices');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('machine.os.raw');
         await PageObjects.visualize.toggleDisabledAgg(2);
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const pieData = await PageObjects.visualize.getPieChartLabels();
-        log.debug('pieData.length = ' + pieData.length);
-        expect(pieData).to.eql(expectedTableData);
+        await pieChart.expectPieChartLabels(expectedTableData);
       });
 
       it('should correctly save disabled agg', async () => {
-        await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
-        const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-        log.debug(`Save viz page title is ${pageTitle}`);
-        expect(pageTitle).to.contain(vizName1);
+        await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
         await PageObjects.visualize.waitForVisualizationSavedToastGone();
         await PageObjects.visualize.loadSavedVisualization(vizName1);
-        await PageObjects.visualize.waitForVisualization();
+        await PageObjects.visualize.waitForRenderingCount();
 
         const expectedTableData =  [ 'win 8', 'win xp', 'win 7', 'ios', 'osx'  ];
-        const pieData = await PageObjects.visualize.getPieChartLabels();
-        log.debug('pieData.length = ' + pieData.length);
-        expect(pieData).to.eql(expectedTableData);
+        await pieChart.expectPieChartLabels(expectedTableData);
       });
 
       it('should show correct result when agg is re-enabled', async () => {
         await PageObjects.visualize.toggleDisabledAgg(2);
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.common.sleep(2000);
 
         const expectedTableData =  [
           '0', 'win 7', 'win xp', 'win 8', 'ios', 'osx', '40,000', 'win 8', 'ios', 'win 7', 'win xp', 'osx', '80,000',
@@ -211,9 +176,8 @@ export default function ({ getService, getPageObjects }) {
           'win 8', 'ios', 'win 7', 'win xp', 'osx', '200,000', 'win 8', 'ios', 'win xp', 'win 7', 'osx', '240,000',
           'ios', 'win 7', 'win xp', 'win 8', 'osx', '280,000', 'win xp', 'win 8', 'win 7', 'ios', 'osx', '320,000',
           'win xp', 'win 7', 'ios', 'win 8', 'osx', '360,000', 'win 7', 'win xp', 'ios', 'win 8', 'osx' ];
-        const pieData = await PageObjects.visualize.getPieChartLabels();
-        log.debug('pieData.length = ' + pieData.length);
-        expect(pieData).to.eql(expectedTableData);
+
+        await pieChart.expectPieChartLabels(expectedTableData);
       });
     });
 
@@ -223,10 +187,9 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clickPieChart');
         await PageObjects.visualize.clickPieChart();
         await PageObjects.visualize.clickNewSearch();
-        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        log.debug('select bucket Split Slices');
-        await PageObjects.visualize.clickBucket('Split Slices');
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        log.debug('select bucket Split slices');
+        await PageObjects.visualize.clickBucket('Split slices');
         log.debug('Click aggregation Filters');
         await PageObjects.visualize.selectAggregation('Filters');
         log.debug('Set the 1st filter value');
@@ -239,31 +202,90 @@ export default function ({ getService, getPageObjects }) {
         const emptyFromTime = '2016-09-19 06:31:44.000';
         const emptyToTime = '2016-09-23 18:31:44.000';
         log.debug('Switch to a different time range from \"' + emptyFromTime + '\" to \"' + emptyToTime + '\"');
-        await PageObjects.header.setAbsoluteRange(emptyFromTime, emptyToTime);
+        await PageObjects.timePicker.setAbsoluteRange(emptyFromTime, emptyToTime);
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.expectPieChartError();
+        await PageObjects.visualize.expectError();
       });
     });
     describe('multi series slice', () => {
-      it('should still showing pie chart when a subseries have zero data', async function () {
+      before(async () => {
+        log.debug('navigateToApp visualize');
         await PageObjects.visualize.navigateToNewVisualization();
         log.debug('clickPieChart');
         await PageObjects.visualize.clickPieChart();
         await PageObjects.visualize.clickNewSearch();
         log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        log.debug('select bucket Split Slices');
-        await PageObjects.visualize.clickBucket('Split Slices');
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        log.debug('select bucket Split slices');
+        await PageObjects.visualize.clickBucket('Split slices');
+        log.debug('Click aggregation Histogram');
+        await PageObjects.visualize.selectAggregation('Histogram');
+        log.debug('Click field memory');
+        await PageObjects.visualize.selectField('memory');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.common.sleep(1003);
+        log.debug('setNumericInterval 4000');
+        await PageObjects.visualize.setNumericInterval('40000');
+        log.debug('Toggle previous editor');
+        await PageObjects.visualize.toggleAggregationEditor(2);
+        log.debug('select bucket Split slices');
+        await PageObjects.visualize.clickBucket('Split slices');
+        await PageObjects.visualize.selectAggregation('Terms');
+        await PageObjects.visualize.selectField('geo.dest');
+        await PageObjects.visualize.clickGo();
+      });
+
+      it ('should show correct chart', async () => {
+        const expectedTableData =  [ [ '0', '55', 'CN', '14' ], [ '0', '55', 'IN', '9' ], [ '0', '55', 'MX', '3' ],
+          [ '0', '55', 'US', '3' ], [ '0', '55', 'BR', '2' ], [ '40,000', '50', 'CN', '7' ],
+          [ '40,000', '50', 'IN', '7' ], [ '40,000', '50', 'US', '5' ], [ '40,000', '50', 'MY', '3' ],
+          [ '40,000', '50', 'ET', '2' ], [ '80,000', '41', 'CN', '9' ], [ '80,000', '41', 'IN', '4' ],
+          [ '80,000', '41', 'US', '4' ], [ '80,000', '41', 'BR', '3' ], [ '80,000', '41', 'IT', '2' ],
+          [ '120,000', '43', 'CN', '8' ], [ '120,000', '43', 'IN', '5' ], [ '120,000', '43', 'US', '4' ],
+          [ '120,000', '43', 'JP', '3' ], [ '120,000', '43', 'RU', '3' ], [ '160,000', '44', 'CN', '15' ],
+          [ '160,000', '44', 'IN', '5' ], [ '160,000', '44', 'IQ', '2' ], [ '160,000', '44', 'JP', '2' ],
+          [ '160,000', '44', 'NG', '2' ], [ '200,000', '40', 'IN', '7' ], [ '200,000', '40', 'CN', '6' ],
+          [ '200,000', '40', 'MX', '3' ], [ '200,000', '40', 'BR', '2' ], [ '200,000', '40', 'ID', '2' ],
+          [ '240,000', '46', 'CN', '6' ], [ '240,000', '46', 'IN', '6' ], [ '240,000', '46', 'US', '6' ],
+          [ '240,000', '46', 'NG', '3' ], [ '240,000', '46', 'CH', '2' ], [ '280,000', '39', 'CN', '11' ],
+          [ '280,000', '39', 'IN', '5' ], [ '280,000', '39', 'BR', '2' ], [ '280,000', '39', 'IT', '2' ],
+          [ '280,000', '39', 'NG', '2' ], [ '320,000', '40', 'CN', '7' ], [ '320,000', '40', 'US', '6' ],
+          [ '320,000', '40', 'MX', '4' ], [ '320,000', '40', 'BD', '2' ], [ '320,000', '40', 'ID', '2' ],
+          [ '360,000', '47', 'IN', '8' ], [ '360,000', '47', 'CN', '6' ], [ '360,000', '47', 'US', '4' ],
+          [ '360,000', '47', 'BD', '3' ], [ '360,000', '47', 'BR', '2' ] ];
+
+        await inspector.open();
+        await inspector.setTablePageSize(50);
+        await inspector.expectTableData(expectedTableData);
+        await inspector.close();
+      });
+
+      it('should correctly filter on legend', async () => {
+        const expectedTableData = [ '0', 'CN', '40,000', 'CN', '80,000', 'CN', '120,000', 'CN', '160,000', 'CN',
+          '200,000', 'CN', '240,000', 'CN', '280,000', 'CN', '320,000', 'CN', '360,000', 'CN' ];
+        await PageObjects.visualize.filterLegend('CN');
+        await PageObjects.visualize.waitForVisualization();
+        await pieChart.expectPieChartLabels(expectedTableData);
+        await filterBar.removeFilter('geo.dest');
+        await PageObjects.visualize.waitForVisualization();
+      });
+
+      it('should still showing pie chart when a subseries have zero data', async function () {
+        await PageObjects.visualize.navigateToNewVisualization();
+        log.debug('clickPieChart');
+        await PageObjects.visualize.clickPieChart();
+        await PageObjects.visualize.clickNewSearch();
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        log.debug('select bucket Split slices');
+        await PageObjects.visualize.clickBucket('Split slices');
         log.debug('Click aggregation Filters');
         await PageObjects.visualize.selectAggregation('Filters');
         log.debug('Set the 1st filter value');
         await PageObjects.visualize.setFilterAggregationValue('geo.dest:"US"');
         log.debug('Toggle previous editor');
         await PageObjects.visualize.toggleAggregationEditor(2);
-        log.debug('Add a new series');
-        await PageObjects.visualize.clickAddBucket();
-        log.debug('select bucket Split Slices');
-        await PageObjects.visualize.clickBucket('Split Slices');
+        log.debug('Add a new series, select bucket Split slices');
+        await PageObjects.visualize.clickBucket('Split slices');
         log.debug('Click aggregation Filters');
         await PageObjects.visualize.selectAggregation('Filters');
         log.debug('Set the 1st filter value of the aggregation id 3');
@@ -280,21 +302,17 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickPieChart();
         await PageObjects.visualize.clickNewSearch();
-        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        log.debug('select bucket Split Slices');
-        await PageObjects.visualize.clickBucket('Split Chart');
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        log.debug('select bucket Split chart');
+        await PageObjects.visualize.clickBucket('Split chart');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('machine.os.raw');
         await PageObjects.visualize.toggleAggregationEditor(2);
-        log.debug('Add a new series');
-        await PageObjects.visualize.clickAddBucket();
-        log.debug('select bucket Split Slices');
-        await PageObjects.visualize.clickBucket('Split Slices');
+        log.debug('Add a new series, select bucket Split slices');
+        await PageObjects.visualize.clickBucket('Split slices');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('geo.src');
         await PageObjects.visualize.clickGo();
-        await PageObjects.visualize.waitForVisualization();
       });
 
       it ('shows correct split chart', async () => {
@@ -325,25 +343,26 @@ export default function ({ getService, getPageObjects }) {
           [ 'osx', '1,322', 'ID', '56' ],
           [ 'osx', '1,322', 'BR', '30' ]
         ];
-        await PageObjects.visualize.openInspector();
-        await PageObjects.visualize.setInspectorTablePageSize(50);
-        const data =  await PageObjects.visualize.getInspectorTableData();
-        await PageObjects.visualize.closeInspector();
-        log.debug(data);
-        expect(data).to.eql(expectedTableData);
+        await inspector.open();
+        await inspector.setTablePageSize(50);
+        await inspector.expectTableData(expectedTableData);
+        await inspector.close();
       });
 
       it ('correctly applies filter', async () => {
-        const expectedTableData = [[ 'win 8', '560', 'CN', '560' ]];
+        const expectedTableData = [
+          [ 'win 8', '560', 'CN', '560' ],
+          [ 'win 7', '537', 'CN', '537' ],
+          [ 'win xp', '526', 'CN', '526' ],
+          [ 'ios', '478', 'CN', '478' ],
+          [ 'osx', '228', 'CN', '228' ]
+        ];
         await PageObjects.visualize.filterLegend('CN');
-        await PageObjects.visualize.applyFilters();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.openInspector();
-        await PageObjects.visualize.setInspectorTablePageSize(50);
-        const data =  await PageObjects.visualize.getInspectorTableData();
-        await PageObjects.visualize.closeInspector();
-        log.debug(data);
-        expect(data).to.eql(expectedTableData);
+        await inspector.open();
+        await inspector.setTablePageSize(50);
+        await inspector.expectTableData(expectedTableData);
+        await inspector.close();
       });
     });
   });

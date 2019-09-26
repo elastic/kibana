@@ -1,69 +1,28 @@
 [[spaces-api-get]]
-=== Get Space
+=== Get a space API
+++++
+<titleabbrev>Get space</titleabbrev>
+++++
 
-experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental.]
+Retrieves a specified {kib} space.
 
-Retrieves all {kib} spaces, or a specific space.
+experimental["The underlying Spaces concepts are stable, but the APIs for managing Spaces are experimental."]
 
-==== Get all {kib} spaces
+[[spaces-api-get-request]]
+==== Request
 
-===== Request
+`GET /api/spaces/space/marketing`
 
-To retrieve all spaces, issue a GET request to the
-/api/spaces/space endpoint.
+[[spaces-api-get-response-codes]]
+==== Response code
 
-[source,js]
---------------------------------------------------
-GET /api/spaces/space
---------------------------------------------------
-// KIBANA
+`200`::
+  Indicates a successful call.
 
-===== Response
+[[spaces-api-get-example]]
+==== Example
 
-A successful call returns a response code of `200` and a response body containing a JSON 
-representation of the spaces.
-
-[source,js]
---------------------------------------------------
-[
-  {
-    "id": "default",
-    "name": "Default",
-    "description" : "This is the Default Space",
-    "_reserved": true
-  },
-  {
-    "id": "marketing",
-    "name": "Marketing",
-    "description" : "This is the Marketing Space",
-    "color": "#aabbcc",
-    "initials": "MK"
-  },
-  {
-    "id": "sales",
-    "name": "Sales",
-    "initials": "MK"
-  },
-]
---------------------------------------------------
-
-==== Get a specific space
-
-===== Request
-
-To retrieve a specific space, issue a GET request to
-the `/api/spaces/space/<space_id>` endpoint:
-
-[source,js]
---------------------------------------------------
-GET /api/spaces/space/marketing
---------------------------------------------------
-// KIBANA
-
-===== Response
-
-A successful call returns a response code of `200` and a response body containing a JSON 
-representation of the space.
+The API returns the following:
 
 [source,js]
 --------------------------------------------------
@@ -72,6 +31,8 @@ representation of the space.
   "name": "Marketing",
   "description" : "This is the Marketing Space",
   "color": "#aabbcc",
-  "initials": "MK"
+  "initials": "MK",
+  "disabledFeatures": [],
+  "imageUrl": ""
 }
 --------------------------------------------------

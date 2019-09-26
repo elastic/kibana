@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots renderers/TimeFilter/components/DatetimeInput default 1`] = `
+<div
+  className="euiFormControlLayout euiFormControlLayout--compressed"
+>
+  <div
+    className="euiFormControlLayout__childrenWrapper"
+  >
+    <input
+      className="euiFieldText euiFieldText--compressed"
+      onChange={[Function]}
+      style={
+        Object {
+          "textAlign": "center",
+        }
+      }
+      type="text"
+      value=""
+    />
+  </div>
+</div>
+`;
+
+exports[`Storyshots renderers/TimeFilter/components/DatetimeInput invalid date 1`] = `
+<div
+  className="euiFormControlLayout euiFormControlLayout--compressed"
+>
+  <div
+    className="euiFormControlLayout__childrenWrapper"
+  >
+    <input
+      className="euiFieldText euiFieldText--compressed"
+      onChange={[Function]}
+      style={
+        Object {
+          "textAlign": "center",
+        }
+      }
+      type="text"
+      value="Invalid date"
+    />
+  </div>
+</div>
+`;
+
+exports[`Storyshots renderers/TimeFilter/components/DatetimeInput with date 1`] = `
+<div
+  className="euiFormControlLayout euiFormControlLayout--compressed"
+>
+  <div
+    className="euiFormControlLayout__childrenWrapper"
+  >
+    <input
+      className="euiFieldText euiFieldText--compressed"
+      onChange={[Function]}
+      style={
+        Object {
+          "textAlign": "center",
+        }
+      }
+      type="text"
+      value="2018-02-20 19:26:52"
+    />
+  </div>
+</div>
+`;

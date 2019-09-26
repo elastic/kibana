@@ -1,0 +1,26 @@
+{
+  "data_frame.preview_data_frame_transform": {
+    "data_autocomplete_rules": {
+      "source": {
+        "index": "SOURCE_INDEX_NAME",
+        "query": {
+          "__scope_link": "GLOBAL.query"
+        }
+      },
+      "pivot": {
+        "group_by": {
+          "__template": {
+            "NAME": {},
+            "__scope_link": "GLOBAL.groupByAggs"
+          }
+        },
+        "aggregations": {
+          "__template": {
+            "NAME": {}
+          },
+          "__scope_link": "GLOBAL.aggregations"
+        }
+      }
+    }
+  }
+}

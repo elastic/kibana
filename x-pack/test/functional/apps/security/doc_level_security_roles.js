@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const retry = getService('retry');
   const log = getService('log');
   const screenshot = getService('screenshots');
@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
     before('initialize tests', async () => {
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('security/dlstest');
-      remote.setWindowSize(1600, 1000);
+      await browser.setWindowSize(1600, 1000);
 
       await PageObjects.settings.createIndexPattern('dlstest', null);
 
@@ -35,10 +35,10 @@ export default function ({ getService, getPageObjects }) {
     it('should add new role myroleEast', async function () {
       await PageObjects.security.addRole('myroleEast', {
         elasticsearch: {
-          "indices": [{
-            "names": ["dlstest"],
-            "privileges": ["read", "view_index_metadata"],
-            "query": "{\"match\": {\"region\": \"EAST\"}}"
+          'indices': [{
+            'names': ['dlstest'],
+            'privileges': ['read', 'view_index_metadata'],
+            'query': '{"match": {"region": "EAST"}}'
           }]
         },
         kibana: {
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }) {
         expect(hitCount).to.be('1');
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
-      expect(rowData).to.be('name:ABC Company region:EAST _id:doc1 _type:dls _index:dlstest _score:1');
+      expect(rowData).to.be('name:ABC Company region:EAST _id:doc1 _type:_doc _index:dlstest _score:0');
     });
     after('logout', async () => {
       await PageObjects.security.logout();

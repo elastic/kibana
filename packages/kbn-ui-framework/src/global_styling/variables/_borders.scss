@@ -1,6 +1,6 @@
 // Borders
 
-$kuiBorderColor: $kuiColorLightGray;
-$kuiBorderRadius: 4px;
-$kuiBorderThick: 2px solid $kuiBorderColor;
-$kuiBorderThin: 1px solid $kuiBorderColor;
+$kuiBorderColor: $euiBorderColor;
+$kuiBorderRadius: $euiBorderRadius;
+$kuiBorderThick: $euiBorderThick;
+$kuiBorderThin: $euiBorderThin;

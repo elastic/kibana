@@ -1,0 +1,12 @@
+.homSynopsis__card {
+  &.homSynopsis__card--noPanel {
+    // SASSTODO: Add a prop to EuiCard to allow for no "panel" style
+    border: none;
+    box-shadow: none;
+  }
+
+  // SASSTODO: Fix in EUI
+  .euiCard__content {
+    padding-top: 0 !important;
+  }
+}

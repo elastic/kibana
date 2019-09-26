@@ -2,7 +2,16 @@
 
 exports[`I18nProvider provides with context 1`] = `
 Object {
-  "defaultFormats": Object {
+  "defaultFormats": Object {},
+  "defaultLocale": "en",
+  "formatDate": [Function],
+  "formatHTMLMessage": [Function],
+  "formatMessage": [Function],
+  "formatNumber": [Function],
+  "formatPlural": [Function],
+  "formatRelative": [Function],
+  "formatTime": [Function],
+  "formats": Object {
     "date": Object {
       "full": Object {
         "day": "numeric",
@@ -34,6 +43,26 @@ Object {
         "style": "percent",
       },
     },
+    "relative": Object {
+      "days": Object {
+        "units": "day",
+      },
+      "hours": Object {
+        "units": "hour",
+      },
+      "minutes": Object {
+        "units": "minute",
+      },
+      "months": Object {
+        "units": "month",
+      },
+      "seconds": Object {
+        "units": "second",
+      },
+      "years": Object {
+        "units": "year",
+      },
+    },
     "time": Object {
       "full": Object {
         "hour": "numeric",
@@ -58,15 +87,6 @@ Object {
       },
     },
   },
-  "defaultLocale": "en",
-  "formatDate": [Function],
-  "formatHTMLMessage": [Function],
-  "formatMessage": [Function],
-  "formatNumber": [Function],
-  "formatPlural": [Function],
-  "formatRelative": [Function],
-  "formatTime": [Function],
-  "formats": Object {},
   "formatters": Object {
     "getDateTimeFormat": [Function],
     "getMessageFormat": [Function],
@@ -83,4 +103,8 @@ Object {
 }
 `;
 
-exports[`I18nProvider renders children 1`] = `<ChildrenMock />`;
+exports[`I18nProvider renders children 1`] = `
+<PseudoLocaleWrapper>
+  <ChildrenMock />
+</PseudoLocaleWrapper>
+`;

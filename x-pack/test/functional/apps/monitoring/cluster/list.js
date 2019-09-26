@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
 export default function ({ getService, getPageObjects }) {
@@ -21,8 +21,8 @@ export default function ({ getService, getPageObjects }) {
 
       before(async () => {
         await setup('monitoring/multicluster', {
-          from: '2017-08-15 21:00:00',
-          to: '2017-08-16 00:00:00',
+          from: '2017-08-15 21:00:00.000',
+          to: '2017-08-16 00:00:00.000',
         });
 
         await clusterList.assertDefaults();
@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
         it('clicking the basic cluster shows a toast message', async () => {
           const basicClusterLink = await clusterList.getClusterLink(UNSUPPORTED_CLUSTER_UUID);
           await basicClusterLink.click();
-          expect(await testSubjects.exists('monitoringLicenseWarning', 2000)).to.be(true);
+          expect(await testSubjects.exists('monitoringLicenseWarning', { timeout: 2000 })).to.be(true);
         });
 
         /*
@@ -87,7 +87,10 @@ export default function ({ getService, getPageObjects }) {
         await tearDown();
       });
 
-      describe('cluster row content', () => {
+      describe('cluster row content', function () {
+        // TODO: https://github.com/elastic/stack-monitoring/issues/31
+        this.tags(['skipCloud']);
+
         it('non-primary basic cluster shows NA for everything', async () => {
           expect(await clusterList.getClusterName(UNSUPPORTED_CLUSTER_UUID)).to.be('staging');
           expect(await clusterList.getClusterStatus(UNSUPPORTED_CLUSTER_UUID)).to.be('-');
@@ -111,21 +114,24 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      describe('cluster row actions', () => {
+      describe('cluster row actions', function () {
+        // TODO: https://github.com/elastic/stack-monitoring/issues/31
+        this.tags(['skipCloud']);
+
         it('clicking the non-primary basic cluster shows a toast message', async () => {
           const basicClusterLink = await clusterList.getClusterLink(UNSUPPORTED_CLUSTER_UUID);
           await basicClusterLink.click();
-          expect(await testSubjects.exists('monitoringLicenseWarning', 2000)).to.be(true);
+          expect(await testSubjects.exists('monitoringLicenseWarning', { timeout: 2000 })).to.be(true);
         });
 
-        it('clicking the primary basic cluster goes to overview', async () => {
+        it('clicking the primary basic cluster goes to overview', async function () {
           const primaryBasicClusterLink = await clusterList.getClusterLink(SUPPORTED_CLUSTER_UUID);
           await primaryBasicClusterLink.click();
 
           expect(await clusterOverview.isOnClusterOverview()).to.be(true);
           expect(await clusterOverview.getClusterName()).to.be('production');
 
-          await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters'); // reset for next test
+          await PageObjects.monitoring.clickBreadcrumb('~breadcrumbClusters'); // reset for next test
         });
 
       });

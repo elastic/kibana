@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`throws on any value set 1`] = `"a value wasn't expected to be present"`;
+
+exports[`throws on any value set 2`] = `"a value wasn't expected to be present"`;
+
+exports[`throws on any value set 3`] = `"a value wasn't expected to be present"`;
+
+exports[`throws on any value set 4`] = `"a value wasn't expected to be present"`;
+
+exports[`throws on value set as object property 1`] = `"[name]: a value wasn't expected to be present"`;
+
+exports[`works for conditional types 1`] = `"[name]: a value wasn't expected to be present"`;

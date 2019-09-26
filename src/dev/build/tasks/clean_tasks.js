@@ -19,17 +19,21 @@
 
 import minimatch from 'minimatch';
 
-import { deleteAll, scanDelete } from '../lib';
+import { deleteAll, deleteEmptyFolders, scanDelete } from '../lib';
+import { resolve } from 'path';
+
+const RELATIVE_CTAGS_BUILD_DIR = 'node_modules/@elastic/node-ctags/ctags/build';
 
 export const CleanTask = {
   global: true,
   description: 'Cleaning artifacts from previous builds',
 
   async run(config, log) {
-    await deleteAll(log, [
+    await deleteAll([
       config.resolveFromRepo('build'),
       config.resolveFromRepo('target'),
-    ]);
+      config.resolveFromRepo('.node_binaries'),
+    ], log);
   },
 };
 
@@ -38,13 +42,13 @@ export const CleanPackagesTask = {
     'Cleaning source for packages that are now installed in node_modules',
 
   async run(config, log, build) {
-    await deleteAll(log, [
+    await deleteAll([
       build.resolvePath('packages'),
-      build.resolvePath('x-pack'),
       build.resolvePath('yarn.lock'),
-    ]);
+    ], log);
   },
 };
+
 
 export const CleanTypescriptTask = {
   description:
@@ -70,103 +74,115 @@ export const CleanExtraFilesFromModulesTask = {
         minimatch.makeRe(pattern, { nocase: true })
       );
 
+    const regularExpressions = makeRegexps([
+      // tests
+      '**/test',
+      '**/tests',
+      '**/__tests__',
+      '**/mocha.opts',
+      '**/*.test.js',
+      '**/*.snap',
+      '**/coverage',
+
+      // docs
+      '**/doc',
+      '**/docs',
+      '**/CONTRIBUTING.md',
+      '**/Contributing.md',
+      '**/contributing.md',
+      '**/History.md',
+      '**/HISTORY.md',
+      '**/history.md',
+      '**/CHANGELOG.md',
+      '**/Changelog.md',
+      '**/changelog.md',
+
+      // examples
+      '**/example',
+      '**/examples',
+      '**/demo',
+      '**/samples',
+
+      // bins
+      '**/.bin',
+
+      // linters
+      '**/.eslintrc',
+      '**/.eslintrc.js',
+      '**/.eslintrc.yml',
+      '**/.prettierrc',
+      '**/.jshintrc',
+      '**/.babelrc',
+      '**/.jscs.json',
+      '**/.lint',
+
+      // hints
+      '**/*.flow',
+      '**/*.webidl',
+      '**/*.map',
+      '**/@types',
+
+      // scripts
+      '**/*.sh',
+      '**/*.bat',
+      '**/*.exe',
+      '**/Gruntfile.js',
+      '**/gulpfile.js',
+      '**/Makefile',
+
+      // untranspiled sources
+      '**/*.coffee',
+      '**/*.scss',
+      '**/*.sass',
+      '**/.ts',
+      '**/.tsx',
+
+      // editors
+      '**/.editorconfig',
+      '**/.vscode',
+
+      // git
+      '**/.gitattributes',
+      '**/.gitkeep',
+      '**/.gitempty',
+      '**/.gitmodules',
+      '**/.keep',
+      '**/.empty',
+
+      // ci
+      '**/.travis.yml',
+      '**/.coveralls.yml',
+      '**/.instanbul.yml',
+      '**/appveyor.yml',
+      '**/.zuul.yml',
+
+      // metadata
+      '**/package-lock.json',
+      '**/component.json',
+      '**/bower.json',
+      '**/yarn.lock',
+
+      // misc
+      '**/.*ignore',
+      '**/.DS_Store',
+      '**/Dockerfile',
+      '**/docker-compose.yml',
+    ]);
+
     log.info('Deleted %d files', await scanDelete({
       directory: build.resolvePath('node_modules'),
-      regularExpressions: makeRegexps([
-        // tests
-        '**/test',
-        '**/tests',
-        '**/__tests__',
-        '**/mocha.opts',
-        '**/*.test.js',
-        '**/*.snap',
-        '**/coverage',
-
-        // docs
-        '**/doc',
-        '**/docs',
-        '**/CONTRIBUTING.md',
-        '**/Contributing.md',
-        '**/contributing.md',
-        '**/History.md',
-        '**/HISTORY.md',
-        '**/history.md',
-        '**/CHANGELOG.md',
-        '**/Changelog.md',
-        '**/changelog.md',
-
-        // examples
-        '**/example',
-        '**/examples',
-        '**/demo',
-        '**/samples',
-
-        // bins
-        '**/.bin',
-
-        // linters
-        '**/.eslintrc',
-        '**/.eslintrc.js',
-        '**/.eslintrc.yml',
-        '**/.prettierrc',
-        '**/.jshintrc',
-        '**/.babelrc',
-        '**/.jscs.json',
-        '**/.lint',
-
-        // hints
-        '**/*.flow',
-        '**/*.webidl',
-        '**/*.map',
-        '**/@types',
-
-        // scripts
-        '**/*.sh',
-        '**/*.bat',
-        '**/*.exe',
-        '**/Gruntfile.js',
-        '**/gulpfile.js',
-        '**/Makefile',
-
-        // untranspiled sources
-        '**/*.coffee',
-        '**/*.scss',
-        '**/*.sass',
-        '**/.ts',
-        '**/.tsx',
-
-        // editors
-        '**/.editorconfig',
-        '**/.vscode',
-
-        // git
-        '**/.gitattributes',
-        '**/.gitkeep',
-        '**/.gitempty',
-        '**/.gitmodules',
-        '**/.keep',
-        '**/.empty',
-
-        // ci
-        '**/.travis.yml',
-        '**/.coveralls.yml',
-        '**/.instanbul.yml',
-        '**/appveyor.yml',
-        '**/.zuul.yml',
-
-        // metadata
-        '**/package-lock.json',
-        '**/component.json',
-        '**/bower.json',
-        '**/yarn.lock',
-
-        // misc
-        '**/.*ignore',
-        '**/.DS_Store',
-        '**/Dockerfile',
-        '**/docker-compose.yml'
-      ])
+      regularExpressions,
+      excludePaths: [
+        build.resolvePath('node_modules/@elastic/ctags-langserver/vendor')
+      ]
     }));
+
+    if (!build.isOss()) {
+      log.info('Deleted %d files', await scanDelete({
+        directory: build.resolvePath('x-pack/node_modules'),
+        regularExpressions
+      }));
+    }
   },
 };
 
@@ -176,14 +192,14 @@ export const CleanExtraBinScriptsTask = {
   async run(config, log, build) {
     for (const platform of config.getNodePlatforms()) {
       if (platform.isWindows()) {
-        await deleteAll(log, [
+        await deleteAll([
           build.resolvePathForPlatform(platform, 'bin', '*'),
           `!${build.resolvePathForPlatform(platform, 'bin', '*.bat')}`,
-        ]);
+        ], log);
       } else {
-        await deleteAll(log, [
+        await deleteAll([
           build.resolvePathForPlatform(platform, 'bin', '*.bat'),
-        ]);
+        ], log);
       }
     }
   },
@@ -194,28 +210,22 @@ export const CleanExtraBrowsersTask = {
 
   async run(config, log, build) {
     const getBrowserPathsForPlatform = platform => {
-      const reportingDir = 'node_modules/x-pack/plugins/reporting';
-      const phantomDir = '.phantom';
+      const reportingDir = 'x-pack/legacy/plugins/reporting';
       const chromiumDir = '.chromium';
-      const phantomPath = p =>
-        build.resolvePathForPlatform(platform, reportingDir, phantomDir, p);
       const chromiumPath = p =>
         build.resolvePathForPlatform(platform, reportingDir, chromiumDir, p);
       return platforms => {
         const paths = [];
         if (platforms.windows) {
-          paths.push(phantomPath('phantomjs-*-windows.zip'));
           paths.push(chromiumPath('chromium-*-win32.zip'));
           paths.push(chromiumPath('chromium-*-windows.zip'));
         }
 
         if (platforms.darwin) {
-          paths.push(phantomPath('phantomjs-*-macosx.zip'));
           paths.push(chromiumPath('chromium-*-darwin.zip'));
         }
 
         if (platforms.linux) {
-          paths.push(phantomPath('phantomjs-*-linux-x86_64.tar.bz2'));
           paths.push(chromiumPath('chromium-*-linux.zip'));
         }
         return paths;
@@ -224,12 +234,60 @@ export const CleanExtraBrowsersTask = {
     for (const platform of config.getNodePlatforms()) {
       const getBrowserPaths = getBrowserPathsForPlatform(platform);
       if (platform.isWindows()) {
-        await deleteAll(log, getBrowserPaths({ linux: true, darwin: true }));
+        await deleteAll(getBrowserPaths({ linux: true, darwin: true }), log);
       } else if (platform.isMac()) {
-        await deleteAll(log, getBrowserPaths({ linux: true, windows: true }));
+        await deleteAll(getBrowserPaths({ linux: true, windows: true }), log);
       } else if (platform.isLinux()) {
-        await deleteAll(log, getBrowserPaths({ windows: true, darwin: true }));
+        await deleteAll(getBrowserPaths({ windows: true, darwin: true }), log);
       }
     }
   },
+};
+
+export const CleanEmptyFoldersTask = {
+  description: 'Cleaning all empty folders recursively',
+
+  async run(config, log, build) {
+    // Delete every single empty folder from
+    // the distributable except the plugins
+    // and data folder.
+    await deleteEmptyFolders(
+      log,
+      build.resolvePath('.'),
+      [
+        build.resolvePath('plugins'),
+        build.resolvePath('data')
+      ]
+    );
+  },
+};
+
+export const CleanCtagBuildTask = {
+  description: 'Cleaning extra platform-specific files from @elastic/node-ctag build dir',
+
+  async run(config, log, build) {
+    const getPlatformId = (platform) => {
+      if (platform.isWindows()) {
+        return 'win32';
+      } else if (platform.isLinux()) {
+        return 'linux';
+      } else if (platform.isMac()) {
+        return 'darwin';
+      }
+    };
+
+    await Promise.all(
+      config.getTargetPlatforms().map(async platform => {
+        if (build.isOss()) {
+          return;
+        }
+
+        const ctagsBuildDir = build.resolvePathForPlatform(platform, RELATIVE_CTAGS_BUILD_DIR);
+        await deleteAll([
+          resolve(ctagsBuildDir, '*'),
+          `!${resolve(ctagsBuildDir, `ctags-node-v${process.versions.modules}-${getPlatformId(platform)}-x64`)}`
+        ], log);
+      })
+    );
+  }
 };

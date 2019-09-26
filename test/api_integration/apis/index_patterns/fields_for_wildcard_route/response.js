@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 
 export default function ({ getService }) {
@@ -25,8 +25,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
 
   const ensureFieldsAreSorted = resp => {
-    expect(resp.body.fields)
-      .to.eql(sortBy(resp.body.fields, 'name'));
+    expect(resp.body.fields).to.eql(sortBy(resp.body.fields, 'name'));
   };
 
   describe('response', () => {
@@ -41,53 +40,55 @@ export default function ({ getService }) {
           fields: [
             {
               type: 'boolean',
+              esTypes: ['boolean'],
               searchable: true,
               aggregatable: true,
               name: 'bar',
-              readFromDocValues: true
+              readFromDocValues: true,
             },
             {
               type: 'string',
+              esTypes: ['text'],
               searchable: true,
               aggregatable: false,
               name: 'baz',
-              readFromDocValues: false
+              readFromDocValues: false,
             },
             {
               type: 'string',
+              esTypes: ['keyword'],
               searchable: true,
               aggregatable: true,
               name: 'baz.keyword',
-              readFromDocValues: true
+              readFromDocValues: true,
+              parent: 'baz',
+              subType: 'multi',
             },
             {
               type: 'number',
+              esTypes: ['long'],
               searchable: true,
               aggregatable: true,
               name: 'foo',
-              readFromDocValues: true
-            }
-          ]
+              readFromDocValues: true,
+            },
+          ],
         })
-        .then(ensureFieldsAreSorted)
-    );
+        .then(ensureFieldsAreSorted));
 
     it('always returns a field for all passed meta fields', () =>
       supertest
         .get('/api/index_patterns/_fields_for_wildcard')
         .query({
           pattern: 'basic_index',
-          meta_fields: JSON.stringify([
-            '_id',
-            '_source',
-            'crazy_meta_field'
-          ])
+          meta_fields: JSON.stringify(['_id', '_source', 'crazy_meta_field']),
         })
         .expect(200, {
           fields: [
             {
-              aggregatable: false,
+              aggregatable: true,
               name: '_id',
+              esTypes: ['_id'],
               readFromDocValues: false,
               searchable: true,
               type: 'string',
@@ -95,30 +96,36 @@ export default function ({ getService }) {
             {
               aggregatable: false,
               name: '_source',
+              esTypes: ['_source'],
               readFromDocValues: false,
               searchable: false,
               type: '_source',
             },
             {
               type: 'boolean',
+              esTypes: ['boolean'],
               searchable: true,
               aggregatable: true,
               name: 'bar',
-              readFromDocValues: true
+              readFromDocValues: true,
             },
             {
               aggregatable: false,
               name: 'baz',
+              esTypes: ['text'],
               readFromDocValues: false,
               searchable: true,
               type: 'string',
             },
             {
               type: 'string',
+              esTypes: ['keyword'],
               searchable: true,
               aggregatable: true,
               name: 'baz.keyword',
-              readFromDocValues: true
+              readFromDocValues: true,
+              parent: 'baz',
+              subType: 'multi',
             },
             {
               aggregatable: false,
@@ -129,14 +136,22 @@ export default function ({ getService }) {
             },
             {
               type: 'number',
+              esTypes: ['long'],
               searchable: true,
               aggregatable: true,
               name: 'foo',
-              readFromDocValues: true
-            }
-          ]
+              readFromDocValues: true,
+            },
+          ],
         })
-        .then(ensureFieldsAreSorted)
-    );
+        .then(ensureFieldsAreSorted));
+
+    it('returns 404 when the pattern does not exist', () =>
+      supertest
+        .get('/api/index_patterns/_fields_for_wildcard')
+        .query({
+          pattern: '[non-existing-pattern]its-invalid-*',
+        })
+        .expect(404));
   });
 }

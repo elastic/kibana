@@ -1,0 +1,11 @@
+{
+  "ml.preview_datafeed": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ml/datafeeds/{datafeed_id}/_preview"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/ml-preview-datafeed.html"
+  }
+}

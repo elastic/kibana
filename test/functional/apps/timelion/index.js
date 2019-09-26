@@ -18,7 +18,7 @@
  */
 
 export default function ({ getService, loadTestFile }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -28,9 +28,9 @@ export default function ({ getService, loadTestFile }) {
 
     before(async function () {
       log.debug('Starting timelion before method');
-      remote.setWindowSize(1280, 800);
+      browser.setWindowSize(1280, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC', 'defaultIndex': 'logstash-*' });
+      await kibanaServer.uiSettings.replace({ 'defaultIndex': 'logstash-*' });
     });
 
     loadTestFile(require.resolve('./_expression_typeahead'));

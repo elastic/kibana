@@ -1,21 +1,21 @@
 [role="xpack"]
 [[reporting-settings-kb]]
-=== {reporting} settings in Kibana
+=== Reporting settings in Kibana
 ++++
-<titleabbrev>Reporting Settings</titleabbrev>
+<titleabbrev>Reporting settings</titleabbrev>
 ++++
 
 You can configure `xpack.reporting` settings in your `kibana.yml` to:
 
-* <<reporting-kibana-server-settings,Control how {reporting}  communicates with the {kib} server>>
+* <<reporting-kibana-server-settings,Control how the {report-features} communicate with the {kib} server>>
 * <<reporting-job-queue-settings,Manage background jobs>>
 * <<reporting-capture-settings,Capture screenshots>>
 
 [float]
 [[general-reporting-settings]]
-==== General Reporting Settings
+==== General reporting settings
 [[xpack-enable-reporting]]`xpack.reporting.enabled`::
-Set to `false` to disable {reporting}.
+Set to `false` to disable the {report-features}.
 
 `xpack.reporting.encryptionKey`::
 Set to any text string. By default, Kibana will generate a random key when it
@@ -24,7 +24,7 @@ setting to preserve the same key across multiple restarts and multiple instances
 
 [float]
 [[reporting-kibana-server-settings]]
-==== Kibana Server Settings
+==== Kibana server settings
 
 Reporting uses the Kibana interface to generate reports. In most cases, you don't need
 to configure Reporting to communicate with Kibana. However, if you use a reverse-proxy
@@ -37,14 +37,14 @@ The port for accessing Kibana, if different from the `server.port` value.
 The protocol for accessing Kibana, typically `http` or `https`.
 
 `xpack.reporting.kibanaServer.hostname`::
-The hostname for accessing Kibana, if different from the `server.name` value.
+The hostname for accessing {kib}, if different from the `server.host` value.
 
 NOTE: Configuring the `xpack.reporting.kibanaServer` settings to point to a
 proxy host requires that the Kibana server has network access to the proxy.
 
 [float]
 [[reporting-job-queue-settings]]
-==== Background Job Settings
+==== Background job settings
 
 Reporting generates reports in the background and jobs are coordinated using documents
 in Elasticsearch. Depending on how often you generate reports and the overall number of
@@ -68,8 +68,8 @@ security is enabled, `xpack.security.encryptionKey`.
 ============
 
 `xpack.reporting.queue.pollInterval`::
-Specifies the number of milliseconds that idle workers wait between polling the
-index for pending jobs. Defaults to `3000` (3 seconds).
+Specifies the number of milliseconds that the reporting poller waits between polling the
+index for any pending Reporting jobs. Defaults to `3000` (3 seconds).
 
 [[xpack-reporting-q-timeout]]`xpack.reporting.queue.timeout`::
 How long each worker has to produce a report. If your machine is slow or under
@@ -78,10 +78,14 @@ Defaults to `120000` (two minutes).
 
 [float]
 [[reporting-capture-settings]]
-==== Capture Settings
+==== Capture settings
 
 Reporting works by capturing screenshots from Kibana. The following settings
 control the capturing process.
+
+`xpack.reporting.capture.maxAttempts`::
+If capturing a report fails for any reason, Kibana will re-attempt othe reporting
+job, as many times as this setting. Defaults to `3`.
 
 `xpack.reporting.capture.loadDelay`::
 When visualizations are not evented, this is the amount of time before
@@ -91,17 +95,14 @@ visualizations, try increasing this value.
 Defaults to `3000` (3 seconds).
 
 [[xpack-reporting-browser]]`xpack.reporting.capture.browser.type`::
-Specifies the browser to use to capture screenshots. Valid options are `phantom`
-and `chromium`. When `chromium` is set, the settings specified in the <<reporting-chromium-settings, Chromium settings>>
-are respected. This setting will be deprecated in 7.0, when Phantom support is removed.
-Defaults to `chromium`.
-
+Specifies the browser to use to capture screenshots. This setting exists for
+backward compatibility. The only valid option is `chromium`. 
 
 [float]
 [[reporting-chromium-settings]]
-==== Chromium Settings
+==== Chromium settings
 
-When `xpack.reporting.capture.browser.type` is set to `chromium` you can also specify the following settings.
+When `xpack.reporting.capture.browser.type` is set to `chromium` (default) you can also specify the following settings.
 
 `xpack.reporting.capture.browser.chromium.disableSandbox`::
 Elastic recommends that you research the feasibility of enabling unprivileged user namespaces. 
@@ -123,7 +124,7 @@ Examples of valid entries are "elastic.co", "*.elastic.co", ".elastic.co", ".ela
 
 [float]
 [[reporting-csv-settings]]
-==== CSV Settings
+==== CSV settings
 [[xpack-reporting-csv]]`xpack.reporting.csv.maxSizeBytes`::
 The maximum size of a CSV file before being truncated. This setting exists to prevent
 large exports from causing performance and storage issues.
@@ -131,7 +132,7 @@ Defaults to `10485760` (10mB)
 
 [float]
 [[reporting-advanced-settings]]
-==== Advanced Settings
+==== Advanced settings
 
 `xpack.reporting.index`::
 Reporting uses a weekly index in Elasticsearch to store the reporting job and

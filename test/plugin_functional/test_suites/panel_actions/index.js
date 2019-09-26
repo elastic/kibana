@@ -24,13 +24,14 @@ export const DATA_ARCHIVE_PATH = path.resolve(__dirname, '../../../functional/fi
 
 
 export default function ({ getService, getPageObjects, loadTestFile }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['dashboard']);
 
-  describe('pluggable panel actions', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/41050
+  describe.skip('pluggable panel actions', function () {
     before(async () => {
-      await remote.setWindowSize(1300, 900);
+      await browser.setWindowSize(1300, 900);
       await PageObjects.dashboard.initTests({
         kibanaIndex: KIBANA_ARCHIVE_PATH,
         dataIndex: DATA_ARCHIVE_PATH,

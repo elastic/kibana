@@ -1,0 +1,125 @@
+[[saved-objects-api-resolve-import-errors]]
+=== Resolve import errors API
+++++
+<titleabbrev>Resolve import errors</titleabbrev>
+++++
+
+experimental[] Resolve errors from the import API. 
+
+To resolve errors, you can: 
+
+* Retry certain saved objects
+
+* Overwrite specific saved objects
+
+* Change references to different saved objects
+
+[[saved-objects-api-resolve-import-errors-request]]
+==== Request
+
+`POST /api/saved_objects/_resolve_import_errors`
+
+[[saved-objects-api-resolve-import-errors-request-body]]
+==== Request body
+
+The request body must include the multipart/form-data type.
+
+`file`::
+  The same file given to the import API.
+
+`retries`::
+  (array) A list of `type`, `id`, `replaceReferences`, and `overwrite` objects to retry. The property `replaceReferences` is a list of `type`, `from`, and `to` used to change the object references.
+
+[[saved-objects-api-resolve-import-errors-response-body]]
+==== Response body
+
+`success`:: 
+  Top-level property that indicates if the errors successfully resolved.
+  
+`successCount`:: 
+  Indicates the number of successfully resolved records.
+
+`errors`::
+  (array) Specifies the objects that failed to resolve.
+  
+[[saved-objects-api-resolve-import-errors-codes]]
+==== Response code
+
+`200`:: 
+    Indicates a successful call.
+
+[[saved-objects-api-resolve-import-errors-example]]
+==== Examples
+
+Retry a dashboard import:
+
+[source,js]
+--------------------------------------------------
+$ curl -X POST "localhost:5601/api/saved_objects/_resolve_import_errors" -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"dashboard","id":"my-dashboard"}]'
+--------------------------------------------------
+
+The `file.ndjson` file contains the following:
+
+[source,js]
+--------------------------------------------------
+{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
+--------------------------------------------------
+
+The API returns the following:
+
+[source,js]
+--------------------------------------------------
+{
+  "success": true,
+  "successCount": 1
+}
+--------------------------------------------------
+
+Resolve errors for a dashboard and overwrite the existing saved object:
+
+[source,js]
+--------------------------------------------------
+$ curl -X POST "localhost:5601/api/saved_objects/_resolve_import_errors" -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"dashboard","id":"my-dashboard","overwrite":true}]'
+--------------------------------------------------
+
+The `file.ndjson` file contains the following:
+
+[source,js]
+--------------------------------------------------
+{"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}
+{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
+--------------------------------------------------
+
+The API returns the following:
+
+[source,js]
+--------------------------------------------------
+{
+  "success": true,
+  "successCount": 1
+}
+--------------------------------------------------
+
+Resolve errors for a visualization by replacing the index pattern with another:
+
+[source,js]
+--------------------------------------------------
+$ curl -X POST "localhost:5601/api/saved_objects/_resolve_import_errors" -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"visualization","id":"my-vis","replaceReferences":[{"type":"index-pattern","from":"missing","to":"existing"}]}]'
+--------------------------------------------------
+
+The `file.ndjson` file contains the following:
+
+[source,js]
+--------------------------------------------------
+{"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"},"references":[{"name":"ref_0","type":"index-pattern","id":"missing"}]}
+--------------------------------------------------
+
+The API returns the following:
+
+[source,js]
+--------------------------------------------------
+{
+  "success": true,
+  "successCount": 1
+}
+--------------------------------------------------

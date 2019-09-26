@@ -1,0 +1,10 @@
+{
+  "ml.update_filter": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/filters/{filter_id}/_update"
+    ]
+  }
+}

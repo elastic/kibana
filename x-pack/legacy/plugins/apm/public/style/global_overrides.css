@@ -1,0 +1,34 @@
+/*
+Hide unused secondary Kibana navigation
+*/
+.kuiLocalNav {
+  min-height: initial;
+}
+
+.kuiLocalNavRow.kuiLocalNavRow--secondary {
+  display: none;
+}
+
+/*
+Remove unnecessary space below the navigation dropdown
+*/
+.kuiLocalDropdown {
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+/*
+Hide the "0-10 of 100" text in KUIPager component for all KUIControlledTable
+*/
+.kuiControlledTable .kuiPagerText {
+  display: none;
+}
+
+/*
+Hide default dashed gridlines in EUI chart component for all APM graphs
+*/
+
+.rv-xy-plot__grid-lines__line {
+  stroke-opacity: 1;
+  stroke-dasharray: 1;
+}

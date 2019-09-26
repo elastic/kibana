@@ -17,65 +17,229 @@
  * under the License.
  */
 
-import { PluginsModule } from './plugins';
+/**
+ * The Kibana Core APIs for server-side plugins.
+ *
+ * A plugin requires a `kibana.json` file at it's root directory that follows
+ * {@link PluginManifest | the manfiest schema} to define static plugin
+ * information required to load the plugin.
+ *
+ * A plugin's `server/index` file must contain a named import, `plugin`, that
+ * implements {@link PluginInitializer} which returns an object that implements
+ * {@link Plugin}.
+ *
+ * The plugin integrates with the core system via lifecycle events: `setup`,
+ * `start`, and `stop`. In each lifecycle method, the plugin will receive the
+ * corresponding core services available (either {@link CoreSetup} or
+ * {@link CoreStart}) and any interfaces returned by dependency plugins'
+ * lifecycle method. Anything returned by the plugin's lifecycle method will be
+ * exposed to downstream dependencies when their corresponding lifecycle methods
+ * are invoked.
+ *
+ * @packageDocumentation
+ */
+
+import { Observable } from 'rxjs';
+import {
+  ClusterClient,
+  ElasticsearchClientConfig,
+  ElasticsearchServiceSetup,
+  ScopedClusterClient,
+} from './elasticsearch';
+import {
+  HttpServiceSetup,
+  HttpServiceStart,
+  IRouter,
+  RequestHandlerContextContainer,
+  RequestHandlerContextProvider,
+} from './http';
+import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
+import { ContextSetup } from './context';
 
 export { bootstrap } from './bootstrap';
+export { ConfigPath, ConfigService } from './config';
+export { IContextContainer, IContextProvider, IContextHandler } from './context';
+export { CoreId } from './core_context';
+export {
+  CallAPIOptions,
+  ClusterClient,
+  Headers,
+  ScopedClusterClient,
+  ElasticsearchClientConfig,
+  ElasticsearchError,
+  ElasticsearchErrorHelpers,
+  APICaller,
+  FakeRequest,
+} from './elasticsearch';
+export {
+  AuthenticationHandler,
+  AuthHeaders,
+  AuthResultParams,
+  AuthStatus,
+  AuthToolkit,
+  CustomHttpResponseOptions,
+  GetAuthHeaders,
+  GetAuthState,
+  HttpResponseOptions,
+  HttpResponsePayload,
+  HttpServerSetup,
+  ErrorHttpResponseOptions,
+  IKibanaSocket,
+  IsAuthenticated,
+  KibanaRequest,
+  KibanaRequestRoute,
+  LifecycleResponseFactory,
+  KnownHeaders,
+  LegacyRequest,
+  OnPreAuthHandler,
+  OnPreAuthToolkit,
+  OnPostAuthHandler,
+  OnPostAuthToolkit,
+  RedirectResponseOptions,
+  RequestHandler,
+  RequestHandlerContextContainer,
+  RequestHandlerContextProvider,
+  RequestHandlerParams,
+  RequestHandlerReturn,
+  ResponseError,
+  ResponseErrorAttributes,
+  ResponseHeaders,
+  kibanaResponseFactory,
+  KibanaResponseFactory,
+  RouteConfig,
+  IRouter,
+  RouteMethod,
+  RouteConfigOptions,
+  SessionStorage,
+  SessionStorageCookieOptions,
+  SessionStorageFactory,
+} from './http';
+export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
-import { first } from 'rxjs/operators';
-import { ConfigService, Env } from './config';
-import { HttpConfig, HttpModule, HttpServerInfo } from './http';
-import { LegacyCompatModule } from './legacy_compat';
-import { Logger, LoggerFactory } from './logging';
+export {
+  DiscoveredPlugin,
+  Plugin,
+  PluginInitializer,
+  PluginInitializerContext,
+  PluginManifest,
+  PluginName,
+} from './plugins';
 
-export class Server {
-  private readonly http: HttpModule;
-  private readonly plugins: PluginsModule;
-  private readonly legacy: LegacyCompatModule;
-  private readonly log: Logger;
+export {
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBulkResponse,
+  SavedObjectsClient,
+  SavedObjectsClientProviderOptions,
+  SavedObjectsClientWrapperFactory,
+  SavedObjectsClientWrapperOptions,
+  SavedObjectsCreateOptions,
+  SavedObjectsErrorHelpers,
+  SavedObjectsExportOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportOptions,
+  SavedObjectsImportResponse,
+  SavedObjectsImportRetry,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsMigrationLogger,
+  SavedObjectsRawDoc,
+  SavedObjectsResolveImportErrorsOptions,
+  SavedObjectsSchema,
+  SavedObjectsSerializer,
+  SavedObjectsService,
+  SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
+} from './saved_objects';
 
-  constructor(
-    private readonly configService: ConfigService,
-    logger: LoggerFactory,
-    private readonly env: Env
-  ) {
-    this.log = logger.get('server');
+export { RecursiveReadonly } from '../utils';
 
-    this.http = new HttpModule(configService.atPath('server', HttpConfig), logger);
-    this.plugins = new PluginsModule(configService, logger, env);
-    this.legacy = new LegacyCompatModule(configService, logger, env);
-  }
+export {
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectReference,
+  SavedObjectsBaseOptions,
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+  SavedObjectsMigrationVersion,
+} from './types';
 
-  public async start() {
-    this.log.debug('starting server');
+export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
 
-    // We shouldn't start http service in two cases:
-    // 1. If `server.autoListen` is explicitly set to `false`.
-    // 2. When the process is run as dev cluster master in which case cluster manager
-    // will fork a dedicated process where http service will be started instead.
-    let httpServerInfo: HttpServerInfo | undefined;
-    const httpConfig = await this.http.config$.pipe(first()).toPromise();
-    if (!this.env.isDevClusterMaster && httpConfig.autoListen) {
-      httpServerInfo = await this.http.service.start();
-    }
-
-    await this.plugins.service.start();
-    await this.legacy.service.start(httpServerInfo);
-
-    const unhandledConfigPaths = await this.configService.getUnusedPaths();
-    if (unhandledConfigPaths.length > 0) {
-      // We don't throw here since unhandled paths are verified by the "legacy"
-      // Kibana right now, but this will eventually change.
-      this.log.trace(
-        `some config paths are not handled by the core: ${JSON.stringify(unhandledConfigPaths)}`
-      );
-    }
-  }
-
-  public async stop() {
-    this.log.debug('stopping server');
-
-    await this.legacy.service.stop();
-    await this.plugins.service.stop();
-    await this.http.service.stop();
-  }
+/**
+ * Plugin specific context passed to a route handler.
+ * @public
+ */
+export interface RequestHandlerContext {
+  core: {
+    elasticsearch: {
+      dataClient: ScopedClusterClient;
+      adminClient: ScopedClusterClient;
+    };
+  };
 }
+
+/**
+ * Context passed to the plugins `setup` method.
+ *
+ * @public
+ */
+export interface CoreSetup {
+  context: {
+    createContextContainer: ContextSetup['createContextContainer'];
+  };
+  elasticsearch: {
+    adminClient$: Observable<ClusterClient>;
+    dataClient$: Observable<ClusterClient>;
+    createClient: (
+      type: string,
+      clientConfig?: Partial<ElasticsearchClientConfig>
+    ) => ClusterClient;
+  };
+  http: {
+    createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
+    registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
+    registerAuth: HttpServiceSetup['registerAuth'];
+    registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
+    basePath: HttpServiceSetup['basePath'];
+    isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
+    registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
+      name: T,
+      provider: RequestHandlerContextProvider<RequestHandlerContext>
+    ) => RequestHandlerContextContainer<RequestHandlerContext>;
+    createRouter: () => IRouter;
+  };
+}
+
+/**
+ * Context passed to the plugins `start` method.
+ *
+ * @public
+ */
+export interface CoreStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
+
+/** @internal */
+export interface InternalCoreSetup {
+  context: ContextSetup;
+  http: HttpServiceSetup;
+  elasticsearch: ElasticsearchServiceSetup;
+}
+
+/**
+ * @public
+ */
+export interface InternalCoreStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
+
+export {
+  ContextSetup,
+  HttpServiceSetup,
+  HttpServiceStart,
+  ElasticsearchServiceSetup,
+  PluginsServiceSetup,
+  PluginsServiceStart,
+  PluginOpaqueId,
+};

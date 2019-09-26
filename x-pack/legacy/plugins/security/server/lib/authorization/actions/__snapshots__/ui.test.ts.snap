@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#get featureId of "" throws error 1`] = `"featureId is required and must be a string"`;
+
+exports[`#get featureId of {} throws error 1`] = `"featureId is required and must be a string"`;
+
+exports[`#get featureId of 1 throws error 1`] = `"featureId is required and must be a string"`;
+
+exports[`#get featureId of null throws error 1`] = `"featureId is required and must be a string"`;
+
+exports[`#get featureId of true throws error 1`] = `"featureId is required and must be a string"`;
+
+exports[`#get featureId of undefined throws error 1`] = `"featureId is required and must be a string"`;
+
+exports[`#get uiCapability of "!" throws error 1`] = `"UI capabilities are required, and must all be strings matching the pattern /^[a-zA-Z0-9:_-]+$/"`;
+
+exports[`#get uiCapability of "" throws error 1`] = `"UI capabilities are required, and must all be strings matching the pattern /^[a-zA-Z0-9:_-]+$/"`;
+
+exports[`#get uiCapability of 1 throws error 1`] = `"UI capabilities are required, and must all be strings matching the pattern /^[a-zA-Z0-9:_-]+$/"`;
+
+exports[`#get uiCapability of null throws error 1`] = `"UI capabilities are required, and must all be strings matching the pattern /^[a-zA-Z0-9:_-]+$/"`;
+
+exports[`#get uiCapability of true throws error 1`] = `"UI capabilities are required, and must all be strings matching the pattern /^[a-zA-Z0-9:_-]+$/"`;
+
+exports[`#get uiCapability of undefined throws error 1`] = `"UI capabilities are required, and must all be strings matching the pattern /^[a-zA-Z0-9:_-]+$/"`;

@@ -21,6 +21,16 @@ const babelJest = require('babel-jest');
 
 module.exports = babelJest.createTransformer({
   presets: [
-    require.resolve('@kbn/babel-preset/node_preset')
+    [require.resolve('@kbn/babel-preset/node_preset'), {
+      '@babel/preset-env': {
+        // disable built-in filtering, which is more performant but strips the import of `regenerator-runtime` required by EUI
+        useBuiltIns: false,
+      }
+    }]
+  ],
+  plugins: [
+    // enables jest to parse and execute dynamic import() calls
+    '@babel/plugin-syntax-dynamic-import',
+    'dynamic-import-node'
   ]
 });

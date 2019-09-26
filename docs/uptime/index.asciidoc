@@ -1,0 +1,18 @@
+[role="xpack"]
+[[xpack-uptime]]
+= Uptime
+
+[partintro]
+--
+Uptime allows you to monitor the status of network endpoints via HTTP/S, TCP, and ICMP.
+You can explore endpoint status over time, drill down into specific monitors,
+and easily view a high-level snapshot of your environment at any point in time.
+
+[float]
+== Get Started
+
+See {uptime-guide}/install-uptime.html[Install Uptime] for instructions on getting started with Elastic Uptime.
+--
+
+include::overview.asciidoc[]
+include::monitor.asciidoc[]

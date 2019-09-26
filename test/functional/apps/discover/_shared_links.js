@@ -17,14 +17,14 @@
 * under the License.
 */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'share']);
+  const PageObjects = getPageObjects(['common', 'discover', 'share', 'timePicker']);
 
   describe('shared links', function describeIndexTests() {
     let baseUrl;
@@ -42,7 +42,6 @@ export default function ({ getService, getPageObjects }) {
 
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
         defaultIndex: 'logstash-*',
       });
 
@@ -54,8 +53,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
 
-      log.debug('setAbsoluteRange');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
       //After hiding the time picker, we need to wait for
       //the refresh button to hide before clicking the share button
@@ -70,10 +68,10 @@ export default function ({ getService, getPageObjects }) {
           baseUrl +
           '/app/kibana?_t=1453775307251#' +
           '/discover?_g=(refreshInterval:(pause:!t,value:0),time' +
-          ':(from:\'2015-09-19T06:31:44.000Z\',mode:absolute,to:\'2015-09' +
+          ':(from:\'2015-09-19T06:31:44.000Z\',to:\'2015-09' +
           '-23T18:31:44.000Z\'))&_a=(columns:!(_source),index:\'logstash-' +
-          '*\',interval:auto,query:(language:lucene,query:\'\')' +
-          ',sort:!(\'@timestamp\',desc))';
+          '*\',interval:auto,query:(language:kuery,query:\'\')' +
+          ',sort:!(!(\'@timestamp\',desc)))';
         const actualUrl = await PageObjects.share.getSharedUrl();
         // strip the timestamp out of each URL
         expect(actualUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP')).to.be(
@@ -97,7 +95,7 @@ export default function ({ getService, getPageObjects }) {
           '/discover/ab12e3c0-f231-11e6-9486-733b1ac9221a' +
           '?_g=(refreshInterval%3A(pause%3A!t%2Cvalue%3A0)' +
           '%2Ctime%3A(from%3A\'2015-09-19T06%3A31%3A44.000Z\'%2C' +
-          'mode%3Aabsolute%2Cto%3A\'2015-09-23T18%3A31%3A44.000Z\'))';
+          'to%3A\'2015-09-23T18%3A31%3A44.000Z\'))';
         await PageObjects.discover.loadSavedSearch('A Saved Search');
         await PageObjects.share.clickShareTopNavButton();
         await PageObjects.share.exportAsSavedObject();

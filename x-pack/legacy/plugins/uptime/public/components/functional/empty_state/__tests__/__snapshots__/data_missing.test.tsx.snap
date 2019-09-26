@@ -1,0 +1,54 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataMissing component renders basePath and headingMessage 1`] = `
+<EuiFlexGroup
+  justifyContent="center"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiSpacer
+      size="xs"
+    />
+    <EuiPanel>
+      <EuiEmptyPrompt
+        body={
+          <p>
+            <FormattedMessage
+              defaultMessage="{configureHeartbeatLink} to start logging uptime data."
+              id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+              values={
+                Object {
+                  "configureHeartbeatLink": <EuiLink
+                    color="primary"
+                    href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                    target="_blank"
+                    type="button"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Configure Heartbeat"
+                      id="xpack.uptime.emptyState.configureHeartbeatLinkText"
+                      values={Object {}}
+                    />
+                  </EuiLink>,
+                }
+              }
+            />
+          </p>
+        }
+        iconColor="subdued"
+        iconType="uptimeApp"
+        title={
+          <EuiTitle
+            size="l"
+          >
+            <h3>
+              bar
+            </h3>
+          </EuiTitle>
+        }
+      />
+    </EuiPanel>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

@@ -1,0 +1,11 @@
+{
+  "watcher.stop": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_watcher/_stop"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-stop.html"
+  }
+}

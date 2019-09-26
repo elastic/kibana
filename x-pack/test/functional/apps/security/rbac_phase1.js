@@ -4,24 +4,24 @@
 * you may not use this file except in compliance with the Elastic License.
 */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
 export default function ({ getService, getPageObjects }) {
 
-  const PageObjects = getPageObjects(['security', 'settings', 'common', 'visualize', 'header']);
+  const PageObjects = getPageObjects(['security', 'settings', 'common', 'visualize', 'timePicker']);
   const log = getService('log');
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
-  describe('rbac ', async function () {
+  describe('rbac ', function () {
     before(async () => {
-      await remote.setWindowSize(1600, 1000);
+      await browser.setWindowSize(1600, 1000);
       log.debug('users');
       await esArchiver.loadIfNeeded('logstash_functional');
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC', 'defaultIndex': 'logstash-*' });
+      await esArchiver.load('security/discover');
+      await kibanaServer.uiSettings.replace({ 'defaultIndex': 'logstash-*' });
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('rbac_all', {
@@ -29,9 +29,9 @@ export default function ({ getService, getPageObjects }) {
           global: ['all']
         },
         elasticsearch: {
-          "indices": [{
-            "names": ["logstash-*"],
-            "privileges": ["read", "view_index_metadata"]
+          'indices': [{
+            'names': ['logstash-*'],
+            'privileges': ['read', 'view_index_metadata']
           }]
         }
       });
@@ -42,9 +42,9 @@ export default function ({ getService, getPageObjects }) {
           global: ['read']
         },
         elasticsearch: {
-          "indices": [{
-            "names": ["logstash-*"],
-            "privileges": ["read", "view_index_metadata"]
+          'indices': [{
+            'names': ['logstash-*'],
+            'privileges': ['read', 'view_index_metadata']
           }]
         }
       });
@@ -97,35 +97,10 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
       log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.visualize.waitForVisualization();
       await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
       await PageObjects.security.logout();
-
-    });
-
-    it('rbac read only role can not  save a visualization', async function () {
-      const fromTime = '2015-09-19 06:31:44.000';
-      const toTime = '2015-09-23 18:31:44.000';
-      const vizName1 = 'Viz VerticalBarChart';
-
-      log.debug('log in as kibanareadonly with rbac_read role');
-      await PageObjects.security.login('kibanareadonly', 'changeme');
-      log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
-      log.debug('clickVerticalBarChart');
-      await PageObjects.visualize.clickVerticalBarChart();
-      await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.visualize.waitForVisualization();
-      await PageObjects.visualize.saveVisualizationExpectFail(vizName1);
-      await PageObjects.security.logout();
-
     });
 
     after(async function () {

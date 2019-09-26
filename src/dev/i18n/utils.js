@@ -31,19 +31,28 @@ import {
 import fs from 'fs';
 import glob from 'glob';
 import { promisify } from 'util';
+import normalize from 'normalize-path';
+import path from 'path';
 import chalk from 'chalk';
 import parser from 'intl-messageformat-parser';
 
-import { createFailError } from '../run';
+import { createFailError } from '@kbn/dev-utils';
 
 const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
 
 const ARGUMENT_ELEMENT_TYPE = 'argumentElement';
+const HTML_KEY_PREFIX = 'html_';
 
 export const readFileAsync = promisify(fs.readFile);
 export const writeFileAsync = promisify(fs.writeFile);
+export const makeDirAsync = promisify(fs.mkdir);
+export const accessAsync = promisify(fs.access);
 export const globAsync = promisify(glob);
+
+export function normalizePath(inputPath) {
+  return normalize(path.relative('.', inputPath));
+}
 
 export function difference(left = [], right = []) {
   return left.filter(value => !right.includes(value));
@@ -162,24 +171,56 @@ function extractValueReferencesFromIcuAst(node, keys = new Set()) {
 /**
  * Checks whether values from "values" and "defaultMessage" correspond to each other.
  *
- * @param {string[]} valuesKeys array of "values" property keys
+ * @param {string[]} prefixedValuesKeys array of "values" property keys
  * @param {string} defaultMessage "defaultMessage" value
  * @param {string} messageId message id for fail errors
  * @throws if "values" and "defaultMessage" don't correspond to each other
  */
-export function checkValuesProperty(valuesKeys, defaultMessage, messageId) {
-  // skip validation if defaultMessage doesn't use ICU and values prop has no keys
-  if (!valuesKeys.length && !defaultMessage.includes('{')) {
+export function checkValuesProperty(prefixedValuesKeys, defaultMessage, messageId) {
+  // Skip validation if `defaultMessage` doesn't include any ICU values and
+  // `values` prop has no keys.
+  const defaultMessageValueReferences = extractValueReferencesFromMessage(defaultMessage, messageId);
+  if (!prefixedValuesKeys.length && defaultMessageValueReferences.length === 0) {
     return;
   }
 
-  let defaultMessageAst;
+  const valuesKeys = prefixedValuesKeys.map(key =>
+    key.startsWith(HTML_KEY_PREFIX) ? key.slice(HTML_KEY_PREFIX.length) : key
+  );
 
+  const missingValuesKeys = difference(defaultMessageValueReferences, valuesKeys);
+  if (missingValuesKeys.length) {
+    throw createFailError(
+      `some properties are missing in "values" object ("${messageId}"): [${missingValuesKeys}].`
+    );
+  }
+
+  const unusedValuesKeys = difference(valuesKeys, defaultMessageValueReferences);
+  if (unusedValuesKeys.length) {
+    throw createFailError(
+      `"values" object contains unused properties ("${messageId}"): [${unusedValuesKeys}].`
+    );
+  }
+}
+
+/**
+ * Extracts value references from the ICU message.
+ * @param message ICU message.
+ * @param messageId ICU message id
+ * @returns {string[]}
+ */
+export function extractValueReferencesFromMessage(message, messageId) {
+  // Skip validation if message doesn't use ICU.
+  if (!message.includes('{')) {
+    return [];
+  }
+
+  let messageAST;
   try {
-    defaultMessageAst = parser.parse(defaultMessage);
+    messageAST = parser.parse(message);
   } catch (error) {
     if (error.name === 'SyntaxError') {
-      const errorWithContext = createParserErrorMessage(defaultMessage, {
+      const errorWithContext = createParserErrorMessage(message, {
         loc: {
           line: error.location.start.line,
           column: error.location.start.column - 1,
@@ -195,26 +236,12 @@ export function checkValuesProperty(valuesKeys, defaultMessage, messageId) {
     throw error;
   }
 
-  // skip validation if intl-messageformat-parser didn't return an AST with nonempty elements array
-  if (!defaultMessageAst || !defaultMessageAst.elements || !defaultMessageAst.elements.length) {
-    return;
+  // Skip extraction if intl-messageformat-parser didn't return an AST with nonempty elements array.
+  if (!messageAST || !messageAST.elements || !messageAST.elements.length) {
+    return [];
   }
 
-  const defaultMessageValueReferences = extractValueReferencesFromIcuAst(defaultMessageAst);
-
-  const missingValuesKeys = difference(defaultMessageValueReferences, valuesKeys);
-  if (missingValuesKeys.length) {
-    throw createFailError(
-      `some properties are missing in "values" object ("${messageId}"):\n[${missingValuesKeys}].`
-    );
-  }
-
-  const unusedValuesKeys = difference(valuesKeys, defaultMessageValueReferences);
-  if (unusedValuesKeys.length) {
-    throw createFailError(
-      `"values" object contains unused properties ("${messageId}"):\n[${unusedValuesKeys}].`
-    );
-  }
+  return extractValueReferencesFromIcuAst(messageAST);
 }
 
 export function extractMessageIdFromNode(node) {
@@ -276,10 +303,29 @@ export function extractDescriptionValueFromNode(node, messageId) {
 
 export function extractValuesKeysFromNode(node, messageId) {
   if (!isObjectExpression(node)) {
-    throw createFailError(`"values" value should be an object expression ("${messageId}").`);
+    throw createFailError(`"values" value should be an inline object literal ("${messageId}").`);
   }
 
-  return node.properties.map(
-    property => (isStringLiteral(property.key) ? property.key.value : property.key.name)
+  return node.properties.map(property =>
+    isStringLiteral(property.key) ? property.key.value : property.key.name
   );
+}
+
+export class ErrorReporter {
+  errors = [];
+
+  withContext(context) {
+    return { report: error => this.report(error, context) };
+  }
+
+  report(error, context) {
+    this.errors.push(
+      `${chalk.white.bgRed(' I18N ERROR ')} Error in ${normalizePath(context.name)}\n${error}`
+    );
+  }
+}
+
+// export function arrayify<Subj = any>(subj: Subj | Subj[]): Subj[] {
+export function arrayify(subj) {
+  return Array.isArray(subj) ? subj : [subj];
 }

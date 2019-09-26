@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KibanaTelemetryAdapter collects monitor and overview data 1`] = `
+Object {
+  "last_24_hours": Object {
+    "hits": Object {
+      "monitor_page": 1,
+      "overview_page": 2,
+    },
+  },
+}
+`;
+
+exports[`KibanaTelemetryAdapter drops old buckets and reduces current window 1`] = `
+Object {
+  "last_24_hours": Object {
+    "hits": Object {
+      "monitor_page": 3,
+      "overview_page": 4,
+    },
+  },
+}
+`;

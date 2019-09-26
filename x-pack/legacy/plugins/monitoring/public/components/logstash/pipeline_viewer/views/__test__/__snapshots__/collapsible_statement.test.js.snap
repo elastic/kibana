@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CollapsibleStatement component renders child components 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  className="monPipelineViewer__statement"
+  gutterSize="none"
+  responsive={false}
+>
+  <EuiFlexItem
+    grow={false}
+    key="statementId"
+  >
+    <EuiButtonIcon
+      aria-label="collapse"
+      color="text"
+      iconType="arrowDown"
+      onClick={[Function]}
+      size="s"
+    />
+  </EuiFlexItem>
+  <div>
+    child element
+  </div>
+</EuiFlexGroup>
+`;

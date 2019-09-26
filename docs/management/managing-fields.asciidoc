@@ -94,13 +94,13 @@ https://www.elastic.co/blog/using-painless-kibana-scripted-fields[Using Painless
 === Creating a Scripted Field
 To create a scripted field:
 
-. Go to *Settings > Indices*
+. Go to *Management > Kibana > Index Patterns*
 . Select the index pattern you want to add a scripted field to.
-. Go to the pattern's *Scripted Fields* tab.
-. Click *Add Scripted Field*.
+. Go to the pattern's *Scripted fields* tab.
+. Click *Add scripted field*.
 . Enter a name for the scripted field.
 . Enter the expression that you want to use to compute a value on the fly from your index data.
-. Click *Save Scripted Field*.
+. Click *Create field*.
 
 For more information about scripted fields in Elasticsearch, see
 {ref}/modules-scripting.html[Scripting].
@@ -110,9 +110,10 @@ For more information about scripted fields in Elasticsearch, see
 === Updating a Scripted Field
 To modify a scripted field:
 
-. Go to *Settings > Indices*
+. Go to *Management > Kibana > Index Patterns*
+. Click the index pattern's *Scripted fields* tab.
 . Click the *Edit* button for the scripted field you want to change.
-. Make your changes and then click *Save Scripted Field* to update the field.
+. Make your changes and then click *Save field* to update the field.
 
 WARNING: Keep in mind that there's no built-in validation of a scripted field. If your scripts are buggy, you'll get
 exceptions whenever you try to view the dynamically generated data.
@@ -122,6 +123,7 @@ exceptions whenever you try to view the dynamically generated data.
 === Deleting a Scripted Field
 To delete a scripted field:
 
-. Go to *Settings > Indices*
+. Go to *Management > Kibana > Index Patterns*
+. Click the index pattern's *Scripted fields* tab.
 . Click the *Delete* button for the scripted field you want to remove.
-. Confirm that you really want to delete the field.
+. Click *Delete* in the confirmation window.

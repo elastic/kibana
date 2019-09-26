@@ -1,17 +1,14 @@
 [[dashboard-import-api]]
-== Dashboard Import API
+== Dashboard import and export APIs
 
-The dashboard import/export APIs allow people to import dashboards along with
-all of their corresponding saved objects such as visualizations, saved
+Import and export dashboards with the corresponding saved objects, such as visualizations, saved
 searches, and index patterns.
 
-Traditionally, developers would perform this level of integration by writing
-documents directly to the `.kibana` index. *Do not do this!* Writing directly
-to the `.kibana` index is not safe and it _will_ result in corrupted data that
-permanently breaks Kibana in a future version.
+WARNING: Do not write documents directly to the `.kibana` index. When you write directly
+to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.
 
-* <<dashboard-import-api-import>>
-* <<dashboard-import-api-export>>
+* <<dashboard-import-api-import, Import dashboard API>>
+* <<dashboard-api-export, Export dashboard API>>
 
 include::dashboard-import/import.asciidoc[]
 include::dashboard-import/export.asciidoc[]

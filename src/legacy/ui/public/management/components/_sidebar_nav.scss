@@ -1,0 +1,10 @@
+.mgtSidebarNav {
+  width: 192px;
+}
+
+@include euiBreakpoint('xs','s') {
+  .mgtSideBarNav {
+    width: auto;
+    margin-bottom: $euiSize;
+  }
+}

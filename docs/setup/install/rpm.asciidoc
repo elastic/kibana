@@ -91,6 +91,36 @@ sudo zypper install kibana <3>
 
 endif::[]
 
+ifeval::["{release-state}"!="unreleased"]
+
+[NOTE]
+==================================================
+
+An alternative package, `kibana-oss`, which contains only features that are available under the
+Apache 2.0 license is also available. To install it, use the following `baseurl` in your `kibana.repo` file:
+
+ifeval::["{release-state}"=="prerelease"]
+
+["source","sh",subs="attributes,callouts"]
+--------------------------------------------------
+baseurl=https://artifacts.elastic.co/packages/oss-{major-version}-prerelease/yum
+--------------------------------------------------
+
+endif::[]
+
+ifeval::["{release-state}"!="prerelease"]
+
+["source","sh",subs="attributes,callouts"]
+--------------------------------------------------
+baseurl=https://artifacts.elastic.co/packages/oss-{major-version}/yum
+--------------------------------------------------
+
+endif::[]
+
+==================================================
+
+endif::[]
+
 [[install-rpm]]
 ==== Download and install the RPM manually
 
@@ -166,11 +196,16 @@ locations for an RPM-based system:
   | The location of the data files written to disk by Kibana and its plugins
   | /var/lib/kibana
   | path.data
+  
+| logs
+    | Logs files location
+    |  /var/log/kibana
+    | path.logs
 
 | optimize
   | Transpiled source code. Certain administrative actions (e.g. plugin install)
     result in the source code being retranspiled on the fly.
-  | /usr/share/kibana/optimize
+  | /var/lib/kibana/optimize
  d|
 
 | plugins

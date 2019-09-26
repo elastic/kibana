@@ -1,8 +1,0 @@
-{
-  "name": "sample_panel_action",
-  "version": "kibana",
-  "dependencies": {
-    "@elastic/eui": "0.0.55",
-    "react": "^16.4.1"
-  }
-}

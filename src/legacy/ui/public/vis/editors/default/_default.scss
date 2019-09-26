@@ -1,0 +1,105 @@
+.visEditor--default {
+  // Prevent the default editor from overflowing. Without that you can cause
+  // a weird issue where the complete page can be scrolled out of view if
+  // the editor within the sidebar is too height.
+  overflow-y: hidden;
+  flex: 1 1 auto;
+  display: flex;
+
+  @include euiBreakpoint('xs', 's', 'm') {
+    flex-direction: column;
+  }
+}
+
+/**
+ * Collapsible sidebar container
+ */
+
+.visEditor__collapsibleSidebar {
+  @include flex-parent(0, 0, auto);
+  margin-right: $euiSizeL;
+  flex-direction: row;
+  min-width: $vis-editor-sidebar-min-width;
+  width: $vis-editor-sidebar-min-width;
+  max-width: 100%;
+
+  @include euiBreakpoint('xs', 's', 'm') {
+    // If we are on a small screen we force the editor to take 100% width.
+    width: 100% !important;
+  }
+
+  @include euiBreakpoint('l', 'xl') {
+    max-width: 75%;
+  }
+}
+
+.visEditor__collapsibleSidebar.closed {
+  min-width: 0;
+}
+
+.visEditor__collapsibleSidebar--small {
+  width: 15%;
+}
+
+.visEditor__collapsibleSidebar--medium {
+  width: 30%;
+}
+
+.visEditor__collapsibleSidebar--large {
+  width: 50%;
+}
+
+
+/**
+ * Actual sidebar
+ */
+
+.visEditor__sidebar {
+  @include flex-parent(1, 0, auto);
+
+  // overridden for tablet and desktop
+  @include euiBreakpoint('l', 'xl') {
+    flex-basis: $vis-editor-sidebar-basis;
+    max-width: calc(100% - #{$vis-editor-resizer-width});
+  }
+}
+
+/**
+ * Resizer
+ */
+
+.visEditor__resizer {
+  @include kbnResizer($vis-editor-resizer-width);
+
+  @include euiBreakpoint('xs', 's', 'm') {
+    display: none;
+  }
+}
+
+/**
+ * Canvas area
+ */
+
+.visEditor__canvas {
+  background-color: $euiColorEmptyShade;
+  display: flex;
+  flex-direction: row;
+  overflow: auto;
+  flex-shrink: 1;
+  flex-basis: 100%;
+
+  &.embedded {
+    flex-shrink: 1;
+    flex-basis: 100%;
+  }
+
+  .visualize {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 100%;
+  }
+
+  .visChart {
+    position: relative;
+  }
+}

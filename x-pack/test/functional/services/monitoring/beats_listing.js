@@ -14,9 +14,8 @@ export function MonitoringBeatsListingProvider({ getService, getPageObjects }) {
   const SUBJ_NO_RECENT_ACTIVITY_MESSAGE = 'noRecentActivityMessage';
 
   const SUBJ_TABLE_CONTAINER   = 'beatsTableContainer';
-  const SUBJ_SEARCH_BAR        = `${SUBJ_TABLE_CONTAINER} monitoringTableToolBar`;
-  const SUBJ_TABLE_BODY        = 'beatsTableBody';
-  const SUBJ_INDEX_LINK_PREFIX = `${SUBJ_TABLE_BODY} beatLink-`;
+  const SUBJ_SEARCH_BAR        = `${SUBJ_TABLE_CONTAINER} > monitoringTableToolBar`;
+  const SUBJ_INDEX_LINK_PREFIX = `${SUBJ_TABLE_CONTAINER} > beatLink-`;
 
   return new class BeatsListing {
 

@@ -1,11 +1,11 @@
 [[url-shortening-api]]
-== URL Shortening API
+== URL shortening API
 
-Kibana URLs contain the state of the application making them very long and cumbersome.
-Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the Kibana URL.
+{kib} URLs contain the state of the application, which makes them long and cumbersome.
+Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the {kib} URL.
 
-The short URLs enabled by this API are designed to make sharing Kibana URLs easier.
+Short URLs are designed to make sharing {kib} URLs easier.
 
-* <<url-shortening-api-api-shorten-url>>
+* <<shorten-url-api, Shorten URL API>>
 
 include::url_shortening/shorten_url.asciidoc[]

@@ -30,9 +30,23 @@ export function MonitoringPageProvider({ getPageObjects, getService }) {
       });
     }
 
+    async assertEuiTableNoData(subj) {
+      await retry.try(async () => {
+        if (await testSubjects.exists(subj)) {
+          throw new Error('Expected to find the no data message');
+        }
+      });
+    }
+
     async tableGetRows(subj) {
       const table = await testSubjects.find(subj);
       return table.findAllByTagName('tr');
+    }
+
+    async tableGetRowsFromContainer(subj) {
+      const table = await testSubjects.find(subj);
+      const tbody = await table.findByTagName('tbody');
+      return tbody.findAllByTagName('tr');
     }
 
     async tableSetFilter(subj, text) {

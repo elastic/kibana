@@ -1,38 +1,42 @@
-[[dashboard-import-api-export]]
-=== Export Dashboard
+[[dashboard-api-export]]
+=== Export dashboard API
+++++
+<titleabbrev>Dashboard export</titleabbrev>
+++++
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Export dashboards and corresponding saved objects.
 
-The dashboard export API allows people to export dashboards along with all of
-their corresponding saved objects such as visualizations, saved searches, and
-index patterns.
-
+[[dashboard-api-export-request]]
 ==== Request
 
 `GET /api/kibana/dashboards/export`
 
-==== Query Parameters
+[[dashboard-api-export-params]]
+==== Query parameters
 
-`dashboard` (required)::
-  (array|string) The id(s) of the dashboard(s) to export
+`dashboard`::
+  (Required, array|string) The IDs of the dashboards that you want to export.
 
+[[dashboard-api-export-response-body]]
 ==== Response body
 
-The response body will have a top level `objects` property that contains an
-array of saved objects. The order of these objects is not guaranteed. You
-should use this exact response body as the request body for the corresponding
-<<dashboard-import-api-import, Import Dashboard API>>.
+`objects`:: 
+  (array) A top level property that includes the saved objects. The order of the objects is not guaranteed. Use the exact response body as the request body for the corresponding <<dashboard-import-api-import, Import dashboard API>>.
+  
+[[dashboard-api-export-codes]]
+==== Response code
 
-==== Examples
+`200`::
+  Indicates a successful call.
 
-The following example exports all saved objects associated with and including
-the dashboard with id `942dcef0-b2cd-11e8-ad8e-85441f0c2e5c`.
+[float]
+[[dashboard-api-export-example]]
+==== Example
 
 [source,js]
 --------------------------------------------------
-GET api/kibana/dashboards/export?dashboard=942dcef0-b2cd-11e8-ad8e-85441f0c2e5c
+GET api/kibana/dashboards/export?dashboard=942dcef0-b2cd-11e8-ad8e-85441f0c2e5c <1>
 --------------------------------------------------
 // KIBANA
 
-A successful call returns a response code of `200` along with the exported
-objects as the response body.
+<1> In this example, `942dcef0-b2cd-11e8-ad8e-85441f0c2e5c` is the dashboard ID.

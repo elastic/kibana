@@ -1,40 +1,40 @@
 [[upgrade-standard]]
-=== Standard Upgrade
+=== Standard upgrade
 
-A standard upgrade is the most straightforward way to upgrade Kibana, and it's
-possible when you're upgrading from Kibana version 4.2 or higher.
+NOTE: 6.7 includes an https://www.elastic.co/guide/en/kibana/6.7/upgrade-assistant.html[Upgrade Assistant] 
+to help you prepare for your upgrade to 7.0. To access the assistant, go to *Management > 7.0 Upgrade Assistant*. 
 
-If you haven't already, consult this <<upgrade,table>> to verify that standard
-upgrade is supported for your version of Kibana.
-
-NOTE: If you've saved and/or exported objects in Kibana that rely on the
-<<search,Elasticsearch Query DSL>>, make sure to check the Elasticsearch
+[IMPORTANT]
+===========================================
+If you've saved and/or exported objects in {kib} that rely on the
+<<search,Elasticsearch Query DSL>>, make sure to check the {es}
 {ref}/breaking-changes.html[breaking changes] documentation and take the
 necessary remediation steps as per those instructions.
+===========================================
 
 [float]
 ==== Upgrading using a `deb` or `rpm` package
 
-. Stop the existing Kibana process using the appropriate command for your
+. Stop the existing {kib} process using the appropriate command for your
   system.
 . Use `rpm` or `dpkg` to install the new package. All files should be placed in
   their proper locations and config files should not be overwritten.
 +
 [NOTE]
 --
-Kibana 4.x used a different config location than 5.0+, so if you're upgrading
+{kib} 4.x used a different config location than 5.0+, so if you're upgrading
 from 4.x, you will need to copy the configurations from your old config
 (`/opt/kibana/config/kibana.yml`) to your new config
 (`/etc/kibana/kibana.yml`).
 
 Make sure you remove or update any configurations
 that are indicated in the <<breaking-changes,breaking changes>> documentation
-otherwise Kibana will fail to start.
+otherwise {kib} will fail to start.
 --
 . Upgrade any plugins by removing the existing plugin and reinstalling the
   appropriate version using the `kibana-plugin` script. Check out the
   <<kibana-plugins,plugins>> documentation for more information.
-. Start the new Kibana process using the appropriate command for your system.
+. Start the new {kib} process using the appropriate command for your system.
 
 [float]
 ==== Upgrading using a `zip` or `tar.gz` archive
@@ -43,7 +43,7 @@ otherwise Kibana will fail to start.
   don't overwrite the `config` or `data` directories. +
 +
 --
-IMPORTANT: If you use {monitoring}, you must re-use the data directory when you
+IMPORTANT: If you use {monitor-features}, you must re-use the data directory when you
 upgrade {kib}. Otherwise, the {kib} instance is assigned a new persistent UUID
 and becomes a new instance in the monitoring data.
 
@@ -51,11 +51,11 @@ and becomes a new instance in the monitoring data.
 . Copy the files from the `config` directory from your old installation to your
   new installation. Make sure you remove or update any configurations that are
   indicated in the <<breaking-changes,breaking changes>> documentation
-  otherwise Kibana will fail to start.
+  otherwise {kib} will fail to start.
 . Copy the files from the `data` directory from your old installation to your
   new installation.
 . Install the appropriate versions of all your plugins for your new
   installation using the `kibana-plugin` script. Check out the
   <<kibana-plugins,plugins>> documentation for more information.
-. Stop the old Kibana process.
-. Start the new Kibana process.
+. Stop the old {kib} process.
+. Start the new {kib} process.

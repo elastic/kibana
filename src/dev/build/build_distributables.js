@@ -21,6 +21,8 @@ import { getConfig, createRunner } from './lib';
 
 import {
   BuildPackagesTask,
+  CleanClientModulesOnDLLTask,
+  CleanEmptyFoldersTask,
   CleanExtraBinScriptsTask,
   CleanExtraBrowsersTask,
   CleanExtraFilesFromModulesTask,
@@ -28,10 +30,12 @@ import {
   CleanTypescriptTask,
   CleanNodeBuildsTask,
   CleanTask,
+  CleanCtagBuildTask,
   CopySourceTask,
   CreateArchivesSourcesTask,
   CreateArchivesTask,
   CreateDebPackageTask,
+  CreateDockerPackageTask,
   CreateEmptyDirsAndFilesTask,
   CreateNoticeFileTask,
   CreatePackageJsonTask,
@@ -41,14 +45,15 @@ import {
   ExtractNodeBuildsTask,
   InstallDependenciesTask,
   OptimizeBuildTask,
+  PatchNativeModulesTask,
   RemovePackageJsonDepsTask,
   RemoveWorkspacesTask,
   TranspileBabelTask,
-  TranspileTypescriptTask,
   TranspileScssTask,
   UpdateLicenseFileTask,
   VerifyEnvTask,
   VerifyExistingNodeBuildsTask,
+  PathLengthTask,
   WriteShaSumsTask,
 } from './tasks';
 
@@ -62,6 +67,7 @@ export async function buildDistributables(options) {
     createArchives,
     createRpmPackage,
     createDebPackage,
+    createDockerPackage,
     versionQualifier,
     targetAllPlatforms,
   } = options;
@@ -105,28 +111,33 @@ export async function buildDistributables(options) {
   await run(CreateEmptyDirsAndFilesTask);
   await run(CreateReadmeTask);
   await run(TranspileBabelTask);
-  await run(TranspileTypescriptTask);
   await run(BuildPackagesTask);
   await run(CreatePackageJsonTask);
   await run(InstallDependenciesTask);
   await run(RemoveWorkspacesTask);
-  await run(CleanTypescriptTask);
   await run(CleanPackagesTask);
   await run(CreateNoticeFileTask);
   await run(UpdateLicenseFileTask);
   await run(RemovePackageJsonDepsTask);
   await run(TranspileScssTask);
-  await run(CleanExtraFilesFromModulesTask);
   await run(OptimizeBuildTask);
+  await run(CleanClientModulesOnDLLTask);
+  await run(CleanTypescriptTask);
+  await run(CleanExtraFilesFromModulesTask);
+  await run(CleanEmptyFoldersTask);
 
   /**
    * copy generic build outputs into platform-specific build
    * directories and perform platform-specific steps
    */
   await run(CreateArchivesSourcesTask);
+  await run(PatchNativeModulesTask);
   await run(CleanExtraBinScriptsTask);
   await run(CleanExtraBrowsersTask);
   await run(CleanNodeBuildsTask);
+  await run(CleanCtagBuildTask);
+
+  await run(PathLengthTask);
 
   /**
    * package platform-specific builds into archives
@@ -140,6 +151,9 @@ export async function buildDistributables(options) {
   }
   if (createRpmPackage) { // control w/ --rpm or --skip-os-packages
     await run(CreateRpmPackageTask);
+  }
+  if (createDockerPackage) { // control w/ --docker or --skip-os-packages
+    await run(CreateDockerPackageTask);
   }
 
   /**

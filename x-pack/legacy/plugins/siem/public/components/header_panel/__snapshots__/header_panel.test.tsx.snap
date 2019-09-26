@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`rendering renders correctly 1`] = `
+<Component
+  subtitle="My Test Subtitle"
+  title="My Test Title"
+  tooltip="My test tooltip."
+>
+  <p>
+    My test supplement.
+  </p>
+</Component>
+`;

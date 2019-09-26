@@ -1,8 +1,8 @@
 {
   "serverTestPatterns": [
-    "server/**/__tests__/**/*.js",
-    "plugins/**/__tests__/**/*.js",
-    "!plugins/**/server/**/__tests__/**/*"
+    "legacy/server/**/__tests__/**/*.js",
+    "legacy/plugins/**/__tests__/**/*.js",
+    "!legacy/plugins/**/server/**/__tests__/**/*"
   ],
   "buildSourcePatterns": [
     "LICENSE.txt",
@@ -11,21 +11,24 @@
     "yarn.lock",
     "tsconfig.json",
     "index.js",
-    "plugins/reporting/.phantom/*",
-    "plugins/reporting/.chromium/*",
-    "common/**/*",
+    ".i18nrc.json",
     "plugins/**/*",
-    "server/**/*",
+    "legacy/plugins/reporting/.phantom/*",
+    "legacy/plugins/reporting/.chromium/*",
+    "legacy/common/**/*",
+    "legacy/plugins/**/*",
+    "legacy/server/**/*",
+    "typings/**/*",
     "webpackShims/*",
     "!**/README.md",
     "!__tests__",
     "!__tests__/**/*",
     "!**/__tests__",
     "!**/__tests__/**/*",
-    "!plugins/**/*.test.js",
-    "!plugins/**/__snapshots__",
-    "!plugins/**/__snapshots__/*",
-    "!plugins/**/__mocks__/*"
+    "!legacy/plugins/**/*.test.{js,ts}",
+    "!legacy/plugins/**/__snapshots__",
+    "!legacy/plugins/**/__snapshots__/*",
+    "!legacy/plugins/**/__mocks__/*"
   ],
   "skipInstallDependencies": true
 }

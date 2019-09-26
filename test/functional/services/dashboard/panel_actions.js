@@ -17,16 +17,15 @@
  * under the License.
  */
 
-const REMOVE_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-deletePanel';
-const EDIT_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-editPanel';
-const TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-togglePanel';
-const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-customizePanel';
-const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'dashboardPanelToggleMenuIcon';
-const OPEN_INSPECTOR_TEST_SUBJ = 'dashboardPanelAction-openInspector';
+const REMOVE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-deletePanel';
+const EDIT_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-editPanel';
+const TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-togglePanel';
+const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-CUSTOMIZE_PANEL_ACTION_ID';
+const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'embeddablePanelToggleMenuIcon';
+const OPEN_INSPECTOR_TEST_SUBJ = 'embeddablePanelAction-openInspector';
 
 export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
   const log = getService('log');
-  const remote = getService('remote');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['header', 'common']);
 
@@ -45,13 +44,13 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
 
     async toggleContextMenu(parent) {
       log.debug('toggleContextMenu');
-      await (parent ? remote.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
+      await (parent ? parent.moveMouseTo() : testSubjects.moveMouseTo('dashboardPanelTitle'));
       const toggleMenuItem = await this.findContextMenu(parent);
       await toggleMenuItem.click();
     }
 
     async expectContextMenuToBeOpen() {
-      await testSubjects.existOrFail('dashboardPanelContextMenuOpen');
+      await testSubjects.existOrFail('embeddablePanelContextMenuOpen');
     }
 
     async openContextMenu(parent) {
@@ -88,6 +87,11 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       await testSubjects.click(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
     }
 
+    async openInspectorByTitle(title) {
+      const header = await this.getPanelHeading(title);
+      await this.openInspector(header);
+    }
+
     async openInspector(parent) {
       await this.openContextMenu(parent);
       await testSubjects.click(OPEN_INSPECTOR_TEST_SUBJ);
@@ -119,7 +123,22 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
     }
 
     async getPanelHeading(title) {
-      return await testSubjects.find(`dashboardPanelHeading-${title.replace(/\s/g, '')}`);
+      return await testSubjects.find(`embeddablePanelHeading-${title.replace(/\s/g, '')}`);
+    }
+
+    async clickHidePanelTitleToggle() {
+      await testSubjects.click('customizePanelHideTitle');
+    }
+
+    async toggleHidePanelTitle(originalTitle) {
+      log.debug(`hidePanelTitle(${originalTitle})`);
+      let panelOptions = null;
+      if (originalTitle) {
+        panelOptions = await this.getPanelHeading(originalTitle);
+      }
+      await this.customizePanel(panelOptions);
+      await this.clickHidePanelTitleToggle();
+      await testSubjects.click('saveNewTitleButton');
     }
 
     /**
@@ -135,14 +154,15 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
         panelOptions = await this.getPanelHeading(originalTitle);
       }
       await this.customizePanel(panelOptions);
-      await testSubjects.setValue('customDashboardPanelTitleInput', customTitle);
-      await this.toggleContextMenu(panelOptions);
+      await testSubjects.setValue('customEmbeddablePanelTitleInput', customTitle);
+      await testSubjects.click('saveNewTitleButton');
     }
 
     async resetCustomPanelTitle(panel) {
       log.debug('resetCustomPanelTitle');
       await this.customizePanel(panel);
-      await testSubjects.click('resetCustomDashboardPanelTitle');
+      await testSubjects.click('resetCustomEmbeddablePanelTitle');
+      await testSubjects.click('saveNewTitleButton');
       await this.toggleContextMenu(panel);
     }
   };

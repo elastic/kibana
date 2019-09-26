@@ -1,0 +1,19 @@
+.tvbEditorVisualization {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  width: 100%;
+  height: $euiSizeL * 10;
+  line-height: normal;
+  background-color: $euiColorEmptyShade;
+  overflow: auto;
+}
+
+.tvbEditorVisualization__apply {
+  padding: $euiSizeS;
+}
+
+.tvbEditorVisualization__draghandle {
+  @include kbnResizer($direction: vertical);
+}

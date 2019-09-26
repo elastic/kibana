@@ -25,13 +25,15 @@ import { promisify } from 'util';
 import del from 'del';
 import deleteEmpty from 'delete-empty';
 import globby from 'globby';
+import normalizePosixPath from 'normalize-path';
 
 const readAsync = promisify(readFile);
 const writeAsync = promisify(writeFile);
 
 interface Params {
-  log: (tags: string[], data: string) => void;
+  logWithMetadata: (tags: string[], message: string, metadata?: { [key: string]: any }) => void;
   outputPath: string;
+  dllsPath: string;
   cachePath: string;
 }
 
@@ -41,8 +43,9 @@ interface WatchCacheStateContent {
 }
 
 export class WatchCache {
-  private readonly log: Params['log'];
+  private readonly logWithMetadata: Params['logWithMetadata'];
   private readonly outputPath: Params['outputPath'];
+  private readonly dllsPath: Params['dllsPath'];
   private readonly cachePath: Params['cachePath'];
   private readonly cacheState: WatchCacheStateContent;
   private statePath: string;
@@ -50,8 +53,9 @@ export class WatchCache {
   private isInitialized: boolean;
 
   constructor(params: Params) {
-    this.log = params.log;
+    this.logWithMetadata = params.logWithMetadata;
     this.outputPath = params.outputPath;
+    this.dllsPath = params.dllsPath;
     this.cachePath = params.cachePath;
 
     this.isInitialized = false;
@@ -83,25 +87,27 @@ export class WatchCache {
   }
 
   public async reset() {
-    this.log(['info', 'optimize:watch_cache'], 'The optimizer watch cache will reset');
+    this.logWithMetadata(['info', 'optimize:watch_cache'], 'The optimizer watch cache will reset');
 
     // start by deleting the state file to lower the
     // amount of time that another process might be able to
     // successfully read it once we decide to delete it
-    await del(this.statePath);
+    await del(this.statePath, { force: true });
 
     // delete everything in optimize/.cache directory
-    // except ts-node
-    await del(await globby([this.cachePath, `!${this.cachePath}/ts-node/**`], { dot: true }));
+    await del(await globby([normalizePosixPath(this.cachePath)], { dot: true }));
 
     // delete some empty folder that could be left
     // from the previous cache path reset action
     await deleteEmpty(this.cachePath);
 
+    // delete dlls
+    await del(this.dllsPath);
+
     // re-write new cache state file
     await this.write();
 
-    this.log(['info', 'optimize:watch_cache'], 'The optimizer watch cache has reset');
+    this.logWithMetadata(['info', 'optimize:watch_cache'], 'The optimizer watch cache has reset');
   }
 
   private async buildShaWithMultipleFiles(filePaths: string[]) {
@@ -109,7 +115,7 @@ export class WatchCache {
 
     for (const filePath of filePaths) {
       try {
-        shaHash.update(await readAsync(filePath), 'utf8');
+        shaHash.update(await readAsync(filePath, 'utf8'), 'utf8');
       } catch (e) {
         /* no-op */
       }
@@ -126,8 +132,14 @@ export class WatchCache {
 
   private async buildOptimizerConfigSha() {
     const baseOptimizer = resolve(__dirname, '../base_optimizer.js');
+    const dynamicDllConfigModel = resolve(__dirname, '../dynamic_dll_plugin/dll_config_model.js');
+    const dynamicDllPlugin = resolve(__dirname, '../dynamic_dll_plugin/dynamic_dll_plugin.js');
 
-    return await this.buildShaWithMultipleFiles([baseOptimizer]);
+    return await this.buildShaWithMultipleFiles([
+      baseOptimizer,
+      dynamicDllConfigModel,
+      dynamicDllPlugin,
+    ]);
   }
 
   private isResetNeeded() {

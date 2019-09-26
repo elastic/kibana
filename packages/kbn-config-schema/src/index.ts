@@ -36,16 +36,22 @@ import {
   MapOfOptions,
   MapOfType,
   MaybeType,
+  NeverType,
   NumberOptions,
   NumberType,
   ObjectType,
+  ObjectTypeOptions,
   Props,
+  RecordOfOptions,
+  RecordOfType,
   StringOptions,
   StringType,
   Type,
   TypeOf,
   TypeOptions,
   UnionType,
+  URIOptions,
+  URIType,
 } from './types';
 
 export { ObjectType, TypeOf, Type };
@@ -63,7 +69,11 @@ function string(options?: StringOptions): Type<string> {
   return new StringType(options);
 }
 
-function literal<T extends string | number | boolean>(value: T): Type<T> {
+function uri(options?: URIOptions): Type<string> {
+  return new URIType(options);
+}
+
+function literal<T extends string | number | boolean | null>(value: T): Type<T> {
   return new LiteralType(value);
 }
 
@@ -79,6 +89,10 @@ function duration(options?: DurationOptions): Type<Duration> {
   return new DurationType(options);
 }
 
+function never(): Type<never> {
+  return new NeverType();
+}
+
 /**
  * Create an optional type
  */
@@ -86,10 +100,11 @@ function maybe<V>(type: Type<V>): Type<V | undefined> {
   return new MaybeType(type);
 }
 
-function object<P extends Props>(
-  props: P,
-  options?: TypeOptions<{ [K in keyof P]: TypeOf<P[K]> }>
-): ObjectType<P> {
+function nullable<V>(type: Type<V>): Type<V | null> {
+  return schema.oneOf([type, schema.literal(null)], { defaultValue: null });
+}
+
+function object<P extends Props>(props: P, options?: ObjectTypeOptions<P>): ObjectType<P> {
   return new ObjectType(props, options);
 }
 
@@ -103,6 +118,14 @@ function mapOf<K, V>(
   options?: MapOfOptions<K, V>
 ): Type<Map<K, V>> {
   return new MapOfType(keyType, valueType, options);
+}
+
+function recordOf<K extends string, V>(
+  keyType: Type<K>,
+  valueType: Type<V>,
+  options?: RecordOfOptions<K, V>
+): Type<Record<K, V>> {
+  return new RecordOfType(keyType, valueType, options);
 }
 
 function oneOf<A, B, C, D, E, F, G, H, I, J>(
@@ -153,7 +176,7 @@ function siblingRef<T>(key: string): SiblingReference<T> {
 
 function conditional<A extends ConditionalTypeValue, B, C>(
   leftOperand: Reference<A>,
-  rightOperand: Reference<A> | A,
+  rightOperand: Reference<A> | A | Type<unknown>,
   equalType: Type<B>,
   notEqualType: Type<C>,
   options?: TypeOptions<B | C>
@@ -172,11 +195,15 @@ export const schema = {
   literal,
   mapOf,
   maybe,
+  nullable,
+  never,
   number,
   object,
   oneOf,
+  recordOf,
   siblingRef,
   string,
+  uri,
 };
 
 export type Schema = typeof schema;

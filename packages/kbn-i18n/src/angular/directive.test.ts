@@ -89,7 +89,7 @@ describe('i18nDirective', () => {
       `<div
         i18n-id="id"
         i18n-default-message="Default message, {value}"
-        i18n-values="{ value: '<div ng-click=&quot;dangerousAction()&quot;></div>' }"
+        i18n-values="{ html_value: '<div ng-click=&quot;dangerousAction()&quot;></div>' }"
        />`
     );
 
@@ -99,7 +99,7 @@ describe('i18nDirective', () => {
     expect(element[0]).toMatchSnapshot();
   });
 
-  test('sanitizes onclick attribute', () => {
+  test(`doesn't render html in result message with text-only values`, () => {
     const element = angular.element(
       `<div
         i18n-id="id"
@@ -114,12 +114,42 @@ describe('i18nDirective', () => {
     expect(element[0]).toMatchSnapshot();
   });
 
+  test('sanitizes onclick attribute', () => {
+    const element = angular.element(
+      `<div
+        i18n-id="id"
+        i18n-default-message="Default {value} message"
+        i18n-values="{ html_value: '<span onclick=alert(1)>Press</span>' }"
+       />`
+    );
+
+    compile(element)(scope);
+    scope.$digest();
+
+    expect(element[0]).toMatchSnapshot();
+  });
+
   test('sanitizes onmouseover attribute', () => {
     const element = angular.element(
       `<div
         i18n-id="id"
         i18n-default-message="Default {value} message"
-        i18n-values="{ value: '<span onmouseover=&quot;alert(1)&quot;>Press</span>' }"
+        i18n-values="{ html_value: '<span onmouseover=&quot;alert(1)&quot;>Press</span>' }"
+       />`
+    );
+
+    compile(element)(scope);
+    scope.$digest();
+
+    expect(element[0]).toMatchSnapshot();
+  });
+
+  test(`doesn't render html in text-only value`, () => {
+    const element = angular.element(
+      `<div
+        i18n-id="id"
+        i18n-default-message="Default {value}"
+        i18n-values="{ value: '<strong>message</strong>' }"
        />`
     );
 

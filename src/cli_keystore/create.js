@@ -18,7 +18,7 @@
  */
 
 import Logger from '../cli_plugin/lib/logger';
-import { confirm } from '../server/utils';
+import { confirm } from '../legacy/server/utils';
 
 export async function create(keystore, command, options) {
   const logger = new Logger(options);

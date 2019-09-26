@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`JsonTooltip Initialization with a non-existing tooltip attribute doesn't throw an error 1`] = `
+<span
+  aria-hidden="true"
+  className="ml-info-icon"
+>
+  <EuiIconTip
+    content=""
+  />
+  <span
+    className="ml-info-tooltip-text"
+    id="ml_aria_description_non_existing_attribute"
+  />
+</span>
+`;
+
+exports[`JsonTooltip Initialize with existing tooltip attribute 1`] = `
+<span
+  aria-hidden="true"
+  className="ml-info-icon"
+>
+  <EuiIconTip
+    content="Unique identifier for job, can use lowercase alphanumeric and underscores."
+  />
+  <span
+    className="ml-info-tooltip-text"
+    id="ml_aria_description_new_job_id"
+  >
+    Unique identifier for job, can use lowercase alphanumeric and underscores.
+  </span>
+</span>
+`;
+
+exports[`JsonTooltip Plain initialization doesn't throw an error 1`] = `
+<span
+  aria-hidden="true"
+  className="ml-info-icon"
+>
+  <EuiIconTip
+    content=""
+  />
+  <span
+    className="ml-info-tooltip-text"
+    id="ml_aria_description_undefined"
+  />
+</span>
+`;

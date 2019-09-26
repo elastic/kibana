@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
-import * as GenerationUrls from "./generation_urls";
+import expect from '@kbn/expect';
+import * as GenerationUrls from './generation_urls';
 
 export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
@@ -13,11 +13,10 @@ export default function ({ getService }) {
   const usageAPI = getService('usageAPI');
 
   describe('reporting usage', () => {
-    before(async () => {
-      await reportingAPI.deleteAllReportingIndexes();
-    });
+    before(() => reportingAPI.deleteAllReportingIndexes());
+    afterEach(() => reportingAPI.deleteAllReportingIndexes());
 
-    describe('initial usage', () => {
+    describe('initial state', () => {
       let usage;
 
       before(async () => {
@@ -45,7 +44,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe('includes usage from reporting indexes', () => {
+    describe('from archive data', () => {
       it('generated from 6.2', async () => {
         await esArchiver.load('bwc/6_2');
         const usage = await usageAPI.getUsageStats();
@@ -79,8 +78,8 @@ export default function ({ getService }) {
         reportingAPI.expectRecentPdfLayoutStats(usage, 'preserve_layout', 0);
         reportingAPI.expectRecentPdfLayoutStats(usage, 'print', 0);
 
-        reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'csv', 3);
-        reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'printable_pdf', 19);
+        reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'csv', 2);
+        reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'printable_pdf', 12);
         reportingAPI.expectAllTimePdfAppStats(usage, 'visualization', 3);
         reportingAPI.expectAllTimePdfAppStats(usage, 'dashboard', 3);
         reportingAPI.expectAllTimePdfLayoutStats(usage, 'preserve_layout', 3);
@@ -88,35 +87,56 @@ export default function ({ getService }) {
       });
     });
 
-    describe('usage updated when new jobs are posted', async () => {
-      it('post jobs', async () => {
-        const reportPaths = [];
-        reportPaths.push(await reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3));
-        reportPaths.push(await reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_DASHBOARD_FILTER_6_3));
-        reportPaths.push(await reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_PIE_VISUALIZATION_6_3));
-        reportPaths.push(await reportingAPI.postJob(GenerationUrls.PDF_PRINT_DASHBOARD_6_3));
-        reportPaths.push(await reportingAPI.postJob(
-          GenerationUrls.PDF_PRINT_PIE_VISUALIZATION_FILTER_AND_SAVED_SEARCH_6_3));
+    describe('from new jobs posted', () => {
+      it('csv', async () => {
+        await reportingAPI.expectAllJobsToFinishSuccessfully(await Promise.all([
+          reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3),
+        ]));
 
-        await reportingAPI.expectAllJobsToFinishSuccessfully(reportPaths);
-      }).timeout(1540000);
-
-      it('usage updated', async () => {
         const usage = await usageAPI.getUsageStats();
-
-        reportingAPI.expectRecentPdfAppStats(usage, 'visualization', 2);
-        reportingAPI.expectRecentPdfAppStats(usage, 'dashboard', 2);
-        reportingAPI.expectRecentPdfLayoutStats(usage, 'preserve_layout', 2);
-        reportingAPI.expectRecentPdfLayoutStats(usage, 'print', 2);
+        reportingAPI.expectRecentPdfAppStats(usage, 'visualization', 0);
+        reportingAPI.expectRecentPdfAppStats(usage, 'dashboard', 0);
+        reportingAPI.expectRecentPdfLayoutStats(usage, 'preserve_layout', 0);
+        reportingAPI.expectRecentPdfLayoutStats(usage, 'print', 0);
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv', 1);
-        reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 4);
+        reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 0);
+      });
 
-        reportingAPI.expectAllTimePdfAppStats(usage, 'visualization', 5);
-        reportingAPI.expectAllTimePdfAppStats(usage, 'dashboard', 5);
-        reportingAPI.expectAllTimePdfLayoutStats(usage, 'preserve_layout', 5);
-        reportingAPI.expectAllTimePdfLayoutStats(usage, 'print', 5);
-        reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'csv', 4);
-        reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'printable_pdf', 23);
+      it('preserve_layout pdf', async () => {
+        await reportingAPI.expectAllJobsToFinishSuccessfully(await Promise.all([
+          reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_DASHBOARD_FILTER_6_3),
+          reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_PIE_VISUALIZATION_6_3),
+        ]));
+
+        const usage = await usageAPI.getUsageStats();
+        reportingAPI.expectRecentPdfAppStats(usage, 'visualization', 1);
+        reportingAPI.expectRecentPdfAppStats(usage, 'dashboard', 1);
+        reportingAPI.expectRecentPdfLayoutStats(usage, 'preserve_layout', 2);
+        reportingAPI.expectRecentPdfLayoutStats(usage, 'print', 0);
+        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv', 0);
+        reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 2);
+      });
+
+      it('print_layout pdf', async () => {
+        await reportingAPI.expectAllJobsToFinishSuccessfully(await Promise.all([
+          reportingAPI.postJob(GenerationUrls.PDF_PRINT_DASHBOARD_6_3),
+          reportingAPI.postJob(GenerationUrls.PDF_PRINT_PIE_VISUALIZATION_FILTER_AND_SAVED_SEARCH_6_3),
+        ]));
+
+        const usage = await usageAPI.getUsageStats();
+        reportingAPI.expectRecentPdfAppStats(usage, 'visualization', 1);
+        reportingAPI.expectRecentPdfAppStats(usage, 'dashboard', 1);
+        reportingAPI.expectRecentPdfLayoutStats(usage, 'preserve_layout', 0);
+        reportingAPI.expectRecentPdfLayoutStats(usage, 'print', 2);
+        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv', 0);
+        reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 2);
+
+        reportingAPI.expectAllTimePdfAppStats(usage, 'visualization', 1);
+        reportingAPI.expectAllTimePdfAppStats(usage, 'dashboard', 1);
+        reportingAPI.expectAllTimePdfLayoutStats(usage, 'preserve_layout', 0);
+        reportingAPI.expectAllTimePdfLayoutStats(usage, 'print', 2);
+        reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'csv', 0);
+        reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'printable_pdf', 2);
       });
     });
   });

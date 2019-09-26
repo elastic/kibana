@@ -28,13 +28,15 @@ export const CopySourceTask = {
       select: [
         'yarn.lock',
         'src/**',
-        '!src/**/*.test.{js,ts,tsx}',
-        '!src/**/{__tests__,__snapshots__}/**',
+        '!src/**/*.{test,test.mocks,mock}.{js,ts,tsx}',
+        '!src/**/mocks.ts', // special file who imports .mock files
+        '!src/**/{__tests__,__snapshots__,__mocks__}/**',
         '!src/test_utils/**',
         '!src/fixtures/**',
-        '!src/core_plugins/tests_bundle/**',
-        '!src/core_plugins/testbed/**',
-        '!src/core_plugins/console/public/tests/**',
+        '!src/legacy/core_plugins/tests_bundle/**',
+        '!src/legacy/core_plugins/testbed/**',
+        '!src/legacy/core_plugins/console/public/tests/**',
+        '!src/plugins/testbed/**',
         '!src/cli/cluster/**',
         '!src/cli/repl/**',
         '!src/es_archiver/**',
@@ -45,6 +47,8 @@ export const CopySourceTask = {
         'webpackShims/**',
         'config/kibana.yml',
         'tsconfig*.json',
+        '.i18nrc.json',
+        'kibana.d.ts'
       ],
     });
   },

@@ -11,14 +11,13 @@ export default function ({ loadTestFile, getService }) {
   const kibanaServer = getService('kibanaServer');
 
   describe('chromium', function () {
-    this.tags('ciGroup6');
+    this.tags('ciGroup2');
 
     before(async () => {
       await esArchiver.load(OSS_KIBANA_ARCHIVE_PATH);
       await esArchiver.load(OSS_DATA_ARCHIVE_PATH);
 
       await kibanaServer.uiSettings.update({
-        'dateFormat:tz': 'UTC',
         'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c'
       });
     });

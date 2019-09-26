@@ -1,32 +1,39 @@
 [[saved-objects-api-delete]]
-=== Delete Object
+=== Delete object API
+++++
+<titleabbrev>Delete object</titleabbrev>
+++++
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Remove a {kib} saved object. 
 
-The delete saved object API permanently removes a Kibana saved object. Once a
-saved object has been deleted, _it cannot be recovered_.
+WARNING: Once you delete a saved object, _it cannot be recovered_.
 
+[[saved-objects-api-delete-request]]
 ==== Request
 
 `DELETE /api/saved_objects/<type>/<id>`
 
-==== Path Parameters
+[[saved-objects-api-delete-path-params]]
+==== Path parameters
 
-`type` (required)::
-  (string) Valid options, include: `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`
+`type`::
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
 
-`id` (required)::
-  (string) Object ID being removed
+`id`::
+  (Required, string) The object ID that you want to remove.
 
+[[saved-objects-api-delete-response-codes]]
+==== Response code
+
+`200`:: 
+  Indicates a successful call.
 
 ==== Examples
 
-The following example deletes an index pattern object with an ID of `my-pattern`
+Delete an index pattern object with the `my-pattern` ID:
 
 [source,js]
 --------------------------------------------------
 DELETE api/saved_objects/index-pattern/my-pattern
 --------------------------------------------------
 // KIBANA
-
-A successful call returns a response code of `200`.

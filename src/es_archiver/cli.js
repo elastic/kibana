@@ -26,13 +26,14 @@
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
 import { format as formatUrl } from 'url';
+import readline from 'readline';
 
 import { Command } from 'commander';
 import elasticsearch from 'elasticsearch';
 
 import { EsArchiver } from './es_archiver';
 import { ToolingLog } from '@kbn/dev-utils';
-import { readConfigFile } from '../functional_test_runner';
+import { readConfigFile } from '@kbn/test';
 
 const cmd = new Command('node scripts/es_archiver');
 
@@ -42,7 +43,7 @@ const defaultConfigPath = resolveConfigPath('test/functional/config.js');
 cmd
   .description(`CLI to manage archiving/restoring data in elasticsearch`)
   .option('--es-url [url]', 'url for elasticsearch')
-  .option('--kibana-url [url]', 'url for kibana (only necessary if using "load" method)')
+  .option('--kibana-url [url]', 'url for kibana (only necessary if using "load" or "unload" methods)')
   .option(`--dir [path]`, 'where archives are stored')
   .option('--verbose', 'turn on verbose logging')
   .option('--config [path]', 'path to a functional test config file to use for default values', resolveConfigPath, defaultConfigPath)
@@ -63,6 +64,28 @@ cmd.command('load <name>')
 cmd.command('unload <name>')
   .description('remove indices created by the archive in --dir with <name>')
   .action(name => execute(archiver => archiver.unload(name)));
+
+cmd.command('empty-kibana-index')
+  .description('[internal] Delete any Kibana indices, and initialize the Kibana index as Kibana would do on startup.')
+  .action(() => execute(archiver => archiver.emptyKibanaIndex()));
+
+cmd.command('edit [prefix]')
+  .description('extract the archives under the prefix, wait for edits to be completed, and then recompress the archives')
+  .action(prefix => (
+    execute(archiver => archiver.edit(prefix, async () => {
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+
+      await new Promise(resolve => {
+        rl.question(`Press enter when you're done`, () => {
+          rl.close();
+          resolve();
+        });
+      });
+    }))
+  ));
 
 cmd.command('rebuild-all')
   .description('[internal] read and write all archives in --dir to remove any inconsistencies')
@@ -96,6 +119,10 @@ async function execute(fn) {
       errorCount++;
       log.error(msg);
     };
+
+    if (!fn) {
+      error(`Unknown command "${cmd.args[0]}"`);
+    }
 
     if (!cmd.esUrl) {
       error('You must specify either --es-url or --config flags');

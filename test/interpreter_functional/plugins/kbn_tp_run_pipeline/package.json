@@ -1,0 +1,14 @@
+{
+  "name": "kbn_tp_run_pipeline",
+  "version": "1.0.0",
+  "kibana": {
+    "version": "kibana",
+    "templateVersion": "1.0.0"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@elastic/eui": "14.2.0",
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
+  }
+}

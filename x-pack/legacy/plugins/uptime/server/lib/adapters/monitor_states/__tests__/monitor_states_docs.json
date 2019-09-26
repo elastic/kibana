@@ -1,0 +1,137 @@
+{
+  "took": 71,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 6561,
+      "relation": "eq"
+    },
+    "max_score": null,
+    "hits": []
+  },
+  "aggregations": {
+    "monitors": {
+      "after_key": null,
+      "buckets": [
+        {
+          "key": {
+            "monitor_id": "auto-http-0X21EE76EAC459873F"
+          },
+          "doc_count": 899,
+          "state": {
+            "value": {
+              "summary": {
+                "up": 0,
+                "down": 1
+              },
+              "observer": {
+                "geo": {
+                  "name": ["us-east-2"]
+                }
+              },
+              "monitor": {
+                "ip": ["127.0.0.1"],
+                "status": "down"
+              },
+              "checks": [
+                {
+                  "observer": {
+                    "geo": {
+                      "name": "us-east-2",
+                      "location": {
+                        "lat": 39.952599965035915,
+                        "lon": 75.1651999913156
+                      }
+                    }
+                  },
+                  "agent": {
+                    "id": "5884d7f7-9a49-4b0e-bff2-72a475aa695f"
+                  },
+                  "@timestamp": 1561556562535,
+                  "monitor": {
+                    "ip": "127.0.0.1",
+                    "name": "test-page",
+                    "status": "down"
+                  }
+                }
+              ],
+              "@timestamp": "2019-06-26T13:42:42.535Z",
+              "url": {
+                "path": "/test-page",
+                "scheme": "http",
+                "port": 12349,
+                "domain": "localhost",
+                "full": "http://localhost:12349/test-page"
+              }
+            }
+          }
+        },
+        {
+          "key": {
+            "monitor_id": "auto-http-0X2AF1D7DB9C490053"
+          },
+          "doc_count": 52,
+          "state": {
+            "value": {
+              "summary": {
+                "up": 0,
+                "down": 1
+              },
+              "observer": {
+                "geo": {
+                  "name": ["us-east-2"]
+                }
+              },
+              "monitor": {
+                "ip": ["35.245.22.113"],
+                "status": "down"
+              },
+              "checks": [
+                {
+                  "observer": {
+                    "geo": {
+                      "name": "us-east-2",
+                      "location": {
+                        "lat": 39.952599965035915,
+                        "lon": 75.1651999913156
+                      }
+                    }
+                  },
+                  "agent": {
+                    "id": "5884d7f7-9a49-4b0e-bff2-72a475aa695f"
+                  },
+                  "@timestamp": 1561556541536,
+                  "monitor": {
+                    "ip": "35.245.22.113",
+                    "name": "prod-site",
+                    "status": "down"
+                  }
+                }
+              ],
+              "tls": [
+                {
+                  "certificate_not_valid_after": "2019-11-09T18:04:06.000Z",
+                  "certificate_not_valid_before": "2019-11-08T17:03:23.000Z"
+                }
+              ],
+              "@timestamp": "2019-06-26T13:42:21.536Z",
+              "url": {
+                "path": "/",
+                "scheme": "http",
+                "port": 12349,
+                "domain": "35.245.22.113",
+                "full": "http://35.245.22.113:12349/"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

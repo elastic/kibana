@@ -17,43 +17,40 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import sinon from 'sinon';
-import Promise from 'bluebird';
-import { IndexPatternProvider, getRoutes } from 'ui/index_patterns/_index_pattern';
-import { formatHit } from 'ui/index_patterns/_format_hit';
-import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';
+// TODO: We should not be importing from the data plugin directly here; this is only necessary
+// because it is one of the few places that we need to access the IndexPattern class itself, rather
+// than just the type. Doing this as a temporary measure; it will be left behind when migrating to NP.
+import { IndexPattern } from '../../legacy/core_plugins/data/public/index_patterns/index_patterns';
+import {
+  FieldList,
+  getRoutes,
+  formatHitProvider,
+  flattenHitWrapper,
+} from 'ui/index_patterns';
 import { fieldFormats } from 'ui/registry/field_formats';
-import { IndexPatternsFlattenHitProvider } from 'ui/index_patterns/_flatten_hit';
-import { FieldList } from 'ui/index_patterns/_field_list';
 
-export default function (Private) {
+export default function () {
 
-  const flattenHit = Private(IndexPatternsFlattenHitProvider);
-  const IndexPattern = Private(IndexPatternProvider);
-
-  function StubIndexPattern(pattern, timeField, fields) {
+  function StubIndexPattern(pattern, getConfig, timeField, fields) {
     this.id = pattern;
     this.title = pattern;
     this.popularizeField = sinon.stub();
     this.timeFieldName = timeField;
     this.isTimeBased = () => Boolean(this.timeFieldName);
+    this.getConfig = getConfig;
     this.getNonScriptedFields = sinon.spy(IndexPattern.prototype.getNonScriptedFields);
     this.getScriptedFields = sinon.spy(IndexPattern.prototype.getScriptedFields);
+    this.getFieldByName = sinon.spy(IndexPattern.prototype.getFieldByName);
     this.getSourceFiltering = sinon.stub();
     this.metaFields = ['_id', '_type', '_source'];
     this.fieldFormatMap = {};
     this.routes = getRoutes();
 
-    this.toIndexList = _.constant(Promise.resolve(pattern.split(',')));
-    this.toDetailedIndexList = _.constant(Promise.resolve(pattern.split(',').map(index => ({
-      index,
-      min: 0,
-      max: 1
-    }))));
-    this.getComputedFields = getComputedFields.bind(this);
-    this.flattenHit = flattenHit(this);
-    this.formatHit = formatHit(this, fieldFormats.getDefaultInstance('string'));
+    this.getComputedFields = IndexPattern.prototype.getComputedFields.bind(this);
+    this.flattenHit = flattenHitWrapper(this, this.metaFields);
+    this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
+    this.fieldsFetcher = { apiClient: { baseUrl: '' } };
     this.formatField = this.formatHit.formatField;
 
     this._reindexFields = function () {
@@ -61,7 +58,7 @@ export default function (Private) {
     };
 
     this.stubSetFieldFormat = function (fieldName, id, params) {
-      const FieldFormat = fieldFormats.byId[id];
+      const FieldFormat = fieldFormats.getType(id);
       this.fieldFormatMap[fieldName] = new FieldFormat(params);
       this._reindexFields();
     };

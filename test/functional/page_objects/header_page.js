@@ -19,230 +19,49 @@
 
 export function HeaderPageProvider({ getService, getPageObjects }) {
   const config = getService('config');
-  const remote = getService('remote');
   const log = getService('log');
   const retry = getService('retry');
-  const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const appsMenu = getService('appsMenu');
+  const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common']);
 
   const defaultFindTimeout = config.get('timeouts.find');
 
   class HeaderPage {
-
-    async clickSelector(selector) {
-      log.debug(`clickSelector(${selector})`);
-      await find.clickByCssSelector(selector);
-    }
-
-    async confirmTopNavTextContains(text) {
-      await retry.try(async () => {
-        const topNavText = await PageObjects.common.getTopNavText();
-        if (topNavText.toLowerCase().indexOf(text.toLowerCase()) < 0) {
-          throw new Error(`Top nav text ${topNavText} does not contain ${text} (case insensitive)`);
-        }
-      });
-    }
-
     async clickDiscover() {
-      log.debug('click Discover tab');
-      await this.clickSelector('a[href*=\'discover\']');
+      await appsMenu.clickLink('Discover');
       await PageObjects.common.waitForTopNavToBeVisible();
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickVisualize() {
-      log.debug('click Visualize tab');
-      await this.clickSelector('a[href*=\'visualize\']');
-      await PageObjects.common.waitForTopNavToBeVisible();
-      await this.confirmTopNavTextContains('visualize');
+      await appsMenu.clickLink('Visualize');
       await this.awaitGlobalLoadingIndicatorHidden();
+      await retry.waitFor('first breadcrumb to be "Visualize"', async () => {
+        const firstBreadcrumb = await globalNav.getFirstBreadcrumb();
+        if (firstBreadcrumb !== 'Visualize') {
+          log.debug('-- first breadcrumb =', firstBreadcrumb);
+          return false;
+        }
+
+        return true;
+      });
     }
 
     async clickDashboard() {
-      log.debug('click Dashboard tab');
-      await this.clickSelector('a[href*=\'dashboard\']');
-      await retry.try(async () => {
+      await appsMenu.clickLink('Dashboard');
+      await retry.waitFor('dashboard app to be loaded', async () => {
         const isNavVisible = await testSubjects.exists('top-nav');
         const isLandingPageVisible = await testSubjects.exists('dashboardLandingPage');
-        if (!isNavVisible && !isLandingPageVisible) {
-          throw new Error('Dashboard application not loaded yet');
-        }
+        return isNavVisible || isLandingPageVisible;
       });
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickManagement() {
-      log.debug('click Management tab');
-      await this.clickSelector('a[href*=\'management\']');
+      await appsMenu.clickLink('Management');
       await this.awaitGlobalLoadingIndicatorHidden();
-    }
-
-    async clickSettings() {
-      log.debug('click Settings tab');
-      await this.clickSelector('a[href*=\'settings\']');
-    }
-
-    async clickTimepicker() {
-      await testSubjects.click('globalTimepickerButton');
-    }
-
-    async clickQuickButton() {
-      await retry.try(async () => {
-        remote.setFindTimeout(defaultFindTimeout);
-        await testSubjects.click('timepicker-quick-button');
-      });
-    }
-
-    async isTimepickerOpen() {
-      return await testSubjects.exists('timePicker');
-    }
-
-    async isAbsoluteSectionShowing() {
-      log.debug('isAbsoluteSectionShowing');
-      return await PageObjects.common.doesCssSelectorExist('input[ng-model=\'absolute.from\']');
-    }
-
-    async showAbsoluteSection() {
-      log.debug('showAbsoluteSection');
-      const isAbsoluteSectionShowing = await this.isAbsoluteSectionShowing();
-      if (!isAbsoluteSectionShowing) {
-        await retry.try(async () => {
-          await remote.setFindTimeout(defaultFindTimeout);
-          await testSubjects.click('timepicker-absolute-button');
-          // Check to make sure one of the elements on the absolute section is showing.
-          await this.getFromTime();
-        });
-      }
-    }
-
-    async getFromTime() {
-      log.debug('getFromTime');
-      return await retry.try(async () => {
-        await this.ensureTimePickerIsOpen();
-        await this.showAbsoluteSection();
-        remote.setFindTimeout(defaultFindTimeout);
-        return await remote.findByCssSelector('input[ng-model=\'absolute.from\']')
-          .getProperty('value');
-      });
-    }
-
-    async getToTime() {
-      log.debug('getToTime');
-      return await retry.try(async () => {
-        await this.ensureTimePickerIsOpen();
-        await this.showAbsoluteSection();
-        remote.setFindTimeout(defaultFindTimeout);
-        return await remote.findByCssSelector('input[ng-model=\'absolute.to\']')
-          .getProperty('value');
-      });
-    }
-
-    async setFromTime(timeString) {
-      log.debug(`setFromTime: ${timeString}`);
-      await retry.try(async () => {
-        await this.ensureTimePickerIsOpen();
-        await this.showAbsoluteSection();
-        remote.setFindTimeout(defaultFindTimeout);
-        await remote.findByCssSelector('input[ng-model=\'absolute.from\']')
-          .clearValue()
-          .type(timeString);
-      });
-    }
-
-    async setToTime(timeString) {
-      log.debug(`setToTime: ${timeString}`);
-      await retry.try(async () => {
-        await this.ensureTimePickerIsOpen();
-        await this.showAbsoluteSection();
-        remote.setFindTimeout(defaultFindTimeout);
-        await remote.findByCssSelector('input[ng-model=\'absolute.to\']')
-          .clearValue()
-          .type(timeString);
-      });
-    }
-
-    async clickGoButton() {
-      log.debug('clickGoButton');
-      await retry.try(async () => {
-        remote.setFindTimeout(defaultFindTimeout);
-        await testSubjects.click('timepickerGoButton');
-        await this.waitUntilLoadingHasFinished();
-      });
-    }
-
-    async ensureTimePickerIsOpen() {
-      log.debug('ensureTimePickerIsOpen');
-      const isOpen = await this.isTimepickerOpen();
-      if (!isOpen) {
-        await retry.try(async () => {
-          await this.clickTimepicker();
-          const isOpen = await this.isTimepickerOpen();
-          if (!isOpen) throw new Error('Time picker still not open, try again.');
-        });
-      }
-    }
-
-    async setAbsoluteRange(fromTime, toTime) {
-      log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
-      await this.ensureTimePickerIsOpen();
-      log.debug('--Clicking Absolute button');
-      await this.showAbsoluteSection();
-      log.debug('--Setting From Time : ' + fromTime);
-      await this.setFromTime(fromTime);
-      log.debug('--Setting To Time : ' + toTime);
-      await this.setToTime(toTime);
-      await this.clickGoButton();
-      await this.awaitGlobalLoadingIndicatorHidden();
-    }
-
-    async setQuickTime(quickTime) {
-      await this.ensureTimePickerIsOpen();
-      log.debug('--Clicking Quick button');
-      await this.clickQuickButton();
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByLinkText(quickTime).click();
-    }
-
-    async getAutoRefreshState() {
-      return testSubjects.getAttribute('globalTimepickerAutoRefreshButton', 'data-test-subj-state');
-    }
-
-    // check if the auto refresh state is active and to pause it
-    async pauseAutoRefresh() {
-      let result = false;
-      if (await this.getAutoRefreshState() === 'active') {
-        await testSubjects.click('globalTimepickerAutoRefreshButton');
-        result = true;
-      }
-      return result;
-    }
-
-    // check if the auto refresh state is inactive and to resume it
-    async resumeAutoRefresh() {
-      let result = false;
-      if (await this.getAutoRefreshState() === 'inactive') {
-        await testSubjects.click('globalTimepickerAutoRefreshButton');
-        result = true;
-      }
-      return result;
-    }
-
-    async getToastMessage(findTimeout = defaultFindTimeout) {
-      const toastMessage =
-        await find.displayedByCssSelector('kbn-truncated.toast-message', findTimeout);
-      const messageText = await toastMessage.getVisibleText();
-      log.debug(`getToastMessage: ${messageText}`);
-      return messageText;
-    }
-
-    async clickToastOK() {
-      log.debug('clickToastOK');
-      await retry.try(async () => {
-        remote.setFindTimeout(defaultFindTimeout);
-        await remote.findByCssSelector('button[ng-if="notif.accept"]')
-          .click();
-      });
     }
 
     async waitUntilLoadingHasFinished() {
@@ -264,8 +83,10 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async awaitGlobalLoadingIndicatorHidden() {
-      log.debug('awaitGlobalLoadingIndicatorHidden');
-      await testSubjects.find('globalLoadingIndicator-hidden', defaultFindTimeout * 10);
+      await testSubjects.existOrFail('globalLoadingIndicator-hidden', {
+        allowHidden: true,
+        timeout: defaultFindTimeout * 10
+      });
     }
 
     async awaitKibanaChrome() {
@@ -273,23 +94,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await testSubjects.find('kibanaChrome', defaultFindTimeout * 10);
     }
 
-    async getGlobalNavigationLink(linkText) {
-      const nav = await testSubjects.find('globalNav');
-      return await nav.findByPartialLinkText(linkText);
-    }
-
-    async clickGlobalNavigationLink(appTitle) {
-      const link = await this.getGlobalNavigationLink(appTitle);
-      await link.click();
-    }
-
-    async getPrettyDuration() {
-      return await testSubjects.getVisibleText('globalTimepickerRange');
-    }
-
-    async isSharedTimefilterEnabled() {
-      return await find.existsByCssSelector('[shared-timefilter=true]');
-    }
   }
 
   return new HeaderPage();

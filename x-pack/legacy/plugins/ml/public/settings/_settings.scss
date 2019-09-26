@@ -1,0 +1,9 @@
+.mlSettingsPage {
+
+  .mlSettingsPage__content {
+    width: map-get($euiBreakpoints, 'xl');
+    margin-top: $euiSize;
+    margin-bottom: $euiSize;
+  }
+
+}

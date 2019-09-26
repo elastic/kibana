@@ -1,0 +1,29 @@
+.form-control {
+  @include __legacyInputStyles__bad;
+}
+
+select.form-control {
+  @include __legacySelectStyles__bad;
+}
+
+.kuiFormSection {
+  margin-bottom: $euiSize;
+}
+
+.kuiFormLabel {
+  @include __legacyLabelStyles__bad;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.kuiInputNote {
+  margin: $euiSizeXS 0 $euiSizeS;
+}
+
+.kuiInputNote--danger {
+  color: $euiColorDanger;
+}
+
+.kuiInputNote--warning {
+  color: $euiColorWarning;
+}

@@ -1,0 +1,16 @@
+{
+  "data_frame.stop_data_frame_transform": {
+    "url_params": {
+      "wait_for_completion": "__flag__",
+      "timeout": "",
+      "allow_no_match": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_data_frame/transforms/{transform_id}/_stop"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/stop-transform.html"
+  }
+}

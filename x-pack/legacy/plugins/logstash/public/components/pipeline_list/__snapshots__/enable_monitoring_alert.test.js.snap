@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EnableMonitoringAlert component renders expected component 1`] = `
+<p>
+  <strong>
+    <FormattedMessage
+      defaultMessage="Enable monitoring."
+      id="xpack.logstash.enableMonitoringAlert.enableMonitoringTitle"
+      values={Object {}}
+    />
+  </strong>
+  <FormattedMessage
+    defaultMessage="In the {configFileName} file, set {monitoringConfigParam} and {monitoringUiConfigParam} to {trueValue}."
+    id="xpack.logstash.enableMonitoringAlert.enableMonitoringDescription"
+    values={
+      Object {
+        "configFileName": <EuiCode>
+          kibana.yml
+        </EuiCode>,
+        "monitoringConfigParam": <EuiCode>
+          xpack.monitoring.enabled
+        </EuiCode>,
+        "monitoringUiConfigParam": <EuiCode>
+          xpack.monitoring.ui.enabled
+        </EuiCode>,
+        "trueValue": <EuiCode>
+          true
+        </EuiCode>,
+      }
+    }
+  />
+</p>
+`;

@@ -7,7 +7,7 @@
 import { range } from 'lodash';
 
 const generateVisibleTextString = text => {
-  return text.split("\n").join(' | ');
+  return text.split('\n').join(' | ');
 };
 
 const classificationsAndTooltipsReducer = (classifications, tooltips) => {
@@ -27,10 +27,10 @@ const classificationsAndTooltipsReducer = (classifications, tooltips) => {
 export function MonitoringElasticsearchShardsProvider({ getService }) {
   const testSubjects = getService('testSubjects');
 
-  const SUBJ_UNASSIGNED_SHARDS         = `clusterView-Unassigned shardIcon`;
+  const SUBJ_UNASSIGNED_SHARDS         = `clusterView-Unassigned > shardIcon`;
   const SUBJ_ASSIGNED_CONTAINER_PREFIX = 'clusterView-Assigned-';
   const SUBJ_SHOW_SYSTEM_INDICES       = 'shardShowSystemIndices';
-  const getAssignedShardsSelector      = parent => parent + ' shardIcon'; // will be used in a descendant search starting with SUBJ_ASSIGNED_CONTAINER
+  const getAssignedShardsSelector      = parent => parent + '> shardIcon'; // will be used in a descendant search starting with SUBJ_ASSIGNED_CONTAINER
 
   return new class ElasticsearchShards {
 
@@ -65,7 +65,7 @@ export function MonitoringElasticsearchShardsProvider({ getService }) {
 
     async showSystemIndices() {
       const checkboxEl = await testSubjects.find(SUBJ_SHOW_SYSTEM_INDICES);
-      const isChecked = await checkboxEl.getSpecAttribute('selected');
+      const isChecked = await checkboxEl.getAttribute('selected');
 
       if (!isChecked) {
         await testSubjects.click(SUBJ_SHOW_SYSTEM_INDICES);

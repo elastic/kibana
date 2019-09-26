@@ -19,52 +19,24 @@
 
 import { resolve } from 'path';
 
-import getopts from 'getopts';
 import dedent from 'dedent';
 import chalk from 'chalk';
 
-import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 import { buildDistributables } from './build_distributables';
 import { isErrorLogged } from './lib';
+import { readCliArgs } from './args';
 
 // ensure the cwd() is always the repo root
 process.chdir(resolve(__dirname, '../../../'));
 
-const unknownFlags = [];
-const flags = getopts(process.argv.slice(0), {
-  boolean: [
-    'oss',
-    'no-oss',
-    'skip-archives',
-    'skip-os-packages',
-    'rpm',
-    'deb',
-    'release',
-    'skip-node-download',
-    'verbose',
-    'debug',
-    'all-platforms'
-  ],
-  alias: {
-    v: 'verbose',
-    d: 'debug',
-  },
-  default: {
-    debug: true,
-    'version-qualifier': ''
-  },
-  unknown: (flag) => {
-    unknownFlags.push(flag);
-  }
-});
+const { showHelp, unknownFlags, log, buildArgs } = readCliArgs(process.argv);
 
-if (unknownFlags.length && !flags.help) {
+if (unknownFlags.length) {
   const pluralized = unknownFlags.length > 1 ? 'flags' : 'flag';
   console.log(chalk`\n{red Unknown ${pluralized}: ${unknownFlags.join(', ')}}\n`);
-  flags.help = true;
 }
 
-if (flags.help) {
+if (showHelp) {
   console.log(
     dedent(chalk`
       {dim usage:} node scripts/build
@@ -75,10 +47,11 @@ if (flags.help) {
         --oss                   {dim Only produce the OSS distributable of Kibana}
         --no-oss                {dim Only produce the default distributable of Kibana}
         --skip-archives         {dim Don't produce tar/zip archives}
-        --skip-os-packages      {dim Don't produce rpm/deb packages}
+        --skip-os-packages      {dim Don't produce rpm/deb/docker packages}
         --all-platforms         {dim Produce archives for all platforms, not just this one}
         --rpm                   {dim Only build the rpm package}
         --deb                   {dim Only build the deb package}
+        --docker                {dim Only build the docker image}
         --release               {dim Produce a release-ready distributable}
         --version-qualifier     {dim Suffix version with a qualifier}
         --skip-node-download    {dim Reuse existing downloads of node.js}
@@ -89,38 +62,7 @@ if (flags.help) {
   process.exit(1);
 }
 
-const log = new ToolingLog({
-  level: pickLevelFromFlags(flags, {
-    default: flags.debug === false ? 'info' : 'debug'
-  }),
-  writeTo: process.stdout
-});
-
-function isOsPackageDesired(name) {
-  if (flags['skip-os-packages'] || !flags['all-platforms']) {
-    return false;
-  }
-
-  // build all if no flags specified
-  if (flags.rpm === undefined && flags.deb === undefined) {
-    return true;
-  }
-
-  return Boolean(flags[name]);
-}
-
-buildDistributables({
-  log,
-  isRelease: Boolean(flags.release),
-  versionQualifier: flags['version-qualifier'],
-  buildOssDist: flags.oss !== false,
-  buildDefaultDist: !flags.oss,
-  downloadFreshNode: !Boolean(flags['skip-node-download']),
-  createArchives: !Boolean(flags['skip-archives']),
-  createRpmPackage: isOsPackageDesired('rpm'),
-  createDebPackage: isOsPackageDesired('deb'),
-  targetAllPlatforms: Boolean(flags['all-platforms']),
-}).catch(error => {
+buildDistributables({ log, ...buildArgs }).catch(error => {
   if (!isErrorLogged(error)) {
     log.error('Uncaught error');
     log.error(error);

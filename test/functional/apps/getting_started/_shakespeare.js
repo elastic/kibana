@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
         const data = await PageObjects.visualize.getBarChartData('Count');
         log.debug('data=' + data);
         log.debug('data.length=' + data.length);
-        expect(data).to.eql(expectedChartValues);
+        expect(data[0] - expectedChartValues[0]).to.be.lessThan(5);
       });
     });
 
@@ -86,7 +86,6 @@ export default function ({ getService, getPageObjects }) {
       // then increment the aggIndex for the next one we create
       aggIndex = aggIndex + 1;
       await PageObjects.visualize.clickGo();
-      await PageObjects.visualize.waitForVisualization();
       const expectedChartValues = [935];
       await retry.try(async () => {
         const data = await PageObjects.visualize.getBarChartData('Speaking Parts');
@@ -105,7 +104,7 @@ export default function ({ getService, getPageObjects }) {
     5. Click Apply changes images/apply-changes-button.png to view the results.
     */
     it('should configure Terms aggregation on play_name', async function () {
-      await PageObjects.visualize.clickBucket('X-Axis');
+      await PageObjects.visualize.clickBucket('X-axis');
       log.debug('Aggregation = Terms');
       await PageObjects.visualize.selectAggregation('Terms');
       aggIndex = aggIndex + 1;
@@ -136,8 +135,7 @@ export default function ({ getService, getPageObjects }) {
     2. Choose the Max aggregation and select the speech_number field.
     */
     it('should configure Max aggregation metric on speech_number', async function () {
-      await PageObjects.visualize.clickAddMetric();
-      await PageObjects.visualize.clickBucket('Y-Axis', 'metric');
+      await PageObjects.visualize.clickBucket('Y-axis', 'metrics');
       log.debug('Aggregation = Max');
       await PageObjects.visualize.selectYAxisAggregation('Max', 'speech_number', 'Max Speaking Parts', aggIndex);
       await PageObjects.visualize.clickGo();

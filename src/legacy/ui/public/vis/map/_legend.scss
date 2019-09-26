@@ -1,0 +1,33 @@
+.visMapLegend {
+  @include fontSize(11px);
+  @include euiBottomShadowMedium($color: $euiShadowColorLarge, $opacity: .1);
+  font-family: $euiFontFamily;
+  font-weight: $euiFontWeightMedium;
+  line-height: $euiLineHeight;
+  color: $euiColorDarkShade;
+  padding: $euiSizeS;
+  background: transparentize($euiColorEmptyShade, .2);
+  border-radius: $euiBorderRadius;
+
+  i {
+    @include size($euiSizeS + 2px);
+    display: inline-block;
+    margin: 3px $euiSizeXS 0 0;
+    border-radius: 50%;
+    border: 1px solid $euiColorDarkShade;
+    background: $euiColorDarkShade;
+  }
+}
+
+.visMapLegend__title {
+  font-weight: $euiFontWeightBold;
+}
+
+// Wrapper/Position
+
+// top left needs some more styles
+.leaflet-top.leaflet-left .visMapLegend__wrapper {
+  position: absolute;
+  left: $euiSizeXXL;
+  white-space: nowrap;
+}

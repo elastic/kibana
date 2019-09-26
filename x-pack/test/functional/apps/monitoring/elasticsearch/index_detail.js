@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
 export default function ({ getService, getPageObjects }) {
@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }) {
   describe('Elasticsearch index detail', () => {
 
     afterEach(async () => {
-      await PageObjects.monitoring.clickBreadcrumb('breadcrumbEsIndices'); // return back for next test
+      await PageObjects.monitoring.clickBreadcrumb('~breadcrumbEsIndices'); // return back for next test
       await indicesList.clearFilter();
     });
 
@@ -42,11 +42,11 @@ export default function ({ getService, getPageObjects }) {
         await indicesList.clickRowByName('avocado-tweets-2017.10.02');
 
         expect(await indexDetail.getSummary()).to.eql({
-          dataSize: 'Total:\n8.8 MB',
-          dataSizePrimaries: 'Primaries:\n4.4 MB',
-          documentCount: 'Documents:\n628',
-          totalShards: 'Total Shards:\n10',
-          unassignedShards: 'Unassigned Shards:\n0',
+          dataSize: 'Total\n8.8 MB',
+          dataSizePrimaries: 'Primaries\n4.4 MB',
+          documentCount: 'Documents\n628',
+          totalShards: 'Total Shards\n10',
+          unassignedShards: 'Unassigned Shards\n0',
           health: 'Health: green',
         });
       });
@@ -55,11 +55,11 @@ export default function ({ getService, getPageObjects }) {
         await indicesList.clickRowByName('relocation_test');
 
         expect(await indexDetail.getSummary()).to.eql({
-          dataSize: 'Total:\n4.8 KB',
-          dataSizePrimaries: 'Primaries:\n4.8 KB',
-          documentCount: 'Documents:\n1',
-          totalShards: 'Total Shards:\n1',
-          unassignedShards: 'Unassigned Shards:\n0',
+          dataSize: 'Total\n4.8 KB',
+          dataSizePrimaries: 'Primaries\n4.8 KB',
+          documentCount: 'Documents\n1',
+          totalShards: 'Total Shards\n1',
+          unassignedShards: 'Unassigned Shards\n0',
           health: 'Health: green',
         });
       });
@@ -68,11 +68,11 @@ export default function ({ getService, getPageObjects }) {
         await indicesList.clickRowByName('phone-home');
 
         expect(await indexDetail.getSummary()).to.eql({
-          dataSize: 'Total:\n1.2 MB',
-          dataSizePrimaries: 'Primaries:\n657.6 KB',
-          documentCount: 'Documents:\n10',
-          totalShards: 'Total Shards:\n10',
-          unassignedShards: 'Unassigned Shards:\n1',
+          dataSize: 'Total\n1.2 MB',
+          dataSizePrimaries: 'Primaries\n657.6 KB',
+          documentCount: 'Documents\n10',
+          totalShards: 'Total Shards\n10',
+          unassignedShards: 'Unassigned Shards\n1',
           health: 'Health: yellow',
         });
       });

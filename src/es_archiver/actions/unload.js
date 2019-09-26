@@ -22,7 +22,7 @@ import { createReadStream } from 'fs';
 
 import {
   createPromiseFromStreams
-} from '../../utils';
+} from '../../legacy/utils';
 
 import {
   isGzip,
@@ -31,12 +31,14 @@ import {
   readDirectory,
   createParseArchiveStreams,
   createFilterRecordsStream,
-  createDeleteIndexStream
+  createDeleteIndexStream,
+  getEnabledKibanaPluginIds,
 } from '../lib';
 
-export async function unloadAction({ name, client, dataDir, log }) {
+export async function unloadAction({ name, client, dataDir, log, kibanaUrl }) {
   const inputDir = resolve(dataDir, name);
   const stats = createStats(name, log);
+  const kibanaPluginIds = await getEnabledKibanaPluginIds(kibanaUrl);
 
   const files = prioritizeMappings(await readDirectory(inputDir));
   for (const filename of files) {
@@ -46,7 +48,7 @@ export async function unloadAction({ name, client, dataDir, log }) {
       createReadStream(resolve(inputDir, filename)),
       ...createParseArchiveStreams({ gzip: isGzip(filename) }),
       createFilterRecordsStream('index'),
-      createDeleteIndexStream(client, stats, log)
+      createDeleteIndexStream(client, stats, log, kibanaPluginIds)
     ]);
   }
 

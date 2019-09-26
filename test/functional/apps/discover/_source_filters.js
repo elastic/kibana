@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'header', 'discover']);
+  const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
 
   describe('source filters', function describeIndexTests() {
     before(async function () {
@@ -32,7 +32,6 @@ export default function ({ getService, getPageObjects }) {
 
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
         defaultIndex: 'logstash-*',
       });
 
@@ -45,8 +44,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
 
-      log.debug('setAbsoluteRange');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
       //After hiding the time picker, we need to wait for
       //the refresh button to hide before clicking the share button

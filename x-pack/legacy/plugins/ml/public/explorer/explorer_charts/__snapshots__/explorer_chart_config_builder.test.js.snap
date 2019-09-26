@@ -1,0 +1,52 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildConfig get dataConfig for anomaly record 1`] = `
+Object {
+  "bucketSpanSeconds": 900,
+  "datafeedConfig": Object {
+    "chunking_config": Object {
+      "mode": "auto",
+    },
+    "datafeed_id": "datafeed-mock-job-id",
+    "indices": Array [
+      "farequote-2017",
+    ],
+    "job_id": "mock-job-id",
+    "query": Object {
+      "match_all": Object {
+        "boost": 1,
+      },
+    },
+    "query_delay": "86658ms",
+    "scroll_size": 1000,
+    "state": "stopped",
+  },
+  "detectorIndex": 0,
+  "detectorLabel": "mean(responsetime)",
+  "entityFields": Array [
+    Object {
+      "fieldName": "airline",
+      "fieldType": "partition",
+      "fieldValue": "JAL",
+    },
+  ],
+  "fieldName": "responsetime",
+  "functionDescription": "mean",
+  "infoTooltip": Object {
+    "aggregationInterval": "15m",
+    "chartFunction": "avg responsetime",
+    "entityFields": Array [
+      Object {
+        "fieldName": "airline",
+        "fieldValue": "JAL",
+      },
+    ],
+    "jobId": "mock-job-id",
+  },
+  "interval": "15m",
+  "jobId": "mock-job-id",
+  "metricFieldName": "responsetime",
+  "metricFunction": "avg",
+  "timeField": "@timestamp",
+}
+`;

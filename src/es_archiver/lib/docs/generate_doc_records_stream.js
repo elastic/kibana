@@ -22,7 +22,7 @@ import { Transform } from 'stream';
 const SCROLL_SIZE = 1000;
 const SCROLL_TIMEOUT = '1m';
 
-export function createGenerateDocRecordsStream(client, stats) {
+export function createGenerateDocRecordsStream(client, stats, progress) {
   return new Transform({
     writableObjectMode: true,
     readableObjectMode: true,
@@ -37,9 +37,11 @@ export function createGenerateDocRecordsStream(client, stats) {
               index: index,
               scroll: SCROLL_TIMEOUT,
               size: SCROLL_SIZE,
-              _source: true
+              _source: true,
+              rest_total_hits_as_int: true
             });
             remainingHits = resp.hits.total;
+            progress.addToTotal(remainingHits);
           } else {
             resp = await client.scroll({
               scrollId: resp._scroll_id,
@@ -53,13 +55,17 @@ export function createGenerateDocRecordsStream(client, stats) {
             this.push({
               type: 'doc',
               value: {
-                index: hit._index,
+                // always rewrite the .kibana_* index to .kibana_1 so that
+                // when it is loaded it can skip migration, if possible
+                index: hit._index.startsWith('.kibana') ? '.kibana_1' : hit._index,
                 type: hit._type,
                 id: hit._id,
                 source: hit._source,
               }
             });
           }
+
+          progress.addToComplete(resp.hits.hits.length);
         }
 
         callback(null);

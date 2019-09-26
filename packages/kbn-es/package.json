@@ -5,20 +5,20 @@
   "license": "Apache-2.0",
   "private": true,
   "dependencies": {
+    "@elastic/elasticsearch": "^7.3.0",
     "@kbn/dev-utils": "1.0.0",
-    "chalk": "^2.4.1",
+    "abort-controller": "^2.0.3",
+    "chalk": "^2.4.2",
     "dedent": "^0.7.0",
-    "del": "^3.0.0",
-    "execa": "^0.10.0",
-    "getopts": "^2.0.6",
+    "del": "^4.1.1",
+    "execa": "^1.0.0",
+    "getopts": "^2.2.4",
     "glob": "^7.1.2",
     "mkdirp": "^0.5.1",
-    "mock-fs": "^4.5.0",
-    "node-fetch": "^2.0.0",
+    "node-fetch": "^2.6.0",
     "simple-git": "^1.91.0",
-    "tar-fs": "^1.16.0",
+    "tar-fs": "^1.16.3",
     "tree-kill": "^1.1.0",
-    "yauzl": "^2.10.0",
-    "zlib": "^1.0.5"
+    "yauzl": "^2.10.0"
   }
 }

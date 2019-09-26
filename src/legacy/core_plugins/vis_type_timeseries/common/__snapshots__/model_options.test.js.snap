@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`src/legacy/core_plugins/metrics/common/model_options.js MODEL_TYPES should match a snapshot of constants 1`] = `
+Object {
+  "UNWEIGHTED": "simple",
+  "WEIGHTED_EXPONENTIAL": "ewma",
+  "WEIGHTED_EXPONENTIAL_DOUBLE": "holt",
+  "WEIGHTED_EXPONENTIAL_TRIPLE": "holt_winters",
+  "WEIGHTED_LINEAR": "linear",
+}
+`;

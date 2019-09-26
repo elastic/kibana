@@ -1,0 +1,12 @@
+{
+  "security.get_user": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_security/user/{username}",
+      "_security/user"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-get-user.html"
+  }
+}

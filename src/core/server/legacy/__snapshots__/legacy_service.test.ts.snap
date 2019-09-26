@@ -1,0 +1,75 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`once LegacyService is set up in \`devClusterMaster\` mode creates ClusterManager with base path proxy.: cli args. cluster manager with base path proxy 1`] = `
+Object {
+  "basePath": true,
+  "dev": true,
+  "open": false,
+  "optimize": false,
+  "oss": false,
+  "quiet": true,
+  "repl": false,
+  "silent": false,
+  "watch": false,
+}
+`;
+
+exports[`once LegacyService is set up in \`devClusterMaster\` mode creates ClusterManager with base path proxy.: config. cluster manager with base path proxy 1`] = `
+Object {
+  "server": Object {
+    "autoListen": true,
+  },
+}
+`;
+
+exports[`once LegacyService is set up in \`devClusterMaster\` mode creates ClusterManager without base path proxy.: cluster manager without base path proxy 1`] = `
+Array [
+  Array [
+    Object {
+      "basePath": false,
+      "dev": true,
+      "open": false,
+      "optimize": false,
+      "oss": false,
+      "quiet": false,
+      "repl": false,
+      "silent": true,
+      "watch": false,
+    },
+    Object {
+      "server": Object {
+        "autoListen": true,
+      },
+    },
+    undefined,
+  ],
+]
+`;
+
+exports[`once LegacyService is set up with connection info creates legacy kbnServer and closes it if \`listen\` fails. 1`] = `"something failed"`;
+
+exports[`once LegacyService is set up with connection info reconfigures logging configuration if new config is received.: applyLoggingConfiguration params 1`] = `
+Array [
+  Array [
+    Object {
+      "logging": Object {
+        "verbose": true,
+      },
+    },
+  ],
+]
+`;
+
+exports[`once LegacyService is set up with connection info throws if fails to retrieve initial config. 1`] = `"something failed"`;
+
+exports[`once LegacyService is set up without connection info reconfigures logging configuration if new config is received.: applyLoggingConfiguration params 1`] = `
+Array [
+  Array [
+    Object {
+      "logging": Object {
+        "verbose": true,
+      },
+    },
+  ],
+]
+`;

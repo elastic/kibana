@@ -1,0 +1,45 @@
+[[start-resume-reindex]]
+=== Start or resume reindex API
+++++
+<titleabbrev>Start or resume reindex</titleabbrev>
+++++
+
+Start a new reindex or resume a paused reindex.
+
+experimental["The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are experimental."]
+
+[[start-resume-reindex-request]]
+==== Request
+
+`POST /api/upgrade_assistant/reindex/myIndex`
+
+[[start-resume-reindex-codes]]
+==== Response code
+
+`200`::
+  Indicates a successful call.
+
+[[start-resume-reindex-example]]
+==== Example
+
+The API returns the following:
+
+[source,js]
+--------------------------------------------------
+{
+  "indexName": ".ml-state",
+  "newIndexName": ".reindexed-v7-ml-state", <1>
+  "status": 0, <2>
+  "lastCompletedStep": 0, <3>
+  "reindexTaskId": null, <4>
+  "reindexTaskPercComplete": null, <5>
+  "errorMessage": null <6>
+}
+--------------------------------------------------
+
+<1> Name of the new index that is being created.
+<2> Current status of the reindex. For details, see <<status-code,Status codes>>.
+<3> Last successfully completed step of the reindex. For details, see <<step-code,Step codes>> table.
+<4> Task ID of the reindex task in Elasticsearch. Only present if reindexing has started.
+<5> Percentage of how far the reindexing task in Elasticsearch has progressed, in decimal from from 0 to 1.
+<6> Error that caused the reindex to fail, if it failed.

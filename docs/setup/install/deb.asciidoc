@@ -99,6 +99,35 @@ Examine +/etc/apt/sources.list.d/kibana-{major-version}.list+ for the duplicate 
 
 endif::[]
 
+ifeval::["{release-state}"!="unreleased"]
+
+[NOTE]
+==================================================
+
+An alternative package, `kibana-oss`,  which contains only features that are available under the
+Apache 2.0 license is also available. To install it, use the following sources list:
+
+ifeval::["{release-state}"=="prerelease"]
+
+["source","sh",subs="attributes,callouts"]
+--------------------------------------------------
+echo "deb https://artifacts.elastic.co/packages/oss-{major-version}-prerelease/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-{major-version}.list
+--------------------------------------------------
+
+endif::[]
+
+ifeval::["{release-state}"!="prerelease"]
+
+["source","sh",subs="attributes,callouts"]
+--------------------------------------------------
+echo "deb https://artifacts.elastic.co/packages/oss-{major-version}/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-{major-version}.list
+--------------------------------------------------
+
+endif::[]
+
+==================================================
+
+endif::[]
 
 [[install-deb]]
 ==== Download and install the Debian package manually
@@ -176,11 +205,16 @@ locations for a Debian-based system:
   | The location of the data files written to disk by Kibana and its plugins
   | /var/lib/kibana
   | path.data
+  
+| logs
+    | Logs files location
+    |  /var/log/kibana
+    | path.logs
 
 | optimize
   | Transpiled source code. Certain administrative actions (e.g. plugin install)
     result in the source code being retranspiled on the fly.
-  | /usr/share/kibana/optimize
+  | /var/lib/kibana/optimize
  d|
 
 | plugins

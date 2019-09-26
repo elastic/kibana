@@ -18,13 +18,13 @@
  */
 
 export default function ({ getService, loadTestFile }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
 
   describe('Getting Started ', function () {
-    this.tags('ciGroup6');
+    this.tags(['ciGroup6', 'smoke']);
 
     before(async function () {
-      await remote.setWindowSize(1200, 800);
+      await browser.setWindowSize(1200, 800);
     });
     // https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html
     loadTestFile(require.resolve('./_shakespeare'));

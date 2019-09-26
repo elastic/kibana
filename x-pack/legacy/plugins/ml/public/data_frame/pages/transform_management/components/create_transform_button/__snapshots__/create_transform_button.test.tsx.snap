@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: Transform List <CreateTransformButton /> Minimal initialization 1`] = `
+<EuiToolTip
+  content="Your license has expired. Please contact your administrator."
+  delay="regular"
+  position="top"
+>
+  <EuiButton
+    data-test-subj="mlDataFramesButtonCreate"
+    disabled={true}
+    fill={true}
+    iconType="plusInCircle"
+    onClick={[Function]}
+    size="s"
+  >
+    <FormattedMessage
+      defaultMessage="Create transform"
+      id="xpack.ml.dataframe.transformList.createDataFrameButton"
+      values={Object {}}
+    />
+  </EuiButton>
+</EuiToolTip>
+`;

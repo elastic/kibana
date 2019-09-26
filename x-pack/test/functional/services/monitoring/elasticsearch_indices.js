@@ -14,21 +14,20 @@ export function MonitoringElasticsearchIndicesProvider({ getService, getPageObje
   const SUBJ_LISTING_PAGE = 'elasticsearchIndicesListingPage';
 
   const SUBJ_TABLE_CONTAINER = 'elasticsearchIndicesTableContainer';
-  const SUBJ_TABLE_NO_DATA = `${SUBJ_TABLE_CONTAINER} monitoringTableNoData`;
-  const SUBJ_SEARCH_BAR = `${SUBJ_TABLE_CONTAINER} monitoringTableToolBar`;
+  const SUBJ_TABLE_NO_DATA = `${SUBJ_TABLE_CONTAINER} > monitoringTableNoData`;
+  const SUBJ_SEARCH_BAR = `${SUBJ_TABLE_CONTAINER} > monitoringTableToolBar`;
 
-  const SUBJ_TABLE_SORT_SEARCH_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell-searchRate`;
+  const SUBJ_TABLE_SORT_SEARCH_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_search_rate_5`;
 
-  const SUBJ_TABLE_BODY = 'elasticsearchIndicesTableBody';
-  const SUBJ_INDICES_NAMES = `${SUBJ_TABLE_BODY} name`;
-  const SUBJ_INDICES_STATUSES = `${SUBJ_TABLE_BODY} statusIcon`;
-  const SUBJ_INDICES_DOCUMENT_COUNTS = `${SUBJ_TABLE_BODY} documentCount`;
-  const SUBJ_INDICES_DATA_SIZES = `${SUBJ_TABLE_BODY} dataSize`;
-  const SUBJ_INDICES_INDEX_RATES = `${SUBJ_TABLE_BODY} indexRate`;
-  const SUBJ_INDICES_SEARCH_RATES = `${SUBJ_TABLE_BODY} searchRate`;
-  const SUBJ_INDICES_UNASSIGNED_SHARD_COUNTS = `${SUBJ_TABLE_BODY} unassignedShards`;
+  const SUBJ_INDICES_NAMES = `${SUBJ_TABLE_CONTAINER} > name`;
+  const SUBJ_INDICES_STATUSES = `${SUBJ_TABLE_CONTAINER} > statusIcon`;
+  const SUBJ_INDICES_DOCUMENT_COUNTS = `${SUBJ_TABLE_CONTAINER} > documentCount`;
+  const SUBJ_INDICES_DATA_SIZES = `${SUBJ_TABLE_CONTAINER} > dataSize`;
+  const SUBJ_INDICES_INDEX_RATES = `${SUBJ_TABLE_CONTAINER} > indexRate`;
+  const SUBJ_INDICES_SEARCH_RATES = `${SUBJ_TABLE_CONTAINER} > searchRate`;
+  const SUBJ_INDICES_UNASSIGNED_SHARD_COUNTS = `${SUBJ_TABLE_CONTAINER} > unassignedShards`;
 
-  const SUBJ_INDEX_LINK_PREFIX = `${SUBJ_TABLE_BODY} indexLink-`;
+  const SUBJ_INDEX_LINK_PREFIX = `${SUBJ_TABLE_CONTAINER} > indexLink-`;
 
   return new class ElasticsearchIndices {
     async isOnListing() {
@@ -43,11 +42,11 @@ export function MonitoringElasticsearchIndicesProvider({ getService, getPageObje
     }
 
     assertNoData() {
-      return PageObjects.monitoring.assertTableNoData(SUBJ_TABLE_NO_DATA);
+      return PageObjects.monitoring.assertEuiTableNoData(SUBJ_TABLE_NO_DATA);
     }
 
     getRows() {
-      return PageObjects.monitoring.tableGetRows(SUBJ_TABLE_BODY);
+      return PageObjects.monitoring.tableGetRowsFromContainer(SUBJ_TABLE_CONTAINER);
     }
 
     setFilter(text) {
@@ -60,7 +59,7 @@ export function MonitoringElasticsearchIndicesProvider({ getService, getPageObje
 
     async getIndicesAll() {
       const names = await testSubjects.getVisibleTextAll(SUBJ_INDICES_NAMES);
-      const statuses = await testSubjects.getPropertyAll(SUBJ_INDICES_STATUSES, 'alt');
+      const statuses = await testSubjects.getAttributeAll(SUBJ_INDICES_STATUSES, 'alt');
       const documentCounts = await testSubjects.getVisibleTextAll(SUBJ_INDICES_DOCUMENT_COUNTS);
       const dataSizes = await testSubjects.getVisibleTextAll(SUBJ_INDICES_DATA_SIZES);
       const indexRates = await testSubjects.getVisibleTextAll(SUBJ_INDICES_INDEX_RATES);

@@ -28,7 +28,7 @@ module.exports = function (grunt) {
     if (grunt.option('browser')) {
       return grunt.option('browser');
     }
-    if (process.env.TEST_BROWSER_HEADLESS) {
+    if (process.env.TEST_BROWSER_HEADLESS === '1') {
       return 'Chrome_Headless';
     }
     return 'Chrome';
@@ -59,11 +59,7 @@ module.exports = function (grunt) {
       customLaunchers: {
         Chrome_Headless: {
           base: 'Chrome',
-          flags: [
-            '--headless',
-            '--disable-gpu',
-            '--remote-debugging-port=9222',
-          ],
+          flags: ['--headless', '--disable-gpu', '--remote-debugging-port=9222'],
         },
       },
 
@@ -71,39 +67,40 @@ module.exports = function (grunt) {
       reporters: process.env.CI ? ['dots', 'junit'] : ['progress'],
 
       junitReporter: {
-        outputFile: resolve(ROOT, 'target/junit/TEST-karma.xml'),
+        outputFile: resolve(ROOT, 'target/junit', process.env.JOB || '.', `TEST-${process.env.JOB ? process.env.JOB + '-' : ''}karma.xml`),
         useBrowserName: false,
-        nameFormatter: (browser, result) => [
-          ...result.suite,
-          result.description
-        ].join(' '),
+        nameFormatter: (browser, result) => [...result.suite, result.description].join(' '),
         classNameFormatter: (browser, result) => {
           const rootSuite = result.suite[0] || result.description;
           return `Browser Unit Tests.${rootSuite.replace(/\./g, '·')}`;
-        }
+        },
       },
 
       // list of files / patterns to load in the browser
       files: [
-        'http://localhost:5610/bundles/vendors.bundle.js',
+        'http://localhost:5610/test_bundle/built_css.css',
+
+        'http://localhost:5610/built_assets/dlls/vendors.bundle.dll.js',
         'http://localhost:5610/bundles/tests.bundle.js',
 
-        'http://localhost:5610/bundles/vendors.style.css',
-        'http://localhost:5610/bundles/tests.style.css'
+        'http://localhost:5610/built_assets/dlls/vendors.style.dll.css',
+        'http://localhost:5610/bundles/tests.style.css',
       ],
 
       proxies: {
         '/tests/': 'http://localhost:5610/tests/',
-        '/bundles/': 'http://localhost:5610/bundles/'
+        '/bundles/': 'http://localhost:5610/bundles/',
+        '/built_assets/dlls/': 'http://localhost:5610/built_assets/dlls/',
+        '/test_bundle/': 'http://localhost:5610/test_bundle/',
       },
 
       client: {
         mocha: {
           reporter: 'html', // change Karma's debug.html to the mocha web reporter
           timeout: 10000,
-          slow: 5000
-        }
-      }
+          slow: 5000,
+        },
+      },
     },
 
     dev: { singleRun: false },
@@ -112,11 +109,8 @@ module.exports = function (grunt) {
       singleRun: true,
       reporters: ['coverage'],
       coverageReporter: {
-        reporters: [
-          { type: 'html', dir: 'coverage' },
-          { type: 'text-summary' },
-        ]
-      }
+        reporters: [{ type: 'html', dir: 'coverage' }, { type: 'text-summary' }],
+      },
     },
   };
 
@@ -167,7 +161,7 @@ module.exports = function (grunt) {
    *  a test is running in by searching for the "ready to load tests for shard X"
    *  log message.
    *
-   *  [1]: src/ui/public/test_harness/test_sharding/setup_test_sharding.js
+   *  [1]: src/legacy/ui/public/test_harness/test_sharding/setup_test_sharding.js
    */
   times(TOTAL_CI_SHARDS, i => {
     const n = i + 1;
@@ -175,15 +169,15 @@ module.exports = function (grunt) {
       singleRun: true,
       options: {
         files: [
-          'http://localhost:5610/bundles/vendors.bundle.js',
-          'http://localhost:5610/bundles/commons.bundle.js',
+          'http://localhost:5610/test_bundle/built_css.css',
+
+          'http://localhost:5610/built_assets/dlls/vendors.bundle.dll.js',
           `http://localhost:5610/bundles/tests.bundle.js?shards=${TOTAL_CI_SHARDS}&shard_num=${n}`,
 
-          'http://localhost:5610/bundles/vendors.style.css',
-          'http://localhost:5610/bundles/commons.style.css',
-          'http://localhost:5610/bundles/tests.style.css'
-        ]
-      }
+          'http://localhost:5610/built_assets/dlls/vendors.style.dll.css',
+          'http://localhost:5610/bundles/tests.style.css',
+        ],
+      },
     };
   });
 

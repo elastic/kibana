@@ -1,0 +1,9 @@
+[role="xpack"]
+[[features-api]]
+== Features API
+
+View information about the available features in {kib}. Features are used by spaces and security to refine and secure access to {kib}.
+
+* <<features-api-get, Get features API>>
+
+include::features/get.asciidoc[]

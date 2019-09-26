@@ -34,6 +34,7 @@ interface Options {
   directory: string;
   regularExpressions: RegExp[];
   concurrency?: 20;
+  excludePaths?: string[];
 }
 
 /**
@@ -45,21 +46,26 @@ interface Options {
  * @param options.concurrency optional concurrency to run deletes, defaults to 20
  */
 export async function scanDelete(options: Options) {
-  const { directory, regularExpressions, concurrency = 20 } = options;
+  const { directory, regularExpressions, concurrency = 20, excludePaths } = options;
 
   assertAbsolute(directory);
+  (excludePaths || []).forEach(excluded => assertAbsolute(excluded));
 
   // get an observable of absolute paths within a directory
   const getChildPath$ = (path: string) =>
     getReadDir$(path).pipe(
       mergeAll(),
-      map(name => join(path, name))
+      map((name: string) => join(path, name))
     );
 
   // get an observable of all paths to be deleted, by starting with the arg
   // and recursively iterating through all children, unless a child matches
   // one of the supplied regular expressions
   const getPathsToDelete$ = (path: string): Rx.Observable<string> => {
+    if (excludePaths && excludePaths.includes(path)) {
+      return Rx.EMPTY;
+    }
+
     if (regularExpressions.some(re => re.test(path))) {
       return Rx.of(path);
     }

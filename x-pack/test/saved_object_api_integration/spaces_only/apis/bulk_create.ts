@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SPACES } from '../../common/lib/spaces';
-import { TestInvoker } from '../../common/lib/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { bulkCreateTestSuiteFactory } from '../../common/suites/bulk_create';
 
 const expectNamespaceSpecifiedBadRequest = (resp: { [key: string]: any }) => {
@@ -22,17 +22,16 @@ const expectNamespaceSpecifiedBadRequest = (resp: { [key: string]: any }) => {
   });
 };
 
-// tslint:disable:no-default-export
-export default function({ getService }: TestInvoker) {
+export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  const { bulkCreateTest, createExpectResults } = bulkCreateTestSuiteFactory(
-    es,
-    esArchiver,
-    supertest
-  );
+  const {
+    bulkCreateTest,
+    createExpectResults,
+    expectBadRequestForHiddenType,
+  } = bulkCreateTestSuiteFactory(es, esArchiver, supertest);
 
   describe('_bulk_create', () => {
     bulkCreateTest('in the current space (space_1)', {
@@ -41,6 +40,10 @@ export default function({ getService }: TestInvoker) {
         default: {
           statusCode: 200,
           response: createExpectResults(SPACES.SPACE_1.spaceId),
+        },
+        includingSpace: {
+          statusCode: 200,
+          response: expectBadRequestForHiddenType,
         },
         custom: {
           description: 'when a namespace is specified on the saved object',
@@ -65,6 +68,10 @@ export default function({ getService }: TestInvoker) {
         default: {
           statusCode: 200,
           response: createExpectResults(SPACES.DEFAULT.spaceId),
+        },
+        includingSpace: {
+          statusCode: 200,
+          response: expectBadRequestForHiddenType,
         },
         custom: {
           description: 'when a namespace is specified on the saved object',

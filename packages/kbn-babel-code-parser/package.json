@@ -1,0 +1,26 @@
+{
+  "name": "@kbn/babel-code-parser",
+  "description": "babel code parser for Kibana",
+  "private": true,
+  "version": "1.0.0",
+  "main": "./target/index.js",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elastic/kibana/tree/master/packages/kbn-babel-code-parser"
+  },
+  "scripts": {
+    "build": "babel src --out-dir target",
+    "kbn:bootstrap": "yarn build --quiet",
+    "kbn:watch": "yarn build --watch"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.5.5"
+  },
+  "dependencies": {
+    "@kbn/babel-preset": "1.0.0",
+    "@babel/parser": "^7.5.5",
+    "@babel/traverse": "^7.5.5",
+    "lodash": "^4.17.15"
+  }
+}

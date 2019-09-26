@@ -21,7 +21,14 @@ export async function getFunctionalConfig({ readConfigFile }) {
     junit: {
       reportName: 'X-Pack Reporting Functional Tests',
     },
-    kbnTestServer: xPackFunctionalTestsConfig.get('kbnTestServer'),
+    kbnTestServer: {
+      ...xPackFunctionalTestsConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
+        '--xpack.reporting.csv.enablePanelActionDownload=true',
+        '--logging.events.log', JSON.stringify(['info', 'warning', 'error', 'fatal', 'optimize', 'reporting'])
+      ],
+    },
     testFiles: [require.resolve('../functional')],
   };
 }

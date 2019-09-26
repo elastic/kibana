@@ -1,0 +1,73 @@
+var kbnCsp = JSON.parse(document.querySelector('kbn-csp').getAttribute('data'));
+window.__kbnStrictCsp__ = kbnCsp.strictCsp;
+
+if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
+  var legacyBrowserError = document.getElementById('kbn_legacy_browser_error');
+  legacyBrowserError.style.display = 'flex';
+} else {
+  if (!window.__kbnCspNotEnforced__ && window.console) {
+    window.console.log("^ A single error about an inline script not firing due to content security policy is expected!");
+  }
+  var loadingMessage = document.getElementById('kbn_loading_message');
+  loadingMessage.style.display = 'flex';
+
+  window.onload = function () {
+    var files = [
+      '{{dllBundlePath}}/vendors.bundle.dll.js',
+      '{{regularBundlePath}}/commons.bundle.js',
+      '{{regularBundlePath}}/{{appId}}.bundle.js'
+    ];
+
+    var failure = function () {
+      // make subsequent calls to failure() noop
+      failure = function () {};
+
+      var err = document.createElement('h1');
+      err.style['color'] = 'white';
+      err.style['font-family'] = 'monospace';
+      err.style['text-align'] = 'center';
+      err.style['background'] = '#F44336';
+      err.style['padding'] = '25px';
+      err.innerText = document.querySelector('[data-error-message]').dataset.errorMessage;
+
+      document.body.innerHTML = err.outerHTML;
+    }
+
+    function loadStyleSheet(path) {
+      var dom = document.createElement('link');
+
+      dom.addEventListener('error', failure);
+      dom.setAttribute('rel', 'stylesheet');
+      dom.setAttribute('type', 'text/css');
+      dom.setAttribute('href', path);
+      document.head.appendChild(dom);
+    }
+
+    function createJavascriptElement(path) {
+      var dom = document.createElement('script');
+
+      dom.setAttribute('async', '');
+      dom.addEventListener('error', failure);
+      dom.setAttribute('src', file);
+      dom.addEventListener('load', next);
+      document.head.appendChild(dom);
+    }
+
+    {{#each styleSheetPaths}}
+      loadStyleSheet('{{this}}');
+    {{/each}}
+
+    (function next() {
+      var file = files.shift();
+      if (!file) return;
+
+      var dom = document.createElement('script');
+
+      dom.setAttribute('async', '');
+      dom.addEventListener('error', failure);
+      dom.setAttribute('src', file);
+      dom.addEventListener('load', next);
+      document.head.appendChild(dom);
+    }());
+  };
+}

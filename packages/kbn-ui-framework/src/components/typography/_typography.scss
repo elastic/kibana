@@ -5,10 +5,6 @@
   margin: 0; /* 1 */
   font-weight: $kuiFontWeightRegular; /* 1 */
   font-size: $typographyTitleFontSize;
-
-  @include darkTheme {
-    color: $kuiTextColor--darkTheme;
-  }
 }
 
 /**
@@ -18,10 +14,6 @@
   margin: 0; /* 1 */
   font-weight: $kuiFontWeightRegular; /* 1 */
   font-size: $kuiTitleFontSize;
-
-  @include darkTheme {
-    color: $kuiTextColor--darkTheme;
-  }
 }
 
 /**
@@ -32,10 +24,6 @@
   font-weight: $kuiFontWeightBold; /* 1 */
   line-height: $kuiLineHeight;
   font-size: $kuiFontSize;
-
-  @include darkTheme {
-    color: $kuiTextColor--darkTheme;
-  }
 }
 
 /**
@@ -46,10 +34,6 @@
   font-weight: $kuiFontWeightRegular; /* 1 */
   line-height: $kuiLineHeight;
   font-size: $kuiFontSize;
-
-  @include darkTheme {
-    color: $kuiTextColor--darkTheme;
-  }
 }
 
 .kuiSubText {
@@ -57,10 +41,6 @@
   font-weight: $kuiFontWeightRegular; /* 1 */
   line-height: $kuiLineHeight;
   font-size: $kuiSubTextFontSize;
-
-  @include darkTheme {
-    color: $kuiTextColor--darkTheme;
-  }
 }
 
 .kuiSubduedText {

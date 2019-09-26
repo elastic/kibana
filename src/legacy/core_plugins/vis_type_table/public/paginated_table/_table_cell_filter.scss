@@ -1,0 +1,30 @@
+.kbnTableCellFilter__hover {
+  position: relative;
+
+  /**
+   * 1. Center vertically regardless of row height.
+   */
+  .kbnTableCellFilter {
+    position: absolute;
+    white-space: nowrap;
+    right: 0;
+    top: 50%; /* 1 */
+    transform: translateY(-50%); /* 1 */
+    display: none;
+  }
+
+  &:hover {
+    .kbnTableCellFilter {
+      display: inline;
+    }
+
+    .kbnTableCellFilter__hover-show {
+      visibility: visible;
+    }
+  }
+}
+
+.kbnTableCellFilter__hover-show {
+  // so that the cell doesn't change size on hover
+  visibility: hidden;
+}

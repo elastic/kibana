@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { decorateQuery } from '../decorate_query';
 
 describe('Query decorator', function () {
@@ -28,5 +28,10 @@ describe('Query decorator', function () {
   it('should merge in the query string options', function () {
     const decoratedQuery = decorateQuery({ query_string: { query: '*' } }, { analyze_wildcard: true });
     expect(decoratedQuery).to.eql({ query_string: { query: '*', analyze_wildcard: true } });
+  });
+
+  it('should add a default of a time_zone parameter if one is provided', function () {
+    const decoratedQuery = decorateQuery({ query_string: { query: '*' } }, { analyze_wildcard: true }, 'America/Phoenix');
+    expect(decoratedQuery).to.eql({ query_string: { query: '*', analyze_wildcard: true, time_zone: 'America/Phoenix' } });
   });
 });

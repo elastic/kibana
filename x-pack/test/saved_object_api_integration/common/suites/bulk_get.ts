@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '../../../../legacy/plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -17,6 +17,7 @@ interface BulkGetTest {
 
 interface BulkGetTests {
   default: BulkGetTest;
+  includingHiddenType: BulkGetTest;
 }
 
 interface BulkGetTestDefinition {
@@ -42,15 +43,6 @@ const createBulkRequests = (spaceId: string) => [
 ];
 
 export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      // eslint-disable-next-line max-len
-      message: `action [indices:data/read/mget] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/mget] is unauthorized for user [${username}]`,
-    });
-  };
-
   const createExpectNotFoundResults = (spaceId: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       saved_objects: [
@@ -78,16 +70,41 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
           attributes: {
             name: 'My favorite global object',
           },
+          references: [],
         },
       ],
     });
   };
 
-  const expectRbacForbidden = (resp: { [key: string]: any }) => {
+  const expectBadRequestForHiddenType = (resp: { [key: string]: any }) => {
+    const spaceEntry = resp.body.saved_objects.find(
+      (entry: any) => entry.id === 'my-hiddentype' && entry.type === 'hiddentype'
+    );
+    expect(spaceEntry).to.eql({
+      id: 'my-hiddentype',
+      type: 'hiddentype',
+      error: {
+        message: "Unsupported saved object type: 'hiddentype': Bad Request",
+        statusCode: 400,
+        error: 'Bad Request',
+      },
+    });
+  };
+
+  const expectedForbiddenTypes = ['dashboard', 'globaltype', 'visualization'];
+  const expectedForbiddenTypesWithHiddenType = [
+    'dashboard',
+    'globaltype',
+    'hiddentype',
+    'visualization',
+  ];
+  const createExpectRbacForbidden = (types: string[] = expectedForbiddenTypes) => (resp: {
+    [key: string]: any;
+  }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to bulk_get dashboard,globaltype,visualization, missing action:saved_objects/dashboard/bulk_get,action:saved_objects/globaltype/bulk_get,action:saved_objects/visualization/bulk_get`,
+      message: `Unable to bulk_get ${types.join(',')}`,
     });
   };
 
@@ -97,6 +114,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
         {
           id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
           type: 'visualization',
+          migrationVersion: resp.body.saved_objects[0].migrationVersion,
           updated_at: '2017-09-21T18:51:23.794Z',
           version: resp.body.saved_objects[0].version,
           attributes: {
@@ -108,6 +126,13 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
             uiStateJSON: resp.body.saved_objects[0].attributes.uiStateJSON,
             kibanaSavedObjectMeta: resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta,
           },
+          references: [
+            {
+              name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+              type: 'index-pattern',
+              id: `${getIdPrefix(spaceId)}91200a00-9efd-11e7-acb3-3dab96693fab`,
+            },
+          ],
         },
         {
           id: `${getIdPrefix(spaceId)}does not exist`,
@@ -125,6 +150,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
           attributes: {
             name: 'My favorite global object',
           },
+          references: [],
         },
       ],
     });
@@ -148,6 +174,22 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
           .expect(tests.default.statusCode)
           .then(tests.default.response);
       });
+
+      it(`with a hiddentype saved object included should return ${tests.includingHiddenType.statusCode}`, async () => {
+        await supertest
+          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_get`)
+          .auth(user.username, user.password)
+          .send(
+            createBulkRequests(otherSpaceId || spaceId).concat([
+              {
+                type: 'hiddentype',
+                id: `my-hiddentype`,
+              },
+            ])
+          )
+          .expect(tests.includingHiddenType.statusCode)
+          .then(tests.includingHiddenType.response);
+      });
     });
   };
 
@@ -157,9 +199,10 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
 
   return {
     bulkGetTest,
-    createExpectLegacyForbidden,
     createExpectNotFoundResults,
     createExpectResults,
-    expectRbacForbidden,
+    createExpectRbacForbidden,
+    expectBadRequestForHiddenType,
+    expectedForbiddenTypesWithHiddenType,
   };
 }

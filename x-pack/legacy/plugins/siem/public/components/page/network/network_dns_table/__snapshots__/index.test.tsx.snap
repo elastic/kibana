@@ -1,0 +1,148 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NetworkTopNFlow Table Component rendering it renders the default NetworkTopNFlow table 1`] = `
+<Connect(NetworkDnsTableComponent)
+  data={
+    Array [
+      Object {
+        "cursor": Object {
+          "value": "nflxvideo.net",
+        },
+        "node": Object {
+          "_id": "nflxvideo.net",
+          "dnsBytesIn": 2964,
+          "dnsBytesOut": 12546,
+          "dnsName": "nflxvideo.net",
+          "queryCount": 52,
+          "uniqueDomains": 21,
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "apple.com",
+        },
+        "node": Object {
+          "_id": "apple.com",
+          "dnsBytesIn": 2680,
+          "dnsBytesOut": 31687,
+          "dnsName": "apple.com",
+          "queryCount": 75,
+          "uniqueDomains": 20,
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "googlevideo.com",
+        },
+        "node": Object {
+          "_id": "googlevideo.com",
+          "dnsBytesIn": 1890,
+          "dnsBytesOut": 16292,
+          "dnsName": "googlevideo.com",
+          "queryCount": 38,
+          "uniqueDomains": 19,
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "netflix.com",
+        },
+        "node": Object {
+          "_id": "netflix.com",
+          "dnsBytesIn": 60525,
+          "dnsBytesOut": 218193,
+          "dnsName": "netflix.com",
+          "queryCount": 1532,
+          "uniqueDomains": 12,
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "samsungcloudsolution.com",
+        },
+        "node": Object {
+          "_id": "samsungcloudsolution.com",
+          "dnsBytesIn": 1480,
+          "dnsBytesOut": 11702,
+          "dnsName": "samsungcloudsolution.com",
+          "queryCount": 31,
+          "uniqueDomains": 8,
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "doubleclick.net",
+        },
+        "node": Object {
+          "_id": "doubleclick.net",
+          "dnsBytesIn": 1505,
+          "dnsBytesOut": 14372,
+          "dnsName": "doubleclick.net",
+          "queryCount": 35,
+          "uniqueDomains": 7,
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "digitalocean.com",
+        },
+        "node": Object {
+          "_id": "digitalocean.com",
+          "dnsBytesIn": 2035,
+          "dnsBytesOut": 4111,
+          "dnsName": "digitalocean.com",
+          "queryCount": 35,
+          "uniqueDomains": 6,
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "samsungelectronics.com",
+        },
+        "node": Object {
+          "_id": "samsungelectronics.com",
+          "dnsBytesIn": 3916,
+          "dnsBytesOut": 36592,
+          "dnsName": "samsungelectronics.com",
+          "queryCount": 89,
+          "uniqueDomains": 6,
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "google.com",
+        },
+        "node": Object {
+          "_id": "google.com",
+          "dnsBytesIn": 896,
+          "dnsBytesOut": 8072,
+          "dnsName": "google.com",
+          "queryCount": 23,
+          "uniqueDomains": 5,
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "samsungcloudsolution.net",
+        },
+        "node": Object {
+          "_id": "samsungcloudsolution.net",
+          "dnsBytesIn": 1490,
+          "dnsBytesOut": 11518,
+          "dnsName": "samsungcloudsolution.net",
+          "queryCount": 30,
+          "uniqueDomains": 5,
+        },
+      },
+    ]
+  }
+  fakeTotalCount={50}
+  id="dns"
+  isInspect={false}
+  loadPage={[MockFunction]}
+  loading={false}
+  showMorePagesIndicator={true}
+  totalCount={80}
+  type="page"
+/>
+`;

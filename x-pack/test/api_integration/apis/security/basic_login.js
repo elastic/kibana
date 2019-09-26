@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import request from 'request';
 
 export default function ({ getService }) {
@@ -21,6 +21,13 @@ export default function ({ getService }) {
         .expect(302);
 
       expect(response.headers.location).to.be('/login?next=%2Fabc%2Fxyz');
+    });
+
+    it('should redirect non-AJAX New platform requests to the login page if not authenticated', async () => {
+      const response = await supertest.get('/core/')
+        .expect(302);
+
+      expect(response.headers.location).to.be('/login?next=%2Fcore%2F');
     });
 
     it('should reject API requests if client is not authenticated', async () => {
@@ -72,17 +79,17 @@ export default function ({ getService }) {
 
       await supertest.get('/api/security/v1/me')
         .set('kbn-xsrf', 'xxx')
-        .set('Authorization', `Basic ${new Buffer(`${wrongUsername}:${wrongPassword}`).toString('base64')}`)
+        .set('Authorization', `Basic ${Buffer.from(`${wrongUsername}:${wrongPassword}`).toString('base64')}`)
         .expect(401);
 
       await supertest.get('/api/security/v1/me')
         .set('kbn-xsrf', 'xxx')
-        .set('Authorization', `Basic ${new Buffer(`${validUsername}:${wrongPassword}`).toString('base64')}`)
+        .set('Authorization', `Basic ${Buffer.from(`${validUsername}:${wrongPassword}`).toString('base64')}`)
         .expect(401);
 
       await supertest.get('/api/security/v1/me')
         .set('kbn-xsrf', 'xxx')
-        .set('Authorization', `Basic ${new Buffer(`${wrongUsername}:${validPassword}`).toString('base64')}`)
+        .set('Authorization', `Basic ${Buffer.from(`${wrongUsername}:${validPassword}`).toString('base64')}`)
         .expect(401);
     });
 
@@ -90,7 +97,7 @@ export default function ({ getService }) {
       const apiResponse = await supertest
         .get('/api/security/v1/me')
         .set('kbn-xsrf', 'xxx')
-        .set('Authorization', `Basic ${new Buffer(`${validUsername}:${validPassword}`).toString('base64')}`)
+        .set('Authorization', `Basic ${Buffer.from(`${validUsername}:${validPassword}`).toString('base64')}`)
         .expect(200);
 
       expect(apiResponse.body).to.only.have.keys([
@@ -98,9 +105,10 @@ export default function ({ getService }) {
         'full_name',
         'email',
         'roles',
-        'scope',
         'metadata',
-        'enabled'
+        'enabled',
+        'authentication_realm',
+        'lookup_realm',
       ]);
       expect(apiResponse.body.username).to.be(validUsername);
     });
@@ -135,9 +143,10 @@ export default function ({ getService }) {
           'full_name',
           'email',
           'roles',
-          'scope',
           'metadata',
-          'enabled'
+          'enabled',
+          'authentication_realm',
+          'lookup_realm',
         ]);
         expect(apiResponse.body.username).to.be(validUsername);
       });
@@ -185,7 +194,7 @@ export default function ({ getService }) {
           .set('kbn-xsrf', 'xxx')
           .set('Authorization', 'Bearer AbCdEf')
           .set('Cookie', sessionCookie.cookieString())
-          .expect(400);
+          .expect(401);
 
         expect(apiResponse.headers['set-cookie']).to.be(undefined);
       });

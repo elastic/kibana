@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AdvancedOptions should hide if not showing 1`] = `
+<div>
+  <EuiButtonEmpty
+    iconType="arrowRight"
+    onClick={[Function]}
+  >
+    <FormattedMessage
+      defaultMessage="Show advanced options"
+      id="kbn.management.createIndexPattern.stepTime.options.showButton"
+      values={Object {}}
+    />
+  </EuiButtonEmpty>
+  <EuiSpacer
+    size="xs"
+  />
+</div>
+`;
+
+exports[`AdvancedOptions should render normally 1`] = `
+<div>
+  <EuiButtonEmpty
+    iconType="arrowRight"
+    onClick={[Function]}
+  >
+    <FormattedMessage
+      defaultMessage="Show advanced options"
+      id="kbn.management.createIndexPattern.stepTime.options.showButton"
+      values={Object {}}
+    />
+  </EuiButtonEmpty>
+  <EuiSpacer
+    size="xs"
+  />
+</div>
+`;

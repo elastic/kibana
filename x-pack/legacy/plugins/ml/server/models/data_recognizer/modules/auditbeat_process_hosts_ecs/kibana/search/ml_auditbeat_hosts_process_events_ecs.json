@@ -1,0 +1,19 @@
+{
+  "title": "ML Auditbeat Hosts: Process Events (ECS)",
+  "description": "Auditbeat auditd process events on host machines",
+  "hits": 0,
+  "columns": [
+    "host.name",
+    "auditd.data.syscall",
+    "process.executable",
+    "process.title"
+  ],
+  "sort": [
+    "@timestamp",
+    "desc"
+  ],
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"index\":\"INDEX_PATTERN_ID\",\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[{\"meta\":{\"index\":\"INDEX_PATTERN_ID\",\"negate\":true,\"disabled\":false,\"alias\":null,\"type\":\"exists\",\"key\":\"container.runtime\",\"value\":\"exists\"},\"exists\":{\"field\":\"container.runtime\"},\"$state\":{\"store\":\"appState\"}},{\"meta\":{\"index\":\"INDEX_PATTERN_ID\",\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"event.module\",\"value\":\"auditd\",\"params\":{\"query\":\"auditd\"}},\"query\":{\"match\":{\"event.module\":{\"query\":\"auditd\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}},{\"meta\":{\"index\":\"INDEX_PATTERN_ID\",\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"exists\",\"key\":\"auditd.data.syscall\",\"value\":\"exists\"},\"exists\":{\"field\":\"auditd.data.syscall\"},\"$state\":{\"store\":\"appState\"}}]}"
+  }
+}

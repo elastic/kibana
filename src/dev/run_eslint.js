@@ -30,5 +30,9 @@ if (!process.argv.includes('--no-cache')) {
   process.argv.push('--cache');
 }
 
+if (!process.argv.includes('--ext')) {
+  process.argv.push('--ext', '.js,.ts,.tsx');
+}
+
 // common-js is required so that logic before this executes before loading eslint
 require('eslint/bin/eslint');

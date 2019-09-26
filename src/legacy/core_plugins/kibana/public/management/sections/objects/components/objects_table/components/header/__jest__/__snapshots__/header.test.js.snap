@@ -1,0 +1,106 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header should render normally 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="baseline"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiTitle>
+        <h1>
+          <FormattedMessage
+            defaultMessage="Saved Objects"
+            id="kbn.management.objects.objectsTable.header.savedObjectsTitle"
+            values={Object {}}
+          />
+        </h1>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFlexGroup
+        alignItems="baseline"
+        gutterSize="m"
+        responsive={false}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            data-test-subj="exportAllObjects"
+            iconType="exportAction"
+            onClick={[Function]}
+            size="s"
+          >
+            <FormattedMessage
+              defaultMessage="Export {filteredCount, plural, one{# object} other {# objects}}"
+              id="kbn.management.objects.objectsTable.header.exportButtonLabel"
+              values={
+                Object {
+                  "filteredCount": 2,
+                }
+              }
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            data-test-subj="importObjects"
+            iconType="importAction"
+            onClick={[Function]}
+            size="s"
+          >
+            <FormattedMessage
+              defaultMessage="Import"
+              id="kbn.management.objects.objectsTable.header.importButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            iconType="refresh"
+            onClick={[Function]}
+            size="s"
+          >
+            <FormattedMessage
+              defaultMessage="Refresh"
+              id="kbn.management.objects.objectsTable.header.refreshButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiText
+    size="s"
+  >
+    <p>
+      <EuiTextColor
+        color="subdued"
+      >
+        <FormattedMessage
+          defaultMessage="From here you can delete saved objects, such as saved searches. You can also edit the raw data of saved objects. Typically objects are only modified via their associated application, which is probably what you should use instead of this screen."
+          id="kbn.management.objects.objectsTable.howToDeleteSavedObjectsDescription"
+          values={Object {}}
+        />
+      </EuiTextColor>
+    </p>
+  </EuiText>
+  <EuiSpacer
+    size="m"
+  />
+</Fragment>
+`;

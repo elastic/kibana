@@ -1,0 +1,130 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SourceDestination renders correctly against snapshot 1`] = `
+<div>
+  <SourceDestination
+    contextId="test"
+    destinationBytes={
+      Array [
+        40,
+      ]
+    }
+    destinationGeoCityName={
+      Array [
+        "New York",
+      ]
+    }
+    destinationGeoContinentName={
+      Array [
+        "North America",
+      ]
+    }
+    destinationGeoCountryIsoCode={
+      Array [
+        "US",
+      ]
+    }
+    destinationGeoCountryName={
+      Array [
+        "United States",
+      ]
+    }
+    destinationGeoRegionName={
+      Array [
+        "New York",
+      ]
+    }
+    destinationIp={
+      Array [
+        "10.1.2.3",
+      ]
+    }
+    destinationPackets={
+      Array [
+        1,
+      ]
+    }
+    destinationPort={
+      Array [
+        80,
+      ]
+    }
+    eventId="abcd"
+    networkBytes={
+      Array [
+        100,
+      ]
+    }
+    networkCommunityId={
+      Array [
+        "we.live.in.a",
+      ]
+    }
+    networkDirection={
+      Array [
+        "outgoing",
+      ]
+    }
+    networkPackets={
+      Array [
+        3,
+      ]
+    }
+    networkProtocol={
+      Array [
+        "http",
+      ]
+    }
+    sourceBytes={
+      Array [
+        60,
+      ]
+    }
+    sourceGeoCityName={
+      Array [
+        "Atlanta",
+      ]
+    }
+    sourceGeoContinentName={
+      Array [
+        "North America",
+      ]
+    }
+    sourceGeoCountryIsoCode={
+      Array [
+        "US",
+      ]
+    }
+    sourceGeoCountryName={
+      Array [
+        "United States",
+      ]
+    }
+    sourceGeoRegionName={
+      Array [
+        "Georgia",
+      ]
+    }
+    sourceIp={
+      Array [
+        "192.168.1.2",
+      ]
+    }
+    sourcePackets={
+      Array [
+        2,
+      ]
+    }
+    sourcePort={
+      Array [
+        9987,
+      ]
+    }
+    transport={
+      Array [
+        "tcp",
+      ]
+    }
+  />
+</div>
+`;

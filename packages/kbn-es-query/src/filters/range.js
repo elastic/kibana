@@ -32,10 +32,19 @@ const comparators = {
   lt: 'boolean lt(Supplier s, def v) {return s.get() < v}',
 };
 
+const dateComparators = {
+  gt: 'boolean gt(Supplier s, def v) {return s.get().toInstant().isAfter(Instant.parse(v))}',
+  gte: 'boolean gte(Supplier s, def v) {return !s.get().toInstant().isBefore(Instant.parse(v))}',
+  lte: 'boolean lte(Supplier s, def v) {return !s.get().toInstant().isAfter(Instant.parse(v))}',
+  lt: 'boolean lt(Supplier s, def v) {return s.get().toInstant().isBefore(Instant.parse(v))}',
+};
+
 function formatValue(field, params) {
   return _.map(params, (val, key) => operators[key] + format(field, val)).join(' ');
 }
 
+// Creates a filter where the value for the given field is in the given range
+// params should be an object containing `lt`, `lte`, `gt`, and/or `gte`
 export function buildRangeFilter(field, params, indexPattern, formattedValue) {
   const filter = { meta: { index: indexPattern.id } };
   if (formattedValue) filter.meta.formattedValue = formattedValue;
@@ -85,7 +94,8 @@ export function getRangeScript(field, params) {
 
   // We must wrap painless scripts in a lambda in case they're more than a simple expression
   if (field.lang === 'painless') {
-    const currentComparators = _.reduce(knownParams, (acc, val, key) => acc.concat(comparators[key]), []).join(' ');
+    const comp = field.type === 'date' ? dateComparators : comparators;
+    const currentComparators = _.reduce(knownParams, (acc, val, key) => acc.concat(comp[key]), []).join(' ');
 
     const comparisons = _.map(knownParams, function (val, key) {
       return `${key}(() -> { ${field.script} }, params.${key})`;
@@ -96,7 +106,7 @@ export function getRangeScript(field, params) {
 
   return {
     script: {
-      inline: script,
+      source: script,
       params: knownParams,
       lang: field.lang
     }

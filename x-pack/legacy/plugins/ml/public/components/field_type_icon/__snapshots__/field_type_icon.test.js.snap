@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FieldTypeIcon render component when type matches a field type 1`] = `
+<FieldTypeIconContainer
+  ariaLabel="keyword type"
+  className="field-type-icon"
+  iconChar="t"
+  needsAria={true}
+/>
+`;
+
+exports[`FieldTypeIcon update component 1`] = `
+<FieldTypeIconContainer
+  ariaLabel="ip type"
+  className="field-type-icon kuiIcon fa-laptop"
+  iconChar=""
+  needsAria={true}
+/>
+`;

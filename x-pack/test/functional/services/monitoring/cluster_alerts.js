@@ -19,15 +19,14 @@ export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) 
   const SUBJ_OVERVIEW_ICONS =
     `[data-test-subj="${SUBJ_OVERVIEW_CLUSTER_ALERTS}"] ` +
     `[data-test-subj="topAlertItem"] .euiCallOutHeader__title`;
-  const SUBJ_OVERVIEW_TEXTS = `${SUBJ_OVERVIEW_CLUSTER_ALERTS} alertText`;
-  const SUBJ_OVERVIEW_ACTIONS = `${SUBJ_OVERVIEW_CLUSTER_ALERTS} alertAction`;
-  const SUBJ_OVERVIEW_VIEW_ALL = `${SUBJ_OVERVIEW_CLUSTER_ALERTS} viewAllAlerts`;
+  const SUBJ_OVERVIEW_TEXTS = `${SUBJ_OVERVIEW_CLUSTER_ALERTS} > alertText`;
+  const SUBJ_OVERVIEW_ACTIONS = `${SUBJ_OVERVIEW_CLUSTER_ALERTS} > alertAction`;
+  const SUBJ_OVERVIEW_VIEW_ALL = `${SUBJ_OVERVIEW_CLUSTER_ALERTS} > viewAllAlerts`;
 
-  const SUBJ_LISTING_PAGE  = 'clusterAlertsListingPage';
-  const SUBJ_TABLE_BODY    = 'alertsTableBody';
-  const SUBJ_TABLE_ICONS   = `${SUBJ_TABLE_BODY} alertIcon`;
-  const SUBJ_TABLE_TEXTS   = `${SUBJ_TABLE_BODY} alertText`;
-  const SUBJ_TABLE_ACTIONS = `${SUBJ_TABLE_BODY} alertAction`;
+  const SUBJ_TABLE_BODY    = 'alertsTableContainer';
+  const SUBJ_TABLE_ICONS   = `${SUBJ_TABLE_BODY} > alertIcon`;
+  const SUBJ_TABLE_TEXTS   = `${SUBJ_TABLE_BODY} > alertText`;
+  const SUBJ_TABLE_ACTIONS = `${SUBJ_TABLE_BODY} > alertAction`;
 
   return new class ClusterAlerts {
 
@@ -57,7 +56,7 @@ export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) 
      */
 
     getOverviewAlerts() {
-      return testSubjects.findAll(`${SUBJ_OVERVIEW_CLUSTER_ALERTS} topAlertItem`);
+      return testSubjects.findAll(`${SUBJ_OVERVIEW_CLUSTER_ALERTS} > topAlertItem`);
     }
 
     async getOverviewAlertsAll() {
@@ -91,12 +90,12 @@ export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) 
      */
 
     async isOnListingPage() {
-      const pageId = await retry.try(() => testSubjects.find(SUBJ_LISTING_PAGE));
+      const pageId = await retry.try(() => testSubjects.find(SUBJ_TABLE_BODY));
       return pageId !== null;
     }
 
     getTableAlerts() {
-      return PageObjects.monitoring.tableGetRows(SUBJ_TABLE_BODY);
+      return PageObjects.monitoring.tableGetRowsFromContainer(SUBJ_TABLE_BODY);
     }
 
     async getTableAlertsAll() {

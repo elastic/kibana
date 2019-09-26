@@ -3,34 +3,35 @@
   "version": "1.0.0",
   "license": "Apache-2.0",
   "scripts": {
-    "canvas:peg": "pegjs common/lib/grammar.peg",
+    "interpreter:peg": "pegjs common/lib/grammar.peg",
     "build": "node scripts/build",
     "kbn:bootstrap": "node scripts/build --dev",
     "kbn:watch": "node scripts/build --dev --watch"
   },
   "dependencies": {
-    "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
+    "@babel/runtime": "^7.5.5",
+    "@kbn/i18n": "1.0.0",
+    "lodash": "npm:@elastic/lodash@3.10.1-kibana3",
     "lodash.clone": "^4.5.0",
-    "scriptjs": "^2.5.8",
-    "socket.io-client": "^2.1.1",
-    "uuid": "3.0.1"
+    "uuid": "3.3.2"
   },
   "devDependencies": {
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/plugin-transform-runtime": "^7.5.5",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/dev-utils": "1.0.0",
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.0",
-    "babel-loader": "7.1.2",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-polyfill": "6.20.0",
-    "css-loader": "0.28.7",
-    "del": "^3.0.0",
-    "getopts": "^2.2.3",
-    "pegjs": "0.9.0",
-    "sass-loader": "^7.1.0",
-    "style-loader": "0.19.0",
-    "supports-color": "^5.5.0",
-    "url-loader": "0.5.9",
-    "webpack": "3.6.0"
+    "babel-loader": "^8.0.6",
+    "copy-webpack-plugin": "^5.0.4",
+    "css-loader": "2.1.1",
+    "del": "^4.1.1",
+    "getopts": "^2.2.4",
+    "pegjs": "0.10.0",
+    "sass-loader": "^7.3.1",
+    "style-loader": "0.23.1",
+    "supports-color": "^7.0.0",
+    "url-loader": "2.1.0",
+    "webpack": "4.39.2",
+    "webpack-cli": "^3.3.7"
   }
 }

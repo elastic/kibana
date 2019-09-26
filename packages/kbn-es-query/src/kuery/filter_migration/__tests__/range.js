@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { convertRangeFilter } from '../range';
 
 describe('filter to kuery migration', function () {

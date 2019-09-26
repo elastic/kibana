@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
-source src/dev/ci_setup/checkout_sibling_es.sh
+set -e
+
+if [[ -z "$IS_PIPELINE_JOB" ]] ; then
+  trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
+fi
 
 export TEST_BROWSER_HEADLESS=1
-export TEST_ES_FROM=${TEST_ES_FROM:-source}
-"$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --from=source --dev;
+
+"$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --dev;

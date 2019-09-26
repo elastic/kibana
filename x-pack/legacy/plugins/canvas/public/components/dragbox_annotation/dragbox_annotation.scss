@@ -1,0 +1,8 @@
+.canvasDragBoxAnnotation {
+  position: absolute;
+  background: none;
+  transform-origin: center center; /* the default, only for clarity */
+  transform-style: preserve-3d;
+  outline: dashed 1px $euiColorDarkShade;
+  pointer-events: none;
+}

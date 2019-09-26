@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import * as exists from '../exists';
 import { nodeTypes } from '../../node_types';
 import _ from 'lodash';
@@ -57,12 +57,21 @@ describe('kuery functions', function () {
         expect(_.isEqual(expected, result)).to.be(true);
       });
 
+      it('should return an ES exists query without an index pattern', function () {
+        const expected = {
+          exists: { field: 'response' }
+        };
+
+        const existsNode = nodeTypes.function.buildNode('exists', 'response');
+        const result = exists.toElasticsearchQuery(existsNode);
+        expect(_.isEqual(expected, result)).to.be(true);
+      });
+
       it('should throw an error for scripted fields', function () {
         const existsNode = nodeTypes.function.buildNode('exists', 'script string');
         expect(exists.toElasticsearchQuery)
           .withArgs(existsNode, indexPattern).to.throwException(/Exists query does not support scripted fields/);
       });
-
     });
   });
 });

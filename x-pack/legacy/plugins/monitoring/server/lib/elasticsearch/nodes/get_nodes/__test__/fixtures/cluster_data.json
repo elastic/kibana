@@ -1,0 +1,2942 @@
+{
+  "nodeStats": {
+    "hits": {
+      "hits": [{
+        "_source": {
+          "source_node": {
+            "host": "127.0.0.1",
+            "ip": "127.0.0.1",
+            "name": "hello01",
+            "timestamp": "2018-02-13T19:26:18.443Z",
+            "transport_address": "127.0.0.1:9300",
+            "uuid": "_x_V2YzPQU-a9KRRBxUxZQ"
+          }
+        }
+      }, {
+        "_source": {
+          "source_node": {
+            "host": "127.0.0.1",
+            "ip": "127.0.0.1",
+            "name": "hello02",
+            "timestamp": "2018-02-13T19:26:17.290Z",
+            "transport_address": "127.0.0.1:9301",
+            "uuid": "DAiX7fFjS3Wii7g2HYKrOg"
+          }
+        }
+      }]
+    },
+    "aggregations": {
+      "nodes": {
+        "buckets": [{
+          "key": "_x_V2YzPQU-a9KRRBxUxZQ",
+          "by_date": {
+            "buckets": [{
+              "key_as_string": "2018-02-13T19:22:10.000Z",
+              "key": 1518549730000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 1.5
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 408
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 79244153296
+              },
+              "odh_node_free_space__metric": {
+                "value": 3164602368
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 24
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 2
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 23311083802
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:22:20.000Z",
+              "key": 1518549740000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 1.8896484375
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 418
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 80850891580
+              },
+              "odh_node_free_space__metric": {
+                "value": 3162071040
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 36
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 7
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 25723239654
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 1606738284,
+                "normalized_value": 160673828.4
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 2412155852,
+                "normalized_value": 241215585.2
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 5,
+                "normalized_value": 0.5
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": 0.3896484375,
+                "normalized_value": 0.03896484375
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 12,
+                "normalized_value": 1.2
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -2531328,
+                "normalized_value": -253132.8
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:22:30.000Z",
+              "key": 1518549750000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.220703125
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 428
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 81159355284
+              },
+              "odh_node_free_space__metric": {
+                "value": 3160485888
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 37
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 1
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 25723239654
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 308463704,
+                "normalized_value": 30846370.4
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": -6,
+                "normalized_value": -0.6
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": 0.3310546875,
+                "normalized_value": 0.03310546875
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 1,
+                "normalized_value": 0.1
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -1585152,
+                "normalized_value": -158515.2
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:22:40.000Z",
+              "key": 1518549760000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 3.0703125
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 438
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 82000164557
+              },
+              "odh_node_free_space__metric": {
+                "value": 3159011328
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 42
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 4
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 27938178895
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 840809273,
+                "normalized_value": 84080927.3
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 2214939241,
+                "normalized_value": 221493924.1
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 3,
+                "normalized_value": 0.3
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": 0.849609375,
+                "normalized_value": 0.0849609375
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 5,
+                "normalized_value": 0.5
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -1474560,
+                "normalized_value": -147456
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:22:50.000Z",
+              "key": 1518549770000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.900390625
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 448
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 82269699529
+              },
+              "odh_node_free_space__metric": {
+                "value": 3158396928
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 28
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 1
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 27938178895
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 269534972,
+                "normalized_value": 26953497.2
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": -3,
+                "normalized_value": -0.3
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.169921875,
+                "normalized_value": -0.0169921875
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": -14,
+                "normalized_value": -1.4
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -614400,
+                "normalized_value": -61440
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:23:00.000Z",
+              "key": 1518549780000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.609375
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 458
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 82573932809
+              },
+              "odh_node_free_space__metric": {
+                "value": 3156910080
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 28
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 1
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 27938178895
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 304233280,
+                "normalized_value": 30423328
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.291015625,
+                "normalized_value": -0.0291015625
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -1486848,
+                "normalized_value": -148684.8
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:23:10.000Z",
+              "key": 1518549790000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.51953125
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 468
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 82834253350
+              },
+              "odh_node_free_space__metric": {
+                "value": 3155001344
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 30
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 1
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 27938178895
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 260320541,
+                "normalized_value": 26032054.1
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.08984375,
+                "normalized_value": -0.008984375
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 2,
+                "normalized_value": 0.2
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -1908736,
+                "normalized_value": -190873.6
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:23:20.000Z",
+              "key": 1518549800000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.359375
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 478
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 83226494668
+              },
+              "odh_node_free_space__metric": {
+                "value": 3153948672
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 42
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 1
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 27938178895
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 392241318,
+                "normalized_value": 39224131.8
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.16015625,
+                "normalized_value": -0.016015625
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 12,
+                "normalized_value": 1.2
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -1052672,
+                "normalized_value": -105267.2
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:23:30.000Z",
+              "key": 1518549810000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.150390625
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 488
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 83491765374
+              },
+              "odh_node_free_space__metric": {
+                "value": 3152474112
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 43
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 1
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 27938178895
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 265270706,
+                "normalized_value": 26527070.6
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.208984375,
+                "normalized_value": -0.0208984375
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 1,
+                "normalized_value": 0.1
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -1474560,
+                "normalized_value": -147456
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:23:40.000Z",
+              "key": 1518549820000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.0390625
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 498
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 84254865150
+              },
+              "odh_node_free_space__metric": {
+                "value": 3150368768
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 37
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 3
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 27938178895
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 763099776,
+                "normalized_value": 76309977.6
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 2,
+                "normalized_value": 0.2
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.111328125,
+                "normalized_value": -0.0111328125
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": -6,
+                "normalized_value": -0.6
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -2105344,
+                "normalized_value": -210534.4
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:23:50.000Z",
+              "key": 1518549830000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 1.9599609375
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 508
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 85201025483
+              },
+              "odh_node_free_space__metric": {
+                "value": 3149758464
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 51
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 4
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 30063709491
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 946160333,
+                "normalized_value": 94616033.3
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 2125530596,
+                "normalized_value": 212553059.6
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 1,
+                "normalized_value": 0.1
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.0791015625,
+                "normalized_value": -0.00791015625
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 14,
+                "normalized_value": 1.4
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -610304,
+                "normalized_value": -61030.4
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:24:00.000Z",
+              "key": 1518549840000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.1796875
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 518
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 85486240745
+              },
+              "odh_node_free_space__metric": {
+                "value": 3148038144
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 51
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 1
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 30063709491
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 285215262,
+                "normalized_value": 28521526.2
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": -3,
+                "normalized_value": -0.3
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": 0.2197265625,
+                "normalized_value": 0.02197265625
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -1720320,
+                "normalized_value": -172032
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:24:10.000Z",
+              "key": 1518549850000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 528
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 85706824361
+              },
+              "odh_node_free_space__metric": {
+                "value": 3146174464
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 51
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 1
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 30063709491
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 220583616,
+                "normalized_value": 22058361.6
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.1796875,
+                "normalized_value": -0.01796875
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -1863680,
+                "normalized_value": -186368
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:24:20.000Z",
+              "key": 1518549860000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.140625
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 538
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 86545803639
+              },
+              "odh_node_free_space__metric": {
+                "value": 3195629568
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 37
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 4
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 31249323660
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 838979278,
+                "normalized_value": 83897927.8
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 1185614169,
+                "normalized_value": 118561416.9
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 3,
+                "normalized_value": 0.3
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": 0.140625,
+                "normalized_value": 0.0140625
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": -14,
+                "normalized_value": -1.4
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": 49455104,
+                "normalized_value": 4945510.4
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:24:30.000Z",
+              "key": 1518549870000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.349609375
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 548
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 87109993704
+              },
+              "odh_node_free_space__metric": {
+                "value": 3143540736
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 39
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 2
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 31273310919
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 564190065,
+                "normalized_value": 56419006.5
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 23987259,
+                "normalized_value": 2398725.9
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": -2,
+                "normalized_value": -0.2
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": 0.208984375,
+                "normalized_value": 0.0208984375
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 2,
+                "normalized_value": 0.2
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -52088832,
+                "normalized_value": -5208883.2
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:24:40.000Z",
+              "key": 1518549880000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.439453125
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 558
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 87940139081
+              },
+              "odh_node_free_space__metric": {
+                "value": 3144876032
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 37
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 4
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 32079981364
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 830145377,
+                "normalized_value": 83014537.7
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 806670445,
+                "normalized_value": 80667044.5
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 2,
+                "normalized_value": 0.2
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": 0.08984375,
+                "normalized_value": 0.008984375
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": -2,
+                "normalized_value": -0.2
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": 1335296,
+                "normalized_value": 133529.6
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:24:50.000Z",
+              "key": 1518549890000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.140625
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 568
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 88333595089
+              },
+              "odh_node_free_space__metric": {
+                "value": 3145293824
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 52
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 2
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 33670032364
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 393456008,
+                "normalized_value": 39345600.8
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 1590051000,
+                "normalized_value": 159005100
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": -2,
+                "normalized_value": -0.2
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.298828125,
+                "normalized_value": -0.0298828125
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 15,
+                "normalized_value": 1.5
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": 417792,
+                "normalized_value": 41779.2
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:25:00.000Z",
+              "key": 1518549900000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 1.8798828125
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 578
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 88712751708
+              },
+              "odh_node_free_space__metric": {
+                "value": 3144929280
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 52
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 1
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 33670032364
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 379156619,
+                "normalized_value": 37915661.9
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": -1,
+                "normalized_value": -0.1
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.2607421875,
+                "normalized_value": -0.02607421875
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -364544,
+                "normalized_value": -36454.4
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:25:10.000Z",
+              "key": 1518549910000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 1.669921875
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 588
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 89174655252
+              },
+              "odh_node_free_space__metric": {
+                "value": 3144785920
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 31
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 2
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 33670032364
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 461903544,
+                "normalized_value": 46190354.4
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 1,
+                "normalized_value": 0.1
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.2099609375,
+                "normalized_value": -0.02099609375
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": -21,
+                "normalized_value": -2.1
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -143360,
+                "normalized_value": -14336
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:25:20.000Z",
+              "key": 1518549920000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 1.41015625
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 598
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 89535735322
+              },
+              "odh_node_free_space__metric": {
+                "value": 3145347072
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 46
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 1
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 34164622899
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 361080070,
+                "normalized_value": 36108007
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 494590535,
+                "normalized_value": 49459053.5
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": -1,
+                "normalized_value": -0.1
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.259765625,
+                "normalized_value": -0.0259765625
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 15,
+                "normalized_value": 1.5
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": 561152,
+                "normalized_value": 56115.2
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:25:30.000Z",
+              "key": 1518549930000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 1.4296875
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 608
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 89818710046
+              },
+              "odh_node_free_space__metric": {
+                "value": 3144146944
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 47
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 1
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 34164622899
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 282974724,
+                "normalized_value": 28297472.4
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": 0.01953125,
+                "normalized_value": 0.001953125
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 1,
+                "normalized_value": 0.1
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -1200128,
+                "normalized_value": -120012.8
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:25:40.000Z",
+              "key": 1518549940000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 1.3701171875
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 618
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 90586195724
+              },
+              "odh_node_free_space__metric": {
+                "value": 3143688192
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 25
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 3
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 34564621879
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 767485678,
+                "normalized_value": 76748567.8
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 399998980,
+                "normalized_value": 39999898
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 2,
+                "normalized_value": 0.2
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.0595703125,
+                "normalized_value": -0.00595703125
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": -22,
+                "normalized_value": -2.2
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -458752,
+                "normalized_value": -45875.2
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:25:50.000Z",
+              "key": 1518549950000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 1.23046875
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 628
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 91244550402
+              },
+              "odh_node_free_space__metric": {
+                "value": 3141689344
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 39
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 3
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 36485560063
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 658354678,
+                "normalized_value": 65835467.8
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 1920938184,
+                "normalized_value": 192093818.4
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.1396484375,
+                "normalized_value": -0.01396484375
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 14,
+                "normalized_value": 1.4
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -1998848,
+                "normalized_value": -199884.8
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:26:00.000Z",
+              "key": 1518549960000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 1.0400390625
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 638
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 91992333071
+              },
+              "odh_node_free_space__metric": {
+                "value": 3141324800
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 40
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 3
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 37715681463
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 747782669,
+                "normalized_value": 74778266.9
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 1230121400,
+                "normalized_value": 123012140
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.1904296875,
+                "normalized_value": -0.01904296875
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 1,
+                "normalized_value": 0.1
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -364544,
+                "normalized_value": -36454.4
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:26:10.000Z",
+              "key": 1518549970000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 1.0302734375
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 648
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": 200000
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 92284067758
+              },
+              "odh_node_free_space__metric": {
+                "value": 3140956160
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 42
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 1
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 37715681463
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 291734687,
+                "normalized_value": 29173468.7
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 10,
+                "normalized_value": 1
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": -2,
+                "normalized_value": -0.2
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.009765625,
+                "normalized_value": -0.0009765625
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 2,
+                "normalized_value": 0.2
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -368640,
+                "normalized_value": -36864
+              }
+            }]
+          }
+        }, {
+          "key": "DAiX7fFjS3Wii7g2HYKrOg",
+          "by_date": {
+            "buckets": [{
+              "key_as_string": "2018-02-13T19:22:20.000Z",
+              "key": 1518549740000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 1.8896484375
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 810790936244
+              },
+              "odh_node_free_space__metric": {
+                "value": 3162230784
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 39
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 39
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:22:30.000Z",
+              "key": 1518549750000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.220703125
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 825262231049
+              },
+              "odh_node_free_space__metric": {
+                "value": 3160723456
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 42
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 8
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 14471294805,
+                "normalized_value": 1447129480.5
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": -31,
+                "normalized_value": -3.1
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": 0.3310546875,
+                "normalized_value": 0.03310546875
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 3,
+                "normalized_value": 0.3
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -1507328,
+                "normalized_value": -150732.8
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:22:40.000Z",
+              "key": 1518549760000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 3.0703125
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 840142354488
+              },
+              "odh_node_free_space__metric": {
+                "value": 3159162880
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 40
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 9
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 14880123439,
+                "normalized_value": 1488012343.9
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 1,
+                "normalized_value": 0.1
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": 0.849609375,
+                "normalized_value": 0.0849609375
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": -2,
+                "normalized_value": -0.2
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -1560576,
+                "normalized_value": -156057.6
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:22:50.000Z",
+              "key": 1518549770000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.900390625
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 853176594348
+              },
+              "odh_node_free_space__metric": {
+                "value": 3158499328
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 28
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 3
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 13034239860,
+                "normalized_value": 1303423986
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": -6,
+                "normalized_value": -0.6
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.169921875,
+                "normalized_value": -0.0169921875
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": -12,
+                "normalized_value": -1.2
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -663552,
+                "normalized_value": -66355.2
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:23:00.000Z",
+              "key": 1518549780000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.609375
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 865475051281
+              },
+              "odh_node_free_space__metric": {
+                "value": 3157045248
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 28
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 1
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 12298456933,
+                "normalized_value": 1229845693.3
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": -2,
+                "normalized_value": -0.2
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.291015625,
+                "normalized_value": -0.0291015625
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -1454080,
+                "normalized_value": -145408
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:23:10.000Z",
+              "key": 1518549790000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.51953125
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 877571060666
+              },
+              "odh_node_free_space__metric": {
+                "value": 3155177472
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 26
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 1
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 12096009385,
+                "normalized_value": 1209600938.5
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.08984375,
+                "normalized_value": -0.008984375
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": -2,
+                "normalized_value": -0.2
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -1867776,
+                "normalized_value": -186777.6
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:23:20.000Z",
+              "key": 1518549800000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.359375
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 890240611377
+              },
+              "odh_node_free_space__metric": {
+                "value": 3154198528
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 40
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 2
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 12669550711,
+                "normalized_value": 1266955071.1
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 1,
+                "normalized_value": 0.1
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.16015625,
+                "normalized_value": -0.016015625
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 14,
+                "normalized_value": 1.4
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -978944,
+                "normalized_value": -97894.4
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:23:30.000Z",
+              "key": 1518549810000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.150390625
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 902703393085
+              },
+              "odh_node_free_space__metric": {
+                "value": 3152666624
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 38
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 1
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 12462781708,
+                "normalized_value": 1246278170.8
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": -1,
+                "normalized_value": -0.1
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.208984375,
+                "normalized_value": -0.0208984375
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": -2,
+                "normalized_value": -0.2
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -1531904,
+                "normalized_value": -153190.4
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:23:40.000Z",
+              "key": 1518549820000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.0390625
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 915747539666
+              },
+              "odh_node_free_space__metric": {
+                "value": 3150692352
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 32
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 3
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 13044146581,
+                "normalized_value": 1304414658.1
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 2,
+                "normalized_value": 0.2
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.111328125,
+                "normalized_value": -0.0111328125
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": -6,
+                "normalized_value": -0.6
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -1974272,
+                "normalized_value": -197427.2
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:23:50.000Z",
+              "key": 1518549830000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 1.9599609375
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 928758926483
+              },
+              "odh_node_free_space__metric": {
+                "value": 3149934592
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 23
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 3
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 13011386817,
+                "normalized_value": 1301138681.7
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.0791015625,
+                "normalized_value": -0.00791015625
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": -9,
+                "normalized_value": -0.9
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -757760,
+                "normalized_value": -75776
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:24:00.000Z",
+              "key": 1518549840000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.1796875
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 941646282031
+              },
+              "odh_node_free_space__metric": {
+                "value": 3148406784
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 22
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 1
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 12887355548,
+                "normalized_value": 1288735554.8
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": -2,
+                "normalized_value": -0.2
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": 0.2197265625,
+                "normalized_value": 0.02197265625
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": -1,
+                "normalized_value": -0.1
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -1527808,
+                "normalized_value": -152780.8
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:24:10.000Z",
+              "key": 1518549850000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 954414302394
+              },
+              "odh_node_free_space__metric": {
+                "value": 3146469376
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 22
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 2
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 12768020363,
+                "normalized_value": 1276802036.3
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 1,
+                "normalized_value": 0.1
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.1796875,
+                "normalized_value": -0.01796875
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -1937408,
+                "normalized_value": -193740.8
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:24:20.000Z",
+              "key": 1518549860000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.140625
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 967670642606
+              },
+              "odh_node_free_space__metric": {
+                "value": 3146575872
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 34
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 5
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 13256340212,
+                "normalized_value": 1325634021.2
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 3,
+                "normalized_value": 0.3
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": 0.140625,
+                "normalized_value": 0.0140625
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 12,
+                "normalized_value": 1.2
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": 106496,
+                "normalized_value": 10649.6
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:24:30.000Z",
+              "key": 1518549870000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.349609375
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 981871818195
+              },
+              "odh_node_free_space__metric": {
+                "value": 3143720960
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 33
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 3
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 14201175589,
+                "normalized_value": 1420117558.9
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": -2,
+                "normalized_value": -0.2
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": 0.208984375,
+                "normalized_value": 0.0208984375
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": -1,
+                "normalized_value": -0.1
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -2854912,
+                "normalized_value": -285491.2
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:24:40.000Z",
+              "key": 1518549880000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.439453125
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 992156482002
+              },
+              "odh_node_free_space__metric": {
+                "value": 3145134080
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 39
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 8
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 10284663807,
+                "normalized_value": 1028466380.7
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 5,
+                "normalized_value": 0.5
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": 0.08984375,
+                "normalized_value": 0.008984375
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 6,
+                "normalized_value": 0.6
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": 1413120,
+                "normalized_value": 141312
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:24:50.000Z",
+              "key": 1518549890000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 2.140625
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 995592458443
+              },
+              "odh_node_free_space__metric": {
+                "value": 3145375744
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 24
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 3
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 3435976441,
+                "normalized_value": 343597644.1
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": -5,
+                "normalized_value": -0.5
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.298828125,
+                "normalized_value": -0.0298828125
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": -15,
+                "normalized_value": -1.5
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": 241664,
+                "normalized_value": 24166.4
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:25:00.000Z",
+              "key": 1518549900000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 1.8798828125
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 998276280550
+              },
+              "odh_node_free_space__metric": {
+                "value": 3145003008
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 24
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 4
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 2683822107,
+                "normalized_value": 268382210.7
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 1,
+                "normalized_value": 0.1
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.2607421875,
+                "normalized_value": -0.02607421875
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -372736,
+                "normalized_value": -37273.6
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:25:10.000Z",
+              "key": 1518549910000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 1.669921875
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 1000229207942
+              },
+              "odh_node_free_space__metric": {
+                "value": 3144859648
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 23
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 1
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 1952927392,
+                "normalized_value": 195292739.2
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": -3,
+                "normalized_value": -0.3
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.2099609375,
+                "normalized_value": -0.02099609375
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": -1,
+                "normalized_value": -0.1
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -143360,
+                "normalized_value": -14336
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:25:20.000Z",
+              "key": 1518549920000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 1.41015625
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 1001857827909
+              },
+              "odh_node_free_space__metric": {
+                "value": 3145433088
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 41
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 1
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 1628619967,
+                "normalized_value": 162861996.7
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.259765625,
+                "normalized_value": -0.0259765625
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 18,
+                "normalized_value": 1.8
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": 573440,
+                "normalized_value": 57344
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:25:30.000Z",
+              "key": 1518549930000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 1.4296875
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 1009162784819
+              },
+              "odh_node_free_space__metric": {
+                "value": 3144224768
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 41
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 2
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 7304956910,
+                "normalized_value": 730495691
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 1,
+                "normalized_value": 0.1
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": 0.01953125,
+                "normalized_value": 0.001953125
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -1208320,
+                "normalized_value": -120832
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:25:40.000Z",
+              "key": 1518549940000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 1.3701171875
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 1014294280510
+              },
+              "odh_node_free_space__metric": {
+                "value": 3143766016
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 29
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 4
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 5131495691,
+                "normalized_value": 513149569.1
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 2,
+                "normalized_value": 0.2
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.0595703125,
+                "normalized_value": -0.00595703125
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": -12,
+                "normalized_value": -1.2
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -458752,
+                "normalized_value": -45875.2
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:25:50.000Z",
+              "key": 1518549950000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 1.23046875
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 1022201061267
+              },
+              "odh_node_free_space__metric": {
+                "value": 3141775360
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 43
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 2
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 7906780757,
+                "normalized_value": 790678075.7
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": -2,
+                "normalized_value": -0.2
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.1396484375,
+                "normalized_value": -0.01396484375
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 14,
+                "normalized_value": 1.4
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -1990656,
+                "normalized_value": -199065.6
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:26:00.000Z",
+              "key": 1518549960000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 1.0400390625
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 1024316448990
+              },
+              "odh_node_free_space__metric": {
+                "value": 3141402624
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 41
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 2115387723,
+                "normalized_value": 211538772.3
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": -2,
+                "normalized_value": -0.2
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.1904296875,
+                "normalized_value": -0.01904296875
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": -2,
+                "normalized_value": -0.2
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -372736,
+                "normalized_value": -37273.6
+              }
+            }, {
+              "key_as_string": "2018-02-13T19:26:10.000Z",
+              "key": 1518549970000,
+              "doc_count": 1,
+              "odh_node_load_average__metric": {
+                "value": 1.0302734375
+              },
+              "odh_node_cgroup_quota__periods": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__quota": {
+                "value": -1
+              },
+              "odh_node_cgroup_quota__usage": {
+                "value": 1026253543446
+              },
+              "odh_node_free_space__metric": {
+                "value": 3141033984
+              },
+              "odh_node_jvm_mem_percent__metric": {
+                "value": 41
+              },
+              "odh_node_cpu_utilization__metric": {
+                "value": 1
+              },
+              "odh_node_cgroup_throttled__metric": {
+                "value": 0
+              },
+              "odh_node_cgroup_quota__usage_deriv": {
+                "value": 1937094456,
+                "normalized_value": 193709445.6
+              },
+              "odh_node_cgroup_quota__periods_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cgroup_throttled__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_cpu_utilization__metric_deriv": {
+                "value": 1,
+                "normalized_value": 0.1
+              },
+              "odh_node_load_average__metric_deriv": {
+                "value": -0.009765625,
+                "normalized_value": -0.0009765625
+              },
+              "odh_node_jvm_mem_percent__metric_deriv": {
+                "value": 0,
+                "normalized_value": 0
+              },
+              "odh_node_free_space__metric_deriv": {
+                "value": -368640,
+                "normalized_value": -36864
+              }
+            }]
+          }
+        }]
+      }
+    }
+  },
+  "clusterStats": {
+    "cluster_name": "hello",
+    "cluster_state": {
+      "master_node": "_x_V2YzPQU-a9KRRBxUxZQ",
+      "nodes": {
+        "DAiX7fFjS3Wii7g2HYKrOg": {
+          "attributes": {
+            "ml.enabled": "true",
+            "ml.machine_memory": "4143853568",
+            "ml.max_open_jobs": "20"
+          },
+          "ephemeral_id": "gVSVcuUXRKqYZgY_eLjdQA",
+          "name": "hello02",
+          "transport_address": "127.0.0.1:9301"
+        },
+        "_x_V2YzPQU-a9KRRBxUxZQ": {
+          "attributes": {
+            "ml.enabled": "true",
+            "ml.machine_memory": "4143853568",
+            "ml.max_open_jobs": "20"
+          },
+          "ephemeral_id": "Q2RAn6QYQFyPNblvlm-C8g",
+          "name": "hello01",
+          "transport_address": "127.0.0.1:9300"
+        }
+      },
+      "nodes_hash": 774278652,
+      "state_uuid": "xtTdpqmySg-IrwDDKgYk8w",
+      "status": "green",
+      "version": 55
+    },
+    "cluster_stats": {
+      "indices": {
+        "completion": {
+          "size_in_bytes": 0
+        },
+        "count": 6,
+        "docs": {
+          "count": 414,
+          "deleted": 36
+        },
+        "fielddata": {
+          "evictions": 0,
+          "memory_size_in_bytes": 0
+        },
+        "query_cache": {
+          "cache_count": 0,
+          "cache_size": 0,
+          "evictions": 0,
+          "hit_count": 0,
+          "memory_size_in_bytes": 0,
+          "miss_count": 0,
+          "total_count": 0
+        },
+        "segments": {
+          "count": 46,
+          "doc_values_memory_in_bytes": 61544,
+          "file_sizes": {},
+          "fixed_bit_set_memory_in_bytes": 400,
+          "index_writer_memory_in_bytes": 287996,
+          "max_unsafe_auto_id_timestamp": 1518549739793,
+          "memory_in_bytes": 306088,
+          "norms_memory_in_bytes": 11520,
+          "points_memory_in_bytes": 3705,
+          "stored_fields_memory_in_bytes": 14456,
+          "term_vectors_memory_in_bytes": 0,
+          "terms_memory_in_bytes": 214863,
+          "version_map_memory_in_bytes": 10008
+        },
+        "shards": {
+          "index": {
+            "primaries": {
+              "avg": 1,
+              "max": 1,
+              "min": 1
+            },
+            "replication": {
+              "avg": 1,
+              "max": 1,
+              "min": 1
+            },
+            "shards": {
+              "avg": 2,
+              "max": 2,
+              "min": 2
+            }
+          },
+          "primaries": 6,
+          "replication": 1,
+          "total": 12
+        },
+        "store": {
+          "size_in_bytes": 1874096
+        }
+      },
+      "nodes": {
+        "count": {
+          "coordinating_only": 0,
+          "data": 2,
+          "ingest": 2,
+          "master": 2,
+          "total": 2
+        },
+        "fs": {
+          "available_in_bytes": 3140956160,
+          "free_in_bytes": 4016672768,
+          "total_in_bytes": 16775028736
+        },
+        "jvm": {
+          "max_uptime_in_millis": 1136459,
+          "mem": {
+            "heap_max_in_bytes": 835321856,
+            "heap_used_in_bytes": 263910352
+          },
+          "threads": 78,
+          "versions": [{
+            "count": 2,
+            "version": "1.8.0_131",
+            "vm_name": "OpenJDK 64-Bit Server VM",
+            "vm_vendor": "Oracle Corporation",
+            "vm_version": "25.131-b11"
+          }]
+        },
+        "network_types": {
+          "http_types": {
+            "security4": 2
+          },
+          "transport_types": {
+            "security4": 2
+          }
+        },
+        "os": {
+          "allocated_processors": 2,
+          "available_processors": 4,
+          "mem": {
+            "free_in_bytes": 1061044224,
+            "free_percent": 13,
+            "total_in_bytes": 8287707136,
+            "used_in_bytes": 7226662912,
+            "used_percent": 87
+          },
+          "names": [{
+            "count": 2,
+            "name": "Linux"
+          }]
+        },
+        "plugins": [{
+          "classname": "org.elasticsearch.xpack.XPackPlugin",
+          "description": "Elasticsearch Expanded Pack Plugin",
+          "has_native_controller": true,
+          "name": "x-pack",
+          "requires_keystore": true,
+          "version": "7.0.0-alpha1"
+        }],
+        "process": {
+          "cpu": {
+            "percent": 4
+          },
+          "open_file_descriptors": {
+            "avg": 212,
+            "max": 217,
+            "min": 208
+          }
+        },
+        "versions": ["7.0.0-alpha1"]
+      },
+      "status": "green",
+      "timestamp": 1518549978465
+    },
+    "cluster_uuid": "Cbo7k85ZRdy--yxmqeykog",
+    "license": {
+      "expiry_date": "2030-09-29T23:59:59.999Z",
+      "expiry_date_in_millis": 1916956799999,
+      "issue_date": "2014-09-29T00:00:00.000Z",
+      "status": "active",
+      "type": "trial"
+    },
+    "version": "7.0.0-alpha1"
+  },
+  "shardStats": {
+    "indicesTotals": {
+      "primary": 6,
+      "replica": 6,
+      "unassigned": {
+        "primary": 0,
+        "replica": 0
+      }
+    },
+    "nodes": {
+      "DAiX7fFjS3Wii7g2HYKrOg": {
+        "shardCount": 6,
+        "indexCount": 6,
+        "name": "hello02",
+        "node_ids": ["DAiX7fFjS3Wii7g2HYKrOg"],
+        "type": "node"
+      },
+      "_x_V2YzPQU-a9KRRBxUxZQ": {
+        "shardCount": 6,
+        "indexCount": 6,
+        "name": "hello01",
+        "node_ids": ["_x_V2YzPQU-a9KRRBxUxZQ"],
+        "type": "master"
+      }
+    }
+  },
+  "timeOptions": {
+    "min": 1518549720000,
+    "max": 1518550020000,
+    "bucketSize": 10
+  }
+}

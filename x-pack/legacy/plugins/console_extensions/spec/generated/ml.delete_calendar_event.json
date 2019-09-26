@@ -1,0 +1,10 @@
+{
+  "ml.delete_calendar_event": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_ml/calendars/{calendar_id}/events/{event_id}"
+    ]
+  }
+}

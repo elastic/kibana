@@ -18,7 +18,7 @@ To target the current development version of Kibana just use the default  `maste
 
 ```sh
 node scripts/generate_plugin my_plugin_name
-# generates a plugin in `../kibana-extra/my_plugin_name`
+# generates a plugin in `plugins/my_plugin_name`
 ```
 
 To target 6.3, use the `6.x` branch (until the `6.3` branch is created).
@@ -64,7 +64,7 @@ Generated plugins receive a handful of scripts that can be used during developme
     Start kibana and have it include this plugin. You can pass any arguments that you would normally send to `bin/kibana`
 
       ```
-      yarn start --elasticsearch.url http://localhost:9220
+      yarn start --elasticsearch.hosts http://localhost:9220
       ```
 
   - `yarn build`
@@ -75,7 +75,7 @@ Generated plugins receive a handful of scripts that can be used during developme
 
     Run the browser tests in a real web browser.
 
-  - `yarn test:server`
+  - `yarn test:mocha`
 
     Run the server tests using mocha.
 

@@ -1,0 +1,279 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots arguments/SeriesStyle simple 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasArgSeries__colorPicker"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        Color 
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <button
+          aria-label="Color: Auto"
+          className="euiLink euiLink--primary"
+          onClick={[Function]}
+          type="button"
+        >
+          Auto 
+          <svg
+            className="euiIcon euiIcon--medium euiIcon-isLoading"
+            focusable="false"
+            height={16}
+            style={null}
+            viewBox="0 0 16 16"
+            width={16}
+            xmlns="http://www.w3.org/2000/svg"
+          />
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots arguments/SeriesStyle/components simple: defaults 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasArgSeries__colorPicker"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        Color 
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <button
+          aria-label="Color: Auto"
+          className="euiLink euiLink--primary"
+          onClick={[Function]}
+          type="button"
+        >
+          Auto 
+          <svg
+            className="euiIcon euiIcon--medium euiIcon-isLoading"
+            focusable="false"
+            height={16}
+            style={null}
+            viewBox="0 0 16 16"
+            width={16}
+            xmlns="http://www.w3.org/2000/svg"
+          />
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots arguments/SeriesStyle/components simple: no labels 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasArgSeries__colorPicker"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        Color 
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <button
+          aria-label="Color: Auto"
+          className="euiLink euiLink--primary"
+          onClick={[Function]}
+          type="button"
+        >
+          Auto 
+          <svg
+            className="euiIcon euiIcon--medium euiIcon-isLoading"
+            focusable="false"
+            height={16}
+            style={null}
+            viewBox="0 0 16 16"
+            width={16}
+            xmlns="http://www.w3.org/2000/svg"
+          />
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots arguments/SeriesStyle/components simple: no series 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasArgSeries__colorPicker"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        Color 
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <button
+          aria-label="Color: Auto"
+          className="euiLink euiLink--primary"
+          onClick={[Function]}
+          type="button"
+        >
+          Auto 
+          <svg
+            className="euiIcon euiIcon--medium euiIcon-isLoading"
+            focusable="false"
+            height={16}
+            style={null}
+            viewBox="0 0 16 16"
+            width={16}
+            xmlns="http://www.w3.org/2000/svg"
+          />
+        </button>
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <span
+        className="euiToolTipAnchor"
+        onMouseOut={[Function]}
+        onMouseOver={[Function]}
+      >
+        <svg
+          aria-label="Info"
+          className="euiIcon euiIcon--medium euiIcon--warning euiIcon-isLoading"
+          focusable="true"
+          height={16}
+          onBlur={[Function]}
+          onFocus={[Function]}
+          style={null}
+          tabIndex={0}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots arguments/SeriesStyle/components simple: with series 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasArgSeries__colorPicker"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        Color 
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <button
+          aria-label="Color: Auto"
+          className="euiLink euiLink--primary"
+          onClick={[Function]}
+          type="button"
+        >
+          Auto 
+          <svg
+            className="euiIcon euiIcon--medium euiIcon-isLoading"
+            focusable="false"
+            height={16}
+            style={null}
+            viewBox="0 0 16 16"
+            width={16}
+            xmlns="http://www.w3.org/2000/svg"
+          />
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import _ from 'lodash';
 import { migrateFilter } from '../migrate_filter';
 

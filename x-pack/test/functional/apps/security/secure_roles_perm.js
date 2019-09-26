@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
 export default function ({ getService, getPageObjects }) {
 
   const PageObjects = getPageObjects(['security', 'settings', 'monitoring', 'discover', 'common', 'reporting', 'header']);
   const log = getService('log');
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -20,12 +20,12 @@ export default function ({ getService, getPageObjects }) {
 
   describe('secure roles and permissions', function () {
     before(async () => {
-      await remote.setWindowSize(1600, 1000);
+      await browser.setWindowSize(1600, 1000);
       log.debug('users');
       await esArchiver.loadIfNeeded('logstash_functional');
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC', 'defaultIndex': 'logstash-*' });
+      await esArchiver.load('security/discover');
+      await kibanaServer.uiSettings.replace({ 'defaultIndex': 'logstash-*' });
       await PageObjects.settings.navigateTo();
     });
 
@@ -33,9 +33,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('logstash_reader', {
         elasticsearch: {
-          "indices": [{
-            "names": ["logstash-*"],
-            "privileges": ["read", "view_index_metadata"]
+          'indices': [{
+            'names': ['logstash-*'],
+            'privileges': ['read', 'view_index_metadata']
           }]
         },
         kibana: {
@@ -63,15 +63,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.security.logout();
       await PageObjects.security.login('Rashmi', 'changeme');
     });
-
-    //Verify the Access Denied message is displayed
-    it('Kibana User navigating to Monitoring gets Access Denied', async function () {
-      const expectedMessage = 'Access Denied';
-      await PageObjects.monitoring.navigateTo();
-      const actualMessage = await PageObjects.monitoring.getAccessDeniedMessage();
-      expect(actualMessage).to.be(expectedMessage);
-    });
-
 
     it('Kibana User navigating to Management gets permission denied', async function () {
       await PageObjects.settings.navigateTo();

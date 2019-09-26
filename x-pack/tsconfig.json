@@ -1,30 +1,41 @@
 {
   "extends": "../tsconfig.json",
   "include": [
-    "common/**/*",
-    "server/**/*",
+    "typings/**/*",
+    "legacy/common/**/*",
+    "legacy/server/**/*",
+    "legacy/plugins/**/*",
     "plugins/**/*",
     "test_utils/**/*"
   ],
   "exclude": [
-    "test/**/*"
+    "test/**/*",
+    "legacy/plugins/siem/cypress/**/*",
+    "legacy/plugins/apm/cypress/**/*",
+    "**/typespec_tests.ts"
   ],
   "compilerOptions": {
+    "outDir": ".",
     "paths": {
+      "kibana/public": ["src/core/public"],
+      "kibana/server": ["src/core/server"],
       "ui/*": [
-        "src/ui/public/*"
+        "src/legacy/ui/public/*"
       ],
       "plugins/xpack_main/*": [
-        "x-pack/plugins/xpack_main/public/*"
+        "x-pack/legacy/plugins/xpack_main/public/*"
       ],
       "plugins/security/*": [
-        "x-pack/plugins/security/public/*"
+        "x-pack/legacy/plugins/security/public/*"
       ],
       "plugins/spaces/*": [
-        "x-pack/plugins/spaces/public/*"
+        "x-pack/legacy/plugins/spaces/public/*"
       ],
       "test_utils/*": [
         "x-pack/test_utils/*"
+      ],
+      "monitoring/common/*": [
+        "x-pack/monitoring/common/*"
       ]
     },
     "types": [

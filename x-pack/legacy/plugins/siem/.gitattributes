@@ -1,0 +1,6 @@
+# Auto-collapse generated files in GitHub
+# https://help.github.com/en/articles/customizing-how-changed-files-appear-on-github
+x-pack/legacy/plugins/siem/public/graphql/types.ts linguist-generated=true
+x-pack/legacy/plugins/siem/server/graphql/types.ts linguist-generated=true
+x-pack/legacy/plugins/siem/public/graphql/introspection.json linguist-generated=true
+

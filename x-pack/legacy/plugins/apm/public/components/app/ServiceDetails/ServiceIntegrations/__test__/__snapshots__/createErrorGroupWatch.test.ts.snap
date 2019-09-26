@@ -1,0 +1,169 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`createErrorGroupWatch should format email correctly 1`] = `
+"Your service \\"opbeans-node\\" has error groups which exceeds 10 occurrences within \\"24h\\"
+
+
+<strong>this is a string</strong>
+N/A
+7761 occurrences
+
+<strong>foo</strong>
+<anonymous> (server/coffee.js)
+7752 occurrences
+
+<strong>socket hang up</strong>
+createHangUpError (_http_client.js)
+3887 occurrences
+
+<strong>this will not get captured by express</strong>
+<anonymous> (server/coffee.js)
+3886 occurrences
+"
+`;
+
+exports[`createErrorGroupWatch should format slack message correctly 1`] = `
+"Your service \\"opbeans-node\\" has error groups which exceeds 10 occurrences within \\"24h\\"
+
+>*this is a string*
+>N/A
+>7761 occurrences
+
+>*foo*
+>\`<anonymous> (server/coffee.js)\`
+>7752 occurrences
+
+>*socket hang up*
+>\`createHangUpError (_http_client.js)\`
+>3887 occurrences
+
+>*this will not get captured by express*
+>\`<anonymous> (server/coffee.js)\`
+>3886 occurrences
+"
+`;
+
+exports[`createErrorGroupWatch should format template correctly 1`] = `
+Object {
+  "actions": Object {
+    "email": Object {
+      "email": Object {
+        "body": Object {
+          "html": "Your service \\"opbeans-node\\" has error groups which exceeds 10 occurrences within \\"24h\\"<br/><br/><br/><strong>this is a string</strong><br/>N/A<br/>7761 occurrences<br/><br/><strong>foo</strong><br/><anonymous> (server/coffee.js)<br/>7752 occurrences<br/><br/><strong>socket hang up</strong><br/>createHangUpError (_http_client.js)<br/>3887 occurrences<br/><br/><strong>this will not get captured by express</strong><br/><anonymous> (server/coffee.js)<br/>3886 occurrences<br/>",
+        },
+        "subject": "\\"opbeans-node\\" has error groups which exceeds the threshold",
+        "to": "my@email.dk,mySecond@email.dk",
+      },
+    },
+    "log_error": Object {
+      "logging": Object {
+        "text": "Your service \\"opbeans-node\\" has error groups which exceeds 10 occurrences within \\"24h\\"<br/><br/><br/><strong>this is a string</strong><br/>N/A<br/>7761 occurrences<br/><br/><strong>foo</strong><br/><anonymous> (server/coffee.js)<br/>7752 occurrences<br/><br/><strong>socket hang up</strong><br/>createHangUpError (_http_client.js)<br/>3887 occurrences<br/><br/><strong>this will not get captured by express</strong><br/><anonymous> (server/coffee.js)<br/>3886 occurrences<br/>",
+      },
+    },
+    "slack_webhook": Object {
+      "webhook": Object {
+        "body": "__json__::{\\"text\\":\\"Your service \\\\\\"opbeans-node\\\\\\" has error groups which exceeds 10 occurrences within \\\\\\"24h\\\\\\"\\\\n\\\\n>*this is a string*\\\\n>N/A\\\\n>7761 occurrences\\\\n\\\\n>*foo*\\\\n>\`<anonymous> (server/coffee.js)\`\\\\n>7752 occurrences\\\\n\\\\n>*socket hang up*\\\\n>\`createHangUpError (_http_client.js)\`\\\\n>3887 occurrences\\\\n\\\\n>*this will not get captured by express*\\\\n>\`<anonymous> (server/coffee.js)\`\\\\n>3886 occurrences\\\\n\\"}",
+        "headers": Object {
+          "Content-Type": "application/json",
+        },
+        "host": "hooks.slack.com",
+        "method": "POST",
+        "path": "/services/slackid1/slackid2/slackid3",
+        "port": 443,
+        "scheme": "https",
+      },
+    },
+  },
+  "condition": Object {
+    "script": Object {
+      "source": "return ctx.payload.aggregations.error_groups.buckets.length > 0",
+    },
+  },
+  "input": Object {
+    "search": Object {
+      "request": Object {
+        "body": Object {
+          "aggs": Object {
+            "error_groups": Object {
+              "aggs": Object {
+                "sample": Object {
+                  "top_hits": Object {
+                    "_source": Array [
+                      "error.log.message",
+                      "error.exception.message",
+                      "error.exception.handled",
+                      "error.culprit",
+                      "error.grouping_key",
+                      "@timestamp",
+                    ],
+                    "size": 1,
+                    "sort": Array [
+                      Object {
+                        "@timestamp": "desc",
+                      },
+                    ],
+                  },
+                },
+              },
+              "terms": Object {
+                "field": "error.grouping_key",
+                "min_doc_count": "10",
+                "order": Object {
+                  "_count": "desc",
+                },
+                "size": 10,
+              },
+            },
+          },
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "term": Object {
+                    "service.name": "opbeans-node",
+                  },
+                },
+                Object {
+                  "term": Object {
+                    "processor.event": "error",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "now-24h",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          "size": 0,
+        },
+        "indices": Array [
+          "myIndexPattern",
+        ],
+      },
+    },
+  },
+  "metadata": Object {
+    "emails": Array [
+      "my@email.dk",
+      "mySecond@email.dk",
+    ],
+    "serviceName": "opbeans-node",
+    "slackUrlPath": "/services/slackid1/slackid2/slackid3",
+    "threshold": 10,
+    "timeRangeUnit": "h",
+    "timeRangeValue": 24,
+    "trigger": "This value must be changed in trigger section",
+  },
+  "trigger": Object {
+    "schedule": Object {
+      "daily": Object {
+        "at": "08:00",
+      },
+    },
+  },
+}
+`;

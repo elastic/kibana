@@ -4,32 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import {
   USERS_PATH,
   EDIT_USERS_PATH,
   ROLES_PATH,
   EDIT_ROLES_PATH,
-} from '../../../../plugins/security/public/views/management/management_urls';
+  CLONE_ROLES_PATH,
+} from '../../../../legacy/plugins/security/public/views/management/management_urls';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
 
-  describe('Management', () => {
+  describe('Management', function () {
+    this.tags(['skipFirefox']);
+
     before(async () => {
       // await PageObjects.security.login('elastic', 'changeme');
       await PageObjects.security.initTests();
       await kibanaServer.uiSettings.update({
-        'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });
       await PageObjects.settings.navigateTo();
 
       // Create logstash-readonly role
-      await PageObjects.settings.clickLinkText('Roles');
+      await testSubjects.click('roles');
       await PageObjects.security.clickCreateNewRole();
       await testSubjects.setValue('roleFormNameInput', 'logstash-readonly');
       await PageObjects.security.addIndexToRole('logstash-*');
@@ -39,18 +41,18 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.navigateTo();
     });
 
-    describe('Security', async () => {
-      describe('navigation', async () => {
+    describe('Security', () => {
+      describe('navigation', () => {
         it('Can navigate to create user section', async () => {
           await PageObjects.security.clickElasticsearchUsers();
           await PageObjects.security.clickCreateNewUser();
-          const currentUrl = await remote.getCurrentUrl();
+          const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_USERS_PATH);
         });
 
         it('Clicking cancel in create user section brings user back to listing', async () => {
           await PageObjects.security.clickCancelEditUser();
-          const currentUrl = await remote.getCurrentUrl();
+          const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(USERS_PATH);
           expect(currentUrl).to.not.contain(EDIT_USERS_PATH);
         });
@@ -66,37 +68,36 @@ export default function ({ getService, getPageObjects }) {
 
           await PageObjects.security.clickSaveEditUser();
 
-          const currentUrl = await remote.getCurrentUrl();
+          const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(USERS_PATH);
           expect(currentUrl).to.not.contain(EDIT_USERS_PATH);
         });
 
         it('Can navigate to edit user section', async () => {
           await PageObjects.settings.clickLinkText('new-user');
-          const currentUrl = await remote.getCurrentUrl();
+          const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_USERS_PATH);
-          const userNameInput = await testSubjects.find('userFormUserNameInput');
           // allow time for user to load
           await PageObjects.common.sleep(500);
-          const userName = await userNameInput.getProperty('value');
+          const userName = await testSubjects.getAttribute('userFormUserNameInput', 'value');
           expect(userName).to.equal('new-user');
         });
 
         it('Can navigate to roles section', async () => {
-          await PageObjects.settings.clickLinkText('Roles');
-          const currentUrl = await remote.getCurrentUrl();
+          await PageObjects.security.clickElasticsearchRoles();
+          const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(ROLES_PATH);
         });
 
         it('Can navigate to create role section', async () => {
           await PageObjects.security.clickCreateNewRole();
-          const currentUrl = await remote.getCurrentUrl();
+          const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_ROLES_PATH);
         });
 
         it('Clicking cancel in create role section brings user back to listing', async () => {
           await PageObjects.security.clickCancelEditRole();
-          const currentUrl = await remote.getCurrentUrl();
+          const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(ROLES_PATH);
           expect(currentUrl).to.not.contain(EDIT_ROLES_PATH);
         });
@@ -104,23 +105,30 @@ export default function ({ getService, getPageObjects }) {
         it('Clicking save in create role section brings user back to listing', async () => {
           await PageObjects.security.clickCreateNewRole();
 
-          await testSubjects.setValue('roleFormNameInput', 'my-new-role');
+          await testSubjects.setValue('roleFormNameInput', 'a-my-new-role');
 
           await PageObjects.security.clickSaveEditRole();
 
-          const currentUrl = await remote.getCurrentUrl();
+          const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(ROLES_PATH);
           expect(currentUrl).to.not.contain(EDIT_ROLES_PATH);
         });
 
         it('Can navigate to edit role section', async () => {
-          await PageObjects.settings.clickLinkText('my-new-role');
-          const currentUrl = await remote.getCurrentUrl();
+          await PageObjects.settings.clickLinkText('a-my-new-role');
+          const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_ROLES_PATH);
 
-          const userNameInput = await testSubjects.find('roleFormNameInput');
-          const userName = await userNameInput.getProperty('value');
-          expect(userName).to.equal('my-new-role');
+          const userName = await testSubjects.getAttribute('roleFormNameInput', 'value');
+          expect(userName).to.equal('a-my-new-role');
+        });
+
+        it('Can navigate to clone role section', async () => {
+          await PageObjects.settings.navigateTo();
+          await PageObjects.security.clickElasticsearchRoles();
+          await PageObjects.security.clickCloneRole('a-my-new-role');
+          const currentUrl = await browser.getCurrentUrl();
+          expect(currentUrl).to.contain(CLONE_ROLES_PATH);
         });
 
         it('Can navigate to edit role section from users page', async () => {
@@ -139,9 +147,9 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.security.clickSaveEditUser();
 
           await PageObjects.settings.navigateTo();
-          await PageObjects.settings.clickLinkText('Users');
+          await testSubjects.click('users');
           await PageObjects.settings.clickLinkText('kibana_dashboard_only_user');
-          const currentUrl = await remote.getCurrentUrl();
+          const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_ROLES_PATH);
         });
       });

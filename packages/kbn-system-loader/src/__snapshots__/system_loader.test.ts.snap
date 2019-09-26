@@ -1,5 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`throws if adding that has the same name as a system that's already added 1`] = `"a system named [foo] has already been added"`;
-
-exports[`throws if starting a system that depends on a system that's not present 1`] = `"System [foo] depends on [does-not-exist], which is not present"`;

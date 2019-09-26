@@ -18,16 +18,17 @@
  */
 
 import { delay } from 'bluebird';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import getUrl from '../../../src/test_utils/get_url';
 
 export function CommonPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const config = getService('config');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const retry = getService('retry');
   const find = getService('find');
+  const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['shield']);
@@ -36,6 +37,33 @@ export function CommonPageProvider({ getService, getPageObjects }) {
   const defaultFindTimeout = config.get('timeouts.find');
 
   class CommonPage {
+
+    static async navigateToUrlAndHandleAlert(url, shouldAcceptAlert) {
+      log.debug('Navigate to: ' + url);
+      try {
+        await browser.get(url);
+      } catch(navigationError) {
+        log.debug('Error navigating to url');
+        const alert = await browser.getAlert();
+        if (alert && alert.accept) {
+          if (shouldAcceptAlert) {
+            log.debug('Should accept alert');
+            try {
+              await alert.accept();
+            } catch(alertException) {
+              log.debug('Error accepting alert');
+              throw alertException;
+            }
+          } else {
+            log.debug('Will not accept alert');
+            throw navigationError;
+          }
+        } else {
+          throw navigationError;
+        }
+      }
+    }
+
     getHostPort() {
       return getUrl.baseUrl(config.get('servers.kibana'));
     }
@@ -48,19 +76,53 @@ export function CommonPageProvider({ getService, getPageObjects }) {
      * @param {string} appName As defined in the apps config
      * @param {string} subUrl The route after the hash (#)
      */
-    async navigateToUrl(appName, subUrl) {
+    async navigateToUrl(appName, subUrl, {
+      basePath = '',
+      ensureCurrentUrl = true,
+      shouldLoginIfPrompted = true,
+      shouldAcceptAlert = true
+    } = {}) {
+      // we onlt use the pathname from the appConfig and use the subUrl as the hash
       const appConfig = {
-        ...config.get(['apps', appName]),
-        // Overwrite the default hash with the URL we really want.
-        hash: `${appName}/${subUrl}`,
+        pathname: `${basePath}${config.get(['apps', appName]).pathname}`,
+        hash: `/${appName}/${subUrl}`,
+      };
+
+      const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
+
+      await retry.try(async () => {
+        await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert);
+        const currentUrl = shouldLoginIfPrompted ? await this.loginIfPrompted(appUrl) : await browser.getCurrentUrl();
+
+        if (ensureCurrentUrl && !currentUrl.includes(appUrl)) {
+          throw new Error(`expected ${currentUrl}.includes(${appUrl})`);
+        }
+      });
+    }
+
+    /**
+     * @param {string} appName As defined in the apps config
+     * @param {string} hash The route after the hash (#)
+     */
+    async navigateToActualUrl(appName, hash, {
+      basePath = '',
+      ensureCurrentUrl = true,
+      shouldLoginIfPrompted = true
+    } = {}) {
+      // we only use the apps config to get the application path
+      const appConfig = {
+        pathname: `${basePath}${config.get(['apps', appName]).pathname}`,
+        hash,
       };
 
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
       await retry.try(async () => {
-        log.debug(`navigateToUrl ${appUrl}`);
-        await remote.get(appUrl);
-        const currentUrl = await this.loginIfPrompted(appUrl);
-        if (!currentUrl.includes(appUrl)) {
+        log.debug(`navigateToActualUrl ${appUrl}`);
+        await browser.get(appUrl);
+
+        const currentUrl = shouldLoginIfPrompted ? await this.loginIfPrompted(appUrl) : await browser.getCurrentUrl();
+
+        if (ensureCurrentUrl && !currentUrl.includes(appUrl)) {
           throw new Error(`expected ${currentUrl}.includes(${appUrl})`);
         }
       });
@@ -68,9 +130,9 @@ export function CommonPageProvider({ getService, getPageObjects }) {
 
 
     async loginIfPrompted(appUrl) {
-      let currentUrl = await remote.getCurrentUrl();
+      let currentUrl = await browser.getCurrentUrl();
       log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
-      await remote.setFindTimeout(defaultTryTimeout * 2).findByCssSelector('[data-test-subj="kibanaChrome"]');
+      await find.byCssSelector('[data-test-subj="kibanaChrome"]', defaultTryTimeout * 2);
       const loginPage = currentUrl.includes('/login');
       const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
 
@@ -80,60 +142,58 @@ export function CommonPageProvider({ getService, getPageObjects }) {
           config.get('servers.kibana.username'),
           config.get('servers.kibana.password')
         );
-        await remote.setFindTimeout(20000).findByCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide)');
-        await remote.get(appUrl);
-        currentUrl = await remote.getCurrentUrl();
+        await find.byCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide)', 20000);
+        await browser.get(appUrl);
+        currentUrl = await browser.getCurrentUrl();
         log.debug(`Finished login process currentUrl = ${currentUrl}`);
       }
       return currentUrl;
     }
 
-
-    navigateToApp(appName) {
+    navigateToApp(appName, { basePath = '', shouldLoginIfPrompted = true, shouldAcceptAlert = true, hash = '' } = {}) {
       const self = this;
-      const appUrl = getUrl.noAuth(config.get('servers.kibana'), config.get(['apps', appName]));
+
+      let appUrl;
+      if (config.has(['apps', appName])) {
+        // Legacy applications
+        const appConfig = config.get(['apps', appName]);
+        appUrl = getUrl.noAuth(config.get('servers.kibana'), {
+          pathname: `${basePath}${appConfig.pathname}`,
+          hash: hash || appConfig.hash,
+        });
+      } else {
+        appUrl = getUrl.noAuth(config.get('servers.kibana'), {
+          pathname: `${basePath}/app/${appName}`,
+          hash
+        });
+      }
+
       log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
       function navigateTo(url) {
         return retry.try(function () {
           // since we're using hash URLs, always reload first to force re-render
           return kibanaServer.uiSettings.getDefaultIndex()
-            .then(function (defaultIndex) {
-              if (appName === 'discover' || appName === 'visualize' || appName === 'dashboard') {
-                if (!defaultIndex) {
-                  // https://github.com/elastic/kibana/issues/7496
-                  // Even though most tests are using esClient to set the default index, sometimes Kibana clobbers
-                  // that change.  If we got here, fix it.
-                  log.debug(' >>>>>>>> WARNING Navigating to [' + appName + '] with defaultIndex=' + defaultIndex);
-                  log.debug(' >>>>>>>> Setting defaultIndex to "logstash-*""');
-                  return kibanaServer.uiSettings.update({
-                    'dateFormat:tz': 'UTC',
-                    'defaultIndex': 'logstash-*',
-                    'telemetry:optIn': false
-                  });
-                }
-              }
-            })
-            .then(function () {
-              log.debug('navigate to: ' + url);
-              return remote.get(url);
+            .then(async function () {
+              return await CommonPage.navigateToUrlAndHandleAlert(url, shouldAcceptAlert);
             })
             .then(function () {
               return self.sleep(700);
             })
             .then(function () {
               log.debug('returned from get, calling refresh');
-              return remote.refresh();
+              return browser.refresh();
             })
             .then(async function () {
-              const currentUrl = await self.loginIfPrompted(appUrl);
+              const currentUrl = shouldLoginIfPrompted ? await self.loginIfPrompted(appUrl) : browser.getCurrentUrl();
 
               if (currentUrl.includes('app/kibana')) {
                 await testSubjects.find('kibanaChrome');
               }
             })
             .then(async function () {
-              const currentUrl = (await remote.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
+
+              const currentUrl = (await browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
               const maxAdditionalLengthOnNavUrl = 230;
               // On several test failures at the end of the TileMap test we try to navigate back to
               // Visualize so we can create the next Vertical Bar Chart, but we can see from the
@@ -148,7 +208,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
 
               // Browsers don't show the ':port' if it's 80 or 443 so we have to
               // remove that part so we can get a match in the tests.
-              const navSuccessful = new RegExp(appUrl.replace(':80', '').replace(':443', '')
+              const navSuccessful = new RegExp(appUrl.replace(':80/', '/').replace(':443/', '/')
                 + '.{0,' + maxAdditionalLengthOnNavUrl + '}$')
                 .test(currentUrl);
 
@@ -174,7 +234,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
               // give the app time to update the URL
               return self.sleep(501)
                 .then(function () {
-                  return remote.getCurrentUrl();
+                  return browser.getCurrentUrl();
                 })
                 .then(function (currentUrl) {
                   log.debug('in navigateTo url = ' + currentUrl);
@@ -192,26 +252,6 @@ export function CommonPageProvider({ getService, getPageObjects }) {
             }
           });
       });
-    }
-
-    runScript(fn, timeout = 10000) {
-      // wait for deps on window before running script
-      return remote
-        .setExecuteAsyncTimeout(timeout)
-        .executeAsync(function (done) {
-          const interval = setInterval(function () {
-            const ready = (document.readyState === 'complete');
-            const hasJQuery = !!window.$;
-
-            if (ready && hasJQuery) {
-              console.log('doc ready, jquery loaded');
-              clearInterval(interval);
-              done();
-            }
-          }, 10);
-        }).then(function () {
-          return remote.execute(fn);
-        });
     }
 
     async sleep(sleepMilliseconds) {
@@ -235,7 +275,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
 
     async waitUntilUrlIncludes(path) {
       await retry.try(async () => {
-        const url = await remote.getCurrentUrl();
+        const url = await browser.getCurrentUrl();
         if (!url.includes(path)) {
           throw new Error('Url not found');
         }
@@ -243,7 +283,9 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async getSharedItemTitleAndDescription() {
-      const element = await find.byCssSelector('[data-shared-item]');
+      const cssSelector = '[data-shared-item][data-title][data-description]';
+      const element = await find.byCssSelector(cssSelector);
+
       return {
         title: await element.getAttribute('data-title'),
         description: await element.getAttribute('data-description')
@@ -255,7 +297,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
      */
     async ensureModalOverlayHidden() {
       return retry.try(async () => {
-        const shown = await testSubjects.exists('modalOverlay');
+        const shown = await testSubjects.exists('confirmModalTitleText');
         if (shown) {
           throw new Error('Modal overlay is showing');
         }
@@ -264,12 +306,14 @@ export function CommonPageProvider({ getService, getPageObjects }) {
 
     async clickConfirmOnModal() {
       log.debug('Clicking modal confirm');
+      // make sure this data-test-subj 'confirmModalTitleText' exists because we're going to wait for it to be gone later
+      await testSubjects.exists('confirmModalTitleText');
       await testSubjects.click('confirmModalConfirmButton');
       await this.ensureModalOverlayHidden();
     }
 
     async pressEnterKey() {
-      await remote.pressKeys('\uE007');
+      await browser.pressKeys(browser.keys.ENTER);
     }
 
     // pass in true if your test will show multiple modals
@@ -298,33 +342,16 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async getBreadcrumbPageTitle() {
-      return await testSubjects.getVisibleText('breadcrumbPageTitle');
-    }
-
-    async getTopNavText() {
-      return await testSubjects.getVisibleText('top-nav');
-    }
-
-    async doesCssSelectorExist(selector) {
-      log.debug(`doesCssSelectorExist ${selector}`);
-
-      const exists = await remote
-        .setFindTimeout(1000)
-        .findByCssSelector(selector)
-        .then(() => true)
-        .catch(() => false);
-
-      remote.setFindTimeout(defaultFindTimeout);
-
-      log.debug(`exists? ${exists}`);
-      return exists;
-    }
-
     async isChromeVisible() {
-      const globalNavShown = await testSubjects.exists('globalNav');
+      const globalNavShown = await globalNav.exists();
       const topNavShown = await testSubjects.exists('top-nav');
       return globalNavShown && topNavShown;
+    }
+
+    async isChromeHidden() {
+      const globalNavShown = await globalNav.exists();
+      const topNavShown = await testSubjects.exists('top-nav');
+      return !globalNavShown && !topNavShown;
     }
 
     async waitForTopNavToBeVisible() {
@@ -337,8 +364,14 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async closeToast() {
-      const toast = await find.byCssSelector('.euiToast');
-      await remote.moveMouseTo(toast);
+      let toast;
+      await retry.try(async () => {
+        toast = await find.byCssSelector('.euiToast');
+        if (!toast) {
+          throw new Error('Toast is not visible yet');
+        }
+      });
+      await toast.moveMouseTo();
       const title = await (await find.byCssSelector('.euiToastHeader__title')).getVisibleText();
       log.debug(title);
       await find.clickByCssSelector('.euiToast__closeButton');
@@ -349,12 +382,27 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       const toasts = await find.allByCssSelector('.euiToast');
       for (const toastElement of toasts) {
         try {
-          await remote.moveMouseTo(toastElement);
+          await toastElement.moveMouseTo();
           const closeBtn = await toastElement.findByCssSelector('.euiToast__closeButton');
           await closeBtn.click();
         } catch (err) {
           // ignore errors, toast clear themselves after timeout
         }
+      }
+    }
+
+    async getBodyText() {
+      if (await find.existsByCssSelector('a[id=rawdata-tab]', 10000)) {
+        // Firefox has 3 tabs and requires navigation to see Raw output
+        await find.clickByCssSelector('a[id=rawdata-tab]');
+      }
+      const msgElements = await find.allByCssSelector('body pre');
+      if (msgElements.length > 0) {
+        return await msgElements[0].getVisibleText();
+      } else {
+        // Sometimes Firefox renders Timelion page without tabs and with div#json
+        const jsonElement = await find.byCssSelector('body div#json');
+        return await jsonElement.getVisibleText();
       }
     }
   }

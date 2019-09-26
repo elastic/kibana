@@ -12,29 +12,23 @@
     "kbn:watch": "node scripts/build --watch --source-maps"
   },
   "devDependencies": {
-    "@babel/cli": "^7.1.0",
-    "@babel/core": "^7.1.0",
-    "@babel/plugin-proposal-class-properties": "^7.1.0",
-    "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
-    "@babel/preset-env": "^7.1.0",
-    "@babel/preset-react": "^7.0.0",
-    "@babel/preset-typescript": "^7.1.0",
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@kbn/babel-preset": "1.0.0",
     "@kbn/dev-utils": "1.0.0",
     "@types/intl-relativeformat": "^2.1.0",
-    "@types/json5": "^0.0.30",
-    "@types/react-intl": "^2.3.11",
-    "del": "^3.0.0",
-    "getopts": "^2.2.3",
-    "supports-color": "^5.5.0",
-    "typescript": "^3.0.3"
+    "@types/react-intl": "^2.3.15",
+    "del": "^4.1.1",
+    "getopts": "^2.2.4",
+    "supports-color": "^7.0.0",
+    "typescript": "3.5.3"
   },
   "dependencies": {
     "intl-format-cache": "^2.1.0",
     "intl-messageformat": "^2.2.0",
     "intl-relativeformat": "^2.1.0",
-    "json5": "^2.0.1",
     "prop-types": "^15.6.2",
-    "react": "^16.3.0",
-    "react-intl": "^2.7.0"
+    "react": "^16.6.0",
+    "react-intl": "^2.8.0"
   }
 }

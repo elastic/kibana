@@ -19,21 +19,18 @@
 
 import { readdir, stat } from 'fs';
 import { resolve } from 'path';
-import { bindNodeCallback, from, merge, Observable, throwError } from 'rxjs';
-import { catchError, map, mergeMap, shareReplay } from 'rxjs/operators';
-import { PackageInfo } from '../../config';
+import { bindNodeCallback, from, merge } from 'rxjs';
+import { catchError, filter, map, mergeMap, shareReplay } from 'rxjs/operators';
+import { CoreContext } from '../../core_context';
 import { Logger } from '../../logging';
+import { PluginWrapper } from '../plugin';
+import { createPluginInitializerContext } from '../plugin_context';
 import { PluginsConfig } from '../plugins_config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
-import { parseManifest, PluginManifest } from './plugin_manifest_parser';
+import { parseManifest } from './plugin_manifest_parser';
 
 const fsReadDir$ = bindNodeCallback(readdir);
 const fsStat$ = bindNodeCallback(stat);
-
-interface DiscoveryResult {
-  plugin?: { path: string; manifest: PluginManifest };
-  error?: PluginDiscoveryError;
-}
 
 /**
  * Tries to discover all possible plugins based on the provided plugin config.
@@ -42,19 +39,26 @@ interface DiscoveryResult {
  * all the errors that occurred during discovery process.
  *
  * @param config Plugin config instance.
- * @param packageInfo Kibana package info.
- * @param log Plugin discovery logger instance.
+ * @param coreContext Kibana core values.
+ * @internal
  */
-export function discover(config: PluginsConfig, packageInfo: PackageInfo, log: Logger) {
+export function discover(config: PluginsConfig, coreContext: CoreContext) {
+  const log = coreContext.logger.get('plugins-discovery');
   log.debug('Discovering plugins...');
 
+  if (config.additionalPluginPaths.length) {
+    log.warn(
+      `Explicit plugin paths [${config.additionalPluginPaths}] are only supported in development. Relative imports will not work in production.`
+    );
+  }
+
   const discoveryResults$ = merge(
-    processScanDirs$(config.scanDirs, log),
-    processPaths$(config.paths, log)
+    from(config.additionalPluginPaths),
+    processPluginSearchPaths$(config.pluginSearchPaths, log)
   ).pipe(
     mergeMap(pluginPathOrError => {
       return typeof pluginPathOrError === 'string'
-        ? createPlugin$(pluginPathOrError, packageInfo, log)
+        ? createPlugin$(pluginPathOrError, log, coreContext)
         : [pluginPathOrError];
     }),
     shareReplay()
@@ -62,64 +66,38 @@ export function discover(config: PluginsConfig, packageInfo: PackageInfo, log: L
 
   return {
     plugin$: discoveryResults$.pipe(
-      mergeMap(entry => (entry.plugin !== undefined ? [entry.plugin] : []))
+      filter((entry): entry is PluginWrapper => entry instanceof PluginWrapper)
     ),
     error$: discoveryResults$.pipe(
-      mergeMap(entry => (entry.error !== undefined ? [entry.error] : []))
+      filter((entry): entry is PluginDiscoveryError => !(entry instanceof PluginWrapper))
     ),
   };
 }
 
 /**
- * Iterates over every entry in `scanDirs` and returns a merged stream of all
+ * Iterates over every plugin search path and returns a merged stream of all
  * sub-directories. If directory cannot be read or it's impossible to get stat
  * for any of the nested entries then error is added into the stream instead.
- * @param scanDirs List of the top-level directories to process.
+ * @param pluginDirs List of the top-level directories to process.
  * @param log Plugin discovery logger instance.
  */
-function processScanDirs$(scanDirs: string[], log: Logger) {
-  return from(scanDirs).pipe(
+function processPluginSearchPaths$(pluginDirs: readonly string[], log: Logger) {
+  return from(pluginDirs).pipe(
     mergeMap(dir => {
       log.debug(`Scanning "${dir}" for plugin sub-directories...`);
 
       return fsReadDir$(dir).pipe(
-        mergeMap(subDirs => subDirs.map(subDir => resolve(dir, subDir))),
+        mergeMap((subDirs: string[]) => subDirs.map(subDir => resolve(dir, subDir))),
         mergeMap(path =>
           fsStat$(path).pipe(
             // Filter out non-directory entries from target directories, it's expected that
             // these directories may contain files (e.g. `README.md` or `package.json`).
             // We shouldn't silently ignore the entries we couldn't get stat for though.
             mergeMap(pathStat => (pathStat.isDirectory() ? [path] : [])),
-            catchError(err => [wrapError(PluginDiscoveryError.invalidPluginDirectory(path, err))])
+            catchError(err => [PluginDiscoveryError.invalidPluginPath(path, err)])
           )
         ),
-        catchError(err => [wrapError(PluginDiscoveryError.invalidScanDirectory(dir, err))])
-      );
-    })
-  );
-}
-
-/**
- * Iterates over every entry in `paths` and returns a stream of all paths that
- * are directories. If path is not a directory or it's impossible to get stat
- * for this path then error is added into the stream instead.
- * @param paths List of paths to process.
- * @param log Plugin discovery logger instance.
- */
-function processPaths$(paths: string[], log: Logger) {
-  return from(paths).pipe(
-    mergeMap(path => {
-      log.debug(`Including "${path}" into the plugin path list.`);
-
-      return fsStat$(path).pipe(
-        // Since every path is specifically provided we should treat non-directory
-        // entries as mistakes we should report of.
-        mergeMap(pathStat => {
-          return pathStat.isDirectory()
-            ? [path]
-            : throwError(new Error(`${path} is not a directory.`));
-        }),
-        catchError(err => [wrapError(PluginDiscoveryError.invalidPluginDirectory(path, err))])
+        catchError(err => [PluginDiscoveryError.invalidSearchPath(dir, err)])
       );
     })
   );
@@ -130,27 +108,21 @@ function processPaths$(paths: string[], log: Logger) {
  * directory path and produces an error result if it fails to do so or plugin manifest
  * isn't valid.
  * @param path Path to the plugin directory where manifest should be loaded from.
- * @param packageInfo Kibana package info.
  * @param log Plugin discovery logger instance.
+ * @param coreContext Kibana core context.
  */
-function createPlugin$(
-  path: string,
-  packageInfo: PackageInfo,
-  log: Logger
-): Observable<DiscoveryResult> {
-  return from(parseManifest(path, packageInfo)).pipe(
+function createPlugin$(path: string, log: Logger, coreContext: CoreContext) {
+  return from(parseManifest(path, coreContext.env.packageInfo)).pipe(
     map(manifest => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
-      return { plugin: { path, manifest } };
+      const opaqueId = Symbol(manifest.id);
+      return new PluginWrapper({
+        path,
+        manifest,
+        opaqueId,
+        initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+      });
     }),
-    catchError(err => [wrapError(err)])
+    catchError(err => [err])
   );
-}
-
-/**
- * Wraps `PluginDiscoveryError` into `DiscoveryResult` entry.
- * @param error Instance of the `PluginDiscoveryError` error.
- */
-function wrapError(error: PluginDiscoveryError): DiscoveryResult {
-  return { error };
 }

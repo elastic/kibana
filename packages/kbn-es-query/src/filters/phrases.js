@@ -19,6 +19,8 @@
 
 import { getPhraseScript } from './phrase';
 
+// Creates a filter where the given field matches one or more of the given values
+// params should be an array of values
 export function buildPhrasesFilter(field, params, indexPattern) {
   const index = indexPattern.id;
   const type = 'phrases';

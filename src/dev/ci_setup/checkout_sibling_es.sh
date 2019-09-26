@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 function checkout_sibling {
   project=$1
   targetDir=$2
@@ -20,7 +22,7 @@ function checkout_sibling {
 
     function clone_target_is_valid {
       echo " -> checking for '${cloneBranch}' branch at ${cloneAuthor}/${project}"
-      if [[ -n "$(git ls-remote --heads git@github.com:${cloneAuthor}/${project}.git ${cloneBranch} 2>/dev/null)" ]]; then
+      if [[ -n "$(git ls-remote --heads "git@github.com:${cloneAuthor}/${project}.git" ${cloneBranch} 2>/dev/null)" ]]; then
         return 0
       else
         return 1
@@ -46,12 +48,12 @@ function checkout_sibling {
         return 0
       fi
 
-      cloneBranch="${PR_TARGET_BRANCH:-master}"
+      cloneBranch="${PR_TARGET_BRANCH:-$KIBANA_PKG_BRANCH}"
       if clone_target_is_valid ; then
         return 0
       fi
 
-      cloneBranch="master"
+      cloneBranch="$KIBANA_PKG_BRANCH"
       if clone_target_is_valid; then
         return 0
       fi
@@ -62,13 +64,15 @@ function checkout_sibling {
 
     function checkout_clone_target {
       pick_clone_target
-      if [[ $cloneBranch = "master"  && $cloneAuthor = "elastic" ]]; then
-        export TEST_ES_FROM=snapshot
+
+      if [[ "$cloneAuthor/$cloneBranch" != "elastic/$KIBANA_PKG_BRANCH" ]]; then
+        echo " -> Setting TEST_ES_FROM=source so that ES in tests will be built from $cloneAuthor/$cloneBranch"
+        export TEST_ES_FROM=source
       fi
 
       echo " -> checking out '${cloneBranch}' branch from ${cloneAuthor}/${project}..."
       git clone -b "$cloneBranch" "git@github.com:${cloneAuthor}/${project}.git" "$targetDir" --depth=1
-      echo " -> checked out ${project} revision: $(git -C ${targetDir} rev-parse HEAD)"
+      echo " -> checked out ${project} revision: $(git -C "${targetDir}" rev-parse HEAD)"
       echo
     }
 
@@ -84,6 +88,7 @@ function checkout_sibling {
 }
 
 checkout_sibling "elasticsearch" "${PARENT_DIR}/elasticsearch" "USE_EXISTING_ES"
+export TEST_ES_FROM=${TEST_ES_FROM:-snapshot}
 
 # Set the JAVA_HOME based on the Java property file in the ES repo
 # This assumes the naming convention used on CI (ex: ~/.java/java10)
@@ -91,7 +96,7 @@ ES_DIR="$PARENT_DIR/elasticsearch"
 ES_JAVA_PROP_PATH=$ES_DIR/.ci/java-versions.properties
 
 
-if [ ! -f $ES_JAVA_PROP_PATH ]; then
+if [ ! -f "$ES_JAVA_PROP_PATH" ]; then
   echo "Unable to set JAVA_HOME, $ES_JAVA_PROP_PATH does not exist"
   exit 1
 fi
@@ -99,7 +104,8 @@ fi
 # While sourcing the property file would currently work, we want
 # to support the case where whitespace surrounds the equals.
 # This has the added benefit of explicitly exporting property values
-export ES_BUILD_JAVA="$(cat "$ES_JAVA_PROP_PATH" | grep "^ES_BUILD_JAVA" | cut -d'=' -f2 | tr -d '[:space:]')"
+ES_BUILD_JAVA="$(grep "^ES_BUILD_JAVA" "$ES_JAVA_PROP_PATH" | cut -d'=' -f2 | tr -d '[:space:]')"
+export ES_BUILD_JAVA
 
 if [ -z "$ES_BUILD_JAVA" ]; then
   echo "Unable to set JAVA_HOME, ES_BUILD_JAVA not present in $ES_JAVA_PROP_PATH"

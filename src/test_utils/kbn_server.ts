@@ -18,14 +18,22 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-// @ts-ignore: implicit any for JS file
-import { createEsTestCluster, esTestConfig, kibanaServerTestUser, kibanaTestUser } from '@kbn/test';
-import { defaultsDeep } from 'lodash';
+import {
+  createEsTestCluster,
+  DEFAULT_SUPERUSER_PASS,
+  esTestConfig,
+  kbnTestConfig,
+  kibanaServerTestUser,
+  kibanaTestUser,
+  setupUsers,
+  // @ts-ignore: implicit any for JS file
+} from '@kbn/test';
+import { defaultsDeep, get } from 'lodash';
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
-import { Env } from '../core/server/config';
-import { LegacyObjectToConfigAdapter } from '../core/server/legacy_compat';
+import { CliArgs, Env } from '../core/server/config';
+import { LegacyObjectToConfigAdapter } from '../core/server/legacy';
 import { Root } from '../core/server/root';
 
 type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';
@@ -44,15 +52,18 @@ const DEFAULTS_SETTINGS = {
 };
 
 const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
-  plugins: { scanDirs: [resolve(__dirname, '../core_plugins')] },
+  plugins: { scanDirs: [resolve(__dirname, '../legacy/core_plugins')] },
   elasticsearch: {
-    url: esTestConfig.getUrl(),
+    hosts: [esTestConfig.getUrl()],
     username: kibanaServerTestUser.username,
     password: kibanaServerTestUser.password,
   },
 };
 
-export function createRootWithSettings(...settings: Array<Record<string, any>>) {
+export function createRootWithSettings(
+  settings: Record<string, any>,
+  cliArgs: Partial<CliArgs> = {}
+) {
   const env = Env.createDefault({
     configs: [],
     cliArgs: {
@@ -64,13 +75,15 @@ export function createRootWithSettings(...settings: Array<Record<string, any>>) 
       repl: false,
       basePath: false,
       optimize: false,
+      oss: true,
+      ...cliArgs,
     },
     isDevClusterMaster: false,
   });
 
   return new Root(
     new BehaviorSubject(
-      new LegacyObjectToConfigAdapter(defaultsDeep({}, ...settings, DEFAULTS_SETTINGS))
+      new LegacyObjectToConfigAdapter(defaultsDeep({}, settings, DEFAULTS_SETTINGS))
     ),
     env
   );
@@ -83,8 +96,8 @@ export function createRootWithSettings(...settings: Array<Record<string, any>>) 
  * @param path
  */
 function getSupertest(root: Root, method: HttpMethod, path: string) {
-  const testUserCredentials = new Buffer(`${kibanaTestUser.username}:${kibanaTestUser.password}`);
-  return supertest((root as any).server.http.service.httpServer.server.listener)
+  const testUserCredentials = Buffer.from(`${kibanaTestUser.username}:${kibanaTestUser.password}`);
+  return supertest((root as any).server.http.httpServer.server.listener)
     [method](path)
     .set('Authorization', `Basic ${testUserCredentials.toString('base64')}`);
 }
@@ -96,8 +109,8 @@ function getSupertest(root: Root, method: HttpMethod, path: string) {
  * @param {Object} [settings={}] Any config overrides for this instance.
  * @returns {Root}
  */
-export function createRoot(settings = {}) {
-  return createRootWithSettings(settings);
+export function createRoot(settings = {}, cliArgs: Partial<CliArgs> = {}) {
+  return createRootWithSettings(settings, cliArgs);
 }
 
 /**
@@ -107,8 +120,11 @@ export function createRoot(settings = {}) {
  *  @param {Object} [settings={}] Any config overrides for this instance.
  *  @returns {Root}
  */
-export function createRootWithCorePlugins(settings = {}) {
-  return createRootWithSettings(settings, DEFAULT_SETTINGS_WITH_CORE_PLUGINS);
+export function createRootWithCorePlugins(settings = {}, cliArgs: Partial<CliArgs> = {}) {
+  return createRootWithSettings(
+    defaultsDeep({}, settings, DEFAULT_SETTINGS_WITH_CORE_PLUGINS),
+    cliArgs
+  );
 }
 
 /**
@@ -116,7 +132,7 @@ export function createRootWithCorePlugins(settings = {}) {
  * @param root
  */
 export function getKbnServer(root: Root) {
-  return (root as any).server.legacy.service.kbnServer;
+  return (root as any).server.legacy.kbnServer;
 }
 
 export const request: Record<
@@ -139,15 +155,44 @@ export const request: Record<
  * @prop adjustTimeout A function(t) => this.timeout(t) that adjust the timeout of a
  * test, ensuring the test properly waits for the server to boot without timing out.
  */
-export async function startTestServers({
+export function createTestServers({
   adjustTimeout,
   settings = {},
 }: {
   adjustTimeout: (timeout: number) => void;
-  settings: Record<string, any>;
+  settings: {
+    es?: {
+      license: 'oss' | 'basic' | 'gold' | 'trial';
+      [key: string]: any;
+    };
+    kbn?: {
+      /**
+       * An array of directories paths, passed in via absolute path strings
+       */
+      plugins?: {
+        paths: string[];
+        [key: string]: any;
+      };
+      [key: string]: any;
+    };
+    /**
+     * Users passed in via this prop are created in ES in adition to the standard elastic and kibana users.
+     * Note, this prop is ignored when using an oss, or basic license
+     */
+    users?: Array<{ username: string; password: string; roles: string[] }>;
+  };
 }) {
   if (!adjustTimeout) {
     throw new Error('adjustTimeout is required in order to avoid flaky tests');
+  }
+  const license = get<'oss' | 'basic' | 'gold' | 'trial'>(settings, 'es.license', 'oss');
+  const usersToBeAdded = get(settings, 'users', []);
+  if (usersToBeAdded.length > 0) {
+    if (license !== 'trial') {
+      throw new Error(
+        'Adding users is only supported by createTestServers when using a trial license'
+      );
+    }
   }
 
   const log = new ToolingLog({
@@ -159,28 +204,68 @@ export async function startTestServers({
   log.info('starting elasticsearch');
   log.indent(4);
 
-  const es = createEsTestCluster({ log });
+  const es = createEsTestCluster(
+    defaultsDeep({}, get(settings, 'es', {}), {
+      log,
+      license,
+      password: license === 'trial' ? DEFAULT_SUPERUSER_PASS : undefined,
+    })
+  );
 
   log.indent(-4);
 
-  adjustTimeout(es.getStartTimeout());
+  // Add time for KBN and adding users
+  adjustTimeout(es.getStartTimeout() + 100000);
 
-  await es.start();
-
-  const root = createRootWithCorePlugins(settings);
-  await root.start();
-
-  const kbnServer = getKbnServer(root);
-  await kbnServer.server.plugins.elasticsearch.waitUntilReady();
+  const kbnSettings: any = get(settings, 'kbn', {});
 
   return {
-    kbnServer,
-    root,
-    es,
+    startES: async () => {
+      await es.start();
 
-    async stop() {
-      await root.shutdown();
-      await es.cleanup();
+      if (['gold', 'trial'].includes(license)) {
+        await setupUsers({
+          log,
+          esPort: esTestConfig.getUrlParts().port,
+          updates: [
+            ...usersToBeAdded,
+            // user elastic
+            esTestConfig.getUrlParts(),
+            // user kibana
+            kbnTestConfig.getUrlParts(),
+          ],
+        });
+
+        // Override provided configs, we know what the elastic user is now
+        kbnSettings.elasticsearch = {
+          hosts: [esTestConfig.getUrl()],
+          username: esTestConfig.getUrlParts().username,
+          password: esTestConfig.getUrlParts().password,
+        };
+      }
+
+      return {
+        stop: async () => await es.cleanup(),
+        es,
+        hosts: [esTestConfig.getUrl()],
+        username: esTestConfig.getUrlParts().username,
+        password: esTestConfig.getUrlParts().password,
+      };
+    },
+    startKibana: async () => {
+      const root = createRootWithCorePlugins(kbnSettings);
+
+      await root.setup();
+      await root.start();
+
+      const kbnServer = getKbnServer(root);
+      await kbnServer.server.plugins.elasticsearch.waitUntilReady();
+
+      return {
+        root,
+        kbnServer,
+        stop: async () => await root.shutdown(),
+      };
     },
   };
 }

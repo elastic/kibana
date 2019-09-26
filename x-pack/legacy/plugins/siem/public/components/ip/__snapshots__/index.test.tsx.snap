@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Port renders correctly against snapshot 1`] = `
+<Component
+  contextId="test"
+  eventId="abcd"
+  fieldName="destination.ip"
+  value="10.1.2.3"
+/>
+`;

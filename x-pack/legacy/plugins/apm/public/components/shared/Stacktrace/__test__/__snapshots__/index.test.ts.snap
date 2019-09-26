@@ -1,0 +1,468 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Stacktrace/index getGroupedStackframes should collapse the library frames into a set of grouped stackframes 1`] = `
+Array [
+  Object {
+    "excludeFromGrouping": false,
+    "isLibraryFrame": false,
+    "stackframes": Array [
+      Object {
+        "abs_path": "/app/server/routes.js",
+        "context": Object {
+          "post": Array [
+            "    req.body.lines.forEach(function (line) {",
+            "      client.query('SELECT id FROM products WHERE id=$1', [line.id], next())",
+          ],
+          "pre": Array [
+            "    })",
+            "",
+          ],
+        },
+        "exclude_from_grouping": false,
+        "filename": "server/routes.js",
+        "function": "<anonymous>",
+        "library_frame": false,
+        "line": Object {
+          "context": "    client.query('SELECT id FROM customers WHERE id=$1', [req.body.customer_id], next())",
+          "number": 307,
+        },
+      },
+    ],
+  },
+  Object {
+    "excludeFromGrouping": false,
+    "isLibraryFrame": true,
+    "stackframes": Array [
+      Object {
+        "abs_path": "/app/node_modules/pg-pool/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/pg-pool/index.js",
+        "function": "BoundPool.<anonymous>",
+        "library_frame": true,
+        "line": Object {
+          "number": 137,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/generic-pool/lib/generic-pool.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/generic-pool/lib/generic-pool.js",
+        "function": "dispense",
+        "library_frame": true,
+        "line": Object {
+          "number": 310,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/generic-pool/lib/generic-pool.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/generic-pool/lib/generic-pool.js",
+        "function": "acquire",
+        "library_frame": true,
+        "line": Object {
+          "number": 391,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/pg-pool/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/pg-pool/index.js",
+        "function": "BoundPool.<anonymous>",
+        "library_frame": true,
+        "line": Object {
+          "number": 111,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/pg-pool/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/pg-pool/index.js",
+        "function": "Pool._promiseNoCallback",
+        "library_frame": true,
+        "line": Object {
+          "number": 75,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/pg-pool/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/pg-pool/index.js",
+        "function": "Pool.connect",
+        "library_frame": true,
+        "line": Object {
+          "number": 109,
+        },
+      },
+    ],
+  },
+  Object {
+    "excludeFromGrouping": false,
+    "isLibraryFrame": false,
+    "stackframes": Array [
+      Object {
+        "abs_path": "/app/server/db.js",
+        "context": Object {
+          "post": Array [
+            "}",
+            "",
+          ],
+          "pre": Array [
+            "",
+            "exports.client = function (cb) {",
+          ],
+        },
+        "exclude_from_grouping": false,
+        "filename": "server/db.js",
+        "function": "exports.client",
+        "library_frame": false,
+        "line": Object {
+          "context": "  pool.connect(cb)",
+          "number": 11,
+        },
+      },
+      Object {
+        "abs_path": "/app/server/routes.js",
+        "context": Object {
+          "post": Array [
+            "    if (err) return error(err, res)",
+            "",
+          ],
+          "pre": Array [
+            "  }",
+            "",
+          ],
+        },
+        "exclude_from_grouping": false,
+        "filename": "server/routes.js",
+        "function": "<anonymous>",
+        "library_frame": false,
+        "line": Object {
+          "context": "  db.client(function (err, client, done) {",
+          "number": 248,
+        },
+      },
+    ],
+  },
+  Object {
+    "excludeFromGrouping": false,
+    "isLibraryFrame": true,
+    "stackframes": Array [
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/layer.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/layer.js",
+        "function": "handle",
+        "library_frame": true,
+        "line": Object {
+          "number": 95,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/route.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/route.js",
+        "function": "next",
+        "library_frame": true,
+        "line": Object {
+          "number": 137,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/route.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/route.js",
+        "function": "dispatch",
+        "library_frame": true,
+        "line": Object {
+          "number": 112,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/layer.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/layer.js",
+        "function": "handle",
+        "library_frame": true,
+        "line": Object {
+          "number": 95,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/index.js",
+        "function": "<anonymous>",
+        "library_frame": true,
+        "line": Object {
+          "number": 281,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/index.js",
+        "function": "process_params",
+        "library_frame": true,
+        "line": Object {
+          "number": 335,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/index.js",
+        "function": "next",
+        "library_frame": true,
+        "line": Object {
+          "number": 275,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/index.js",
+        "function": "handle",
+        "library_frame": true,
+        "line": Object {
+          "number": 174,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/index.js",
+        "function": "router",
+        "library_frame": true,
+        "line": Object {
+          "number": 47,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/layer.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/layer.js",
+        "function": "handle",
+        "library_frame": true,
+        "line": Object {
+          "number": 95,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/index.js",
+        "function": "trim_prefix",
+        "library_frame": true,
+        "line": Object {
+          "number": 317,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/index.js",
+        "function": "<anonymous>",
+        "library_frame": true,
+        "line": Object {
+          "number": 284,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/index.js",
+        "function": "process_params",
+        "library_frame": true,
+        "line": Object {
+          "number": 335,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/index.js",
+        "function": "next",
+        "library_frame": true,
+        "line": Object {
+          "number": 275,
+        },
+      },
+    ],
+  },
+  Object {
+    "excludeFromGrouping": false,
+    "isLibraryFrame": false,
+    "stackframes": Array [
+      Object {
+        "abs_path": "/app/server.js",
+        "context": Object {
+          "post": Array [
+            "  }",
+            "",
+          ],
+          "pre": Array [
+            "app.use('/api', function (req, res, next) {",
+            "  if (Math.random() > opbeansRedirectProbability) {",
+          ],
+        },
+        "exclude_from_grouping": false,
+        "filename": "server.js",
+        "function": "<anonymous>",
+        "library_frame": false,
+        "line": Object {
+          "context": "    return next()",
+          "number": 88,
+        },
+      },
+    ],
+  },
+  Object {
+    "excludeFromGrouping": false,
+    "isLibraryFrame": true,
+    "stackframes": Array [
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/layer.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/layer.js",
+        "function": "handle",
+        "library_frame": true,
+        "line": Object {
+          "number": 95,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/index.js",
+        "function": "trim_prefix",
+        "library_frame": true,
+        "line": Object {
+          "number": 317,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/index.js",
+        "function": "<anonymous>",
+        "library_frame": true,
+        "line": Object {
+          "number": 284,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/index.js",
+        "function": "process_params",
+        "library_frame": true,
+        "line": Object {
+          "number": 335,
+        },
+      },
+    ],
+  },
+  Object {
+    "excludeFromGrouping": true,
+    "isLibraryFrame": true,
+    "stackframes": Array [
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/index.js",
+        "exclude_from_grouping": true,
+        "filename": "node_modules/express/lib/router/index.js",
+        "function": "next",
+        "library_frame": true,
+        "line": Object {
+          "number": 275,
+        },
+      },
+    ],
+  },
+  Object {
+    "excludeFromGrouping": false,
+    "isLibraryFrame": true,
+    "stackframes": Array [
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/index.js",
+        "function": "<anonymous>",
+        "library_frame": true,
+        "line": Object {
+          "number": 635,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/index.js",
+        "function": "next",
+        "library_frame": true,
+        "line": Object {
+          "number": 260,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/index.js",
+        "function": "handle",
+        "library_frame": true,
+        "line": Object {
+          "number": 174,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/index.js",
+        "function": "router",
+        "library_frame": true,
+        "line": Object {
+          "number": 47,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/layer.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/layer.js",
+        "function": "handle",
+        "library_frame": true,
+        "line": Object {
+          "number": 95,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/index.js",
+        "function": "trim_prefix",
+        "library_frame": true,
+        "line": Object {
+          "number": 317,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/index.js",
+        "function": "<anonymous>",
+        "library_frame": true,
+        "line": Object {
+          "number": 284,
+        },
+      },
+      Object {
+        "abs_path": "/app/node_modules/express/lib/router/index.js",
+        "exclude_from_grouping": false,
+        "filename": "node_modules/express/lib/router/index.js",
+        "function": "process_params",
+        "library_frame": true,
+        "line": Object {
+          "number": 335,
+        },
+      },
+    ],
+  },
+]
+`;
