@@ -48,15 +48,13 @@ export interface SkeletonRowProps {
 
 export const SkeletonRow = pure<SkeletonRowProps>(
   ({ cellColor, cellCount = 4, cellMargin, rowHeight, rowPadding, style }) => {
-    const colElements = [];
-
-    for (let i = 0; i < cellCount; i++) {
-      colElements.push(<Cell cellColor={cellColor} cellMargin={cellMargin} key={i}></Cell>);
-    }
+    const cells = [...Array(cellCount)].map((_, i) => (
+      <Cell cellColor={cellColor} cellMargin={cellMargin} key={i}></Cell>
+    ));
 
     return (
       <Row rowHeight={rowHeight} rowPadding={rowPadding} style={style}>
-        {colElements}
+        {cells}
       </Row>
     );
   }
