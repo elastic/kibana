@@ -119,7 +119,7 @@ You should prefer modern language features in a lot of cases, e.g.:
 * Prefer arrow function over function expressions
 * Prefer arrow function over storing `this` (no `const self = this;`)
 * Prefer template strings over string concatenation
-* Prefer the spread operator (`[...arr]`) to copy over `.slice()`
+* Prefer the spread operator for copying arrays (`[...arr]`) over `arr.slice()`
 
 ### Avoid mutability and state
 
