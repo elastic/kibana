@@ -19,7 +19,7 @@ type TimeStamp = number;
 
 interface Result {
   time: TimeStamp;
-  value: Value;
+  value: unknown;
 }
 
 interface ProcessedResults {
