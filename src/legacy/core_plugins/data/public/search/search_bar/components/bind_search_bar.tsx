@@ -57,31 +57,33 @@ export function createSearchBar({
   filterManager,
   autocomplete,
 }: StatefulSearchBarDeps) {
-  const timeRange = timefilter.timefilter.getTime();
-  const refreshInterval = timefilter.timefilter.getRefreshInterval();
-
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
-  return (props: SearchBarOwnProps & { appName: string }) => (
-    <KibanaContextProvider
-      services={{
-        appName: props.appName,
-        autocomplete,
-        store,
-        ...core,
-      }}
-    >
-      <SearchBar
-        timeHistory={timefilter.history}
-        dateRangeFrom={timeRange.from}
-        dateRangeTo={timeRange.to}
-        refreshInterval={refreshInterval.value}
-        isRefreshPaused={refreshInterval.pause}
-        filters={filterManager.getFilters()}
-        onFiltersUpdated={defaultFiltersUpdated(filterManager)}
-        onRefreshChange={defaultOnRefreshChange(timefilter)}
-        {...props}
-      />
-    </KibanaContextProvider>
-  );
+  return (props: SearchBarOwnProps & { appName: string }) => {
+    const timeRange = timefilter.timefilter.getTime();
+    const refreshInterval = timefilter.timefilter.getRefreshInterval();
+
+    return (
+      <KibanaContextProvider
+        services={{
+          appName: props.appName,
+          autocomplete,
+          store,
+          ...core,
+        }}
+      >
+        <SearchBar
+          timeHistory={timefilter.history}
+          dateRangeFrom={timeRange.from}
+          dateRangeTo={timeRange.to}
+          refreshInterval={refreshInterval.value}
+          isRefreshPaused={refreshInterval.pause}
+          filters={filterManager.getFilters()}
+          onFiltersUpdated={defaultFiltersUpdated(filterManager)}
+          onRefreshChange={defaultOnRefreshChange(timefilter)}
+          {...props}
+        />
+      </KibanaContextProvider>
+    );
+  };
 }
