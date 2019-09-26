@@ -151,9 +151,16 @@ discover-app {
   }
 }
 
-// SASSTODO: replace the padding value with a variable
+.dscFieldSearch {
+  padding: $euiSizeS;
+}
+
+.dscFieldFilter {
+  margin-top: $euiSizeS;
+}
+
 .dscFieldDetails {
-  padding: 10px;
+  padding: $euiSizeS;
   background-color: $euiColorLightestShade;
   color: $euiTextColor;
 }
