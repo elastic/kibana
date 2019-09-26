@@ -126,6 +126,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
           type,
           NetworkTopNFlowTableId
         )}
+        dataTestSubj={`table-${tableType}`}
         headerCount={totalCount}
         headerTitle={headerTitle}
         headerUnit={i18n.UNIT(totalCount)}

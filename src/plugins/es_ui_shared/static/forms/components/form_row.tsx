@@ -63,3 +63,12 @@ export const FormRow = ({
     </EuiDescribedFormGroup>
   );
 };
+
+/**
+ * Get a <FormRow /> component providing some common props for all instances.
+ * @param partialProps Partial props to apply to all <FormRow /> instances
+ */
+export const getFormRow = (partialProps: Partial<Props>) => (props: Partial<Props>) => {
+  const componentProps = { ...partialProps, ...props } as Props;
+  return <FormRow {...componentProps} />;
+};
