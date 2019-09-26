@@ -14,6 +14,8 @@ def CI_GROUP = JOB_PARTS[2] ?: ''
 
 def worker = getWorkerFromParams(IS_XPACK, JOB, CI_GROUP)
 
+def workerFailures = []
+
 stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a little bit
   timeout(time: 180, unit: 'MINUTES') {
     timestamps {
@@ -29,6 +31,13 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               buildXpack()
             }
           }, getWorkerMap(params.NUMBER_EXECUTIONS.toInteger(), worker))()
+        }
+
+        if (workerFailures.size > 0) {
+          print "There were ${workerFailures.size} test suite failures."
+          print "The executions that failed were:"
+          print workerFailures.join("\n")
+          print "Please check 'Test Result' and 'Pipeline Steps' pages for more info"
         }
       }
     }
@@ -302,10 +311,15 @@ def getWorkerMap(numberOfExecutions, worker, maxWorkers = 14) {
 
     workerMap["worker-${i}"] = { workerNumber ->
       for(def j = 0; j < workerExecutions; j++) {
-        catchError {
-          print "Execute worker-${workerNumber}: ${j}"
-          withEnv(["JOB=worker-${workerNumber}-${j}"]) {
-            worker(workerNumber)
+        print "Execute worker-${workerNumber}: ${j}"
+        withEnv(["JOB=worker-${workerNumber}-${j}"]) {
+          catchError {
+            try {
+              worker(workerNumber)
+            } catch (ex) {
+              workerFailures << "worker-${workerNumber}-${j}"
+              throw ex
+            }
           }
         }
       }
