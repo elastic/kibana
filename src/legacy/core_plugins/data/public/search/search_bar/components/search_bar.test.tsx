@@ -44,13 +44,6 @@ jest.mock('../../../query/query_bar', () => {
   };
 });
 
-jest.mock('ui/notify', () => ({
-  toastNotifications: {
-    addSuccess: () => {},
-    addDanger: () => {},
-  },
-}));
-
 const noop = jest.fn();
 
 const createMockWebStorage = () => ({
