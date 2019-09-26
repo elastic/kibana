@@ -19,28 +19,32 @@
 
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
+import { Legacy } from 'kibana';
+import { LegacyPluginApi, LegacyPluginInitializer } from 'src/legacy/plugin_discovery/types';
+import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { plugin } from './server';
+import { CustomCoreSetup } from './server/plugin';
 
 const experimentalLabel = i18n.translate('timelion.uiSettings.experimentalLabel', {
   defaultMessage: 'experimental',
 });
 
-export default function (kibana) {
-  return new kibana.Plugin({
+const timelionPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
+  new Plugin({
     require: ['kibana', 'elasticsearch'],
-
-    config(Joi) {
+    config(Joi: any) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         ui: Joi.object({
           enabled: Joi.boolean().default(false),
         }).default(),
-        graphiteUrls: Joi.array().items(
-          Joi.string().uri({ scheme: ['http', 'https'] }),
-        ).default([]),
+        graphiteUrls: Joi.array()
+          .items(Joi.string().uri({ scheme: ['http', 'https'] }))
+          .default([]),
       }).default();
     },
-
+    // @ts-ignore
+    // https://github.com/elastic/kibana/pull/44039#discussion_r326582255
     uiCapabilities() {
       return {
         timelion: {
@@ -48,7 +52,7 @@ export default function (kibana) {
         },
       };
     },
-
+    publicDir: resolve(__dirname, 'public'),
     uiExports: {
       app: {
         title: 'Timelion',
@@ -58,11 +62,7 @@ export default function (kibana) {
         main: 'plugins/timelion/app',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      hacks: [
-        'plugins/timelion/hacks/toggle_app_link_in_nav',
-        'plugins/timelion/lib/panel_registry',
-        'plugins/timelion/panels/timechart/timechart',
-      ],
+      hacks: [resolve(__dirname, 'public/legacy')],
       injectDefaultVars(server) {
         const config = server.config();
 
@@ -71,13 +71,6 @@ export default function (kibana) {
           kbnIndex: config.get('kibana.index'),
         };
       },
-      visTypes: [
-        'plugins/timelion/vis',
-      ],
-      interpreter: ['plugins/timelion/timelion_vis_fn'],
-      home: [
-        'plugins/timelion/register_feature',
-      ],
       mappings: require('./mappings.json'),
       uiSettingDefaults: {
         'timelion:showTutorial': {
@@ -159,17 +152,19 @@ export default function (kibana) {
           value: '1ms',
           description: i18n.translate('timelion.uiSettings.minimumIntervalDescription', {
             defaultMessage: 'The smallest interval that will be calculated when using "auto"',
-            description: '"auto" is a technical value in that context, that should not be translated.',
+            description:
+              '"auto" is a technical value in that context, that should not be translated.',
           }),
           category: ['timelion'],
         },
         'timelion:graphite.url': {
           name: i18n.translate('timelion.uiSettings.graphiteURLLabel', {
             defaultMessage: 'Graphite URL',
-            description: 'The URL should be in the form of https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite',
+            description:
+              'The URL should be in the form of https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite',
           }),
-          value: (server) => {
-            const urls = server.config().get('timelion.graphiteUrls');
+          value: (server: Legacy.Server) => {
+            const urls = server.config().get('timelion.graphiteUrls') as string[];
             if (urls.length === 0) {
               return null;
             } else {
@@ -177,11 +172,12 @@ export default function (kibana) {
             }
           },
           description: i18n.translate('timelion.uiSettings.graphiteURLDescription', {
-            defaultMessage: '{experimentalLabel} The <a href="https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite" target="_blank" rel="noopener">URL</a> of your graphite host',
+            defaultMessage:
+              '{experimentalLabel} The <a href="https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite" target="_blank" rel="noopener">URL</a> of your graphite host',
             values: { experimentalLabel: `<em>[${experimentalLabel}]</em>` },
           }),
           type: 'select',
-          options: (server) => (server.config().get('timelion.graphiteUrls')),
+          options: (server: Legacy.Server) => server.config().get('timelion.graphiteUrls'),
           category: ['timelion'],
         },
         'timelion:quandl.key': {
@@ -197,11 +193,13 @@ export default function (kibana) {
         },
       },
     },
-    init: (server) => {
-      const initializerContext = {};
-      const core = { http: { server } };
+    init: (server: Legacy.Server) => {
+      const initializerContext = {} as PluginInitializerContext;
+      const core = { http: { server } } as CoreSetup & CustomCoreSetup;
 
       plugin(initializerContext).setup(core);
     },
   });
-}
+
+// eslint-disable-next-line import/no-default-export
+export default timelionPluginInitializer;
