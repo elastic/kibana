@@ -117,8 +117,7 @@ export function LayerSettings(props) {
         label={i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGlobalFilterLabel', {
           defaultMessage: 'Global filter',
         })}
-        display="columnCompressed"
-        className="mapLayerSettings__globalFilterRow"
+        display="columnCompressedSwitch"
       >
         <EuiSwitch
           label={i18n.translate('xpack.maps.layerPanel.applyGlobalQueryCheckboxLabel', {
