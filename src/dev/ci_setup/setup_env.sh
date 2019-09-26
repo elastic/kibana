@@ -2,6 +2,10 @@
 
 set -e
 
+if [[ "$CI_ENV_SETUP" ]]; then
+  exit 0
+fi
+
 installNode=$1
 
 dir="$(pwd)"
@@ -152,3 +156,5 @@ if [[ -d "$ES_DIR" && -f "$ES_JAVA_PROP_PATH" ]]; then
   echo "Setting JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA"
   export JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA
 fi
+
+export CI_ENV_SETUP=true
