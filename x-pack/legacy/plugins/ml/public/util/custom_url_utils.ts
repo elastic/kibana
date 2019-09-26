@@ -108,9 +108,8 @@ function escapeForKQL(value: string): string {
 function buildKibanaUrl(urlConfig: UrlConfig, record: AnomalyRecordSource) {
   const urlValue = urlConfig.url_value;
 
-  const queryLanguageEscapeCallback = urlValue.includes('language:lucene')
-    ? escapeForElasticsearchQuery
-    : escapeForKQL;
+  const isLuceneQuery = urlValue.includes('language:lucene');
+  const queryLanguageEscapeCallback = isLuceneQuery ? escapeForElasticsearchQuery : escapeForKQL;
 
   type GetResultTokenValue = (v: string) => string;
 
@@ -142,11 +141,11 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: AnomalyRecordSource) {
           // combine values with OR operator e.g. `influencerField:value or influencerField:another_value`.
           const result = tokenValues
             .map(value => `${name}:"${getResultTokenValue(value)}"`)
-            .join(' or ');
+            .join(` ${isLuceneQuery ? 'OR' : 'or'} `);
           return tokenValues.length > 1 ? `(${result})` : result;
         })
         .filter(v => v !== null)
-        .join(' and ')}'`;
+        .join(` ${isLuceneQuery ? 'AND' : 'and'} `)}'`;
     })
     .replace(/\$(\w+)\$/, (match, name: string) => {
       // Use lodash get to allow nested JSON fields to be retrieved.
