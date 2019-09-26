@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimeRange } from '../../../../../../../../src/plugins/data/public';
 import {
   EmbeddableOutput,
   Embeddable,
   EmbeddableInput,
   IContainer,
-} from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+} from 'src/plugins/embeddable/public';
+import { TimeRange } from '../../../../../../../../src/plugins/data/public';
 
 interface EmbeddableTimeRangeInput extends EmbeddableInput {
   timeRange: TimeRange;

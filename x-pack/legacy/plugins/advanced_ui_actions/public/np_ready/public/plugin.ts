@@ -5,12 +5,12 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { IUiActionsStart } from 'src/plugins/ui_actions/public';
+import { IUiActionsStart, IUiActionsSetup } from 'src/plugins/ui_actions/public';
 import {
   Plugin as EmbeddablePlugin,
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+} from 'src/plugins/embeddable/public';
 import { CustomTimeRangeAction } from './custom_time_range_action';
 
 import { CustomTimeRangeBadge } from './custom_time_range_badge';
@@ -18,6 +18,7 @@ import { CommonlyUsedRange } from './types';
 
 interface SetupDependencies {
   embeddable: ReturnType<EmbeddablePlugin['setup']>;
+  uiActions: IUiActionsSetup;
 }
 
 interface StartDependencies {

@@ -43,7 +43,7 @@ import { StaticIndexPattern, Query, SavedQuery } from 'plugins/data';
 import moment from 'moment';
 import { Subscription } from 'rxjs';
 
-import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
+import { ViewMode } from 'src/plugins/embeddable/public';
 import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
 import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn } from './types';
 

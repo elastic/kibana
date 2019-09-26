@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { canInheritTimeRange } from './can_inherit_time_range';
+/** eslint-disable */
 import {
   HelloWorldEmbeddable,
   HelloWorldContainer,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples';
+} from 'src/plugins/embeddable/public/lib/test_samples';
+/** eslint-enable */
 import { TimeRangeEmbeddable, TimeRangeContainer } from './test_helpers';
 
 jest.mock('ui/new_platform');

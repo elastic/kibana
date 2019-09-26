@@ -30,7 +30,8 @@ import {
   ViewMode,
   EmbeddableFactory,
   IEmbeddable,
-} from '../../../../../../embeddable_api/public/np_ready/public';
+  Start as EmbeddableStartContract,
+} from '../embeddable_api';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_container_factory';
 import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';
@@ -38,7 +39,6 @@ import { DashboardViewport } from './viewport/dashboard_viewport';
 import { Query } from '../../../../../../data/public';
 import { CoreStart } from '../../../../../../../../core/public';
 import { Start as InspectorStartContract } from '../../../../../../../../plugins/inspector/public';
-import { Start as EmbeddableStartContract } from '../../../../../../embeddable_api/public/np_ready/public';
 import {
   KibanaReactContext,
   KibanaReactContextValue,

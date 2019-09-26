@@ -6,21 +6,20 @@
 
 import uuid from 'uuid';
 import { npStart } from 'ui/new_platform';
-import { ActionToaster, AppToast } from '../toasters';
-import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import {
+  ViewMode,
+  APPLY_FILTER_ACTION,
   APPLY_FILTER_TRIGGER,
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/triggers';
+} from 'src/plugins/embeddable/public';
+import { ActionToaster, AppToast } from '../toasters';
 import {
   APPLY_SIEM_FILTER_ACTION_ID,
   ApplySiemFilterAction,
 } from './actions/apply_siem_filter_action';
-import { APPLY_FILTER_ACTION } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/actions';
 import { IndexPatternMapping, MapEmbeddable, SetQuery } from './types';
 import { getLayerList } from './map_config';
-import { ViewMode } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 // @ts-ignore Missing type defs as maps moves to Typescript
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../maps/common/constants';
 import * as i18n from './translations';
@@ -98,7 +97,7 @@ export const createEmbeddable = async (
   endDate: number,
   setQuery: SetQuery
 ): Promise<MapEmbeddable> => {
-  const factory = start.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
+  const factory = npStart.plugins.embeddable.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
   const state = {
     layerList: getLayerList(indexPatterns),

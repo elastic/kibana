@@ -5,7 +5,7 @@
  */
 
 import { ExpressionType } from 'src/plugins/expressions/common';
-import { EmbeddableInput } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { EmbeddableInput } from 'src/plugins/embeddable/public';
 import { EmbeddableTypes } from './embeddable_types';
 
 export const EmbeddableExpressionType = 'embeddable';

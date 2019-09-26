@@ -19,19 +19,14 @@
 
 import '../doc_table';
 import { capabilities } from 'ui/capabilities';
-import { npStart } from 'ui/new_platform';
+import { npStart, npSetup } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import { IPrivate } from 'ui/private';
 import { TimeRange } from 'src/plugins/data/public';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
-import {
-  EmbeddableFactory,
-  ErrorEmbeddable,
-  Container,
-} from '../../../../embeddable_api/public/np_ready/public';
-import { setup } from '../../../../embeddable_api/public/np_ready/public/legacy';
+import { EmbeddableFactory, ErrorEmbeddable, Container } from 'src/plugins/embeddable/public';
 import { SavedSearchLoader } from '../types';
 import { SearchEmbeddable, SEARCH_EMBEDDABLE_TYPE } from './search_embeddable';
 import { SearchInput, SearchOutput } from './types';
@@ -112,4 +107,4 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
 }
 
 const factory = new SearchEmbeddableFactory(npStart.plugins.uiActions.executeTriggerActions);
-setup.registerEmbeddableFactory(factory.type, factory);
+npSetup.plugins.embeddable.registerEmbeddableFactory(factory.type, factory);

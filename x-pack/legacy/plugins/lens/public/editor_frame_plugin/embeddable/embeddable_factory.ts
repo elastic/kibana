@@ -16,7 +16,7 @@ import {
   ErrorEmbeddable,
   EmbeddableInput,
   IContainer,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+} from '../../../../../../../src/plugins/embeddable/public';
 import { Embeddable } from './embeddable';
 import { SavedObjectIndexStore, DOC_TYPE } from '../../persistence';
 import { getEditPath } from '../../../common';
