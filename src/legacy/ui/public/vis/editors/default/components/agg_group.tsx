@@ -132,7 +132,7 @@ function DefaultEditorAggGroup({
     <EuiDragDropContext onDragEnd={onDragEnd}>
       <EuiPanel paddingSize="s">
         <EuiTitle size="xs">
-          <div>{groupNameLabel}</div>
+          <h3>{groupNameLabel}</h3>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiDroppable droppableId={`agg_group_dnd_${groupName}`}>

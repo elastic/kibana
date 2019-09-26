@@ -32,6 +32,7 @@ export interface PanelHeaderProps {
   closeContextMenu: boolean;
   badges: IAction[];
   embeddable: IEmbeddable;
+  headerId: string;
 }
 
 function renderBadges(badges: IAction[], embeddable: IEmbeddable) {
@@ -65,6 +66,7 @@ export function PanelHeader({
   closeContextMenu,
   badges,
   embeddable,
+  headerId,
 }: PanelHeaderProps) {
   const showTitle = !isViewMode || (title && !hidePanelTitles);
   const showPanelBar = badges.length > 0 || showTitle;
@@ -95,23 +97,29 @@ export function PanelHeader({
     viewDescr = '';
   }
 
+  const headingAriaLabel = i18n.translate('embeddableApi.panel.dashboardPanelAriaLabel', {
+    defaultMessage: 'Dashboard panel',
+  });
+  const enhancedHeadingAriaLabel = i18n.translate(
+    'embeddableApi.panel.enhancedDashboardPanelAriaLabel',
+    {
+      defaultMessage: 'Dashboard panel: {title}',
+      values: {
+        title,
+      },
+    }
+  );
+
   return (
-    <div
+    <figcaption
       className={classes}
       data-test-subj={`embeddablePanelHeading-${(title || '').replace(/\s/g, '')}`}
     >
-      <div
+      <h2
+        id={headerId}
         data-test-subj="dashboardPanelTitle"
         className="embPanel__title embPanel__dragger"
-        /* title={title} */ /* this is redundant - it shows a tooltip with the view title - and clutters the UI */ aria-label={i18n.translate(
-          'embeddableApi.panel.dashboardPanelAriaLabel',
-          {
-            defaultMessage: 'Dashboard panel: {title}',
-            values: {
-              title,
-            },
-          }
-        )}
+        aria-label={title ? enhancedHeadingAriaLabel : headingAriaLabel}
       >
         {showTitle || viewDescr !== '' ? (
           <span className="embPanel__titleInner">
@@ -126,14 +134,14 @@ export function PanelHeader({
         ) : (
           undefined
         )}
-        {renderBadges(badges, embeddable)}
-      </div>
+      </h2>
 
       <PanelOptionsMenu
         isViewMode={isViewMode}
         getActionContextMenuPanel={getActionContextMenuPanel}
         closeContextMenu={closeContextMenu}
+        title={title}
       />
-    </div>
+    </figcaption>
   );
 }

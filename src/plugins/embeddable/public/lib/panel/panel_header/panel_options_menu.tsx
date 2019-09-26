@@ -31,6 +31,7 @@ export interface PanelOptionsMenuProps {
   getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor>;
   isViewMode: boolean;
   closeContextMenu: boolean;
+  title?: string;
 }
 
 interface State {
@@ -74,14 +75,26 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
 
   public render() {
     const { isViewMode } = this.props;
+    const enhancedAriaLabel = i18n.translate(
+      'embeddableApi.panel.optionsMenu.panelOptionsButtonEnhancedAriaLabel',
+      {
+        defaultMessage: 'Panel options for {title}',
+        values: { title: this.props.title },
+      }
+    );
+    const ariaLabelWithoutTitle = i18n.translate(
+      'embeddableApi.panel.optionsMenu.panelOptionsButtonAriaLabel',
+      {
+        defaultMessage: 'Panel options',
+      }
+    );
+
     const button = (
       <EuiButtonIcon
         iconType={isViewMode ? 'boxesHorizontal' : 'gear'}
         color="text"
         className="embPanel__optionsMenuButton"
-        aria-label={i18n.translate('embeddableApi.panel.optionsMenu.panelOptionsButtonAriaLabel', {
-          defaultMessage: 'Panel options',
-        })}
+        aria-label={this.props.title ? enhancedAriaLabel : ariaLabelWithoutTitle}
         data-test-subj="embeddablePanelToggleMenuIcon"
         onClick={this.toggleContextMenu}
       />
@@ -89,7 +102,6 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
 
     return (
       <EuiPopover
-        id="dashboardPanelContextMenu"
         className="embPanel__optionsMenuPopover"
         button={button}
         isOpen={this.state.isPopoverOpen}
