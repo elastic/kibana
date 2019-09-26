@@ -10,7 +10,7 @@ import _ from 'lodash';
 
 import { EVENT_RATE_COUNT_FIELD, WIZARD_TYPE } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
 import { ML_MEDIAN_PERCENTS } from 'plugins/ml/../common/util/job_utils';
-import { MlTimeBuckets } from 'plugins/ml/util/ml_time_buckets';
+import { TimeBuckets } from 'plugins/ml/util/time_buckets';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { createJobForSaving } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
@@ -76,7 +76,7 @@ export function PopulationJobServiceProvider() {
           };
         });
 
-        const searchJson = getSearchJsonFromConfig(formConfig, timefilter, MlTimeBuckets);
+        const searchJson = getSearchJsonFromConfig(formConfig, timefilter, TimeBuckets);
 
         ml.esSearch(searchJson)
           .then((resp) => {
@@ -313,7 +313,7 @@ export function PopulationJobServiceProvider() {
 
   function getSearchJsonFromConfig(formConfig) {
     const bounds = timefilter.getActiveBounds();
-    const buckets = new MlTimeBuckets();
+    const buckets = new TimeBuckets();
     buckets.setInterval('auto');
     buckets.setBounds(bounds);
 

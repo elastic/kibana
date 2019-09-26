@@ -19,7 +19,7 @@ interface Props {
 
 export function getTabs(tabId: TabId, disableLinks: boolean): Tab[] {
   const TAB_MAP: Partial<Record<TabId, Tab[]>> = {
-    // overview: [],
+    overview: [],
     datavisualizer: [],
     data_frames: [],
     data_frame_analytics: [],
@@ -59,7 +59,7 @@ export function getTabs(tabId: TabId, disableLinks: boolean): Tab[] {
 }
 
 enum TAB_TEST_SUBJECT {
-  // overview = 'mlOverview',
+  overview = 'mlOverview',
   jobs = 'mlSubTab jobManagement',
   explorer = 'mlSubTab anomalyExplorer',
   timeseriesexplorer = 'mlSubTab singleMetricViewer',

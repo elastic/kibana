@@ -887,7 +887,7 @@ describe('I18n engine', () => {
   });
 
   describe('load', () => {
-    let mockFetch: jest.Mock;
+    let mockFetch: jest.SpyInstance;
     beforeEach(() => {
       mockFetch = jest.spyOn(global as any, 'fetch').mockImplementation();
     });

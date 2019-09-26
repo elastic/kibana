@@ -21,8 +21,9 @@ import { generateId } from '../id_generator';
 const columnSortOrder = {
   date: 0,
   string: 1,
-  boolean: 2,
-  number: 3,
+  ip: 2,
+  boolean: 3,
+  number: 4,
 };
 
 function getIconForSeries(type: SeriesType): EuiIconType {
@@ -261,9 +262,13 @@ function getSeriesType(
   changeType: TableChangeType
 ): SeriesType {
   const defaultType = xValue.operation.dataType === 'date' ? 'area_stacked' : 'bar_stacked';
-  if (changeType === 'initial') {
-    return defaultType;
-  } else {
+  const preferredSeriesType = (currentState && currentState.preferredSeriesType) || defaultType;
+  const isDateCompatible =
+    preferredSeriesType === 'area' ||
+    preferredSeriesType === 'line' ||
+    preferredSeriesType === 'area_stacked';
+
+  if (changeType !== 'initial') {
     const oldLayer = getExistingLayer(currentState, layerId);
     return (
       (oldLayer && oldLayer.seriesType) ||
@@ -271,6 +276,12 @@ function getSeriesType(
       defaultType
     );
   }
+
+  if (xValue.operation.dataType === 'date') {
+    return isDateCompatible ? preferredSeriesType : defaultType;
+  }
+
+  return isDateCompatible ? defaultType : preferredSeriesType;
 }
 
 function getSuggestionTitle(
