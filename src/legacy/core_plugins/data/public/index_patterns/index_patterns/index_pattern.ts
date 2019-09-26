@@ -141,7 +141,7 @@ export class IndexPattern implements StaticIndexPattern {
   }
 
   private initFields(input?: any) {
-    const newValue = input || (this.fields && this.fields.getArray());
+    const newValue = input || this.fields;
     this.fields = new FieldList(this, newValue, this.shortDotsEnable, this.notifications);
   }
 
@@ -279,24 +279,6 @@ export class IndexPattern implements StaticIndexPattern {
       throw new DuplicateField(name);
     }
 
-<<<<<<< HEAD
-    this.fields.push(
-      new Field(
-        this,
-        {
-          name,
-          script,
-          fieldType,
-          scripted: true,
-          lang,
-          aggregatable: true,
-          filterable: true,
-          searchable: true,
-        },
-        false,
-        this.notifications
-      )
-=======
     this.fields.add(
       new Field(this, {
         name,
@@ -307,8 +289,10 @@ export class IndexPattern implements StaticIndexPattern {
         aggregatable: true,
         filterable: true,
         searchable: true,
-      })
->>>>>>> partial progress
+      },
+      false,
+      this.notifications
+      )
     );
 
     await this.save();
@@ -333,11 +317,11 @@ export class IndexPattern implements StaticIndexPattern {
   }
 
   getNonScriptedFields() {
-    return this.fields.where({ scripted: false });
+    return _.where(this.fields, { scripted: false });
   }
 
   getScriptedFields() {
-    return this.fields.where({ scripted: true });
+    return _.where(this.fields, { scripted: true });
   }
 
   isTimeBased(): boolean {
