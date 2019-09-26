@@ -18,11 +18,9 @@
  */
 
 import 'ui/directives/css_truncate';
-import { i18n } from '@kbn/i18n';
 import 'ui/directives/field_name';
 import './discover_field';
 import 'ui/angular_ui_select';
-//import './discover_index_pattern_directive';
 import './discover_field_search_directive';
 import _ from 'lodash';
 import $ from 'jquery';
@@ -85,44 +83,20 @@ app.directive('discFieldChooser', function ($location, config, $route) {
           { label: 'yes', value: true },
           { label: 'no', value: false }
         ],
-        toggleVal: function (name, def) {
-          if (filter.vals[name] !== def) filter.vals[name] = def;
-          else filter.vals[name] = undefined;
-        },
         reset: function () {
           filter.vals = _.clone(filter.defaults);
         },
-        isFieldSelected: function (field) {
-          const matchFilter = (filter.vals.type === 'any' || field.type === filter.vals.type);
-          const isAggregatable = (filter.vals.aggregatable == null || field.aggregatable === filter.vals.aggregatable);
-          const isSearchable = (filter.vals.searchable == null || field.searchable === filter.vals.searchable);
-          const scriptedOrMissing = (!filter.vals.missing || field.scripted || field.rowCount > 0);
-          const matchName = (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1);
-
-          return field.display
-            && matchFilter
-            && isAggregatable
-            && isSearchable
-            && scriptedOrMissing
-            && matchName;
+        /**
+         * filter for fields that are displayed / selected for the data table
+         */
+        isFieldFilteredAndDisplayed: function (field) {
+          return field.display && isFieldFiltered(field);
         },
-        isFieldFiltered: function (field) {
-          const matchFilter = (filter.vals.type === 'any' || field.type === filter.vals.type);
-          const isAggregatable = (filter.vals.aggregatable == null || field.aggregatable === filter.vals.aggregatable);
-          const isSearchable = (filter.vals.searchable == null || field.searchable === filter.vals.searchable);
-          const scriptedOrMissing = (!filter.vals.missing || field.scripted || field.rowCount > 0);
-          const matchName = (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1);
-
-          return !field.display
-            && matchFilter
-            && isAggregatable
-            && isSearchable
-            && scriptedOrMissing
-            && matchName
-          ;
-        },
-        popularity: function (field) {
-          return field.count > 0;
+        /**
+         * filter for fields that are not displayed / selected for the data table
+         */
+        isFieldFilteredAndNotDisplayed: function (field) {
+          return !field.display && isFieldFiltered(field);
         },
         getActive: function () {
           return _.some(filter.props, function (prop) {
@@ -130,6 +104,16 @@ app.directive('discFieldChooser', function ($location, config, $route) {
           });
         }
       };
+
+      function isFieldFiltered(field) {
+        const matchFilter = (filter.vals.type === 'any' || field.type === filter.vals.type);
+        const isAggregatable = (filter.vals.aggregatable == null || field.aggregatable === filter.vals.aggregatable);
+        const isSearchable = (filter.vals.searchable == null || field.searchable === filter.vals.searchable);
+        const scriptedOrMissing = (!filter.vals.missing || field.scripted || field.rowCount > 0);
+        const matchName = (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1);
+
+        return matchFilter && isAggregatable && isSearchable && scriptedOrMissing && matchName;
+      }
 
       $scope.setFilterValue = (name, value) => {
         filter.vals[name] = value;

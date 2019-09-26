@@ -18,39 +18,73 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFieldText, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonToggle, EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 export interface Props {
-  displayFilter: boolean;
-  filter: any;
+  /**
+   * triggered on input of user into search field
+   */
   onChange: (field: string, value: string) => void;
-  onShowFilter: any;
+  /**
+   * triggered when the "additional filter btn" is clicked
+   */
+  onShowFilter: () => void;
+  /**
+   * determines whether additional filter fields are displayed
+   */
+  showFilter: boolean;
+  /**
+   * the input value of the user
+   */
   value: string;
 }
-export function DiscoverFieldSearch({ value, displayFilter, onChange, onShowFilter }: Props) {
+
+/**
+ * Component is Discover's side bar to  search of available fields
+ * Additionally there's a button displayed that allows the user to show/hide more filter fields
+ */
+export function DiscoverFieldSearch({ showFilter, onChange, onShowFilter, value }: Props) {
   if (typeof value !== 'string') {
-    // at initial rendering value is undefined, this catches the warning
+    // at initial rendering value is undefined (angular related), this catches the warning
     // should be removed once all is react
     return null;
   }
-  const ariaLabel = displayFilter
+  const filterBtnAriaLabel = showFilter
     ? i18n.translate('kbn.discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
         defaultMessage: 'Hide field filter settings',
       })
     : i18n.translate('kbn.discover.fieldChooser.toggleFieldFilterButtonShowAriaLabel', {
         defaultMessage: 'Show field filter settings',
       });
+  const searchPlaceholder = i18n.translate('kbn.discover.fieldChooser.searchPlaceHolder', {
+    defaultMessage: 'Search fields',
+  });
 
   return (
-    <EuiFieldText
-      aria-label={ariaLabel}
-      placeholder="search"
-      prepend={
-        <EuiButtonIcon iconType="filter" onClick={() => onShowFilter()} aria-label={ariaLabel} />
-      }
-      compressed
-      onChange={event => onChange('name', event.currentTarget.value)}
-      value={value}
-    />
+    <EuiFlexGroup responsive={false} gutterSize={'s'}>
+      <EuiFlexItem>
+        <EuiFieldSearch
+          aria-label={searchPlaceholder}
+          data-test-subj="fieldFilterSearchInput"
+          compressed
+          fullWidth
+          onChange={event => onChange('name', event.currentTarget.value)}
+          placeholder={searchPlaceholder}
+          value={value}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonToggle
+          aria-expanded={showFilter}
+          aria-label={filterBtnAriaLabel}
+          data-test-subj="toggleFieldFilterButton"
+          iconType="gear"
+          isIconOnly
+          label="Toggle Me"
+          onChange={() => onShowFilter()}
+          size="s"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
