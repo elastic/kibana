@@ -51,7 +51,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
 
-        await testSubjects.existOrFail('ml-jobs-list');
+        await testSubjects.existOrFail('mlPageOverview');
       });
     });
 
