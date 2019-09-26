@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import Panel from '../panel';
-import { i18n } from '@kbn/i18n';
-import panelRegistry from '../../lib/panel_registry';
+import { timechartFn } from './schema';
+import { Panel } from '../panel';
+import { TimelionStartDependencies } from '../../plugin';
 
-panelRegistry.register(function timeChartProvider(Private) {
+export function getTimeChart(dependencies: TimelionStartDependencies) {
   // Schema is broken out so that it may be extended for use in other plugins
   // Its also easier to test.
-  return new Panel('timechart', Private(require('./schema'))(), i18n);
-});
+  return new Panel('timechart', timechartFn(dependencies)());
+}
