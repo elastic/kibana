@@ -49,10 +49,6 @@
   height: $lnsSuggestionHeight - $euiSizeL;
 }
 
-.lnsSuggestionPanel__chartWrapper > * {
-  flex: 1;
-}
-
 .lnsSuggestionPanel__buttonLabel {
   @include euiFontSizeXS;
   display: block;

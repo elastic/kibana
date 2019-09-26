@@ -113,8 +113,8 @@ export function MetricChart({
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        maxWidth: '100%',
-        maxHeight: '100%',
+        width: '100%',
+        height: '100%',
         textAlign: 'center',
       }}
     >

@@ -59,10 +59,10 @@ describe('metric_expression', () => {
               "alignItems": "center",
               "display": "flex",
               "flexDirection": "column",
+              "height": "100%",
               "justifyContent": "center",
-              "maxHeight": "100%",
-              "maxWidth": "100%",
               "textAlign": "center",
+              "width": "100%",
             }
           }
         >
@@ -105,35 +105,35 @@ describe('metric_expression', () => {
           />
         )
       ).toMatchInlineSnapshot(`
-                <VisualizationContainer
-                  reportTitle="My fanci metric chart"
-                  style={
-                    Object {
-                      "alignItems": "center",
-                      "display": "flex",
-                      "flexDirection": "column",
-                      "justifyContent": "center",
-                      "maxHeight": "100%",
-                      "maxWidth": "100%",
-                      "textAlign": "center",
-                    }
-                  }
-                >
-                  <AutoScale>
-                    <div
-                      data-test-subj="lns_metric_value"
-                      style={
-                        Object {
-                          "fontSize": "60pt",
-                          "fontWeight": 600,
-                        }
-                      }
-                    >
-                      10110
-                    </div>
-                  </AutoScale>
-                </VisualizationContainer>
-            `);
+        <VisualizationContainer
+          reportTitle="My fanci metric chart"
+          style={
+            Object {
+              "alignItems": "center",
+              "display": "flex",
+              "flexDirection": "column",
+              "height": "100%",
+              "justifyContent": "center",
+              "textAlign": "center",
+              "width": "100%",
+            }
+          }
+        >
+          <AutoScale>
+            <div
+              data-test-subj="lns_metric_value"
+              style={
+                Object {
+                  "fontSize": "60pt",
+                  "fontWeight": 600,
+                }
+              }
+            >
+              10110
+            </div>
+          </AutoScale>
+        </VisualizationContainer>
+      `);
     });
   });
 });
