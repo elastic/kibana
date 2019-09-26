@@ -4,6 +4,7 @@
   "server": false,
   "ui": true,
   "requiredPlugins": [
-    "inspector"
+    "inspector",
+    "uiActions"
   ]
 }

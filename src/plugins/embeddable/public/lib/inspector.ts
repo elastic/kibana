@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from '../../../../../../../../src/plugins/embeddable/public';
+export * from '../../../inspector/public';

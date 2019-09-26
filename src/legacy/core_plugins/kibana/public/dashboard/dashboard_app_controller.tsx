@@ -62,7 +62,7 @@ import {
   ErrorEmbeddable,
   ViewMode,
   openAddPanelFlyout,
-} from 'src/plugins/embeddable/public';
+} from '../../../../../../src/plugins/embeddable/public';
 import { data } from '../../../data/public/setup';
 
 import {

@@ -12,7 +12,7 @@ import {
   APPLY_FILTER_TRIGGER,
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
-} from 'src/plugins/embeddable/public';
+} from '../../../../../../../src/plugins/embeddable/public';
 import { ActionToaster, AppToast } from '../toasters';
 import {
   APPLY_SIEM_FILTER_ACTION_ID,

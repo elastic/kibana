@@ -10,7 +10,7 @@ import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 
 import styled from 'styled-components';
-import { EmbeddablePanel } from 'src/plugins/embeddable/public';
+import { EmbeddablePanel } from '../../../../../../../src/plugins/embeddable/public';
 
 import { Loader } from '../loader';
 import { useIndexPatterns } from '../ml_popover/hooks/use_index_patterns';

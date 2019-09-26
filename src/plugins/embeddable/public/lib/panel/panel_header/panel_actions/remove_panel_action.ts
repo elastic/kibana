@@ -17,7 +17,7 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { IAction, IncompatibleActionError } from 'src/plugins/ui_actions/public';
+import { IAction, IncompatibleActionError } from '../../../ui_actions';
 import { ContainerInput, IContainer } from '../../../containers';
 import { ViewMode } from '../../../types';
 import { IEmbeddable } from '../../../embeddables';

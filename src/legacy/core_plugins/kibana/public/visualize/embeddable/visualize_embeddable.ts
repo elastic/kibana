@@ -29,14 +29,14 @@ import {
 } from 'ui/visualize/loader/types';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
-import { TimeRange } from 'src/plugins/data/public';
 import { Filter } from '@kbn/es-query';
+import { TimeRange } from '../../../../../../plugins/data/public';
 import {
   EmbeddableInput,
   EmbeddableOutput,
   Embeddable,
   Container,
-} from 'src/plugins/embeddable/public';
+} from '../../../../../../plugins/embeddable/public';
 import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 
