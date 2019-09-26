@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ValidationError } from '../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
+import { ValidationError } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 import { ERROR_CODES } from './constants';
 

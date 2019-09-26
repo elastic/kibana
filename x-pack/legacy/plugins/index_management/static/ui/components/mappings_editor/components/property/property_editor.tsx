@@ -21,8 +21,8 @@ import {
   FormDataProvider,
   FieldConfig,
   ValidationConfig,
-} from '../../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
-import { Field } from '../../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/components';
+} from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+import { Field } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/components';
 
 import { nameConflictError } from '../../errors';
 import {

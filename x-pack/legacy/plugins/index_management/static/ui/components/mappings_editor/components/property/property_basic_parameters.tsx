@@ -7,8 +7,8 @@
 import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { UseField } from '../../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
-import { Field } from '../../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/components';
+import { UseField } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+import { Field } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/components';
 import { parametersDefinition, ParameterName, DataTypeDefinition } from '../../config';
 
 interface Props {

@@ -10,8 +10,8 @@ import {
   UseField,
   Form,
   FieldConfig,
-} from '../../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
-import { Field } from '../../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/components';
+} from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+import { Field } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/components';
 
 import { parametersDefinition, ParameterName } from '../../config';
 import { ANALYZERS_OPTIONS, INDEX_OPTIONS, SIMILARITY_ALGORITHM_OPTIONS } from '../../constants';

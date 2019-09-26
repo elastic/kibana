@@ -7,14 +7,15 @@
 import {
   FieldConfig,
   FIELD_TYPES,
-} from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
+} from '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 import {
-  emptyField,
-  containsCharsField,
-} from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/lib/field_validators';
+  fieldValidators,
+  fieldFormatters,
+} from '../../../../../../../../../src/plugins/es_ui_shared/static/forms/helpers';
 
-import { toInt } from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/lib';
+const { toInt } = fieldFormatters;
+const { emptyField, containsCharsField } = fieldValidators;
 
 export type ParameterName =
   | 'name'

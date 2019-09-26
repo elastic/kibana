@@ -9,12 +9,12 @@ import {
   useForm,
   UseField,
   Form,
-} from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
+} from '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 import {
   FormRow,
   Field,
-} from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/components';
+} from '../../../../../../../../../src/plugins/es_ui_shared/static/forms/components';
 
 import { schema } from '../form.schema';
 import { DYNAMIC_SETTING_OPTIONS } from '../constants';
