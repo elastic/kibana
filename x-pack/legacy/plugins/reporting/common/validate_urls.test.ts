@@ -34,6 +34,10 @@ describe('Validate URLS', () => {
       ).toThrow();
     });
 
+    it(`throws for JS URLs`, () => {
+      expect(() => validateUrls(['javascript:alert(document.cookies)'])).toThrow();
+    });
+
     it(`throws for URLs with protocols`, () => {
       expect(() =>
         validateUrls(['//169.254.169.254/latest/meta-data/iam/security-credentials/profileName'])
