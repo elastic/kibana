@@ -24,6 +24,7 @@ import { Query, QueryBarInput } from 'plugins/data';
 import { AggConfig } from '../../..';
 import { npStart } from '../../../../new_platform';
 import { Storage } from '../../../../storage';
+import { KibanaContextProvider } from '../../../../../../../plugins/kibana_react/public';
 const localStorage = new Storage(window.localStorage);
 
 interface FilterRowProps {
@@ -89,20 +90,24 @@ function FilterRow({
         labelAppend={FilterControl}
         fullWidth={true}
       >
-        <QueryBarInput
-          query={value}
-          indexPatterns={[agg.getIndexPattern()]}
-          appName="filtersAgg"
-          onChange={(query: Query) => onChangeValue(id, query, customLabel)}
-          disableAutoFocus={!autoFocus}
-          data-test-subj={dataTestSubj}
-          bubbleSubmitEvent={true}
-          languageSwitcherPopoverAnchorPosition="leftDown"
-          store={localStorage}
-          uiSettings={npStart.core.uiSettings}
-          http={npStart.core.http}
-          savedObjectsClient={npStart.core.savedObjects.client}
-        />
+        <KibanaContextProvider
+          services={{
+            appName: 'filtersAgg',
+            store: localStorage,
+            autcomplete: npStart.plugins.data.autocomplete,
+            ...npStart.core,
+          }}
+        >
+          <QueryBarInput
+            query={value}
+            indexPatterns={[agg.getIndexPattern()]}
+            onChange={(query: Query) => onChangeValue(id, query, customLabel)}
+            disableAutoFocus={!autoFocus}
+            data-test-subj={dataTestSubj}
+            bubbleSubmitEvent={true}
+            languageSwitcherPopoverAnchorPosition="leftDown"
+          />
+        </KibanaContextProvider>
       </EuiFormRow>
       {showCustomLabel ? (
         <EuiFormRow

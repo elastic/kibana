@@ -114,11 +114,7 @@ app.directive('graphApp', function (reactDirective) {
     ['isLoading', { watchDepth: 'reference' }],
     ['onIndexPatternSelected', { watchDepth: 'reference' }],
     ['onQuerySubmit', { watchDepth: 'reference' }],
-    ['savedObjects', { watchDepth: 'reference' }],
-    ['uiSettings', { watchDepth: 'reference' }],
-    ['http', { watchDepth: 'reference' }],
-    ['initialQuery', { watchDepth: 'reference' }],
-    ['overlays', { watchDepth: 'reference' }]
+    ['initialQuery', { watchDepth: 'reference' }]
   ]);
 });
 
@@ -296,8 +292,6 @@ app.controller('graphuiPlugin', function (
       });
     }
   };
-
-  $scope.pluginDependencies = npStart.core;
 
   $scope.loading = false;
 
