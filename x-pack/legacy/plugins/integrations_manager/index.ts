@@ -18,6 +18,7 @@ import {
   IntegrationsManagerPluginInitializerContext,
 } from './server/plugin';
 import { mappings, savedObjectSchemas } from './server/saved_objects';
+import { getConfigSchema } from './server/config';
 
 const ROOT = `plugins/${PLUGIN.ID}`;
 
@@ -101,17 +102,6 @@ const pluginOptions: LegacyPluginOptions = {
   },
   postInit: undefined,
   isEnabled: false,
-};
-
-export const getConfigSchema = (Joi: typeof JoiNamespace) => {
-  const IntegrationsManagerConfigSchema = Joi.object({
-    enabled: Joi.boolean().default(true),
-    registryUrl: Joi.string()
-      .uri()
-      .default(),
-  }).default();
-
-  return IntegrationsManagerConfigSchema;
 };
 
 export const integrationsManager: LegacyPluginInitializer = kibana =>
