@@ -17,21 +17,40 @@
  * under the License.
  */
 
+import { IconType } from '@elastic/eui';
 import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 
-export interface VisTypeDefinition {
+export interface VisType {
   name: string;
+  title: string;
+  description?: string;
+  visualization: any;
+  isAccessible?: boolean;
+  requestHandler: string;
+  responseHandler: string;
+  icon?: IconType;
+  image?: string;
+  stage: 'experimental' | 'production';
+  requiresSearch: boolean;
+  hidden: boolean;
+
+  // Since we haven't typed everything here yet, we basically "any" the rest
+  // of that interface. This should be removed as soon as this type definition
+  // has been completed. But that way we at least have typing for a couple of
+  // properties on that type.
+  [key: string]: any;
 }
+
 /**
  * Vis Types Service
  *
  * @internal
  */
 export class TypesService {
-  private types: Record<string, VisTypeDefinition> = {};
+  private types: Record<string, VisType> = {};
   public setup() {
     return {
-      registerVisualization: (registerFn: () => VisTypeDefinition) => {
+      registerVisualization: (registerFn: () => VisType) => {
         const visDefinition = registerFn();
         if (this.types[visDefinition.name]) {
           throw new Error('type already exists!');
@@ -48,7 +67,7 @@ export class TypesService {
         return this.types[visualization];
       },
       all: () => {
-        return { ...this.types };
+        return [...Object.values(this.types)];
       },
       getAliases: visTypeAliasRegistry.get,
     };

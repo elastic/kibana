@@ -41,7 +41,7 @@ export type Vis = types.Vis;
 export type VisParams = types.VisParams;
 export type VisProvider = types.VisProvider;
 export type VisState = types.VisState;
-export { VisualizationController, VisType } from 'ui/vis/vis_types/vis_type';
+export { VisualizationController } from 'ui/vis/vis_types/vis_type';
 export { Status } from 'ui/vis/update_status';
 
 /**
