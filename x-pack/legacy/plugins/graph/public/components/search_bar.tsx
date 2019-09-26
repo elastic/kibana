@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import React, { useState } from 'react';
 
-import { CoreStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
@@ -56,7 +55,7 @@ export function SearchBar(props: SearchBarProps) {
   const [query, setQuery] = useState<Query>({ language: 'kuery', query: initialQuery || '' });
   const kibana = useKibana<IDataPluginServices>();
   const { overlays, uiSettings, savedObjects } = kibana.services;
-  if (!overlays) return;
+  if (!overlays) return null;
 
   return (
     <I18nProvider>
