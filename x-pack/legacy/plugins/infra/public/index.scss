@@ -30,11 +30,11 @@
 // This is a temporary workaround for https://github.com/elastic/kibana/issues/39808
 // A real fix will most likely depend on changes in elastic-charts.
 
-.infMetricsExplorerChart .echTooltip {
+.infrastructureChart .echTooltip {
   max-width: 90vw;
 }
 
-.infMetricsExplorerChart .echTooltip__label {
+.infrastructureChart .echTooltip__label {
   overflow-x: hidden;
   white-space: no-wrap;
   text-overflow: ellipsis;

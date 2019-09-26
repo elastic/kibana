@@ -112,7 +112,7 @@ export const ChartSection = ({
       <EuiTitle size="xs">
         <h3 id={section.id}>{section.label}</h3>
       </EuiTitle>
-      <div className="infMetricsExplorerChart" style={{ height: 250, marginBottom: 16 }}>
+      <div className="infrastructureChart" style={{ height: 250, marginBottom: 16 }}>
         <Chart>
           <Axis
             id={getAxisId('timestamp')}
