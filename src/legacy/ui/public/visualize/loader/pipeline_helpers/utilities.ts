@@ -48,7 +48,7 @@ const getConfig = (...args: any[]): any => config.get(...args);
 const getDefaultFieldFormat = () => ({ convert: identity });
 
 const getFieldFormat = (id: string | undefined, params: object = {}) => {
-  const Format = fieldFormats.byId[id];
+  const Format = fieldFormats.getType(id);
   if (Format) {
     return new Format(params, getConfig);
   } else {

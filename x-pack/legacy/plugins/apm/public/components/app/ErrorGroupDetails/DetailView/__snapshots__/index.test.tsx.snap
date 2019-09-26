@@ -4,7 +4,6 @@ exports[`DetailView should render Discover button 1`] = `
 <DiscoverErrorLink
   error={
     Object {
-      "@timestamp": "myTimestamp",
       "error": Object {
         "exception": Object {
           "handled": true,
@@ -17,6 +16,9 @@ exports[`DetailView should render Discover button 1`] = `
       },
       "service": Object {
         "name": "myService",
+      },
+      "timestamp": Object {
+        "us": 0,
       },
       "transaction": Object {
         "id": "myTransactionId",
@@ -49,8 +51,10 @@ exports[`DetailView should render TabContent 1`] = `
   }
   error={
     Object {
-      "@timestamp": "myTimestamp",
       "context": Object {},
+      "timestamp": Object {
+        "us": 0,
+      },
     }
   }
 />
