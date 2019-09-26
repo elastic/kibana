@@ -7,16 +7,28 @@
 import { parse } from 'url';
 import * as _ from 'lodash';
 
-const isAbsoluteUrl = (url: string) => {
-  const parsed = parse(url, false, true);
+/*
+ * isBogusUrl
+ *
+ * Besides checking to see if the URL is relative, we also
+ * need to verify that window.location.href won't navigate
+ * to it, which url.parse doesn't catch all variants of
+ */
+const isBogusUrl = (url: string) => {
+  const cleansed = _.trim(url);
+  const { host, protocol, port } = parse(cleansed, false, true);
 
-  return parsed.host || parsed.protocol || parsed.port;
+  if (cleansed.indexOf('//') === 0) {
+    return true;
+  }
+
+  return host || protocol || port;
 };
 
 export const validateUrls = (urls: string[]): void => {
-  const absoluteUrls = _.filter(urls, url => isAbsoluteUrl(url));
+  const badUrls = _.filter(urls, url => isBogusUrl(url));
 
-  if (absoluteUrls.length) {
-    throw new Error(`Found invalid URL(s), all URLs must be relative: ${absoluteUrls.join(' ')}`);
+  if (badUrls.length) {
+    throw new Error(`Found invalid URL(s), all URLs must be relative: ${badUrls.join(' ')}`);
   }
 };
