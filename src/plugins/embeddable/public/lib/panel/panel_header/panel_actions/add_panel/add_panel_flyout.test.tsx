@@ -33,7 +33,7 @@ import { mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 // eslint-disable-next-line
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '../../../../../../../../core/public/mocks';
 
 test('createNewEmbeddable() add embeddable to container', async () => {
   const core = coreMock.createStart();

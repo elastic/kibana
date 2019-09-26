@@ -30,7 +30,7 @@ import { FilterableEmbeddableFactory } from '../../../../test_samples/embeddable
 import { FilterableContainer } from '../../../../test_samples/embeddables/filterable_container';
 import { GetEmbeddableFactory } from '../../../../types';
 // eslint-disable-next-line
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '../../../../../../../../core/public/mocks';
 import { ContactCardEmbeddable } from '../../../../test_samples';
 
 const embeddableFactories = new Map<string, EmbeddableFactory>();
