@@ -67,7 +67,12 @@ export const CategoriesPane = React.memo<Props>(
         <h5 data-test-subj="categories-pane-title">{i18n.CATEGORIES}</h5>
       </Title>
 
-      <CategoryNames data-test-subj="categories-container" height={TABLE_HEIGHT} width={width}>
+      <CategoryNames
+        className="euiTable--compressed"
+        data-test-subj="categories-container"
+        height={TABLE_HEIGHT}
+        width={width}
+      >
         <EuiInMemoryTable
           columns={getCategoryColumns({
             browserFields,

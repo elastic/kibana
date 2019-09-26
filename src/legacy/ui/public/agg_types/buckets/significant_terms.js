@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SizeParamEditor } from '../controls/size';
+import { SizeParamEditor } from '../../vis/editors/default/controls/size';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterTerms } from './create_filter/terms';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';

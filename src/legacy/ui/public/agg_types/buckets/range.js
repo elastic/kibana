@@ -20,9 +20,9 @@
 import React from 'react';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterRange } from './create_filter/range';
-import { FieldFormat } from '../../../field_formats/field_format';
+import { FieldFormat } from '../../../../../plugins/data/common/field_formats';
 import { RangeKey } from './range_key';
-import { RangesParamEditor } from '../controls/ranges';
+import { RangesParamEditor } from '../../vis/editors/default/controls/ranges';
 import { i18n } from '@kbn/i18n';
 
 const keyCaches = new WeakMap();

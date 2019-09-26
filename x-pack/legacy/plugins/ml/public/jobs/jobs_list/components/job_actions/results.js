@@ -18,7 +18,7 @@ import chrome from 'ui/chrome';
 import { mlJobService } from '../../../../services/job_service';
 import { injectI18n } from '@kbn/i18n/react';
 
-function getLink(location, jobs) {
+export function getLink(location, jobs) {
   const resultsPageUrl = mlJobService.createResultsUrlForJobs(jobs, location);
   return `${chrome.getBasePath()}/app/${resultsPageUrl}`;
 }
@@ -52,6 +52,7 @@ function ResultLinksUI({ jobs, intl }) {
             aria-label={openJobsInSingleMetricViewerText}
             className="results-button"
             isDisabled={(singleMetricEnabled === false || jobActionsDisabled === true)}
+            data-test-subj={`openJobsInSingleMetricViewer openJobsInSingleMetricViewer-${jobs[0].id}`}
           />
         </EuiToolTip>
       }
@@ -65,6 +66,7 @@ function ResultLinksUI({ jobs, intl }) {
           aria-label={openJobsInAnomalyExplorerText}
           className="results-button"
           isDisabled={(jobActionsDisabled === true)}
+          data-test-subj={`openJobsInAnomalyExplorer openJobsInSingleAnomalyExplorer-${jobs[0].id}`}
         />
       </EuiToolTip>
       <div className="actions-border"/>

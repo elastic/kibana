@@ -27,7 +27,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
-import { AggConfig } from '../../../agg_config';
+import { AggConfig } from '../../../../agg_types/agg_config';
 import { aggGroupNamesMap, AggGroupNames } from '../agg_groups';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';

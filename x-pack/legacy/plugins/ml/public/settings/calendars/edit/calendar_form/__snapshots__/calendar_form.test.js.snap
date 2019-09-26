@@ -36,6 +36,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
   />
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     error={
       Array [
         "Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character",
@@ -65,6 +66,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label={
@@ -88,6 +90,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label={
@@ -112,6 +115,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label={
@@ -140,6 +144,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
   />
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={true}
     hasEmptyLabelSpace={false}
     label={
@@ -171,14 +176,10 @@ exports[`CalendarForm Renders calendar form 1`] = `
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-testid="ml_save_calendar_button"
         fill={true}
-        iconSide="left"
         isDisabled={true}
         onClick={[MockFunction]}
-        size="m"
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Save"
@@ -191,13 +192,8 @@ exports[`CalendarForm Renders calendar form 1`] = `
       grow={false}
     >
       <EuiButton
-        color="primary"
-        fill={false}
         href="undefined/app/ml#/settings/calendars_list"
-        iconSide="left"
         isDisabled={false}
-        size="m"
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Cancel"

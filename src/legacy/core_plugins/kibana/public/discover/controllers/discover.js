@@ -29,6 +29,7 @@ import dateMath from '@elastic/datemath';
 // doc table
 import '../doc_table';
 import { getSort } from '../doc_table/lib/get_sort';
+import { getSortForSearchSource } from '../doc_table/lib/get_sort_for_search_source';
 import * as columnActions from '../doc_table/actions/columns';
 import * as filterActions from '../doc_table/actions/filter';
 
@@ -54,7 +55,6 @@ import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { getFilterGenerator } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
-import { VisualizeLoaderProvider } from 'ui/visualize/loader/visualize_loader';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { getDocLink } from 'ui/documentation_links';
 import '../components/fetch_error';
@@ -196,8 +196,6 @@ function discoverController(
   localStorage,
   uiCapabilities
 ) {
-  const visualizeLoader = Private(VisualizeLoaderProvider);
-  let visualizeHandler;
   const Vis = Private(VisProvider);
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
   const getUnhashableStates = Private(getUnhashableStatesProvider);
@@ -214,6 +212,13 @@ function discoverController(
 
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
+  $scope.timefilterUpdateHandler = (ranges) => {
+    timefilter.setTime({
+      from: moment(ranges.from).toISOString(),
+      to: moment(ranges.to).toISOString(),
+      mode: 'absolute',
+    });
+  };
 
   $scope.getDocLink = getDocLink;
   $scope.intervalOptions = intervalOptions;
@@ -252,7 +257,7 @@ function discoverController(
       description: i18n.translate('kbn.discover.localMenu.newSearchDescription', {
         defaultMessage: 'New Search',
       }),
-      run: function () { kbnUrl.change('/discover'); },
+      run: function () { $scope.$evalAsync(() => { kbnUrl.change('/discover'); }); },
       testId: 'discoverNewButton',
     };
 
@@ -476,7 +481,7 @@ function discoverController(
 
     const { searchFields, selectFields } = await getSharingDataFields();
     searchSource.setField('fields', searchFields);
-    searchSource.setField('sort', getSort($state.sort, $scope.indexPattern));
+    searchSource.setField('sort', getSortForSearchSource($state.sort, $scope.indexPattern));
     searchSource.setField('highlight', null);
     searchSource.setField('highlightAll', null);
     searchSource.setField('aggs', null);
@@ -794,15 +799,7 @@ function discoverController(
         .resolve(buildVislibDimensions($scope.vis, { timeRange: $scope.timeRange, searchSource: $scope.searchSource }))
         .then(resp => responseHandler(tabifiedData, resp))
         .then(resp => {
-          visualizeHandler.render({
-            as: 'visualization',
-            value: {
-              visType: $scope.vis.type.name,
-              visData: resp,
-              visConfig: $scope.vis.params,
-              params: {},
-            }
-          });
+          $scope.histogramData = resp;
         });
     }
 
@@ -884,9 +881,10 @@ function discoverController(
   };
 
   $scope.updateDataSource = Promise.method(function updateDataSource() {
-    $scope.searchSource
+    const { indexPattern, searchSource } = $scope;
+    searchSource
       .setField('size', $scope.opts.sampleSize)
-      .setField('sort', getSort($state.sort, $scope.indexPattern))
+      .setField('sort', getSortForSearchSource($state.sort, indexPattern))
       .setField('query', !$state.query ? null : $state.query)
       .setField('filter', queryFilter.getFilters());
   });
@@ -967,15 +965,14 @@ function discoverController(
     $scope.fetch();
   };
 
-  $scope.$watch('savedQuery', (newSavedQuery, oldSavedQuery) => {
+  $scope.$watch('savedQuery', (newSavedQuery) => {
     if (!newSavedQuery) return;
 
     $state.savedQuery = newSavedQuery.id;
     $state.save();
 
-    if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
-      updateStateFromSavedQuery(newSavedQuery);
-    }
+    updateStateFromSavedQuery(newSavedQuery);
+
   });
 
   $scope.$watch('state.savedQuery', newSavedQueryId => {
@@ -984,12 +981,14 @@ function discoverController(
       return;
     }
 
-    savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
-      $scope.$evalAsync(() => {
-        $scope.savedQuery = savedQuery;
-        updateStateFromSavedQuery(savedQuery);
+    if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+      savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
+        $scope.$evalAsync(() => {
+          $scope.savedQuery = savedQuery;
+          updateStateFromSavedQuery(savedQuery);
+        });
       });
-    });
+    }
   });
 
   async function setupVisualization() {
@@ -1046,13 +1045,6 @@ function discoverController(
 
     $scope.searchSource.setField('aggs', function () {
       return $scope.vis.getAggConfig().toDsl();
-    });
-
-    $timeout(async () => {
-      const visEl = $element.find('#discoverHistogram')[0];
-      visualizeHandler = await visualizeLoader.embedVisualizationWithSavedObject(visEl, visSavedObject, {
-        autoFetch: false,
-      });
     });
   }
 

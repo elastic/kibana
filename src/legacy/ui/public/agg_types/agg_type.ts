@@ -24,7 +24,7 @@ import { AggParam, initParams } from './agg_params';
 // @ts-ignore
 import { FieldFormat, fieldFormats } from '../registry/field_formats';
 import { AggConfig } from '../vis';
-import { AggConfigs } from '../vis/agg_configs';
+import { AggConfigs } from './agg_configs';
 import { SearchSource } from '../courier';
 import { Adapters } from '../inspector';
 
@@ -172,7 +172,8 @@ export class AggType {
     aggConfigs: AggConfigs,
     aggConfig: AggConfig,
     searchSource: SearchSource,
-    inspectorAdapters: Adapters
+    inspectorAdapters: Adapters,
+    abortSignal?: AbortSignal
   ) => Promise<any>;
   /**
    * Pick a format for the values produced by this agg type,

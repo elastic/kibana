@@ -8,13 +8,11 @@ import chrome from 'ui/chrome';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import {
-  SingleMetricJobCreator,
-  MultiMetricJobCreator,
-  PopulationJobCreator,
+  JobCreatorType,
   isMultiMetricJobCreator,
   isPopulationJobCreator,
 } from '../../../../common/job_creator';
-import { MlTimeBuckets } from '../../../../../../util/ml_time_buckets';
+import { TimeBuckets } from '../../../../../../util/time_buckets';
 
 const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
 const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
@@ -59,10 +57,7 @@ export const seriesStyle = {
   },
 };
 
-export function getChartSettings(
-  jobCreator: SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator,
-  chartInterval: MlTimeBuckets
-) {
+export function getChartSettings(jobCreator: JobCreatorType, chartInterval: TimeBuckets) {
   const cs = {
     ...defaultChartSettings,
     intervalMs: chartInterval.getInterval().asMilliseconds(),
@@ -70,13 +65,18 @@ export function getChartSettings(
 
   if (isPopulationJobCreator(jobCreator)) {
     // for population charts, use a larger interval based on
-    // the calculation from MlTimeBuckets, but without the
+    // the calculation from TimeBuckets, but without the
     // bar target and max bars which have been set for the
     // general chartInterval
-    const interval = new MlTimeBuckets();
+    const interval = new TimeBuckets();
     interval.setInterval('auto');
     interval.setBounds(chartInterval.getBounds());
     cs.intervalMs = interval.getInterval().asMilliseconds();
+  }
+
+  if (cs.intervalMs < jobCreator.bucketSpanMs) {
+    // don't allow the chart interval to be smaller than the bucket span
+    cs.intervalMs = jobCreator.bucketSpanMs;
   }
 
   if (isMultiMetricJobCreator(jobCreator) || isPopulationJobCreator(jobCreator)) {

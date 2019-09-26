@@ -20,30 +20,29 @@ import { EuiContextMenuPanelDescriptor, EuiPanel } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import { Subscription } from 'rxjs';
+import {
+  buildContextMenuForActions,
+  TGetActionsCompatibleWithTrigger,
+  IAction,
+} from '../../../../../../../../plugins/ui_actions/public';
 import { CoreStart } from '../../../../../../../../core/public';
-import { buildContextMenuForActions } from '../context_menu_actions';
 
 import { CONTEXT_MENU_TRIGGER, PANEL_BADGE_TRIGGER } from '../triggers';
 import { IEmbeddable } from '../embeddables/i_embeddable';
-import {
-  ViewMode,
-  GetActionsCompatibleWithTrigger,
-  GetEmbeddableFactory,
-  GetEmbeddableFactories,
-} from '../types';
+import { ViewMode, GetEmbeddableFactory, GetEmbeddableFactories } from '../types';
 
 import { RemovePanelAction } from './panel_header/panel_actions';
 import { AddPanelAction } from './panel_header/panel_actions/add_panel/add_panel_action';
 import { CustomizePanelTitleAction } from './panel_header/panel_actions/customize_title/customize_panel_action';
 import { PanelHeader } from './panel_header/panel_header';
 import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
-import { EditPanelAction, Action, ActionContext } from '../actions';
+import { EditPanelAction } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
 import { Start as InspectorStartContract } from '../../../../../../../../plugins/inspector/public';
 
 interface Props {
   embeddable: IEmbeddable<any, any>;
-  getActions: GetActionsCompatibleWithTrigger;
+  getActions: TGetActionsCompatibleWithTrigger;
   getEmbeddableFactory: GetEmbeddableFactory;
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];
@@ -58,7 +57,7 @@ interface State {
   viewMode: ViewMode;
   hidePanelTitles: boolean;
   closeContextMenu: boolean;
-  badges: Action[];
+  badges: IAction[];
 }
 
 export class EmbeddablePanel extends React.Component<Props, State> {
@@ -192,7 +191,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     });
 
     const createGetUserData = (overlays: CoreStart['overlays']) =>
-      async function getUserData(context: ActionContext) {
+      async function getUserData(context: { embeddable: IEmbeddable }) {
         return new Promise<{ title: string | undefined }>(resolve => {
           const session = overlays.openModal(
             <CustomizePanelModal
@@ -211,7 +210,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
     // These actions are exposed on the context menu for every embeddable, they bypass the trigger
     // registry.
-    const extraActions = [
+    const extraActions: Array<IAction<{ embeddable: IEmbeddable }>> = [
       new CustomizePanelTitleAction(createGetUserData(this.props.overlays)),
       new AddPanelAction(
         this.props.getEmbeddableFactory,
@@ -225,8 +224,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       new EditPanelAction(this.props.getEmbeddableFactory),
     ];
 
-    const sorted = actions.concat(extraActions).sort((a: Action, b: Action) => {
-      return b.order - a.order;
+    const sorted = actions.concat(extraActions).sort((a: IAction, b: IAction) => {
+      const bOrder = b.order || 0;
+      const aOrder = a.order || 0;
+      return bOrder - aOrder;
     });
 
     return await buildContextMenuForActions({

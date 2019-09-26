@@ -140,11 +140,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
                 className="euiSpacer euiSpacer--xs"
               />
             </EuiSpacer>
-            <EuiPanel
-              grow={true}
-              hasShadow={false}
-              paddingSize="m"
-            >
+            <EuiPanel>
               <div
                 className="euiPanel euiPanel--paddingMedium"
               >
@@ -616,11 +612,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                 className="euiSpacer euiSpacer--xs"
               />
             </EuiSpacer>
-            <EuiPanel
-              grow={true}
-              hasShadow={false}
-              paddingSize="m"
-            >
+            <EuiPanel>
               <div
                 className="euiPanel euiPanel--paddingMedium"
               >
@@ -935,78 +927,119 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
       ]
     }
   >
-    <EuiPanel
-      grow={true}
-      hasShadow={false}
-      paddingSize="m"
+    <EuiFlexGroup
+      justifyContent="center"
     >
       <div
-        className="euiPanel euiPanel--paddingMedium"
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
-        <EuiEmptyPrompt
-          body={
-            <React.Fragment>
-              <p>
-                An error occurred
-              </p>
-            </React.Fragment>
-          }
-          iconColor="subdued"
-          title={
-            <EuiTitle
-              size="l"
-            >
-              <h3>
-                Error
-              </h3>
-            </EuiTitle>
-          }
+        <EuiFlexItem
+          grow={false}
         >
           <div
-            className="euiEmptyPrompt"
+            className="euiFlexItem euiFlexItem--flexGrowZero"
           >
-            <EuiTextColor
-              color="subdued"
-            >
-              <span
-                className="euiTextColor euiTextColor--subdued"
+            <EuiPanel>
+              <div
+                className="euiPanel euiPanel--paddingMedium"
               >
-                <EuiTitle>
-                  <EuiTitle
-                    className="euiTitle euiTitle--medium"
-                    size="l"
-                  >
-                    <h3
-                      className="euiTitle euiTitle--large euiTitle euiTitle--medium"
+                <EuiEmptyPrompt
+                  body={
+                    <React.Fragment>
+                      <p>
+                        An error occurred
+                      </p>
+                    </React.Fragment>
+                  }
+                  iconColor="subdued"
+                  iconType="securityApp"
+                  title={
+                    <EuiTitle
+                      size="m"
                     >
-                      Error
-                    </h3>
-                  </EuiTitle>
-                </EuiTitle>
-                <EuiSpacer
-                  size="m"
+                      <h3>
+                        Error
+                      </h3>
+                    </EuiTitle>
+                  }
                 >
                   <div
-                    className="euiSpacer euiSpacer--m"
-                  />
-                </EuiSpacer>
-                <EuiText>
-                  <div
-                    className="euiText euiText--medium"
+                    className="euiEmptyPrompt"
                   >
-                    <p
-                      key="An error occurred"
+                    <EuiIcon
+                      color="subdued"
+                      size="xxl"
+                      type="securityApp"
                     >
-                      An error occurred
-                    </p>
+                      <EuiIconEmpty
+                        className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
+                        focusable="false"
+                        style={null}
+                      >
+                        <svg
+                          className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
+                          focusable="false"
+                          height={16}
+                          style={null}
+                          viewBox="0 0 16 16"
+                          width={16}
+                          xmlns="http://www.w3.org/2000/svg"
+                        />
+                      </EuiIconEmpty>
+                    </EuiIcon>
+                    <EuiSpacer
+                      size="s"
+                    >
+                      <div
+                        className="euiSpacer euiSpacer--s"
+                      />
+                    </EuiSpacer>
+                    <EuiTextColor
+                      color="subdued"
+                    >
+                      <span
+                        className="euiTextColor euiTextColor--subdued"
+                      >
+                        <EuiTitle>
+                          <EuiTitle
+                            className="euiTitle euiTitle--medium"
+                            size="m"
+                          >
+                            <h3
+                              className="euiTitle euiTitle--medium euiTitle euiTitle--medium"
+                            >
+                              Error
+                            </h3>
+                          </EuiTitle>
+                        </EuiTitle>
+                        <EuiSpacer
+                          size="m"
+                        >
+                          <div
+                            className="euiSpacer euiSpacer--m"
+                          />
+                        </EuiSpacer>
+                        <EuiText>
+                          <div
+                            className="euiText euiText--medium"
+                          >
+                            <p
+                              key="An error occurred"
+                            >
+                              An error occurred
+                            </p>
+                          </div>
+                        </EuiText>
+                      </span>
+                    </EuiTextColor>
                   </div>
-                </EuiText>
-              </span>
-            </EuiTextColor>
+                </EuiEmptyPrompt>
+              </div>
+            </EuiPanel>
           </div>
-        </EuiEmptyPrompt>
+        </EuiFlexItem>
       </div>
-    </EuiPanel>
+    </EuiFlexGroup>
   </EmptyStateError>
 </EmptyStateComponent>
 `;

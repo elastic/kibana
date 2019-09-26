@@ -19,7 +19,7 @@
 
 import { Field } from 'ui/index_patterns';
 import { AggParam } from 'ui/agg_types';
-import { AggConfig } from '../../../agg_config';
+import { AggConfig } from '../../../../agg_types/agg_config';
 import { ComboBoxGroupedOptions } from '../utils';
 import { EditorConfig } from '../../config/types';
 import { VisState } from '../../..';

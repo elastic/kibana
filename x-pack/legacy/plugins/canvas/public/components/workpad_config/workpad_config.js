@@ -70,35 +70,38 @@ export class WorkpadConfig extends PureComponent {
 
         <EuiSpacer size="m" />
 
-        <EuiFormRow label="Name" compressed>
-          <EuiFieldText value={name} onChange={e => setName(e.target.value)} />
+        <EuiFormRow label="Name" display="rowCompressed">
+          <EuiFieldText compressed value={name} onChange={e => setName(e.target.value)} />
         </EuiFormRow>
+
+        <EuiSpacer size="s" />
 
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem>
-            <EuiFormRow label="Width" compressed>
+            <EuiFormRow label="Width" display="rowCompressed">
               <EuiFieldNumber
+                compressed
                 onChange={e => setSize({ width: Number(e.target.value), height: size.height })}
                 value={size.width}
               />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormRow hasEmptyLabelSpace>
+            <EuiFormRow display="rowCompressed" hasEmptyLabelSpace>
               <EuiToolTip position="bottom" content="Flip the width and height">
                 <EuiButtonIcon
                   iconType="merge"
                   color="text"
                   onClick={rotate}
                   aria-label="Swap Page Dimensions"
-                  style={{ marginBottom: 12 }}
                 />
               </EuiToolTip>
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow label="Height" compressed>
+            <EuiFormRow label="Height" display="rowCompressed">
               <EuiFieldNumber
+                compressed
                 onChange={e => setSize({ height: Number(e.target.value), width: size.width })}
                 value={size.height}
               />
@@ -143,6 +146,7 @@ export class WorkpadConfig extends PureComponent {
             <EuiTextArea
               aria-label="Apply styles to all pages in this workpad"
               value={css}
+              compressed
               onChange={e => this.setState({ css: e.target.value })}
               rows={10}
             />

@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { formatnumber } from '../../functions/common/formatnumber';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { NUMERALJS } from '../constants';
+import { NUMERALJS } from '../../../i18n';
 
 export const help: FunctionHelp<FunctionFactory<typeof formatnumber>> = {
   help: i18n.translate('xpack.canvas.functions.formatnumberHelpText', {
