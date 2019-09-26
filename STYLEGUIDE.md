@@ -226,22 +226,6 @@ const keys = ['foo', 'bar'],
       values = [23, 42];
 ```
 
-### Prefix private class methods with an underscore `JS only`
-
-Identifying private class methods makes it easier to differentiate a class's public and internal
-APIs, and makes private methods easier to mark as `private` when the code is migrated to TypeScript.
-
-```js
-// good
-class BankAccount {
-  addFunds() {}
-
-  _calculateInterest() {}
-}
-```
-
-If using TypeScript you should use the `private` modifier instead.
-
 ### Magic numbers/strings
 
 These are numbers (or other values) simply used in line in your code. *Do not
@@ -319,26 +303,6 @@ import inSibling from '../foo/child';
 Don't do this. Everything should be wrapped in a module that can be depended on
 by other modules. Even things as simple as a single value should be a module.
 
-### Function definitions
-
-Use function declarations over function expressions, so that their names will
-show up in stack traces, making errors easier to debug.
-
-Also, keep function definitions above other code instead of relying on function
-hoisting.
-
-```js
-// good
-function myFunc() {
-  ...
-}
-
-// bad
-const myFunc = function () {
-  ...
-};
-```
-
 ### Arrow functions
 
 If you must use a function expression, then use an arrow function:
@@ -371,32 +335,6 @@ object in parentheses rather than using an explicit return:
   return {
     foo: 'bar'
   };
-}
-```
-
-### Object / Array iterations, transformations and operations
-
-Use native methods to iterate and transform arrays and objects where possible.
-Avoid `for` and `while` loops as they introduce the possibility of infinite
-loops and break out of our preferred convention of declarative programming.
-
-Use descriptive variable names in the closures.
-
-Use a utility library as needed and where it will make code more
-comprehensible.
-
-```js
-// best
-const userNames = users.map(user => user.name);
-
-// ok
-import { pluck } from 'lodash';
-const userNames = pluck(users, 'name');
-
-// bad
-const userNames = [];
-for (let i = 0; i < users.length; i++) {
-  userNames.push(users[i].name);
 }
 ```
 
