@@ -39,6 +39,7 @@ import {
   WatchStatus,
   SectionError,
   SectionLoading,
+  Error,
 } from '../../../components';
 import { loadWatches } from '../../../lib/api';
 import { watcherGettingStartedUrl } from '../../../lib/documentation_links';
@@ -223,7 +224,7 @@ export const WatchList = () => {
             defaultMessage="Error loading watches"
           />
         }
-        error={error}
+        error={error as Error}
       />
     );
   } else if (availableWatches) {

@@ -23,11 +23,11 @@ import {
 
 import {
   ColumnType,
-  MlInMemoryTable,
+  MlInMemoryTableBasic,
   SORT_DIRECTION,
-} from '../../../../../../common/types/eui/in_memory_table';
+} from '../../../../../components/ml_in_memory_table';
 import { dictionaryToArray } from '../../../../../../common/types/common';
-import { ES_FIELD_TYPES } from '../../../../../../common/constants/field_types';
+import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 
 import { useCurrentIndexPattern } from '../../../../../contexts/kibana';
@@ -284,7 +284,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
       {dataFramePreviewData.length > 0 && clearTable === false && columns.length > 0 && (
-        <MlInMemoryTable
+        <MlInMemoryTableBasic
           allowNeutralSort={false}
           compressed
           items={dataFramePreviewData}
