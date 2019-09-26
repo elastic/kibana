@@ -13,7 +13,8 @@ import {
   EmbeddablePanel,
   EmbeddableFactoryNotFoundError,
   EmbeddableInput,
-} from '../../../../../../src/plugins/embeddable/public';
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { start } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { EmbeddableExpression } from '../expression_types/embeddable';
 import { SavedObjectFinder } from '../../../../../../src/legacy/ui/public/saved_objects/components/saved_object_finder';
 
@@ -39,8 +40,8 @@ const renderEmbeddable = (embeddableObject: IEmbeddable, domNode: HTMLElement) =
         <EmbeddablePanel
           embeddable={embeddableObject}
           getActions={npStart.plugins.uiActions.getTriggerCompatibleActions}
-          getEmbeddableFactory={npStart.plugins.embeddable.getEmbeddableFactory}
-          getAllEmbeddableFactories={npStart.plugins.embeddable.getEmbeddableFactories}
+          getEmbeddableFactory={start.getEmbeddableFactory}
+          getAllEmbeddableFactories={start.getEmbeddableFactories}
           notifications={npStart.core.notifications}
           overlays={npStart.core.overlays}
           inspector={npStart.plugins.inspector}
@@ -62,7 +63,7 @@ const embeddable = () => ({
     handlers: Handlers
   ) => {
     if (!embeddablesRegistry[input.id]) {
-      const factory = Array.from(npStart.plugins.embeddable.getEmbeddableFactories()).find(
+      const factory = Array.from(start.getEmbeddableFactories()).find(
         embeddableFactory => embeddableFactory.type === embeddableType
       );
 

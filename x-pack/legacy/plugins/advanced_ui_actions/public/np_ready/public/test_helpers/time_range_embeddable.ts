@@ -9,7 +9,7 @@ import {
   Embeddable,
   EmbeddableInput,
   IContainer,
-} from 'src/plugins/embeddable/public';
+} from '../../../../../../../../src/plugins/embeddable/public';
 import { TimeRange } from '../../../../../../../../src/plugins/data/public';
 
 interface EmbeddableTimeRangeInput extends EmbeddableInput {
