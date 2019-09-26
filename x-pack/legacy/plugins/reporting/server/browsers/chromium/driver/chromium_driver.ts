@@ -46,7 +46,19 @@ export class HeadlessChromiumDriver {
     await this.page.setRequestInterception(true);
     let interceptedCount = 0;
     this.page.on('request', (interceptedRequest: any) => {
+      let interceptedUrl = interceptedRequest.url();
       let isData = false;
+
+      // We check these URLs upstream, but if chrome somehow gets
+      // bamboozled into fetching this we need to fail right away
+      // as something very fishy is going on
+      if (interceptedUrl.startsWith('file://')) {
+        logger.error(`Got bogus URL "${interceptedUrl}", exiting job!`);
+        interceptedRequest.abort();
+        this.page.browser().close();
+        throw new Error(`Received bad URL to fetch ${interceptedUrl}`);
+      }
+
       if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedRequest.url())) {
         logger.debug(`Using custom headers for ${interceptedRequest.url()}`);
         interceptedRequest.continue({
@@ -56,8 +68,6 @@ export class HeadlessChromiumDriver {
           },
         });
       } else {
-        let interceptedUrl = interceptedRequest.url();
-
         if (interceptedUrl.startsWith('data:')) {
           // `data:image/xyz;base64` can be very long URLs
           interceptedUrl = interceptedUrl.substring(0, 100) + '[truncated]';

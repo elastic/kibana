@@ -21,6 +21,23 @@ describe('Validate URLS', () => {
     ).toThrow();
   });
 
+  it(`throws errors for URLs without protocols`, () => {
+    // window.location can navigate to these bad links still
+    expect(() =>
+      validateUrls(['//169.254.169.254/latest/meta-data/iam/security-credentials/profileName'])
+    ).toThrow();
+  });
+
+  it(`throws errors for URLs with casing issues`, () => {
+    expect(() =>
+      validateUrls(['Http://169.254.169.254/latest/meta-data/iam/security-credentials/profileName'])
+    ).toThrow();
+  });
+
+  it(`throws errors for odd-protocols`, () => {
+    expect(() => validateUrls(['chrome://extensions'])).toThrow();
+  });
+
   it(`throws errors if any URLs are naughty 👿`, () => {
     expect(() => validateUrls(['/im/ok', '/so/am/i', 'wss://but/ima/steal/your/keys'])).toThrow();
   });
