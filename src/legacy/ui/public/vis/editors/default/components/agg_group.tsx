@@ -82,7 +82,7 @@ function DefaultEditorAggGroup({
   const isGroupValid = Object.values(aggsState).every(item => item.valid);
   const isAllAggsTouched = isInvalidAggsTouched(aggsState);
   const isAggregationDisabled = useMemo(
-    () => (groupName === AggGroupNames.Metrics ? isAggDisabled(group) : true),
+    () => (groupName === AggGroupNames.Metrics ? isAggDisabled(group) : false),
     [groupName, group]
   );
 
