@@ -249,8 +249,6 @@ def sendInfraMail() {
 def sendKibanaMail() {
   catchError {
     def buildStatus = buildUtils.getBuildStatus()
-    
-    print buildStatus // TODO remove
 
     if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
       emailext(
