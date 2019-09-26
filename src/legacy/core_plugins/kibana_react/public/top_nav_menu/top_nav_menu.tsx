@@ -21,10 +21,11 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
-import { start as data } from '../../../data/public/legacy';
+
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 import { SearchBarProps } from '../../../../core_plugins/data/public';
+import { start as data } from '../../../data/public/legacy';
 
 type Props = Partial<SearchBarProps> & {
   appName: string;

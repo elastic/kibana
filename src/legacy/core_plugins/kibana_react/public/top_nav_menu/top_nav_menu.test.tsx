@@ -27,6 +27,15 @@ const timefilterSetupMock = timefilterServiceMock.createSetupContract();
 
 jest.mock('ui/new_platform');
 
+jest.mock('../../../../../../src/legacy/core_plugins/data/public/legacy', () => ({
+  start: {
+    ui: {
+      SearchBar: () => {},
+    },
+  },
+  setup: {},
+}));
+
 jest.mock('../../../../core_plugins/data/public', () => {
   return {
     SearchBar: () => <div className="searchBar"></div>,
