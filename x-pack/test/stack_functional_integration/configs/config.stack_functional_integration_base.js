@@ -25,6 +25,9 @@ export default async function ({ readConfigFile }) {
 
   return {
     ...defaultConfig.getAll(),
+    junit: {
+      reportName: 'Stack Functional Integration Tests'
+    },
     servers: serverConfig.servers,
     apps: serverConfig.apps,
   };

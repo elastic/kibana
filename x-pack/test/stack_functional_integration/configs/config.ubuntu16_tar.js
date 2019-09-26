@@ -20,11 +20,11 @@
 
 export default async function ({ readConfigFile }) {
   const baseConfig = await readConfigFile(require.resolve('./config.stack_functional_integration_base'));
-
+  const baseConfigs = baseConfig.getAll();
   return {
-    ...baseConfig.getAll(),
+    ...baseConfigs,
     junit: {
-      reportName: 'Stack Functional Integration Tests - ubuntu16_tar'
+      reportName: `${baseConfigs.junit.reportName} - ubuntu16_tar`
     },
     testFiles: [
       require.resolve('../test/functional/apps/telemetry'),
