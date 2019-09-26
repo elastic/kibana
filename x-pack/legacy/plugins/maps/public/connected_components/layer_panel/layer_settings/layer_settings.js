@@ -49,9 +49,9 @@ export function LayerSettings(props) {
     return (
       <ValidatedDualRange
         label={i18n.translate('xpack.maps.layerPanel.settingsPanel.visibleZoomLabel', {
-          defaultMessage: 'Zoom range for layer visibility',
+          defaultMessage: 'Visibility',
         })}
-        formRowDisplay="rowCompressed"
+        formRowDisplay="columnCompressed"
         min={MIN_ZOOM}
         max={MAX_ZOOM}
         value={[props.minZoom, props.maxZoom]}
@@ -72,9 +72,9 @@ export function LayerSettings(props) {
     return (
       <EuiFormRow
         label={i18n.translate('xpack.maps.layerPanel.settingsPanel.layerNameLabel', {
-          defaultMessage: 'Layer name',
+          defaultMessage: 'Name',
         })}
-        display="rowCompressed"
+        display="columnCompressed"
       >
         <EuiFieldText value={props.label} onChange={onLabelChange} compressed />
       </EuiFormRow>
@@ -87,9 +87,9 @@ export function LayerSettings(props) {
     return (
       <EuiFormRow
         label={i18n.translate('xpack.maps.layerPanel.settingsPanel.layerTransparencyLabel', {
-          defaultMessage: 'Layer transparency',
+          defaultMessage: 'Opacity',
         })}
-        display="rowCompressed"
+        display="columnCompressed"
       >
         <ValidatedRange
           min={0}
@@ -97,7 +97,6 @@ export function LayerSettings(props) {
           step={5}
           value={alphaPercent}
           onChange={onAlphaChange}
-          showLabels
           showInput
           showRange
           compressed
@@ -114,15 +113,24 @@ export function LayerSettings(props) {
     const layerSupportsGlobalQuery = props.layer.getIndexPatternIds().length;
 
     const applyGlobalQueryCheckbox = (
-      <EuiSwitch
-        label={i18n.translate('xpack.maps.layerPanel.applyGlobalQueryCheckboxLabel', {
-          defaultMessage: `Apply global filter to layer`,
+      <EuiFormRow
+        label={i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGlobalFilterLabel', {
+          defaultMessage: 'Global filter',
         })}
-        checked={layerSupportsGlobalQuery ? props.applyGlobalQuery : false}
-        onChange={onApplyGlobalQueryChange}
-        disabled={!layerSupportsGlobalQuery}
-        data-test-subj="mapLayerPanelApplyGlobalQueryCheckbox"
-      />
+        display="columnCompressed"
+        className="mapLayerSettings__globalFilterRow"
+      >
+        <EuiSwitch
+          label={i18n.translate('xpack.maps.layerPanel.applyGlobalQueryCheckboxLabel', {
+            defaultMessage: `Apply to layer`,
+          })}
+          checked={layerSupportsGlobalQuery ? props.applyGlobalQuery : false}
+          onChange={onApplyGlobalQueryChange}
+          disabled={!layerSupportsGlobalQuery}
+          data-test-subj="mapLayerPanelApplyGlobalQueryCheckbox"
+          compressed
+        />
+      </EuiFormRow>
     );
 
     if (layerSupportsGlobalQuery) {
@@ -157,8 +165,6 @@ export function LayerSettings(props) {
         {renderLabel()}
         {renderZoomSliders()}
         {renderAlphaSlider()}
-
-        <EuiSpacer size="m" />
         {renderApplyGlobalQueryCheckbox()}
       </EuiPanel>
 
