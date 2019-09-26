@@ -4,21 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useTransactionBreakdown } from '../../../hooks/useTransactionBreakdown';
 import { TransactionBreakdownHeader } from './TransactionBreakdownHeader';
 import { TransactionBreakdownKpiList } from './TransactionBreakdownKpiList';
 import { TransactionBreakdownGraph } from './TransactionBreakdownGraph';
 import { trackEvent } from '../../../../../infra/public/hooks/use_track_metric';
+import { FETCH_STATUS } from '../../../hooks/useFetcher';
+
+const emptyMessage = i18n.translate('xpack.apm.transactionBreakdown.noData', {
+  defaultMessage: 'No data within this time range.'
+});
 
 const TransactionBreakdown: React.FC<{
   initialIsOpen?: boolean;
 }> = ({ initialIsOpen }) => {
   const [showChart, setShowChart] = useState(!!initialIsOpen);
 
-  const { data } = useTransactionBreakdown();
+  const { data, status } = useTransactionBreakdown();
 
   const { kpis, timeseries } = data;
+
+  const noHits = data.kpis.length === 0 && status === FETCH_STATUS.SUCCESS;
+  const showEmptyMessage = noHits && !showChart;
 
   return (
     <EuiPanel>
@@ -37,7 +46,11 @@ const TransactionBreakdown: React.FC<{
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <TransactionBreakdownKpiList kpis={kpis} />
+          {showEmptyMessage ? (
+            <EuiText>{emptyMessage}</EuiText>
+          ) : (
+            <TransactionBreakdownKpiList kpis={kpis} />
+          )}
         </EuiFlexItem>
         {showChart ? (
           <EuiFlexItem grow={false}>
