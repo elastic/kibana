@@ -36,7 +36,7 @@ import {
 
 import { KbnUrl } from 'ui/url/kbn_url';
 import { Filter } from '@kbn/es-query';
-import { TimeRange } from 'ui/timefilter';
+import { TimeRange } from 'src/plugins/data/public';
 import { IndexPattern } from 'ui/index_patterns';
 import { IPrivate } from 'ui/private';
 import { StaticIndexPattern, Query, SavedQuery } from 'plugins/data';

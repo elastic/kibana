@@ -13,10 +13,11 @@ import { BASE_PATH, UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../commo
 import { TemplateDeleteModal } from '../../../../components';
 import { trackUiMetric, METRIC_TYPE } from '../../../../services/track_ui_metric';
 import { getTemplateDetailsLink } from '../../../../services/routing';
+import { SendRequestResponse } from '../../../../shared_imports';
 
 interface Props {
   templates: TemplateListItem[];
-  reload: () => Promise<void>;
+  reload: () => Promise<SendRequestResponse>;
   editTemplate: (name: Template['name']) => void;
   cloneTemplate: (name: Template['name']) => void;
 }
@@ -134,6 +135,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           onClick: ({ name }: Template) => {
             editTemplate(name);
           },
+          enabled: ({ isManaged }: Template) => !isManaged,
         },
         {
           name: i18n.translate('xpack.idxMgmt.templateList.table.actionCloneTitle', {
@@ -161,6 +163,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
             setTemplatesToDelete([name]);
           },
           isPrimary: true,
+          enabled: ({ isManaged }: Template) => !isManaged,
         },
       ],
     },
@@ -180,6 +183,14 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
 
   const selectionConfig = {
     onSelectionChange: setSelection,
+    selectable: ({ isManaged }: Template) => !isManaged,
+    selectableMessage: (selectable: boolean) => {
+      if (!selectable) {
+        return i18n.translate('xpack.idxMgmt.templateList.table.deleteManagedTemplateTooltip', {
+          defaultMessage: 'You cannot delete a managed template.',
+        });
+      }
+    },
   };
 
   const searchConfig = {

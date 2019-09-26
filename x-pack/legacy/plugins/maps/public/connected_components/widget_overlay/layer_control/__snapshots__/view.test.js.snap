@@ -5,7 +5,6 @@ exports[`LayerControl is rendered 1`] = `
   <EuiPanel
     className="mapWidgetControl mapWidgetControl-hasShadow"
     grow={false}
-    hasShadow={false}
     paddingSize="none"
   >
     <EuiFlexItem
@@ -45,10 +44,8 @@ exports[`LayerControl is rendered 1`] = `
               className="mapLayerControl__closeLayerTOCButton"
               color="text"
               data-test-subj="mapToggleLegendButton"
-              iconSize="m"
               iconType="menuRight"
               onClick={[Function]}
-              type="button"
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -65,14 +62,10 @@ exports[`LayerControl is rendered 1`] = `
   />
   <EuiButton
     className="mapLayerControl__addLayerButton"
-    color="primary"
     data-test-subj="addLayerButton"
     fill={true}
     fullWidth={true}
-    iconSide="left"
     onClick={[Function]}
-    size="m"
-    type="button"
   >
     <FormattedMessage
       defaultMessage="Add layer"
@@ -93,10 +86,8 @@ exports[`LayerControl props Should not render LayerTOC when isLayerTOCOpen is fa
     aria-label="Expand layers panel"
     className="mapLayerControl__openLayerTOCButton"
     color="text"
-    iconSize="m"
     iconType="menuLeft"
     onClick={[Function]}
-    type="button"
   />
 </EuiToolTip>
 `;
@@ -106,7 +97,6 @@ exports[`LayerControl props isReadOnly 1`] = `
   <EuiPanel
     className="mapWidgetControl mapWidgetControl-hasShadow"
     grow={false}
-    hasShadow={false}
     paddingSize="none"
   >
     <EuiFlexItem
@@ -146,10 +136,8 @@ exports[`LayerControl props isReadOnly 1`] = `
               className="mapLayerControl__closeLayerTOCButton"
               color="text"
               data-test-subj="mapToggleLegendButton"
-              iconSize="m"
               iconType="menuRight"
               onClick={[Function]}
-              type="button"
             />
           </EuiToolTip>
         </EuiFlexItem>

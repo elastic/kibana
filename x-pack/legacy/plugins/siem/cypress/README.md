@@ -6,9 +6,9 @@ that rely on mocked API calls), that execute via [Cypress](https://www.cypress.i
 Cypress tests may be run against:
 
 - A local Kibana instance, interactively or via the command line. Credentials
-are specified via `kibna.dev.yml` or environment variables.
+are specified via `kibana.dev.yml` or environment variables.
 - A remote Elastic Cloud instance (override `baseUrl`), interactively or via
-the command line. Again, credentials are specified via `kibna.dev.yml` or
+the command line. Again, credentials are specified via `kibana.dev.yml` or
 environment variables.
 - As part of CI (override `baseUrl` and pass credentials via the
 `CYPRESS_ELASTICSEARCH_USERNAME` and `CYPRESS_ELASTICSEARCH_PASSWORD`
@@ -201,7 +201,7 @@ CYPRESS_baseUrl=http://localhost:5601 CYPRESS_ELASTICSEARCH_USERNAME=elastic CYP
 
 When Cypress tests are run on the command line via `yarn cypress:run`,
 reporting artifacts are generated under the `target` directory in the root
-of the Kibana, as detailed for each artifact type in the sections bleow.
+of the Kibana, as detailed for each artifact type in the sections below.
 
 ### HTML Reports
 

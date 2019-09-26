@@ -9,9 +9,9 @@ import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { SnapshotDetails, RestoreSettings } from '../../../../common/types';
 import { BASE_PATH } from '../../constants';
-import { SectionError, SectionLoading, RestoreSnapshotForm } from '../../components';
+import { SectionError, SectionLoading, RestoreSnapshotForm, Error } from '../../components';
 import { useAppDependencies } from '../../index';
-import { breadcrumbService } from '../../services/navigation';
+import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { useLoadSnapshot, executeRestore } from '../../services/http';
 
 interface MatchParams {
@@ -30,9 +30,10 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
 
-  // Set breadcrumb
+  // Set breadcrumb and page title
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('restoreSnapshot');
+    docTitleService.setTitle('restoreSnapshot');
   }, []);
 
   // Snapshot details state with default empty snapshot
@@ -85,7 +86,7 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
   };
 
   const renderError = () => {
-    const notFound = snapshotError.status === 404;
+    const notFound = (snapshotError as any).status === 404;
     const errorObject = notFound
       ? {
           data: {
@@ -110,7 +111,7 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
             defaultMessage="Error loading snapshot details"
           />
         }
-        error={errorObject}
+        error={errorObject as Error}
       />
     );
   };

@@ -8,21 +8,30 @@
 }
 
 .globalFilterGroup__filterBar {
-  margin-top: $euiSizeS;
+  margin-top: $euiSizeXS;
 }
 
 // sass-lint:disable quotes
 .globalFilterGroup__branch {
-  padding: $euiSizeM $euiSizeM 0 0;
+  padding: $euiSizeS $euiSizeM 0 0;
   background-repeat: no-repeat;
-  background-position: $euiSizeM ($euiSizeXS * -1);
-  background-image: url("data:image/svg+xml,%0A%3Csvg width='28px' height='28px' viewBox='0 0 28 28' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='#{hexToRGB($euiColorLightShade)}'%3E%3Crect x='14' y='27' width='14' height='1'%3E%3C/rect%3E%3Crect x='0' y='0' width='1' height='14'%3E%3C/rect%3E%3C/g%3E%3C/svg%3E");
+  background-position: $euiSizeM ($euiSizeS * -1);
+  background-image: url("data:image/svg+xml,%0A%3Csvg width='28px' height='28px' viewBox='0 0 28 28' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='#{hexToRGB($euiColorLightShade)}'%3E%3Crect x='14' y='27' width='14' height='1'%3E%3C/rect%3E%3C/g%3E%3C/svg%3E");
 }
 
 .globalFilterGroup__wrapper {
   line-height: 1; // Override kuiLocalNav & kuiLocalNavRow
   overflow: hidden;
   transition: height $euiAnimSpeedNormal $euiAnimSlightResistance;
+}
+
+.globalFilterGroup__filterFlexItem {
+  overflow: hidden;
+  padding-bottom: 2px; // Allow the shadows of the pills to show
+}
+
+.globalFilterBar__flexItem {
+  max-width: calc(100% - #{$euiSizeXS}); // Width minus margin around each flex itm
 }
 
 @include euiBreakpoint('xs', 's') {

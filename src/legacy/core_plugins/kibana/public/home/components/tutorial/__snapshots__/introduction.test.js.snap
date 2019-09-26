@@ -26,14 +26,9 @@ exports[`props exportedFieldsUrl 1`] = `
     <div>
       <EuiSpacer />
       <EuiButton
-        color="primary"
-        fill={false}
         href="exported_fields_url"
-        iconSide="left"
         rel="noopener"
-        size="m"
         target="_blank"
-        type="button"
       >
         <FormattedMessage
           defaultMessage="View exported fields"

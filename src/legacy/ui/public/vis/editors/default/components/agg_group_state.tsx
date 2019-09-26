@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AggConfig } from '../../../agg_config';
+import { AggConfig } from '../../../../agg_types/agg_config';
 
 export enum AGGS_ACTION_KEYS {
   TOUCHED = 'aggsTouched',
@@ -30,13 +30,13 @@ interface AggsItem {
 }
 
 export interface AggsState {
-  [aggId: number]: AggsItem;
+  [aggId: string]: AggsItem;
 }
 
 interface AggsAction {
   type: AGGS_ACTION_KEYS;
   payload: boolean;
-  aggId: number;
+  aggId: string;
   newState?: AggsState;
 }
 
@@ -53,10 +53,13 @@ function aggGroupReducer(state: AggsState, action: AggsAction): AggsState {
 }
 
 function initAggsState(group: AggConfig[]): AggsState {
-  return group.reduce((state, agg) => {
-    state[agg.id] = { touched: false, valid: true };
-    return state;
-  }, {});
+  return group.reduce(
+    (state, agg) => {
+      state[agg.id] = { touched: false, valid: true };
+      return state;
+    },
+    {} as AggsState
+  );
 }
 
 export { aggGroupReducer, initAggsState };

@@ -23,16 +23,19 @@ import React from 'react';
 import { EuiFieldText, EuiOutsideClickDetector, PopoverAnchorPosition } from '@elastic/eui';
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { debounce, compact, isEqual, omit } from 'lodash';
+import { PersistedLog } from 'ui/persisted_log';
+import { Storage } from 'ui/storage';
+import { npStart } from 'ui/new_platform';
+import {
+  UiSettingsClientContract,
+  SavedObjectsClientContract,
+  HttpServiceBase,
+} from 'src/core/public';
 import {
   AutocompleteSuggestion,
   AutocompleteSuggestionType,
-  getAutocompleteProvider,
-} from 'ui/autocomplete_providers';
-import { debounce, compact, isEqual, omit } from 'lodash';
-import { PersistedLog } from 'ui/persisted_log';
-import { kfetch } from 'ui/kfetch';
-import { Storage } from 'ui/storage';
-import { UiSettingsClientContract } from 'src/core/public';
+} from '../../../../../../../plugins/data/public';
 import { IndexPattern, StaticIndexPattern } from '../../../index_patterns';
 import { Query } from '../index';
 import { fromUser, matchPairs, toUser } from '../lib';
@@ -41,9 +44,16 @@ import { SuggestionsComponent } from './typeahead/suggestions_component';
 import { getQueryLog } from '../lib/get_query_log';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 
+// todo: related to https://github.com/elastic/kibana/pull/45762/files
+// Will be refactored after merge of related PR
+const getAutocompleteProvider = (language: string) =>
+  npStart.plugins.data.autocomplete.getProvider(language);
+
 interface Props {
   uiSettings: UiSettingsClientContract;
   indexPatterns: Array<IndexPattern | string>;
+  savedObjectsClient: SavedObjectsClientContract;
+  http: HttpServiceBase;
   store: Storage;
   intl: InjectedIntl;
   query: Query;
@@ -53,6 +63,7 @@ interface Props {
   prepend?: React.ReactNode;
   persistedLog?: PersistedLog;
   bubbleSubmitEvent?: boolean;
+  placeholder?: string;
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
   onChange?: (query: Query) => void;
   onSubmit?: (query: Query) => void;
@@ -111,6 +122,7 @@ export class QueryBarInputUI extends Component<Props, State> {
     ) as IndexPattern[];
 
     const objectPatternsFromStrings = (await fetchIndexPatterns(
+      this.props.savedObjectsClient,
       stringPatterns,
       this.props.uiSettings
     )) as IndexPattern[];
@@ -357,9 +369,7 @@ export class QueryBarInputUI extends Component<Props, State> {
     // Send telemetry info every time the user opts in or out of kuery
     // As a result it is important this function only ever gets called in the
     // UI component's change handler.
-    kfetch({
-      pathname: '/api/kibana/kql_opt_in_telemetry',
-      method: 'POST',
+    this.props.http.post('/api/kibana/kql_opt_in_telemetry', {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
@@ -451,6 +461,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       'onChange',
       'onSubmit',
       'uiSettings',
+      'savedObjectsClient',
     ]);
 
     return (
@@ -466,10 +477,13 @@ export class QueryBarInputUI extends Component<Props, State> {
           <div role="search">
             <div className="kuiLocalSearchAssistedInput">
               <EuiFieldText
-                placeholder={this.props.intl.formatMessage({
-                  id: 'data.query.queryBar.searchInputPlaceholder',
-                  defaultMessage: 'Search',
-                })}
+                placeholder={
+                  this.props.placeholder ||
+                  this.props.intl.formatMessage({
+                    id: 'data.query.queryBar.searchInputPlaceholder',
+                    defaultMessage: 'Search',
+                  })
+                }
                 value={this.getQueryString()}
                 onKeyDown={this.onKeyDown}
                 onKeyUp={this.onKeyUp}

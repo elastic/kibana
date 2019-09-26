@@ -22,7 +22,7 @@ import sinon from 'sinon';
 import { FilterStateStore } from '@kbn/es-query';
 import { FilterStateManager } from './filter_state_manager';
 
-import { IndexPatterns } from 'ui/index_patterns';
+import { IndexPatterns } from '../../index_patterns';
 import { StubState } from './test_helpers/stub_state';
 import { getFilter } from './test_helpers/get_stub_filter';
 import { FilterManager } from './filter_manager';
@@ -31,16 +31,11 @@ import { StubIndexPatterns } from './test_helpers/stub_index_pattern';
 import { coreMock } from '../../../../../../core/public/mocks';
 const setupMock = coreMock.createSetup();
 
+import { timefilterServiceMock } from '../../timefilter/timefilter_service.mock';
+const timefilterSetupMock = timefilterServiceMock.createSetupContract();
+
 setupMock.uiSettings.get.mockImplementation((key: string) => {
   return true;
-});
-
-jest.mock('ui/timefilter', () => {
-  return {
-    timefilter: {
-      setTime: jest.fn(),
-    },
-  };
 });
 
 describe('filter_state_manager', () => {
@@ -53,7 +48,11 @@ describe('filter_state_manager', () => {
     appStateStub = new StubState();
     globalStateStub = new StubState();
     const indexPatterns = new StubIndexPatterns();
-    filterManager = new FilterManager(indexPatterns as IndexPatterns, setupMock.uiSettings);
+    filterManager = new FilterManager(
+      (indexPatterns as unknown) as IndexPatterns,
+      setupMock.uiSettings,
+      timefilterSetupMock.timefilter
+    );
   });
 
   describe('app_state_undefined', () => {

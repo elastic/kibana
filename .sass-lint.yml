@@ -7,32 +7,28 @@ files:
     - 'x-pack/legacy/plugins/rollup/**/*.s+(a|c)ss'
     - 'x-pack/legacy/plugins/security/**/*.s+(a|c)ss'
     - 'x-pack/legacy/plugins/canvas/**/*.s+(a|c)ss'
+    - 'x-pack/legacy/plugins/lens/**/*.s+(a|c)ss'
 rules:
   quotes:
     - 2
-    -
-      style: 'single'
+    - style: 'single'
   # } else { style on one line, like our JS
   brace-style:
     - 2
-    -
-      style: '1tbs'
+    - style: '1tbs'
   variable-name-format:
     - 2
-    -
-      convention: 'camelcase'
+    - convention: 'camelcase'
   # Needs regex, right now we ignore
   class-name-format: 0
   # Order how you please
   property-sort-order: 0
   hex-notation:
     - 2
-    -
-      style: 'uppercase'
+    - style: 'uppercase'
   mixin-name-format:
     - 2
-    -
-      allow-leading-underscore: false
+    - allow-leading-underscore: false
       convention: 'camelcase'
   # Use none instead of 0 for no border
   border-zero:
@@ -47,8 +43,7 @@ rules:
   indentation: 2
   function-name-format:
     - 2
-    -
-      allow-leading-underscore: false
+    - allow-leading-underscore: false
       convention: 'camelcase'
   # This removes the need for ::hover
   pseudo-element: 0
@@ -62,23 +57,20 @@ rules:
   force-attribute-nesting: 0
   no-qualifying-elements:
     - 2
-    -
-      # Allows input[type=search]
+    - # Allows input[type=search]
       allow-element-with-attribute: 1
   # Files can end without a newline
   final-newline: 0
   # We use some rare duplicate property values for browser variance
   no-duplicate-properties:
     - 2
-    -
-      exclude:
+    - exclude:
         - 'font-size'
         - 'word-break'
   # Put a line-break between sections of CSS, but allow quicky one-liners for legibility
   empty-line-between-blocks:
     - 2
-    -
-      allow-single-line-rulesets: 1
+    - allow-single-line-rulesets: 1
   # Warns are nice for deprecations and development
   no-warn: 0
   # Transition all is useful in certain situations and there's no recent info to suggest slowdown

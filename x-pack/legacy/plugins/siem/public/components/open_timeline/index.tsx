@@ -4,41 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import dateMath from '@elastic/datemath';
 import ApolloClient from 'apollo-client';
-import { getOr, assign } from 'lodash/fp';
 import * as React from 'react';
 import { connect } from 'react-redux';
 
-import {
-  defaultHeaders,
-  defaultColumnHeaderType,
-} from '../../components/timeline/body/column_headers/default_headers';
+import { Dispatch } from 'redux';
+import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { deleteTimelineMutation } from '../../containers/timeline/delete/persist.gql_query';
-import { AllTimelinesVariables } from '../../containers/timeline/all';
+import { AllTimelinesVariables, AllTimelinesQuery } from '../../containers/timeline/all';
 
 import { allTimelinesQuery } from '../../containers/timeline/all/index.gql_query';
-import { oneTimelineQuery } from '../../containers/timeline/one/index.gql_query';
-import {
-  DeleteTimelineMutation,
-  GetOneTimeline,
-  TimelineResult,
-  SortFieldTimeline,
-} from '../../graphql/types';
-import { Note } from '../../lib/note';
+import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../graphql/types';
 import { State, timelineSelectors } from '../../store';
-import { addNotes as dispatchAddNotes } from '../../store/app/actions';
-import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../store/inputs/actions';
 import {
-  applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
-  addTimeline as dispatchAddTimeline,
   createTimeline as dispatchCreateNewTimeline,
-  setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
   updateIsLoading as dispatchUpdateIsLoading,
 } from '../../store/timeline/actions';
-import { TimelineModel } from '../../store/timeline/model';
 import { OpenTimeline } from './open_timeline';
-import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
+import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById, dispatchUpdateTimeline } from './helpers';
 import { OpenTimelineModal } from './open_timeline_modal/open_timeline_modal';
 import {
   DeleteTimelines,
@@ -57,11 +40,8 @@ import {
   OpenTimelineDispatchProps,
   OpenTimelineReduxProps,
 } from './types';
-import { AllTimelinesQuery } from '../../containers/timeline/all';
-import { Direction } from '../../graphql/types';
-import { DEFAULT_DATE_COLUMN_MIN_WIDTH, DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
+import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 
 export interface OpenTimelineState {
   /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
@@ -327,13 +307,10 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
     timelineId: string;
   }) => {
     const {
-      applyKqlFilterQuery,
-      addNotes,
-      addTimeline,
+      apolloClient,
       closeModalTimeline,
       isModal,
-      setTimelineRangeDatePicker,
-      setKqlFilterQueryDraft,
+      updateTimeline,
       updateIsLoading,
     } = this.props;
 
@@ -341,138 +318,13 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
       closeModalTimeline();
     }
 
-    updateIsLoading({ id: 'timeline-1', isLoading: true });
-    this.props.apolloClient
-      .query<GetOneTimeline.Query, GetOneTimeline.Variables>({
-        query: oneTimelineQuery,
-        fetchPolicy: 'no-cache',
-        variables: { id: timelineId },
-      })
-      // eslint-disable-next-line
-      .then(result => {
-        const timelineToOpen: TimelineResult = omitTypenameInTimeline(
-          getOr({}, 'data.getOneTimeline', result)
-        );
-
-        const { notes, ...timelineModel } = timelineToOpen;
-        const momentDate = dateMath.parse('now-24h');
-        setTimelineRangeDatePicker({
-          from: getOr(momentDate ? momentDate.valueOf() : 0, 'dateRange.start', timelineModel),
-          to: getOr(Date.now(), 'dateRange.end', timelineModel),
-        });
-
-        addTimeline({
-          id: 'timeline-1',
-          timeline: {
-            ...assign(this.props.timeline, timelineModel),
-            columns:
-              timelineModel.columns != null
-                ? timelineModel.columns.map(col => {
-                    const timelineCols: ColumnHeader = {
-                      ...col,
-                      columnHeaderType: defaultColumnHeaderType,
-                      id: col.id != null ? col.id : 'unknown',
-                      placeholder: col.placeholder != null ? col.placeholder : undefined,
-                      category: col.category != null ? col.category : undefined,
-                      description: col.description != null ? col.description : undefined,
-                      example: col.example != null ? col.example : undefined,
-                      type: col.type != null ? col.type : undefined,
-                      aggregatable: col.aggregatable != null ? col.aggregatable : undefined,
-                      width:
-                        col.id === '@timestamp'
-                          ? DEFAULT_DATE_COLUMN_MIN_WIDTH
-                          : DEFAULT_COLUMN_MIN_WIDTH,
-                    };
-                    return timelineCols;
-                  })
-                : defaultHeaders,
-            eventIdToNoteIds: duplicate
-              ? {}
-              : timelineModel.eventIdToNoteIds != null
-              ? timelineModel.eventIdToNoteIds.reduce((acc, note) => {
-                  if (note.eventId != null) {
-                    const eventNotes = getOr([], note.eventId, acc);
-                    return { ...acc, [note.eventId]: [...eventNotes, note.noteId] };
-                  }
-                  return acc;
-                }, {})
-              : {},
-            isFavorite: duplicate
-              ? false
-              : timelineModel.favorite != null
-              ? timelineModel.favorite.length > 0
-              : false,
-            isLive: false,
-            isSaving: false,
-            itemsPerPage: 25,
-            noteIds: duplicate ? [] : timelineModel.noteIds != null ? timelineModel.noteIds : [],
-            pinnedEventIds: duplicate
-              ? {}
-              : timelineModel.pinnedEventIds != null
-              ? timelineModel.pinnedEventIds.reduce(
-                  (acc, pinnedEventId) => ({ ...acc, [pinnedEventId]: true }),
-                  {}
-                )
-              : {},
-            pinnedEventsSaveObject: duplicate
-              ? {}
-              : timelineModel.pinnedEventsSaveObject != null
-              ? timelineModel.pinnedEventsSaveObject.reduce(
-                  (acc, pinnedEvent) => ({ ...acc, [pinnedEvent.pinnedEventId]: pinnedEvent }),
-                  {}
-                )
-              : {},
-            savedObjectId: duplicate ? null : timelineModel.savedObjectId,
-            version: duplicate ? null : timelineModel.version,
-            title: duplicate ? '' : timelineModel.title || '',
-          },
-        });
-
-        if (
-          timelineModel.kqlQuery != null &&
-          timelineModel.kqlQuery.filterQuery != null &&
-          timelineModel.kqlQuery.filterQuery.kuery != null &&
-          timelineModel.kqlQuery.filterQuery.kuery.expression !== ''
-        ) {
-          setKqlFilterQueryDraft({
-            id: 'timeline-1',
-            filterQueryDraft: {
-              kind: 'kuery',
-              expression: timelineModel.kqlQuery.filterQuery.kuery.expression || '',
-            },
-          });
-          applyKqlFilterQuery({
-            id: 'timeline-1',
-            filterQuery: {
-              kuery: {
-                kind: 'kuery',
-                expression: timelineModel.kqlQuery.filterQuery.kuery.expression || '',
-              },
-              serializedQuery: timelineModel.kqlQuery.filterQuery.serializedQuery || '',
-            },
-          });
-        }
-
-        if (!duplicate) {
-          addNotes({
-            notes:
-              notes != null
-                ? notes.map<Note>(note => ({
-                    created: note.created != null ? new Date(note.created) : new Date(),
-                    id: note.noteId,
-                    lastEdit: note.updated != null ? new Date(note.updated) : new Date(),
-                    note: note.note || '',
-                    user: note.updatedBy || 'unknown',
-                    saveObjectId: note.noteId,
-                    version: note.version,
-                  }))
-                : [],
-          });
-        }
-      })
-      .finally(() => {
-        updateIsLoading({ id: 'timeline-1', isLoading: false });
-      });
+    queryTimelineById({
+      apolloClient,
+      duplicate,
+      timelineId,
+      updateIsLoading,
+      updateTimeline,
+    });
   };
 
   private deleteTimelines: DeleteTimelines = (
@@ -511,21 +363,22 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  createNewTimeline: ({
+    id,
+    columns,
+    show,
+  }: {
+    id: string;
+    columns: ColumnHeader[];
+    show?: boolean;
+  }) => dispatch(dispatchCreateNewTimeline({ id, columns, show })),
+  updateIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) =>
+    dispatch(dispatchUpdateIsLoading({ id, isLoading })),
+  updateTimeline: dispatchUpdateTimeline(dispatch),
+});
+
 export const StatefulOpenTimeline = connect(
   makeMapStateToProps,
-  {
-    applyKqlFilterQuery: dispatchApplyKqlFilterQuery,
-    addTimeline: dispatchAddTimeline,
-    addNotes: dispatchAddNotes,
-    createNewTimeline: dispatchCreateNewTimeline,
-    setKqlFilterQueryDraft: dispatchSetKqlFilterQueryDraft,
-    setTimelineRangeDatePicker: dispatchSetTimelineRangeDatePicker,
-    updateIsLoading: dispatchUpdateIsLoading,
-  }
+  mapDispatchToProps
 )(StatefulOpenTimelineComponent);
-
-const omitTypename = (key: string, value: keyof TimelineModel) =>
-  key === '__typename' ? undefined : value;
-
-const omitTypenameInTimeline = (timeline: TimelineResult): TimelineResult =>
-  JSON.parse(JSON.stringify(timeline), omitTypename);

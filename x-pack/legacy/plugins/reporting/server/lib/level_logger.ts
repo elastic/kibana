@@ -6,22 +6,24 @@
 
 type ServerLog = (tags: string[], msg: string) => void;
 
+const trimStr = (toTrim: string) => {
+  return typeof toTrim === 'string' ? toTrim.trim() : toTrim;
+};
+
 export class LevelLogger {
   private _logger: any;
   private _tags: string[];
-  private _isVerbose: boolean;
 
   public warn: (msg: string, tags?: string[]) => void;
 
-  static createForServer(server: any, tags: string[], isVerbose = false) {
+  static createForServer(server: any, tags: string[]) {
     const serverLog: ServerLog = (tgs: string[], msg: string) => server.log(tgs, msg);
-    return new LevelLogger(serverLog, tags, isVerbose);
+    return new LevelLogger(serverLog, tags);
   }
 
-  constructor(logger: ServerLog, tags: string[], isVerbose: boolean) {
+  constructor(logger: ServerLog, tags: string[]) {
     this._logger = logger;
     this._tags = tags;
-    this._isVerbose = isVerbose;
 
     /*
      * This shortcut provides maintenance convenience: Reporting code has been
@@ -30,27 +32,23 @@ export class LevelLogger {
     this.warn = this.warning.bind(this);
   }
 
-  public error(msg: string, tags: string[] = []) {
-    this._logger([...this._tags, ...tags, 'error'], msg);
+  public error(err: string | Error, tags: string[] = []) {
+    this._logger([...this._tags, ...tags, 'error'], err);
   }
 
   public warning(msg: string, tags: string[] = []) {
-    this._logger([...this._tags, ...tags, 'warning'], msg);
+    this._logger([...this._tags, ...tags, 'warning'], trimStr(msg));
   }
 
   public debug(msg: string, tags: string[] = []) {
-    this._logger([...this._tags, ...tags, 'debug'], msg);
+    this._logger([...this._tags, ...tags, 'debug'], trimStr(msg));
   }
 
   public info(msg: string, tags: string[] = []) {
-    this._logger([...this._tags, ...tags, 'info'], msg);
-  }
-
-  public get isVerbose() {
-    return this._isVerbose;
+    this._logger([...this._tags, ...tags, 'info'], trimStr(msg));
   }
 
   public clone(tags: string[]) {
-    return new LevelLogger(this._logger, [...this._tags, ...tags], this._isVerbose);
+    return new LevelLogger(this._logger, [...this._tags, ...tags]);
   }
 }

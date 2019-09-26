@@ -79,6 +79,13 @@ uiRoutes
         }
 
         return savedVisualizations.get($route.current.params)
+          .then(savedVis => {
+            if (savedVis.vis.type.setup) {
+              return savedVis.vis.type.setup(savedVis)
+                .catch(() => savedVis);
+            }
+            return savedVis;
+          })
           .catch(redirectWhenMissing({
             '*': '/visualize'
           }));
@@ -96,6 +103,13 @@ uiRoutes
               savedVis.getFullPath(),
               savedVis.title,
               savedVis.id);
+            return savedVis;
+          })
+          .then(savedVis => {
+            if (savedVis.vis.type.setup) {
+              return savedVis.vis.type.setup(savedVis)
+                .catch(() => savedVis);
+            }
             return savedVis;
           })
           .catch(redirectWhenMissing({
@@ -173,10 +187,11 @@ function VisEditor(
       }
     },
     run: async () => {
-      const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+      const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate, newDescription }) => {
         const currentTitle = savedVis.title;
         savedVis.title = newTitle;
         savedVis.copyOnSave = newCopyOnSave;
+        savedVis.description = newDescription;
         const saveOptions = {
           confirmOverwrite: false,
           isTitleDuplicateConfirmed,
@@ -206,6 +221,7 @@ function VisEditor(
           showCopyOnSave={savedVis.id ? true : false}
           objectType="visualization"
           confirmButtonLabel={confirmButtonLabel}
+          description={savedVis.description}
         />);
       showSaveModal(saveModal);
     }
@@ -481,7 +497,7 @@ function VisEditor(
   };
 
   $scope.onSavedQueryUpdated = savedQuery => {
-    $scope.savedQuery = savedQuery;
+    $scope.savedQuery = { ...savedQuery };
   };
 
   $scope.onClearSavedQuery = () => {
@@ -513,14 +529,12 @@ function VisEditor(
     $scope.fetch();
   };
 
-  $scope.$watch('savedQuery', (newSavedQuery, oldSavedQuery) => {
+  $scope.$watch('savedQuery', (newSavedQuery) => {
     if (!newSavedQuery) return;
     $state.savedQuery = newSavedQuery.id;
     $state.save();
 
-    if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
-      updateStateFromSavedQuery(newSavedQuery);
-    }
+    updateStateFromSavedQuery(newSavedQuery);
   });
 
   $scope.$watch('state.savedQuery', newSavedQueryId => {
@@ -528,13 +542,14 @@ function VisEditor(
       $scope.savedQuery = undefined;
       return;
     }
-
-    savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
-      $scope.$evalAsync(() => {
-        $scope.savedQuery = savedQuery;
-        updateStateFromSavedQuery(savedQuery);
+    if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+      savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
+        $scope.$evalAsync(() => {
+          $scope.savedQuery = savedQuery;
+          updateStateFromSavedQuery(savedQuery);
+        });
       });
-    });
+    }
   });
 
   /**

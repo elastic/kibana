@@ -21,13 +21,14 @@ import React, { useEffect, useReducer } from 'react';
 import {
   EuiTitle,
   EuiDragDropContext,
+  DragDropContextProps,
   EuiDroppable,
   EuiDraggable,
   EuiSpacer,
   EuiPanel,
 } from '@elastic/eui';
 
-import { AggConfig } from '../../../agg_config';
+import { AggConfig } from '../../../../agg_types/agg_config';
 import { aggGroupNamesMap, AggGroupNames } from '../agg_groups';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
@@ -60,7 +61,8 @@ function DefaultEditorAggGroup({
 }: DefaultEditorAggGroupProps) {
   const groupNameLabel = aggGroupNamesMap()[groupName];
   // e.g. buckets can have no aggs
-  const group: AggConfig[] = state.aggs.bySchemaGroup[groupName] || [];
+  const group: AggConfig[] =
+    state.aggs.aggs.filter((agg: AggConfig) => agg.schema.group === groupName) || [];
 
   const stats = {
     max: 0,
@@ -90,7 +92,7 @@ function DefaultEditorAggGroup({
         setAggsState({
           type: AGGS_ACTION_KEYS.TOUCHED,
           payload: true,
-          aggId: Number(aggId),
+          aggId,
         });
       });
     }
@@ -100,11 +102,7 @@ function DefaultEditorAggGroup({
     setValidity(isGroupValid);
   }, [isGroupValid]);
 
-  interface DragDropResultProps {
-    source: { index: number };
-    destination?: { index: number } | null;
-  }
-  const onDragEnd = ({ source, destination }: DragDropResultProps) => {
+  const onDragEnd: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
       const orderedGroup = Array.from(group);
       const [removed] = orderedGroup.splice(source.index, 1);
@@ -114,7 +112,7 @@ function DefaultEditorAggGroup({
     }
   };
 
-  const setTouchedHandler = (aggId: number, touched: boolean) => {
+  const setTouchedHandler = (aggId: string, touched: boolean) => {
     setAggsState({
       type: AGGS_ACTION_KEYS.TOUCHED,
       payload: touched,
@@ -122,7 +120,7 @@ function DefaultEditorAggGroup({
     });
   };
 
-  const setValidityHandler = (aggId: number, valid: boolean) => {
+  const setValidityHandler = (aggId: string, valid: boolean) => {
     setAggsState({
       type: AGGS_ACTION_KEYS.VALID,
       payload: valid,

@@ -106,6 +106,38 @@ test('dashboard migration 7.3.0 migrates filters to query on search source when 
   expect(newDoc.attributes.uiStateJSON).toBeUndefined();
 });
 
+// See https://github.com/elastic/kibana/issues/44639 - apparently this can happen.
+test('dashboard migration works when panelsJSON is missing panelIndex', () => {
+  const doc: DashboardDoc700To720 = {
+    id: '1',
+    type: 'dashboard',
+    references: [],
+    attributes: {
+      description: '',
+      uiStateJSON: '{}',
+      title: 'fancy stuff',
+      timeRestore: true,
+      version: 1,
+      panelsJSON:
+        '[{"id":"funky-funky","type":"visualization","size_x":7,"size_y":5,"col":1,"row":1},{"id":"funky-funky2","type":"search","size_x":5,"size_y":5,"col":8,"row":1,"columns":["_source"],"sort":["@timestamp","desc"]}]',
+      optionsJSON: '{"darkTheme":false}',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON:
+          '{"filter":[{"query":{"query_string":{"query":"user:spiderman","analyze_wildcard":true}}}]}',
+      },
+    },
+  };
+
+  const doc700: DashboardDoc700To720 = migrations.dashboard['7.0.0'](doc, mockLogger);
+  const newDoc = migrations.dashboard['7.3.0'](doc700, mockLogger);
+
+  const parsedSearchSource = JSON.parse(newDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON);
+  expect(parsedSearchSource.filter.length).toBe(0);
+  expect(parsedSearchSource.query.query).toBe('user:spiderman');
+
+  expect(newDoc.attributes.uiStateJSON).toBeUndefined();
+});
+
 test('dashboard migration 7.3.0 migrates panels', () => {
   const doc: DashboardDoc700To720 = {
     id: '1',

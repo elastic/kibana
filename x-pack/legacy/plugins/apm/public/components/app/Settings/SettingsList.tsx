@@ -4,46 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiPanel,
-  EuiBetaBadge,
-  EuiSpacer,
-  EuiCallOut,
-  EuiEmptyPrompt,
-  EuiButton,
-  EuiLink
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { isEmpty } from 'lodash';
-import { useFetcher } from '../../../hooks/useFetcher';
+import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
-import { AgentConfigurationListAPIResponse } from '../../../../server/lib/settings/agent_configuration/list_configurations';
-import { AddSettingsFlyout } from './AddSettings/AddSettingFlyout';
-import { APMLink } from '../../shared/Links/apm/APMLink';
 import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
-import { callApmApi } from '../../../services/rest/callApmApi';
+import { AgentConfigurationListAPIResponse } from '../../../../server/lib/settings/agent_configuration/list_configurations';
+import { Config } from '.';
 
-export type Config = AgentConfigurationListAPIResponse[0];
-
-export function SettingsList() {
-  const { data = [], status, refresh } = useFetcher(
-    () =>
-      callApmApi({
-        pathname: `/api/apm/settings/agent-configuration`
-      }),
-    []
-  );
-  const [selectedConfig, setSelectedConfig] = useState<Config | null>(null);
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-
-  const COLUMNS: Array<ITableColumn<Config>> = [
+export function SettingsList({
+  status,
+  data,
+  setIsFlyoutOpen,
+  setSelectedConfig
+}: {
+  status: FETCH_STATUS;
+  data: AgentConfigurationListAPIResponse;
+  setIsFlyoutOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setSelectedConfig: React.Dispatch<React.SetStateAction<Config | null>>;
+}) {
+  const columns: Array<ITableColumn<Config>> = [
     {
       field: 'service.name',
       name: i18n.translate(
@@ -127,15 +110,6 @@ export function SettingsList() {
     }
   ];
 
-  const RETURN_TO_OVERVIEW_LINK_LABEL = i18n.translate(
-    'xpack.apm.settings.agentConf.returnToOverviewLinkLabel',
-    {
-      defaultMessage: 'Return to overview'
-    }
-  );
-
-  const hasConfigurations = !isEmpty(data);
-
   const emptyStatePrompt = (
     <EuiEmptyPrompt
       iconType="controlsHorizontal"
@@ -173,141 +147,44 @@ export function SettingsList() {
     />
   );
 
-  return (
-    <>
-      <AddSettingsFlyout
-        isOpen={isFlyoutOpen}
-        selectedConfig={selectedConfig}
-        onClose={() => {
-          setSelectedConfig(null);
-          setIsFlyoutOpen(false);
-        }}
-        onSubmit={() => {
-          setSelectedConfig(null);
-          setIsFlyoutOpen(false);
-          refresh();
-        }}
-      />
-
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="l">
-            <h1>
-              {i18n.translate('xpack.apm.settings.agentConf.pageTitle', {
-                defaultMessage: 'Settings'
-              })}
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <APMLink path="/">
-            <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
-              {RETURN_TO_OVERVIEW_LINK_LABEL}
-            </EuiButtonEmpty>
-          </APMLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="l" />
-
-      <EuiPanel>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h2>
-                {i18n.translate(
-                  'xpack.apm.settings.agentConf.configurationsPanelTitle',
-                  {
-                    defaultMessage: 'Configurations'
-                  }
-                )}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              label={i18n.translate(
-                'xpack.apm.settings.agentConf.betaBadgeLabel',
-                {
-                  defaultMessage: 'Beta'
-                }
-              )}
-              tooltipContent={i18n.translate(
-                'xpack.apm.settings.agentConf.betaBadgeText',
-                {
-                  defaultMessage:
-                    'This feature is still in development. If you have feedback, please reach out in our Discuss forum.'
-                }
-              )}
-            />
-          </EuiFlexItem>
-          {hasConfigurations ? (
-            <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    color="primary"
-                    fill
-                    iconType="plusInCircle"
-                    onClick={() => setIsFlyoutOpen(true)}
-                  >
-                    {i18n.translate(
-                      'xpack.apm.settings.agentConf.createConfigButtonLabel',
-                      {
-                        defaultMessage: 'Create configuration'
-                      }
-                    )}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-
-        <EuiSpacer size="m" />
-
-        <EuiCallOut
-          title={i18n.translate(
-            'xpack.apm.settings.agentConf.betaCallOutTitle',
-            {
-              defaultMessage: 'APM Agent Configuration (BETA)'
-            }
-          )}
-          iconType="iInCircle"
-        >
+  const failurePrompt = (
+    <EuiEmptyPrompt
+      iconType="alert"
+      body={
+        <>
           <p>
-            <FormattedMessage
-              id="xpack.apm.settings.agentConf.betaCallOutText"
-              defaultMessage="We're excited to bring you a first look at APM Agent configuration. {agentConfigDocsLink}"
-              values={{
-                agentConfigDocsLink: (
-                  <EuiLink href="https://www.elastic.co/guide/en/kibana/current/agent-configuration.html">
-                    {i18n.translate(
-                      'xpack.apm.settings.agentConf.agentConfigDocsLinkLabel',
-                      { defaultMessage: 'Learn more in our docs.' }
-                    )}
-                  </EuiLink>
-                )
-              }}
-            />
+            {i18n.translate(
+              'xpack.apm.settings.agentConf.configTable.failurePromptText',
+              {
+                defaultMessage:
+                  'The list of agent configurations could not be fetched. Your user may not have the sufficient permissions.'
+              }
+            )}
           </p>
-        </EuiCallOut>
-
-        <EuiSpacer size="m" />
-
-        {status === 'success' && !hasConfigurations ? (
-          emptyStatePrompt
-        ) : (
-          <ManagedTable
-            noItemsMessage={<LoadingStatePrompt />}
-            columns={COLUMNS}
-            items={data}
-            initialSortField="service.name"
-            initialSortDirection="asc"
-            initialPageSize={50}
-          />
-        )}
-      </EuiPanel>
-    </>
+        </>
+      }
+    />
   );
+  const hasConfigurations = !isEmpty(data);
+
+  if (status === 'failure') {
+    return failurePrompt;
+  }
+  if (status === 'success') {
+    if (hasConfigurations) {
+      return (
+        <ManagedTable
+          noItemsMessage={<LoadingStatePrompt />}
+          columns={columns}
+          items={data}
+          initialSortField="service.name"
+          initialSortDirection="asc"
+          initialPageSize={50}
+        />
+      );
+    } else {
+      return emptyStatePrompt;
+    }
+  }
+  return null;
 }

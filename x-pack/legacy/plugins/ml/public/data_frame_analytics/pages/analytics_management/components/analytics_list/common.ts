@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataFrameAnalyticsId, DataFrameAnalyticsOutlierConfig } from '../../../../common';
+import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
 
 export enum DATA_FRAME_TASK_STATE {
+  ANALYZING = 'analyzing',
   FAILED = 'failed',
   REINDEXING = 'reindexing',
   STARTED = 'started',
@@ -32,6 +33,11 @@ export interface Query {
   syntax: any;
 }
 
+interface ProgressSection {
+  phase: string;
+  progress_percent: number;
+}
+
 export interface DataFrameAnalyticsStats {
   assignment_explanation?: string;
   id: DataFrameAnalyticsId;
@@ -42,9 +48,17 @@ export interface DataFrameAnalyticsStats {
     name: string;
     transport_address: string;
   };
-  progress_percent?: number;
+  progress: ProgressSection[];
   reason?: string;
   state: DATA_FRAME_TASK_STATE;
+}
+
+export function isDataFrameAnalyticsRunning(stats: DataFrameAnalyticsStats) {
+  return (
+    stats.state === DATA_FRAME_TASK_STATE.ANALYZING ||
+    stats.state === DATA_FRAME_TASK_STATE.STARTED ||
+    stats.state === DATA_FRAME_TASK_STATE.REINDEXING
+  );
 }
 
 export function isDataFrameAnalyticsStats(arg: any): arg is DataFrameAnalyticsStats {
@@ -52,14 +66,26 @@ export function isDataFrameAnalyticsStats(arg: any): arg is DataFrameAnalyticsSt
     typeof arg === 'object' &&
     arg !== null &&
     {}.hasOwnProperty.call(arg, 'state') &&
-    Object.values(DATA_FRAME_TASK_STATE).includes(arg.state)
+    Object.values(DATA_FRAME_TASK_STATE).includes(arg.state) &&
+    {}.hasOwnProperty.call(arg, 'progress') &&
+    Array.isArray(arg.progress)
   );
+}
+
+export function getDataFrameAnalyticsProgress(stats: DataFrameAnalyticsStats) {
+  if (isDataFrameAnalyticsStats(stats)) {
+    return Math.round(
+      stats.progress.reduce((p, c) => p + c.progress_percent, 0) / stats.progress.length
+    );
+  }
+
+  return undefined;
 }
 
 export interface DataFrameAnalyticsListRow {
   id: DataFrameAnalyticsId;
   checkpointing: object;
-  config: DataFrameAnalyticsOutlierConfig;
+  config: DataFrameAnalyticsConfig;
   mode: string;
   stats: DataFrameAnalyticsStats;
 }
@@ -68,6 +94,7 @@ export interface DataFrameAnalyticsListRow {
 export enum DataFrameAnalyticsListColumn {
   configDestIndex = 'config.dest.index',
   configSourceIndex = 'config.source.index',
+  configCreateTime = 'config.create_time',
   // Description attribute is not supported yet by API
   // description = 'config.description',
   id = 'id',
@@ -75,9 +102,9 @@ export enum DataFrameAnalyticsListColumn {
 
 export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 
-export function isCompletedBatchAnalytics(item: DataFrameAnalyticsListRow) {
-  // For now all analytics jobs are batch jobs.
-  return false;
+export function isCompletedAnalyticsJob(stats: DataFrameAnalyticsStats) {
+  const progress = getDataFrameAnalyticsProgress(stats);
+  return stats.state === DATA_FRAME_TASK_STATE.STOPPED && progress === 100;
 }
 
 export function getResultsUrl(jobId: string) {

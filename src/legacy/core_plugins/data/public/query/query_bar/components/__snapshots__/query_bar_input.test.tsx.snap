@@ -4,6 +4,28 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
 <QueryBarInputUI
   appName="discover"
   disableAutoFocus={true}
+  http={
+    Object {
+      "addLoadingCount": [MockFunction],
+      "basePath": Object {
+        "get": [MockFunction],
+        "prepend": [MockFunction],
+        "remove": [MockFunction],
+      },
+      "delete": [MockFunction],
+      "fetch": [MockFunction],
+      "get": [MockFunction],
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
+      "removeAllInterceptors": [MockFunction],
+      "stop": [MockFunction],
+    }
+  }
   indexPatterns={
     Array [
       Object {
@@ -133,6 +155,17 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
       "query": "response:200",
     }
   }
+  savedObjectsClient={
+    Object {
+      "bulkCreate": [MockFunction],
+      "bulkGet": [MockFunction],
+      "create": [MockFunction],
+      "delete": [MockFunction],
+      "find": [MockFunction],
+      "get": [MockFunction],
+      "update": [MockFunction],
+    }
+  }
   screenTitle="Another Screen"
   store={
     Object {
@@ -222,6 +255,28 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
             compressed={false}
             data-test-subj="queryInput"
             fullWidth={true}
+            http={
+              Object {
+                "addLoadingCount": [MockFunction],
+                "basePath": Object {
+                  "get": [MockFunction],
+                  "prepend": [MockFunction],
+                  "remove": [MockFunction],
+                },
+                "delete": [MockFunction],
+                "fetch": [MockFunction],
+                "get": [MockFunction],
+                "getLoadingCount$": [MockFunction],
+                "head": [MockFunction],
+                "intercept": [MockFunction],
+                "options": [MockFunction],
+                "patch": [MockFunction],
+                "post": [MockFunction],
+                "put": [MockFunction],
+                "removeAllInterceptors": [MockFunction],
+                "stop": [MockFunction],
+              }
+            }
             inputRef={[Function]}
             isLoading={false}
             onChange={[Function]}
@@ -251,9 +306,7 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                 <div
                   className="euiFormControlLayout__childrenWrapper"
                 >
-                  <EuiValidatableControl
-                    className="undefined euiFormControlLayout__child--noStyle"
-                  >
+                  <EuiValidatableControl>
                     <input
                       aria-activedescendant=""
                       aria-autocomplete="list"
@@ -263,6 +316,28 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                       autoFocus={false}
                       className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
                       data-test-subj="queryInput"
+                      http={
+                        Object {
+                          "addLoadingCount": [MockFunction],
+                          "basePath": Object {
+                            "get": [MockFunction],
+                            "prepend": [MockFunction],
+                            "remove": [MockFunction],
+                          },
+                          "delete": [MockFunction],
+                          "fetch": [MockFunction],
+                          "get": [MockFunction],
+                          "getLoadingCount$": [MockFunction],
+                          "head": [MockFunction],
+                          "intercept": [MockFunction],
+                          "options": [MockFunction],
+                          "patch": [MockFunction],
+                          "post": [MockFunction],
+                          "put": [MockFunction],
+                          "removeAllInterceptors": [MockFunction],
+                          "stop": [MockFunction],
+                        }
+                      }
                       onChange={[Function]}
                       onClick={[Function]}
                       onKeyDown={[Function]}
@@ -285,14 +360,13 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                   onSelectLanguage={[Function]}
                 >
                   <EuiPopover
+                    anchorClassName="euiFormControlLayout__append"
                     anchorPosition="downRight"
                     button={
                       <EuiButtonEmpty
-                        color="primary"
-                        iconSide="left"
+                        className="euiFormControlLayout__append"
                         onClick={[Function]}
                         size="xs"
-                        type="button"
                       >
                         <FormattedMessage
                           defaultMessage="KQL"
@@ -301,7 +375,6 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                         />
                       </EuiButtonEmpty>
                     }
-                    className="eui-displayBlock"
                     closePopover={[Function]}
                     display="inlineBlock"
                     hasArrow={true}
@@ -316,7 +389,7 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                       onOutsideClick={[Function]}
                     >
                       <div
-                        className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle eui-displayBlock"
+                        className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle"
                         id="popover"
                         onKeyDown={[Function]}
                         onMouseDown={[Function]}
@@ -325,17 +398,15 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                         onTouchStart={[Function]}
                       >
                         <div
-                          className="euiPopover__anchor"
+                          className="euiPopover__anchor euiFormControlLayout__append"
                         >
                           <EuiButtonEmpty
-                            color="primary"
-                            iconSide="left"
+                            className="euiFormControlLayout__append"
                             onClick={[Function]}
                             size="xs"
-                            type="button"
                           >
                             <button
-                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__append"
                               onClick={[Function]}
                               type="button"
                             >
@@ -382,6 +453,28 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
 exports[`QueryBarInput Should pass the query language to the language switcher 1`] = `
 <QueryBarInputUI
   appName="discover"
+  http={
+    Object {
+      "addLoadingCount": [MockFunction],
+      "basePath": Object {
+        "get": [MockFunction],
+        "prepend": [MockFunction],
+        "remove": [MockFunction],
+      },
+      "delete": [MockFunction],
+      "fetch": [MockFunction],
+      "get": [MockFunction],
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
+      "removeAllInterceptors": [MockFunction],
+      "stop": [MockFunction],
+    }
+  }
   indexPatterns={
     Array [
       Object {
@@ -511,6 +604,17 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
       "query": "response:200",
     }
   }
+  savedObjectsClient={
+    Object {
+      "bulkCreate": [MockFunction],
+      "bulkGet": [MockFunction],
+      "create": [MockFunction],
+      "delete": [MockFunction],
+      "find": [MockFunction],
+      "get": [MockFunction],
+      "update": [MockFunction],
+    }
+  }
   screenTitle="Another Screen"
   store={
     Object {
@@ -600,6 +704,28 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
             compressed={false}
             data-test-subj="queryInput"
             fullWidth={true}
+            http={
+              Object {
+                "addLoadingCount": [MockFunction],
+                "basePath": Object {
+                  "get": [MockFunction],
+                  "prepend": [MockFunction],
+                  "remove": [MockFunction],
+                },
+                "delete": [MockFunction],
+                "fetch": [MockFunction],
+                "get": [MockFunction],
+                "getLoadingCount$": [MockFunction],
+                "head": [MockFunction],
+                "intercept": [MockFunction],
+                "options": [MockFunction],
+                "patch": [MockFunction],
+                "post": [MockFunction],
+                "put": [MockFunction],
+                "removeAllInterceptors": [MockFunction],
+                "stop": [MockFunction],
+              }
+            }
             inputRef={[Function]}
             isLoading={false}
             onChange={[Function]}
@@ -629,9 +755,7 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                 <div
                   className="euiFormControlLayout__childrenWrapper"
                 >
-                  <EuiValidatableControl
-                    className="undefined euiFormControlLayout__child--noStyle"
-                  >
+                  <EuiValidatableControl>
                     <input
                       aria-activedescendant=""
                       aria-autocomplete="list"
@@ -641,6 +765,28 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                       autoFocus={true}
                       className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
                       data-test-subj="queryInput"
+                      http={
+                        Object {
+                          "addLoadingCount": [MockFunction],
+                          "basePath": Object {
+                            "get": [MockFunction],
+                            "prepend": [MockFunction],
+                            "remove": [MockFunction],
+                          },
+                          "delete": [MockFunction],
+                          "fetch": [MockFunction],
+                          "get": [MockFunction],
+                          "getLoadingCount$": [MockFunction],
+                          "head": [MockFunction],
+                          "intercept": [MockFunction],
+                          "options": [MockFunction],
+                          "patch": [MockFunction],
+                          "post": [MockFunction],
+                          "put": [MockFunction],
+                          "removeAllInterceptors": [MockFunction],
+                          "stop": [MockFunction],
+                        }
+                      }
                       onChange={[Function]}
                       onClick={[Function]}
                       onKeyDown={[Function]}
@@ -663,14 +809,13 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                   onSelectLanguage={[Function]}
                 >
                   <EuiPopover
+                    anchorClassName="euiFormControlLayout__append"
                     anchorPosition="downRight"
                     button={
                       <EuiButtonEmpty
-                        color="primary"
-                        iconSide="left"
+                        className="euiFormControlLayout__append"
                         onClick={[Function]}
                         size="xs"
-                        type="button"
                       >
                         <FormattedMessage
                           defaultMessage="Lucene"
@@ -679,7 +824,6 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                         />
                       </EuiButtonEmpty>
                     }
-                    className="eui-displayBlock"
                     closePopover={[Function]}
                     display="inlineBlock"
                     hasArrow={true}
@@ -694,7 +838,7 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                       onOutsideClick={[Function]}
                     >
                       <div
-                        className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle eui-displayBlock"
+                        className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle"
                         id="popover"
                         onKeyDown={[Function]}
                         onMouseDown={[Function]}
@@ -703,17 +847,15 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                         onTouchStart={[Function]}
                       >
                         <div
-                          className="euiPopover__anchor"
+                          className="euiPopover__anchor euiFormControlLayout__append"
                         >
                           <EuiButtonEmpty
-                            color="primary"
-                            iconSide="left"
+                            className="euiFormControlLayout__append"
                             onClick={[Function]}
                             size="xs"
-                            type="button"
                           >
                             <button
-                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__append"
                               onClick={[Function]}
                               type="button"
                             >
@@ -760,6 +902,28 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
 exports[`QueryBarInput Should render the given query 1`] = `
 <QueryBarInputUI
   appName="discover"
+  http={
+    Object {
+      "addLoadingCount": [MockFunction],
+      "basePath": Object {
+        "get": [MockFunction],
+        "prepend": [MockFunction],
+        "remove": [MockFunction],
+      },
+      "delete": [MockFunction],
+      "fetch": [MockFunction],
+      "get": [MockFunction],
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
+      "removeAllInterceptors": [MockFunction],
+      "stop": [MockFunction],
+    }
+  }
   indexPatterns={
     Array [
       Object {
@@ -889,6 +1053,17 @@ exports[`QueryBarInput Should render the given query 1`] = `
       "query": "response:200",
     }
   }
+  savedObjectsClient={
+    Object {
+      "bulkCreate": [MockFunction],
+      "bulkGet": [MockFunction],
+      "create": [MockFunction],
+      "delete": [MockFunction],
+      "find": [MockFunction],
+      "get": [MockFunction],
+      "update": [MockFunction],
+    }
+  }
   screenTitle="Another Screen"
   store={
     Object {
@@ -978,6 +1153,28 @@ exports[`QueryBarInput Should render the given query 1`] = `
             compressed={false}
             data-test-subj="queryInput"
             fullWidth={true}
+            http={
+              Object {
+                "addLoadingCount": [MockFunction],
+                "basePath": Object {
+                  "get": [MockFunction],
+                  "prepend": [MockFunction],
+                  "remove": [MockFunction],
+                },
+                "delete": [MockFunction],
+                "fetch": [MockFunction],
+                "get": [MockFunction],
+                "getLoadingCount$": [MockFunction],
+                "head": [MockFunction],
+                "intercept": [MockFunction],
+                "options": [MockFunction],
+                "patch": [MockFunction],
+                "post": [MockFunction],
+                "put": [MockFunction],
+                "removeAllInterceptors": [MockFunction],
+                "stop": [MockFunction],
+              }
+            }
             inputRef={[Function]}
             isLoading={false}
             onChange={[Function]}
@@ -1007,9 +1204,7 @@ exports[`QueryBarInput Should render the given query 1`] = `
                 <div
                   className="euiFormControlLayout__childrenWrapper"
                 >
-                  <EuiValidatableControl
-                    className="undefined euiFormControlLayout__child--noStyle"
-                  >
+                  <EuiValidatableControl>
                     <input
                       aria-activedescendant=""
                       aria-autocomplete="list"
@@ -1019,6 +1214,28 @@ exports[`QueryBarInput Should render the given query 1`] = `
                       autoFocus={true}
                       className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
                       data-test-subj="queryInput"
+                      http={
+                        Object {
+                          "addLoadingCount": [MockFunction],
+                          "basePath": Object {
+                            "get": [MockFunction],
+                            "prepend": [MockFunction],
+                            "remove": [MockFunction],
+                          },
+                          "delete": [MockFunction],
+                          "fetch": [MockFunction],
+                          "get": [MockFunction],
+                          "getLoadingCount$": [MockFunction],
+                          "head": [MockFunction],
+                          "intercept": [MockFunction],
+                          "options": [MockFunction],
+                          "patch": [MockFunction],
+                          "post": [MockFunction],
+                          "put": [MockFunction],
+                          "removeAllInterceptors": [MockFunction],
+                          "stop": [MockFunction],
+                        }
+                      }
                       onChange={[Function]}
                       onClick={[Function]}
                       onKeyDown={[Function]}
@@ -1041,14 +1258,13 @@ exports[`QueryBarInput Should render the given query 1`] = `
                   onSelectLanguage={[Function]}
                 >
                   <EuiPopover
+                    anchorClassName="euiFormControlLayout__append"
                     anchorPosition="downRight"
                     button={
                       <EuiButtonEmpty
-                        color="primary"
-                        iconSide="left"
+                        className="euiFormControlLayout__append"
                         onClick={[Function]}
                         size="xs"
-                        type="button"
                       >
                         <FormattedMessage
                           defaultMessage="KQL"
@@ -1057,7 +1273,6 @@ exports[`QueryBarInput Should render the given query 1`] = `
                         />
                       </EuiButtonEmpty>
                     }
-                    className="eui-displayBlock"
                     closePopover={[Function]}
                     display="inlineBlock"
                     hasArrow={true}
@@ -1072,7 +1287,7 @@ exports[`QueryBarInput Should render the given query 1`] = `
                       onOutsideClick={[Function]}
                     >
                       <div
-                        className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle eui-displayBlock"
+                        className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle"
                         id="popover"
                         onKeyDown={[Function]}
                         onMouseDown={[Function]}
@@ -1081,17 +1296,15 @@ exports[`QueryBarInput Should render the given query 1`] = `
                         onTouchStart={[Function]}
                       >
                         <div
-                          className="euiPopover__anchor"
+                          className="euiPopover__anchor euiFormControlLayout__append"
                         >
                           <EuiButtonEmpty
-                            color="primary"
-                            iconSide="left"
+                            className="euiFormControlLayout__append"
                             onClick={[Function]}
                             size="xs"
-                            type="button"
                           >
                             <button
-                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__append"
                               onClick={[Function]}
                               type="button"
                             >

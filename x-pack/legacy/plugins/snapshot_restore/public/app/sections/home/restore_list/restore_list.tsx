@@ -17,7 +17,8 @@ import {
   EuiLoadingSpinner,
   EuiLink,
 } from '@elastic/eui';
-import { SectionError, SectionLoading } from '../../../components';
+import { APP_RESTORE_INDEX_PRIVILEGES } from '../../../../../common/constants';
+import { SectionError, SectionLoading, Error } from '../../../components';
 import { UIM_RESTORE_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { useLoadRestores } from '../../../services/http';
@@ -84,7 +85,7 @@ export const RestoreList: React.FunctionComponent = () => {
               defaultMessage="Error loading restores"
             />
           }
-          error={error}
+          error={error as Error}
         />
       );
     }
@@ -134,7 +135,6 @@ export const RestoreList: React.FunctionComponent = () => {
                 button={
                   <EuiButtonEmpty
                     size="xs"
-                    type="text"
                     iconType="arrowDown"
                     iconSide="right"
                     onClick={() => setIsIntervalMenuOpen(!isIntervalMenuOpen)}
@@ -207,7 +207,7 @@ export const RestoreList: React.FunctionComponent = () => {
   }
 
   return (
-    <WithPrivileges privileges="index.*">
+    <WithPrivileges privileges={APP_RESTORE_INDEX_PRIVILEGES.map(name => `index.${name}`)}>
       {({ hasPrivileges, privilegesMissing }) =>
         hasPrivileges ? (
           <section data-test-subj="restoreList">{content}</section>

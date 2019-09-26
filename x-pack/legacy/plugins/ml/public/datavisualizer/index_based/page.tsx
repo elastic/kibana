@@ -25,7 +25,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { KBN_FIELD_TYPES, ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
+import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';
 // @ts-ignore
 import { isFullLicense } from '../../license/check_license';
@@ -35,8 +36,7 @@ import { useKibanaContext, SavedSearchQuery } from '../../contexts/kibana';
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
 // @ts-ignore
 import { timeBasedIndexCheck } from '../../util/index_utils';
-// @ts-ignore
-import { MlTimeBuckets } from '../../util/ml_time_buckets';
+import { TimeBuckets } from '../../util/time_buckets';
 import { FieldRequestConfig, FieldVisConfig } from './common';
 import { ActionsPanel } from './components/actions_panel';
 import { FieldsPanel } from './components/fields_panel';
@@ -270,7 +270,7 @@ export const Page: FC = () => {
 
     // Obtain the interval to use for date histogram aggregations
     // (such as the document count chart). Aim for 75 bars.
-    const buckets = new MlTimeBuckets();
+    const buckets = new TimeBuckets();
 
     const tf = timefilter as any;
     let earliest: number | undefined;

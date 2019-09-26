@@ -7,26 +7,25 @@ import {
   KibanaRequest,
   OnPreAuthToolkit,
   LifecycleResponseFactory,
-  HttpServiceSetup,
+  CoreSetup,
 } from 'src/core/server';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { format } from 'url';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { getSpaceIdFromPath } from '../spaces_url_parser';
 import { modifyUrl } from '../utils/url';
+import { LegacyAPI } from '../../new_platform/plugin';
 
 export interface OnRequestInterceptorDeps {
-  config: KibanaConfig;
-  http: HttpServiceSetup;
+  getLegacyAPI(): LegacyAPI;
+  http: CoreSetup['http'];
 }
-export function initSpacesOnRequestInterceptor({ config, http }: OnRequestInterceptorDeps) {
-  const serverBasePath: string = config.get('server.basePath');
-
+export function initSpacesOnRequestInterceptor({ getLegacyAPI, http }: OnRequestInterceptorDeps) {
   http.registerOnPreAuth(async function spacesOnPreAuthHandler(
     request: KibanaRequest,
     response: LifecycleResponseFactory,
     toolkit: OnPreAuthToolkit
   ) {
+    const { serverBasePath } = getLegacyAPI().legacyConfig;
     const path = request.url.pathname;
 
     // If navigating within the context of a space, then we store the Space's URL Context on the request,

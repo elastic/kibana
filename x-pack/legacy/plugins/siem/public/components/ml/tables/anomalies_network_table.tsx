@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel } from '@elastic/eui';
 import React, { useContext } from 'react';
-import styled from 'styled-components';
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { HeaderPanel } from '../../header_panel';
 
@@ -22,6 +20,7 @@ import { MlCapabilitiesContext } from '../permissions/ml_capabilities_provider';
 import { BasicTable } from './basic_table';
 import { networkEquality } from './network_equality';
 import { getCriteriaFromNetworkType } from '../criteria/get_criteria_from_network_type';
+import { Panel } from '../../panel';
 
 const sorting = {
   sort: {
@@ -61,7 +60,7 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
       return null;
     } else {
       return (
-        <Panel loading={{ loading }}>
+        <Panel loading={loading}>
           <HeaderPanel
             subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.UNIT(
               pagination.totalItemCount
@@ -71,8 +70,9 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
           />
 
           <BasicTable
-            items={networks}
             columns={columns}
+            compressed
+            items={networks}
             pagination={pagination}
             sorting={sorting}
           />
@@ -86,17 +86,5 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
   },
   networkEquality
 );
-
-const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
-  position: relative;
-
-  ${({ loading }) =>
-    loading &&
-    `
-    overflow: hidden;
-  `}
-`;
-
-Panel.displayName = 'Panel';
 
 AnomaliesNetworkTable.displayName = 'AnomaliesNetworkTable';

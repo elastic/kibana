@@ -13,22 +13,21 @@ import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import 'uiExports/autocompleteProviders';
 import { GlobalHelpExtension } from './components/app/GlobalHelpExtension';
 import { plugin } from './new-platform';
 import { REACT_APP_ROOT_ID } from './new-platform/plugin';
 import './style/global_overrides.css';
 import template from './templates/index.html';
-import { CoreProvider } from './context/CoreContext';
+import { KibanaCoreContextProvider } from '../../observability/public';
 
 const { core } = npStart;
 
 // render APM feedback link in global help menu
 core.chrome.setHelpExtension(domElement => {
   ReactDOM.render(
-    <CoreProvider core={core}>
+    <KibanaCoreContextProvider core={core}>
       <GlobalHelpExtension />
-    </CoreProvider>,
+    </KibanaCoreContextProvider>,
     domElement
   );
   return () => {

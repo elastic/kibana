@@ -10,7 +10,7 @@ import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer, EuiCallOut } from '@e
 import { setBreadcrumbs } from '../../services/set_breadcrumbs';
 import { loadIndexTemplate, updateTemplate } from '../../services/api';
 import { decodePath, getTemplateDetailsLink } from '../../services/routing';
-import { SectionLoading, SectionError, TemplateForm } from '../../components';
+import { SectionLoading, SectionError, TemplateForm, Error } from '../../components';
 import { Template } from '../../../common/types';
 
 interface MatchParams {
@@ -73,47 +73,68 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
             defaultMessage="Error loading template"
           />
         }
-        error={error}
+        error={error as Error}
         data-test-subj="sectionError"
       />
     );
   } else if (template) {
-    const { name: templateName } = template;
+    const { name: templateName, isManaged } = template;
     const isSystemTemplate = templateName && templateName.startsWith('.');
 
-    content = (
-      <Fragment>
-        {isSystemTemplate && (
-          <Fragment>
-            <EuiCallOut
-              title={
+    if (isManaged) {
+      content = (
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.idxMgmt.templateEdit.managedTemplateWarningTitle"
+              defaultMessage="Editing a managed template is not permitted"
+            />
+          }
+          color="danger"
+          iconType="alert"
+          data-test-subj="systemTemplateEditCallout"
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.templateEdit.managedTemplateWarningDescription"
+            defaultMessage="Managed templates are critical for internal operations."
+          />
+        </EuiCallOut>
+      );
+    } else {
+      content = (
+        <Fragment>
+          {isSystemTemplate && (
+            <Fragment>
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.idxMgmt.templateEdit.systemTemplateWarningTitle"
+                    defaultMessage="Editing a system template can break Kibana"
+                  />
+                }
+                color="danger"
+                iconType="alert"
+                data-test-subj="systemTemplateEditCallout"
+              >
                 <FormattedMessage
-                  id="xpack.idxMgmt.templateEdit.systemTemplateWarningTitle"
-                  defaultMessage="Editing a system template can break Kibana"
+                  id="xpack.idxMgmt.templateEdit.systemTemplateWarningDescription"
+                  defaultMessage="System templates are critical for internal operations."
                 />
-              }
-              color="danger"
-              iconType="alert"
-              data-test-subj="systemTemplateEditCallout"
-            >
-              <FormattedMessage
-                id="xpack.idxMgmt.templateEdit.systemTemplateWarningDescription"
-                defaultMessage="System templates are critical for internal operations."
-              />
-            </EuiCallOut>
-            <EuiSpacer size="l" />
-          </Fragment>
-        )}
-        <TemplateForm
-          template={template}
-          onSave={onSave}
-          isSaving={isSaving}
-          saveError={saveError}
-          clearSaveError={clearSaveError}
-          isEditing={true}
-        />
-      </Fragment>
-    );
+              </EuiCallOut>
+              <EuiSpacer size="l" />
+            </Fragment>
+          )}
+          <TemplateForm
+            defaultValue={template}
+            onSave={onSave}
+            isSaving={isSaving}
+            saveError={saveError}
+            clearSaveError={clearSaveError}
+            isEditing={true}
+          />
+        </Fragment>
+      );
+    }
   }
 
   return (

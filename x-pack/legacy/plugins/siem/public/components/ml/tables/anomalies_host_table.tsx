@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel } from '@elastic/eui';
 import React, { useContext } from 'react';
-import styled from 'styled-components';
 
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { HeaderPanel } from '../../header_panel';
@@ -23,6 +21,7 @@ import { MlCapabilitiesContext } from '../permissions/ml_capabilities_provider';
 import { BasicTable } from './basic_table';
 import { hostEquality } from './host_equality';
 import { getCriteriaFromHostType } from '../criteria/get_criteria_from_host_type';
+import { Panel } from '../../panel';
 
 const sorting = {
   sort: {
@@ -63,7 +62,7 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
       return null;
     } else {
       return (
-        <Panel loading={{ loading }}>
+        <Panel loading={loading}>
           <HeaderPanel
             subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.UNIT(
               pagination.totalItemCount
@@ -72,7 +71,13 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
             tooltip={i18n.TOOLTIP}
           />
 
-          <BasicTable items={hosts} columns={columns} pagination={pagination} sorting={sorting} />
+          <BasicTable
+            columns={columns}
+            compressed
+            items={hosts}
+            pagination={pagination}
+            sorting={sorting}
+          />
 
           {loading && (
             <Loader data-test-subj="anomalies-host-table-loading-panel" overlay size="xl" />
@@ -83,17 +88,5 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
   },
   hostEquality
 );
-
-const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
-  position: relative;
-
-  ${({ loading }) =>
-    loading &&
-    `
-    overflow: hidden;
-  `}
-`;
-
-Panel.displayName = 'Panel';
 
 AnomaliesHostTable.displayName = 'AnomaliesHostTable';

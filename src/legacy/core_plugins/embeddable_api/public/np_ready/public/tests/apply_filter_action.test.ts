@@ -18,7 +18,7 @@
  */
 
 import { testPlugin } from './test_plugin';
-import { ApplyFilterAction, EmbeddableOutput, isErrorEmbeddable } from '../lib';
+import { EmbeddableOutput, isErrorEmbeddable, createFilterAction } from '../lib';
 import {
   FilterableContainer,
   FilterableContainerInput,
@@ -44,7 +44,7 @@ test('ApplyFilterAction applies the filter to the root of the container tree', a
   api.registerEmbeddableFactory(factory1.type, factory1);
   api.registerEmbeddableFactory(factory2.type, factory2);
 
-  const applyFilterAction = new ApplyFilterAction();
+  const applyFilterAction = createFilterAction();
 
   const root = new FilterableContainer(
     { id: 'root', panels: {}, filters: [] },
@@ -85,7 +85,7 @@ test('ApplyFilterAction applies the filter to the root of the container tree', a
     query: { match: { extension: { query: 'foo' } } },
   };
 
-  applyFilterAction.execute({ embeddable, triggerContext: { filters: [filter] } });
+  await applyFilterAction.execute({ embeddable, filters: [filter] });
   expect(root.getInput().filters.length).toBe(1);
   expect(node1.getInput().filters.length).toBe(1);
   expect(embeddable.getInput().filters.length).toBe(1);
@@ -97,11 +97,11 @@ test('ApplyFilterAction is incompatible if the root container does not accept a 
   const api = doStart();
   const inspector = inspectorPluginMock.createStartContract();
 
-  const applyFilterAction = new ApplyFilterAction();
+  const applyFilterAction = createFilterAction();
   const parent = new HelloWorldContainer(
     { id: 'root', panels: {} },
     {
-      getActions: api.getTriggerCompatibleActions,
+      getActions: () => Promise.resolve([]),
       getEmbeddableFactory: api.getEmbeddableFactory,
       getAllEmbeddableFactories: api.getEmbeddableFactories,
       overlays: coreStart.overlays,
@@ -124,6 +124,7 @@ test('ApplyFilterAction is incompatible if the root container does not accept a 
     throw new Error();
   }
 
+  // @ts-ignore
   expect(await applyFilterAction.isCompatible({ embeddable })).toBe(false);
 });
 
@@ -135,11 +136,11 @@ test('trying to execute on incompatible context throws an error ', async () => {
   const factory = new FilterableEmbeddableFactory();
   api.registerEmbeddableFactory(factory.type, factory);
 
-  const applyFilterAction = new ApplyFilterAction();
+  const applyFilterAction = createFilterAction();
   const parent = new HelloWorldContainer(
     { id: 'root', panels: {} },
     {
-      getActions: api.getTriggerCompatibleActions,
+      getActions: () => Promise.resolve([]),
       getEmbeddableFactory: api.getEmbeddableFactory,
       getAllEmbeddableFactories: api.getEmbeddableFactories,
       overlays: coreStart.overlays,
@@ -160,12 +161,12 @@ test('trying to execute on incompatible context throws an error ', async () => {
   }
 
   async function check() {
-    await applyFilterAction.execute({ embeddable });
+    await applyFilterAction.execute({ embeddable } as any);
   }
   await expect(check()).rejects.toThrow(Error);
 });
 
 test('gets title', async () => {
-  const applyFilterAction = new ApplyFilterAction();
-  expect(applyFilterAction.getDisplayName()).toBeDefined();
+  const applyFilterAction = createFilterAction();
+  expect(applyFilterAction.getDisplayName({} as any)).toBeDefined();
 });

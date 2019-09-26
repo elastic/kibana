@@ -6,9 +6,14 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
-import { getTestAlertData, setupEsTestIndex, destroyEsTestIndex } from './utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import {
+  ESTestIndexTool,
+  ES_TEST_INDEX_NAME,
+  getUrlPrefix,
+  getTestAlertData,
+  ObjectRemover,
+} from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {
@@ -16,72 +21,48 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const esTestIndexTool = new ESTestIndexTool(es, retry);
 
   describe('alerts', () => {
-    let esTestIndexName: string;
     const authorizationIndex = '.kibana-test-authorization';
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
-      await destroyEsTestIndex(es);
-      ({ name: esTestIndexName } = await setupEsTestIndex(es));
+      await esTestIndexTool.destroy();
+      await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
     });
     afterEach(() => objectRemover.removeAll());
     after(async () => {
-      await destroyEsTestIndex(es);
+      await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
     });
 
-    async function waitForTestIndexDoc(source: string, reference: string) {
-      return await retry.try(async () => {
-        const searchResult = await es.search({
-          index: esTestIndexName,
-          body: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      source,
-                    },
-                  },
-                  {
-                    term: {
-                      reference,
-                    },
-                  },
-                ],
-              },
-            },
+    async function createIndexRecordAction(spaceId: string) {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(spaceId)}/api/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          description: 'My action',
+          actionTypeId: 'test.index-record',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
           },
-        });
-        expect(searchResult.hits.total.value).to.eql(1);
-        return searchResult.hits.hits[0];
-      });
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+        })
+        .expect(200);
+      objectRemover.add(spaceId, createdAction.id, 'action');
+      return createdAction;
     }
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('should schedule task, run alert and fire actions when appropriate', async () => {
+        it('should schedule task, run alert and schedule actions when appropriate', async () => {
           const reference = `create-test-1:${user.username}`;
-          const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              description: 'My action',
-              actionTypeId: 'test.index-record',
-              config: {
-                unencrypted: `This value shouldn't get encrypted`,
-              },
-              secrets: {
-                encrypted: 'This value should be encrypted',
-              },
-            })
-            .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
-
+          const createdAction = await createIndexRecordAction(space.id);
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
@@ -91,7 +72,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 interval: '1m',
                 alertTypeId: 'test.always-firing',
                 alertTypeParams: {
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   reference,
                 },
                 actions: [
@@ -99,7 +80,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                     group: 'default',
                     id: createdAction.id,
                     params: {
-                      index: esTestIndexName,
+                      index: ES_TEST_INDEX_NAME,
                       reference,
                       message:
                         'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
@@ -124,23 +105,23 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
-              const alertTestRecord = await waitForTestIndexDoc(
+              const alertTestRecord = (await esTestIndexTool.waitForDocs(
                 'alert:test.always-firing',
                 reference
-              );
+              ))[0];
               expect(alertTestRecord._source).to.eql({
                 source: 'alert:test.always-firing',
                 reference,
                 state: {},
                 params: {
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   reference,
                 },
               });
-              const actionTestRecord = await waitForTestIndexDoc(
+              const actionTestRecord = (await esTestIndexTool.waitForDocs(
                 'action:test.index-record',
                 reference
-              );
+              ))[0];
               expect(actionTestRecord._source).to.eql({
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
@@ -149,7 +130,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   encrypted: 'This value should be encrypted',
                 },
                 params: {
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   reference,
                   message: 'instanceContextValue: true, instanceStateValue: true',
                 },
@@ -189,7 +170,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 interval: '1m',
                 alertTypeId: 'test.always-firing',
                 alertTypeParams: {
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   reference: 'create-test-2',
                 },
                 actions: [
@@ -198,7 +179,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                     id: createdAction.id,
                     params: {
                       reference,
-                      index: esTestIndexName,
+                      index: ES_TEST_INDEX_NAME,
                       retryAt: retryDate.getTime(),
                     },
                   },
@@ -279,7 +260,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   callClusterAuthorizationIndex: authorizationIndex,
                   savedObjectsClientType: 'dashboard',
                   savedObjectsClientId: '1',
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   reference,
                 },
               })
@@ -299,13 +280,15 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
-              alertTestRecord = await waitForTestIndexDoc('alert:test.authorization', reference);
+              alertTestRecord = (await esTestIndexTool.waitForDocs(
+                'alert:test.authorization',
+                reference
+              ))[0];
               expect(alertTestRecord._source.state).to.eql({
                 callClusterSuccess: false,
                 savedObjectsClientSuccess: false,
                 callClusterError: {
                   ...alertTestRecord._source.state.callClusterError,
-                  msg: `[security_exception] action [indices:data/write/bulk[s]] is unauthorized for user [${user.username}]`,
                   statusCode: 403,
                 },
                 savedObjectsClientError: {
@@ -320,7 +303,10 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
-              alertTestRecord = await waitForTestIndexDoc('alert:test.authorization', reference);
+              alertTestRecord = (await esTestIndexTool.waitForDocs(
+                'alert:test.authorization',
+                reference
+              ))[0];
               expect(alertTestRecord._source.state).to.eql({
                 callClusterSuccess: true,
                 savedObjectsClientSuccess: false,
@@ -358,7 +344,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               getTestAlertData({
                 alertTypeId: 'test.always-firing',
                 alertTypeParams: {
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   reference,
                 },
                 actions: [
@@ -369,7 +355,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                       callClusterAuthorizationIndex: authorizationIndex,
                       savedObjectsClientType: 'dashboard',
                       savedObjectsClientId: '1',
-                      index: esTestIndexName,
+                      index: ES_TEST_INDEX_NAME,
                       reference,
                     },
                   },
@@ -391,13 +377,15 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
-              actionTestRecord = await waitForTestIndexDoc('action:test.authorization', reference);
+              actionTestRecord = (await esTestIndexTool.waitForDocs(
+                'action:test.authorization',
+                reference
+              ))[0];
               expect(actionTestRecord._source.state).to.eql({
                 callClusterSuccess: false,
                 savedObjectsClientSuccess: false,
                 callClusterError: {
                   ...actionTestRecord._source.state.callClusterError,
-                  msg: `[security_exception] action [indices:data/write/bulk[s]] is unauthorized for user [${user.username}]`,
                   statusCode: 403,
                 },
                 savedObjectsClientError: {
@@ -412,7 +400,10 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
-              actionTestRecord = await waitForTestIndexDoc('action:test.authorization', reference);
+              actionTestRecord = (await esTestIndexTool.waitForDocs(
+                'action:test.authorization',
+                reference
+              ))[0];
               expect(actionTestRecord._source.state).to.eql({
                 callClusterSuccess: true,
                 savedObjectsClientSuccess: false,
@@ -424,6 +415,189 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   },
                 },
               });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should throttle alerts when appropriate', async () => {
+          const reference = `create-test-5:${user.username}`;
+          const createdAction = await createIndexRecordAction(space.id);
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(
+              getTestAlertData({
+                interval: '1s',
+                throttle: '1m',
+                alertTypeId: 'test.always-firing',
+                alertTypeParams: {
+                  index: ES_TEST_INDEX_NAME,
+                  reference,
+                },
+                actions: [
+                  {
+                    group: 'default',
+                    id: createdAction.id,
+                    params: {
+                      index: ES_TEST_INDEX_NAME,
+                      reference,
+                      message: '',
+                    },
+                  },
+                ],
+              })
+            );
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'superuser at space1':
+              // Wait until alerts scheduled actions 3 times to ensure actions had a chance to execute twice
+              await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 3);
+              const executedActionsResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+              expect(executedActionsResult.hits.total.value).to.eql(1);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should not throttle when changing groups', async () => {
+          const reference = `create-test-6:${user.username}`;
+          const createdAction = await createIndexRecordAction(space.id);
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(
+              getTestAlertData({
+                interval: '1s',
+                throttle: '1m',
+                alertTypeId: 'test.always-firing',
+                alertTypeParams: {
+                  index: ES_TEST_INDEX_NAME,
+                  reference,
+                  groupsToScheduleActionsInSeries: ['default', 'other'],
+                },
+                actions: [
+                  {
+                    group: 'default',
+                    id: createdAction.id,
+                    params: {
+                      index: ES_TEST_INDEX_NAME,
+                      reference,
+                      message: 'from:default',
+                    },
+                  },
+                  {
+                    group: 'other',
+                    id: createdAction.id,
+                    params: {
+                      index: ES_TEST_INDEX_NAME,
+                      reference,
+                      message: 'from:other',
+                    },
+                  },
+                ],
+              })
+            );
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'superuser at space1':
+              // Wait until alerts scheduled actions 3 times to ensure actions had a chance to execute twice
+              await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 3);
+              const executedActionsResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+              expect(executedActionsResult.hits.total.value).to.eql(2);
+              const messages: string[] = executedActionsResult.hits.hits.map(
+                (hit: { _source: { params: { message: string } } }) => hit._source.params.message
+              );
+              expect(messages.sort()).to.eql(['from:default', 'from:other']);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should reset throttle window when not firing', async () => {
+          const reference = `create-test-7:${user.username}`;
+          const createdAction = await createIndexRecordAction(space.id);
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(
+              getTestAlertData({
+                interval: '1s',
+                throttle: '1m',
+                alertTypeId: 'test.always-firing',
+                alertTypeParams: {
+                  index: ES_TEST_INDEX_NAME,
+                  reference,
+                  groupsToScheduleActionsInSeries: ['default', null, 'default'],
+                },
+                actions: [
+                  {
+                    group: 'default',
+                    id: createdAction.id,
+                    params: {
+                      index: ES_TEST_INDEX_NAME,
+                      reference,
+                      message: 'from:default',
+                    },
+                  },
+                ],
+              })
+            );
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'superuser at space1':
+              // Wait until alerts scheduled actions 4 times to ensure actions had a chance to execute twice
+              await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 4);
+              const executedActionsResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+              expect(executedActionsResult.hits.total.value).to.eql(2);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
