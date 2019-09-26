@@ -22,6 +22,7 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const inspector = getService('inspector');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
 
   describe('heatmap chart', function indexPatternCreation() {
@@ -120,6 +121,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickAddRange();
       await PageObjects.visualize.clickAddRange();
       await PageObjects.visualize.clickAddRange();
+
+      log.debug('customize 2 last ranges');
+      await testSubjects.setValue('heatmapColorRange6__from', '650');
+      await testSubjects.setValue('heatmapColorRange6__to', '720');
+      await testSubjects.setValue('heatmapColorRange7__from', '800');
+      await testSubjects.setValue('heatmapColorRange7__to', '905');
+
       await PageObjects.visualize.waitForVisualizationRenderingStabilized();
       await PageObjects.visualize.clickGo();
       const legends = await PageObjects.visualize.getLegendEntries();
@@ -130,8 +138,8 @@ export default function ({ getService, getPageObjects }) {
         '300 - 400',
         '400 - 500',
         '500 - 600',
-        '600 - 700',
-        '700 - 800',
+        '650 - 720',
+        '800 - 905',
       ];
       expect(legends).to.eql(expectedLegends);
     });
