@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import getConfigs from './get_configs';
 
 export default async function ({ readConfigFile }) {
-  const baseConfig = await readConfigFile(require.resolve('./config.stack_functional_integration_base'));
-  const baseConfigs = baseConfig.getAll();
+  const baseConfigs = await getConfigs(readConfigFile, './config.stack_functional_integration_base');
+
   return {
     ...baseConfigs,
     junit: {
