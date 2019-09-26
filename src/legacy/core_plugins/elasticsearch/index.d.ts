@@ -150,7 +150,7 @@ import {
 export class Cluster {
   public callWithRequest: CallClusterWithRequest;
   public callWithInternalUser: CallCluster;
-  public constructor(config: ClusterConfig);
+  constructor(config: ClusterConfig);
 }
 
 export interface ClusterConfig {
@@ -206,6 +206,7 @@ export interface DeprecationAPIResponse {
 
 export interface CallClusterOptions {
   wrap401Errors?: boolean;
+  signal?: AbortSignal;
 }
 
 export interface CallClusterWithRequest {

@@ -40,13 +40,18 @@ import {
   ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
+  ChromeNavControl,
+  ChromeNavControls,
   ChromeNavLink,
-  ChromeSetup,
+  ChromeNavLinks,
+  ChromeNavLinkUpdateableFields,
   ChromeStart,
+  ChromeRecentlyAccessed,
+  ChromeRecentlyAccessedHistoryItem,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
-import { HttpServiceBase, HttpSetup, HttpStart } from './http';
-import { I18nSetup, I18nStart } from './i18n';
+import { HttpSetup, HttpStart } from './http';
+import { I18nStart } from './i18n';
 import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
 import {
   ErrorToastOptions,
@@ -56,12 +61,60 @@ import {
   ToastInput,
   ToastsApi,
 } from './notifications';
-import { OverlayRef, OverlayStart } from './overlays';
-import { Plugin, PluginInitializer, PluginInitializerContext } from './plugins';
-import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
+import { OverlayStart } from './overlays';
+import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
+import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
+import { DocLinksStart } from './doc_links';
+import { SavedObjectsStart } from './saved_objects';
+import { IContextContainer, IContextProvider, ContextSetup, IContextHandler } from './context';
 
 export { CoreContext, CoreSystem } from './core_system';
+export { RecursiveReadonly } from '../utils';
+
+export { App, AppBase, AppUnmount, AppMountContext, AppMountParameters } from './application';
+
+export {
+  SavedObjectsBatchResponse,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkCreateOptions,
+  SavedObjectsCreateOptions,
+  SavedObjectsFindResponsePublic,
+  SavedObjectsUpdateOptions,
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectReference,
+  SavedObjectsBaseOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsMigrationVersion,
+  SavedObjectsClientContract,
+  SavedObjectsClient,
+  SimpleSavedObject,
+} from './saved_objects';
+
+export {
+  HttpServiceBase,
+  HttpHeadersInit,
+  HttpRequestInit,
+  HttpFetchOptions,
+  HttpFetchQuery,
+  HttpErrorResponse,
+  HttpErrorRequest,
+  HttpInterceptor,
+  HttpResponse,
+  HttpHandler,
+  HttpBody,
+  HttpInterceptController,
+} from './http';
+
+export {
+  OverlayStart,
+  OverlayBannerMount,
+  OverlayBannerUnmount,
+  OverlayBannersStart,
+  OverlayRef,
+} from './overlays';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -73,18 +126,18 @@ export { CoreContext, CoreSystem } from './core_system';
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup {
-  /** {@link ChromeSetup} */
-  chrome: ChromeSetup;
+  /** {@link ApplicationSetup} */
+  application: ApplicationSetup;
+  /** {@link ContextSetup} */
+  context: ContextSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
   /** {@link HttpSetup} */
   http: HttpSetup;
-  /** {@link I18nSetup} */
-  i18n: I18nSetup;
   /** {@link NotificationsSetup} */
   notifications: NotificationsSetup;
-  /** {@link UiSettingsSetup} */
-  uiSettings: UiSettingsSetup;
+  /** {@link UiSettingsClient} */
+  uiSettings: UiSettingsClientContract;
 }
 
 /**
@@ -98,62 +151,94 @@ export interface CoreSetup {
  */
 export interface CoreStart {
   /** {@link ApplicationStart} */
-  application: Pick<ApplicationStart, 'capabilities'>;
+  application: ApplicationStart;
   /** {@link ChromeStart} */
   chrome: ChromeStart;
+  /** {@link DocLinksStart} */
+  docLinks: DocLinksStart;
   /** {@link HttpStart} */
   http: HttpStart;
+  /** {@link SavedObjectsStart} */
+  savedObjects: SavedObjectsStart;
   /** {@link I18nStart} */
   i18n: I18nStart;
   /** {@link NotificationsStart} */
   notifications: NotificationsStart;
   /** {@link OverlayStart} */
   overlays: OverlayStart;
+  /** {@link UiSettingsClient} */
+  uiSettings: UiSettingsClientContract;
 }
 
-/** @internal */
-export interface InternalCoreSetup extends CoreSetup {
-  application: ApplicationSetup;
+/**
+ * Setup interface exposed to the legacy platform via the `ui/new_platform` module.
+ *
+ * @remarks
+ * Some methods are not supported in the legacy platform and while present to make this type compatibile with
+ * {@link CoreSetup}, unsupported methods will throw exceptions when called.
+ *
+ * @public
+ * @deprecated
+ */
+export interface LegacyCoreSetup extends CoreSetup {
+  /** @deprecated */
   injectedMetadata: InjectedMetadataSetup;
 }
 
-/** @internal */
-export interface InternalCoreStart extends CoreStart {
-  application: ApplicationStart;
+/**
+ * Start interface exposed to the legacy platform via the `ui/new_platform` module.
+ *
+ * @remarks
+ * Some methods are not supported in the legacy platform and while present to make this type compatibile with
+ * {@link CoreStart}, unsupported methods will throw exceptions when called.
+ *
+ * @public
+ * @deprecated
+ */
+export interface LegacyCoreStart extends CoreStart {
+  /** @deprecated */
   injectedMetadata: InjectedMetadataStart;
 }
 
 export {
   ApplicationSetup,
   ApplicationStart,
-  HttpServiceBase,
+  Capabilities,
+  ChromeBadge,
+  ChromeBrand,
+  ChromeBreadcrumb,
+  ChromeHelpExtension,
+  ChromeNavControl,
+  ChromeNavControls,
+  ChromeNavLink,
+  ChromeNavLinks,
+  ChromeNavLinkUpdateableFields,
+  ChromeRecentlyAccessed,
+  ChromeRecentlyAccessedHistoryItem,
+  ChromeStart,
+  IContextContainer,
+  IContextHandler,
+  IContextProvider,
+  ContextSetup,
+  DocLinksStart,
+  ErrorToastOptions,
+  FatalErrorInfo,
+  FatalErrorsSetup,
   HttpSetup,
   HttpStart,
-  ErrorToastOptions,
-  FatalErrorsSetup,
-  FatalErrorInfo,
-  Capabilities,
-  ChromeSetup,
-  ChromeStart,
-  ChromeBadge,
-  ChromeBreadcrumb,
-  ChromeBrand,
-  ChromeHelpExtension,
-  ChromeNavLink,
-  I18nSetup,
   I18nStart,
   LegacyNavLink,
+  NotificationsSetup,
+  NotificationsStart,
   Plugin,
   PluginInitializer,
   PluginInitializerContext,
-  NotificationsSetup,
-  NotificationsStart,
-  OverlayRef,
-  OverlayStart,
+  SavedObjectsStart,
+  PluginOpaqueId,
   Toast,
   ToastInput,
   ToastsApi,
   UiSettingsClient,
+  UiSettingsClientContract,
   UiSettingsState,
-  UiSettingsSetup,
 };

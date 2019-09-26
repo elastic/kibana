@@ -1,0 +1,15 @@
+{
+  "ilm.explain_lifecycle": {
+    "url_params": {
+      "only_managed": "__flag__",
+      "only_errors": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "{indices}/_ilm/explain"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-explain-lifecycle.html"
+  }
+}

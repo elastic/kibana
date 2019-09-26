@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   let version: string;
@@ -1151,6 +1150,47 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   `saved_object:${version}:config/find`,
                 ],
               },
+              lens: {
+                all: [
+                  'login:',
+                  `version:${version}`,
+                  `api:${version}:lens`,
+                  `app:${version}:lens`,
+                  `app:${version}:kibana`,
+                  `ui:${version}:catalogue/lens`,
+                  `ui:${version}:navLinks/lens`,
+                  `saved_object:${version}:telemetry/bulk_get`,
+                  `saved_object:${version}:telemetry/get`,
+                  `saved_object:${version}:telemetry/find`,
+                  `saved_object:${version}:telemetry/create`,
+                  `saved_object:${version}:telemetry/bulk_create`,
+                  `saved_object:${version}:telemetry/update`,
+                  `saved_object:${version}:telemetry/delete`,
+                  `saved_object:${version}:config/bulk_get`,
+                  `saved_object:${version}:config/get`,
+                  `saved_object:${version}:config/find`,
+                  `ui:${version}:savedObjectsManagement/telemetry/delete`,
+                  `ui:${version}:savedObjectsManagement/telemetry/edit`,
+                  `ui:${version}:savedObjectsManagement/telemetry/read`,
+                  `ui:${version}:savedObjectsManagement/config/read`,
+                  `ui:${version}:lens/show`,
+                  'allHack:',
+                ],
+                read: [
+                  'login:',
+                  `version:${version}`,
+                  `api:${version}:lens`,
+                  `app:${version}:lens`,
+                  `app:${version}:kibana`,
+                  `ui:${version}:catalogue/lens`,
+                  `ui:${version}:navLinks/lens`,
+                  `saved_object:${version}:config/bulk_get`,
+                  `saved_object:${version}:config/get`,
+                  `saved_object:${version}:config/find`,
+                  `ui:${version}:savedObjectsManagement/config/read`,
+                  `ui:${version}:lens/show`,
+                ],
+              },
             },
             global: {
               all: [
@@ -1475,6 +1515,11 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 `ui:${version}:catalogue/uptime`,
                 `ui:${version}:navLinks/uptime`,
                 `ui:${version}:uptime/save`,
+                `api:${version}:lens`,
+                `app:${version}:lens`,
+                `ui:${version}:catalogue/lens`,
+                `ui:${version}:navLinks/lens`,
+                `ui:${version}:lens/show`,
                 'allHack:',
               ],
               read: [
@@ -1635,6 +1680,11 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 `app:${version}:uptime`,
                 `ui:${version}:catalogue/uptime`,
                 `ui:${version}:navLinks/uptime`,
+                `api:${version}:lens`,
+                `app:${version}:lens`,
+                `ui:${version}:catalogue/lens`,
+                `ui:${version}:navLinks/lens`,
+                `ui:${version}:lens/show`,
               ],
             },
             space: {
@@ -1957,6 +2007,11 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 `ui:${version}:catalogue/uptime`,
                 `ui:${version}:navLinks/uptime`,
                 `ui:${version}:uptime/save`,
+                `api:${version}:lens`,
+                `app:${version}:lens`,
+                `ui:${version}:catalogue/lens`,
+                `ui:${version}:navLinks/lens`,
+                `ui:${version}:lens/show`,
                 'allHack:',
               ],
               read: [
@@ -2117,6 +2172,11 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 `app:${version}:uptime`,
                 `ui:${version}:catalogue/uptime`,
                 `ui:${version}:navLinks/uptime`,
+                `api:${version}:lens`,
+                `app:${version}:lens`,
+                `ui:${version}:catalogue/lens`,
+                `ui:${version}:navLinks/lens`,
+                `ui:${version}:lens/show`,
               ],
             },
             reserved: {
@@ -2183,6 +2243,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 apm: ['all', 'read'],
                 siem: ['all', 'read'],
                 code: ['all', 'read'],
+                lens: ['all', 'read'],
               },
               global: ['all', 'read'],
               space: ['all', 'read'],

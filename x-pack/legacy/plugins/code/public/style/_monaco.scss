@@ -1,0 +1,110 @@
+.codeSearch__highlight {
+	background-color: $euiColorVis5;
+	color: black !important;
+	padding: $euiSizeXS / 2;
+	border-radius: $euiSizeXS / 2;
+	font-weight: bold;
+	font-style: oblique;
+	cursor: pointer;
+}
+
+
+.code-monaco-highlight-line {
+  background: $euiCodeBlockBuiltInColor;
+}
+
+.code-mark-line-number {
+  background: $euiCodeBlockBuiltInColor;
+  width: $euiSizeXS;
+}
+
+.monaco-editor .margin-view-overlays .line-numbers {
+  text-align: center;
+  border-right: $euiBorderThin;
+}
+
+.monaco-editor-hover {
+  min-width: 350px;
+  border: $euiBorderThin;
+  border-bottom: 0;
+  cursor: default;
+  position: absolute;
+  overflow-y: auto;
+  z-index: 5;
+  -webkit-user-select: text;
+  -ms-user-select: text;
+  -moz-user-select: text;
+  -o-user-select: text;
+  user-select: text;
+  box-sizing: initial;
+  animation: fadein 0.1s linear;
+  line-height: 1.5em;
+  background: $euiColorLightestShade;
+  border-radius: 4px 4px 4px 4px;
+  @include euiBottomShadow;
+}
+
+.monaco-editor-hover .hover-row {
+  padding: 4px 5px;
+}
+
+.monaco-editor-hover .button-group {
+  background: linear-gradient(-180deg, $euiColorLightestShade 0%, $euiColorEmptyShade 100%);
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 -1px 0 0 $euiBorderColor;
+  height: 33px;
+}
+
+.monaco-editor-hover .button-group button:not(:first-child) {
+  border-left: 1px solid $euiBorderColor;
+}
+
+.monaco-editor-hover .button-group button {
+  font-size: 13px;
+  font-weight: normal;
+  border: 0;
+  border-radius: 0;
+  flex: 1;
+}
+
+.monaco-editor .scroll-decoration {
+  display: none;
+}
+
+.code-mark-line-number,
+.code-monaco-highlight-line {
+  background-color: $euiColorLightShade;
+}
+
+.text-placeholder {
+  width: 100%;
+  height: 18px;
+  margin: 4px 0 4px 0;
+}
+
+.gradient {
+  animation-duration: 1.8s;
+  animation-fill-mode: forwards;
+  animation-iteration-count: infinite;
+  animation-name: placeHolderShimmer;
+  animation-timing-function: linear;
+  background: $euiColorLightestShade;
+  background: linear-gradient(
+    to right,
+    $euiColorLightShade 8%,
+    $euiColorLightestShade 38%,
+    $euiColorLightShade 54%
+  );
+  background-size: 1000px 640px;
+
+  position: relative;
+}
+
+@keyframes placeHolderShimmer {
+  0% {
+    background-position: -468px 0;
+  }
+  100% {
+    background-position: 468px 0;
+  }
+}

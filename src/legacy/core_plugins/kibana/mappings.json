@@ -137,9 +137,6 @@
       "title": {
         "type": "text"
       },
-      "uiStateJSON": {
-        "type": "text"
-      },
       "version": {
         "type": "integer"
       }

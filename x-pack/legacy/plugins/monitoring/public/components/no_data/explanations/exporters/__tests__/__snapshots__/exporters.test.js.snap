@@ -1,0 +1,169 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExplainExporters should explain about xpack.monitoring.exporters setting 1`] = `
+Array [
+  <h2
+    class="euiTitle euiTitle--large"
+  >
+    You need to make some adjustments
+  </h2>,
+  <span
+    class="euiTextColor euiTextColor--subdued"
+  >
+    <div
+      class="euiText euiText--medium"
+    >
+      <p>
+        To run monitoring please perform the following steps
+      </p>
+    </div>
+  </span>,
+  <hr
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+  />,
+  <div
+    class="euiText euiText--medium eui-textLeft"
+  >
+    <p>
+      We checked the 
+      <span
+        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+      >
+        <code
+          class="euiCodeBlock__code"
+        >
+          esProd001
+        </code>
+      </span>
+       settings for 
+      <span
+        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+      >
+        <code
+          class="euiCodeBlock__code"
+        >
+          xpack.monitoring.exporters
+        </code>
+      </span>
+      , and found the reason: 
+      <span
+        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+      >
+        <code
+          class="euiCodeBlock__code"
+        >
+          myMonitoringClusterExporter1
+        </code>
+      </span>
+      .
+    </p>
+    <p>
+      Using monitoring exporters to ship the monitoring data to a remote monitoring cluster is highly recommended as it keeps the integrity of the monitoring data safe no matter what the state of the production cluster. However, as this instance of Kibana could not find any monitoring data, there seems to be a problem with the 
+      <span
+        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+      >
+        <code
+          class="euiCodeBlock__code"
+        >
+          xpack.monitoring.exporters
+        </code>
+      </span>
+       configuration, or the 
+      <span
+        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+      >
+        <code
+          class="euiCodeBlock__code"
+        >
+          xpack.monitoring.elasticsearch
+        </code>
+      </span>
+       settings in 
+      <span
+        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+      >
+        <code
+          class="euiCodeBlock__code"
+        >
+          kibana.yml
+        </code>
+      </span>
+      .
+    </p>
+    <p>
+      Check that the intended exporters are enabled for sending statistics to the monitoring cluster, and that the monitoring cluster host matches the 
+      <span
+        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+      >
+        <code
+          class="euiCodeBlock__code"
+        >
+          xpack.monitoring.elasticsearch
+        </code>
+      </span>
+       setting in 
+      <span
+        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+      >
+        <code
+          class="euiCodeBlock__code"
+        >
+          kibana.yml
+        </code>
+      </span>
+       to see monitoring data in this instance of Kibana.
+    </p>
+  </div>,
+]
+`;
+
+exports[`ExplainExportersCloud should explain about xpack.monitoring.exporters setting in a cloud environment 1`] = `
+Array [
+  <h2
+    class="euiTitle euiTitle--large"
+  >
+    Your monitoring data is not available here.
+  </h2>,
+  <span
+    class="euiTextColor euiTextColor--subdued"
+  >
+    <div
+      class="euiSpacer euiSpacer--l"
+    />
+    <div
+      class="euiText euiText--medium"
+    >
+      <p>
+        Please return to your 
+        <a
+          class="euiLink euiLink--primary"
+          href="https://cloud.elastic.co/deployments"
+          rel="noopener"
+          target="_blank"
+        >
+          cloud dashboard.
+        </a>
+         For more information on Monitoring in Elastic Cloud, please see 
+        <a
+          class="euiLink euiLink--primary"
+          href="https://www.elastic.co/guide/en/cloud/current/ec-enable-monitoring.html"
+          rel="noopener"
+          target="_blank"
+        >
+          the documentation.
+        </a>
+      </p>
+    </div>
+  </span>,
+  <hr
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+  />,
+  <div
+    class="euiText euiText--medium eui-textLeft"
+  >
+    <p>
+      In Elastic Cloud, your monitoring data is stored in your dedicated monitoring cluster.
+    </p>
+  </div>,
+]
+`;

@@ -1,0 +1,19 @@
+.canvasTimePickerPopover {
+  width: 100%;
+
+  .canvasTimePickerPopover__button {
+    width: 100%;
+    padding: $euiSizeXS;
+    border: $euiBorderThin;
+    border-radius: $euiBorderRadius;
+    background-color: $euiColorEmptyShade;
+
+    &:hover {
+      background-color: $euiColorLightestShade;
+    }
+  }
+
+  .canvasTimePickerPopover__anchor {
+    width: 100%;
+  }
+}

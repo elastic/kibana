@@ -18,8 +18,8 @@
  */
 
 import React, { Component, ComponentClass, ComponentType } from 'react';
-import { UICapabilities } from '..';
 import { UICapabilitiesContext } from './ui_capabilities_context';
+import { UICapabilities } from '..';
 
 function getDisplayName(component: ComponentType<any>) {
   return component.displayName || component.name || 'Component';

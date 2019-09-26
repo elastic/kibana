@@ -7,13 +7,13 @@
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 
-import { waffleNodesQuery } from '../../../../plugins/infra/public/containers/waffle/waffle_nodes.gql_query';
-import { WaffleNodesQuery } from '../../../../plugins/infra/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { waffleNodesQuery } from '../../../../legacy/plugins/infra/public/containers/waffle/waffle_nodes.gql_query';
+import { WaffleNodesQuery } from '../../../../legacy/plugins/infra/public/graphql/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { DATES } from './constants';
 
-const waffleTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
 
@@ -64,6 +64,85 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
                 avg: 0,
                 __typename: 'InfraSnapshotNodeMetric',
               });
+            }
+          });
+      });
+    });
+
+    describe('8.0.0', () => {
+      const { min, max } = DATES['8.0.0'].logs_and_metrics;
+      before(() => esArchiver.load('infra/8.0.0/logs_and_metrics'));
+      after(() => esArchiver.unload('infra/8.0.0/logs_and_metrics'));
+
+      it("should use the id for the label when the name doesn't exist", () => {
+        return client
+          .query<WaffleNodesQuery.Query>({
+            query: waffleNodesQuery,
+            variables: {
+              sourceId: 'default',
+              timerange: {
+                to: max,
+                from: min,
+                interval: '1m',
+              },
+              metric: { type: 'cpu' },
+              type: 'pod',
+              groupBy: [],
+            },
+          })
+          .then(resp => {
+            const { snapshot } = resp.data.source;
+            expect(snapshot).to.have.property('nodes');
+            if (snapshot) {
+              const { nodes } = snapshot;
+              expect(nodes.length).to.equal(65);
+              const firstNode = first(nodes);
+              expect(firstNode).to.have.property('path');
+              expect(firstNode.path.length).to.equal(1);
+              expect(first(firstNode.path)).to.have.property(
+                'value',
+                '00597dd7-a348-11e9-9a96-42010a84004d'
+              );
+              expect(first(firstNode.path)).to.have.property(
+                'label',
+                '00597dd7-a348-11e9-9a96-42010a84004d'
+              );
+            }
+          });
+      });
+      it('should have an id and label', () => {
+        return client
+          .query<WaffleNodesQuery.Query>({
+            query: waffleNodesQuery,
+            variables: {
+              sourceId: 'default',
+              timerange: {
+                to: max,
+                from: min,
+                interval: '1m',
+              },
+              metric: { type: 'cpu' },
+              type: 'container',
+              groupBy: [],
+            },
+          })
+          .then(resp => {
+            const { snapshot } = resp.data.source;
+            expect(snapshot).to.have.property('nodes');
+            if (snapshot) {
+              const { nodes } = snapshot;
+              expect(nodes.length).to.equal(136);
+              const firstNode = first(nodes);
+              expect(firstNode).to.have.property('path');
+              expect(firstNode.path.length).to.equal(1);
+              expect(first(firstNode.path)).to.have.property(
+                'value',
+                '01078c21eef4194b0b96253c7c6c32796aba66e3f3f37e26ac97d1dff3e2e91a'
+              );
+              expect(first(firstNode.path)).to.have.property(
+                'label',
+                'k8s_prometheus-to-sd-exporter_fluentd-gcp-v3.2.0-wcmm4_kube-system_b214d17a-9ae0-11e9-9a96-42010a84004d_0'
+              );
             }
           });
       });
@@ -229,7 +308,4 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default waffleTests;
+}

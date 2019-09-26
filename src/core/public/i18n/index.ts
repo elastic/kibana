@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { I18nService, I18nSetup, I18nStart } from './i18n_service';
+export { I18nService, I18nStart } from './i18n_service';

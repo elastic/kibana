@@ -14,20 +14,20 @@ export function MonitoringElasticsearchIndicesProvider({ getService, getPageObje
   const SUBJ_LISTING_PAGE = 'elasticsearchIndicesListingPage';
 
   const SUBJ_TABLE_CONTAINER = 'elasticsearchIndicesTableContainer';
-  const SUBJ_TABLE_NO_DATA = `${SUBJ_TABLE_CONTAINER} monitoringTableNoData`;
-  const SUBJ_SEARCH_BAR = `${SUBJ_TABLE_CONTAINER} monitoringTableToolBar`;
+  const SUBJ_TABLE_NO_DATA = `${SUBJ_TABLE_CONTAINER} > monitoringTableNoData`;
+  const SUBJ_SEARCH_BAR = `${SUBJ_TABLE_CONTAINER} > monitoringTableToolBar`;
 
   const SUBJ_TABLE_SORT_SEARCH_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_search_rate_5`;
 
-  const SUBJ_INDICES_NAMES = `${SUBJ_TABLE_CONTAINER} name`;
-  const SUBJ_INDICES_STATUSES = `${SUBJ_TABLE_CONTAINER} statusIcon`;
-  const SUBJ_INDICES_DOCUMENT_COUNTS = `${SUBJ_TABLE_CONTAINER} documentCount`;
-  const SUBJ_INDICES_DATA_SIZES = `${SUBJ_TABLE_CONTAINER} dataSize`;
-  const SUBJ_INDICES_INDEX_RATES = `${SUBJ_TABLE_CONTAINER} indexRate`;
-  const SUBJ_INDICES_SEARCH_RATES = `${SUBJ_TABLE_CONTAINER} searchRate`;
-  const SUBJ_INDICES_UNASSIGNED_SHARD_COUNTS = `${SUBJ_TABLE_CONTAINER} unassignedShards`;
+  const SUBJ_INDICES_NAMES = `${SUBJ_TABLE_CONTAINER} > name`;
+  const SUBJ_INDICES_STATUSES = `${SUBJ_TABLE_CONTAINER} > statusIcon`;
+  const SUBJ_INDICES_DOCUMENT_COUNTS = `${SUBJ_TABLE_CONTAINER} > documentCount`;
+  const SUBJ_INDICES_DATA_SIZES = `${SUBJ_TABLE_CONTAINER} > dataSize`;
+  const SUBJ_INDICES_INDEX_RATES = `${SUBJ_TABLE_CONTAINER} > indexRate`;
+  const SUBJ_INDICES_SEARCH_RATES = `${SUBJ_TABLE_CONTAINER} > searchRate`;
+  const SUBJ_INDICES_UNASSIGNED_SHARD_COUNTS = `${SUBJ_TABLE_CONTAINER} > unassignedShards`;
 
-  const SUBJ_INDEX_LINK_PREFIX = `${SUBJ_TABLE_CONTAINER} indexLink-`;
+  const SUBJ_INDEX_LINK_PREFIX = `${SUBJ_TABLE_CONTAINER} > indexLink-`;
 
   return new class ElasticsearchIndices {
     async isOnListing() {
@@ -59,7 +59,7 @@ export function MonitoringElasticsearchIndicesProvider({ getService, getPageObje
 
     async getIndicesAll() {
       const names = await testSubjects.getVisibleTextAll(SUBJ_INDICES_NAMES);
-      const statuses = await testSubjects.getPropertyAll(SUBJ_INDICES_STATUSES, 'alt');
+      const statuses = await testSubjects.getAttributeAll(SUBJ_INDICES_STATUSES, 'alt');
       const documentCounts = await testSubjects.getVisibleTextAll(SUBJ_INDICES_DOCUMENT_COUNTS);
       const dataSizes = await testSubjects.getVisibleTextAll(SUBJ_INDICES_DATA_SIZES);
       const indexRates = await testSubjects.getVisibleTextAll(SUBJ_INDICES_INDEX_RATES);

@@ -17,39 +17,31 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { DocTitleProvider } from '..';
+import { setBaseTitle, docTitle } from '../doc_title';
 
 describe('docTitle Service', function () {
   let initialDocTitle;
   const MAIN_TITLE = 'Kibana 4';
-
-  let docTitle;
   let $rootScope;
 
   beforeEach(function () {
     initialDocTitle = document.title;
     document.title = MAIN_TITLE;
+    setBaseTitle(MAIN_TITLE);
   });
   afterEach(function () {
     document.title = initialDocTitle;
+    setBaseTitle(initialDocTitle);
   });
 
   beforeEach(ngMock.module('kibana', function ($provide) {
-    $provide.decorator('docTitle', decorateWithSpy('update'));
     $provide.decorator('$rootScope', decorateWithSpy('$on'));
   }));
 
-  beforeEach(ngMock.inject(function ($injector, Private) {
-    if (_.random(0, 1)) {
-      docTitle = $injector.get('docTitle');
-    } else {
-      docTitle = Private(DocTitleProvider);
-    }
-
+  beforeEach(ngMock.inject(function ($injector) {
     $rootScope = $injector.get('$rootScope');
   }));
 

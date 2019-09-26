@@ -68,6 +68,8 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
       port: configValue.port,
       rewriteBasePath: configValue.rewriteBasePath,
       ssl: configValue.ssl,
+      keepaliveTimeout: configValue.keepaliveTimeout,
+      socketTimeout: configValue.socketTimeout,
     };
   }
 
@@ -84,11 +86,11 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
     const configValue = super.get(configPath);
     switch (configPath) {
       case 'logging':
-        return LegacyObjectToConfigAdapter.transformLogging(configValue);
+        return LegacyObjectToConfigAdapter.transformLogging(configValue as LegacyLoggingConfig);
       case 'server':
         return LegacyObjectToConfigAdapter.transformServer(configValue);
       case 'plugins':
-        return LegacyObjectToConfigAdapter.transformPlugins(configValue);
+        return LegacyObjectToConfigAdapter.transformPlugins(configValue as Record<string, any>);
       default:
         return configValue;
     }

@@ -17,12 +17,13 @@
  * under the License.
  */
 
-import { deepFreeze, RecursiveReadonly } from '../../utils/deep_freeze';
-import { MixedApp } from '../application_service';
+import { deepFreeze, RecursiveReadonly } from '../../../utils';
+import { LegacyApp, App } from '../types';
 import { InjectedMetadataStart } from '../../injected_metadata';
 
 interface StartDeps {
-  apps: ReadonlyArray<MixedApp>;
+  apps: ReadonlyMap<string, App>;
+  legacyApps: ReadonlyMap<string, LegacyApp>;
   injectedMetadata: InjectedMetadataStart;
 }
 
@@ -49,35 +50,41 @@ export interface Capabilities {
   [key: string]: Record<string, boolean | Record<string, boolean>>;
 }
 
-/**
- * Capabilities Setup.
- * @public
- */
-export interface CapabilitiesStart {
-  /**
-   * Gets the read-only capabilities.
-   */
-  capabilities: RecursiveReadonly<Capabilities>;
-
-  /**
-   * Apps available based on the current capabilities. Should be used
-   * to show navigation links and make routing decisions.
-   */
-  availableApps: ReadonlyArray<MixedApp>;
-}
-
 /** @internal */
+export interface CapabilitiesStart {
+  capabilities: RecursiveReadonly<Capabilities>;
+  availableApps: ReadonlyMap<string, App>;
+  availableLegacyApps: ReadonlyMap<string, LegacyApp>;
+}
 
 /**
  * Service that is responsible for UI Capabilities.
+ * @internal
  */
 export class CapabilitiesService {
-  public async start({ apps, injectedMetadata }: StartDeps): Promise<CapabilitiesStart> {
+  public async start({
+    apps,
+    legacyApps,
+    injectedMetadata,
+  }: StartDeps): Promise<CapabilitiesStart> {
     const capabilities = deepFreeze(injectedMetadata.getCapabilities());
-    const availableApps = apps.filter(app => capabilities.navLinks[app.id]);
+    const availableApps = new Map(
+      [...apps].filter(
+        ([appId]) =>
+          capabilities.navLinks[appId] === undefined || capabilities.navLinks[appId] === true
+      )
+    );
+
+    const availableLegacyApps = new Map(
+      [...legacyApps].filter(
+        ([appId]) =>
+          capabilities.navLinks[appId] === undefined || capabilities.navLinks[appId] === true
+      )
+    );
 
     return {
       availableApps,
+      availableLegacyApps,
       capabilities,
     };
   }

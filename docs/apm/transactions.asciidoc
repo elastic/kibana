@@ -4,12 +4,25 @@
 TIP: A {apm-overview-ref-v}/transactions.html[transaction] describes an event captured by an Elastic APM agent instrumenting a service.
 The APM agents automatically collect performance metrics on HTTP requests, database queries, and much more.
 
-// Clicking *service* brings you to detail of transaction
-Selecting a <<services,*service*>> will display all associated *transactions*.
-The charts and table on this dashboard display the transaction duration, requests per minute, and a list of transactions for the selected service.
+Selecting a <<services,*service*>> brings you to the *transactions* overview.
+The *time spent by span type*, *transaction duration* and *requests per minute* chart display information on all transactions associated with the selected service.
+The *Transactions* table, however, provides only a list of _transaction groups_ for the selected service.
+In other words, this view groups all transactions of the same name together, and only displays one transaction for each group.
 
 [role="screenshot"]
 image::apm/images/apm-transactions-overview.png[Example view of transactions table in the APM UI in Kibana]
+
+*Time spent by span type* -- beta[] Certain agents support breakdown graphs in the APM UI.
+This graph is an easy way to visualize where your application is spending most of its time.
+For example, is your app spending time in external calls, database processing, or application code execution?
+
+The time a transaction took to complete is also recorded and displayed on the chart under the "app" label.
+"app" indicates that something was happening within the application, but we're not sure exactly what.
+This could be a sign that the agent does not have auto-instrumentation for whatever was happening during that time.
+
+It's important to note that if you have asynchronous spans, the sum of all span times may exceed the duration of the transaction.
+
+TIP: If the *Time spent by span type* chart is missing in the APM UI, it means your agent does not support this feature yet. 
 
 *Transaction duration* shows the response times for this service and is broken down into average, 95th, and 99th percentile.
 If there's a weird spike that you'd like to investigate,
@@ -20,9 +33,9 @@ and all of the data on the page will update accordingly.
 and is useful for determining if you're serving more of one code than you typically do.
 Like in the Transaction duration graph, you can zoom in on anomalies to further investigate them.
 
-The table at the bottom is similar to the <<traces,traces>> overview and shows the name of each transaction occurring in the selected service.
+The *Transactions* table is similar to the <<traces,traces>> overview and shows the name of each transaction occurring in the selected service.
 Transactions with the same name are grouped together and only shown once in this table.
-By default, transactions are sorted by _Impact_.
+By default, transaction groups are sorted by _Impact_.
 Impact helps show the most used and slowest endpoints in your service - in other words,
 it's the collective amount of pain a specific endpoint is causing your users.
 If there's a particular endpoint you're worried about, you can click on it to view the <<transaction-details, transaction details>>.
@@ -39,13 +52,27 @@ For further details, including troubleshooting and custom implementation instruc
 refer to the documentation for each {apm-agents-ref}[APM Agent] you've implemented.
 ====
 
+[[rum-transaction-overview]]
+==== RUM Transaction overview
+
+The transaction overview page is customized for the JavaScript RUM Agent.
+This page highlights things like *page load times*, *transactions per minute*, and even the *average page load duration distribution by country*.
+
+[role="screenshot"]
+image::apm/images/apm-geo-ui.jpg[average page load duration distribution]
+
+This data is available due to the geo-ip and user agent pipelines being enabled by default,
+which allows for the capture of geo-location and user agent data.
+These visualizations make it easy for you to visualize performance information about your
+end users' experience based on their location.
+
 [[transaction-details]]
 ==== Transaction details
 
 Selecting a transaction group will bring you to the *transaction* details.
-Transaction details include a high-level overview of the transaction group duration,
-requests per minute, and transaction group duration distribution.
-It's important to note that all three of these graphs show data from every transaction within the selected transaction group. 
+Transaction details include a high-level overview of the time spent by span type,
+transaction group duration, requests per minute, and transaction group duration distribution.
+It's important to note that all of these graphs show data from every transaction within the selected transaction group.
 
 [role="screenshot"]
 image::apm/images/apm-transaction-response-dist.png[Example view of response time distribution]
@@ -73,18 +100,18 @@ image::apm/images/apm-transaction-sample.png[Example view of transactions sample
 
 NOTE: More information on timeline waterfalls is available in <<spans, spans>>.
 
-For a particular transaction sample, we can get even more information in the tabs:
+For a particular transaction sample, we can get even more information in the *metadata* tab:
 
-* *Timeline* - See the <<spans, Spans>> section for more information.
-* *Request* - The URL, headers, body, etc..
-* *Response* - The response.
-* *System* - The system hostname, architecture, platform, etc..
-* *Service* - The service/application runtime, agent, name, etc..
-* *Process* - The process id that served up the request.
-* *User* - This requires additional configuration, but allows you to see which user experienced the current transaction.
-This can be extremely useful if it's determined that specific users are getting slow requests.
-* *Tags* - Useful if you want to start correlating transactions with log files or metrics from Metricbeat.
-* *Custom* - You can configure your agent to add custom contextual information on transactions.
+* Labels - Custom labels added by agents
+* HTTP request/response information
+* Host information
+* Container information
+* Service - The service/application runtime, agent, name, etc..
+* Process - The process id that served up the request.
+* Agent information
+* URL
+* User - Requires additional configuration, but allows you to see which user experienced the current transaction.
+* Custom - You can configure your agent to add custom contextual information on transactions.
 
 TIP: All of this data is stored in documents in Elasticsearch.
 This means you can select "Actions - View sample document" to see the actual Elasticsearch document under the discover tab.

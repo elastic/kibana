@@ -1,0 +1,52 @@
+.autocomplete {
+  position: relative;
+}
+
+.autocompletePopup {
+  position: absolute;
+  top: -262px;
+  height: 260px;
+  width: 100%;
+}
+
+.autocompleteItems {
+  border-right: $euiBorderThin;
+}
+
+.autocompleteItems,
+.autocompleteReference {
+  @include euiScrollBar;
+  height: 258px;
+  overflow: auto;
+}
+
+.autocompleteReference {
+  padding: $euiSizeS $euiSizeM;
+  background-color: tintOrShade($euiColorLightestShade, 65%, 20%);
+}
+
+.autocompleteItem {
+  padding: $euiSizeS $euiSizeM;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: $euiCodeFontFamily;
+  font-weight: $euiFontWeightRegular;
+}
+
+.autocompleteItem--isActive {
+  color: $euiColorPrimary;
+  background-color: $euiFocusBackgroundColor;
+}
+
+.autocompleteType {
+  padding: $euiSizeS;
+}
+
+.autocompleteTable .euiTable {
+  background-color: transparent;
+}
+
+.autocompleteDescList .euiDescriptionList__description {
+  margin-right: $euiSizeS;
+}

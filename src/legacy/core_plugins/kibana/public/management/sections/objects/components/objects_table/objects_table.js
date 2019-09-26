@@ -82,9 +82,7 @@ class ObjectsTableUI extends Component {
 
   constructor(props) {
     super(props);
-    this.savedObjectTypes = POSSIBLE_TYPES.filter(type => {
-      return this.props.uiCapabilities.savedObjectsManagement[type].read;
-    });
+    this.savedObjectTypes = POSSIBLE_TYPES;
 
     this.state = {
       totalCount: 0,
@@ -371,7 +369,7 @@ class ObjectsTableUI extends Component {
       object => object.type === 'index-pattern'
     );
     if (indexPatterns.length) {
-      await this.props.indexPatterns.cache.clearAll();
+      await this.props.indexPatterns.clearCache();
     }
 
     const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
@@ -615,6 +613,7 @@ class ObjectsTableUI extends Component {
                 }}
               />
             </EuiFormRow>
+            <EuiSpacer size="m" />
             <EuiSwitch
               name="includeReferencesDeep"
               label={(
@@ -677,10 +676,6 @@ class ObjectsTableUI extends Component {
       view: `${type} (${savedObjectCounts[type] || 0})`,
     }));
 
-    const canDeleteSavedObjectTypes = POSSIBLE_TYPES.filter(type => {
-      return this.props.uiCapabilities.savedObjectsManagement[type].delete;
-    });
-
     return (
       <EuiPageContent
         horizontalPosition="center"
@@ -706,7 +701,7 @@ class ObjectsTableUI extends Component {
           onTableChange={this.onTableChange}
           filterOptions={filterOptions}
           onExport={this.onExport}
-          canDeleteSavedObjectTypes={canDeleteSavedObjectTypes}
+          canDelete={this.props.uiCapabilities.savedObjectsManagement.delete}
           onDelete={this.onDelete}
           goInspectObject={this.props.goInspectObject}
           pageIndex={page}

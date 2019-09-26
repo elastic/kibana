@@ -22,7 +22,9 @@ export default function ({ getService }) {
     deleteAllAutoFollowPatterns
   } = registerAutoFollowPatternHelpers(supertest);
 
-  describe('auto follow patterns', () => {
+  describe('auto follow patterns', function () {
+    this.tags(['skipCloud']);
+
     after(() => deleteAllAutoFollowPatterns().then(deleteAllClusters));
 
     describe('list()', () => {

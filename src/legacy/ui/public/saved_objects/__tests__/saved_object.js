@@ -23,10 +23,11 @@ import sinon from 'sinon';
 import BluebirdPromise from 'bluebird';
 
 import { SavedObjectProvider } from '../saved_object';
-import { IndexPatternProvider } from '../../index_patterns/_index_pattern';
+import StubIndexPatternProv from 'test_utils/stub_index_pattern';
 import { SavedObjectsClientProvider } from '../saved_objects_client_provider';
-import { StubIndexPatternsApiClientModule } from '../../index_patterns/__tests__/stub_index_patterns_api_client';
-import { InvalidJSONProperty } from '../../errors';
+import { InvalidJSONProperty } from '../../../../../plugins/kibana_utils/public';
+
+const getConfig = cfg => cfg;
 
 describe('Saved Object', function () {
   require('test_utils/no_digest_promises').activateForSuite();
@@ -87,7 +88,6 @@ describe('Saved Object', function () {
 
   beforeEach(ngMock.module(
     'kibana',
-    StubIndexPatternsApiClientModule,
     // Use the native window.confirm instead of our specialized version to make testing
     // this easier.
     function ($provide) {
@@ -98,7 +98,7 @@ describe('Saved Object', function () {
 
   beforeEach(ngMock.inject(function (es, Private, $window) {
     SavedObject = Private(SavedObjectProvider);
-    IndexPattern = Private(IndexPatternProvider);
+    IndexPattern = Private(StubIndexPatternProv);
     esDataStub = es;
     savedObjectsClientStub = Private(SavedObjectsClientProvider);
     window = $window;
@@ -339,7 +339,7 @@ describe('Saved Object', function () {
                 type: 'dashboard',
               });
             });
-            const indexPattern = new IndexPattern('my-index', null, []);
+            const indexPattern = new IndexPattern('my-index', getConfig, null, []);
             indexPattern.title = indexPattern.id;
             savedObject.searchSource.setField('index', indexPattern);
             return savedObject
@@ -358,6 +358,40 @@ describe('Saved Object', function () {
                   name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
                   type: 'index-pattern',
                   id: 'my-index',
+                });
+              });
+          });
+      });
+
+      it('when index in searchSourceJSON is not found', () => {
+        const id = '123';
+        stubESResponse(getMockedDocResponse(id));
+        return createInitializedSavedObject({ type: 'dashboard', searchSource: true })
+          .then((savedObject) => {
+            sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
+              return BluebirdPromise.resolve({
+                id,
+                version: 2,
+                type: 'dashboard',
+              });
+            });
+            savedObject.searchSource.setFields({ 'index': 'non-existant-index' });
+            return savedObject
+              .save()
+              .then(() => {
+                expect(savedObjectsClientStub.create.getCall(0).args[1]).to.eql({
+                  kibanaSavedObjectMeta: {
+                    searchSourceJSON: JSON.stringify({
+                      indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                    }),
+                  },
+                });
+                const { references } = savedObjectsClientStub.create.getCall(0).args[2];
+                expect(references).to.have.length(1);
+                expect(references[0]).to.eql({
+                  name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                  type: 'index-pattern',
+                  id: 'non-existant-index',
                 });
               });
           });
@@ -692,6 +726,12 @@ describe('Saved Object', function () {
         });
 
         const savedObject = new SavedObject(config);
+        sinon.stub(savedObject, 'hydrateIndexPattern').callsFake(() => {
+          const indexPattern = new IndexPattern(indexPatternId, getConfig, null, []);
+          indexPattern.title = indexPattern.id;
+          savedObject.searchSource.setField('index', indexPattern);
+          return Promise.resolve(indexPattern);
+        });
         expect(!!savedObject.searchSource.getField('index')).to.be(false);
 
         return savedObject.init().then(() => {

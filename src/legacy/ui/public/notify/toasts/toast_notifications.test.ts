@@ -24,23 +24,21 @@ import { ToastNotifications } from './toast_notifications';
 
 function toastDeps() {
   const uiSettingsMock = uiSettingsServiceMock.createSetupContract();
-  (uiSettingsMock.get as jest.Mock<typeof uiSettingsMock['get']>).mockImplementation(
-    () => (config: string) => {
-      switch (config) {
-        case 'notifications:lifetime:info':
-          return 5000;
-        case 'notifications:lifetime:warning':
-          return 10000;
-        case 'notification:lifetime:error':
-          return 30000;
-        default:
-          throw new Error(`Accessing ${config} is not supported in the mock.`);
-      }
+  uiSettingsMock.get.mockImplementation(() => (config: string) => {
+    switch (config) {
+      case 'notifications:lifetime:info':
+        return 5000;
+      case 'notifications:lifetime:warning':
+        return 10000;
+      case 'notification:lifetime:error':
+        return 30000;
+      default:
+        throw new Error(`Accessing ${config} is not supported in the mock.`);
     }
-  );
+  });
   return {
     uiSettings: uiSettingsMock,
-    i18n: i18nServiceMock.createSetupContract(),
+    i18n: i18nServiceMock.createStartContract(),
   };
 }
 

@@ -41,7 +41,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getChartTimespan() {
-      const el = await find.byCssSelector('.small > span:nth-child(1)');
+      const el = await find.byCssSelector('.small > label[for="dscResultsIntervalSelector"]');
       return await el.getVisibleText();
     }
 
@@ -116,27 +116,25 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('discoverOpenButton');
     }
 
-    async clickHistogramBar(i) {
-      const bars = await find.allByCssSelector(`.series.histogram rect`);
-      await bars[i].click();
+    async clickHistogramBar() {
+      const el = await find.byCssSelector('.echChart canvas:last-of-type');
+
+      await browser.getActions()
+        .move({ x: 200, y: 20, origin: el._webElement })
+        .click()
+        .perform();
     }
 
-    async brushHistogram(from, to) {
-      const bars = await find.allByCssSelector('.series.histogram rect');
+    async brushHistogram() {
+      const el = await find.byCssSelector('.echChart canvas:last-of-type');
       await browser.dragAndDrop(
-        { location: bars[from], offset: { x: 0, y: -5 } },
-        { location: bars[to], offset: { x: 0, y: -5 } }
+        { location: el, offset: { x: 200, y: 20 } },
+        { location: el, offset: { x: 400, y: 30 } }
       );
     }
 
     async getCurrentQueryName() {
       return await globalNav.getLastBreadcrumb();
-    }
-
-    async getBarChartXTicks() {
-      const xAxis = await find.byCssSelector('.x.axis.CategoryAxis-1');
-      const $ = await xAxis.parseDomContent();
-      return $('.tick > text').toArray().map(tick => $(tick).text().trim());
     }
 
     async getBarChartData() {
@@ -161,7 +159,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getChartInterval() {
-      const selectedValue = await testSubjects.getProperty('discoverIntervalSelect', 'value');
+      const selectedValue = await testSubjects.getAttribute('discoverIntervalSelect', 'value');
       const selectedOption = await find.byCssSelector('option[value="' + selectedValue + '"]');
       return selectedOption.getVisibleText();
     }
@@ -193,6 +191,13 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await row.getVisibleText();
     }
 
+    async getDocTableField(index) {
+      const field = await find.byCssSelector(
+        `tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableField']`
+      );
+      return await field.getVisibleText();
+    }
+
     async clickDocSortDown() {
       await find.clickByCssSelector('.fa-sort-down');
     }
@@ -217,7 +222,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async getSidebarWidth() {
       const sidebar = await find.byCssSelector('.sidebar-list');
-      return await sidebar.getProperty('clientWidth');
+      return await sidebar.getAttribute('clientWidth');
     }
 
     async hasNoResults() {
@@ -248,7 +253,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async expectMissingFieldListItemVisualize(field) {
-      await testSubjects.missingOrFail(`fieldVisualize-${field}`);
+      await testSubjects.missingOrFail(`fieldVisualize-${field}`, { allowHidden: true });
     }
 
     async clickFieldListPlusFilter(field, value) {
@@ -288,7 +293,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       const fieldFilterFormExists = await testSubjects.exists('discoverFieldFilter');
       if (fieldFilterFormExists) {
         await testSubjects.click('toggleFieldFilterButton');
-        await testSubjects.missingOrFail('discoverFieldFilter');
+        await testSubjects.missingOrFail('discoverFieldFilter', { allowHidden: true });
       }
     }
 

@@ -1,54 +1,63 @@
 <visualize-app class="app-container visEditor visEditor--{{ vis.type.name }}">
-  <!-- Local nav. -->
-  <kbn-top-nav name="visualize" config="topNavMenu">
-    <!-- Transcluded elements. -->
-    <div data-transclude-slots>
-      <!-- Search. -->
-      <div
-        data-transclude-slot="bottomRow"
-        ng-show="chrome.getVisible()"
-        class="fullWidth"
+  <!-- Linked search. -->
+  <div
+      ng-show="chrome.getVisible()"
+      ng-if="vis.type.requiresSearch && state.linked"
+      class="fullWidth visEditor__linkedMessage"
+    >
+    <div class="kuiVerticalRhythmSmall">
+      {{ ::'kbn.visualize.linkedToSearchInfoText' | i18n: { defaultMessage: 'Linked to Saved Search' } }}
+      <a
+        href="#/discover/{{savedVis.savedSearch.id}}"
       >
-        <div ng-if="vis.type.requiresSearch && state.linked" class="kuiVerticalRhythmSmall">
-          {{ ::'kbn.visualize.linkedToSearchInfoText' | i18n: { defaultMessage: 'Linked to Saved Search' } }}
-          <a
-            href="#/discover/{{savedVis.savedSearch.id}}"
-          >
-            {{ savedVis.savedSearch.title }}
-          </a>
-          &nbsp;
-          <a
-            data-test-subj="unlinkSavedSearch"
-            href=""
-            ng-dblclick="unlink()"
-            tooltip="{{ ::'kbn.visualize.linkedToSearch.unlinkButtonTooltip' | i18n: { defaultMessage: 'Double click to unlink from Saved Search' } }}"
-          >
-            <span aria-hidden="true" class="kuiIcon fa-chain-broken"></span>
-          </a>
-        </div>
-
-        <div class="fullWidth kuiVerticalRhythmSmall">
-          <search-bar
-            query="state.query"
-            screen-title="state.vis.title"
-            on-query-submit="updateQueryAndFetch"
-            app-name="'visualize'"
-            index-patterns="[indexPattern]"
-            filters="filters"
-            on-filters-updated="onFiltersUpdated"
-            show-query-bar="showQueryBar()"
-            show-filter-bar="vis.type.options.showFilterBar && chrome.getVisible()"
-            show-date-picker="enableQueryBarTimeRangeSelector"
-            date-range-from="timeRange.from"
-            date-range-to="timeRange.to"
-            is-refresh-paused="refreshInterval.pause"
-            refresh-interval="refreshInterval.value"
-            show-auto-refresh-only="showAutoRefreshOnlyInQueryBar"
-            on-refresh-change="onRefreshChange"
-          ></search-bar>
-        </div>
-      </div>
+        {{ savedVis.savedSearch.title }}
+      </a>
+      &nbsp;
+      <a
+        data-test-subj="unlinkSavedSearch"
+        href=""
+        ng-dblclick="unlink()"
+        tooltip="{{ ::'kbn.visualize.linkedToSearch.unlinkButtonTooltip' | i18n: { defaultMessage: 'Double click to unlink from Saved Search' } }}"
+      >
+        <span aria-hidden="true" class="kuiIcon fa-chain-broken"></span>
+      </a>
     </div>
+  </div>
+
+  <!--
+    Local nav.
+    Most visualizations have all search bar components enabled
+    Some visualizations have fewer options but all visualizations have a search bar
+    which is why show-search-baris set to "true".
+    All visualizaions also have least a timepicker \ autorefresh component, which is why
+    show-query-bar is set to "true".
+  -->
+  <kbn-top-nav
+    app-name="'visualize'"
+    config="topNavMenu"
+    show-search-bar="true"
+    show-query-bar="true"
+    show-query-input="showQueryInput()"
+    show-filter-bar="showFilterBar() && chrome.getVisible()"
+    show-date-picker="showQueryBarTimePicker()"
+    show-auto-refresh-only="!showQueryBarTimePicker()"
+    query="state.query"
+    saved-query="savedQuery"
+    screen-title="state.vis.title"
+    on-query-submit="updateQueryAndFetch"
+    index-patterns="[indexPattern]"
+    filters="filters"
+    on-filters-updated="onFiltersUpdated"
+    date-range-from="timeRange.from"
+    date-range-to="timeRange.to"
+    is-refresh-paused="refreshInterval.pause"
+    refresh-interval="refreshInterval.value"
+    on-refresh-change="onRefreshChange"
+    show-save-query="showSaveQuery"
+    on-saved="onQuerySaved"
+    on-saved-query-updated="onSavedQueryUpdated"
+    on-clear-saved-query="onClearSavedQuery"
+  >
   </kbn-top-nav>
 
   <!--

@@ -19,8 +19,8 @@
 
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { absoluteToParsedUrl } from '../../url/absolute_to_parsed_url';
-import { onStart } from '../../new_platform';
-import { ChromeStart, ChromeNavLink } from '../../../../../core/public';
+import { npStart } from '../../new_platform';
+import { ChromeNavLink } from '../../../../../core/public';
 import { relativeToAbsolute } from '../../url/relative_to_absolute';
 
 export interface ChromeNavLinks {
@@ -34,8 +34,7 @@ interface NavInternals {
 }
 
 export function initChromeNavApi(chrome: any, internals: NavInternals) {
-  let coreNavLinks: ChromeStart['navLinks'];
-  onStart(({ core }) => (coreNavLinks = core.chrome.navLinks));
+  const coreNavLinks = npStart.core.chrome.navLinks;
 
   /**
    * Clear last url for deleted saved objects to avoid loading pages with "Could not locate..."
@@ -79,7 +78,7 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
     coreNavLinks
       .getAll()
       // Filter only legacy links
-      .filter(link => link.subUrlBase)
+      .filter(link => link.legacy)
       .forEach(link => {
         const active = url.startsWith(link.subUrlBase!);
         link = coreNavLinks.update(link.id, { active })!;
@@ -145,15 +144,14 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
 
   // simulate a possible change in url to initialize the
   // link.active and link.lastUrl properties
-  onStart(({ core }) => {
-    core.chrome.navLinks
-      .getAll()
-      .filter(link => link.subUrlBase)
-      .forEach(link => {
-        core.chrome.navLinks.update(link.id, {
-          subUrlBase: relativeToAbsolute(chrome.addBasePath(link.subUrlBase)),
-        });
+  coreNavLinks
+    .getAll()
+    .filter(link => link.subUrlBase)
+    .forEach(link => {
+      coreNavLinks.update(link.id, {
+        subUrlBase: relativeToAbsolute(chrome.addBasePath(link.subUrlBase)),
       });
-    internals.trackPossibleSubUrl(document.location.href);
-  });
+    });
+
+  internals.trackPossibleSubUrl(document.location.href);
 }

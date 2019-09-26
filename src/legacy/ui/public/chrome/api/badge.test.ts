@@ -19,13 +19,10 @@
 
 import * as Rx from 'rxjs';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ChromeBadge } from 'src/core/public/chrome';
-import { chromeServiceMock } from '../../../../../core/public/mocks';
-import { __newPlatformSetup__, initChromeBadgeApi } from './badge';
-
-const newPlatformChrome = chromeServiceMock.createSetupContract();
-
-__newPlatformSetup__(newPlatformChrome);
+import { newPlatformChrome } from './badge.test.mocks';
+import { initChromeBadgeApi } from './badge';
 
 function setup() {
   const getBadge$ = new Rx.BehaviorSubject<ChromeBadge | undefined>(undefined);

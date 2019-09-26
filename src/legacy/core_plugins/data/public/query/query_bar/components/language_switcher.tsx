@@ -27,6 +27,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  PopoverAnchorPosition,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
@@ -41,6 +42,7 @@ interface State {
 interface Props {
   language: string;
   onSelectLanguage: (newLanguage: string) => void;
+  anchorPosition?: PopoverAnchorPosition;
 }
 
 export class QueryLanguageSwitcher extends Component<Props, State> {
@@ -63,7 +65,11 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
     );
 
     const button = (
-      <EuiButtonEmpty size="xs" onClick={this.togglePopover}>
+      <EuiButtonEmpty
+        size="xs"
+        onClick={this.togglePopover}
+        className="euiFormControlLayout__append"
+      >
         {this.props.language === 'lucene' ? luceneLabel : kqlLabel}
       </EuiButtonEmpty>
     );
@@ -71,9 +77,9 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
     return (
       <EuiPopover
         id="popover"
-        className="eui-displayBlock"
+        anchorClassName="euiFormControlLayout__append"
         ownFocus
-        anchorPosition="downRight"
+        anchorPosition={this.props.anchorPosition || 'downRight'}
         button={button}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}

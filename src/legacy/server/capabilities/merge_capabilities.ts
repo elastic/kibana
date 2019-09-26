@@ -17,23 +17,28 @@
  * under the License.
  */
 
+import typeDetect from 'type-detect';
+import { merge } from 'lodash';
 import { Capabilities } from '../../../core/public';
 
 export const mergeCapabilities = (...sources: Array<Partial<Capabilities>>): Capabilities =>
-  sources.reduce(
-    (capabilities: Capabilities, source) => {
-      Object.entries(source).forEach(([key, value = {}]) => {
-        capabilities[key] = {
-          ...value,
-          ...capabilities[key],
-        };
-      });
-
-      return capabilities;
-    },
+  merge(
     {
       navLinks: {},
       management: {},
       catalogue: {},
-    } as Capabilities
+    },
+    ...sources,
+    (a: any, b: any) => {
+      if (
+        (typeDetect(a) === 'boolean' && typeDetect(b) === 'Object') ||
+        (typeDetect(b) === 'boolean' && typeDetect(a) === 'Object')
+      ) {
+        throw new Error(`a boolean and an object can't be merged`);
+      }
+
+      if (typeDetect(a) === 'boolean' && typeDetect(b) === 'boolean' && a !== b) {
+        throw new Error(`"true" and "false" can't be merged`);
+      }
+    }
   );

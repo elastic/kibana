@@ -28,7 +28,7 @@ export function netflowSpecProvider() {
   return {
     id: 'netflow',
     name: 'Netflow',
-    category: TUTORIAL_CATEGORY.SECURITY,
+    category: TUTORIAL_CATEGORY.SIEM,
     shortDescription: i18n.translate('kbn.server.tutorials.netflow.tutorialShortDescription', {
       defaultMessage: 'Collect Netflow records sent by a Netflow exporter.',
     }),

@@ -24,19 +24,6 @@ import { keyCodes } from '@elastic/eui/lib/services';
 
 jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
 
-jest.mock('ui/errors', () => ({
-  SavedObjectNotFound: class SavedObjectNotFound extends Error {
-    constructor(options) {
-      super();
-      for (const option in options) {
-        if (options.hasOwnProperty(option)) {
-          this[option] = options[option];
-        }
-      }
-    }
-  },
-}));
-
 jest.mock('ui/chrome', () => ({
   addBasePath: () => ''
 }));
@@ -86,7 +73,7 @@ const defaultProps = {
   onTableChange: () => {},
   isSearching: false,
   onShowRelationships: () => {},
-  canDeleteSavedObjectTypes: ['visualization']
+  canDelete: true
 };
 
 describe('Table', () => {
@@ -127,9 +114,9 @@ describe('Table', () => {
     expect(component.state().isSearchTextValid).toBe(true);
   });
 
-  it(`restricts which saved objects can be deleted based on type`, () => {
+  it(`prevents saved objects from being deleted`, () => {
     const selectedSavedObjects = [{ type: 'visualization' }, { type: 'search' }, { type: 'index-pattern' }];
-    const customizedProps = { ...defaultProps, selectedSavedObjects, canDeleteSavedObjectTypes: ['visualization'] };
+    const customizedProps = { ...defaultProps, selectedSavedObjects, canDelete: false };
     const component = shallowWithIntl(
       <Table.WrappedComponent
         {...customizedProps}

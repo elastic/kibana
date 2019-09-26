@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import { Toast } from '@elastic/eui';
+import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
 import React from 'react';
 import * as Rx from 'rxjs';
 
 import { ErrorToast } from './error_toast';
-import { UiSettingsSetup } from '../../ui_settings';
-import { I18nSetup } from '../../i18n';
+import { UiSettingsClientContract } from '../../ui_settings';
 import { OverlayStart } from '../../overlays';
 
 type ToastInputFields = Pick<Toast, Exclude<keyof Toast, 'id'>>;
@@ -59,14 +58,12 @@ const normalizeToast = (toastOrTitle: ToastInput) => {
 export class ToastsApi {
   private toasts$ = new Rx.BehaviorSubject<Toast[]>([]);
   private idCounter = 0;
-  private uiSettings: UiSettingsSetup;
-  private i18n: I18nSetup;
+  private uiSettings: UiSettingsClientContract;
 
   private overlays?: OverlayStart;
 
-  constructor(deps: { uiSettings: UiSettingsSetup; i18n: I18nSetup }) {
+  constructor(deps: { uiSettings: UiSettingsClientContract }) {
     this.uiSettings = deps.uiSettings;
-    this.i18n = deps.i18n;
   }
 
   public registerOverlays(overlays: OverlayStart) {
@@ -136,7 +133,6 @@ export class ToastsApi {
           error={error}
           title={options.title}
           toastMessage={message}
-          i18nContext={this.i18n.Context}
         />
       ),
     });

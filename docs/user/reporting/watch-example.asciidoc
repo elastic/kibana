@@ -1,0 +1,62 @@
+To automatically generate reports with a watch, you need to configure
+{watcher} to trust the {kib} server’s certificate. For more information,
+see {kibana-ref}/secure-reporting.html[Securing Reporting].
+
+To configure a watch to email reports, you use the `reporting` attachment type
+in an `email` action. For more information, see
+{stack-ov}/actions-email.html#configuring-email[Configuring Email Accounts].
+
+For example, the following watch generates a PDF report and emails the report every hour:
+
+[source,js]
+---------------------------------------------------------
+PUT _watcher/watch/error_report
+{
+  "trigger" : {
+    "schedule": {
+      "interval": "1h"
+    }
+  },
+  "actions" : {
+    "email_admin" : { <1>
+      "email": {
+        "to": "'Recipient Name <recipient@example.com>'",
+        "subject": "Error Monitoring Report",
+        "attachments" : {
+          "error_report.pdf" : {
+            "reporting" : {
+              "url": "http://0.0.0.0:5601/api/reporting/generate/printablePdf?jobParams=...", <2>
+              "retries":6, <3>
+              "interval":"1s", <4>
+              "auth":{ <5>
+                "basic":{
+                  "username":"elastic",
+                  "password":"changeme"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+---------------------------------------------------------
+// CONSOLE
+
+<1> You must configure at least one email account to enable Watcher to send email.
+For more information, see
+{xpack-ref}/actions-email.html#configuring-email[Configuring Email Accounts].
+<2> This is an example POST URL. You can copy and paste the URL for any
+report from the Kibana UI.
+<3> Optional, default is 40
+<4> Optional, default is 15s
+<5> Provide user credentials for a user with permission to access Kibana and
+{reporting}.
+//For more information, see <<secure-reporting>>.
+//<<reporting-app-users, Setting up a Reporting Role>>.
+
+NOTE: Reporting is integrated with Watcher only as an email attachment type.
+
+For more information about configuring watches, see
+{stack-ov}/how-watcher-works.html[How Watcher Works].

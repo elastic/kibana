@@ -20,13 +20,19 @@
 import { Observable } from 'rxjs';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
+import { HttpInterceptController } from './http_intercept_controller';
+import { HttpFetchError } from './http_fetch_error';
 
 /** @public */
 export interface HttpServiceBase {
   stop(): void;
-  getBasePath(): string;
-  prependBasePath(path: string): string;
-  removeBasePath(path: string): string;
+  basePath: {
+    get: () => string;
+    prepend: (url: string) => string;
+    remove: (url: string) => string;
+  };
+  intercept(interceptor: HttpInterceptor): () => void;
+  removeAllInterceptors(): void;
   fetch: HttpHandler;
   delete: HttpHandler;
   get: HttpHandler;
@@ -80,4 +86,41 @@ export interface HttpFetchOptions extends HttpRequestInit {
 /** @public */
 export type HttpHandler = (path: string, options?: HttpFetchOptions) => Promise<HttpBody>;
 /** @public */
-export type HttpBody = BodyInit | null;
+export type HttpBody = BodyInit | null | any;
+/** @public */
+export interface HttpResponse {
+  request?: Request;
+  response?: Response;
+  body?: HttpBody;
+}
+/** @public */
+export interface HttpErrorResponse {
+  error: Error | HttpFetchError;
+  request?: Request;
+  response?: Response;
+  body?: HttpBody;
+}
+/** @public */
+export interface HttpErrorRequest {
+  request: Request;
+  error: Error;
+}
+/** @public */
+export interface HttpInterceptor {
+  request?(
+    request: Request,
+    controller: HttpInterceptController
+  ): Promise<Request> | Request | void;
+  requestError?(
+    httpErrorRequest: HttpErrorRequest,
+    controller: HttpInterceptController
+  ): Promise<Request> | Request | void;
+  response?(
+    httpResponse: HttpResponse,
+    controller: HttpInterceptController
+  ): Promise<HttpResponse> | HttpResponse | void;
+  responseError?(
+    httpErrorResponse: HttpErrorResponse,
+    controller: HttpInterceptController
+  ): Promise<HttpResponse> | HttpResponse | void;
+}

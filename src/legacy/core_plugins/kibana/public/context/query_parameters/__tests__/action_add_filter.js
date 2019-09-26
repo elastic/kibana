@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
 
-import { FilterManagerProvider } from 'ui/filter_manager';
+import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 
 import { createStateStub } from './_utils';
 import { QueryParameterActionsProvider } from '../actions';
@@ -35,8 +35,8 @@ describe('context app', function () {
     let addFilter;
 
     beforeEach(ngMock.inject(function createPrivateStubs(Private) {
-      filterManagerStub = createFilterManagerStub();
-      Private.stub(FilterManagerProvider, filterManagerStub);
+      filterManagerStub = createQueryFilterStub();
+      Private.stub(FilterBarQueryFilterProvider, filterManagerStub);
 
       addFilter = Private(QueryParameterActionsProvider).addFilter;
     }));
@@ -46,11 +46,13 @@ describe('context app', function () {
 
       addFilter(state)('FIELD_NAME', 'FIELD_VALUE', 'FILTER_OPERATION');
 
-      const filterManagerAddStub = filterManagerStub.add;
+      const filterManagerAddStub = filterManagerStub.addFilters;
+      //get the generated filter
+      const generatedFilter = filterManagerAddStub.firstCall.args[0][0];
+      const queryKeys = Object.keys(generatedFilter.query.match);
       expect(filterManagerAddStub.calledOnce).to.be(true);
-      expect(filterManagerAddStub.firstCall.args[0]).to.eql('FIELD_NAME');
-      expect(filterManagerAddStub.firstCall.args[1]).to.eql('FIELD_VALUE');
-      expect(filterManagerAddStub.firstCall.args[2]).to.eql('FILTER_OPERATION');
+      expect(queryKeys[0]).to.eql('FIELD_NAME');
+      expect(generatedFilter.query.match[queryKeys[0]].query).to.eql('FIELD_VALUE');
     });
 
     it('should pass the index pattern id to the filterManager', function () {
@@ -58,15 +60,17 @@ describe('context app', function () {
 
       addFilter(state)('FIELD_NAME', 'FIELD_VALUE', 'FILTER_OPERATION');
 
-      const filterManagerAddStub = filterManagerStub.add;
+      const filterManagerAddStub = filterManagerStub.addFilters;
+      const generatedFilter = filterManagerAddStub.firstCall.args[0][0];
       expect(filterManagerAddStub.calledOnce).to.be(true);
-      expect(filterManagerAddStub.firstCall.args[3]).to.eql('INDEX_PATTERN_ID');
+      expect(generatedFilter.meta.index).to.eql('INDEX_PATTERN_ID');
     });
   });
 });
 
-function createFilterManagerStub() {
+function createQueryFilterStub() {
   return {
-    add: sinon.stub(),
+    addFilters: sinon.stub(),
+    getAppFilters: sinon.stub(),
   };
 }

@@ -1,5 +1,17 @@
+@import 'node_modules/@elastic/eui/src/components/panel/mixins';
+
 discover-app {
-  background-color: $euiColorEmptyShade;
+  flex-grow: 1;
+
+  .sidebar-container {
+    background-color: transparent;
+  }
+}
+
+.dscHistogram {
+  display: flex;
+  height: 200px;
+  padding: $euiSizeS;
 }
 
 // SASSTODO: replace the margin-top value with a variable
@@ -14,14 +26,20 @@ discover-app {
 
 // SASSTODO: replace the z-index value with a variable
 .dscWrapper {
-  padding-right: 0;
+  padding-right: $euiSizeS;
   padding-left: 21px;
-  z-index: 1
+  z-index: 1;
 }
 
+@include euiPanel('dscWrapper__content');
+
 .dscWrapper__content {
-  padding-right: $euiSize;
-  clear: both;
+  padding-top: $euiSizeXS;
+  background-color: $euiColorEmptyShade;
+
+  .kbn-table {
+    margin-bottom: 0;
+  }
 }
 
 .dscTimechart {
@@ -32,6 +50,20 @@ discover-app {
   .series > rect {
     fill-opacity: 0.5;
     stroke-width: 1;
+  }
+}
+
+.dscResultCount {
+  text-align: center;
+  padding-top: $euiSizeXS;
+  padding-left: $euiSizeM;
+
+  .dscResultHits {
+    padding-left: $euiSizeXS;
+  }
+
+  > .kuiLink {
+    padding-left: $euiSizeM;
   }
 }
 
@@ -122,7 +154,7 @@ discover-app {
 // SASSTODO: replace the padding value with a variable
 .dscFieldDetails {
   padding: 10px;
-  background-color: shade($euiColorLightestShade, 5%);
+  background-color: $euiColorLightestShade;
   color: $euiTextColor;
 }
 
@@ -164,15 +196,6 @@ discover-app {
 }
 
 .dscField--noResults {
-  color: $euiColorDarkShade;
-}
-
-// SASSTODO: replace the margin-right value with a variables
-.dscField__icon {
-  margin-right: 5px;
-  text-align: center;
-  display: inline-block;
-  width: $euiSizeM;
   color: $euiColorDarkShade;
 }
 

@@ -1,0 +1,15 @@
+{
+  "sql.query": {
+    "url_params": {
+      "format": ""
+    },
+    "methods": [
+      "POST",
+      "GET"
+    ],
+    "patterns": [
+      "_sql"
+    ],
+    "documentation": "Execute SQL"
+  }
+}

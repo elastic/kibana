@@ -8,9 +8,9 @@ import expect from '@kbn/expect';
 import { ascending, pairs } from 'd3-array';
 import gql from 'graphql-tag';
 
-import { sharedFragments } from '../../../../plugins/infra/common/graphql/shared';
-import { InfraTimeKey } from '../../../../plugins/infra/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { sharedFragments } from '../../../../legacy/plugins/infra/common/graphql/shared';
+import { InfraTimeKey } from '../../../../legacy/plugins/infra/public/graphql/types';
 
 const KEY_WITHIN_DATA_RANGE = {
   time: new Date('2019-01-06T00:00:00.000Z').valueOf(),
@@ -25,7 +25,7 @@ const LATEST_KEY_WITH_DATA = {
   tiebreaker: 2,
 };
 
-const logsWithoutMillisTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
 
@@ -97,10 +97,7 @@ const logsWithoutMillisTests: KbnTestProvider = ({ getService }) => {
       ).to.have.length(2);
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default logsWithoutMillisTests;
+}
 
 const logEntriesAroundQuery = gql`
   query LogEntriesAroundQuery(

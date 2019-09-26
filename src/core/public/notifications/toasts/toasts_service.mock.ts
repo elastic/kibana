@@ -16,11 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import { Observable } from 'rxjs';
 import { ToastsSetup } from './toasts_service';
 
 const createToastsApiMock = () => {
   const api: jest.Mocked<PublicMethodsOf<ToastsSetup>> = {
-    get$: jest.fn(),
+    get$: jest.fn(() => new Observable()),
     add: jest.fn(),
     remove: jest.fn(),
     addSuccess: jest.fn(),

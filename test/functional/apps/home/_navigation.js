@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'home', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'header', 'home', 'timePicker']);
   const appsMenu = getService('appsMenu');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
@@ -34,6 +34,7 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       await esArchiver.loadIfNeeded('makelogs');
       await browser.refresh();
+      await PageObjects.header.awaitKibanaChrome();
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/33468
@@ -72,14 +73,18 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('encodes portions of the URL as necessary', async () => {
-      await browser.get('http://localhost:5620/app/kibana#/home', false);
+      const host = process.env.TEST_KIBANA_HOST || 'localhost';
+      const port = process.env.TEST_KIBANA_PORT || '5620';
+      const basePath = `http://${host}:${port}`;
+
+      await browser.get(`${basePath}/app/kibana#/home`, false);
       await retry.waitFor('navigation to home app', async () => (
-        (await browser.getCurrentUrl()) === 'http://localhost:5620/app/kibana#/home?_g=()'
+        (await browser.getCurrentUrl()) === `${basePath}/app/kibana#/home?_g=()`
       ));
 
-      await browser.get('http://localhost:5620/app/kibana#/home?_g=()&a=b/c', false);
+      await browser.get(`${basePath}/app/kibana#/home?_g=()&a=b/c`, false);
       await retry.waitFor('hash to be properly encoded', async () => (
-        (await browser.getCurrentUrl()) === 'http://localhost:5620/app/kibana#/home?_g=()&a=b%2Fc'
+        (await browser.getCurrentUrl()) === `${basePath}/app/kibana#/home?_g=()&a=b%2Fc`
       ));
     });
   });

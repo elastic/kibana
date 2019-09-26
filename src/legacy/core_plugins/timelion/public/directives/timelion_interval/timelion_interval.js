@@ -19,11 +19,9 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-
-const app = require('ui/modules').get('apps/timelion', []);
 import template from './timelion_interval.html';
 
-app.directive('timelionInterval', function ($compile, $timeout) {
+export function TimelionInterval($timeout) {
   return {
     restrict: 'E',
     scope: {
@@ -81,4 +79,5 @@ app.directive('timelionInterval', function ($compile, $timeout) {
       });
     }
   };
-});
+}
+

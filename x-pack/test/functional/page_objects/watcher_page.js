@@ -16,7 +16,7 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
     async deleteAllWatches() {
       const checkBoxExists = await testSubjects.exists('selectAllWatchesCheckBox');
       if (checkBoxExists) {
-        await testSubjects.click('selectAllWatchesCheckBox');
+        await testSubjects.click('checkboxSelectAll');
         await testSubjects.click('btnDeleteWatches');
         await testSubjects.click('confirmModalConfirmButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -35,8 +35,8 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
     async createAdvancedWatch(watchName, name) {
       await testSubjects.click('createAdvancedWatchButton');
       await find.setValue('#id', watchName);
-      await find.setValue('#name', name);
-      await testSubjects.click('btnSaveWatch');
+      await find.setValue('#watchName', name);
+      await find.clickByCssSelector('[type="submit"]');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -53,7 +53,7 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
     }
 
     async deleteWatch() {
-      await testSubjects.click('selectAllWatchesCheckBox');
+      await testSubjects.click('checkboxSelectAll');
       await testSubjects.click('btnDeleteWatches');
     }
 
@@ -66,9 +66,9 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
         const name = await watch.findByCssSelector('td:nth-child(3)');
 
         return {
-          checkBox: (await checkBox.getProperty('innerHTML')).includes('input'),
+          checkBox: (await checkBox.getAttribute('innerHTML')).includes('input'),
           id: await id.getVisibleText(),
-          name: (await name.getVisibleText()).split(',').map(role => role.trim())
+          name: (await name.getVisibleText()).split(',').map(role => role.trim()),
         };
       });
     }

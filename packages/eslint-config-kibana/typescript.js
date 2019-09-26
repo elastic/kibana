@@ -42,9 +42,8 @@ module.exports = {
 
       parserOptions: {
         sourceType: 'module',
-        ecmaVersion: 6,
+        ecmaVersion: 2018,
         ecmaFeatures: {
-          experimentalObjectRestSpread: true,
           jsx: true
         },
         // NOTE: That is to avoid a known performance issue related with the `ts.Program` used by
@@ -80,10 +79,16 @@ module.exports = {
             'allow': ['^[A-Z0-9_]+$']
           }],
           '@typescript-eslint/class-name-casing': 'error',
-          // TODO: disable this rule until a PR with more options to configure
-          //       get merged and we can then reproduce the old behaviour
-          // https://github.com/typescript-eslint/typescript-eslint/pull/322
-          // '@typescript-eslint/explicit-member-accessibility': 'error',
+          '@typescript-eslint/explicit-member-accessibility': ['error',
+            {
+              accessibility: 'off',
+              overrides: {
+                accessors: 'explicit',
+                constructors: 'no-public',
+                parameterProperties: 'explicit'
+              }
+            }
+          ],
           'indent': 'off',
           '@typescript-eslint/indent': [ 'error', 2, { SwitchCase: 1 } ],
           '@typescript-eslint/prefer-function-type': 'error',

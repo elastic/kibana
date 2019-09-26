@@ -5,10 +5,9 @@
  */
 import expect from '@kbn/expect';
 import { SpacesService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService: SpacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'graph', 'security', 'error']);
@@ -42,18 +41,21 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         expect(navLinks).to.contain('Graph');
       });
 
-      it('shows save button', async () => {
+      it('landing page shows "Create new Workspace" button', async () => {
         await PageObjects.common.navigateToApp('graph', {
           basePath: '/s/custom_space',
         });
-        await testSubjects.existOrFail('graphSaveButton');
+        await testSubjects.existOrFail('workspaceLandingPage', { timeout: 10000 });
+        await testSubjects.existOrFail('graphCreateWorkspacePromptButton');
       });
 
-      it('shows delete button', async () => {
+      it('allows creating a new workspace', async () => {
         await PageObjects.common.navigateToApp('graph', {
           basePath: '/s/custom_space',
         });
-        await testSubjects.existOrFail('graphDeleteButton');
+        await testSubjects.click('graphCreateWorkspacePromptButton');
+        const breadcrumb = await testSubjects.find('~graphCurrentWorkspaceBreadcrumb');
+        expect(await breadcrumb.getVisibleText()).to.equal('Unsaved workspace');
       });
     });
 

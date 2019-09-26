@@ -17,14 +17,16 @@
  * under the License.
  */
 
-import { startTestServers } from '../../../../../../test_utils/kbn_server';
+import { createTestServers } from '../../../../../../test_utils/kbn_server';
 
 let kbnServer;
 let services;
 let servers;
+let esServer;
+let kbn;
 
 export async function startServers() {
-  servers = await startTestServers({
+  servers = createTestServers({
     adjustTimeout: (t) => this.timeout(t),
     settings: {
       kbn: {
@@ -36,7 +38,9 @@ export async function startServers() {
       },
     },
   });
-  kbnServer = servers.kbnServer;
+  esServer = await servers.startES();
+  kbn = await servers.startKibana();
+  kbnServer = kbn.kbnServer;
 }
 
 async function deleteKibanaIndex(callCluster) {
@@ -58,7 +62,7 @@ export function getServices() {
     return services;
   }
 
-  const callCluster = servers.es.getCallCluster();
+  const callCluster = esServer.es.getCallCluster();
 
   const savedObjects = kbnServer.server.savedObjects;
   const savedObjectsClient = savedObjects.getScopedSavedObjectsClient();
@@ -82,6 +86,7 @@ export async function stopServers() {
   services = null;
   kbnServer = null;
   if (servers) {
-    await servers.stop();
+    esServer.stop();
+    kbn.stop();
   }
 }

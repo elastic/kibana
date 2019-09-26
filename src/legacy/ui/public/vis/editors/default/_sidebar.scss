@@ -119,7 +119,7 @@
 // Collapsible section
 
 .visEditorSidebar__collapsible {
-  background-color: transparentize($euiColorLightShade, .85);
+  background-color: lightOrDarkTheme($euiPageBackgroundColor, $euiColorLightestShade);
 }
 
 .visEditorSidebar__collapsible--margin {
@@ -165,17 +165,6 @@
   margin-left: $euiSizeS;
 }
 
-.visEditorSidebar__collapsibleTitleDescription {
-  flex: 1 1 0;
-  @include euiTextTruncate;
-}
-
-.visEditorSidebar__collapsibleTitleDescription--danger {
-  color: $euiColorDanger;
-  font-weight: $euiFontWeightBold;
-}
-
-
 //
 // FORMS
 //
@@ -187,11 +176,6 @@
 
 .visEditorSidebar__select {
   @include __legacySelectStyles__bad;
-}
-
-.visEditorSidebar__formTitle {
-  @include euiTitle('xxs');
-  margin: $euiSizeS 0;
 }
 
 .visEditorSidebar__formRow {
@@ -224,4 +208,17 @@
 .visEditorSidebar__aggParamFormRow {
   margin-top: $euiSizeS;
   margin-bottom: $euiSizeS;
+}
+
+.visEditorSidebar__aggGroupAccordionButtonContent {
+  font-size: $euiFontSizeS;
+
+   span {
+    color: $euiColorDarkShade;
+  }
+}
+
+.visEditorSidebar__switchOptionFormRow {
+  margin-top: $euiSizeS;
+  padding-bottom: $euiSizeS;
 }

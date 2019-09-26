@@ -13,17 +13,18 @@ You do not need to configure any additional settings to use the
 ==== General security settings
 
 `xpack.security.enabled`::
-Set to `true` (default) to enable {security-features}. +
+By default, {kib} automatically detects whether to enable the
+{security-features} based on the license and whether {es} {security-features}
+are enabled.
 +
-Do not set this to `false`. To disable {security-features} entirely, see
-{ref}/security-settings.html[{es} security settings]. +
-+
-If set to `false` in `kibana.yml`, the login form, user and role management screens, and 
-authorization using <<kibana-privileges>> are disabled. +
-+
+Do not set this to `false`; it disables the login form, user and role management
+screens, and authorization using <<kibana-privileges>>. To disable
+{security-features} entirely, see
+{ref}/security-settings.html[{es} security settings]. 
+
 `xpack.security.audit.enabled`::
-Set to `true` to enable audit logging for security events. This is set to `false` by default.
-For more details see <<xpack-security-audit-logging>>.
+Set to `true` to enable audit logging for security events. By default, it is set
+to `false`. For more details see <<xpack-security-audit-logging>>.
 
 [float]
 [[security-ui-settings]]

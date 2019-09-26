@@ -37,7 +37,8 @@ uiRoutes.when('/error/action.auto_create_index', {
 
 export function isAutoCreateIndexError(error: object) {
   return (
-    get(error, 'res.status') === 503 && get(error, 'body.code') === 'ES_AUTO_CREATE_INDEX_ERROR'
+    get(error, 'res.status') === 503 &&
+    get(error, 'body.attributes.code') === 'ES_AUTO_CREATE_INDEX_ERROR'
   );
 }
 

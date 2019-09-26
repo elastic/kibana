@@ -20,12 +20,16 @@
 import { ConfigService, Env } from './config';
 import { LoggerFactory } from './logging';
 
+/** @internal */
+export type CoreId = symbol;
+
 /**
  * Groups all main Kibana's core modules/systems/services that are consumed in a
  * variety of places within the core itself.
  * @internal
  */
 export interface CoreContext {
+  coreId: CoreId;
   env: Env;
   configService: ConfigService;
   logger: LoggerFactory;

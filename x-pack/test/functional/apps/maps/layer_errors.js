@@ -16,7 +16,7 @@ export default function ({ getPageObjects }) {
       await PageObjects.maps.loadSavedMap('layer with errors');
     });
 
-    describe('ESSearchSource with missing index pattern id', async () => {
+    describe('ESSearchSource with missing index pattern id', () => {
       const MISSING_INDEX_ID = 'idThatDoesNotExitForESSearchSource';
       const LAYER_NAME = MISSING_INDEX_ID;
 
@@ -33,7 +33,7 @@ export default function ({ getPageObjects }) {
       });
     });
 
-    describe('ESGeoGridSource with missing index pattern id', async () => {
+    describe('ESGeoGridSource with missing index pattern id', () => {
       const MISSING_INDEX_ID = 'idThatDoesNotExitForESGeoGridSource';
       const LAYER_NAME = MISSING_INDEX_ID;
 
@@ -49,7 +49,7 @@ export default function ({ getPageObjects }) {
       });
     });
 
-    describe('ESJoinSource with missing index pattern id', async () => {
+    describe('ESJoinSource with missing index pattern id', () => {
       const MISSING_INDEX_ID = 'idThatDoesNotExitForESJoinSource';
       const LAYER_NAME = 'geo_shapes*';
 
@@ -65,7 +65,7 @@ export default function ({ getPageObjects }) {
       });
     });
 
-    describe('EMSFileSource with missing EMS id', async () => {
+    describe('EMSFileSource with missing EMS id', () => {
       const MISSING_EMS_ID = 'idThatDoesNotExitForEMSFileSource';
       const LAYER_NAME = 'EMS_vector_shapes';
 
@@ -81,7 +81,7 @@ export default function ({ getPageObjects }) {
       });
     });
 
-    describe('EMSTMSSource with missing EMS id', async () => {
+    describe('EMSTMSSource with missing EMS id', () => {
       const MISSING_EMS_ID = 'idThatDoesNotExitForEMSTile';
       const LAYER_NAME = 'EMS_tiles';
 
@@ -97,7 +97,7 @@ export default function ({ getPageObjects }) {
       });
     });
 
-    describe('KibanaRegionmapSource with missing region map configuration', async () => {
+    describe('KibanaRegionmapSource with missing region map configuration', () => {
       const MISSING_REGION_NAME = 'nameThatDoesNotExitForKibanaRegionmapSource';
       const LAYER_NAME = 'Custom_vector_shapes';
 
@@ -113,7 +113,7 @@ export default function ({ getPageObjects }) {
       });
     });
 
-    describe('KibanaTilemapSource with missing map.tilemap.url configuration', async () => {
+    describe('KibanaTilemapSource with missing map.tilemap.url configuration', () => {
       const LAYER_NAME = 'Custom_TMS';
 
       it('should diplay error message in layer panel', async () => {

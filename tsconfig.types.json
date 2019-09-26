@@ -9,6 +9,7 @@
   },
   "include": [
     "src/core/server/index.ts",
-    "src/core/public/index.ts"
+    "src/core/public/index.ts",
+    "typings"
   ]
 }

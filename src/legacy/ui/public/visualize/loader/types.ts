@@ -17,38 +17,17 @@
  * under the License.
  */
 
+import { Filter } from '@kbn/es-query';
+import { TimeRange } from 'src/plugins/data/public';
+import { Query } from 'src/legacy/core_plugins/data/public';
+import { SavedObject } from 'ui/saved_objects/saved_object';
+
 import { SearchSource } from '../../courier';
 import { PersistedState } from '../../persisted_state';
 import { AppState } from '../../state_management/app_state';
 import { Vis } from '../../vis';
 
-export interface TimeRange {
-  from: string;
-  to: string;
-}
-
-export interface FilterMeta {
-  disabled: boolean;
-}
-
-export interface Filter {
-  meta: FilterMeta;
-  query: object;
-}
-
-export type Filters = Filter[];
-
-export enum QueryLanguageType {
-  KUERY = 'kuery',
-  LUCENE = 'lucene',
-}
-
-export interface Query {
-  language: QueryLanguageType;
-  query: string;
-}
-
-export interface VisSavedObject {
+export interface VisSavedObject extends SavedObject {
   vis: Vis;
   description?: string;
   searchSource: SearchSource;
@@ -96,7 +75,7 @@ export interface VisualizeLoaderParams {
   /**
    * Specifies the filters that should be applied to that visualization.
    */
-  filters?: Filters;
+  filters?: Filter[];
   /**
    * The query that should apply to that visualization.
    */

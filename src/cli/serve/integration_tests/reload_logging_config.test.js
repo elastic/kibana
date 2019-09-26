@@ -181,7 +181,7 @@ describe('Server logging configuration', function () {
         '--logging.json', 'false'
       ]);
 
-      watchFileUntil(logPath, /Server running at/, 2 * minute)
+      watchFileUntil(logPath, /http server running/, 2 * minute)
         .then(() => {
           // once the server is running, archive the log file and issue SIGHUP
           fs.renameSync(logPath, logPathArchived);

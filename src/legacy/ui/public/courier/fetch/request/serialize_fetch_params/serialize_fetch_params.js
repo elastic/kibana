@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { getPreference, getTimeout } from '../../get_search_params';
+
 /**
  *
  * @param requestsFetchParams {Array.<Object>}
@@ -34,25 +36,18 @@ export function serializeFetchParams(
     return Promise.resolve(fetchParams.index)
       .then(function (indexPattern) {
         const body = {
+          timeout: getTimeout(esShardTimeout),
           ...fetchParams.body || {},
         };
-        if (esShardTimeout > 0) {
-          body.timeout = `${esShardTimeout}ms`;
-        }
 
         const index = (indexPattern && indexPattern.title) ? indexPattern.title : indexPattern;
 
         const header = {
           index,
-          type: fetchParams.type,
           search_type: fetchParams.search_type,
           ignore_unavailable: true,
+          preference: getPreference(config, sessionId)
         };
-        if (config.get('courier:setRequestPreference') === 'sessionId') {
-          header.preference = sessionId;
-        } else if (config.get('courier:setRequestPreference') === 'custom') {
-          header.preference = config.get('courier:customRequestPreference');
-        }
 
         return `${JSON.stringify(header)}\n${JSON.stringify(body)}`;
       });

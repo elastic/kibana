@@ -1,0 +1,69 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots arguments/AxisConfig simple 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div
+    className="euiSwitch euiSwitch--compressed"
+  >
+    <input
+      checked={false}
+      className="euiSwitch__input"
+      id="generated-id"
+      onChange={[Function]}
+      type="checkbox"
+    />
+    <span
+      className="euiSwitch__body"
+    >
+      <span
+        className="euiSwitch__thumb"
+      />
+      <span
+        className="euiSwitch__track"
+      />
+    </span>
+  </div>
+</div>
+`;
+
+exports[`Storyshots arguments/AxisConfig/components simple template 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div
+    className="euiSwitch euiSwitch--compressed"
+  >
+    <input
+      checked={false}
+      className="euiSwitch__input"
+      id="generated-id"
+      onChange={[Function]}
+      type="checkbox"
+    />
+    <span
+      className="euiSwitch__body"
+    >
+      <span
+        className="euiSwitch__thumb"
+      />
+      <span
+        className="euiSwitch__track"
+      />
+    </span>
+  </div>
+</div>
+`;

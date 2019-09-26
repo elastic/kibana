@@ -1,14 +1,14 @@
 {
   "name": "kbn_tp_sample_panel_action",
   "version": "1.0.0",
-  "main":"target/test/plugin_functional/plugins/kbn_tp_sample_panel_action",
+  "main": "target/test/plugin_functional/plugins/kbn_tp_sample_panel_action",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@elastic/eui": "10.4.1",
+    "@elastic/eui": "14.2.0",
     "react": "^16.8.0"
   },
   "scripts": {
@@ -16,7 +16,7 @@
     "build": "rm -rf './target' && tsc"
   },
   "devDependencies": {
-    "@kbn/plugin-helpers" : "9.0.2",
-    "typescript": "^3.3.3333"
+    "@kbn/plugin-helpers": "9.0.2",
+    "typescript": "3.5.3"
   }
 }

@@ -25,7 +25,7 @@ export function RetryProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const log = getService('log');
 
-  return new class Retry {
+  return new (class Retry {
     public async tryForTime<T>(
       timeout: number,
       block: () => Promise<T>,
@@ -76,5 +76,5 @@ export function RetryProvider({ getService }: FtrProviderContext) {
         onFailureBlock,
       });
     }
-  }();
+  })();
 }

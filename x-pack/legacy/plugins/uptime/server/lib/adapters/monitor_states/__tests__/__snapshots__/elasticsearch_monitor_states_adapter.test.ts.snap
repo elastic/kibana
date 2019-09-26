@@ -1,0 +1,741 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ElasticsearchMonitorStatesAdapter applies an appropriate filter section to the query based on filters 1`] = `
+Array [
+  Array [
+    Object {},
+    Object {
+      "body": Object {
+        "aggs": Object {
+          "monitors": Object {
+            "aggs": Object {
+              "top": Object {
+                "top_hits": Object {
+                  "_source": Object {
+                    "includes": Array [
+                      "monitor.check_group",
+                      "@timestamp",
+                    ],
+                  },
+                  "size": 1,
+                  "sort": Array [
+                    Object {
+                      "@timestamp": "desc",
+                    },
+                  ],
+                },
+              },
+            },
+            "composite": Object {
+              "size": 100,
+              "sources": Array [
+                Object {
+                  "monitor_id": Object {
+                    "terms": Object {
+                      "field": "monitor.id",
+                    },
+                  },
+                },
+                Object {
+                  "location": Object {
+                    "terms": Object {
+                      "field": "observer.geo.name",
+                      "missing_bucket": true,
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": "now-15m",
+                    "lte": "now",
+                  },
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "summary.up",
+                },
+              },
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "bool": Object {
+                        "filter": Array [
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match_phrase": Object {
+                                    "monitor.id": "green-0001",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match_phrase": Object {
+                                    "monitor.name": "",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match": Object {
+                                    "monitor.id": "green-0000",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "bool": Object {
+                                    "minimum_should_match": 1,
+                                    "should": Array [
+                                      Object {
+                                        "match": Object {
+                                          "monitor.id": "green-0001",
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                                Object {
+                                  "bool": Object {
+                                    "minimum_should_match": 1,
+                                    "should": Array [
+                                      Object {
+                                        "bool": Object {
+                                          "minimum_should_match": 1,
+                                          "should": Array [
+                                            Object {
+                                              "match": Object {
+                                                "monitor.id": "green-0002",
+                                              },
+                                            },
+                                          ],
+                                        },
+                                      },
+                                      Object {
+                                        "bool": Object {
+                                          "minimum_should_match": 1,
+                                          "should": Array [
+                                            Object {
+                                              "bool": Object {
+                                                "minimum_should_match": 1,
+                                                "should": Array [
+                                                  Object {
+                                                    "match": Object {
+                                                      "monitor.id": "green-0003",
+                                                    },
+                                                  },
+                                                ],
+                                              },
+                                            },
+                                            Object {
+                                              "bool": Object {
+                                                "minimum_should_match": 1,
+                                                "should": Array [
+                                                  Object {
+                                                    "match": Object {
+                                                      "monitor.id": "green-0004",
+                                                    },
+                                                  },
+                                                ],
+                                              },
+                                            },
+                                          ],
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        "size": 0,
+        "sort": Array [
+          Object {
+            "@timestamp": "desc",
+          },
+        ],
+      },
+      "index": "heartbeat-8*",
+    },
+  ],
+  Array [
+    Object {},
+    Object {
+      "body": Object {
+        "aggs": Object {
+          "monitors": Object {
+            "aggregations": Object {
+              "state": Object {
+                "scripted_metric": Object {
+                  "combine_script": "return state;",
+                  "init_script": "
+                          // Globals are values that should be identical across all docs
+                          // We can cheat a bit by always overwriting these and make the
+                          // assumption that there is no variation in these across checks
+                          state.globals = new HashMap();
+                          // Here we store stuff broken out by agent.id and monitor.id
+                          // This should correspond to a unique check.
+                          state.checksByAgentIdIP = new HashMap();
+                          ",
+                  "map_script": "      
+                        Map curCheck = new HashMap();
+                        String agentId = doc[\\"agent.id\\"][0];
+                        String ip = null;
+                        if (doc[\\"monitor.ip\\"].length > 0) {
+                          ip = doc[\\"monitor.ip\\"][0];
+                        }
+                        String agentIdIP = agentId + \\"-\\" + (ip == null ? \\"\\" : ip.toString());
+                        def ts = doc[\\"@timestamp\\"][0].toInstant().toEpochMilli();
+                        
+                        def lastCheck = state.checksByAgentIdIP[agentId];
+                        Instant lastTs = lastCheck != null ? lastCheck[\\"@timestamp\\"] : null;
+                        if (lastTs != null && lastTs > ts) {
+                          return;
+                        }
+                        
+                        curCheck.put(\\"@timestamp\\", ts);
+                        
+                        Map agent = new HashMap();
+                        agent.id = agentId;
+                        curCheck.put(\\"agent\\", agent);
+                        
+                        if (state.globals.url == null) {
+                          Map url = new HashMap();
+                          Collection fields = [\\"full\\", \\"original\\", \\"scheme\\", \\"username\\", \\"password\\", \\"domain\\", \\"port\\", \\"path\\", \\"query\\", \\"fragment\\"];
+                          for (field in fields) {
+                            String docPath = \\"url.\\" + field;
+                            def val = doc[docPath];
+                            if (!val.isEmpty()) {
+                              url[field] = val[0];
+                            }
+                          }
+                          state.globals.url = url;
+                        }
+                        
+                        Map monitor = new HashMap();
+                        monitor.status = doc[\\"monitor.status\\"][0];
+                        monitor.ip = ip;
+                        if (!doc[\\"monitor.name\\"].isEmpty()) {
+                          String monitorName = doc[\\"monitor.name\\"][0];
+                          if (monitor.name != \\"\\") {
+                            monitor.name = monitorName;
+                          }
+                        }
+                        curCheck.monitor = monitor;
+                        
+                        if (curCheck.observer == null) {
+                          curCheck.observer = new HashMap();
+                        }
+                        if (curCheck.observer.geo == null) {
+                          curCheck.observer.geo = new HashMap();
+                        }
+                        if (!doc[\\"observer.geo.name\\"].isEmpty()) {
+                          curCheck.observer.geo.name = doc[\\"observer.geo.name\\"][0];
+                        }
+                        if (!doc[\\"observer.geo.location\\"].isEmpty()) {
+                          curCheck.observer.geo.location = doc[\\"observer.geo.location\\"][0];
+                        }
+                        if (!doc[\\"kubernetes.pod.uid\\"].isEmpty() && curCheck.kubernetes == null) {
+                          curCheck.kubernetes = new HashMap();
+                          curCheck.kubernetes.pod = new HashMap();
+                          curCheck.kubernetes.pod.uid = doc[\\"kubernetes.pod.uid\\"][0];
+                        }
+                        if (!doc[\\"container.id\\"].isEmpty() && curCheck.container == null) {
+                          curCheck.container = new HashMap();
+                          curCheck.container.id = doc[\\"container.id\\"][0];
+                        }
+                        if (curCheck.tls == null) {
+                          curCheck.tls = new HashMap();
+                        }
+                        if (!doc[\\"tls.certificate_not_valid_after\\"].isEmpty()) {
+                          curCheck.tls.certificate_not_valid_after = doc[\\"tls.certificate_not_valid_after\\"][0];
+                        }
+                        if (!doc[\\"tls.certificate_not_valid_before\\"].isEmpty()) {
+                          curCheck.tls.certificate_not_valid_before = doc[\\"tls.certificate_not_valid_before\\"][0];
+                        }
+                        
+                        state.checksByAgentIdIP[agentIdIP] = curCheck;
+                        ",
+                  "reduce_script": "
+                        // The final document
+                        Map result = new HashMap();
+                        
+                        Map checks = new HashMap();
+                        Instant maxTs = Instant.ofEpochMilli(0);
+                        Collection ips = new HashSet();
+                        Collection geoNames = new HashSet();
+                        Collection podUids = new HashSet();
+                        Collection containerIds = new HashSet();
+                        Collection tls = new HashSet();
+                        String name = null; 
+                        for (state in states) {
+                          result.putAll(state.globals);
+                          for (entry in state.checksByAgentIdIP.entrySet()) {
+                            def agentIdIP = entry.getKey();
+                            def check = entry.getValue();
+                            def lastBestCheck = checks.get(agentIdIP);
+                            def checkTs = Instant.ofEpochMilli(check.get(\\"@timestamp\\"));
+                        
+                            if (maxTs.isBefore(checkTs)) { maxTs = checkTs}
+                        
+                            if (lastBestCheck == null || lastBestCheck.get(\\"@timestamp\\") < checkTs) {
+                              check[\\"@timestamp\\"] = check[\\"@timestamp\\"];
+                              checks[agentIdIP] = check
+                            }
+      
+                            if (check.monitor.name != null && check.monitor.name != \\"\\") {
+                              name = check.monitor.name;
+                            }
+      
+                            ips.add(check.monitor.ip);
+                            if (check.observer != null && check.observer.geo != null && check.observer.geo.name != null) {
+                              geoNames.add(check.observer.geo.name);
+                            }
+                            if (check.kubernetes != null && check.kubernetes.pod != null) {
+                              podUids.add(check.kubernetes.pod.uid);
+                            }
+                            if (check.container != null) {
+                              containerIds.add(check.container.id);
+                            }
+                            if (check.tls != null) {
+                              tls.add(check.tls);
+                            }
+                          }
+                        }
+                        
+                        // We just use the values so we can store these as nested docs
+                        result.checks = checks.values();
+                        result.put(\\"@timestamp\\", maxTs);
+                        
+                        
+                        Map summary = new HashMap();
+                        summary.up = checks.entrySet().stream().filter(c -> c.getValue().monitor.status == \\"up\\").count();
+                        summary.down = checks.size() - summary.up;
+                        result.summary = summary;
+                        
+                        Map monitor = new HashMap();
+                        monitor.ip = ips;
+                        monitor.name = name;
+                        monitor.status = summary.down > 0 ? (summary.up > 0 ? \\"mixed\\": \\"down\\") : \\"up\\";
+                        result.monitor = monitor;
+                        
+                        Map observer = new HashMap();
+                        Map geo = new HashMap();
+                        observer.geo = geo;
+                        geo.name = geoNames;
+                        result.observer = observer;
+                        
+                        if (!podUids.isEmpty()) {
+                          result.kubernetes = new HashMap();
+                          result.kubernetes.pod = new HashMap();
+                          result.kubernetes.pod.uid = podUids;
+                        }
+      
+                        if (!containerIds.isEmpty()) {
+                          result.container = new HashMap();
+                          result.container.id = containerIds;
+                        }
+                        
+                        if (!tls.isEmpty()) {
+                          result.tls = new HashMap();
+                          result.tls = tls;
+                        }
+      
+                        return result;
+                        ",
+                },
+              },
+            },
+            "composite": Object {
+              "size": 50,
+              "sources": Array [
+                Object {
+                  "monitor_id": Object {
+                    "terms": Object {
+                      "field": "monitor.id",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": "now-15m",
+                    "lte": "now",
+                  },
+                },
+              },
+              Object {
+                "terms": Object {
+                  "monitor.check_group": Array [
+                    undefined,
+                    undefined,
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "bool": Object {
+                        "filter": Array [
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match_phrase": Object {
+                                    "monitor.id": "green-0001",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match_phrase": Object {
+                                    "monitor.name": "",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match": Object {
+                                    "monitor.id": "green-0000",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "bool": Object {
+                                    "minimum_should_match": 1,
+                                    "should": Array [
+                                      Object {
+                                        "match": Object {
+                                          "monitor.id": "green-0001",
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                                Object {
+                                  "bool": Object {
+                                    "minimum_should_match": 1,
+                                    "should": Array [
+                                      Object {
+                                        "bool": Object {
+                                          "minimum_should_match": 1,
+                                          "should": Array [
+                                            Object {
+                                              "match": Object {
+                                                "monitor.id": "green-0002",
+                                              },
+                                            },
+                                          ],
+                                        },
+                                      },
+                                      Object {
+                                        "bool": Object {
+                                          "minimum_should_match": 1,
+                                          "should": Array [
+                                            Object {
+                                              "bool": Object {
+                                                "minimum_should_match": 1,
+                                                "should": Array [
+                                                  Object {
+                                                    "match": Object {
+                                                      "monitor.id": "green-0003",
+                                                    },
+                                                  },
+                                                ],
+                                              },
+                                            },
+                                            Object {
+                                              "bool": Object {
+                                                "minimum_should_match": 1,
+                                                "should": Array [
+                                                  Object {
+                                                    "match": Object {
+                                                      "monitor.id": "green-0004",
+                                                    },
+                                                  },
+                                                ],
+                                              },
+                                            },
+                                          ],
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        "size": 0,
+        "sort": Array [
+          Object {
+            "@timestamp": "desc",
+          },
+        ],
+      },
+      "index": "heartbeat-8*",
+    },
+  ],
+  Array [
+    Object {},
+    Object {
+      "body": Object {
+        "aggs": Object {
+          "by_id": Object {
+            "aggs": Object {
+              "histogram": Object {
+                "aggs": Object {
+                  "status": Object {
+                    "terms": Object {
+                      "field": "monitor.status",
+                      "shard_size": 2,
+                      "size": 2,
+                    },
+                  },
+                },
+                "date_histogram": Object {
+                  "field": "@timestamp",
+                  "fixed_interval": "36000ms",
+                  "missing": 0,
+                },
+              },
+            },
+            "terms": Object {
+              "field": "monitor.id",
+              "size": 50,
+            },
+          },
+        },
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "terms": Object {
+                  "monitor.id": Array [
+                    "auto-http-0X21EE76EAC459873F",
+                    "auto-http-0X2AF1D7DB9C490053",
+                  ],
+                },
+              },
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": "now-15m",
+                    "lte": "now",
+                  },
+                },
+              },
+            ],
+          },
+        },
+        "size": 0,
+      },
+      "index": "heartbeat-8*",
+    },
+  ],
+]
+`;
+
+exports[`ElasticsearchMonitorStatesAdapter returns properly formatted objects from raw es documents 1`] = `
+Array [
+  Object {
+    "histogram": undefined,
+    "monitor_id": "auto-http-0X21EE76EAC459873F",
+    "state": Object {
+      "@timestamp": "2019-06-26T13:42:42.535Z",
+      "checks": Array [
+        Object {
+          "@timestamp": 1561556562535,
+          "agent": Object {
+            "id": "5884d7f7-9a49-4b0e-bff2-72a475aa695f",
+          },
+          "monitor": Object {
+            "ip": "127.0.0.1",
+            "name": "test-page",
+            "status": "down",
+          },
+          "observer": Object {
+            "geo": Object {
+              "location": Object {
+                "lat": 39.952599965035915,
+                "lon": 75.1651999913156,
+              },
+              "name": "us-east-2",
+            },
+          },
+          "timestamp": 1561556562535,
+        },
+      ],
+      "monitor": Object {
+        "ip": Array [
+          "127.0.0.1",
+        ],
+        "status": "down",
+      },
+      "observer": Object {
+        "geo": Object {
+          "name": Array [
+            "us-east-2",
+          ],
+        },
+      },
+      "summary": Object {
+        "down": 1,
+        "up": 0,
+      },
+      "timestamp": "2019-06-26T13:42:42.535Z",
+      "url": Object {
+        "domain": "localhost",
+        "full": "http://localhost:12349/test-page",
+        "path": "/test-page",
+        "port": 12349,
+        "scheme": "http",
+      },
+    },
+  },
+  Object {
+    "histogram": undefined,
+    "monitor_id": "auto-http-0X2AF1D7DB9C490053",
+    "state": Object {
+      "@timestamp": "2019-06-26T13:42:21.536Z",
+      "checks": Array [
+        Object {
+          "@timestamp": 1561556541536,
+          "agent": Object {
+            "id": "5884d7f7-9a49-4b0e-bff2-72a475aa695f",
+          },
+          "monitor": Object {
+            "ip": "35.245.22.113",
+            "name": "prod-site",
+            "status": "down",
+          },
+          "observer": Object {
+            "geo": Object {
+              "location": Object {
+                "lat": 39.952599965035915,
+                "lon": 75.1651999913156,
+              },
+              "name": "us-east-2",
+            },
+          },
+          "timestamp": 1561556541536,
+        },
+      ],
+      "monitor": Object {
+        "ip": Array [
+          "35.245.22.113",
+        ],
+        "status": "down",
+      },
+      "observer": Object {
+        "geo": Object {
+          "name": Array [
+            "us-east-2",
+          ],
+        },
+      },
+      "summary": Object {
+        "down": 1,
+        "up": 0,
+      },
+      "timestamp": "2019-06-26T13:42:21.536Z",
+      "tls": Array [
+        Object {
+          "certificate_not_valid_after": "2019-11-09T18:04:06.000Z",
+          "certificate_not_valid_before": "2019-11-08T17:03:23.000Z",
+        },
+      ],
+      "url": Object {
+        "domain": "35.245.22.113",
+        "full": "http://35.245.22.113:12349/",
+        "path": "/",
+        "port": 12349,
+        "scheme": "http",
+      },
+    },
+  },
+]
+`;

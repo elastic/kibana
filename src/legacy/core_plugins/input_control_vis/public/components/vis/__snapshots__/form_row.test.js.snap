@@ -1,9 +1,40 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`renders control with warning 1`] = `
+<EuiFormRow
+  data-test-subj="inputControl0"
+  describedByIds={Array []}
+  display="row"
+  fullWidth={false}
+  hasEmptyLabelSpace={false}
+  id="controlId"
+  label={
+    <React.Fragment>
+      <EuiToolTip
+        content="This is a warning"
+        delay="regular"
+        position="top"
+      >
+        <EuiIcon
+          type="alert"
+        />
+      </EuiToolTip>
+      test control
+    </React.Fragment>
+  }
+  labelType="label"
+>
+  <div>
+    My Control
+  </div>
+</EuiFormRow>
+`;
+
 exports[`renders disabled control with tooltip 1`] = `
 <EuiFormRow
   data-test-subj="inputControl0"
   describedByIds={Array []}
+  display="row"
   fullWidth={false}
   hasEmptyLabelSpace={false}
   id="controlId"
@@ -11,6 +42,7 @@ exports[`renders disabled control with tooltip 1`] = `
   labelType="label"
 >
   <EuiToolTip
+    anchorClassName="eui-displayBlock"
     content="I am disabled for testing purposes"
     delay="regular"
     placement="top"
@@ -27,6 +59,7 @@ exports[`renders enabled control 1`] = `
 <EuiFormRow
   data-test-subj="inputControl0"
   describedByIds={Array []}
+  display="row"
   fullWidth={false}
   hasEmptyLabelSpace={false}
   id="controlId"

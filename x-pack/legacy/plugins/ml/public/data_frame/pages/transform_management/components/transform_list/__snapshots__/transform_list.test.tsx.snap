@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: Transform List <DataFrameTransformList /> Minimal initialization 1`] = `
+<Fragment>
+  <ProgressBar
+    isLoading={false}
+  />
+  <EuiEmptyPrompt
+    actions={
+      Array [
+        <EuiButtonEmpty
+          isDisabled={true}
+          onClick={[Function]}
+        >
+          Create your first data frame transform
+        </EuiButtonEmpty>,
+      ]
+    }
+    data-test-subj="mlNoDataFrameTransformsFound"
+    iconColor="subdued"
+    title={
+      <h2>
+        No data frame transforms found
+      </h2>
+    }
+  />
+</Fragment>
+`;

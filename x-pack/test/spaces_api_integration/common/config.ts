@@ -38,6 +38,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         esSupertestWithoutAuth: config.xpack.api.get('services.esSupertestWithoutAuth'),
         supertest: config.kibana.api.get('services.supertest'),
         supertestWithoutAuth: config.xpack.api.get('services.supertestWithoutAuth'),
+        retry: config.xpack.api.get('services.retry'),
         esArchiver: config.kibana.functional.get('services.esArchiver'),
         kibanaServer: config.kibana.functional.get('services.kibanaServer'),
       },
@@ -63,6 +64,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         serverArgs: [
           ...config.xpack.api.get('kbnTestServer.serverArgs'),
           '--optimize.enabled=false',
+          // disable anonymouse access so that we're testing both on and off in different suites
+          '--status.allowAnonymous=false',
           '--server.xsrf.disableProtection=true',
           ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
         ],

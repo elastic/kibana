@@ -17,7 +17,7 @@
  * under the License.
  */
 
-module.exports = () => {
+module.exports = (_, options = {}) => {
   return {
     presets: [
       [
@@ -32,11 +32,14 @@ module.exports = () => {
             node: 'current',
           },
 
-          // replaces `import "@babel/polyfill"` with a list of require statements
+          // replaces `import "core-js/stable"` with a list of require statements
           // for just the polyfills that the target versions don't already supply
           // on their own
           useBuiltIns: 'entry',
-          modules: 'cjs'
+          modules: 'cjs',
+          corejs: 3,
+
+          ...(options['@babel/preset-env'] || {})
         },
       ],
       require('./common_preset'),

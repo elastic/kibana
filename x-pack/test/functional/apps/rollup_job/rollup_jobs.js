@@ -12,13 +12,12 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['security', 'rollup', 'common', 'header']);
 
-  describe('rollup job', async () => {
+  describe('rollup job', function () {
+    this.tags('smoke');
     before(async () => {
       // init data
-      await Promise.all([
-        esArchiver.loadIfNeeded('logstash_functional'),
-        esArchiver.load('canvas/default'),
-      ]);
+      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.load('canvas/default');
       await PageObjects.common.navigateToApp('rollupJob');
     });
 

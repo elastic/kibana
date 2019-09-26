@@ -76,7 +76,7 @@ export class CreateIndexPatternWizard extends Component {
       this.setState(prevState => ({
         toasts: prevState.toasts.concat([{
           title: errorMsg,
-          id: errorMsg,
+          id: errorMsg.props.id,
           color: 'warning',
           iconType: 'alert',
         }])
@@ -121,7 +121,7 @@ export class CreateIndexPatternWizard extends Component {
     const { services } = this.props;
     const { indexPattern } = this.state;
 
-    const emptyPattern = await services.indexPatterns.get();
+    const emptyPattern = await services.indexPatterns.make();
 
     Object.assign(emptyPattern, {
       id: indexPatternId,
@@ -146,7 +146,7 @@ export class CreateIndexPatternWizard extends Component {
       await services.config.set('defaultIndex', createdId);
     }
 
-    services.indexPatterns.cache.clear(createdId);
+    services.indexPatterns.clearCache(createdId);
     services.changeUrl(`/management/kibana/index_patterns/${createdId}`);
   }
 

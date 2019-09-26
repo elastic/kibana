@@ -36,7 +36,7 @@ import path from 'path';
 import chalk from 'chalk';
 import parser from 'intl-messageformat-parser';
 
-import { createFailError } from '../run';
+import { createFailError } from '@kbn/dev-utils';
 
 const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
@@ -323,4 +323,9 @@ export class ErrorReporter {
       `${chalk.white.bgRed(' I18N ERROR ')} Error in ${normalizePath(context.name)}\n${error}`
     );
   }
+}
+
+// export function arrayify<Subj = any>(subj: Subj | Subj[]): Subj[] {
+export function arrayify(subj) {
+  return Array.isArray(subj) ? subj : [subj];
 }

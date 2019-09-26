@@ -20,7 +20,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { injectI18n } from '@kbn/i18n/react';
-import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
+import { IndexPatternSelect } from 'ui/index_patterns';
 
 import {
   EuiFormRow,

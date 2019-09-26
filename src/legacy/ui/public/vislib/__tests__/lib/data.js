@@ -21,7 +21,7 @@ import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 
-import { VislibLibDataProvider } from '../../lib/data';
+import { Data } from '../../lib/data';
 import '../../../persisted_state';
 
 const seriesData = {
@@ -117,12 +117,10 @@ const colsData = {
 };
 
 describe('Vislib Data Class Test Suite', function () {
-  let Data;
   let persistedState;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
-    Data = Private(VislibLibDataProvider);
+  beforeEach(ngMock.inject(function ($injector) {
     persistedState = new ($injector.get('PersistedState'))();
   }));
 

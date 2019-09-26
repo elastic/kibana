@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
       ];
 
       // check the all data in the table
-      pipelinesAll.forEach((obj, index) => { // eslint-disable-line no-unused-vars
+      pipelinesAll.forEach((obj, index) => {
         expect(pipelinesAll[index].id).to.be(tableData[index].id);
         expect(pipelinesAll[index].eventsEmittedRate).to.be(tableData[index].eventsEmittedRate);
         expect(pipelinesAll[index].nodeCount).to.be(tableData[index].nodeCount);
@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }) {
       ];
 
       // check the all data in the table
-      pipelinesAll.forEach((obj, index) => { // eslint-disable-line no-unused-vars
+      pipelinesAll.forEach((obj, index) => {
         expect(pipelinesAll[index].id).to.be(tableData[index].id);
         expect(pipelinesAll[index].eventsEmittedRate).to.be(tableData[index].eventsEmittedRate);
         expect(pipelinesAll[index].nodeCount).to.be(tableData[index].nodeCount);

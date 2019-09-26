@@ -22,6 +22,7 @@ import { first, map } from 'rxjs/operators';
 import healthCheck from './lib/health_check';
 import { Cluster } from './lib/cluster';
 import { createProxy } from './lib/create_proxy';
+import { handleESError } from './lib/handle_es_error';
 
 export default function (kibana) {
   let defaultVars;
@@ -77,13 +78,7 @@ export default function (kibana) {
           throw new Error(`cluster '${name}' already exists`);
         }
 
-        // We fill all the missing properties in the `clientConfig` using the default
-        // Elasticsearch config so that we don't depend on default values set and
-        // controlled by underlying Elasticsearch JS client.
-        const cluster = new Cluster(server.newPlatform.setup.core.elasticsearch.createClient(name, {
-          ...esConfig,
-          ...clientConfig,
-        }));
+        const cluster = new Cluster(server.newPlatform.setup.core.elasticsearch.createClient(name, clientConfig));
 
         clusters.set(name, cluster);
 
@@ -97,6 +92,8 @@ export default function (kibana) {
 
         clusters.clear();
       });
+
+      server.expose('handleESError', handleESError);
 
       createProxy(server);
 

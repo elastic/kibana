@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['dashboard']);
 
-  describe('dashboard data-shared attributes', async () => {
+  describe('dashboard data-shared attributes', () => {
     let originalTitles = [];
 
     before(async () => {

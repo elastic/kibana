@@ -9,7 +9,19 @@ for displayed decimal values.
 . Scroll or search for the setting you want to modify.
 . Enter a new value for the setting.
 
+[float]
+[[settings-read-only-access]]
+=== [xpack]#Read only access#
+When you have insufficient privileges to edit advanced settings, the following 
+indicator in Kibana will be displayed. The buttons to edit settings won't be visible. 
+For more information on granting access to Kibana see <<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::images/settings-read-only-badge.png[Example of Advanced Settings Management's read only access indicator in Kibana's header]
+
+[float]
 [[kibana-settings-reference]]
+=== Kibana settings reference
 
 WARNING: Modifying a setting can affect {kib}
 performance and cause problems that are
@@ -31,6 +43,7 @@ removes it from {kib} permanently.
 `dateFormat:scaled`:: The values that define the format to use to render ordered time-based data. Formatted timestamps must
 adapt to the interval between measurements. Keys are http://en.wikipedia.org/wiki/ISO_8601#Time_intervals[ISO8601 intervals].
 `dateFormat:tz`:: The timezone that Kibana uses. The default value of `Browser` uses the timezone detected by the browser.
+`dateNanosFormat`:: The format to use for displaying https://momentjs.com/docs/#/displaying/format/[pretty formatted dates] of {ref}/date_nanos.html[Elasticsearch date_nanos type].
 `defaultIndex`:: The index to access if no index is set. The default is `null`. 
 `fields:popularLimit`:: The top N most popular fields to show.
 `filterEditor:suggestValues`:: Set this property to `false` to prevent the filter editor from suggesting values for fields.
@@ -69,7 +82,7 @@ Choices are <<kuery-query, KQL>>, a language built specifically for {kib}, and t
 query syntax>>.
 `shortDots:enable`:: Set this property to `true` to shorten long 
 field names in visualizations. For example, show `f.b.baz` instead of `foo.bar.baz`.
-`sort:options`:: Options for the Elasticsearch {ref}/search-request-sort.html[sort] parameter.
+`sort:options`:: Options for the Elasticsearch {ref}/search-request-body.html#request-body-search-sort[sort] parameter.
 `state:storeInSessionStorage`:: [experimental] Kibana tracks UI state in the 
 URL, which can lead to problems when there is a lot of state information, 
 and the URL gets very long. 
@@ -120,6 +133,8 @@ The default is `_source`.
 the Visualize button in the field drop down. The default is `20`.
 `discover:sampleSize`:: The number of rows to show in the Discover table.
 `discover:sort:defaultOrder`:: The default sort direction for time-based index patterns.
+`discover:searchOnPageLoad`:: Controls whether a search is executed when Discover first loads. 
+This setting does not have an effect when loading a saved search.
 `doc_table:hideTimeColumn`:: Hides the "Time" column in Discover and in all saved searches on dashboards.
 `doc_table:highlight`:: Highlights results in Discover and saved searches on dashboards. 
 Highlighting slows requests when
@@ -170,7 +185,10 @@ Refresh the page to apply the changes.
 === Search settings
 
 [horizontal]
-`courier:customRequestPreference`:: {ref}/search-request-preference.html[Request preference] 
+`courier:batchSearches`:: When disabled, dashboard panels will load individually, and search requests will terminate when
+users navigate away or update the query. When enabled, dashboard panels will load together when all of the data is loaded,
+and searches will not terminate.
+`courier:customRequestPreference`:: {ref}/search-request-body.html#request-body-search-preference[Request preference] 
 to use when `courier:setRequestPreference` is set to "custom".
 `courier:ignoreFilterIfFieldNotInIndex`:: Skips filters that apply to fields that don't exist in the index for a visualization. 
 Useful when dashboards consist of visualizations from multiple index patterns.
@@ -187,7 +205,17 @@ because requests can be spread across all shard copies. However, results might
 be inconsistent because different shards might be in different refresh states.
 `search:includeFrozen`:: Includes {ref}/frozen-indices.html[frozen indices] in results. 
 Searching through frozen indices
-might increase the search time.
+might increase the search time. This setting is off by default. Users must opt-in to include frozen indices.
+
+[float]
+[[kibana-siem-settings]]
+=== SIEM settings
+
+[horizontal]
+`siem:defaultAnomalyScore`:: The threshold above which anomalies are displayed in the SIEM app.
+`siem:defaultIndex`:: A comma-delimited list of Elasticsearch indices from which the SIEM app collects events. 
+`siem:refreshIntervalDefaults`:: The default refresh interval for the SIEM time filter, in milliseconds.
+`siem:timeDefaults`:: The default period of time in the SIEM time filter.
 
 [float]
 [[kibana-timelion-settings]]
@@ -198,7 +226,9 @@ might increase the search time.
 `timelion:default_rows`:: The default number of rows to use on a Timelion sheet.
 `timelion:es.default_index`:: The default index when using the `.es()` query.
 `timelion:es.timefield`:: The default field containing a timestamp when using the `.es()` query.
-`timelion:graphite.url`:: [experimental] Used with graphite queries, this is the URL of your graphite host.
+`timelion:graphite.url`:: [experimental] Used with graphite queries, this is the URL of your graphite host 
+in the form https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite. This URL can be 
+selected from a whitelist configured in the `kibana.yml` under `timelion.graphiteUrls`.
 `timelion:max_buckets`:: The maximum number of buckets a single data source can return.
 This value is used for calculating automatic intervals in visualizations.
 `timelion:min_interval`:: The smallest interval to calculate when using "auto".

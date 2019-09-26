@@ -28,13 +28,17 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const renderable = getService('renderable');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'discover']);
   const dashboardName = 'Dashboard Panel Controls Test';
 
   describe('dashboard panel controls', function viewEditModeTests() {
+    this.tags('smoke');
+
     before(async function () {
       await PageObjects.dashboard.initTests();
       await browser.refresh();
+      await PageObjects.header.awaitKibanaChrome();
 
       // This flip between apps fixes the url so state is preserved when switching apps in test mode.
       // Without this flip the url in test mode looks something like
@@ -92,6 +96,7 @@ export default function ({ getService, getPageObjects }) {
 
       describe('on an expanded panel', function () {
         it('are hidden in view mode', async function () {
+          await renderable.waitForRender();
           await PageObjects.dashboard.saveDashboard(dashboardName);
           await dashboardPanelActions.openContextMenu();
           await dashboardPanelActions.clickExpandPanelToggle();

@@ -23,7 +23,7 @@ import path from 'path';
 import _ from 'lodash';
 const grammar = fs.readFileSync(path.resolve(__dirname, '../../../public/chain.peg'), 'utf8');
 import PEG from 'pegjs';
-const Parser = PEG.buildParser(grammar);
+const Parser = PEG.generate(grammar);
 
 export default function parseSheet(sheet) {
   return _.map(sheet, function (plot) {

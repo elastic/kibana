@@ -1,0 +1,10 @@
+{
+  "id": "code",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "elasticsearch",
+    "xpack_main"
+  ]
+}

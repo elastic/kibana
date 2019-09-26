@@ -21,7 +21,7 @@ import url, { format as formatUrl } from 'url';
 import pkg from '../../../../package.json';
 import { adminTestUser } from '../kbn';
 
-export const esTestConfig = new class EsTestConfig {
+export const esTestConfig = new (class EsTestConfig {
   getVersion() {
     return process.env.TEST_ES_BRANCH || pkg.version;
   }
@@ -36,6 +36,10 @@ export const esTestConfig = new class EsTestConfig {
 
   getBuildFrom() {
     return process.env.TEST_ES_FROM || 'snapshot';
+  }
+
+  getTransportPort() {
+    return process.env.TEST_ES_TRANSPORT_PORT || '9300-9400';
   }
 
   getUrlParts() {
@@ -67,4 +71,4 @@ export const esTestConfig = new class EsTestConfig {
       password: password,
     };
   }
-}();
+})();

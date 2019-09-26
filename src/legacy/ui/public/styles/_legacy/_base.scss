@@ -59,8 +59,8 @@ input[type="checkbox"],
     padding-bottom: $euiSizeS;
   }
 
-  > kbn-top-nav {
-    z-index: 5;
+  .globalQueryBar {
+    padding: 0px $euiSizeS $euiSizeS $euiSizeS;
   }
 
   > nav,

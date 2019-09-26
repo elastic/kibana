@@ -37,9 +37,47 @@ for example, `logstash-*`.
 
 // tag::notable-breaking-changes[]
 [float]
+==== Legacy browsers are now rejected by default
+*Details:* `csp.strict` is now enabled by default, so Kibana will fail to load for older, legacy browsers that do not enforce basic Content Security Policy protections - notably Internet Explorer 11.
+
+*Impact:* To allow Kibana to function for these legacy browsers, set `csp.strict: false`. Since this is about enforcing a security protocol, we *strongly discourage* disabling `csp.strict` unless it is critical that you support Internet Explorer 11.
+
+[float]
 ==== Default logging timezone is now the system's timezone
 *Details:* In prior releases the timezone used in logs defaulted to UTC.  We now use the host machine's timezone by default.
 
 *Impact:* To restore the previous behavior, in kibana.yml set `logging.timezone: UTC`.
+
+[float]
+==== Responses are never logged by default
+*Details:* Previously responses would be logged if either `logging.json` was true, `logging.dest` was specified, or a `TTY` was detected.
+
+*Impact:* To restore the previous behavior, in kibana.yml set `logging.events.response=*`.
+
+[float]
+==== `xpack.security.authProviders` is no longer valid
+*Details:* The deprecated `xpack.security.authProviders` setting in the `kibana.yml` file has been removed.
+
+*Impact:* Use `xpack.security.authc.providers` instead.
+
+[float]
+==== `xpack.security.authc.saml.realm` is now mandatory when using the SAML authentication provider
+*Details:* Previously Kibana was choosing the appropriate Elasticsearch SAML realm automatically using the `Assertion Consumer Service`
+URL that it derived from the actual server address. Starting in 8.0.0, the Elasticsearch SAML realm name that Kibana will use should be
+specified explicitly.
+
+*Impact:* Always define `xpack.security.authc.saml.realm` when using the SAML authentication provider.
+
+[float]
+==== `xpack.security.public` is no longer valid
+*Details:* The deprecated `xpack.security.public` setting in the `kibana.yml` file has been removed.
+
+*Impact:* Define `xpack.security.authc.saml.realm` when using the SAML authentication provider instead.
+
+[float]
+=== `optimize` directory is now in the `data` folder
+*Details:* Generated bundles have moved to the configured `path.data` folder.
+
+*Impact:* Any workflow that involved manually clearing generated bundles will have to be updated with the new path.
 
 // end::notable-breaking-changes[]

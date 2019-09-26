@@ -56,14 +56,14 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       // check for the index pattern info flyout that covers the
       // create index pattern button on smaller screens
       if (await testSubjects.exists('CreateIndexPatternPrompt')) {
-        await testSubjects.click('CreateIndexPatternPrompt euiFlyoutCloseButton');
+        await testSubjects.click('CreateIndexPatternPrompt > euiFlyoutCloseButton');
       }
     }
 
     async getAdvancedSettings(propertyName) {
       log.debug('in getAdvancedSettings');
       const setting = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
-      return await setting.getProperty('value');
+      return await setting.getAttribute('value');
     }
 
     async expectDisabledAdvancedSetting(propertyName) {
@@ -73,7 +73,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async getAdvancedSettingCheckbox(propertyName) {
       log.debug('in getAdvancedSettingCheckbox');
-      return await testSubjects.getProperty(`advancedSetting-editField-${propertyName}`, 'checked');
+      return await testSubjects.getAttribute(`advancedSetting-editField-${propertyName}`, 'checked');
     }
 
     async clearAdvancedSettings(propertyName) {
@@ -208,21 +208,21 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getFieldNames() {
-      const fieldNameCells = await testSubjects.findAll('editIndexPattern indexedFieldName');
+      const fieldNameCells = await testSubjects.findAll('editIndexPattern > indexedFieldName');
       return await mapAsync(fieldNameCells, async cell => {
         return (await cell.getVisibleText()).trim();
       });
     }
 
     async getFieldTypes() {
-      const fieldNameCells = await testSubjects.findAll('editIndexPattern indexedFieldType');
+      const fieldNameCells = await testSubjects.findAll('editIndexPattern > indexedFieldType');
       return await mapAsync(fieldNameCells, async cell => {
         return (await cell.getVisibleText()).trim();
       });
     }
 
     async getScriptedFieldLangs() {
-      const fieldNameCells = await testSubjects.findAll('editIndexPattern scriptedFieldLang');
+      const fieldNameCells = await testSubjects.findAll('editIndexPattern > scriptedFieldLang');
       return await mapAsync(fieldNameCells, async cell => {
         return (await cell.getVisibleText()).trim();
       });
@@ -267,7 +267,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getPopularity() {
-      return await testSubjects.getProperty('editorFieldCount', 'value');
+      return await testSubjects.getAttribute('editorFieldCount', 'value');
     }
 
     async controlChangeCancel() {
@@ -564,12 +564,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       log.debug(`Clicking importObjects`);
       await testSubjects.click('importObjects');
       log.debug(`Setting the path on the file input`);
-      if (browser.isW3CEnabled) {
-        const input = await find.byCssSelector('.euiFilePicker__input');
-        await input.type(path);
-      } else {
-        await find.setValue('.euiFilePicker__input', path);
-      }
+      const input = await find.byCssSelector('.euiFilePicker__input');
+      await input.type(path);
 
       if (!overwriteAll) {
         log.debug(`Toggling overwriteAll`);

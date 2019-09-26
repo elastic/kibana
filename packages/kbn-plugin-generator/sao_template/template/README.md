@@ -32,7 +32,7 @@ See the [kibana contributing guide](https://github.com/elastic/kibana/blob/maste
 
     Run the browser tests in a real web browser.
 
-  - `yarn test:server`
+  - `yarn test:mocha`
 
     Run the server tests using mocha.
 

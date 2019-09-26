@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { VislibComponentsLabelsLabelsProvider } from './labels';
+export { labels } from './labels';

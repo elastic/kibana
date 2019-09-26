@@ -17,78 +17,53 @@
  * under the License.
  */
 
-// TODO these are imports from the old plugin world.
-// Once the new platform is ready, they can get removed
-// and handled by the platform itself in the setup method
-// of the ExpressionExectorService
-// @ts-ignore
-import { getInterpreter } from 'plugins/interpreter/interpreter';
-// @ts-ignore
-import { renderersRegistry } from 'plugins/interpreter/registries';
-import { ExpressionsService, ExpressionsSetup } from './expressions';
-import { SearchService, SearchSetup } from './search';
-import { QueryService, QuerySetup } from './query';
-import { FilterService, FilterSetup } from './filter';
-import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
+// /// Define plugin function
+import { DataPlugin as Plugin, DataSetup } from './plugin';
 
-class DataPlugin {
-  // Exposed services, sorted alphabetically
-  private readonly expressions: ExpressionsService;
-  private readonly filter: FilterService;
-  private readonly indexPatterns: IndexPatternsService;
-  private readonly search: SearchService;
-  private readonly query: QueryService;
-
-  constructor() {
-    this.indexPatterns = new IndexPatternsService();
-    this.filter = new FilterService();
-    this.query = new QueryService();
-    this.search = new SearchService();
-    this.expressions = new ExpressionsService();
-  }
-
-  public setup(): DataSetup {
-    return {
-      expressions: this.expressions.setup({
-        interpreter: {
-          getInterpreter,
-          renderersRegistry,
-        },
-      }),
-      indexPatterns: this.indexPatterns.setup(),
-      filter: this.filter.setup(),
-      search: this.search.setup(),
-      query: this.query.setup(),
-    };
-  }
-
-  public stop() {
-    this.expressions.stop();
-    this.indexPatterns.stop();
-    this.filter.stop();
-    this.search.stop();
-    this.query.stop();
-  }
+export function plugin() {
+  return new Plugin();
 }
 
-/**
- * We export data here so that users importing from 'plugins/data'
- * will automatically receive the response value of the `setup` contract, mimicking
- * the data that will eventually be injected by the new platform.
- */
-export const data = new DataPlugin().setup();
-
-/** @public */
-export interface DataSetup {
-  expressions: ExpressionsSetup;
-  indexPatterns: IndexPatternsSetup;
-  filter: FilterSetup;
-  search: SearchSetup;
-  query: QuerySetup;
-}
+// /// Export types & static code
 
 /** @public types */
-export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';
+export type DataSetup = DataSetup;
 
-/** @public types */
-export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';
+export { FilterBar, ApplyFiltersPopover } from './filter';
+export {
+  Field,
+  FieldType,
+  IndexPattern,
+  IndexPatterns,
+  StaticIndexPattern,
+} from './index_patterns';
+export { Query, QueryBarInput } from './query';
+export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
+
+/** @public static code */
+export * from '../common';
+export {
+  FilterManager,
+  FilterStateManager,
+  uniqFilters,
+  onlyDisabledFiltersChanged,
+} from './filter/filter_manager';
+export {
+  CONTAINS_SPACES,
+  getFromSavedObject,
+  getRoutes,
+  isFilterable,
+  IndexPatternSelect,
+  validateIndexPattern,
+  ILLEGAL_CHARACTERS,
+  INDEX_PATTERN_ILLEGAL_CHARACTERS,
+  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
+  IndexPatternAlreadyExists,
+  IndexPatternMissingIndices,
+  NoDefaultIndexPattern,
+  NoDefinedIndexPatterns,
+  mockFields,
+  mockIndexPattern,
+} from './index_patterns';
+
+export { TimeHistoryContract, TimefilterContract, getTime, InputTimeRange } from './timefilter';

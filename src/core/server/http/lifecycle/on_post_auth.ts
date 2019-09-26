@@ -17,59 +17,32 @@
  * under the License.
  */
 
-import Boom from 'boom';
-import { Lifecycle, Request, ResponseToolkit } from 'hapi';
-import { KibanaRequest } from '../router';
+import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from 'hapi';
+import { Logger } from '../../logging';
+import {
+  HapiResponseAdapter,
+  KibanaRequest,
+  KibanaResponse,
+  lifecycleResponseFactory,
+  LifecycleResponseFactory,
+} from '../router';
 
 enum ResultType {
   next = 'next',
-  redirected = 'redirected',
-  rejected = 'rejected',
 }
 
 interface Next {
   type: ResultType.next;
 }
 
-interface Redirected {
-  type: ResultType.redirected;
-  url: string;
-}
-
-interface Rejected {
-  type: ResultType.rejected;
-  error: Error;
-  statusCode?: number;
-}
-
-type OnPostAuthResult = Next | Rejected | Redirected;
+type OnPostAuthResult = Next;
 
 const postAuthResult = {
   next(): OnPostAuthResult {
     return { type: ResultType.next };
   },
-  redirected(url: string): OnPostAuthResult {
-    return { type: ResultType.redirected, url };
-  },
-  rejected(error: Error, options: { statusCode?: number } = {}): OnPostAuthResult {
-    return { type: ResultType.rejected, error, statusCode: options.statusCode };
-  },
-  isValid(candidate: any): candidate is OnPostAuthResult {
-    return (
-      candidate &&
-      (candidate.type === ResultType.next ||
-        candidate.type === ResultType.rejected ||
-        candidate.type === ResultType.redirected)
-    );
-  },
   isNext(result: OnPostAuthResult): result is Next {
-    return result.type === ResultType.next;
-  },
-  isRedirected(result: OnPostAuthResult): result is Redirected {
-    return result.type === ResultType.redirected;
-  },
-  isRejected(result: OnPostAuthResult): result is Rejected {
-    return result.type === ResultType.rejected;
+    return result && result.type === ResultType.next;
   },
 };
 
@@ -80,51 +53,46 @@ const postAuthResult = {
 export interface OnPostAuthToolkit {
   /** To pass request to the next handler */
   next: () => OnPostAuthResult;
-  /** To interrupt request handling and redirect to a configured url */
-  redirected: (url: string) => OnPostAuthResult;
-  /** Fail the request with specified error. */
-  rejected: (error: Error, options?: { statusCode?: number }) => OnPostAuthResult;
 }
 
 /** @public */
-export type OnPostAuthHandler<Params = any, Query = any, Body = any> = (
-  request: KibanaRequest<Params, Query, Body>,
-  t: OnPostAuthToolkit
-) => OnPostAuthResult | Promise<OnPostAuthResult>;
+export type OnPostAuthHandler = (
+  request: KibanaRequest,
+  response: LifecycleResponseFactory,
+  toolkit: OnPostAuthToolkit
+) => OnPostAuthResult | KibanaResponse | Promise<OnPostAuthResult | KibanaResponse>;
 
 const toolkit: OnPostAuthToolkit = {
   next: postAuthResult.next,
-  redirected: postAuthResult.redirected,
-  rejected: postAuthResult.rejected,
 };
+
 /**
  * @public
  * Adopt custom request interceptor to Hapi lifecycle system.
  * @param fn - an extension point allowing to perform custom logic for
  * incoming HTTP requests.
  */
-export function adoptToHapiOnPostAuthFormat(fn: OnPostAuthHandler) {
+export function adoptToHapiOnPostAuthFormat(fn: OnPostAuthHandler, log: Logger) {
   return async function interceptRequest(
     request: Request,
-    h: ResponseToolkit
+    responseToolkit: HapiResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
+    const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
-      const result = await fn(KibanaRequest.from(request, undefined), toolkit);
-      if (!postAuthResult.isValid(result)) {
-        throw new Error(
-          `Unexpected result from OnPostAuth. Expected OnPostAuthResult, but given: ${result}.`
-        );
+      const result = await fn(KibanaRequest.from(request), lifecycleResponseFactory, toolkit);
+      if (result instanceof KibanaResponse) {
+        return hapiResponseAdapter.handle(result);
       }
       if (postAuthResult.isNext(result)) {
-        return h.continue;
+        return responseToolkit.continue;
       }
-      if (postAuthResult.isRedirected(result)) {
-        return h.redirect(result.url).takeover();
-      }
-      const { error, statusCode } = result;
-      return Boom.boomify(error, { statusCode });
+
+      throw new Error(
+        `Unexpected result from OnPostAuth. Expected OnPostAuthResult or KibanaResponse, but given: ${result}.`
+      );
     } catch (error) {
-      return Boom.internal(error.message, { statusCode: 500 });
+      log.error(error);
+      return hapiResponseAdapter.toInternalError();
     }
   };
 }

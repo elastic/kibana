@@ -166,7 +166,7 @@ export const getSavedObjects = () => [
       "title": i18n.translate('server.sampleData.ecommerceSpec.averageSalesPriceTitle', {
         defaultMessage: '[eCommerce] Average Sales Price',
       }),
-      "visState": "{\"title\":\"[eCommerce] Average Sales Price\",\"type\":\"gauge\",\"params\":{\"type\":\"gauge\",\"addTooltip\":true,\"addLegend\":true,\"isDisplayWarning\":false,\"gauge\":{\"alignment\":\"automatic\",\"extendRange\":true,\"percentageMode\":false,\"gaugeType\":\"Circle\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Green to Red\",\"gaugeColorMode\":\"Labels\",\"colorsRange\":[{\"from\":0,\"to\":50},{\"from\":50,\"to\":75},{\"from\":75,\"to\":100}],\"invertColors\":true,\"labels\":{\"show\":true,\"color\":\"black\"},\"scale\":{\"show\":false,\"labels\":false,\"color\":\"#333\"},\"type\":\"meter\",\"style\":{\"bgWidth\":0.9,\"width\":0.9,\"mask\":false,\"bgMask\":false,\"maskBars\":50,\"bgFill\":\"#eee\",\"bgColor\":false,\"subText\":\"per order\",\"fontSize\":60,\"labelColor\":true},\"minAngle\":0,\"maxAngle\":6.283185307179586}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"avg\",\"schema\":\"metric\",\"params\":{\"field\":\"taxful_total_price\",\"customLabel\":\"average spend\"}}]}",
+      "visState": "{\"title\":\"[eCommerce] Average Sales Price\",\"type\":\"gauge\",\"params\":{\"type\":\"gauge\",\"addTooltip\":true,\"addLegend\":true,\"isDisplayWarning\":false,\"gauge\":{\"verticalSplit\":false,\"extendRange\":true,\"percentageMode\":false,\"gaugeType\":\"Circle\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Green to Red\",\"gaugeColorMode\":\"Labels\",\"colorsRange\":[{\"from\":0,\"to\":50},{\"from\":50,\"to\":75},{\"from\":75,\"to\":100}],\"invertColors\":true,\"labels\":{\"show\":true,\"color\":\"black\"},\"scale\":{\"show\":false,\"labels\":false,\"color\":\"#333\"},\"type\":\"meter\",\"style\":{\"bgWidth\":0.9,\"width\":0.9,\"mask\":false,\"bgMask\":false,\"maskBars\":50,\"bgFill\":\"#eee\",\"bgColor\":false,\"subText\":\"per order\",\"fontSize\":60,\"labelColor\":true},\"minAngle\":0,\"maxAngle\":6.283185307179586}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"avg\",\"schema\":\"metric\",\"params\":{\"field\":\"taxful_total_price\",\"customLabel\":\"average spend\"}}]}",
       "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 50\":\"rgb(165,0,38)\",\"50 - 75\":\"rgb(255,255,190)\",\"75 - 100\":\"rgb(0,104,55)\"}}}",
       "description": "",
       "version": 1,
@@ -185,7 +185,7 @@ export const getSavedObjects = () => [
       "title": i18n.translate('server.sampleData.ecommerceSpec.averageSoldQuantityTitle', {
         defaultMessage: '[eCommerce] Average Sold Quantity',
       }),
-      "visState": "{\"title\":\"[eCommerce] Average Sold Quantity\",\"type\":\"gauge\",\"params\":{\"type\":\"gauge\",\"addTooltip\":true,\"addLegend\":true,\"isDisplayWarning\":false,\"gauge\":{\"alignment\":\"automatic\",\"extendRange\":true,\"percentageMode\":false,\"gaugeType\":\"Circle\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Green to Red\",\"gaugeColorMode\":\"Labels\",\"colorsRange\":[{\"from\":0,\"to\":2},{\"from\":2,\"to\":3},{\"from\":3,\"to\":4}],\"invertColors\":true,\"labels\":{\"show\":true,\"color\":\"black\"},\"scale\":{\"show\":false,\"labels\":false,\"color\":\"#333\"},\"type\":\"meter\",\"style\":{\"bgWidth\":0.9,\"width\":0.9,\"mask\":false,\"bgMask\":false,\"maskBars\":50,\"bgFill\":\"#eee\",\"bgColor\":false,\"subText\":\"per order\",\"fontSize\":60,\"labelColor\":true},\"minAngle\":0,\"maxAngle\":6.283185307179586}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"avg\",\"schema\":\"metric\",\"params\":{\"field\":\"total_quantity\",\"customLabel\":\"average items\"}}]}",
+      "visState": "{\"title\":\"[eCommerce] Average Sold Quantity\",\"type\":\"gauge\",\"params\":{\"type\":\"gauge\",\"addTooltip\":true,\"addLegend\":true,\"isDisplayWarning\":false,\"gauge\":{\"verticalSplit\":false,\"extendRange\":true,\"percentageMode\":false,\"gaugeType\":\"Circle\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Green to Red\",\"gaugeColorMode\":\"Labels\",\"colorsRange\":[{\"from\":0,\"to\":2},{\"from\":2,\"to\":3},{\"from\":3,\"to\":4}],\"invertColors\":true,\"labels\":{\"show\":true,\"color\":\"black\"},\"scale\":{\"show\":false,\"labels\":false,\"color\":\"#333\"},\"type\":\"meter\",\"style\":{\"bgWidth\":0.9,\"width\":0.9,\"mask\":false,\"bgMask\":false,\"maskBars\":50,\"bgFill\":\"#eee\",\"bgColor\":false,\"subText\":\"per order\",\"fontSize\":60,\"labelColor\":true},\"minAngle\":0,\"maxAngle\":6.283185307179586}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"avg\",\"schema\":\"metric\",\"params\":{\"field\":\"total_quantity\",\"customLabel\":\"average items\"}}]}",
       "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 2\":\"rgb(165,0,38)\",\"2 - 3\":\"rgb(255,255,190)\",\"3 - 4\":\"rgb(0,104,55)\"}}}",
       "description": "",
       "version": 1,
@@ -212,10 +212,10 @@ export const getSavedObjects = () => [
         "taxful_total_price",
         "total_quantity"
       ],
-      "sort": [
+      "sort": [[
         "order_date",
         "desc"
-      ],
+      ]],
       "version": 1,
       "kibanaSavedObjectMeta": {
         "searchSourceJSON": "{\"index\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
@@ -278,7 +278,71 @@ export const getSavedObjects = () => [
     "type": "dashboard",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
-    "migrationVersion": {},
+    "references": [
+      {
+        "name": "panel_0",
+        "type": "visualization",
+        "id": "37cc8650-b882-11e8-a6d9-e546fe2bba5f"
+      },
+      {
+        "name": "panel_1",
+        "type": "visualization",
+        "id": "ed8436b0-b88b-11e8-a6d9-e546fe2bba5f"
+      },
+      {
+        "name": "panel_2",
+        "type": "visualization",
+        "id": "09ffee60-b88c-11e8-a6d9-e546fe2bba5f"
+      },
+      {
+        "name": "panel_3",
+        "type": "visualization",
+        "id": "1c389590-b88d-11e8-a6d9-e546fe2bba5f"
+      },
+      {
+        "name": "panel_4",
+        "type": "visualization",
+        "id": "45e07720-b890-11e8-a6d9-e546fe2bba5f"
+      },
+      {
+        "name": "panel_5",
+        "type": "visualization",
+        "id": "10f1a240-b891-11e8-a6d9-e546fe2bba5f"
+      },
+      {
+        "name": "panel_6",
+        "type": "visualization",
+        "id": "b80e6540-b891-11e8-a6d9-e546fe2bba5f"
+      },
+      {
+        "name": "panel_7",
+        "type": "visualization",
+        "id": "4b3ec120-b892-11e8-a6d9-e546fe2bba5f"
+      },
+      {
+        "name": "panel_8",
+        "type": "visualization",
+        "id": "9ca7aa90-b892-11e8-a6d9-e546fe2bba5f"
+      },
+      {
+        "name": "panel_9",
+        "type": "search",
+        "id": "3ba638e0-b894-11e8-a6d9-e546fe2bba5f"
+      },
+      {
+        "name": "panel_10",
+        "type": "visualization",
+        "id": "9c6f83f0-bb4d-11e8-9c84-77068524bcab"
+      },
+      {
+        "name": "panel_11",
+        "type": "visualization",
+        "id": "b72dd430-bb4d-11e8-9c84-77068524bcab"
+      }
+    ],
+    "migrationVersion": {
+      "dashboard": "7.0.0"
+    },
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.revenueDashboardTitle', {
         defaultMessage: '[eCommerce] Revenue Dashboard',
@@ -287,7 +351,7 @@ export const getSavedObjects = () => [
       "description": i18n.translate('server.sampleData.ecommerceSpec.revenueDashboardDescription', {
         defaultMessage: 'Analyze mock eCommerce orders and revenue',
       }),
-      "panelsJSON": "[{\"embeddableConfig\":{\"vis\":{\"colors\":{\"Men's Accessories\":\"#82B5D8\",\"Men's Clothing\":\"#F9BA8F\",\"Men's Shoes\":\"#F29191\",\"Women's Accessories\":\"#F4D598\",\"Women's Clothing\":\"#70DBED\",\"Women's Shoes\":\"#B7DBAB\"}}},\"gridData\":{\"x\":12,\"y\":18,\"w\":36,\"h\":10,\"i\":\"1\"},\"id\":\"37cc8650-b882-11e8-a6d9-e546fe2bba5f\",\"panelIndex\":\"1\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{\"vis\":{\"colors\":{\"FEMALE\":\"#6ED0E0\",\"MALE\":\"#447EBC\"},\"legendOpen\":false}},\"gridData\":{\"x\":12,\"y\":7,\"w\":12,\"h\":11,\"i\":\"2\"},\"id\":\"ed8436b0-b88b-11e8-a6d9-e546fe2bba5f\",\"panelIndex\":\"2\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":0,\"w\":18,\"h\":7,\"i\":\"3\"},\"id\":\"09ffee60-b88c-11e8-a6d9-e546fe2bba5f\",\"panelIndex\":\"3\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":18,\"y\":0,\"w\":30,\"h\":7,\"i\":\"4\"},\"id\":\"1c389590-b88d-11e8-a6d9-e546fe2bba5f\",\"panelIndex\":\"4\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":28,\"w\":48,\"h\":11,\"i\":\"5\"},\"id\":\"45e07720-b890-11e8-a6d9-e546fe2bba5f\",\"panelIndex\":\"5\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":18,\"w\":12,\"h\":10,\"i\":\"6\"},\"id\":\"10f1a240-b891-11e8-a6d9-e546fe2bba5f\",\"panelIndex\":\"6\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":7,\"w\":12,\"h\":11,\"i\":\"7\"},\"id\":\"b80e6540-b891-11e8-a6d9-e546fe2bba5f\",\"panelIndex\":\"7\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{\"vis\":{\"colors\":{\"0 - 50\":\"#E24D42\",\"50 - 75\":\"#EAB839\",\"75 - 100\":\"#7EB26D\"},\"defaultColors\":{\"0 - 50\":\"rgb(165,0,38)\",\"50 - 75\":\"rgb(255,255,190)\",\"75 - 100\":\"rgb(0,104,55)\"},\"legendOpen\":false}},\"gridData\":{\"x\":24,\"y\":7,\"w\":12,\"h\":11,\"i\":\"8\"},\"id\":\"4b3ec120-b892-11e8-a6d9-e546fe2bba5f\",\"panelIndex\":\"8\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{\"vis\":{\"colors\":{\"0 - 2\":\"#E24D42\",\"2 - 3\":\"#F2C96D\",\"3 - 4\":\"#9AC48A\"},\"defaultColors\":{\"0 - 2\":\"rgb(165,0,38)\",\"2 - 3\":\"rgb(255,255,190)\",\"3 - 4\":\"rgb(0,104,55)\"},\"legendOpen\":false}},\"gridData\":{\"x\":36,\"y\":7,\"w\":12,\"h\":11,\"i\":\"9\"},\"id\":\"9ca7aa90-b892-11e8-a6d9-e546fe2bba5f\",\"panelIndex\":\"9\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":54,\"w\":48,\"h\":18,\"i\":\"10\"},\"id\":\"3ba638e0-b894-11e8-a6d9-e546fe2bba5f\",\"panelIndex\":\"10\",\"type\":\"search\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{\"mapZoom\":2,\"mapCenter\":[28.304380682962783,-22.148437500000004]},\"gridData\":{\"x\":0,\"y\":39,\"w\":24,\"h\":15,\"i\":\"11\"},\"id\":\"9c6f83f0-bb4d-11e8-9c84-77068524bcab\",\"panelIndex\":\"11\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":24,\"y\":39,\"w\":24,\"h\":15,\"i\":\"12\"},\"id\":\"b72dd430-bb4d-11e8-9c84-77068524bcab\",\"panelIndex\":\"12\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"}]",
+      "panelsJSON": "[{\"embeddableConfig\":{\"vis\":{\"colors\":{\"Men's Accessories\":\"#82B5D8\",\"Men's Clothing\":\"#F9BA8F\",\"Men's Shoes\":\"#F29191\",\"Women's Accessories\":\"#F4D598\",\"Women's Clothing\":\"#70DBED\",\"Women's Shoes\":\"#B7DBAB\"}}},\"gridData\":{\"x\":12,\"y\":18,\"w\":36,\"h\":10,\"i\":\"1\"},\"panelIndex\":\"1\",\"version\":\"7.0.0-alpha1\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{\"vis\":{\"colors\":{\"FEMALE\":\"#6ED0E0\",\"MALE\":\"#447EBC\"},\"legendOpen\":false}},\"gridData\":{\"x\":12,\"y\":7,\"w\":12,\"h\":11,\"i\":\"2\"},\"panelIndex\":\"2\",\"version\":\"7.0.0-alpha1\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":0,\"w\":18,\"h\":7,\"i\":\"3\"},\"panelIndex\":\"3\",\"version\":\"7.0.0-alpha1\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":18,\"y\":0,\"w\":30,\"h\":7,\"i\":\"4\"},\"panelIndex\":\"4\",\"version\":\"7.0.0-alpha1\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":28,\"w\":48,\"h\":11,\"i\":\"5\"},\"panelIndex\":\"5\",\"version\":\"7.0.0-alpha1\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":18,\"w\":12,\"h\":10,\"i\":\"6\"},\"panelIndex\":\"6\",\"version\":\"7.0.0-alpha1\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":7,\"w\":12,\"h\":11,\"i\":\"7\"},\"panelIndex\":\"7\",\"version\":\"7.0.0-alpha1\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{\"vis\":{\"colors\":{\"0 - 50\":\"#E24D42\",\"50 - 75\":\"#EAB839\",\"75 - 100\":\"#7EB26D\"},\"defaultColors\":{\"0 - 50\":\"rgb(165,0,38)\",\"50 - 75\":\"rgb(255,255,190)\",\"75 - 100\":\"rgb(0,104,55)\"},\"legendOpen\":false}},\"gridData\":{\"x\":24,\"y\":7,\"w\":12,\"h\":11,\"i\":\"8\"},\"panelIndex\":\"8\",\"version\":\"7.0.0-alpha1\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{\"vis\":{\"colors\":{\"0 - 2\":\"#E24D42\",\"2 - 3\":\"#F2C96D\",\"3 - 4\":\"#9AC48A\"},\"defaultColors\":{\"0 - 2\":\"rgb(165,0,38)\",\"2 - 3\":\"rgb(255,255,190)\",\"3 - 4\":\"rgb(0,104,55)\"},\"legendOpen\":false}},\"gridData\":{\"x\":36,\"y\":7,\"w\":12,\"h\":11,\"i\":\"9\"},\"panelIndex\":\"9\",\"version\":\"7.0.0-alpha1\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":54,\"w\":48,\"h\":18,\"i\":\"10\"},\"panelIndex\":\"10\",\"version\":\"7.0.0-alpha1\",\"panelRefName\":\"panel_9\"},{\"embeddableConfig\":{\"mapZoom\":2,\"mapCenter\":[28.304380682962783,-22.148437500000004]},\"gridData\":{\"x\":0,\"y\":39,\"w\":24,\"h\":15,\"i\":\"11\"},\"panelIndex\":\"11\",\"version\":\"7.0.0-alpha1\",\"panelRefName\":\"panel_10\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":24,\"y\":39,\"w\":24,\"h\":15,\"i\":\"12\"},\"panelIndex\":\"12\",\"version\":\"7.0.0-alpha1\",\"panelRefName\":\"panel_11\"}]",
       "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
       "version": 1,
       "timeRestore": true,

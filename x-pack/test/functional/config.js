@@ -8,64 +8,8 @@
 
 import { resolve } from 'path';
 
-import {
-  CanvasPageProvider,
-  SecurityPageProvider,
-  MonitoringPageProvider,
-  LogstashPageProvider,
-  GraphPageProvider,
-  GrokDebuggerPageProvider,
-  WatcherPageProvider,
-  ReportingPageProvider,
-  SpaceSelectorPageProvider,
-  AccountSettingProvider,
-  InfraHomePageProvider,
-  InfraLogsPageProvider,
-  GisPageProvider,
-  StatusPagePageProvider,
-  UpgradeAssistantProvider,
-  CodeHomePageProvider,
-  RollupPageProvider,
-  UptimePageProvider,
-} from './page_objects';
-
-import {
-  MonitoringNoDataProvider,
-  MonitoringClusterListProvider,
-  MonitoringClusterOverviewProvider,
-  MonitoringClusterAlertsProvider,
-  MonitoringElasticsearchSummaryStatusProvider,
-  MonitoringElasticsearchOverviewProvider,
-  MonitoringElasticsearchNodesProvider,
-  MonitoringElasticsearchNodeDetailProvider,
-  MonitoringElasticsearchIndicesProvider,
-  MonitoringElasticsearchIndexDetailProvider,
-  MonitoringElasticsearchShardsProvider,
-  MonitoringBeatsOverviewProvider,
-  MonitoringBeatsListingProvider,
-  MonitoringBeatDetailProvider,
-  MonitoringBeatsSummaryStatusProvider,
-  MonitoringLogstashPipelinesProvider,
-  MonitoringLogstashSummaryStatusProvider,
-  MonitoringKibanaOverviewProvider,
-  MonitoringKibanaInstancesProvider,
-  MonitoringKibanaInstanceProvider,
-  MonitoringKibanaSummaryStatusProvider,
-  PipelineListProvider,
-  PipelineEditorProvider,
-  RandomProvider,
-  AceEditorProvider,
-  GrokDebuggerProvider,
-  UserMenuProvider,
-  UptimeProvider,
-  InfraSourceConfigurationFlyoutProvider,
-  InfraLogStreamProvider,
-} from './services';
-
-import {
-  SecurityServiceProvider,
-  SpacesServiceProvider,
-} from '../common/services';
+import { services } from './services';
+import { pageObjects } from './page_objects';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
@@ -75,9 +19,6 @@ export default async function ({ readConfigFile }) {
   );
   const kibanaFunctionalConfig = await readConfigFile(
     require.resolve('../../../test/functional/config.js')
-  );
-  const kibanaAPITestsConfig = await readConfigFile(
-    require.resolve('../../../test/api_integration/config.js')
   );
 
   return {
@@ -93,6 +34,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/discover'),
       resolve(__dirname, './apps/security'),
       resolve(__dirname, './apps/spaces'),
+      resolve(__dirname, './apps/lens'),
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
@@ -108,73 +50,18 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/saved_objects_management'),
       resolve(__dirname, './apps/dev_tools'),
       resolve(__dirname, './apps/apm'),
-      resolve(__dirname, './apps/index_patterns')
+      resolve(__dirname, './apps/index_patterns'),
+      resolve(__dirname, './apps/index_management'),
+      resolve(__dirname, './apps/index_lifecycle_management'),
+      resolve(__dirname, './apps/snapshot_restore'),
+      resolve(__dirname, './apps/cross_cluster_replication'),
+      resolve(__dirname, './apps/remote_clusters'),
+      // This license_management file must be last because it is destructive.
+      resolve(__dirname, './apps/license_management'),
     ],
 
-    // define the name and providers for services that should be
-    // available to your tests. If you don't specify anything here
-    // only the built-in services will be available
-    services: {
-      ...kibanaFunctionalConfig.get('services'),
-      esSupertest: kibanaAPITestsConfig.get('services.esSupertest'),
-      monitoringNoData: MonitoringNoDataProvider,
-      monitoringClusterList: MonitoringClusterListProvider,
-      monitoringClusterOverview: MonitoringClusterOverviewProvider,
-      monitoringClusterAlerts: MonitoringClusterAlertsProvider,
-      monitoringElasticsearchSummaryStatus: MonitoringElasticsearchSummaryStatusProvider,
-      monitoringElasticsearchOverview: MonitoringElasticsearchOverviewProvider,
-      monitoringElasticsearchNodes: MonitoringElasticsearchNodesProvider,
-      monitoringElasticsearchNodeDetail: MonitoringElasticsearchNodeDetailProvider,
-      monitoringElasticsearchIndices: MonitoringElasticsearchIndicesProvider,
-      monitoringElasticsearchIndexDetail: MonitoringElasticsearchIndexDetailProvider,
-      monitoringElasticsearchShards: MonitoringElasticsearchShardsProvider,
-      monitoringBeatsOverview: MonitoringBeatsOverviewProvider,
-      monitoringBeatsListing: MonitoringBeatsListingProvider,
-      monitoringBeatDetail: MonitoringBeatDetailProvider,
-      monitoringBeatsSummaryStatus: MonitoringBeatsSummaryStatusProvider,
-      monitoringLogstashPipelines: MonitoringLogstashPipelinesProvider,
-      monitoringLogstashSummaryStatus: MonitoringLogstashSummaryStatusProvider,
-      monitoringKibanaOverview: MonitoringKibanaOverviewProvider,
-      monitoringKibanaInstances: MonitoringKibanaInstancesProvider,
-      monitoringKibanaInstance: MonitoringKibanaInstanceProvider,
-      monitoringKibanaSummaryStatus: MonitoringKibanaSummaryStatusProvider,
-      pipelineList: PipelineListProvider,
-      pipelineEditor: PipelineEditorProvider,
-      random: RandomProvider,
-      aceEditor: AceEditorProvider,
-      grokDebugger: GrokDebuggerProvider,
-      security: SecurityServiceProvider,
-      spaces: SpacesServiceProvider,
-      userMenu: UserMenuProvider,
-      uptime: UptimeProvider,
-      rollup: RollupPageProvider,
-      infraSourceConfigurationFlyout: InfraSourceConfigurationFlyoutProvider,
-      infraLogStream: InfraLogStreamProvider,
-    },
-
-    // just like services, PageObjects are defined as a map of
-    // names to Providers. Merge in Kibana's or pick specific ones
-    pageObjects: {
-      ...kibanaFunctionalConfig.get('pageObjects'),
-      canvas: CanvasPageProvider,
-      security: SecurityPageProvider,
-      accountSetting: AccountSettingProvider,
-      monitoring: MonitoringPageProvider,
-      logstash: LogstashPageProvider,
-      graph: GraphPageProvider,
-      grokDebugger: GrokDebuggerPageProvider,
-      watcher: WatcherPageProvider,
-      reporting: ReportingPageProvider,
-      spaceSelector: SpaceSelectorPageProvider,
-      infraHome: InfraHomePageProvider,
-      infraLogs: InfraLogsPageProvider,
-      maps: GisPageProvider,
-      statusPage: StatusPagePageProvider,
-      upgradeAssistant: UpgradeAssistantProvider,
-      code: CodeHomePageProvider,
-      uptime: UptimePageProvider,
-      rollup: RollupPageProvider,
-    },
+    services,
+    pageObjects,
 
     servers: kibanaFunctionalConfig.get('servers'),
 
@@ -190,19 +77,21 @@ export default async function ({ readConfigFile }) {
         ...kibanaCommonConfig.get('kbnTestServer.serverArgs'),
         '--status.allowAnonymous=true',
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
-        '--xpack.xpack_main.telemetry.enabled=false',
         '--xpack.maps.showMapsInspectorAdapter=true',
+        '--xpack.maps.preserveDrawingBuffer=true',
+        '--xpack.telemetry.banner=false',
         '--xpack.reporting.queue.pollInterval=3000', // make it explicitly the default
         '--xpack.reporting.csv.maxSizeBytes=2850', // small-ish limit for cutting off a 1999 byte report
-        '--stats.maximumWaitTimeForAllCollectorsInS=0',
+        '--stats.maximumWaitTimeForAllCollectorsInS=1',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
-        '--xpack.code.security.enableGitCertCheck=false', // Disable git certificate check
+        '--xpack.encrypted_saved_objects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--timelion.ui.enabled=true',
       ],
     },
     uiSettings: {
       defaults: {
         'accessibility:disableAnimations': true,
+        'dateFormat:tz': 'UTC',
       },
     },
     // the apps section defines the urls that
@@ -211,6 +100,9 @@ export default async function ({ readConfigFile }) {
     // Kibana's config in order to use this helper
     apps: {
       ...kibanaFunctionalConfig.get('apps'),
+      lens: {
+        pathname: '/app/lens',
+      },
       login: {
         pathname: '/login',
       },
@@ -270,9 +162,37 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/rollup_jobs/',
       },
+      licenseManagement: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/license_management',
+      },
+      indexManagement: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/index_management',
+      },
+      indexLifecycleManagement: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/index_lifecycle_management',
+      },
+      snapshotRestore: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/snapshot_restore',
+      },
+      crossClusterReplication: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/cross_cluster_replication',
+      },
+      remoteClusters: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/remote_clusters',
+      },
       apm: {
         pathname: '/app/apm',
-      }
+      },
+      watcher: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/watcher/watches/',
+      },
     },
 
     // choose where esArchiver should load archives from
@@ -286,7 +206,7 @@ export default async function ({ readConfigFile }) {
     },
 
     junit: {
-      reportName: 'X-Pack Functional Tests',
+      reportName: 'Chrome X-Pack UI Functional Tests',
     },
   };
 }

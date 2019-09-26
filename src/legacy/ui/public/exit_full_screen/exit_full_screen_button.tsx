@@ -17,75 +17,29 @@
  * under the License.
  */
 
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import React, { PureComponent } from 'react';
 import chrome from 'ui/chrome';
+import { ExitFullScreenButton as ExitFullScreenButtonUi } from '../../../../plugins/kibana_react/public';
 
-// @ts-ignore
-import { KuiButton } from '@kbn/ui-framework/components';
+/**
+ * DO NOT USE THIS COMPONENT, IT IS DEPRECATED.
+ * Use the one in `src/plugins/kibana_react`.
+ */
 
-import { EuiScreenReaderOnly, keyCodes } from '@elastic/eui';
-
-interface Props extends ReactIntl.InjectedIntlProps {
+interface Props {
   onExitFullScreenMode: () => void;
 }
 
-class ExitFullScreenButtonUi extends PureComponent<Props> {
-  public onKeyDown = (e: KeyboardEvent) => {
-    if (e.keyCode === keyCodes.ESCAPE) {
-      this.props.onExitFullScreenMode();
-    }
-  };
-
+export class ExitFullScreenButton extends PureComponent<Props> {
   public componentWillMount() {
-    document.addEventListener('keydown', this.onKeyDown, false);
     chrome.setVisible(false);
   }
 
   public componentWillUnmount() {
-    document.removeEventListener('keydown', this.onKeyDown, false);
     chrome.setVisible(true);
   }
 
   public render() {
-    const { intl } = this.props;
-
-    return (
-      <div>
-        <EuiScreenReaderOnly>
-          <p aria-live="polite">
-            <FormattedMessage
-              id="common.ui.exitFullScreenButton.fullScreenModeDescription"
-              defaultMessage="In full screen mode, press ESC to exit."
-            />
-          </p>
-        </EuiScreenReaderOnly>
-        <div className="dshExitFullScreenButton">
-          <KuiButton
-            type="hollow"
-            aria-label={intl.formatMessage({
-              id: 'common.ui.exitFullScreenButton.exitFullScreenModeButtonAreaLabel',
-              defaultMessage: 'Exit full screen mode',
-            })}
-            className="dshExitFullScreenButton__mode"
-            onClick={this.props.onExitFullScreenMode}
-          >
-            <span
-              className="dshExitFullScreenButton__logo"
-              data-test-subj="exitFullScreenModeLogo"
-            />
-            <span className="dshExitFullScreenButton__text" data-test-subj="exitFullScreenModeText">
-              <FormattedMessage
-                id="common.ui.exitFullScreenButton.exitFullScreenModeButtonLabel"
-                defaultMessage="Exit full screen"
-              />
-              <span className="kuiIcon fa fa-angle-left" />
-            </span>
-          </KuiButton>
-        </div>
-      </div>
-    );
+    return <ExitFullScreenButtonUi onExitFullScreenMode={this.props.onExitFullScreenMode} />;
   }
 }
-
-export const ExitFullScreenButton = injectI18n(ExitFullScreenButtonUi);

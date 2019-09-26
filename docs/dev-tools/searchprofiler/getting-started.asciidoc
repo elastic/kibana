@@ -31,7 +31,7 @@ indices and shards, it doesn't necessarily represent the actual physical query t
 
 You can select the name of the shard and then click *View details* to see more profiling information, 
 including details about the query component(s) that ran on the shard, as well as the timing 
-breakdown of low-level Lucene methods. For more information, see {ref}/search-profile-queries.html[Profiling queries].
+breakdown of low-level Lucene methods. For more information, see {ref}/search-profile.html#profiling-queries[Profiling queries].
 
 [float]
 === Index and type filtering

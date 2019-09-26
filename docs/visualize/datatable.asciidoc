@@ -13,7 +13,7 @@ numeric field and organized by date. You can specify a time frame for the interv
 weeks, months, or years. You can also specify a custom interval frame by selecting *Custom* as the interval and
 specifying a number and a time unit in the text field. Custom interval time units are *s* for seconds, *m* for minutes,
 *h* for hours, *d* for days, *w* for weeks, and *y* for years. Different units support different levels of precision,
-down to one second. Intervals are labeled at the start of the interval, using the date-key returned by Elasticsearch. 
+down to one second. Intervals are labeled at the start of the interval, using the date-key returned by Elasticsearch.
 For example, the tooltip for a monthly interval will show the first day of the month.
 *Histogram*:: A standard {ref}/search-aggregations-bucket-histogram-aggregation.html[_histogram_] is built from a
 numeric field. Specify an integer interval for this field. Select the *Show empty buckets* checkbox to include empty
@@ -66,10 +66,10 @@ The availability of these options varies depending on the aggregation you choose
 Select the *Options* tab to change the following aspects of the table:
 
 *Per Page*:: This field controls the pagination of the table. The default value is ten rows per page.
-
-Checkboxes are available to enable and disable the following behaviors:
-
 *Show metrics for every bucket/level*:: Check this box to display the intermediate results for each bucket aggregation.
 *Show partial rows*:: Check this box to display a row even when there is no result.
+*Show total*:: Check this box to display a row at the bottom of the table with each column's total value.
+*Total function*:: This field controls the function used to calculate totals that you can toggle with the **Show total** checkbox.
+*Percentage column*:: Select a column to add a percentage based column on the same data.
 
 NOTE: Enabling these behaviors may have a substantial effect on performance.

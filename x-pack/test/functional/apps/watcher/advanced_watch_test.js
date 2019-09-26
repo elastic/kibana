@@ -16,10 +16,23 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
+  const esSupertest = getService('esSupertest');
   const PageObjects = getPageObjects(['security', 'common', 'header', 'settings', 'watcher']);
 
   describe('advanced watch', function () {
     before('initialize tests', async () => {
+      // There may be system watches if monitoring was previously enabled
+      // These cannot be deleted via the UI, so we need to delete via the API
+      const watches = await esSupertest.get('/.watches/_search');
+
+      if (watches.status === 200) {
+        for (const hit of watches.body.hits.hits) {
+          if (hit._id) {
+            await esSupertest.delete(`/_watcher/watch/${hit._id}`);
+          }
+        }
+      }
+
       await browser.setWindowSize(1600, 1000);
       await PageObjects.common.navigateToApp('settings');
       await testSubjects.click('watcher');

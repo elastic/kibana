@@ -20,7 +20,7 @@
 import { get } from 'lodash';
 import { DiscoveredPlugin, PluginName } from '../../server';
 import { UiSettingsState } from '../ui_settings';
-import { deepFreeze } from '../utils/deep_freeze';
+import { deepFreeze } from '../../utils/';
 import { Capabilities } from '..';
 
 /** @public */
@@ -38,6 +38,7 @@ export interface InjectedMetadataParams {
   injectedMetadata: {
     version: string;
     buildNumber: number;
+    branch: string;
     basePath: string;
     csp: {
       warnLegacyBrowsers: boolean;
@@ -50,9 +51,9 @@ export interface InjectedMetadataParams {
       plugin: DiscoveredPlugin;
     }>;
     capabilities: Capabilities;
+    legacyMode: boolean;
     legacyMetadata: {
       app: unknown;
-      translations: unknown;
       bundleId: string;
       nav: LegacyNavLink[];
       version: string;
@@ -111,6 +112,10 @@ export class InjectedMetadataService {
         return this.state.uiPlugins;
       },
 
+      getLegacyMode: () => {
+        return this.state.legacyMode;
+      },
+
       getLegacyMetadata: () => {
         return this.state.legacyMetadata;
       },
@@ -126,6 +131,10 @@ export class InjectedMetadataService {
       getKibanaBuildNumber: () => {
         return this.state.buildNumber;
       },
+
+      getKibanaBranch: () => {
+        return this.state.branch;
+      },
     };
   }
 }
@@ -138,6 +147,7 @@ export class InjectedMetadataService {
 export interface InjectedMetadataSetup {
   getBasePath: () => string;
   getKibanaBuildNumber: () => number;
+  getKibanaBranch: () => string;
   getKibanaVersion: () => string;
   getCapabilities: () => Capabilities;
   getCspConfig: () => {
@@ -150,9 +160,10 @@ export interface InjectedMetadataSetup {
     id: string;
     plugin: DiscoveredPlugin;
   }>;
+  /** Indicates whether or not we are rendering a known legacy app. */
+  getLegacyMode: () => boolean;
   getLegacyMetadata: () => {
     app: unknown;
-    translations: unknown;
     bundleId: string;
     nav: LegacyNavLink[];
     version: string;

@@ -17,12 +17,18 @@
  * under the License.
  */
 
-import { deleteAll, read, write } from '../../lib';
-import { dirname, sep, relative } from 'path';
+import { deleteAll, isFileAccessible, read, write } from '../../lib';
+import { dirname, relative, resolve } from 'path';
 import pkgUp from 'pkg-up';
 import globby from 'globby';
+import normalizePosixPath from 'normalize-path';
 
-export async function getDllEntries(manifestPath, whiteListedModules) {
+function checkDllEntryAccess(entry, baseDir = '') {
+  const resolvedPath = baseDir ? resolve(baseDir, entry) : entry;
+  return isFileAccessible(resolvedPath);
+}
+
+export async function getDllEntries(manifestPath, whiteListedModules, baseDir = '') {
   const manifest = JSON.parse(await read(manifestPath));
 
   if (!manifest || !manifest.content) {
@@ -43,10 +49,20 @@ export async function getDllEntries(manifestPath, whiteListedModules) {
   // Only includes modules who are not in the white list of modules
   // and that are node_modules
   return modules.filter(entry => {
-    const isWhiteListed = whiteListedModules.some(nonEntry => entry.includes(`node_modules${sep}${nonEntry}${sep}`));
+    const isWhiteListed = whiteListedModules.some(nonEntry => normalizePosixPath(entry).includes(`node_modules/${nonEntry}`));
     const isNodeModule = entry.includes('node_modules');
 
-    return !isWhiteListed && isNodeModule;
+    // NOTE: when using dynamic imports on webpack the entry paths could be created
+    // with special context module (ex: lazy recursive) values over directories that are not real files
+    // and only exists in runtime, so we need to check if the entry is a real file.
+    // We found that problem through the issue https://github.com/elastic/kibana/issues/38481
+    //
+    // More info:
+    // https://github.com/webpack/webpack/blob/master/examples/code-splitting-harmony/README.md
+    // https://webpack.js.org/guides/dependency-management/#require-with-expression
+    const isAccessible = checkDllEntryAccess(entry, baseDir);
+
+    return !isWhiteListed && isNodeModule && isAccessible;
   });
 }
 
@@ -54,6 +70,7 @@ export async function cleanDllModuleFromEntryPath(logger, entryPath) {
   const modulePkgPath = await pkgUp(entryPath);
   const modulePkg = JSON.parse(await read(modulePkgPath));
   const moduleDir = dirname(modulePkgPath);
+  const normalizedModuleDir = normalizePosixPath(moduleDir);
 
   // Cancel the cleanup for this module as it
   // was already done.
@@ -78,9 +95,9 @@ export async function cleanDllModuleFromEntryPath(logger, entryPath) {
   // until the following issue gets closed
   // https://github.com/sindresorhus/globby/issues/87
   const filesToDelete = await globby([
-    `${moduleDir}/**`,
-    `!${moduleDir}/**/*.+(css)`,
-    `!${moduleDir}/**/*.+(gif|ico|jpeg|jpg|tiff|tif|svg|png|webp)`,
+    `${normalizedModuleDir}/**`,
+    `!${normalizedModuleDir}/**/*.+(css)`,
+    `!${normalizedModuleDir}/**/*.+(gif|ico|jpeg|jpg|tiff|tif|svg|png|webp)`,
   ]);
 
   await deleteAll(filesToDelete.filter(path => {

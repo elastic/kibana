@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { monitorChartsQueryString } from '../../../../../plugins/uptime/public/queries';
+import { monitorChartsQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
 import monitorCharts from './fixtures/monitor_charts';
 import monitorChartsEmptySet from './fixtures/monitor_charts_empty_set';
 

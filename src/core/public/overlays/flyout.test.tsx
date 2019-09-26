@@ -22,7 +22,7 @@ import React from 'react';
 import { i18nServiceMock } from '../i18n/i18n_service.mock';
 import { FlyoutRef, FlyoutService } from './flyout';
 
-const i18nMock = i18nServiceMock.createSetupContract();
+const i18nMock = i18nServiceMock.createStartContract();
 
 beforeEach(() => {
   mockReactDomRender.mockClear();

@@ -1,9 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renders OptionsTab 1`] = `
+exports[`OptionsTab should renders OptionsTab 1`] = `
 <EuiForm>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="updateFiltersOnChange"
@@ -24,6 +25,7 @@ exports[`renders OptionsTab 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="useTimeFilter"
@@ -44,6 +46,7 @@ exports[`renders OptionsTab 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="pinFilters"

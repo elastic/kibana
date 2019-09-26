@@ -157,7 +157,11 @@ export default class BaseOptimizer {
 
   getThreadLoaderPoolConfig() {
     // Calculate the node options from the NODE_OPTIONS env var
-    const parsedNodeOptions = process.env.NODE_OPTIONS ? process.env.NODE_OPTIONS.split(/\s/) : [];
+    const parsedNodeOptions = process.env.NODE_OPTIONS
+      // thread-loader could not receive empty string as options
+      // or it would break that's why we need to filter here
+      ? process.env.NODE_OPTIONS.split(/\s/).filter(opt => !!opt)
+      : [];
 
     return {
       name: 'optimizer-thread-loader-main-pool',
@@ -208,19 +212,17 @@ export default class BaseOptimizer {
     /**
      * Adds a cache loader if we're running in dev mode. The reason we're not adding
      * the cache-loader when running in production mode is that it creates cache
-     * files in optimize/.cache that are not necessary for distributable versions
+     * files in data/optimize/.cache that are not necessary for distributable versions
      * of Kibana and just make compressing and extracting it more difficult.
      */
     const maybeAddCacheLoader = (cacheName, loaders) => {
-      if (IS_KIBANA_DISTRIBUTABLE) {
-        return loaders;
-      }
-
       return [
         {
           loader: 'cache-loader',
           options: {
-            cacheDirectory: this.uiBundles.getCacheDirectory(cacheName)
+            cacheContext: fromRoot('.'),
+            cacheDirectory: this.uiBundles.getCacheDirectory(cacheName),
+            readOnly: process.env.KBN_CACHE_LOADER_WRITABLE ? false : IS_KIBANA_DISTRIBUTABLE
           }
         },
         ...loaders
@@ -406,10 +408,7 @@ export default class BaseOptimizer {
           'node_modules',
           fromRoot('node_modules'),
         ],
-        alias: {
-          ...this.uiBundles.getAliases(),
-          'dll/set_csp_nonce$': require.resolve('./dynamic_dll_plugin/public/set_csp_nonce')
-        }
+        alias: this.uiBundles.getAliases(),
       },
 
       performance: {
@@ -474,14 +473,16 @@ export default class BaseOptimizer {
       }
     };
 
-    return webpackMerge(
-      commonConfig,
-      IS_KIBANA_DISTRIBUTABLE
-        ? isDistributableConfig
-        : {},
-      this.uiBundles.isDevMode()
-        ? webpackMerge(watchingConfig, supportEnzymeConfig)
-        : productionConfig
+    return this.uiBundles.getExtendedConfig(
+      webpackMerge(
+        commonConfig,
+        IS_KIBANA_DISTRIBUTABLE
+          ? isDistributableConfig
+          : {},
+        this.uiBundles.isDevMode()
+          ? webpackMerge(watchingConfig, supportEnzymeConfig)
+          : productionConfig
+      )
     );
   }
 

@@ -27,12 +27,10 @@ in a manner that is inconsistent with `/proc/self/cgroup`
 
 `csp.rules:`:: A template
 https://w3c.github.io/webappsec-csp/[content-security-policy] that disables
-certain unnecessary and potentially insecure capabilities in the browser. All
-instances of `{nonce}` will be replaced with an automatically generated nonce
-at load time. We strongly recommend that you keep the default CSP rules that
-ship with Kibana.
+certain unnecessary and potentially insecure capabilities in the browser. We
+strongly recommend that you keep the default CSP rules that ship with Kibana.
 
-`csp.strict:`:: *Default: `false`* Blocks access to Kibana to any browser that
+`csp.strict:`:: *Default: `true`* Blocks access to Kibana to any browser that
 does not enforce even rudimentary CSP rules. In practice, this will disable
 support for older, less safe browsers like Internet Explorer.
 
@@ -121,12 +119,20 @@ which is proxied through the Kibana server.
 `interpreter.enableInVisualize`:: *Default: true* Enables use of interpreter in
 Visualize.
 
-`kibana.defaultAppId:`:: *Default: "discover"* The default application to load.
+`kibana.defaultAppId:`:: *Default: "home"* The default application to load.
 
 `kibana.index:`:: *Default: ".kibana"* Kibana uses an index in Elasticsearch to
 store saved searches, visualizations and dashboards. Kibana creates a new index
 if the index doesn’t already exist. If you configure a custom index, the name must
 be lowercase, and conform to {es} {ref}/indices-create-index.html[index name limitations].
+
+`kibana.autocompleteTimeout:`:: *Default: "1000"* Time in milliseconds to wait
+for autocomplete suggestions from Elasticsearch. This value must be a whole number
+greater than zero.
+
+`kibana.autocompleteTerminateAfter:`:: *Default: "100000"* Maximum number of
+documents loaded by each shard to generate autocomplete suggestions. This value
+must be a whole number greater than zero.
 
 `logging.dest:`:: *Default: `stdout`* Enables you specify a file where Kibana
 stores log output.
@@ -257,6 +263,9 @@ modify the landing page when opening Kibana. Supported on {ece}.
 `server.host:`:: *Default: "localhost"* This setting specifies the host of the
 back end server.
 
+`server.keepaliveTimeout:`:: *Default: "120000"* The number of milliseconds to wait for additional data before restarting
+the `server.socketTimeout` counter.
+
 `server.maxPayloadBytes:`:: *Default: 1048576* The maximum payload size in bytes
 for incoming server requests.
 
@@ -266,10 +275,12 @@ identifies this Kibana instance.
 `server.port:`:: *Default: 5601* Kibana is served by a back end server. This
 setting specifies the port to use.
 
-`server.rewriteBasePath:`:: *Default: false* Specifies whether Kibana should
+`server.rewriteBasePath:`:: *Default: true* Specifies whether Kibana should
 rewrite requests that are prefixed with `server.basePath` or require that they
-are rewritten by your reverse proxy. This setting was effectively always `false`
-before Kibana 6.3 and will default to `true` starting in Kibana 7.0.
+are rewritten by your reverse proxy.
+
+`server.socketTimeout:`:: *Default: "120000"* The number of milliseconds to wait before closing an
+inactive socket.
 
 `server.ssl.certificate:` and `server.ssl.key:`:: Paths to the PEM-format SSL
 certificate and SSL key files, respectively.
@@ -280,6 +291,10 @@ files that should be trusted.
 `server.ssl.cipherSuites:`:: *Default: ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-GCM-SHA384, DHE-RSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-SHA256, DHE-RSA-AES128-SHA256, ECDHE-RSA-AES256-SHA384, DHE-RSA-AES256-SHA384, ECDHE-RSA-AES256-SHA256, DHE-RSA-AES256-SHA256, HIGH,!aNULL, !eNULL, !EXPORT, !DES, !RC4, !MD5, !PSK, !SRP, !CAMELLIA*.
 Details on the format, and the valid options, are available via the
 https://www.openssl.org/docs/man1.0.2/apps/ciphers.html#CIPHER-LIST-FORMAT[OpenSSL cipher list format documentation].
+
+`server.ssl.clientAuthentication:`:: *Default: none* Controls the server’s behavior in regard to requesting a certificate from client
+connections. Valid values are `required`, `optional`, and `none`. `required` forces a client to present a certificate, while `optional`
+requests a client certificate but the client is not required to present one.
 
 `server.ssl.enabled:`:: *Default: "false"* Enables SSL for outgoing requests
 from the Kibana server to the browser. When set to `true`,
@@ -298,6 +313,8 @@ supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2
 setting this to `true` enables unauthenticated users to access the Kibana
 server status API and status page.
 
+`vega.enableExternalUrls:`:: *Default: false* Set this value to true to allow Vega to use any URL to access external data sources and images. If false, Vega can only get data from Elasticsearch.
+
 `xpack.license_management.enabled`:: *Default: true* Set this value to false to
 disable the License Management user interface.
 
@@ -308,6 +325,7 @@ Rollup user interface.
 
 
 include::{docdir}/settings/apm-settings.asciidoc[]
+include::{docdir}/settings/code-settings.asciidoc[]
 include::{docdir}/settings/dev-settings.asciidoc[]
 include::{docdir}/settings/graph-settings.asciidoc[]
 include::{docdir}/settings/infrastructure-ui-settings.asciidoc[]

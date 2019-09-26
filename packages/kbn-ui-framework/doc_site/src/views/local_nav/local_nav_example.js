@@ -62,7 +62,7 @@ import { LocalNavWithTabs } from './local_nav_tabs';
 import localNavWithTabsSource from '!!raw-loader!./local_nav_tabs';
 const localNavWithTabsHtml = renderToHtml(LocalNavWithTabs);
 
-const datePickerHtml = require('./local_nav_date_picker.html');
+import datePickerHtml from './local_nav_date_picker.html';
 
 export default props => (
   <GuidePage title={props.route.name}>

@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { ChromeNavLink } from './nav_link';
-export { NavLinksService } from './nav_links_service';
+export { ChromeNavLink, ChromeNavLinkUpdateableFields } from './nav_link';
+export { ChromeNavLinks, NavLinksService } from './nav_links_service';

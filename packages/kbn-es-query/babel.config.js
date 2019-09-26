@@ -19,32 +19,15 @@
 
 // We can't use common Kibana presets here because of babel versions incompatibility
 module.exports = {
-  plugins: ['@babel/plugin-proposal-class-properties', '@babel/plugin-proposal-object-rest-spread'],
-  presets: ['@babel/typescript'],
   env: {
     public: {
       presets: [
-        [
-          '@babel/preset-env',
-          {
-            targets: {
-              browsers: ['last 2 versions', '> 5%', 'Safari 7'],
-            },
-            modules: false
-          },
-        ],
+        '@kbn/babel-preset/webpack_preset'
       ],
     },
     server: {
       presets: [
-        [
-          '@babel/preset-env',
-          {
-            targets: {
-              node: 'current',
-            },
-          },
-        ],
+        '@kbn/babel-preset/node_preset'
       ],
     },
   },

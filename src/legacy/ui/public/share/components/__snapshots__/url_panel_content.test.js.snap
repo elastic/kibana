@@ -7,6 +7,7 @@ exports[`render 1`] = `
 >
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     helpText={
@@ -37,8 +38,9 @@ exports[`render 1`] = `
           Object {
             "data-test-subj": "exportAsSnapshot",
             "id": "snapshot",
-            "label": <EuiFlexGroup
+            "label": <ForwardRef
               gutterSize="none"
+              responsive={false}
             >
               <EuiFlexItem>
                 <FormattedMessage
@@ -51,7 +53,6 @@ exports[`render 1`] = `
                 grow={false}
               >
                 <EuiIconTip
-                  aria-label="Info"
                   content={
                     <FormattedMessage
                       defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself. Edits to the saved {objectType} won't be visible via this URL."
@@ -64,17 +65,17 @@ exports[`render 1`] = `
                     />
                   }
                   position="bottom"
-                  type="questionInCircle"
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>,
+            </ForwardRef>,
           },
           Object {
             "data-test-subj": "exportAsSavedObject",
             "disabled": true,
             "id": "savedObject",
-            "label": <EuiFlexGroup
+            "label": <ForwardRef
               gutterSize="none"
+              responsive={false}
             >
               <EuiFlexItem>
                 <FormattedMessage
@@ -87,7 +88,6 @@ exports[`render 1`] = `
                 grow={false}
               >
                 <EuiIconTip
-                  aria-label="Info"
                   content={
                     <FormattedMessage
                       defaultMessage="You can share this URL with people to let them load the most recent saved version of this {objectType}."
@@ -100,10 +100,9 @@ exports[`render 1`] = `
                     />
                   }
                   position="bottom"
-                  type="questionInCircle"
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>,
+            </ForwardRef>,
           },
         ]
       }
@@ -112,12 +111,14 @@ exports[`render 1`] = `
   <EuiFormRow
     data-test-subj="createShortUrl"
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     labelType="label"
   >
     <EuiFlexGroup
       gutterSize="none"
+      responsive={false}
     >
       <EuiFlexItem>
         <EuiSwitch
@@ -137,7 +138,6 @@ exports[`render 1`] = `
         grow={false}
       >
         <EuiIconTip
-          aria-label="Info"
           content={
             <FormattedMessage
               defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great."
@@ -146,11 +146,13 @@ exports[`render 1`] = `
             />
           }
           position="bottom"
-          type="questionInCircle"
         />
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
   <EuiCopy
     afterMessage="Copied"
     anchorClassName="kbnShareContextMenu__copyAnchor"
@@ -168,6 +170,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
 >
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label={
@@ -187,8 +190,9 @@ exports[`should enable saved object export option when objectId is provided 1`] 
           Object {
             "data-test-subj": "exportAsSnapshot",
             "id": "snapshot",
-            "label": <EuiFlexGroup
+            "label": <ForwardRef
               gutterSize="none"
+              responsive={false}
             >
               <EuiFlexItem>
                 <FormattedMessage
@@ -201,7 +205,6 @@ exports[`should enable saved object export option when objectId is provided 1`] 
                 grow={false}
               >
                 <EuiIconTip
-                  aria-label="Info"
                   content={
                     <FormattedMessage
                       defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself. Edits to the saved {objectType} won't be visible via this URL."
@@ -214,17 +217,17 @@ exports[`should enable saved object export option when objectId is provided 1`] 
                     />
                   }
                   position="bottom"
-                  type="questionInCircle"
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>,
+            </ForwardRef>,
           },
           Object {
             "data-test-subj": "exportAsSavedObject",
             "disabled": false,
             "id": "savedObject",
-            "label": <EuiFlexGroup
+            "label": <ForwardRef
               gutterSize="none"
+              responsive={false}
             >
               <EuiFlexItem>
                 <FormattedMessage
@@ -237,7 +240,6 @@ exports[`should enable saved object export option when objectId is provided 1`] 
                 grow={false}
               >
                 <EuiIconTip
-                  aria-label="Info"
                   content={
                     <FormattedMessage
                       defaultMessage="You can share this URL with people to let them load the most recent saved version of this {objectType}."
@@ -250,10 +252,9 @@ exports[`should enable saved object export option when objectId is provided 1`] 
                     />
                   }
                   position="bottom"
-                  type="questionInCircle"
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>,
+            </ForwardRef>,
           },
         ]
       }
@@ -262,12 +263,14 @@ exports[`should enable saved object export option when objectId is provided 1`] 
   <EuiFormRow
     data-test-subj="createShortUrl"
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     labelType="label"
   >
     <EuiFlexGroup
       gutterSize="none"
+      responsive={false}
     >
       <EuiFlexItem>
         <EuiSwitch
@@ -287,7 +290,6 @@ exports[`should enable saved object export option when objectId is provided 1`] 
         grow={false}
       >
         <EuiIconTip
-          aria-label="Info"
           content={
             <FormattedMessage
               defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great."
@@ -296,11 +298,13 @@ exports[`should enable saved object export option when objectId is provided 1`] 
             />
           }
           position="bottom"
-          type="questionInCircle"
         />
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
   <EuiCopy
     afterMessage="Copied"
     anchorClassName="kbnShareContextMenu__copyAnchor"
@@ -318,6 +322,7 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
 >
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label={
@@ -337,8 +342,9 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
           Object {
             "data-test-subj": "exportAsSnapshot",
             "id": "snapshot",
-            "label": <EuiFlexGroup
+            "label": <ForwardRef
               gutterSize="none"
+              responsive={false}
             >
               <EuiFlexItem>
                 <FormattedMessage
@@ -351,7 +357,6 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
                 grow={false}
               >
                 <EuiIconTip
-                  aria-label="Info"
                   content={
                     <FormattedMessage
                       defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself. Edits to the saved {objectType} won't be visible via this URL."
@@ -364,17 +369,17 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
                     />
                   }
                   position="bottom"
-                  type="questionInCircle"
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>,
+            </ForwardRef>,
           },
           Object {
             "data-test-subj": "exportAsSavedObject",
             "disabled": false,
             "id": "savedObject",
-            "label": <EuiFlexGroup
+            "label": <ForwardRef
               gutterSize="none"
+              responsive={false}
             >
               <EuiFlexItem>
                 <FormattedMessage
@@ -387,7 +392,6 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
                 grow={false}
               >
                 <EuiIconTip
-                  aria-label="Info"
                   content={
                     <FormattedMessage
                       defaultMessage="You can share this URL with people to let them load the most recent saved version of this {objectType}."
@@ -400,15 +404,17 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
                     />
                   }
                   position="bottom"
-                  type="questionInCircle"
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>,
+            </ForwardRef>,
           },
         ]
       }
     />
   </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
   <EuiCopy
     afterMessage="Copied"
     anchorClassName="kbnShareContextMenu__copyAnchor"

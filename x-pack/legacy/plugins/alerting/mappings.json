@@ -1,0 +1,52 @@
+{
+  "alert": {
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "alertTypeId": {
+        "type": "keyword"
+      },
+      "interval": {
+        "type": "keyword"
+      },
+      "actions": {
+        "type": "nested",
+        "properties": {
+          "group": {
+            "type": "keyword"
+          },
+          "actionRef": {
+            "type": "keyword"
+          },
+          "params": {
+            "enabled": false,
+            "type": "object"
+          }
+        }
+      },
+      "alertTypeParams": {
+        "enabled": false,
+        "type": "object"
+      },
+      "scheduledTaskId": {
+        "type": "keyword"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      },
+      "apiKey": {
+        "type": "binary"
+      },
+      "apiKeyOwner": {
+        "type": "keyword"
+      },
+      "throttle": {
+        "type": "keyword"
+      }
+    }
+  }
+}

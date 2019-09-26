@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '../../../../legacy/plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -17,6 +17,7 @@ interface ExportTest {
 
 interface ExportTests {
   spaceAwareType: ExportTest;
+  hiddenType: ExportTest;
   noTypeOrObjects: ExportTest;
 }
 
@@ -55,6 +56,18 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
+  const expectInvalidTypeSpecified = (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: `child \"objects\" fails because [\"objects\" at position 0 fails because [child \"type\" fails because [\"type\" must be one of [canvas-element, canvas-workpad, config, dashboard, globaltype, index-pattern, lens, map, query, search, url, visualization]]]]`,
+      validation: {
+        source: 'payload',
+        keys: ['objects.0.type'],
+      },
+    });
+  };
+
   const createExpectVisualizationResults = (spaceId = DEFAULT_SPACE_ID) => (resp: {
     [key: string]: any;
   }) => {
@@ -86,9 +99,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       before(() => esArchiver.load('saved_objects/spaces'));
       after(() => esArchiver.unload('saved_objects/spaces'));
 
-      it(`space aware type should return ${tests.spaceAwareType.statusCode} with ${
-        tests.spaceAwareType.description
-      } when querying by type`, async () => {
+      it(`space aware type should return ${tests.spaceAwareType.statusCode} with ${tests.spaceAwareType.description} when querying by type`, async () => {
         await supertest
           .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
           .send({
@@ -99,9 +110,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           .then(tests.spaceAwareType.response);
       });
 
-      it(`space aware type should return ${tests.spaceAwareType.statusCode} with ${
-        tests.spaceAwareType.description
-      } when querying by objects`, async () => {
+      it(`space aware type should return ${tests.spaceAwareType.statusCode} with ${tests.spaceAwareType.description} when querying by objects`, async () => {
         await supertest
           .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
           .send({
@@ -117,10 +126,26 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           .then(tests.spaceAwareType.response);
       });
 
+      describe('hidden type', () => {
+        it(`should return ${tests.hiddenType.statusCode} with ${tests.hiddenType.description}`, async () => {
+          await supertest
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
+            .send({
+              objects: [
+                {
+                  type: 'hiddentype',
+                  id: `hiddentype_1`,
+                },
+              ],
+            })
+            .auth(user.username, user.password)
+            .expect(tests.hiddenType.statusCode)
+            .then(tests.hiddenType.response);
+        });
+      });
+
       describe('no type or objects', () => {
-        it(`should return ${tests.noTypeOrObjects.statusCode} with ${
-          tests.noTypeOrObjects.description
-        }`, async () => {
+        it(`should return ${tests.noTypeOrObjects.statusCode} with ${tests.noTypeOrObjects.description}`, async () => {
           await supertest
             .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
             .auth(user.username, user.password)
@@ -138,6 +163,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   return {
     createExpectRbacForbidden,
     expectTypeOrObjectsRequired,
+    expectInvalidTypeSpecified,
     createExpectVisualizationResults,
     exportTest,
   };

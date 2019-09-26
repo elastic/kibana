@@ -17,6 +17,25 @@
  * under the License.
  */
 
+const { resolve } = require('path');
+
+// force cwd
+process.chdir(resolve(__dirname, '../../..'));
+
+// JOB_NAME is formatted as `elastic+kibana+7.x` in some places and `elastic+kibana+7.x/JOB=kibana-intake,node=immutable` in others
+const jobNameSplit = (process.env.JOB_NAME || '').split(/\+|\//);
+const branch = jobNameSplit.length >= 3 ? jobNameSplit[2] : process.env.GIT_BRANCH;
+if (!branch) {
+  console.log('Unable to determine originating branch from job name or other environment variables');
+  process.exit(1);
+}
+
+const isPr = !!process.env.ghprbPullId;
+const isMasterOrVersion = branch.match(/^(origin\/){0,1}master$/) || branch.match(/^(origin\/){0,1}\d+\.(x|\d+)$/);
+if (!isMasterOrVersion || isPr) {
+  console.log('Failure issues only created on master/version branch jobs');
+  process.exit(0);
+}
 
 require('../../setup_node_env');
 require('./report').reportFailedTests();

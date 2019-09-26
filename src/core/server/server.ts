@@ -17,11 +17,12 @@
  * under the License.
  */
 import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { Type } from '@kbn/config-schema';
 
 import { ConfigService, Env, Config, ConfigPath } from './config';
 import { ElasticsearchService } from './elasticsearch';
-import { HttpService, HttpServiceSetup, Router } from './http';
+import { HttpService, HttpServiceSetup } from './http';
 import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
 import { PluginsService, config as pluginsConfig } from './plugins';
@@ -31,9 +32,14 @@ import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
 import { config as devConfig } from './dev';
 import { mapToObject } from '../utils/';
+import { ContextService } from './context';
+import { InternalCoreSetup } from './index';
+
+const coreId = Symbol('core');
 
 export class Server {
   public readonly configService: ConfigService;
+  private readonly context: ContextService;
   private readonly elasticsearch: ElasticsearchService;
   private readonly http: HttpService;
   private readonly plugins: PluginsService;
@@ -48,7 +54,8 @@ export class Server {
     this.log = this.logger.get('server');
     this.configService = new ConfigService(config$, env, logger);
 
-    const core = { configService: this.configService, env, logger };
+    const core = { coreId, configService: this.configService, env, logger };
+    this.context = new ContextService(core);
     this.http = new HttpService(core);
     this.plugins = new PluginsService(core);
     this.legacy = new LegacyService(core);
@@ -58,24 +65,31 @@ export class Server {
   public async setup() {
     this.log.debug('setting up server');
 
-    const httpSetup = await this.http.setup();
+    // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
+    const pluginDependencies = await this.plugins.discover();
+    const contextServiceSetup = this.context.setup({ pluginDependencies });
+
+    const httpSetup = await this.http.setup({
+      context: contextServiceSetup,
+    });
+
     this.registerDefaultRoute(httpSetup);
 
-    const elasticsearchServiceSetup = await this.elasticsearch.setup();
-
-    const pluginsSetup = await this.plugins.setup({
-      elasticsearch: elasticsearchServiceSetup,
+    const elasticsearchServiceSetup = await this.elasticsearch.setup({
       http: httpSetup,
     });
 
     const coreSetup = {
+      context: contextServiceSetup,
       elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,
-      plugins: pluginsSetup,
     };
 
+    this.registerCoreContext(coreSetup);
+    const pluginsSetup = await this.plugins.setup(coreSetup);
+
     await this.legacy.setup({
-      core: coreSetup,
+      core: { ...coreSetup, plugins: pluginsSetup },
       plugins: mapToObject(pluginsSetup.contracts),
     });
 
@@ -83,11 +97,9 @@ export class Server {
   }
 
   public async start() {
-    const httpStart = await this.http.start();
     const pluginsStart = await this.plugins.start({});
 
     const coreStart = {
-      http: httpStart,
       plugins: pluginsStart,
     };
 
@@ -96,6 +108,7 @@ export class Server {
       plugins: mapToObject(pluginsStart.contracts),
     });
 
+    await this.http.start();
     return coreStart;
   }
 
@@ -109,9 +122,23 @@ export class Server {
   }
 
   private registerDefaultRoute(httpSetup: HttpServiceSetup) {
-    const router = new Router('/core');
-    router.get({ path: '/', validate: false }, async (req, res) => res.ok({ version: '0.0.1' }));
-    httpSetup.registerRouter(router);
+    const router = httpSetup.createRouter('/core');
+    router.get({ path: '/', validate: false }, async (context, req, res) =>
+      res.ok({ body: { version: '0.0.1' } })
+    );
+  }
+
+  private registerCoreContext(coreSetup: InternalCoreSetup) {
+    coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req) => {
+      const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(take(1)).toPromise();
+      const dataClient = await coreSetup.elasticsearch.dataClient$.pipe(take(1)).toPromise();
+      return {
+        elasticsearch: {
+          adminClient: adminClient.asScoped(req),
+          dataClient: dataClient.asScoped(req),
+        },
+      };
+    });
   }
 
   public async setupConfigSchemas() {

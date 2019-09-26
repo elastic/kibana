@@ -10,7 +10,8 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
   const PageObjects = getPageObjects(['common', 'maps', 'header', 'home', 'timePicker']);
   const screenshot = getService('screenshots');
 
-  describe('maps loaded from sample data', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/38137
+  describe.skip('maps loaded from sample data', () => {
 
     // Sample data is shifted to be relative to current time
     // This means that a static timerange will return different documents
@@ -34,7 +35,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('ecommerce');
         await PageObjects.maps.loadSavedMap('[eCommerce] Orders by Country');
-        await PageObjects.maps.toggleLayerVisibility('Road Map - Bright');
+        await PageObjects.maps.toggleLayerVisibility('Road map');
         await PageObjects.maps.toggleLayerVisibility('United Kingdom');
         await PageObjects.maps.toggleLayerVisibility('France');
         await PageObjects.maps.toggleLayerVisibility('United States');
@@ -62,7 +63,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('flights');
         await PageObjects.maps.loadSavedMap('[Flights] Origin and Destination Flight Time');
-        await PageObjects.maps.toggleLayerVisibility('Road Map - Bright');
+        await PageObjects.maps.toggleLayerVisibility('Road map');
         await setTimerangeToCoverAllSampleData();
         await PageObjects.maps.enterFullScreen();
       });
@@ -87,7 +88,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('logs');
         await PageObjects.maps.loadSavedMap('[Logs] Total Requests and Bytes');
-        await PageObjects.maps.toggleLayerVisibility('Road Map - Bright');
+        await PageObjects.maps.toggleLayerVisibility('Road map');
         await PageObjects.maps.toggleLayerVisibility('Total Requests by Country');
         await setTimerangeToCoverAllSampleData();
         await PageObjects.maps.enterFullScreen();

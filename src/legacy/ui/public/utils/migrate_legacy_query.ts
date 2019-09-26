@@ -18,6 +18,7 @@
  */
 
 import { has } from 'lodash';
+import { Query } from 'plugins/data';
 
 /**
  * Creates a standardized query object from old queries that were either strings or pure ES query DSL
@@ -25,11 +26,12 @@ import { has } from 'lodash';
  * @param query - a legacy query, what used to be stored in SearchSource's query property
  * @return Object
  */
-export function migrateLegacyQuery(query: object): object {
+
+export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene
   if (!has(query, 'language')) {
     return { query, language: 'lucene' };
   }
 
-  return query;
+  return query as Query;
 }

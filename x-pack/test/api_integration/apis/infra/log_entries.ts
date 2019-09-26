@@ -9,9 +9,9 @@ import { ascending, pairs } from 'd3-array';
 import gql from 'graphql-tag';
 import { v4 as uuidv4 } from 'uuid';
 
-import { sharedFragments } from '../../../../plugins/infra/common/graphql/shared';
-import { InfraTimeKey } from '../../../../plugins/infra/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { sharedFragments } from '../../../../legacy/plugins/infra/common/graphql/shared';
+import { InfraTimeKey } from '../../../../legacy/plugins/infra/public/graphql/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const KEY_WITHIN_DATA_RANGE = {
   time: new Date('2018-10-17T19:50:00.000Z').valueOf(),
@@ -88,7 +88,7 @@ const logEntriesBetweenQuery = gql`
   ${sharedFragments.InfraLogEntryFields}
 `;
 
-const logEntriesTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
   const sourceConfigurationService = getService('infraOpsSourceConfiguration');
@@ -333,10 +333,7 @@ const logEntriesTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default logEntriesTests;
+}
 
 const isSorted = <Value>(comparator: (first: Value, second: Value) => number) => (
   values: Value[]

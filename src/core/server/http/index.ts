@@ -19,8 +19,42 @@
 
 export { config, HttpConfig, HttpConfigType } from './http_config';
 export { HttpService, HttpServiceSetup, HttpServiceStart } from './http_service';
-export { Router, KibanaRequest } from './router';
+export { HttpServerSetup } from './http_server';
+export { GetAuthHeaders } from './auth_headers_storage';
+export { AuthStatus, GetAuthState, IsAuthenticated } from './auth_state_storage';
+export {
+  CustomHttpResponseOptions,
+  IKibanaSocket,
+  isRealRequest,
+  HttpResponseOptions,
+  HttpResponsePayload,
+  ErrorHttpResponseOptions,
+  KibanaRequest,
+  KibanaRequestRoute,
+  KnownHeaders,
+  LegacyRequest,
+  LifecycleResponseFactory,
+  RedirectResponseOptions,
+  RequestHandler,
+  ResponseError,
+  ResponseErrorAttributes,
+  ResponseHeaders,
+  kibanaResponseFactory,
+  KibanaResponseFactory,
+  RouteConfig,
+  IRouter,
+  RouteMethod,
+  RouteConfigOptions,
+} from './router';
 export { BasePathProxyServer } from './base_path_proxy_server';
 export { OnPreAuthHandler, OnPreAuthToolkit } from './lifecycle/on_pre_auth';
-export { AuthenticationHandler, AuthToolkit } from './lifecycle/auth';
+export {
+  AuthenticationHandler,
+  AuthHeaders,
+  AuthResultParams,
+  AuthToolkit,
+} from './lifecycle/auth';
 export { OnPostAuthHandler, OnPostAuthToolkit } from './lifecycle/on_post_auth';
+export { SessionStorageFactory, SessionStorage } from './session_storage';
+export { SessionStorageCookieOptions } from './cookie_session_storage';
+export * from './types';

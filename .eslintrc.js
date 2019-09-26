@@ -31,7 +31,9 @@ const ELASTIC_LICENSE_HEADER = `
 `;
 
 module.exports = {
-  extends: ['@elastic/eslint-config-kibana'],
+  root: true,
+
+  extends: ['@elastic/eslint-config-kibana', 'plugin:@elastic/eui/recommended'],
 
   overrides: [
     /**
@@ -40,6 +42,7 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
+        'packages/kbn-utility-types/**/*',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'packages/kbn-config-schema/**/*',
         'packages/kbn-pm/**/*',
@@ -53,9 +56,10 @@ module.exports = {
         'packages/kbn-test/**/*',
         'packages/kbn-eslint-import-resolver-kibana/**/*',
         'src/legacy/server/saved_objects/**/*',
-        'x-pack/plugins/apm/**/*',
-        'x-pack/plugins/canvas/**/*',
+        'x-pack/legacy/plugins/apm/**/*',
+        'x-pack/legacy/plugins/canvas/**/*',
         '**/*.{ts,tsx}',
+        'src/legacy/core_plugins/metrics/**/*.js',
       ],
       plugins: ['prettier'],
       rules: Object.assign(
@@ -139,11 +143,13 @@ module.exports = {
                   'src/core/public/**/*',
                   '!src/core/public/index.ts',
                   '!src/core/public/mocks.ts',
+                  '!src/core/public/*.test.mocks.ts',
                   '!src/core/public/utils/**/*',
 
                   'src/core/server/**/*',
                   '!src/core/server/index.ts',
                   '!src/core/server/mocks.ts',
+                  '!src/core/server/*.test.mocks.ts',
 
                   'src/plugins/**/public/**/*',
                   '!src/plugins/**/public/index*',
@@ -152,6 +158,23 @@ module.exports = {
                   '!src/plugins/**/server/index*',
                 ],
                 allowSameFolder: true,
+              },
+              {
+                from: ['src/legacy/ui/**/*', 'ui/**/*'],
+                target: [
+                  'test/plugin_functional/plugins/**/public/np_ready/**/*',
+                  'test/plugin_functional/plugins/**/server/np_ready/**/*',
+                  'src/legacy/core_plugins/**/public/np_ready/**/*',
+                  'src/legacy/core_plugins/**/server/np_ready/**/*',
+                  'x-pack/legacy/plugins/**/public/np_ready/**/*',
+                  'x-pack/legacy/plugins/**/server/np_ready/**/*',
+                ],
+                allowSameFolder: true,
+                errorMessage:
+                  'NP-ready code should not import from /src/legacy/ui/** folder. ' +
+                  'Instead of importing from /src/legacy/ui/** deeply within a np_ready folder, ' +
+                  'import those things once at the top level of your plugin and pass those down, just ' +
+                  'like you pass down `core` and `plugins` objects.',
               },
             ],
           },
@@ -163,7 +186,16 @@ module.exports = {
      * Allow default exports
      */
     {
-      files: ['x-pack/test/functional/apps/**/*.js', 'x-pack/plugins/apm/**/*.js'],
+      files: [
+        'x-pack/test/functional/apps/**/*.js',
+        'x-pack/legacy/plugins/apm/**/*.js',
+        'test/*/config.ts',
+        'test/visual_regression/tests/**/*',
+        'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
+        'x-pack/test/*/*config.*ts',
+        'x-pack/test/saved_object_api_integration/*/apis/**/*',
+        'x-pack/test/ui_capabilities/*/tests/**/*',
+      ],
       rules: {
         'import/no-default-export': 'off',
         'import/no-named-as-default': 'off',
@@ -184,19 +216,28 @@ module.exports = {
         // instructs import/no-extraneous-dependencies to treat modules
         // in plugins/ or ui/ namespace as "core modules" so they don't
         // trigger failures for not being listed in package.json
-        'import/core-modules': ['plugins', 'legacy/ui', 'uiExports'],
+        'import/core-modules': [
+          'plugins',
+          'legacy/ui',
+          'uiExports',
+          // TODO: Remove once https://github.com/benmosher/eslint-plugin-import/issues/1374 is fixed
+          'querystring',
+        ],
 
         'import/resolver': {
           '@kbn/eslint-import-resolver-kibana': {
             forceNode: false,
             rootPackageName: 'kibana',
             kibanaPath: '.',
-            pluginMap: readdirSync(resolve(__dirname, 'x-pack/plugins')).reduce((acc, name) => {
-              if (!name.startsWith('_')) {
-                acc[name] = `x-pack/plugins/${name}`;
-              }
-              return acc;
-            }, {}),
+            pluginMap: readdirSync(resolve(__dirname, 'x-pack/legacy/plugins')).reduce(
+              (acc, name) => {
+                if (!name.startsWith('_')) {
+                  acc[name] = `x-pack/legacy/plugins/${name}`;
+                }
+                return acc;
+              },
+              {}
+            ),
           },
         },
       },
@@ -239,7 +280,7 @@ module.exports = {
         'x-pack/**/*.test.js',
         'x-pack/test_utils/**/*',
         'x-pack/gulpfile.js',
-        'x-pack/plugins/apm/public/utils/testHelpers.js',
+        'x-pack/legacy/plugins/apm/public/utils/testHelpers.js',
       ],
       rules: {
         'import/no-extraneous-dependencies': [
@@ -343,13 +384,31 @@ module.exports = {
     },
 
     /**
+     * Jest specific rules
+     */
+    {
+      files: ['**/*.test.{js,ts,tsx}'],
+      rules: {
+        'jest/valid-describe': 'error',
+      },
+    },
+
+    /**
      * APM overrides
      */
     {
-      files: ['x-pack/plugins/apm/**/*.js'],
+      files: ['x-pack/legacy/plugins/apm/**/*.js'],
       rules: {
         'no-unused-vars': ['error', { ignoreRestSiblings: true }],
         'no-console': ['warn', { allow: ['error'] }],
+      },
+    },
+    {
+      plugins: ['react-hooks'],
+      files: ['x-pack/legacy/plugins/apm/**/*.{ts,tsx}'],
+      rules: {
+        'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
+        'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^useFetcher$' }],
       },
     },
 
@@ -357,7 +416,7 @@ module.exports = {
      * GIS overrides
      */
     {
-      files: ['x-pack/plugins/maps/**/*.js'],
+      files: ['x-pack/legacy/plugins/maps/**/*.js'],
       rules: {
         'react/prefer-stateless-function': [0, { ignorePureComponents: false }],
       },
@@ -367,7 +426,7 @@ module.exports = {
      * Graph overrides
      */
     {
-      files: ['x-pack/plugins/graph/**/*.js'],
+      files: ['x-pack/legacy/plugins/graph/**/*.js'],
       globals: {
         angular: true,
         $: true,
@@ -390,7 +449,7 @@ module.exports = {
      * ML overrides
      */
     {
-      files: ['x-pack/plugins/ml/**/*.js'],
+      files: ['x-pack/legacy/plugins/ml/**/*.js'],
       rules: {
         'no-shadow': 'error',
       },
@@ -401,7 +460,7 @@ module.exports = {
      */
     {
       // front end typescript and javascript files only
-      files: ['x-pack/plugins/siem/public/**/*.{js,ts,tsx}'],
+      files: ['x-pack/legacy/plugins/siem/public/**/*.{js,ts,tsx}'],
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-restricted-imports': [
@@ -415,7 +474,7 @@ module.exports = {
     },
     {
       // typescript only for front and back end
-      files: ['x-pack/plugins/siem/**/*.{ts,tsx}'],
+      files: ['x-pack/legacy/plugins/siem/**/*.{ts,tsx}'],
       rules: {
         // This will be turned on after bug fixes are complete
         // '@typescript-eslint/explicit-member-accessibility': 'warn',
@@ -449,8 +508,8 @@ module.exports = {
     },
     {
       // typescript and javascript for front and back end
-      files: ['x-pack/plugins/siem/**/*.{js,ts,tsx}'],
-      plugins: ['react'],
+      files: ['x-pack/legacy/plugins/siem/**/*.{js,ts,tsx}'],
+      plugins: ['eslint-plugin-node', 'react'],
       rules: {
         'accessor-pairs': 'error',
         'array-callback-return': 'error',
@@ -473,12 +532,12 @@ module.exports = {
           },
         ],
         */
+        'node/no-deprecated-api': 'error',
         'no-bitwise': 'error',
         'no-continue': 'error',
         'no-dupe-keys': 'error',
         'no-duplicate-case': 'error',
-        // This will be turned on after bug fixes are mostly completed
-        // 'no-duplicate-imports': 'warn',
+        'no-duplicate-imports': 'error',
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
@@ -497,12 +556,10 @@ module.exports = {
         'no-misleading-character-class': 'error',
         'no-new-symbol': 'error',
         'no-obj-calls': 'error',
-        // This will be turned on after bug fixes are mostly complete
-        // 'no-param-reassign': 'warn',
+        'no-param-reassign': 'error',
         'no-process-exit': 'error',
         'no-prototype-builtins': 'error',
-        // This will be turned on after bug fixes are mostly complete
-        // 'no-return-await': 'warn',
+        'no-return-await': 'error',
         'no-self-compare': 'error',
         'no-shadow-restricted-names': 'error',
         'no-sparse-arrays': 'error',
@@ -562,8 +619,7 @@ module.exports = {
         // will introduced after the other warns are fixed
         // 'react/jsx-no-bind': 'error',
         'react/jsx-no-comment-textnodes': 'error',
-        // will be introduced to fix missing i18n keys
-        // 'react/jsx-no-literals': 'warn',
+        'react/jsx-no-literals': 'error',
         'react/jsx-no-target-blank': 'error',
         'react/jsx-fragments': 'error',
         'react/jsx-sort-default-props': 'error',
@@ -575,6 +631,16 @@ module.exports = {
         'symbol-description': 'error',
         'template-curly-spacing': 'error',
         'vars-on-top': 'error',
+      },
+    },
+
+    /**
+     * Lens overrides
+     */
+    {
+      files: ['x-pack/legacy/plugins/lens/**/*.ts', 'x-pack/legacy/plugins/lens/**/*.tsx'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
       },
     },
 
@@ -596,7 +662,7 @@ module.exports = {
      * Monitoring overrides
      */
     {
-      files: ['x-pack/plugins/monitoring/**/*.js'],
+      files: ['x-pack/legacy/plugins/monitoring/**/*.js'],
       rules: {
         'block-spacing': ['error', 'always'],
         curly: ['error', 'all'],
@@ -605,7 +671,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/monitoring/public/**/*.js'],
+      files: ['x-pack/legacy/plugins/monitoring/public/**/*.js'],
       env: { browser: true },
     },
 
@@ -613,7 +679,7 @@ module.exports = {
      * Canvas overrides
      */
     {
-      files: ['x-pack/plugins/canvas/**/*.js'],
+      files: ['x-pack/legacy/plugins/canvas/**/*.js'],
       rules: {
         radix: 'error',
         curly: ['error', 'all'],
@@ -659,12 +725,12 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/plugins/canvas/gulpfile.js',
-        'x-pack/plugins/canvas/scripts/*.js',
-        'x-pack/plugins/canvas/tasks/*.js',
-        'x-pack/plugins/canvas/tasks/**/*.js',
-        'x-pack/plugins/canvas/__tests__/**/*.js',
-        'x-pack/plugins/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
+        'x-pack/legacy/plugins/canvas/gulpfile.js',
+        'x-pack/legacy/plugins/canvas/scripts/*.js',
+        'x-pack/legacy/plugins/canvas/tasks/*.js',
+        'x-pack/legacy/plugins/canvas/tasks/**/*.js',
+        'x-pack/legacy/plugins/canvas/__tests__/**/*.js',
+        'x-pack/legacy/plugins/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
       ],
       rules: {
         'import/no-extraneous-dependencies': [
@@ -677,7 +743,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/canvas/canvas_plugin_src/**/*.js'],
+      files: ['x-pack/legacy/plugins/canvas/canvas_plugin_src/**/*.js'],
       globals: { canvas: true, $: true },
       rules: {
         'import/no-unresolved': [
@@ -689,13 +755,13 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/canvas/public/**/*.js'],
+      files: ['x-pack/legacy/plugins/canvas/public/**/*.js'],
       env: {
         browser: true,
       },
     },
     {
-      files: ['x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*.js'],
+      files: ['x-pack/legacy/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*.js'],
       env: {
         jquery: true,
       },

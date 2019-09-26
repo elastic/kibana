@@ -1,0 +1,18 @@
+.codeQueryBar {
+  max-width: 90%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.codeQueryBar__input {
+  padding-right: 10rem;
+}
+
+.codeQueryBar__scope {
+  width: calc(#{$codeSideBarWidth} - #{$codeSearchBarPadding});
+}
+
+.codeQueryBar__filter-badge {
+  margin-right: $euiSizeS;
+}

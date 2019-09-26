@@ -22,11 +22,15 @@ import angular from 'angular';
 
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterFilters } from './create_filter/filters';
-import { decorateQuery, luceneStringToDsl } from '@kbn/es-query';
-import { FiltersParamEditor } from '../controls/filters';
+import { FiltersParamEditor } from '../../vis/editors/default/controls/filters';
 import { i18n } from '@kbn/i18n';
 
 import chrome from 'ui/chrome';
+import { buildEsQuery } from '@kbn/es-query';
+import { setup as data } from '../../../../core_plugins/data/public/legacy';
+
+const { getQueryLog } = data.query.helpers;
+const config = chrome.getUiSettingsClient();
 
 export const filtersBucketAgg = new BucketAggType({
   name: 'filters',
@@ -40,10 +44,15 @@ export const filtersBucketAgg = new BucketAggType({
     {
       name: 'filters',
       editorComponent: FiltersParamEditor,
-      default: [ { input: {}, label: '' } ],
+      default: [ { input: { query: '', language: config.get('search:queryLanguage') }, label: '' } ],
       write: function (aggConfig, output) {
         const inFilters = aggConfig.params.filters;
         if (!_.size(inFilters)) return;
+
+        inFilters.forEach((filter) => {
+          const persistedLog = getQueryLog(config, 'filtersAgg', filter.input.language);
+          persistedLog.add(filter.input.query);
+        });
 
         const outFilters = _.transform(inFilters, function (filters, filter) {
           const input = _.cloneDeep(filter.input);
@@ -53,19 +62,18 @@ export const filtersBucketAgg = new BucketAggType({
             return;
           }
 
-          const query = input.query = luceneStringToDsl(input.query);
+          const query = buildEsQuery(aggConfig.getIndexPattern(), [input], [], config);
+
           if (!query) {
             console.log('malformed filter agg params, missing "query" on input'); // eslint-disable-line no-console
             return;
           }
-          const config = chrome.getUiSettingsClient();
-          const queryStringOptions = config.get('query:queryString:options');
 
-          decorateQuery(query, queryStringOptions);
-
-          const matchAllLabel = (filter.input.query === '' && _.has(query, 'match_all')) ? '*' : '';
-          const label = filter.label || matchAllLabel || _.get(query, 'query_string.query') || angular.toJson(query);
-          filters[label] = input;
+          const matchAllLabel = filter.input.query === '' ? '*' : '';
+          const label = filter.label
+            || matchAllLabel
+            || (typeof filter.input.query === 'string' ? filter.input.query : angular.toJson(filter.input.query));
+          filters[label] = { query };
         }, {});
 
         if (!_.size(outFilters)) return;

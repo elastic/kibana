@@ -24,9 +24,9 @@ class IndexPatternList {
     this._plugins = registry.inOrder.map(Plugin => new Plugin());
   }
 
-  getIndexPatternTags = (indexPattern) => {
+  getIndexPatternTags = (indexPattern, isDefault) => {
     return this._plugins.reduce((tags, plugin) => {
-      return plugin.getIndexPatternTags ? tags.concat(plugin.getIndexPatternTags(indexPattern)) : tags;
+      return plugin.getIndexPatternTags ? tags.concat(plugin.getIndexPatternTags(indexPattern, isDefault)) : tags;
     }, []);
   }
 

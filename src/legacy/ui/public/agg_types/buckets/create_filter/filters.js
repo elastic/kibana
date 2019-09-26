@@ -26,6 +26,6 @@ export function createFilterFilters(aggConfig, key) {
   const filter = dslFilters[key];
 
   if (filter) {
-    return buildQueryFilter(filter.query, aggConfig.getIndexPattern().id);
+    return buildQueryFilter(filter.query, aggConfig.getIndexPattern().id, key);
   }
 }

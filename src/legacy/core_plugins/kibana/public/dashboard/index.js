@@ -30,7 +30,7 @@ import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
 
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
-import { InvalidJSONProperty, SavedObjectNotFound } from 'ui/errors';
+import { InvalidJSONProperty, SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { recentlyAccessed } from 'ui/persisted_log';
@@ -38,10 +38,10 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { uiModules } from 'ui/modules';
 import 'ui/capabilities/route_setup';
+import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 
-import { data } from 'plugins/data';
-data.search.loadLegacyDirectives();
-data.filter.loadLegacyDirectives();
+// load directives
+import '../../../data/public';
 
 const app = uiModules.get('app/dashboard', [
   'ngRoute',
@@ -56,6 +56,7 @@ function createNewDashboardCtrl($scope) {
   $scope.visitVisualizeAppLinkText = i18n.translate('kbn.dashboard.visitVisualizeAppLinkText', {
     defaultMessage: 'visit the Visualize app',
   });
+  addHelpMenuToAppChrome(chrome);
 }
 
 uiRoutes
@@ -98,8 +99,8 @@ uiRoutes
       $scope.getViewUrl = ({ id }) => {
         return chrome.addBasePath(`#${createDashboardEditUrl(id)}`);
       };
-      $scope.delete = (ids) => {
-        return services.dashboards.delete(ids);
+      $scope.delete = (dashboards) => {
+        return services.dashboards.delete(dashboards.map(d => d.id));
       };
       $scope.hideWriteControls = dashboardConfig.getHideWriteControls();
       $scope.initialFilter = ($location.search()).filter || EMPTY_FILTER;
@@ -108,6 +109,7 @@ uiRoutes
           defaultMessage: 'Dashboards',
         }),
       }]);
+      addHelpMenuToAppChrome(chrome);
     },
     resolve: {
       dash: function ($route, Private, redirectWhenMissing, kbnUrl) {

@@ -6,18 +6,15 @@ exports[`should render popover when appLinks is not empty 1`] = `
   button={
     <EuiButton
       aria-label="View Sample eCommerce orders"
-      color="primary"
-      fill={false}
       iconSide="right"
       iconType="arrowDown"
       onClick={[Function]}
-      size="m"
-      type="button"
     >
       View data
     </EuiButton>
   }
   closePopover={[Function]}
+  display="inlineBlock"
   hasArrow={true}
   id="sampleDataLinksecommerce"
   isOpen={false}
@@ -58,13 +55,8 @@ exports[`should render popover when appLinks is not empty 1`] = `
 exports[`should render simple button when appLinks is empty 1`] = `
 <EuiButton
   aria-label="View Sample eCommerce orders"
-  color="primary"
   data-test-subj="launchSampleDataSetecommerce"
-  fill={false}
   href="root/app/kibana#/dashboard/722b74f0-b882-11e8-a6d9-e546fe2bba5f"
-  iconSide="left"
-  size="m"
-  type="button"
 >
   View data
 </EuiButton>

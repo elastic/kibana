@@ -17,22 +17,16 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { memoize, forOwn, isFunction } from 'lodash';
 import chrome from '../chrome';
-import { FieldFormat } from '../../field_formats/field_format';
-import { IndexedArray } from '../indexed_array';
+import { FieldFormat } from '../../../../plugins/data/common/field_formats';
 
-class FieldFormatRegistry extends IndexedArray {
+class FieldFormatRegistry {
   constructor() {
-    super({
-      group: ['fieldType'],
-      index: ['id', 'name']
-    });
-
+    this.fieldFormats = new Map();
     this._uiSettings = chrome.getUiSettingsClient();
     this.getConfig = (...args) => this._uiSettings.get(...args);
     this._defaultMap = [];
-    this._providers = [];
     this.init();
   }
 
@@ -51,10 +45,12 @@ class FieldFormatRegistry extends IndexedArray {
    * using the format:defaultTypeMap config map
    *
    * @param  {String} fieldType - the field type
-   * @return {String}
+   * @param  {String[]} esTypes - Array of ES data types
+   * @return {Object}
    */
-  getDefaultConfig = (fieldType) => {
-    return this._defaultMap[fieldType] || this._defaultMap._default_;
+  getDefaultConfig = (fieldType, esTypes) => {
+    const type = this.getDefaultTypeName(fieldType, esTypes);
+    return this._defaultMap[type] || this._defaultMap._default_;
   };
 
   /**
@@ -64,18 +60,45 @@ class FieldFormatRegistry extends IndexedArray {
    * @return {Function}
    */
   getType = (formatId) => {
-    return this.byId[formatId];
+    return this.fieldFormats.get(formatId);
   };
-
   /**
    * Get the default FieldFormat type (class) for
    * a field type, using the format:defaultTypeMap.
+   * used by the field editor
    *
    * @param  {String} fieldType
+   * @param  {String} esTypes - Array of ES data types
    * @return {Function}
    */
-  getDefaultType = (fieldType) => {
-    return this.byId[this.getDefaultConfig(fieldType).id];
+  getDefaultType = (fieldType, esTypes) => {
+    const config = this.getDefaultConfig(fieldType, esTypes);
+    return this.getType(config.id);
+  };
+
+  /**
+   * Get the name of the default type for ES types like date_nanos
+   * using the format:defaultTypeMap config map
+   *
+   * @param  {String[]} esTypes - Array of ES data types
+   * @return {String|undefined}
+   */
+  getTypeNameByEsTypes = (esTypes) => {
+    if(!Array.isArray(esTypes)) {
+      return;
+    }
+    return esTypes.find(type => this._defaultMap[type] && this._defaultMap[type].es);
+  };
+  /**
+   * Get the default FieldFormat type name for
+   * a field type, using the format:defaultTypeMap.
+   *
+   * @param  {String} fieldType
+   * @param  {String[]} esTypes
+   * @return {string}
+   */
+  getDefaultTypeName = (fieldType, esTypes) => {
+    return this.getTypeNameByEsTypes(esTypes) || fieldType;
   };
 
   /**
@@ -84,8 +107,8 @@ class FieldFormatRegistry extends IndexedArray {
    * @param  {String} formatId
    * @return {FieldFormat}
    */
-  getInstance = _.memoize(function (formatId) {
-    const FieldFormat = this.byId[formatId];
+  getInstance = memoize(function (formatId) {
+    const FieldFormat = this.getType(formatId);
     if (!FieldFormat) {
       throw new Error(`Field Format '${formatId}' not found!`);
     }
@@ -96,30 +119,67 @@ class FieldFormatRegistry extends IndexedArray {
    * Get the default fieldFormat instance for a field format.
    *
    * @param  {String} fieldType
+   * @param  {String[]} esTypes
    * @return {FieldFormat}
    */
-  getDefaultInstance = _.memoize(function (fieldType) {
-    const conf = this.getDefaultConfig(fieldType);
-    const FieldFormat = this.byId[conf.id];
-    return new FieldFormat(conf.params, this.getConfig);
-  });
+  getDefaultInstancePlain(fieldType, esTypes) {
+    const conf = this.getDefaultConfig(fieldType, esTypes);
 
+    const FieldFormat = this.getType(conf.id);
+    return new FieldFormat(conf.params, this.getConfig);
+  }
+  /**
+   * Returns a cache key built by the given variables for caching in memoized
+   * Where esType contains fieldType, fieldType is returned
+   * -> kibana types have a higher priority in that case
+   * -> would lead to failing tests that match e.g. date format with/without esTypes
+   * https://lodash.com/docs#memoize
+   *
+   * @param  {String} fieldType
+   * @param  {String[]} esTypes
+   * @return {string}
+   */
+  getDefaultInstanceCacheResolver(fieldType, esTypes) {
+    return Array.isArray(esTypes) && esTypes.indexOf(fieldType) === -1
+      ? [fieldType, ...esTypes].join('-')
+      : fieldType;
+  }
+
+  /**
+   * Get filtered list of field formats by format type
+   *
+   * @param  {String} fieldType
+   * @return {FieldFormat[]}
+   */
+
+  getByFieldType(fieldType) {
+    return [ ...this.fieldFormats.values()]
+      .filter(format => format.fieldType.indexOf(fieldType) !== -1);
+  }
+
+  /**
+   * Get the default fieldFormat instance for a field format.
+   * It's a memoized function that builds and reads a cache
+   *
+   * @param  {String} fieldType
+   * @param  {String[]} esTypes
+   * @return {FieldFormat}
+   */
+  getDefaultInstance = memoize(this.getDefaultInstancePlain, this.getDefaultInstanceCacheResolver);
 
   parseDefaultTypeMap(value) {
     this._defaultMap = value;
-    _.forOwn(this, function (fn) {
-      if (_.isFunction(fn) && fn.cache) {
+    forOwn(this, function (fn) {
+      if (isFunction(fn) && fn.cache) {
         // clear all memoize caches
-        fn.cache = new _.memoize.Cache();
+        fn.cache = new memoize.Cache();
       }
     });
   }
 
-  name = 'fieldFormats';
-  displayName = '[registry ' + this.name + ']';
-
   register = (module) => {
-    this.push(module(FieldFormat));
+    const fieldFormatInstance = module(FieldFormat);
+    this.fieldFormats.set(fieldFormatInstance.id, fieldFormatInstance);
     return this;
   };
 }

@@ -7,10 +7,9 @@
 import expect from '@kbn/expect';
 import request, { Cookie } from 'request';
 import { delay } from 'bluebird';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getService }: FtrProviderContext) {
   const spnegoToken =
     'YIIChwYGKwYBBQUCoIICezCCAnegDTALBgkqhkiG9xIBAgKiggJkBIICYGCCAlwGCSqGSIb3EgECAgEAboICSzCCAkegAwIBBaEDAgEOogcDBQAAAAAAo4IBW2GCAVcwggFToAMCAQWhERsPVEVTVC5FTEFTVElDLkNPohwwGqADAgEDoRMwERsESFRUUBsJbG9jYWxob3N0o4IBGTCCARWgAwIBEqEDAgECooIBBwSCAQNBN2a1Rso+KEJsDwICYLCt7ACLzdlbhEZF5YNsehO109b/WiZR1VTK6kCQyDdBdQFefyvV8EiC35mz7XnTb239nWz6xBGbdmtjSfF0XzpXKbL/zGzLEKkEXQuqFLPUN6qEJXsh0OoNdj9OWwmTr93FVyugs1hO/E5wjlAe2SDYpBN6uZICXu6dFg9nLQKkb/XgbgKM7ZZvgA/UElWDgHav4nPO1VWppCCLKHqXTRnvpr/AsxeON4qeJLaukxBigfIaJlLFMNQal5H7MyXa0j3Y1sckbURnWoBt6r4XE7c8F8cz0rYoGwoCO+Cs5tNutKY6XcsAFbLh59hjgIkhVBhhyTeypIHSMIHPoAMCARKigccEgcSsXqIRAcHfZivrbHfsnvbFgmzmnrKVPFNtJ9Hl23KunCsNW49nP4VF2dEf9n12prDaIguJDV5LPHpTew9rmCj1GCahKJ9bJbRKIgImLFd+nelm3E2zxRqAhrgM1469oDg0ksE3+5lJBuJlVEECMp0F/gxvEiL7DhasICqw+FOJ/jD9QUYvg+E6BIxWgZyPszaxerzBBszAhIF1rxCHRRL1KLjskNeJlBhH77DkAO6AEmsYGdsgEq7b7uCov9PKPiiPAuFF';
   const supertest = getService('supertestWithoutAuth');
@@ -36,16 +35,10 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
 
   describe('Kerberos authentication', () => {
     before(async () => {
-      // HACK: remove as soon as we have a solution for https://github.com/elastic/elasticsearch/issues/41943.
-      await getService('esSupertest')
-        .post('/_security/role/krb5-user')
-        .send({ cluster: ['cluster:admin/xpack/security/token/create'] })
-        .expect(200);
-
       await getService('esSupertest')
         .post('/_security/role_mapping/krb5')
         .send({
-          roles: ['krb5-user'],
+          roles: ['kibana_user'],
           enabled: true,
           rules: { field: { 'realm.name': 'kerb1' } },
         })
@@ -109,6 +102,11 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
           .set('Authorization', `Negotiate ${spnegoToken}`)
           .expect(200);
 
+        // Verify that mutual authentication works.
+        expect(response.headers['www-authenticate']).to.be(
+          'Negotiate oRQwEqADCgEAoQsGCSqGSIb3EgECAg=='
+        );
+
         const cookies = response.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
@@ -121,7 +119,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(200, {
             username: 'tester@TEST.ELASTIC.CO',
-            roles: ['krb5-user'],
+            roles: ['kibana_user'],
             full_name: null,
             email: null,
             metadata: {
@@ -134,11 +132,20 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
           });
       });
 
-      it('should fail if SPNEGO token is rejected', async () => {
+      it('should re-initiate SPNEGO handshake if token is rejected with 401', async () => {
         const spnegoResponse = await supertest
           .get('/api/security/v1/me')
           .set('Authorization', `Negotiate ${Buffer.from('Hello').toString('base64')}`)
           .expect(401);
+        expect(spnegoResponse.headers['set-cookie']).to.be(undefined);
+        expect(spnegoResponse.headers['www-authenticate']).to.be('Negotiate');
+      });
+
+      it('should fail if SPNEGO token is rejected because of unknown reason', async () => {
+        const spnegoResponse = await supertest
+          .get('/api/security/v1/me')
+          .set('Authorization', 'Negotiate (:I am malformed:)')
+          .expect(500);
         expect(spnegoResponse.headers['set-cookie']).to.be(undefined);
         expect(spnegoResponse.headers['www-authenticate']).to.be(undefined);
       });
@@ -201,7 +208,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         const apiResponse = await supertest
           .get('/api/security/v1/me')
           .set('kbn-xsrf', 'xxx')
-          .set('Authorization', 'Bearer AbCdEf')
+          .set('Authorization', 'Basic a3JiNTprcmI1')
           .set('Cookie', sessionCookie.cookieString())
           .expect(401);
 
@@ -275,47 +282,69 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         checkCookieIsSet(sessionCookie);
       });
 
-      it('AJAX call should initiate SPNEGO and clear existing cookie', async function() {
+      it('AJAX call should refresh token and update existing cookie', async function() {
         this.timeout(40000);
 
         // Access token expiration is set to 15s for API integration tests.
         // Let's wait for 20s to make sure token expires.
         await delay(20000);
 
+        // This api call should succeed and automatically refresh token. Returned cookie will contain
+        // the new access and refresh token pair.
         const apiResponse = await supertest
           .get('/api/security/v1/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
-          .expect(401);
+          .expect(200);
 
         const cookies = apiResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
-        checkCookieIsCleared(request.cookie(cookies[0])!);
 
-        expect(apiResponse.headers['www-authenticate']).to.be('Negotiate');
+        const refreshedCookie = request.cookie(cookies[0])!;
+        checkCookieIsSet(refreshedCookie);
+
+        // The first new cookie with fresh pair of access and refresh tokens should work.
+        await supertest
+          .get('/api/security/v1/me')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', refreshedCookie.cookieString())
+          .expect(200);
+
+        expect(apiResponse.headers['www-authenticate']).to.be(undefined);
       });
 
-      it('non-AJAX call should initiate SPNEGO and clear existing cookie', async function() {
+      it('non-AJAX call should refresh token and update existing cookie', async function() {
         this.timeout(40000);
 
         // Access token expiration is set to 15s for API integration tests.
         // Let's wait for 20s to make sure token expires.
         await delay(20000);
 
+        // This request should succeed and automatically refresh token. Returned cookie will contain
+        // the new access and refresh token pair.
         const nonAjaxResponse = await supertest
-          .get('/')
+          .get('/app/kibana')
           .set('Cookie', sessionCookie.cookieString())
-          .expect(401);
+          .expect(200);
 
         const cookies = nonAjaxResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
-        checkCookieIsCleared(request.cookie(cookies[0])!);
 
-        expect(nonAjaxResponse.headers['www-authenticate']).to.be('Negotiate');
+        const refreshedCookie = request.cookie(cookies[0])!;
+        checkCookieIsSet(refreshedCookie);
+
+        // The first new cookie with fresh pair of access and refresh tokens should work.
+        await supertest
+          .get('/api/security/v1/me')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', refreshedCookie.cookieString())
+          .expect(200);
+
+        expect(nonAjaxResponse.headers['www-authenticate']).to.be(undefined);
       });
     });
 
-    describe('API access with missing access token document.', () => {
+    describe('API access with missing access token document or expired refresh token.', () => {
       let sessionCookie: Cookie;
 
       beforeEach(async () => {
@@ -331,8 +360,8 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         checkCookieIsSet(sessionCookie);
 
         // Let's delete tokens from `.security-tokens` index directly to simulate the case when
-        // Elasticsearch automatically removes access token document from the index after some
-        // period of time.
+        // Elasticsearch automatically removes access/refresh token document from the index after
+        // some period of time.
         const esResponse = await getService('es').deleteByQuery({
           index: '.security-tokens',
           q: 'doc_type:token',

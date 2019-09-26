@@ -42,7 +42,7 @@ function resolveKibanaPath(path) {
 }
 
 function readFtrConfigFile(log, path, settingOverrides) {
-  return require(resolveKibanaPath('src/functional_test_runner')) // eslint-disable-line import/no-dynamic-require
+  return require('@kbn/test') // eslint-disable-line import/no-dynamic-require
     .readConfigFile(log, path, settingOverrides);
 }
 

@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/winlogbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/winlogbeat_instructions';
 
 export function windowsEventLogsSpecProvider(server, context) {
   return {
@@ -28,12 +32,13 @@ export function windowsEventLogsSpecProvider(server, context) {
       defaultMessage: 'Windows Event Log',
     }),
     isBeta: false,
-    category: TUTORIAL_CATEGORY.SECURITY,
+    category: TUTORIAL_CATEGORY.SIEM,
     shortDescription: i18n.translate('kbn.server.tutorials.windowsEventLogs.shortDescription', {
       defaultMessage: 'Fetch logs from the Windows Event Log.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.windowsEventLogs.longDescription', {
-      defaultMessage: 'Use Winlogbeat to collect the logs from the Windows Event Log. \
+      defaultMessage:
+        'Use Winlogbeat to collect the logs from the Windows Event Log. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.winlogbeat}/index.html',
@@ -45,16 +50,16 @@ export function windowsEventLogsSpecProvider(server, context) {
         label: i18n.translate('kbn.server.tutorials.windowsEventLogs.artifacts.application.label', {
           defaultMessage: 'SIEM App',
         }),
-        path: '/app/siem'
+        path: '/app/siem',
       },
       dashboards: [],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.winlogbeat}/exported-fields.html'
-      }
+        documentationUrl: '{config.docs.beats.winlogbeat}/exported-fields.html',
+      },
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(null, null, null, context),
     elasticCloud: cloudInstructions(),
-    onPremElasticCloud: onPremCloudInstructions()
+    onPremElasticCloud: onPremCloudInstructions(),
   };
 }

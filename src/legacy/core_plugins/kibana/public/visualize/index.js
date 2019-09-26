@@ -29,9 +29,8 @@ import { VisualizeConstants } from './visualize_constants';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { getLandingBreadcrumbs, getWizardStep1Breadcrumbs } from './breadcrumbs';
 
-import { data } from 'plugins/data';
-data.search.loadLegacyDirectives();
-data.filter.loadLegacyDirectives();
+// load directives
+import '../../../data/public';
 
 uiRoutes
   .defaults(/visualize/, {

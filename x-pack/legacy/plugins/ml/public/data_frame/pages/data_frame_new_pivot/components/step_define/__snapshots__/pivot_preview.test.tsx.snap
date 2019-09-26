@@ -1,0 +1,79 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: <PivotPreview /> Minimal initialization 1`] = `
+<div>
+  <ContextProvider
+    value={
+      Object {
+        "combinedQuery": Object {
+          "language": "the-query-language",
+          "query": "the-query-string",
+        },
+        "currentIndexPattern": Object {
+          "fields": Array [],
+          "id": "the-index-pattern-id",
+          "title": "the-index-pattern-title",
+        },
+        "currentSavedSearch": Object {
+          "columns": Array [],
+          "destroy": [Function],
+          "id": "the-saved-search-id",
+          "searchSource": Object {},
+          "sort": Array [],
+          "title": "the-saved-search-title",
+        },
+        "indexPatterns": _temp {
+          "clearCache": [MockFunction],
+          "config": Object {},
+          "fieldFormats": Array [],
+          "get": [MockFunction],
+          "getDefault": [MockFunction],
+          "getFields": [MockFunction],
+          "getIds": [MockFunction],
+          "getTitles": [MockFunction],
+          "make": [MockFunction],
+          "refreshSavedObjectsCache": Object {},
+          "savedObjectsClient": Object {},
+        },
+        "kbnBaseUrl": "url",
+        "kibanaConfig": Object {
+          "get": [Function],
+          "has": [Function],
+          "set": [Function],
+        },
+      }
+    }
+  >
+    <Component
+      aggs={
+        Object {
+          "the-agg-name": Object {
+            "agg": "avg",
+            "aggName": "the-group-by-agg-name",
+            "dropDownName": "the-group-by-drop-down-name",
+            "field": "the-agg-field",
+          },
+        }
+      }
+      groupBy={
+        Object {
+          "the-group-by-name": Object {
+            "agg": "terms",
+            "aggName": "the-group-by-agg-name",
+            "dropDownName": "the-group-by-drop-down-name",
+            "field": "the-group-by-field",
+          },
+        }
+      }
+      query={
+        Object {
+          "query_string": Object {
+            "default_operator": "AND",
+            "query": "the-query",
+          },
+        }
+      }
+    />
+  </ContextProvider>
+</div>
+`;

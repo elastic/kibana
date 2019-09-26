@@ -23,6 +23,7 @@ export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
 
   describe('dashboard save', function describeIndexTests() {
+    this.tags('smoke');
     const dashboardName = 'Dashboard Save Test';
     const dashboardNameEnterKey = 'Dashboard Save Test with Enter Key';
 

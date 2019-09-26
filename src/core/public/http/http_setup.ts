@@ -31,12 +31,22 @@ import { merge } from 'lodash';
 import { format } from 'url';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
-import { modifyUrl } from '../utils';
-import { HttpBody, HttpFetchOptions, HttpServiceBase } from './types';
+import { HttpFetchOptions, HttpServiceBase, HttpInterceptor, HttpResponse } from './types';
+import { HttpInterceptController } from './http_intercept_controller';
 import { HttpFetchError } from './http_fetch_error';
+import { HttpInterceptHaltError } from './http_intercept_halt_error';
+import { BasePath } from './base_path_service';
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const NDJSON_CONTENT = /^(application\/ndjson)(;.*)?$/;
+
+function checkHalt(controller: HttpInterceptController, error?: Error) {
+  if (error instanceof HttpInterceptHaltError) {
+    throw error;
+  } else if (controller.halted) {
+    throw new HttpInterceptHaltError();
+  }
+}
 
 export const setup = (
   injectedMetadata: InjectedMetadataSetup,
@@ -44,18 +54,21 @@ export const setup = (
 ): HttpServiceBase => {
   const loadingCount$ = new BehaviorSubject(0);
   const stop$ = new Subject();
+  const interceptors = new Set<HttpInterceptor>();
   const kibanaVersion = injectedMetadata.getKibanaVersion();
-  const basePath = injectedMetadata.getBasePath() || '';
+  const basePath = new BasePath(injectedMetadata.getBasePath());
 
-  function prependBasePath(path: string): string {
-    return modifyUrl(path, parts => {
-      if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
-        parts.pathname = `${basePath}${parts.pathname}`;
-      }
-    });
+  function intercept(interceptor: HttpInterceptor) {
+    interceptors.add(interceptor);
+
+    return () => interceptors.delete(interceptor);
   }
 
-  async function fetch(path: string, options?: HttpFetchOptions): Promise<HttpBody> {
+  function removeAllInterceptors() {
+    interceptors.clear();
+  }
+
+  function createRequest(path: string, options?: HttpFetchOptions) {
     const { query, prependBasePath: shouldPrependBasePath, ...fetchOptions } = merge(
       {
         method: 'GET',
@@ -69,7 +82,7 @@ export const setup = (
       options || {}
     );
     const url = format({
-      pathname: shouldPrependBasePath ? prependBasePath(path) : path,
+      pathname: shouldPrependBasePath ? basePath.prepend(path) : path,
       query,
     });
 
@@ -82,13 +95,124 @@ export const setup = (
       delete fetchOptions.headers['Content-Type'];
     }
 
+    return new Request(url, fetchOptions);
+  }
+
+  // Request/response interceptors are called in opposite orders.
+  // Request hooks start from the newest interceptor and end with the oldest.
+  function interceptRequest(
+    request: Request,
+    controller: HttpInterceptController
+  ): Promise<Request> {
+    let next = request;
+
+    return [...interceptors].reduceRight(
+      (promise, interceptor) =>
+        promise.then(
+          async (current: Request) => {
+            checkHalt(controller);
+
+            if (!interceptor.request) {
+              return current;
+            }
+
+            next = (await interceptor.request(current, controller)) || current;
+
+            return next;
+          },
+          async error => {
+            checkHalt(controller, error);
+
+            if (!interceptor.requestError) {
+              throw error;
+            }
+
+            const nextRequest = await interceptor.requestError(
+              { error, request: next },
+              controller
+            );
+
+            if (!nextRequest) {
+              throw error;
+            }
+
+            next = nextRequest;
+            return next;
+          }
+        ),
+      Promise.resolve(request)
+    );
+  }
+
+  // Response hooks start from the oldest interceptor and end with the newest.
+  async function interceptResponse(
+    responsePromise: Promise<HttpResponse>,
+    controller: HttpInterceptController
+  ) {
+    let current: HttpResponse | undefined;
+
+    const finalHttpResponse = await [...interceptors].reduce(
+      (promise, interceptor) =>
+        promise.then(
+          async httpResponse => {
+            checkHalt(controller);
+
+            if (!interceptor.response) {
+              return httpResponse;
+            }
+
+            current = (await interceptor.response(httpResponse, controller)) || httpResponse;
+
+            return current;
+          },
+          async error => {
+            checkHalt(controller, error);
+
+            if (!interceptor.responseError) {
+              throw error;
+            }
+
+            try {
+              const next = await interceptor.responseError(
+                {
+                  error,
+                  request: error.request || (current && current.request),
+                  response: error.response || (current && current.response),
+                  body: error.body || (current && current.body),
+                },
+                controller
+              );
+
+              checkHalt(controller, error);
+
+              if (!next) {
+                throw error;
+              }
+
+              return next;
+            } catch (err) {
+              checkHalt(controller, err);
+              throw err;
+            }
+          }
+        ),
+      responsePromise.then(httpResponse => {
+        current = httpResponse;
+        return httpResponse;
+      })
+    );
+
+    return finalHttpResponse.body;
+  }
+
+  async function fetcher(request: Request): Promise<HttpResponse> {
     let response;
     let body = null;
 
     try {
-      response = await window.fetch(url, fetchOptions as RequestInit);
+      response = await window.fetch(request);
     } catch (err) {
-      throw new HttpFetchError(err.message);
+      throw new HttpFetchError(err.message, request);
     }
 
     const contentType = response.headers.get('Content-Type') || '';
@@ -108,14 +232,36 @@ export const setup = (
         }
       }
     } catch (err) {
-      throw new HttpFetchError(err.message, response, body);
+      throw new HttpFetchError(err.message, request, response, body);
     }
 
     if (!response.ok) {
-      throw new HttpFetchError(response.statusText, response, body);
+      throw new HttpFetchError(response.statusText, request, response, body);
     }
 
-    return body;
+    return { response, body, request };
+  }
+
+  async function fetch(path: string, options: HttpFetchOptions = {}) {
+    const controller = new HttpInterceptController();
+    const initialRequest = createRequest(path, options);
+
+    // We wrap the interception in a separate promise to ensure that when
+    // a halt is called we do not resolve or reject, halting handling of the promise.
+    return new Promise(async (resolve, reject) => {
+      try {
+        const value = await interceptResponse(
+          interceptRequest(initialRequest, controller).then(fetcher),
+          controller
+        );
+
+        resolve(value);
+      } catch (err) {
+        if (!(err instanceof HttpInterceptHaltError)) {
+          reject(err);
+        }
+      }
+    });
   }
 
   function shorthand(method: string) {
@@ -125,26 +271,6 @@ export const setup = (
   function stop() {
     stop$.next();
     loadingCount$.complete();
-  }
-
-  function getBasePath() {
-    return basePath;
-  }
-
-  function removeBasePath(path: string): string {
-    if (!basePath) {
-      return path;
-    }
-
-    if (path === basePath) {
-      return '/';
-    }
-
-    if (path.startsWith(`${basePath}/`)) {
-      return path.slice(basePath.length);
-    }
-
-    return path;
   }
 
   function addLoadingCount(count$: Observable<number>) {
@@ -186,9 +312,9 @@ export const setup = (
 
   return {
     stop,
-    getBasePath,
-    prependBasePath,
-    removeBasePath,
+    basePath,
+    intercept,
+    removeAllInterceptors,
     fetch,
     delete: shorthand('DELETE'),
     get: shorthand('GET'),

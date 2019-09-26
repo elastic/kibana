@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AreaChartBaseComponent render with customized configs should 2 render AreaSeries 1`] = `[Function]`;
+
+exports[`AreaChartBaseComponent render with default configs if no customized configs given should 2 render AreaSeries 1`] = `[Function]`;

@@ -17,16 +17,19 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
-import * as exportMock from '../export';
-import { createMockServer } from './_mock_server';
-import { createExportRoute } from './export';
-
-const getSortedObjectsForExport = exportMock.getSortedObjectsForExport as jest.Mock;
-
-jest.mock('../export', () => ({
+jest.mock('../../../../core/server/saved_objects/export', () => ({
   getSortedObjectsForExport: jest.fn(),
 }));
+
+import Hapi from 'hapi';
+// Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import * as exportMock from '../../../../core/server/saved_objects/export';
+import { createMockServer } from './_mock_server';
+import { createExportRoute } from './export';
+import { createListStream } from '../../../utils/streams';
+
+const getSortedObjectsForExport = exportMock.getSortedObjectsForExport as jest.Mock;
 
 describe('POST /api/saved_objects/_export', () => {
   let server: Hapi.Server;
@@ -68,26 +71,28 @@ describe('POST /api/saved_objects/_export', () => {
         includeReferencesDeep: true,
       },
     };
-    getSortedObjectsForExport.mockResolvedValueOnce([
-      {
-        id: '1',
-        type: 'index-pattern',
-        attributes: {},
-        references: [],
-      },
-      {
-        id: '2',
-        type: 'search',
-        attributes: {},
-        references: [
-          {
-            name: 'ref_0',
-            type: 'index-pattern',
-            id: '1',
-          },
-        ],
-      },
-    ]);
+    getSortedObjectsForExport.mockResolvedValueOnce(
+      createListStream([
+        {
+          id: '1',
+          type: 'index-pattern',
+          attributes: {},
+          references: [],
+        },
+        {
+          id: '2',
+          type: 'search',
+          attributes: {},
+          references: [
+            {
+              name: 'ref_0',
+              type: 'index-pattern',
+              id: '1',
+            },
+          ],
+        },
+      ])
+    );
 
     const { payload, statusCode, headers } = await server.inject(request);
     const objects = payload.split('\n').map(row => JSON.parse(row));

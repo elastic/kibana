@@ -22,8 +22,8 @@ export interface RoleKibanaPrivilege {
 export interface CustomRoleSpecification {
   name: string;
   elasticsearch?: {
-    cluster: string[];
-    indices: CustomRoleSpecificationElasticsearchIndices[];
+    cluster?: string[];
+    indices?: CustomRoleSpecificationElasticsearchIndices[];
   };
   kibana?: RoleKibanaPrivilege[];
 }

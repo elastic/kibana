@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import metricAggTemplate from '../../controls/sub_agg.html';
+import { MetricAggParamEditor } from '../../../vis/editors/default/controls/metric_agg';
+import { SubAggParamEditor } from '../../../vis/editors/default/controls/sub_agg';
 import _ from 'lodash';
-import { AggConfig } from '../../../vis/agg_config';
 import { Schemas } from '../../../vis/editors/default/schemas';
-import { parentPipelineAggController } from './parent_pipeline_agg_controller';
 import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 import { i18n } from '@kbn/i18n';
@@ -33,7 +32,7 @@ const metricAggSchema = (new Schemas([
     group: 'none',
     name: 'metricAgg',
     title: i18n.translate('common.ui.aggTypes.metrics.metricAggTitle', {
-      defaultMessage: 'Metric Agg'
+      defaultMessage: 'Metric agg'
     }),
     hideCustomLabel: true,
     aggFilter: metricAggFilter
@@ -47,15 +46,16 @@ const parentPipelineAggHelper = {
   params: function () {
     return [
       {
+        name: 'metricAgg',
+        editorComponent: MetricAggParamEditor,
+        default: 'custom',
+        write: parentPipelineAggWriter
+      },
+      {
         name: 'customMetric',
-        type: AggConfig,
+        editorComponent: SubAggParamEditor,
+        type: 'agg',
         default: null,
-        serialize: function (customMetric) {
-          return customMetric.toJSON();
-        },
-        deserialize: function (state, agg) {
-          return this.makeAgg(agg, state);
-        },
         makeAgg: function (termsAgg, state) {
           state = state || { type: 'count' };
           state.schema = metricAggSchema;
@@ -69,13 +69,6 @@ const parentPipelineAggHelper = {
       {
         name: 'buckets_path',
         write: _.noop
-      },
-      {
-        name: 'metricAgg',
-        editor: metricAggTemplate,
-        default: 'custom',
-        controller: parentPipelineAggController,
-        write: parentPipelineAggWriter
       }
     ];
   },
@@ -84,7 +77,7 @@ const parentPipelineAggHelper = {
     if (agg.params.customMetric) {
       subAgg = agg.params.customMetric;
     } else {
-      subAgg = agg.aggConfigs.byId[agg.params.metricAgg];
+      subAgg = agg.aggConfigs.byId(agg.params.metricAgg);
     }
     return subAgg.type.getFormat(subAgg);
   }

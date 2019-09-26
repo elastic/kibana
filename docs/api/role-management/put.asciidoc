@@ -1,52 +1,60 @@
 [[role-management-api-put]]
-=== Create or Update Role
+=== Create or update role API
+++++
+<titleabbrev>Create or update role</titleabbrev>
+++++
 
-experimental["This API is experimental and may be changed or removed completely in a future release. Although the underlying mechanism of enforcing role-based access control is stable, the APIs for managing the roles are currently experimental."]
-
-Creates a new {kib} role or updates the attributes of an existing role. {kib} roles are stored in the
+Creates a new {kib} role, or updates the attributes of an existing role. {kib} roles are stored in the
 {es} native realm.
 
-NOTE: You cannot access this endpoint via the Console in Kibana.
+experimental["The underlying mechanism of enforcing role-based access control is stable, but the APIs for managing the roles are experimental."]
 
-==== Authorization
-
-To use this API, you must have at least the `manage_security` cluster privilege.
-
+[[role-management-api-put-request]]
 ==== Request
 
-To create or update a role, issue a PUT request to the
-`/api/security/role/<rolename>` endpoint.
+`PUT /api/security/role/my_kibana_role`
 
-[source,js]
---------------------------------------------------
-PUT /api/security/role/my_kibana_role
---------------------------------------------------
+[[role-management-api-put-prereqs]]
+==== Prerequisite
 
-==== Request Body
+To use the create or update role API, you must have the `manage_security` cluster privilege.
 
-The following parameters can be specified in the body of a PUT request to add or update a role:
+[[role-management-api-response-body]]
+==== Request body
 
-`metadata`:: (object) Optional meta-data. Within the `metadata` object, keys
-that begin with `_` are reserved for system usage.
+`metadata`:: 
+  (Optional, object) In the `metadata` object, keys that begin with `_` are reserved for system usage.
 
-`elasticsearch`:: (object) Optional {es} cluster and index privileges, valid keys are
-`cluster`, `indices` and `run_as`. For more information, see {xpack-ref}/defining-roles.html[Defining Roles].
+`elasticsearch`:: 
+  (Optional, object) {es} cluster and index privileges. Valid keys include `cluster`, `indices`, and `run_as`. For more information, see {xpack-ref}/defining-roles.html[Defining Roles].
 
-`kibana`:: (list) A list of objects that specifies the <<kibana-privileges>> for this role:
-`base` ::: (list) An optional base privilege. If specified, must either be `["all"]` or `["read"]`.
-The `feature` section cannot be used if a base privilege is specified here. You must use one or the other.
-"all" grants read/write access to all Kibana features for the specified spaces.
-"read" grants read-only access to all Kibana features for the specified spaces.
+`kibana`:: 
+  (list) Objects that specify the <<kibana-privileges, Kibana privileges>> for the role:
 
-`feature` ::: (object) Object containing privileges for specific features.
-The `base` section cannot be used if feature privileges are specified here. You must use one or the other.
-Use the <<features-api, Features API>> to retrieve a list of available features.
+`base` ::: 
+  (Optional, list) A base privilege. When specified, the base must be `["all"]` or `["read"]`.
+  When the `base` privilege is specified, you are unable to use the `feature` section.
+  "all" grants read/write access to all {kib} features for the specified spaces.
+  "read" grants read-only access to all {kib} features for the specified spaces.
 
-`spaces` ::: (list) The spaces these privileges should be applied to.
-To grant access to all spaces, set this to `["*"]`, or omit the value.
+`feature` ::: 
+  (object) Contains privileges for specific features.
+  When the `feature` privileges are specified, you are unable to use the `base` section.
+  To retrieve a list of available features, use the <<features-api, features API>>.
 
-===== Example 1
-Granting access to various features in all spaces.
+`spaces` ::: 
+  (list) The spaces to apply the privileges to.
+  To grant access to all spaces, set to `["*"]`, or omit the value.
+
+[[role-management-api-put-response-codes]]
+==== Response code
+
+`204`:: 
+  Indicates a successful call.
+
+===== Examples
+
+Grant access to various features in all spaces:
 
 [source,js]
 --------------------------------------------------
@@ -115,8 +123,7 @@ PUT /api/security/role/my_kibana_role
 --------------------------------------------------
 // KIBANA
 
-===== Example 2
-Granting "dashboard only" access to only the Marketing space.
+Grant dashboard-only access to only the Marketing space:
 
 [source,js]
 --------------------------------------------------
@@ -142,9 +149,9 @@ PUT /api/security/role/my_kibana_role
   ]
 }
 --------------------------------------------------
+// KIBANA
 
-===== Example 3
-Granting full access to all features in the Default space.
+Grant full access to all features in the Default space:
 
 [source,js]
 --------------------------------------------------
@@ -169,9 +176,9 @@ PUT /api/security/role/my_kibana_role
   ]
 }
 --------------------------------------------------
+// KIBANA
 
-===== Example 4
-Granting different access to different spaces.
+Grant different access to different spaces:
 
 [source,js]
 --------------------------------------------------
@@ -205,10 +212,9 @@ PUT /api/security/role/my_kibana_role
   ]
 }
 --------------------------------------------------
+// KIBANA
 
-
-===== Example 5
-Granting access to both Kibana and Elasticsearch.
+Grant access to {kib} and Elasticsearch:
 
 [source,js]
 --------------------------------------------------
@@ -228,7 +234,6 @@ PUT /api/security/role/my_kibana_role
       "query" : "{\"match\": {\"title\": \"foo\"}}"
     } ]
   },
-<<<<<<< HEAD
   "kibana": [
     {
       "base": ["all"],
@@ -237,18 +242,8 @@ PUT /api/security/role/my_kibana_role
       "spaces": [
         "default"
       ]
-=======
-  "kibana": {
-    "global": [],
-    "space": {
-      "marketing": ["all"],
-      "engineering": ["read"]
->>>>>>> 83b7ea76b0fd7afcbeff26cd95241ef4b075d12e
     }
   ]
 }
 --------------------------------------------------
-
-==== Response
-
-A successful call returns a response code of `204` and no response body.
+// KIBANA

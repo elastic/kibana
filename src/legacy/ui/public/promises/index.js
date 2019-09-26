@@ -18,3 +18,4 @@
  */
 
 import './promises';
+export { createDefer } from './defer';

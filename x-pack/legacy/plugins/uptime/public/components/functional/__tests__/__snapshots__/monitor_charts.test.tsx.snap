@@ -1,0 +1,84 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MonitorCharts component renders the component without errors 1`] = `
+<Fragment>
+  <EuiFlexGroup>
+    <EuiFlexItem>
+      <DurationChart
+        loading={false}
+        locationDurationLines={
+          Array [
+            Object {
+              "line": Array [
+                Object {
+                  "x": 1548697620000,
+                  "y": 743928.2027027027,
+                },
+                Object {
+                  "x": 1548697920000,
+                  "y": 766840.0133333333,
+                },
+                Object {
+                  "x": 1548698220000,
+                  "y": 786970.8266666667,
+                },
+                Object {
+                  "x": 1548698520000,
+                  "y": 781064.7808219178,
+                },
+                Object {
+                  "x": 1548698820000,
+                  "y": 741563.04,
+                },
+                Object {
+                  "x": 1548699120000,
+                  "y": 759354.6756756756,
+                },
+                Object {
+                  "x": 1548699420000,
+                  "y": 737533.3866666667,
+                },
+                Object {
+                  "x": 1548699720000,
+                  "y": 728669.0266666666,
+                },
+                Object {
+                  "x": 1548700020000,
+                  "y": 719951.64,
+                },
+                Object {
+                  "x": 1548700320000,
+                  "y": 769181.7866666666,
+                },
+                Object {
+                  "x": 1548700620000,
+                  "y": 740805.2666666667,
+                },
+              ],
+              "name": "somewhere",
+            },
+          ]
+        }
+        meanColor="mean"
+        rangeColor="range"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <withApollo(Component)
+        absoluteEndDate={20}
+        absoluteStartDate={20}
+        dangerColor="#bd271e"
+        height="400px"
+        successColor="#017d73"
+        variables={
+          Object {
+            "dateRangeEnd": "2011-12-03T10:15:30+01:00",
+            "dateRangeStart": "2011-12-03T10:15:30+01:00",
+            "monitorId": "something",
+          }
+        }
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;

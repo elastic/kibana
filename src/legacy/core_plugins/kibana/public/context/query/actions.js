@@ -20,20 +20,18 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { MarkdownSimple } from 'ui/markdown';
 import { toastNotifications } from 'ui/notify';
 
 import { fetchAnchorProvider } from '../api/anchor';
 import { fetchContextProvider } from '../api/context';
 import { QueryParameterActionsProvider } from '../query_parameters';
 import { FAILURE_REASONS, LOADING_STATUS } from './constants';
+import { MarkdownSimple } from '../../../../kibana_react/public';
 
 export function QueryActionsProvider(Private, Promise) {
   const fetchAnchor = Private(fetchAnchorProvider);
-  const { fetchPredecessors, fetchSuccessors } = Private(fetchContextProvider);
+  const { fetchSurroundingDocs } = Private(fetchContextProvider);
   const {
-    increasePredecessorCount,
-    increaseSuccessorCount,
     setPredecessorCount,
     setQueryParameters,
     setSuccessorCount,
@@ -60,7 +58,7 @@ export function QueryActionsProvider(Private, Promise) {
   );
 
   const fetchAnchorRow = (state) => () => {
-    const { queryParameters: { indexPatternId, anchorType, anchorId, sort, tieBreakerField } } = state;
+    const { queryParameters: { indexPatternId, anchorId, sort, tieBreakerField } } = state;
 
     if (!tieBreakerField) {
       return Promise.reject(setFailedStatus(state)('anchor', {
@@ -71,7 +69,7 @@ export function QueryActionsProvider(Private, Promise) {
     setLoadingStatus(state)('anchor');
 
     return Promise.try(() => (
-      fetchAnchor(indexPatternId, anchorType, anchorId, [_.zipObject([sort]), { [tieBreakerField]: sort[1] }])
+      fetchAnchor(indexPatternId, anchorId, [_.zipObject([sort]), { [tieBreakerField]: sort[1] }])
     ))
       .then(
         (anchorDocument) => {
@@ -92,40 +90,44 @@ export function QueryActionsProvider(Private, Promise) {
       );
   };
 
-  const fetchPredecessorRows = (state) => () => {
+  const fetchSurroundingRows = (type, state) => {
     const {
-      queryParameters: { indexPatternId, filters, predecessorCount, sort, tieBreakerField },
+      queryParameters: { indexPatternId, filters,  sort, tieBreakerField },
       rows: { anchor },
     } = state;
+    const count = type === 'successors'
+      ? state.queryParameters.successorCount
+      : state.queryParameters.predecessorCount;
 
     if (!tieBreakerField) {
-      return Promise.reject(setFailedStatus(state)('predecessors', {
+      return Promise.reject(setFailedStatus(state)(type, {
         reason: FAILURE_REASONS.INVALID_TIEBREAKER
       }));
     }
 
-    setLoadingStatus(state)('predecessors');
+    setLoadingStatus(state)(type);
+    const [sortField, sortDir] = sort;
 
     return Promise.try(() => (
-      fetchPredecessors(
+      fetchSurroundingDocs(
+        type,
         indexPatternId,
-        sort[0],
-        sort[1],
-        anchor.sort[0],
+        anchor,
+        sortField,
         tieBreakerField,
-        anchor.sort[1],
-        predecessorCount,
+        sortDir,
+        count,
         filters
       )
     ))
       .then(
-        (predecessorDocuments) => {
-          setLoadedStatus(state)('predecessors');
-          state.rows.predecessors = predecessorDocuments;
-          return predecessorDocuments;
+        (documents) => {
+          setLoadedStatus(state)(type);
+          state.rows[type] = documents;
+          return documents;
         },
         (error) => {
-          setFailedStatus(state)('predecessors', { error });
+          setFailedStatus(state)(type, { error });
           toastNotifications.addDanger({
             title: i18n.translate('kbn.context.unableToLoadDocumentDescription', {
               defaultMessage: 'Unable to load documents'
@@ -137,53 +139,10 @@ export function QueryActionsProvider(Private, Promise) {
       );
   };
 
-  const fetchSuccessorRows = (state) => () => {
-    const {
-      queryParameters: { indexPatternId, filters, sort, successorCount, tieBreakerField },
-      rows: { anchor },
-    } = state;
-
-    if (!tieBreakerField) {
-      return Promise.reject(setFailedStatus(state)('successors', {
-        reason: FAILURE_REASONS.INVALID_TIEBREAKER
-      }));
-    }
-
-    setLoadingStatus(state)('successors');
-
-    return Promise.try(() => (
-      fetchSuccessors(
-        indexPatternId,
-        sort[0],
-        sort[1],
-        anchor.sort[0],
-        tieBreakerField,
-        anchor.sort[1],
-        successorCount,
-        filters
-      )
-    ))
-      .then(
-        (successorDocuments) => {
-          setLoadedStatus(state)('successors');
-          state.rows.successors = successorDocuments;
-          return successorDocuments;
-        },
-        (error) => {
-          setFailedStatus(state)('successors', { error });
-          toastNotifications.addDanger({
-            title: 'Unable to load documents',
-            text: <MarkdownSimple>{error.message}</MarkdownSimple>,
-          });
-          throw error;
-        },
-      );
-  };
-
   const fetchContextRows = (state) => () => (
     Promise.all([
-      fetchPredecessorRows(state)(),
-      fetchSuccessorRows(state)(),
+      fetchSurroundingRows('predecessors', state),
+      fetchSurroundingRows('successors', state),
     ])
   );
 
@@ -204,22 +163,12 @@ export function QueryActionsProvider(Private, Promise) {
 
   const fetchGivenPredecessorRows = (state) => (count) => {
     setPredecessorCount(state)(count);
-    return fetchPredecessorRows(state)();
+    return fetchSurroundingRows('predecessors', state);
   };
 
   const fetchGivenSuccessorRows = (state) => (count) => {
     setSuccessorCount(state)(count);
-    return fetchSuccessorRows(state)();
-  };
-
-  const fetchMorePredecessorRows = (state) => () => {
-    increasePredecessorCount(state)();
-    return fetchPredecessorRows(state)();
-  };
-
-  const fetchMoreSuccessorRows = (state) => () => {
-    increaseSuccessorCount(state)();
-    return fetchSuccessorRows(state)();
+    return fetchSurroundingRows('successors', state);
   };
 
   const setAllRows = (state) => (predecessorRows, anchorRow, successorRows) => (
@@ -238,10 +187,6 @@ export function QueryActionsProvider(Private, Promise) {
     fetchContextRowsWithNewQueryParameters,
     fetchGivenPredecessorRows,
     fetchGivenSuccessorRows,
-    fetchMorePredecessorRows,
-    fetchMoreSuccessorRows,
-    fetchPredecessorRows,
-    fetchSuccessorRows,
     setAllRows,
   };
 }

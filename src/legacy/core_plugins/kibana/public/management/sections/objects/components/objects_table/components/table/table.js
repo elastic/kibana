@@ -18,6 +18,7 @@
  */
 
 import chrome from 'ui/chrome';
+import { SavedObjectsManagementActionRegistry } from 'ui/management/saved_objects_management';
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
@@ -36,6 +37,7 @@ import {
   EuiText
 } from '@elastic/eui';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../../lib';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 class TableUI extends PureComponent {
@@ -47,7 +49,7 @@ class TableUI extends PureComponent {
       onSelectionChange: PropTypes.func.isRequired,
     }).isRequired,
     filterOptions: PropTypes.array.isRequired,
-    canDeleteSavedObjectTypes: PropTypes.array.isRequired,
+    canDelete: PropTypes.bool.isRequired,
     onDelete: PropTypes.func.isRequired,
     onExport: PropTypes.func.isRequired,
     goInspectObject: PropTypes.func.isRequired,
@@ -72,6 +74,12 @@ class TableUI extends PureComponent {
     parseErrorMessage: null,
     isExportPopoverOpen: false,
     isIncludeReferencesDeepChecked: true,
+    activeAction: null,
+  }
+
+  constructor(props) {
+    super(props);
+    this.extraActions = SavedObjectsManagementActionRegistry.get();
   }
 
   onChange = ({ query, error }) => {
@@ -237,6 +245,24 @@ class TableUI extends PureComponent {
             icon: 'kqlSelector',
             onClick: object => onShowRelationships(object),
           },
+          ...this.extraActions.map(action => {
+            return {
+              ...action.euiAction,
+              onClick: (object) => {
+                this.setState({
+                  activeAction: action
+                });
+
+                action.registerOnFinishCallback(() => {
+                  this.setState({
+                    activeAction: null,
+                  });
+                });
+
+                action.euiAction.onClick(object);
+              }
+            };
+          })
         ],
       },
     ];
@@ -254,10 +280,6 @@ class TableUI extends PureComponent {
       );
     }
 
-    const unableToDeleteSavedObjectTypes = selectedSavedObjects
-      .map(({ type }) => type)
-      .filter(type => !this.props.canDeleteSavedObjectTypes.includes(type));
-
     const button = (
       <EuiButton
         iconType="arrowDown"
@@ -272,8 +294,11 @@ class TableUI extends PureComponent {
       </EuiButton>
     );
 
+    const activeActionContents = this.state.activeAction ? this.state.activeAction.render() : null;
+
     return (
       <Fragment>
+        {activeActionContents}
         <EuiSearchBar
           box={{ 'data-test-subj': 'savedObjectSearchBar' }}
           filters={filters}
@@ -286,10 +311,15 @@ class TableUI extends PureComponent {
               onClick={onDelete}
               isDisabled={
                 selectedSavedObjects.length === 0 ||
-                unableToDeleteSavedObjectTypes.length > 0
+                !this.props.canDelete
               }
               title={
-                unableToDeleteSavedObjectTypes.length > 0 ? `Unable to delete ${unableToDeleteSavedObjectTypes.join(', ')}` : undefined
+                this.props.canDelete
+                  ? undefined
+                  : i18n.translate(
+                    'kbn.management.objects.objectsTable.table.deleteButtonTitle',
+                    { defaultMessage: 'Unable to delete saved objects' }
+                  )
               }
               data-test-subj="savedObjectsManagementDelete"
             >

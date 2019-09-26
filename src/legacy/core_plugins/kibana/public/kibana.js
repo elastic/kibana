@@ -27,8 +27,7 @@ import { uiModules } from 'ui/modules';
 // import the uiExports that we want to "use"
 import 'uiExports/home';
 import 'uiExports/visTypes';
-import 'uiExports/visResponseHandlers';
-import 'uiExports/visRequestHandlers';
+
 import 'uiExports/visEditorTypes';
 import 'uiExports/visualize';
 import 'uiExports/savedObjectTypes';
@@ -41,9 +40,9 @@ import 'uiExports/indexManagement';
 import 'uiExports/devTools';
 import 'uiExports/docViews';
 import 'uiExports/embeddableFactories';
+import 'uiExports/embeddableActions';
 import 'uiExports/inspectorViews';
 import 'uiExports/search';
-import 'uiExports/autocompleteProviders';
 import 'uiExports/shareContextMenuExtensions';
 
 import 'ui/autoload/all';
@@ -59,7 +58,6 @@ import './context';
 import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
-import 'ui/timepicker';
 import { showAppRedirectNotification } from 'ui/notify';
 import 'leaflet';
 

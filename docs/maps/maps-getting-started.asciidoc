@@ -1,8 +1,8 @@
 [role="xpack"]
 [[maps-getting-started]]
-== Getting started with Maps
+== Getting started with Elastic Maps
 
-You work with *Maps* by adding layers. The data for a layer can come from
+You work with *Elastic Maps* by adding layers. The data for a layer can come from
 sources such as {es} documents, vector sources, tile map services, web map
 services, and more. You can symbolize the data in different ways.
 For example, you might show which airports have the longest flight
@@ -13,10 +13,19 @@ light to dark.
 [role="screenshot"]
 image::maps/images/sample_data_web_logs.png[]
 
+[[maps-read-only-access]]
+NOTE: If you have insufficient privileges to create or save maps, a read-only icon
+appears in the application header. The buttons to create new maps or edit
+existing maps won't be visible. For more information on granting access to
+Kibana see <<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::maps/images/read-only-badge.png[Example of Maps' read only access indicator in Kibana's header]
+
 [float]
 === Prerequisites
 Before you start this tutorial, <<add-sample-data, add the web logs sample data set>>. Each
-sample data set includes a map to go along with the data. Once you've added the data, open *Maps* and
+sample data set includes a map to go along with the data. Once you've added the data, open *Elastic Maps* and
 explore the different layers of the *[Logs] Total Requests and Bytes* map.
 You'll re-create this map in this tutorial.
 
@@ -35,7 +44,7 @@ In this tutorial, you'll learn to:
 
 The first thing to do is to create a new map.
 
-. If you haven't already, open *Maps*.
+. If you haven't already, open *Elastic Maps*.
 . On the maps list page, click *Create map*.
 . Set the time range to *Last 7 days*.
 +

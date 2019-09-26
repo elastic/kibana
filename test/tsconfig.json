@@ -13,6 +13,7 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    "../typings/lodash.topath/*.ts",
   ],
   "exclude": [
     "plugin_functional/plugins/**/*"

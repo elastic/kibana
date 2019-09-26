@@ -10,8 +10,11 @@ export default function ({ loadTestFile }) {
 
     loadTestFile(require.resolve('./es'));
     loadTestFile(require.resolve('./security'));
+    loadTestFile(require.resolve('./spaces'));
     loadTestFile(require.resolve('./monitoring'));
     loadTestFile(require.resolve('./xpack_main'));
+    loadTestFile(require.resolve('./features'));
+    loadTestFile(require.resolve('./telemetry'));
     loadTestFile(require.resolve('./logstash'));
     loadTestFile(require.resolve('./kibana'));
     loadTestFile(require.resolve('./infra'));
@@ -23,5 +26,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./apm'));
     loadTestFile(require.resolve('./siem'));
     loadTestFile(require.resolve('./code'));
+    loadTestFile(require.resolve('./short_urls'));
+    loadTestFile(require.resolve('./lens'));
   });
 }

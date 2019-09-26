@@ -18,31 +18,29 @@
  */
 
 import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
 import html from './doc_table.html';
-import { getSort } from './lib/get_sort';
 import './infinite_scroll';
 import './components/table_header';
 import './components/table_row';
-import { dispatchRenderComplete } from 'ui/render_complete';
+import { dispatchRenderComplete } from '../../../../../../plugins/kibana_utils/public';
 import { uiModules } from 'ui/modules';
-import 'ui/pager_control';
-import 'ui/pager';
-import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
+import './components/pager';
+import './lib/pager';
 
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
 uiModules.get('app/discover')
-  .directive('docTable', function (config, Notifier, getAppState, pagerFactory, $filter, courier) {
+  .directive('docTable', function (config, getAppState, pagerFactory, $filter) {
     return {
       restrict: 'E',
       template: html,
       scope: {
         sorting: '=',
         columns: '=',
-        hits: '=?', // You really want either hits & indexPattern, OR searchSource
-        indexPattern: '=?',
-        searchSource: '=?',
+        hits: '=',
+        totalHitCount: '=',
+        indexPattern: '=',
+        isLoading: '=?',
         infiniteScroll: '=?',
         filter: '=?',
         filters: '=?',
@@ -54,8 +52,6 @@ uiModules.get('app/discover')
         inspectorAdapters: '=?',
       },
       link: function ($scope, $el) {
-        const notify = new Notifier();
-
         $scope.$watch('minimumVisibleRows', (minimumVisibleRows) => {
           $scope.limit = Math.max(minimumVisibleRows || 50, $scope.limit || 50);
         });
@@ -94,79 +90,19 @@ uiModules.get('app/discover')
           if ($scope.columns.length === 0) $scope.columns.push('_source');
         });
 
-        $scope.$watch('searchSource', function () {
-          if (!$scope.searchSource) return;
+        $scope.$watch('hits', hits => {
+          if (!hits) return;
 
-          $scope.indexPattern = $scope.searchSource.getField('index');
-
-          $scope.searchSource.setField('size', config.get('discover:sampleSize'));
-          $scope.searchSource.setField('sort', getSort($scope.sorting, $scope.indexPattern));
-
-          // Set the watcher after initialization
-          $scope.$watchCollection('sorting', function (newSort, oldSort) {
-          // Don't react if sort values didn't really change
-            if (newSort === oldSort) return;
-            $scope.searchSource.setField('sort', getSort(newSort, $scope.indexPattern));
-            $scope.searchSource.fetchQueued();
-          });
-
-          $scope.$on('$destroy', function () {
-            if ($scope.searchSource) $scope.searchSource.destroy();
-          });
-
-          function onResults(resp) {
           // Reset infinite scroll limit
-            $scope.limit = 50;
+          $scope.limit = 50;
 
-            // Abort if something changed
-            if ($scope.searchSource !== $scope.searchSource) return;
-
-            $scope.hits = resp.hits.hits;
-            if ($scope.hits.length === 0) {
-              dispatchRenderComplete($el[0]);
-            }
-            // We limit the number of returned results, but we want to show the actual number of hits, not
-            // just how many we retrieved.
-            $scope.totalHitCount = resp.hits.total;
-            $scope.pager = pagerFactory.create($scope.hits.length, 50, 1);
-            calculateItemsOnPage();
-
-            return $scope.searchSource.onResults().then(onResults);
+          if (hits.length === 0) {
+            dispatchRenderComplete($el[0]);
           }
 
-          function startSearching() {
-            let inspectorRequest = undefined;
-            if (_.has($scope, 'inspectorAdapters.requests')) {
-              $scope.inspectorAdapters.requests.reset();
-              const title = i18n.translate('kbn.docTable.inspectorRequestDataTitle', {
-                defaultMessage: 'Data',
-              });
-              const description = i18n.translate('kbn.docTable.inspectorRequestDescription', {
-                defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
-              });
-              inspectorRequest = $scope.inspectorAdapters.requests.start(title, { description });
-              inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
-              $scope.searchSource.getSearchRequestBody().then(body => {
-                inspectorRequest.json(body);
-              });
-            }
-            $scope.searchSource.onResults()
-              .then(resp => {
-                if (inspectorRequest) {
-                  inspectorRequest
-                    .stats(getResponseInspectorStats($scope.searchSource, resp))
-                    .ok({ json: resp });
-                }
-                return resp;
-              })
-              .then(onResults)
-              .catch(error => {
-                notify.error(error);
-                startSearching();
-              });
-          }
-          startSearching();
-          courier.fetch();
+          if ($scope.infiniteScroll) return;
+          $scope.pager = pagerFactory.create(hits.length, 50, 1);
+          calculateItemsOnPage();
         });
 
         $scope.pageOfItems = [];

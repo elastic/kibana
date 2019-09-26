@@ -1,0 +1,95 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render correctly 1`] = `
+<nav
+  aria-label="breadcrumb"
+  className="euiBreadcrumbs euiBreadcrumbs--truncate euiBreadcrumbs--responsive"
+>
+  <a
+    className="euiLink euiLink--subdued euiBreadcrumb codeNoMinWidth"
+    data-test-subj="codeFileBreadcrumb-src"
+    href="#github.com/elastic/TypeScript-Node-Starter/tree/master/src"
+    onClick={[Function]}
+    rel="noreferrer"
+    title="src"
+  >
+    src
+  </a>
+  <div
+    className="euiBreadcrumbSeparator"
+  />
+  <a
+    className="euiLink euiLink--subdued euiBreadcrumb codeNoMinWidth"
+    data-test-subj="codeFileBreadcrumb-public"
+    href="#github.com/elastic/TypeScript-Node-Starter/tree/master/src/public"
+    onClick={[Function]}
+    rel="noreferrer"
+    title="public"
+  >
+    public
+  </a>
+  <div
+    className="euiBreadcrumbSeparator"
+  />
+  <a
+    className="euiLink euiLink--subdued euiBreadcrumb codeNoMinWidth"
+    data-test-subj="codeFileBreadcrumb-css"
+    href="#github.com/elastic/TypeScript-Node-Starter/tree/master/src/public/css"
+    onClick={[Function]}
+    rel="noreferrer"
+    title="css"
+  >
+    css
+  </a>
+  <div
+    className="euiBreadcrumbSeparator"
+  />
+  <a
+    className="euiLink euiLink--subdued euiBreadcrumb codeNoMinWidth"
+    data-test-subj="codeFileBreadcrumb-lib"
+    href="#github.com/elastic/TypeScript-Node-Starter/tree/master/src/public/css/lib"
+    onClick={[Function]}
+    rel="noreferrer"
+    title="lib"
+  >
+    lib
+  </a>
+  <div
+    className="euiBreadcrumbSeparator"
+  />
+  <a
+    className="euiLink euiLink--subdued euiBreadcrumb codeNoMinWidth"
+    data-test-subj="codeFileBreadcrumb-bootstrap"
+    href="#github.com/elastic/TypeScript-Node-Starter/tree/master/src/public/css/lib/bootstrap"
+    onClick={[Function]}
+    rel="noreferrer"
+    title="bootstrap"
+  >
+    bootstrap
+  </a>
+  <div
+    className="euiBreadcrumbSeparator"
+  />
+  <a
+    className="euiLink euiLink--subdued euiBreadcrumb codeNoMinWidth"
+    data-test-subj="codeFileBreadcrumb-mixins"
+    href="#github.com/elastic/TypeScript-Node-Starter/tree/master/src/public/css/lib/bootstrap/mixins"
+    onClick={[Function]}
+    rel="noreferrer"
+    title="mixins"
+  >
+    mixins
+  </a>
+  <div
+    className="euiBreadcrumbSeparator"
+  />
+  <span
+    aria-current="page"
+    className="euiBreadcrumb codeNoMinWidth euiBreadcrumb--last"
+    data-test-subj="codeFileBreadcrumb-_alerts.scss"
+    title="_alerts.scss"
+  >
+    _alerts.scss
+  </span>
+</nav>
+`;

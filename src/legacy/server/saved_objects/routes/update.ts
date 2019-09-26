@@ -19,7 +19,7 @@
 
 import Hapi from 'hapi';
 import Joi from 'joi';
-import { SavedObjectAttributes, SavedObjectsClient } from '../';
+import { SavedObjectAttributes, SavedObjectsClient } from 'src/core/server';
 import { Prerequisites, SavedObjectReference } from './types';
 
 interface UpdateRequest extends Hapi.Request {

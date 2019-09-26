@@ -5,15 +5,14 @@
  */
 
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   GetUICapabilitiesFailureReason,
   UICapabilitiesService,
 } from '../../common/services/ui_capabilities';
 import { UserAtSpaceScenarios } from '../scenarios';
 
-// eslint-disable-next-line import/no-default-export
-export default function fooTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function fooTests({ getService }: FtrProviderContext) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
   describe('foo', () => {
@@ -84,7 +83,7 @@ export default function fooTests({ getService }: KibanaFunctionalTestDefaultProv
           case 'nothing_space_read at everything_space':
             expect(uiCapabilities.success).to.be(false);
             expect(uiCapabilities.failureReason).to.be(
-              GetUICapabilitiesFailureReason.RedirectedToRoot
+              GetUICapabilitiesFailureReason.RedirectedToSpaceSelector
             );
             break;
           default:

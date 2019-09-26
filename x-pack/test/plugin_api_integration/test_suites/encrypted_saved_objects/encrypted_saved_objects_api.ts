@@ -5,11 +5,10 @@
  */
 
 import expect from '@kbn/expect';
-import { SavedObject } from 'src/legacy/server/saved_objects/service';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { SavedObject } from 'src/core/server';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getService }: FtrProviderContext) {
   const es = getService('es');
   const chance = getService('chance');
   const supertest = getService('supertest');
@@ -46,7 +45,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
       const { body } = await supertest
         .post(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}`)
         .set('kbn-xsrf', 'xxx')
-        .send({ attributes: savedObjectOriginalAttributes }, {})
+        .send({ attributes: savedObjectOriginalAttributes })
         .expect(200);
 
       savedObject = body;
@@ -171,7 +170,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
       const { body: response } = await supertest
         .put(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
         .set('kbn-xsrf', 'xxx')
-        .send({ attributes: updatedAttributes }, {})
+        .send({ attributes: updatedAttributes })
         .expect(200);
 
       expect(response.attributes).to.eql({
@@ -203,7 +202,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
       const { body: response } = await supertest
         .put(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
         .set('kbn-xsrf', 'xxx')
-        .send({ attributes: updatedAttributes }, {})
+        .send({ attributes: updatedAttributes })
         .expect(200);
 
       expect(response.attributes).to.eql({
@@ -226,7 +225,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
       const { body: response } = await supertest
         .put(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
         .set('kbn-xsrf', 'xxx')
-        .send({ attributes: updatedAttributes }, {})
+        .send({ attributes: updatedAttributes })
         .expect(200);
 
       expect(response.attributes).to.eql({

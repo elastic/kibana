@@ -18,7 +18,11 @@ export default function ({ getService }) {
   const { getNodesStats } = initElasticsearchHelpers(es);
   const { loadNodes, getNodeDetails } = registerHelpers({ supertest });
 
-  describe('nodes', () => {
+  describe('nodes', function () {
+    // Cloud disallows setting custom node attributes, so we can't use `NODE_CUSTOM_ATTRIBUTE`
+    // to retrieve the IDs we expect.
+    this.tags(['skipCloud']);
+
     describe('list', () => {
       it('should return the list of ES node for each custom attributes', async () => {
         const nodeStats = await getNodesStats();
@@ -29,7 +33,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe('detail', async () => {
+    describe('detail', () => {
       it('should return the node stats when providing a custom node attribute', async () => {
         // Load the stats from ES js client
         const nodeStats = await getNodesStats();

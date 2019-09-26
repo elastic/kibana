@@ -35,7 +35,6 @@ import { registerKqlTelemetryApi } from './server/routes/api/kql_telemetry';
 import { registerFieldFormats } from './server/field_formats/register';
 import { registerTutorials } from './server/tutorials/register';
 import * as systemApi from './server/lib/system_api';
-import handleEsError from './server/lib/handle_es_error';
 import mappings from './mappings.json';
 import { getUiSettingDefaults } from './ui_setting_defaults';
 import { makeKQLUsageCollector } from './server/lib/kql_usage_collector';
@@ -54,11 +53,16 @@ export default function (kibana) {
         defaultAppId: Joi.string().default('home'),
         index: Joi.string().default('.kibana'),
         disableWelcomeScreen: Joi.boolean().default(false),
+        autocompleteTerminateAfter: Joi.number().integer().min(1).default(100000),
+        // TODO Also allow units here like in elasticsearch config once this is moved to the new platform
+        autocompleteTimeout: Joi.number().integer().min(1).default(1000),
       }).default();
     },
 
     uiExports: {
-      hacks: ['plugins/kibana/dev_tools/hacks/hide_empty_tools'],
+      hacks: [
+        'plugins/kibana/dev_tools/hacks/hide_empty_tools',
+      ],
       fieldFormats: ['plugins/kibana/field_formats/register'],
       savedObjectTypes: [
         'plugins/kibana/visualize/saved_visualizations/saved_visualization_register',
@@ -76,25 +80,27 @@ export default function (kibana) {
         {
           id: 'kibana:discover',
           title: i18n.translate('kbn.discoverTitle', {
-            defaultMessage: 'Discover'
+            defaultMessage: 'Discover',
           }),
           order: -1003,
           url: `${kbnBaseUrl}#/discover`,
           icon: 'plugins/kibana/assets/discover.svg',
           euiIconType: 'discoverApp',
-        }, {
+        },
+        {
           id: 'kibana:visualize',
           title: i18n.translate('kbn.visualizeTitle', {
-            defaultMessage: 'Visualize'
+            defaultMessage: 'Visualize',
           }),
           order: -1002,
           url: `${kbnBaseUrl}#/visualize`,
           icon: 'plugins/kibana/assets/visualize.svg',
           euiIconType: 'visualizeApp',
-        }, {
+        },
+        {
           id: 'kibana:dashboard',
           title: i18n.translate('kbn.dashboardTitle', {
-            defaultMessage: 'Dashboard'
+            defaultMessage: 'Dashboard',
           }),
           order: -1001,
           url: `${kbnBaseUrl}#/dashboards`,
@@ -106,25 +112,27 @@ export default function (kibana) {
           subUrlBase: `${kbnBaseUrl}#/dashboard`,
           icon: 'plugins/kibana/assets/dashboard.svg',
           euiIconType: 'dashboardApp',
-        }, {
+        },
+        {
           id: 'kibana:dev_tools',
           title: i18n.translate('kbn.devToolsTitle', {
-            defaultMessage: 'Dev Tools'
+            defaultMessage: 'Dev Tools',
           }),
           order: 9001,
           url: '/app/kibana#/dev_tools',
           icon: 'plugins/kibana/assets/wrench.svg',
           euiIconType: 'devToolsApp',
-        }, {
+        },
+        {
           id: 'kibana:management',
           title: i18n.translate('kbn.managementTitle', {
-            defaultMessage: 'Management'
+            defaultMessage: 'Management',
           }),
           order: 9003,
           url: `${kbnBaseUrl}#/management`,
           icon: 'plugins/kibana/assets/settings.svg',
           euiIconType: 'managementApp',
-          linkToLastSubUrl: false
+          linkToLastSubUrl: false,
         },
       ],
 
@@ -164,7 +172,7 @@ export default function (kibana) {
           },
         },
         search: {
-          icon: 'search',
+          icon: 'discoverApp',
           defaultSearchField: 'title',
           isImportableAndExportable: true,
           getTitle(obj) {
@@ -201,7 +209,7 @@ export default function (kibana) {
           defaultSearchField: 'url',
           isImportableAndExportable: true,
           getTitle(obj) {
-            return obj.attributes.url;
+            return `/goto/${encodeURIComponent(obj.id)}`;
           },
         },
         config: {
@@ -228,9 +236,22 @@ export default function (kibana) {
       },
 
       injectDefaultVars(server, options) {
+        const mapConfig = server.config().get('map');
+        const tilemap = mapConfig.tilemap;
+
         return {
           kbnIndex: options.index,
           kbnBaseUrl,
+
+          // required on all pages due to hacks that use these values
+          mapConfig,
+          tilemapsConfig: {
+            deprecated: {
+              // If url is set, old settings must be used for backward compatibility
+              isOverridden: typeof tilemap.url === 'string' && tilemap.url !== '',
+              config: tilemap,
+            },
+          },
         };
       },
 
@@ -240,25 +261,26 @@ export default function (kibana) {
       migrations,
     },
 
-    uiCapabilities: async function (server) {
-      const { savedObjects } = server;
-
+    uiCapabilities: async function () {
       return {
         discover: {
           show: true,
           createShortUrl: true,
           save: true,
+          saveQuery: true,
         },
         visualize: {
           show: true,
           createShortUrl: true,
           delete: true,
           save: true,
+          saveQuery: true,
         },
         dashboard: {
           createNew: true,
           show: true,
           showWriteControls: true,
+          saveQuery: true,
         },
         catalogue: {
           discover: true,
@@ -270,19 +292,16 @@ export default function (kibana) {
         },
         advancedSettings: {
           show: true,
-          save: true
+          save: true,
         },
         indexPatterns: {
           save: true,
         },
-        savedObjectsManagement: savedObjects.types.reduce((acc, type) => ({
-          ...acc,
-          [type]: {
-            delete: true,
-            edit: true,
-            read: true,
-          }
-        }), {}),
+        savedObjectsManagement: {
+          delete: true,
+          edit: true,
+          read: true,
+        },
         management: {
           /*
            * Management settings correspond to management section/link ids, and should not be changed
@@ -293,7 +312,7 @@ export default function (kibana) {
             index_patterns: true,
             objects: true,
           },
-        }
+        },
       };
     },
 
@@ -326,8 +345,7 @@ export default function (kibana) {
       registerTutorials(server);
       makeKQLUsageCollector(server);
       server.expose('systemApi', systemApi);
-      server.expose('handleEsError', handleEsError);
       server.injectUiAppVars('kibana', () => injectVars(server));
-    }
+    },
   });
 }

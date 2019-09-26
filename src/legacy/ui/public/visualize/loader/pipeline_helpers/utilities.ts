@@ -20,21 +20,35 @@
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
 import { AggConfig, Vis } from 'ui/vis';
-// @ts-ignore
-import { FieldFormat } from '../../../../field_formats/field_format';
+import { SerializedFieldFormat } from 'src/plugins/expressions/common/expressions/types/common';
+
+import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
+
 // @ts-ignore
 import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
 import chrome from '../../../chrome';
 // @ts-ignore
 import { fieldFormats } from '../../../registry/field_formats';
 
+interface TermsFieldFormatParams {
+  otherBucketLabel: string;
+  missingBucketLabel: string;
+  id: string;
+}
+
+function isTermsFieldFormat(
+  serializedFieldFormat: SerializedFieldFormat
+): serializedFieldFormat is SerializedFieldFormat<TermsFieldFormatParams> {
+  return serializedFieldFormat.id === 'terms';
+}
+
 const config = chrome.getUiSettingsClient();
 
 const getConfig = (...args: any[]): any => config.get(...args);
 const getDefaultFieldFormat = () => ({ convert: identity });
 
-const getFieldFormat = (id: string, params: object) => {
-  const Format = fieldFormats.byId[id];
+const getFieldFormat = (id: string | undefined, params: object = {}) => {
+  const Format = fieldFormats.getType(id);
   if (Format) {
     return new Format(params, getConfig);
   } else {
@@ -42,7 +56,42 @@ const getFieldFormat = (id: string, params: object) => {
   }
 };
 
-export const getFormat = (mapping: any) => {
+export type FieldFormat = any;
+
+export const createFormat = (agg: AggConfig): SerializedFieldFormat => {
+  const format: SerializedFieldFormat = agg.params.field ? agg.params.field.format.toJSON() : {};
+  const formats: Record<string, () => SerializedFieldFormat> = {
+    date_range: () => ({ id: 'string' }),
+    percentile_ranks: () => ({ id: 'percent' }),
+    count: () => ({ id: 'number' }),
+    cardinality: () => ({ id: 'number' }),
+    date_histogram: () => ({
+      id: 'date',
+      params: {
+        pattern: (agg as any).buckets.getScaledDateFormat(),
+      },
+    }),
+    terms: () => ({
+      id: 'terms',
+      params: {
+        id: format.id,
+        otherBucketLabel: agg.params.otherBucketLabel,
+        missingBucketLabel: agg.params.missingBucketLabel,
+        ...format.params,
+      },
+    }),
+    range: () => ({
+      id: 'range',
+      params: { id: format.id, ...format.params },
+    }),
+  };
+
+  return formats[agg.type.name] ? formats[agg.type.name]() : format;
+};
+
+export type FormatFactory = (mapping?: SerializedFieldFormat) => FieldFormat;
+
+export const getFormat: FormatFactory = (mapping = {}) => {
   if (!mapping) {
     return getDefaultFieldFormat();
   }
@@ -59,16 +108,17 @@ export const getFormat = (mapping: any) => {
       });
     });
     return new RangeFormat();
-  } else if (id === 'terms') {
+  } else if (isTermsFieldFormat(mapping) && mapping.params) {
+    const params = mapping.params;
     return {
       getConverterFor: (type: string) => {
-        const format = getFieldFormat(mapping.params.id, mapping.params);
+        const format = getFieldFormat(params.id, mapping.params);
         return (val: string) => {
           if (val === '__other__') {
-            return mapping.params.otherBucketLabel;
+            return params.otherBucketLabel;
           }
           if (val === '__missing__') {
-            return mapping.params.missingBucketLabel;
+            return params.missingBucketLabel;
           }
           const parsedUrl = {
             origin: window.location.origin,
@@ -79,12 +129,12 @@ export const getFormat = (mapping: any) => {
         };
       },
       convert: (val: string, type: string) => {
-        const format = getFieldFormat(mapping.params.id, mapping.params);
+        const format = getFieldFormat(params.id, mapping.params);
         if (val === '__other__') {
-          return mapping.params.otherBucketLabel;
+          return params.otherBucketLabel;
         }
         if (val === '__missing__') {
-          return mapping.params.missingBucketLabel;
+          return params.missingBucketLabel;
         }
         const parsedUrl = {
           origin: window.location.origin,

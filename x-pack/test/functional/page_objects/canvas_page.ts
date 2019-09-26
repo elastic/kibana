@@ -6,21 +6,21 @@
 
 import expect from '@kbn/expect';
 
-import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function CanvasPageProvider({ getService }: KibanaFunctionalTestDefaultProviders) {
+export function CanvasPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
 
   return {
     async expectCreateWorkpadButtonEnabled() {
-      const button = await testSubjects.find('create-workpad-button');
+      const button = await testSubjects.find('create-workpad-button', 20000);
       const disabledAttr = await button.getAttribute('disabled');
       expect(disabledAttr).to.be(null);
     },
 
     async expectCreateWorkpadButtonDisabled() {
-      const button = await testSubjects.find('create-workpad-button');
+      const button = await testSubjects.find('create-workpad-button', 20000);
       const disabledAttr = await button.getAttribute('disabled');
       expect(disabledAttr).to.be('true');
     },

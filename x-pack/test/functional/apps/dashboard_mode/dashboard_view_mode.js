@@ -30,7 +30,8 @@ export default function ({ getService, getPageObjects }) {
   const dashboardName = 'Dashboard View Mode Test Dashboard';
   const savedSearchName = 'Saved search for dashboard';
 
-  describe('Dashboard View Mode', () => {
+  describe('Dashboard View Mode', function () {
+    this.tags(['skipFirefox']);
 
     before('initialize tests', async () => {
       log.debug('Dashboard View Mode:initTests');
@@ -39,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.replace({
         'defaultIndex': 'logstash-*'
       });
-      browser.setWindowSize(1600, 1000);
+      await browser.setWindowSize(1600, 1000);
 
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.dashboard.setTimepickerInHistoricalDataRange();

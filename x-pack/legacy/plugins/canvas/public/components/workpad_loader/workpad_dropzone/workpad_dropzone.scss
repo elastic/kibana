@@ -1,0 +1,22 @@
+.canvasWorkpad__dropzone {
+  border: 2px dashed transparent;
+}
+
+.canvasWorkpad__dropzone--active {
+  background-color: $euiColorLightestShade;
+  border-color: $euiColorLightShade;
+}
+
+.canvasWorkpad__dropzoneTable .euiTable {
+  background-color: transparent;
+}
+
+.canvasWorkpad__dropzoneTable--tags {
+  .euiTableCellContent {
+    flex-wrap: wrap;
+  }
+
+  .euiHealth {
+    width: 100%;
+  }
+} 

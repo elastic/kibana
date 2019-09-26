@@ -16,21 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { isEmpty } from 'lodash';
+import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
+import { getFromSavedObject } from '../../../index_patterns';
 
-import chrome from 'ui/chrome';
-import { getFromSavedObject } from 'ui/index_patterns/static_utils';
+export async function fetchIndexPatterns(
+  savedObjectsClient: SavedObjectsClientContract,
+  indexPatternStrings: string[],
+  uiSettings: UiSettingsClientContract
+) {
+  if (!indexPatternStrings || isEmpty(indexPatternStrings)) {
+    return [];
+  }
 
-const config = chrome.getUiSettingsClient();
-
-export async function fetchIndexPatterns(indexPatternStrings: string[]) {
-  const quotedIndexPatternStrings = indexPatternStrings.map(
-    indexPatternString => `"${indexPatternString}"`
-  );
-  const searchString = quotedIndexPatternStrings.join(' | ');
-  const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
+  const searchString = indexPatternStrings.map(string => `"${string}"`).join(' | ');
+  const indexPatternsFromSavedObjects = await savedObjectsClient.find({
     type: 'index-pattern',
     fields: ['title', 'fields'],
-    search: `"${searchString}"`,
+    search: searchString,
     searchFields: ['title'],
   });
 
@@ -38,17 +41,12 @@ export async function fetchIndexPatterns(indexPatternStrings: string[]) {
     return indexPatternStrings.includes(savedObject.attributes.title as string);
   });
 
+  const defaultIndex = uiSettings.get('defaultIndex');
+
   const allMatches =
     exactMatches.length === indexPatternStrings.length
       ? exactMatches
-      : [...exactMatches, await fetchDefaultIndexPattern()];
+      : [...exactMatches, await savedObjectsClient.get('index-pattern', defaultIndex)];
 
   return allMatches.map(getFromSavedObject);
 }
-
-const fetchDefaultIndexPattern = async () => {
-  const savedObjectsClient = chrome.getSavedObjectsClient();
-  const indexPattern = await savedObjectsClient.get('index-pattern', config.get('defaultIndex'));
-
-  return getFromSavedObject(indexPattern);
-};

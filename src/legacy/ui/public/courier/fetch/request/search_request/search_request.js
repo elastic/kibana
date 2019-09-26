@@ -21,6 +21,7 @@ import moment from 'moment';
 
 import { searchRequestQueue } from '../../../search_request_queue';
 
+import { createDefer } from 'ui/promises';
 import { i18n } from '@kbn/i18n';
 
 export function SearchRequestProvider(Promise) {
@@ -37,8 +38,8 @@ export function SearchRequestProvider(Promise) {
 
       this.errorHandler = errorHandler;
       this.source = source;
-      this.defer = defer || Promise.defer();
-      this.abortedDefer = Promise.defer();
+      this.defer = defer || createDefer(Promise);
+      this.abortedDefer = createDefer(Promise);
       this.type = 'search';
 
       // Track execution time.
@@ -167,10 +168,13 @@ export function SearchRequestProvider(Promise) {
 
     abort() {
       this._markStopped();
-      this.defer = null;
       this.aborted = true;
-      this.abortedDefer.resolve();
+      const error = new Error('The request was aborted.');
+      error.name = 'AbortError';
+      this.abortedDefer.resolve(error);
       this.abortedDefer = null;
+      this.defer.reject(error);
+      this.defer = null;
     }
 
     whenAborted(cb) {

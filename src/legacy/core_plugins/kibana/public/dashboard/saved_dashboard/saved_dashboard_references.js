@@ -25,7 +25,8 @@ export function extractReferences({ attributes, references = [] }) {
       throw new Error(`"type" attribute is missing from panel "${i}"`);
     }
     if (!panel.id) {
-      throw new Error(`"id" attribute is missing from panel "${i}"`);
+      // Embeddables are not required to be backed off a saved object.
+      return;
     }
     panel.panelRefName = `panel_${i}`;
     panelReferences.push({

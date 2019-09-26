@@ -21,6 +21,10 @@ xpack.apm.ui.enabled:: Set to `false` to hide the APM plugin {kib} from the menu
 
 xpack.apm.ui.transactionGroupBucketSize:: Number of top transaction groups displayed in APM plugin in Kibana. Defaults to `100`.
 
+xpack.apm.ui.maxTraceItems:: Max number of child items displayed when viewing trace details. Defaults to `1000`.
+
+apm_oss.apmAgentConfigurationIndex:: Index containing agent configuration settings. Defaults to `.apm-agent-configuration`.
+
 apm_oss.indexPattern:: Index pattern is used for integrations with Machine Learning and Kuery Bar. It must match all apm indices. Defaults to `apm-*`.
 
 apm_oss.errorIndices:: Matcher for indices containing error documents. Defaults to `apm-*`.

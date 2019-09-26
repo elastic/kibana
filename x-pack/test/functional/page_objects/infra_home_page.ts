@@ -5,26 +5,31 @@
  */
 
 import testSubjSelector from '@kbn/test-subj-selector';
-import moment from 'moment';
 
-import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function InfraHomePageProvider({ getService }: KibanaFunctionalTestDefaultProviders) {
+export function InfraHomePageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const find = getService('find');
   const browser = getService('browser');
 
   return {
-    async goToTime(time: number) {
+    async goToTime(time: string) {
       const datePickerInput = await find.byCssSelector(
         `${testSubjSelector('waffleDatePicker')} .euiDatePicker.euiFieldText`
       );
-
       await datePickerInput.type(Array(30).fill(browser.keys.BACK_SPACE));
-      await datePickerInput.type([moment(time).format('L LTS'), browser.keys.RETURN]);
+      await datePickerInput.type([time, browser.keys.RETURN]);
     },
 
     async getWaffleMap() {
+      await retry.try(async () => {
+        const element = await testSubjects.find('waffleMap');
+        if (!element) {
+          throw new Error();
+        }
+      });
       return await testSubjects.find('waffleMap');
     },
 

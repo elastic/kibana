@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       afterEach(async () => {
-        await PageObjects.monitoring.clickBreadcrumb('breadcrumbEsNodes'); // return back for next test
+        await PageObjects.monitoring.clickBreadcrumb('~breadcrumbEsNodes'); // return back for next test
       });
 
       it('should show node summary of master node with 20 indices and 38 shards', async () => {
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }) {
         expect(await nodeDetail.getSummary()).to.eql({
           transportAddress: 'Transport Address\n127.0.0.1:9300',
           jvmHeap: 'JVM Heap\n29%',
-          freeDiskSpace: 'Free Disk Space\n173.9 GB',
+          freeDiskSpace: 'Free Disk Space\n173.9 GB (37.42%)',
           documentCount: 'Documents\n24.8k',
           dataSize: 'Data\n50.4 MB',
           indicesCount: 'Indices\n20',
@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
         expect(await nodeDetail.getSummary()).to.eql({
           transportAddress: 'Transport Address\n127.0.0.1:9302',
           jvmHeap: 'JVM Heap\n17%',
-          freeDiskSpace: 'Free Disk Space\n173.9 GB',
+          freeDiskSpace: 'Free Disk Space\n173.9 GB (37.42%)',
           documentCount: 'Documents\n240',
           dataSize: 'Data\n1.4 MB',
           indicesCount: 'Indices\n4',
@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }) {
         expect(await nodeDetail.getSummary()).to.eql({
           transportAddress: 'Transport Address\n127.0.0.1:9302',
           jvmHeap: 'JVM Heap\nN/A',
-          freeDiskSpace: 'Free Disk Space\nN/A',
+          freeDiskSpace: 'Free Disk Space\nN/A (N/A)',
           documentCount: 'Documents\nN/A',
           dataSize: 'Data\nN/A',
           indicesCount: 'Indices\nN/A',

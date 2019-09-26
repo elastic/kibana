@@ -39,6 +39,10 @@ export const initElasticsearchHelpers = (es) => {
     deleteAllIndices()
   );
 
+  const catTemplate = name => (
+    es.cat.templates({ name, format: 'json' })
+  );
+
   return ({
     createIndex,
     deleteIndex,
@@ -46,5 +50,6 @@ export const initElasticsearchHelpers = (es) => {
     catIndex,
     indexStats,
     cleanUp,
+    catTemplate,
   });
 };

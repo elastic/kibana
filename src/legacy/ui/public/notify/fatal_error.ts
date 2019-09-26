@@ -17,25 +17,15 @@
  * under the License.
  */
 
-import { FatalErrorsSetup } from '../../../../core/public';
+import { npSetup } from 'ui/new_platform';
 import {
   AngularHttpError,
   formatAngularHttpError,
   isAngularHttpError,
 } from './lib/format_angular_http_error';
 
-let newPlatformFatalErrors: FatalErrorsSetup;
-
-export function __newPlatformSetup__(instance: FatalErrorsSetup) {
-  if (newPlatformFatalErrors) {
-    throw new Error('ui/notify/fatal_error already initialized with new platform apis');
-  }
-
-  newPlatformFatalErrors = instance;
-}
-
 export function addFatalErrorCallback(callback: () => void) {
-  newPlatformFatalErrors.get$().subscribe(() => {
+  npSetup.core.fatalErrors.get$().subscribe(() => {
     callback();
   });
 }
@@ -46,5 +36,5 @@ export function fatalError(error: AngularHttpError | Error | string, location?: 
     error = formatAngularHttpError(error);
   }
 
-  newPlatformFatalErrors.add(error, location);
+  npSetup.core.fatalErrors.add(error, location);
 }

@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { SearchBar } from './search_bar';
+export * from './search_bar';

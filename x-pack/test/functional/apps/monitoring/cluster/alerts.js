@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }) {
 
         const alertsAll = await alerts.getOverviewAlertsAll();
 
-        alertsAll.forEach((obj, index) => { // eslint-disable-line no-unused-vars
+        alertsAll.forEach((obj, index) => {
           expect(alertsAll[index].alertIcon).to.be(panelData[index].alertIcon);
           expect(alertsAll[index].alertText).to.be(panelData[index].alertText);
         });
@@ -152,16 +152,16 @@ export default function ({ getService, getPageObjects }) {
         ));
         expect(alertsAll.length).to.be(tableData.length);
 
-        alertsAll.forEach((obj, index) => { // eslint-disable-line no-unused-vars
+        alertsAll.forEach((obj, index) => {
           expect(`${alertsAll[index].alertIcon} ${alertsAll[index].alertText}`)
             .to.be(`${tableData[index].alertIcon} ${tableData[index].alertText}`);
         });
 
-        await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters');
+        await PageObjects.monitoring.clickBreadcrumb('~breadcrumbClusters');
       });
     });
 
-    describe('alert actions take you to the elasticsearch indices listing', async () => {
+    describe('alert actions take you to the elasticsearch indices listing', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
@@ -183,7 +183,7 @@ export default function ({ getService, getPageObjects }) {
         await alertAction.click();
         expect(await indices.isOnListing()).to.be(true);
 
-        await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters');
+        await PageObjects.monitoring.clickBreadcrumb('~breadcrumbClusters');
       });
 
       it('with alert on listing table page', async () => {
@@ -194,7 +194,7 @@ export default function ({ getService, getPageObjects }) {
         await alertAction.click();
         expect(await indices.isOnListing()).to.be(true);
 
-        await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters');
+        await PageObjects.monitoring.clickBreadcrumb('~breadcrumbClusters');
       });
     });
 

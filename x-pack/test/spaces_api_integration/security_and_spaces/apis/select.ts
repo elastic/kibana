@@ -53,9 +53,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
       },
     ].forEach(scenario => {
       selectTest(
-        `user with no access selects ${scenario.selectSpaceId} space from the ${
-          scenario.currentSpaceId
-        } space`,
+        `user with no access selects ${scenario.selectSpaceId} space from the ${scenario.currentSpaceId} space`,
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
@@ -70,9 +68,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
       );
 
       selectTest(
-        `superuser selects ${scenario.selectSpaceId} space from the ${
-          scenario.currentSpaceId
-        } space`,
+        `superuser selects ${scenario.selectSpaceId} space from the ${scenario.currentSpaceId} space`,
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
@@ -87,9 +83,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
       );
 
       selectTest(
-        `rbac user with all globally selects ${scenario.selectSpaceId} space from the ${
-          scenario.currentSpaceId
-        } space`,
+        `rbac user with all globally selects ${scenario.selectSpaceId} space from the ${scenario.currentSpaceId} space`,
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
@@ -104,9 +98,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
       );
 
       selectTest(
-        `dual-privileges user selects ${scenario.selectSpaceId} space from the ${
-          scenario.currentSpaceId
-        }`,
+        `dual-privileges user selects ${scenario.selectSpaceId} space from the ${scenario.currentSpaceId}`,
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
@@ -284,9 +276,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
       );
 
       selectTest(
-        `rbac user with all at ${scenario.currentSpaceId} space cannot select ${
-          scenario.selectSpaceId
-        }
+        `rbac user with all at ${scenario.currentSpaceId} space cannot select ${scenario.selectSpaceId}
         from ${scenario.currentSpaceId}`,
         {
           currentSpaceId: scenario.currentSpaceId,

@@ -18,17 +18,13 @@
  */
 
 // @ts-ignore
+import './error_auto_create_index.test.mocks';
 import fetchMock from 'fetch-mock/es5/client';
-import { __newPlatformSetup__, kfetch } from '../kfetch';
-import { setup } from '../../../../test_utils/public/http_test_setup';
+import { kfetch } from '../kfetch';
 
 import { isAutoCreateIndexError } from './error_auto_create_index';
 
 describe('isAutoCreateIndexError correctly handles KFetchError thrown by kfetch', () => {
-  beforeAll(() => {
-    __newPlatformSetup__(setup().http);
-  });
-
   describe('404', () => {
     beforeEach(() => {
       fetchMock.post({
@@ -77,7 +73,9 @@ describe('isAutoCreateIndexError correctly handles KFetchError thrown by kfetch'
         matcher: '*',
         response: {
           body: {
-            code: 'ES_AUTO_CREATE_INDEX_ERROR',
+            attributes: {
+              code: 'ES_AUTO_CREATE_INDEX_ERROR',
+            },
           },
           status: 503,
         },

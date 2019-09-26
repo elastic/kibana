@@ -2,55 +2,82 @@
 # Identify which groups will be pinged by changes to different parts of the codebase.
 # For more info, see https://help.github.com/articles/about-codeowners/
 
+# App
+/x-pack/legacy/plugins/lens/ @elastic/kibana-app
+/x-pack/legacy/plugins/graph/ @elastic/kibana-app
+
+# App Architecture
+/src/plugins/data/ @elastic/kibana-app-arch
+/src/plugins/kibana_utils/ @elastic/kibana-app-arch
+/src/plugins/kibana_react/ @elastic/kibana-app-arch
+
 # APM
-/x-pack/plugins/apm/  @elastic/apm-ui
+/x-pack/legacy/plugins/apm/  @elastic/apm-ui
 
 # Beats
-/x-pack/plugins/beats_management/  @elastic/beats
+/x-pack/legacy/plugins/beats_management/  @elastic/beats
 
 # Canvas
-/x-pack/plugins/canvas/  @elastic/kibana-canvas
+/x-pack/legacy/plugins/canvas/  @elastic/kibana-canvas
 
 # Code
-/x-pack/plugins/code/  @teams/code
+/x-pack/legacy/plugins/code/  @teams/code
 /x-pack/test/functional/apps/code/  @teams/code
 /x-pack/test/api_integration/apis/code/  @teams/code
 
 # Infrastructure and Logs UI
-/x-pack/plugins/infra/ @elastic/infra-logs-ui
+/x-pack/legacy/plugins/infra/ @elastic/infra-logs-ui
 
 # Machine Learning
-/x-pack/plugins/ml/  @elastic/ml-ui
+/x-pack/legacy/plugins/ml/  @elastic/ml-ui
+/x-pack/test/functional/apps/machine_learning/  @elastic/ml-ui
+/x-pack/test/functional/services/machine_learning/  @elastic/ml-ui
+/x-pack/test/functional/services/ml.ts  @elastic/ml-ui
 
 # Operations
+/renovate.json5 @elastic/kibana-operations
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
 /src/optimize/ @elastic/kibana-operations
 
 # Platform
 /src/core/  @elastic/kibana-platform
+/src/legacy/server/saved_objects/  @elastic/kibana-platform
+/src/legacy/ui/public/saved_objects  @elastic/kibana-platform
+/config/kibana.yml @elastic/kibana-platform
+/x-pack/plugins/features/  @elastic/kibana-platform
 
 # Security
-/x-pack/plugins/security/  @elastic/kibana-security
-/x-pack/plugins/spaces/  @elastic/kibana-security
-/x-pack/plugins/encrypted_saved_objects/  @elastic/kibana-security
+/x-pack/legacy/plugins/security/  @elastic/kibana-security
+/x-pack/legacy/plugins/spaces/  @elastic/kibana-security
+/x-pack/legacy/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /src/legacy/server/csp/ @elastic/kibana-security
+/x-pack/plugins/security/  @elastic/kibana-security
+
+# Kibana Stack Services
+/packages/kbn-analytics/ @elastic/kibana-stack-services
+/src/legacy/core_plugins/ui_metric/ @elastic/kibana-stack-services
+/x-pack/legacy/plugins/telemetry @elastic/kibana-stack-services
+/x-pack/legacy/plugins/alerting @elastic/kibana-stack-services
+/x-pack/legacy/plugins/actions @elastic/kibana-stack-services
+/x-pack/legacy/plugins/task_manager @elastic/kibana-stack-services
 
 # Design
 **/*.scss  @elastic/kibana-design
 
 # Elasticsearch UI
 /src/legacy/core_plugins/console/  @elastic/es-ui
-/x-pack/plugins/console_extensions/  @elastic/es-ui
-/x-pack/plugins/cross_cluster_replication/  @elastic/es-ui
-/x-pack/plugins/index_lifecycle_management/  @elastic/es-ui
-/x-pack/plugins/index_management/  @elastic/es-ui
-/x-pack/plugins/license_management/  @elastic/es-ui
-/x-pack/plugins/remote_clusters/  @elastic/es-ui
-/x-pack/plugins/rollup/  @elastic/es-ui
-/x-pack/plugins/searchprofiler/  @elastic/es-ui
-/x-pack/plugins/snapshot_restore/  @elastic/es-ui
-/x-pack/plugins/watcher/  @elastic/es-ui
+/src/plugins/es_ui_shared/  @elastic/es-ui
+/x-pack/legacy/plugins/console_extensions/  @elastic/es-ui
+/x-pack/legacy/plugins/cross_cluster_replication/  @elastic/es-ui
+/x-pack/legacy/plugins/index_lifecycle_management/  @elastic/es-ui
+/x-pack/legacy/plugins/index_management/  @elastic/es-ui
+/x-pack/legacy/plugins/license_management/  @elastic/es-ui
+/x-pack/legacy/plugins/remote_clusters/  @elastic/es-ui
+/x-pack/legacy/plugins/rollup/  @elastic/es-ui
+/x-pack/legacy/plugins/searchprofiler/  @elastic/es-ui
+/x-pack/legacy/plugins/snapshot_restore/  @elastic/es-ui
+/x-pack/legacy/plugins/watcher/  @elastic/es-ui
 
 # Kibana TSVB external contractors
 /src/legacy/core_plugins/metrics/  @elastic/kibana-tsvb-external

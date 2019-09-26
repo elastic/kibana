@@ -3,13 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
-  describe('machine learning', function() {
+export default function({ loadTestFile }: FtrProviderContext) {
+  // FLAKY: https://github.com/elastic/kibana/issues/46674
+  describe.skip('machine learning', function() {
     this.tags('ciGroup3');
 
     loadTestFile(require.resolve('./feature_controls'));
+    loadTestFile(require.resolve('./pages'));
+    loadTestFile(require.resolve('./create_single_metric_job'));
+    loadTestFile(require.resolve('./create_multi_metric_job'));
+    loadTestFile(require.resolve('./create_population_job'));
   });
 }

@@ -54,7 +54,7 @@ Specifies the password that {kib} uses for authentication when it retrieves data
 from the monitoring cluster. If not set, {kib} uses the value of the
 `elasticsearch.password` setting.
 
-`xpack.xpack_main.telemetry.enabled`::
+`xpack.telemetry.enabled`::
 Set to `true` (default) to send cluster statistics to Elastic. Reporting your
 cluster statistics helps us improve your user experience. Your data is never
 shared with anyone. Set to `false` to disable statistics reporting from any
@@ -91,10 +91,9 @@ However, the defaults work best in most circumstances. For more information
 about configuring {kib}, see
 {kibana-ref}/settings.html[Setting Kibana Server Properties].
 
-`xpack.monitoring.ui.enabled`::
-Set to `false` to hide the Monitoring UI in {kib}. The monitoring back-end
-continues to run as an agent for sending {kib} stats to the monitoring
-cluster. Defaults to `true`.
+`xpack.monitoring.elasticsearch.logFetchCount`::
+Specifies the number of log entries to display in the Monitoring UI. Defaults to
+`10`. The maximum value is `50`.
 
 `xpack.monitoring.max_bucket_size`::
 Specifies the number of term buckets to return out of the overall terms list when
@@ -108,6 +107,11 @@ Specifies the minimum number of seconds that a time bucket in a chart can
 represent. Defaults to 10. If you modify the
 `xpack.monitoring.collection.interval` in `elasticsearch.yml`, use the same
 value in this setting.
+
+`xpack.monitoring.ui.enabled`::
+Set to `false` to hide the Monitoring UI in {kib}. The monitoring back-end
+continues to run as an agent for sending {kib} stats to the monitoring
+cluster. Defaults to `true`.
 
 [float]
 [[monitoring-ui-cgroup-settings]]
@@ -125,6 +129,3 @@ For {es} clusters that are running in containers, this setting changes the
 statistics. It also adds the calculated Cgroup CPU utilization to the
 *Node Overview* page instead of the overall operating system's CPU
 utilization. Defaults to `false`.
-+
-[role="screenshot"]
-image::images/monitoring-containers.png[Elasticsearch Inside a Container]

@@ -1,0 +1,175 @@
+{
+  "indices": [
+    "cloudwatch-2018.11.03",
+    "cloudwatch-2018.11.02",
+    "cloudwatch-2018.11.01",
+    "cloudwatch-2018.11.11",
+    "cloudwatch-2018.10.28",
+    "cloudwatch-2018.11.07",
+    "cloudwatch-2018.11.06",
+    "cloudwatch-2018.11.05",
+    "cloudwatch-2018.11.04",
+    "cloudwatch-2018.11.10",
+    "cloudwatch-2018.10.31",
+    "cloudwatch-2018.10.30",
+    "cloudwatch-2018.11.09",
+    "cloudwatch-2018.11.08",
+    "cloudwatch-2018.10.29"
+  ],
+  "fields": {
+    "_routing": {
+      "_routing": {
+        "type": "_routing",
+        "searchable": true,
+        "aggregatable": false
+      }
+    },
+    "instance": {
+      "keyword": {
+        "type": "keyword",
+        "searchable": true,
+        "aggregatable": true
+      }
+    },
+    "_index": {
+      "_index": {
+        "type": "_index",
+        "searchable": true,
+        "aggregatable": true
+      }
+    },
+    "_feature": {
+      "_feature": {
+        "type": "_feature",
+        "searchable": true,
+        "aggregatable": false
+      }
+    },
+    "DiskReadOps": {
+      "double": {
+        "type": "double",
+        "searchable": true,
+        "aggregatable": true
+      }
+    },
+    "_type": {
+      "_type": {
+        "type": "_type",
+        "searchable": true,
+        "aggregatable": true
+      }
+    },
+    "DiskReadBytes": {
+      "double": {
+        "type": "double",
+        "searchable": true,
+        "aggregatable": true
+      }
+    },
+    "_ignored": {
+      "_ignored": {
+        "type": "_ignored",
+        "searchable": true,
+        "aggregatable": false
+      }
+    },
+    "DiskWriteOps": {
+      "double": {
+        "type": "double",
+        "searchable": true,
+        "aggregatable": true
+      }
+    },
+    "NetworkOut": {
+      "double": {
+        "type": "double",
+        "searchable": true,
+        "aggregatable": true
+      }
+    },
+    "CPUUtilization": {
+      "double": {
+        "type": "double",
+        "searchable": true,
+        "aggregatable": true
+      }
+    },
+    "_seq_no": {
+      "_seq_no": {
+        "type": "_seq_no",
+        "searchable": true,
+        "aggregatable": true
+      }
+    },
+    "@timestamp": {
+      "date": {
+        "type": "date",
+        "searchable": true,
+        "aggregatable": true
+      }
+    },
+    "DiskWriteBytes": {
+      "double": {
+        "type": "double",
+        "searchable": true,
+        "aggregatable": true
+      }
+    },
+    "_field_names": {
+      "_field_names": {
+        "type": "_field_names",
+        "searchable": true,
+        "aggregatable": false
+      }
+    },
+    "NetworkIn": {
+      "double": {
+        "type": "double",
+        "searchable": true,
+        "aggregatable": true
+      }
+    },
+    "sourcetype.keyword": {
+      "keyword": {
+        "type": "keyword",
+        "searchable": true,
+        "aggregatable": true
+      }
+    },
+    "_source": {
+      "_source": {
+        "type": "_source",
+        "searchable": false,
+        "aggregatable": false
+      }
+    },
+    "sourcetype": {
+      "text": {
+        "type": "text",
+        "searchable": true,
+        "aggregatable": false
+      }
+    },
+    "_id": {
+      "_id": {
+        "type": "_id",
+        "searchable": true,
+        "aggregatable": true
+      }
+    },
+    "region": {
+      "keyword": {
+        "type": "keyword",
+        "searchable": true,
+        "aggregatable": true
+      }
+    },
+    "_version": {
+      "_version": {
+        "type": "_version",
+        "searchable": false,
+        "aggregatable": false
+      }
+    }
+  }
+}

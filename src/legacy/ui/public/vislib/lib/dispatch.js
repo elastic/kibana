@@ -21,349 +21,376 @@ import d3 from 'd3';
 import { get } from 'lodash';
 import $ from 'jquery';
 import { SimpleEmitter } from '../../utils/simple_emitter';
+import chrome from 'ui/chrome';
 
-export function VislibLibDispatchProvider(Private, config) {
+const config = chrome.getUiSettingsClient();
+
+/**
+ * Handles event responses
+ *
+ * @class Dispatch
+ * @constructor
+ * @param handler {Object} Reference to Handler Class Object
+ */
+export class Dispatch extends SimpleEmitter {
+  constructor(handler) {
+    super();
+    this.handler = handler;
+    this._listeners = {};
+  }
+
+  _pieClickResponse(data) {
+    const points = [];
+
+    let dataPointer = data;
+    while (dataPointer && dataPointer.rawData) {
+      points.push(dataPointer.rawData);
+      dataPointer = dataPointer.parent;
+    }
+
+    if (get(data, 'rawData.table.$parent')) {
+      const { table, column, row, key } = get(data, 'rawData.table.$parent');
+      points.push({ table, column, row, value: key });
+    }
+
+    return points;
+  }
+
+  _seriesClickResponse(data) {
+    const points = [];
+
+    ['xRaw', 'yRaw', 'zRaw', 'seriesRaw', 'rawData', 'tableRaw'].forEach(val => {
+      if (data[val] && data[val].column !== undefined && data[val].row !== undefined) {
+        points.push(data[val]);
+      }
+    });
+
+    return points;
+  }
 
   /**
-   * Handles event responses
+   * Response to click  events
    *
-   * @class Dispatch
-   * @constructor
-   * @param handler {Object} Reference to Handler Class Object
+   * @param d {Object} Data point
+   * @returns event with list of data points related to the click
    */
-
-  class Dispatch extends SimpleEmitter {
-    constructor(handler) {
-      super();
-      this.handler = handler;
-      this._listeners = {};
+  clickEventResponse(d, props = {}) {
+    let isSlices = props.isSlices;
+    if (isSlices === undefined) {
+      const _data = d3.event.target.nearestViewportElement
+        ? d3.event.target.nearestViewportElement.__data__
+        : d3.event.target.__data__;
+      isSlices = !!(_data && _data.slices);
     }
 
+    const data = d.input || d;
 
-    _pieClickResponse(data) {
-      const points = [];
+    return {
+      e: d3.event,
+      data: isSlices ? this._pieClickResponse(data) : this._seriesClickResponse(data),
+    };
+  }
 
-      let dataPointer = data;
-      while (dataPointer && dataPointer.rawData) {
-        points.push(dataPointer.rawData);
-        dataPointer = dataPointer.parent;
-      }
+  /**
+   * Determine whether rendering a series is configured in percentage mode
+   * Used to display a value percentage formatted in it's popover
+   *
+   * @param rawId {string} The rawId of series to check
+   * @param series {Array} Array of all series data
+   * @param visConfig {VisConfig}
+   * @returns {Boolean}
+   */
+  _isSeriesInPercentageMode(rawId, series, visConfig) {
 
-      if (get(data, 'rawData.table.$parent')) {
-        const { table, column, row, key } = get(data, 'rawData.table.$parent');
-        points.push({ table, column, row, value: key });
-      }
-
-      return points;
+    if (!rawId || !Array.isArray(series) || !visConfig) {
+      return false;
+    }
+    //find the primary id by the rawId, that id is used in the config's seriesParams
+    const { id } = series.find(series => series.rawId === rawId);
+    if (!id) {
+      return false;
     }
 
-    _seriesClickResponse(data) {
-      const points = [];
+    //find the matching seriesParams of the series, to get the id of the valueAxis
+    const seriesParams = visConfig.get('seriesParams', []);
+    const { valueAxis: valueAxisId } = seriesParams.find(param => param.data.id === id) || {};
+    if (!valueAxisId) {
+      return false;
+    }
+    const usedValueAxis = visConfig
+      .get('valueAxes', [])
+      .find(valueAxis => valueAxis.id === valueAxisId);
+    return get(usedValueAxis, 'scale.mode') === 'percentage';
+  }
 
-      ['xRaw', 'yRaw', 'zRaw', 'seriesRaw', 'rawData', 'tableRaw'].forEach(val => {
-        if (data[val] && data[val].column !== undefined && data[val].row !== undefined) {
-          points.push(data[val]);
+  /**
+   * Response to hover events
+   *
+   * @param d {Object} Data point
+   * @param i {Number} Index number of data point
+   * @returns {{value: *, point: *, label: *, color: *, pointIndex: *,
+   * series: *, config: *, data: (Object|*),
+   * e: (d3.event|*), handler: (Object|*)}} Event response object
+   */
+  eventResponse(d, i) {
+    const datum = d._input || d;
+    const data = d3.event.target.nearestViewportElement
+      ? d3.event.target.nearestViewportElement.__data__
+      : d3.event.target.__data__;
+    const label = d.label ? d.label : d.series || 'Count';
+    const isSeries = !!(data && data.series);
+    const isSlices = !!(data && data.slices);
+    const series = isSeries ? data.series : undefined;
+    const slices = isSlices ? data.slices : undefined;
+    const handler = this.handler;
+    const color = get(handler, 'data.color');
+    const config = handler && handler.visConfig;
+    const isPercentageMode = this._isSeriesInPercentageMode(d.seriesId, series, config);
+
+    const eventData = {
+      value: d.y,
+      point: datum,
+      datum,
+      label,
+      color: color ? color(label) : undefined,
+      pointIndex: i,
+      series,
+      slices,
+      config,
+      data,
+      e: d3.event,
+      handler,
+      isPercentageMode,
+    };
+
+    return eventData;
+  }
+
+  /**
+   * Returns a function that adds events and listeners to a D3 selection
+   *
+   * @method addEvent
+   * @param event {String}
+   * @param callback {Function}
+   * @returns {Function}
+   */
+  addEvent(event, callback) {
+    return function (selection) {
+      selection.each(function () {
+        const element = d3.select(this);
+
+        if (typeof callback === 'function') {
+          return element.on(event, callback);
         }
       });
+    };
+  }
 
-      return points;
+  /**
+   *
+   * @method addHoverEvent
+   * @returns {Function}
+   */
+  addHoverEvent() {
+    const self = this;
+    const isClickable = this.listenerCount('click') > 0;
+    const addEvent = this.addEvent;
+    const $el = this.handler.el;
+    if (!this.handler.highlight) {
+      this.handler.highlight = self.highlight;
     }
 
-    /**
-     * Response to click  events
-     *
-     * @param d {Object} Data point
-     * @returns event with list of data points related to the click
-     */
-    clickEventResponse(d, props = {}) {
-      let isSlices = props.isSlices;
-      if (isSlices === undefined) {
-        const _data = d3.event.target.nearestViewportElement ?
-          d3.event.target.nearestViewportElement.__data__ : d3.event.target.__data__;
-        isSlices = !!(_data && _data.slices);
+    function hover(d, i) {
+      // Add pointer if item is clickable
+      if (isClickable) {
+        self.addMousePointer.call(this, arguments);
       }
 
-      const data = d.input || d;
+      self.handler.highlight.call(this, $el);
+      self.emit('hover', self.eventResponse(d, i));
+    }
 
-      return {
+    return addEvent('mouseover', hover);
+  }
+
+  /**
+   *
+   * @method addMouseoutEvent
+   * @returns {Function}
+   */
+  addMouseoutEvent() {
+    const self = this;
+    const addEvent = this.addEvent;
+    const $el = this.handler.el;
+    if (!this.handler.unHighlight) {
+      this.handler.unHighlight = self.unHighlight;
+    }
+
+    function mouseout() {
+      self.handler.unHighlight.call(this, $el);
+    }
+
+    return addEvent('mouseout', mouseout);
+  }
+
+  /**
+   *
+   * @method addClickEvent
+   * @returns {Function}
+   */
+  addClickEvent() {
+    const onClick = (d) => this.emit('click', this.clickEventResponse(d));
+
+    return this.addEvent('click', onClick);
+  }
+
+  /**
+   * Determine if we will allow brushing
+   *
+   * @method allowBrushing
+   * @returns {Boolean}
+   */
+  allowBrushing() {
+    const xAxis = this.handler.categoryAxes[0];
+
+    //Allow brushing for ordered axis - date histogram and histogram
+    return Boolean(xAxis.ordered);
+  }
+
+  /**
+   * Determine if brushing is currently enabled
+   *
+   * @method isBrushable
+   * @returns {Boolean}
+   */
+  isBrushable() {
+    return this.allowBrushing() && this.listenerCount('brush') > 0;
+  }
+
+  /**
+   *
+   * @param svg
+   * @returns {Function}
+   */
+  addBrushEvent(svg) {
+    if (!this.isBrushable()) return;
+
+    const xScale = this.handler.categoryAxes[0].getScale();
+    this.createBrush(xScale, svg);
+  }
+
+  /**
+   * Mouseover Behavior
+   *
+   * @method addMousePointer
+   * @returns {d3.Selection}
+   */
+  addMousePointer() {
+    return d3.select(this).style('cursor', 'pointer');
+  }
+
+  /**
+   * Highlight the element that is under the cursor
+   * by reducing the opacity of all the elements on the graph.
+   * @param element {d3.Selection}
+   * @method highlight
+   */
+  highlight(element) {
+    const label = this.getAttribute('data-label');
+    if (!label) return;
+    const dimming = config.get('visualization:dimmingOpacity');
+    $(element)
+      .parent()
+      .find('[data-label]')
+      .css('opacity', 1) //Opacity 1 is needed to avoid the css application
+      .not((els, el) => String($(el).data('label')) === label)
+      .css('opacity', justifyOpacity(dimming));
+  }
+
+  /**
+   * Mouseout Behavior
+   *
+   * @param element {d3.Selection}
+   * @method unHighlight
+   */
+  unHighlight(element) {
+    $('[data-label]', element.parentNode).css('opacity', 1);
+  }
+
+  /**
+   * Adds D3 brush to SVG and returns the brush function
+   *
+   * @param xScale {Function} D3 xScale function
+   * @param svg {HTMLElement} Reference to SVG
+   * @returns {*} Returns a D3 brush function and a SVG with a brush group attached
+   */
+  createBrush(xScale, svg) {
+    const self = this;
+    const visConfig = self.handler.visConfig;
+    const { width, height } = svg.node().getBBox();
+    const isHorizontal = self.handler.categoryAxes[0].axisConfig.isHorizontal();
+
+    // Brush scale
+    const brush = d3.svg.brush();
+    if (isHorizontal) {
+      brush.x(xScale);
+    } else {
+      brush.y(xScale);
+    }
+
+    brush.on('brushend', function brushEnd() {
+      // Assumes data is selected at the chart level
+      // In this case, the number of data objects should always be 1
+      const data = d3.select(this).data()[0];
+      const isTimeSeries = data.ordered && data.ordered.date;
+
+      // Allows for brushing on d3.scale.ordinal()
+      const selected = xScale.domain().filter((d) =>
+        brush.extent()[0] <= xScale(d) && xScale(d) <= brush.extent()[1]
+      );
+      const range = isTimeSeries ? brush.extent() : selected;
+
+      return self.emit('brush', {
+        range,
+        config: visConfig,
         e: d3.event,
-        data: isSlices ? this._pieClickResponse(data) : this._seriesClickResponse(data),
-      };
-    }
+        data,
+      });
+    });
 
-    /**
-     * Response to hover events
-     *
-     * @param d {Object} Data point
-     * @param i {Number} Index number of data point
-     * @returns {{value: *, point: *, label: *, color: *, pointIndex: *,
-     * series: *, config: *, data: (Object|*),
-     * e: (d3.event|*), handler: (Object|*)}} Event response object
-     */
-    eventResponse(d, i) {
-      const datum = d._input || d;
-      const data = d3.event.target.nearestViewportElement ?
-        d3.event.target.nearestViewportElement.__data__ : d3.event.target.__data__;
-      const label = d.label ? d.label : (d.series || 'Count');
-      const isSeries = !!(data && data.series);
-      const isSlices = !!(data && data.slices);
-      const series = isSeries ? data.series : undefined;
-      const slices = isSlices ? data.slices : undefined;
-      const handler = this.handler;
-      const color = get(handler, 'data.color');
+    // if `addBrushing` is true, add brush canvas
+    if (self.listenerCount('brush')) {
+      const rect = svg
+        .insert('g', 'g')
+        .attr('class', 'brush')
+        .call(brush)
+        .call(brushG => {
+          // hijack the brush start event to filter out right/middle clicks
+          const brushHandler = brushG.on('mousedown.brush');
+          if (!brushHandler) return; // touch events in use
+          brushG.on('mousedown.brush', function () {
+            if (validBrushClick(d3.event)) brushHandler.apply(this, arguments);
+          });
+        })
+        .selectAll('rect');
 
-      const eventData = {
-        value: d.y,
-        point: datum,
-        datum: datum,
-        label: label,
-        color: color ? color(label) : undefined,
-        pointIndex: i,
-        series: series,
-        slices: slices,
-        config: handler && handler.visConfig,
-        data: data,
-        e: d3.event,
-        handler: handler
-      };
-
-      return eventData;
-    }
-
-    /**
-     * Returns a function that adds events and listeners to a D3 selection
-     *
-     * @method addEvent
-     * @param event {String}
-     * @param callback {Function}
-     * @returns {Function}
-     */
-    addEvent(event, callback) {
-      return function (selection) {
-        selection.each(function () {
-          const element = d3.select(this);
-
-          if (typeof callback === 'function') {
-            return element.on(event, callback);
-          }
-        });
-      };
-    }
-
-    /**
-     *
-     * @method addHoverEvent
-     * @returns {Function}
-     */
-    addHoverEvent() {
-      const self = this;
-      const isClickable = this.listenerCount('click') > 0;
-      const addEvent = this.addEvent;
-      const $el = this.handler.el;
-      if (!this.handler.highlight) {
-        this.handler.highlight = self.highlight;
-      }
-
-      function hover(d, i) {
-        // Add pointer if item is clickable
-        if (isClickable) {
-          self.addMousePointer.call(this, arguments);
-        }
-
-        self.handler.highlight.call(this, $el);
-        self.emit('hover', self.eventResponse(d, i));
-      }
-
-      return addEvent('mouseover', hover);
-    }
-
-    /**
-     *
-     * @method addMouseoutEvent
-     * @returns {Function}
-     */
-    addMouseoutEvent() {
-      const self = this;
-      const addEvent = this.addEvent;
-      const $el = this.handler.el;
-      if (!this.handler.unHighlight) {
-        this.handler.unHighlight = self.unHighlight;
-      }
-
-      function mouseout() {
-        self.handler.unHighlight.call(this, $el);
-      }
-
-      return addEvent('mouseout', mouseout);
-    }
-
-    /**
-     *
-     * @method addClickEvent
-     * @returns {Function}
-     */
-    addClickEvent() {
-      const self = this;
-      const addEvent = this.addEvent;
-
-      function click(d) {
-        self.emit('click', self.clickEventResponse(d));
-      }
-
-      return addEvent('click', click);
-    }
-
-    /**
-     * Determine if we will allow brushing
-     *
-     * @method allowBrushing
-     * @returns {Boolean}
-     */
-    allowBrushing() {
-      const xAxis = this.handler.categoryAxes[0];
-
-      //Allow brushing for ordered axis - date histogram and histogram
-      return Boolean(xAxis.ordered);
-    }
-
-    /**
-     * Determine if brushing is currently enabled
-     *
-     * @method isBrushable
-     * @returns {Boolean}
-     */
-    isBrushable() {
-      return this.allowBrushing() && this.listenerCount('brush') > 0;
-    }
-
-    /**
-     *
-     * @param svg
-     * @returns {Function}
-     */
-    addBrushEvent(svg) {
-      if (!this.isBrushable()) return;
-
-      const xScale = this.handler.categoryAxes[0].getScale();
-      this.createBrush(xScale, svg);
-
-    }
-
-    /**
-     * Mouseover Behavior
-     *
-     * @method addMousePointer
-     * @returns {d3.Selection}
-     */
-    addMousePointer() {
-      return d3.select(this).style('cursor', 'pointer');
-    }
-
-    /**
-     * Highlight the element that is under the cursor
-     * by reducing the opacity of all the elements on the graph.
-     * @param element {d3.Selection}
-     * @method highlight
-     */
-    highlight(element) {
-      const label = this.getAttribute('data-label');
-      if (!label) return;
-
-      const dimming = config.get('visualization:dimmingOpacity');
-      $(element).parent().find('[data-label]')
-        .css('opacity', 1)//Opacity 1 is needed to avoid the css application
-        .not((els, el) => String($(el).data('label')) === label)
-        .css('opacity', justifyOpacity(dimming));
-    }
-
-    /**
-     * Mouseout Behavior
-     *
-     * @param element {d3.Selection}
-     * @method unHighlight
-     */
-    unHighlight(element) {
-      $('[data-label]', element.parentNode).css('opacity', 1);
-    }
-
-    /**
-     * Adds D3 brush to SVG and returns the brush function
-     *
-     * @param xScale {Function} D3 xScale function
-     * @param svg {HTMLElement} Reference to SVG
-     * @returns {*} Returns a D3 brush function and a SVG with a brush group attached
-     */
-    createBrush(xScale, svg) {
-      const self = this;
-      const visConfig = self.handler.visConfig;
-      const { width, height } = svg.node().getBBox();
-      const isHorizontal = self.handler.categoryAxes[0].axisConfig.isHorizontal();
-
-      // Brush scale
-      const brush = d3.svg.brush();
       if (isHorizontal) {
-        brush.x(xScale);
+        rect.attr('height', height);
       } else {
-        brush.y(xScale);
+        rect.attr('width', width);
       }
 
-      brush.on('brushend', function brushEnd() {
-
-        // Assumes data is selected at the chart level
-        // In this case, the number of data objects should always be 1
-        const data = d3.select(this).data()[0];
-        const isTimeSeries = (data.ordered && data.ordered.date);
-
-        // Allows for brushing on d3.scale.ordinal()
-        const selected = xScale.domain().filter(function (d) {
-          return (brush.extent()[0] <= xScale(d)) && (xScale(d) <= brush.extent()[1]);
-        });
-        const range = isTimeSeries ? brush.extent() : selected;
-
-        return self.emit('brush', {
-          range: range,
-          config: visConfig,
-          e: d3.event,
-          data: data
-        });
-      });
-
-      // if `addBrushing` is true, add brush canvas
-      if (self.listenerCount('brush')) {
-        const rect = svg.insert('g', 'g')
-          .attr('class', 'brush')
-          .call(brush)
-          .call(function (brushG) {
-            // hijack the brush start event to filter out right/middle clicks
-            const brushHandler = brushG.on('mousedown.brush');
-            if (!brushHandler) return; // touch events in use
-            brushG.on('mousedown.brush', function () {
-              if (validBrushClick(d3.event)) brushHandler.apply(this, arguments);
-            });
-          })
-          .selectAll('rect');
-
-        if (isHorizontal) {
-          rect.attr('height', height);
-        } else {
-          rect.attr('width', width);
-        }
-
-        return brush;
-      }
+      return brush;
     }
   }
+}
 
-  function validBrushClick(event) {
-    return event.button === 0;
-  }
+function validBrushClick(event) {
+  return event.button === 0;
+}
 
-
-  function justifyOpacity(opacity) {
-    const decimalNumber = parseFloat(opacity, 10);
-    const fallbackOpacity = 0.5;
-    return (0 <= decimalNumber  && decimalNumber <= 1) ? decimalNumber : fallbackOpacity;
-  }
-
-  return Dispatch;
+function justifyOpacity(opacity) {
+  const decimalNumber = parseFloat(opacity, 10);
+  const fallbackOpacity = 0.5;
+  return 0 <= decimalNumber && decimalNumber <= 1 ? decimalNumber : fallbackOpacity;
 }

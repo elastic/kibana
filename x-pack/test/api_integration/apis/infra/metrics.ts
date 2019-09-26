@@ -7,14 +7,14 @@
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 
-import { metricsQuery } from '../../../../plugins/infra/public/containers/metrics/metrics.gql_query';
-import { MetricsQuery } from '../../../../plugins/infra/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { metricsQuery } from '../../../../legacy/plugins/infra/public/containers/metrics/metrics.gql_query';
+import { MetricsQuery } from '../../../../legacy/plugins/infra/public/graphql/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { DATES } from './constants';
 const { min, max } = DATES['7.0.0'].hosts;
 
-const metricTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
 
@@ -75,7 +75,4 @@ const metricTests: KbnTestProvider = ({ getService }) => {
         });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default metricTests;
+}

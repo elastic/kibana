@@ -20,8 +20,6 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 
-import { FilterManagerProvider } from 'ui/filter_manager';
-
 import { createStateStub } from './_utils';
 import { QueryParameterActionsProvider } from '../actions';
 
@@ -33,8 +31,6 @@ describe('context app', function () {
     let setQueryParameters;
 
     beforeEach(ngMock.inject(function createPrivateStubs(Private) {
-      Private.stub(FilterManagerProvider, {});
-
       setQueryParameters = Private(QueryParameterActionsProvider).setQueryParameters;
     }));
 
@@ -46,7 +42,6 @@ describe('context app', function () {
       });
 
       setQueryParameters(state)({
-        anchorType: 'ANCHOR_TYPE',
         anchorId: 'ANCHOR_ID',
         columns: ['column'],
         defaultStepSize: 3,
@@ -59,7 +54,6 @@ describe('context app', function () {
 
       expect(state.queryParameters).to.eql({
         additionalParameter: 'ADDITIONAL_PARAMETER',
-        anchorType: 'ANCHOR_TYPE',
         anchorId: 'ANCHOR_ID',
         columns: ['column'],
         defaultStepSize: 3,

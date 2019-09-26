@@ -27,12 +27,12 @@ export default function ({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
 
-  describe('dashboard filter bar', async () => {
+  describe('dashboard filter bar', () => {
     before(async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    describe('Add a filter bar', async function () {
+    describe('Add a filter bar', function () {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
       });
@@ -50,7 +50,9 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('filter editor field list', async () => {
+    describe('filter editor field list', function () {
+      this.tags(['skipFirefox']);
+
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
@@ -78,7 +80,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('filter pills', async function () {
+    describe('filter pills', function () {
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.dashboard.gotoDashboardLandingPage();
@@ -120,6 +122,24 @@ export default function ({ getService, getPageObjects }) {
         expect(filterCount).to.equal(1);
 
         await pieChart.expectPieSliceCount(1);
+      });
+    });
+
+    describe('saved search filtering', function () {
+      before(async () => {
+        await filterBar.ensureFieldEditorModalIsClosed();
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.dashboard.setTimepickerInDataRange();
+      });
+
+      it('are added when a cell magnifying glass is clicked', async function () {
+        await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
+        await PageObjects.dashboard.waitForRenderComplete();
+        await testSubjects.click('docTableCellFilter');
+
+        const filterCount = await filterBar.getFilterCount();
+        expect(filterCount).to.equal(1);
       });
     });
   });

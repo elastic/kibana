@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }) {
       ]; /*eslint-enable*/
 
       // check the all data in the table
-      indicesAll.forEach((obj, index) => { // eslint-disable-line no-unused-vars
+      indicesAll.forEach((obj, index) => {
         expect(indicesAll[index].name).to.be(tableData[index].name);
         expect(indicesAll[index].status).to.be(tableData[index].status);
         expect(indicesAll[index].documentCount).to.be(tableData[index].documentCount);

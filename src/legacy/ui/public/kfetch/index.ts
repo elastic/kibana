@@ -17,22 +17,11 @@
  * under the License.
  */
 
+import { npSetup } from 'ui/new_platform';
 import { createKfetch, KFetchKibanaOptions, KFetchOptions } from './kfetch';
 export { addInterceptor, KFetchOptions, KFetchQuery } from './kfetch';
 
-import { HttpSetup } from '../../../../core/public';
-
-let http: HttpSetup;
-let kfetchInstance: (options: KFetchOptions, kfetchOptions?: KFetchKibanaOptions) => any;
-
-export function __newPlatformSetup__(httpSetup: HttpSetup) {
-  if (http) {
-    throw new Error('ui/kfetch already initialized with New Platform APIs');
-  }
-
-  http = httpSetup;
-  kfetchInstance = createKfetch(http);
-}
+const kfetchInstance = createKfetch(npSetup.core.http);
 
 export const kfetch = (options: KFetchOptions, kfetchOptions?: KFetchKibanaOptions) => {
   return kfetchInstance(options, kfetchOptions);

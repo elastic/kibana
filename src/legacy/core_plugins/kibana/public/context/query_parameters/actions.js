@@ -20,7 +20,7 @@
 import _ from 'lodash';
 
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
-import { FilterManagerProvider } from 'ui/filter_manager';
+import { getFilterGenerator } from 'ui/filter_manager';
 import {
   MAX_CONTEXT_SIZE,
   MIN_CONTEXT_SIZE,
@@ -30,7 +30,7 @@ import {
 
 export function QueryParameterActionsProvider(indexPatterns, Private) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const filterManager = Private(FilterManagerProvider);
+  const filterGen = getFilterGenerator(queryFilter);
 
   const setPredecessorCount = (state) => (predecessorCount) => (
     state.queryParameters.predecessorCount = clamp(
@@ -40,24 +40,12 @@ export function QueryParameterActionsProvider(indexPatterns, Private) {
     )
   );
 
-  const increasePredecessorCount = (state) => (
-    value = state.queryParameters.defaultStepSize,
-  ) => (
-    setPredecessorCount(state)(state.queryParameters.predecessorCount + value)
-  );
-
   const setSuccessorCount = (state) => (successorCount) => (
     state.queryParameters.successorCount = clamp(
       MIN_CONTEXT_SIZE,
       MAX_CONTEXT_SIZE,
       successorCount,
     )
-  );
-
-  const increaseSuccessorCount = (state) => (
-    value = state.queryParameters.defaultStepSize,
-  ) => (
-    setSuccessorCount(state)(state.queryParameters.successorCount + value)
   );
 
   const setQueryParameters = (state) => (queryParameters) => (
@@ -73,7 +61,8 @@ export function QueryParameterActionsProvider(indexPatterns, Private) {
 
   const addFilter = (state) => async (field, values, operation) => {
     const indexPatternId = state.queryParameters.indexPatternId;
-    filterManager.add(field, values, operation, indexPatternId);
+    const newFilters = filterGen.generate(field, values, operation, indexPatternId);
+    queryFilter.addFilters(newFilters);
     const indexPattern = await indexPatterns.get(indexPatternId);
     indexPattern.popularizeField(field.name, 1);
   };
@@ -81,8 +70,6 @@ export function QueryParameterActionsProvider(indexPatterns, Private) {
   return {
     addFilter,
     updateFilters,
-    increasePredecessorCount,
-    increaseSuccessorCount,
     setPredecessorCount,
     setQueryParameters,
     setSuccessorCount,

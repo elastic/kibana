@@ -21,6 +21,7 @@ import { ToolingLog } from '@kbn/dev-utils';
 import { i18n } from '@kbn/i18n';
 import path from 'path';
 
+import { createFailError } from '@kbn/dev-utils';
 import {
   accessAsync,
   checkValuesProperty,
@@ -33,11 +34,10 @@ import {
   // @ts-ignore
 } from './utils';
 
-import { createFailError } from '../run';
 import { I18nConfig } from './config';
 import { serializeToJson } from './serializers';
 
-interface IntegrateOptions {
+export interface IntegrateOptions {
   sourceFileName: string;
   targetFileName?: string;
   dryRun: boolean;
@@ -160,17 +160,19 @@ async function writeMessages(
   // Use basename of source file name to write the same locale name as the source file has.
   const fileName = path.basename(options.sourceFileName);
   for (const [namespace, messages] of localizedMessagesByNamespace) {
-    const destPath = path.resolve(options.config.paths[namespace], 'translations');
+    for (const namespacedPath of options.config.paths[namespace]) {
+      const destPath = path.resolve(namespacedPath, 'translations');
 
-    try {
-      await accessAsync(destPath);
-    } catch (_) {
-      await makeDirAsync(destPath);
+      try {
+        await accessAsync(destPath);
+      } catch (_) {
+        await makeDirAsync(destPath);
+      }
+
+      const writePath = path.resolve(destPath, fileName);
+      await writeFileAsync(writePath, serializeToJson(messages, formats));
+      options.log.success(`Translations have been integrated to ${normalizePath(writePath)}`);
     }
-
-    const writePath = path.resolve(destPath, fileName);
-    await writeFileAsync(writePath, serializeToJson(messages, formats));
-    options.log.success(`Translations have been integrated to ${normalizePath(writePath)}`);
   }
 }
 

@@ -19,21 +19,61 @@
 
 import { Request, Server } from 'hapi';
 import hapiAuthCookie from 'hapi-auth-cookie';
-import { SessionStorageFactory, SessionStorage } from './session_storage';
 
+import { KibanaRequest, ensureRawRequest } from './router';
+import { SessionStorageFactory, SessionStorage } from './session_storage';
+import { Logger } from '..';
+
+/**
+ * Configuration used to create HTTP session storage based on top of cookie mechanism.
+ * @public
+ */
 export interface SessionStorageCookieOptions<T> {
+  /**
+   * Name of the session cookie.
+   */
   name: string;
+  /**
+   * A key used to encrypt a cookie value. Should be at least 32 characters long.
+   */
   encryptionKey: string;
+  /**
+   * Function called to validate a cookie content.
+   */
   validate: (sessionValue: T) => boolean | Promise<boolean>;
+  /**
+   * Flag indicating whether the cookie should be sent only via a secure connection.
+   */
   isSecure: boolean;
 }
 
 class ScopedCookieSessionStorage<T extends Record<string, any>> implements SessionStorage<T> {
-  constructor(private readonly server: Server, private readonly request: Request) {}
+  constructor(
+    private readonly log: Logger,
+    private readonly server: Server,
+    private readonly request: Request
+  ) {}
   public async get(): Promise<T | null> {
     try {
-      return await this.server.auth.test('security-cookie', this.request);
+      const session = await this.server.auth.test('security-cookie', this.request);
+      // A browser can send several cookies, if it's not an array, just return the session value
+      if (!Array.isArray(session)) {
+        return session as T;
+      }
+
+      // If we have an array with one value, we're good also
+      if (session.length === 1) {
+        return session[0] as T;
+      }
+
+      // Otherwise, we have more than one and won't be authing the user because we don't
+      // know which session identifies the actual user. There's potential to change this behavior
+      // to ensure all valid sessions identify the same user, or choose one valid one, but this
+      // is the safest option.
+      this.log.warn(`Found ${session.length} auth sessions when we were only expecting 1.`);
+      return null;
     } catch (error) {
+      this.log.debug(String(error));
       return null;
     }
   }
@@ -53,6 +93,7 @@ class ScopedCookieSessionStorage<T extends Record<string, any>> implements Sessi
  * @param cookieOptions - cookies configuration
  */
 export async function createCookieSessionStorageFactory<T>(
+  log: Logger,
   server: Server,
   cookieOptions: SessionStorageCookieOptions<T>,
   basePath?: string
@@ -71,8 +112,8 @@ export async function createCookieSessionStorageFactory<T>(
   });
 
   return {
-    asScoped(request: Request) {
-      return new ScopedCookieSessionStorage<T>(server, request);
+    asScoped(request: KibanaRequest) {
+      return new ScopedCookieSessionStorage<T>(log, server, ensureRawRequest(request));
     },
   };
 }

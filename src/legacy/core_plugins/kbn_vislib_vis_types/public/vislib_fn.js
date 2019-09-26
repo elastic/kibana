@@ -19,8 +19,7 @@
 
 import { functionsRegistry } from 'plugins/interpreter/registries';
 import { i18n } from '@kbn/i18n';
-import { VislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
-import chrome from 'ui/chrome';
+import { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 
 export const vislib = () => ({
   name: 'vislib',
@@ -34,15 +33,17 @@ export const vislib = () => ({
     defaultMessage: 'Vislib visualization'
   }),
   args: {
+    type: {
+      types: ['string'],
+      default: '""',
+    },
     visConfig: {
       types: ['string', 'null'],
       default: '"{}"',
     },
   },
   async fn(context, args) {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get('Private');
-    const responseHandler = Private(VislibSeriesResponseHandlerProvider).handler;
+    const responseHandler = vislibSeriesResponseHandlerProvider().handler;
     const visConfigParams = JSON.parse(args.visConfig);
 
     const convertedData = await responseHandler(context, visConfigParams.dimensions);

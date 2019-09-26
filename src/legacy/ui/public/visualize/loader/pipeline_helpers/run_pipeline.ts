@@ -23,19 +23,14 @@ import { fromExpression } from '@kbn/interpreter/common';
 import { getInterpreter } from 'plugins/interpreter/interpreter';
 
 import { Adapters } from 'ui/inspector';
-import { Filters, Query, TimeRange } from 'ui/visualize';
+import { KibanaContext } from '../../../../../core_plugins/interpreter/public';
 
-export interface InitialContextObject {
-  timeRange?: TimeRange;
-  filters?: Filters;
-  query?: Query;
-}
-
-export type getInitialContextFunction = () => InitialContextObject;
+type getInitialContextFunction = () => KibanaContext;
 
 export interface RunPipelineHandlers {
   getInitialContext: getInitialContextFunction;
   inspectorAdapters?: Adapters;
+  abortSignal?: AbortSignal;
 }
 
 export const runPipeline = async (

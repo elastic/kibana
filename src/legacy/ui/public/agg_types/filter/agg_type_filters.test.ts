@@ -17,25 +17,28 @@
  * under the License.
  */
 
+import { IndexPattern } from 'ui/index_patterns';
 import { AggTypeFilters } from './agg_type_filters';
+import { AggType } from '..';
+import { AggConfig } from '../../vis';
 
 describe('AggTypeFilters', () => {
   let registry: AggTypeFilters;
-  const indexPattern = { id: '1234', fields: [], title: 'foo' };
-  const aggConfig = {};
+  const indexPattern = ({ id: '1234', fields: [], title: 'foo' } as unknown) as IndexPattern;
+  const aggConfig = {} as AggConfig;
 
   beforeEach(() => {
     registry = new AggTypeFilters();
   });
 
   it('should filter nothing without registered filters', async () => {
-    const aggTypes = [{ name: 'count' }, { name: 'sum' }];
+    const aggTypes = [{ name: 'count' }, { name: 'sum' }] as AggType[];
     const filtered = registry.filter(aggTypes, indexPattern, aggConfig);
     expect(filtered).toEqual(aggTypes);
   });
 
   it('should pass all aggTypes to the registered filter', async () => {
-    const aggTypes = [{ name: 'count' }, { name: 'sum' }];
+    const aggTypes = [{ name: 'count' }, { name: 'sum' }] as AggType[];
     const filter = jest.fn();
     registry.addFilter(filter);
     registry.filter(aggTypes, indexPattern, aggConfig);
@@ -44,7 +47,7 @@ describe('AggTypeFilters', () => {
   });
 
   it('should allow registered filters to filter out aggTypes', async () => {
-    const aggTypes = [{ name: 'count' }, { name: 'sum' }, { name: 'avg' }];
+    const aggTypes = [{ name: 'count' }, { name: 'sum' }, { name: 'avg' }] as AggType[];
     let filtered = registry.filter(aggTypes, indexPattern, aggConfig);
     expect(filtered).toEqual(aggTypes);
 

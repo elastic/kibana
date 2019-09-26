@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'settings', 'security', 'maps']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
+  const queryBar = getService('queryBar');
+  const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
-  describe('security feature controls', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/38414
+  describe.skip('security feature controls', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('maps/data');
       await esArchiver.load('maps/kibana');
@@ -81,6 +83,37 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it(`doesn't show read-only badge`, async () => {
         await globalNav.badgeMissingOrFail();
+      });
+
+      it('allows saving via the saved query management component popover with no query loaded', async () => {
+        await PageObjects.maps.openNewMap();
+        await queryBar.setQuery('response:200');
+        await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
+        await savedQueryManagementComponent.savedQueryExistOrFail('foo');
+      });
+
+      it('allows saving a currently loaded saved query as a new query via the saved query management component ', async () => {
+        await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
+          'foo2',
+          'bar2',
+          true,
+          false
+        );
+        await savedQueryManagementComponent.savedQueryExistOrFail('foo2');
+      });
+
+      it('allow saving changes to a currently loaded query via the saved query management component', async () => {
+        await queryBar.setQuery('response:404');
+        await savedQueryManagementComponent.updateCurrentlyLoadedQuery('bar2', false, false);
+        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        await savedQueryManagementComponent.loadSavedQuery('foo2');
+        const queryString = await queryBar.getQueryString();
+        expect(queryString).to.eql('response:404');
+      });
+
+      it('allows deleting saved queries in the saved query management component ', async () => {
+        await savedQueryManagementComponent.deleteSavedQuery('foo2');
+        await savedQueryManagementComponent.savedQueryMissingOrFail('foo2');
       });
     });
 
@@ -152,6 +185,31 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
         it(`can't add layer`, async () => {
           await PageObjects.maps.expectMissingAddLayerButton();
+        });
+
+        it('allows loading a saved query via the saved query management component', async () => {
+          await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+          const queryString = await queryBar.getQueryString();
+          expect(queryString).to.eql('response:200');
+        });
+
+        it('does not allow saving via the saved query management component popover with no query loaded', async () => {
+          await savedQueryManagementComponent.saveNewQueryMissingOrFail();
+        });
+
+        it('does not allow saving changes to saved query from the saved query management component', async () => {
+          await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+          await queryBar.setQuery('response:404');
+          await savedQueryManagementComponent.updateCurrentlyLoadedQueryMissingOrFail();
+        });
+
+        it('does not allow deleting a saved query from the saved query management component', async () => {
+          await savedQueryManagementComponent.deleteSavedQueryMissingOrFail('OKJpgs');
+        });
+
+        it('allows clearing the currently loaded saved query', async () => {
+          await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+          await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         });
       });
     });

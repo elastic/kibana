@@ -18,42 +18,117 @@
  */
 
 import { sortBy } from 'lodash';
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, Observable } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import { NavLinkWrapper, NavLinkUpdateableFields } from './nav_link';
-import { ApplicationStart } from '../../application';
+import { NavLinkWrapper, ChromeNavLinkUpdateableFields, ChromeNavLink } from './nav_link';
+import { InternalApplicationStart } from '../../application';
 import { HttpStart } from '../../http';
 
 interface StartDeps {
-  application: ApplicationStart;
+  application: InternalApplicationStart;
   http: HttpStart;
+}
+
+/**
+ * {@link ChromeNavLinks | APIs} for manipulating nav links.
+ *
+ * @public
+ */
+export interface ChromeNavLinks {
+  /**
+   * Get an observable for a sorted list of navlinks.
+   */
+  getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
+
+  /**
+   * Get the state of a navlink at this point in time.
+   * @param id
+   */
+  get(id: string): ChromeNavLink | undefined;
+
+  /**
+   * Get the current state of all navlinks.
+   */
+  getAll(): Array<Readonly<ChromeNavLink>>;
+
+  /**
+   * Check whether or not a navlink exists.
+   * @param id
+   */
+  has(id: string): boolean;
+
+  /**
+   * Remove all navlinks except the one matching the given id.
+   *
+   * @remarks
+   * NOTE: this is not reversible.
+   *
+   * @param id
+   */
+  showOnly(id: string): void;
+
+  /**
+   * Update the navlink for the given id with the updated attributes.
+   * Returns the updated navlink or `undefined` if it does not exist.
+   * @param id
+   * @param values
+   */
+  update(id: string, values: ChromeNavLinkUpdateableFields): ChromeNavLink | undefined;
+
+  /**
+   * Enable forced navigation mode, which will trigger a page refresh
+   * when a nav link is clicked and only the hash is updated.
+   *
+   * @remarks
+   * This is only necessary when rendering the status page in place of another
+   * app, as links to that app will set the current URL and change the hash, but
+   * the routes for the correct are not loaded so nothing will happen.
+   * https://github.com/elastic/kibana/pull/29770
+   *
+   * Used only by status_page plugin
+   */
+  enableForcedAppSwitcherNavigation(): void;
+
+  /**
+   * An observable of the forced app switcher state.
+   */
+  getForceAppSwitcherNavigation$(): Observable<boolean>;
 }
 
 export class NavLinksService {
   private readonly stop$ = new ReplaySubject(1);
 
-  public start({ application, http }: StartDeps) {
+  public start({ application, http }: StartDeps): ChromeNavLinks {
+    const appLinks = [...application.availableApps].map(
+      ([appId, app]) =>
+        [
+          appId,
+          new NavLinkWrapper({
+            ...app,
+            legacy: false,
+            baseUrl: relativeToAbsolute(http.basePath.prepend(`/app/${appId}`)),
+          }),
+        ] as [string, NavLinkWrapper]
+    );
+
+    const legacyAppLinks = [...application.availableLegacyApps].map(
+      ([appId, app]) =>
+        [
+          appId,
+          new NavLinkWrapper({
+            ...app,
+            legacy: true,
+            baseUrl: relativeToAbsolute(http.basePath.prepend(app.appUrl)),
+          }),
+        ] as [string, NavLinkWrapper]
+    );
+
     const navLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(
-      new Map(
-        application.availableApps.map(
-          app =>
-            [
-              app.id,
-              new NavLinkWrapper({
-                ...app,
-                // Either rootRoute or appUrl must be defined.
-                baseUrl: relativeToAbsolute(http.prependBasePath((app.rootRoute || app.appUrl)!)),
-              }),
-            ] as [string, NavLinkWrapper]
-        )
-      )
+      new Map([...legacyAppLinks, ...appLinks])
     );
     const forceAppSwitcherNavigation$ = new BehaviorSubject(false);
 
     return {
-      /**
-       * Get an observable for a sorted list of navlinks.
-       */
       getNavLinks$: () => {
         return navLinks$.pipe(
           map(sortNavLinks),
@@ -61,35 +136,19 @@ export class NavLinksService {
         );
       },
 
-      /**
-       * Get the state of a navlink at this point in time.
-       * @param id
-       */
       get(id: string) {
         const link = navLinks$.value.get(id);
         return link && link.properties;
       },
 
-      /**
-       * Get the current state of all navlinks.
-       */
       getAll() {
         return sortNavLinks(navLinks$.value);
       },
 
-      /**
-       * Check whether or not a navlink exists.
-       * @param id
-       */
       has(id: string) {
         return navLinks$.value.has(id);
       },
 
-      /**
-       * Remove all navlinks except the one matching the given id.
-       * NOTE: this is not reversible.
-       * @param id
-       */
       showOnly(id: string) {
         if (!this.has(id)) {
           return;
@@ -98,13 +157,7 @@ export class NavLinksService {
         navLinks$.next(new Map([...navLinks$.value.entries()].filter(([linkId]) => linkId === id)));
       },
 
-      /**
-       * Update the navlink for the given id with the updated attributes.
-       * Returns the updated navlink or `undefined` if it does not exist.
-       * @param id
-       * @param values
-       */
-      update(id: string, values: NavLinkUpdateableFields) {
+      update(id: string, values: ChromeNavLinkUpdateableFields) {
         if (!this.has(id)) {
           return;
         }
@@ -123,23 +176,10 @@ export class NavLinksService {
         return this.get(id);
       },
 
-      /**
-       * Enable forced navigation mode, which will trigger a page refresh
-       * when a nav link is clicked and only the hash is updated. This is only
-       * necessary when rendering the status page in place of another app, as
-       * links to that app will set the current URL and change the hash, but
-       * the routes for the correct are not loaded so nothing will happen.
-       * https://github.com/elastic/kibana/pull/29770
-       *
-       * Used only by status_page plugin
-       */
       enableForcedAppSwitcherNavigation() {
         forceAppSwitcherNavigation$.next(true);
       },
 
-      /**
-       * An observable of the forced app switcher state.
-       */
       getForceAppSwitcherNavigation$() {
         return forceAppSwitcherNavigation$.asObservable();
       },

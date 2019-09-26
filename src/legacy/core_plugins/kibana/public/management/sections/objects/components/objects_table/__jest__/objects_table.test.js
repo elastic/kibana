@@ -35,19 +35,6 @@ jest.mock('../components/header', () => ({
   Header: () => 'Header',
 }));
 
-jest.mock('ui/errors', () => ({
-  SavedObjectNotFound: class SavedObjectNotFound extends Error {
-    constructor(options) {
-      super();
-      for (const option in options) {
-        if (options.hasOwnProperty(option)) {
-          this[option] = options[option];
-        }
-      }
-    }
-  },
-}));
-
 jest.mock('ui/chrome', () => ({
   addBasePath: () => '',
   getInjected: () => ['index-pattern', 'visualization', 'dashboard', 'search'],
@@ -123,9 +110,7 @@ const defaultProps = {
     bulkGet: jest.fn(),
   },
   indexPatterns: {
-    cache: {
-      clearAll: jest.fn(),
-    }
+    clearCache: jest.fn(),
   },
   $http,
   basePath: '',
@@ -134,26 +119,12 @@ const defaultProps = {
   services: [],
   uiCapabilities: {
     savedObjectsManagement: {
-      'index-pattern': {
-        read: true
-      },
-      visualization: {
-        read: true
-      },
-      dashboard: {
-        read: true
-      },
-      search: {
-        read: true
-      }
+      read: true,
+      edit: false,
+      delete: false,
     }
   },
-  canDeleteSavedObjectTypes: [
-    'index-pattern',
-    'visualization',
-    'dashboard',
-    'search'
-  ]
+  canDelete: true,
 };
 
 beforeEach(() => {
@@ -270,41 +241,6 @@ describe('ObjectsTable', () => {
     component.update();
 
     expect(addDangerMock).toHaveBeenCalled();
-  });
-
-  it('should filter find operation based on the uiCapabilities', async () => {
-    const uiCapabilities = {
-      savedObjectsManagement: {
-        'index-pattern': {
-          read: false,
-        },
-        visualization: {
-          read: false,
-        },
-        dashboard: {
-          read: false,
-        },
-        search: {
-          read: true,
-        }
-      }
-    };
-    const customizedProps = { ...defaultProps, uiCapabilities };
-    const component = shallowWithIntl(
-      <ObjectsTable.WrappedComponent
-        {...customizedProps}
-        perPageConfig={15}
-      />
-    );
-
-    // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-
-    expect(findObjects).toHaveBeenCalledWith(expect.objectContaining({
-      type: ['search']
-    }));
   });
 
   describe('export', () => {
@@ -452,42 +388,6 @@ describe('ObjectsTable', () => {
       expect(getRelationships).toHaveBeenCalledWith('search', '1', savedObjectTypes, defaultProps.$http, defaultProps.basePath);
     });
 
-    it('should fetch relationships filtered based on the uiCapabilities', async () => {
-      const { getRelationships } = require('../../../lib/get_relationships');
-
-      const uiCapabilities = {
-        savedObjectsManagement: {
-          'index-pattern': {
-            read: false,
-          },
-          visualization: {
-            read: false,
-          },
-          dashboard: {
-            read: false,
-          },
-          search: {
-            read: true,
-          }
-        }
-      };
-      const customizedProps = { ...defaultProps, uiCapabilities };
-      const component = shallowWithIntl(
-        <ObjectsTable.WrappedComponent
-          {...customizedProps}
-        />
-      );
-
-      // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
-      // Ensure the state changes are reflected
-      component.update();
-
-      await component.instance().getRelationships('search', '1');
-      const savedObjectTypes = ['search'];
-      expect(getRelationships).toHaveBeenCalledWith('search', '1', savedObjectTypes, defaultProps.$http, defaultProps.basePath);
-    });
-
     it('should show the flyout', async () => {
       const component = shallowWithIntl(
         <ObjectsTable.WrappedComponent
@@ -616,7 +516,7 @@ describe('ObjectsTable', () => {
 
       await component.instance().delete();
 
-      expect(defaultProps.indexPatterns.cache.clearAll).toHaveBeenCalled();
+      expect(defaultProps.indexPatterns.clearCache).toHaveBeenCalled();
       expect(mockSavedObjectsClient.bulkGet).toHaveBeenCalledWith(mockSelectedSavedObjects);
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(mockSavedObjects[0].type, mockSavedObjects[0].id);
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(mockSavedObjects[1].type, mockSavedObjects[1].id);

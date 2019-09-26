@@ -41,11 +41,10 @@ export {
 
 export {
   visTypes,
-  visResponseHandlers,
-  visRequestHandlers,
   visEditorTypes,
   interpreter,
   savedObjectTypes,
+  embeddableActions,
   embeddableFactories,
   fieldFormats,
   fieldFormatEditors,
@@ -64,7 +63,6 @@ export {
   aliases,
   visualize,
   search,
-  autocompleteProviders,
   shareContextMenuExtensions,
 } from './ui_app_extensions';
 

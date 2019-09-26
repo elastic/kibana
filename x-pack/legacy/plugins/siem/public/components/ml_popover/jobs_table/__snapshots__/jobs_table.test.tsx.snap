@@ -1,0 +1,110 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`JobsTable renders correctly against snapshot 1`] = `
+<EuiBasicTable
+  columns={
+    Array [
+      Object {
+        "name": "Job name",
+        "render": [Function],
+      },
+      Object {
+        "align": "center",
+        "name": "Run job",
+        "render": [Function],
+        "width": "80px",
+      },
+    ]
+  }
+  compressed={true}
+  data-test-subj="jobs-table"
+  items={
+    Array [
+      Object {
+        "datafeedId": "datafeed-rc-rare-process-windows-5",
+        "datafeedIndices": Array [
+          "winlogbeat-*",
+        ],
+        "datafeedState": "stopped",
+        "description": "Looks for rare and anomalous processes on a Windows host. Requires process execution events from Sysmon.",
+        "earliestTimestampMs": 1554327458406,
+        "groups": Array [
+          "host",
+        ],
+        "hasDatafeed": true,
+        "id": "rc-rare-process-windows-5",
+        "isSingleMetricViewerJob": true,
+        "jobState": "closed",
+        "latestTimestampMs": 1561402325194,
+        "memory_status": "ok",
+        "processed_record_count": 8577,
+      },
+      Object {
+        "datafeedId": "datafeed-siem-api-rare_process_linux_ecs",
+        "datafeedIndices": Array [
+          "auditbeat-*",
+        ],
+        "datafeedState": "stopped",
+        "description": "SIEM Auditbeat: Detect unusually rare processes on Linux (beta)",
+        "earliestTimestampMs": 1557353420495,
+        "groups": Array [
+          "siem",
+        ],
+        "hasDatafeed": true,
+        "id": "siem-api-rare_process_linux_ecs",
+        "isSingleMetricViewerJob": true,
+        "jobState": "closed",
+        "latestTimestampMs": 1557434782207,
+        "memory_status": "hard_limit",
+        "processed_record_count": 582251,
+      },
+      Object {
+        "datafeedId": "datafeed-siem-api-rare_process_windows_ecs",
+        "datafeedIndices": Array [
+          "winlogbeat-*",
+        ],
+        "datafeedState": "stopped",
+        "description": "SIEM Winlogbeat: Detect unusually rare processes on Windows (beta)",
+        "groups": Array [
+          "siem",
+        ],
+        "hasDatafeed": true,
+        "id": "siem-api-rare_process_windows_ecs",
+        "isSingleMetricViewerJob": true,
+        "jobState": "closed",
+        "memory_status": "ok",
+        "processed_record_count": 0,
+      },
+      Object {
+        "datafeedId": "datafeed-siem-api-suspicious_login_activity_ecs",
+        "datafeedIndices": Array [
+          "auditbeat-*",
+        ],
+        "datafeedState": "stopped",
+        "description": "SIEM Auditbeat: Detect unusually high number of authentication attempts (beta)",
+        "groups": Array [
+          "siem",
+        ],
+        "hasDatafeed": true,
+        "id": "siem-api-suspicious_login_activity_ecs",
+        "isSingleMetricViewerJob": true,
+        "jobState": "closed",
+        "memory_status": "ok",
+        "processed_record_count": 0,
+      },
+    ]
+  }
+  loading={true}
+  noItemsMessage={<Memo(NoItemsMessage) />}
+  onChange={[Function]}
+  pagination={
+    Object {
+      "hidePerPageOptions": true,
+      "pageIndex": 0,
+      "pageSize": 5,
+      "totalItemCount": 4,
+    }
+  }
+  responsive={false}
+/>
+`;

@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiIcon, EuiLink, EuiFormHelpText, EuiFormControlLayoutDelimited } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import { Component } from 'react';
 import React from 'react';
 import { getDocLink } from 'ui/documentation_links';
-import { Field } from 'ui/index_patterns';
+import { Field } from '../../../index_patterns';
 import { ValueInputType } from './value_input_type';
 
 interface RangeParams {
@@ -41,7 +41,7 @@ interface Props {
 }
 
 class RangeValueInputUI extends Component<Props> {
-  public constructor(props: Props) {
+  constructor(props: Props) {
     super(props);
   }
 
@@ -50,52 +50,46 @@ class RangeValueInputUI extends Component<Props> {
 
     return (
       <div>
-        <EuiFlexGroup style={{ maxWidth: 600 }}>
-          <EuiFlexItem>
-            <EuiFormRow
-              label={this.props.intl.formatMessage({
-                id: 'data.filter.filterEditor.rangeStartInputLabel',
-                defaultMessage: 'From',
+        <EuiFormControlLayoutDelimited
+          aria-label={this.props.intl.formatMessage({
+            id: 'data.filter.filterEditor.rangeInputLabel',
+            defaultMessage: 'Range',
+          })}
+          startControl={
+            <ValueInputType
+              controlOnly
+              type={type}
+              value={this.props.value ? this.props.value.from : undefined}
+              onChange={this.onFromChange}
+              placeholder={this.props.intl.formatMessage({
+                id: 'data.filter.filterEditor.rangeStartInputPlaceholder',
+                defaultMessage: 'Start of the range',
               })}
-            >
-              <ValueInputType
-                type={type}
-                value={this.props.value ? this.props.value.from : undefined}
-                onChange={this.onFromChange}
-                placeholder={this.props.intl.formatMessage({
-                  id: 'data.filter.filterEditor.rangeStartInputPlaceholder',
-                  defaultMessage: 'Start of the range',
-                })}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow
-              label={this.props.intl.formatMessage({
-                id: 'data.filter.filterEditor.rangeEndInputLabel',
-                defaultMessage: 'To',
+            />
+          }
+          endControl={
+            <ValueInputType
+              controlOnly
+              type={type}
+              value={this.props.value ? this.props.value.to : undefined}
+              onChange={this.onToChange}
+              placeholder={this.props.intl.formatMessage({
+                id: 'data.filter.filterEditor.rangeEndInputPlaceholder',
+                defaultMessage: 'End of the range',
               })}
-            >
-              <ValueInputType
-                type={type}
-                value={this.props.value ? this.props.value.to : undefined}
-                onChange={this.onToChange}
-                placeholder={this.props.intl.formatMessage({
-                  id: 'data.filter.filterEditor.rangeEndInputPlaceholder',
-                  defaultMessage: 'End of the range',
-                })}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            />
+          }
+        />
         {type === 'date' ? (
-          <EuiLink target="_blank" href={getDocLink('date.dateMath')}>
-            <FormattedMessage
-              id="data.filter.filterEditor.dateFormatHelpLinkLabel"
-              defaultMessage="Accepted date formats"
-            />{' '}
-            <EuiIcon type="link" />
-          </EuiLink>
+          <EuiFormHelpText>
+            <EuiLink target="_blank" href={getDocLink('date.dateMath')}>
+              <FormattedMessage
+                id="data.filter.filterEditor.dateFormatHelpLinkLabel"
+                defaultMessage="Accepted date formats"
+              />{' '}
+              <EuiIcon type="popout" size="s" />
+            </EuiLink>
+          </EuiFormHelpText>
         ) : (
           ''
         )}

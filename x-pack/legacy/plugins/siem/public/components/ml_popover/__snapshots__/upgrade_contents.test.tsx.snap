@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FilterGroup renders correctly against snapshot 1`] = `
+<PopoverContentsDiv
+  data-test-subj="ml-popover-upgrade-contents"
+>
+  <EuiPopoverTitle>
+    Upgrade to Elastic Platinum
+  </EuiPopoverTitle>
+  <EuiText
+    size="s"
+  >
+    In order to access SIEM’s anomaly detection features, you must be subscribed to an Elastic Platinum license. With it, you’ll have the ability to run Machine Learning jobs to view anomalous events throughout SIEM.
+  </EuiText>
+  <EuiSpacer />
+  <EuiButton
+    href="https://www.elastic.co/subscriptions"
+    iconSide="right"
+    iconType="popout"
+    target="_blank"
+  >
+    Subscription options
+  </EuiButton>
+</PopoverContentsDiv>
+`;

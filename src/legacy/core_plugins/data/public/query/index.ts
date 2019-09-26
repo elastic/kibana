@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { QueryService, QuerySetup } from './query_service';
+export * from './query_service';

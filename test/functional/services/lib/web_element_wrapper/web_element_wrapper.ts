@@ -25,6 +25,7 @@ import { PNG } from 'pngjs';
 import cheerio from 'cheerio';
 import testSubjSelector from '@kbn/test-subj-selector';
 import { ToolingLog } from '@kbn/dev-utils';
+import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
 // @ts-ignore not supported yet
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 import { Browsers } from '../../remote/browsers';
@@ -41,25 +42,57 @@ interface TypeOptions {
   charByChar: boolean;
 }
 
+interface ClearOptions {
+  withJS: boolean;
+}
+
+const RETRY_CLICK_MAX_ATTEMPTS = 3;
+const RETRY_CLICK_RETRY_ON_ERRORS = [
+  'ElementClickInterceptedError',
+  'ElementNotInteractableError',
+  'StaleElementReferenceError',
+];
+
 export class WebElementWrapper {
   private By: typeof By = this.webDriver.By;
   private Keys: IKey = this.webDriver.Key;
   private driver: WebDriver = this.webDriver.driver;
-  public _webElement: WebElement = this.webElement as WebElement;
   public LegacyAction: any = this.webDriver.LegacyActionSequence;
+  public isW3CEnabled: boolean = (this.webDriver.driver as any).executor_.w3c === true;
+
+  public static create(
+    webElement: WebElement | WebElementWrapper,
+    locator: By | null,
+    webDriver: Driver,
+    timeout: number,
+    fixedHeaderHeight: number,
+    logger: ToolingLog,
+    browserType: string
+  ): WebElementWrapper {
+    if (webElement instanceof WebElementWrapper) {
+      return webElement;
+    }
+
+    return new WebElementWrapper(
+      webElement,
+      locator,
+      webDriver,
+      timeout,
+      fixedHeaderHeight,
+      logger,
+      browserType
+    );
+  }
 
   constructor(
-    private webElement: WebElementWrapper | WebElement,
+    public _webElement: WebElement,
+    private locator: By | null,
     private webDriver: Driver,
     private timeout: number,
     private fixedHeaderHeight: number,
     private logger: ToolingLog,
     private browserType: string
-  ) {
-    if (webElement instanceof WebElementWrapper) {
-      return webElement;
-    }
-  }
+  ) {}
 
   private async _findWithCustomTimeout(
     findFunction: () => Promise<Array<WebElement | WebElementWrapper>>,
@@ -75,9 +108,10 @@ export class WebElementWrapper {
     return elements;
   }
 
-  private _wrap(otherWebElement: WebElement | WebElementWrapper) {
-    return new WebElementWrapper(
+  private _wrap(otherWebElement: WebElement | WebElementWrapper, locator: By | null = null) {
+    return WebElementWrapper.create(
       otherWebElement,
+      locator,
       this.webDriver,
       this.timeout,
       this.fixedHeaderHeight,
@@ -88,6 +122,38 @@ export class WebElementWrapper {
 
   private _wrapAll(otherWebElements: Array<WebElement | WebElementWrapper>) {
     return otherWebElements.map(e => this._wrap(e));
+  }
+
+  private async retryCall<T>(
+    fn: (wrapper: this) => T | Promise<T>,
+    attemptsRemaining: number = RETRY_CLICK_MAX_ATTEMPTS
+  ): Promise<T> {
+    try {
+      return await fn(this);
+    } catch (err) {
+      if (
+        !RETRY_CLICK_RETRY_ON_ERRORS.includes(err.name) ||
+        this.locator === null ||
+        attemptsRemaining === 0
+      ) {
+        throw err;
+      }
+
+      this.logger.warning(`WebElementWrapper.${fn.name}: ${err.message}`);
+      this.logger.debug(
+        `finding element '${this.locator.toString()}' again, ${attemptsRemaining - 1} attempts left`
+      );
+
+      await delay(200);
+      this._webElement = await this.driver.findElement(this.locator);
+      return await this.retryCall(fn, attemptsRemaining - 1);
+    }
+  }
+
+  private getActions(): any {
+    return this.isW3CEnabled
+      ? (this.driver as any).actions()
+      : (this.driver as any).actions({ bridge: true });
   }
 
   /**
@@ -104,8 +170,10 @@ export class WebElementWrapper {
    *
    * @return {Promise<boolean>}
    */
-  public async isDisplayed(): Promise<boolean> {
-    return await this._webElement.isDisplayed();
+  public async isDisplayed() {
+    return await this.retryCall(async function isDisplayed(wrapper) {
+      return await wrapper._webElement.isDisplayed();
+    });
   }
 
   /**
@@ -114,8 +182,10 @@ export class WebElementWrapper {
    *
    * @return {Promise<boolean>}
    */
-  public async isEnabled(): Promise<boolean> {
-    return await this._webElement.isEnabled();
+  public async isEnabled() {
+    return await this.retryCall(async function isEnabled(wrapper) {
+      return await wrapper._webElement.isEnabled();
+    });
   }
 
   /**
@@ -124,8 +194,10 @@ export class WebElementWrapper {
    *
    * @return {Promise<boolean>}
    */
-  public async isSelected(): Promise<boolean> {
-    return await this._webElement.isSelected();
+  public async isSelected() {
+    return await this.retryCall(async function isSelected(wrapper) {
+      return await wrapper._webElement.isSelected();
+    });
   }
 
   /**
@@ -134,9 +206,23 @@ export class WebElementWrapper {
    *
    * @return {Promise<void>}
    */
-  public async click(): Promise<void> {
-    await this.scrollIntoViewIfNecessary();
-    await this._webElement.click();
+  public async click() {
+    await this.retryCall(async function click(wrapper) {
+      await wrapper.scrollIntoViewIfNecessary();
+      await wrapper._webElement.click();
+    });
+  }
+
+  /**
+   * Focuses this element.
+   *
+   * @return {Promise<void>}
+   */
+  public async focus() {
+    await this.retryCall(async function focus(wrapper) {
+      await wrapper.scrollIntoViewIfNecessary();
+      await wrapper.driver.executeScript(`arguments[0].focus()`, wrapper._webElement);
+    });
   }
 
   /**
@@ -144,20 +230,26 @@ export class WebElementWrapper {
    * is neither a text INPUT element nor a TEXTAREA element.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#clear
    *
-   * @return {Promise<void>}
+   * @param {{ withJS: boolean }} options option to clear input with JS: `arguments[0].value=''`
+   * @default { withJS: false }
    */
-  async clearValue() {
-    // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
-    // await this._webElement.clear();
-    await this.driver.executeScript(`arguments[0].value=''`, this._webElement);
+  async clearValue(options: ClearOptions = { withJS: false }) {
+    await this.retryCall(async function clearValue(wrapper) {
+      if (wrapper.browserType === Browsers.Chrome || options.withJS) {
+        // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
+        await wrapper.driver.executeScript(`arguments[0].value=''`, wrapper._webElement);
+      } else {
+        await wrapper._webElement.clear();
+      }
+    });
   }
 
   /**
    * Clear the value of this element using Keyboard
-   * @param {{ charByChar: boolean }} options
+   * @param {{ charByChar: boolean }} options to input characters one by one
    * @default { charByChar: false }
    */
-  async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }): Promise<void> {
+  async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }) {
     if (options.charByChar === true) {
       const value = await this.getAttribute('value');
       for (let i = 0; i <= value.length; i++) {
@@ -165,9 +257,18 @@ export class WebElementWrapper {
         await delay(100);
       }
     } else {
-      // https://bugs.chromium.org/p/chromedriver/issues/detail?id=30
-      await this.driver.executeScript(`arguments[0].select();`, this._webElement);
-      await this.pressKeys(this.Keys.BACK_SPACE);
+      if (this.browserType === Browsers.Chrome) {
+        // https://bugs.chromium.org/p/chromedriver/issues/detail?id=30
+        await this.retryCall(async function clearValueWithKeyboard(wrapper) {
+          await wrapper.driver.executeScript(`arguments[0].select();`, wrapper._webElement);
+        });
+        await this.pressKeys(this.Keys.BACK_SPACE);
+      } else {
+        const selectionKey = this.Keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+        await this.pressKeys([selectionKey, 'a']);
+        await this.pressKeys(this.Keys.NULL); // Release modifier keys
+        await this.pressKeys(this.Keys.BACK_SPACE); // Delete all content
+      }
     }
   }
 
@@ -187,17 +288,18 @@ export class WebElementWrapper {
    * @param {charByChar: boolean} options
    * @return {Promise<void>}
    */
-  public async type(
-    value: string | string[],
-    options: TypeOptions = { charByChar: false }
-  ): Promise<void> {
+  public async type(value: string | string[], options: TypeOptions = { charByChar: false }) {
     if (options.charByChar) {
       for (const char of value) {
-        await this._webElement.sendKeys(char);
-        await delay(100);
+        await this.retryCall(async function type(wrapper) {
+          await wrapper._webElement.sendKeys(char);
+          await delay(100);
+        });
       }
     } else {
-      await this._webElement.sendKeys(...value);
+      await this.retryCall(async function type(wrapper) {
+        await wrapper._webElement.sendKeys(...value);
+      });
     }
   }
 
@@ -211,12 +313,14 @@ export class WebElementWrapper {
   public async pressKeys<T extends IKey>(keys: T | T[]): Promise<void>;
   public async pressKeys<T extends string>(keys: T | T[]): Promise<void>;
   public async pressKeys(keys: string): Promise<void> {
-    if (Array.isArray(keys)) {
-      const chord = this.Keys.chord(keys);
-      await this._webElement.sendKeys(chord);
-    } else {
-      await this._webElement.sendKeys(keys);
-    }
+    await this.retryCall(async function pressKeys(wrapper) {
+      if (Array.isArray(keys)) {
+        const chord = wrapper.Keys.chord(keys);
+        await wrapper._webElement.sendKeys(chord);
+      } else {
+        await wrapper._webElement.sendKeys(keys);
+      }
+    });
   }
 
   /**
@@ -230,34 +334,10 @@ export class WebElementWrapper {
    *
    * @param {string} name
    */
-  public async getAttribute(name: string): Promise<string> {
-    return await this._webElement.getAttribute(name);
-  }
-
-  /**
-   * Retrieves the current value of the given attribute of this element. Will return the current
-   * value, even if it has been modified after the page has been loaded. More exactly, this method
-   * will return the value of the given attribute, unless that attribute is not present, in which
-   * case the value of the property with the same name is returned. If neither value is set, null
-   * is returned (for example, the "value" property of a textarea element). The "style" attribute
-   * is converted as best can be to a text representation with a trailing semi-colon.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getAttribute
-   *
-   * @param {string} name
-   * @return {Promise<any>}
-   */
-  public async getProperty(name: string): Promise<string | boolean> {
-    const property = await this._webElement.getAttribute(name);
-
-    // leadfoot compatibility convertion
-    if (property == null) {
-      return false;
-    }
-    if (['true', 'false'].includes(property)) {
-      return property === 'true';
-    } else {
-      return property;
-    }
+  public async getAttribute(name: string) {
+    return await this.retryCall(async function getAttribute(wrapper) {
+      return await wrapper._webElement.getAttribute(name);
+    });
   }
 
   /**
@@ -269,8 +349,10 @@ export class WebElementWrapper {
    * @param {string} propertyName
    * @return {Promise<string>}
    */
-  public async getComputedStyle(propertyName: string): Promise<string> {
-    return await this._webElement.getCssValue(propertyName);
+  public async getComputedStyle(propertyName: string) {
+    return await this.retryCall(async function getComputedStyle(wrapper) {
+      return await wrapper._webElement.getCssValue(propertyName);
+    });
   }
 
   /**
@@ -280,8 +362,10 @@ export class WebElementWrapper {
    *
    * @return {Promise<string>}
    */
-  public async getVisibleText(): Promise<string> {
-    return await this._webElement.getText();
+  public async getVisibleText() {
+    return await this.retryCall(async function getVisibleText(wrapper) {
+      return await wrapper._webElement.getText();
+    });
   }
 
   /**
@@ -293,7 +377,9 @@ export class WebElementWrapper {
   public async getTagName<T extends keyof HTMLElementTagNameMap>(): Promise<T>;
   public async getTagName<T extends string>(): Promise<T>;
   public async getTagName(): Promise<string> {
-    return await this._webElement.getTagName();
+    return await this.retryCall(async function getTagName(wrapper) {
+      return await wrapper._webElement.getTagName();
+    });
   }
 
   /**
@@ -304,7 +390,9 @@ export class WebElementWrapper {
    * @return {Promise<{height: number, width: number, x: number, y: number}>}
    */
   public async getPosition(): Promise<{ height: number; width: number; x: number; y: number }> {
-    return await (this._webElement as any).getRect();
+    return await this.retryCall(async function getPosition(wrapper) {
+      return await (wrapper._webElement as any).getRect();
+    });
   }
 
   /**
@@ -315,29 +403,85 @@ export class WebElementWrapper {
    * @return {Promise<{height: number, width: number, x: number, y: number}>}
    */
   public async getSize(): Promise<{ height: number; width: number; x: number; y: number }> {
-    return await (this._webElement as any).getRect();
+    return await this.retryCall(async function getSize(wrapper) {
+      return await (wrapper._webElement as any).getRect();
+    });
   }
 
   /**
-   * Moves the remote environment’s mouse cursor to the current element
+   * Moves the remote environment’s mouse cursor to the current element with optional offset
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#move
-   *
+   * @param { xOffset: 0, yOffset: 0 } options
    * @return {Promise<void>}
    */
-  public async moveMouseTo(): Promise<void> {
-    await this.scrollIntoViewIfNecessary();
-    if (this.browserType === Browsers.Firefox) {
-      const actions = (this.driver as any).actions();
-      await actions.move({ x: 0, y: 0 }).perform();
-      await actions.move({ x: 10, y: 10, origin: this._webElement }).perform();
-    } else {
-      const mouse = (this.driver.actions() as any).mouse();
-      const actions = (this.driver as any).actions({ bridge: true });
-      await actions
-        .pause(mouse)
-        .move({ origin: this._webElement })
+  public async moveMouseTo(options = { xOffset: 0, yOffset: 0 }) {
+    await this.retryCall(async function moveMouseTo(wrapper) {
+      await wrapper.scrollIntoViewIfNecessary();
+      if (wrapper.isW3CEnabled) {
+        await wrapper
+          .getActions()
+          .move({ x: 0, y: 0 })
+          .perform();
+        await wrapper
+          .getActions()
+          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
+          .perform();
+      } else {
+        await wrapper
+          .getActions()
+          .pause(wrapper.getActions().mouse)
+          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
+          .perform();
+      }
+    });
+  }
+
+  /**
+   * Inserts an action for moving the mouse to element center, unless optional offset is provided.
+   * Then adds an action for left-click (down/up) with the mouse.
+   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#click
+   *
+   * @param { xOffset: 0, yOffset: 0 } options Optional
+   * @return {Promise<void>}
+   */
+  public async clickMouseButton(options = { xOffset: 0, yOffset: 0 }): Promise<void> {
+    await this.retryCall(async function clickMouseButton(wrapper) {
+      await wrapper.scrollIntoViewIfNecessary();
+      if (wrapper.isW3CEnabled) {
+        await wrapper
+          .getActions()
+          .move({ x: 0, y: 0 })
+          .perform();
+        await wrapper
+          .getActions()
+          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
+          .click()
+          .perform();
+      } else {
+        await wrapper
+          .getActions()
+          .pause(wrapper.getActions().mouse)
+          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
+          .click()
+          .perform();
+      }
+    });
+  }
+
+  /**
+   * Inserts action for performing a double left-click with the mouse.
+   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#doubleClick
+   * @param {WebElementWrapper} element
+   * @return {Promise<void>}
+   */
+  public async doubleClick(): Promise<void> {
+    await this.retryCall(async function clickMouseButton(wrapper) {
+      await wrapper.scrollIntoViewIfNecessary();
+      await wrapper
+        .getActions()
+        .doubleClick(wrapper._webElement)
         .perform();
-    }
+    });
   }
 
   /**
@@ -347,8 +491,13 @@ export class WebElementWrapper {
    * @param {string} selector
    * @return {Promise<WebElementWrapper>}
    */
-  public async findByCssSelector(selector: string): Promise<WebElementWrapper> {
-    return this._wrap(await this._webElement.findElement(this.By.css(selector)));
+  public async findByCssSelector(selector: string) {
+    return await this.retryCall(async function findByCssSelector(wrapper) {
+      return wrapper._wrap(
+        await wrapper._webElement.findElement(wrapper.By.css(selector)),
+        wrapper.By.css(selector)
+      );
+    });
   }
 
   /**
@@ -360,12 +509,14 @@ export class WebElementWrapper {
    * @return {Promise<WebElementWrapper[]>}
    */
   public async findAllByCssSelector(selector: string, timeout?: number) {
-    return this._wrapAll(
-      await this._findWithCustomTimeout(
-        async () => await this._webElement.findElements(this.By.css(selector)),
-        timeout
-      )
-    );
+    return await this.retryCall(async function findAllByCssSelector(wrapper) {
+      return wrapper._wrapAll(
+        await wrapper._findWithCustomTimeout(
+          async () => await wrapper._webElement.findElements(wrapper.By.css(selector)),
+          timeout
+        )
+      );
+    });
   }
 
   /**
@@ -375,8 +526,13 @@ export class WebElementWrapper {
    * @param {string} className
    * @return {Promise<WebElementWrapper>}
    */
-  public async findByClassName(className: string): Promise<WebElementWrapper> {
-    return this._wrap(await this._webElement.findElement(this.By.className(className)));
+  public async findByClassName(className: string) {
+    return await this.retryCall(async function findByClassName(wrapper) {
+      return wrapper._wrap(
+        await wrapper._webElement.findElement(wrapper.By.className(className)),
+        wrapper.By.className(className)
+      );
+    });
   }
 
   /**
@@ -387,16 +543,15 @@ export class WebElementWrapper {
    * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  public async findAllByClassName(
-    className: string,
-    timeout?: number
-  ): Promise<WebElementWrapper[]> {
-    return this._wrapAll(
-      await this._findWithCustomTimeout(
-        async () => await this._webElement.findElements(this.By.className(className)),
-        timeout
-      )
-    );
+  public async findAllByClassName(className: string, timeout?: number) {
+    return await this.retryCall(async function findAllByClassName(wrapper) {
+      return wrapper._wrapAll(
+        await wrapper._findWithCustomTimeout(
+          async () => await wrapper._webElement.findElements(wrapper.By.className(className)),
+          timeout
+        )
+      );
+    });
   }
 
   /**
@@ -411,7 +566,12 @@ export class WebElementWrapper {
   ): Promise<WebElementWrapper>;
   public async findByTagName<T extends string>(tagName: T): Promise<WebElementWrapper>;
   public async findByTagName(tagName: string): Promise<WebElementWrapper> {
-    return this._wrap(await this._webElement.findElement(this.By.tagName(tagName)));
+    return await this.retryCall(async function findByTagName(wrapper) {
+      return wrapper._wrap(
+        await wrapper._webElement.findElement(wrapper.By.tagName(tagName)),
+        wrapper.By.tagName(tagName)
+      );
+    });
   }
 
   /**
@@ -431,12 +591,14 @@ export class WebElementWrapper {
     timeout?: number
   ): Promise<WebElementWrapper[]>;
   public async findAllByTagName(tagName: string, timeout?: number): Promise<WebElementWrapper[]> {
-    return this._wrapAll(
-      await this._findWithCustomTimeout(
-        async () => await this._webElement.findElements(this.By.tagName(tagName)),
-        timeout
-      )
-    );
+    return await this.retryCall(async function findAllByTagName(wrapper) {
+      return wrapper._wrapAll(
+        await wrapper._findWithCustomTimeout(
+          async () => await wrapper._webElement.findElements(wrapper.By.tagName(tagName)),
+          timeout
+        )
+      );
+    });
   }
 
   /**
@@ -446,8 +608,13 @@ export class WebElementWrapper {
    * @param {string} selector
    * @return {Promise<WebElementWrapper>}
    */
-  async findByXpath(selector: string): Promise<WebElementWrapper> {
-    return this._wrap(await this._webElement.findElement(this.By.xpath(selector)));
+  async findByXpath(selector: string) {
+    return await this.retryCall(async function findByXpath(wrapper) {
+      return wrapper._wrap(
+        await wrapper._webElement.findElement(wrapper.By.xpath(selector)),
+        wrapper.By.xpath(selector)
+      );
+    });
   }
 
   /**
@@ -458,41 +625,52 @@ export class WebElementWrapper {
    * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  public async findAllByXpath(selector: string, timeout?: number): Promise<WebElementWrapper[]> {
-    return this._wrapAll(
-      await this._findWithCustomTimeout(
-        async () => await this._webElement.findElements(this.By.xpath(selector)),
-        timeout
-      )
-    );
+  public async findAllByXpath(selector: string, timeout?: number) {
+    return await this.retryCall(async function findAllByXpath(wrapper) {
+      return wrapper._wrapAll(
+        await wrapper._findWithCustomTimeout(
+          async () => await wrapper._webElement.findElements(wrapper.By.xpath(selector)),
+          timeout
+        )
+      );
+    });
   }
 
   /**
    * Gets the first element inside this element matching the given partial link text.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
    *
-   * @param {string} selector
+   * @param {string} linkText
    * @return {Promise<WebElementWrapper[]>}
    */
-  public async findByPartialLinkText(linkText: string): Promise<WebElementWrapper> {
-    return await this._wrap(await this._webElement.findElement(this.By.partialLinkText(linkText)));
+  public async findByPartialLinkText(linkText: string) {
+    return await this.retryCall(async function findByPartialLinkText(wrapper) {
+      return wrapper._wrap(
+        await wrapper._webElement.findElement(wrapper.By.partialLinkText(linkText)),
+        wrapper.By.partialLinkText(linkText)
+      );
+    });
   }
 
   /**
    * Gets all elements inside this element matching the given partial link text.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
    *
-   * @param {string} selector
+   * @param {string} linkText
    * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
   public async findAllByPartialLinkText(linkText: string, timeout?: number) {
-    return this._wrapAll(
-      await this._findWithCustomTimeout(
-        async () => await this._webElement.findElements(this.By.partialLinkText(linkText)),
-        timeout
-      )
-    );
+    return await this.retryCall(async function findAllByPartialLinkText(
+      wrapper: WebElementWrapper
+    ) {
+      return wrapper._wrapAll(
+        await wrapper._findWithCustomTimeout(
+          async () => await wrapper._webElement.findElements(wrapper.By.partialLinkText(linkText)),
+          timeout
+        )
+      );
+    });
   }
 
   /**
@@ -532,24 +710,28 @@ export class WebElementWrapper {
    * Gets element innerHTML and wrap it up with cheerio
    *
    * @nonstandard
-   * @return {Promise<void>}
+   * @return {Promise<CustomCheerioStatic>}
    */
-  public async parseDomContent(): Promise<any> {
-    const htmlContent: any = await this.getProperty('innerHTML');
+  public async parseDomContent(): Promise<CustomCheerioStatic> {
+    const htmlContent: any = await this.getAttribute('innerHTML');
     const $: any = cheerio.load(htmlContent, {
       normalizeWhitespace: true,
       xmlMode: true,
     });
 
-    $.findTestSubjects = function testSubjects(selector: string) {
+    $.findTestSubjects = function findTestSubjects(this: CustomCheerioStatic, selector: string) {
       return this(testSubjSelector(selector));
     };
 
-    $.fn.findTestSubjects = function testSubjects(selector: string) {
+    $.fn.findTestSubjects = function findTestSubjects(this: CustomCheerio, selector: string) {
       return this.find(testSubjSelector(selector));
     };
 
-    $.findTestSubject = $.fn.findTestSubject = function testSubjects(selector: string) {
+    $.findTestSubject = function findTestSubject(this: CustomCheerioStatic, selector: string) {
+      return this.findTestSubjects(selector).first();
+    };
+
+    $.fn.findTestSubject = function findTestSubject(this: CustomCheerio, selector: string) {
       return this.findTestSubjects(selector).first();
     };
 
@@ -565,7 +747,22 @@ export class WebElementWrapper {
     const screenshot = await this.driver.takeScreenshot();
     const buffer = Buffer.from(screenshot.toString(), 'base64');
     const { width, height, x, y } = await this.getPosition();
+    const windowWidth: number = await this.driver.executeScript(
+      'return window.document.body.clientWidth'
+    );
     const src = PNG.sync.read(buffer);
+    if (src.width > windowWidth) {
+      // on linux size of screenshot is double size of screen, scale it down
+      src.width = src.width / 2;
+      src.height = src.height / 2;
+      let h = false;
+      let v = false;
+      src.data = src.data.filter((d: any, i: number) => {
+        h = i % 4 ? h : !h;
+        v = i % (src.width * 2 * 4) ? v : !v;
+        return h && v;
+      });
+    }
     const dst = new PNG({ width, height });
     PNG.bitblt(src, dst, x, y, width, height, 0, 0);
     return PNG.sync.write(dst);

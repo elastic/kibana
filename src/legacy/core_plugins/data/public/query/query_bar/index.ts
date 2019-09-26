@@ -17,9 +17,11 @@
  * under the License.
  */
 
-export { QueryBar, QueryBarInput } from './components';
+export { QueryBarTopRow } from './components/query_bar_top_row';
+export { QueryBarInput } from './components/query_bar_input';
+
 export { fromUser } from './lib/from_user';
 export { toUser } from './lib/to_user';
+export { getQueryLog } from './lib/get_query_log';
 
-// @ts-ignore
-export { setupDirective } from './directive';
+export { Query } from '../../../../../../plugins/data/public';

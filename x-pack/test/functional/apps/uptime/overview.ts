@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default ({ getPageObjects }: KibanaFunctionalTestDefaultProviders) => {
+export default ({ getPageObjects }: FtrProviderContext) => {
   // TODO: add UI functional tests
   const pageObjects = getPageObjects(['uptime']);
-  describe('overview page', () => {
+
+  // FLAKY: https://github.com/elastic/kibana/issues/35773
+  describe.skip('overview page', function() {
+    this.tags(['skipFirefox']);
     const DEFAULT_DATE_START = '2019-01-28 12:40:08.078';
     const DEFAULT_DATE_END = '2019-01-29 12:40:08.078';
     it('loads and displays uptime data based on date range', async () => {

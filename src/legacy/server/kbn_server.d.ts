@@ -18,25 +18,26 @@
  */
 
 import { ResponseObject, Server } from 'hapi';
+import { UnwrapPromise } from '@kbn/utility-types';
 
+import { SavedObjectsClientProviderOptions } from 'src/core/server';
 import {
-  ElasticsearchServiceSetup,
   ConfigService,
+  ElasticsearchServiceSetup,
   LoggerFactory,
-  InternalCoreSetup,
-  InternalCoreStart,
+  SavedObjectsClientContract,
+  SavedObjectsService,
 } from '../../core/server';
+
+import { LegacyServiceSetupDeps, LegacyServiceStartDeps } from '../../core/server/';
+// Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectsManagement } from '../../core/server/saved_objects/management';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 
 import { CapabilitiesModifier } from './capabilities';
 import { IndexPatternsServiceFactory } from './index_patterns';
-import {
-  SavedObjectsClient,
-  SavedObjectsService,
-  SavedObjectsSchema,
-  SavedObjectsManagement,
-} from './saved_objects';
 import { Capabilities } from '../../core/public';
 
 export interface KibanaConfig {
@@ -70,11 +71,16 @@ declare module 'hapi' {
       scopedTutorialContextFactory: (...args: any[]) => any
     ) => void;
     savedObjectsManagement(): SavedObjectsManagement;
+    getInjectedUiAppVars: (pluginName: string) => { [key: string]: any };
     getUiNavLinks(): Array<{ _id: string }>;
+    addMemoizedFactoryToRequest: (
+      name: string,
+      factoryFn: (request: Request) => Record<string, any>
+    ) => void;
   }
 
   interface Request {
-    getSavedObjectsClient(): SavedObjectsClient;
+    getSavedObjectsClient(options?: SavedObjectsClientProviderOptions): SavedObjectsClientContract;
     getBasePath(): string;
     getUiSettingsService(): any;
     getCapabilities(): Promise<Capabilities>;
@@ -86,25 +92,18 @@ declare module 'hapi' {
 }
 
 type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promise<any> | void;
-type Unpromise<T> = T extends Promise<infer U> ? U : T;
+
 // eslint-disable-next-line import/no-default-export
 export default class KbnServer {
   public readonly newPlatform: {
     coreContext: {
       logger: LoggerFactory;
     };
-    setup: {
-      core: InternalCoreSetup;
-      plugins: Record<string, unknown>;
-    };
-    start: {
-      core: InternalCoreStart;
-      plugins: Record<string, unknown>;
-    };
+    setup: LegacyServiceSetupDeps;
+    start: LegacyServiceStartDeps;
     stop: null;
     params: {
-      serverOptions: ElasticsearchServiceSetup;
-      handledConfigPaths: Unpromise<ReturnType<ConfigService['getUsedPaths']>>;
+      handledConfigPaths: UnwrapPromise<ReturnType<ConfigService['getUsedPaths']>>;
     };
   };
   public server: Server;
@@ -126,4 +125,4 @@ export { Server, Request, ResponseToolkit } from 'hapi';
 
 // Re-export commonly accessed api types.
 export { IndexPatternsService } from './index_patterns';
-export { SavedObject, SavedObjectsClient, SavedObjectsService } from './saved_objects';
+export { SavedObjectsService, SavedObjectsClient } from 'src/core/server';

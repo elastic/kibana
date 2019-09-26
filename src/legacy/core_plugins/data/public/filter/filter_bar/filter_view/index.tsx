@@ -28,7 +28,7 @@ interface Props {
   [propName: string]: any;
 }
 
-export const FilterView: SFC<Props> = ({ filter, ...rest }: Props) => {
+export const FilterView: SFC<Props> = ({ filter, iconOnClick, onClick, ...rest }: Props) => {
   let title = `Filter: ${getFilterDisplayText(filter)}. ${i18n.translate(
     'data.filter.filterBar.moreFilterActionsMessage',
     {
@@ -51,16 +51,17 @@ export const FilterView: SFC<Props> = ({ filter, ...rest }: Props) => {
     <EuiBadge
       title={title}
       iconType="cross"
-      // @ts-ignore
       iconSide="right"
       closeButtonProps={{
         // Removing tab focus on close button because the same option can be optained through the context menu
         // Also, we may want to add a `DEL` keyboard press functionality
-        tabIndex: '-1',
+        tabIndex: -1,
       }}
+      iconOnClick={iconOnClick}
       iconOnClickAriaLabel={i18n.translate('data.filter.filterBar.filterItemBadgeIconAriaLabel', {
         defaultMessage: 'Delete',
       })}
+      onClick={onClick}
       onClickAriaLabel={i18n.translate('data.filter.filterBar.filterItemBadgeAriaLabel', {
         defaultMessage: 'Filter actions',
       })}

@@ -68,10 +68,14 @@ export const CleanClientModulesOnDLLTask = {
 
     // Get dll entries filtering out the ones
     // from any whitelisted module
-    const dllEntries = await getDllEntries(dllManifestPath, whiteListedModules);
+    const dllEntries = await getDllEntries(dllManifestPath, whiteListedModules, baseDir);
 
     for (const relativeEntryPath of dllEntries) {
       const entryPath = `${baseDir}/${relativeEntryPath}`;
+
+      if (entryPath.endsWith('package.json')) {
+        continue;
+      }
 
       // Clean a module included into the dll
       // and then write a blank file for each

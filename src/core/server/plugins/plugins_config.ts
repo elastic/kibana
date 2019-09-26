@@ -45,12 +45,12 @@ export class PluginsConfig {
   /**
    * Defines directories that we should scan for the plugin subdirectories.
    */
-  public readonly pluginSearchPaths: ReadonlyArray<string>;
+  public readonly pluginSearchPaths: readonly string[];
 
   /**
    * Defines directories where an additional plugin exists.
    */
-  public readonly additionalPluginPaths: ReadonlyArray<string>;
+  public readonly additionalPluginPaths: readonly string[];
 
   constructor(rawConfig: PluginsConfigType, env: Env) {
     this.initialize = rawConfig.initialize;

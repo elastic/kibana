@@ -28,10 +28,11 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { fatalError, toastNotifications } from 'ui/notify';
 import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
-import { castEsToKbnFieldTypeName } from '../../../../../../../legacy/utils';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { isNumeric } from 'ui/utils/numeric';
 import { canViewInApp } from './lib/in_app_url';
+
+import { castEsToKbnFieldTypeName } from '../../../../../../../plugins/data/public';
 
 import { getViewBreadcrumbs } from './breadcrumbs';
 
@@ -139,7 +140,7 @@ uiModules.get('apps/management', ['monospaced.elastic'])
           }
         };
 
-        const { edit: canEdit, delete: canDelete } = uiCapabilities.savedObjectsManagement[service.type];
+        const { edit: canEdit, delete: canDelete } = uiCapabilities.savedObjectsManagement;
         $scope.canEdit = canEdit;
         $scope.canDelete = canDelete;
         $scope.canViewInApp = canViewInApp(uiCapabilities, service.type);

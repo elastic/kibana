@@ -1,0 +1,207 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FeatureTooltip (multi) should not show close button / should show count 1`] = `
+<Fragment>
+  <FeatureProperties
+    featureId="feature1"
+    layerId="layer1"
+    loadFeatureProperties={[Function]}
+    onCloseTooltip={[Function]}
+    showFilterButtons={false}
+  />
+  <EuiHorizontalRule
+    margin="xs"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem>
+      <EuiTextColor
+        color="subdued"
+      >
+        <FormattedMessage
+          defaultMessage="{pageNumber} of {total} features"
+          id="xpack.maps.tooltip.pageNumerText"
+          values={
+            Object {
+              "pageNumber": 1,
+              "total": 3,
+            }
+          }
+        />
+      </EuiTextColor>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    />
+  </EuiFlexGroup>
+</Fragment>
+`;
+
+exports[`FeatureTooltip (multi) should show close button / should show count / should show arrows / should show layer filter 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <EuiFlexItem />
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonIcon
+        aria-label="Close tooltip"
+        data-test-subj="mapTooltipCloseButton"
+        iconType="cross"
+        onClick={[Function]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <FeatureProperties
+    featureId="feature1"
+    layerId="layer1"
+    loadFeatureProperties={[Function]}
+    onCloseTooltip={[Function]}
+    showFilterButtons={false}
+  />
+  <EuiHorizontalRule
+    margin="xs"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem>
+      <EuiTextColor
+        color="subdued"
+      >
+        <FormattedMessage
+          defaultMessage="{pageNumber} of {total} features"
+          id="xpack.maps.tooltip.pageNumerText"
+          values={
+            Object {
+              "pageNumber": 1,
+              "total": 3,
+            }
+          }
+        />
+      </EuiTextColor>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiPagination
+        activePage={0}
+        compressed={true}
+        onPageClick={[Function]}
+        pageCount={3}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;
+
+exports[`FeatureTooltip (multi) should show close button / should show count 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <EuiFlexItem />
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonIcon
+        aria-label="Close tooltip"
+        data-test-subj="mapTooltipCloseButton"
+        iconType="cross"
+        onClick={[Function]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <FeatureProperties
+    featureId="feature1"
+    layerId="layer1"
+    loadFeatureProperties={[Function]}
+    onCloseTooltip={[Function]}
+    showFilterButtons={false}
+  />
+  <EuiHorizontalRule
+    margin="xs"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem>
+      <EuiTextColor
+        color="subdued"
+      >
+        <FormattedMessage
+          defaultMessage="{pageNumber} of {total} features"
+          id="xpack.maps.tooltip.pageNumerText"
+          values={
+            Object {
+              "pageNumber": 1,
+              "total": 3,
+            }
+          }
+        />
+      </EuiTextColor>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiPagination
+        activePage={0}
+        compressed={true}
+        onPageClick={[Function]}
+        pageCount={3}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;
+
+exports[`FeatureTooltip (single) should not show close button 1`] = `
+<Fragment>
+  <FeatureProperties
+    featureId="feature1"
+    layerId="layer1"
+    loadFeatureProperties={[Function]}
+    onCloseTooltip={[Function]}
+    showFilterButtons={false}
+  />
+</Fragment>
+`;
+
+exports[`FeatureTooltip (single) should show close button 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <EuiFlexItem />
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonIcon
+        aria-label="Close tooltip"
+        data-test-subj="mapTooltipCloseButton"
+        iconType="cross"
+        onClick={[Function]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <FeatureProperties
+    featureId="feature1"
+    layerId="layer1"
+    loadFeatureProperties={[Function]}
+    onCloseTooltip={[Function]}
+    showFilterButtons={false}
+  />
+</Fragment>
+`;

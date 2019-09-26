@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Table restricts which saved objects can be deleted based on type 1`] = `
+exports[`Table prevents saved objects from being deleted 1`] = `
 <Fragment>
   <EuiSearchBar
     box={
@@ -29,14 +29,10 @@ exports[`Table restricts which saved objects can be deleted based on type 1`] = 
         <EuiButton
           color="danger"
           data-test-subj="savedObjectsManagementDelete"
-          fill={false}
-          iconSide="left"
           iconType="trash"
           isDisabled={true}
           onClick={[Function]}
-          size="m"
-          title="Unable to delete search, index-pattern"
-          type="button"
+          title="Unable to delete saved objects"
         >
           <FormattedMessage
             defaultMessage="Delete"
@@ -48,14 +44,10 @@ exports[`Table restricts which saved objects can be deleted based on type 1`] = 
           anchorPosition="downCenter"
           button={
             <EuiButton
-              color="primary"
-              fill={false}
               iconSide="right"
               iconType="arrowDown"
               isDisabled={false}
               onClick={[Function]}
-              size="m"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Export"
@@ -65,6 +57,7 @@ exports[`Table restricts which saved objects can be deleted based on type 1`] = 
             </EuiButton>
           }
           closePopover={[Function]}
+          display="inlineBlock"
           hasArrow={true}
           isOpen={false}
           ownFocus={false}
@@ -72,6 +65,7 @@ exports[`Table restricts which saved objects can be deleted based on type 1`] = 
         >
           <EuiFormRow
             describedByIds={Array []}
+            display="row"
             fullWidth={false}
             hasEmptyLabelSpace={false}
             label={
@@ -98,18 +92,15 @@ exports[`Table restricts which saved objects can be deleted based on type 1`] = 
           </EuiFormRow>
           <EuiFormRow
             describedByIds={Array []}
+            display="row"
             fullWidth={false}
             hasEmptyLabelSpace={false}
             labelType="label"
           >
             <EuiButton
-              color="primary"
               fill={true}
-              iconSide="left"
               iconType="exportAction"
               onClick={[Function]}
-              size="m"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Export"
@@ -244,14 +235,9 @@ exports[`Table should render normally 1`] = `
         <EuiButton
           color="danger"
           data-test-subj="savedObjectsManagementDelete"
-          fill={false}
-          iconSide="left"
           iconType="trash"
-          isDisabled={true}
+          isDisabled={false}
           onClick={[Function]}
-          size="m"
-          title="Unable to delete index-pattern"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Delete"
@@ -263,14 +249,10 @@ exports[`Table should render normally 1`] = `
           anchorPosition="downCenter"
           button={
             <EuiButton
-              color="primary"
-              fill={false}
               iconSide="right"
               iconType="arrowDown"
               isDisabled={false}
               onClick={[Function]}
-              size="m"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Export"
@@ -280,6 +262,7 @@ exports[`Table should render normally 1`] = `
             </EuiButton>
           }
           closePopover={[Function]}
+          display="inlineBlock"
           hasArrow={true}
           isOpen={false}
           ownFocus={false}
@@ -287,6 +270,7 @@ exports[`Table should render normally 1`] = `
         >
           <EuiFormRow
             describedByIds={Array []}
+            display="row"
             fullWidth={false}
             hasEmptyLabelSpace={false}
             label={
@@ -313,18 +297,15 @@ exports[`Table should render normally 1`] = `
           </EuiFormRow>
           <EuiFormRow
             describedByIds={Array []}
+            display="row"
             fullWidth={false}
             hasEmptyLabelSpace={false}
             labelType="label"
           >
             <EuiButton
-              color="primary"
               fill={true}
-              iconSide="left"
               iconType="exportAction"
               onClick={[Function]}
-              size="m"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Export"

@@ -1,49 +1,93 @@
 [role="xpack"]
-[[canvas-workpad]]
-=== Using the workpad
+[[create-canvas-workpad]]
+== Create a workpad
 
-Now that you have a workpad with sample data that you can mess with, let’s mess with it. 
-We’ll start out by making a few stylistic changes. 
+A Canvas _workpad_ provides you with a workspace where you can build presentations of your live data.
 
-. Click the gauge chart in the top left of the workpad (fun fact, these are actually pie charts). 
-Try clicking on the small red slice. If you click the number, you'll notice that
-you’ve actually selected a number element, not the gauge itself. 
-+ 
-This element is now selected. Off to the right, you'll see that the side bar has changed. 
-This is where you can make changes to the element.
+To create a workpad, you can:
+
+* <<blank-canvas-workpad,Build fully customizable presentations of your own data>>
+
+* <<canvas-template-workpad,Choose from a set of preconfigured workpad templates>>
+
+* <<import-canvas-workpad,Import a workpad that someone else has already started>>
+
+* <<sample-data-workpad,Gather inspiration from the {kib} sample data workpads>>
+
+[float]
+[[blank-canvas-workpad]]
+=== Start with a blank page
+
+To use the background colors, images, and data of your choice, start with a blank workpad. 
+
+. Open *Canvas*.
+
+. On the *Canvas workpads* page, click *Create workpad*.
+
+. Add a *Name* to your workpad.
+
+. In the *Width* and *Height* fields, specify the size. 
+
+. Select the layout. 
++
+For example, click *720p* for a traditional presentation layout.
+
+. Click the *Background color* picker, then select the background color for your workpad.
 +
 [role="screenshot"]
-image::images/canvas_workpad_edit_style.png[]
+image::images/canvas-background-color-picker.gif[Canvas color picker]
 
-. Try changing the color palette. Easy right? Click the Back button in your 
-browser to undo your change.
+[float]
+[[canvas-template-workpad]]
+=== Create a workpad from a template
 
-. Try dragging the chart around the page. Grab the resize handles to make 
-the chart bigger and smaller.
+If you're unsure about where to start, you can use one of the preconfigured templates that come with Canvas.
 
-. Now click somewhere off of the element, but not on another element, 
-to deselect it. 
+. Open *Canvas*.
+
+. On the *Canvas workpads* page, select *Templates*.
+
+. Click the preconfigured template that you want to use.
+
+. Add your own *Name* to the workpad.
+
+[float]
+[[import-canvas-workpad]]
+=== Import an existing workpad
+
+When you want to use a workpad that someone else has already started, import the JSON file into Canvas.
+
+. Open *Canvas*.
+
+. On the *Canvas workpads* page, click and drag the file to the *Import workpad JSON file* field.
+
+[float]
+[[sample-data-workpad]]
+=== Use a sample data workpad
+
+Each of the sample data sets comes with a Canvas workpad that you can use for your own workpad inspiration.
+
+. Add a {kibana-ref}/add-sample-data.html[sample data set]. 
+
+. On the *Add Data to Kibana* page, click the *View data* dropdown list, then select *Canvas*.
 +
-You will notice the sidebar changing again. You now have 
-access to the page and workpad-level settings. Feel free to change the page 
-background color or rename your workpad.
+Need some more workpad inspiration? Check out the link:https://www.elastic.co/blog/[Elastic Blog]. 
 
-Speaking of pages, Canvas workpads can have multiple pages.
+[float]
+[[apply-workpad-styles]]
+== Apply a set of styles to the entire workpad
 
-. Click the arrow to the right of the *Page 1 of 2* text in the toolbar at the bottom
-of the page. You'll see a whole new view of the the eCommerce data.
-. Click the *Page 2 of 2* text to see a live preview of all of the pages in your 
-workpad.
-. Click the (+) button to create a new, blank page.
-. Click the *Add element* button in the top right hand corner of the page.
-. Add an *Area Chart.*
+To make your workpad look exactly the way you want, use the editor on the right to apply CSS overrides.
+
+. Expand *Global CSS overrides*.
+
+. Enter the CSS. For example, to change the background on every page, enter:
 +
-[role="screenshot"]
-image::images/canvas_workpad_3_page.png[]
+[source,js]
+--------------------------------------------------
+.canvasPage {
+background-color: #3990e6;
+}
+--------------------------------------------------
 
-You now have a three-page workpad, and a new element connected 
-to some demo data.  Your next step is to wire your new element 
-up to some real data; you can click on the *Data* tab in the right sidebar menu 
-and click "Change your data source" to start working with your Elasticsearch data.
-
-
+. Click *Apply stylesheet*.

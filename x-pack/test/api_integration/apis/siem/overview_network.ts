@@ -5,11 +5,11 @@
  */
 
 import expect from '@kbn/expect';
-import { overviewNetworkQuery } from '../../../../plugins/siem/public/containers/overview/overview_network/index.gql_query';
-import { GetOverviewNetworkQuery } from '../../../../plugins/siem/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { overviewNetworkQuery } from '../../../../legacy/plugins/siem/public/containers/overview/overview_network/index.gql_query';
+import { GetOverviewNetworkQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-const overviewNetworkTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
   describe('Overview Network', () => {
@@ -21,11 +21,15 @@ const overviewNetworkTests: KbnTestProvider = ({ getService }) => {
       const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
 
       const expectedResult = {
-        packetbeatFlow: 0,
-        packetbeatDNS: 0,
+        auditbeatSocket: 0,
+        filebeatCisco: 0,
+        filebeatNetflow: 1273,
+        filebeatPanw: 0,
         filebeatSuricata: 4547,
         filebeatZeek: 0,
-        auditbeatSocket: 0,
+        packetbeatDNS: 0,
+        packetbeatFlow: 0,
+        packetbeatTLS: 0,
         __typename: 'OverviewNetworkData',
       };
 
@@ -41,6 +45,7 @@ const overviewNetworkTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -57,11 +62,15 @@ const overviewNetworkTests: KbnTestProvider = ({ getService }) => {
       const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
       const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
       const expectedResult = {
-        packetbeatFlow: 0,
-        packetbeatDNS: 0,
+        auditbeatSocket: 0,
+        filebeatCisco: 0,
+        filebeatNetflow: 1273,
+        filebeatPanw: 0,
         filebeatSuricata: 4547,
         filebeatZeek: 0,
-        auditbeatSocket: 0,
+        packetbeatDNS: 0,
+        packetbeatFlow: 0,
+        packetbeatTLS: 0,
         __typename: 'OverviewNetworkData',
       };
 
@@ -77,6 +86,7 @@ const overviewNetworkTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -93,11 +103,15 @@ const overviewNetworkTests: KbnTestProvider = ({ getService }) => {
       const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
       const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
       const expectedResult = {
-        packetbeatFlow: 0,
-        packetbeatDNS: 0,
+        auditbeatSocket: 0,
+        filebeatCisco: 0,
+        filebeatNetflow: 1273,
+        filebeatPanw: 0,
         filebeatSuricata: 4547,
         filebeatZeek: 0,
-        auditbeatSocket: 0,
+        packetbeatDNS: 0,
+        packetbeatFlow: 0,
+        packetbeatTLS: 0,
         __typename: 'OverviewNetworkData',
       };
 
@@ -113,6 +127,7 @@ const overviewNetworkTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -122,7 +137,4 @@ const overviewNetworkTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default overviewNetworkTests;
+}

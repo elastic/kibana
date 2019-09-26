@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { VislibLibLayoutLayoutProvider } from './layout';
+export { Layout } from './layout';

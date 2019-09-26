@@ -73,14 +73,14 @@ import _ from 'lodash';
 import angular from 'angular';
 import { buildEsQuery, getEsQueryConfig, filterMatchesIndex } from '@kbn/es-query';
 
-import '../../promises';
+import { createDefer } from 'ui/promises';
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { SearchRequestProvider } from '../fetch/request';
 
 import { searchRequestQueue } from '../search_request_queue';
 import { FetchSoonProvider } from '../fetch';
 import { FieldWildcardProvider } from '../../field_wildcard';
-import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
+import { getHighlightRequest } from '../../../../../plugins/data/common/field_formats';
 
 const FIELDS = [
   'type',
@@ -376,7 +376,7 @@ export function SearchSourceProvider(Promise, Private, config) {
       const self = this;
 
       return new Promise(function (resolve, reject) {
-        const defer = Promise.defer();
+        const defer = createDefer(Promise);
         defer.promise.then(resolve, reject);
 
         const errorHandler = (request, error) => {

@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         log.debug('select bucket Geo Coordinates');
-        await PageObjects.visualize.clickBucket('Geo Coordinates');
+        await PageObjects.visualize.clickBucket('Geo coordinates');
         log.debug('Click aggregation Geohash');
         await PageObjects.visualize.selectAggregation('Geohash');
         log.debug('Click field geo.coordinates');
@@ -209,7 +209,7 @@ export default function ({ getService, getPageObjects }) {
 
       });
 
-      describe('Only request data around extent of map option', async () => {
+      describe('Only request data around extent of map option', () => {
 
         it('when checked adds filters to aggregation', async () => {
           const vizName1 = 'Visualization TileMap';
@@ -236,6 +236,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('zoom warning behavior', function describeIndexTests() {
+      // Zoom warning is only applicable to OSS
+      this.tags(['skipCloud', 'skipFirefox']);
 
       const waitForLoading = false;
       let zoomWarningEnabled;

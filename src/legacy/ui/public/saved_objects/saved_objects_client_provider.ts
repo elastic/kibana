@@ -17,9 +17,9 @@
  * under the License.
  */
 
+import { SavedObjectsClient } from 'src/core/public';
 import chrome from '../chrome';
 import { PromiseService } from '../promises';
-import { SavedObjectsClient } from './saved_objects_client';
 
 type Args<T extends (...args: any[]) => any> = T extends (...args: infer X) => any ? X : never;
 

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+jest.mock('ui/new_platform');
 import { functionWrapper } from '../../interpreter/test_helpers';
 import { inputControlVis } from './input_control_fn';
 

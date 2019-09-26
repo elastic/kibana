@@ -21,12 +21,12 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { AggConfig } from '../agg_config';
+import { AggConfig } from '../../agg_types/agg_config';
 import { VisProvider } from '..';
-import { AggConfigs } from '../agg_configs';
+import { AggConfigs } from '../../agg_types/agg_configs';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { Schemas } from '../editors/default/schemas';
-import { IndexedArray } from '../../indexed_array';
+import { AggGroupNames } from '../editors/default/agg_groups';
 
 describe('AggConfigs', function () {
 
@@ -40,11 +40,6 @@ describe('AggConfigs', function () {
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
-  it('extends IndexedArray', function () {
-    const ac = new AggConfigs();
-    expect(ac).to.be.a(IndexedArray);
-  });
-
   describe('constructor', function () {
     it('handles passing just a vis', function () {
       const vis = new Vis(indexPattern, {
@@ -53,7 +48,7 @@ describe('AggConfigs', function () {
       });
 
       const ac = new AggConfigs(vis.indexPattern, [], vis.type.schemas.all);
-      expect(ac).to.have.length(1);
+      expect(ac.aggs).to.have.length(1);
     });
 
     it('converts configStates into AggConfig objects if they are not already', function () {
@@ -73,7 +68,7 @@ describe('AggConfigs', function () {
         })
       ], vis.type.schemas.all);
 
-      expect(ac).to.have.length(3);
+      expect(ac.aggs).to.have.length(3);
     });
 
     it('attempts to ensure that all states have an id', function () {
@@ -108,7 +103,7 @@ describe('AggConfigs', function () {
           type: {
             schemas: new Schemas([
               {
-                group: 'metrics',
+                group: AggGroupNames.Metrics,
                 name: 'metric',
                 title: 'Simple',
                 min: 1,
@@ -120,7 +115,7 @@ describe('AggConfigs', function () {
                 ]
               },
               {
-                group: 'buckets',
+                group: AggGroupNames.Buckets,
                 name: 'segment',
                 title: 'Example',
                 min: 0,
@@ -137,18 +132,18 @@ describe('AggConfigs', function () {
 
       it('should only set the number of defaults defined by the max', function () {
         const ac = new AggConfigs(vis.indexPattern, [], vis.type.schemas.all);
-        expect(ac.bySchemaName.metric).to.have.length(2);
+        expect(ac.bySchemaName('metric')).to.have.length(2);
       });
 
       it('should set the defaults defined in the schema when none exist', function () {
         const ac = new AggConfigs(vis.indexPattern, [], vis.type.schemas.all);
-        expect(ac).to.have.length(3);
+        expect(ac.aggs).to.have.length(3);
       });
 
       it('should NOT set the defaults defined in the schema when some exist', function () {
         const ac = new AggConfigs(vis.indexPattern, [{ schema: 'segment', type: 'date_histogram' }], vis.type.schemas.all);
-        expect(ac).to.have.length(3);
-        expect(ac.bySchemaName.segment[0].type.name).to.equal('date_histogram');
+        expect(ac.aggs).to.have.length(3);
+        expect(ac.bySchemaName('segment')[0].type.name).to.equal('date_histogram');
       });
     });
   });
@@ -169,7 +164,7 @@ describe('AggConfigs', function () {
       });
 
       const sorted = vis.aggs.getRequestAggs();
-      const aggs = _.indexBy(vis.aggs, function (agg) {
+      const aggs = _.indexBy(vis.aggs.aggs, function (agg) {
         return agg.type.name;
       });
 
@@ -196,7 +191,7 @@ describe('AggConfigs', function () {
       });
 
       const sorted = vis.aggs.getResponseAggs();
-      const aggs = _.indexBy(vis.aggs, function (agg) {
+      const aggs = _.indexBy(vis.aggs.aggs, function (agg) {
         return agg.type.name;
       });
 
@@ -217,7 +212,7 @@ describe('AggConfigs', function () {
       });
 
       const sorted = vis.aggs.getResponseAggs();
-      const aggs = _.indexBy(vis.aggs, function (agg) {
+      const aggs = _.indexBy(vis.aggs.aggs, function (agg) {
         return agg.type.name;
       });
 
@@ -247,7 +242,7 @@ describe('AggConfigs', function () {
         ]
       });
 
-      const aggInfos = vis.aggs.map(function (aggConfig) {
+      const aggInfos = vis.aggs.aggs.map(function (aggConfig) {
         const football = {};
 
         sinon.stub(aggConfig, 'toDsl').returns(football);
@@ -276,14 +271,14 @@ describe('AggConfigs', function () {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
-          { type: 'date_histogram', schema: 'segment', params: { field: '@timestamp' } },
+          { type: 'date_histogram', schema: 'segment', params: { field: '@timestamp', interval: '10s' } },
           { type: 'count', schema: 'metric' }
         ]
       });
 
       const dsl = vis.aggs.toDsl();
-      const histo = vis.aggs.byTypeName.date_histogram[0];
-      const count = vis.aggs.byTypeName.count[0];
+      const histo = vis.aggs.byName('date_histogram')[0];
+      const count = vis.aggs.byName('count')[0];
 
       expect(dsl).to.have.property(histo.id);
       expect(dsl[histo.id]).to.be.an('object');
@@ -295,7 +290,7 @@ describe('AggConfigs', function () {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
-          { type: 'date_histogram', schema: 'segment', params: { field: '@timestamp' } },
+          { type: 'date_histogram', schema: 'segment', params: { field: '@timestamp', interval: '10s' } },
           { type: 'avg', schema: 'metric', params: { field: 'bytes' }  },
           { type: 'sum', schema: 'metric', params: { field: 'bytes' }  },
           { type: 'min', schema: 'metric', params: { field: 'bytes' }  },
@@ -305,8 +300,8 @@ describe('AggConfigs', function () {
 
       const dsl = vis.aggs.toDsl();
 
-      const histo = vis.aggs.byTypeName.date_histogram[0];
-      const metrics = vis.aggs.bySchemaGroup.metrics;
+      const histo = vis.aggs.byName('date_histogram')[0];
+      const metrics = vis.aggs.bySchemaGroup('metrics');
 
       expect(dsl).to.have.property(histo.id);
       expect(dsl[histo.id]).to.be.an('object');
@@ -333,8 +328,8 @@ describe('AggConfigs', function () {
       vis.isHierarchical = _.constant(true);
 
       const topLevelDsl = vis.aggs.toDsl(vis.isHierarchical());
-      const buckets = vis.aggs.bySchemaGroup.buckets;
-      const metrics = vis.aggs.bySchemaGroup.metrics;
+      const buckets = vis.aggs.bySchemaGroup('buckets');
+      const metrics = vis.aggs.bySchemaGroup('metrics');
 
       (function checkLevel(dsl) {
         const bucket = buckets.shift();
@@ -368,7 +363,8 @@ describe('AggConfigs', function () {
                 type: 'date_histogram',
                 schema: 'bucketAgg',
                 params: {
-                  field: '@timestamp'
+                  field: '@timestamp',
+                  interval: '10s',
                 }
               },
               customMetric: {

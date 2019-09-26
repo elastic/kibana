@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { ControlEditor } from './control_editor';
 import { addControl, moveControl, newControl, removeControl, setControl } from '../../editor_utils';
 import { getLineageMap, getParentCandidates } from '../../lineage';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { setup as data } from '../../../../../core_plugins/data/public/legacy';
 
 import {
   EuiButton,
@@ -41,69 +41,65 @@ class ControlsTabUi extends Component {
   }
 
   getIndexPattern = async (indexPatternId) => {
-    return await this.props.scope.vis.API.indexPatterns.get(indexPatternId);
+    return await data.indexPatterns.indexPatterns.get(indexPatternId);
   }
 
-  setVisParam(paramName, paramValue) {
-    const params = _.cloneDeep(this.props.editorState.params);
-    params[paramName] = paramValue;
-    this.props.stageEditorParams(params);
-  }
+  onChange = value => this.props.setValue('controls', value)
 
   handleLabelChange = (controlIndex, evt) => {
-    const updatedControl = this.props.editorState.params.controls[controlIndex];
+    const updatedControl = this.props.stateParams.controls[controlIndex];
     updatedControl.label = evt.target.value;
-    this.setVisParam('controls', setControl(this.props.editorState.params.controls, controlIndex, updatedControl));
+    this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
   }
 
   handleIndexPatternChange = (controlIndex, indexPatternId) => {
-    const updatedControl = this.props.editorState.params.controls[controlIndex];
+    const updatedControl = this.props.stateParams.controls[controlIndex];
     updatedControl.indexPattern = indexPatternId;
     updatedControl.fieldName = '';
-    this.setVisParam('controls', setControl(this.props.editorState.params.controls, controlIndex, updatedControl));
+    this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
   }
 
   handleFieldNameChange = (controlIndex, fieldName) => {
-    const updatedControl = this.props.editorState.params.controls[controlIndex];
+    const updatedControl = this.props.stateParams.controls[controlIndex];
     updatedControl.fieldName = fieldName;
-    this.setVisParam('controls', setControl(this.props.editorState.params.controls, controlIndex, updatedControl));
+    this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
   }
 
   handleCheckboxOptionChange = (controlIndex, optionName, evt) => {
-    const updatedControl = this.props.editorState.params.controls[controlIndex];
+    const updatedControl = this.props.stateParams.controls[controlIndex];
     updatedControl.options[optionName] = evt.target.checked;
-    this.setVisParam('controls', setControl(this.props.editorState.params.controls, controlIndex, updatedControl));
+    this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
   }
 
   handleNumberOptionChange = (controlIndex, optionName, evt) => {
-    const updatedControl = this.props.editorState.params.controls[controlIndex];
+    const updatedControl = this.props.stateParams.controls[controlIndex];
     updatedControl.options[optionName] = parseFloat(evt.target.value);
-    this.setVisParam('controls', setControl(this.props.editorState.params.controls, controlIndex, updatedControl));
+    this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
   }
 
   handleRemoveControl = (controlIndex) => {
-    this.setVisParam('controls', removeControl(this.props.editorState.params.controls, controlIndex));
+    this.onChange(removeControl(this.props.stateParams.controls, controlIndex));
   }
 
   moveControl = (controlIndex, direction) => {
-    this.setVisParam('controls', moveControl(this.props.editorState.params.controls, controlIndex, direction));
+    this.onChange(moveControl(this.props.stateParams.controls, controlIndex, direction));
   }
 
   handleAddControl = () => {
-    this.setVisParam('controls', addControl(this.props.editorState.params.controls, newControl(this.state.type)));
+    this.onChange(addControl(this.props.stateParams.controls, newControl(this.state.type)));
   }
 
   handleParentChange = (controlIndex, evt) => {
-    const updatedControl = this.props.editorState.params.controls[controlIndex];
+    const updatedControl = this.props.stateParams.controls[controlIndex];
     updatedControl.parent = evt.target.value;
-    this.setVisParam('controls', setControl(this.props.editorState.params.controls, controlIndex, updatedControl));
+    this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
   }
 
   renderControls() {
-    const lineageMap = getLineageMap(this.props.editorState.params.controls);
-    return this.props.editorState.params.controls.map((controlParams, controlIndex) => {
+    const lineageMap = getLineageMap(this.props.stateParams.controls);
+    return this.props.stateParams.controls.map((controlParams, controlIndex) => {
       const parentCandidates = getParentCandidates(
-        this.props.editorState.params.controls,
+        this.props.stateParams.controls,
         controlParams.id,
         lineageMap);
       return (
@@ -141,6 +137,7 @@ class ControlsTabUi extends Component {
                 id="selectControlType"
               >
                 <EuiSelect
+                  data-test-subj="selectControlType"
                   options={[
                     { value: 'range', text: intl.formatMessage({
                       id: 'inputControl.editor.controlsTab.select.rangeDropDownOptionLabel',
@@ -187,8 +184,8 @@ class ControlsTabUi extends Component {
 }
 
 ControlsTabUi.propTypes = {
-  scope: PropTypes.object.isRequired,
-  stageEditorParams: PropTypes.func.isRequired
+  vis: PropTypes.object.isRequired,
+  setValue: PropTypes.func.isRequired
 };
 
 export const ControlsTab = injectI18n(ControlsTabUi);

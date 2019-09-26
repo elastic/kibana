@@ -21,7 +21,8 @@ import { pick } from 'lodash';
 
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { DiscoveredPlugin, DiscoveredPluginInternal, PluginWrapper, PluginName } from './plugin';
+import { PluginWrapper } from './plugin';
+import { DiscoveredPlugin, DiscoveredPluginInternal, PluginName, PluginOpaqueId } from './types';
 import { createPluginSetupContext, createPluginStartContext } from './plugin_context';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 
@@ -38,6 +39,25 @@ export class PluginsSystem {
 
   public addPlugin(plugin: PluginWrapper) {
     this.plugins.set(plugin.name, plugin);
+  }
+
+  /**
+   * @returns a ReadonlyMap of each plugin and an Array of its available dependencies
+   * @internal
+   */
+  public getPluginDependencies(): ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]> {
+    // Return dependency map of opaque ids
+    return new Map(
+      [...this.plugins].map(([name, plugin]) => [
+        plugin.opaqueId,
+        [
+          ...new Set([
+            ...plugin.requiredPlugins,
+            ...plugin.optionalPlugins.filter(optPlugin => this.plugins.has(optPlugin)),
+          ]),
+        ].map(depId => this.plugins.get(depId)!.opaqueId),
+      ])
+    );
   }
 
   public async setupPlugins(deps: PluginsServiceSetupDeps) {

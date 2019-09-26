@@ -1,0 +1,17 @@
+
+// Stats bar styles
+.stat {
+  margin-right: $euiSizeS;
+
+  .stat-value {
+    font-weight: bold
+  }
+}
+
+.mlStatsBar {
+  // SASSTODO: proper calcs
+  height: 42px;
+  padding: 14px;
+  background-color: $euiColorLightestShade;
+}
+

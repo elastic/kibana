@@ -19,17 +19,10 @@
 
 import * as Rx from 'rxjs';
 
-import { ChromeBrand, ChromeSetup } from '../../../../../core/public';
+import { npStart } from 'ui/new_platform';
+import { ChromeBrand } from '../../../../../core/public';
 
-let newPlatformChrome: ChromeSetup;
-
-export function __newPlatformSetup__(instance: ChromeSetup) {
-  if (newPlatformChrome) {
-    throw new Error('ui/chrome/api/theme is already initialized');
-  }
-
-  newPlatformChrome = instance;
-}
+const newPlatformChrome = npStart.core.chrome;
 
 export function initChromeThemeApi(chrome: { [key: string]: any }) {
   const brandCache$ = new Rx.BehaviorSubject<ChromeBrand>({});

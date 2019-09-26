@@ -1,0 +1,13 @@
+{
+    "x": "Men's Shoes",
+    "y": 43,
+    "extraMetrics": [],
+    "parent": {
+        "accessor": "col-0-2",
+        "column": 0,
+        "title": "day_of_week: Descending",
+        "params": {}
+    },
+    "series": "Thursday",
+    "seriesId": "Thursday-col-2-1"
+}

@@ -19,21 +19,40 @@
 
 import { cloneDeep } from 'lodash';
 import { IKey, logging } from 'selenium-webdriver';
+import { takeUntil } from 'rxjs/operators';
 
 import { modifyUrl } from '../../../src/core/utils';
-
 import { WebElementWrapper } from './lib/web_element_wrapper';
-
 import { FtrProviderContext } from '../ftr_provider_context';
-
 import { Browsers } from './remote/browsers';
+import { pollForLogEntry$ } from './remote/poll_for_log_entry';
 
 export async function BrowserProvider({ getService }: FtrProviderContext) {
+  const log = getService('log');
+  const config = getService('config');
+  const lifecycle = getService('lifecycle');
   const { driver, Key, LegacyActionSequence, browserType } = await getService(
     '__webdriver__'
   ).init();
 
-  class BrowserService {
+  const isW3CEnabled = (driver as any).executor_.w3c === true;
+
+  if (browserType === Browsers.Chrome) {
+    // The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
+    // See: https://github.com/w3c/webdriver/issues/406
+    // See: https://w3c.github.io/webdriver/#endpoints
+
+    pollForLogEntry$(driver, logging.Type.BROWSER, config.get('browser.logPollingMs'))
+      .pipe(takeUntil(lifecycle.cleanup$))
+      .subscribe({
+        next({ message, level: { name: level } }) {
+          const msg = message.replace(/\\n/g, '\n');
+          log[level === 'SEVERE' ? 'error' : 'debug'](`browser[${level}] ${msg}`);
+        },
+      });
+  }
+
+  return new (class BrowserService {
     /**
      * Keyboard events
      */
@@ -44,10 +63,14 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      */
     public readonly browserType: string = browserType;
 
+    public readonly isChrome: boolean = browserType === Browsers.Chrome;
+
+    public readonly isFirefox: boolean = browserType === Browsers.Firefox;
+
     /**
      * Is WebDriver instance W3C compatible
      */
-    isW3CEnabled = (driver as any).executor_.w3c === true;
+    isW3CEnabled = isW3CEnabled;
 
     /**
      * Returns instance of Actions API based on driver w3c flag
@@ -57,6 +80,18 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       return this.isW3CEnabled
         ? (driver as any).actions()
         : (driver as any).actions({ bridge: true });
+    }
+
+    /**
+     * Get handle for an alert, confirm, or prompt dialog. (if any).
+     * @return {Promise<void>}
+     */
+    public async getAlert() {
+      try {
+        return await driver.switchTo().alert();
+      } catch (e) {
+        return null;
+      }
     }
 
     /**
@@ -120,56 +155,26 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
-     * Moves the remote environment’s mouse cursor to the specified element or relative
-     * position.
+     * Moves the remote environment’s mouse cursor to the specified point {x, y} which is
+     * offset to browser page top left corner.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#move
      *
-     * @param {WebElementWrapper} element Optional
-     * @param {number} xOffset Optional
-     * @param {number} yOffset Optional
+     * @param {x: number, y: number} point on browser page
      * @return {Promise<void>}
      */
-    public async moveMouseTo(element: any, xOffset: number, yOffset: number): Promise<void>;
-    public async moveMouseTo(element: WebElementWrapper): Promise<void>;
-    public async moveMouseTo(
-      element: WebElementWrapper,
-      xOffset?: number,
-      yOffset?: number
-    ): Promise<void> {
-      switch (this.browserType) {
-        case Browsers.Firefox: {
-          // Workaround for scrolling bug in Firefox
-          // https://github.com/mozilla/geckodriver/issues/776
-          await this.getActions()
-            .move({ x: 0, y: 0 })
-            .perform();
-          if (element instanceof WebElementWrapper) {
-            await this.getActions()
-              .move({ x: xOffset || 10, y: yOffset || 10, origin: element._webElement })
-              .perform();
-          } else {
-            await this.getActions()
-              .move({ origin: { x: xOffset, y: yOffset } })
-              .perform();
-          }
-          break;
-        }
-        case Browsers.Chrome: {
-          if (element instanceof WebElementWrapper) {
-            await this.getActions()
-              .pause(this.getActions().mouse)
-              .move({ origin: element._webElement })
-              .perform();
-          } else {
-            await this.getActions()
-              .pause(this.getActions().mouse)
-              .move({ origin: { x: xOffset, y: yOffset } })
-              .perform();
-          }
-          break;
-        }
-        default:
-          throw new Error(`unsupported browser: ${this.browserType}`);
+    public async moveMouseTo(point: { x: number; y: number }): Promise<void> {
+      if (this.isW3CEnabled) {
+        await this.getActions()
+          .move({ x: 0, y: 0 })
+          .perform();
+        await this.getActions()
+          .move({ x: point.x, y: point.y, origin: 'pointer' })
+          .perform();
+      } else {
+        await this.getActions()
+          .pause(this.getActions().mouse)
+          .move({ x: point.x, y: point.y, origin: 'pointer' })
+          .perform();
       }
     }
 
@@ -182,73 +187,50 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async dragAndDrop(
-      from: { offset: { x: any; y: any }; location: { _webElement: any } },
-      to: { offset: { x: any; y: any }; location: { _webElement: any; x: any } }
+      from: { offset: { x: any; y: any }; location: any },
+      to: { offset: { x: any; y: any }; location: any }
     ) {
-      // tslint:disable-next-line:variable-name
-      let _from;
-      // tslint:disable-next-line:variable-name
-      let _to;
-      // tslint:disable-next-line:variable-name
-      const _fromOffset = from.offset
-        ? { x: from.offset.x || 0, y: from.offset.y || 0 }
-        : { x: 0, y: 0 };
-      // tslint:disable-next-line:variable-name
-      const _toOffset = to.offset ? { x: to.offset.x || 0, y: to.offset.y || 0 } : { x: 0, y: 0 };
-      // tslint:disable-next-line:variable-name
-      const _convertPointW3C = async (point: any, offset: { x: any; y: any }) => {
-        if (point.location instanceof WebElementWrapper) {
-          const position = await point.location.getPosition();
-          return {
-            x: Math.round(position.x + offset.x),
-            y: Math.round(position.y + offset.y),
-          };
-        } else {
-          return {
-            x: Math.round(point.location.x + offset.x),
-            y: Math.round(point.location.y + offset.y),
-          };
-        }
-      };
-      // tslint:disable-next-line:variable-name
-      const _convertPoint = (point: any) => {
-        return point.location instanceof WebElementWrapper
-          ? point.location._webElement
-          : point.location;
-      };
-
       if (this.isW3CEnabled) {
-        // tslint:disable-next-line:variable-name
-        _from = await _convertPointW3C(from, _fromOffset);
-        // tslint:disable-next-line:variable-name
-        _to = await _convertPointW3C(to, _toOffset);
-        // tslint:disable-next-line:variable-name
-        const _offset = { x: _to.x - _from.x, y: _to.y - _from.y };
+        // The offset should be specified in pixels relative to the center of the element's bounding box
+        const getW3CPoint = (data: any) => {
+          if (!data.offset) {
+            data.offset = {};
+          }
+          return data.location instanceof WebElementWrapper
+            ? { x: data.offset.x || 0, y: data.offset.y || 0, origin: data.location._webElement }
+            : { x: data.location.x, y: data.location.y, origin: 'pointer' };
+        };
 
+        const startPoint = getW3CPoint(from);
+        const endPoint = getW3CPoint(to);
+        await this.getActions()
+          .move({ x: 0, y: 0 })
+          .perform();
         return await this.getActions()
-          .move({ x: _from.x, y: _from.y, origin: 'pointer' })
+          .move(startPoint)
           .press()
-          .move({ x: _offset.x, y: _offset.y, origin: 'pointer' })
+          .move(endPoint)
           .release()
           .perform();
       } else {
-        // until Chromedriver is not supporting W3C Webdriver Actions API
-        // tslint:disable-next-line:variable-name
-        _from = _convertPoint(from);
-        // tslint:disable-next-line:variable-name
-        _to = _convertPoint(to);
-        if (from.location instanceof WebElementWrapper && typeof to.location.x === 'number') {
+        // The offset should be specified in pixels relative to the top-left corner of the element's bounding box
+        const getOffset: any = (offset: { x: number; y: number }) =>
+          offset ? { x: offset.x || 0, y: offset.y || 0 } : { x: 0, y: 0 };
+
+        if (from.location instanceof WebElementWrapper === false) {
+          throw new Error('Dragging point should be WebElementWrapper instance');
+        } else if (typeof to.location.x === 'number') {
           return await this.getActions()
-            .move({ origin: _from })
+            .move({ origin: from.location._webElement })
             .press()
-            .move({ x: _to.x, y: _to.y, origin: 'pointer' })
+            .move({ x: to.location.x, y: to.location.y, origin: 'pointer' })
             .release()
             .perform();
         } else {
           return await new LegacyActionSequence(driver)
-            .mouseMove(_from, _fromOffset)
+            .mouseMove(from.location._webElement, getOffset(from.offset))
             .mouseDown()
-            .mouseMove(_to, _toOffset)
+            .mouseMove(to.location._webElement, getOffset(to.offset))
             .mouseUp()
             .perform();
         }
@@ -292,34 +274,29 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
-     * Inserts an action for moving the mouse x and y pixels relative to the specified origin.
-     * The origin may be defined as the mouse's current position, the viewport, or the center
-     * of a specific WebElement. Then adds an action for left-click (down/up) with the mouse.
+     * Moves the remote environment’s mouse cursor to the specified point {x, y} which is
+     * offset to browser page top left corner.
+     * Then adds an action for left-click (down/up) with the mouse.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#click
      *
-     * @param {WebElementWrapper} element Optional
-     * @param {number} xOffset Optional
-     * @param {number} yOffset Optional
+     * @param {x: number, y: number} point on browser page
      * @return {Promise<void>}
      */
-    public async clickMouseButton(element: any, xOffset: number, yOffset: number): Promise<void>;
-    public async clickMouseButton(element: WebElementWrapper): Promise<void>;
-    public async clickMouseButton(...args: unknown[]): Promise<void> {
-      const arg0 = args[0];
-      if (arg0 instanceof WebElementWrapper) {
+    public async clickMouseButton(point: { x: number; y: number }): Promise<void> {
+      if (this.isW3CEnabled) {
         await this.getActions()
-          .pause(this.getActions().mouse)
-          .move({ origin: arg0._webElement })
-          .click()
+          .move({ x: 0, y: 0 })
           .perform();
-      } else if (isNaN(args[1] as number) || isNaN(args[2] as number) === false) {
         await this.getActions()
-          .pause(this.getActions().mouse)
-          .move({ origin: { x: args[1], y: args[2] } })
+          .move({ x: point.x, y: point.y, origin: 'pointer' })
           .click()
           .perform();
       } else {
-        throw new Error('Element or coordinates should be provided');
+        await this.getActions()
+          .pause(this.getActions().mouse)
+          .move({ x: point.x, y: point.y, origin: 'pointer' })
+          .click()
+          .perform();
       }
     }
 
@@ -332,29 +309,6 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      */
     public async getPageSource(): Promise<string> {
       return await driver.getPageSource();
-    }
-
-    /**
-     * Gets all logs from the remote environment of the given type. The logs in the remote
-     * environment are cleared once they have been retrieved.
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Logs.html#get
-     *
-     * @param {!logging.Type} type The desired log type.
-     * @return {Promise<LogEntry[]>}
-     */
-    public async getLogsFor(type: typeof logging.Type | string): Promise<logging.Entry[]>;
-    public async getLogsFor(...args: any[]): Promise<logging.Entry[]> {
-      // The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
-      // See: https://github.com/w3c/webdriver/issues/406
-      // See: https://w3c.github.io/webdriver/#endpoints
-      if (this.isW3CEnabled) {
-        return [];
-      } else {
-        return await (driver as any)
-          .manage()
-          .logs()
-          .get(...args);
-      }
     }
 
     /**
@@ -373,16 +327,10 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {WebElementWrapper} element
      * @return {Promise<void>}
      */
-    public async doubleClick(element?: WebElementWrapper): Promise<void> {
-      if (element instanceof WebElementWrapper) {
-        await this.getActions()
-          .doubleClick(element._webElement)
-          .perform();
-      } else {
-        await this.getActions()
-          .doubleClick()
-          .perform();
-      }
+    public async doubleClick(): Promise<void> {
+      await this.getActions()
+        .doubleClick()
+        .perform();
     }
 
     /**
@@ -490,7 +438,5 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       await driver.executeScript('document.body.scrollLeft = ' + scrollSize);
       return this.getScrollLeft();
     }
-  }
-
-  return new BrowserService();
+  })();
 }

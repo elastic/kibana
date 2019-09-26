@@ -32,7 +32,15 @@ interface EuiValues {
  * @internal
  */
 export class I18nService {
-  public setup() {
+  /**
+   * Used exclusively to give a Context component to FatalErrorsService which
+   * may render before Core successfully sets up or starts.
+   *
+   * Separated from `start` to disambiguate that this can be called from within
+   * Core outside the lifecycle flow.
+   * @internal
+   */
+  public getContext(): I18nStart {
     const mapping = {
       'euiBasicTable.selectAllRows': i18n.translate('core.euiBasicTable.selectAllRows', {
         defaultMessage: 'Select all rows',
@@ -57,6 +65,18 @@ export class I18nService {
             'Screen reader announcement that functionality is available in the page document',
         }
       ),
+      'euiCardSelect.select': i18n.translate('core.euiCardSelect.select', {
+        defaultMessage: 'Select',
+        description: 'Displayed button text when a card option can be selected.',
+      }),
+      'euiCardSelect.selected': i18n.translate('core.euiCardSelect.selected', {
+        defaultMessage: 'Selected',
+        description: 'Displayed button text when a card option is selected.',
+      }),
+      'euiCardSelect.unavailable': i18n.translate('core.euiCardSelect.unavailable', {
+        defaultMessage: 'Unavailable',
+        description: 'Displayed button text when a card option is unavailable.',
+      }),
       'euiCodeBlock.copyButton': i18n.translate('core.euiCodeBlock.copyButton', {
         defaultMessage: 'Copy',
         description: 'ARIA label for a button that copies source code text to the clipboard',
@@ -81,15 +101,22 @@ export class I18nService {
             'ARIA label and tooltip content describing a button that expands an actions menu',
         }
       ),
-      'euiColorPicker.colorSelectionLabel': ({ colorValue }: EuiValues) =>
-        i18n.translate('core.euiColorPicker.colorSelectionLabel', {
-          defaultMessage: 'Color selection is {colorValue}',
-          values: { colorValue },
+      'euiColorPicker.screenReaderAnnouncement': i18n.translate(
+        'core.euiColorPicker.screenReaderAnnouncement',
+        {
+          defaultMessage:
+            'A popup with a range of selectable colors opened. Tab forward to cycle through colors choices or press escape to close this popup.',
+          description:
+            'Message when the color picker popover is opened. Describes the interaction with the elements in the popover.',
+        }
+      ),
+      'euiColorPicker.swatchAriaLabel': ({ swatch }: EuiValues) =>
+        i18n.translate('core.euiColorPicker.swatchAriaLabel', {
+          defaultMessage: 'Select {swatch} as the color',
+          values: { swatch },
+          description:
+            'Screen reader text to describe the action and hex value of the selectable option',
         }),
-      'euiColorPicker.transparentColor': i18n.translate('core.euiColorPicker.transparentColor', {
-        defaultMessage: 'transparent',
-        description: 'Describes a color that is fully transparent',
-      }),
       'euiComboBoxOptionsList.allOptionsSelected': i18n.translate(
         'core.euiComboBoxOptionsList.allOptionsSelected',
         {
@@ -136,6 +163,11 @@ export class I18nService {
           values: { children },
           description: 'ARIA label, `children` is the human-friendly value of an option',
         }),
+      'euiFilterButton.filterBadge': ({ count, hasActiveFilters }: EuiValues) =>
+        i18n.translate('core.euiFilterButton.filterBadge', {
+          defaultMessage: '${count} ${filterCountLabel} filters',
+          values: { count, filterCountLabel: hasActiveFilters ? 'active' : 'available' },
+        }),
       'euiForm.addressFormErrors': i18n.translate('core.euiForm.addressFormErrors', {
         defaultMessage: 'Please address the errors in your form.',
       }),
@@ -160,6 +192,9 @@ export class I18nService {
           defaultMessage: 'Open navigation menu',
         }
       ),
+      'euiHue.label': i18n.translate('core.euiHue.label', {
+        defaultMessage: 'Select the HSV color mode "hue" value',
+      }),
       'euiModal.closeModal': i18n.translate('core.euiModal.closeModal', {
         defaultMessage: 'Closes this modal window',
       }),
@@ -185,6 +220,16 @@ export class I18nService {
           defaultMessage: 'You are in a popup. To exit this popup, hit Escape.',
         }
       ),
+      'euiSaturation.roleDescription': i18n.translate('core.euiSaturation.roleDescription', {
+        defaultMessage: 'HSV color mode saturation and value selection',
+      }),
+      'euiSaturation.screenReaderAnnouncement': i18n.translate(
+        'core.euiSaturation.screenReaderAnnouncement',
+        {
+          defaultMessage:
+            'Use the arrow keys to navigate the square color gradient. The coordinates resulting from each key press will be used to calculate HSV color mode "saturation" and "value" numbers, in the range of 0 to 1. Left and right decrease and increase (respectively) the "saturation" value. Up and down decrease and increase (respectively) the "value" value.',
+        }
+      ),
       'euiSelectable.loadingOptions': i18n.translate('core.euiSelectable.loadingOptions', {
         defaultMessage: 'Loading options',
         description: 'Placeholder message while data is asynchronously loaded',
@@ -199,6 +244,9 @@ export class I18nService {
           values={{ searchValue }}
         />
       ),
+      'euiStat.loadingText': i18n.translate('core.euiStat.loadingText', {
+        defaultMessage: 'Statistic is loading',
+      }),
       'euiStep.completeStep': i18n.translate('core.euiStep.completeStep', {
         defaultMessage: 'Step',
         description:
@@ -237,6 +285,13 @@ export class I18nService {
         description:
           'Used as the title attribute on an image or svg icon to indicate a given process step is complete',
       }),
+      'euiSuperDatePicker.showDatesButtonLabel': i18n.translate(
+        'core.euiSuperDatePicker.showDatesButtonLabel',
+        {
+          defaultMessage: 'Show dates',
+          description: 'Displayed in a button that shows date picker',
+        }
+      ),
       'euiSuperSelect.screenReaderAnnouncement': ({ optionsCount }: EuiValues) =>
         i18n.translate('core.euiSuperSelect.screenReaderAnnouncement', {
           defaultMessage:
@@ -248,10 +303,51 @@ export class I18nService {
           defaultMessage: 'Select an option: {selectedValue}, is selected',
           values: { selectedValue },
         }),
+      'euiSuperUpdateButton.cannotUpdateTooltip': i18n.translate(
+        'core.euiSuperUpdateButton.cannotUpdateTooltip',
+        {
+          defaultMessage: 'Cannot update',
+          description: "Displayed in a tooltip when updates can't happen",
+        }
+      ),
+      'euiSuperUpdateButton.clickToApplyTooltip': i18n.translate(
+        'core.euiSuperUpdateButton.clickToApplyTooltip',
+        {
+          defaultMessage: 'Click to apply',
+          description: "Displayed in a tooltip when there are changes that haven't been applied",
+        }
+      ),
+      'euiSuperUpdateButton.refreshButtonLabel': i18n.translate(
+        'core.euiSuperUpdateButton.refreshButtonLabel',
+        {
+          defaultMessage: 'Refresh',
+          description: 'Displayed in a button that refreshes based on date picked',
+        }
+      ),
+      'euiSuperUpdateButton.updatingButtonLabel': i18n.translate(
+        'core.euiSuperUpdateButton.updatingButtonLabel',
+        {
+          defaultMessage: 'Updating',
+          description: 'Displayed in a button that refreshes when updates are happening',
+        }
+      ),
+      'euiSuperUpdateButton.updateButtonLabel': i18n.translate(
+        'core.euiSuperUpdateButton.updateButtonLabel',
+        {
+          defaultMessage: 'Update',
+          description: 'Displayed in a button that updates based on date picked',
+        }
+      ),
       'euiTablePagination.rowsPerPage': i18n.translate('core.euiTablePagination.rowsPerPage', {
         defaultMessage: 'Rows per page',
         description: 'Displayed in a button that toggles a table pagination menu',
       }),
+      'euiTablePagination.rowsPerPageOption': ({ rowsPerPage }: EuiValues) =>
+        i18n.translate('core.euiTablePagination.rowsPerPageOption', {
+          defaultMessage: '{rowsPerPage} rows',
+          description: 'Displayed in a button that toggles the number of visible rows',
+          values: { rowsPerPage },
+        }),
       'euiTableSortMobile.sorting': i18n.translate('core.euiTableSortMobile.sorting', {
         defaultMessage: 'Sorting',
         description: 'Displayed in a button that toggles a table sorting menu',
@@ -268,7 +364,7 @@ export class I18nService {
       }),
     };
 
-    const setup: I18nSetup = {
+    return {
       Context: function I18nContext({ children }) {
         return (
           <I18nProvider>
@@ -277,12 +373,10 @@ export class I18nService {
         );
       },
     };
-
-    return setup;
   }
 
-  public start() {
-    return this.setup();
+  public start(): I18nStart {
+    return this.getContext();
   }
 
   public stop() {
@@ -291,20 +385,15 @@ export class I18nService {
 }
 
 /**
- * I18nSetup.Context is required by any localizable React component from \@kbn/i18n and \@elastic/eui packages
+ * I18nStart.Context is required by any localizable React component from \@kbn/i18n and \@elastic/eui packages
  * and is supposed to be used as the topmost component for any i18n-compatible React tree.
  *
  * @public
  *
  */
-export interface I18nSetup {
+export interface I18nStart {
   /**
    * React Context provider required as the topmost component for any i18n-compatible React tree.
    */
   Context: ({ children }: { children: React.ReactNode }) => JSX.Element;
 }
-
-/**
- * @public
- */
-export type I18nStart = I18nSetup;

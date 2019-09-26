@@ -17,20 +17,22 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visFactory } from '../../../ui/public/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import heatmapTemplate from './editors/heatmap.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
+import { vislibVisController } from './controller';
+import './controls/heatmap_options';
 
-export default function HeatmapVisType(Private) {
-  const VisFactory = Private(VisFactoryProvider);
+export default function HeatmapVisType() {
 
-  return VisFactory.createVislibVisualization({
+  return visFactory.createBaseVisualization({
     name: 'heatmap',
     title: i18n.translate('kbnVislibVisTypes.heatmap.heatmapTitle', { defaultMessage: 'Heat Map' }),
     icon: 'visHeatmap',
     description: i18n.translate('kbnVislibVisTypes.heatmap.heatmapDescription', { defaultMessage: 'Shade cells within a matrix' }),
+    visualization: vislibVisController,
     visConfig: {
       defaults: {
         type: 'heatmap',
@@ -61,6 +63,9 @@ export default function HeatmapVisType(Private) {
           }
         }]
       },
+    },
+    events: {
+      brush: { disabled: false },
     },
     editorConfig: {
       collections: {
@@ -96,7 +101,7 @@ export default function HeatmapVisType(Private) {
         {
           group: 'buckets',
           name: 'segment',
-          title: i18n.translate('kbnVislibVisTypes.heatmap.segmentTitle', { defaultMessage: 'X-Axis' }),
+          title: i18n.translate('kbnVislibVisTypes.heatmap.segmentTitle', { defaultMessage: 'X-axis' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
@@ -104,7 +109,7 @@ export default function HeatmapVisType(Private) {
         {
           group: 'buckets',
           name: 'group',
-          title: i18n.translate('kbnVislibVisTypes.heatmap.groupTitle', { defaultMessage: 'Y-Axis' }),
+          title: i18n.translate('kbnVislibVisTypes.heatmap.groupTitle', { defaultMessage: 'Y-axis' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
@@ -112,7 +117,7 @@ export default function HeatmapVisType(Private) {
         {
           group: 'buckets',
           name: 'split',
-          title: i18n.translate('kbnVislibVisTypes.heatmap.splitTitle', { defaultMessage: 'Split Chart' }),
+          title: i18n.translate('kbnVislibVisTypes.heatmap.splitTitle', { defaultMessage: 'Split chart' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']

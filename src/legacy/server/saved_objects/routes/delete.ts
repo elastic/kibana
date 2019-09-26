@@ -19,12 +19,12 @@
 
 import Hapi from 'hapi';
 import Joi from 'joi';
-import { SavedObjectsClient } from '../';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { Prerequisites } from './types';
 
 interface DeleteRequest extends Hapi.Request {
   pre: {
-    savedObjectsClient: SavedObjectsClient;
+    savedObjectsClient: SavedObjectsClientContract;
   };
   params: {
     type: string;

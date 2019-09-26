@@ -23,6 +23,7 @@ import {
   EuiButton,
   EuiCopy,
   EuiFlexGroup,
+  EuiSpacer,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
@@ -100,7 +101,12 @@ class UrlPanelContentUI extends Component<Props, State> {
 
         {this.renderShortUrlSwitch()}
 
-        <EuiCopy textToCopy={this.state.url} anchorClassName="kbnShareContextMenu__copyAnchor">
+        <EuiSpacer size="m" />
+
+        <EuiCopy
+          textToCopy={this.state.url || ''}
+          anchorClassName="kbnShareContextMenu__copyAnchor"
+        >
           {(copy: () => void) => (
             <EuiButton
               fill
@@ -316,7 +322,7 @@ class UrlPanelContentUI extends Component<Props, State> {
 
   private renderWithIconTip = (child: React.ReactNode, tipContent: React.ReactNode) => {
     return (
-      <EuiFlexGroup gutterSize="none">
+      <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem>{child}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <FixedEuiIconTip content={tipContent} position="bottom" />

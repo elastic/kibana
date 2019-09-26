@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '../../../../legacy/plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -21,6 +21,7 @@ interface FindTests {
   unknownType: FindTest;
   pageBeyondTotal: FindTest;
   unknownSearchField: FindTest;
+  hiddenType: FindTest;
   noType: FindTest;
 }
 
@@ -123,28 +124,29 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
       before(() => esArchiver.load('saved_objects/spaces'));
       after(() => esArchiver.unload('saved_objects/spaces'));
 
-      it(`space aware type should return ${tests.spaceAwareType.statusCode} with ${
-        tests.spaceAwareType.description
-      }`, async () =>
+      it(`space aware type should return ${tests.spaceAwareType.statusCode} with ${tests.spaceAwareType.description}`, async () =>
         await supertest
           .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=visualization&fields=title`)
           .auth(user.username, user.password)
           .expect(tests.spaceAwareType.statusCode)
           .then(tests.spaceAwareType.response));
 
-      it(`not space aware type should return ${tests.notSpaceAwareType.statusCode} with ${
-        tests.notSpaceAwareType.description
-      }`, async () =>
+      it(`not space aware type should return ${tests.notSpaceAwareType.statusCode} with ${tests.notSpaceAwareType.description}`, async () =>
         await supertest
           .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=globaltype&fields=name`)
           .auth(user.username, user.password)
           .expect(tests.notSpaceAwareType.statusCode)
           .then(tests.notSpaceAwareType.response));
 
+      it(`finding a hiddentype should return ${tests.hiddenType.statusCode} with ${tests.hiddenType.description}`, async () =>
+        await supertest
+          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=hiddentype&fields=name`)
+          .auth(user.username, user.password)
+          .expect(tests.hiddenType.statusCode)
+          .then(tests.hiddenType.response));
+
       describe('unknown type', () => {
-        it(`should return ${tests.unknownType.statusCode} with ${
-          tests.unknownType.description
-        }`, async () =>
+        it(`should return ${tests.unknownType.statusCode} with ${tests.unknownType.description}`, async () =>
           await supertest
             .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=wigwags`)
             .auth(user.username, user.password)
@@ -153,9 +155,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
       });
 
       describe('page beyond total', () => {
-        it(`should return ${tests.pageBeyondTotal.statusCode} with ${
-          tests.pageBeyondTotal.description
-        }`, async () =>
+        it(`should return ${tests.pageBeyondTotal.statusCode} with ${tests.pageBeyondTotal.description}`, async () =>
           await supertest
             .get(
               `${getUrlPrefix(
@@ -168,9 +168,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
       });
 
       describe('unknown search field', () => {
-        it(`should return ${tests.unknownSearchField.statusCode} with ${
-          tests.unknownSearchField.description
-        }`, async () =>
+        it(`should return ${tests.unknownSearchField.statusCode} with ${tests.unknownSearchField.description}`, async () =>
           await supertest
             .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=url&search_fields=a`)
             .auth(user.username, user.password)

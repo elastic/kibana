@@ -82,7 +82,26 @@ kibana_vars=(
     vega.enableExternalUrls
     xpack.apm.enabled
     xpack.apm.ui.enabled
+    xpack.apm.ui.maxTraceItems
+    apm_oss.apmAgentConfigurationIndex
+    apm_oss.indexPattern
+    apm_oss.errorIndices
+    apm_oss.onboardingIndices
+    apm_oss.spanIndices
+    apm_oss.transactionIndices
+    apm_oss.metricsIndices
     xpack.canvas.enabled
+    xpack.code.ui.enabled
+    xpack.code.disk.thresholdEnabled
+    xpack.code.disk.watermarkLow
+    xpack.code.maxWorkspace
+    xpack.code.indexRepoFrequencyMs
+    xpack.code.updateRepoFrequencyMs
+    xpack.code.lsp.verbose
+    xpack.code.verbose
+    xpack.code.security.enableGitCertCheck
+    xpack.code.security.gitHostWhitelist
+    xpack.code.security.gitProtocolWhitelist
     xpack.graph.enabled
     xpack.grokdebugger.enabled
     xpack.infra.enabled
@@ -136,13 +155,15 @@ kibana_vars=(
     xpack.reporting.queue.timeout
     xpack.reporting.roles.allow
     xpack.searchprofiler.enabled
-    xpack.security.authProviders
+    xpack.security.authc.providers
+    xpack.security.authc.oidc.realm
+    xpack.security.authc.saml.realm
     xpack.security.cookieName
     xpack.security.enabled
     xpack.security.encryptionKey
     xpack.security.secureCookies
     xpack.security.sessionTimeout
-    xpack.xpack_main.telemetry.enabled
+    xpack.telemetry.enabled
 )
 
 longopts=''

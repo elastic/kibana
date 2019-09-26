@@ -20,20 +20,18 @@
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { BucketAggType } from './_bucket_agg_type';
-import { AggConfig } from '../../vis/agg_config';
 import { Schemas } from '../../vis/editors/default/schemas';
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
 import { createFilterTerms } from './create_filter/terms';
 import { wrapWithInlineComp } from './_inline_comp_wrapper';
 import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from './_terms_other_bucket_helper';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
-import { aggFilter } from './_terms_helper';
-import orderAggTemplate from '../controls/order_agg.html';
-import { OrderParamEditor } from '../controls/order';
-import { OrderAggParamEditor } from '../controls/order_agg';
-import { SizeParamEditor } from '../controls/size';
-import { MissingBucketParamEditor } from '../controls/missing_bucket';
-import { OtherBucketParamEditor } from '../controls/other_bucket';
+import { OrderAggParamEditor } from '../../vis/editors/default/controls/order_agg';
+import { OrderParamEditor } from '../../vis/editors/default/controls/order';
+import { OrderByParamEditor, aggFilter } from '../../vis/editors/default/controls/order_by';
+import { SizeParamEditor } from '../../vis/editors/default/controls/size';
+import { MissingBucketParamEditor } from '../../vis/editors/default/controls/missing_bucket';
+import { OtherBucketParamEditor } from '../../vis/editors/default/controls/other_bucket';
 
 const orderAggSchema = (new Schemas([
   {
@@ -77,10 +75,16 @@ export const termsBucketAgg = new BucketAggType({
     };
   },
   createFilter: createFilterTerms,
-  postFlightRequest: async (resp, aggConfigs, aggConfig, searchSource, inspectorAdapters) => {
+  postFlightRequest: async (resp, aggConfigs, aggConfig, searchSource, inspectorAdapters, abortSignal) => {
+    if (!resp.aggregations) return resp;
     const nestedSearchSource = searchSource.createChild();
     if (aggConfig.params.otherBucket) {
       const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
+      if (!filterAgg) return resp;
+      if (abortSignal) {
+        abortSignal.addEventListener('abort', () => nestedSearchSource.cancelQueued());
+      }
+
       nestedSearchSource.setField('aggs', filterAgg);
 
       const request = inspectorAdapters.requests.start(
@@ -116,47 +120,20 @@ export const termsBucketAgg = new BucketAggType({
     },
     {
       name: 'orderBy',
-      editorComponent: OrderAggParamEditor,
+      editorComponent: OrderByParamEditor,
       write: () => {} // prevent default write, it's handled by orderAgg
     },
     {
       name: 'orderAgg',
-      type: AggConfig,
+      type: 'agg',
       default: null,
-      editor: orderAggTemplate,
-      serialize: function (orderAgg) {
-        return orderAgg.toJSON();
-      },
-      deserialize: function (state, agg) {
-        return this.makeOrderAgg(agg, state);
-      },
-      makeOrderAgg: function (termsAgg, state) {
+      editorComponent: OrderAggParamEditor,
+      makeAgg: function (termsAgg, state) {
         state = state || {};
         state.schema = orderAggSchema;
         const orderAgg = termsAgg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
         orderAgg.id = termsAgg.id + '-orderAgg';
         return orderAgg;
-      },
-      controller: function ($scope) {
-        $scope.$watch('responseValueAggs', updateOrderAgg);
-        $scope.$watch('agg.params.orderBy', updateOrderAgg);
-
-        function updateOrderAgg() {
-          // abort until we get the responseValueAggs
-          if (!$scope.responseValueAggs) return;
-          const agg = $scope.agg;
-          const params = agg.params;
-          const orderBy = params.orderBy;
-          const paramDef = agg.type.params.byName.orderAgg;
-
-          // we aren't creating a custom aggConfig
-          if (!orderBy || orderBy !== 'custom') {
-            params.orderAgg = null;
-            return;
-          }
-
-          params.orderAgg = params.orderAgg || paramDef.makeOrderAgg(agg);
-        }
       },
       write: function (agg, output, aggs) {
         const dir = agg.params.order.value;
@@ -187,7 +164,7 @@ export const termsBucketAgg = new BucketAggType({
 
         const orderAggId = orderAgg.id;
         if (orderAgg.parentId) {
-          orderAgg = aggs.byId[orderAgg.parentId];
+          orderAgg = aggs.byId(orderAgg.parentId);
         }
 
         output.subAggs = (output.subAggs || []).concat(orderAgg);
@@ -196,7 +173,7 @@ export const termsBucketAgg = new BucketAggType({
     },
     {
       name: 'order',
-      type: 'select',
+      type: 'optioned',
       default: 'desc',
       editorComponent: wrapWithInlineComp(OrderParamEditor),
       options: [

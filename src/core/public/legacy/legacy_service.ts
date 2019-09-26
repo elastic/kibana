@@ -18,7 +18,8 @@
  */
 
 import angular from 'angular';
-import { InternalCoreSetup, InternalCoreStart } from '../';
+import { InternalCoreSetup, InternalCoreStart } from '../core_system';
+import { LegacyCoreSetup, LegacyCoreStart } from '../';
 
 /** @internal */
 export interface LegacyPlatformParams {
@@ -34,7 +35,8 @@ interface SetupDeps {
 interface StartDeps {
   core: InternalCoreStart;
   plugins: Record<string, unknown>;
-  targetDomElement: HTMLElement;
+  lastSubUrlStorage?: Storage;
+  targetDomElement?: HTMLElement;
 }
 
 interface BootstrapModule {
@@ -55,37 +57,9 @@ export class LegacyPlatformService {
   constructor(private readonly params: LegacyPlatformParams) {}
 
   public setup({ core, plugins }: SetupDeps) {
-    const {
-      application,
-      i18n,
-      injectedMetadata,
-      fatalErrors,
-      notifications,
-      http,
-      uiSettings,
-      chrome,
-    } = core;
-    // Inject parts of the new platform into parts of the legacy platform
-    // so that legacy APIs/modules can mimic their new platform counterparts
-    require('ui/new_platform').__newPlatformSetup__(core, plugins);
-    require('ui/metadata').__newPlatformSetup__(injectedMetadata.getLegacyMetadata());
-    require('ui/i18n').__newPlatformSetup__(i18n.Context);
-    require('ui/notify/fatal_error').__newPlatformSetup__(fatalErrors);
-    require('ui/kfetch').__newPlatformSetup__(http);
-    require('ui/notify/toasts').__newPlatformSetup__(notifications.toasts);
-    require('ui/chrome/api/loading_count').__newPlatformSetup__(http);
-    require('ui/chrome/api/base_path').__newPlatformSetup__(http);
-    require('ui/chrome/api/ui_settings').__newPlatformSetup__(uiSettings);
-    require('ui/chrome/api/injected_vars').__newPlatformSetup__(injectedMetadata);
-    require('ui/chrome/api/controls').__newPlatformSetup__(chrome);
-    require('ui/chrome/api/help_extension').__newPlatformSetup__(chrome);
-    require('ui/chrome/api/theme').__newPlatformSetup__(chrome);
-    require('ui/chrome/api/badge').__newPlatformSetup__(chrome);
-    require('ui/chrome/api/breadcrumbs').__newPlatformSetup__(chrome);
-    require('ui/chrome/services/global_nav_state').__newPlatformSetup__(chrome);
-
-    injectedMetadata.getLegacyMetadata().nav.forEach((navLink: any) =>
-      application.registerLegacyApp({
+    // Always register legacy apps, even if not in legacy mode.
+    core.injectedMetadata.getLegacyMetadata().nav.forEach((navLink: any) =>
+      core.application.registerLegacyApp({
         id: navLink.id,
         order: navLink.order,
         title: navLink.title,
@@ -97,25 +71,72 @@ export class LegacyPlatformService {
       })
     );
 
+    const legacyCore: LegacyCoreSetup = {
+      ...core,
+      application: {
+        register: notSupported(`core.application.register()`),
+        registerMountContext: notSupported(`core.application.registerMountContext()`),
+      },
+    };
+
+    // Inject parts of the new platform into parts of the legacy platform
+    // so that legacy APIs/modules can mimic their new platform counterparts
+    if (core.injectedMetadata.getLegacyMode()) {
+      require('ui/new_platform').__setup__(legacyCore, plugins);
+    }
+  }
+
+  public start({
+    core,
+    targetDomElement,
+    plugins,
+    lastSubUrlStorage = window.sessionStorage,
+  }: StartDeps) {
+    // Initialize legacy sub urls
+    core.chrome.navLinks
+      .getAll()
+      .filter(link => link.legacy)
+      .forEach(navLink => {
+        const lastSubUrl = lastSubUrlStorage.getItem(`lastSubUrl:${navLink.baseUrl}`);
+        core.chrome.navLinks.update(navLink.id, {
+          url: lastSubUrl || navLink.url || navLink.baseUrl,
+        });
+      });
+
+    // Only import and bootstrap legacy platform if we're in legacy mode.
+    if (!core.injectedMetadata.getLegacyMode()) {
+      return;
+    }
+
+    const legacyCore: LegacyCoreStart = {
+      ...core,
+      application: {
+        capabilities: core.application.capabilities,
+        getUrlForApp: core.application.getUrlForApp,
+        navigateToApp: core.application.navigateToApp,
+        registerMountContext: notSupported(`core.application.registerMountContext()`),
+      },
+    };
+
+    // Inject parts of the new platform into parts of the legacy platform
+    // so that legacy APIs/modules can mimic their new platform counterparts
+    require('ui/new_platform').__start__(legacyCore, plugins);
+
     // Load the bootstrap module before loading the legacy platform files so that
     // the bootstrap module can modify the environment a bit first
     this.bootstrapModule = this.loadBootstrapModule();
 
     // require the files that will tie into the legacy platform
     this.params.requireLegacyFiles();
-  }
 
-  public start({ core, targetDomElement, plugins }: StartDeps) {
     if (!this.bootstrapModule) {
       throw new Error('Bootstrap module must be loaded before `start`');
     }
 
     this.targetDomElement = targetDomElement;
 
-    require('ui/new_platform').__newPlatformStart__(core, plugins);
-    require('ui/capabilities').__newPlatformStart__(core.application.capabilities);
-
-    this.bootstrapModule.bootstrap(this.targetDomElement);
+    // `targetDomElement` is always defined when in legacy mode
+    this.bootstrapModule.bootstrap(this.targetDomElement!);
   }
 
   public stop() {
@@ -153,3 +174,7 @@ export class LegacyPlatformService {
     return require('ui/chrome');
   }
 }
+
+const notSupported = (methodName: string) => (...args: any[]) => {
+  throw new Error(`${methodName} is not supported in the legacy platform.`);
+};

@@ -50,7 +50,7 @@ export class ApplyFiltersPopover extends Component<Props, State> {
     filters: [],
   };
 
-  public constructor(props: Props) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       isFilterSelected: props.filters.map(() => true),

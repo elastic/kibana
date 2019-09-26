@@ -97,6 +97,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
   <EuiModalBody>
     <EuiFormRow
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
       hasEmptyLabelSpace={false}
       label={
@@ -140,6 +141,9 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
         }
       />
     </EuiFormRow>
+    <EuiSpacer
+      size="m"
+    />
     <EuiSwitch
       checked={true}
       label={
@@ -165,10 +169,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
             grow={false}
           >
             <EuiButtonEmpty
-              color="primary"
-              iconSide="left"
               onClick={[Function]}
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Cancel"
@@ -181,12 +182,8 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
             grow={false}
           >
             <EuiButton
-              color="primary"
               fill={true}
-              iconSide="left"
               onClick={[Function]}
-              size="m"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Export all"
@@ -209,9 +206,7 @@ exports[`ObjectsTable import should show the flyout 1`] = `
   done={[Function]}
   indexPatterns={
     Object {
-      "cache": Object {
-        "clearAll": [MockFunction],
-      },
+      "clearCache": [MockFunction],
     }
   }
   newIndexPatternUrl=""
@@ -257,7 +252,7 @@ exports[`ObjectsTable should render normally 1`] = `
     size="xs"
   />
   <InjectIntl(TableUI)
-    canDeleteSavedObjectTypes={Array []}
+    canDelete={false}
     filterOptions={
       Array [
         Object {

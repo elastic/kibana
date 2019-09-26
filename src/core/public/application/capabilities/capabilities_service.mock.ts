@@ -17,13 +17,15 @@
  * under the License.
  */
 import { CapabilitiesService, CapabilitiesStart } from './capabilities_service';
-import { deepFreeze } from '../../utils/deep_freeze';
-import { MixedApp } from '../application_service';
+import { deepFreeze } from '../../../utils/';
+import { App, LegacyApp } from '../types';
 
 const createStartContractMock = (
-  apps: ReadonlyArray<MixedApp> = []
+  apps: ReadonlyMap<string, App> = new Map(),
+  legacyApps: ReadonlyMap<string, LegacyApp> = new Map()
 ): jest.Mocked<CapabilitiesStart> => ({
   availableApps: apps,
+  availableLegacyApps: legacyApps,
   capabilities: deepFreeze({
     catalogue: {},
     management: {},
@@ -33,7 +35,9 @@ const createStartContractMock = (
 
 type CapabilitiesServiceContract = PublicMethodsOf<CapabilitiesService>;
 const createMock = (): jest.Mocked<CapabilitiesServiceContract> => ({
-  start: jest.fn().mockImplementation(({ apps }) => createStartContractMock(apps)),
+  start: jest
+    .fn()
+    .mockImplementation(({ apps, legacyApps }) => createStartContractMock(apps, legacyApps)),
 });
 
 export const capabilitiesServiceMock = {

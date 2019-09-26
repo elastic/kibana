@@ -18,7 +18,6 @@
  */
 
 import { snakeCase } from 'lodash';
-import Promise from 'bluebird';
 import { getCollectorLogger } from '../lib';
 import { Collector } from './collector';
 import { UsageCollector } from './usage_collector';
@@ -114,24 +113,26 @@ export class CollectorSet {
    * Call a bunch of fetch methods and then do them in bulk
    * @param {CollectorSet} collectorSet - a set of collectors to fetch. Default to all registered collectors
    */
-  bulkFetch(callCluster, collectorSet = this) {
+  async bulkFetch(callCluster, collectorSet = this) {
     if (!(collectorSet instanceof CollectorSet)) {
       throw new Error(`bulkFetch method given bad collectorSet parameter: ` + typeof collectorSet);
     }
 
-    const fetchPromises = collectorSet.map(collector => {
-      const collectorType = collector.type;
-      this._log.debug(`Fetching data from ${collectorType} collector`);
-      return Promise.props({
-        type: collectorType,
-        result: collector.fetchInternal(callCluster) // use the wrapper for fetch, kicks in error checking
-      })
-        .catch(err => {
-          this._log.warn(err);
-          this._log.warn(`Unable to fetch data from ${collectorType} collector`);
+    const responses = [];
+    await collectorSet.asyncEach(async collector => {
+      this._log.debug(`Fetching data from ${collector.type} collector`);
+      try {
+        responses.push({
+          type: collector.type,
+          result: await collector.fetchInternal(callCluster)
         });
+      }
+      catch (err) {
+        this._log.warn(err);
+        this._log.warn(`Unable to fetch data from ${collector.type} collector`);
+      }
     });
-    return Promise.all(fetchPromises);
+    return responses;
   }
 
   /*

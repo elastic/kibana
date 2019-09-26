@@ -27,6 +27,8 @@ The various build flags are not well documented. Some are documented [here](http
 
 As of this writing, there is an officially supported headless Chromium build args file for Linux: `build/args/headless.gn`. This does not work on Windows or Mac, so we have taken that as our starting point, and modified it until the Windows / Mac builds succeeded.
 
+**NOTE:** Please, make sure you consult @elastic/kibana-security before you change, remove or add any of the build flags.
+
 ## VMs
 
 I ran Linux and Windows VMs in GCP with the following specs:
@@ -84,13 +86,13 @@ In windows, at least, you will need to do a number of extra steps:
 
 Find the sha of the Chromium commit you wish to build. Most likely, you want to build the Chromium revision that is tied to the version of puppeteer that we're using.
 
-Find the Chromium revision (modify the following command to be wherever you have the kibana source installed):
+Find the Chromium revision (run in kibana's working directory):
 
-- `cat ~/dev/elastic/kibana/x-pack/node_modules/puppeteer-core/package.json | grep chromium_revision`
+- `cat node_modules/puppeteer-core/package.json | grep chromium_revision`
 - Take the revision number from that, and tack it to the end of this URL: https://crrev.com
-  - (For example: https://crrev.com/637110)
+  - (For example, puppeteer@1.19.0 has rev (674921): https://crrev.com/674921)
 - Grab the SHA from there
-  - (For example, rev 637110 has sha 2fac04abf6133ab2da2846a8fbd0e97690722699)
+  - (For example, rev 674921 has sha 312d84c8ce62810976feda0d3457108a6dfff9e6)
 
 Note: In Linux, you should run the build command in tmux so that if your ssh session disconnects, the build can keep going. To do this, just type `tmux` into your terminal to hop into a tmux session. If you get disconnected, you can hop back in like so:
 
@@ -100,18 +102,18 @@ Note: In Linux, you should run the build command in tmux so that if your ssh ses
 
 To run the build, replace the sha in the following commands with the sha that you wish to build:
 
-- Mac: `python ~/chromium/build_chromium/build.py 2fac04abf6133ab2da2846a8fbd0e97690722699`
-- Linux: `python ~/chromium/build_chromium/build.py 2fac04abf6133ab2da2846a8fbd0e97690722699`
-- Windows: `python c:\chromium\build_chromium\build.py 2fac04abf6133ab2da2846a8fbd0e97690722699`
+- Mac: `python ~/chromium/build_chromium/build.py 312d84c8ce62810976feda0d3457108a6dfff9e6`
+- Linux: `python ~/chromium/build_chromium/build.py 312d84c8ce62810976feda0d3457108a6dfff9e6`
+- Windows: `python c:\chromium\build_chromium\build.py 312d84c8ce62810976feda0d3457108a6dfff9e6`
 
 ## Artifacts
 
 After the build completes, there will be a .zip file and a .md5 file in `~/chromium/chromium/src/out/headless`. These are named like so: `chromium-{first_7_of_SHA}-{platform}`, for example: `chromium-4747cc2-linux`.
 
-The zip files need to be deployed to s3. For testing, I drop them into `headless-shell-dev`, but for production, they need to be in `headless-shell`. And the `x-pack/plugins/reporting/server/browsers/chromium/paths.js` file needs to be upated to have the correct `archiveChecksum`, `archiveFilename`, `rawChecksum` and `baseUrl`. Below is a list of what the archive's are:
+The zip files need to be deployed to s3. For testing, I drop them into `headless-shell-dev`, but for production, they need to be in `headless-shell`. And the `x-pack/legacy/plugins/reporting/server/browsers/chromium/paths.js` file needs to be upated to have the correct `archiveChecksum`, `archiveFilename`, `binaryChecksum` and `baseUrl`. Below is a list of what the archive's are:
 
 - `archiveChecksum`: The contents of the `.md5` file, which is the `md5` checksum of the zip file.
-- `rawChecksum`: The `md5` checksum of the `headless_shell` binary itself.
+- `binaryChecksum`: The `md5` checksum of the `headless_shell` binary itself.
 
 *If you're building in the cloud, don't forget to turn off your VM after retrieving the build artifacts!*
 

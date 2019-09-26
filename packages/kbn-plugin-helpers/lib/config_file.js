@@ -47,8 +47,9 @@ module.exports = function(root) {
 
   const deprecationMsg =
     'has been removed from `@kbn/plugin-helpers`. ' +
-    'During development your plugin must be located in `../kibana-extra/{pluginName}` ' +
-    'relative to the Kibana directory to work with this package.\n';
+    'During development your plugin must live in `./plugins/{pluginName}` ' +
+    'inside the Kibana folder or `../kibana-extra/{pluginName}` ' +
+    'relative to the Kibana folder to work with this package.\n';
 
   if (config.kibanaRoot) {
     throw new Error('The `kibanaRoot` config option ' + deprecationMsg);

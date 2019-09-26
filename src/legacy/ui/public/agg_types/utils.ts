@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { parseInterval } from '../utils/parse_interval';
+import { isValidEsInterval } from '../../../core_plugins/data/common';
 import { leastCommonInterval } from '../vis/lib/least_common_interval';
 
 /**
@@ -53,7 +53,7 @@ function isValidInterval(value: string, baseInterval: string) {
   if (baseInterval) {
     return _parseWithBase(value, baseInterval);
   } else {
-    return parseInterval(value) !== null;
+    return isValidEsInterval(value);
   }
 }
 

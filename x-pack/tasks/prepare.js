@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ensureAllBrowsersDownloaded } from '../plugins/reporting/server/browsers';
+import { ensureAllBrowsersDownloaded } from '../legacy/plugins/reporting/server/browsers';
 
 export default gulp => {
   // anything that should always happen before anything else

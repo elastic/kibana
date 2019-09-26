@@ -28,7 +28,8 @@ import {
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import { IndexPattern } from 'ui/index_patterns';
+import { UiSettingsClientContract } from 'src/core/public';
+import { IndexPattern } from '../../index_patterns';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
 
@@ -40,6 +41,7 @@ interface Props {
   onUpdate: (filter: Filter) => void;
   onRemove: () => void;
   intl: InjectedIntl;
+  uiSettings: UiSettingsClientContract;
 }
 
 interface State {
@@ -161,7 +163,7 @@ class FilterItemUI extends Component<Props, State> {
       },
       {
         id: 1,
-        width: 400,
+        width: 420,
         content: (
           <div>
             <FilterEditor
@@ -169,6 +171,7 @@ class FilterItemUI extends Component<Props, State> {
               indexPatterns={this.props.indexPatterns}
               onSubmit={this.onSubmit}
               onCancel={this.closePopover}
+              uiSettings={this.props.uiSettings}
             />
           </div>
         ),
@@ -178,6 +181,8 @@ class FilterItemUI extends Component<Props, State> {
     return (
       <EuiPopover
         id={`popoverFor_filter${id}`}
+        className={`globalFilterItem__popover`}
+        anchorClassName={`globalFilterItem__popoverAnchor`}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
         button={badge}

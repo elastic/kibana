@@ -25,6 +25,7 @@ export function createIndexPatternsStub() {
     get: sinon.spy(indexPatternId =>
       Promise.resolve({
         id: indexPatternId,
+        isTimeNanosBased: () => false
       })
     ),
   };

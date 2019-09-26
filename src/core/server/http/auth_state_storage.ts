@@ -16,26 +16,52 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Request } from 'hapi';
-import { KibanaRequest } from './router';
+import { ensureRawRequest, KibanaRequest, LegacyRequest } from './router';
 
+/**
+ * Status indicating an outcome of the authentication.
+ * @public
+ */
 export enum AuthStatus {
+  /**
+   * `auth` interceptor successfully authenticated a user
+   */
   authenticated = 'authenticated',
+  /**
+   * `auth` interceptor failed user authentication
+   */
   unauthenticated = 'unauthenticated',
+  /**
+   * `auth` interceptor has not been registered
+   */
   unknown = 'unknown',
 }
 
-const toKey = (request: KibanaRequest | Request) =>
-  request instanceof KibanaRequest ? request.unstable_getIncomingMessage() : request.raw.req;
+/**
+ * Get authentication state for a request. Returned by `auth` interceptor.
+ * @param request {@link KibanaRequest} - an incoming request.
+ * @public
+ */
+export type GetAuthState = (
+  request: KibanaRequest | LegacyRequest
+) => { status: AuthStatus; state: unknown };
 
+/**
+ * Return authentication status for a request.
+ * @param request {@link KibanaRequest} - an incoming request.
+ * @public
+ */
+export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolean;
+
+/** @internal */
 export class AuthStateStorage {
-  private readonly storage = new WeakMap<ReturnType<typeof toKey>, unknown>();
+  private readonly storage = new WeakMap<LegacyRequest, unknown>();
   constructor(private readonly canBeAuthenticated: () => boolean) {}
-  public set = (request: KibanaRequest | Request, state: unknown) => {
-    this.storage.set(toKey(request), state);
+  public set = (request: KibanaRequest | LegacyRequest, state: unknown) => {
+    this.storage.set(ensureRawRequest(request), state);
   };
-  public get = (request: KibanaRequest | Request) => {
-    const key = toKey(request);
+  public get: GetAuthState = request => {
+    const key = ensureRawRequest(request);
     const state = this.storage.get(key);
     const status: AuthStatus = this.storage.has(key)
       ? AuthStatus.authenticated
@@ -45,7 +71,7 @@ export class AuthStateStorage {
 
     return { status, state };
   };
-  public isAuthenticated = (request: KibanaRequest | Request) => {
+  public isAuthenticated: IsAuthenticated = request => {
     return this.get(request).status === AuthStatus.authenticated;
   };
 }

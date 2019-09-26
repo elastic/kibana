@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard']);
 
-  describe('empty dashboard', async () => {
+  describe('empty dashboard', () => {
     before(async () => {
       await PageObjects.dashboard.clickNewDashboard();
     });

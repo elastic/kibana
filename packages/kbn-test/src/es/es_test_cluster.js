@@ -37,6 +37,8 @@ export function createEsTestCluster(options = {}) {
     basePath = resolve(KIBANA_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
     dataArchive,
+    esArgs,
+    ssl,
   } = options;
 
   const randomHash = Math.random()
@@ -50,11 +52,13 @@ export function createEsTestCluster(options = {}) {
     password,
     license,
     basePath,
+    esArgs,
   };
+  const transportPort = esTestConfig.getTransportPort();
 
-  const cluster = new Cluster(log);
+  const cluster = new Cluster({ log, ssl });
 
-  return new class EsTestCluster {
+  return new (class EsTestCluster {
     getStartTimeout() {
       const second = 1000;
       const minute = second * 60;
@@ -85,6 +89,7 @@ export function createEsTestCluster(options = {}) {
           `cluster.name=${clusterName}`,
           `http.port=${port}`,
           'discovery.type=single-node',
+          `transport.port=${transportPort}`,
           ...esArgs,
         ],
         esEnvVars,
@@ -121,7 +126,7 @@ export function createEsTestCluster(options = {}) {
 
       return format(parts);
     }
-  }();
+  })();
 }
 
 /**
