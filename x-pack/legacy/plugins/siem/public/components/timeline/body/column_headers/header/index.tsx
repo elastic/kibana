@@ -101,7 +101,7 @@ export class Header extends React.PureComponent<Props> {
         handle={<EventsHeadingHandle />}
         id={header.id}
         onResize={this.onResize}
-        position="absolute"
+        positionAbsolute
         render={this.renderActions}
         right="-1px"
         top={0}

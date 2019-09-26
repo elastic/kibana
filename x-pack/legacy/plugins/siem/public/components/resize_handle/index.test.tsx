@@ -44,6 +44,59 @@ describe('Resizeable', () => {
     );
   });
 
+  test('it applies positioning styles to the ResizeHandleContainer when positionAbsolute is true and bottom/left/right/top is specified', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Resizeable
+          bottom={0}
+          handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
+          id="test"
+          left={0}
+          onResize={jest.fn()}
+          positionAbsolute
+          render={() => <></>}
+          right={0}
+          top={0}
+        />
+      </TestProviders>
+    );
+    const resizeHandleContainer = wrapper
+      .find('[data-test-subj="resize-handle-container"]')
+      .first();
+
+    expect(resizeHandleContainer).toHaveStyleRule('bottom', '0');
+    expect(resizeHandleContainer).toHaveStyleRule('left', '0');
+    expect(resizeHandleContainer).toHaveStyleRule('position', 'absolute');
+    expect(resizeHandleContainer).toHaveStyleRule('right', '0');
+    expect(resizeHandleContainer).toHaveStyleRule('top', '0');
+  });
+
+  test('it DOES NOT apply positioning styles to the ResizeHandleContainer when positionAbsolute is false, regardless if bottom/left/right/top is specified', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Resizeable
+          bottom={0}
+          handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
+          id="test"
+          left={0}
+          onResize={jest.fn()}
+          render={() => <></>}
+          right={0}
+          top={0}
+        />
+      </TestProviders>
+    );
+    const resizeHandleContainer = wrapper
+      .find('[data-test-subj="resize-handle-container"]')
+      .first();
+
+    expect(resizeHandleContainer).not.toHaveStyleRule('bottom', '0');
+    expect(resizeHandleContainer).not.toHaveStyleRule('left', '0');
+    expect(resizeHandleContainer).not.toHaveStyleRule('position', 'absolute');
+    expect(resizeHandleContainer).not.toHaveStyleRule('right', '0');
+    expect(resizeHandleContainer).not.toHaveStyleRule('top', '0');
+  });
+
   test('it renders', () => {
     const wrapper = shallow(
       <TestProviders>

@@ -20,45 +20,41 @@ export const calculateDeltaX = ({ prevX, screenX }: { prevX: number; screenX: nu
 
 const isSafari = /^((?!chrome|android|crios|fxios|Firefox).)*safari/i.test(navigator.userAgent);
 
-interface Props {
+interface ResizeHandleContainerProps {
   bottom?: string | number;
-  /** a (styled) resize handle */
-  handle: React.ReactNode;
   /** optionally provide a height style ResizeHandleContainer */
   height?: string;
+  left?: string | number;
+  positionAbsolute?: boolean;
+  right?: string | number;
+  top?: string | number;
+}
+
+interface Props extends ResizeHandleContainerProps {
+  /** a (styled) resize handle */
+  handle: React.ReactNode;
   /** the `onResize` callback will be invoked with this id */
   id: string;
-  left?: string | number;
   /** invoked when the handle is resized */
   onResize: OnResize;
   /** The resizeable content to render */
-  position?: string;
   render: (isResizing: boolean) => React.ReactNode;
-  right?: string | number;
-  top?: string | number;
 }
 
 interface State {
   isResizing: boolean;
 }
 
-const ResizeHandleContainer = styled.div<{
-  bottom?: string | number;
-  height?: string;
-  left?: string | number;
-  position?: string;
-  right?: string | number;
-  top?: string | number;
-}>`
-  ${({ bottom, height, left, position, right, theme, top }) => css`
-    bottom: ${bottom};
+const ResizeHandleContainer = styled.div<ResizeHandleContainerProps>`
+  ${({ bottom, height, left, positionAbsolute, right, theme, top }) => css`
+    bottom: ${positionAbsolute && bottom};
     cursor: ${resizeCursorStyle};
     height: ${height};
-    left: ${left};
-    position: ${position};
-    right: ${right};
-    top: ${top};
-    z-index: ${(position === 'absolute' || position === 'relative') && theme.eui.euiZLevel1};
+    left: ${positionAbsolute && left};
+    position: ${positionAbsolute && 'absolute'};
+    right: ${positionAbsolute && right};
+    top: ${positionAbsolute && top};
+    z-index: ${positionAbsolute && theme.eui.euiZLevel1};
   `}
 `;
 ResizeHandleContainer.displayName = 'ResizeHandleContainer';
@@ -143,7 +139,7 @@ export class Resizeable extends React.PureComponent<Props, State> {
   }
 
   public render() {
-    const { bottom, handle, height, left, position, render, right, top } = this.props;
+    const { bottom, handle, height, left, positionAbsolute, render, right, top } = this.props;
 
     return (
       <>
@@ -154,7 +150,7 @@ export class Resizeable extends React.PureComponent<Props, State> {
           height={height}
           innerRef={this.ref}
           left={left}
-          position={position}
+          positionAbsolute={positionAbsolute}
           right={right}
           top={top}
         >
