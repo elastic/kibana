@@ -27,7 +27,6 @@ function flattenHit(indexPattern: IndexPattern, hit: Record<string, any>, deep: 
   const flat = {} as Record<string, any>;
 
   // recursively merge _source
-  // debugger;
   const fields = indexPattern.fields.getByName;
   (function flatten(obj, keyPrefix = '') {
     keyPrefix = keyPrefix ? keyPrefix + '.' : '';
