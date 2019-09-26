@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SavedViewListFlyout } from './view_list_flyout';
@@ -52,18 +52,26 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
   return (
     <>
       <EuiFlexGroup>
-        <EuiButtonEmpty onClick={openSaveModal} data-test-subj="openSaveViewModal">
-          <FormattedMessage
-            defaultMessage="Save view"
-            id="xpack.infra.waffle.savedViews.saveViewLabel"
-          />
-        </EuiButtonEmpty>
-        <EuiButtonEmpty onClick={loadViews} data-test-subj="loadViews">
-          <FormattedMessage
-            defaultMessage="Load views"
-            id="xpack.infra.waffle.savedViews.loadViewsLabel"
-          />
-        </EuiButtonEmpty>
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            iconType="save"
+            onClick={openSaveModal}
+            data-test-subj="openSaveViewModal"
+          >
+            <FormattedMessage
+              defaultMessage="Save view"
+              id="xpack.infra.waffle.savedViews.saveViewLabel"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButtonEmpty onClick={loadViews} data-test-subj="loadViews">
+            <FormattedMessage
+              defaultMessage="Load views"
+              id="xpack.infra.waffle.savedViews.loadViewsLabel"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       </EuiFlexGroup>
 
       {createModalOpen && <SavedViewCreateModal close={closeCreateModal} save={save} />}

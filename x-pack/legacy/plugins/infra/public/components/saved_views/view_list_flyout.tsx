@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -14,6 +14,8 @@ import {
   EuiTitle,
   EuiFlyoutBody,
   EuiInMemoryTable,
+  EuiFlexGroup,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -26,6 +28,48 @@ interface Props<ViewState> {
   setView(viewState: ViewState): void;
   deleteView(id: string): void;
 }
+
+interface DeleteConfimationProps {
+  confirmedAction(): void;
+}
+const DeleteConfimation = (props: DeleteConfimationProps) => {
+  const [confirmVisible, setConfirmVisible] = useState(false);
+
+  const showConfirm = useCallback(() => setConfirmVisible(true), []);
+  const hideConfirm = useCallback(() => setConfirmVisible(false), []);
+
+  return (
+    <>
+      {confirmVisible && (
+        <EuiFlexGroup>
+          <EuiButton
+            fill={true}
+            iconType="trash"
+            color="danger"
+            onClick={props.confirmedAction}
+            data-test-subj="showConfirm"
+          >
+            <FormattedMessage
+              defaultMessage="Are you sure?"
+              id="xpack.infra.openView.actionNames.deleteConfirmation"
+            />
+          </EuiButton>
+          <EuiButtonEmpty onClick={hideConfirm} data-test-subj="hideConfirm">
+            <FormattedMessage defaultMessage="cancel" id="xpack.infra.waffle.savedViews.cancel" />
+          </EuiButtonEmpty>
+        </EuiFlexGroup>
+      )}
+      {!confirmVisible && (
+        <EuiButtonEmpty onClick={showConfirm}>
+          <FormattedMessage
+            defaultMessage="Delete view"
+            id="xpack.infra.openView.actionNames.delete"
+          />
+        </EuiButtonEmpty>
+      )}
+    </>
+  );
+};
 
 export function SavedViewListFlyout<ViewState>({
   close,
@@ -59,16 +103,10 @@ export function SavedViewListFlyout<ViewState>({
       }),
       actions: [
         {
-          name: i18n.translate('xpack.infra.openView.actionNames.delete', {
-            defaultMessage: 'Delete',
-          }),
-          description: i18n.translate('xpack.infra.openView.actionDescription.delete', {
-            defaultMessage: 'Delete a view',
-          }),
-          icon: 'trash',
-          color: 'danger',
           available: (item: SavedView<ViewState>) => !item.isDefault,
-          onClick: useCallback(e => deleteView(e.id), []),
+          render: (item: SavedView<ViewState>) => {
+            return <DeleteConfimation confirmedAction={() => deleteView(item.id)} />;
+          },
         },
       ],
     },
