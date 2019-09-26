@@ -1,11 +1,5 @@
 #!/bin/groovy
 
-// params.GITHUB_OWNER
-// params.GITHUB_REPO
-// params.GITHUB_BRANCH
-// params.CI_GROUP
-// params.NUMBER_EXECUTIONS
-
 // Looks like 'oss:ciGroup:1' or 'oss:firefoxSmoke'
 def JOB_PARTS = params.CI_GROUP.split(':')
 def IS_XPACK = JOB_PARTS[0] == 'xpack'
@@ -16,7 +10,7 @@ def worker = getWorkerFromParams(IS_XPACK, JOB, CI_GROUP)
 
 def workerFailures = []
 
-stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a little bit
+stage("Kibana Pipeline") {
   timeout(time: 180, unit: 'MINUTES') {
     timestamps {
       ansiColor('xterm') {
@@ -79,10 +73,6 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
         catchError {
           publishJunit()
         }
-
-        catchError {
-          runErrorReporter()
-        }
       }
     }
   }
@@ -129,34 +119,6 @@ def getXpackCiGroupWorker(ciGroup) {
   })
 }
 
-def legacyJobRunner(name) {
-  return {
-    parallel([
-      "${name}": {
-        withEnv([
-          "JOB=${name}",
-        ]) {
-          jobRunner('linux && immutable') {
-            try {
-              runbld('.ci/run.sh', true)
-            } finally {
-              catchError {
-                uploadAllGcsArtifacts(name)
-              }
-              catchError {
-                publishJunit()
-              }
-              catchError {
-                runErrorReporter()
-              }
-            }
-          }
-        }
-      }
-    ])
-  }
-}
-
 def jobRunner(label, closure) {
   node(label) {
     def scmVars = checkout scm
@@ -185,11 +147,8 @@ def jobRunner(label, closure) {
   }
 }
 
-// TODO what should happen if GCS, Junit, or email publishing fails? Unstable build? Failed build?
-
 def uploadGcsArtifact(workerName, pattern) {
-  def storageLocation = "gs://kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}" // TODO
-  // def storageLocation = "gs://kibana-pipeline-testing/jobs/pipeline-test/${BUILD_NUMBER}/${workerName}"
+  def storageLocation = "gs://kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
 
   googleStorageUpload(
     credentialsId: 'kibana-ci-gcs-plugin',
@@ -218,35 +177,6 @@ def uploadAllGcsArtifacts(workerName) {
 
 def publishJunit() {
   junit(testResults: 'target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
-}
-
-def sendMail() {
-  sendInfraMail()
-  sendKibanaMail()
-}
-
-def sendInfraMail() {
-  catchError {
-    step([
-      $class: 'Mailer',
-      notifyEveryUnstableBuild: true,
-      recipients: 'infra-root+build@elastic.co',
-      sendToIndividuals: false
-    ])
-  }
-}
-
-def sendKibanaMail() {
-  catchError {
-    if(params.NOTIFY_ON_FAILURE && currentBuild.result != 'SUCCESS' && currentBuild.result != 'ABORTED') {
-      emailext(
-        to: 'build-kibana@elastic.co',
-        subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${currentBuild.result}",
-        body: '${SCRIPT,template="groovy-html.template"}',
-        mimeType: 'text/html',
-      )
-    }
-  }
 }
 
 def runbld(script, enableJunitProcessing = false) {
