@@ -18,6 +18,7 @@ exports[`MonitorList component renders a no items message when no data is provid
       size="s"
     />
     <EuiBasicTable
+      aria-label="Monitor Status table with 5 rows of data and columns for Status, Name, URL, IP, Downtime History and Integrations"
       columns={
         Array [
           Object {
@@ -101,6 +102,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
       size="s"
     />
     <EuiBasicTable
+      aria-label="Monitor Status table with 5 rows of data and columns for Status, Name, URL, IP, Downtime History and Integrations"
       columns={
         Array [
           Object {
