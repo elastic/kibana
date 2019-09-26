@@ -162,8 +162,12 @@ type Props = OwnProps & DispatchProps;
  * data provider associated with the item being dropped
  */
 class DraggableWrapperComponent extends React.Component<Props> {
-  public shouldComponentUpdate = ({ dataProvider, render }: Props) =>
-    isEqual(dataProvider, this.props.dataProvider) && render !== this.props.render;
+  public shouldComponentUpdate = ({ dataProvider, render, truncate }: Props) =>
+    isEqual(dataProvider, this.props.dataProvider) &&
+    render !== this.props.render &&
+    truncate === this.props.truncate
+      ? false
+      : true;
 
   public componentDidMount() {
     const { dataProvider, registerProvider } = this.props;
