@@ -35,7 +35,6 @@ import { Adapters } from '../../inspector/types';
 import { PersistedState } from '../../persisted_state';
 import { IPrivate } from '../../private';
 import { RenderCompleteHelper } from '../../../../../plugins/kibana_utils/public';
-import { AppState } from '../../state_management/app_state';
 import { timefilter } from '../../timefilter';
 import { Vis } from '../../vis';
 // @ts-ignore untyped dependency
@@ -214,8 +213,8 @@ export class EmbeddedVisualizeHandler {
         const newFilters = this.actions[event.name](event.data) || [];
         if (event.name === 'brush') {
           const fieldName = newFilters[0].meta.key;
-          const filters = data.filter.filterManager.getFilters();
-          const existingFilter = filters.find(
+          const existingFilters = data.filter.filterManager.getFilters();
+          const existingFilter = existingFilters.find(
             (filter: any) => filter.meta && filter.meta.key === fieldName
           );
           if (existingFilter) {
@@ -254,10 +253,6 @@ export class EmbeddedVisualizeHandler {
     }
 
     let fetchRequired = false;
-    if (params.hasOwnProperty('visParams') && !isEqual(this.vis.params, params.visParams)) {
-      fetchRequired = true;
-      this.vis.params = _.cloneDeep(params.visParams);
-    }
     if (
       params.hasOwnProperty('timeRange') &&
       !isEqual(this.dataLoaderParams.timeRange, params.timeRange)
@@ -480,19 +475,19 @@ export class EmbeddedVisualizeHandler {
         // Don't pass in this.dataLoaderParams directly because it may be modified async in another
         // call to fetch before the previous one has completed
         .fetch({ ...this.dataLoaderParams })
-        .then(data => {
+        .then(responseData => {
           // Pipeline responses never throw errors, so we need to check for
           // `type: 'error'`, and then throw so it can be caught below.
           // TODO: We should revisit this after we have fully migrated
           // to the new expression pipeline infrastructure.
-          if (data && data.type === 'error') {
-            throw data.error;
+          if (responseData && responseData.type === 'error') {
+            throw responseData.error;
           }
 
-          if (data && data.value) {
-            this.dataSubject.next(data.value);
+          if (responseData && responseData.value) {
+            this.dataSubject.next(responseData.value);
           }
-          return data;
+          return responseData;
         })
         .catch(this.handleDataLoaderError)
     );

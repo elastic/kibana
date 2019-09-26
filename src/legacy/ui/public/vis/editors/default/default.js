@@ -84,7 +84,9 @@ const defaultEditor = function ($rootScope, $compile) {
           $scope.stageEditableVis = () => {
             $scope.oldState = $scope.vis.getSerializableState($scope.state);
             $scope.vis.setCurrentState($scope.state);
-            $scope.$emit('render');
+            this._handler.reload();
+            appState.vis = this.vis.getCurrentState();
+            appState.save();
             $scope.vis.dirty = false;
           };
           $scope.resetEditableVis = () => {

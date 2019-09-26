@@ -78,10 +78,6 @@ function MockSearchSource() {
   };
 }
 
-const getMockKbnApi = () => ({
-  SearchSource: jest.fn(MockSearchSource),
-});
-
 describe('hasValue', () => {
   const controlParams = {
     id: '1',
@@ -92,7 +88,7 @@ describe('hasValue', () => {
 
   let listControl;
   beforeEach(async () => {
-    listControl = await listControlFactory(controlParams, getMockKbnApi(), useTimeFilter);
+    listControl = await listControlFactory(controlParams, useTimeFilter, MockSearchSource);
   });
 
   test('should be false when control has no value', () => {
@@ -121,8 +117,7 @@ describe('fetch', () => {
 
   let listControl;
   beforeEach(async () => {
-    mockKbnApi = getMockKbnApi();
-    listControl = await listControlFactory(controlParams, mockKbnApi, useTimeFilter);
+    listControl = await listControlFactory(controlParams, useTimeFilter, MockSearchSource);
   });
 
   test('should pass in timeout parameters from injected vars', async () => {
@@ -151,15 +146,14 @@ describe('fetch with ancestors', () => {
   let listControl;
   let parentControl;
   beforeEach(async () => {
-    const mockKbnApi = getMockKbnApi();
-    listControl = await listControlFactory(controlParams, mockKbnApi, useTimeFilter);
+    listControl = await listControlFactory(controlParams, useTimeFilter, MockSearchSource);
 
     const parentControlParams = {
       id: 'parent',
       fieldName: 'myField',
       options: {},
     };
-    parentControl = await listControlFactory(parentControlParams, mockKbnApi, useTimeFilter);
+    parentControl = await listControlFactory(parentControlParams, useTimeFilter, MockSearchSource);
     parentControl.clear();
     listControl.setAncestors([parentControl]);
   });
