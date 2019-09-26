@@ -36,8 +36,6 @@ export class NoDataController extends MonitoringViewBaseController {
         if (monitoringClustersData && monitoringClustersData.length) {
           kbnUrl.redirect('/home');
           return monitoringClustersData;
-        } else if (this.isCollectionEnabledUpdated) {
-          return Promise.resolve(this.data);
         }
       }
       catch (err) {
@@ -74,7 +72,12 @@ export class NoDataController extends MonitoringViewBaseController {
     //Need to set updateModel after super since there is no `this` otherwise
     const { updateModel } = new ModelUpdater($scope, this);
     const enabler = new Enabler($http, updateModel);
-    $scope.$watch(() => this, () => this.render(enabler), true);
+    $scope.$watch(() => this, () => {
+      if (this.isCollectionEnabledUpdated && !this.reason) {
+        return;
+      }
+      this.render(enabler);
+    }, true);
   }
 
   getDefaultModel() {
