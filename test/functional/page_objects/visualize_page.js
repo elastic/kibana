@@ -685,9 +685,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async selectYAxisScaleType(axisId, scaleType) {
-      const selectElement = await testSubjects.find(`scaleSelectYAxis-${axisId}`);
-      const selector = await selectElement.findByCssSelector(`option[value="${scaleType}"]`);
-      await selector.click();
+      await find.selectValue(`select#scaleSelectYAxis-${axisId}`, scaleType);
     }
 
     async selectYAxisMode(mode) {
