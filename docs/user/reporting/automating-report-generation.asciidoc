@@ -1,43 +1,54 @@
 [role="xpack"]
 [[automating-report-generation]]
-== Automating Report Generation
+== Automating report generation
 You can automatically generate reports with {watcher}, or by submitting
 HTTP POST requests from a script.
 
-To automatically generate reports with a watch, you need to configure
-{watcher} to trust the {kib} server’s certificate. For more information,
-see <<securing-reporting, Securing Reporting>>.
-
 include::report-intervals.asciidoc[]
 
-To get the URL for triggering a report generation during a given time period:
+[float]
+=== Get the POST URL
 
-. Load the saved object.
-. Use the timepicker to specify a relative or absolute time period.
-. Click *Share* in the Kibana toolbar.
+Generating a report either through {watcher} or a script requires capturing the **POST
+URL**, which is the URL to queue a report for generation.
+
+To get the URL for triggering PDF report generation during a given time period:
+
+. Load the saved object in the Visualize editor, or load a Dashboard.
+. To specify a relative or absolute time period, use the time filter.
+. In the {kib} toolbar, click *Share*.
 . Select *PDF Reports*.
 . Click **Copy POST URL**.
 
-NOTE: The response from this request with be JSON, and will contain a `path` property
-with a URL to use to download the generated report. When requesting that path,
-you will get a 503 response if it's not completed yet. In this case, retry after the
-number of seconds in the `Retry-After` header in the response until the PDF is returned.
+To get the URL for triggering CSV report generation during a given time period:
 
-To configure a watch to email reports, you use the `reporting` attachment type
-in an `email` action. For more information, see
-{stack-ov}/actions-email.html#configuring-email[Configuring Email Accounts].
+. Load the saved search in Discover.
+. To specify a relative or absolute time period, use the time filter.
+. In the {kib} toolbar, click *Share*.
+. Select *CSV Reports*.
+. Click **Copy POST URL**.
+
+[float]
+=== Use Watcher
 
 include::watch-example.asciidoc[]
 
-For more information about configuring watches, see
-{stack-ov}/how-watcher-works.html[How Watcher Works].
+[float]
+=== Use a script
 
-== Deprecated Report URLs
+include::script-example.asciidoc[]
 
-The following is deprecated in 6.0, and you should now use {kib} to get the URL for a
-particular report.
+[float]
+=== HTTP response codes
 
-You may request PDF reports optimized for printing through three {reporting} endpoints:
+include::response-codes.asciidoc[]
+
+[float]
+== Deprecated report URLs
+
+The following POST URL paths were once supported but are now deprecated. If there are
+any problems with using these paths after upgrading {kib}, use
+{kib} to regenerate the POST URL for a particular report.
 
 * Dashboard Reports:  `/api/reporting/generate/dashboard/<dashboard-id>`
 * Visualization Reports:  `/api/reporting/generate/visualization/<visualization-id>`
