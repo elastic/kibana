@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import { AutocompleteField } from '../../../components/autocomplete_field';
@@ -22,7 +22,7 @@ import { WithSource } from '../../../containers/with_source';
 import { SavedViewsToolbarControls } from '../../../components/waffle/saved_views_toolbar_items';
 import { WithWaffleViewState } from '../../../containers/waffle/with_waffle_view_state';
 
-export const SnapshotToolbar = injectI18n(({ intl }) => (
+export const SnapshotToolbar = () => (
   <Toolbar>
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
       <EuiFlexItem>
@@ -43,10 +43,12 @@ export const SnapshotToolbar = injectI18n(({ intl }) => (
                       loadSuggestions={loadSuggestions}
                       onChange={setFilterQueryDraftFromKueryExpression}
                       onSubmit={applyFilterQueryFromKueryExpression}
-                      placeholder={intl.formatMessage({
-                        id: 'xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder',
-                        defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
-                      })}
+                      placeholder={i18n.translate(
+                        'xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder',
+                        {
+                          defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
+                        }
+                      )}
                       suggestions={suggestions}
                       value={filterQueryDraft ? filterQueryDraft.expression : ''}
                       autoFocus={true}
@@ -130,4 +132,4 @@ export const SnapshotToolbar = injectI18n(({ intl }) => (
       </WithSource>
     </EuiFlexGroup>
   </Toolbar>
-));
+);
