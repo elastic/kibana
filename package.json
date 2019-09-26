@@ -444,7 +444,7 @@
     "tree-kill": "^1.1.0",
     "typescript": "3.5.3",
     "typings-tester": "^0.3.2",
-    "vinyl-fs": "^3.0.2",
+    "vinyl-fs": "^3.0.3",
     "xml2js": "^0.4.19",
     "xmlbuilder": "13.0.2",
     "zlib": "^1.0.5"
