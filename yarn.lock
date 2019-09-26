@@ -1071,15 +1071,31 @@
     oppsy "2.x.x"
     pumpify "1.3.x"
 
-"@elastic/javascript-typescript-langserver@^0.2.2":
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/@elastic/javascript-typescript-langserver/-/javascript-typescript-langserver-0.2.2.tgz#0dc126e35ead4016dcf8f318281578934436be27"
-  integrity sha512-u7gnQGD1uSuIWlUpoT2m6jIb34gablwwtqxwe46wOYXh201m4KhBy6qjFkclWYT/czhwDuOQlS+cfaDhjM54qg==
+"@elastic/javascript-typescript-langserver@^0.3.3":
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/@elastic/javascript-typescript-langserver/-/javascript-typescript-langserver-0.3.3.tgz#950c3fd129bf3954c4931e36b5c21d64b7ea2bb4"
+  integrity sha512-rmHZlGFDFvUIIydr/xSo5p4M30KV00F7bu5TxJQAL/vn65mZMYQvuVyZz3T2sHe+MahuitATe9W0MwUnchOfoA==
   dependencies:
     "@elastic/lsp-extension" "^0.1.2"
-    javascript-typescript-langserver "^2.11.3"
+    chai "^4.0.1"
+    chai-as-promised "^7.0.0"
+    chalk "^2.2.0"
+    commander "^2.9.0"
+    fast-json-patch "^2.0.2"
+    glob "^7.1.1"
+    iterare "^1.1.2"
+    jaeger-client "^3.5.3"
+    lodash "^4.17.4"
+    mz "^2.6.0"
+    object-hash "^1.1.8"
+    opentracing "^0.14.0"
     rxjs "^5.5.0"
+    semaphore-async-await "^1.5.1"
+    string-similarity "^2.0.0"
     typescript "~3.3.3333"
+    vscode-jsonrpc "^4.0.0"
+    vscode-languageserver "^5.0.0"
+    vscode-languageserver-types "^3.0.3"
     yarn "^1.12.3"
 
 "@elastic/lsp-extension@^0.1.1", "@elastic/lsp-extension@^0.1.2":
@@ -3381,12 +3397,7 @@
   dependencies:
     "@types/sizzle" "*"
 
-"@types/js-yaml@^3.11.1":
-  version "3.11.2"
-  resolved "https://registry.yarnpkg.com/@types/js-yaml/-/js-yaml-3.11.2.tgz#699ad86054cc20043c30d66a6fcde30bbf5d3d5e"
-  integrity sha512-JRDtMPEqXrzfuYAdqbxLot1GvAr/QvicIZAnOAigZaj8xVMhuSJTg/xsv9E1TvyL+wujYhRLx9ZsQ0oFOSmwyA==
-
-"@types/js-yaml@^3.12.1":
+"@types/js-yaml@^3.11.1", "@types/js-yaml@^3.12.1":
   version "3.12.1"
   resolved "https://registry.yarnpkg.com/@types/js-yaml/-/js-yaml-3.12.1.tgz#5c6f4a1eabca84792fbd916f0cb40847f123c656"
   integrity sha512-SGGAhXLHDx+PK4YLNcNGa6goPf9XRWQNAUUbffkwVGGXIxmDKWyGGL4inzq2sPmExu431Ekb9aEMn9BkPqEYFA==
@@ -16297,31 +16308,6 @@ jaeger-client@^3.5.3:
     uuid "^3.2.1"
     xorshift "^0.2.0"
 
-javascript-typescript-langserver@^2.11.3:
-  version "2.11.3"
-  resolved "https://registry.yarnpkg.com/javascript-typescript-langserver/-/javascript-typescript-langserver-2.11.3.tgz#71bd0b08e43588f1d49a85eb774acc02a3d9a26d"
-  integrity sha512-j2dKPq5tgSUyM2AOXWh2O7pNWzXzKI/3W02X1OrEZnV3B9yt9IM+snuGt/mk1Nryxyy7OZnhdL0XqHe4xx7Qzw==
-  dependencies:
-    chai "^4.0.1"
-    chai-as-promised "^7.0.0"
-    chalk "^2.2.0"
-    commander "^2.9.0"
-    fast-json-patch "^2.0.2"
-    glob "^7.1.1"
-    iterare "^1.1.2"
-    jaeger-client "^3.5.3"
-    lodash "^4.17.4"
-    mz "^2.6.0"
-    object-hash "^1.1.8"
-    opentracing "^0.14.0"
-    rxjs "^5.5.0"
-    semaphore-async-await "^1.5.1"
-    string-similarity "^2.0.0"
-    typescript "~3.0.3"
-    vscode-jsonrpc "^4.0.0"
-    vscode-languageserver "^5.0.0"
-    vscode-languageserver-types "^3.0.3"
-
 jest-changed-files@^24.9.0:
   version "24.9.0"
   resolved "https://registry.yarnpkg.com/jest-changed-files/-/jest-changed-files-24.9.0.tgz#08d8c15eb79a7fa3fc98269bc14b451ee82f8039"
@@ -18245,17 +18231,7 @@ lodash.uniqby@^4.7.0:
   resolved "https://registry.yarnpkg.com/lodash.uniqby/-/lodash.uniqby-4.7.0.tgz#d99c07a669e9e6d24e1362dfe266c67616af1302"
   integrity sha1-2ZwHpmnp5tJOE2Lf4mbGdhavEwI=
 
-lodash@4.17.11:
-  version "4.17.11"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
-  integrity sha512-cQKh8igo5QUhZ7lg38DYWAxMvjSAKG0A8wGSVimP07SIUEK2UO+arSRKbRZWtelMtN5V0Hkwh5ryOto/SshYIg==
-
-lodash@4.17.13:
-  version "4.17.13"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.13.tgz#0bdc3a6adc873d2f4e0c4bac285df91b64fc7b93"
-  integrity sha512-vm3/XWXfWtRua0FkUyEHBZy8kCPjErNBT9fJx8Zvs+U6zjqPbTUOpkaoum3O5uiA8sm+yNMHXfYkTUHFoMxFNA==
-
-lodash@4.17.15, lodash@>4.17.4, lodash@^4.0.0, lodash@^4.0.1, lodash@^4.10.0, lodash@^4.11.1, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.16.4, lodash@^4.17.0, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.12, lodash@^4.17.13, lodash@^4.17.15, lodash@^4.17.2, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.0, lodash@^4.2.1, lodash@^4.3.0, lodash@^4.5.0, lodash@^4.6.1, lodash@~4.17.10, lodash@~4.17.15, lodash@~4.17.5:
+lodash@4.17.11, lodash@4.17.15, lodash@>4.17.4, lodash@^4.0.0, lodash@^4.0.1, lodash@^4.10.0, lodash@^4.11.1, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.16.4, lodash@^4.17.0, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.12, lodash@^4.17.13, lodash@^4.17.15, lodash@^4.17.2, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.0, lodash@^4.2.1, lodash@^4.3.0, lodash@^4.5.0, lodash@^4.6.1, lodash@~4.17.10, lodash@~4.17.15, lodash@~4.17.5:
   version "4.17.15"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
   integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
@@ -27905,7 +27881,7 @@ typescript-fsa@^2.0.0, typescript-fsa@^2.5.0:
   resolved "https://registry.yarnpkg.com/typescript-fsa/-/typescript-fsa-2.5.0.tgz#1baec01b5e8f5f34c322679d1327016e9e294faf"
   integrity sha1-G67AG16PXzTDImedEycBbp4pT68=
 
-typescript@3.5.1, typescript@3.5.3, typescript@^3.0.1, typescript@^3.0.3, typescript@^3.2.2, typescript@^3.3.3333, typescript@^3.4.5, typescript@~3.0.3, typescript@~3.3.3333, typescript@~3.5.3:
+typescript@3.5.1, typescript@3.5.3, typescript@^3.0.1, typescript@^3.0.3, typescript@^3.2.2, typescript@^3.3.3333, typescript@^3.4.5, typescript@~3.3.3333, typescript@~3.5.3:
   version "3.5.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.5.3.tgz#c830f657f93f1ea846819e929092f5fe5983e977"
   integrity sha512-ACzBtm/PhXBDId6a6sDJfroT2pOWt/oOnk4/dElG5G33ZL776N3Y6/6bKZJBFpd+b05F3Ct9qDjMeJmRWtE2/g==
@@ -30211,9 +30187,9 @@ yarn-install@^0.5.1:
     cross-spawn "^4.0.2"
 
 yarn@^1.12.3:
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.16.0.tgz#5701b58ac555ff91f7b889b7d791b3dc86f8f999"
-  integrity sha512-cfemyGlnWKA1zopUUgebTPf8C4WkPIZ+TJmklwcEAJ4u6oWPtJeAzrsamaGGh/+b1XWe8W51yzAImC4AWbWR1g==
+  version "1.17.3"
+  resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.17.3.tgz#60e0b77d079eb78e753bb616f7592b51b6a9adce"
+  integrity sha512-CgA8o7nRZaQvmeF/WBx2FC7f9W/0X59T2IaLYqgMo6637wfp5mMEsM3YXoJtKUspnpmDJKl/gGFhnqS+sON7hA==
 
 yauzl@2.10.0, yauzl@^2.10.0:
   version "2.10.0"
