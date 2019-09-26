@@ -17,9 +17,12 @@
  * under the License.
  */
 
-import { npStart } from 'ui/new_platform';
+import { timechartFn } from './schema';
+import { Panel } from '../panel';
+import { TimelionStartDependencies } from '../../plugin';
 
-const timelionUiEnabled = npStart.core.injectedMetadata.getInjectedVar('timelionUiEnabled');
-if (timelionUiEnabled === false) {
-  npStart.core.chrome.navLinks.update('timelion', { hidden: true });
+export function getTimeChart(dependencies: TimelionStartDependencies) {
+  // Schema is broken out so that it may be extended for use in other plugins
+  // Its also easier to test.
+  return new Panel('timechart', timechartFn(dependencies)());
 }
