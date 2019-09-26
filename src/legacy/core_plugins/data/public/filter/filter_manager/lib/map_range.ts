@@ -44,9 +44,8 @@ function getParams(filter: RangeFilter, indexPattern?: IndexPattern) {
   // for example a user might manually edit the url or the index pattern's ID might change due to
   // external factors e.g. a reindex. We only need the index in order to grab the field formatter, so we fallback
   // on displaying the raw value if the index is invalid.
-  if (key && indexPattern && indexPattern.fields.byName[key]) {
-    const convert = indexPattern.fields.byName[key].format.getConverterFor('text');
-
+  if (key && indexPattern && indexPattern.fields.getByName(key)) {
+    const convert = indexPattern.fields.getByName(key).format.getConverterFor('text');
     value = `${convert(left)} to ${convert(right)}`;
   }
 
