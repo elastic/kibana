@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
-import { IAction, createAction, IncompatibleActionError } from 'src/plugins/ui_actions/public';
+import { IAction, createAction, IncompatibleActionError } from '../ui_actions';
 import { IEmbeddable, EmbeddableInput } from '../embeddables';
 
 export const APPLY_FILTER_ACTION = 'APPLY_FILTER_ACTION';

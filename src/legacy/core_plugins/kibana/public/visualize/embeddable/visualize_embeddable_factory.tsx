@@ -47,13 +47,13 @@ import { VisTypesRegistry, VisTypesRegistryProvider } from 'ui/registry/vis_type
 
 import { IPrivate } from 'ui/private';
 import { SavedObjectAttributes } from 'kibana/server';
+import { npSetup } from 'ui/new_platform';
 import {
   EmbeddableFactory,
   ErrorEmbeddable,
   Container,
   EmbeddableOutput,
-} from 'src/plugins/embeddable/public';
-import { npSetup } from 'ui/new_platform';
+} from '../../../../../../plugins/embeddable/public';
 import { showNewVisModal } from '../wizard';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';

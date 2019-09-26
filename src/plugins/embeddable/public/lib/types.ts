@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Adapters } from 'src/plugins/inspector/public';
+import { Adapters } from './inspector';
 import { EmbeddableFactory } from './embeddables/embeddable_factory';
 
 export interface Trigger {

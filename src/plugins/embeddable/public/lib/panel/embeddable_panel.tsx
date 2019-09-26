@@ -24,10 +24,10 @@ import {
   buildContextMenuForActions,
   TGetActionsCompatibleWithTrigger,
   IAction,
-} from 'src/plugins/ui_actions/public';
-import { CoreStart } from 'src/core/public';
+} from '../ui_actions';
+import { CoreStart } from '../../../../../core/public';
 
-import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import { Start as InspectorStartContract } from '../inspector';
 import { CONTEXT_MENU_TRIGGER, PANEL_BADGE_TRIGGER } from '../triggers';
 import { IEmbeddable } from '../embeddables/i_embeddable';
 import { ViewMode, GetEmbeddableFactory, GetEmbeddableFactories } from '../types';

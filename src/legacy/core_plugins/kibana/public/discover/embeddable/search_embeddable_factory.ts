@@ -26,7 +26,11 @@ import { IPrivate } from 'ui/private';
 import { TimeRange } from 'src/plugins/data/public';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
-import { EmbeddableFactory, ErrorEmbeddable, Container } from 'src/plugins/embeddable/public';
+import {
+  EmbeddableFactory,
+  ErrorEmbeddable,
+  Container,
+} from '../../../../../../plugins/embeddable/public';
 import { SavedSearchLoader } from '../types';
 import { SearchEmbeddable, SEARCH_EMBEDDABLE_TYPE } from './search_embeddable';
 import { SearchInput, SearchOutput } from './types';

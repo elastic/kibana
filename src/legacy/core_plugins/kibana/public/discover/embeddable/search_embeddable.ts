@@ -37,7 +37,11 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { TimeRange } from 'src/plugins/data/public';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
-import { APPLY_FILTER_TRIGGER, Embeddable, Container } from 'src/plugins/embeddable/public';
+import {
+  APPLY_FILTER_TRIGGER,
+  Embeddable,
+  Container,
+} from '../../../../../../plugins/embeddable/public';
 import { setup as data } from '../../../../data/public/legacy';
 import { Query, onlyDisabledFiltersChanged, getTime } from '../../../../data/public';
 import * as columnActions from '../doc_table/actions/columns';
