@@ -9,8 +9,9 @@ import JoiNamespace from 'joi';
 import { Legacy } from 'kibana';
 import moment from 'moment';
 import { resolve } from 'path';
-
+import { take } from 'rxjs/operators';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+
 import { APP_TITLE } from './common/constants';
 import { codePlugin } from './server';
 import { DEFAULT_WATERMARK_LOW_PERCENTAGE } from './server/disk_watermark';
@@ -125,7 +126,10 @@ export const code = (kibana: any) =>
         }).default(),
       }).default();
     },
-    init(server: ServerFacade, options: any) {
+    async init(server: ServerFacade, options: any) {
+      const { config$ } = server.newPlatform.setup.plugins.code;
+      const currentConfig = await config$.pipe(take(1)).toPromise();
+
       if (!options.ui.enabled) {
         return;
       }

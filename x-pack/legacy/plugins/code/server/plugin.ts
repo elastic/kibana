@@ -7,7 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import crypto from 'crypto';
 import * as _ from 'lodash';
-import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { Observable } from 'rxjs';
+import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
 
 import { XPackMainPlugin } from '../../xpack_main/xpack_main';
 import { GitOperations } from './git_operations';
@@ -56,8 +57,13 @@ import { initWorkers } from './init_workers';
 import { ClusterNodeAdapter } from './distributed/cluster/cluster_node_adapter';
 import { NodeRepositoriesService } from './distributed/cluster/node_repositories_service';
 import { initCodeUsageCollector } from './usage_collector';
+import { CodeConfig } from '.';
 
-export class CodePlugin {
+export interface CodeSetup {
+  config$: Observable<CodeConfig>;
+}
+
+export class CodePlugin implements Plugin<CodeSetup> {
   private isCodeNode = false;
 
   private gitOps: GitOperations | null = null;
@@ -70,7 +76,7 @@ export class CodePlugin {
   private codeServices: CodeServices | null = null;
   private nodeService: NodeRepositoriesService | null = null;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private readonly initContext: PluginInitializerContext) {
     this.log = {} as Logger;
     this.serverOptions = {} as ServerOptions;
   }
@@ -114,6 +120,10 @@ export class CodePlugin {
         },
       },
     });
+
+    return {
+      config$: this.initContext.config.create<CodeConfig>(),
+    };
   }
 
   // TODO: CodeStart will not have the register route api.
