@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createAction } from 'src/plugins/ui_actions/public';
+import { createAction } from '../../ui_actions';
 import { ViewMode } from '../../types';
 import { IEmbeddable } from '../../embeddables';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IAction, IncompatibleActionError } from 'src/plugins/ui_actions/public';
+import { IAction, IncompatibleActionError } from '../../ui_actions';
 import { EmbeddableInput, Embeddable, EmbeddableOutput, IEmbeddable } from '../../embeddables';
 
 export const SAY_HELLO_ACTION = 'SAY_HELLO_ACTION';

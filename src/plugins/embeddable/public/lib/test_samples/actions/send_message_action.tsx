@@ -18,8 +18,8 @@
  */
 import React from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
-import { createAction, IncompatibleActionError } from 'src/plugins/ui_actions/public';
-import { CoreStart } from 'src/core/public';
+import { createAction, IncompatibleActionError } from '../../ui_actions';
+import { CoreStart } from '../../../../../../core/public';
 import { Embeddable, EmbeddableInput } from '../../embeddables';
 import { GetMessageModal } from './get_message_modal';
 import { FullNameEmbeddableOutput, hasFullNameOutput } from './say_hello_action';
