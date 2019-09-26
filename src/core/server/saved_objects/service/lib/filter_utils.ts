@@ -59,25 +59,12 @@ export const validateConvertFilterToKueryNode = (
         path.length === 0 ? filterKueryNode : get(filterKueryNode, path);
       if (item.isSavedObjectAttr) {
         existingKueryNode.arguments[0].value = existingKueryNode.arguments[0].value.split('.')[1];
-        if (types.length > 1) {
+        const itemType = types.filter(t => t === item.type);
+        if (itemType.length === 1) {
           set(
             filterKueryNode,
             path,
-            buildKueryNode(
-              'or',
-              types.map(type => {
-                return buildKueryNode('and', [
-                  buildKueryNode('is', 'type', type),
-                  existingKueryNode,
-                ]);
-              })
-            )
-          );
-        } else {
-          set(
-            filterKueryNode,
-            path,
-            buildKueryNode('and', [buildKueryNode('is', 'type', types[0]), existingKueryNode])
+            buildKueryNode('and', [buildKueryNode('is', 'type', itemType[0]), existingKueryNode])
           );
         }
       } else {
@@ -106,10 +93,11 @@ export const getSavedObjectTypeIndexPatterns = (
 };
 
 interface ValidateFilterKueryNode {
-  key: string;
   astPath: string;
-  isSavedObjectAttr: boolean;
   error: string;
+  isSavedObjectAttr: boolean;
+  key: string;
+  type: string | null;
 }
 
 export const validateFilterKueryNode = (
@@ -138,16 +126,19 @@ export const validateFilterKueryNode = (
       return [
         ...kueryNode,
         {
-          key: ast.value,
           astPath: splitPath.slice(0, splitPath.length - 1).join('.'),
-          isSavedObjectAttr: isSavedObjectAttr(ast.value, typeIndexPatterns),
           error: hasFilterKeyError(ast.value, types, typeIndexPatterns),
+          isSavedObjectAttr: isSavedObjectAttr(ast.value, typeIndexPatterns),
+          key: ast.value,
+          type: getType(ast.value),
         },
       ];
     }
     return kueryNode;
   }, []);
 };
+
+const getType = (key: string) => (key.includes('.') ? key.split('.')[0] : null);
 
 export const isSavedObjectAttr = (
   key: string,

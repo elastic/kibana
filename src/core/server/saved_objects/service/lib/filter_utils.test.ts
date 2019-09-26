@@ -58,6 +58,18 @@ const mockIndexPatterns: SavedObjectsIndexPattern = {
       aggregatable: true,
       searchable: true,
     },
+    {
+      name: 'bar.description',
+      type: 'text',
+      aggregatable: true,
+      searchable: true,
+    },
+    {
+      name: 'hiddentype.description',
+      type: 'text',
+      aggregatable: true,
+      searchable: true,
+    },
   ],
   title: 'mock',
 };
@@ -83,7 +95,7 @@ describe('Filter Utils', () => {
       );
     });
 
-    test('Assemble filter kuery node saved object attributes with multiple saved object type', () => {
+    test('Assemble filter with one type kuery node saved object attributes with multiple saved object type', () => {
       expect(
         validateConvertFilterToKueryNode(
           ['foo', 'bar'],
@@ -92,7 +104,21 @@ describe('Filter Utils', () => {
         )
       ).toEqual(
         fromKueryExpression(
-          '((type: foo and updatedAt: 5678654567) or (type: bar and updatedAt: 5678654567)) and foo.bytes > 1000 and foo.bytes < 8000 and foo.title: "best" and (foo.description: t* or foo.description :*)'
+          '(type: foo and updatedAt: 5678654567) and foo.bytes > 1000 and foo.bytes < 8000 and foo.title: "best" and (foo.description: t* or foo.description :*)'
+        )
+      );
+    });
+
+    test('Assemble filter with two types kuery node saved object attributes with multiple saved object type', () => {
+      expect(
+        validateConvertFilterToKueryNode(
+          ['foo', 'bar'],
+          '(bar.updatedAt: 5678654567 OR foo.updatedAt: 5678654567) and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or bar.attributes.description :*)',
+          mockIndexPatterns
+        )
+      ).toEqual(
+        fromKueryExpression(
+          '((type: bar and updatedAt: 5678654567) or (type: foo and updatedAt: 5678654567)) and foo.bytes > 1000 and foo.bytes < 8000 and foo.title: "best" and (foo.description: t* or bar.description :*)'
         )
       );
     });
@@ -107,6 +133,12 @@ describe('Filter Utils', () => {
       }).toThrowErrorMatchingInlineSnapshot(
         `"This key 'updatedAt' need to be wrapped by a saved object type like foo,bar"`
       );
+    });
+
+    test('Lets make sure that we are throwing an exception if we are using hiddentype with types', () => {
+      expect(() => {
+        validateConvertFilterToKueryNode([], 'hiddentype.title: "title"', mockIndexPatterns);
+      }).toThrowErrorMatchingInlineSnapshot(`"This type hiddentype is not allowed"`);
     });
   });
 
@@ -126,36 +158,42 @@ describe('Filter Utils', () => {
           error: null,
           isSavedObjectAttr: true,
           key: 'foo.updatedAt',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.1.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.1.arguments.1.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.title',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
+          type: 'foo',
         },
       ]);
     });
@@ -175,36 +213,42 @@ describe('Filter Utils', () => {
           error: "This key 'updatedAt' need to be wrapped by a saved object type like foo",
           isSavedObjectAttr: true,
           key: 'updatedAt',
+          type: null,
         },
         {
           astPath: 'arguments.1.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.1.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.1.arguments.1.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.title',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
+          type: 'foo',
         },
       ]);
     });
@@ -224,12 +268,14 @@ describe('Filter Utils', () => {
           error: null,
           isSavedObjectAttr: true,
           key: 'foo.updatedAt',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.1.arguments.0',
@@ -237,18 +283,21 @@ describe('Filter Utils', () => {
             "This key 'foo.bytes' does NOT match the filter proposition SavedObjectType.attributes.key",
           isSavedObjectAttr: false,
           key: 'foo.bytes',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.1.arguments.1.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.title',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.1',
@@ -256,6 +305,7 @@ describe('Filter Utils', () => {
             "This key 'foo.description' does NOT match the filter proposition SavedObjectType.attributes.key",
           isSavedObjectAttr: false,
           key: 'foo.description',
+          type: 'foo',
         },
       ]);
     });
@@ -275,36 +325,42 @@ describe('Filter Utils', () => {
           error: 'This type bar is not allowed',
           isSavedObjectAttr: true,
           key: 'bar.updatedAt',
+          type: 'bar',
         },
         {
           astPath: 'arguments.1.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.1.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.1.arguments.1.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.title',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
+          type: 'foo',
         },
       ]);
     });
@@ -324,18 +380,21 @@ describe('Filter Utils', () => {
           error: "This key 'foo.updatedAt33' does NOT exist in foo saved object index patterns",
           isSavedObjectAttr: false,
           key: 'foo.updatedAt33',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.1.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.1.arguments.1.arguments.0',
@@ -343,18 +402,21 @@ describe('Filter Utils', () => {
             "This key 'foo.attributes.header' does NOT exist in foo saved object index patterns",
           isSavedObjectAttr: false,
           key: 'foo.attributes.header',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
+          type: 'foo',
         },
         {
           astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
+          type: 'foo',
         },
       ]);
     });

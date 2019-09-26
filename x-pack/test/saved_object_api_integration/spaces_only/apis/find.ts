@@ -15,6 +15,7 @@ export default function({ getService }: FtrProviderContext) {
   const {
     createExpectEmpty,
     createExpectVisualizationResults,
+    expectFilterInternalServerError,
     expectNotSpaceAwareResults,
     expectTypeRequired,
     findTest,
@@ -59,6 +60,31 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 400,
           response: expectTypeRequired,
         },
+        filterWithNotSpaceAwareType: {
+          description: 'only the visualization',
+          statusCode: 200,
+          response: expectNotSpaceAwareResults,
+        },
+        filterWithHiddenType: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
+        },
+        filterWithUnknownType: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
+        },
+        filterWithNoType: {
+          description: 'bad request, type is required',
+          statusCode: 400,
+          response: expectTypeRequired,
+        },
+        filterWithUnAllowedType: {
+          description: 'Internal Server Error',
+          statusCode: 500,
+          response: expectFilterInternalServerError,
+        },
       },
     });
 
@@ -99,6 +125,31 @@ export default function({ getService }: FtrProviderContext) {
           description: 'bad request, type is required',
           statusCode: 400,
           response: expectTypeRequired,
+        },
+        filterWithNotSpaceAwareType: {
+          description: 'only the visualization',
+          statusCode: 200,
+          response: expectNotSpaceAwareResults,
+        },
+        filterWithHiddenType: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
+        },
+        filterWithUnknownType: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
+        },
+        filterWithNoType: {
+          description: 'bad request, type is required',
+          statusCode: 400,
+          response: expectTypeRequired,
+        },
+        filterWithUnAllowedType: {
+          description: 'Internal Server Error',
+          statusCode: 500,
+          response: expectFilterInternalServerError,
         },
       },
     });
