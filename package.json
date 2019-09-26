@@ -294,7 +294,7 @@
     "@types/chance": "^1.0.0",
     "@types/cheerio": "^0.22.10",
     "@types/chromedriver": "^2.38.0",
-    "@types/classnames": "^2.2.3",
+    "@types/classnames": "^2.2.9",
     "@types/d3": "^3.5.43",
     "@types/dedent": "^0.7.0",
     "@types/delete-empty": "^2.0.0",
