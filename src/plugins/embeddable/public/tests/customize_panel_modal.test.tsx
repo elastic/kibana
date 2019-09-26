@@ -32,7 +32,7 @@ import {
 } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
 // eslint-disable-next-line
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '../../../../core/public/mocks';
 import { testPlugin } from './test_plugin';
 import { EmbeddableApi } from '../api';
 import { CustomizePanelModal } from '../lib/panel/panel_header/panel_actions/customize_title/customize_panel_modal';

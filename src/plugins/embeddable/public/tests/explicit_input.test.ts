@@ -33,7 +33,7 @@ import { FilterableContainer } from '../lib/test_samples/embeddables/filterable_
 import { isErrorEmbeddable } from '../lib';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
 // eslint-disable-next-line
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '../../../../core/public/mocks';
 
 const { setup, doStart, coreStart, uiActions } = testPlugin(
   coreMock.createSetup(),

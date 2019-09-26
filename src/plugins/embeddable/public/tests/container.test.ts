@@ -44,7 +44,7 @@ import {
   FilterableContainerInput,
 } from '../lib/test_samples/embeddables/filterable_container';
 // eslint-disable-next-line
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '../../../../core/public/mocks';
 import { testPlugin } from './test_plugin';
 import { of } from './helpers';
 
