@@ -7,14 +7,14 @@ import { DATES } from '../../../functional/apps/infra/constants';
 const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'infraHome']);
+  const PageObjects = getPageObjects(['common', 'infraHome', 'infraMetricExplorer']);
   const visualTesting = getService('visualTesting');
   const esArchiver = getService('esArchiver');
 
   describe('saved views', () => {
     before(() => esArchiver.load('infra/metrics_and_logs'));
     after(() => esArchiver.unload('infra/metrics_and_logs'));
-    describe('Test save functionality', () => {
+    describe('Inverntory Test save functionality', () => {
       it('should have save and load controls', async () => {
         await PageObjects.common.navigateToApp('infraOps');
         await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
@@ -41,6 +41,37 @@ export default function ({ getPageObjects, getService }) {
 
       it('should see a saved view in list', async () => {
         await PageObjects.infraHome.openSaveViewsFlyout();
+        await visualTesting.snapshot();
+      });
+    });
+
+    describe('Metric Explorer Test save functionality', () => {
+      it('should have save and load controls', async () => {
+        await PageObjects.common.navigateToApp('infraOps');
+        await PageObjects.infraHome.goToMetricExplorer();
+        await PageObjects.infraMetricExplorer.getSaveViewButton();
+        await PageObjects.infraMetricExplorer.getLoadViewsButton();
+        await visualTesting.snapshot();
+      });
+
+      it('should open flyout list', async () => {
+        await PageObjects.infraMetricExplorer.openSaveViewsFlyout();
+        await visualTesting.snapshot();
+        await PageObjects.infraMetricExplorer.closeSavedViewFlyout();
+      });
+
+      it('should open saved view modal', async () => {
+        await PageObjects.infraMetricExplorer.openCreateSaveViewModal();
+        await visualTesting.snapshot();
+      });
+
+      it('should be able to enter a view name', async () => {
+        await PageObjects.infraMetricExplorer.openEnterViewNameAndSave();
+        await visualTesting.snapshot();
+      });
+
+      it('should see a saved view in list', async () => {
+        await PageObjects.infraMetricExplorer.openSaveViewsFlyout();
         await visualTesting.snapshot();
       });
     });

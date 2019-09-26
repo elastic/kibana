@@ -33,6 +33,10 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.find('waffleMap');
     },
 
+    async goToMetricExplorer() {
+      return await testSubjects.click('infrastructureNavLink_/infrastructure/metrics-explorer');
+    },
+
     async getSaveViewButton() {
       return await testSubjects.find('openSaveViewModal');
     },

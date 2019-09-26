@@ -36,6 +36,7 @@ export class RoutedTabs extends React.Component<RoutedTabsProps> {
               {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiLink
                 href={`#${tab.path}`}
+                data-test-subj={`infrastructureNavLink_${tab.path}`}
                 onClick={e => {
                   e.preventDefault();
                   history.push(tab.path);
