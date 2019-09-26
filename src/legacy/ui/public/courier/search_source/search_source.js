@@ -71,7 +71,7 @@
 
 import _ from 'lodash';
 import angular from 'angular';
-import { buildEsQuery, getEsQueryConfig, filterMatchesIndex } from '@kbn/es-query';
+import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 
 import { normalizeSortRequest } from './_normalize_sort_request';
 
@@ -128,21 +128,6 @@ export class SearchSource {
     this.history = [];
     this._requestStartHandlers = [];
     this._inheritOptions = {};
-
-    this._filterPredicates = [
-      (filter) => {
-        // remove null/undefined filters
-        return filter;
-      },
-      (filter) => {
-        const disabled = _.get(filter, 'meta.disabled');
-        return disabled === undefined || disabled === false;
-      },
-      (filter, data) => {
-        const index = data.index || this.getField('index');
-        return !config.get('courier:ignoreFilterIfFieldNotInIndex') || filterMatchesIndex(filter, index);
-      }
-    ];
   }
 
   /*****
@@ -357,16 +342,6 @@ export class SearchSource {
      * PRIVATE APIS
      ******/
 
-  _getSearchConfig() {
-    return {
-      esShardTimeout,
-      includeFrozen: config.get('search:includeFrozen'),
-      maxConcurrentShardRequests: config.get('courier:maxConcurrentShardRequests'),
-      setRequestPreference: config.get('courier:setRequestPreference'),
-      customRequestPreference: config.get('courier:customRequestPreference'),
-    };
-  }
-
   /**
      * Used to merge properties into the data within ._flatten().
      * The data is passed in and modified by the function
@@ -389,12 +364,7 @@ export class SearchSource {
 
     switch (key) {
       case 'filter':
-        let filters = Array.isArray(val) ? val : [val];
-
-        filters = filters.filter(filter => {
-          return this._filterPredicates.every(predicate => predicate(filter, data));
-        });
-
+        const filters = Array.isArray(val) ? val : [val];
         data.filters = [...(data.filters || []), ...filters];
         return;
       case 'index':

@@ -19,14 +19,9 @@
 
 import { SearchSource } from '../search_source';
 
-let mockConfig = {};
-
 jest.mock('ui/new_platform', () => ({
   npSetup: {
     core: {
-      uiSettings: {
-        get: key => mockConfig[key]
-      },
       injectedMetadata: {
         getInjectedVar: () => 0,
       }
@@ -196,112 +191,6 @@ describe('SearchSource', function () {
 
       expect(fn).toBeCalledWith(searchSource, request, options);
       expect(parentFn).toBeCalledWith(searchSource, request, options);
-    });
-  });
-
-  describe('#_mergeProp', function () {
-    describe('filter', function () {
-      let previousMockConfig;
-      let searchSource;
-      let state;
-
-      beforeEach(function () {
-        previousMockConfig = mockConfig;
-        searchSource = new SearchSource();
-        state = {};
-      });
-
-      afterEach(() => {
-        mockConfig = previousMockConfig;
-      });
-
-      [null, undefined].forEach(falsyValue => {
-        it(`ignores ${falsyValue} filter`, function () {
-          searchSource._mergeProp(state, falsyValue, 'filter');
-          expect(state.filters).toBe(undefined);
-        });
-      });
-
-      [false, 0, '', NaN].forEach(falsyValue => {
-        it(`doesn't add ${falsyValue} filter`, function () {
-          searchSource._mergeProp(state, falsyValue, 'filter');
-          expect(state.filters).toEqual([]);
-        });
-      });
-
-      it('adds "meta.disabled: undefined" filter', function () {
-        const filter = {
-          meta: {}
-        };
-        searchSource._mergeProp(state, filter, 'filter');
-        expect(state.filters).toEqual([filter]);
-      });
-
-      it('adds "meta.disabled: false" filter', function () {
-        const filter = {
-          meta: {
-            disabled: false
-          }
-        };
-        searchSource._mergeProp(state, filter, 'filter');
-        expect(state.filters).toEqual([filter]);
-      });
-
-      it(`doesn't add "meta.disabled: true" filter`, function () {
-        const filter = {
-          meta: {
-            disabled: true
-          }
-        };
-        searchSource._mergeProp(state, filter, 'filter');
-        expect(state.filters).toEqual([]);
-      });
-
-      describe('when courier:ignoreFilterIfFieldNotInIndex is false', function () {
-        it('adds filter for non-existent field', function () {
-          mockConfig = { 'courier:ignoreFilterIfFieldNotInIndex': false };
-          const filter = {
-            meta: {
-              key: 'bar'
-            }
-          };
-          state.index = {
-            fields: []
-          };
-          searchSource._mergeProp(state, filter, 'filter');
-          expect(state.filters).toEqual([ filter ]);
-        });
-      });
-
-      describe('when courier:ignoreFilterIfFieldNotInIndex is true', function () {
-        it(`doesn't add filter for non-existent field`, function () {
-          mockConfig = { 'courier:ignoreFilterIfFieldNotInIndex': true };
-          const filter = {
-            meta: {
-              key: 'bar'
-            }
-          };
-          state.index = {
-            fields: []
-          };
-          searchSource._mergeProp(state, filter, 'filter');
-          expect(state.filters).toEqual([]);
-        });
-
-        it(`adds filter for existent field`, function () {
-          mockConfig = { 'courier:ignoreFilterIfFieldNotInIndex': true };
-          const filter = {
-            meta: {
-              key: 'bar'
-            }
-          };
-          state.index = {
-            fields: [{ name: 'bar' }]
-          };
-          searchSource._mergeProp(state, filter, 'filter');
-          expect(state.filters).toEqual([ filter ]);
-        });
-      });
     });
   });
 });
