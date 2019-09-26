@@ -188,7 +188,7 @@ describe('ML - custom URL utils', () => {
     test('replaces tokens outside of a query', () => {
       const TEST_DOC_WITH_METHOD: AnomalyRecordDoc = {
         ...TEST_DOC,
-        method: 'POST',
+        method: ['POST'],
       };
       const TEST_MULTIPLE_NON_QUERY_TOKENS: UrlConfig = {
         url_name: 'no_query',

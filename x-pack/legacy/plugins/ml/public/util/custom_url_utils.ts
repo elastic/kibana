@@ -122,66 +122,65 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: AnomalyRecordSource) {
     encodeURIComponent
   );
 
-  return String(urlValue)
-    .replace('$earliest$', record.earliest)
-    .replace('$latest$', record.latest)
-    .replace(
-      /(.+query:')([^']*)('.+)/,
-      (fullMatch, prefix: string, queryString: string, postfix: string) => {
-        const [resultPrefix, resultPostfix] = [prefix, postfix].map(str =>
-          str.replace(/\$(\w+)\$/g, (match, name: string) => {
-            // Use lodash get to allow nested JSON fields to be retrieved.
-            const tokenValue: string | undefined = get(record, name);
-            // If property not found string is not replaced.
-            return tokenValue === undefined ? match : getResultTokenValue(tokenValue);
-          })
-        );
-
-        let availableCharactersLeft = URL_LENGTH_LIMIT - resultPrefix.length - resultPostfix.length;
-        const queryFields = queryString
-          // Split query string by AND operator.
-          .split(/\sand\s/i)
-          // Get property name from `influencerField:$influencerField$` string.
-          .map(v => v.split(':')[0]);
-
-        const queryParts: string[] = [];
-        const joinOperator = ' AND ';
-
-        for (let i = 0; i < queryFields.length; i++) {
-          const field = queryFields[i];
-          // Use lodash get to allow nested JSON fields to be retrieved.
-          const tokenValues: string[] = get(record, field) || null;
-          if (tokenValues === null) {
-            continue;
-          }
-          // Create a pair `influencerField:value`.
-          // In cases where there are multiple influencer field values for an anomaly
-          // combine values with OR operator e.g. `(influencerField:value or influencerField:another_value)`.
-          let result = tokenValues
-            .map(value => `${field}:"${getResultTokenValue(value)}"`)
-            .join(' OR ');
-          result = tokenValues.length > 1 ? `(${result})` : result;
-
-          availableCharactersLeft -= result.length - (i === 0 ? 0 : joinOperator.length);
-
-          if (availableCharactersLeft <= 0) {
-            break;
-          } else {
-            queryParts.push(result);
-          }
-        }
-
-        const resultQuery = queryParts.join(joinOperator);
-
-        return `${resultPrefix}${resultQuery}${resultPostfix}`;
-      }
-    )
-    .replace(/\$(\w+)\$/g, (match, name: string) => {
+  const replaceSingleTokenValues = (str: string) =>
+    str.replace(/\$(\w+)\$/g, (match, name: string) => {
       // Use lodash get to allow nested JSON fields to be retrieved.
-      const tokenValue: string | undefined = get(record, name);
+      let tokenValue: string | string[] | undefined = get(record, name);
+      tokenValue = Array.isArray(tokenValue) ? tokenValue[0] : tokenValue;
       // If property not found string is not replaced.
       return tokenValue === undefined ? match : getResultTokenValue(tokenValue);
     });
+
+  return flow(
+    (str: string) => str.replace('$earliest$', record.earliest).replace('$latest$', record.latest),
+    (str: string) =>
+      str.replace(
+        /(.+query:')([^']*)('.+)/,
+        (fullMatch, prefix: string, queryString: string, postfix: string) => {
+          const [resultPrefix, resultPostfix] = [prefix, postfix].map(replaceSingleTokenValues);
+
+          let availableCharactersLeft =
+            URL_LENGTH_LIMIT - resultPrefix.length - resultPostfix.length;
+          const queryFields = queryString
+            // Split query string by AND operator.
+            .split(/\sand\s/i)
+            // Get property name from `influencerField:$influencerField$` string.
+            .map(v => v.split(':')[0]);
+
+          const queryParts: string[] = [];
+          const joinOperator = ' AND ';
+
+          for (let i = 0; i < queryFields.length; i++) {
+            const field = queryFields[i];
+            // Use lodash get to allow nested JSON fields to be retrieved.
+            const tokenValues: string[] = get(record, field) || null;
+            if (tokenValues === null) {
+              continue;
+            }
+            // Create a pair `influencerField:value`.
+            // In cases where there are multiple influencer field values for an anomaly
+            // combine values with OR operator e.g. `(influencerField:value or influencerField:another_value)`.
+            let result = tokenValues
+              .map(value => `${field}:"${getResultTokenValue(value)}"`)
+              .join(' OR ');
+            result = tokenValues.length > 1 ? `(${result})` : result;
+
+            availableCharactersLeft -= result.length - (i === 0 ? 0 : joinOperator.length);
+
+            if (availableCharactersLeft <= 0) {
+              break;
+            } else {
+              queryParts.push(result);
+            }
+          }
+
+          const resultQuery = queryParts.join(joinOperator);
+
+          return `${resultPrefix}${resultQuery}${resultPostfix}`;
+        }
+      ),
+    replaceSingleTokenValues
+  )(urlValue);
 }
 
 // Returns whether the supplied label is valid for a custom URL.
