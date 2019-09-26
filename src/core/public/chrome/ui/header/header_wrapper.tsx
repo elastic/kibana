@@ -21,13 +21,13 @@ import React, { FunctionComponent, useState } from 'react';
 import classnames from 'classnames';
 import { Header, HeaderProps } from './';
 
-const IS_LOCKED_KEY = 'core.chrome.isLocked';
+export const IS_NAV_LOCKED_KEY = 'core.chrome.isLocked';
 
 export const HeaderWrapper: FunctionComponent<HeaderProps> = props => {
-  const initialIsLocked = localStorage.getItem(IS_LOCKED_KEY);
+  const initialIsLocked = localStorage.getItem(IS_NAV_LOCKED_KEY);
   const [isLocked, setIsLocked] = useState(initialIsLocked === 'true');
   const setIsLockedStored = (locked: boolean) => {
-    localStorage.setItem(IS_LOCKED_KEY, `${locked}`);
+    localStorage.setItem(IS_NAV_LOCKED_KEY, `${locked}`);
     setIsLocked(locked);
   };
   const className = classnames(

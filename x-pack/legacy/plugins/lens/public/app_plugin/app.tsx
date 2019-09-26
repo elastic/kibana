@@ -6,9 +6,10 @@
 
 import _ from 'lodash';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import classNames from 'classnames';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiBottomBar, EuiButton } from '@elastic/eui';
 import { Storage } from 'ui/storage';
 import { CoreStart } from 'src/core/public';
 import { Query } from '../../../../../../src/legacy/core_plugins/data/public';
@@ -35,6 +36,7 @@ interface State {
       to: string;
     };
   };
+  bottomBarIsShowing?: boolean;
 }
 
 function isLocalStateDirty(
@@ -64,6 +66,7 @@ export function App({
   docStorage: SavedObjectStore;
   redirectTo: (id?: string) => void;
 }) {
+  const chromeNavIsLockedOpen = localStorage.getItem('core.chrome.isLocked');
   const timeDefaults = core.uiSettings.get('timepicker:timeDefaults');
   const language =
     store.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
@@ -84,6 +87,7 @@ export function App({
         to: timeDefaults.to,
       },
     },
+    bottomBarIsShowing: true,
   });
 
   const lastKnownDocRef = useRef<Document | undefined>(undefined);
@@ -152,6 +156,14 @@ export function App({
     []
   );
 
+  const classes = classNames('lnsApp', {
+    'lnsApp-bottomBarShowing': state.bottomBarIsShowing,
+  });
+
+  const bottomBarClasses = classNames('lnsApp__bottomBar', {
+    'lnsApp__bottomBar-navIsLockedOpen': chromeNavIsLockedOpen === 'true',
+  });
+
   return (
     <I18nProvider>
       <KibanaContextProvider
@@ -162,7 +174,7 @@ export function App({
           http: core.http,
         }}
       >
-        <div className="lnsApp">
+        <div className={classes}>
           <div className="lnsApp__header">
             <nav>
               <EuiFlexGroup>
@@ -267,6 +279,23 @@ export function App({
             />
           )}
         </div>
+
+        {state.bottomBarIsShowing && (
+          <EuiBottomBar className={bottomBarClasses} paddingSize="s">
+            <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem grow={false}>
+                {/* <EuiButtonEmpty color="ghost" size="s" iconType="cross">
+                      Discard
+                    </EuiButtonEmpty> */}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton color="primary" fill size="s" iconType="check">
+                  Save
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiBottomBar>
+        )}
       </KibanaContextProvider>
     </I18nProvider>
   );

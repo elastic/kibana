@@ -1,3 +1,6 @@
+@import '@elastic/eui/src/components/header/variables';
+@import '@elastic/eui/src/components/nav_drawer/variables';
+
 .lnsApp {
   position: absolute;
   top: 0;
@@ -10,6 +13,10 @@
   overflow: hidden;
 }
 
+.lnsApp-bottomBarShowing {
+  padding-bottom: $euiSizeL * 2;
+}
+
 .lnsApp__header {
   padding: $euiSize;
   border-bottom: $euiBorderThin;
@@ -20,4 +27,13 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+}
+
+.lnsApp__bottomBar {
+  left: $euiNavDrawerWidthCollapsed;
+  z-index: $euiZHeader + 10;
+}
+
+.lnsApp__bottomBar-navIsLockedOpen {
+  left: $euiNavDrawerWidthExpanded;
 }
