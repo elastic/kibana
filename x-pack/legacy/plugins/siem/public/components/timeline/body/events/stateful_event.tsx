@@ -161,11 +161,14 @@ export class StatefulEvent extends React.Component<Props, State> {
       updateNote,
     } = this.props;
 
+    // Number of current columns plus one for actions.
+    const columnCount = columnHeaders.length + 1;
+
     // If we are not ready to render yet, just return null
     // see componentDidMount() for when it schedules the first
     // time this stateful component should be rendered.
     if (!this.state.initialRender) {
-      return <SkeletonRow cellCount={9} />;
+      return <SkeletonRow cellCount={columnCount} />;
     }
 
     return (
@@ -248,7 +251,7 @@ export class StatefulEvent extends React.Component<Props, State> {
             // height is being inlined directly in here because of performance with StyledComponents
             // involving quick and constant changes to the DOM.
             // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-            return <SkeletonRow cellCount={9} style={{ height }} />;
+            return <SkeletonRow cellCount={columnCount} style={{ height }} />;
           }
         }}
       </VisibilitySensor>
