@@ -24,11 +24,12 @@ import { useAppDependencies } from '../../../../index';
 import { textService } from '../../../../services/text';
 import { uiMetricService } from '../../../../services/ui_metric';
 import { linkToEditRepository, linkToAddRepository } from '../../../../services/navigation';
+import { SendRequestResponse } from '../../../../../shared_imports';
 
 interface Props {
   repositories: Repository[];
   managedRepository?: string;
-  reload: () => Promise<void>;
+  reload: () => Promise<SendRequestResponse>;
   openRepositoryDetailsUrl: (name: Repository['name']) => string;
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
 }

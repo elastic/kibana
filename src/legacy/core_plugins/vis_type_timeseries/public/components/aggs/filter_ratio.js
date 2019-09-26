@@ -35,7 +35,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ES_TYPES } from '../../../common/es_types';
+import { ES_FIELD_TYPES } from '../../../../../../plugins/data/common';
 import { METRIC_TYPES } from '../../../common/metric_types';
 
 export const FilterRatioAgg = props => {
@@ -56,7 +56,7 @@ export const FilterRatioAgg = props => {
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
 
-  const restrictFields = model.metric_agg === METRIC_TYPES.CARDINALITY ? [] : [ES_TYPES.NUMBER];
+  const restrictFields = model.metric_agg === METRIC_TYPES.CARDINALITY ? [] : [ES_FIELD_TYPES.NUMBER];
 
   return (
     <AggRow

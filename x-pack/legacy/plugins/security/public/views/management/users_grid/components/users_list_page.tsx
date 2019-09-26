@@ -142,12 +142,12 @@ class UsersListPageUI extends Component<Props, State> {
         },
       },
       {
-        field: 'metadata._reserved',
+        field: 'metadata',
         name: intl.formatMessage({
           id: 'xpack.security.management.users.reservedColumnName',
           defaultMessage: 'Reserved',
         }),
-        sortable: false,
+        sortable: ({ metadata }: User) => Boolean(metadata && metadata._reserved),
         width: '100px',
         align: 'right',
         description: intl.formatMessage({
@@ -155,8 +155,8 @@ class UsersListPageUI extends Component<Props, State> {
           defaultMessage:
             'Reserved users are built-in and cannot be removed. Only the password can be changed.',
         }),
-        render: (reserved?: boolean) =>
-          reserved ? (
+        render: (metadata: User['metadata']) =>
+          metadata && metadata._reserved ? (
             <EuiIcon aria-label="Reserved user" data-test-subj="reservedUser" type="check" />
           ) : null,
       },
