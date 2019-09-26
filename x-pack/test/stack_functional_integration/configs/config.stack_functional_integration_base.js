@@ -18,17 +18,14 @@
  */
 
 
+const serverConfig = require('../test/server_config');
+
 export default async function ({ readConfigFile }) {
-  const baseConfig = await readConfigFile(require.resolve('./config.stack_functional_integration_base'));
+  const defaultConfig = await readConfigFile(require.resolve('../../functional/config'));
 
   return {
-    ...baseConfig.getAll(),
-    junit: {
-      reportName: 'Stack Functional Integration Tests - ubuntu16_tar'
-    },
-    testFiles: [
-      require.resolve('../test/functional/apps/telemetry'),
-      // require.resolve('./test/functional/apps/monitoring'),
-    ],
+    ...defaultConfig.getAll(),
+    servers: serverConfig.servers,
+    apps: serverConfig.apps,
   };
 }
