@@ -59,7 +59,7 @@ export class ConsoleMenu extends Component<Props, State> {
     if (addNotification) {
       addNotification({
         title: i18n.translate('console.consoleMenu.copyAsCurlMessage', {
-          defaultMessage: 'Copied as cURL!',
+          defaultMessage: 'Request copied as cURL',
         }),
       });
     }
