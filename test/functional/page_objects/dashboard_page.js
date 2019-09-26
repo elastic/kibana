@@ -98,10 +98,12 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickExitFullScreenLogoButton() {
       await testSubjects.click('exitFullScreenModeLogo');
+      await this.waitForRenderComplete();
     }
 
     async clickExitFullScreenTextButton() {
       await testSubjects.click('exitFullScreenModeText');
+      await this.waitForRenderComplete();
     }
 
     async getDashboardIdFromCurrentUrl() {

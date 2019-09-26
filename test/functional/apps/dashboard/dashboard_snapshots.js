@@ -30,6 +30,9 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
     before(async function () {
       // We use a really small window to minimize differences across os's and browsers.
       await browser.setScreenshotSize(1000, 500);
+      // adding this navigate adds the timestamp hash to the url which invalidates previous
+      // session.  If we don't do this, the colors on the visualizations are different and the screenshots won't match.
+      await PageObjects.common.navigateToApp('dashboard');
     });
 
     after(async function () {
@@ -57,32 +60,25 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       expect(percentDifference).to.be.lessThan(0.02);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/40173
-    // This test passes locally for LeeDr but fails every time on Jenkins
-    it.skip('compare area chart snapshot', async () => {
+    it('compare area chart snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInLogstashDataRange();
       await dashboardAddPanel.addVisualization('Rendering Test: area with not filter');
       await PageObjects.common.closeToast();
+
       await PageObjects.dashboard.saveDashboard('area');
       await PageObjects.common.closeToast();
-
       await PageObjects.dashboard.clickFullScreenMode();
-      await screenshot.take('temp_area_chart_full_screen_1');
-      await PageObjects.common.sleep(5000);
-      await screenshot.take('temp_area_chart_full_screen_2');
+      // await PageObjects.common.sleep(500);
       await dashboardPanelActions.openContextMenu();
-      await screenshot.take('temp_area_chart_full_screen_3');
       await dashboardPanelActions.clickExpandPanelToggle();
-      await PageObjects.common.sleep(5000);
 
       await PageObjects.dashboard.waitForRenderComplete();
       const percentDifference = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
 
-      // Testing some OS/browser differences were shown to cause .009 percent difference.
       expect(percentDifference).to.be.lessThan(0.02);
     });
   });
