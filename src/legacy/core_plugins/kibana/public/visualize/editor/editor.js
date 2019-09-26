@@ -213,12 +213,12 @@ function VisEditor(
           defaultMessage="Save and add to dashboard"
         />
       ) : null;
-
+      const saveModalTitle = savedVis.id ? savedVis.title : '';
       const saveModal = (
         <SavedObjectSaveModal
           onSave={onSave}
           onClose={() => {}}
-          title={savedVis.title}
+          title={saveModalTitle}
           showCopyOnSave={savedVis.id ? true : false}
           objectType="visualization"
           confirmButtonLabel={confirmButtonLabel}
