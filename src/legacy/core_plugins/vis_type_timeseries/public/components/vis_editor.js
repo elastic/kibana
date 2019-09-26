@@ -43,8 +43,6 @@ const APP_NAME = 'VisEditor';
 export class VisEditor extends Component {
   constructor(props) {
     super(props);
-    const { vis } = props;
-    this.appState = vis.API.getAppState();
     this.state = {
       model: props.visParams,
       dirty: false,
@@ -172,7 +170,6 @@ export class VisEditor extends Component {
             dirty={this.state.dirty}
             autoApply={this.state.autoApply}
             model={model}
-            appState={this.appState}
             savedObj={this.props.savedObj}
             timeRange={this.props.timeRange}
             uiState={this.uiState}

@@ -73,7 +73,6 @@ export function createEditorController(config, savedObjectsClient) {
             timeRange={params.timeRange}
             renderComplete={() => {}}
             isEditorMode={true}
-            appState={params.appState}
           />
         </I18nContext>,
         this.el

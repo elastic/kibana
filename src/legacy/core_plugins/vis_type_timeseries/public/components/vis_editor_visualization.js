@@ -72,13 +72,12 @@ class VisEditorVisualizationUI extends Component {
       return;
     }
 
-    const { uiState, timeRange, appState, savedObj, onDataChange } = this.props;
+    const { uiState, timeRange, savedObj, onDataChange } = this.props;
 
     this._handler = loader.embedVisualizationWithSavedObject(this._visEl.current, savedObj, {
       listenOnChange: false,
       uiState,
       timeRange,
-      appState,
     });
 
     this._subscription = this._handler.data$.subscribe(data => {
@@ -287,7 +286,6 @@ VisEditorVisualizationUI.propTypes = {
   timeRange: PropTypes.object,
   dirty: PropTypes.bool,
   autoApply: PropTypes.bool,
-  appState: PropTypes.object,
 };
 
 export const VisEditorVisualization = injectI18n(VisEditorVisualizationUI);

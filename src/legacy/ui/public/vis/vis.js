@@ -37,7 +37,7 @@ import { updateVisualizationConfig } from './vis_update';
 
 import '../directives/bind';
 
-export function VisProvider(Private, getAppState) {
+export function VisProvider(Private) {
   const visTypes = Private(VisTypesRegistryProvider);
 
   class Vis extends EventEmitter {
@@ -64,7 +64,6 @@ export function VisProvider(Private, getAppState) {
           filter: data => this.eventsSubject.next({ name: 'filterBucket', data }),
           brush: data => this.eventsSubject.next({ name: 'brush', data }),
         },
-        getAppState,
       };
     }
 

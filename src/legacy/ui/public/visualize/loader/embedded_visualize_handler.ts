@@ -55,6 +55,8 @@ import {
 } from './types';
 import { queryGeohashBounds } from './utils';
 
+import { setup as data } from '../../../../core_plugins/data/public/legacy';
+
 interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   Private: IPrivate;
   queryFilter: any;
@@ -116,7 +118,6 @@ export class EmbeddedVisualizeHandler {
   }, 100);
 
   private dataLoaderParams: RequestHandlerParams;
-  private readonly appState?: AppState;
   private uiState: PersistedState;
   private dataLoader: PipelineDataLoader;
   private dataSubject: Rx.Subject<any>;
@@ -134,7 +135,6 @@ export class EmbeddedVisualizeHandler {
     const { searchSource, vis } = savedObject;
 
     const {
-      appState,
       uiState,
       queryFilter,
       timeRange,
@@ -168,7 +168,6 @@ export class EmbeddedVisualizeHandler {
     element.addEventListener('renderComplete', this.onRenderCompleteListener);
 
     this.autoFetch = autoFetch;
-    this.appState = appState;
     this.vis = vis;
     if (uiState) {
       vis._setUiState(uiState);
@@ -223,8 +222,8 @@ export class EmbeddedVisualizeHandler {
         const newFilters = this.actions[event.name](event.data) || [];
         if (event.name === 'brush') {
           const fieldName = newFilters[0].meta.key;
-          const $state = this.vis.API.getAppState();
-          const existingFilter = $state.filters.find(
+          const filters = data.filter.filterManager.getFilters();
+          const existingFilter = filters.find(
             (filter: any) => filter.meta && filter.meta.key === fieldName
           );
           if (existingFilter) {
@@ -461,11 +460,6 @@ export class EmbeddedVisualizeHandler {
   };
 
   private handleVisUpdate = () => {
-    if (this.appState) {
-      this.appState.vis = this.vis.getState();
-      this.appState.save();
-    }
-
     this.fetchAndRender();
   };
 

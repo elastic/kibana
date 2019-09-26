@@ -32,7 +32,7 @@ import _ from 'lodash';
 import { VisTypesRegistryProvider } from '../../registry/vis_types';
 import { PersistedState } from '../../persisted_state';
 
-export function VisProvider(Private, indexPatterns, getAppState) {
+export function VisProvider(Private) {
   const visTypes = Private(VisTypesRegistryProvider);
 
   class Vis extends EventEmitter {
@@ -57,7 +57,6 @@ export function VisProvider(Private, indexPatterns, getAppState) {
             this.eventsSubject.next({ name: 'brush', data });
           },
         },
-        getAppState,
       };
     }
 

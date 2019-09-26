@@ -57,7 +57,7 @@ const defaultEditor = function ($rootScope, $compile) {
       }
     }
 
-    render({ uiState, timeRange, filters, appState }) {
+    render({ uiState, timeRange, filters }) {
       let $scope;
 
       const updateScope = () => {
@@ -167,7 +167,6 @@ const defaultEditor = function ($rootScope, $compile) {
               listenOnChange: false,
               timeRange: timeRange,
               filters: filters,
-              appState: appState,
             });
           });
         } else {
