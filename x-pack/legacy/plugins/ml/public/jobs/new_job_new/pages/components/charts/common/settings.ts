@@ -12,7 +12,7 @@ import {
   isMultiMetricJobCreator,
   isPopulationJobCreator,
 } from '../../../../common/job_creator';
-import { MlTimeBuckets } from '../../../../../../util/ml_time_buckets';
+import { TimeBuckets } from '../../../../../../util/time_buckets';
 
 const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
 const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
@@ -57,7 +57,7 @@ export const seriesStyle = {
   },
 };
 
-export function getChartSettings(jobCreator: JobCreatorType, chartInterval: MlTimeBuckets) {
+export function getChartSettings(jobCreator: JobCreatorType, chartInterval: TimeBuckets) {
   const cs = {
     ...defaultChartSettings,
     intervalMs: chartInterval.getInterval().asMilliseconds(),
@@ -65,10 +65,10 @@ export function getChartSettings(jobCreator: JobCreatorType, chartInterval: MlTi
 
   if (isPopulationJobCreator(jobCreator)) {
     // for population charts, use a larger interval based on
-    // the calculation from MlTimeBuckets, but without the
+    // the calculation from TimeBuckets, but without the
     // bar target and max bars which have been set for the
     // general chartInterval
-    const interval = new MlTimeBuckets();
+    const interval = new TimeBuckets();
     interval.setInterval('auto');
     interval.setBounds(chartInterval.getBounds());
     cs.intervalMs = interval.getInterval().asMilliseconds();

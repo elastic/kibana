@@ -10,9 +10,10 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Storage } from 'ui/storage';
-import { CoreStart, SavedObjectsClientContract } from 'src/core/public';
-import { Query } from '../../../../../../src/legacy/core_plugins/data/public/query';
+import { CoreStart } from 'src/core/public';
+import { Query } from '../../../../../../src/legacy/core_plugins/data/public';
 import { QueryBarTopRow } from '../../../../../../src/legacy/core_plugins/data/public/query/query_bar';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
@@ -55,7 +56,6 @@ export function App({
   docId,
   docStorage,
   redirectTo,
-  savedObjectsClient,
 }: {
   editorFrame: EditorFrameInstance;
   core: CoreStart;
@@ -63,7 +63,6 @@ export function App({
   docId?: string;
   docStorage: SavedObjectStore;
   redirectTo: (id?: string) => void;
-  savedObjectsClient: SavedObjectsClientContract;
 }) {
   const timeDefaults = core.uiSettings.get('timepicker:timeDefaults');
   const language =
@@ -155,112 +154,120 @@ export function App({
 
   return (
     <I18nProvider>
-      <div className="lnsApp">
-        <div className="lnsAppHeader">
-          <nav>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiLink
-                  data-test-subj="lnsApp_saveButton"
-                  onClick={() => {
-                    if (isSaveable && lastKnownDocRef.current) {
-                      docStorage
-                        .save(lastKnownDocRef.current)
-                        .then(({ id }) => {
-                          // Prevents unnecessary network request and disables save button
-                          const newDoc = { ...lastKnownDocRef.current!, id };
-                          setState({
-                            ...state,
-                            isDirty: false,
-                            persistedDoc: newDoc,
+      <KibanaContextProvider
+        services={{
+          uiSettings: core.uiSettings,
+          savedObjects: core.savedObjects,
+          notifications: core.notifications,
+          http: core.http,
+        }}
+      >
+        <div className="lnsApp">
+          <div className="lnsApp__header">
+            <nav>
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiLink
+                    data-test-subj="lnsApp_saveButton"
+                    onClick={() => {
+                      if (isSaveable && lastKnownDocRef.current) {
+                        docStorage
+                          .save(lastKnownDocRef.current)
+                          .then(({ id }) => {
+                            // Prevents unnecessary network request and disables save button
+                            const newDoc = { ...lastKnownDocRef.current!, id };
+                            setState({
+                              ...state,
+                              isDirty: false,
+                              persistedDoc: newDoc,
+                            });
+                            if (docId !== id) {
+                              redirectTo(id);
+                            }
+                          })
+                          .catch(reason => {
+                            core.notifications.toasts.addDanger(
+                              i18n.translate('xpack.lens.editorFrame.docSavingError', {
+                                defaultMessage: 'Error saving document {reason}',
+                                values: { reason },
+                              })
+                            );
                           });
-                          if (docId !== id) {
-                            redirectTo(id);
-                          }
-                        })
-                        .catch(reason => {
-                          core.notifications.toasts.addDanger(
-                            i18n.translate('xpack.lens.editorFrame.docSavingError', {
-                              defaultMessage: 'Error saving document {reason}',
-                              values: { reason },
-                            })
-                          );
-                        });
-                    }
-                  }}
-                  color={isSaveable ? 'primary' : 'subdued'}
-                  disabled={!isSaveable}
-                >
-                  {i18n.translate('xpack.lens.editorFrame.save', {
-                    defaultMessage: 'Save',
-                  })}
-                </EuiLink>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </nav>
-          <QueryBarTopRow
-            data-test-subj="lnsApp_queryBar"
-            screenTitle={'lens'}
-            onSubmit={payload => {
-              const { dateRange, query } = payload;
-              setState({
-                ...state,
-                dateRange: {
-                  fromDate: dateRange.from,
-                  toDate: dateRange.to,
-                },
-                query: query || state.query,
-                localQueryBarState: payload,
-              });
-            }}
-            onChange={localQueryBarState => {
-              setState({ ...state, localQueryBarState });
-            }}
-            isDirty={isLocalStateDirty(state.localQueryBarState, state.query, state.dateRange)}
-            appName={'lens'}
-            indexPatterns={state.indexPatternTitles}
-            store={store}
-            showDatePicker={true}
-            showQueryInput={true}
-            query={state.localQueryBarState.query}
-            dateRangeFrom={
-              state.localQueryBarState.dateRange && state.localQueryBarState.dateRange.from
-            }
-            dateRangeTo={
-              state.localQueryBarState.dateRange && state.localQueryBarState.dateRange.to
-            }
-            toasts={core.notifications.toasts}
-            uiSettings={core.uiSettings}
-            savedObjectsClient={savedObjectsClient}
-            http={core.http}
-          />
-        </div>
+                      }
+                    }}
+                    color={isSaveable ? 'primary' : 'subdued'}
+                    disabled={!isSaveable}
+                  >
+                    {i18n.translate('xpack.lens.editorFrame.save', {
+                      defaultMessage: 'Save',
+                    })}
+                  </EuiLink>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </nav>
+            <QueryBarTopRow
+              data-test-subj="lnsApp_queryBar"
+              screenTitle={'lens'}
+              onSubmit={payload => {
+                const { dateRange, query } = payload;
+                setState({
+                  ...state,
+                  dateRange: {
+                    fromDate: dateRange.from,
+                    toDate: dateRange.to,
+                  },
+                  query: query || state.query,
+                  localQueryBarState: payload,
+                });
+              }}
+              onChange={localQueryBarState => {
+                setState({ ...state, localQueryBarState });
+              }}
+              isDirty={isLocalStateDirty(state.localQueryBarState, state.query, state.dateRange)}
+              appName={'lens'}
+              indexPatterns={state.indexPatternTitles}
+              store={store}
+              showDatePicker={true}
+              showQueryInput={true}
+              query={state.localQueryBarState.query}
+              dateRangeFrom={
+                state.localQueryBarState.dateRange && state.localQueryBarState.dateRange.from
+              }
+              dateRangeTo={
+                state.localQueryBarState.dateRange && state.localQueryBarState.dateRange.to
+              }
+            />
+          </div>
 
-        {(!state.isLoading || state.persistedDoc) && (
-          <NativeRenderer
-            className="lnsAppFrame"
-            render={editorFrame.mount}
-            nativeProps={{
-              dateRange: state.dateRange,
-              query: state.query,
-              doc: state.persistedDoc,
-              onError,
-              onChange: ({ indexPatternTitles, doc }) => {
-                const indexPatternChange = !_.isEqual(state.indexPatternTitles, indexPatternTitles);
-                const docChange = !_.isEqual(state.persistedDoc, doc);
-                if (indexPatternChange || docChange) {
-                  setState({
-                    ...state,
-                    indexPatternTitles,
-                    isDirty: docChange,
-                  });
-                }
-                lastKnownDocRef.current = doc;
-              },
-            }}
-          />
-        )}
-      </div>
+          {(!state.isLoading || state.persistedDoc) && (
+            <NativeRenderer
+              className="lnsApp__frame"
+              render={editorFrame.mount}
+              nativeProps={{
+                dateRange: state.dateRange,
+                query: state.query,
+                doc: state.persistedDoc,
+                onError,
+                onChange: ({ indexPatternTitles, doc }) => {
+                  const indexPatternChange = !_.isEqual(
+                    state.indexPatternTitles,
+                    indexPatternTitles
+                  );
+                  const docChange = !_.isEqual(state.persistedDoc, doc);
+                  if (indexPatternChange || docChange) {
+                    setState({
+                      ...state,
+                      indexPatternTitles,
+                      isDirty: docChange,
+                    });
+                  }
+                  lastKnownDocRef.current = doc;
+                },
+              }}
+            />
+          )}
+        </div>
+      </KibanaContextProvider>
     </I18nProvider>
   );
 }
