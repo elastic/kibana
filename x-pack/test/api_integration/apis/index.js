@@ -6,7 +6,7 @@
 
 export default function ({ loadTestFile }) {
   describe('apis', function () {
-    this.tags('ciGroup1');
+    this.tags('ciGroup6');
 
     loadTestFile(require.resolve('./actions'));
     loadTestFile(require.resolve('./alerting'));
