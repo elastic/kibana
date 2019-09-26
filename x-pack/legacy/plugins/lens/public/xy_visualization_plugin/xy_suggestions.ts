@@ -120,7 +120,14 @@ function getBucketMappings(table: TableSuggestion, currentState?: State) {
   const currentXColumnIndex = prioritizedBuckets.findIndex(
     ({ columnId }) => columnId === currentLayer.xAccessor
   );
-  if (currentXColumnIndex) {
+  const currentXDataType =
+    currentXColumnIndex > -1 && prioritizedBuckets[currentXColumnIndex].operation.dataType;
+
+  if (
+    currentXDataType &&
+    // make sure time gets mapped to x dimension even when changing current bucket/dimension mapping
+    (currentXDataType === 'date' || prioritizedBuckets[0].operation.dataType !== 'date')
+  ) {
     const [x] = prioritizedBuckets.splice(currentXColumnIndex, 1);
     prioritizedBuckets.unshift(x);
   }
@@ -128,7 +135,7 @@ function getBucketMappings(table: TableSuggestion, currentState?: State) {
   const currentSplitColumnIndex = prioritizedBuckets.findIndex(
     ({ columnId }) => columnId === currentLayer.splitAccessor
   );
-  if (currentSplitColumnIndex) {
+  if (currentSplitColumnIndex > -1) {
     const [splitBy] = prioritizedBuckets.splice(currentSplitColumnIndex, 1);
     prioritizedBuckets.push(splitBy);
   }

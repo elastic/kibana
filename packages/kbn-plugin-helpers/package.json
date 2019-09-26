@@ -27,6 +27,6 @@
     "node-sass": "^4.9.4",
     "through2": "^2.0.3",
     "through2-map": "^3.0.0",
-    "vinyl-fs": "^3.0.0"
+    "vinyl-fs": "^3.0.3"
   }
 }
