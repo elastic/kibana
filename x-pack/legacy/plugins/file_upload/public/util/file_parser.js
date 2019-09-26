@@ -57,15 +57,15 @@ const fileHandler = (
   const filePromise = new Promise((resolve, reject) => {
     fileReader.onloadend = ({ target: { readyState, result } }) => {
       if (readyState === FileReader.DONE) {
-        chunkHandler({
-          bytesProcessed: stop || file.size,
-          totalBytes: file.size
-        });
         if (!getFileParseActive() || !result) {
           oboeStream.abort();
           resolve(null);
           return;
         }
+        chunkHandler({
+          bytesProcessed: stop || file.size,
+          totalBytes: file.size
+        });
         oboeStream.emit('data', result);
         if (!stop) {
           return;
@@ -125,9 +125,6 @@ export async function parseFile(
   const parsedJson = await fileHandler(
     file, onChunkParse, cleanAndValidate, getFileParseActive
   );
-  // Stream to both parseFile caller and preview callback
-  // const jsonResult = cleanAndValidate(parsedJson);
   jsonPreview(parsedJson, previewCallback);
-
   return parsedJson;
 }
