@@ -651,6 +651,11 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await testSubjects.click(`heatmapColorRange__addRangeButton`);
     }
 
+    async setCustomRangeByIndex(index, from, to) {
+      await testSubjects.setValue(`heatmapColorRange${index}__from`, from);
+      await testSubjects.setValue(`heatmapColorRange${index}__to`, to);
+    }
+
     async clickYAxisOptions(axisId) {
       await testSubjects.click(`toggleYAxisOptions-${axisId}`);
     }
