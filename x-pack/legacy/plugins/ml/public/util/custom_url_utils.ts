@@ -137,6 +137,7 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
 
   return flow(
     (str: string) => str.replace('$earliest$', record.earliest).replace('$latest$', record.latest),
+    // Process query string content of the URL
     (str: string) =>
       str.replace(
         /(.+query:')([^']*)('.+)/,
@@ -169,6 +170,7 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
               .join(' OR ');
             result = tokenValues.length > 1 ? `(${result})` : result;
 
+            // Build up a URL string which is not longer than the allowed length and isn't corrupted by invalid query.
             availableCharactersLeft -= result.length - (i === 0 ? 0 : joinOperator.length);
 
             if (availableCharactersLeft <= 0) {
