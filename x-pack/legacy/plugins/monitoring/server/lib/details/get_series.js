@@ -186,12 +186,40 @@ const formatBucketSize = bucketSizeInSeconds => {
   return formatTimestampToDuration(timestamp, CALCULATE_DURATION_UNTIL, now);
 };
 
+function isObject(value) {
+  return typeof value === 'object' && !!value && !Array.isArray(value);
+}
+
+function countBuckets(data, count = 0) {
+  if (data.buckets) {
+    count += data.buckets.length;
+    for (const bucket of data.buckets) {
+      for (const key of Object.keys(bucket)) {
+        if (isObject(bucket[key])) {
+          count = countBuckets(bucket[key], count);
+        }
+      }
+    }
+  } else {
+    for (const key of Object.keys(data)) {
+      if (isObject(data[key])) {
+        count = countBuckets(data[key], count);
+      }
+    }
+  }
+  return count;
+}
+
 function handleSeries(metric, min, max, bucketSizeInSeconds, response) {
   const { derivative, calculation: customCalculation } = metric;
   const buckets = get(response, 'aggregations.check.buckets', []);
   const firstUsableBucketIndex = findFirstUsableBucketIndex(buckets, min);
   const lastUsableBucketIndex = findLastUsableBucketIndex(buckets, max, firstUsableBucketIndex, bucketSizeInSeconds * 1000);
   let data = [];
+
+  if (metric.debug) {
+    console.log(`metric.debug field=${metric.field} bucketsCreated: ${countBuckets(get(response, 'aggregations.check'))}`);
+  }
 
   if (firstUsableBucketIndex <= lastUsableBucketIndex) {
     // map buckets to values for charts
