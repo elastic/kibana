@@ -82,12 +82,12 @@ const mockIndexPattern = {
 
 function wrapQueryBarInputInContext(testProps: any, store?: any) {
   const defaultOptions = {
-    appName: 'test',
     screenTitle: 'Another Screen',
     intl: null as any,
   };
 
   const services = {
+    appName: 'test',
     uiSettings: startMock.uiSettings,
     savedObjects: startMock.savedObjects,
     notifications: startMock.notifications,

@@ -499,7 +499,7 @@ export class QueryBarInputUI extends Component<Props, State> {
                         },
                         {
                           previouslyTranslatedPageTitle: this.props.screenTitle,
-                          pageType: this.props.appName,
+                          pageType: this.services.appName,
                         }
                       )
                     : undefined
