@@ -20,7 +20,7 @@
 import _ from 'lodash';
 
 import { RefreshInterval } from 'src/plugins/data/public';
-import { InputTimeRange } from '../timefilter';
+import { InputTimeRange } from '../types';
 
 const valueOf = function(o: any) {
   if (o) return o.valueOf();

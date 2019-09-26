@@ -59,18 +59,28 @@ export const AppearanceForm: FunctionComponent<Props> = ({
   return (
     <EuiFlexGroup gutterSize="s" justify-content="spaceBetween">
       <EuiFlexItem grow={2}>
-        <EuiFormRow label="Padding" compressed>
-          <EuiFieldNumber value={Number(padding)} onChange={namedChange('padding')} />
+        <EuiFormRow label="Padding" display="rowCompressed">
+          <EuiFieldNumber compressed value={Number(padding)} onChange={namedChange('padding')} />
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem grow={3}>
-        <EuiFormRow label="Opacity" compressed>
-          <EuiSelect value={opacity} options={opacities} onChange={namedChange('opacity')} />
+        <EuiFormRow label="Opacity" display="rowCompressed">
+          <EuiSelect
+            compressed
+            value={opacity}
+            options={opacities}
+            onChange={namedChange('opacity')}
+          />
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem grow={3}>
-        <EuiFormRow label="Overflow" compressed>
-          <EuiSelect value={overflow} options={overflows} onChange={namedChange('overflow')} />
+        <EuiFormRow label="Overflow" display="rowCompressed">
+          <EuiSelect
+            compressed
+            value={overflow}
+            options={overflows}
+            onChange={namedChange('overflow')}
+          />
         </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
