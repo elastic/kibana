@@ -5,7 +5,7 @@
  */
 
 import { Registry } from '@kbn/interpreter/target/common';
-import { CoreSetup, CoreStart } from 'src/core/public';
+import { CoreSetup } from 'src/core/public';
 // The following dependencies on ui/* and src/legacy/core_plugins must be mocked when testing
 import chrome, { Chrome } from 'ui/chrome';
 import { Storage } from 'ui/storage';

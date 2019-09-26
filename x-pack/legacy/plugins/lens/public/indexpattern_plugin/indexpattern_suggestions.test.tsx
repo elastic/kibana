@@ -5,9 +5,6 @@
  */
 
 import chromeMock from 'ui/chrome';
-import { data as dataMock } from '../../../../../../src/legacy/core_plugins/data/public/setup';
-import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
-import { SavedObjectsClientContract } from 'src/core/public';
 import {
   getIndexPatternDatasource,
   IndexPatternPersistedState,
