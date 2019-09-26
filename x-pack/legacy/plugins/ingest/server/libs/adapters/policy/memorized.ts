@@ -12,7 +12,7 @@ import { PolicyAdapter } from './default';
 export class MemorizedPolicyAdapter {
   constructor(private readonly adapter?: PolicyAdapter) {}
 
-  public async create(newPolicy: NewPolicyFile): Promise<PolicyFile> {
+  public async create(newPolicy: NewPolicyFile, options?: { id?: string }): Promise<PolicyFile> {
     const { shared_id, ...policy } = newPolicy;
     return await memorize(
       `create - ${JSON.stringify({ name: policy.name, description: policy.description })}`,
@@ -20,7 +20,7 @@ export class MemorizedPolicyAdapter {
         if (!this.adapter) {
           throw new Error('An adapter must be provided when running tests online');
         }
-        return await this.adapter.create(newPolicy);
+        return await this.adapter.create(newPolicy, options);
       },
       {
         pure: false,

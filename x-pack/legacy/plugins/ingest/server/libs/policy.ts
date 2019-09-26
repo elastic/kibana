@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { assign, omit } from 'lodash';
 import uuidv4 from 'uuid/v4';
 import { PolicyAdapter } from './adapters/policy/default';
@@ -15,6 +16,7 @@ import {
 } from './adapters/policy/adapter_types';
 import { FrameworkAuthenticatedUser } from './adapters/framework/adapter_types';
 import { NewDatasource } from './adapters/policy/adapter_types';
+import { DEFAULT_POLICY_ID } from '../../common/constants';
 
 export class PolicyLib {
   constructor(
@@ -131,6 +133,9 @@ export class PolicyLib {
   }
 
   public async delete(sharedId: string): Promise<{ success: boolean }> {
+    if (sharedId === DEFAULT_POLICY_ID) {
+      throw new Error('Not allowed (impossible to delete default policy)');
+    }
     // TODO Low priority - page through vs one large query as this will break if there are more then 10k past versions
     const versions = await this.listVersions(sharedId, false, 1, 10000);
 
@@ -258,7 +263,36 @@ export class PolicyLib {
       shared_id: newPolicyInfo.shared_id,
     };
   }
-
+  public async ensureDefaultPolicy() {
+    try {
+      await this.adapter.get(DEFAULT_POLICY_ID);
+    } catch (err) {
+      if (!err.isBoom || err.output.statusCode !== 404) {
+        throw err;
+      }
+      const info = this.libs.framework.info;
+      if (info === null) {
+        throw new Error('Could not get version information about Kibana from xpack');
+      }
+      const newDefaultPolicy: NewPolicyFile = {
+        name: 'Default policy',
+        description: 'Default policy created by Kibana',
+        status: 'active',
+        monitoring_enabled: true,
+        shared_id: DEFAULT_POLICY_ID,
+        version: 0,
+        agent_version: info.kibana.version,
+        data_sources: [],
+        created_on: new Date().toISOString(),
+        created_by: 'kibana',
+        updated_on: new Date().toISOString(),
+        updated_by: 'kibana',
+      };
+      await this.adapter.create(newDefaultPolicy, {
+        id: DEFAULT_POLICY_ID,
+      });
+    }
+  }
   /**
    * request* because in the future with an approval flow it will not directly make the change
    */

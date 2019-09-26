@@ -82,6 +82,25 @@ describe('Policies Lib', () => {
     });
   });
 
+  describe('ensureDefaultPolicy', () => {
+    it('should create a new default policy if none exists', async () => {
+      await libs.policy.ensureDefaultPolicy();
+
+      const { items: policies } = await libs.policy.list();
+      expect(policies).toHaveLength(1);
+      expect(policies[0].id).toBe('default');
+    });
+
+    it('should not create the new default policy more than once', async () => {
+      await libs.policy.ensureDefaultPolicy();
+      await libs.policy.ensureDefaultPolicy();
+
+      const { items: policies } = await libs.policy.list();
+      expect(policies).toHaveLength(1);
+      expect(policies[0].id).toBe('default');
+    });
+  });
+
   describe('list', () => {
     it('should list all active policies', async () => {
       const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
@@ -185,6 +204,10 @@ describe('Policies Lib', () => {
 
       const { items: gottenPolicies } = await libs.policy.list();
       expect(gottenPolicies.length).toBe(0);
+    });
+
+    it('Should never delete the default policy', async () => {
+      expect(libs.policy.delete('default')).rejects.toThrowError(/Not allowed/);
     });
   });
 
