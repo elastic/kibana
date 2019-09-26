@@ -30,100 +30,77 @@ import {
 } from '@kbn/es-query';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
-import React, { Component } from 'react';
-import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
+import React, { useState } from 'react';
+import { UiSettingsClientContract } from 'src/core/public';
+import { CoreStart } from 'src/core/public';
 import { IndexPattern } from '../../index_patterns';
 import { FilterEditor } from './filter_editor';
 import { FilterItem } from './filter_item';
 import { FilterOptions } from './filter_options';
 import { createSavedQueryService } from '../../search/search_bar/lib/saved_query_service';
+import { useKibana } from '../../../../../../plugins/kibana_react/public';
 
 interface Props {
   filters: Filter[];
-  onFiltersUpdated: (filters: Filter[]) => void;
+  onFiltersUpdated?: (filters: Filter[]) => void;
   className: string;
   indexPatterns: IndexPattern[];
   intl: InjectedIntl;
-  uiSettings: UiSettingsClientContract;
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjects?: CoreStart['savedObjects'];
   showSaveQuery?: boolean;
+  // Only for directives!
+  uiSettings?: UiSettingsClientContract;
 }
 
-interface State {
-  isAddFilterPopoverOpen: boolean;
-}
+function FilterBarUI(props: Props) {
+  const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
+  const kibana = useKibana();
+  let { uiSettings } = kibana.services;
+  const { savedObjects } = kibana.services;
+  const savedQueryService = savedObjects
+    ? createSavedQueryService(savedObjects!.client)
+    : createSavedQueryService(props.savedObjects!.client);
 
-class FilterBarUI extends Component<Props, State> {
-  public state = {
-    isAddFilterPopoverOpen: false,
-  };
-
-  public render() {
-    if (!this.props.uiSettings) {
-      return null;
-    }
-    const classes = classNames('globalFilterBar', this.props.className);
-
-    return (
-      <EuiFlexGroup
-        className="globalFilterGroup"
-        gutterSize="none"
-        alignItems="flexStart"
-        responsive={false}
-      >
-        <EuiFlexItem className="globalFilterGroup__branch" grow={false}>
-          <FilterOptions
-            onEnableAll={this.onEnableAll}
-            onDisableAll={this.onDisableAll}
-            onPinAll={this.onPinAll}
-            onUnpinAll={this.onUnpinAll}
-            onToggleAllNegated={this.onToggleAllNegated}
-            onToggleAllDisabled={this.onToggleAllDisabled}
-            onRemoveAll={this.onRemoveAll}
-          />
-        </EuiFlexItem>
-
-        <EuiFlexItem className="globalFilterGroup__filterFlexItem">
-          <EuiFlexGroup
-            className={classes}
-            wrap={true}
-            responsive={false}
-            gutterSize="xs"
-            alignItems="center"
-          >
-            {this.renderItems()}
-            {this.renderAddFilter()}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+  if (!uiSettings) {
+    // Only for directives!
+    uiSettings = props.uiSettings;
   }
 
-  private renderItems() {
-    return this.props.filters.map((filter, i) => (
+  function onFiltersUpdated(filters: Filter[]) {
+    if (props.onFiltersUpdated) {
+      props.onFiltersUpdated(filters);
+    }
+  }
+
+  function renderItems() {
+    return props.filters.map((filter, i) => (
       <EuiFlexItem key={i} grow={false} className="globalFilterBar__flexItem">
         <FilterItem
           id={`${i}`}
           filter={filter}
-          onUpdate={newFilter => this.onUpdate(i, newFilter)}
-          onRemove={() => this.onRemove(i)}
-          indexPatterns={this.props.indexPatterns}
-          uiSettings={this.props.uiSettings}
-          savedQueryService={createSavedQueryService(this.props.savedObjectsClient)}
-          showSaveQuery={this.props.showSaveQuery}
+          onUpdate={newFilter => onUpdate(i, newFilter)}
+          onRemove={() => onRemove(i)}
+          indexPatterns={props.indexPatterns}
+          uiSettings={uiSettings!}
+          savedQueryService={savedQueryService}
+          showSaveQuery={props.showSaveQuery}
         />
       </EuiFlexItem>
     ));
   }
 
-  private renderAddFilter() {
-    const isPinned = this.props.uiSettings.get('filters:pinnedByDefault');
-    const [indexPattern] = this.props.indexPatterns;
+  function renderAddFilter() {
+    const isPinned = uiSettings!.get('filters:pinnedByDefault');
+    const [indexPattern] = props.indexPatterns;
     const index = indexPattern && indexPattern.id;
     const newFilter = buildEmptyFilter(isPinned, index);
 
     const button = (
-      <EuiButtonEmpty size="xs" onClick={this.onOpenAddFilterPopover} data-test-subj="addFilter">
+      <EuiButtonEmpty
+        size="xs"
+        onClick={() => setIsAddFilterPopoverOpen(true)}
+        data-test-subj="addFilter"
+      >
         +{' '}
         <FormattedMessage
           id="data.filter.filterBar.addFilterButtonLabel"
@@ -137,8 +114,8 @@ class FilterBarUI extends Component<Props, State> {
         <EuiPopover
           id="addFilterPopover"
           button={button}
-          isOpen={this.state.isAddFilterPopoverOpen}
-          closePopover={this.onCloseAddFilterPopover}
+          isOpen={isAddFilterPopoverOpen}
+          closePopover={() => setIsAddFilterPopoverOpen(false)}
           anchorPosition="downLeft"
           withTitle
           panelPaddingSize="none"
@@ -148,13 +125,13 @@ class FilterBarUI extends Component<Props, State> {
             <div style={{ width: 400 }}>
               <FilterEditor
                 filter={newFilter}
-                indexPatterns={this.props.indexPatterns}
-                onSubmit={this.onAdd}
-                onCancel={this.onCloseAddFilterPopover}
+                indexPatterns={props.indexPatterns}
+                onSubmit={onAdd}
+                onCancel={() => setIsAddFilterPopoverOpen(false)}
                 key={JSON.stringify(newFilter)}
-                uiSettings={this.props.uiSettings}
-                savedQueryService={createSavedQueryService(this.props.savedObjectsClient)}
-                showSaveQuery={this.props.showSaveQuery}
+                uiSettings={uiSettings!}
+                savedQueryService={savedQueryService}
+                showSaveQuery={props.showSaveQuery}
               />
             </div>
           </EuiFlexItem>
@@ -163,69 +140,93 @@ class FilterBarUI extends Component<Props, State> {
     );
   }
 
-  private onAdd = (filter: Filter) => {
-    this.onCloseAddFilterPopover();
-    const filters = [...this.props.filters, filter];
-    this.props.onFiltersUpdated(filters);
-  };
+  function onAdd(filter: Filter) {
+    setIsAddFilterPopoverOpen(false);
+    const filters = [...props.filters, filter];
+    onFiltersUpdated(filters);
+  }
 
-  private onRemove = (i: number) => {
-    const filters = [...this.props.filters];
+  function onRemove(i: number) {
+    const filters = [...props.filters];
     filters.splice(i, 1);
-    this.props.onFiltersUpdated(filters);
-  };
+    onFiltersUpdated(filters);
+  }
 
-  private onUpdate = (i: number, filter: Filter) => {
-    const filters = [...this.props.filters];
+  function onUpdate(i: number, filter: Filter) {
+    const filters = [...props.filters];
     filters[i] = filter;
-    this.props.onFiltersUpdated(filters);
-  };
+    onFiltersUpdated(filters);
+  }
 
-  private onEnableAll = () => {
-    const filters = this.props.filters.map(enableFilter);
-    this.props.onFiltersUpdated(filters);
-  };
+  function onEnableAll() {
+    const filters = props.filters.map(enableFilter);
+    onFiltersUpdated(filters);
+  }
 
-  private onDisableAll = () => {
-    const filters = this.props.filters.map(disableFilter);
-    this.props.onFiltersUpdated(filters);
-  };
+  function onDisableAll() {
+    const filters = props.filters.map(disableFilter);
+    onFiltersUpdated(filters);
+  }
 
-  private onPinAll = () => {
-    const filters = this.props.filters.map(pinFilter);
-    this.props.onFiltersUpdated(filters);
-  };
+  function onPinAll() {
+    const filters = props.filters.map(pinFilter);
+    onFiltersUpdated(filters);
+  }
 
-  private onUnpinAll = () => {
-    const filters = this.props.filters.map(unpinFilter);
-    this.props.onFiltersUpdated(filters);
-  };
+  function onUnpinAll() {
+    const filters = props.filters.map(unpinFilter);
+    onFiltersUpdated(filters);
+  }
 
-  private onToggleAllNegated = () => {
-    const filters = this.props.filters.map(toggleFilterNegated);
-    this.props.onFiltersUpdated(filters);
-  };
+  function onToggleAllNegated() {
+    const filters = props.filters.map(toggleFilterNegated);
+    onFiltersUpdated(filters);
+  }
 
-  private onToggleAllDisabled = () => {
-    const filters = this.props.filters.map(toggleFilterDisabled);
-    this.props.onFiltersUpdated(filters);
-  };
+  function onToggleAllDisabled() {
+    const filters = props.filters.map(toggleFilterDisabled);
+    onFiltersUpdated(filters);
+  }
 
-  private onRemoveAll = () => {
-    this.props.onFiltersUpdated([]);
-  };
+  function onRemoveAll() {
+    onFiltersUpdated([]);
+  }
 
-  private onOpenAddFilterPopover = () => {
-    this.setState({
-      isAddFilterPopoverOpen: true,
-    });
-  };
+  const classes = classNames('globalFilterBar', props.className);
 
-  private onCloseAddFilterPopover = () => {
-    this.setState({
-      isAddFilterPopoverOpen: false,
-    });
-  };
+  return (
+    <EuiFlexGroup
+      className="globalFilterGroup"
+      gutterSize="none"
+      alignItems="flexStart"
+      responsive={false}
+    >
+      <EuiFlexItem className="globalFilterGroup__branch" grow={false}>
+        <FilterOptions
+          onEnableAll={onEnableAll}
+          onDisableAll={onDisableAll}
+          onPinAll={onPinAll}
+          onUnpinAll={onUnpinAll}
+          onToggleAllNegated={onToggleAllNegated}
+          onToggleAllDisabled={onToggleAllDisabled}
+          onRemoveAll={onRemoveAll}
+        />
+      </EuiFlexItem>
+
+      <EuiFlexItem className="globalFilterGroup__filterFlexItem">
+        <EuiFlexGroup
+          className={classes}
+          wrap={true}
+          responsive={false}
+          gutterSize="xs"
+          alignItems="center"
+        >
+          {renderItems()}
+          {renderAddFilter()}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 }
 
 export const FilterBar = injectI18n(FilterBarUI);

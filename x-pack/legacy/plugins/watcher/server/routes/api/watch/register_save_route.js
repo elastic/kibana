@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { WATCH_TYPES } from '../../../../common/constants';
+import { serializeJsonWatch, serializeThresholdWatch } from '../../../../common/lib/serialization';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
-import { Watch } from '../../../models/watch';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError, wrapCustomError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
@@ -17,15 +18,14 @@ function fetchWatch(callWithRequest, watchId) {
   });
 }
 
-function saveWatch(callWithRequest, watch) {
+function saveWatch(callWithRequest, id, body) {
   return callWithRequest('watcher.putWatch', {
-    id: watch.id,
-    body: watch.watch
+    id,
+    body,
   });
 }
 
 export function registerSaveRoute(server) {
-
   const isEsError = isEsErrorFactory(server);
   const licensePreRouting = licensePreRoutingFactory(server);
 
@@ -34,22 +34,22 @@ export function registerSaveRoute(server) {
     method: 'PUT',
     handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
-      const watchPayload = request.payload;
+      const { id, type, isNew, ...watchConfig } = request.payload;
 
       // For new watches, verify watch with the same ID doesn't already exist
-      if (watchPayload.isNew) {
+      if (isNew) {
         const conflictError = wrapCustomError(
           new Error(i18n.translate('xpack.watcher.saveRoute.duplicateWatchIdErrorMessage', {
             defaultMessage: 'There is already a watch with ID \'{watchId}\'.',
             values: {
-              watchId: watchPayload.id,
+              watchId: id,
             }
           })),
           409
         );
 
         try {
-          const existingWatch = await fetchWatch(callWithRequest, watchPayload.id);
+          const existingWatch = await fetchWatch(callWithRequest, id);
 
           if (existingWatch.found) {
             throw conflictError;
@@ -62,10 +62,21 @@ export function registerSaveRoute(server) {
         }
       }
 
-      const watchFromDownstream = Watch.fromDownstreamJson(watchPayload);
+      let serializedWatch;
+
+      switch (type) {
+        case WATCH_TYPES.JSON:
+          const { name, watch } = watchConfig;
+          serializedWatch = serializeJsonWatch(name, watch);
+          break;
+
+        case WATCH_TYPES.THRESHOLD:
+          serializedWatch = serializeThresholdWatch(watchConfig);
+          break;
+      }
 
       // Create new watch
-      return saveWatch(callWithRequest, watchFromDownstream.upstreamJson)
+      return saveWatch(callWithRequest, id, serializedWatch)
         .catch(err => {
           // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {

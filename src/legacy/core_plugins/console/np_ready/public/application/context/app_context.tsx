@@ -18,6 +18,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
+import { NotificationsSetup } from '../../../../../../../core/public';
 import { History, Storage, Settings } from '../../services';
 
 interface ContextValue {
@@ -25,6 +26,7 @@ interface ContextValue {
     history: History;
     storage: Storage;
     settings: Settings;
+    notifications: NotificationsSetup;
   };
   docLinkVersion: string;
   ResizeChecker: any;
