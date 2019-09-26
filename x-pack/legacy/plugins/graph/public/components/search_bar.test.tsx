@@ -4,32 +4,49 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchBar } from './search_bar';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { SearchBar, SearchBarProps } from './search_bar';
 import React, { ReactElement } from 'react';
 import { CoreStart } from 'src/core/public';
 import { act } from 'react-dom/test-utils';
 import { IndexPattern, QueryBarInput } from 'src/legacy/core_plugins/data/public';
 
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { I18nProvider } from '@kbn/i18n/react';
+
 jest.mock('ui/new_platform');
 import { openSourceModal } from '../services/source_modal';
+import { mount } from 'enzyme';
 
 jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
+
+function wrapSearchBarInContext(testProps: SearchBarProps) {
+  const services = {
+    uiSettings: {} as CoreStart['uiSettings'],
+    savedObjects: {} as CoreStart['savedObjects'],
+    notifications: {} as CoreStart['notifications'],
+    http: {} as CoreStart['http'],
+    overlays: {} as CoreStart['overlays'],
+  };
+
+  return (
+    <I18nProvider>
+      <KibanaContextProvider services={services}>
+        <SearchBar {...testProps} />
+      </KibanaContextProvider>
+    </I18nProvider>
+  );
+}
 
 describe('search_bar', () => {
   it('should render search bar and submit queryies', () => {
     const querySubmit = jest.fn();
-    const instance = shallowWithIntl(
-      <SearchBar
-        isLoading={false}
-        onIndexPatternSelected={() => {}}
-        onQuerySubmit={querySubmit}
-        savedObjects={{} as CoreStart['savedObjects']}
-        uiSettings={{} as CoreStart['uiSettings']}
-        http={{} as CoreStart['http']}
-        overlays={{} as CoreStart['overlays']}
-        currentIndexPattern={{ title: 'Testpattern' } as IndexPattern}
-      />
+    const instance = mount(
+      wrapSearchBarInContext({
+        isLoading: false,
+        onIndexPatternSelected: () => {},
+        onQuerySubmit: querySubmit,
+        currentIndexPattern: { title: 'Testpattern' } as IndexPattern,
+      })
     );
     act(() => {
       instance.find(QueryBarInput).prop('onChange')!({ language: 'lucene', query: 'testQuery' });
@@ -44,17 +61,13 @@ describe('search_bar', () => {
 
   it('should translate kql query into JSON dsl', () => {
     const querySubmit = jest.fn();
-    const instance = shallowWithIntl(
-      <SearchBar
-        isLoading={false}
-        onIndexPatternSelected={() => {}}
-        onQuerySubmit={querySubmit}
-        savedObjects={{} as CoreStart['savedObjects']}
-        uiSettings={{} as CoreStart['uiSettings']}
-        http={{} as CoreStart['http']}
-        overlays={{} as CoreStart['overlays']}
-        currentIndexPattern={{ title: 'Testpattern', fields: [{ name: 'test' }] } as IndexPattern}
-      />
+    const instance = mount(
+      wrapSearchBarInContext({
+        isLoading: false,
+        onIndexPatternSelected: () => {},
+        onQuerySubmit: querySubmit,
+        currentIndexPattern: { title: 'Testpattern', fields: [{ name: 'test' }] } as IndexPattern,
+      })
     );
     act(() => {
       instance.find(QueryBarInput).prop('onChange')!({ language: 'kuery', query: 'test: abc' });
@@ -72,17 +85,14 @@ describe('search_bar', () => {
 
   it('should open index pattern picker', () => {
     const indexPatternSelected = jest.fn();
-    const instance = shallowWithIntl(
-      <SearchBar
-        isLoading={false}
-        onIndexPatternSelected={indexPatternSelected}
-        onQuerySubmit={() => {}}
-        savedObjects={{} as CoreStart['savedObjects']}
-        uiSettings={{} as CoreStart['uiSettings']}
-        http={{} as CoreStart['http']}
-        overlays={{} as CoreStart['overlays']}
-        currentIndexPattern={{ title: 'Testpattern' } as IndexPattern}
-      />
+
+    const instance = mount(
+      wrapSearchBarInContext({
+        isLoading: false,
+        onIndexPatternSelected: indexPatternSelected,
+        onQuerySubmit: () => {},
+        currentIndexPattern: { title: 'Testpattern' } as IndexPattern,
+      })
     );
 
     // pick the button component out of the tree because
