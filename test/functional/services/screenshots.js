@@ -35,7 +35,10 @@ export async function ScreenshotsProvider({ getService }) {
   const SESSION_DIRECTORY = resolve(config.get('screenshots.directory'), 'session');
   const FAILURE_DIRECTORY = resolve(config.get('screenshots.directory'), 'failure');
   const BASELINE_DIRECTORY = resolve(config.get('screenshots.directory'), 'baseline');
-  await del([SESSION_DIRECTORY, FAILURE_DIRECTORY]);
+
+  if (process.env.CI !== 'true') {
+    await del([SESSION_DIRECTORY, FAILURE_DIRECTORY]);
+  }
 
   class Screenshots {
 

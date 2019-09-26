@@ -33,7 +33,9 @@ export async function FailureDebuggingProvider({ getService }) {
   const log = getService('log');
   const browser = getService('browser');
 
-  await del(config.get('failureDebugging.htmlDirectory'));
+  if (process.env.CI !== 'true') {
+    await del(config.get('failureDebugging.htmlDirectory'));
+  }
 
   async function logCurrentUrl() {
     const currentUrl = await browser.getCurrentUrl();
