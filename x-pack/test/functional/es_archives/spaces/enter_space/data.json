@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "config:8.0.0",
+    "id": "config:6.0.0",
     "index": ".kibana",
     "source": {
       "config": {
@@ -17,7 +17,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "another-space:config:8.0.0",
+    "id": "another-space:config:6.0.0",
     "index": ".kibana",
     "source": {
       "namespace": "another-space",
