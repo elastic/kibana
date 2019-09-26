@@ -14,7 +14,7 @@ import { CommitInfo } from '../../../model/commit';
 describe('Commit component', () => {
   test('renders correctly for a commit', () => {
     const commitInfo: CommitInfo = {
-      updated: new Date('10/10/2020'),
+      updated: new Date(Date.UTC(2222, 10, 11)),
       message: 'This is my commit message\n\nThis is the description',
       author: 'author',
       committer: 'committer',
@@ -26,7 +26,7 @@ describe('Commit component', () => {
       <Commit
         showRepoLink={false}
         commit={commitInfo}
-        date="10/10/2020"
+        date="11/11/2222"
         repoUri="github.com/elastic/code"
       />
     );

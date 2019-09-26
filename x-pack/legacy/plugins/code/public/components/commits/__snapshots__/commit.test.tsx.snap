@@ -14,10 +14,10 @@ This is the description",
         "9817575",
       ],
       "treeId": "96440ceb55e04a99d33c1c8ee021400a680fbf74",
-      "updated": 2020-10-10T05:00:00.000Z,
+      "updated": 2222-11-11T00:00:00.000Z,
     }
   }
-  date="10/10/2020"
+  date="11/11/2222"
   repoUri="github.com/elastic/code"
   showRepoLink={false}
 >
@@ -67,12 +67,12 @@ This is the description",
                       values={
                         Object {
                           "committer": "committer",
-                          "date": "10/10/2020",
+                          "date": "11/11/2222",
                         }
                       }
                     >
                       <span>
-                        Committed on 10/10/2020 by committer
+                        Committed on 11/11/2222 by committer
                       </span>
                     </FormattedMessage>
                   </span>
