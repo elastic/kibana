@@ -7,15 +7,15 @@ Choose from a variety of visualizations to best display your data.
 [[area-chart]]
 === Area chart
 
-Area charts show one or more quantities over time. In area charts, points are 
-plotted and connected by lines to show the value of a quantity at several 
-different times. 
- 
+Area charts show one or more quantities over time. In area charts, points are
+plotted and connected by lines to show the value of a quantity at several
+different times.
+
 With area charts, you can:
 
 * Show trends in the data over time
 
-* Compare two or more quantities 
+* Compare two or more quantities
 
 * Display the magnitude of trends
 
@@ -32,7 +32,7 @@ With Controls, you can:
 
 * Interact with the data on your {kib} dashboard
 
-* Watch your data change in real-time 
+* Watch your data change in real-time
 
 * Drill down into your data with filters
 
@@ -50,8 +50,8 @@ Ready to add Controls to your dashboard? Check out the <<controls-tutorial, Cont
 
 Mark areas of a geographic area based on the aggregation that you choose. For each bucket, a circle displays on the map, and the circle color indicates the value of the aggregation.
 
-NOTE: Since the Maps application provides you with more functionality and is 
-easier to use, it is recommended to use the Maps application instead of the 
+NOTE: Since the Maps application provides you with more functionality and is
+easier to use, it is recommended to use the Maps application instead of the
 coordinate map.
 
 [role="screenshot"]
@@ -61,11 +61,20 @@ image::images/visualize-coordinate-map.png[]
 [[visualize-data-table]]
 === Data table
 
-Mellori’s section.
 
-Data tables display your raw data in a tabular format.
+Data tables display your raw data or aggregation results in a tabular format.
 
-//<image>
+You can use them to:
+
+* Display server configuration details
+
+* Track counts, min, or max values for a specific field
+
+* Monitor the status of key services
+
+[role="screenshot"]
+image:images/visualize-data-table-tutorial02.png[Data table with web logs sample data]
+
 
 Ready to create a data table? Check out the <<data-table-tutorial, data example>>.
 
@@ -92,7 +101,7 @@ Ready to create a gauge visualization? Check out the <<gauge-tutorial, gauge exa
 [[visualize-goal]]
 === Goal
 
-The goal visualization displays how your metric progresses toward a fixed goal. 
+The goal visualization displays how your metric progresses toward a fixed goal.
 
 [role="screenshot"]
 image::images/visualize-goal.png[Goal with eCommerce Orders sample data]
@@ -151,7 +160,7 @@ Ready to create a line chart? Check out the <<line-chart-tutorial, line chart ex
 [[visualize-maps-app]]
 === Maps
 
-To create and style maps with multiple layers and indices, use the Maps application.  
+To create and style maps with multiple layers and indices, use the Maps application.
 
 For more information about the Maps application, refer to <<maps,Maps>>.
 
@@ -184,7 +193,7 @@ Ready to use the Markdown widget? Check out the <<markdown-tutorial, Markdown wi
 [[visualize-metric]]
 === Metric
 
-Mellori's section. 
+Mellori's section.
 
 The metric visualization displays a single numeric value for an aggregation.
 
@@ -221,8 +230,8 @@ image::images/visualize-region-map.png[Region map with Flights Origin Country Ti
 [[visualize-tsvb]]
 === TSVB
 
-TSVB is a time series data visualizer that allows you to use the full power of the 
-Elasticsearch aggregation framework. With TSVB, you can combine an infinite 
+TSVB is a time series data visualizer that allows you to use the full power of the
+Elasticsearch aggregation framework. With TSVB, you can combine an infinite
 number of aggregations to display complex data.
 
 NOTE: In Elasticsearch version 7.3.0 and later, the time series data visualizer is now referred to as TSVB instead of Time Series Visual Builder.

@@ -49,7 +49,7 @@ To create the area chart visualization, use the visualization builder.
 [[area-chart-metric-aggregation]]
 === Choose the aggregations
 
-Specify the options for the metric and bucket aggregations. 
+Specify the options for the metric and bucket aggregations.
 
 . In the *Metrics* area, expand the *Y-axis* options.
 
@@ -75,7 +75,7 @@ image:images/visualize-area-chart-tutorial.png[Area chart with flight sample dat
 [[area-chart-lines]]
 === Make the area chart easier to read
 
-To make the area chart easier to read, add background lines.  
+To make the area chart easier to read, add background lines.
 
 . Select *Panel Settings*.
 
@@ -96,8 +96,79 @@ Want some more Controls inspiration? Check out the link:https://www.elastic.co/b
 [[data-table-tutorial]]
 === Data table tutorial
 
-Mellori’s section.
+Create a data table to display the status code and request resource from web logs.
 
+[float]
+[[data-table-before-you-begin]]
+==== Before you begin
+
+For this tutorial, you'll need to add the <<add-sample-data, Sample Web Logs data>>.
+
+[float]
+[[create-the-data-table]]
+==== Create the data table
+
+To create the data table visualization, use the visualization builder.
+
+. In the side navigation, click *Visualize*.
+
+. Click *Create new visualization*.
+
+. On the *New Visualization* window, click *Data Table*.
+
+. On the *New Data Table/Choose a source* window, select *kibana_sample_data_logs*.
+
+. From the time filter, select *Last 7 days*.
+
+[float]
+[[data-table-aggregation]]
+==== Choose the aggregations
+
+Use these values to create the table, accept the defaults for all other settings.
+
+* *Metrics*: Count
+* *Buckets*:
+** *Split Rows*
+*** *Aggregation*: Terms
+*** *Field*: `request.keyword`
+*** *Order*: Descending
+*** *Size*: 8
+*** Toggle *Group other values in separate bucket*
+*** *Custom Label*: Resource
+
+** *Split Rows*
+*** *Sub aggregation*: Terms
+*** *Field*: `response.keyword`
+*** *Custom Label*: Status Code
+*** *Exclude*: 200
+
+[role="screenshot"]
+image:images/visualize-data-table-tutorial01.png[Data table with web logs sample data]
+
+[float]
+[[data-table-split-table]]
+==== Split the data table into multiple tables
+
+If you wanted to view all of the requests that had a certain status code. You could use the split table option to see results grouped by status code in separate tables.
+
+* *Metrics*: Count
+* *Buckets*:
+** *Split Table*
+*** *Aggregation*: Terms
+*** *Field*: `response.keyword`
+*** *Order*: Descending
+*** *Size*: 5
+*** *Custom Label*: Status Code
+
+** *Split Rows*
+*** *Sub aggregation*: Terms
+*** *Field*: `request.keyword`
+*** *Custom Label*: Resource
+
+[role="screenshot"]
+image:images/visualize-data-table-tutorial02.png[Split data table with web logs sample data]
+
+[float]
 [[gauge-tutorial]]
 === Gauge tutorial
 
@@ -126,7 +197,7 @@ Short description.
 [[metric-tutorial]]
 === Metric tutorial
 
-Mellori's section. 
+Mellori's section.
 
 [[pie-chart-tutorial]]
 === Pie chart tutorial
@@ -179,7 +250,7 @@ image::images/timelion-create01.png[]
 [[time-series-compare-data]]
 ==== Compare the data
 
-To compare the two data sets, add another series with data from the previous hour, separated by a comma:  
+To compare the two data sets, add another series with data from the previous hour, separated by a comma:
 
 [source,text]
 ----------------------------------
@@ -217,7 +288,7 @@ image::images/timelion-create03.png[]
 
 [float]
 [[time-series-title]]
-==== Add a title 
+==== Add a title
 
 Add a meaningful title:
 
@@ -305,7 +376,7 @@ Change the position and style of the legend:
 
 [source,text]
 ----------------------------------
-.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour').lines(fill=1,width=0.5).color(gray), .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour').title('CPU usage over time').color(#1E90FF).legend(columns=2, position=nw) <1> 
+.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour').lines(fill=1,width=0.5).color(gray), .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour').title('CPU usage over time').color(#1E90FF).legend(columns=2, position=nw) <1>
 ----------------------------------
 
 <1> `.legend()` sets the position and style of the legend. In this example, `.legend(columns=2, position=nw)` places the legend in the north west position of the visualization with two columns.
@@ -346,7 +417,7 @@ Change how the data is displayed so that you can easily monitor the inbound traf
 .es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.in.bytes).derivative() <1>
 ----------------------------------
 
-<1> `.derivative` plots the change in values over time. 
+<1> `.derivative` plots the change in values over time.
 
 [role="screenshot"]
 image::images/timelion-math02.png[]
@@ -376,7 +447,7 @@ To make the visualization easier to analyze, change the data metric from bytes t
 .es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.in.bytes).derivative().divide(1048576), .es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.out.bytes).derivative().multiply(-1).divide(1048576) <1>
 ----------------------------------
 
-<1> `.divide()` accepts the same input as `.multiply()`, then divides the data series by the defined divisor. 
+<1> `.divide()` accepts the same input as `.multiply()`, then divides the data series by the defined divisor.
 
 [role="screenshot"]
 image::images/timelion-math04.png[]
