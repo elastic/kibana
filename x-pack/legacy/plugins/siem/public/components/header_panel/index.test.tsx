@@ -134,7 +134,7 @@ describe('HeaderPanel', () => {
     ).toBe(false);
   });
 
-  test('it renders the border when border is true', () => {
+  test('it applies border styles when border is true', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPanel border title="Test title" />
@@ -146,7 +146,7 @@ describe('HeaderPanel', () => {
     expect(siemHeaderPanel).toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
   });
 
-  test('it DOES NOT render the border when border is false', () => {
+  test('it DOES NOT apply border styles when border is false', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPanel title="Test title" />

@@ -8,9 +8,11 @@ import React from 'react';
 import { pure } from 'recompose';
 import styled, { css } from 'styled-components';
 
-const Row = styled.div<{ rowHeight?: string; rowPadding?: string }>`
+const Row = styled.div.attrs({
+  className: 'siemSkeletonRow',
+})<{ rowHeight?: string; rowPadding?: string }>`
   ${({ rowHeight, rowPadding, theme }) => css`
-    border-bottom: ${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiColorLightShade};
+    border-bottom: ${theme.eui.euiBorderThin};
     display: flex;
     height: ${rowHeight ? rowHeight : theme.eui.euiSizeXL};
     padding: ${rowPadding
@@ -20,7 +22,9 @@ const Row = styled.div<{ rowHeight?: string; rowPadding?: string }>`
 `;
 Row.displayName = 'Row';
 
-const Cell = styled.div<{ cellColor?: string; cellMargin?: string }>`
+const Cell = styled.div.attrs({
+  className: 'siemSkeletonRow__cell',
+})<{ cellColor?: string; cellMargin?: string }>`
   ${({ cellColor, cellMargin, theme }) => css`
     background-color: ${cellColor ? cellColor : theme.eui.euiColorLightestShade};
     border-radius: 2px;
