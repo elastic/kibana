@@ -80,8 +80,8 @@ export const WorkpadExport = compose<ComponentProps, {}>(
           case 'reportingConfig':
             notify.info(strings.getCopyReportingConfigMessage());
             break;
-          case 'embed':
-            notify.info(`Copied embed code to clipboard`);
+          case 'share':
+            notify.info(strings.getCopyShareConfigMessage());
             break;
           default:
             throw new Error(strings.getUnknownExportErrorMessage(type));
@@ -105,17 +105,20 @@ export const WorkpadExport = compose<ComponentProps, {}>(
           case 'json':
             downloadWorkpad(workpad.id);
             return;
-          case 'embed':
+          case 'share':
             downloadRenderedWorkpad(renderedWorkpad);
             return;
-          case 'runtime':
+          case 'shareRuntime':
             downloadEmbedRuntime();
             return;
-          case 'zip':
+          case 'shareZip':
             const basePath = chrome.getBasePath();
             arrayBufferFetch
               .post(`${basePath}${API_ROUTE_SHAREABLE_ZIP}`, JSON.stringify(renderedWorkpad))
-              .then(blob => downloadZippedEmbed(blob.data));
+              .then(blob => downloadZippedEmbed(blob.data))
+              .catch((err: Error) => {
+                notify.error(err, { title: strings.getShareableZipErrorTitle(workpad.name) });
+              });
             return;
           default:
             throw new Error(strings.getUnknownExportErrorMessage(type));

@@ -14,7 +14,7 @@ import { RenderedElementContainer } from '../rendered_element.container';
 
 const { hello } = sharedWorkpads;
 
-storiesOf('snapshots', module)
+storiesOf('shareables', module)
   .add('Canvas', () => (
     <ExampleContext height={448}>
       <CanvasContainer />

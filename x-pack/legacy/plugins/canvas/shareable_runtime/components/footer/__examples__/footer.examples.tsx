@@ -13,7 +13,7 @@ import { PageControlsContainer } from '../page_controls.container';
 import { PagePreviewContainer } from '../page_preview.container';
 import { ScrubberContainer } from '../scrubber.container';
 
-storiesOf('shareable/Footer', module)
+storiesOf('shareables/Footer', module)
   .add('Footer', () => (
     <ExampleContext height={172}>
       <FooterContainer />

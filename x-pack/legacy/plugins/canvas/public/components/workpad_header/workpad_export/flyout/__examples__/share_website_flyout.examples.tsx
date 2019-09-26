@@ -6,9 +6,9 @@
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { ExternalEmbedFlyout } from '../external_embed_flyout';
+import { ShareWebsiteFlyout } from '../share_website_flyout';
 
-storiesOf('components/Export/ExternalEmbedFlyout', module)
+storiesOf('components/Export/ShareWebsiteFlyout', module)
   .addParameters({
     info: {
       inline: true,
@@ -24,7 +24,7 @@ storiesOf('components/Export/ExternalEmbedFlyout', module)
     },
   })
   .add('default', () => (
-    <ExternalEmbedFlyout
+    <ShareWebsiteFlyout
       onCopy={action('onCopy')}
       onExport={action('onExport')}
       onClose={action('onClose')}

@@ -12,7 +12,7 @@ import { AutoplaySettingsContainer } from '../autoplay_settings.container';
 import { SettingsContainer } from '../settings.container';
 import { ToolbarSettingsContainer } from '../toolbar_settings.container';
 
-storiesOf('shareable/Settings', module)
+storiesOf('shareables/Settings', module)
   .add('Settings', () => (
     <ExampleContext style={{ background: '#333', padding: 10 }}>
       <SettingsContainer />

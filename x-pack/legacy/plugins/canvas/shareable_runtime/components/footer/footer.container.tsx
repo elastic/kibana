@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import { useCanvasShareableState } from '../../context';
 import { Footer, Props as FooterProps } from './footer';
 export { FOOTER_HEIGHT } from './footer';
@@ -14,7 +14,7 @@ type Props = Pick<FooterProps, 'isHidden'>;
 /**
  * A store-connected container for the `Footer` component.
  */
-export const FooterContainer = ({ isHidden = false }: Props) => {
+export const FooterContainer: FC<Props> = ({ isHidden = false }: Props) => {
   const [{ workpad, settings }] = useCanvasShareableState();
 
   if (!workpad) {

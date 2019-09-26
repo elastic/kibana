@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots shareable/Footer/components PageControls 1`] = `
+exports[`Storyshots shareables/Footer/components PageControls 1`] = `
 <div
   className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
   style={
@@ -87,7 +87,7 @@ exports[`Storyshots shareable/Footer/components PageControls 1`] = `
 </div>
 `;
 
-exports[`Storyshots shareable/Footer/components Title 1`] = `
+exports[`Storyshots shareables/Footer/components Title 1`] = `
 <div
   style={
     Object {

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots snapshots Canvas 1`] = `
+exports[`Storyshots shareables Canvas 1`] = `
 <div
   className="kbnCanvas"
   style={
@@ -298,7 +298,7 @@ exports[`Storyshots snapshots Canvas 1`] = `
 </div>
 `;
 
-exports[`Storyshots snapshots Page 1`] = `
+exports[`Storyshots shareables Page 1`] = `
 <div
   className="kbnCanvas"
   style={
@@ -324,7 +324,7 @@ exports[`Storyshots snapshots Page 1`] = `
 </div>
 `;
 
-exports[`Storyshots snapshots RenderedElement 1`] = `
+exports[`Storyshots shareables RenderedElement 1`] = `
 <div
   className="kbnCanvas"
   style={

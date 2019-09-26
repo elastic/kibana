@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots shareable/Settings AutoplaySettings 1`] = `
+exports[`Storyshots shareables/Settings AutoplaySettings 1`] = `
 <div
   className="kbnCanvas"
   style={
@@ -175,7 +175,7 @@ exports[`Storyshots shareable/Settings AutoplaySettings 1`] = `
 </div>
 `;
 
-exports[`Storyshots shareable/Settings Settings 1`] = `
+exports[`Storyshots shareables/Settings Settings 1`] = `
 <div
   className="kbnCanvas"
   style={
@@ -231,7 +231,7 @@ exports[`Storyshots shareable/Settings Settings 1`] = `
 </div>
 `;
 
-exports[`Storyshots shareable/Settings ToolbarSettings 1`] = `
+exports[`Storyshots shareables/Settings ToolbarSettings 1`] = `
 <div
   className="kbnCanvas"
   style={

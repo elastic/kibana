@@ -11,7 +11,7 @@ import { action } from '@storybook/addon-actions';
 import { AutoplaySettings } from '../autoplay_settings';
 import { ToolbarSettings } from '../toolbar_settings';
 
-storiesOf('shareable/Settings/components', module)
+storiesOf('shareables/Settings/components', module)
   .add('AutoplaySettings, autoplay disabled', () => (
     <AutoplaySettings
       onSetAutoplay={action('onSetAutoplay')}

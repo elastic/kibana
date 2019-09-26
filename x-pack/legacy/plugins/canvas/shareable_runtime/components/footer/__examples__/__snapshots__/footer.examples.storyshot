@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots shareable/Footer Footer 1`] = `
+exports[`Storyshots shareables/Footer Footer 1`] = `
 <div
   className="kbnCanvas"
   style={
@@ -254,7 +254,7 @@ exports[`Storyshots shareable/Footer Footer 1`] = `
 </div>
 `;
 
-exports[`Storyshots shareable/Footer PageControls 1`] = `
+exports[`Storyshots shareables/Footer PageControls 1`] = `
 <div
   className="kbnCanvas"
   style={
@@ -355,7 +355,7 @@ exports[`Storyshots shareable/Footer PageControls 1`] = `
 </div>
 `;
 
-exports[`Storyshots shareable/Footer PagePreview 1`] = `
+exports[`Storyshots shareables/Footer PagePreview 1`] = `
 <div
   className="kbnCanvas"
   style={
@@ -404,7 +404,7 @@ exports[`Storyshots shareable/Footer PagePreview 1`] = `
 </div>
 `;
 
-exports[`Storyshots shareable/Footer Scrubber 1`] = `
+exports[`Storyshots shareables/Footer Scrubber 1`] = `
 <div
   className="kbnCanvas"
   style={
@@ -461,7 +461,7 @@ exports[`Storyshots shareable/Footer Scrubber 1`] = `
 </div>
 `;
 
-exports[`Storyshots shareable/Footer Title 1`] = `
+exports[`Storyshots shareables/Footer Title 1`] = `
 <div
   className="kbnCanvas"
   style={
