@@ -15,7 +15,6 @@ import {
   EuiPageContentHeaderSection,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   EuiButtonIcon,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
@@ -191,29 +190,22 @@ class RolesGridPageUI extends Component<Props, State> {
         },
       },
       {
-        field: 'metadata._reserved',
-        name: (
-          <EuiToolTip content={reservedRoleDesc}>
-            <span className="rolesGridPage__reservedRoleTooltip">
-              <FormattedMessage
-                id="xpack.security.management.roles.reservedColumnName"
-                defaultMessage="Reserved"
-              />
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
-        ),
-        sortable: ({ metadata }: any) => (metadata && metadata._reserved) || false,
+        field: 'metadata',
+        name: intl.formatMessage({
+          id: 'xpack.security.management.roles.reservedColumnName',
+          defaultMessage: 'Reserved',
+        }),
+        sortable: ({ metadata }: Role) => Boolean(metadata && metadata._reserved),
         dataType: 'boolean',
         align: 'right',
         description: reservedRoleDesc,
-        render: (reserved: boolean | undefined) => {
+        render: (metadata: Role['metadata']) => {
           const label = intl.formatMessage({
             id: 'xpack.security.management.roles.reservedRoleIconLabel',
             defaultMessage: 'Reserved role',
           });
 
-          return reserved ? (
+          return metadata && metadata._reserved ? (
             <span title={label}>
               <EuiIcon aria-label={label} data-test-subj="reservedRole" type="check" />
             </span>
