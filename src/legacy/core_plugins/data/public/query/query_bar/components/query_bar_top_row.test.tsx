@@ -99,7 +99,6 @@ const mockIndexPattern = {
 
 function wrapQueryBarTopRowInContext(testProps: any) {
   const defaultOptions = {
-    appName: 'discover',
     screenTitle: 'Another Screen',
     onSubmit: noop,
     onChange: noop,
@@ -107,6 +106,7 @@ function wrapQueryBarTopRowInContext(testProps: any) {
   };
 
   const services = {
+    appName: 'discover',
     uiSettings: startMock.uiSettings,
     savedObjects: startMock.savedObjects,
     notifications: startMock.notifications,
