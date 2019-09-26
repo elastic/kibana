@@ -21,7 +21,6 @@ import { mockPersistedLogFactory } from './query_bar_input.test.mocks';
 
 import React from 'react';
 import { mount } from 'enzyme';
-import './query_bar_top_row.test.mocks';
 import { QueryBarTopRow } from './query_bar_top_row';
 import { IndexPattern } from '../../../index';
 
