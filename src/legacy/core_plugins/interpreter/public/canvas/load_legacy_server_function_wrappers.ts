@@ -66,7 +66,7 @@ export const loadLegacyServerFunctionWrappers = async () => {
   if (!cached) {
     cached = (async () => {
       const serverFunctionList = await npSetup.core.http.get(FUNCTIONS_URL);
-      const types = npSetup.plugins.data.expressions.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.types.toJS();
+      const types = npSetup.plugins.expressions.__LEGACY.types.toJS();
       const { serialize } = serializeProvider(types);
       const batch = batchedFetch({
         ajaxStream: ajaxStream(
@@ -84,7 +84,7 @@ export const loadLegacyServerFunctionWrappers = async () => {
           ...serverFunctionList[functionName],
           fn: (context: any, args: any) => batch({ functionName, args, context }),
         });
-        npSetup.plugins.data.expressions.registerFunction(fn);
+        npSetup.plugins.expressions.registerFunction(fn);
       });
     })();
   }
