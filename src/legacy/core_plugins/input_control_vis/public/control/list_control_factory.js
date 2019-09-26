@@ -116,7 +116,7 @@ class ListControl extends Control {
       query
     });
     const searchSource = createSearchSource(
-      this.kbnApi,
+      this.SearchSource,
       initialSearchSourceState,
       indexPattern,
       aggs,
@@ -169,7 +169,7 @@ class ListControl extends Control {
   }
 }
 
-export async function listControlFactory(controlParams, kbnApi, useTimeFilter) {
+export async function listControlFactory(controlParams, useTimeFilter, SearchSource) {
   let indexPattern;
   try {
     indexPattern = await data.indexPatterns.indexPatterns.get(controlParams.indexPattern);
@@ -190,7 +190,7 @@ export async function listControlFactory(controlParams, kbnApi, useTimeFilter) {
   return new ListControl(
     controlParams,
     new PhraseFilterManager(controlParams.id, controlParams.fieldName, indexPattern, data.filter.filterManager),
-    kbnApi,
+    SearchSource,
     useTimeFilter
   );
 }

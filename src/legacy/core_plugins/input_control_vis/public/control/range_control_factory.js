@@ -65,7 +65,7 @@ class RangeControl extends Control {
     const fieldName = this.filterManager.fieldName;
 
     const aggs = minMaxAgg(indexPattern.fields.byName[fieldName]);
-    const searchSource = createSearchSource(this.kbnApi, null, indexPattern, aggs, this.useTimeFilter);
+    const searchSource = createSearchSource(this.SearchSource, null, indexPattern, aggs, this.useTimeFilter);
     this.abortController.signal.addEventListener('abort', () => searchSource.cancelQueued());
 
     let resp;
@@ -99,7 +99,7 @@ class RangeControl extends Control {
   }
 }
 
-export async function rangeControlFactory(controlParams, kbnApi, useTimeFilter) {
+export async function rangeControlFactory(controlParams, useTimeFilter, SearchSource) {
   let indexPattern;
   try {
     indexPattern = await data.indexPatterns.indexPatterns.get(controlParams.indexPattern);
@@ -109,7 +109,7 @@ export async function rangeControlFactory(controlParams, kbnApi, useTimeFilter) 
   return new RangeControl(
     controlParams,
     new RangeFilterManager(controlParams.id, controlParams.fieldName, indexPattern, data.filter.filterManager),
-    kbnApi,
+    SearchSource,
     useTimeFilter
   );
 }

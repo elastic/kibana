@@ -38,7 +38,7 @@ export function noIndexPatternMsg(indexPatternId) {
 }
 
 export class Control {
-  constructor(controlParams, filterManager, kbnApi, useTimeFilter) {
+  constructor(controlParams, filterManager, SearchSource, useTimeFilter) {
     this.id = controlParams.id;
     this.controlParams = controlParams;
     this.options = controlParams.options;
@@ -46,7 +46,7 @@ export class Control {
     this.label = controlParams.label ? controlParams.label : controlParams.fieldName;
     this.useTimeFilter = useTimeFilter;
     this.filterManager = filterManager;
-    this.kbnApi = kbnApi;
+    this.SearchSource = SearchSource;
 
     // restore state from kibana filter context
     this.reset();
