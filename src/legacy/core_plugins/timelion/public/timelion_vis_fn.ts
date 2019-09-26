@@ -17,51 +17,65 @@
  * under the License.
  */
 
-import { functionsRegistry } from 'plugins/interpreter/registries';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { TimelionRequestHandlerProvider } from './vis/timelion_request_handler';
+import { ExpressionFunction, KibanaContext, Render } from 'src/plugins/expressions/public';
+import { getTimelionRequestHandler, TimelionSuccessResponse } from './vis/timelion_request_handler';
+import { TimelionVisualizationDependencies } from './plugin';
 
+const name = 'timelion_vis';
 
-import chrome from 'ui/chrome';
+interface Arguments {
+  expression: string;
+  interval: any;
+}
 
-export const timelionVis = () => ({
-  name: 'timelion_vis',
+interface RenderValue {
+  visData: Context;
+  visType: typeof name;
+  visParams: VisParams;
+}
+
+type Context = KibanaContext | null;
+type VisParams = Arguments;
+type Return = Promise<Render<RenderValue>>;
+
+export const getTimelionVisualizationConfig = (
+  dependencies: TimelionVisualizationDependencies
+): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
+  name,
   type: 'render',
   context: {
-    types: [
-      'kibana_context',
-      'null',
-    ],
+    types: ['kibana_context', 'null'],
   },
   help: i18n.translate('timelion.function.help', {
-    defaultMessage: 'Timelion visualization'
+    defaultMessage: 'Timelion visualization',
   }),
   args: {
     expression: {
       types: ['string'],
       aliases: ['_'],
       default: '".es(*)"',
+      help: '',
     },
     interval: {
       types: ['string', 'null'],
       default: 'auto',
-    }
+      help: '',
+    },
   },
   async fn(context, args) {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get('Private');
-    const timelionRequestHandler = Private(TimelionRequestHandlerProvider).handler;
+    const timelionRequestHandler = getTimelionRequestHandler(dependencies);
 
     const visParams = { expression: args.expression, interval: args.interval };
 
-    const response = await timelionRequestHandler({
-      timeRange: get(context, 'timeRange', null),
-      query: get(context, 'query', null),
-      filters: get(context, 'filters', null),
+    const response = (await timelionRequestHandler({
+      timeRange: get(context, 'timeRange'),
+      query: get(context, 'query'),
+      filters: get(context, 'filters'),
+      visParams,
       forceFetch: true,
-      visParams: visParams,
-    });
+    })) as TimelionSuccessResponse;
 
     response.visType = 'timelion';
 
@@ -70,11 +84,9 @@ export const timelionVis = () => ({
       as: 'visualization',
       value: {
         visParams,
-        visType: 'timelion',
+        visType: name,
         visData: response,
       },
     };
   },
 });
-
-functionsRegistry.register(timelionVis);
