@@ -5,6 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { isEmpty } from 'lodash/fp';
 import { ActionTypeExecutorOptions, ActionType } from '../../../../../actions';
 import { AlertType, AlertExecutorOptions } from '../../../../../alerting';
 
@@ -13,47 +14,20 @@ export const alwaysFiringAlertType: AlertType = {
   name: 'Test: Always Firing',
   actionGroups: ['default', 'other'],
   async executor({ services, params, state }: AlertExecutorOptions) {
-    console.log('[Hello I am in executor]');
-    console.group();
-    console.log('[params are]', params);
-    console.log('[state is]', state);
-    console.log('[getState is]', services.alertInstanceFactory('1').getState());
-    console.groupEnd();
-    // services.replaceState();
-    /*
-      let group = 'default';
-
-      if (params.groupsToScheduleActionsInSeries) {
-        const index = state.groupInSeriesIndex || 0;
-        group = params.groupsToScheduleActionsInSeries[index];
-      }
-
-      if (group) {
-        services
-          .alertInstanceFactory('1')
-          .replaceState({ instanceStateValue: true })
-          .scheduleActions(group, {
-            instanceContextValue: true,
-          });
-      }
-      await services.callCluster('index', {
-        index: params.index,
-        refresh: 'wait_for',
-        body: {
-          state,
-          params,
-          reference: params.reference,
-          source: 'alert:test.always-firing',
-        },
+    const instance = services.alertInstanceFactory('1');
+    console.log('my state is:', state, 'and also', instance.getState());
+    if (isEmpty(instance.getState())) {
+      console.log('empty object, changing it...');
+      instance.replaceState({
+        count: 1,
       });
-      return {
-        globalStateValue: true,
-        groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,
-      };
-    */
+    } else {
+      console.log('not an empty object, changing it...');
+    }
   },
 };
 
+// Testing, not using at the moment.
 export const rateLimitedActionType: ActionType = {
   id: 'test.rate-limit',
   name: 'Test: Rate Limit',

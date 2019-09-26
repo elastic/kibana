@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { Server } from 'hapi';
 
+import { Legacy } from 'kibana';
 import { initServerWithKibana } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 
@@ -118,8 +119,10 @@ export function siem(kibana: any) {
       },
       mappings: savedObjectMappings,
     },
+    isEnabled(config: Legacy.KibanaConfig) {
+      return config.get('xpack.alerting.enabled') && config.get('xpack.actions.enabled');
+    },
     init(server: Server) {
-      console.log('server.plugins.alerting', server.plugins.alerting);
       if (server.plugins.alerting != null) {
         console.log('...I have found alerting and should be ok to run...');
         server.plugins.alerting.registerType(alwaysFiringAlertType);
