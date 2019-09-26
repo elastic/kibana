@@ -201,6 +201,18 @@ describe('DefaultEditorAgg component', () => {
       expect(defaultProps.onToggleEnableAgg).toBeCalledWith(defaultProps.agg, false);
     });
 
+    it('should disable the disableAggregation button', () => {
+      defaultProps.isDisabled = true;
+      defaultProps.isRemovable = true;
+      const comp = mount(<DefaultEditorAgg {...defaultProps} />);
+
+      expect(
+        comp
+          .find('EuiButtonIcon[data-test-subj="toggleDisableAggregationBtn disable"]')
+          .prop('disabled')
+      ).toBeTruthy();
+    });
+
     it('should enable agg', () => {
       defaultProps.agg.enabled = false;
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);

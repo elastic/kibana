@@ -18,7 +18,12 @@
  */
 
 import { AggConfig } from '../../../../agg_types/agg_config';
-import { isAggRemovable, calcAggIsTooLow, isInvalidAggsTouched } from './agg_group_helper';
+import {
+  isAggRemovable,
+  calcAggIsTooLow,
+  isInvalidAggsTouched,
+  isAggDisabled,
+} from './agg_group_helper';
 import { AggsState } from './agg_group_state';
 
 describe('DefaultEditorGroup helpers', () => {
@@ -46,6 +51,7 @@ describe('DefaultEditorGroup helpers', () => {
       } as AggConfig,
     ];
   });
+
   describe('isAggRemovable', () => {
     it('should return true when the number of aggs with the same schema is above the min', () => {
       const isRemovable = isAggRemovable(group[0], group);
@@ -57,6 +63,23 @@ describe('DefaultEditorGroup helpers', () => {
       const isRemovable = isAggRemovable(group[1], group);
 
       expect(isRemovable).toBeFalsy();
+    });
+  });
+
+  describe('isAggDisabled', () => {
+    it('should return true when there is the only enabled agg', () => {
+      group[0].enabled = true;
+      const isDisabled = isAggDisabled(group);
+
+      expect(isDisabled).toBeTruthy();
+    });
+
+    it('should return false when there are multiple enabled aggs', () => {
+      group[0].enabled = true;
+      group[1].enabled = true;
+      const isDisabled = isAggDisabled(group);
+
+      expect(isDisabled).toBeFalsy();
     });
   });
 
