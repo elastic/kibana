@@ -17,24 +17,29 @@
  * under the License.
  */
 
-import {
-  FeatureCatalogueRegistryProvider,
-  FeatureCatalogueCategory,
-} from 'ui/registry/feature_catalogue';
-
 import { i18n } from '@kbn/i18n';
 
-FeatureCatalogueRegistryProvider.register(() => {
-  return {
-    id: 'timelion',
-    title: 'Timelion',
-    description: i18n.translate('timelion.registerFeatureDescription', {
-      defaultMessage:
-        'Use an expression language to analyze time series data and visualize the results.',
-    }),
-    icon: 'timelionApp',
-    path: '/app/timelion',
-    showOnHomePage: false,
-    category: FeatureCatalogueCategory.DATA,
-  };
-});
+interface PanelConfig {
+  help?: string;
+  render?: Function;
+}
+
+export class Panel {
+  name: string;
+  help: string;
+  render: Function | undefined;
+
+  constructor(name: string, config: PanelConfig) {
+    this.name = name;
+    this.help = config.help || '';
+    this.render = config.render;
+
+    if (!config.render) {
+      throw new Error(
+        i18n.translate('timelion.panels.noRenderFunctionErrorMessage', {
+          defaultMessage: 'Panel must have a rendering function',
+        })
+      );
+    }
+  }
+}

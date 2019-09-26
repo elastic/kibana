@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ES_FIELD_TYPES } from '../../common/constants/field_types';
+import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 import {
   ML_JOB_AGGREGATION,
   KIBANA_AGGREGATION,

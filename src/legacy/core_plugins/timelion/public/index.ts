@@ -17,22 +17,9 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { PluginInitializerContext } from 'kibana/public';
+import { TimelionPlugin as Plugin } from './plugin';
 
-export default function Panel(name, config) {
-
-  this.name = name;
-
-  this.help = config.help || '';
-
-  this.render = config.render;
-
-  if (!config.render) {
-    throw new Error (
-      i18n.translate('timelion.panels.noRenderFunctionErrorMessage', {
-        defaultMessage: 'Panel must have a rendering function'
-      })
-    );
-  }
-
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
 }
