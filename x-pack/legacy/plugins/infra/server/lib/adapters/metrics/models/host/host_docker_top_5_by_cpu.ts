@@ -28,7 +28,7 @@ export const hostDockerTop5ByCpu: InfraMetricModelCreator = (
       metrics: [
         {
           field: 'docker.cpu.total.pct',
-          id: '61ca57f2-469d-11e7-af02-69e470af7417',
+          id: 'avg-cpu-metric',
           type: InfraMetricModelMetricType.avg,
         },
       ],

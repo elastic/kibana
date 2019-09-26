@@ -28,7 +28,7 @@ export const hostDockerTop5ByMemory: InfraMetricModelCreator = (
       metrics: [
         {
           field: 'docker.memory.usage.pct',
-          id: '61ca57f2-469d-11e7-af02-69e470af7417',
+          id: 'avg-memory-metric',
           type: InfraMetricModelMetricType.avg,
         },
       ],
