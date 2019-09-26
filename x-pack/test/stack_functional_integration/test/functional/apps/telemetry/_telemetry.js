@@ -18,7 +18,6 @@ No`;
       const actualMessage = await PageObjects.monitoring.getWelcome();
       log.debug(`X-Pack message = ${actualMessage}`);
       expect(actualMessage).to.be(expectedMessage);
-      // await PageObjects.monitoring.optOutPhoneHome();
     });
 
   });
