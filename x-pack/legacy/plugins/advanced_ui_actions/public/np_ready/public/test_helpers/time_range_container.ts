@@ -9,7 +9,7 @@ import {
   Container,
   ContainerOutput,
   GetEmbeddableFactory,
-} from 'src/plugins/embeddable/public';
+} from '../../../../../../../../src/plugins/embeddable/public';
 import { TimeRange } from '../../../../../../../../src/plugins/data/public';
 
 /**
