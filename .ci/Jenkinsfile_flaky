@@ -22,6 +22,9 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
           withWorkers('flaky-test-runner', {
             if (!IS_XPACK) {
               buildOss()
+              if (CI_GROUP == '1') {
+                runbld "./test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh"
+              }
             } else {
               buildXpack()
             }
