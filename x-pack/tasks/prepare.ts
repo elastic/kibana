@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import gulp from 'gulp';
-
 // @ts-ignore
 import { ensureAllBrowsersDownloaded } from '../legacy/plugins/reporting/server/browsers';
 
-export const prepareTask: gulp.TaskFunction = async () => {
+export const prepareTask = async () => {
   await ensureAllBrowsersDownloaded();
 };

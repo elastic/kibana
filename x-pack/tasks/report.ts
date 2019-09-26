@@ -5,14 +5,13 @@
  */
 
 import chalk from 'chalk';
-import gulp from 'gulp';
 import log from 'fancy-log';
 
 import { gitInfo } from './helpers/git_info';
 import { PKG_NAME } from './helpers/pkg';
 import { BUILD_VERSION } from './helpers/build_version';
 
-export const reportTask: gulp.TaskFunction = async () => {
+export const reportTask = async () => {
   const info = await gitInfo();
 
   log('Package Name', chalk.yellow(PKG_NAME));
