@@ -415,7 +415,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async selectIndexPatternTimeField(timeField: string) {
-      await comboBox.set('metricsIndexPatternFieldsSelect', timeField);
+      await retry.try(async () => {
+        await comboBox.set('metricsIndexPatternFieldsSelect', timeField);
+      });
     }
 
     /**

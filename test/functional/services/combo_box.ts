@@ -140,7 +140,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       filterValue: string
     ): Promise<void> {
       const input = await comboBoxElement.findByTagName('input');
-      await input.clearValue();
+      await input.clearValueWithKeyboard();
       await this.waitForOptionsListLoading(comboBoxElement);
       await input.type(filterValue);
       await this.waitForOptionsListLoading(comboBoxElement);
