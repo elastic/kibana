@@ -24,7 +24,6 @@ import { SerializedFieldFormat } from 'src/plugins/expressions/common/expression
 
 import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
 
-// @ts-ignore
 import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
 import chrome from '../../../chrome';
 // @ts-ignore
@@ -154,5 +153,5 @@ export const getTableAggs = (vis: Vis): AggConfig[] => {
     return [];
   }
   const columns = tabifyGetColumns(vis.aggs.getResponseAggs(), !vis.isHierarchical());
-  return columns.map((c: any) => c.aggConfig);
+  return columns.map(c => c.aggConfig);
 };

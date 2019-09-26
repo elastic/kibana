@@ -71,12 +71,12 @@ function TableOptions({
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
-        <h2>
+        <h3>
           <FormattedMessage
             id="visTypeTable.params.showMetricsLabel.optionsTitle"
             defaultMessage="Options"
           />
-        </h2>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       <NumberInputOption
