@@ -15,6 +15,7 @@ import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../adapters
 import { NoLogRateResultsIndexError } from './errors';
 
 const ML_ANOMALY_INDEX_PREFIX = '.ml-anomalies-';
+const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 
 export class InfraLogAnalysis {
   constructor(
@@ -38,6 +39,7 @@ export class InfraLogAnalysis {
   ) {
     const logRateJobId = this.getJobIds(request, sourceId).logEntryRate;
 
+    // TODO: fetch all batches
     const mlModelPlotResponse = await this.libs.framework.callWithRequest(request, 'search', {
       allowNoIndices: true,
       body: {
@@ -68,10 +70,28 @@ export class InfraLogAnalysis {
           },
         },
         aggs: {
-          timestamp_buckets: {
-            date_histogram: {
-              field: 'timestamp',
-              fixed_interval: `${bucketDuration}ms`,
+          timestamp_data_set_buckets: {
+            composite: {
+              size: COMPOSITE_AGGREGATION_BATCH_SIZE,
+              sources: [
+                {
+                  timestamp: {
+                    date_histogram: {
+                      field: 'timestamp',
+                      fixed_interval: `${bucketDuration}ms`,
+                      order: 'asc',
+                    },
+                  },
+                },
+                {
+                  data_set: {
+                    terms: {
+                      field: 'partition_field_value',
+                      order: 'asc',
+                    },
+                  },
+                },
+              ],
             },
             aggs: {
               filter_model_plot: {
@@ -81,18 +101,8 @@ export class InfraLogAnalysis {
                   },
                 },
                 aggs: {
-                  stats_model_lower: {
-                    stats: {
-                      field: 'model_lower',
-                    },
-                  },
-                  stats_model_upper: {
-                    stats: {
-                      field: 'model_upper',
-                    },
-                  },
-                  stats_actual: {
-                    stats: {
+                  average_actual: {
+                    avg: {
                       field: 'actual',
                     },
                   },
@@ -137,24 +147,63 @@ export class InfraLogAnalysis {
 
     const mlModelPlotBuckets = pipe(
       logRateModelPlotResponseRT.decode(mlModelPlotResponse),
-      map(response => response.aggregations.timestamp_buckets.buckets),
+      map(response => response.aggregations.timestamp_data_set_buckets.buckets),
       fold(throwErrors(createPlainError), identity)
     );
 
-    return mlModelPlotBuckets.map(bucket => ({
-      anomalies: bucket.filter_records.top_hits_record.hits.hits.map(({ _source: record }) => ({
-        actualLogEntryRate: record.actual[0],
-        anomalyScore: record.record_score,
-        duration: record.bucket_span * 1000,
-        startTime: record.timestamp,
-        typicalLogEntryRate: record.typical[0],
-      })),
-      duration: bucketDuration,
-      logEntryRateStats: bucket.filter_model_plot.stats_actual,
-      modelLowerBoundStats: bucket.filter_model_plot.stats_model_lower,
-      modelUpperBoundStats: bucket.filter_model_plot.stats_model_upper,
-      startTime: bucket.key,
-    }));
+    return mlModelPlotBuckets.reduce<
+      Array<{
+        dataSets: Array<{
+          analysisBucketCount: number;
+          anomalies: Array<{
+            actualLogEntryRate: number;
+            anomalyScore: number;
+            duration: number;
+            startTime: number;
+            typicalLogEntryRate: number;
+          }>;
+          averageActualLogEntryRate: number;
+          dataSetId: string;
+        }>;
+        startTime: number;
+      }>
+    >((histogramBuckets, timestampDataSetBucket) => {
+      const previousHistogramBucket = histogramBuckets[histogramBuckets.length - 1];
+      const dataSet = {
+        analysisBucketCount: timestampDataSetBucket.filter_model_plot.doc_count,
+        anomalies: timestampDataSetBucket.filter_records.top_hits_record.hits.hits.map(
+          ({ _source: record }) => ({
+            actualLogEntryRate: record.actual[0],
+            anomalyScore: record.record_score,
+            duration: record.bucket_span * 1000,
+            startTime: record.timestamp,
+            typicalLogEntryRate: record.typical[0],
+          })
+        ),
+        averageActualLogEntryRate: timestampDataSetBucket.filter_model_plot.average_actual.value,
+        dataSetId: timestampDataSetBucket.key.data_set,
+      };
+      if (
+        previousHistogramBucket &&
+        previousHistogramBucket.startTime === timestampDataSetBucket.key.timestamp
+      ) {
+        return [
+          ...histogramBuckets.slice(0, -1),
+          {
+            ...previousHistogramBucket,
+            dataSets: [...previousHistogramBucket.dataSets, dataSet],
+          },
+        ];
+      } else {
+        return [
+          ...histogramBuckets,
+          {
+            dataSets: [dataSet],
+            startTime: timestampDataSetBucket.key.timestamp,
+          },
+        ];
+      }
+    }, []);
   }
 }
 
@@ -166,20 +215,22 @@ const logRateMlRecordRT = rt.type({
   typical: rt.array(rt.number),
 });
 
-const logRateStatsAggregationRT = rt.type({
-  avg: rt.union([rt.number, rt.null]),
-  count: rt.number,
-  max: rt.union([rt.number, rt.null]),
-  min: rt.union([rt.number, rt.null]),
-  sum: rt.number,
+const metricAggregationRT = rt.type({
+  value: rt.number,
+});
+
+const compositeTimestampDataSetKeyRT = rt.type({
+  data_set: rt.string,
+  timestamp: rt.number,
 });
 
 const logRateModelPlotResponseRT = rt.type({
   aggregations: rt.type({
-    timestamp_buckets: rt.type({
+    timestamp_data_set_buckets: rt.type({
+      after_key: compositeTimestampDataSetKeyRT,
       buckets: rt.array(
         rt.type({
-          key: rt.number,
+          key: compositeTimestampDataSetKeyRT,
           filter_records: rt.type({
             doc_count: rt.number,
             top_hits_record: rt.type({
@@ -194,9 +245,7 @@ const logRateModelPlotResponseRT = rt.type({
           }),
           filter_model_plot: rt.type({
             doc_count: rt.number,
-            stats_actual: logRateStatsAggregationRT,
-            stats_model_lower: logRateStatsAggregationRT,
-            stats_model_upper: logRateStatsAggregationRT,
+            average_actual: metricAggregationRT,
           }),
         })
       ),
