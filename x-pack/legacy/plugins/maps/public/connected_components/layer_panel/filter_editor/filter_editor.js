@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import React, { Component, Fragment } from 'react';
 
 import {
@@ -26,7 +25,8 @@ import { Storage } from 'ui/storage';
 
 import { SearchBar } from 'plugins/data';
 
-const settings = chrome.getUiSettingsClient();
+import { npStart } from 'ui/new_platform';
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 const localStorage = new Storage(window.localStorage);
 
 export class FilterEditor extends Component {
@@ -82,6 +82,7 @@ export class FilterEditor extends Component {
 
   _renderQueryPopover() {
     const layerQuery = this.props.layer.getQuery();
+    const { uiSettings } = npStart.core;
 
     return (
       <EuiPopover
@@ -92,29 +93,35 @@ export class FilterEditor extends Component {
         anchorPosition="leftCenter"
       >
         <div className="mapFilterEditor" data-test-subj="mapFilterEditor">
-          <SearchBar
-            uiSettings={settings}
-            showFilterBar={false}
-            showDatePicker={false}
-            showQueryInput={true}
-            query={
-              layerQuery
-                ? layerQuery
-                : { language: settings.get('search:queryLanguage'), query: '' }
-            }
-            onQuerySubmit={this._onQueryChange}
-            appName="maps"
-            indexPatterns={this.state.indexPatterns}
-            store={localStorage}
-            customSubmitButton={
-              <EuiButton fill data-test-subj="mapFilterEditorSubmitButton">
-                <FormattedMessage
-                  id="xpack.maps.layerPanel.filterEditor.queryBarSubmitButtonLabel"
-                  defaultMessage="Set filter"
-                />
-              </EuiButton>
-            }
-          />
+          <KibanaContextProvider
+            services={{
+              uiSettings: uiSettings,
+              savedObjects: npStart.core.savedObjects,
+            }}
+          >
+            <SearchBar
+              showFilterBar={false}
+              showDatePicker={false}
+              showQueryInput={true}
+              query={
+                layerQuery
+                  ? layerQuery
+                  : { language: uiSettings.get('search:queryLanguage'), query: '' }
+              }
+              onQuerySubmit={this._onQueryChange}
+              appName="maps"
+              indexPatterns={this.state.indexPatterns}
+              store={localStorage}
+              customSubmitButton={
+                <EuiButton fill data-test-subj="mapFilterEditorSubmitButton">
+                  <FormattedMessage
+                    id="xpack.maps.layerPanel.filterEditor.queryBarSubmitButtonLabel"
+                    defaultMessage="Set filter"
+                  />
+                </EuiButton>
+              }
+            />
+          </KibanaContextProvider>
         </div>
       </EuiPopover>
     );

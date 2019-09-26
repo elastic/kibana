@@ -275,6 +275,21 @@ describe('getOperationTypesForField', () => {
                 "type": "field",
               },
               Object {
+                "field": "timestamp",
+                "operationType": "cardinality",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
+                "operationType": "cardinality",
+                "type": "field",
+              },
+              Object {
+                "field": "source",
+                "operationType": "cardinality",
+                "type": "field",
+              },
+              Object {
                 "field": "bytes",
                 "operationType": "sum",
                 "type": "field",

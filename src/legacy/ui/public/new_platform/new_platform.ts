@@ -24,6 +24,7 @@ import {
   Setup as InspectorSetup,
   Start as InspectorStart,
 } from '../../../../plugins/inspector/public';
+import { EuiUtilsStart } from '../../../../plugins/eui_utils/public';
 
 export interface PluginsSetup {
   data: ReturnType<DataPlugin['setup']>;
@@ -34,6 +35,7 @@ export interface PluginsSetup {
 
 export interface PluginsStart {
   data: ReturnType<DataPlugin['start']>;
+  eui_utils: EuiUtilsStart;
   expressions: ReturnType<ExpressionsPlugin['start']>;
   inspector: InspectorStart;
   uiActions: IUiActionsStart;
