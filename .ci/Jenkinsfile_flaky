@@ -102,7 +102,7 @@ def getOssCiGroupWorker(ciGroup) {
   return getPostBuildWorker("ciGroup" + ciGroup, {
     withEnv([
       "CI_GROUP=${ciGroup}",
-      "JOB=kibana-ciGroup${ciGroup}",
+      "JOB=" + env.JOB ?: "kibana-ciGroup${ciGroup}",
     ]) {
       runbld "./test/scripts/jenkins_ci_group.sh"
     }
@@ -113,7 +113,7 @@ def getXpackCiGroupWorker(ciGroup) {
   return getPostBuildWorker("xpack-ciGroup" + ciGroup, {
     withEnv([
       "CI_GROUP=${ciGroup}",
-      "JOB=xpack-kibana-ciGroup${ciGroup}",
+      "JOB=" + env.job ?: "xpack-kibana-ciGroup${ciGroup}",
     ]) {
       runbld "./test/scripts/jenkins_xpack_ci_group.sh"
     }
@@ -304,7 +304,9 @@ def getWorkerMap(numberOfExecutions, worker, maxWorkers = 14) {
       for(def j = 0; j < workerExecutions; j++) {
         catchError {
           print "Execute worker-${workerNumber}: ${j}"
-          worker(workerNumber)
+          withEnv(["JOB=worker-${workerNumber}-${j}"]) {
+            worker(workerNumber)
+          }
         }
       }
     }
