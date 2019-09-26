@@ -353,7 +353,7 @@
     "@typescript-eslint/eslint-plugin": "1.13.0",
     "@typescript-eslint/parser": "1.13.0",
     "angular-mocks": "^1.7.8",
-    "archiver": "^3.0.0",
+    "archiver": "^3.1.1",
     "babel-eslint": "^10.0.3",
     "babel-jest": "^24.9.0",
     "babel-plugin-dynamic-import-node": "^2.3.0",
