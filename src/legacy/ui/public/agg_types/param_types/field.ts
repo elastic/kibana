@@ -79,7 +79,7 @@ export class FieldParamType extends BaseParamType {
       if (!aggConfig) {
         throw new Error('aggConfig was not provided to FieldParamType deserialize function');
       }
-      const field = aggConfig.getIndexPattern().fields.byName[fieldName];
+      const field = aggConfig.getIndexPattern().fields.getByName(fieldName);
 
       if (!field) {
         throw new SavedObjectNotFound('index-pattern-field', fieldName);

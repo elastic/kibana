@@ -110,7 +110,7 @@ class ListControl extends Control {
       terminate_after: chrome.getInjected('autocompleteTerminateAfter')
     };
     const aggs = termsAgg({
-      field: indexPattern.fields.byName[fieldName],
+      field: indexPattern.fields.getByName(fieldName),
       size: this.options.dynamicOptions ? null : _.get(this.options, 'size', 5),
       direction: 'desc',
       query

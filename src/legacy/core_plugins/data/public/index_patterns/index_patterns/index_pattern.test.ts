@@ -168,17 +168,17 @@ describe('IndexPattern', () => {
   describe('init', () => {
     test('should append the found fields', () => {
       expect(savedObjectsClient.get).toHaveBeenCalled();
-      expect(indexPattern.fields.length()).toEqual(mockLogStashFields().length);
+      expect(indexPattern.fields).toHaveLength(mockLogStashFields().length);
     });
   });
 
   describe('fields', () => {
     test('should have expected properties on fields', function() {
-      expect(indexPattern.fields.getByIndex(0)).toHaveProperty('displayName');
-      expect(indexPattern.fields.getByIndex(0)).toHaveProperty('filterable');
-      expect(indexPattern.fields.getByIndex(0)).toHaveProperty('format');
-      expect(indexPattern.fields.getByIndex(0)).toHaveProperty('sortable');
-      expect(indexPattern.fields.getByIndex(0)).toHaveProperty('scripted');
+      expect(indexPattern.fields[0]).toHaveProperty('displayName');
+      expect(indexPattern.fields[0]).toHaveProperty('filterable');
+      expect(indexPattern.fields[0]).toHaveProperty('format');
+      expect(indexPattern.fields[0]).toHaveProperty('sortable');
+      expect(indexPattern.fields[0]).toHaveProperty('scripted');
     });
   });
 
@@ -239,7 +239,7 @@ describe('IndexPattern', () => {
 
   describe('refresh fields', () => {
     test('should fetch fields from the fieldsFetcher', async () => {
-      expect(indexPattern.fields.length()).toBeGreaterThan(2);
+      expect(indexPattern.fields.length).toBeGreaterThan(2);
 
       mockFieldsFetcherResponse = [{ name: 'foo' }, { name: 'bar' }];
 

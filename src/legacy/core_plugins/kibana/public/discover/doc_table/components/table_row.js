@@ -130,7 +130,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
         // We just create a string here because its faster.
         const newHtmls = [openRowHtml];
 
-        const mapping = indexPattern.fields.byName;
+        const mapping = indexPattern.fields.getByName;
         const hideTimeColumn = config.get('doc_table:hideTimeColumn');
         if (indexPattern.timeFieldName && !hideTimeColumn) {
           newHtmls.push(
@@ -138,7 +138,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
               timefield: true,
               formatted: _displayField(row, indexPattern.timeFieldName),
               filterable:
-                mapping[indexPattern.timeFieldName].filterable && _.isFunction($scope.filter),
+                mapping(indexPattern.timeFieldName).filterable && _.isFunction($scope.filter),
               column: indexPattern.timeFieldName,
             })
           );
