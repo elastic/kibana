@@ -21,11 +21,11 @@ export const PKG_VERSION = PKG.version;
 export const PKG_NAME = PKG.name;
 
 if (!PKG_VERSION) {
-  throw new Error('No version found in package.json');
+  throw new Error('No "version" found in package.json');
 }
 
 if (!PKG_NAME) {
-  throw new Error('No version found in package.json');
+  throw new Error('No "name" found in package.json');
 }
 
 if (!semver.valid(PKG_VERSION)) {
