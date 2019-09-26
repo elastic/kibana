@@ -70,8 +70,8 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       loadTestFile(require.resolve('./dashboard_filtering'));
       loadTestFile(require.resolve('./panel_expand_toggle'));
       loadTestFile(require.resolve('./dashboard_grid'));
-      loadTestFile(require.resolve('./dashboard_snapshots'));
       loadTestFile(require.resolve('./view_edit'));
+      loadTestFile(require.resolve('./dashboard_snapshots'));
     });
 
     // Each of these tests call initTests themselves, the way it was originally written.  The above tests only load
