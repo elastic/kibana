@@ -109,12 +109,22 @@ export interface SymbolSearchRequest extends SearchRequest {
   repoScope?: RepositoryUri[];
 }
 
-export interface CodeIntegrationRequest {
-  repoUri: RepositoryUri;
-  revision?: string;
+export interface StackTraceItem {
+  filePath: string;
+  lineNumStart: number;
+  lineNumEnd?: number;
+  // We could add more in here in the future, e.g. qname.
 }
 
-export interface ResolveSnippetsIntegrationRequest extends CodeIntegrationRequest {
+export interface StackTraceSnippetsRequest {
+  repoUris: RepositoryUri[];
+  revision?: string; // Not used for now.
+  stacktraceItems: StackTraceItem[];
+}
+
+export interface ResolveSnippetsRequest {
+  repoUris: RepositoryUri[];
+  revision?: string; // Not used for now.
   filePath: string;
   lineNumStart: number;
   lineNumEnd?: number;

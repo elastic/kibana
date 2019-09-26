@@ -11,7 +11,9 @@ import {
   CommitSearchRequest,
   DocumentSearchRequest,
   RepositorySearchRequest,
-  ResolveSnippetsIntegrationRequest,
+  ResolveSnippetsRequest,
+  StackTraceItem,
+  StackTraceSnippetsRequest,
   SymbolSearchRequest,
 } from '../../model';
 import { Logger } from '../log';
@@ -158,18 +160,29 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
   // * filePath: the path of the file.
   // * lineNumStart: the start line number of the snippet.
   // * lineNumEnd: Optional. The end line number of the snippet.
+  // We can always add more context for snippet resolution in the future.
   router.route({
     path: '/api/code/integration/snippets',
     method: 'POST',
     async handler(req: RequestFacade) {
-      const reqs: ResolveSnippetsIntegrationRequest[] = (req.payload as any).requests;
-      const responses = await Promise.all(
-        reqs.map((integrationReq: ResolveSnippetsIntegrationRequest) => {
+      const reqs: StackTraceSnippetsRequest[] = (req.payload as any).requests;
+      return await Promise.all(
+        reqs.map((stacktraceReq: StackTraceSnippetsRequest) => {
           const integClient = new IntegrationsSearchClient(new EsClientWithRequest(req), log);
-          return integClient.resolveSnippets(integrationReq);
+          return Promise.all(
+            stacktraceReq.stacktraceItems.map((stacktrace: StackTraceItem) => {
+              const integrationReq: ResolveSnippetsRequest = {
+                repoUris: stacktraceReq.repoUris,
+                revision: stacktraceReq.revision,
+                filePath: stacktrace.filePath,
+                lineNumStart: stacktrace.lineNumStart,
+                lineNumEnd: stacktrace.lineNumEnd,
+              };
+              return integClient.resolveSnippets(integrationReq);
+            })
+          );
         })
       );
-      return responses;
     },
   });
 }

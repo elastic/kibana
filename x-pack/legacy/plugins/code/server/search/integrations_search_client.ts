@@ -7,7 +7,7 @@
 import {
   Document,
   IntegrationsSearchResult,
-  ResolveSnippetsIntegrationRequest,
+  ResolveSnippetsRequest,
   SearchResultItem,
   SourceHit,
 } from '../../model';
@@ -21,11 +21,9 @@ export class IntegrationsSearchClient extends DocumentSearchClient {
     super(client, log);
   }
 
-  public async resolveSnippets(
-    req: ResolveSnippetsIntegrationRequest
-  ): Promise<IntegrationsSearchResult> {
-    const { repoUri, filePath, lineNumStart, lineNumEnd } = req;
-    const index = DocumentSearchIndexWithScope([repoUri]);
+  public async resolveSnippets(req: ResolveSnippetsRequest): Promise<IntegrationsSearchResult> {
+    const { repoUris, filePath, lineNumStart, lineNumEnd } = req;
+    const index = DocumentSearchIndexWithScope(repoUris);
 
     let fallback = false;
     let rawRes = await this.client.search({
