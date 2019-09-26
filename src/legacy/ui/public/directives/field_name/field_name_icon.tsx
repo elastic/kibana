@@ -24,14 +24,27 @@ interface IconMapEntry {
   icon: string;
   color: string;
 }
-interface Props {
-  type: string;
+interface FieldNameIconProps {
+  type:
+    | 'boolean'
+    | 'conflict'
+    | 'date'
+    | 'geo_point'
+    | 'geo_shape'
+    | 'ip'
+    | 'murmur3'
+    | 'number'
+    | '_source'
+    | 'string'
+    | string;
   label: string;
   size?: IconSize;
   useColor?: boolean;
 }
+
 const { colors } = palettes.euiPaletteColorBlind;
-// default => a unknown datatype
+
+// defaultIcon => a unknown datatype
 const defaultIcon = { icon: 'questionInCircle', color: colors[0] };
 
 const typeToEuiIconMap: Partial<Record<string, IconMapEntry>> = {
@@ -49,7 +62,10 @@ const typeToEuiIconMap: Partial<Record<string, IconMapEntry>> = {
   string: { icon: 'string', color: colors[4] },
 };
 
-export function FieldNameIcon({ type, label, size = 's', useColor = false }: Props) {
+/**
+ * Field icon displayed in discover doc_viewer + side bar
+ */
+export function FieldNameIcon({ type, label, size = 's', useColor = false }: FieldNameIconProps) {
   const euiIcon = typeToEuiIconMap[type] || defaultIcon;
 
   return (
