@@ -161,17 +161,20 @@ export function cloneJob(jobId) {
           job.data_counts.latest_bucket_timestamp !== undefined) {
           // if the job has run before, use the earliest and latest record timestamp
           // as the cloned job's time range
+          let start = job.data_counts.earliest_record_timestamp;
           let end = job.data_counts.latest_record_timestamp;
 
           if (job.datafeed_config.aggregations !== undefined) {
-            // if the datafeed uses aggregations the latest_record_timestamp may not be the same
-            // as the last data point in the index, so instead use latest_bucket_timestamp and add two
-            // bucket spans minus one ms
+            // if the datafeed uses aggregations the earliest and latest record timestamps may not be the same
+            // as the start and end of the data in the index.
             const bucketSpanMs = parseInterval(job.analysis_config.bucket_span).asMilliseconds();
+            // round down to the start of the nearest bucket
+            start = Math.floor(job.data_counts.earliest_record_timestamp / bucketSpanMs) * bucketSpanMs;
+            // use latest_bucket_timestamp and add two bucket spans minus one ms
             end = job.data_counts.latest_bucket_timestamp + (bucketSpanMs * 2) - 1;
           }
 
-          mlJobService.tempJobCloningObjects.start = job.data_counts.earliest_record_timestamp;
+          mlJobService.tempJobCloningObjects.start = start;
           mlJobService.tempJobCloningObjects.end = end;
         }
       } else {
