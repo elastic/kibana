@@ -61,6 +61,7 @@ describe('DefaultEditorAgg component', () => {
       dragHandleProps: null,
       formIsTouched: false,
       groupName: AggGroupNames.Metrics,
+      isDisabled: false,
       isDraggable: false,
       isLastBucket: false,
       isRemovable: false,

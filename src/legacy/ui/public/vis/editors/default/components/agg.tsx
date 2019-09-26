@@ -37,7 +37,7 @@ export interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
   aggIndex: number;
   aggIsTooLow: boolean;
   dragHandleProps: {} | null;
-  canBeDisabled: boolean;
+  isDisabled: boolean;
   isDraggable: boolean;
   isLastBucket: boolean;
   isRemovable: boolean;
@@ -50,7 +50,7 @@ function DefaultEditorAgg({
   dragHandleProps,
   formIsTouched,
   groupName,
-  canBeDisabled,
+  isDisabled,
   isDraggable,
   isLastBucket,
   isRemovable,
@@ -144,7 +144,7 @@ function DefaultEditorAgg({
       actionIcons.push({
         id: 'disableAggregation',
         color: 'text',
-        disabled: !canBeDisabled,
+        disabled: isDisabled,
         type: 'eye',
         onClick: () => onToggleEnableAgg(agg, false),
         tooltip: i18n.translate('common.ui.vis.editors.agg.disableAggButtonTooltip', {

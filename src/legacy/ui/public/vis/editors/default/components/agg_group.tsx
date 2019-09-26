@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer, useMemo } from 'react';
 import {
   EuiTitle,
   EuiDragDropContext,
@@ -36,14 +36,14 @@ import {
   isInvalidAggsTouched,
   isAggRemovable,
   calcAggIsTooLow,
-  canAggBeDisabled,
+  isAggDisabled,
 } from './agg_group_helper';
 import { aggGroupReducer, initAggsState, AGGS_ACTION_KEYS } from './agg_group_state';
 import { Schema } from '../schemas';
 
 export interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {
   schemas: Schema[];
-  addSchema: (schems: Schema) => void;
+  addSchema: (schemas: Schema) => void;
   reorderAggs: (group: AggConfig[]) => void;
 }
 
@@ -81,6 +81,10 @@ function DefaultEditorAggGroup({
 
   const isGroupValid = Object.values(aggsState).every(item => item.valid);
   const isAllAggsTouched = isInvalidAggsTouched(aggsState);
+  const isAggregationDisabled = useMemo(
+    () => (groupName === AggGroupNames.Metrics ? isAggDisabled(group) : true),
+    [groupName, group]
+  );
 
   useEffect(() => {
     // when isAllAggsTouched is true, it means that all invalid aggs are touched and we will set ngModel's touched to true
@@ -163,9 +167,7 @@ function DefaultEditorAggGroup({
                     isDraggable={stats.count > 1}
                     isLastBucket={groupName === AggGroupNames.Buckets && index === group.length - 1}
                     isRemovable={isAggRemovable(agg, group)}
-                    canBeDisabled={
-                      groupName === AggGroupNames.Metrics ? canAggBeDisabled(agg, group) : true
-                    }
+                    isDisabled={isAggregationDisabled}
                     lastParentPipelineAggTitle={lastParentPipelineAggTitle}
                     metricAggs={metricAggs}
                     state={state}

@@ -17,32 +17,24 @@
  * under the License.
  */
 
-import { findIndex, reduce, isEmpty } from 'lodash';
+import { findIndex, isEmpty } from 'lodash';
 import { AggConfig } from '../../../../agg_types/agg_config';
 import { AggsState } from './agg_group_state';
 
 const isAggRemovable = (agg: AggConfig, group: AggConfig[]) => {
-  const metricCount = reduce(
-    group,
-    (count, aggregation: AggConfig) => {
-      return aggregation.schema.name === agg.schema.name ? ++count : count;
-    },
-    0
-  );
+  const metricCount = group.reduce((count, aggregation: AggConfig) => {
+    return aggregation.schema.name === agg.schema.name ? ++count : count;
+  }, 0);
   // make sure the the number of these aggs is above the min
   return metricCount > agg.schema.min;
 };
 
-const canAggBeDisabled = (agg: AggConfig, group: AggConfig[]) => {
-  const enabledAggsCount = reduce(
-    group,
-    (count, aggregation: AggConfig) => {
-      return aggregation.enabled ? ++count : count;
-    },
-    0
-  );
+const isAggDisabled = (group: AggConfig[]) => {
+  const enabledAggsCount = group.reduce((count, aggregation: AggConfig) => {
+    return aggregation.enabled ? ++count : count;
+  }, 0);
 
-  return enabledAggsCount !== 1;
+  return enabledAggsCount === 1;
 };
 
 const calcAggIsTooLow = (agg: AggConfig, aggIndex: number, group: AggConfig[]) => {
@@ -71,4 +63,4 @@ function isInvalidAggsTouched(aggsState: AggsState) {
   return invalidAggs.every(agg => agg.touched);
 }
 
-export { isAggRemovable, calcAggIsTooLow, isInvalidAggsTouched, canAggBeDisabled };
+export { isAggRemovable, calcAggIsTooLow, isInvalidAggsTouched, isAggDisabled };
