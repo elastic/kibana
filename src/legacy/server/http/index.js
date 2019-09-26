@@ -34,7 +34,7 @@ export default async function (kbnServer, server, config) {
 
   setupBasePathProvider(kbnServer);
 
-  setupDefaultRouteProvider(kbnServer);
+  setupDefaultRouteProvider(server);
 
   await registerHapiPlugins(server);
 

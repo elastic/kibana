@@ -19,16 +19,13 @@
 
 import { Legacy } from 'kibana';
 import { parse } from 'url';
-import KbnServer from '../kbn_server';
 
-export function setupDefaultRouteProvider(kbnServer: KbnServer) {
-  const server = (KbnServer as unknown) as Legacy.Server;
-
-  kbnServer.server.decorate('request', 'getDefaultRoute', async function() {
+export function setupDefaultRouteProvider(server: Legacy.Server) {
+  server.decorate('request', 'getDefaultRoute', async function() {
     // @ts-ignore
     const request: Legacy.Request = this;
 
-    const serverBasePath: string = kbnServer.server.config().get('server.basePath');
+    const serverBasePath: string = server.config().get('server.basePath');
 
     const uiSettings = request.getUiSettingsService();
 
