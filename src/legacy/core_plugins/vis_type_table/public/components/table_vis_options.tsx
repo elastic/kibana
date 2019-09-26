@@ -37,6 +37,7 @@ function TableOptions({
   aggs,
   aggsLabels,
   stateParams,
+  setValidity,
   setValue,
 }: VisOptionsProps<TableVisParams>) {
   const noCol = useMemo(
@@ -57,6 +58,12 @@ function TableOptions({
     ],
     [aggs, aggsLabels, stateParams.percentageCol, stateParams.dimensions]
   );
+
+  const isPerPageValid = stateParams.perPage === '' ? true : stateParams.perPage > 0;
+
+  useEffect(() => {
+    setValidity(isPerPageValid);
+  }, [isPerPageValid]);
 
   useEffect(() => {
     if (
@@ -83,6 +90,8 @@ function TableOptions({
         label={i18n.translate('visTypeTable.params.perPageLabel', {
           defaultMessage: 'Rows per page',
         })}
+        isInvalid={!isPerPageValid}
+        min={1}
         paramName="perPage"
         value={stateParams.perPage}
         setValue={setValue}
