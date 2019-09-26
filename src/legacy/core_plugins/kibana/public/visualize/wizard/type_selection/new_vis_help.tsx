@@ -21,6 +21,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import { EuiText } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 
 export const NewVisHelp = () => (
   <EuiText>
@@ -30,5 +31,16 @@ export const NewVisHelp = () => (
         defaultMessage="Start creating your visualization by selecting a type for that visualization."
       />
     </p>
+    <p>
+      <strong>
+        <FormattedMessage
+          id="kbn.visualize.newVisWizard.tryLensText"
+          defaultMessage="Try Lens, our new, intuitive way to create visualizations."
+        />
+      </strong>
+    </p>
+    <EuiButton fill size="s" iconType="popout" iconSide="right">
+      Go to Lens
+    </EuiButton>
   </EuiText>
 );
