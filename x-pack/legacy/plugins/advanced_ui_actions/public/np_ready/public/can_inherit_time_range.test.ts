@@ -8,7 +8,7 @@ import { canInheritTimeRange } from './can_inherit_time_range';
 import {
   HelloWorldEmbeddable,
   HelloWorldContainer,
-} from 'src/plugins/embeddable/public/lib/test_samples';
+} from '../../../../../../../src/plugins/embeddable/public/lib/test_samples';
 /** eslint-enable */
 import { TimeRangeEmbeddable, TimeRangeContainer } from './test_helpers';
 
