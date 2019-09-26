@@ -1,40 +1,33 @@
 JOB:
-  #- intake
-  #- firefoxSmoke
-  #- kibana-ciGroup1
-  #- kibana-ciGroup2
-  #- kibana-ciGroup3
-  #- kibana-ciGroup4
-  #- kibana-ciGroup5
-  #- kibana-ciGroup6
+  - kibana-intake
+  - x-pack-intake
+  - kibana-firefoxSmoke
+  - kibana-ciGroup1
+  - kibana-ciGroup2
+  - kibana-ciGroup3
+  - kibana-ciGroup4
+  - kibana-ciGroup5
+  - kibana-ciGroup6
+  - kibana-ciGroup7
+  - kibana-ciGroup8
+  - kibana-ciGroup9
+  - kibana-ciGroup10
+  - kibana-ciGroup11
+  - kibana-ciGroup12
   # - kibana-visualRegression
-  #trials to get this test working.
+
   # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
-  #- x-pack-ciGroup1
-  - x-pack-ciGroup2-1
-  - x-pack-ciGroup2-2
-  - x-pack-ciGroup2-3
-  - x-pack-ciGroup2-4
-  - x-pack-ciGroup2-5
-  - x-pack-ciGroup2-6
-  - x-pack-ciGroup2-7
-  - x-pack-ciGroup2-8
-  - x-pack-ciGroup2-9
-  - x-pack-ciGroup2-10
-  - x-pack-ciGroup2-11
-  - x-pack-ciGroup2-12
-  - x-pack-ciGroup2-13
-  - x-pack-ciGroup2-14
-  - x-pack-ciGroup2-15
-  - x-pack-ciGroup2-15
-  - x-pack-ciGroup2-16
-  - x-pack-ciGroup2-17
-  - x-pack-ciGroup2-18
-  - x-pack-ciGroup2-19
-  - x-pack-ciGroup2-20
-  #- x-pack-ciGroup3
-  #- x-pack-ciGroup4
-  #- x-pack-ciGroup5
+  - x-pack-firefoxSmoke
+  - x-pack-ciGroup1
+  - x-pack-ciGroup2
+  - x-pack-ciGroup3
+  - x-pack-ciGroup4
+  - x-pack-ciGroup5
+  - x-pack-ciGroup6
+  - x-pack-ciGroup7
+  - x-pack-ciGroup8
+  - x-pack-ciGroup9
+  - x-pack-ciGroup10
   # - x-pack-visualRegression
 
 # `~` is yaml for `null`
