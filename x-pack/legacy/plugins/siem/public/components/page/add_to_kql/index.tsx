@@ -7,7 +7,6 @@
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
@@ -26,15 +25,21 @@ interface Props {
   filterQueryDraft: KueryFilterQuery;
 }
 
-class AddToKqlComponent extends React.PureComponent<Props> {
-  public render() {
-    const { children } = this.props;
+const AddToKqlComponent = React.memo<Props>(
+  ({ children, expression, filterQueryDraft, applyFilterQueryFromKueryExpression }) => {
+    const addToKql = () => {
+      applyFilterQueryFromKueryExpression(
+        filterQueryDraft && !isEmpty(filterQueryDraft.expression)
+          ? `${filterQueryDraft.expression} and ${expression}`
+          : expression
+      );
+    };
     return (
       <WithHoverActions
         hoverContent={
           <HoverActionsContainer data-test-subj="hover-actions-container">
             <EuiToolTip content={i18n.FILTER_FOR_VALUE}>
-              <EuiIcon type="filter" onClick={this.addToKql} />
+              <EuiIcon type="filter" onClick={addToKql} />
             </EuiToolTip>
           </HoverActionsContainer>
         }
@@ -42,16 +47,9 @@ class AddToKqlComponent extends React.PureComponent<Props> {
       />
     );
   }
+);
 
-  private addToKql = () => {
-    const { expression, filterQueryDraft, applyFilterQueryFromKueryExpression } = this.props;
-    applyFilterQueryFromKueryExpression(
-      filterQueryDraft && !isEmpty(filterQueryDraft.expression)
-        ? `${filterQueryDraft.expression} and ${expression}`
-        : expression
-    );
-  };
-}
+AddToKqlComponent.displayName = 'AddToKqlComponent';
 
 const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
@@ -76,7 +74,7 @@ interface AddToKqlProps {
   type: networkModel.NetworkType | hostsModel.HostsType;
 }
 
-export const AddToKql = pure<AddToKqlProps>(
+export const AddToKql = React.memo<AddToKqlProps>(
   ({ children, expression, type, componentFilterType, indexPattern }) => {
     switch (componentFilterType) {
       case 'hosts':

@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
-import React from 'react';
+import React, { useEffect } from 'react';
+import memoizeOne from 'memoize-one';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import memoizeOne from 'memoize-one';
 import { convertKueryToElasticSearchQuery } from '../../lib/keury';
 import {
   KueryFilterQuery,
@@ -33,13 +32,13 @@ export interface NetworkFilterArgs {
 interface OwnProps {
   children: (args: NetworkFilterArgs) => React.ReactNode;
   indexPattern: StaticIndexPattern;
-  type: networkModel.NetworkType;
   setQuery?: (params: {
     id: string;
     inspect: null;
     loading: boolean;
     refetch: inputsModel.Refetch | inputsModel.RefetchKql;
   }) => void;
+  type: networkModel.NetworkType;
 }
 
 interface NetworkFilterReduxProps {
@@ -61,80 +60,71 @@ interface NetworkFilterDispatchProps {
 
 export type NetworkFilterProps = OwnProps & NetworkFilterReduxProps & NetworkFilterDispatchProps;
 
-class NetworkFilterComponent extends React.PureComponent<NetworkFilterProps> {
-  private memoizedApplyFilterQueryFromKueryExpression: (expression: string) => void;
-  private memoizedSetFilterQueryDraftFromKueryExpression: (expression: string) => void;
-
-  constructor(props: NetworkFilterProps) {
-    super(props);
-    this.memoizedApplyFilterQueryFromKueryExpression = memoizeOne(
-      this.applyFilterQueryFromKueryExpression
-    );
-    this.memoizedSetFilterQueryDraftFromKueryExpression = memoizeOne(
-      this.setFilterQueryDraftFromKueryExpression
-    );
-  }
-
-  public componentDidUpdate(prevProps: NetworkFilterProps) {
-    const { indexPattern, networkFilterQueryDraft, kueryFilterQuery, setQuery, type } = this.props;
-
-    if (
-      setQuery &&
-      (!isEqual(prevProps.networkFilterQueryDraft, networkFilterQueryDraft) ||
-        !isEqual(prevProps.kueryFilterQuery, kueryFilterQuery) ||
-        prevProps.type !== type)
-    ) {
-      setQuery({
-        id: 'kql',
-        inspect: null,
-        loading: false,
-        refetch: useUpdateKql({
-          indexPattern,
-          kueryFilterQuery,
-          kueryFilterQueryDraft: networkFilterQueryDraft,
-          storeType: 'networkType',
-          type,
-        }),
+const NetworkFilterComponent = React.memo<NetworkFilterProps>(
+  ({
+    applyNetworkFilterQuery,
+    children,
+    indexPattern,
+    isNetworkFilterQueryDraftValid,
+    kueryFilterQuery,
+    networkFilterQueryDraft,
+    setNetworkFilterQueryDraft,
+    setQuery,
+    type,
+  }) => {
+    const applyFilterQueryFromKueryExpression = (expression: string) =>
+      applyNetworkFilterQuery({
+        filterQuery: {
+          kuery: {
+            kind: 'kuery',
+            expression,
+          },
+          serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
+        },
+        networkType: type,
       });
-    }
-  }
 
-  public render() {
-    const { children, networkFilterQueryDraft, isNetworkFilterQueryDraftValid } = this.props;
+    const setFilterQueryDraftFromKueryExpression = (expression: string) =>
+      setNetworkFilterQueryDraft({
+        filterQueryDraft: {
+          kind: 'kuery',
+          expression,
+        },
+        networkType: type,
+      });
+    const memoizedApplyFilter = memoizeOne(applyFilterQueryFromKueryExpression);
+    const memoizedSetFilter = memoizeOne(setFilterQueryDraftFromKueryExpression);
 
+    useEffect(() => {
+      if (setQuery) {
+        setQuery({
+          id: 'kql',
+          inspect: null,
+          loading: false,
+          refetch: useUpdateKql({
+            indexPattern,
+            kueryFilterQuery,
+            kueryFilterQueryDraft: networkFilterQueryDraft,
+            storeType: 'networkType',
+            type,
+          }),
+        });
+      }
+    }, [networkFilterQueryDraft, kueryFilterQuery, type]);
     return (
       <>
         {children({
-          applyFilterQueryFromKueryExpression: this.memoizedApplyFilterQueryFromKueryExpression,
+          applyFilterQueryFromKueryExpression: memoizedApplyFilter,
           filterQueryDraft: networkFilterQueryDraft,
           isFilterQueryDraftValid: isNetworkFilterQueryDraftValid,
-          setFilterQueryDraftFromKueryExpression: this
-            .memoizedSetFilterQueryDraftFromKueryExpression,
+          setFilterQueryDraftFromKueryExpression: memoizedSetFilter,
         })}
       </>
     );
   }
-  private applyFilterQueryFromKueryExpression = (expression: string) =>
-    this.props.applyNetworkFilterQuery({
-      filterQuery: {
-        kuery: {
-          kind: 'kuery',
-          expression,
-        },
-        serializedQuery: convertKueryToElasticSearchQuery(expression, this.props.indexPattern),
-      },
-      networkType: this.props.type,
-    });
+);
 
-  private setFilterQueryDraftFromKueryExpression = (expression: string) =>
-    this.props.setNetworkFilterQueryDraft({
-      filterQueryDraft: {
-        kind: 'kuery',
-        expression,
-      },
-      networkType: this.props.type,
-    });
-}
+NetworkFilterComponent.displayName = 'NetworkFilterComponent';
 
 const makeMapStateToProps = () => {
   const getNetworkFilterQueryDraft = networkSelectors.networkFilterQueryDraft();
@@ -142,9 +132,9 @@ const makeMapStateToProps = () => {
   const getNetworkKueryFilterQuery = networkSelectors.networkFilterQueryAsKuery();
   const mapStateToProps = (state: State, { type }: OwnProps) => {
     return {
-      networkFilterQueryDraft: getNetworkFilterQueryDraft(state, type),
       isNetworkFilterQueryDraftValid: getIsNetworkFilterQueryDraftValid(state, type),
       kueryFilterQuery: getNetworkKueryFilterQuery(state, type),
+      networkFilterQueryDraft: getNetworkFilterQueryDraft(state, type),
     };
   };
   return mapStateToProps;

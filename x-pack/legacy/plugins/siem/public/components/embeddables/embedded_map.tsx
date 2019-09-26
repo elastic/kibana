@@ -43,7 +43,7 @@ export interface EmbeddedMapProps {
 }
 
 export const EmbeddedMap = React.memo<EmbeddedMapProps>(
-  ({ applyFilterQueryFromKueryExpression, queryExpression, startDate, endDate, setQuery }) => {
+  ({ applyFilterQueryFromKueryExpression, endDate, queryExpression, setQuery, startDate }) => {
     const [embeddable, setEmbeddable] = React.useState<MapEmbeddable | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);

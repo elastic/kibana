@@ -8,13 +8,12 @@ import { ActionCreator } from 'typescript-fsa';
 import { connect } from 'react-redux';
 import { EuiButton, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import * as React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { DEFAULT_CATEGORY_NAME } from '../timeline/body/column_headers/default_headers';
-import { OnUpdateColumns } from '../timeline/events';
 
 import { FieldsBrowser } from './field_browser';
 import { FieldBrowserProps } from './types';
@@ -27,19 +26,6 @@ const fieldsButtonClassName = 'fields-button';
 
 /** wait this many ms after the user completes typing before applying the filter input */
 const INPUT_TIMEOUT = 250;
-
-interface State {
-  /** all field names shown in the field browser must contain this string (when specified) */
-  filterInput: string;
-  /** all fields in this collection have field names that match the filterInput */
-  filteredBrowserFields: BrowserFields | null;
-  /** when true, show a spinner in the input to indicate the field browser is searching for matching field names */
-  isSearching: boolean;
-  /** this category will be displayed in the right-hand pane of the field browser */
-  selectedCategoryId: string;
-  /** show the field browser */
-  show: boolean;
-}
 
 const FieldsBrowserButtonContainer = styled.div<{ show: boolean }>`
   ${({ show }) => (show ? 'position: absolute;' : '')}
@@ -71,52 +57,110 @@ interface DispatchProps {
 /**
  * Manages the state of the field browser
  */
-export class StatefulFieldsBrowserComponent extends React.PureComponent<
-  FieldBrowserProps & DispatchProps,
-  State
-> {
-  /** tracks the latest timeout id from `setTimeout`*/
-  private inputTimeoutId: number = 0;
+export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & DispatchProps>(
+  ({
+    columnHeaders,
+    browserFields,
+    height,
+    isEventViewer = false,
+    onFieldSelected,
+    onUpdateColumns,
+    timelineId,
+    toggleColumn,
+    width,
+  }) => {
+    /** tracks the latest timeout id from `setTimeout`*/
+    const inputTimeoutId = useRef(0);
 
-  constructor(props: FieldBrowserProps) {
-    super(props);
+    /** all field names shown in the field browser must contain this string (when specified) */
+    const [filterInput, setFilterInput] = useState('');
+    /** all fields in this collection have field names that match the filterInput */
+    const [filteredBrowserFields, setFilteredBrowserFields] = useState<BrowserFields | null>(null);
+    /** when true, show a spinner in the input to indicate the field browser is searching for matching field names */
+    const [isSearching, setIsSearching] = useState(false);
+    /** this category will be displayed in the right-hand pane of the field browser */
+    const [selectedCategoryId, setSelectedCategoryId] = useState(DEFAULT_CATEGORY_NAME);
+    /** show the field browser */
+    const [show, setShow] = useState(false);
+    useEffect(() => {
+      return () => {
+        if (inputTimeoutId.current !== 0) {
+          // ⚠️ mutation: cancel any remaining timers and zero-out the timer id:
+          clearTimeout(inputTimeoutId.current);
+          inputTimeoutId.current = 0;
+        }
+      };
+    }, []);
 
-    this.state = {
-      filterInput: '',
-      filteredBrowserFields: null,
-      isSearching: false,
-      selectedCategoryId: DEFAULT_CATEGORY_NAME,
-      show: false,
-    };
-  }
-
-  public componentWillUnmount() {
-    if (this.inputTimeoutId !== 0) {
-      // ⚠️ mutation: cancel any remaining timers and zero-out the timer id:
-      clearTimeout(this.inputTimeoutId);
-      this.inputTimeoutId = 0;
+    /** Shows / hides the field browser */
+    function toggleShow() {
+      setShow(!show);
     }
-  }
 
-  public render() {
-    const {
-      columnHeaders,
-      browserFields,
-      height,
-      isEventViewer = false,
-      onFieldSelected,
-      timelineId,
-      toggleColumn,
-      width,
-    } = this.props;
-    const {
-      filterInput,
-      filteredBrowserFields,
-      isSearching,
-      selectedCategoryId,
-      show,
-    } = this.state;
+    /** Invoked when the user types in the filter input */
+    function updateFilter(newFilterInput: string) {
+      setFilterInput(newFilterInput);
+      setIsSearching(true);
 
+      if (inputTimeoutId.current !== 0) {
+        clearTimeout(inputTimeoutId.current); // ⚠️ mutation: cancel any previous timers
+      }
+
+      // ⚠️ mutation: schedule a new timer that will apply the filter when it fires:
+      inputTimeoutId.current = window.setTimeout(() => {
+        const newFilteredBrowserFields = filterBrowserFieldsByFieldName({
+          browserFields: mergeBrowserFieldsWithDefaultCategory(browserFields),
+          substring: filterInput,
+        });
+
+        setFilteredBrowserFields(newFilteredBrowserFields);
+        setIsSearching(false);
+
+        const newSelectedCategoryId =
+          filterInput === '' || Object.keys(newFilteredBrowserFields).length === 0
+            ? DEFAULT_CATEGORY_NAME
+            : Object.keys(newFilteredBrowserFields)
+                .sort()
+                .reduce<string>(
+                  (selected, category) =>
+                    newFilteredBrowserFields[category].fields != null &&
+                    newFilteredBrowserFields[selected].fields != null &&
+                    newFilteredBrowserFields[category].fields!.length >
+                      newFilteredBrowserFields[selected].fields!.length
+                      ? category
+                      : selected,
+                  Object.keys(newFilteredBrowserFields)[0]
+                );
+        setSelectedCategoryId(newSelectedCategoryId);
+      }, INPUT_TIMEOUT);
+    }
+
+    /**
+     * Invoked when the user clicks a category name in the left-hand side of
+     * the field browser
+     */
+    function updateSelectedCategoryId(categoryId: string) {
+      setSelectedCategoryId(categoryId);
+    }
+
+    /**
+     * Invoked when the user clicks on the context menu to view a category's
+     * columns in the timeline, this function dispatches the action that
+     * causes the timeline display those columns.
+     */
+    function updateColumnsAndSelectCategoryId(columns: ColumnHeader[]) {
+      onUpdateColumns(columns); // show the category columns in the timeline
+    }
+
+    /** Invoked when the field browser should be hidden */
+    function hideFieldBrowser() {
+      setFilterInput('');
+      setFilterInput('');
+      setFilteredBrowserFields(null);
+      setIsSearching(false);
+      setSelectedCategoryId(DEFAULT_CATEGORY_NAME);
+      setShow(false);
+    }
     // only merge in the default category if the field browser is visible
     const browserFieldsWithDefaultCategory = show
       ? mergeBrowserFieldsWithDefaultCategory(browserFields)
@@ -132,7 +176,7 @@ export class StatefulFieldsBrowserComponent extends React.PureComponent<
                 className={fieldsButtonClassName}
                 data-test-subj="show-field-browser-gear"
                 iconType="gear"
-                onClick={this.toggleShow}
+                onClick={toggleShow}
               />
             ) : (
               <EuiButton
@@ -141,7 +185,7 @@ export class StatefulFieldsBrowserComponent extends React.PureComponent<
                 data-test-subj="show-field-browser"
                 iconSide="right"
                 iconType="arrowDown"
-                onClick={this.toggleShow}
+                onClick={toggleShow}
                 size="s"
               >
                 {i18n.FIELDS}
@@ -161,12 +205,12 @@ export class StatefulFieldsBrowserComponent extends React.PureComponent<
               height={height}
               isEventViewer={isEventViewer}
               isSearching={isSearching}
-              onCategorySelected={this.updateSelectedCategoryId}
+              onCategorySelected={updateSelectedCategoryId}
               onFieldSelected={onFieldSelected}
-              onHideFieldBrowser={this.hideFieldBrowser}
-              onOutsideClick={show ? this.hideFieldBrowser : noop}
-              onSearchInputChange={this.updateFilter}
-              onUpdateColumns={this.updateColumnsAndSelectCategoryId}
+              onHideFieldBrowser={hideFieldBrowser}
+              onOutsideClick={show ? hideFieldBrowser : noop}
+              onSearchInputChange={updateFilter}
+              onUpdateColumns={updateColumnsAndSelectCategoryId}
               searchInput={filterInput}
               selectedCategoryId={selectedCategoryId}
               timelineId={timelineId}
@@ -178,84 +222,9 @@ export class StatefulFieldsBrowserComponent extends React.PureComponent<
       </>
     );
   }
+);
 
-  /** Shows / hides the field browser */
-  private toggleShow = () => {
-    this.setState(({ show }) => ({
-      show: !show,
-    }));
-  };
-
-  /** Invoked when the user types in the filter input */
-  private updateFilter = (filterInput: string): void => {
-    this.setState({
-      filterInput,
-      isSearching: true,
-    });
-
-    if (this.inputTimeoutId !== 0) {
-      clearTimeout(this.inputTimeoutId); // ⚠️ mutation: cancel any previous timers
-    }
-
-    // ⚠️ mutation: schedule a new timer that will apply the filter when it fires:
-    this.inputTimeoutId = window.setTimeout(() => {
-      const filteredBrowserFields = filterBrowserFieldsByFieldName({
-        browserFields: mergeBrowserFieldsWithDefaultCategory(this.props.browserFields),
-        substring: this.state.filterInput,
-      });
-
-      this.setState(currentState => ({
-        filteredBrowserFields,
-        isSearching: false,
-        selectedCategoryId:
-          currentState.filterInput === '' || Object.keys(filteredBrowserFields).length === 0
-            ? DEFAULT_CATEGORY_NAME
-            : Object.keys(filteredBrowserFields)
-                .sort()
-                .reduce<string>(
-                  (selected, category) =>
-                    filteredBrowserFields[category].fields != null &&
-                    filteredBrowserFields[selected].fields != null &&
-                    filteredBrowserFields[category].fields!.length >
-                      filteredBrowserFields[selected].fields!.length
-                      ? category
-                      : selected,
-                  Object.keys(filteredBrowserFields)[0]
-                ),
-      }));
-    }, INPUT_TIMEOUT);
-  };
-
-  /**
-   * Invoked when the user clicks a category name in the left-hand side of
-   * the field browser
-   */
-  private updateSelectedCategoryId = (categoryId: string): void => {
-    this.setState({
-      selectedCategoryId: categoryId,
-    });
-  };
-
-  /**
-   * Invoked when the user clicks on the context menu to view a category's
-   * columns in the timeline, this function dispatches the action that
-   * causes the timeline display those columns.
-   */
-  private updateColumnsAndSelectCategoryId: OnUpdateColumns = (columns: ColumnHeader[]): void => {
-    this.props.onUpdateColumns(columns); // show the category columns in the timeline
-  };
-
-  /** Invoked when the field browser should be hidden */
-  private hideFieldBrowser = () => {
-    this.setState({
-      filterInput: '',
-      filteredBrowserFields: null,
-      isSearching: false,
-      selectedCategoryId: DEFAULT_CATEGORY_NAME,
-      show: false,
-    });
-  };
-}
+StatefulFieldsBrowserComponent.displayName = 'StatefulFieldsBrowserComponent';
 
 export const StatefulFieldsBrowser = connect(
   null,

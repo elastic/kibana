@@ -6,7 +6,7 @@
 
 import { defaultTo, noop } from 'lodash/fp';
 import * as React from 'react';
-import { DragDropContext, DropResult, ResponderProvided, DragStart } from 'react-beautiful-dnd';
+import { DragDropContext, DropResult, DragStart } from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 
@@ -57,43 +57,39 @@ const onDragEndHandler = ({
 /**
  * DragDropContextWrapperComponent handles all drag end events
  */
-export class DragDropContextWrapperComponent extends React.Component<Props> {
-  public shouldComponentUpdate = ({ children, dataProviders }: Props) =>
-    children === this.props.children && dataProviders !== this.props.dataProviders // prevent re-renders when data providers are added or removed, but all other props are the same
-      ? false
-      : true;
+export const DragDropContextWrapperComponent = React.memo<Props>(
+  ({ browserFields, children, dataProviders, dispatch }) => {
+    function onDragEnd(result: DropResult) {
+      enableScrolling();
 
-  public render() {
-    const { children } = this.props;
+      if (dataProviders != null) {
+        onDragEndHandler({
+          browserFields,
+          result,
+          dataProviders,
+          dispatch,
+        });
+      }
 
+      if (!draggableIsField(result)) {
+        document.body.classList.remove(IS_DRAGGING_CLASS_NAME);
+      }
+    }
     return (
-      <DragDropContext onDragEnd={this.onDragEnd} onDragStart={onDragStart}>
+      <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
         {children}
       </DragDropContext>
     );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.children === nextProps.children &&
+      prevProps.dataProviders !== nextProps.dataProviders
+    ); // prevent re-renders when data providers are added or removed, but all other props are the same
   }
+);
 
-  private onDragEnd: (result: DropResult, provided: ResponderProvided) => void = (
-    result: DropResult
-  ) => {
-    const { browserFields, dataProviders, dispatch } = this.props;
-
-    enableScrolling();
-
-    if (dataProviders != null) {
-      onDragEndHandler({
-        browserFields,
-        result,
-        dataProviders,
-        dispatch,
-      });
-    }
-
-    if (!draggableIsField(result)) {
-      document.body.classList.remove(IS_DRAGGING_CLASS_NAME);
-    }
-  };
-}
+DragDropContextWrapperComponent.displayName = 'DragDropContextWrapperComponent';
 
 const emptyDataProviders: dragAndDropModel.IdToDataProvider = {}; // stable reference
 

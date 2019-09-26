@@ -5,7 +5,7 @@
  */
 
 import isEqual from 'lodash/fp/isEqual';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 
 interface Measurement {
@@ -20,163 +20,135 @@ interface Measurements {
 }
 
 interface AutoSizerProps {
-  detectAnyWindowResize?: boolean;
   bounds?: boolean;
-  content?: boolean;
-  onResize?: (size: Measurements) => void;
   children: (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     args: { measureRef: (instance: HTMLElement | null) => any } & Measurements
-  ) => React.ReactNode;
+  ) => React.ReactElement;
+  content?: boolean;
+  detectAnyWindowResize?: boolean;
+  onResize?: (size: Measurements) => void;
 }
 
-interface AutoSizerState {
-  boundsMeasurement: Measurement;
-  contentMeasurement: Measurement;
-  windowMeasurement: Measurement;
-}
-
-/** A hard-fork of the `infra` `AutoSizer` ಠ_ಠ */
-export class AutoSizer extends React.PureComponent<AutoSizerProps, AutoSizerState> {
-  public element: HTMLElement | null = null;
-  public resizeObserver: ResizeObserver | null = null;
-  public windowWidth: number = -1;
-
-  public readonly state = {
-    boundsMeasurement: {
-      height: void 0,
-      width: void 0,
-    },
-    contentMeasurement: {
-      height: void 0,
-      width: void 0,
-    },
-    windowMeasurement: {
-      height: void 0,
-      width: void 0,
-    },
-  };
-
-  constructor(props: AutoSizerProps) {
-    super(props);
-    if (this.props.detectAnyWindowResize) {
-      window.addEventListener('resize', this.updateMeasurement);
-    }
-    this.resizeObserver = new ResizeObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.target === this.element) {
-          this.measure(entry);
-        }
-      });
+export const AutoSizer = React.memo<AutoSizerProps>(
+  ({ bounds = false, children, content = true, detectAnyWindowResize, onResize }) => {
+    const element = useRef<HTMLElement | null>(null);
+    const resizeObserver = useRef<ResizeObserver | null>(null);
+    const windowWidth = useRef(-1);
+    const [boundsMeasurement, setBoundsMeasurement] = useState<Measurement>({
+      height: 0,
+      width: 0,
     });
-  }
+    const [contentMeasurement, setContentMeasurement] = useState<Measurement>({
+      height: 0,
+      width: 0,
+    });
+    const [windowMeasurement, setWindowMeasurement] = useState<Measurement>({
+      height: 0,
+      width: 0,
+    });
 
-  public componentWillUnmount() {
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-      this.resizeObserver = null;
-    }
-    if (this.props.detectAnyWindowResize) {
-      window.removeEventListener('resize', this.updateMeasurement);
-    }
-  }
-
-  public measure = (entry: ResizeObserverEntry | null) => {
-    if (!this.element) {
-      return;
-    }
-
-    const { content = true, bounds = false } = this.props;
-    const {
-      boundsMeasurement: previousBoundsMeasurement,
-      contentMeasurement: previousContentMeasurement,
-      windowMeasurement: previousWindowMeasurement,
-    } = this.state;
-
-    const boundsRect = bounds ? this.element.getBoundingClientRect() : null;
-    const boundsMeasurement = boundsRect
-      ? {
-          height: this.element.getBoundingClientRect().height,
-          width: this.element.getBoundingClientRect().width,
-        }
-      : previousBoundsMeasurement;
-    const windowMeasurement: Measurement = {
-      width: window.innerWidth,
-      height: window.innerHeight,
+    const storeRef = (htmlElement: HTMLElement | null) => {
+      if (htmlElement && resizeObserver.current) {
+        resizeObserver.current.observe(htmlElement);
+      }
+      element.current = htmlElement;
     };
 
-    if (
-      this.props.detectAnyWindowResize &&
-      boundsMeasurement &&
-      boundsMeasurement.width &&
-      this.windowWidth !== -1 &&
-      this.windowWidth > window.innerWidth
-    ) {
-      const gap = this.windowWidth - window.innerWidth;
-      boundsMeasurement.width = boundsMeasurement.width - gap;
-    }
-    this.windowWidth = window.innerWidth;
-    const contentRect = content && entry ? entry.contentRect : null;
-    const contentMeasurement =
-      contentRect && entry
+    const measure = (entry: ResizeObserverEntry | null) => {
+      if (!element.current) {
+        return;
+      }
+      const boundsRect = bounds ? element.current.getBoundingClientRect() : null;
+
+      const boundsMeasurementNow: Measurement = boundsRect
         ? {
-            height: entry.contentRect.height,
-            width: entry.contentRect.width,
+            height: element.current.getBoundingClientRect().height,
+            width: element.current.getBoundingClientRect().width,
           }
-        : previousContentMeasurement;
+        : boundsMeasurement;
 
-    if (
-      isEqual(boundsMeasurement, previousBoundsMeasurement) &&
-      isEqual(contentMeasurement, previousContentMeasurement) &&
-      isEqual(windowMeasurement, previousWindowMeasurement)
-    ) {
-      return;
-    }
+      const windowMeasurementNow: Measurement = {
+        width: window.innerWidth,
+        height: window.innerHeight,
+      };
 
-    requestAnimationFrame(() => {
-      if (!this.resizeObserver) {
+      if (
+        detectAnyWindowResize &&
+        boundsMeasurementNow &&
+        boundsMeasurementNow.width &&
+        windowWidth.current !== -1 &&
+        windowWidth.current > window.innerWidth
+      ) {
+        const gap = windowWidth.current - window.innerWidth;
+        boundsMeasurementNow.width = boundsMeasurementNow.width - gap;
+      }
+      windowWidth.current = window.innerWidth;
+      const contentRect = content && entry ? entry.contentRect : null;
+      const contentMeasurementNow: Measurement =
+        contentRect && entry
+          ? {
+              height: entry.contentRect.height,
+              width: entry.contentRect.width,
+            }
+          : contentMeasurement;
+
+      if (
+        isEqual(boundsMeasurementNow, boundsMeasurement) &&
+        isEqual(contentMeasurementNow, contentMeasurement) &&
+        isEqual(windowMeasurementNow, windowMeasurement)
+      ) {
         return;
       }
 
-      this.setState({ boundsMeasurement, contentMeasurement, windowMeasurement });
+      requestAnimationFrame(() => {
+        if (!resizeObserver) {
+          return;
+        }
 
-      if (this.props.onResize) {
-        this.props.onResize({
-          bounds: boundsMeasurement,
-          content: contentMeasurement,
-          windowMeasurement,
-        });
+        setBoundsMeasurement(boundsMeasurementNow);
+        setContentMeasurement(contentMeasurementNow);
+        setWindowMeasurement(windowMeasurementNow);
+        if (onResize) {
+          onResize({
+            bounds: boundsMeasurementNow,
+            content: contentMeasurementNow,
+            windowMeasurement: windowMeasurementNow,
+          });
+        }
+      });
+    };
+
+    useEffect(() => {
+      if (detectAnyWindowResize) {
+        window.addEventListener('resize', () => measure(null));
       }
-    });
-  };
 
-  public render() {
-    const { children } = this.props;
-    const { boundsMeasurement, contentMeasurement, windowMeasurement } = this.state;
+      resizeObserver.current = new ResizeObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.target === element.current) {
+            measure(entry);
+          }
+        });
+      });
 
+      return () => {
+        if (resizeObserver && resizeObserver.current) {
+          resizeObserver.current.disconnect();
+          resizeObserver.current = null;
+        }
+        if (detectAnyWindowResize) {
+          window.removeEventListener('resize', () => measure(null));
+        }
+      };
+    }, []);
     return children({
       bounds: boundsMeasurement,
       content: contentMeasurement,
       windowMeasurement,
-      measureRef: this.storeRef,
+      measureRef: storeRef,
     });
   }
+);
 
-  private updateMeasurement = () => {
-    window.setTimeout(() => {
-      this.measure(null);
-    }, 0);
-  };
-
-  private storeRef = (element: HTMLElement | null) => {
-    if (this.element && this.resizeObserver) {
-      this.resizeObserver.unobserve(this.element);
-    }
-
-    if (element && this.resizeObserver) {
-      this.resizeObserver.observe(element);
-    }
-
-    this.element = element;
-  };
-}
+AutoSizer.displayName = 'AutoSizer';

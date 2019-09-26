@@ -55,12 +55,14 @@ type NetworkComponentProps = NetworkComponentReduxProps & Partial<RouteComponent
 const mediaMatch = window.matchMedia(
   'screen and (min-width: ' + euiLightVars.euiBreakpoints.xl + ')'
 );
-const getFlexDirectionByMediaMatch = (): 'row' | 'column' => {
+
+type Direction = 'row' | 'column';
+const getFlexDirectionByMediaMatch = (): Direction => {
   const { matches } = mediaMatch;
   return matches ? 'row' : 'column';
 };
 export const getFlexDirection = () => {
-  const [display, setDisplay] = useState(getFlexDirectionByMediaMatch());
+  const [display, setDisplay] = useState<Direction>(getFlexDirectionByMediaMatch());
 
   useEffect(() => {
     const setFromEvent = () => setDisplay(getFlexDirectionByMediaMatch());

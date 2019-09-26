@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import * as React from 'react';
+import React, { useEffect } from 'react';
 import {
   Draggable,
   DraggableProvided,
@@ -165,28 +165,15 @@ type Props = OwnProps & DispatchProps;
  * Wraps a draggable component to handle registration / unregistration of the
  * data provider associated with the item being dropped
  */
-class DraggableWrapperComponent extends React.Component<Props> {
-  public shouldComponentUpdate = ({ dataProvider, render, width }: Props) =>
-    isEqual(dataProvider, this.props.dataProvider) &&
-    render !== this.props.render &&
-    width === this.props.width
-      ? false
-      : true;
 
-  public componentDidMount() {
-    const { dataProvider, registerProvider } = this.props;
-
-    registerProvider!({ provider: dataProvider });
-  }
-
-  public componentWillUnmount() {
-    const { dataProvider, unRegisterProvider } = this.props;
-
-    unRegisterProvider!({ id: dataProvider.id });
-  }
-
-  public render() {
-    const { dataProvider, render, width } = this.props;
+const DraggableWrapperComponent = React.memo<Props>(
+  ({ dataProvider, registerProvider, render, unRegisterProvider, width }) => {
+    useEffect(() => {
+      registerProvider!({ provider: dataProvider });
+      return () => {
+        unRegisterProvider!({ id: dataProvider.id });
+      };
+    }, []);
 
     return (
       <Wrapper data-test-subj="draggableWrapperDiv">
@@ -233,8 +220,17 @@ class DraggableWrapperComponent extends React.Component<Props> {
         </Droppable>
       </Wrapper>
     );
+  },
+  (prevProps, nextProps) => {
+    return (
+      isEqual(prevProps.dataProvider, nextProps.dataProvider) &&
+      prevProps.render !== nextProps.render &&
+      prevProps.width === nextProps.width
+    );
   }
-}
+);
+
+DraggableWrapperComponent.displayName = 'DraggableWrapperComponent';
 
 export const DraggableWrapper = connect(
   null,

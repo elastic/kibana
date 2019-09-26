@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { fromEvent, Observable, Subscription } from 'rxjs';
 import { concatMap, takeUntil } from 'rxjs/operators';
 import styled from 'styled-components';
@@ -33,10 +33,6 @@ interface Props {
   onResize: OnResize;
 }
 
-interface State {
-  isResizing: boolean;
-}
-
 const ResizeHandleContainer = styled.div<{ height?: string }>`
   cursor: ${resizeCursorStyle};
   ${({ height }) => (height != null ? `height: ${height}` : '')}
@@ -52,99 +48,77 @@ export const removeGlobalResizeCursorStyleFromBody = () => {
   document.body.classList.remove(globalResizeCursorClassName);
 };
 
-export class Resizeable extends React.PureComponent<Props, State> {
-  private drag$: Observable<MouseEvent> | null;
-  private dragEventTargets: Array<{ htmlElement: HTMLElement; prevCursor: string }>;
-  private dragSubscription: Subscription | null;
-  private prevX: number = 0;
-  private ref: React.RefObject<HTMLElement>;
-  private upSubscription: Subscription | null;
+export const Resizeable = React.memo<Props>(({ id, onResize, handle, height, render }) => {
+  const drag$ = useRef<Observable<MouseEvent> | null>(null);
+  const dragEventTargets = useRef<Array<{ htmlElement: HTMLElement; prevCursor: string }>>([]);
+  const dragSubscription = useRef<Subscription | null>(null);
+  const prevX = useRef(0);
+  const ref = useRef<React.RefObject<HTMLElement>>(React.createRef<HTMLElement>());
+  const upSubscription = useRef<Subscription | null>(null);
+  const isResizingRef = useRef(false);
 
-  constructor(props: Props) {
-    super(props);
-
-    // NOTE: the ref and observable below are NOT stored in component `State`
-    this.ref = React.createRef<HTMLElement>();
-    this.drag$ = null;
-    this.dragSubscription = null;
-    this.upSubscription = null;
-    this.dragEventTargets = [];
-
-    this.state = {
-      isResizing: false,
-    };
-  }
-
-  public componentDidMount() {
-    const { id, onResize } = this.props;
-
-    const move$ = fromEvent<MouseEvent>(document, 'mousemove');
-    const down$ = fromEvent<MouseEvent>(this.ref.current!, 'mousedown');
-    const up$ = fromEvent<MouseEvent>(document, 'mouseup');
-
-    this.drag$ = down$.pipe(concatMap(() => move$.pipe(takeUntil(up$))));
-    this.dragSubscription = this.drag$.subscribe(event => {
-      // We do a feature detection of event.movementX here and if it is missing
-      // we calculate the delta manually. Browsers IE-11 and Safari will call calculateDelta
-      const delta =
-        event.movementX == null || isSafari ? this.calculateDelta(event) : event.movementX;
-      if (!this.state.isResizing) {
-        this.setState({ isResizing: true });
-      }
-      onResize({ id, delta });
-      if (event.target != null && event.target instanceof HTMLElement) {
-        const htmlElement: HTMLElement = event.target;
-        this.dragEventTargets = [
-          ...this.dragEventTargets,
-          { htmlElement, prevCursor: htmlElement.style.cursor },
-        ];
-        htmlElement.style.cursor = resizeCursorStyle;
-      }
-    });
-
-    this.upSubscription = up$.subscribe(() => {
-      if (this.state.isResizing) {
-        this.dragEventTargets.reverse().forEach(eventTarget => {
-          eventTarget.htmlElement.style.cursor = eventTarget.prevCursor;
-        });
-        this.dragEventTargets = [];
-        this.setState({ isResizing: false });
-      }
-    });
-  }
-
-  public componentWillUnmount() {
-    if (this.dragSubscription != null) {
-      this.dragSubscription.unsubscribe();
-    }
-
-    if (this.upSubscription != null) {
-      this.upSubscription.unsubscribe();
-    }
-  }
-
-  public render() {
-    const { handle, height, render } = this.props;
-
-    return (
-      <>
-        {render(this.state.isResizing)}
-        <ResizeHandleContainer
-          data-test-subj="resize-handle-container"
-          height={height}
-          innerRef={this.ref}
-        >
-          {handle}
-        </ResizeHandleContainer>
-      </>
-    );
-  }
-
-  private calculateDelta = (e: MouseEvent) => {
-    const deltaX = calculateDeltaX({ prevX: this.prevX, screenX: e.screenX });
-
-    this.prevX = e.screenX;
-
+  const calculateDelta = (e: MouseEvent) => {
+    const deltaX = calculateDeltaX({ prevX: prevX.current, screenX: e.screenX });
+    prevX.current = e.screenX;
     return deltaX;
   };
-}
+  useEffect(() => {
+    const move$ = fromEvent<MouseEvent>(document, 'mousemove');
+    const down$ = fromEvent<MouseEvent>(ref.current.current!, 'mousedown');
+    const up$ = fromEvent<MouseEvent>(document, 'mouseup');
+
+    drag$.current = down$.pipe(concatMap(() => move$.pipe(takeUntil(up$))));
+    dragSubscription.current =
+      drag$.current &&
+      drag$.current.subscribe(event => {
+        // We do a feature detection of event.movementX here and if it is missing
+        // we calculate the delta manually. Browsers IE-11 and Safari will call calculateDelta
+        const delta = event.movementX == null || isSafari ? calculateDelta(event) : event.movementX;
+        if (!isResizingRef.current) {
+          isResizingRef.current = true;
+        }
+        onResize({ id, delta });
+        if (event.target != null && event.target instanceof HTMLElement) {
+          const htmlElement: HTMLElement = event.target;
+          dragEventTargets.current = [
+            ...dragEventTargets.current,
+            { htmlElement, prevCursor: htmlElement.style.cursor },
+          ];
+          htmlElement.style.cursor = resizeCursorStyle;
+        }
+      });
+
+    upSubscription.current = up$.subscribe(() => {
+      if (isResizingRef.current) {
+        dragEventTargets.current.reverse().forEach(eventTarget => {
+          eventTarget.htmlElement.style.cursor = eventTarget.prevCursor;
+        });
+        dragEventTargets.current = [];
+        isResizingRef.current = false;
+      }
+    });
+    return () => {
+      if (dragSubscription.current != null) {
+        dragSubscription.current.unsubscribe();
+      }
+      if (upSubscription.current != null) {
+        upSubscription.current.unsubscribe();
+      }
+    };
+  }, []);
+
+  return (
+    <>
+      {render(isResizingRef.current)}
+      <ResizeHandleContainer
+        data-test-subj="resize-handle-container"
+        height={height}
+        innerRef={ref.current}
+      >
+        {handle}
+      </ResizeHandleContainer>
+    </>
+  );
+});
+
+Resizeable.displayName = 'Resizeable';

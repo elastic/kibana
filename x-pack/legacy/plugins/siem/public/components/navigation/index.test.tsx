@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import * as React from 'react';
 
 import { CONSTANTS } from '../url_state/constants';
@@ -63,7 +63,7 @@ describe('SIEM Navigation', () => {
     },
     [CONSTANTS.timelineId]: '',
   };
-  const wrapper = shallow(<SiemNavigationComponent {...mockProps} />);
+  const wrapper = mount(<SiemNavigationComponent {...mockProps} />);
   test('it calls setBreadcrumbs with correct path on mount', () => {
     expect(setBreadcrumbs).toHaveBeenNthCalledWith(1, {
       detailName: undefined,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React, { useState } from 'react';
 
 import { BrowserFields } from '../../containers/source';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
@@ -23,43 +23,24 @@ interface Props {
   toggleColumn: (column: ColumnHeader) => void;
 }
 
-interface State {
-  view: View;
-}
+export const StatefulEventDetails = React.memo<Props>(
+  ({ browserFields, columnHeaders, data, id, onUpdateColumns, timelineId, toggleColumn }) => {
+    const [view, setView] = useState<View>('table-view');
 
-export class StatefulEventDetails extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
-    super(props);
-
-    this.state = { view: 'table-view' };
-  }
-
-  public onViewSelected = (view: View): void => {
-    this.setState({ view });
-  };
-
-  public render() {
-    const {
-      browserFields,
-      columnHeaders,
-      data,
-      id,
-      onUpdateColumns,
-      timelineId,
-      toggleColumn,
-    } = this.props;
     return (
       <EventDetails
         browserFields={browserFields}
         columnHeaders={columnHeaders}
         data={data}
         id={id}
-        view={this.state.view}
         onUpdateColumns={onUpdateColumns}
-        onViewSelected={this.onViewSelected}
+        onViewSelected={newView => setView(newView)}
         timelineId={timelineId}
         toggleColumn={toggleColumn}
+        view={view}
       />
     );
   }
-}
+);
+
+StatefulEventDetails.displayName = 'StatefulEventDetails';

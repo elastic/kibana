@@ -5,8 +5,7 @@
  */
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { get } from 'lodash/fp';
-import { mount, ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { ThemeProvider } from 'styled-components';
@@ -19,12 +18,6 @@ import * as i18n from '../translations';
 import { OpenTimelineModalButton } from '.';
 
 jest.mock('../../../lib/settings/use_kibana_ui_setting');
-
-const getStateChildComponent = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  wrapper: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>
-): // eslint-disable-next-line @typescript-eslint/no-explicit-any
-React.Component<{}, {}, any> => wrapper.find('[data-test-subj="state-child-component"]').instance();
 
 describe('OpenTimelineModalButton', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
@@ -56,10 +49,7 @@ describe('OpenTimelineModalButton', () => {
         <ThemeProvider theme={theme}>
           <TestProviderWithoutDragAndDrop>
             <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-              <OpenTimelineModalButton
-                data-test-subj="state-child-component"
-                onToggle={jest.fn()}
-              />
+              <OpenTimelineModalButton onToggle={jest.fn()} />
             </MockedProvider>
           </TestProviderWithoutDragAndDrop>
         </ThemeProvider>
@@ -69,7 +59,7 @@ describe('OpenTimelineModalButton', () => {
 
       wrapper.update();
 
-      expect(get('showModal', getStateChildComponent(wrapper).state)).toEqual(false);
+      expect(wrapper.find('div[data-test-subj="open-timeline-modal"].euiModal').length).toEqual(0);
     });
 
     test('it sets showModal to true when the button is clicked', async () => {
@@ -151,10 +141,7 @@ describe('OpenTimelineModalButton', () => {
         <ThemeProvider theme={theme}>
           <TestProviderWithoutDragAndDrop>
             <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-              <OpenTimelineModalButton
-                data-test-subj="state-child-component"
-                onToggle={jest.fn()}
-              />
+              <OpenTimelineModalButton onToggle={jest.fn()} />
             </MockedProvider>
           </TestProviderWithoutDragAndDrop>
         </ThemeProvider>
@@ -169,7 +156,7 @@ describe('OpenTimelineModalButton', () => {
 
       wrapper.update();
 
-      expect(get('showModal', getStateChildComponent(wrapper).state)).toEqual(true);
+      expect(wrapper.find('div[data-test-subj="open-timeline-modal"].euiModal').length).toEqual(1);
     });
 
     test('it invokes the optional onToggle function provided as a prop when the open timeline button is clicked', async () => {

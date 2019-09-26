@@ -5,8 +5,7 @@
  */
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { mount, ReactWrapper } from 'enzyme';
-import { get } from 'lodash/fp';
+import { mount } from 'enzyme';
 import { MockedProvider } from 'react-apollo/test-utils';
 import * as React from 'react';
 import { ThemeProvider } from 'styled-components';
@@ -22,21 +21,11 @@ import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
-const getStateChildComponent = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  wrapper: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>
-): // eslint-disable-next-line @typescript-eslint/no-explicit-any
-React.Component<{}, {}, any> =>
-  wrapper
-    .find('[data-test-subj="stateful-timeline"]')
-    .last()
-    .instance();
-
 describe('StatefulOpenTimeline', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const title = 'All Timelines / Open Timelines';
 
-  test('it has the expected initial state', async () => {
+  test('it has the expected initial state', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <TestProviderWithoutDragAndDrop>
@@ -53,15 +42,18 @@ describe('StatefulOpenTimeline', () => {
       </ThemeProvider>
     );
 
-    await wait();
-    wrapper.update();
+    const componentProps = wrapper
+      .find('[data-test-subj="open-timeline"]')
+      .last()
+      .props();
 
-    expect(getStateChildComponent(wrapper).state).toEqual({
+    expect(componentProps).toEqual({
+      ...componentProps,
       itemIdToExpandedNotesRowMap: {},
       onlyFavorites: false,
       pageIndex: 0,
       pageSize: 10,
-      search: '',
+      query: '',
       selectedItems: [],
       sortDirection: 'desc',
       sortField: 'updated',
@@ -69,7 +61,7 @@ describe('StatefulOpenTimeline', () => {
   });
 
   describe('#onQueryChange', () => {
-    test('it updates the query state with the expected trimmed value when the user enters a query', async () => {
+    test('it updates the query state with the expected trimmed value when the user enters a query', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <TestProviderWithoutDragAndDrop>
@@ -85,26 +77,15 @@ describe('StatefulOpenTimeline', () => {
           </TestProviderWithoutDragAndDrop>
         </ThemeProvider>
       );
-
-      await wait();
-      wrapper.update();
-
       wrapper
         .find('[data-test-subj="search-bar"] input')
         .simulate('keyup', { keyCode: 13, target: { value: '   abcd   ' } });
-
-      wrapper.update();
-
-      expect(getStateChildComponent(wrapper).state).toEqual({
-        itemIdToExpandedNotesRowMap: {},
-        onlyFavorites: false,
-        pageIndex: 0,
-        pageSize: 10,
-        search: 'abcd',
-        selectedItems: [],
-        sortDirection: 'desc',
-        sortField: 'updated',
-      });
+      expect(
+        wrapper
+          .find('[data-test-subj="search-row"]')
+          .first()
+          .prop('query')
+      ).toEqual('abcd');
     });
 
     test('it appends the word "with" to the Showing in Timelines message when the user enters a query', async () => {
@@ -128,8 +109,6 @@ describe('StatefulOpenTimeline', () => {
       wrapper
         .find('[data-test-subj="search-bar"] input')
         .simulate('keyup', { keyCode: 13, target: { value: '   abcd   ' } });
-
-      wrapper.update();
 
       expect(
         wrapper
@@ -160,8 +139,6 @@ describe('StatefulOpenTimeline', () => {
       wrapper
         .find('[data-test-subj="search-bar"] input')
         .simulate('keyup', { keyCode: 13, target: { value: '   abcd   ' } });
-
-      wrapper.update();
 
       expect(
         wrapper
@@ -226,7 +203,6 @@ describe('StatefulOpenTimeline', () => {
         .find('.euiCheckbox__input')
         .first()
         .simulate('change', { target: { checked: true } });
-      wrapper.update();
 
       wrapper
         .find('[data-test-subj="favorite-selected"]')
@@ -273,7 +249,6 @@ describe('StatefulOpenTimeline', () => {
         .find('.euiCheckbox__input')
         .first()
         .simulate('change', { target: { checked: true } });
-      wrapper.update();
 
       wrapper
         .find('[data-test-subj="delete-selected"]')
@@ -319,14 +294,17 @@ describe('StatefulOpenTimeline', () => {
         .first()
         .simulate('change', { target: { checked: true } });
 
-      wrapper.update();
+      const selectedItems: [] = wrapper
+        .find('[data-test-subj="open-timeline"]')
+        .last()
+        .prop('selectedItems');
 
-      expect(get('selectedItems', getStateChildComponent(wrapper).state).length).toEqual(13); // 13 because we did mock 13 timelines in the query
+      expect(selectedItems.length).toEqual(13); // 13 because we did mock 13 timelines in the query
     });
   });
 
   describe('#onTableChange', () => {
-    test('it updates the sort state when the user clicks on a column to sort it', async () => {
+    test('it updates the sort state when the user clicks on a column to sort it', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <TestProviderWithoutDragAndDrop>
@@ -343,32 +321,29 @@ describe('StatefulOpenTimeline', () => {
         </ThemeProvider>
       );
 
-      await wait();
-
-      wrapper.update();
+      expect(
+        wrapper
+          .find('[data-test-subj="open-timeline"]')
+          .last()
+          .prop('sortDirection')
+      ).toEqual('desc');
 
       wrapper
         .find('thead tr th button')
         .at(0)
         .simulate('click');
 
-      wrapper.update();
-
-      expect(getStateChildComponent(wrapper).state).toEqual({
-        itemIdToExpandedNotesRowMap: {},
-        onlyFavorites: false,
-        pageIndex: 0,
-        pageSize: 10,
-        search: '',
-        selectedItems: [],
-        sortDirection: 'asc',
-        sortField: 'updated',
-      });
+      expect(
+        wrapper
+          .find('[data-test-subj="open-timeline"]')
+          .last()
+          .prop('sortDirection')
+      ).toEqual('asc');
     });
   });
 
   describe('#onToggleOnlyFavorites', () => {
-    test('it updates the onlyFavorites state when the user clicks the Only Favorites button', async () => {
+    test('it updates the onlyFavorites state when the user clicks the Only Favorites button', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <TestProviderWithoutDragAndDrop>
@@ -385,25 +360,24 @@ describe('StatefulOpenTimeline', () => {
         </ThemeProvider>
       );
 
-      await wait();
+      expect(
+        wrapper
+          .find('[data-test-subj="open-timeline"]')
+          .last()
+          .prop('onlyFavorites')
+      ).toEqual(false);
 
       wrapper
         .find('[data-test-subj="only-favorites-toggle"]')
         .first()
         .simulate('click');
 
-      wrapper.update();
-
-      expect(getStateChildComponent(wrapper).state).toEqual({
-        itemIdToExpandedNotesRowMap: {},
-        onlyFavorites: true,
-        pageIndex: 0,
-        pageSize: 10,
-        search: '',
-        selectedItems: [],
-        sortDirection: 'desc',
-        sortField: 'updated',
-      });
+      expect(
+        wrapper
+          .find('[data-test-subj="open-timeline"]')
+          .last()
+          .prop('onlyFavorites')
+      ).toEqual(true);
     });
   });
 
@@ -426,38 +400,38 @@ describe('StatefulOpenTimeline', () => {
       );
 
       await wait();
-
       wrapper.update();
+
+      expect(
+        wrapper
+          .find('[data-test-subj="open-timeline"]')
+          .last()
+          .prop('itemIdToExpandedNotesRowMap')
+      ).toEqual({});
 
       wrapper
         .find('[data-test-subj="expand-notes"]')
         .first()
         .simulate('click');
 
-      wrapper.update();
-      expect(getStateChildComponent(wrapper).state).toEqual({
-        itemIdToExpandedNotesRowMap: {
-          '10849df0-7b44-11e9-a608-ab3d811609': (
-            <NotePreviews
-              isModal={false}
-              notes={
-                mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes !=
-                null
-                  ? mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes.map(
-                      note => ({ ...note, savedObjectId: note.noteId })
-                    )
-                  : []
-              }
-            />
-          ),
-        },
-        onlyFavorites: false,
-        pageIndex: 0,
-        pageSize: 10,
-        search: '',
-        selectedItems: [],
-        sortDirection: 'desc',
-        sortField: 'updated',
+      expect(
+        wrapper
+          .find('[data-test-subj="open-timeline"]')
+          .last()
+          .prop('itemIdToExpandedNotesRowMap')
+      ).toEqual({
+        '10849df0-7b44-11e9-a608-ab3d811609': (
+          <NotePreviews
+            isModal={false}
+            notes={
+              mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes != null
+                ? mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes.map(
+                    note => ({ ...note, savedObjectId: note.noteId })
+                  )
+                : []
+            }
+          />
+        ),
       });
     });
 
@@ -486,8 +460,6 @@ describe('StatefulOpenTimeline', () => {
         .find('[data-test-subj="expand-notes"]')
         .first()
         .simulate('click');
-
-      wrapper.update();
 
       expect(
         wrapper
@@ -543,25 +515,23 @@ describe('StatefulOpenTimeline', () => {
           </TestProviderWithoutDragAndDrop>
         </ThemeProvider>
       );
-
+      const getSelectedItem = (): [] =>
+        wrapper
+          .find('[data-test-subj="open-timeline"]')
+          .last()
+          .prop('selectedItems');
       await wait();
-
-      wrapper.update();
-
+      expect(getSelectedItem().length).toEqual(0);
       wrapper
         .find('.euiCheckbox__input')
         .first()
         .simulate('change', { target: { checked: true } });
-      wrapper.update();
-
+      expect(getSelectedItem().length).toEqual(13);
       wrapper
         .find('[data-test-subj="delete-selected"]')
         .first()
         .simulate('click');
-
-      wrapper.update();
-
-      expect(get('selectedItems', getStateChildComponent(wrapper).state).length).toEqual(0);
+      expect(getSelectedItem().length).toEqual(0);
     });
   });
 

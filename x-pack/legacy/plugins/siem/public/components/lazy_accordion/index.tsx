@@ -5,7 +5,7 @@
  */
 
 import { EuiAccordion, EuiAccordionProps } from '@elastic/eui';
-import * as React from 'react';
+import React, { useState } from 'react';
 
 type Props = Pick<EuiAccordionProps, Exclude<keyof EuiAccordionProps, 'initialIsOpen'>> & {
   forceExpand?: boolean;
@@ -13,10 +13,6 @@ type Props = Pick<EuiAccordionProps, Exclude<keyof EuiAccordionProps, 'initialIs
   onExpand?: () => void;
   renderExpandedContent: (expanded: boolean) => React.ReactNode;
 };
-
-interface State {
-  expanded: boolean;
-}
 
 /**
  * An accordion that doesn't render it's content unless it's expanded.
@@ -33,29 +29,36 @@ interface State {
  * TODO: animate the expansion and collapse of content rendered "below"
  * the real `EuiAccordion`.
  */
-export class LazyAccordion extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
-    super(props);
-
-    this.state = {
-      expanded: false,
+export const LazyAccordion = React.memo<Props>(
+  ({
+    buttonContent,
+    buttonContentClassName,
+    extraAction,
+    forceExpand,
+    id,
+    onCollapse,
+    onExpand,
+    paddingSize,
+    renderExpandedContent,
+  }) => {
+    const [expanded, setExpanded] = useState(false);
+    const onCollapsedClick = () => {
+      setExpanded(true);
+      if (onExpand != null) {
+        onExpand();
+      }
     };
-  }
 
-  public render() {
-    const {
-      id,
-      buttonContentClassName,
-      buttonContent,
-      forceExpand,
-      extraAction,
-      renderExpandedContent,
-      paddingSize,
-    } = this.props;
+    const onExpandedClick = () => {
+      setExpanded(false);
+      if (onCollapse != null) {
+        onCollapse();
+      }
+    };
 
     return (
       <>
-        {forceExpand || this.state.expanded ? (
+        {forceExpand || expanded ? (
           <>
             <EuiAccordion
               buttonContent={buttonContent}
@@ -64,12 +67,12 @@ export class LazyAccordion extends React.PureComponent<Props, State> {
               extraAction={extraAction}
               id={id}
               initialIsOpen={true}
-              onClick={this.onExpandedClick}
+              onClick={onExpandedClick}
               paddingSize={paddingSize}
             >
               <></>
             </EuiAccordion>
-            {renderExpandedContent(this.state.expanded)}
+            {renderExpandedContent(expanded)}
           </>
         ) : (
           <EuiAccordion
@@ -78,31 +81,13 @@ export class LazyAccordion extends React.PureComponent<Props, State> {
             data-test-subj="lazy-accordion-placeholder"
             extraAction={extraAction}
             id={id}
-            onClick={this.onCollapsedClick}
+            onClick={onCollapsedClick}
             paddingSize={paddingSize}
           />
         )}
       </>
     );
   }
+);
 
-  private onCollapsedClick = () => {
-    const { onExpand } = this.props;
-
-    this.setState({ expanded: true });
-
-    if (onExpand != null) {
-      onExpand();
-    }
-  };
-
-  private onExpandedClick = () => {
-    const { onCollapse } = this.props;
-
-    this.setState({ expanded: false });
-
-    if (onCollapse != null) {
-      onCollapse();
-    }
-  };
-}
+LazyAccordion.displayName = 'LazyAccordion';

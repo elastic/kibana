@@ -18,13 +18,8 @@ interface SuggestionItemProps {
   suggestion: AutocompleteSuggestion;
 }
 
-export class SuggestionItem extends React.PureComponent<SuggestionItemProps> {
-  public static defaultProps: Partial<SuggestionItemProps> = {
-    isSelected: false,
-  };
-
-  public render() {
-    const { isSelected, onClick, onMouseEnter, suggestion } = this.props;
+export const SuggestionItem = React.memo<SuggestionItemProps>(
+  ({ isSelected = false, onClick, onMouseEnter, suggestion }) => {
     return (
       <SuggestionItemContainer
         isSelected={isSelected}
@@ -40,7 +35,9 @@ export class SuggestionItem extends React.PureComponent<SuggestionItemProps> {
       </SuggestionItemContainer>
     );
   }
-}
+);
+
+SuggestionItem.displayName = 'SuggestionItem';
 
 const SuggestionItemContainer = euiStyled.div<{
   isSelected?: boolean;

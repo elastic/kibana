@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
-import * as React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
 import { Note } from '../../../lib/note';
@@ -65,27 +65,23 @@ interface Props {
   updateNote: UpdateNote;
 }
 
-interface State {
-  newNote: string;
-}
-
 /** A view for entering and reviewing notes */
-export class NoteCards extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
-    super(props);
+export const NoteCards = React.memo<Props>(
+  ({
+    associateNote,
+    getNotesByIds,
+    getNewNoteId,
+    noteIds,
+    showAddNote,
+    toggleShowAddNote,
+    updateNote,
+  }) => {
+    const [newNote, setNewNote] = useState('');
 
-    this.state = { newNote: '' };
-  }
-
-  public render() {
-    const {
-      getNotesByIds,
-      getNewNoteId,
-      noteIds,
-      showAddNote,
-      toggleShowAddNote,
-      updateNote,
-    } = this.props;
+    const associateNoteAndToggleShow = (noteId: string) => {
+      associateNote(noteId);
+      toggleShowAddNote();
+    };
 
     return (
       <NoteCardsComp>
@@ -102,11 +98,11 @@ export class NoteCards extends React.PureComponent<Props, State> {
         {showAddNote ? (
           <AddNoteContainer data-test-subj="add-note-container">
             <AddNote
-              associateNote={this.associateNoteAndToggleShow}
+              associateNote={associateNoteAndToggleShow}
               getNewNoteId={getNewNoteId}
-              newNote={this.state.newNote}
+              newNote={newNote}
               onCancelAddNote={toggleShowAddNote}
-              updateNewNote={this.updateNewNote}
+              updateNewNote={setNewNote}
               updateNote={updateNote}
             />
           </AddNoteContainer>
@@ -114,13 +110,6 @@ export class NoteCards extends React.PureComponent<Props, State> {
       </NoteCardsComp>
     );
   }
+);
 
-  private associateNoteAndToggleShow = (noteId: string) => {
-    this.props.associateNote(noteId);
-    this.props.toggleShowAddNote();
-  };
-
-  private updateNewNote = (newNote: string): void => {
-    this.setState({ newNote });
-  };
-}
+NoteCards.displayName = 'NoteCards';

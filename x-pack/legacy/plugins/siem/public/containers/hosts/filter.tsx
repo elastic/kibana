@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
+import React, { useEffect } from 'react';
 import memoizeOne from 'memoize-one';
-import React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
@@ -61,80 +60,72 @@ interface HostsFilterDispatchProps {
 
 export type HostsFilterProps = OwnProps & HostsFilterReduxProps & HostsFilterDispatchProps;
 
-class HostsFilterComponent extends React.PureComponent<HostsFilterProps> {
-  private memoizedApplyFilterQueryFromKueryExpression: (expression: string) => void;
-  private memoizedSetFilterQueryDraftFromKueryExpression: (expression: string) => void;
-
-  constructor(props: HostsFilterProps) {
-    super(props);
-    this.memoizedApplyFilterQueryFromKueryExpression = memoizeOne(
-      this.applyFilterQueryFromKueryExpression
-    );
-    this.memoizedSetFilterQueryDraftFromKueryExpression = memoizeOne(
-      this.setFilterQueryDraftFromKueryExpression
-    );
-  }
-
-  public componentDidUpdate(prevProps: HostsFilterProps) {
-    const { indexPattern, hostsFilterQueryDraft, kueryFilterQuery, setQuery, type } = this.props;
-    if (
-      setQuery &&
-      (!isEqual(prevProps.hostsFilterQueryDraft, hostsFilterQueryDraft) ||
-        !isEqual(prevProps.kueryFilterQuery, kueryFilterQuery) ||
-        prevProps.type !== type)
-    ) {
-      setQuery({
-        id: 'kql',
-        inspect: null,
-        loading: false,
-        refetch: useUpdateKql({
-          indexPattern,
-          kueryFilterQuery,
-          kueryFilterQueryDraft: hostsFilterQueryDraft,
-          storeType: 'hostsType',
-          type,
-        }),
+const HostsFilterComponent = React.memo<HostsFilterProps>(
+  ({
+    applyHostsFilterQuery,
+    children,
+    hostsFilterQueryDraft,
+    indexPattern,
+    isHostFilterQueryDraftValid,
+    kueryFilterQuery,
+    setHostsFilterQueryDraft,
+    setQuery,
+    type,
+  }) => {
+    const applyFilterQueryFromKueryExpression = (expression: string) =>
+      applyHostsFilterQuery({
+        filterQuery: {
+          kuery: {
+            kind: 'kuery',
+            expression,
+          },
+          serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
+        },
+        hostsType: type,
       });
-    }
-  }
 
-  public render() {
-    const { children, hostsFilterQueryDraft, isHostFilterQueryDraftValid } = this.props;
+    const setFilterQueryDraftFromKueryExpression = (expression: string) =>
+      setHostsFilterQueryDraft({
+        filterQueryDraft: {
+          kind: 'kuery',
+          expression,
+        },
+        hostsType: type,
+      });
+
+    const memoizedApplyFilter = memoizeOne(applyFilterQueryFromKueryExpression);
+    const memoizedSetFilter = memoizeOne(setFilterQueryDraftFromKueryExpression);
+    useEffect(() => {
+      if (setQuery) {
+        setQuery({
+          id: 'kql',
+          inspect: null,
+          loading: false,
+          refetch: useUpdateKql({
+            indexPattern,
+            kueryFilterQuery,
+            kueryFilterQueryDraft: hostsFilterQueryDraft,
+            storeType: 'hostsType',
+            type,
+          }),
+        });
+      }
+    }, [hostsFilterQueryDraft, kueryFilterQuery, type]);
 
     return (
       <>
         {children({
-          applyFilterQueryFromKueryExpression: this.memoizedApplyFilterQueryFromKueryExpression,
+          applyFilterQueryFromKueryExpression: memoizedApplyFilter,
           filterQueryDraft: hostsFilterQueryDraft,
           isFilterQueryDraftValid: isHostFilterQueryDraftValid,
-          setFilterQueryDraftFromKueryExpression: this
-            .memoizedSetFilterQueryDraftFromKueryExpression,
+          setFilterQueryDraftFromKueryExpression: memoizedSetFilter,
         })}
       </>
     );
   }
+);
 
-  private applyFilterQueryFromKueryExpression = (expression: string) =>
-    this.props.applyHostsFilterQuery({
-      filterQuery: {
-        kuery: {
-          kind: 'kuery',
-          expression,
-        },
-        serializedQuery: convertKueryToElasticSearchQuery(expression, this.props.indexPattern),
-      },
-      hostsType: this.props.type,
-    });
-
-  private setFilterQueryDraftFromKueryExpression = (expression: string) =>
-    this.props.setHostsFilterQueryDraft({
-      filterQueryDraft: {
-        kind: 'kuery',
-        expression,
-      },
-      hostsType: this.props.type,
-    });
-}
+HostsFilterComponent.displayName = 'HostsFilterComponent';
 
 const makeMapStateToProps = () => {
   const getHostsFilterQueryDraft = hostsSelectors.hostsFilterQueryDraft();

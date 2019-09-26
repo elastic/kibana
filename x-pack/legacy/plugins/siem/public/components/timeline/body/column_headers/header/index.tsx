@@ -96,9 +96,79 @@ interface Props {
 }
 
 /** Renders a header */
-export class Header extends React.PureComponent<Props> {
-  public render() {
-    const { header } = this.props;
+export const Header = React.memo<Props>(
+  ({
+    header,
+    onColumnRemoved,
+    onColumnResized,
+    onColumnSorted,
+    onFilterChange = noop,
+    setIsResizing,
+    sort,
+  }) => {
+    const onClick = () => {
+      if (header.aggregatable) {
+        onColumnSorted!({
+          columnId: header.id,
+          sortDirection: getNewSortDirectionOnClick({
+            clickedHeader: header,
+            currentSort: sort,
+          }),
+        });
+      }
+    };
+
+    const onResize: OnResize = ({ delta, id }) => {
+      onColumnResized({ columnId: id, delta });
+    };
+
+    const renderActions = (isResizing: boolean) => {
+      setIsResizing(isResizing);
+      return (
+        <HeaderFlexItem grow={false} width={`${header.width - CELL_RESIZE_HANDLE_WIDTH}px`}>
+          <WithHoverActions
+            render={showHoverContent => (
+              <>
+                <HeaderComp isResizing={isResizing} data-test-subj="header" onClick={onClick}>
+                  <EuiToolTip
+                    data-test-subj="header-tooltip"
+                    content={<HeaderToolTipContent header={header} />}
+                  >
+                    <FullHeightFlexGroup
+                      data-test-subj="header-items"
+                      alignItems="center"
+                      gutterSize="none"
+                    >
+                      <EuiFlexItem grow={false}>
+                        <FieldNameContainer>
+                          <TruncatableHeaderText
+                            data-test-subj={`header-text-${header.id}`}
+                            size="xs"
+                            width={`${header.width -
+                              (ACTIONS_WIDTH + CELL_RESIZE_HANDLE_WIDTH + TITLE_PADDING)}px`}
+                          >
+                            {header.id}
+                          </TruncatableHeaderText>
+                        </FieldNameContainer>
+                      </EuiFlexItem>
+                      <FullHeightFlexItem>
+                        <Actions
+                          header={header}
+                          onColumnRemoved={onColumnRemoved}
+                          show={header.id !== '@timestamp' ? showHoverContent : false}
+                          sort={sort}
+                        />
+                      </FullHeightFlexItem>
+                    </FullHeightFlexGroup>
+                  </EuiToolTip>
+                </HeaderComp>
+                <Filter header={header} onFilterChange={onFilterChange} />
+              </>
+            )}
+          />
+        </HeaderFlexItem>
+      );
+    };
 
     return (
       <HeaderContainer
@@ -115,79 +185,12 @@ export class Header extends React.PureComponent<Props> {
           }
           height={`${RESIZE_HANDLE_HEIGHT}px`}
           id={header.id}
-          render={this.renderActions}
-          onResize={this.onResize}
+          render={renderActions}
+          onResize={onResize}
         />
       </HeaderContainer>
     );
   }
+);
 
-  private renderActions = (isResizing: boolean) => {
-    const { header, onColumnRemoved, onFilterChange = noop, setIsResizing, sort } = this.props;
-
-    setIsResizing(isResizing);
-
-    return (
-      <HeaderFlexItem grow={false} width={`${header.width - CELL_RESIZE_HANDLE_WIDTH}px`}>
-        <WithHoverActions
-          render={showHoverContent => (
-            <>
-              <HeaderComp isResizing={isResizing} data-test-subj="header" onClick={this.onClick}>
-                <EuiToolTip
-                  data-test-subj="header-tooltip"
-                  content={<HeaderToolTipContent header={header} />}
-                >
-                  <FullHeightFlexGroup
-                    data-test-subj="header-items"
-                    alignItems="center"
-                    gutterSize="none"
-                  >
-                    <EuiFlexItem grow={false}>
-                      <FieldNameContainer>
-                        <TruncatableHeaderText
-                          data-test-subj={`header-text-${header.id}`}
-                          size="xs"
-                          width={`${header.width -
-                            (ACTIONS_WIDTH + CELL_RESIZE_HANDLE_WIDTH + TITLE_PADDING)}px`}
-                        >
-                          {header.id}
-                        </TruncatableHeaderText>
-                      </FieldNameContainer>
-                    </EuiFlexItem>
-                    <FullHeightFlexItem>
-                      <Actions
-                        header={header}
-                        onColumnRemoved={onColumnRemoved}
-                        show={header.id !== '@timestamp' ? showHoverContent : false}
-                        sort={sort}
-                      />
-                    </FullHeightFlexItem>
-                  </FullHeightFlexGroup>
-                </EuiToolTip>
-              </HeaderComp>
-              <Filter header={header} onFilterChange={onFilterChange} />
-            </>
-          )}
-        />
-      </HeaderFlexItem>
-    );
-  };
-
-  private onClick = () => {
-    const { header, onColumnSorted, sort } = this.props;
-
-    if (header.aggregatable) {
-      onColumnSorted!({
-        columnId: header.id,
-        sortDirection: getNewSortDirectionOnClick({
-          clickedHeader: header,
-          currentSort: sort,
-        }),
-      });
-    }
-  };
-
-  private onResize: OnResize = ({ delta, id }) => {
-    this.props.onColumnResized({ columnId: id, delta });
-  };
-}
+Header.displayName = 'Header';

@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
-import * as React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import uuid from 'uuid';
 
 import VisibilitySensor from 'react-visibility-sensor';
@@ -34,24 +34,18 @@ interface Props {
   columnRenderers: ColumnRenderer[];
   event: TimelineItem;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
-  isEventViewer?: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
+  isEventViewer?: boolean;
+  maxDelay?: number;
   onColumnResized: OnColumnResized;
   onPinEvent: OnPinEvent;
-  onUpdateColumns: OnUpdateColumns;
   onUnPinEvent: OnUnPinEvent;
+  onUpdateColumns: OnUpdateColumns;
   pinnedEventIds: Readonly<Record<string, boolean>>;
   rowRenderers: RowRenderer[];
   timelineId: string;
   toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
-  maxDelay?: number;
-}
-
-interface State {
-  expanded: { [eventId: string]: boolean };
-  showNotes: { [eventId: string]: boolean };
-  initialRender: boolean;
 }
 
 export const getNewNoteId = (): string => uuid.v4();
@@ -106,66 +100,83 @@ export const EmptyRow = styled.div`
   margin: 5px 0 5px 0;
 `;
 
-export class StatefulEvent extends React.Component<Props, State> {
-  private _isMounted: boolean = false;
+export const StatefulEvent = React.memo<Props>(
+  ({
+    actionsColumnWidth,
+    addNoteToEvent,
+    browserFields,
+    columnHeaders,
+    columnRenderers,
+    event,
+    eventIdToNoteIds,
+    getNotesByIds,
+    isEventViewer = false,
+    maxDelay = 0,
+    onColumnResized,
+    onPinEvent,
+    onUnPinEvent,
+    onUpdateColumns,
+    pinnedEventIds,
+    rowRenderers,
+    timelineId,
+    toggleColumn,
+    updateNote,
+  }) => {
+    const [expanded, setExpanded] = useState<{ [eventId: string]: boolean }>({});
+    const [initialRender, setInitialRender] = useState(false);
+    const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
 
-  public readonly state: State = {
-    expanded: {},
-    showNotes: {},
-    initialRender: false,
-  };
+    const divElement = useRef<HTMLDivElement | null>(null);
 
-  public divElement: HTMLDivElement | null = null;
+    const onToggleShowNotes = (eventId: string): (() => void) => () => {
+      setShowNotes({ ...showNotes, [eventId]: !showNotes[eventId] });
+    };
 
-  /**
-   * Incrementally loads the events when it mounts by trying to
-   * see if it resides within a window frame and if it is it will
-   * indicate to React that it should render its self by setting
-   * its initialRender to true.
-   */
-  public componentDidMount() {
-    this._isMounted = true;
+    const onToggleExpanded = (eventId: string): (() => void) => () => {
+      setExpanded({
+        ...expanded,
+        [eventId]: !expanded[eventId],
+      });
+    };
 
-    requestIdleCallbackViaScheduler(
-      () => {
-        if (!this.state.initialRender && this._isMounted) {
-          this.setState({ initialRender: true });
-        }
-      },
-      { timeout: this.props.maxDelay ? this.props.maxDelay : 0 }
-    );
-  }
+    const associateNote = (
+      eventId: string,
+      addNoteToEventChild: AddNoteToEvent,
+      onPinEventChild: OnPinEvent
+    ): ((noteId: string) => void) => (noteId: string) => {
+      addNoteToEventChild({ eventId, noteId });
+      if (!eventIsPinned({ eventId, pinnedEventIds })) {
+        onPinEventChild(eventId); // pin the event, because it has notes
+      }
+    };
 
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
+    /**
+     * Incrementally loads the events when it mounts by trying to
+     * see if it resides within a window frame and if it is it will
+     * indicate to React that it should render its self by setting
+     * its initialRender to true.
+     */
 
-  public render() {
-    const {
-      actionsColumnWidth,
-      addNoteToEvent,
-      browserFields,
-      columnHeaders,
-      columnRenderers,
-      event,
-      eventIdToNoteIds,
-      getNotesByIds,
-      isEventViewer = false,
-      onColumnResized,
-      onPinEvent,
-      onUpdateColumns,
-      onUnPinEvent,
-      pinnedEventIds,
-      rowRenderers,
-      timelineId,
-      toggleColumn,
-      updateNote,
-    } = this.props;
+    useEffect(() => {
+      let _isMounted = true;
+
+      requestIdleCallbackViaScheduler(
+        () => {
+          if (!initialRender && _isMounted) {
+            setInitialRender(true);
+          }
+        },
+        { timeout: maxDelay }
+      );
+      return () => {
+        _isMounted = false;
+      };
+    }, []);
 
     // If we are not ready to render yet, just return null
-    // see componentDidMount() for when it schedules the first
+    // see useEffect() for when it schedules the first
     // time this stateful component should be rendered.
-    if (!this.state.initialRender) {
+    if (!initialRender) {
       // height is being inlined directly in here because of performance with StyledComponents
       // involving quick and constant changes to the DOM.
       // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
@@ -185,15 +196,15 @@ export class StatefulEvent extends React.Component<Props, State> {
                 sourceId="default"
                 indexName={event._index!}
                 eventId={event._id}
-                executeQuery={!!this.state.expanded[event._id]}
+                executeQuery={!!expanded[event._id]}
               >
                 {({ detailsData, loading }) => (
                   <div
                     className={STATEFUL_EVENT_CSS_CLASS_NAME}
                     data-test-subj="event"
-                    ref={divElement => {
-                      if (divElement != null) {
-                        this.divElement = divElement;
+                    ref={newDivElement => {
+                      if (newDivElement != null) {
+                        divElement.current = newDivElement;
                       }
                     }}
                   >
@@ -202,26 +213,26 @@ export class StatefulEvent extends React.Component<Props, State> {
                       data: event.ecs,
                       children: (
                         <StatefulEventChild
-                          id={event._id}
                           actionsColumnWidth={actionsColumnWidth}
-                          associateNote={this.associateNote}
                           addNoteToEvent={addNoteToEvent}
-                          onPinEvent={onPinEvent}
+                          associateNote={associateNote}
                           columnHeaders={columnHeaders}
                           columnRenderers={columnRenderers}
-                          expanded={!!this.state.expanded[event._id]}
                           data={event.data}
                           eventIdToNoteIds={eventIdToNoteIds}
+                          expanded={!!expanded[event._id]}
                           getNotesByIds={getNotesByIds}
+                          id={event._id}
                           isEventViewer={isEventViewer}
                           loading={loading}
                           onColumnResized={onColumnResized}
-                          onToggleExpanded={this.onToggleExpanded}
+                          onPinEvent={onPinEvent}
+                          onToggleExpanded={onToggleExpanded}
+                          onToggleShowNotes={onToggleShowNotes}
                           onUnPinEvent={onUnPinEvent}
                           pinnedEventIds={pinnedEventIds}
-                          showNotes={!!this.state.showNotes[event._id]}
+                          showNotes={!!showNotes[event._id]}
                           timelineId={timelineId}
-                          onToggleShowNotes={this.onToggleShowNotes}
                           updateNote={updateNote}
                         />
                       ),
@@ -231,9 +242,9 @@ export class StatefulEvent extends React.Component<Props, State> {
                       <ExpandableEvent
                         browserFields={browserFields}
                         columnHeaders={columnHeaders}
-                        id={event._id}
                         event={detailsData || emptyDetails}
-                        forceExpand={!!this.state.expanded[event._id] && !loading}
+                        forceExpand={!!expanded[event._id] && !loading}
+                        id={event._id}
                         onUpdateColumns={onUpdateColumns}
                         timelineId={timelineId}
                         toggleColumn={toggleColumn}
@@ -246,8 +257,8 @@ export class StatefulEvent extends React.Component<Props, State> {
           } else {
             // Height place holder for visibility detection as well as re-rendering sections.
             const height =
-              this.divElement != null
-                ? `${this.divElement.clientHeight - EMPTY_ROW_MARGIN_TOP_BOTTOM}px`
+              divElement.current != null
+                ? `${divElement.current.clientHeight - EMPTY_ROW_MARGIN_TOP_BOTTOM}px`
                 : DEFAULT_ROW_HEIGHT;
 
             // height is being inlined directly in here because of performance with StyledComponents
@@ -259,33 +270,6 @@ export class StatefulEvent extends React.Component<Props, State> {
       </VisibilitySensor>
     );
   }
+);
 
-  private onToggleShowNotes = (eventId: string): (() => void) => () => {
-    this.setState(state => ({
-      showNotes: {
-        ...state.showNotes,
-        [eventId]: !state.showNotes[eventId],
-      },
-    }));
-  };
-
-  private onToggleExpanded = (eventId: string): (() => void) => () => {
-    this.setState(state => ({
-      expanded: {
-        ...state.expanded,
-        [eventId]: !state.expanded[eventId],
-      },
-    }));
-  };
-
-  private associateNote = (
-    eventId: string,
-    addNoteToEvent: AddNoteToEvent,
-    onPinEvent: OnPinEvent
-  ): ((noteId: string) => void) => (noteId: string) => {
-    addNoteToEvent({ eventId, noteId });
-    if (!eventIsPinned({ eventId, pinnedEventIds: this.props.pinnedEventIds })) {
-      onPinEvent(eventId); // pin the event, because it has notes
-    }
-  };
-}
+StatefulEvent.displayName = 'StatefulEvent';

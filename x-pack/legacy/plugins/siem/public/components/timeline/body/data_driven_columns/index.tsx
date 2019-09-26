@@ -53,9 +53,31 @@ const CellContainer = styled(EuiFlexGroup)<{ width: string }>`
 
 CellContainer.displayName = 'CellContainer';
 
-export class DataDrivenColumns extends React.PureComponent<Props> {
-  public render() {
-    const { columnHeaders } = this.props;
+export const DataDrivenColumns = React.memo<Props>(
+  ({ _id, columnHeaders, columnRenderers, data, onColumnResized, timelineId }) => {
+    const renderCell = (header: ColumnHeader, index: number) => () => (
+      <EuiFlexItem grow={false}>
+        <Cell
+          data-test-subj="column-cell"
+          index={index}
+          width={`${header.width - CELL_RESIZE_HANDLE_WIDTH}px`}
+        >
+          {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
+            columnName: header.id,
+            eventId: _id,
+            field: header,
+            timelineId,
+            values: getMappedNonEcsValue({
+              data,
+              fieldName: header.id,
+            }),
+            width: `${header.width - CELL_RESIZE_HANDLE_WIDTH}px`,
+          })}
+        </Cell>
+      </EuiFlexItem>
+    );
+
+    const onResize: OnResize = ({ delta, id }) => onColumnResized({ columnId: id, delta });
 
     return (
       <EuiFlexGroup data-test-subj="data-driven-columns" direction="row" gutterSize="none">
@@ -76,8 +98,8 @@ export class DataDrivenColumns extends React.PureComponent<Props> {
                 height="100%"
                 id={header.id}
                 key={header.id}
-                render={this.renderCell(header, index)}
-                onResize={this.onResize}
+                onResize={onResize}
+                render={renderCell(header, index)}
               />
             </CellContainer>
           </EuiFlexItem>
@@ -85,37 +107,9 @@ export class DataDrivenColumns extends React.PureComponent<Props> {
       </EuiFlexGroup>
     );
   }
+);
 
-  private renderCell = (header: ColumnHeader, index: number) => () => {
-    const { columnRenderers, data, _id, timelineId } = this.props;
-
-    return (
-      <EuiFlexItem grow={false}>
-        <Cell
-          data-test-subj="column-cell"
-          index={index}
-          width={`${header.width - CELL_RESIZE_HANDLE_WIDTH}px`}
-        >
-          {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
-            columnName: header.id,
-            eventId: _id,
-            values: getMappedNonEcsValue({
-              data,
-              fieldName: header.id,
-            }),
-            field: header,
-            width: `${header.width - CELL_RESIZE_HANDLE_WIDTH}px`,
-            timelineId,
-          })}
-        </Cell>
-      </EuiFlexItem>
-    );
-  };
-
-  private onResize: OnResize = ({ delta, id }) => {
-    this.props.onColumnResized({ columnId: id, delta });
-  };
-}
+DataDrivenColumns.displayName = 'DataDrivenColumns';
 
 const getMappedNonEcsValue = ({
   data,
