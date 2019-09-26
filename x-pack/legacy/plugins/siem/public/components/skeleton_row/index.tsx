@@ -5,12 +5,16 @@
  */
 
 import React from 'react';
-import { pure } from 'recompose';
 import styled, { css } from 'styled-components';
+
+interface RowProps {
+  rowHeight?: string;
+  rowPadding?: string;
+}
 
 const Row = styled.div.attrs({
   className: 'siemSkeletonRow',
-})<{ rowHeight?: string; rowPadding?: string }>`
+})<RowProps>`
   ${({ rowHeight, rowPadding, theme }) => css`
     border-bottom: ${theme.eui.euiBorderThin};
     display: flex;
@@ -22,9 +26,14 @@ const Row = styled.div.attrs({
 `;
 Row.displayName = 'Row';
 
+interface CellProps {
+  cellColor?: string;
+  cellMargin?: string;
+}
+
 const Cell = styled.div.attrs({
   className: 'siemSkeletonRow__cell',
-})<{ cellColor?: string; cellMargin?: string }>`
+})<CellProps>`
   ${({ cellColor, cellMargin, theme }) => css`
     background-color: ${cellColor ? cellColor : theme.eui.euiColorLightestShade};
     border-radius: 2px;
@@ -37,16 +46,12 @@ const Cell = styled.div.attrs({
 `;
 Cell.displayName = 'Cell';
 
-export interface SkeletonRowProps {
-  cellColor?: string;
+export interface SkeletonRowProps extends CellProps, RowProps {
   cellCount?: number;
-  cellMargin?: string;
-  rowHeight?: string;
-  rowPadding?: string;
   style?: object;
 }
 
-export const SkeletonRow = pure<SkeletonRowProps>(
+export const SkeletonRow = React.memo<SkeletonRowProps>(
   ({ cellColor, cellCount = 4, cellMargin, rowHeight, rowPadding, style }) => {
     const cells = [...Array(cellCount)].map((_, i) => (
       <Cell cellColor={cellColor} cellMargin={cellMargin} key={i}></Cell>

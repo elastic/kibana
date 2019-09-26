@@ -6,14 +6,17 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { pure } from 'recompose';
 import styled, { css } from 'styled-components';
 
 import { InspectButton } from '../inspect';
 
+interface HeaderProps {
+  border?: boolean;
+}
+
 const Header = styled.header.attrs({
   className: 'siemHeaderPanel',
-})<{ border?: boolean }>`
+})<HeaderProps>`
   ${props => css`
     margin-bottom: ${props.theme.eui.euiSizeL};
     user-select: text;
@@ -28,8 +31,7 @@ const Header = styled.header.attrs({
 
 Header.displayName = 'Header';
 
-export interface HeaderPanelProps {
-  border?: boolean;
+export interface HeaderPanelProps extends HeaderProps {
   children?: React.ReactNode;
   id?: string;
   subtitle?: string | React.ReactNode;
@@ -38,7 +40,7 @@ export interface HeaderPanelProps {
   tooltip?: string;
 }
 
-export const HeaderPanel = pure<HeaderPanelProps>(
+export const HeaderPanel = React.memo<HeaderPanelProps>(
   ({ border, children, id, showInspect = false, subtitle, title, tooltip }) => (
     <Header border={border}>
       <EuiFlexGroup alignItems="center">
