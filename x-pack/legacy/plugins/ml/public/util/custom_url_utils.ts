@@ -11,7 +11,11 @@ import moment from 'moment';
 
 import { parseInterval } from '../../common/util/parse_interval';
 import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils';
-import { UrlConfig, KibanaUrlConfig, AnomalyRecordSource } from '../../common/types/custom_urls';
+import {
+  UrlConfig,
+  KibanaUrlConfig,
+  CustomUrlAnomalyRecordDoc,
+} from '../../common/types/custom_urls';
 import { AnomalyRecordDoc } from '../../common/types/anomalies';
 
 // Value of custom_url time_range property indicating drilldown time range is calculated automatically
@@ -31,7 +35,7 @@ export function replaceTokensInUrlValue(
   const timestamp = doc[timeFieldName];
   const timeRangeInterval =
     'time_range' in customUrlConfig ? parseInterval(customUrlConfig.time_range) : null;
-  const record = { ...doc } as AnomalyRecordSource;
+  const record = { ...doc } as CustomUrlAnomalyRecordDoc;
   if (urlValue.includes('$earliest$')) {
     const earliestMoment = moment(timestamp);
     if (timeRangeInterval !== null) {
@@ -59,7 +63,7 @@ export function replaceTokensInUrlValue(
 // substituted from the supplied anomaly record.
 export function getUrlForRecord(
   urlConfig: UrlConfig | KibanaUrlConfig,
-  record: AnomalyRecordSource
+  record: CustomUrlAnomalyRecordDoc
 ) {
   if (isKibanaUrl(urlConfig) === true) {
     return buildKibanaUrl(urlConfig, record);
@@ -105,7 +109,7 @@ function escapeForKQL(value: string): string {
 
 // Builds a Kibana dashboard or Discover URL from the supplied config, with any
 // dollar delimited tokens substituted from the supplied anomaly record.
-function buildKibanaUrl(urlConfig: UrlConfig, record: AnomalyRecordSource) {
+function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc) {
   const urlValue = urlConfig.url_value;
   const URL_LENGTH_LIMIT = 2000;
 

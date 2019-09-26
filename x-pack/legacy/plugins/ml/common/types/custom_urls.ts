@@ -15,7 +15,7 @@ export interface KibanaUrlConfig extends UrlConfig {
   time_range: string;
 }
 
-export interface AnomalyRecordSource extends AnomalyRecordDoc {
+export interface CustomUrlAnomalyRecordDoc extends AnomalyRecordDoc {
   earliest: string;
   latest: string;
 }

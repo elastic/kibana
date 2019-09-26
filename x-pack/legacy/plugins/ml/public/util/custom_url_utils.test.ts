@@ -11,7 +11,11 @@ import {
   isValidTimeRange,
 } from './custom_url_utils';
 import { AnomalyRecordDoc } from '../../common/types/anomalies';
-import { AnomalyRecordSource, KibanaUrlConfig, UrlConfig } from '../../common/types/custom_urls';
+import {
+  CustomUrlAnomalyRecordDoc,
+  KibanaUrlConfig,
+  UrlConfig,
+} from '../../common/types/custom_urls';
 
 describe('ML - custom URL utils', () => {
   const TEST_DOC: AnomalyRecordDoc = {
@@ -40,7 +44,7 @@ describe('ML - custom URL utils', () => {
     airline: ['AAL'],
   };
 
-  const TEST_RECORD: AnomalyRecordSource = {
+  const TEST_RECORD: CustomUrlAnomalyRecordDoc = {
     ...TEST_DOC,
     earliest: '2017-02-09T15:10:00.000Z',
     latest: '2017-02-09T17:15:00.000Z',
@@ -60,7 +64,7 @@ describe('ML - custom URL utils', () => {
     airline: ['<>:;[}")'],
   };
 
-  const TEST_RECORD_MULTIPLE_INFLUENCER_VALUES: AnomalyRecordSource = {
+  const TEST_RECORD_MULTIPLE_INFLUENCER_VALUES: CustomUrlAnomalyRecordDoc = {
     ...TEST_RECORD,
     influencers: [
       {
@@ -71,7 +75,7 @@ describe('ML - custom URL utils', () => {
     airline: ['AAL', 'AWE'],
   };
 
-  const TEST_RECORD_NO_INFLUENCER_VALUES: AnomalyRecordSource = {
+  const TEST_RECORD_NO_INFLUENCER_VALUES: CustomUrlAnomalyRecordDoc = {
     ...TEST_RECORD,
     influencers: [
       {

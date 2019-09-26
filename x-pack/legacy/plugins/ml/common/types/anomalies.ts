@@ -25,7 +25,7 @@ export interface AnomalyRecordDoc {
   function: string;
   function_description: string;
   typical?: number[];
-  actual: number[];
+  actual?: number[];
   influencers?: Influencer[];
   by_field_name?: string;
   field_name?: string;
