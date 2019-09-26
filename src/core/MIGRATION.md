@@ -28,6 +28,7 @@
 * [How to](#how-to)
   * [Configure plugin](#configure-plugin)
   * [Mock new platform services in tests](#mock-new-platform-services-in-tests)
+  * [Provide Legacy Platform API to the New platform plugin](#provide-legacy-platform-api-to-the-new-platform-plugin)
 
 Make no mistake, it is going to take a lot of work to move certain plugins to the new platform. Our target is to migrate the entire repo over to the new platform throughout 7.x and to remove the legacy plugin system no later than 8.0, and this is only possible if teams start on the effort now.
 
@@ -1196,3 +1197,47 @@ While our plan is to only provide first-class mocks for Jest tests, there are ma
 For these tests, we are maintaining a separate set of mocks. Files with a `.karma_mock.{js|ts|tsx}` extension will be loaded _globally_ before karma tests are run.
 
 It is important to note that this behavior is different from `jest.mock('ui/new_platform')`, which only mocks tests on an individual basis. If you encounter any failures in karma tests as a result of new platform migration efforts, you may need to add a `.karma_mock.js` file for the affected services, or add to the existing karma mock we are maintaining in `ui/new_platform`.
+
+### Provide Legacy Platform API to the New platform plugin
+During migration, you can face a problem that not all API is available in the New platform yet. You can work around this by extending your
+new platform plugin with Legacy API:
+- create New platform plugin
+- New platform plugin should expose a method `registerLegacyAPI` that allows passing API from the Legacy platform and store it in the NP plugin instance
+```js
+class MyPlugin {
+  public async setup(core){
+    return {
+      registerLegacyAPI: (legacyAPI) => (this.legacyAPI = legacyAPI)
+    }
+  }
+}
+```
+- The legacy plugin provides API calling `registerLegacyAPI`
+```js
+new kibana.Plugin({
+  init(server){
+    const myPlugin = server.newPlatform.setup.plugins.myPlugin;
+    if (!myPlugin) {
+      throw new Error('myPlugin plugin is not available.');
+    }
+    myPlugin.registerLegacyAPI({ ... });
+  }
+})
+```
+- The new platform plugin access stored Legacy platform API via `getLegacyAPI` getter. Getter function must have name indicating that’s API provided from the Legacy platform.
+```js
+class MyPlugin {
+  private getLegacyAPI(){
+    return this.legacyAPI;
+  }
+  public async setup(core){
+    const routeHandler = (context, req, req) => {
+      const legacyApi = this.getLegacyAPI();
+      // ...
+    }
+    return {
+      registerLegacyAPI: (legacyAPI) => (this.legacyAPI = legacyAPI)
+    }
+  }
+}
+```
