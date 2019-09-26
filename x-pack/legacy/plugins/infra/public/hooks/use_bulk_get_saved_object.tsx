@@ -21,11 +21,12 @@ export const useBulkGetSavedObject = (type: string) => {
       const fetchData = async () => {
         try {
           const d = await npStart.core.savedObjects.client.bulkGet(ids.map(i => ({ type, id: i })));
+          setError(null);
           setLoading(false);
           setData(d);
         } catch (e) {
           setLoading(false);
-          setError('FAILED_GETTING_SAVED_OBJECTS');
+          setError(e);
         }
       };
       fetchData();

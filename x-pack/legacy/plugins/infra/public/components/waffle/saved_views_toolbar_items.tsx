@@ -6,7 +6,9 @@
 
 import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import React, { useCallback, useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { toastNotifications } from 'ui/notify';
 import { SavedViewListFlyout } from './saved_view_list_flyout';
 import { SavedViewCreateModal } from './saved_view_create_modal';
 import { WaffleViewState } from '../../containers/waffle/with_waffle_view_state';
@@ -18,10 +20,16 @@ interface Props {
 }
 
 export const SavedViewsToolbarControls = (props: Props) => {
-  const { views, saveView, loading, deletedId, deleteView, find } = useSavedView(
-    props.defaultViewState,
-    'INVENTORY_VIEW'
-  );
+  const {
+    views,
+    saveView,
+    loading,
+    deletedId,
+    deleteView,
+    find,
+    findError,
+    createError,
+  } = useSavedView(props.defaultViewState, 'INVENTORY_VIEW');
   const [modalOpen, setModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const openSaveModal = useCallback(() => setCreateModalOpen(true), []);
@@ -48,6 +56,14 @@ export const SavedViewsToolbarControls = (props: Props) => {
       find();
     }
   }, [deletedId]);
+
+  useEffect(() => {
+    if (createError) {
+      toastNotifications.addWarning(getErrorToast('create'));
+    } else if (findError) {
+      toastNotifications.addWarning(getErrorToast('find'));
+    }
+  }, [createError, findError]);
 
   return (
     <>
@@ -78,4 +94,20 @@ export const SavedViewsToolbarControls = (props: Props) => {
       )}
     </>
   );
+};
+
+const getErrorToast = (type: 'create' | 'find') => {
+  if (type === 'create') {
+    return {
+      title: i18n.translate('xpack.infra.savedView.error.title', {
+        defaultMessage: `An error occured saving view.`,
+      }),
+    };
+  } else if (type === 'find') {
+    return {
+      title: i18n.translate('xpack.infra.savedView.error.title', {
+        defaultMessage: `An error occurred while loading views.`,
+      }),
+    };
+  }
 };

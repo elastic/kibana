@@ -21,11 +21,12 @@ export const useCreateSavedObject = (type: string) => {
       const save = async () => {
         try {
           const d = await npStart.core.savedObjects.client.create(type, attributes, options);
+          setError(null);
           setData(d);
           setLoading(false);
         } catch (e) {
           setLoading(false);
-          setError('FAILED_GETTING_SAVED_OBJECTS');
+          setError(e);
         }
       };
       save();

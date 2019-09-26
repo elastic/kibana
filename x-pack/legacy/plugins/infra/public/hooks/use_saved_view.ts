@@ -27,8 +27,10 @@ export interface SavedViewSavedObject extends SavedObjectAttributes {
 }
 
 export const useSavedView = <ViewState>(defaultViewState: ViewState, viewType: string) => {
-  const { data, loading, find, error } = useFindSavedObject<SavedViewSavedObject>('config');
-  const { create } = useCreateSavedObject('config');
+  const { data, loading, find, error: findError } = useFindSavedObject<SavedViewSavedObject>(
+    'config'
+  );
+  const { create, error: createError } = useCreateSavedObject('config');
   const { deleteObject, deletedId } = useDeleteSavedObject('config');
   const deleteView = useCallback((id: string) => deleteObject(id), []);
   const saveView = useCallback(
@@ -69,7 +71,8 @@ export const useSavedView = <ViewState>(defaultViewState: ViewState, viewType: s
     saveView,
     loading,
     deletedId,
-    error,
+    findError,
+    createError,
     deleteView,
     find,
   };
