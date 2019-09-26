@@ -618,6 +618,14 @@
         ],
       },
       {
+        groupSlug: 'fancy-log',
+        groupName: 'fancy-log related packages',
+        packageNames: [
+          'fancy-log',
+          '@types/fancy-log',
+        ],
+      },
+      {
         groupSlug: 'file-saver',
         groupName: 'file-saver related packages',
         packageNames: [
