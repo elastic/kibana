@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { VERSION } from './pkg';
+import { PKG_VERSION } from './pkg';
 import { FLAGS } from './flags';
 
 const snapshotText = FLAGS.release ? '' : '-SNAPSHOT';
-const qualifierText = FLAGS['build-qualifier'] ? '-' + FLAGS['build-qualifier'] : '';
-export const BUILD_VERSION = `${VERSION}${qualifierText}${snapshotText}`;
+const qualifierText = FLAGS.buildQualifier ? '-' + FLAGS.buildQualifier : '';
+export const BUILD_VERSION = `${PKG_VERSION}${qualifierText}${snapshotText}`;
