@@ -91,6 +91,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
           .build();
       case 'firefox':
         const firefoxOptions = new firefox.Options();
+        firefoxOptions.setPreference('devtools.console.stdout.content', true);
         if (headlessBrowser === '1') {
           // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
           firefoxOptions.addArguments('-headless');
@@ -98,7 +99,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
         return new Builder()
           .forBrowser(browserType)
           .setFirefoxOptions(firefoxOptions)
-          .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path).enableVerboseLogging())
+          .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path).setStdio('inherit'))
           .build();
       default:
         throw new Error(`${browserType} is not supported yet`);
