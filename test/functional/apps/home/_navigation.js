@@ -34,13 +34,13 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('makelogs');
-      if (browser.browserType === 'ie') {
+      if (browser.isInternetExplorer) {
         await kibanaServer.uiSettings.replace({ 'state:storeInSessionStorage': false });
       }
     });
 
     after(async () => {
-      if (browser.browserType === 'ie') {
+      if (browser.isInternetExplorer) {
         await kibanaServer.uiSettings.replace({ 'state:storeInSessionStorage': true });
       }
     });
