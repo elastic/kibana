@@ -5,7 +5,7 @@
  */
 
 import React, { FC, Fragment, useEffect, useState } from 'react';
-import { Subscription } from 'rxjs';
+import { merge } from 'rxjs';
 
 // @ts-ignore
 import { decorateQuery, luceneStringToDsl } from '@kbn/es-query';
@@ -168,12 +168,12 @@ export const Page: FC = () => {
   const [nonMetricFieldQuery, setNonMetricFieldQuery] = useState(defaults.nonMetricFieldQuery);
 
   useEffect(() => {
-    const subscriptions = new Subscription();
-    subscriptions.add(timefilter.getTimeUpdate$().subscribe(() => loadOverallStats()));
-    subscriptions.add(mlTimefilterRefresh$.subscribe(() => loadOverallStats()));
-
-    return function cleanup() {
-      subscriptions.unsubscribe();
+    const timeUpdateSubscription = merge(
+      timefilter.getTimeUpdate$(),
+      mlTimefilterRefresh$
+    ).subscribe(loadOverallStats);
+    return () => {
+      timeUpdateSubscription.unsubscribe();
     };
   });
 
