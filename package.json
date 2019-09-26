@@ -167,7 +167,7 @@
     "globby": "^8.0.1",
     "good-squeeze": "2.1.0",
     "h2o2": "^8.1.2",
-    "handlebars": "4.1.2",
+    "handlebars": "4.3.0",
     "hapi": "^17.5.3",
     "hapi-auth-cookie": "^9.0.0",
     "history": "^4.9.0",
