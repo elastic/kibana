@@ -26,23 +26,13 @@ const DEFAULT_CONFIG = {
 // This is meant to be only updated from the config$ Observable's subscription
 // (see the Plugin class constructor in server/plugin.ts) but this is not enforced.
 
-class IntegrationsManagerConfigStore {
-  private config: IntegrationsManagerConfigSchema;
+let _config: IntegrationsManagerConfigSchema = DEFAULT_CONFIG;
 
-  constructor() {
-    this.config = DEFAULT_CONFIG;
-  }
-
+export const integrationsManagerConfigStore = {
   updateConfig(newConfig: IntegrationsManagerConfigSchema) {
-    this.config = {
-      enabled: newConfig.enabled ? newConfig.enabled : DEFAULT_CONFIG.enabled,
-      registryUrl: newConfig.registryUrl ? newConfig.registryUrl : DEFAULT_CONFIG.registryUrl,
-    };
-  }
-
+    _config = Object.assign({}, _config, newConfig);
+  },
   getConfig() {
-    return this.config;
-  }
-}
-
-export const integrationsManagerConfigStore = new IntegrationsManagerConfigStore();
+    return _config;
+  },
+};
