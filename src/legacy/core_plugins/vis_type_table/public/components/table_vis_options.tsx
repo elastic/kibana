@@ -81,7 +81,7 @@ function TableOptions({
       <EuiSpacer size="s" />
       <NumberInputOption
         label={i18n.translate('visTypeTable.params.perPageLabel', {
-          defaultMessage: 'Per page',
+          defaultMessage: 'Rows per page',
         })}
         paramName="perPage"
         value={stateParams.perPage}

@@ -2830,7 +2830,6 @@
     "visTypeTable.directives.tableCellFilter.filterForValueTooltip": "筛留值",
     "visTypeTable.directives.tableCellFilter.filterOutValueTooltip": "筛除值",
     "visTypeTable.function.help": "表可视化",
-    "visTypeTable.params.perPageLabel": "每页",
     "visTypeTable.params.showMetricsLabel": "显示每个桶/级别的指标",
     "visTypeTable.params.showPartialRowsLabel": "显示部分行",
     "visTypeTable.params.showPartialRowsTip": "显示具有部分数据的行。这仍将计算每个桶/级别的指标，即使它们未显示。",

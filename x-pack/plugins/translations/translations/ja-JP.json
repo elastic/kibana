@@ -2829,7 +2829,6 @@
     "visTypeTable.directives.tableCellFilter.filterForValueTooltip": "値でフィルタリング",
     "visTypeTable.directives.tableCellFilter.filterOutValueTooltip": "値を除外",
     "visTypeTable.function.help": "表ビジュアライゼーション",
-    "visTypeTable.params.perPageLabel": "1 ページあたり",
     "visTypeTable.params.showMetricsLabel": "すべてのバケット/レベルのメトリックを表示",
     "visTypeTable.params.showPartialRowsLabel": "部分的な行を表示",
     "visTypeTable.params.showPartialRowsTip": "部分データのある行を表示。表示されていなくてもすべてのバケット/レベルのメトリックが計算されます。",
