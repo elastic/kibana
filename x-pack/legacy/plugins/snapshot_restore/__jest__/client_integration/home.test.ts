@@ -78,13 +78,14 @@ describe.skip('<SnapshotRestoreHome />', () => {
         });
       });
 
-      test('should have 3 tabs', () => {
+      test('should have 4 tabs', () => {
         const { find } = testBed;
 
         // expect(find('tab').length).toBe(4);
         expect(find('tab').map(t => t.text())).toEqual([
           'Snapshots',
           'Repositories',
+          'Policies',
           'Restore Status',
         ]);
       });

@@ -6,3 +6,4 @@
 
 export * from './repository';
 export * from './snapshot';
+export * from './policy';

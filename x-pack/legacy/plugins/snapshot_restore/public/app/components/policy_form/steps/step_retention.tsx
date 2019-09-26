@@ -56,6 +56,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
     minCount: false,
     maxCount: false,
   });
+
   const renderExpireAfterField = () => (
     <EuiDescribedFormGroup
       title={
@@ -129,7 +130,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
           <h3>
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepRetention.countDescriptionTitle"
-              defaultMessage="Count"
+              defaultMessage="Snapshots to retain"
             />
           </h3>
         </EuiTitle>
@@ -149,7 +150,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
             label={
               <FormattedMessage
                 id="xpack.snapshotRestore.policyForm.stepRetention.minCountLabel"
-                defaultMessage="Mininum"
+                defaultMessage="Mininum count"
               />
             }
             describedByIds={['countDescription']}
@@ -176,7 +177,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
             label={
               <FormattedMessage
                 id="xpack.snapshotRestore.policyForm.stepRetention.maxCountLabel"
-                defaultMessage="Maximum"
+                defaultMessage="Maximum count"
               />
             }
             describedByIds={['countDescription']}

@@ -175,6 +175,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
                     onClick={() => onNext()}
                     iconSide="right"
                     disabled={!validation.isValid}
+                    data-test-subj="nextButton"
                   >
                     <FormattedMessage
                       id="xpack.snapshotRestore.policyForm.nextButtonLabel"
@@ -191,6 +192,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
                     iconType="check"
                     onClick={() => savePolicy()}
                     isLoading={isSaving}
+                    data-test-subj="submitButton"
                   >
                     {isSaving ? (
                       <FormattedMessage

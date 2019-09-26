@@ -109,6 +109,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
               />
             }
             checked={isAllIndices}
+            data-test-subj="allIndicesToggle"
             onChange={e => {
               const isChecked = e.target.checked;
               setIsAllIndices(isChecked);
@@ -162,6 +163,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiLink
+                          data-test-subj="selectIndicesLink"
                           onClick={() => {
                             setSelectIndicesMode('list');
                             updatePolicyConfig({ indices: indicesSelection });
@@ -186,6 +188,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
                         selectOrDeselectAllLink:
                           config.indices && config.indices.length > 0 ? (
                             <EuiLink
+                              data-test-subj="deselectIndicesLink"
                               onClick={() => {
                                 // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
                                 indicesOptions.forEach((option: Option) => {
@@ -313,6 +316,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
         fullWidth
       >
         <EuiSwitch
+          data-test-subj="ignoreUnavailableIndicesToggle"
           label={
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepSettings.ignoreUnavailableLabel"
@@ -353,6 +357,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
     >
       <EuiFormRow hasEmptyLabelSpace describedByIds={['policyPartialDescription']} fullWidth>
         <EuiSwitch
+          data-test-subj="partialIndicesToggle"
           label={
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepSettings.partialLabel"
@@ -397,6 +402,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
         fullWidth
       >
         <EuiSwitch
+          data-test-subj="globalStateToggle"
           label={
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepSettings.policyIncludeGlobalStateLabel"
