@@ -15,14 +15,9 @@ import * as _ from 'lodash';
  * to it, which url.parse doesn't catch all variants of
  */
 const isBogusUrl = (url: string) => {
-  const cleansed = _.trim(url);
-  const { host, protocol, port } = parse(cleansed, false, true);
+  const { host, protocol, port } = parse(url, false, true);
 
-  if (cleansed.indexOf('//') === 0) {
-    return true;
-  }
-
-  return host || protocol || port;
+  return host !== null || protocol !== null || port !== null;
 };
 
 export const validateUrls = (urls: string[]): void => {
