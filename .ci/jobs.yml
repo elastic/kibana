@@ -8,7 +8,7 @@ JOB:
   #- kibana-ciGroup5
   #- kibana-ciGroup6
   # - kibana-visualRegression
-
+  #trials to get this test working.
   # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
   #- x-pack-ciGroup1
   - x-pack-ciGroup2-1
