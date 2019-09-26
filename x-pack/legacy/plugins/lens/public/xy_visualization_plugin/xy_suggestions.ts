@@ -120,13 +120,13 @@ function getBucketMappings(table: TableSuggestion, currentState?: State) {
   const currentXColumnIndex = prioritizedBuckets.findIndex(
     ({ columnId }) => columnId === currentLayer.xAccessor
   );
+  const currentXDataType =
+    currentXColumnIndex > -1 && prioritizedBuckets[currentXColumnIndex].operation.dataType;
+
   if (
-    currentXColumnIndex > -1 &&
+    currentXDataType &&
     // make sure time gets mapped to x dimension even when changing current bucket/dimension mapping
-    !(
-      prioritizedBuckets[currentXColumnIndex].operation.dataType !== 'date' &&
-      prioritizedBuckets[0].operation.dataType === 'date'
-    )
+    (currentXDataType === 'date' || prioritizedBuckets[0].operation.dataType !== 'date')
   ) {
     const [x] = prioritizedBuckets.splice(currentXColumnIndex, 1);
     prioritizedBuckets.unshift(x);
