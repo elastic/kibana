@@ -19,14 +19,7 @@
 
 import chrome from 'ui/chrome';
 import { Plugin } from 'kibana/public';
-// @ts-ignore
-import { visFactory } from 'ui/vis/vis_factory';
 import { initTimelionLegacyModule } from './timelion_legacy_module';
-
-/** @internal */
-export interface LegacyDependenciesPluginSetup {
-  createBaseVisualization: Function;
-}
 
 /** @internal */
 export interface LegacyDependenciesPluginStart {
@@ -35,14 +28,9 @@ export interface LegacyDependenciesPluginStart {
 }
 
 export class LegacyDependenciesPlugin
-  implements
-    Plugin<Promise<LegacyDependenciesPluginSetup>, Promise<LegacyDependenciesPluginStart>> {
-  public async setup() {
+  implements Plugin<void, Promise<LegacyDependenciesPluginStart>> {
+  public setup() {
     initTimelionLegacyModule();
-
-    return {
-      createBaseVisualization: visFactory.createBaseVisualization,
-    } as LegacyDependenciesPluginSetup;
   }
 
   public async start() {

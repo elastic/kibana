@@ -30,11 +30,7 @@ import { VisualizationsSetup } from '../../visualizations/public/np_ready';
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisualization } from './vis';
 import { getTimeChart } from './panels/timechart/timechart';
-import {
-  LegacyDependenciesPlugin,
-  LegacyDependenciesPluginSetup,
-  LegacyDependenciesPluginStart,
-} from './shim';
+import { LegacyDependenciesPlugin, LegacyDependenciesPluginStart } from './shim';
 
 /** @internal */
 export interface TimelionPluginSetupDependencies {
@@ -54,14 +50,10 @@ export interface TimelionPluginStartDependencies {
 }
 
 /** @private */
-interface TimelionVisualizationDependencies {
+export interface TimelionVisualizationDependencies {
   uiSettings: UiSettingsClientContract;
   http: HttpSetup;
 }
-
-/** @internal */
-export type TimelionSetupDependencies = TimelionVisualizationDependencies &
-  LegacyDependenciesPluginSetup;
 
 /** @internal */
 export type TimelionStartDependencies = Pick<TimelionVisualizationDependencies, 'uiSettings'> &
@@ -78,12 +70,12 @@ export class TimelionPlugin
   }
 
   public async setup(core: CoreSetup, plugins: TimelionPluginSetupDependencies) {
-    const dependencies: TimelionSetupDependencies = {
+    const dependencies: TimelionVisualizationDependencies = {
       uiSettings: core.uiSettings,
       http: core.http,
-      ...(await plugins.__LEGACY.setup()),
     };
 
+    plugins.__LEGACY.setup();
     plugins.expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
     plugins.visualizations.types.registerVisualization(() =>
       getTimelionVisualization(dependencies)
