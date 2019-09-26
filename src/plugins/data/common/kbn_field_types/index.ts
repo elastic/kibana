@@ -17,9 +17,11 @@
  * under the License.
  */
 
-import { npStart } from 'ui/new_platform';
+export { KbnFieldType } from './kbn_field_type';
 
-const timelionUiEnabled = npStart.core.injectedMetadata.getInjectedVar('timelionUiEnabled');
-if (timelionUiEnabled === false) {
-  npStart.core.chrome.navLinks.update('timelion', { hidden: true });
-}
+export {
+  castEsToKbnFieldTypeName,
+  getKbnFieldType,
+  getKbnTypeNames,
+  getFilterableKbnTypeNames,
+} from './kbn_field_types';

@@ -16,25 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { shallow } from 'enzyme';
+import { FieldNameIcon } from './field_name_icon';
 
-import {
-  FeatureCatalogueRegistryProvider,
-  FeatureCatalogueCategory,
-} from 'ui/registry/feature_catalogue';
+test('FieldNameIcon renders a blackwhite icon for a string', () => {
+  const component = shallow(<FieldNameIcon type="string" label="test" />);
+  expect(component).toMatchSnapshot();
+});
 
-import { i18n } from '@kbn/i18n';
+test('FieldNameIcon renders a colored icon for a number', () => {
+  const component = shallow(<FieldNameIcon type="number" label="test" useColor />);
+  expect(component).toMatchSnapshot();
+});
 
-FeatureCatalogueRegistryProvider.register(() => {
-  return {
-    id: 'timelion',
-    title: 'Timelion',
-    description: i18n.translate('timelion.registerFeatureDescription', {
-      defaultMessage:
-        'Use an expression language to analyze time series data and visualize the results.',
-    }),
-    icon: 'timelionApp',
-    path: '/app/timelion',
-    showOnHomePage: false,
-    category: FeatureCatalogueCategory.DATA,
-  };
+test('FieldNameIcon renders an icon for an unknown type', () => {
+  const component = shallow(<FieldNameIcon type="sdfsdf" label="test" useColor />);
+  expect(component).toMatchSnapshot();
 });
