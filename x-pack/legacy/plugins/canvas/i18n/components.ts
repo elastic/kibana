@@ -214,6 +214,44 @@ export const ComponentStrings = {
         defaultMessage: 'Closes keyboard shortcuts reference',
       }),
   },
+  Toolbar: {
+    getEditorButtonLabel: () =>
+      i18n.translate('xpack.canvas.toolbar.editorButtonLabel', {
+        defaultMessage: 'Expression editor',
+      }),
+    getNextPageAriaLabel: () =>
+      i18n.translate('xpack.canvas.toolbar.nextPageAriaLabel', {
+        defaultMessage: 'Next Page',
+      }),
+    getPageButtonLabel: (pageNum: number, totalPages: number) =>
+      i18n.translate('xpack.canvas.toolbar.pageButtonLabel', {
+        defaultMessage: 'Page {pageNum}{rest}',
+        values: {
+          pageNum,
+          rest: totalPages > 1 ? ` of ${totalPages}` : '',
+        },
+      }),
+    getPreviousPageAriaLabel: () =>
+      i18n.translate('xpack.canvas.toolbar.previousPageAriaLabel', {
+        defaultMessage: 'Previous Page',
+      }),
+    getWorkpadManagerCloseButtonLabel: () =>
+      i18n.translate('xpack.canvas.toolbar.workpadManagerCloseButtonLabel', {
+        defaultMessage: 'Close',
+      }),
+  },
+  ToolbarTray: {
+    getCloseTrayAriaLabel: () =>
+      i18n.translate('xpack.canvas.toolbarTray.closeTrayAriaLabel', {
+        defaultMessage: 'Close tray',
+      }),
+  },
+  WorkpadCreate: {
+    getWorkpadCreateButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadCreate.createButtonLabel', {
+        defaultMessage: 'Create workpad',
+      }),
+  },
   WorkpadHeader: {
     getAddElementButtonLabel: () =>
       i18n.translate('xpack.canvas.workpadHeader.addElementButtonLabel', {
