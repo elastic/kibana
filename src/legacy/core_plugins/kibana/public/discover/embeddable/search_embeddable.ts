@@ -37,13 +37,13 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { TimeRange } from 'src/plugins/data/public';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+import { setup as data } from '../../../../data/public/legacy';
+import { Query, onlyDisabledFiltersChanged, getTime } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
   Embeddable,
   Container,
-} from '../../../../../../plugins/embeddable/public';
-import { setup as data } from '../../../../data/public/legacy';
-import { Query, onlyDisabledFiltersChanged, getTime } from '../../../../data/public';
+} from '../../../../embeddable_api/public/np_ready/public';
 import * as columnActions from '../doc_table/actions/columns';
 import { SavedSearch } from '../types';
 import searchTemplate from './search_template.html';

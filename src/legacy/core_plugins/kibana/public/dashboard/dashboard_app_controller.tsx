@@ -57,12 +57,6 @@ import { capabilities } from 'ui/capabilities';
 import { Subscription } from 'rxjs';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
-import {
-  isErrorEmbeddable,
-  ErrorEmbeddable,
-  ViewMode,
-  openAddPanelFlyout,
-} from '../../../../../../src/plugins/embeddable/public';
 import { data } from '../../../data/public/setup';
 
 import {
@@ -72,6 +66,13 @@ import {
   DashboardContainerInput,
   DashboardPanelState,
 } from '../../../dashboard_embeddable_container/public/np_ready/public';
+import {
+  isErrorEmbeddable,
+  ErrorEmbeddable,
+  ViewMode,
+  openAddPanelFlyout,
+} from '../../../embeddable_api/public/np_ready/public';
+import { start } from '../../../embeddable_api/public/np_ready/public/legacy';
 import { DashboardAppState, NavAction, ConfirmModalFn, SavedDashboardPanel } from './types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
@@ -241,7 +242,7 @@ export class DashboardAppController {
     let outputSubscription: Subscription | undefined;
 
     const dashboardDom = document.getElementById('dashboardViewport');
-    const dashboardFactory = npStart.plugins.embeddable.getEmbeddableFactory(
+    const dashboardFactory = start.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE
     ) as DashboardContainerFactory;
     dashboardFactory
@@ -744,8 +745,8 @@ export class DashboardAppController {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
         openAddPanelFlyout({
           embeddable: dashboardContainer,
-          getAllFactories: npStart.plugins.embeddable.getEmbeddableFactories,
-          getFactory: npStart.plugins.embeddable.getEmbeddableFactory,
+          getAllFactories: start.getEmbeddableFactories,
+          getFactory: start.getEmbeddableFactory,
           notifications: npStart.core.notifications,
           overlays: npStart.core.overlays,
           SavedObjectFinder,
