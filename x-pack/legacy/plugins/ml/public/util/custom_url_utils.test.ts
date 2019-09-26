@@ -156,7 +156,7 @@ describe('ML - custom URL utils', () => {
           'timestamp'
         )
       ).toBe(
-        "kibana#/discover?_g=(time:(from:'2017-02-09T16:05:00.000Z',mode:absolute,to:'2017-02-09T16:20:00.000Z'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:'(airline:\"AAL\" or airline:\"AWE\")'))"
+        "kibana#/discover?_g=(time:(from:'2017-02-09T16:05:00.000Z',mode:absolute,to:'2017-02-09T16:20:00.000Z'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:'(airline:\"AAL\" OR airline:\"AWE\")'))"
       ); // eslint-disable-line max-len
     });
 
@@ -182,6 +182,66 @@ describe('ML - custom URL utils', () => {
     test('replaces tokens as expected for other type URL without tokens', () => {
       expect(replaceTokensInUrlValue(TEST_OTHER_URL_NO_TOKENS, 300, TEST_DOC, 'timestamp')).toBe(
         'https://www.elastic.co/guide/index.html'
+      );
+    });
+
+    test('replaces tokens outside of a query', () => {
+      const TEST_DOC_WITH_METHOD: AnomalyRecordDoc = {
+        ...TEST_DOC,
+        method: 'POST',
+      };
+      const TEST_MULTIPLE_NON_QUERY_TOKENS: UrlConfig = {
+        url_name: 'no_query',
+        url_value: `kibana#/dashboard/b3ad9930-db86-11e9-b5d5-e3a9ca224c61?_g=(filters:!(),time:(from:'2018-12-17T00:00:00.000Z',mode:absolute,to:'2018-12-17T09:00:00.000Z'))&_a=(description:'',filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'7e06e310-dae4-11e9-8260-995f99197467',key:method,negate:!f,params:(query:$method$),type:phrase,value:$method$),query:(match:(method:(query:$method$,type:phrase))))))`,
+      };
+      expect(
+        replaceTokensInUrlValue(
+          TEST_MULTIPLE_NON_QUERY_TOKENS,
+          300,
+          TEST_DOC_WITH_METHOD,
+          'timestamp'
+        )
+      ).toBe(
+        `kibana#/dashboard/b3ad9930-db86-11e9-b5d5-e3a9ca224c61?_g=(filters:!(),time:(from:'2018-12-17T00:00:00.000Z',mode:absolute,to:'2018-12-17T09:00:00.000Z'))&_a=(description:'',filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'7e06e310-dae4-11e9-8260-995f99197467',key:method,negate:!f,params:(query:POST),type:phrase,value:POST),query:(match:(method:(query:POST,type:phrase))))))`
+      );
+    });
+
+    // eslint-disable-next-line ban/ban
+    test('truncates long queries', () => {
+      const TEST_DOC_WITH_METHOD: AnomalyRecordDoc = {
+        ...TEST_DOC,
+        influencers: [
+          {
+            influencer_field_name: 'action',
+            influencer_field_values: ['dashboard-widgets', 'edit', 'delete'],
+          },
+          {
+            influencer_field_name: 'method',
+            influencer_field_values: ['POST'],
+          },
+          {
+            influencer_field_name: 'clientip',
+            influencer_field_values: ['92.20.59.36', '92.20.59.41'],
+          },
+        ],
+        action: ['dashboard-widgets', 'edit', 'delete'],
+        clientip: ['92.20.59.36', '92.20.59.41'],
+        referer: ['http://www.example.com/wp-admin/post.php?post=51&action=edit'],
+        method: 'POST',
+      };
+      const TEST_MULTIPLE_NON_QUERY_TOKENS: UrlConfig = {
+        url_name: 'massive_url',
+        url_value: `kibana#/discover/11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61?_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'7e06e310-dae4-11e9-8260-995f99197467',key:method,negate:!f,params:(query:$method$),type:phrase,value:$method$),query:(match:(method:(query:$method$,type:phrase))))),index:'7e06e310-dae4-11e9-8260-995f99197467',interval:auto,query:(language:kuery,query:'clientip:$clientip$ and action:$action$ and referer:$referer$'),sort:!(!('@timestamp',desc)))`,
+      };
+      expect(
+        replaceTokensInUrlValue(
+          TEST_MULTIPLE_NON_QUERY_TOKENS,
+          300,
+          TEST_DOC_WITH_METHOD,
+          'timestamp'
+        )
+      ).toBe(
+        `kibana#/discover/11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61?_g=(filters:!(),time:(from:'2017-02-09T16:05:00.000Z',mode:absolute,to:'2017-02-09T16:20:00.000Z'))&_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'7e06e310-dae4-11e9-8260-995f99197467',key:method,negate:!f,params:(query:POST),type:phrase,value:POST),query:(match:(method:(query:POST,type:phrase))))),index:'7e06e310-dae4-11e9-8260-995f99197467',interval:auto,query:(language:kuery,query:'(clientip:\"92.20.59.36\" OR clientip:\"92.20.59.41\") AND (action:\"dashboard-widgets\" OR action:\"edit\" OR action:\"delete\")'),sort:!(!('@timestamp',desc)))`
       );
     });
   });
