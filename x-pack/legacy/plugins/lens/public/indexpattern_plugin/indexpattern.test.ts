@@ -14,6 +14,7 @@ import {
   IndexPatternPersistedState,
   IndexPatternPrivateState,
   IndexPatternColumn,
+  uniqueLabels,
 } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 import { coreMock } from 'src/core/public/mocks';
@@ -170,6 +171,47 @@ describe('IndexPattern Data Source', () => {
     };
   });
 
+  describe('uniqueLabels', () => {
+    it('appends a suffix to duplicates', () => {
+      const col: IndexPatternColumn = {
+        dataType: 'number',
+        isBucketed: false,
+        label: 'Foo',
+        operationType: 'count',
+      };
+      const map = uniqueLabels({
+        a: {
+          columnOrder: ['a', 'b'],
+          columns: {
+            a: col,
+            b: col,
+          },
+          indexPatternId: 'foo',
+        },
+        b: {
+          columnOrder: ['c', 'd'],
+          columns: {
+            c: col,
+            d: {
+              ...col,
+              label: 'Foo [1]',
+            },
+          },
+          indexPatternId: 'foo',
+        },
+      });
+
+      expect(map).toMatchInlineSnapshot(`
+        Object {
+          "a": "Foo",
+          "b": "Foo [1]",
+          "c": "Foo [2]",
+          "d": "Foo [1] [1]",
+        }
+      `);
+    });
+  });
+
   describe('#initialize', () => {
     it('should load a default state', async () => {
       const state = await indexPatternDatasource.initialize();
@@ -239,13 +281,13 @@ describe('IndexPattern Data Source', () => {
       };
       const state = await indexPatternDatasource.initialize(queryPersistedState);
       expect(indexPatternDatasource.toExpression(state, 'first')).toMatchInlineSnapshot(`
-        "esaggs
-              index=\\"1\\"
-              metricsAtAllLevels=false
-              partialRows=false
-              includeFormatHints=true
-              aggConfigs='[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":1,\\"extended_bounds\\":{}}}]' | lens_rename_columns idMap='{\\"col-0-col1\\":\\"col1\\",\\"col-1-col2\\":\\"col2\\"}'"
-      `);
+                "esaggs
+                      index=\\"1\\"
+                      metricsAtAllLevels=false
+                      partialRows=false
+                      includeFormatHints=true
+                      aggConfigs='[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":1,\\"extended_bounds\\":{}}}]' | lens_rename_columns idMap='{\\"col-0-col1\\":\\"col1\\",\\"col-1-col2\\":\\"col2\\"}'"
+            `);
     });
   });
 
