@@ -29,16 +29,13 @@ import { compareFilters } from './lib/compare_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 // @ts-ignore
 import { uniqFilters } from './lib/uniq_filters';
-// @ts-ignore
+
 import { extractTimeFilter } from './lib/extract_time_filter';
-// @ts-ignore
 import { changeTimeFilter } from './lib/change_time_filter';
-
 import { onlyDisabledFiltersChanged } from './lib/only_disabled';
-
 import { PartitionedFilters } from './partitioned_filters';
-
 import { IndexPatterns } from '../../index_patterns';
+import { TimefilterContract } from '../../timefilter';
 
 export class FilterManager {
   private indexPatterns: IndexPatterns;
@@ -46,10 +43,16 @@ export class FilterManager {
   private updated$: Subject<void> = new Subject();
   private fetch$: Subject<void> = new Subject();
   private uiSettings: UiSettingsClientContract;
+  private timefilter: TimefilterContract;
 
-  constructor(indexPatterns: IndexPatterns, uiSettings: UiSettingsClientContract) {
+  constructor(
+    indexPatterns: IndexPatterns,
+    uiSettings: UiSettingsClientContract,
+    timefilter: TimefilterContract
+  ) {
     this.indexPatterns = indexPatterns;
     this.uiSettings = uiSettings;
+    this.timefilter = timefilter;
   }
 
   private mergeIncomingFilters(partitionedFilters: PartitionedFilters): Filter[] {
@@ -191,7 +194,7 @@ export class FilterManager {
 
   public async addFiltersAndChangeTimeFilter(filters: Filter[]) {
     const timeFilter = await extractTimeFilter(this.indexPatterns, filters);
-    if (timeFilter) changeTimeFilter(timeFilter);
+    if (timeFilter) changeTimeFilter(this.timefilter, timeFilter);
     return this.addFilters(filters.filter(filter => filter !== timeFilter));
   }
 

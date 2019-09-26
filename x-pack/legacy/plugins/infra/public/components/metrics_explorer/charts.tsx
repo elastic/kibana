@@ -5,7 +5,8 @@
  */
 
 import { EuiButton, EuiFlexGrid, EuiFlexItem, EuiText, EuiHorizontalRule } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { MetricsExplorerResponse } from '../../../server/routes/metrics_explorer/types';
 import {
@@ -27,111 +28,104 @@ interface Props {
   onFilter: (filter: string) => void;
   onTimeChange: (start: string, end: string) => void;
   data: MetricsExplorerResponse | null;
-  intl: InjectedIntl;
   source: SourceQuery.Query['source']['configuration'] | undefined;
   timeRange: MetricsExplorerTimeOptions;
 }
-export const MetricsExplorerCharts = injectI18n(
-  ({
-    loading,
-    data,
-    onLoadMore,
-    options,
-    chartOptions,
-    onRefetch,
-    intl,
-    onFilter,
-    source,
-    timeRange,
-    onTimeChange,
-  }: Props) => {
-    if (!data && loading) {
-      return (
-        <InfraLoadingPanel
-          height={800}
-          width="100%"
-          text={intl.formatMessage({
-            defaultMessage: 'Loading charts',
-            id: 'xpack.infra.metricsExplorer.loadingCharts',
-          })}
-        />
-      );
-    }
+export const MetricsExplorerCharts = ({
+  loading,
+  data,
+  onLoadMore,
+  options,
+  chartOptions,
+  onRefetch,
 
-    if (!data || data.series.length === 0) {
-      return (
-        <NoData
-          titleText={intl.formatMessage({
-            id: 'xpack.infra.metricsExplorer.noDataTitle',
-            defaultMessage: 'There is no data to display.',
-          })}
-          bodyText={intl.formatMessage({
-            id: 'xpack.infra.metricsExplorer.noDataBodyText',
-            defaultMessage: 'Try adjusting your time, filters or group by settings.',
-          })}
-          refetchText={intl.formatMessage({
-            id: 'xpack.infra.metricsExplorer.noDataRefetchText',
-            defaultMessage: 'Check for new data',
-          })}
-          testString="metrics-explorer-no-data"
-          onRefetch={onRefetch}
-        />
-      );
-    }
-
+  onFilter,
+  source,
+  timeRange,
+  onTimeChange,
+}: Props) => {
+  if (!data && loading) {
     return (
-      <div style={{ width: '100%' }}>
-        <EuiFlexGrid gutterSize="s" columns={data.series.length === 1 ? 1 : 3}>
-          {data.series.map(series => (
-            <EuiFlexItem key={series.id} style={{ minWidth: 0 }}>
-              <MetricsExplorerChart
-                key={`chart-${series.id}`}
-                onFilter={onFilter}
-                options={options}
-                chartOptions={chartOptions}
-                title={options.groupBy ? series.id : null}
-                height={data.series.length > 1 ? 200 : 400}
-                series={series}
-                source={source}
-                timeRange={timeRange}
-                onTimeChange={onTimeChange}
-              />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGrid>
-        {data.series.length > 1 ? (
-          <div style={{ textAlign: 'center', marginBottom: 16 }}>
-            <EuiHorizontalRule />
-            <EuiText color="subdued">
-              <p>
-                <FormattedMessage
-                  id="xpack.infra.metricsExplorer.footerPaginationMessage"
-                  defaultMessage='Displaying {length} of {total} charts grouped by "{groupBy}".'
-                  values={{
-                    length: data.series.length,
-                    total: data.pageInfo.total,
-                    groupBy: options.groupBy,
-                  }}
-                />
-              </p>
-            </EuiText>
-            {data.pageInfo.afterKey ? (
-              <div style={{ margin: '16px 0' }}>
-                <EuiButton
-                  isLoading={loading}
-                  size="s"
-                  onClick={() => onLoadMore(data.pageInfo.afterKey || null)}
-                >
-                  <FormattedMessage
-                    id="xpack.infra.metricsExplorer.loadMoreChartsButton"
-                    defaultMessage="Load More Charts"
-                  />
-                </EuiButton>
-              </div>
-            ) : null}
-          </div>
-        ) : null}
-      </div>
+      <InfraLoadingPanel
+        height={800}
+        width="100%"
+        text={i18n.translate('xpack.infra.metricsExplorer.loadingCharts', {
+          defaultMessage: 'Loading charts',
+        })}
+      />
     );
   }
-);
+
+  if (!data || data.series.length === 0) {
+    return (
+      <NoData
+        titleText={i18n.translate('xpack.infra.metricsExplorer.noDataTitle', {
+          defaultMessage: 'There is no data to display.',
+        })}
+        bodyText={i18n.translate('xpack.infra.metricsExplorer.noDataBodyText', {
+          defaultMessage: 'Try adjusting your time, filters or group by settings.',
+        })}
+        refetchText={i18n.translate('xpack.infra.metricsExplorer.noDataRefetchText', {
+          defaultMessage: 'Check for new data',
+        })}
+        testString="metrics-explorer-no-data"
+        onRefetch={onRefetch}
+      />
+    );
+  }
+
+  return (
+    <div style={{ width: '100%' }}>
+      <EuiFlexGrid gutterSize="s" columns={data.series.length === 1 ? 1 : 3}>
+        {data.series.map(series => (
+          <EuiFlexItem key={series.id} style={{ minWidth: 0 }}>
+            <MetricsExplorerChart
+              key={`chart-${series.id}`}
+              onFilter={onFilter}
+              options={options}
+              chartOptions={chartOptions}
+              title={options.groupBy ? series.id : null}
+              height={data.series.length > 1 ? 200 : 400}
+              series={series}
+              source={source}
+              timeRange={timeRange}
+              onTimeChange={onTimeChange}
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGrid>
+      {data.series.length > 1 ? (
+        <div style={{ textAlign: 'center', marginBottom: 16 }}>
+          <EuiHorizontalRule />
+          <EuiText color="subdued">
+            <p>
+              <FormattedMessage
+                id="xpack.infra.metricsExplorer.footerPaginationMessage"
+                defaultMessage='Displaying {length} of {total} charts grouped by "{groupBy}".'
+                values={{
+                  length: data.series.length,
+                  total: data.pageInfo.total,
+                  groupBy: options.groupBy,
+                }}
+              />
+            </p>
+          </EuiText>
+          {data.pageInfo.afterKey ? (
+            <div style={{ margin: '16px 0' }}>
+              <EuiButton
+                isLoading={loading}
+                size="s"
+                onClick={() => onLoadMore(data.pageInfo.afterKey || null)}
+              >
+                <FormattedMessage
+                  id="xpack.infra.metricsExplorer.loadMoreChartsButton"
+                  defaultMessage="Load More Charts"
+                />
+              </EuiButton>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+};
