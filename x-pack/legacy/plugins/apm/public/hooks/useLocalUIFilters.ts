@@ -9,14 +9,24 @@ import { useFetcher } from './useFetcher';
 import { callApi } from '../services/rest/callApi';
 import { LocalUIFiltersAPIResponse } from '../../server/lib/ui_filters/local_ui_filters';
 import { useUrlParams } from './useUrlParams';
-import { LocalUIFilterName } from '../../server/lib/ui_filters/local_ui_filters/config';
+import {
+  LocalUIFilterName,
+  localUIFilters
+} from '../../server/lib/ui_filters/local_ui_filters/config';
 import { history } from '../utils/history';
 import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
 import { removeUndefinedProps } from '../context/UrlParamsContext/helpers';
 import { PROJECTION } from '../../common/projections/typings';
 import { pickKeys } from '../utils/pickKeys';
 
-const initialData = [] as LocalUIFiltersAPIResponse;
+const getInitialData = (
+  filterNames: LocalUIFilterName[]
+): LocalUIFiltersAPIResponse => {
+  return filterNames.map(filterName => ({
+    options: [],
+    ...localUIFilters[filterName]
+  }));
+};
 
 export function useLocalUIFilters({
   projection,
@@ -53,8 +63,8 @@ export function useLocalUIFilters({
     });
   };
 
-  const { data = initialData, status } = useFetcher(async () => {
-    const foo = await callApi<LocalUIFiltersAPIResponse>({
+  const { data = getInitialData(filterNames), status } = useFetcher(() => {
+    return callApi<LocalUIFiltersAPIResponse>({
       method: 'GET',
       pathname: `/api/apm/ui_filters/local_filters/${projection}`,
       query: {
@@ -65,7 +75,6 @@ export function useLocalUIFilters({
         ...params
       }
     });
-    return foo;
   }, [uiFilters, urlParams, params, filterNames, projection]);
 
   const filters = data.map(filter => ({

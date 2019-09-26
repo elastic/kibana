@@ -52,8 +52,7 @@ export const LockIconContainer = styled(EuiFlexItem)`
 
 LockIconContainer.displayName = 'LockIconContainer';
 
-export const DatePicker = styled(EuiFlexItem)<{ width: number }>`
-  width: ${({ width }) => `${width}px`};
+export const DatePicker = styled(EuiFlexItem)`
   .euiSuperDatePicker__flexWrapper {
     max-width: none;
     width: auto;
@@ -152,7 +151,7 @@ export const PropertiesLeft = React.memo<Props>(
               />
             </EuiToolTip>
           </LockIconContainer>
-          <DatePicker grow={1} width={datePickerWidth}>
+          <DatePicker grow={1} style={{ width: datePickerWidth }}>
             <SuperDatePicker id="timeline" timelineId={timelineId} />
           </DatePicker>
         </EuiFlexGroup>

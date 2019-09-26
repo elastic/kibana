@@ -12,6 +12,7 @@ import { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } from 'ui/documentation_links';
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { fatalError, toastNotifications } from 'ui/notify';
 import routes from 'ui/routes';
+import { docTitle } from 'ui/doc_title/doc_title';
 
 import { HashRouter } from 'react-router-dom';
 
@@ -30,6 +31,7 @@ export interface AppCore {
     fatalError: typeof fatalError;
     toastNotifications: typeof toastNotifications;
   };
+  chrome: typeof chrome;
 }
 
 export interface AppPlugins {
@@ -39,7 +41,6 @@ export interface AppPlugins {
 }
 
 export interface Core extends AppCore {
-  chrome: typeof chrome;
   http: {
     getClient(): any;
     setClient(client: any): void;
@@ -52,6 +53,10 @@ export interface Core extends AppCore {
   documentation: {
     esDocBasePath: string;
     esPluginDocBasePath: string;
+    esStackOverviewDocBasePath: string;
+  };
+  docTitle: {
+    change: typeof docTitle.change;
   };
 }
 
@@ -108,6 +113,10 @@ export function createShim(): { core: Core; plugins: Plugins } {
       documentation: {
         esDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`,
         esPluginDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`,
+        esStackOverviewDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack-overview/${DOC_LINK_VERSION}/`,
+      },
+      docTitle: {
+        change: docTitle.change,
       },
     },
     plugins: {

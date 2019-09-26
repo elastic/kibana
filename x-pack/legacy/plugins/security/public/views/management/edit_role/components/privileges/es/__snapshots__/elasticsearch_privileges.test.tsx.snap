@@ -43,12 +43,13 @@ exports[`it renders without crashing 1`] = `
   >
     <EuiFormRow
       describedByIds={Array []}
+      display="row"
       fullWidth={true}
       hasEmptyLabelSpace={true}
       labelType="label"
     >
       <ClusterPrivileges
-        availableClusterPrivileges={
+        builtinClusterPrivileges={
           Array [
             "all",
             "manage",
@@ -109,6 +110,7 @@ exports[`it renders without crashing 1`] = `
   >
     <EuiFormRow
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
       hasEmptyLabelSpace={true}
       labelType="label"
@@ -200,13 +202,8 @@ exports[`it renders without crashing 1`] = `
   />
   <EuiHorizontalRule />
   <EuiButton
-    color="primary"
-    fill={false}
-    iconSide="left"
     iconType="plusInCircleFilled"
     onClick={[Function]}
-    size="m"
-    type="button"
   >
     <FormattedMessage
       defaultMessage="Add index privilege"

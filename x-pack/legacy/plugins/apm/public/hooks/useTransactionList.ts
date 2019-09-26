@@ -5,11 +5,11 @@
  */
 
 import { useMemo } from 'react';
-import { loadTransactionList } from '../services/rest/apm/transaction_groups';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useUiFilters } from '../context/UrlParamsContext';
 import { useFetcher } from './useFetcher';
 import { TransactionGroupListAPIResponse } from '../../server/lib/transaction_groups';
+import { callApmApi } from '../services/rest/callApmApi';
 
 const getRelativeImpact = (
   impact: number,
@@ -45,12 +45,17 @@ export function useTransactionList(urlParams: IUrlParams) {
   const uiFilters = useUiFilters(urlParams);
   const { data = [], error, status } = useFetcher(() => {
     if (serviceName && start && end && transactionType) {
-      return loadTransactionList({
-        serviceName,
-        start,
-        end,
-        transactionType,
-        uiFilters
+      return callApmApi({
+        pathname: '/api/apm/services/{serviceName}/transaction_groups',
+        params: {
+          path: { serviceName },
+          query: {
+            start,
+            end,
+            transactionType,
+            uiFilters: JSON.stringify(uiFilters)
+          }
+        }
       });
     }
   }, [serviceName, start, end, transactionType, uiFilters]);

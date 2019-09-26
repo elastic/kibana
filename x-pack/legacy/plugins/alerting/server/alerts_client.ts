@@ -4,11 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { omit } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientContract, SavedObjectReference } from 'src/core/server';
-import { Alert, RawAlert, AlertTypeRegistry, AlertAction, Log } from './types';
+import { Alert, RawAlert, AlertTypeRegistry, AlertAction, Log, AlertType } from './types';
 import { TaskManager } from '../../task_manager';
 import { validateAlertTypeParams } from './lib';
+import { CreateAPIKeyResult as SecurityPluginCreateAPIKeyResult } from '../../../../plugins/security/server';
+
+interface FailedCreateAPIKeyResult {
+  created: false;
+}
+interface SuccessCreateAPIKeyResult {
+  created: true;
+  result: SecurityPluginCreateAPIKeyResult;
+}
+export type CreateAPIKeyResult = FailedCreateAPIKeyResult | SuccessCreateAPIKeyResult;
 
 interface ConstructorOptions {
   log: Log;
@@ -16,6 +28,8 @@ interface ConstructorOptions {
   savedObjectsClient: SavedObjectsClientContract;
   alertTypeRegistry: AlertTypeRegistry;
   spaceId?: string;
+  getUserName: () => Promise<string | null>;
+  createAPIKey: () => Promise<CreateAPIKeyResult>;
 }
 
 interface FindOptions {
@@ -42,7 +56,7 @@ interface FindResult {
 }
 
 interface CreateOptions {
-  data: Alert;
+  data: Pick<Alert, Exclude<keyof Alert, 'createdBy' | 'updatedBy' | 'apiKey' | 'apiKeyOwner'>>;
   options?: {
     migrationVersion?: Record<string, string>;
   };
@@ -60,10 +74,12 @@ interface UpdateOptions {
 
 export class AlertsClient {
   private readonly log: Log;
+  private readonly getUserName: () => Promise<string | null>;
   private readonly spaceId?: string;
   private readonly taskManager: TaskManager;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly alertTypeRegistry: AlertTypeRegistry;
+  private readonly createAPIKey: () => Promise<CreateAPIKeyResult>;
 
   constructor({
     alertTypeRegistry,
@@ -71,20 +87,35 @@ export class AlertsClient {
     taskManager,
     log,
     spaceId,
+    getUserName,
+    createAPIKey,
   }: ConstructorOptions) {
     this.log = log;
+    this.getUserName = getUserName;
     this.spaceId = spaceId;
     this.taskManager = taskManager;
     this.alertTypeRegistry = alertTypeRegistry;
     this.savedObjectsClient = savedObjectsClient;
+    this.createAPIKey = createAPIKey;
   }
 
   public async create({ data, options }: CreateOptions) {
     // Throws an error if alert type isn't registered
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.alertTypeParams);
+    const apiKey = await this.createAPIKey();
+    const username = await this.getUserName();
+
+    this.validateActions(alertType, data.actions);
+
     const { alert: rawAlert, references } = this.getRawAlert({
       ...data,
+      createdBy: username,
+      updatedBy: username,
+      apiKeyOwner: apiKey.created && username ? username : undefined,
+      apiKey: apiKey.created
+        ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
+        : undefined,
       alertTypeParams: validatedAlertTypeParams,
     });
     const createdAlert = await this.savedObjectsClient.create('alert', rawAlert, {
@@ -161,11 +192,14 @@ export class AlertsClient {
     const existingObject = await this.savedObjectsClient.get('alert', id);
     const { alertTypeId } = existingObject.attributes;
     const alertType = this.alertTypeRegistry.get(alertTypeId);
+    const apiKey = await this.createAPIKey();
 
     // Validate
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.alertTypeParams);
+    this.validateActions(alertType, data.actions);
 
     const { actions, references } = this.extractReferences(data.actions);
+    const username = await this.getUserName();
     const updatedObject = await this.savedObjectsClient.update(
       'alert',
       id,
@@ -173,6 +207,11 @@ export class AlertsClient {
         ...data,
         alertTypeParams: validatedAlertTypeParams,
         actions,
+        updatedBy: username,
+        apiKeyOwner: apiKey.created ? username : null,
+        apiKey: apiKey.created
+          ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
+          : null,
       },
       {
         ...options,
@@ -182,20 +221,48 @@ export class AlertsClient {
     return this.getAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
   }
 
+  public async updateApiKey({ id }: { id: string }) {
+    const { references } = await this.savedObjectsClient.get('alert', id);
+
+    const apiKey = await this.createAPIKey();
+    const username = await this.getUserName();
+    await this.savedObjectsClient.update(
+      'alert',
+      id,
+      {
+        updatedBy: username,
+        apiKeyOwner: apiKey.created ? username : null,
+        apiKey: apiKey.created
+          ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
+          : null,
+      },
+      {
+        references,
+      }
+    );
+  }
+
   public async enable({ id }: { id: string }) {
     const existingObject = await this.savedObjectsClient.get('alert', id);
     if (existingObject.attributes.enabled === false) {
+      const apiKey = await this.createAPIKey();
       const scheduledTask = await this.scheduleAlert(
         id,
         existingObject.attributes.alertTypeId,
         existingObject.attributes.interval
       );
+      const username = await this.getUserName();
       await this.savedObjectsClient.update(
         'alert',
         id,
         {
           enabled: true,
+          updatedBy: username,
+          apiKeyOwner: apiKey.created ? username : null,
           scheduledTaskId: scheduledTask.id,
+          apiKey: apiKey.created
+            ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
+            : null,
         },
         { references: existingObject.references }
       );
@@ -205,16 +272,19 @@ export class AlertsClient {
   public async disable({ id }: { id: string }) {
     const existingObject = await this.savedObjectsClient.get('alert', id);
     if (existingObject.attributes.enabled === true) {
-      await this.taskManager.remove(existingObject.attributes.scheduledTaskId);
       await this.savedObjectsClient.update(
         'alert',
         id,
         {
           enabled: false,
           scheduledTaskId: null,
+          apiKey: null,
+          apiKeyOwner: null,
+          updatedBy: await this.getUserName(),
         },
         { references: existingObject.references }
       );
+      await this.taskManager.remove(existingObject.attributes.scheduledTaskId);
     }
   }
 
@@ -298,5 +368,24 @@ export class AlertsClient {
       },
       references,
     };
+  }
+
+  private validateActions(alertType: AlertType, actions: Alert['actions']) {
+    // TODO: Should also ensure user has access to each action
+    const { actionGroups: alertTypeActionGroups } = alertType;
+    const usedAlertActionGroups = actions.map(action => action.group);
+    const invalidActionGroups = usedAlertActionGroups.filter(
+      group => !alertTypeActionGroups.includes(group)
+    );
+    if (invalidActionGroups.length) {
+      throw Boom.badRequest(
+        i18n.translate('xpack.alerting.alertsClient.validateActions.invalidGroups', {
+          defaultMessage: 'Invalid action groups: {groups}',
+          values: {
+            groups: invalidActionGroups.join(', '),
+          },
+        })
+      );
+    }
   }
 }

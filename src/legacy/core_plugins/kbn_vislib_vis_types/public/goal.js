@@ -17,22 +17,23 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import gaugeTemplate from './editors/gauge.html';
-import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
+import { colorSchemas } from 'ui/vislib/components/color/colormaps';
+import { GaugeOptions } from './components/options';
+import { vislibVisController } from './controller';
+import { visFactory } from '../../../ui/public/vis/vis_factory';
 
-export default function GoalVisType(Private) {
-  const VisFactory = Private(VisFactoryProvider);
+export default function GoalVisType() {
 
-  return VisFactory.createVislibVisualization({
+  return visFactory.createBaseVisualization({
     name: 'goal',
     title: i18n.translate('kbnVislibVisTypes.goal.goalTitle', { defaultMessage: 'Goal' }),
     icon: 'visGoal',
     description: i18n.translate('kbnVislibVisTypes.goal.goalDescription', {
       defaultMessage: 'A goal chart indicates how close you are to your final goal.'
     }),
+    visualization: vislibVisController,
     visConfig: {
       defaults: {
         addTooltip: true,
@@ -75,17 +76,38 @@ export default function GoalVisType(Private) {
         }
       },
     },
-    events: {
-      brush: { disabled: true },
-    },
     editorConfig: {
       collections: {
-        gaugeTypes: ['Arc', 'Circle'],
-        gaugeColorMode: ['None', 'Labels', 'Background'],
-        scales: ['linear', 'log', 'square root'],
-        colorSchemas: Object.values(vislibColorMaps).map(value => ({ id: value.id, label: value.label })),
+        gaugeTypes: [
+          {
+            text: i18n.translate('kbnVislibVisTypes.gauge.gaugeTypes.arcText', {
+              defaultMessage: 'Arc',
+            }),
+            value: 'Arc',
+          },
+          {
+            text: i18n.translate('kbnVislibVisTypes.gauge.gaugeTypes.circleText', {
+              defaultMessage: 'Circle',
+            }),
+            value: 'Circle',
+          },
+        ],
+        alignments: [
+          {
+            value: 'automatic',
+            text: i18n.translate('kbnVislibVisTypes.gauge.alignmentAutomaticTitle', { defaultMessage: 'Automatic' })
+          },
+          {
+            value: 'horizontal',
+            text: i18n.translate('kbnVislibVisTypes.gauge.alignmentHorizontalTitle', { defaultMessage: 'Horizontal' })
+          },
+          {
+            value: 'vertical',
+            text: i18n.translate('kbnVislibVisTypes.gauge.alignmentVerticalTitle', { defaultMessage: 'Vertical' }) },
+        ],
+        colorSchemas,
       },
-      optionsTemplate: gaugeTemplate,
+      optionsTemplate: GaugeOptions,
       schemas: new Schemas([
         {
           group: 'metrics',

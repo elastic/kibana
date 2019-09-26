@@ -9,7 +9,8 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_rollup_search"
+      "{indices}/_rollup_search",
+      "{indices}/{type}/_rollup_search"
     ]
   }
 }

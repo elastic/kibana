@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { REPO_ROOT } from '@kbn/dev-utils';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { load as repoLoad, unload as repoUnload } from './repo_archiver';
 
 export default function manageRepositoriesFunctionalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  // const esArchiver = getService('esArchiver');
+  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const log = getService('log');
@@ -22,50 +24,38 @@ export default function manageRepositoriesFunctionalTests({
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/37859
-  describe.skip('History', function() {
+  const existsInvisible = async (selector: string) =>
+    await testSubjects.exists(selector, { allowHidden: true });
+
+  describe('History', function() {
     this.tags('smoke');
-    const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
+    const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
 
     describe('browser history can go back while exploring code app', () => {
       let driver: any;
       before(async () => {
+        await repoLoad(
+          'github.com/elastic/TypeScript-Node-Starter',
+          'typescript_node_starter',
+          config.get('kbnTestServer.installDir') || REPO_ROOT
+        );
+        await esArchiver.load('code/repositories/typescript_node_starter');
+
         // Navigate to the code app.
         await PageObjects.common.navigateToApp('code');
         await PageObjects.header.waitUntilLoadingHasFinished();
-
-        log.debug('Code test import repository');
-        // Fill in the import repository input box with a valid git repository url.
-        await PageObjects.code.fillImportRepositoryUrlInputBox(
-          'https://github.com/elastic/TypeScript-Node-Starter'
-        );
-        // Click the import repository button.
-        await PageObjects.code.clickImportRepositoryButton();
 
         const webDriver = await getService('__webdriver__').init();
         driver = webDriver.driver;
       });
-      // after(async () => await esArchiver.unload('code'));
 
       after(async () => {
-        // Navigate to the code app.
-        await PageObjects.common.navigateToApp('code');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
-        // Clean up the imported repository
-        await PageObjects.code.clickDeleteRepositoryButton();
-        await retry.try(async () => {
-          expect(await testSubjects.exists('confirmModalConfirmButton')).to.be(true);
-        });
-
-        await testSubjects.click('confirmModalConfirmButton');
-
-        await retry.tryForTime(300000, async () => {
-          const repositoryItems = await testSubjects.findAll(repositoryListSelector);
-          expect(repositoryItems).to.have.length(0);
-        });
-
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
+        await esArchiver.unload('code/repositories/typescript_node_starter');
+        await repoUnload(
+          'github.com/elastic/TypeScript-Node-Starter',
+          config.get('kbnTestServer.installDir') || REPO_ROOT
+        );
       });
 
       it('from admin page to source view page can go back and forward', async () => {
@@ -132,10 +122,12 @@ export default function manageRepositoriesFunctionalTests({
 
       it('in search page, change language filters can go back and forward', async () => {
         log.debug('it select typescript language filter');
-        const url = `${PageObjects.common.getHostPort()}/app/code#/search?q=string&p=&langs=typescript`;
+        const url = `${PageObjects.common.getHostPort()}/app/code#/search?q=string&langs=typescript`;
         await browser.get(url);
 
-        await retry.try(async () => {
+        await PageObjects.header.awaitKibanaChrome();
+
+        await retry.tryForTime(300000, async () => {
           const language = await (await find.byCssSelector(
             '.euiFacetButton--isSelected'
           )).getVisibleText();
@@ -179,14 +171,16 @@ export default function manageRepositoriesFunctionalTests({
         log.debug('it goes back after line number changed');
         const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/elastic/TypeScript-Node-Starter`;
         await browser.get(url);
+        await PageObjects.header.awaitKibanaChrome();
+
         const lineNumber = 20;
         await retry.try(async () => {
-          const existence = await testSubjects.exists('codeFileTreeNode-File-tsconfig.json');
+          const existence = await existsInvisible('codeFileTreeNode-File-tsconfig.json');
           expect(existence).to.be(true);
         });
         await testSubjects.click('codeFileTreeNode-File-tsconfig.json');
         await retry.try(async () => {
-          const existence = await testSubjects.exists('codeFileTreeNode-File-package.json');
+          const existence = await existsInvisible('codeFileTreeNode-File-package.json');
           expect(existence).to.be(true);
         });
         await testSubjects.click('codeFileTreeNode-File-package.json');
@@ -226,6 +220,9 @@ export default function manageRepositoriesFunctionalTests({
         await browser.get(url);
         // refresh so language server will be initialized.
         await browser.refresh();
+
+        await PageObjects.header.awaitKibanaChrome();
+
         // wait for tab is not disabled
         await PageObjects.common.sleep(5000);
         await testSubjects.click('codeStructureTreeTab');

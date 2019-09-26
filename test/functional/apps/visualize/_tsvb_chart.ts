@@ -93,7 +93,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('switch index patterns', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/44132
+    describe.skip('switch index patterns', () => {
       beforeEach(async () => {
         log.debug('Load kibana_sample_data_flights data');
         await esArchiver.loadIfNeeded('kibana_sample_data_flights');

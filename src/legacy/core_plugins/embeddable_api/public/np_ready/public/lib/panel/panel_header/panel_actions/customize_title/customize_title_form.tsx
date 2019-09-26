@@ -20,24 +20,20 @@
 import React, { ChangeEvent } from 'react';
 
 import { EuiButtonEmpty, EuiFieldText, EuiFormRow } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-export interface Props {
+export interface PanelOptionsMenuFormProps {
   title?: string;
   onReset: () => void;
   onUpdatePanelTitle: (newPanelTitle: string) => void;
 }
 
-interface PanelOptionsMenuFormUiProps extends Props {
-  intl: InjectedIntl;
-}
-
-function CustomizeTitleFormUi({
+export function CustomizeTitleForm({
   title,
   onReset,
   onUpdatePanelTitle,
-  intl,
-}: PanelOptionsMenuFormUiProps) {
+}: PanelOptionsMenuFormProps) {
   function onInputChange(event: ChangeEvent<HTMLInputElement>) {
     onUpdatePanelTitle(event.target.value);
   }
@@ -45,10 +41,12 @@ function CustomizeTitleFormUi({
   return (
     <div className="embPanel__optionsMenuForm" data-test-subj="dashboardPanelTitleInputMenuItem">
       <EuiFormRow
-        label={intl.formatMessage({
-          id: 'embeddableApi.customizeTitle.optionsMenuForm.panelTitleFormRowLabel',
-          defaultMessage: 'Panel title',
-        })}
+        label={i18n.translate(
+          'embeddableApi.customizeTitle.optionsMenuForm.panelTitleFormRowLabel',
+          {
+            defaultMessage: 'Panel title',
+          }
+        )}
       >
         <EuiFieldText
           id="panelTitleInput"
@@ -57,10 +55,12 @@ function CustomizeTitleFormUi({
           type="text"
           value={title}
           onChange={onInputChange}
-          aria-label={intl.formatMessage({
-            id: 'embeddableApi.customizeTitle.optionsMenuForm.panelTitleInputAriaLabel',
-            defaultMessage: 'Changes to this input are applied immediately. Press enter to exit.',
-          })}
+          aria-label={i18n.translate(
+            'embeddableApi.customizeTitle.optionsMenuForm.panelTitleInputAriaLabel',
+            {
+              defaultMessage: 'Changes to this input are applied immediately. Press enter to exit.',
+            }
+          )}
         />
       </EuiFormRow>
 
@@ -73,5 +73,3 @@ function CustomizeTitleFormUi({
     </div>
   );
 }
-
-export const CustomizeTitleForm = injectI18n(CustomizeTitleFormUi);

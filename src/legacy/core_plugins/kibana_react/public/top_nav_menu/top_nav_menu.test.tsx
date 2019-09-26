@@ -23,7 +23,10 @@ import { TopNavMenuData } from './top_nav_menu_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { coreMock } from '../../../../../core/public/mocks';
-const setupMock = coreMock.createSetup();
+const startMock = coreMock.createStart();
+
+import { timefilterServiceMock } from '../../../../core_plugins/data/public/timefilter/timefilter_service.mock';
+const timefilterSetupMock = timefilterServiceMock.createSetupContract();
 
 jest.mock('../../../../core_plugins/data/public', () => {
   return {
@@ -54,33 +57,37 @@ describe('TopNavMenu', () => {
   ];
 
   it('Should render nothing when no config is provided', () => {
-    const component = shallowWithIntl(<TopNavMenu name="test" uiSettings={setupMock.uiSettings} />);
+    const component = shallowWithIntl(<TopNavMenu name={'test'} />);
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
     expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(0);
   });
 
   it('Should render 1 menu item', () => {
-    const component = shallowWithIntl(
-      <TopNavMenu name="test" uiSettings={setupMock.uiSettings} config={[menuItems[0]]} />
-    );
+    const component = shallowWithIntl(<TopNavMenu name={'test'} config={[menuItems[0]]} />);
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(1);
     expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(0);
   });
 
   it('Should render multiple menu items', () => {
-    const component = shallowWithIntl(
-      <TopNavMenu name="test" uiSettings={setupMock.uiSettings} config={menuItems} />
-    );
+    const component = shallowWithIntl(<TopNavMenu name={'test'} config={menuItems} />);
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(menuItems.length);
     expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(0);
   });
 
   it('Should render search bar', () => {
     const component = shallowWithIntl(
-      <TopNavMenu name="test" uiSettings={setupMock.uiSettings} showSearchBar={true} />
+      <TopNavMenu
+        name={'test'}
+        showSearchBar={true}
+        savedObjects={startMock.savedObjects}
+        notifications={startMock.notifications}
+        uiSettings={startMock.uiSettings}
+        http={startMock.http}
+        timeHistory={timefilterSetupMock.history}
+      />
     );
 
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
-    expect(component.find(`span > ${SEARCH_BAR_SELECTOR}`).length).toBe(1);
+    expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(1);
   });
 });

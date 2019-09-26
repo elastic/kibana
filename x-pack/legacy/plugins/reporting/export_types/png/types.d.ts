@@ -6,8 +6,9 @@
 
 import { Request } from 'hapi';
 import { LayoutInstance } from '../common/layouts/layout';
-import { ConditionalHeaders, KbnServer } from '../../types';
+import { ConditionalHeaders, KbnServer, JobDocPayload } from '../../types';
 
+// Job params: structure of incoming user request data
 export interface JobParamsPNG {
   objectType: string;
   title: string;
@@ -16,10 +17,18 @@ export interface JobParamsPNG {
   layout: LayoutInstance;
 }
 
+// Job payload: structure of stored job data provided by create_job
+export interface JobDocPayloadPNG extends JobDocPayload {
+  basePath?: string;
+  browserTimezone: string;
+  forceNow?: string;
+  layout: any;
+  relativeUrl: string;
+  objects: undefined;
+}
+
 export type ESQueueCreateJobFnPNG = (
   jobParams: JobParamsPNG,
   headers: ConditionalHeaders,
   request: Request
 ) => Promise<JobParamsPNG>;
-
-export type CreateJobFactoryPNG = (server: KbnServer) => ESQueueCreateJobFnPNG;

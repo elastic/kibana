@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import path from 'path';
+import { EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
+import { LevelLogger } from '../../../server/lib';
 import { HeadlessChromiumDriver } from '../../../server/browsers/chromium/driver';
-import { EvaluateOptions, KbnServer } from '../../../types';
+import { KbnServer } from '../../../types';
 import { LayoutTypes } from '../constants';
 import { Layout, LayoutSelectorDictionary, Size } from './layout';
 import { CaptureConfig } from './types';
@@ -49,12 +51,17 @@ export class PrintLayout extends Layout {
     };
   }
 
-  public async positionElements(browser: HeadlessChromiumDriver): Promise<void> {
+  public async positionElements(
+    browser: HeadlessChromiumDriver,
+    logger: LevelLogger
+  ): Promise<void> {
+    logger.debug('positioning elements');
+
     const elementSize: Size = {
       width: this.captureConfig.viewport.width / this.captureConfig.zoom,
       height: this.captureConfig.viewport.height / this.captureConfig.zoom,
     };
-    const evalOptions: EvaluateOptions = {
+    const evalOptions: { fn: EvaluateFn; args: SerializableOrJSHandle[] } = {
       fn: (selector: string, height: number, width: number) => {
         const visualizations = document.querySelectorAll(selector) as NodeListOf<HTMLElement>;
         const visualizationsLength = visualizations.length;

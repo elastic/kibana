@@ -26,6 +26,7 @@
   @import 'datavisualizer/index';
   @import 'explorer/index'; // SASSTODO: This file needs to be rewritten
   @import 'jobs/index'; // SASSTODO: This collection of sass files has multiple problems
+  @import 'overview/index';
   @import 'settings/index';
   @import 'timeseriesexplorer/index';
 
@@ -50,6 +51,7 @@
   @import 'components/messagebar/index';
   @import 'components/navigation_menu/index';
   @import 'components/rule_editor/index'; // SASSTODO: This file overwrites EUI directly
+  @import 'components/stats_bar/index';
 
   // Hacks are last so they can overwrite anything above if needed
   @import 'hacks';

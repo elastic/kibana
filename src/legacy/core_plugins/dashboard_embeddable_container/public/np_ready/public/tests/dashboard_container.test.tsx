@@ -24,7 +24,10 @@ import { mount } from 'enzyme';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ViewMode, CONTEXT_MENU_TRIGGER, EmbeddablePanel } from '../lib/embeddable_api';
-import { DashboardContainer } from '../lib/embeddable/dashboard_container';
+import {
+  DashboardContainer,
+  DashboardContainerOptions,
+} from '../lib/embeddable/dashboard_container';
 import { getSampleDashboardInput } from '../lib/test_helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
@@ -36,17 +39,21 @@ import {
   ContactCardEmbeddableOutput,
 } from '../../../../../embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable';
 import { embeddablePluginMock } from '../../../../../embeddable_api/public/np_ready/public/mocks';
-import { EditModeAction } from '../../../../../embeddable_api/public/np_ready/public/lib/test_samples/actions/edit_mode_action';
+import { createEditModeAction } from '../../../../../embeddable_api/public/np_ready/public/lib/test_samples/actions/edit_mode_action';
 // eslint-disable-next-line
 import { inspectorPluginMock } from '../../../../../../../plugins/inspector/public/mocks';
+import { KibanaContextProvider } from '../../../../../../../plugins/kibana_react/public';
+// eslint-disable-next-line
+import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
 
 test('DashboardContainer in edit mode shows edit mode actions', async () => {
   const inspector = inspectorPluginMock.createStartContract();
   const { setup, doStart } = embeddablePluginMock.createInstance();
+  const uiActionsSetup = uiActionsPluginMock.createSetupContract();
 
-  const editModeAction = new EditModeAction();
-  setup.registerAction(editModeAction);
-  setup.attachAction(CONTEXT_MENU_TRIGGER, editModeAction.id);
+  const editModeAction = createEditModeAction();
+  uiActionsSetup.registerAction(editModeAction);
+  uiActionsSetup.attachAction(CONTEXT_MENU_TRIGGER, editModeAction.id);
   setup.registerEmbeddableFactory(
     CONTACT_CARD_EMBEDDABLE,
     new ContactCardEmbeddableFactory({} as any, (() => null) as any, {} as any)
@@ -54,9 +61,18 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
 
   const start = doStart();
 
-  const container = new DashboardContainer(getSampleDashboardInput({ viewMode: ViewMode.VIEW }), {
-    getEmbeddableFactory: start.getEmbeddableFactory,
-  } as any);
+  const initialInput = getSampleDashboardInput({ viewMode: ViewMode.VIEW });
+  const options: DashboardContainerOptions = {
+    application: {} as any,
+    embeddable: start,
+    notifications: {} as any,
+    overlays: {} as any,
+    inspector: {} as any,
+    SavedObjectFinder: () => null,
+    ExitFullScreenButton: () => null,
+    uiActions: {} as any,
+  };
+  const container = new DashboardContainer(initialInput, options);
 
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
@@ -68,16 +84,18 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
 
   const component = mount(
     <I18nProvider>
-      <EmbeddablePanel
-        embeddable={embeddable}
-        getActions={() => Promise.resolve([])}
-        getAllEmbeddableFactories={(() => []) as any}
-        getEmbeddableFactory={(() => null) as any}
-        notifications={{} as any}
-        overlays={{} as any}
-        inspector={inspector}
-        SavedObjectFinder={() => null}
-      />
+      <KibanaContextProvider services={options}>
+        <EmbeddablePanel
+          embeddable={embeddable}
+          getActions={() => Promise.resolve([])}
+          getAllEmbeddableFactories={(() => []) as any}
+          getEmbeddableFactory={(() => null) as any}
+          notifications={{} as any}
+          overlays={{} as any}
+          inspector={inspector}
+          SavedObjectFinder={() => null}
+        />
+      </KibanaContextProvider>
     </I18nProvider>
   );
 

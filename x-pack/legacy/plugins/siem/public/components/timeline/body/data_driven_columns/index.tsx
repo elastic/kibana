@@ -23,6 +23,7 @@ interface Props {
   columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
   onColumnResized: OnColumnResized;
+  timelineId: string;
 }
 
 const Cell = styled.div<{
@@ -35,10 +36,8 @@ const Cell = styled.div<{
       : index % 2 === 0 && !theme.darkMode
       ? theme.eui.euiColorLightestShade
       : 'inherit'};
-  border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  height: 100%;
+  height: 20px;
   overflow: hidden;
-  padding: 5px;
   user-select: none;
   width: ${({ width }) => width};
 `;
@@ -88,7 +87,7 @@ export class DataDrivenColumns extends React.PureComponent<Props> {
   }
 
   private renderCell = (header: ColumnHeader, index: number) => () => {
-    const { columnRenderers, data, _id } = this.props;
+    const { columnRenderers, data, _id, timelineId } = this.props;
 
     return (
       <EuiFlexItem grow={false}>
@@ -106,6 +105,7 @@ export class DataDrivenColumns extends React.PureComponent<Props> {
             }),
             field: header,
             width: `${header.width - CELL_RESIZE_HANDLE_WIDTH}px`,
+            timelineId,
           })}
         </Cell>
       </EuiFlexItem>

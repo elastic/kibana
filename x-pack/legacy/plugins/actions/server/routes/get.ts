@@ -18,6 +18,7 @@ export function getRoute(server: Hapi.Server) {
     method: 'GET',
     path: `/api/action/{id}`,
     options: {
+      tags: ['access:actions-read'],
       validate: {
         params: Joi.object()
           .keys({

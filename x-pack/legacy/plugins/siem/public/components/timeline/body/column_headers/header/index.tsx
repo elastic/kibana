@@ -9,7 +9,6 @@ import { noop } from 'lodash/fp';
 import * as React from 'react';
 import styled from 'styled-components';
 
-import { useContext } from 'react';
 import { FieldNameContainer } from '../../../../draggables/field_badge';
 import { OnResize, Resizeable } from '../../../../resize_handle';
 import {
@@ -27,7 +26,7 @@ import { Filter } from '../filter';
 import { HeaderToolTipContent } from '../header_tooltip_content';
 
 import { getNewSortDirectionOnClick } from './helpers';
-import { TimelineContext } from '../../../timeline_context';
+import { useTimelineContext } from '../../../timeline_context';
 
 const TITLE_PADDING = 10; // px
 const RESIZE_HANDLE_HEIGHT = 35; // px
@@ -64,7 +63,7 @@ interface HeaderCompProps {
 }
 
 const HeaderComp = React.memo<HeaderCompProps>(({ children, onClick, isResizing }) => {
-  const { isLoading } = useContext(TimelineContext);
+  const isLoading = useTimelineContext();
   return (
     <HeaderDiv
       data-test-subj="header"

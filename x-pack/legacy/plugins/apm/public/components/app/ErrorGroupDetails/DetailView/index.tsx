@@ -10,7 +10,9 @@ import {
   EuiSpacer,
   EuiTab,
   EuiTabs,
-  EuiTitle
+  EuiTitle,
+  EuiIcon,
+  EuiToolTip
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
@@ -21,7 +23,7 @@ import { idx } from '@kbn/elastic-idx';
 import { ErrorGroupAPIResponse } from '../../../../../server/lib/errors/get_error_group';
 import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { px, unit } from '../../../../style/variables';
+import { px, unit, units } from '../../../../style/variables';
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { history } from '../../../../utils/history';
@@ -33,13 +35,22 @@ import {
   getTabs,
   logStacktraceTab
 } from './ErrorTabs';
-import { StickyErrorProperties } from './StickyErrorProperties';
+import { Summary } from '../../../shared/Summary';
+import { TimestampSummaryItem } from '../../../shared/Summary/TimestampSummaryItem';
+import { HttpInfoSummaryItem } from '../../../shared/Summary/HttpInfoSummaryItem';
+import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 
 const HeaderContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: ${px(unit)};
+`;
+
+const TransactionLinkName = styled.div`
+  margin-left: ${px(units.half)};
+  display: inline-block;
+  vertical-align: middle;
 `;
 
 interface Props {
@@ -66,6 +77,12 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
 
   const tabs = getTabs(error);
   const currentTab = getCurrentTab(tabs, urlParams.detailTab);
+
+  const errorUrl =
+    idx(error, _ => _.error.page.url) || idx(error, _ => _.url.full);
+
+  const method = idx(error, _ => _.http.request.method);
+  const status = idx(error, _ => _.http.response.status_code);
 
   return (
     <EuiPanel>
@@ -94,7 +111,41 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
         </DiscoverErrorLink>
       </HeaderContainer>
 
-      <StickyErrorProperties error={error} transaction={transaction} />
+      <Summary
+        items={[
+          <TimestampSummaryItem time={error.timestamp.us / 1000} />,
+          errorUrl && method ? (
+            <HttpInfoSummaryItem
+              url={errorUrl}
+              method={method}
+              status={status}
+            />
+          ) : null,
+          transaction && (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.apm.errorGroupDetails.relatedTransactionSample',
+                {
+                  defaultMessage: 'Related transaction sample'
+                }
+              )}
+            >
+              <TransactionDetailLink
+                traceId={transaction.trace.id}
+                transactionId={transaction.transaction.id}
+                transactionName={transaction.transaction.name}
+                transactionType={transaction.transaction.type}
+                serviceName={transaction.service.name}
+              >
+                <EuiIcon type="merge" />
+                <TransactionLinkName>
+                  {transaction.transaction.name}
+                </TransactionLinkName>
+              </TransactionDetailLink>
+            </EuiToolTip>
+          )
+        ]}
+      />
 
       <EuiSpacer />
 
@@ -132,7 +183,7 @@ export function TabContent({
   error: APMError;
   currentTab: ErrorTab;
 }) {
-  const codeLanguage = error.service.name;
+  const codeLanguage = idx(error, _ => _.service.language.name);
   const excStackframes = idx(error, _ => _.error.exception[0].stacktrace);
   const logStackframes = idx(error, _ => _.error.exception[0].stacktrace);
 

@@ -18,6 +18,14 @@ exports[`#delete authorization.mode.useRbacForRequest returns true throws bad re
 
 exports[`#get useRbacForRequest is true throws Boom.forbidden if the user isn't authorized at space 1`] = `"Unauthorized to get foo-space space"`;
 
-exports[`#getAll useRbacForRequest is true throws Boom.forbidden when user isn't authorized for any spaces 1`] = `"Forbidden"`;
+exports[`#getAll authorization.mode.useRbacForRequest returns false throws Boom.badRequest when an invalid purpose is provided' 1`] = `"unsupported space purpose: invalid_purpose"`;
+
+exports[`#getAll useRbacForRequest is true throws Boom.badRequest when an invalid purpose is provided 1`] = `"unsupported space purpose: invalid_purpose"`;
+
+exports[`#getAll useRbacForRequest is true with purpose='any' throws Boom.forbidden when user isn't authorized for any spaces 1`] = `"Forbidden"`;
+
+exports[`#getAll useRbacForRequest is true with purpose='copySavedObjectsIntoSpace' throws Boom.forbidden when user isn't authorized for any spaces 1`] = `"Forbidden"`;
+
+exports[`#getAll useRbacForRequest is true with purpose='undefined' throws Boom.forbidden when user isn't authorized for any spaces 1`] = `"Forbidden"`;
 
 exports[`#update useRbacForRequest is true throws Boom.forbidden when user isn't authorized at space 1`] = `"Unauthorized to update spaces"`;

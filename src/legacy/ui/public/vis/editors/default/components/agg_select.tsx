@@ -114,7 +114,7 @@ function DefaultEditorAggSelect({
   const onChange = (options: EuiComboBoxOptionProps[]) => {
     const selectedOption = get(options, '0.target');
     if (selectedOption) {
-      setValue(selectedOption);
+      setValue(selectedOption as AggType);
     }
   };
 
@@ -142,6 +142,7 @@ function DefaultEditorAggSelect({
         isClearable={false}
         isInvalid={showValidation ? !isValid : false}
         fullWidth={true}
+        compressed
       />
     </EuiFormRow>
   );

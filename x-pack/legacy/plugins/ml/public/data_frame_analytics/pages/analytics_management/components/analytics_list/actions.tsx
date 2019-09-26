@@ -13,23 +13,44 @@ import {
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
 
-import { DataFrameAnalyticsListRow, DATA_FRAME_TASK_STATE } from './common';
+import { isOutlierAnalysis } from '../../../../common/analytics';
+
+import { getResultsUrl, isDataFrameAnalyticsRunning, DataFrameAnalyticsListRow } from './common';
 import { stopAnalytics } from '../../services/analytics_service';
 
 import { StartAction } from './action_start';
 import { DeleteAction } from './action_delete';
 
+export const AnalyticsViewAction = {
+  isPrimary: true,
+  render: (item: DataFrameAnalyticsListRow) => {
+    return (
+      <EuiButtonEmpty
+        disabled={!isOutlierAnalysis(item.config.analysis)}
+        onClick={() => (window.location.href = getResultsUrl(item.id))}
+        size="xs"
+        color="text"
+        iconType="visTable"
+        aria-label={i18n.translate('xpack.ml.dataframe.analyticsList.viewAriaLabel', {
+          defaultMessage: 'View',
+        })}
+      >
+        {i18n.translate('xpack.ml.dataframe.analyticsList.viewActionName', {
+          defaultMessage: 'View',
+        })}
+      </EuiButtonEmpty>
+    );
+  },
+};
+
 export const getActions = () => {
   const canStartStopDataFrameAnalytics: boolean = checkPermission('canStartStopDataFrameAnalytics');
 
   return [
+    AnalyticsViewAction,
     {
-      isPrimary: true,
       render: (item: DataFrameAnalyticsListRow) => {
-        if (
-          item.stats.state !== DATA_FRAME_TASK_STATE.STARTED &&
-          item.stats.state !== DATA_FRAME_TASK_STATE.REINDEXING
-        ) {
+        if (!isDataFrameAnalyticsRunning(item.stats)) {
           return <StartAction item={item} />;
         }
 

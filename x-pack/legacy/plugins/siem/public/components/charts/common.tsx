@@ -23,20 +23,28 @@ import {
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import moment from 'moment-timezone';
-
-const chartHeight = 74;
+import { DEFAULT_DATE_FORMAT_TZ, DEFAULT_DARK_MODE } from '../../../common/constants';
+export const defaultChartHeight = '100%';
+export const defaultChartWidth = '100%';
 const chartDefaultRotation: Rotation = 0;
 const chartDefaultRendering: Rendering = 'canvas';
-const FlexGroup = styled(EuiFlexGroup)`
-  height: 100%;
+const FlexGroup = styled(EuiFlexGroup)<{ height?: string | null; width?: string | null }>`
+  height: ${({ height }) => (height ? height : '100%')};
+  width: ${({ width }) => (width ? width : '100%')};
 `;
 
 FlexGroup.displayName = 'FlexGroup';
 
 export type UpdateDateRange = (min: number, max: number) => void;
 
-export const ChartHolder = () => (
-  <FlexGroup justifyContent="center" alignItems="center">
+export const ChartHolder = ({
+  height = '100%',
+  width = '100%',
+}: {
+  height?: string | null;
+  width?: string | null;
+}) => (
+  <FlexGroup justifyContent="center" alignItems="center" height={height} width={width}>
     <EuiFlexItem grow={false}>
       <EuiText size="s" textAlign="center" color="subdued">
         {i18n.translate('xpack.siem.chart.dataNotAvailableTitle', {
@@ -47,15 +55,6 @@ export const ChartHolder = () => (
   </FlexGroup>
 );
 
-export const chartDefaultSettings = {
-  rotation: chartDefaultRotation,
-  rendering: chartDefaultRendering,
-  animatedData: false,
-  showLegend: false,
-  showLegendDisplayValue: false,
-  debug: false,
-};
-
 export interface ChartData {
   x: number | string | null;
   y: number | string | null;
@@ -64,6 +63,7 @@ export interface ChartData {
 }
 
 export interface ChartSeriesConfigs {
+  customHeight?: number;
   series?: {
     xScaleType?: ScaleType | undefined;
     yScaleType?: ScaleType | undefined;
@@ -75,16 +75,17 @@ export interface ChartSeriesConfigs {
   settings?: Partial<SettingSpecProps>;
 }
 
-export interface ChartConfigsData {
+export interface ChartSeriesData {
   key: string;
   value: ChartData[] | [] | null;
   color?: string | undefined;
-  areachartConfigs?: ChartSeriesConfigs | undefined;
-  barchartConfigs?: ChartSeriesConfigs | undefined;
 }
 
-export const WrappedByAutoSizer = styled.div`
-  height: ${chartHeight}px;
+export const WrappedByAutoSizer = styled.div<{ height?: string }>`
+  ${style =>
+    `
+    height: ${style.height != null ? style.height : defaultChartHeight};
+  `}
   position: relative;
 
   &:hover {
@@ -138,10 +139,30 @@ export const getTheme = () => {
       barsPadding: 0.5,
     },
   };
-  const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
+  const isDarkMode: boolean = chrome.getUiSettingsClient().get(DEFAULT_DARK_MODE);
   const defaultTheme = isDarkMode ? DARK_THEME : LIGHT_THEME;
   return mergeWithDefaultTheme(theme, defaultTheme);
 };
 
-const kibanaTimezone = chrome.getUiSettingsClient().get('dateFormat:tz');
+export const chartDefaultSettings = {
+  rotation: chartDefaultRotation,
+  rendering: chartDefaultRendering,
+  animatedData: false,
+  showLegend: false,
+  showLegendDisplayValue: false,
+  debug: false,
+  theme: getTheme(),
+};
+
+const kibanaTimezone: string = chrome.getUiSettingsClient().get(DEFAULT_DATE_FORMAT_TZ);
 export const browserTimezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
+
+export const getChartHeight = (customHeight?: number, autoSizerHeight?: number): string => {
+  const height = customHeight || autoSizerHeight;
+  return height ? `${height}px` : defaultChartHeight;
+};
+
+export const getChartWidth = (customWidth?: number, autoSizerWidth?: number): string => {
+  const height = customWidth || autoSizerWidth;
+  return height ? `${height}px` : defaultChartWidth;
+};

@@ -31,16 +31,16 @@ import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { toastNotifications } from 'ui/notify';
-import { InternalCoreStart } from 'src/core/public';
+import { LegacyCoreStart } from 'src/core/public';
+import { KibanaCoreContext } from '../../../../../../observability/public';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { KibanaLink } from '../../../shared/Links/KibanaLink';
 import { createErrorGroupWatch, Schedule } from './createErrorGroupWatch';
 import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
-import { CoreContext } from '../../../../context/CoreContext';
 
 type ScheduleKey = keyof Schedule;
 
-const getUserTimezone = memoize((core: InternalCoreStart): string => {
+const getUserTimezone = memoize((core: LegacyCoreStart): string => {
   return core.uiSettings.get('dateFormat:tz') === 'Browser'
     ? moment.tz.guess()
     : core.uiSettings.get('dateFormat:tz');
@@ -83,7 +83,8 @@ export class WatcherFlyout extends Component<
   WatcherFlyoutProps,
   WatcherFlyoutState
 > {
-  static contextType = CoreContext;
+  static contextType = KibanaCoreContext;
+  context!: React.ContextType<typeof KibanaCoreContext>;
   public state: WatcherFlyoutState = {
     schedule: 'daily',
     threshold: 10,
@@ -156,7 +157,7 @@ export class WatcherFlyout extends Component<
   };
 
   public createWatch = () => {
-    const core: InternalCoreStart = this.context;
+    const core = this.context;
     const { serviceName } = this.props.urlParams;
 
     if (!serviceName) {
@@ -278,7 +279,7 @@ export class WatcherFlyout extends Component<
       return null;
     }
 
-    const core: InternalCoreStart = this.context;
+    const core = this.context;
     const userTimezoneSetting = getUserTimezone(core);
     const dailyTime = this.state.daily;
     const inputTime = `${dailyTime}Z`; // Add tz to make into UTC
@@ -354,6 +355,7 @@ export class WatcherFlyout extends Component<
               onChange={this.onChangeThreshold}
             />
           </EuiFormRow>
+          <EuiSpacer size="m" />
           <h4>
             {i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.triggerScheduleTitle',
@@ -402,6 +404,7 @@ export class WatcherFlyout extends Component<
               disabled={this.state.schedule !== 'daily'}
             />
           </EuiFormRow>
+          <EuiSpacer size="m" />
           <EuiRadio
             id="interval"
             label={i18n.translate(
@@ -427,6 +430,7 @@ export class WatcherFlyout extends Component<
                   compressed
                 >
                   <EuiFieldNumber
+                    compressed
                     icon="clock"
                     min={1}
                     value={this.state.interval.value}
@@ -441,6 +445,7 @@ export class WatcherFlyout extends Component<
                 <EuiSelect
                   value={this.state.interval.unit}
                   onChange={this.onChangeIntervalUnit}
+                  compressed
                   options={[
                     {
                       value: 'm',
@@ -530,12 +535,14 @@ export class WatcherFlyout extends Component<
               }
             >
               <EuiFieldText
+                compressed
                 icon="user"
                 value={this.state.emails}
                 onChange={this.onChangeEmails}
               />
             </EuiFormRow>
           )}
+          <EuiSpacer size="m" />
           <EuiSwitch
             label={i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.sendSlackNotificationLabel',
@@ -581,6 +588,7 @@ export class WatcherFlyout extends Component<
               }
             >
               <EuiFieldText
+                compressed
                 icon="link"
                 value={this.state.slackUrl}
                 onChange={this.onChangeSlackUrl}

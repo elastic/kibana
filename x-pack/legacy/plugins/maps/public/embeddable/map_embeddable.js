@@ -11,14 +11,13 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { Embeddable, APPLY_FILTER_TRIGGER } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { start } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { onlyDisabledFiltersChanged } from '../../../../../../src/legacy/core_plugins/data/public';
 
 import { I18nContext } from 'ui/i18n';
 
 import { GisMap } from '../connected_components/gis_map';
 import { createMapStore } from '../reducers/store';
-import { getInitialLayers } from '../angular/get_initial_layers';
+import { npStart } from 'ui/new_platform';
 import {
   setGotoWithCenter,
   replaceLayerList,
@@ -26,7 +25,6 @@ import {
   setRefreshConfig,
   disableScrollZoom,
 } from '../actions/map_actions';
-import { DEFAULT_IS_LAYER_TOC_OPEN } from '../reducers/ui';
 import {
   setReadOnly,
   setIsLayerTOCOpen,
@@ -47,11 +45,11 @@ export class MapEmbeddable extends Embeddable {
         editUrl: config.editUrl,
         indexPatterns: config.indexPatterns,
         editable: config.editable,
-        defaultTitle: config.savedMap.title
+        defaultTitle: config.title
       },
       parent);
 
-    this._savedMap = config.savedMap;
+    this._layerList = config.layerList;
     this._store = createMapStore();
 
     this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
@@ -103,16 +101,10 @@ export class MapEmbeddable extends Embeddable {
 
     if (_.has(this.input, 'isLayerTOCOpen')) {
       this._store.dispatch(setIsLayerTOCOpen(this.input.isLayerTOCOpen));
-    } else if (this._savedMap.uiStateJSON) {
-      const uiState = JSON.parse(this._savedMap.uiStateJSON);
-      this._store.dispatch(setIsLayerTOCOpen(_.get(uiState, 'isLayerTOCOpen', DEFAULT_IS_LAYER_TOC_OPEN)));
     }
 
     if (_.has(this.input, 'openTOCDetails')) {
       this._store.dispatch(setOpenTOCDetails(this.input.openTOCDetails));
-    } else if (this._savedMap.uiStateJSON) {
-      const uiState = JSON.parse(this._savedMap.uiStateJSON);
-      this._store.dispatch(setOpenTOCDetails(_.get(uiState, 'openTOCDetails', [])));
     }
 
     if (this.input.mapCenter) {
@@ -121,26 +113,21 @@ export class MapEmbeddable extends Embeddable {
         lon: this.input.mapCenter.lon,
         zoom: this.input.mapCenter.zoom,
       }));
-    } else if (this._savedMap.mapStateJSON) {
-      const mapState = JSON.parse(this._savedMap.mapStateJSON);
-      this._store.dispatch(setGotoWithCenter({
-        lat: mapState.center.lat,
-        lon: mapState.center.lon,
-        zoom: mapState.zoom,
-      }));
     }
-    const layerList = getInitialLayers(this._savedMap.layerListJSON);
-    this._store.dispatch(replaceLayerList(layerList));
+
+    this._store.dispatch(replaceLayerList(this._layerList));
     this._dispatchSetQuery(this.input);
     this._dispatchSetRefreshConfig(this.input);
+
+    this._domNode = domNode;
 
     render(
       <Provider store={this._store}>
         <I18nContext>
-          <GisMap addFilters={this.addFilters}/>
+          <GisMap addFilters={this.input.hideFilterActions ? null : this.addFilters}/>
         </I18nContext>
       </Provider>,
-      domNode
+      this._domNode
     );
 
     this._unsubscribeFromStore = this._store.subscribe(() => {
@@ -149,11 +136,9 @@ export class MapEmbeddable extends Embeddable {
   }
 
   addFilters = filters => {
-    start.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+    npStart.plugins.uiActions.executeTriggerActions(APPLY_FILTER_TRIGGER, {
       embeddable: this,
-      triggerContext: {
-        filters,
-      },
+      filters,
     });
   }
 
@@ -162,7 +147,7 @@ export class MapEmbeddable extends Embeddable {
     if (this._unsubscribeFromStore) {
       this._unsubscribeFromStore();
     }
-    this._savedMap.destroy();
+
     if (this._domNode) {
       unmountComponentAtNode(this._domNode);
     }

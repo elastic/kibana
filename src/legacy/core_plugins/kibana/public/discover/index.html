@@ -6,7 +6,9 @@
     config="topNavMenu"
     show-search-bar="true"
     show-date-picker="enableTimeRangeSelector"
+    show-save-query="showSaveQuery"
     query="state.query"
+    saved-query="savedQuery"
     screen-title="screenTitle"
     on-query-submit="updateQueryAndFetch"
     index-patterns="[indexPattern]"
@@ -17,6 +19,9 @@
     is-refresh-paused="refreshInterval.pause"
     refresh-interval="refreshInterval.value"
     on-refresh-change="onRefreshChange"
+    on-saved="onQuerySaved"
+    on-saved-query-updated="onSavedQueryUpdated"
+    on-clear-saved-query="onClearSavedQuery"
   >
   </kbn-top-nav>
 
@@ -157,11 +162,13 @@
 
               </header>
 
-              <div id="discoverHistogram"
+              <discover-histogram
+                class="dscHistogram"
                 ng-show="vis && rows.length !== 0"
-                style="display: flex; height: 200px"
-              >
-              </div>
+                chart-data="histogramData"
+                timefilter-update-handler="timefilterUpdateHandler"
+                watch-depth="reference"
+              ></discover-histogram>
             </section>
 
             <section

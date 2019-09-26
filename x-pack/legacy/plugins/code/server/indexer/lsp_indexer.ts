@@ -13,7 +13,14 @@ import {
   LanguageServerStartFailed,
 } from '../../common/lsp_error_codes';
 import { toCanonicalUrl } from '../../common/uri_util';
-import { Document, IndexStats, IndexStatsKey, LspIndexRequest, RepositoryUri } from '../../model';
+import {
+  Document,
+  IndexStats,
+  IndexStatsKey,
+  IndexerType,
+  LspIndexRequest,
+  RepositoryUri,
+} from '../../model';
 import { GitOperations, HEAD } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
@@ -30,7 +37,7 @@ import {
 import { ALL_RESERVED, DocumentIndexName, ReferenceIndexName, SymbolIndexName } from './schema';
 
 export class LspIndexer extends AbstractIndexer {
-  protected type: string = 'lsp';
+  public type: IndexerType = IndexerType.LSP;
   // Batch index helper for symbols/references
   protected lspBatchIndexHelper: BatchIndexHelper;
   // Batch index helper for documents
@@ -46,10 +53,9 @@ export class LspIndexer extends AbstractIndexer {
     protected readonly options: ServerOptions,
     protected readonly gitOps: GitOperations,
     protected readonly client: EsClient,
-    protected readonly log: Logger
+    protected log: Logger
   ) {
     super(repoUri, revision, client, log);
-
     this.lspBatchIndexHelper = new BatchIndexHelper(client, log, this.LSP_BATCH_INDEX_SIZE);
     this.docBatchIndexHelper = new BatchIndexHelper(client, log, this.DOC_BATCH_INDEX_SIZE);
   }
@@ -114,7 +120,7 @@ export class LspIndexer extends AbstractIndexer {
         yield req;
       }
     } catch (error) {
-      this.log.error(`Prepare lsp indexing requests error.`);
+      this.log.error(`Prepare ${this.type} indexing requests error.`);
       this.log.error(error);
       throw error;
     }
@@ -125,10 +131,10 @@ export class LspIndexer extends AbstractIndexer {
       return await this.gitOps.countRepoFiles(this.repoUri, HEAD);
     } catch (error) {
       if (this.isCancelled()) {
-        this.log.debug(`Indexer got cancelled. Skip get index count error.`);
+        this.log.debug(`Indexer ${this.type} got cancelled. Skip get index count error.`);
         return 1;
       } else {
-        this.log.error(`Get lsp index requests count error.`);
+        this.log.error(`Get ${this.type} index requests count error.`);
         this.log.error(error);
         throw error;
       }

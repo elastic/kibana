@@ -51,6 +51,7 @@ export default {
     '!src/legacy/ui/public/{agg_types,vis}/**/*.d.ts',
   ],
   moduleNameMapper: {
+    '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',
     '^plugins/([^\/.]*)(.*)': '<rootDir>/src/legacy/core_plugins/$1/public$2',
     '^ui/(.*)': '<rootDir>/src/legacy/ui/public/$1',
     '^uiExports/(.*)': '<rootDir>/src/dev/jest/mocks/file_mock.js',
@@ -66,7 +67,7 @@ export default {
   setupFilesAfterEnv: [
     '<rootDir>/src/dev/jest/setup/mocks.js',
   ],
-  coverageDirectory: '<rootDir>/target/jest-coverage',
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
   coverageReporters: [
     'html',
     'text',

@@ -24,7 +24,7 @@ import { getAnomalyExplorerBreadcrumbs } from './breadcrumbs';
 import { checkFullLicense } from '../license/check_license';
 import { checkGetJobsPrivilege } from '../privilege/check_privilege';
 import { getIndexPatterns, loadIndexPatterns } from '../util/index_utils';
-import { MlTimeBuckets } from 'plugins/ml/util/ml_time_buckets';
+import { TimeBuckets } from 'plugins/ml/util/time_buckets';
 import { explorer$ } from './explorer_dashboard_service';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
@@ -74,7 +74,7 @@ module.controller('MlExplorerController', function (
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
 
-  $scope.MlTimeBuckets = MlTimeBuckets;
+  $scope.TimeBuckets = TimeBuckets;
 
   let resizeTimeout = null;
 
@@ -198,19 +198,12 @@ module.controller('MlExplorerController', function (
 
   subscriptions.add(mlTimefilterRefresh$.subscribe(() => {
     if ($scope.jobSelectionUpdateInProgress === false) {
-      explorer$.next({ action: EXPLORER_ACTION.RELOAD });
+      explorer$.next({ action: EXPLORER_ACTION.REDRAW });
     }
   }));
 
   // Refresh all the data when the time range is altered.
-  $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
-    if ($scope.jobSelectionUpdateInProgress === false) {
-      explorer$.next({ action: EXPLORER_ACTION.RELOAD });
-    }
-  });
-
-  // Add a watcher for auto-refresh of the time filter to refresh all the data.
-  subscriptions.add(mlTimefilterRefresh$.subscribe(() => {
+  subscriptions.add(timefilter.getFetch$().subscribe(() => {
     if ($scope.jobSelectionUpdateInProgress === false) {
       explorer$.next({ action: EXPLORER_ACTION.RELOAD });
     }

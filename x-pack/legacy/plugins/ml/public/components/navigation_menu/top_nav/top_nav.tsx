@@ -5,8 +5,10 @@
  */
 
 import React, { FC, Fragment, useState, useEffect } from 'react';
+import { Subscription } from 'rxjs';
 import { EuiSuperDatePicker } from '@elastic/eui';
-import { TimeHistory, TimeRange } from 'ui/timefilter/time_history';
+import { TimeHistory } from 'ui/timefilter';
+import { TimeRange } from 'src/plugins/data/public';
 
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
 import { useUiContext } from '../../../contexts/ui/use_ui_context';
@@ -35,23 +37,22 @@ export const TopNav: FC = () => {
   const [time, setTime] = useState(timefilter.getTime());
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges());
   const [isAutoRefreshSelectorEnabled, setIsAutoRefreshSelectorEnabled] = useState(
-    timefilter.isAutoRefreshSelectorEnabled
+    timefilter.isAutoRefreshSelectorEnabled()
   );
   const [isTimeRangeSelectorEnabled, setIsTimeRangeSelectorEnabled] = useState(
-    timefilter.isTimeRangeSelectorEnabled
+    timefilter.isTimeRangeSelectorEnabled()
   );
 
   const dateFormat = chrome.getUiSettingsClient().get('dateFormat');
 
   useEffect(() => {
-    timefilter.on('refreshIntervalUpdate', timefilterUpdateListener);
-    timefilter.on('timeUpdate', timefilterUpdateListener);
-    timefilter.on('enabledUpdated', timefilterUpdateListener);
+    const subscriptions = new Subscription();
+    subscriptions.add(timefilter.getRefreshIntervalUpdate$().subscribe(timefilterUpdateListener));
+    subscriptions.add(timefilter.getTimeUpdate$().subscribe(timefilterUpdateListener));
+    subscriptions.add(timefilter.getEnabledUpdated$().subscribe(timefilterUpdateListener));
 
     return function cleanup() {
-      timefilter.off('refreshIntervalUpdate', timefilterUpdateListener);
-      timefilter.off('timeUpdate', timefilterUpdateListener);
-      timefilter.off('enabledUpdated', timefilterUpdateListener);
+      subscriptions.unsubscribe();
     };
   }, []);
 
@@ -63,8 +64,8 @@ export const TopNav: FC = () => {
   function timefilterUpdateListener() {
     setTime(timefilter.getTime());
     setRefreshInterval(timefilter.getRefreshInterval());
-    setIsAutoRefreshSelectorEnabled(timefilter.isAutoRefreshSelectorEnabled);
-    setIsTimeRangeSelectorEnabled(timefilter.isTimeRangeSelectorEnabled);
+    setIsAutoRefreshSelectorEnabled(timefilter.isAutoRefreshSelectorEnabled());
+    setIsTimeRangeSelectorEnabled(timefilter.isTimeRangeSelectorEnabled());
   }
 
   function updateFilter({ start, end }: Duration) {

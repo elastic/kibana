@@ -21,21 +21,16 @@ import React, { useCallback } from 'react';
 import {
   EuiPanel,
   EuiTitle,
-  EuiSpacer,
   EuiLink,
   EuiIcon,
-  EuiFormRow,
   EuiTextArea,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { SwitchOption } from '../../kbn_vislib_vis_types/public/controls/switch';
-import { RangeOption } from '../../kbn_vislib_vis_types/public/controls/range';
 import { MarkdownVisParams } from './types';
 
 function MarkdownOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisParams>) {
@@ -46,58 +41,44 @@ function MarkdownOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisP
 
   return (
     <EuiPanel paddingSize="s">
-      <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="baseline">
+      <EuiFlexGroup direction="column" gutterSize="m" className="mkdEditor">
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h2>Markdown</h2>
-          </EuiTitle>
+          <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="baseline">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h2>Markdown</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">
+                <EuiLink
+                  href="https://help.github.com/articles/github-flavored-markdown/"
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="visTypeMarkdown.params.helpLinkLabel"
+                    defaultMessage="Help"
+                  />{' '}
+                  <EuiIcon type="popout" size="s" />
+                </EuiLink>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs">
-            <EuiLink
-              href="https://help.github.com/articles/github-flavored-markdown/"
-              target="_blank"
-            >
-              <FormattedMessage id="visTypeMarkdown.params.helpLinkLabel" defaultMessage="Help" />{' '}
-              <EuiIcon type="popout" size="s" />
-            </EuiLink>
-          </EuiText>
+        <EuiFlexItem>
+          <EuiTextArea
+            id="markdownVisInput"
+            className="visEditor--markdown__textarea"
+            value={stateParams.markdown}
+            onChange={({ target: { value } }) => onMarkdownUpdate(value)}
+            fullWidth={true}
+            data-test-subj="markdownTextarea"
+            resize="none"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
-
-      <RangeOption
-        label={i18n.translate('visTypeMarkdown.params.fontSizeLabel', {
-          defaultMessage: 'Base font size in points',
-        })}
-        max={36}
-        min={8}
-        paramName="fontSize"
-        showInput
-        value={stateParams.fontSize}
-        setValue={setValue}
-      />
-
-      <SwitchOption
-        label={i18n.translate('visTypeMarkdown.params.openLinksLabel', {
-          defaultMessage: 'Open links in new tab',
-        })}
-        paramName="openLinksInNewTab"
-        value={stateParams.openLinksInNewTab}
-        setValue={setValue}
-      />
-      <EuiFormRow fullWidth={true} compressed>
-        <EuiTextArea
-          id="markdownVisInput"
-          value={stateParams.markdown}
-          onChange={({ target: { value } }) => onMarkdownUpdate(value)}
-          rows={20}
-          fullWidth={true}
-          data-test-subj="markdownTextarea"
-          // resize="none"
-        />
-      </EuiFormRow>
     </EuiPanel>
   );
 }

@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
-import { IconType } from '@elastic/eui';
+import { EuiFlexGroup, EuiSpacer, IconType } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
@@ -128,10 +126,11 @@ interface GenericDetailsProps {
   contextId: string;
   text: string;
   fileIcon: IconType;
+  timelineId: string;
 }
 
 export const AuditdGenericFileDetails = pure<GenericDetailsProps>(
-  ({ data, contextId, text, fileIcon = 'document' }) => {
+  ({ data, contextId, text, fileIcon = 'document', timelineId }) => {
     const id = data._id;
     const session: string | null | undefined = get('auditd.session[0]', data);
     const hostName: string | null | undefined = get('host.name[0]', data);
@@ -171,7 +170,7 @@ export const AuditdGenericFileDetails = pure<GenericDetailsProps>(
             result={result}
           />
           <EuiSpacer size="s" />
-          <NetflowRenderer data={data} />
+          <NetflowRenderer data={data} timelineId={timelineId} />
         </Details>
       );
     } else {

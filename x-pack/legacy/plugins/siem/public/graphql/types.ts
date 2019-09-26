@@ -111,14 +111,14 @@ export interface Source {
   status: SourceStatus;
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
-  /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
-  Events: EventsData;
 
   Timeline: TimelineData;
 
   TimelineDetails: TimelineDetailsData;
 
   LastEventTime: LastEventTimeData;
+
+  EventsOverTime: EventsOverTimeData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
@@ -339,20 +339,36 @@ export interface Inspect {
   response: string[];
 }
 
-export interface EventsData {
-  edges: EcsEdges[];
+export interface TimelineData {
+  edges: TimelineEdges[];
 
   totalCount: number;
 
-  pageInfo: PageInfoPaginated;
+  pageInfo: PageInfo;
 
   inspect?: Inspect | null;
 }
 
-export interface EcsEdges {
-  node: Ecs;
+export interface TimelineEdges {
+  node: TimelineItem;
 
   cursor: CursorType;
+}
+
+export interface TimelineItem {
+  _id: string;
+
+  _index?: string | null;
+
+  data: TimelineNonEcsData[];
+
+  ecs: Ecs;
+}
+
+export interface TimelineNonEcsData {
+  field: string;
+
+  value?: ToStringArray | null;
 }
 
 export interface Ecs {
@@ -807,38 +823,6 @@ export interface SshEcsFields {
   signature?: ToStringArray | null;
 }
 
-export interface TimelineData {
-  edges: TimelineEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfo;
-
-  inspect?: Inspect | null;
-}
-
-export interface TimelineEdges {
-  node: TimelineItem;
-
-  cursor: CursorType;
-}
-
-export interface TimelineItem {
-  _id: string;
-
-  _index?: string | null;
-
-  data: TimelineNonEcsData[];
-
-  ecs: Ecs;
-}
-
-export interface TimelineNonEcsData {
-  field: string;
-
-  value?: ToStringArray | null;
-}
-
 export interface PageInfo {
   endCursor?: CursorType | null;
 
@@ -863,6 +847,22 @@ export interface LastEventTimeData {
   lastSeen?: Date | null;
 
   inspect?: Inspect | null;
+}
+
+export interface EventsOverTimeData {
+  inspect?: Inspect | null;
+
+  eventsOverTime: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface MatrixOverTimeHistogramData {
+  x: number;
+
+  y: number;
+
+  g: string;
 }
 
 export interface HostsData {
@@ -944,11 +944,13 @@ export interface Overview {
 }
 
 export interface AutonomousSystem {
-  as_org?: string | null;
+  number?: number | null;
 
-  asn?: string | null;
+  organization?: AutonomousSystemOrganization | null;
+}
 
-  ip?: string | null;
+export interface AutonomousSystemOrganization {
+  name?: string | null;
 }
 
 export interface DomainsData {
@@ -1166,33 +1168,57 @@ export interface NetworkTopNFlowEdges {
 export interface NetworkTopNFlowItem {
   _id?: string | null;
 
-  source?: TopNFlowItem | null;
+  source?: TopNFlowItemSource | null;
 
-  destination?: TopNFlowItem | null;
-
-  client?: TopNFlowItem | null;
-
-  server?: TopNFlowItem | null;
+  destination?: TopNFlowItemDestination | null;
 
   network?: TopNFlowNetworkEcsField | null;
 }
 
-export interface TopNFlowItem {
-  count?: number | null;
+export interface TopNFlowItemSource {
+  autonomous_system?: AutonomousSystemItem | null;
 
   domain?: string[] | null;
 
   ip?: string | null;
+
+  location?: GeoItem | null;
+
+  flows?: number | null;
+
+  destination_ips?: number | null;
+}
+
+export interface AutonomousSystemItem {
+  name?: string | null;
+
+  number?: number | null;
+}
+
+export interface GeoItem {
+  geo?: GeoEcsFields | null;
+
+  flowTarget?: FlowTarget | null;
+}
+
+export interface TopNFlowItemDestination {
+  autonomous_system?: AutonomousSystemItem | null;
+
+  domain?: string[] | null;
+
+  ip?: string | null;
+
+  location?: GeoItem | null;
+
+  flows?: number | null;
+
+  source_ips?: number | null;
 }
 
 export interface TopNFlowNetworkEcsField {
-  bytes?: number | null;
+  bytes_in?: number | null;
 
-  packets?: number | null;
-
-  transport?: string | null;
-
-  direction?: NetworkDirectionEcs[] | null;
+  bytes_out?: number | null;
 }
 
 export interface NetworkDnsData {
@@ -1485,6 +1511,12 @@ export interface ResponseFavoriteTimeline {
   favorite?: FavoriteTimelineResult[] | null;
 }
 
+export interface EcsEdges {
+  node: Ecs;
+
+  cursor: CursorType;
+}
+
 export interface EventsTimelineData {
   edges: EcsEdges[];
 
@@ -1561,12 +1593,6 @@ export interface PaginationInputPaginated {
   querySize: number;
 }
 
-export interface SortField {
-  sortFieldId: string;
-
-  direction: Direction;
-}
-
 export interface PaginationInput {
   /** The limit parameter allows you to configure the maximum amount of items to be returned */
   limit: number;
@@ -1574,6 +1600,12 @@ export interface PaginationInput {
   cursor?: string | null;
   /** The tiebreaker parameter allow to be more precise to fetch the next item */
   tiebreaker?: string | null;
+}
+
+export interface SortField {
+  sortFieldId: string;
+
+  direction: Direction;
 }
 
 export interface LastTimeDetails {
@@ -1792,17 +1824,6 @@ export interface AuthenticationsSourceArgs {
 
   defaultIndex: string[];
 }
-export interface EventsSourceArgs {
-  pagination: PaginationInputPaginated;
-
-  sortField: SortField;
-
-  timerange?: TimerangeInput | null;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
 export interface TimelineSourceArgs {
   pagination: PaginationInput;
 
@@ -1829,6 +1850,13 @@ export interface LastEventTimeSourceArgs {
   indexKey: LastEventIndexKey;
 
   details: LastTimeDetails;
+
+  defaultIndex: string[];
+}
+export interface EventsOverTimeSourceArgs {
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
 
   defaultIndex: string[];
 }
@@ -1955,9 +1983,7 @@ export interface NetworkTopNFlowSourceArgs {
 
   filterQuery?: string | null;
 
-  flowDirection: FlowDirection;
-
-  flowTarget: FlowTarget;
+  flowTarget: FlowTargetNew;
 
   pagination: PaginationInputPaginated;
 
@@ -2123,10 +2149,17 @@ export enum UsersFields {
   count = 'count',
 }
 
+export enum FlowTargetNew {
+  destination = 'destination',
+  source = 'source',
+}
+
 export enum NetworkTopNFlowFields {
-  bytes = 'bytes',
-  packets = 'packets',
-  ipCount = 'ipCount',
+  bytes_in = 'bytes_in',
+  bytes_out = 'bytes_out',
+  flows = 'flows',
+  destination_ips = 'destination_ips',
+  source_ips = 'source_ips',
 }
 
 export enum NetworkDnsFields {
@@ -2408,14 +2441,12 @@ export namespace GetDomainsQuery {
   };
 }
 
-export namespace GetEventsQuery {
+export namespace GetEventsOverTimeQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;
-    pagination: PaginationInputPaginated;
-    sortField: SortField;
-    filterQuery?: string | null;
     defaultIndex: string[];
+    filterQuery?: string | null;
     inspect: boolean;
   };
 
@@ -2430,29 +2461,27 @@ export namespace GetEventsQuery {
 
     id: string;
 
-    Events: Events;
+    EventsOverTime: EventsOverTime;
   };
 
-  export type Events = {
-    __typename?: 'EventsData';
+  export type EventsOverTime = {
+    __typename?: 'EventsOverTimeData';
+
+    eventsOverTime: _EventsOverTime[];
 
     totalCount: number;
 
-    pageInfo: PageInfo;
-
     inspect?: Inspect | null;
-
-    edges: Edges[];
   };
 
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
+  export type _EventsOverTime = {
+    __typename?: 'MatrixOverTimeHistogramData';
 
-    activePage: number;
+    x: number;
 
-    fakeTotalCount: number;
+    y: number;
 
-    showMorePagesIndicator: boolean;
+    g: string;
   };
 
   export type Inspect = {
@@ -2461,116 +2490,6 @@ export namespace GetEventsQuery {
     dsl: string[];
 
     response: string[];
-  };
-
-  export type Edges = {
-    __typename?: 'EcsEdges';
-
-    node: Node;
-  };
-
-  export type Node = {
-    __typename?: 'ECS';
-
-    _id: string;
-
-    _index?: string | null;
-
-    timestamp?: Date | null;
-
-    event?: Event | null;
-
-    host?: Host | null;
-
-    message?: ToStringArray | null;
-
-    source?: _Source | null;
-
-    destination?: Destination | null;
-
-    suricata?: Suricata | null;
-
-    user?: User | null;
-
-    zeek?: Zeek | null;
-  };
-
-  export type Event = {
-    __typename?: 'EventEcsFields';
-
-    action?: ToStringArray | null;
-
-    category?: ToStringArray | null;
-
-    dataset?: ToStringArray | null;
-
-    id?: ToStringArray | null;
-
-    module?: ToStringArray | null;
-
-    severity?: ToNumberArray | null;
-  };
-
-  export type Host = {
-    __typename?: 'HostEcsFields';
-
-    name?: ToStringArray | null;
-
-    ip?: ToStringArray | null;
-
-    id?: ToStringArray | null;
-  };
-
-  export type _Source = {
-    __typename?: 'SourceEcsFields';
-
-    ip?: ToStringArray | null;
-
-    port?: ToNumberArray | null;
-  };
-
-  export type Destination = {
-    __typename?: 'DestinationEcsFields';
-
-    ip?: ToStringArray | null;
-
-    port?: ToNumberArray | null;
-  };
-
-  export type Suricata = {
-    __typename?: 'SuricataEcsFields';
-
-    eve?: Eve | null;
-  };
-
-  export type Eve = {
-    __typename?: 'SuricataEveData';
-
-    proto?: ToStringArray | null;
-
-    flow_id?: ToNumberArray | null;
-
-    alert?: Alert | null;
-  };
-
-  export type Alert = {
-    __typename?: 'SuricataAlertData';
-
-    signature?: ToStringArray | null;
-
-    signature_id?: ToNumberArray | null;
-  };
-
-  export type User = {
-    __typename?: 'UserEcsFields';
-
-    name?: ToStringArray | null;
-  };
-
-  export type Zeek = {
-    __typename?: 'ZeekEcsFields';
-
-    session_id?: ToStringArray | null;
   };
 }
 
@@ -2879,11 +2798,15 @@ export namespace GetIpOverviewQuery {
   export type AutonomousSystem = {
     __typename?: 'AutonomousSystem';
 
-    as_org?: string | null;
+    number?: number | null;
 
-    asn?: string | null;
+    organization?: Organization | null;
+  };
 
-    ip?: string | null;
+  export type Organization = {
+    __typename?: 'AutonomousSystemOrganization';
+
+    name?: string | null;
   };
 
   export type Geo = {
@@ -2927,11 +2850,15 @@ export namespace GetIpOverviewQuery {
   export type _AutonomousSystem = {
     __typename?: 'AutonomousSystem';
 
-    as_org?: string | null;
+    number?: number | null;
 
-    asn?: string | null;
+    organization?: _Organization | null;
+  };
 
-    ip?: string | null;
+  export type _Organization = {
+    __typename?: 'AutonomousSystemOrganization';
+
+    name?: string | null;
   };
 
   export type _Geo = {
@@ -3277,11 +3204,10 @@ export namespace GetNetworkDnsQuery {
 export namespace GetNetworkTopNFlowQuery {
   export type Variables = {
     sourceId: string;
-    flowDirection: FlowDirection;
     filterQuery?: string | null;
     pagination: PaginationInputPaginated;
     sort: NetworkTopNFlowSortField;
-    flowTarget: FlowTarget;
+    flowTarget: FlowTargetNew;
     timerange: TimerangeInput;
     defaultIndex: string[];
     inspect: boolean;
@@ -3328,61 +3254,111 @@ export namespace GetNetworkTopNFlowQuery {
 
     destination?: Destination | null;
 
-    client?: Client | null;
-
-    server?: Server | null;
-
     network?: Network | null;
   };
 
   export type _Source = {
-    __typename?: 'TopNFlowItem';
+    __typename?: 'TopNFlowItemSource';
 
-    count?: number | null;
+    autonomous_system?: AutonomousSystem | null;
+
+    domain?: string[] | null;
 
     ip?: string | null;
 
-    domain?: string[] | null;
+    location?: Location | null;
+
+    flows?: number | null;
+
+    destination_ips?: number | null;
+  };
+
+  export type AutonomousSystem = {
+    __typename?: 'AutonomousSystemItem';
+
+    name?: string | null;
+
+    number?: number | null;
+  };
+
+  export type Location = {
+    __typename?: 'GeoItem';
+
+    geo?: Geo | null;
+
+    flowTarget?: FlowTarget | null;
+  };
+
+  export type Geo = {
+    __typename?: 'GeoEcsFields';
+
+    continent_name?: ToStringArray | null;
+
+    country_name?: ToStringArray | null;
+
+    country_iso_code?: ToStringArray | null;
+
+    city_name?: ToStringArray | null;
+
+    region_iso_code?: ToStringArray | null;
+
+    region_name?: ToStringArray | null;
   };
 
   export type Destination = {
-    __typename?: 'TopNFlowItem';
+    __typename?: 'TopNFlowItemDestination';
 
-    count?: number | null;
+    autonomous_system?: _AutonomousSystem | null;
+
+    domain?: string[] | null;
 
     ip?: string | null;
 
-    domain?: string[] | null;
+    location?: _Location | null;
+
+    flows?: number | null;
+
+    source_ips?: number | null;
   };
 
-  export type Client = {
-    __typename?: 'TopNFlowItem';
+  export type _AutonomousSystem = {
+    __typename?: 'AutonomousSystemItem';
 
-    count?: number | null;
+    name?: string | null;
 
-    ip?: string | null;
-
-    domain?: string[] | null;
+    number?: number | null;
   };
 
-  export type Server = {
-    __typename?: 'TopNFlowItem';
+  export type _Location = {
+    __typename?: 'GeoItem';
 
-    count?: number | null;
+    geo?: _Geo | null;
 
-    ip?: string | null;
+    flowTarget?: FlowTarget | null;
+  };
 
-    domain?: string[] | null;
+  export type _Geo = {
+    __typename?: 'GeoEcsFields';
+
+    continent_name?: ToStringArray | null;
+
+    country_name?: ToStringArray | null;
+
+    country_iso_code?: ToStringArray | null;
+
+    city_name?: ToStringArray | null;
+
+    region_iso_code?: ToStringArray | null;
+
+    region_name?: ToStringArray | null;
   };
 
   export type Network = {
     __typename?: 'TopNFlowNetworkEcsField';
 
-    bytes?: number | null;
+    bytes_in?: number | null;
 
-    direction?: NetworkDirectionEcs[] | null;
-
-    packets?: number | null;
+    bytes_out?: number | null;
   };
 
   export type Cursor = {

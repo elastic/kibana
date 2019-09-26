@@ -17,7 +17,12 @@ export const registerHelpers = ({ supertest }) => {
     indexPatterns: INDEX_PATTERNS,
     version: 1,
     settings: {
-      number_of_shards: 1
+      number_of_shards: 1,
+      index: {
+        lifecycle: {
+          name: 'my_policy',
+        }
+      }
     },
     mappings: {
       _source: {
@@ -49,11 +54,18 @@ export const registerHelpers = ({ supertest }) => {
       .delete(`${API_BASE_PATH}/templates/${templatesToDelete.map(template => encodeURIComponent(template)).join(',')}`)
       .set('kbn-xsrf', 'xxx');
 
+  const updateTemplate = (payload, templateName) =>
+    supertest
+      .put(`${API_BASE_PATH}/templates/${templateName}`)
+      .set('kbn-xsrf', 'xxx')
+      .send(payload);
+
   return {
     getAllTemplates,
     getOneTemplate,
     getTemplatePayload,
     createTemplate,
+    updateTemplate,
     deleteTemplates,
   };
 };

@@ -70,7 +70,7 @@ interface DispatchProps {
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
 
-const statefulFlyoutHeader = React.memo<Props>(
+const StatefulFlyoutHeader = React.memo<Props>(
   ({
     associateNote,
     createTimeline,
@@ -112,7 +112,7 @@ const statefulFlyoutHeader = React.memo<Props>(
   )
 );
 
-statefulFlyoutHeader.displayName = 'statefulFlyoutHeader';
+StatefulFlyoutHeader.displayName = 'StatefulFlyoutHeader';
 
 const emptyHistory: History[] = []; // stable reference
 
@@ -212,4 +212,4 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
 export const FlyoutHeader = connect(
   makeMapStateToProps,
   mapDispatchToProps
-)(statefulFlyoutHeader);
+)(StatefulFlyoutHeader);

@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 
-import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexItem, EuiLoadingSpinner, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
-import { EuiSpacer } from '@elastic/eui';
 import { chunk as _chunk } from 'lodash/fp';
 import {
   StatItemsComponent,
@@ -122,21 +120,14 @@ const FlexGroup = styled(EuiFlexGroup)`
 
 FlexGroup.displayName = 'FlexGroup';
 
-export const KpiNetworkBaseComponent = ({
-  fieldsMapping,
-  data,
-  id,
-  from,
-  to,
-  narrowDateRange,
-}: {
+export const KpiNetworkBaseComponent = React.memo<{
   fieldsMapping: Readonly<StatItems[]>;
   data: KpiNetworkData;
   id: string;
   from: number;
   to: number;
   narrowDateRange: UpdateDateRange;
-}) => {
+}>(({ fieldsMapping, data, id, from, to, narrowDateRange }) => {
   const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
     fieldsMapping,
     data,
@@ -153,7 +144,7 @@ export const KpiNetworkBaseComponent = ({
       })}
     </EuiFlexGroup>
   );
-};
+});
 
 export const KpiNetworkComponent = React.memo<KpiNetworkProps>(
   ({ data, from, id, loading, to, narrowDateRange }) => {

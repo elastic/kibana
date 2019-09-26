@@ -6,12 +6,17 @@
 
 import { cloneDeep } from 'lodash';
 import { Request } from 'src/legacy/server/kbn_server';
-import { Field, Aggregation, FieldId, NewJobCaps } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../common/constants/field_types';
+import {
+  Field,
+  Aggregation,
+  FieldId,
+  NewJobCaps,
+  METRIC_AGG_TYPE,
+} from '../../../../common/types/fields';
+import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/common';
+import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { rollupServiceProvider, RollupJob, RollupFields } from './rollup';
 import { aggregations } from './aggregations';
-
-const METRIC_AGG_TYPE: string = 'metrics';
 
 const supportedTypes: string[] = [
   ES_FIELD_TYPES.DATE,
@@ -25,6 +30,7 @@ const supportedTypes: string[] = [
   ES_FIELD_TYPES.HALF_FLOAT,
   ES_FIELD_TYPES.SCALED_FLOAT,
   ES_FIELD_TYPES.SHORT,
+  ES_FIELD_TYPES.IP,
 ];
 
 export function fieldServiceProvider(
@@ -126,25 +132,30 @@ async function combineFieldsAndAggs(
   aggs: Aggregation[],
   rollupFields: RollupFields
 ): Promise<NewJobCaps> {
-  const textAndKeywordFields = getTextAndKeywordFields(fields);
+  const keywordFields = getKeywordFields(fields);
   const numericalFields = getNumericalFields(fields);
+  const ipFields = getIpFields(fields);
 
   const mix = mixFactory(rollupFields);
 
   aggs.forEach(a => {
     if (a.type === METRIC_AGG_TYPE) {
-      switch (a.kibanaName) {
-        case 'cardinality':
-          textAndKeywordFields.forEach(f => {
+      switch (a.dslName) {
+        case ES_AGGREGATION.COUNT:
+          // count doesn't take any fields, so break here
+          break;
+        case ES_AGGREGATION.CARDINALITY:
+          // distinct count (i.e. cardinality) takes keywords, ips
+          // as well as numerical fields
+          keywordFields.forEach(f => {
             mix(f, a);
           });
-          numericalFields.forEach(f => {
+          ipFields.forEach(f => {
             mix(f, a);
           });
-          break;
-        case 'count':
-          break;
+        // note, no break to fall through to add numerical fields.
         default:
+          // all other aggs take numerical fields
           numericalFields.forEach(f => {
             mix(f, a);
           });
@@ -177,7 +188,7 @@ function mixFactory(rollupFields: RollupFields) {
   return function mix(field: Field, agg: Aggregation): void {
     if (
       isRollup === false ||
-      (rollupFields[field.id] && rollupFields[field.id].find(f => f.agg === agg.kibanaName))
+      (rollupFields[field.id] && rollupFields[field.id].find(f => f.agg === agg.dslName))
     ) {
       if (field.aggs !== undefined) {
         field.aggs.push(agg);
@@ -208,15 +219,24 @@ function combineAllRollupFields(rollupConfigs: RollupJob[]): RollupFields {
   return rollupFields;
 }
 
-function getTextAndKeywordFields(fields: Field[]): Field[] {
-  return fields.filter(f => f.type === ES_FIELD_TYPES.KEYWORD || f.type === ES_FIELD_TYPES.TEXT);
+function getKeywordFields(fields: Field[]): Field[] {
+  return fields.filter(f => f.type === ES_FIELD_TYPES.KEYWORD);
+}
+
+function getIpFields(fields: Field[]): Field[] {
+  return fields.filter(f => f.type === ES_FIELD_TYPES.IP);
 }
 
 function getNumericalFields(fields: Field[]): Field[] {
   return fields.filter(
     f =>
+      f.type === ES_FIELD_TYPES.LONG ||
+      f.type === ES_FIELD_TYPES.INTEGER ||
+      f.type === ES_FIELD_TYPES.SHORT ||
+      f.type === ES_FIELD_TYPES.BYTE ||
       f.type === ES_FIELD_TYPES.DOUBLE ||
       f.type === ES_FIELD_TYPES.FLOAT ||
-      f.type === ES_FIELD_TYPES.LONG
+      f.type === ES_FIELD_TYPES.HALF_FLOAT ||
+      f.type === ES_FIELD_TYPES.SCALED_FLOAT
   );
 }

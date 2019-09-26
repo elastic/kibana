@@ -7,8 +7,10 @@
 import Joi from 'joi';
 import { MAX_SPACE_INITIALS } from '../../common/constants';
 
+export const SPACE_ID_REGEX = /^[a-z0-9_\-]+$/;
+
 export const spaceSchema = Joi.object({
-  id: Joi.string().regex(/^[a-z0-9_\-]+$/, `lower case, a-z, 0-9, "_", and "-" are allowed`),
+  id: Joi.string().regex(SPACE_ID_REGEX, `lower case, a-z, 0-9, "_", and "-" are allowed`),
   name: Joi.string().required(),
   description: Joi.string().allow(''),
   initials: Joi.string().max(MAX_SPACE_INITIALS),
@@ -17,4 +19,7 @@ export const spaceSchema = Joi.object({
     .items(Joi.string())
     .default([]),
   _reserved: Joi.boolean(),
+  imageUrl: Joi.string()
+    .allow('')
+    .regex(/^data:image.*$/, `Image URL should start with 'data:image'`),
 }).default();

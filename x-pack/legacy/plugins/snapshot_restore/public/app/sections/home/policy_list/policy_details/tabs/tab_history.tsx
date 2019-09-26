@@ -55,12 +55,11 @@ export const TabHistory: React.FunctionComponent<Props> = ({ policy }) => {
 
         <EuiDescriptionList textStyle="reverse">
           <EuiFlexGroup>
-            <EuiFlexItem data-test-subj="successTime">
+            <EuiFlexItem data-test-subj="successDate">
               <EuiDescriptionListTitle data-test-subj="title">
                 <FormattedMessage
-                  id="xpack.snapshotRestore.policyDetails.lastSuccess.timeLabel"
-                  defaultMessage="Succeeded on"
-                  description="Title for date time. Example: Succeeded on Jul 16, 2019 6:30 PM PDT"
+                  id="xpack.snapshotRestore.policyDetails.lastSuccess.dateLabel"
+                  defaultMessage="Date"
                 />
               </EuiDescriptionListTitle>
 
@@ -107,12 +106,11 @@ export const TabHistory: React.FunctionComponent<Props> = ({ policy }) => {
 
         <EuiDescriptionList textStyle="reverse">
           <EuiFlexGroup>
-            <EuiFlexItem data-test-subj="failureTime">
+            <EuiFlexItem data-test-subj="failureDate">
               <EuiDescriptionListTitle data-test-subj="title">
                 <FormattedMessage
-                  id="xpack.snapshotRestore.policyDetails.lastFailure.timeLabel"
-                  defaultMessage="Failed on"
-                  description="Title for date time. Example: Failed on Jul 16, 2019 6:30 PM PDT"
+                  id="xpack.snapshotRestore.policyDetails.lastFailure.dateLabel"
+                  defaultMessage="Date"
                 />
               </EuiDescriptionListTitle>
 
@@ -140,7 +138,7 @@ export const TabHistory: React.FunctionComponent<Props> = ({ policy }) => {
               <EuiDescriptionListTitle data-test-subj="title">
                 <FormattedMessage
                   id="xpack.snapshotRestore.policyDetails.lastFailure.detailsLabel"
-                  defaultMessage="Failure details"
+                  defaultMessage="Details"
                 />
               </EuiDescriptionListTitle>
               <EuiSpacer size="s" />
@@ -154,13 +152,13 @@ export const TabHistory: React.FunctionComponent<Props> = ({ policy }) => {
                   setOptions={{
                     showLineNumbers: false,
                     tabSize: 2,
-                    maxLines: Infinity,
                   }}
                   editorProps={{
                     $blockScrolling: Infinity,
                   }}
                   minLines={6}
-                  maxLines={6}
+                  maxLines={12}
+                  wrapEnabled={true}
                   showGutter={false}
                   aria-label={
                     <FormattedMessage
@@ -191,7 +189,7 @@ export const TabHistory: React.FunctionComponent<Props> = ({ policy }) => {
       <p>
         <FormattedMessage
           id="xpack.snapshotRestore.policyDetails.noHistoryMessage"
-          defaultMessage="This policy has not been executed yet. It will automatically run on {date} at {time}."
+          defaultMessage="This policy will run on {date} at {time}."
           values={{
             date: <FormattedDateTime epochMs={nextExecutionMillis} type="date" />,
             time: <FormattedDateTime epochMs={nextExecutionMillis} type="time" />,

@@ -38,12 +38,16 @@ export interface ConfigObject {
   get: (path?: string) => any;
 }
 
-export type EvalArgs = any[];
-export type EvalFn<T> = (...evalArgs: EvalArgs) => T;
-
-export interface EvaluateOptions {
-  fn: EvalFn<any>;
-  args: EvalArgs; // Arguments to be passed into the function defined by fn.
+export interface BrowserConfig {
+  inspect: boolean;
+  userDataDir: string;
+  viewport: { width: number; height: number };
+  disableSandbox: boolean;
+  proxy: {
+    enabled: boolean;
+    server: string;
+    bypass?: string[];
+  };
 }
 
 export interface ElementPosition {
@@ -58,10 +62,6 @@ export interface ElementPosition {
     x: number;
     y: number;
   };
-}
-
-export interface HeadlessElementInfo {
-  position: ElementPosition;
 }
 
 export interface ConditionalHeaders {
@@ -86,56 +86,17 @@ export interface TimeRangeParams {
   max: Date | string | number;
 }
 
-type PostPayloadState = Partial<{
-  state: {
-    query: any;
-    sort: any[];
-    columns: string[]; // TODO
-  };
-}>;
-
 // retain POST payload data, needed for async
-export interface JobParamPostPayload extends PostPayloadState {
+export interface JobParamPostPayload {
   timerange: TimeRangeParams;
 }
 
-// params that come into a request
-export interface JobParams {
-  savedObjectType: string;
-  savedObjectId: string;
-  isImmediate: boolean;
-  post?: JobParamPostPayload;
-  panel?: any; // has to be resolved by the request handler
-  visType?: string; // has to be resolved by the request handler
-
-  indexPatternId?: string; // for export_types/csv
-}
-
 export interface JobDocPayload {
-  basePath?: string;
-  forceNow?: string;
   headers?: Record<string, string>;
-  jobParams: JobParams;
-  relativeUrl?: string;
-  timeRange?: any;
+  jobParams: object;
   title: string;
-  urls?: string[];
-  type?: string | null; // string if completed job; null if incomplete job;
-  objects?: string | null; // string if completed job; null if incomplete job;
+  type: string | null;
 }
-
-export type JobDocPayloadScreenshot = JobDocPayload & {
-  browserTimezone: string;
-  layout: any;
-};
-
-export type JobDocPayloadDiscoverCsv = JobDocPayload & {
-  searchRequest: any;
-  fields: any;
-  indexPatternSavedObject: any;
-  metaFields: any;
-  conflictedTypesFields: any;
-};
 
 export interface JobDocOutput {
   content: string; // encoded content
@@ -171,7 +132,6 @@ export interface JobDocOutputExecuted {
   content: string | null; // defaultOutput is null
   max_size_reached: boolean;
   size: number;
-  csv_contains_formulas?: string[];
 }
 
 export interface ESQueueWorker {
@@ -179,13 +139,16 @@ export interface ESQueueWorker {
 }
 
 export type ESQueueCreateJobFn = (
-  jobParams: JobParams,
+  jobParams: object,
   headers: ConditionalHeaders,
   request: Request
-) => Promise<JobParams>;
+) => Promise<object>;
 
-export type ESQueueWorkerExecuteFn = (job: JobDoc, cancellationToken: any) => void;
+export type ESQueueWorkerExecuteFn = (jobId: string, job: JobDoc, cancellationToken: any) => void;
+
+export type JobIDForImmediate = null;
 export type ImmediateExecuteFn = (
+  jobId: JobIDForImmediate,
   jobDocPayload: JobDocPayload,
   request: Request
 ) => Promise<JobDocOutputExecuted>;
@@ -219,6 +182,7 @@ export interface ExportTypeDefinition {
   validLicenses: string[];
 }
 
+// Note: this seems to be nearly a duplicate of ExportTypeDefinition
 export interface ExportType {
   jobType: string;
   createJobFactory: any;
@@ -229,4 +193,5 @@ export interface ExportTypesRegistry {
   register: (exportTypeDefinition: ExportTypeDefinition) => void;
 }
 
+// Prefer to import this type using: `import { LevelLogger } from 'relative/path/server/lib';`
 export { LevelLogger as Logger } from './server/lib/level_logger';

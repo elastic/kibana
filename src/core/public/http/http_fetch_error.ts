@@ -18,7 +18,12 @@
  */
 
 export class HttpFetchError extends Error {
-  constructor(message: string, public readonly response?: Response, public readonly body?: any) {
+  constructor(
+    message: string,
+    public readonly request: Request,
+    public readonly response?: Response,
+    public readonly body?: any
+  ) {
     super(message);
 
     // captureStackTrace is only available in the V8 engine, so any browser using

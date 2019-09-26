@@ -17,12 +17,13 @@ const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
 describe('TaskManager', () => {
   let clock: sinon.SinonFakeTimers;
   const defaultConfig = {
-    task_manager: {
-      max_workers: 10,
-      override_num_workers: {},
-      index: 'foo',
-      max_attempts: 9,
-      poll_interval: 6000000,
+    xpack: {
+      task_manager: {
+        max_workers: 10,
+        index: 'foo',
+        max_attempts: 9,
+        poll_interval: 6000000,
+      },
     },
   };
   const config = {
@@ -42,27 +43,106 @@ describe('TaskManager', () => {
 
   afterEach(() => clock.restore());
 
-  test('disallows schedule before init', async () => {
+  test('allows and queues scheduling tasks before starting', async () => {
     const client = new TaskManager(taskManagerOpts);
+    client.registerTaskDefinitions({
+      foo: {
+        type: 'foo',
+        title: 'Foo',
+        createTaskRunner: jest.fn(),
+      },
+    });
     const task = {
       taskType: 'foo',
       params: {},
       state: {},
     };
-    await expect(client.schedule(task)).rejects.toThrow(/^NotInitialized: .*/i);
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'task',
+      attributes: {},
+      references: [],
+    });
+    const promise = client.schedule(task);
+    client.start();
+    await promise;
+    expect(savedObjectsClient.create).toHaveBeenCalled();
   });
 
-  test('disallows fetch before init', async () => {
+  test('allows scheduling tasks after starting', async () => {
     const client = new TaskManager(taskManagerOpts);
-    await expect(client.fetch({})).rejects.toThrow(/^NotInitialized: .*/i);
+    client.registerTaskDefinitions({
+      foo: {
+        type: 'foo',
+        title: 'Foo',
+        createTaskRunner: jest.fn(),
+      },
+    });
+    client.start();
+    const task = {
+      taskType: 'foo',
+      params: {},
+      state: {},
+    };
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'task',
+      attributes: {},
+      references: [],
+    });
+    await client.schedule(task);
+    expect(savedObjectsClient.create).toHaveBeenCalled();
   });
 
-  test('disallows remove before init', async () => {
+  test('allows and queues removing tasks before starting', async () => {
     const client = new TaskManager(taskManagerOpts);
-    await expect(client.remove('23')).rejects.toThrow(/^NotInitialized: .*/i);
+    savedObjectsClient.delete.mockResolvedValueOnce({});
+    const promise = client.remove('1');
+    client.start();
+    await promise;
+    expect(savedObjectsClient.delete).toHaveBeenCalled();
   });
 
-  test('allows middleware registration before init', () => {
+  test('allows removing tasks after starting', async () => {
+    const client = new TaskManager(taskManagerOpts);
+    client.start();
+    savedObjectsClient.delete.mockResolvedValueOnce({});
+    await client.remove('1');
+    expect(savedObjectsClient.delete).toHaveBeenCalled();
+  });
+
+  test('allows and queues fetching tasks before starting', async () => {
+    const client = new TaskManager(taskManagerOpts);
+    taskManagerOpts.callWithInternalUser.mockResolvedValue({
+      hits: {
+        total: {
+          value: 0,
+        },
+        hits: [],
+      },
+    });
+    const promise = client.fetch({});
+    client.start();
+    await promise;
+    expect(taskManagerOpts.callWithInternalUser).toHaveBeenCalled();
+  });
+
+  test('allows fetching tasks after starting', async () => {
+    const client = new TaskManager(taskManagerOpts);
+    client.start();
+    taskManagerOpts.callWithInternalUser.mockResolvedValue({
+      hits: {
+        total: {
+          value: 0,
+        },
+        hits: [],
+      },
+    });
+    await client.fetch({});
+    expect(taskManagerOpts.callWithInternalUser).toHaveBeenCalled();
+  });
+
+  test('allows middleware registration before starting', () => {
     const client = new TaskManager(taskManagerOpts);
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,
@@ -71,7 +151,7 @@ describe('TaskManager', () => {
     expect(() => client.addMiddleware(middleware)).not.toThrow();
   });
 
-  test('disallows middleware registration after init', async () => {
+  test('disallows middleware registration after starting', async () => {
     const client = new TaskManager(taskManagerOpts);
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,

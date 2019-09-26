@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment, FC } from 'react';
-import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { AggFieldPair, SplitField } from '../../../../../../../../common/types/fields';
 import { ChartSettings } from '../../../charts/common/settings';
@@ -49,7 +49,7 @@ export const ChartGrid: FC<ChartGridProps> = ({
   return (
     <EuiFlexGrid columns={chartSettings.cols}>
       {aggFieldPairList.map((af, i) => (
-        <EuiFlexItem key={i}>
+        <EuiFlexItem key={i} data-test-subj={`detector ${i}`}>
           <Fragment>
             <EuiFlexGroup>
               <EuiFlexItem>
@@ -57,12 +57,12 @@ export const ChartGrid: FC<ChartGridProps> = ({
                   index={i}
                   agg={aggFieldPairList[i].agg}
                   field={aggFieldPairList[i].field}
-                  splitField={splitField}
+                  byField={aggFieldPairList[i].by}
                   deleteDetector={deleteDetector}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                {deleteDetector !== undefined && <ByFieldSelector detectorIndex={i} />}
+                >
+                  {deleteDetector !== undefined && <ByFieldSelector detectorIndex={i} />}
+                </DetectorTitle>
+                {jobType === JOB_TYPE.POPULATION && <EuiSpacer size="s" />}
               </EuiFlexItem>
             </EuiFlexGroup>
             <SplitCards

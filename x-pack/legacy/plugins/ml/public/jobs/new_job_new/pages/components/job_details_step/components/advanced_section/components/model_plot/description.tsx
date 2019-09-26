@@ -22,16 +22,16 @@ export const Description: FC<Props> = memo(({ children }) => {
   );
   return (
     <EuiDescribedFormGroup
-      idAria="single-example-aria"
+      idAria="description"
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.enableModelPlot.description"
-          defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam."
+          defaultMessage="Select to store additional model information used for plotting model bounds. This will add overhead to the performance of the system and is not recommended for high cardinality data."
         />
       }
     >
-      <EuiFormRow label={title} describedByIds={['single-example-aria']}>
+      <EuiFormRow label={title} describedByIds={['description']}>
         {children}
       </EuiFormRow>
     </EuiDescribedFormGroup>

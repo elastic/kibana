@@ -17,16 +17,15 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
+import { visFactory } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import gaugeTemplate from './editors/gauge.html';
-import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
+import { colorSchemas } from 'ui/vislib/components/color/colormaps';
+import { GaugeOptions } from './components/options';
+import { vislibVisController } from './controller';
 
-export default function GaugeVisType(Private) {
-  const VisFactory = Private(VisFactoryProvider);
-
-  return VisFactory.createVislibVisualization({
+export default function GaugeVisType() {
+  return visFactory.createBaseVisualization({
     name: 'gauge',
     title: i18n.translate('kbnVislibVisTypes.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
     icon: 'visGauge',
@@ -79,30 +78,39 @@ export default function GaugeVisType(Private) {
         }
       },
     },
-    events: {
-      brush: { disabled: true },
-    },
+    visualization: vislibVisController,
     editorConfig: {
       collections: {
-        gaugeTypes: ['Arc', 'Circle'],
-        gaugeColorMode: ['None', 'Labels', 'Background'],
+        gaugeTypes: [
+          {
+            text: i18n.translate('kbnVislibVisTypes.gauge.gaugeTypes.arcText', {
+              defaultMessage: 'Arc',
+            }),
+            value: 'Arc',
+          },
+          {
+            text: i18n.translate('kbnVislibVisTypes.gauge.gaugeTypes.circleText', {
+              defaultMessage: 'Circle',
+            }),
+            value: 'Circle',
+          },
+        ],
         alignments: [
           {
-            id: 'automatic',
-            label: i18n.translate('kbnVislibVisTypes.gauge.alignmentAutomaticTitle', { defaultMessage: 'Automatic' })
+            value: 'automatic',
+            text: i18n.translate('kbnVislibVisTypes.gauge.alignmentAutomaticTitle', { defaultMessage: 'Automatic' })
           },
           {
-            id: 'horizontal',
-            label: i18n.translate('kbnVislibVisTypes.gauge.alignmentHorizontalTitle', { defaultMessage: 'Horizontal' })
+            value: 'horizontal',
+            text: i18n.translate('kbnVislibVisTypes.gauge.alignmentHorizontalTitle', { defaultMessage: 'Horizontal' })
           },
           {
-            id: 'vertical',
-            label: i18n.translate('kbnVislibVisTypes.gauge.alignmentVerticalTitle', { defaultMessage: 'Vertical' }) },
+            value: 'vertical',
+            text: i18n.translate('kbnVislibVisTypes.gauge.alignmentVerticalTitle', { defaultMessage: 'Vertical' }) },
         ],
-        scales: ['linear', 'log', 'square root'],
-        colorSchemas: Object.values(vislibColorMaps).map(value => ({ id: value.id, label: value.label })),
+        colorSchemas,
       },
-      optionsTemplate: gaugeTemplate,
+      optionsTemplate: GaugeOptions,
       schemas: new Schemas([
         {
           group: 'metrics',

@@ -16,6 +16,6 @@ export class Authentications {
     req: FrameworkRequest,
     options: RequestOptionsPaginated
   ): Promise<AuthenticationsData> {
-    return await this.adapter.getAuthentications(req, options);
+    return this.adapter.getAuthentications(req, options);
   }
 }

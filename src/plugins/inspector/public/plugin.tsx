@@ -24,12 +24,12 @@ import { InspectorViewRegistry } from './view_registry';
 import { Adapters, InspectorOptions, InspectorSession } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
 
-import { RequestsView } from './views';
+import { getRequestsViewDescription, getDataViewDescription } from './views';
 
 export interface Setup {
   registerView: InspectorViewRegistry['register'];
 
-  __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
+  __LEGACY: {
     views: InspectorViewRegistry;
   };
 }
@@ -68,12 +68,13 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
   public async setup(core: CoreSetup) {
     this.views = new InspectorViewRegistry();
 
-    this.views.register(RequestsView);
+    this.views.register(getDataViewDescription(core.uiSettings));
+    this.views.register(getRequestsViewDescription());
 
     return {
       registerView: this.views!.register.bind(this.views),
 
-      __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
+      __LEGACY: {
         views: this.views,
       },
     };

@@ -5,18 +5,19 @@
  */
 
 import {
+  EuiButtonIcon,
   // @ts-ignore
   EuiHighlight,
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import * as React from 'react';
-import styled from 'styled-components';
+import React, { useContext } from 'react';
+import styled, { css } from 'styled-components';
 
-import { useContext } from 'react';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { OnUpdateColumns } from '../timeline/events';
@@ -30,30 +31,67 @@ import { TimelineContext } from '../timeline/timeline_context';
  * The name of a (draggable) field
  */
 export const FieldNameContainer = styled.span`
-  padding: 5px;
-  &:hover {
-    transition: background-color 0.7s ease;
-    background-color: #000;
-    color: #fff;
-  }
+  ${({ theme }) => css`
+    padding: 5px;
+    {
+      border-radius: 4px;
+      padding: 0 4px 0 8px;
+      position: relative;
+
+      &::before {
+        background-image: linear-gradient(
+            135deg,
+            ${theme.eui.euiColorMediumShade} 25%,
+            transparent 25%
+          ),
+          linear-gradient(-135deg, ${theme.eui.euiColorMediumShade} 25%, transparent 25%),
+          linear-gradient(135deg, transparent 75%, ${theme.eui.euiColorMediumShade} 75%),
+          linear-gradient(-135deg, transparent 75%, ${theme.eui.euiColorMediumShade} 75%);
+        background-position: 0 0, 1px 0, 1px -1px, 0px 1px;
+        background-size: 2px 2px;
+        bottom: 2px;
+        content: '';
+        display: block;
+        left: 2px;
+        position: absolute;
+        top: 2px;
+        width: 4px;
+      }
+
+      &:hover,
+      &:focus {
+        transition: background-color 0.7s ease;
+        background-color: #000;
+        color: #fff;
+
+        &::before {
+          background-image: linear-gradient(
+              135deg,
+              #fff 25%,
+              transparent 25%
+            ),
+            linear-gradient(-135deg, ${theme.eui.euiColorLightestShade} 25%, transparent 25%),
+            linear-gradient(135deg, transparent 75%, ${theme.eui.euiColorLightestShade} 75%),
+            linear-gradient(-135deg, transparent 75%, ${theme.eui.euiColorLightestShade} 75%);
+        }
+      }
+  `}
 `;
 
 FieldNameContainer.displayName = 'FieldNameContainer';
 
 const HoverActionsContainer = styled(EuiPanel)`
   cursor: default;
-  height: 25px;
   left: 5px;
+  padding: 4px;
   position: absolute;
-  top: 3px;
+  top: -6px;
 `;
 
 HoverActionsContainer.displayName = 'HoverActionsContainer';
 
 const HoverActionsFlexGroup = styled(EuiFlexGroup)`
   cursor: pointer;
-  position: relative;
-  top: -8px;
 `;
 
 HoverActionsFlexGroup.displayName = 'HoverActionsFlexGroup';
@@ -70,28 +108,30 @@ interface ToolTipProps {
   categoryColumns: ColumnHeader[];
 }
 
-const ToolTip = React.memo<ToolTipProps>(({ categoryId, onUpdateColumns, categoryColumns }) => {
-  const { isLoading } = useContext(TimelineContext);
-  return (
-    <EuiToolTip content={i18n.VIEW_CATEGORY(categoryId)}>
-      {!isLoading ? (
-        <ViewCategoryIcon
-          aria-label={i18n.VIEW_CATEGORY(categoryId)}
-          color="text"
-          data-test-subj="view-category"
-          onClick={() => {
-            onUpdateColumns(categoryColumns);
-          }}
-          type="visTable"
-        />
-      ) : (
-        <LoadingSpinner size="m" />
-      )}
-    </EuiToolTip>
-  );
-});
+const ViewCategory = React.memo<ToolTipProps>(
+  ({ categoryId, onUpdateColumns, categoryColumns }) => {
+    const isLoading = useContext(TimelineContext);
+    return (
+      <EuiToolTip content={i18n.VIEW_CATEGORY(categoryId)}>
+        {!isLoading ? (
+          <EuiButtonIcon
+            aria-label={i18n.VIEW_CATEGORY(categoryId)}
+            color="text"
+            data-test-subj="view-category"
+            onClick={() => {
+              onUpdateColumns(categoryColumns);
+            }}
+            iconType="visTable"
+          />
+        ) : (
+          <LoadingSpinner size="m" />
+        )}
+      </EuiToolTip>
+    );
+  }
+);
 
-ToolTip.displayName = 'ToolTip';
+ViewCategory.displayName = 'ViewCategory';
 
 /** Renders a field name in it's non-dragging state */
 export const FieldName = React.memo<{
@@ -103,7 +143,7 @@ export const FieldName = React.memo<{
 }>(({ categoryId, categoryColumns, fieldId, highlight = '', onUpdateColumns }) => (
   <WithHoverActions
     hoverContent={
-      <HoverActionsContainer data-test-subj="hover-actions-container" paddingSize="s">
+      <HoverActionsContainer data-test-subj="hover-actions-container" paddingSize="none">
         <HoverActionsFlexGroup
           alignItems="center"
           direction="row"
@@ -122,7 +162,7 @@ export const FieldName = React.memo<{
 
           {categoryColumns.length > 0 && (
             <EuiFlexItem grow={false}>
-              <ToolTip
+              <ViewCategory
                 categoryId={categoryId}
                 categoryColumns={categoryColumns}
                 onUpdateColumns={onUpdateColumns}
@@ -134,9 +174,11 @@ export const FieldName = React.memo<{
     }
     render={() => (
       <FieldNameContainer>
-        <EuiHighlight data-test-subj={`field-name-${fieldId}`} search={highlight}>
-          {fieldId}
-        </EuiHighlight>
+        <EuiText size="xs">
+          <EuiHighlight data-test-subj={`field-name-${fieldId}`} search={highlight}>
+            {fieldId}
+          </EuiHighlight>
+        </EuiText>
       </FieldNameContainer>
     )}
   />

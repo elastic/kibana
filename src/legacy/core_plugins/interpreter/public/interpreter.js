@@ -26,7 +26,7 @@ import { registries } from './registries';
 import { ajaxStream } from './lib/ajax_stream';
 import { functions } from './functions';
 import { visualization } from './renderers/visualization';
-import { typeSpecs } from '../../../../plugins/data/common/expressions/expression_types';
+import { typeSpecs } from '../../../../plugins/expressions/common';
 
 const { http } = npSetup.core;
 const KIBANA_VERSION = npSetup.core.injectedMetadata.getKibanaVersion();

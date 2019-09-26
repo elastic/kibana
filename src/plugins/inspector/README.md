@@ -46,7 +46,6 @@ inspector view as follows:
 
 ```js
 import React from 'react';
-import { viewRegistry } from 'ui/inspector';
 
 function MyInspectorComponent(props) {
   // props.adapters is the object of all adapters and may vary depending
@@ -114,9 +113,6 @@ class MyCustomInspectorAdapter {
   }
 }
 ```
-
-An instance of MyCustomInspectorAdapter will now be available on each visualization
-of that type and can be accessed via `vis.API.inspectorAdapters.someInspector`.
 
 Custom inspector views can now check for the presence of `adapters.someAdapter`
 in their `shouldShow` method and use this adapter in their component.

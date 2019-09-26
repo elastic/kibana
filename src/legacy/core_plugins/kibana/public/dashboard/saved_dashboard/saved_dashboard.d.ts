@@ -20,7 +20,7 @@
 import { SearchSource } from 'ui/courier';
 import { SavedObject } from 'ui/saved_objects/saved_object';
 import moment from 'moment';
-import { RefreshInterval } from 'ui/timefilter/timefilter';
+import { RefreshInterval } from 'src/plugins/data/public';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
 

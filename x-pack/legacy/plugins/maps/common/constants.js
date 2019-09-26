@@ -19,7 +19,6 @@ export const EMS_TILES_VECTOR_STYLE_PATH = 'ems/tiles/vector/style';
 export const EMS_TILES_VECTOR_SOURCE_PATH = 'ems/tiles/vector/source';
 export const EMS_TILES_VECTOR_TILE_PATH = 'ems/tiles/vector/tile';
 
-
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
@@ -33,9 +32,18 @@ export function createMapPath(id) {
   return `${MAP_BASE_URL}/${id}`;
 }
 
+export const LAYER_TYPE = {
+  TILE: 'TILE',
+  VECTOR: 'VECTOR',
+  VECTOR_TILE: 'VECTOR_TILE',
+  HEATMAP: 'HEATMAP'
+};
+
+export const EMS_TMS = 'EMS_TMS';
 export const EMS_FILE = 'EMS_FILE';
 export const ES_GEO_GRID = 'ES_GEO_GRID';
 export const ES_SEARCH = 'ES_SEARCH';
+export const ES_PEW_PEW = 'ES_PEW_PEW';
 export const SOURCE_DATA_ID_ORIGIN = 'source';
 
 export const GEOJSON_FILE = 'GEOJSON_FILE';
@@ -77,4 +85,9 @@ export const LAT_INDEX = 1;
 export const EMPTY_FEATURE_COLLECTION = {
   type: 'FeatureCollection',
   features: []
+};
+
+export const DRAW_TYPE = {
+  BOUNDS: 'BOUNDS',
+  POLYGON: 'POLYGON'
 };

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -14,10 +13,11 @@ import {
   EuiFormHelpText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { QueryBar } from 'plugins/data';
+import { SearchBar } from 'plugins/data';
 import { Storage } from 'ui/storage';
+import { npStart } from 'ui/new_platform';
+import { KibanaContextProvider } from '../../../../../../../../../src/plugins/kibana_react/public';
 
-const settings = chrome.getUiSettingsClient();
 const localStorage = new Storage(window.localStorage);
 
 export class WhereExpression extends Component {
@@ -51,6 +51,8 @@ export class WhereExpression extends Component {
         defaultMessage: '-- add filter --'
       });
 
+    const { uiSettings } = npStart.core;
+
     return (
       <EuiPopover
         id="whereClausePopover"
@@ -78,26 +80,35 @@ export class WhereExpression extends Component {
               defaultMessage="Use a query to narrow right source."
             />
           </EuiFormHelpText>
-          <QueryBar
-            uiSettings={settings}
-            query={whereQuery ? whereQuery : { language: settings.get('search:queryLanguage'), query: '' }}
-            onSubmit={this._onQueryChange}
-            appName="maps"
-            showDatePicker={false}
-            indexPatterns={[indexPattern]}
-            store={localStorage}
-            customSubmitButton={
-              <EuiButton
-                fill
-                data-test-subj="mapWhereFilterEditorSubmitButton"
-              >
-                <FormattedMessage
-                  id="xpack.maps.layerPanel.whereExpression.queryBarSubmitButtonLabel"
-                  defaultMessage="Set filter"
-                />
-              </EuiButton>
-            }
-          />
+
+          <KibanaContextProvider
+            services={{
+              uiSettings: uiSettings,
+              savedObjects: npStart.core.savedObjects,
+            }}
+          >
+            <SearchBar
+              showFilterBar={false}
+              showDatePicker={false}
+              showQueryInput={true}
+              query={whereQuery ? whereQuery : { language: uiSettings.get('search:queryLanguage'), query: '' }}
+              onQuerySubmit={this._onQueryChange}
+              appName="maps"
+              indexPatterns={[indexPattern]}
+              store={localStorage}
+              customSubmitButton={
+                <EuiButton
+                  fill
+                  data-test-subj="mapWhereFilterEditorSubmitButton"
+                >
+                  <FormattedMessage
+                    id="xpack.maps.layerPanel.whereExpression.queryBarSubmitButtonLabel"
+                    defaultMessage="Set filter"
+                  />
+                </EuiButton>
+              }
+            />
+          </KibanaContextProvider>
         </div>
       </EuiPopover>
     );

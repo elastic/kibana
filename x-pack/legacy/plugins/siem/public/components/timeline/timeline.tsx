@@ -34,7 +34,8 @@ import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header';
 import { calculateBodyHeight, combineQueries } from './helpers';
 import { TimelineRefetch } from './refetch_timeline';
-import { TimelineContext } from './timeline_context';
+import { ManageTimelineContext } from './timeline_context';
+import { TimelineKqlFetch } from './fetch_kql_timeline';
 
 const WrappedByAutoSizer = styled.div`
   width: 100%;
@@ -147,7 +148,7 @@ export const Timeline = React.memo<Props>(
                 sort={sort}
               />
             </WrappedByAutoSizer>
-
+            <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
             {combinedQueries != null ? (
               <TimelineQuery
                 id={id}
@@ -170,40 +171,44 @@ export const Timeline = React.memo<Props>(
                   getUpdatedAt,
                   refetch,
                 }) => (
-                  <TimelineRefetch loading={loading} id={id} inspect={inspect} refetch={refetch}>
-                    <TimelineContext.Provider value={{ isLoading: loading }}>
-                      <StatefulBody
-                        browserFields={browserFields}
-                        data={events}
-                        id={id}
-                        height={calculateBodyHeight({
-                          flyoutHeight,
-                          flyoutHeaderHeight,
-                          timelineHeaderHeight,
-                          timelineFooterHeight: footerHeight,
-                        })}
-                        sort={sort}
-                        toggleColumn={toggleColumn}
-                        width={width}
-                      />
-                      <Footer
-                        serverSideEventCount={totalCount}
-                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                        height={footerHeight}
-                        isLive={isLive}
-                        isLoading={loading}
-                        itemsCount={events.length}
-                        itemsPerPage={itemsPerPage}
-                        itemsPerPageOptions={itemsPerPageOptions}
-                        onChangeItemsPerPage={onChangeItemsPerPage}
-                        onLoadMore={loadMore}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                        tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                        getUpdatedAt={getUpdatedAt}
-                        compact={isCompactFooter(width)}
-                      />
-                    </TimelineContext.Provider>
-                  </TimelineRefetch>
+                  <ManageTimelineContext loading={loading} width={width}>
+                    <TimelineRefetch
+                      id={id}
+                      inputId="timeline"
+                      inspect={inspect}
+                      loading={loading}
+                      refetch={refetch}
+                    />
+                    <StatefulBody
+                      browserFields={browserFields}
+                      data={events}
+                      id={id}
+                      height={calculateBodyHeight({
+                        flyoutHeight,
+                        flyoutHeaderHeight,
+                        timelineHeaderHeight,
+                        timelineFooterHeight: footerHeight,
+                      })}
+                      sort={sort}
+                      toggleColumn={toggleColumn}
+                    />
+                    <Footer
+                      serverSideEventCount={totalCount}
+                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                      height={footerHeight}
+                      isLive={isLive}
+                      isLoading={loading}
+                      itemsCount={events.length}
+                      itemsPerPage={itemsPerPage}
+                      itemsPerPageOptions={itemsPerPageOptions}
+                      onChangeItemsPerPage={onChangeItemsPerPage}
+                      onLoadMore={loadMore}
+                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                      tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+                      getUpdatedAt={getUpdatedAt}
+                      compact={isCompactFooter(width)}
+                    />
+                  </ManageTimelineContext>
                 )}
               </TimelineQuery>
             ) : null}

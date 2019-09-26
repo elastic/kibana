@@ -9,8 +9,13 @@ import { Logger } from './types';
 import { fillPool } from './lib/fill_pool';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
 import { sanitizeTaskDefinitions } from './lib/sanitize_task_definitions';
-import { ConcreteTaskInstance, RunContext, TaskInstance } from './task';
-import { SanitizedTaskDefinition, TaskDefinition, TaskDictionary } from './task';
+import {
+  TaskDefinition,
+  TaskDictionary,
+  ConcreteTaskInstance,
+  RunContext,
+  TaskInstance,
+} from './task';
 import { TaskPoller } from './task_poller';
 import { TaskPool } from './task_pool';
 import { TaskManagerRunner } from './task_runner';
@@ -38,15 +43,15 @@ export interface TaskManagerOpts {
  * The public interface into the task manager system.
  */
 export class TaskManager {
-  private isInitialized = false;
+  private isStarted = false;
   private maxWorkers: number;
-  private overrideNumWorkers: { [taskType: string]: number };
   private readonly pollerInterval: number;
-  private definitions: TaskDictionary<SanitizedTaskDefinition>;
+  private definitions: TaskDictionary<TaskDefinition>;
   private store: TaskStore;
   private poller: TaskPoller;
   private logger: Logger;
   private pool: TaskPool;
+  private startQueue: Array<() => void> = [];
   private middleware = {
     beforeSave: async (saveOpts: BeforeSaveMiddlewareParams) => saveOpts,
     beforeRun: async (runOpts: RunContext) => runOpts,
@@ -59,7 +64,6 @@ export class TaskManager {
    */
   constructor(opts: TaskManagerOpts) {
     this.maxWorkers = opts.config.get('xpack.task_manager.max_workers');
-    this.overrideNumWorkers = opts.config.get('xpack.task_manager.override_num_workers');
     this.pollerInterval = opts.config.get('xpack.task_manager.poll_interval');
     this.definitions = {};
     this.logger = opts.logger;
@@ -103,7 +107,10 @@ export class TaskManager {
    * Starts up the task manager and starts picking up tasks.
    */
   public start() {
-    this.isInitialized = true;
+    this.isStarted = true;
+    // Some calls are waiting until task manager is started
+    this.startQueue.forEach(fn => fn());
+    this.startQueue = [];
     const startPoller = async () => {
       try {
         await this.poller.start();
@@ -120,10 +127,19 @@ export class TaskManager {
     startPoller();
   }
 
+  private async waitUntilStarted() {
+    if (!this.isStarted) {
+      await new Promise(resolve => {
+        this.startQueue.push(resolve);
+      });
+    }
+  }
+
   /**
    * Stops the task manager and cancels running tasks.
    */
   public stop() {
+    this.poller.stop();
     this.pool.cancelRunningTasks();
   }
 
@@ -139,11 +155,7 @@ export class TaskManager {
     }
 
     try {
-      const sanitized = sanitizeTaskDefinitions(
-        taskDefinitions,
-        this.maxWorkers,
-        this.overrideNumWorkers
-      );
+      const sanitized = sanitizeTaskDefinitions(taskDefinitions);
 
       Object.assign(this.definitions, sanitized);
     } catch (e) {
@@ -169,7 +181,7 @@ export class TaskManager {
    * @returns {Promise<ConcreteTaskInstance>}
    */
   public async schedule(taskInstance: TaskInstance, options?: any): Promise<ConcreteTaskInstance> {
-    this.assertInitialized('Tasks cannot be scheduled until after task manager is initialized!');
+    await this.waitUntilStarted();
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...options,
       taskInstance,
@@ -186,7 +198,7 @@ export class TaskManager {
    * @returns {Promise<FetchResult>}
    */
   public async fetch(opts: FetchOpts): Promise<FetchResult> {
-    this.assertInitialized('Tasks cannot be fetched before task manager is initialized!');
+    await this.waitUntilStarted();
     return this.store.fetch(opts);
   }
 
@@ -197,7 +209,7 @@ export class TaskManager {
    * @returns {Promise<RemoveResult>}
    */
   public async remove(id: string): Promise<void> {
-    this.assertInitialized('Tasks cannot be removed before task manager is initialized!');
+    await this.waitUntilStarted();
     return this.store.remove(id);
   }
 
@@ -208,20 +220,8 @@ export class TaskManager {
    * @returns void
    */
   private assertUninitialized(message: string) {
-    if (this.isInitialized) {
+    if (this.isStarted) {
       throw new Error(`Cannot ${message} after the task manager is initialized!`);
-    }
-  }
-
-  /**
-   * Ensures task manager IS already initialized
-   *
-   * @param {string} message shown if task manager is not initialized
-   * @returns void
-   */
-  private assertInitialized(message: string) {
-    if (!this.isInitialized) {
-      throw new Error(`NotInitialized: ${message}`);
     }
   }
 }

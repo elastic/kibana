@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Request } from 'hapi';
 import { get } from 'lodash';
 // @ts-ignore
 import { events as esqueueEvents } from './esqueue';
 import { oncePerServer } from './once_per_server';
-import { KbnServer, Logger, JobParams, ConditionalHeaders } from '../../types';
+import { KbnServer, Logger, ConditionalHeaders } from '../../types';
 
 interface ConfirmedJob {
   id: string;
@@ -22,12 +23,13 @@ function enqueueJobFn(server: KbnServer) {
   const config = server.config();
   const queueConfig = config.get('xpack.reporting.queue');
   const browserType = config.get('xpack.reporting.capture.browser.type');
+  const maxAttempts = config.get('xpack.reporting.capture.maxAttempts');
   const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
 
   return async function enqueueJob(
     parentLogger: Logger,
     exportTypeId: string,
-    jobParams: JobParams,
+    jobParams: object,
     user: string,
     headers: ConditionalHeaders,
     request: Request
@@ -41,6 +43,7 @@ function enqueueJobFn(server: KbnServer) {
       timeout: queueConfig.timeout,
       created_by: get(user, 'username', false),
       browser_type: browserType,
+      max_attempts: maxAttempts,
     };
 
     return new Promise((resolve, reject) => {

@@ -116,6 +116,10 @@ export const isUsingSearch = (state) => {
 
 export const getDrawState = ({ map }) => map.mapState.drawState;
 
+export const isDrawingFilter = ({ map }) => {
+  return !!map.mapState.drawState;
+};
+
 export const getRefreshConfig = ({ map }) => {
   if (map.mapState.refreshConfig) {
     return map.mapState.refreshConfig;

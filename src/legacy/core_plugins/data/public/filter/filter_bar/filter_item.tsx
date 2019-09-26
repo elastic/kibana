@@ -163,7 +163,7 @@ class FilterItemUI extends Component<Props, State> {
       },
       {
         id: 1,
-        width: 400,
+        width: 420,
         content: (
           <div>
             <FilterEditor
@@ -181,6 +181,8 @@ class FilterItemUI extends Component<Props, State> {
     return (
       <EuiPopover
         id={`popoverFor_filter${id}`}
+        className={`globalFilterItem__popover`}
+        anchorClassName={`globalFilterItem__popoverAnchor`}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
         button={badge}

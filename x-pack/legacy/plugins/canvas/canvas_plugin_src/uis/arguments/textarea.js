@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { compose, withProps } from 'recompose';
-import { EuiForm, EuiTextArea, EuiSpacer, EuiButton } from '@elastic/eui';
+import { EuiFormRow, EuiTextArea, EuiSpacer, EuiButton } from '@elastic/eui';
 import { get } from 'lodash';
 import { createStatefulPropHoc } from '../../../public/components/enhance/stateful_prop';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
@@ -18,21 +18,24 @@ const TextAreaArgInput = ({ updateValue, value, confirm, commit, renderError, ar
     return null;
   }
   return (
-    <EuiForm>
-      <EuiTextArea
-        className="canvasTextArea--code"
-        id={argId}
-        rows={10}
-        value={value}
-        resize="none"
-        onChange={confirm ? updateValue : ev => commit(ev.target.value)}
-      />
+    <div>
+      <EuiFormRow display="rowCompressed">
+        <EuiTextArea
+          className="canvasTextArea__code"
+          id={argId}
+          compressed
+          rows={10}
+          value={value}
+          resize="none"
+          onChange={confirm ? updateValue : ev => commit(ev.target.value)}
+        />
+      </EuiFormRow>
       <EuiSpacer size="s" />
       <EuiButton size="s" onClick={() => commit(value)}>
         {confirm}
       </EuiButton>
       <EuiSpacer size="xs" />
-    </EuiForm>
+    </div>
   );
 };
 
