@@ -23,7 +23,7 @@ import {
   HttpServiceBase,
   NotificationsSetup,
 } from 'src/core/public';
-import { Field, FieldList, FieldType } from './fields';
+import { Field, FieldList, FieldListInterface, FieldType } from './fields';
 import { createFlattenHitWrapper } from './index_patterns';
 import { createIndexPatternSelect } from './components';
 import {
@@ -114,3 +114,6 @@ export type Field = Field;
 
 /** @public */
 export type FieldType = FieldType;
+
+/** @public */
+export type FieldListInterface = FieldListInterface;
