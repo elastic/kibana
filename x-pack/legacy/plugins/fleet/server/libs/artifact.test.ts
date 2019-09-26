@@ -44,6 +44,34 @@ describe('Artifact lib', () => {
       expect(file).toBe('testartifcat');
     });
 
+    it('should download the artifacts and not verify it if the user ask for an asc file', async () => {
+      const store = new InMemoryArtifactStore();
+      const httpAdapter = new InMemoryHttpAdapter();
+      httpAdapter.responses[
+        'https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.3.2-i386.rpm.asc'
+      ] = `asc file`;
+      const artifact = new ArtifactLib(store, httpAdapter);
+
+      const fileStream = await artifact.download('beats/filebeat/filebeat-7.3.2-i386.rpm.asc');
+      const file = await readStreamAsString(fileStream);
+
+      expect(file).toBe('asc file');
+    });
+
+    it('should allow to download GPG-KEY-elasticsearch', async () => {
+      const store = new InMemoryArtifactStore();
+      const httpAdapter = new InMemoryHttpAdapter();
+      httpAdapter.responses['https://artifacts.elastic.co/GPG-KEY-elasticsearch'] = Buffer.from(
+        `GPG-KEY-elasticsearch`
+      );
+      const artifact = new ArtifactLib(store, httpAdapter);
+
+      const fileStream = await artifact.download('GPG-KEY-elasticsearch');
+      const file = await readStreamAsString(fileStream);
+
+      expect(file).toBe('GPG-KEY-elasticsearch');
+    });
+
     it('should throw if the sha512 is not valid', async () => {
       const store = new InMemoryArtifactStore();
       const httpAdapter = new InMemoryHttpAdapter();

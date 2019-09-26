@@ -5,13 +5,17 @@
  */
 
 import { Writable, pipeline } from 'stream';
+import Boom from 'boom';
 import { promisify } from 'util';
 import { createHash } from 'crypto';
+import path from 'path';
 import { HttpAdapter as HttpAdapterType } from './adapters/http_adapter/adapter_type';
 import { ArtifactStore } from './adapters/artifact_store/adapter_type';
 
 const pipelineAsync = promisify(pipeline);
 const ARTIFACT_BASE_PATH = 'https://artifacts.elastic.co/downloads';
+const ARTIFACT_ROOT_PATH = 'https://artifacts.elastic.co';
+const GCP_KEY_PATH = 'GPG-KEY-elasticsearch';
 
 export class ArtifactLib {
   constructor(
@@ -23,32 +27,48 @@ export class ArtifactLib {
     const hasCacheEntry = await this.store.has(downloadPath);
     if (!hasCacheEntry) {
       const cacheStream = await this.store.setCacheStream(downloadPath);
-      const downloadRes = await this.httpAdapter.get({
-        baseURL: ARTIFACT_BASE_PATH,
-        url: downloadPath,
-        responseType: 'stream',
-      });
+      try {
+        const downloadRes = await this.httpAdapter.get({
+          baseURL: GCP_KEY_PATH === downloadPath ? ARTIFACT_ROOT_PATH : ARTIFACT_BASE_PATH,
+          url: downloadPath,
+          responseType: 'stream',
+        });
 
-      await pipelineAsync(downloadRes, cacheStream);
+        await pipelineAsync(downloadRes, cacheStream);
+      } catch (error) {
+        if (error.isAxiosError && error.response.status === 404) {
+          throw Boom.notFound(`File not found ${downloadPath}`);
+        }
+        throw error;
+      }
 
-      const readCacheStream = this.store.getCacheStream(downloadPath);
-      const [cacheSha512, expectedSha512File] = await Promise.all([
-        getSha512(readCacheStream),
-        await this.httpAdapter.get({
-          baseURL: ARTIFACT_BASE_PATH,
-          url: `${downloadPath}.sha512`,
-          responseType: 'text',
-        }),
-      ]);
-      const expectedSha512 = expectedSha512File.split(' ')[0];
-      if (cacheSha512 !== expectedSha512) {
-        await this.store.deleteCache(downloadPath);
-        throw new Error(
-          `Impossible to download ${downloadPath} invalid checksum.\n  Got: ${cacheSha512}\n  Expected: ${expectedSha512}`
-        );
+      if (
+        GCP_KEY_PATH !== downloadPath &&
+        ['.sha512', '.asc'].indexOf(path.extname(downloadPath)) < 0
+      ) {
+        await this._verifySHA512(downloadPath);
       }
     }
     return this.store.getCacheStream(downloadPath);
+  }
+
+  private async _verifySHA512(downloadPath: string) {
+    const readCacheStream = this.store.getCacheStream(downloadPath);
+    const [cacheSha512, expectedSha512File] = await Promise.all([
+      getSha512(readCacheStream),
+      await this.httpAdapter.get({
+        baseURL: ARTIFACT_BASE_PATH,
+        url: `${downloadPath}.sha512`,
+        responseType: 'text',
+      }),
+    ]);
+    const expectedSha512 = expectedSha512File.split(' ')[0];
+    if (cacheSha512 !== expectedSha512) {
+      await this.store.deleteCache(downloadPath);
+      throw new Error(
+        `Impossible to download ${downloadPath} invalid checksum.\n  Got: ${cacheSha512}\n  Expected: ${expectedSha512}`
+      );
+    }
   }
 }
 

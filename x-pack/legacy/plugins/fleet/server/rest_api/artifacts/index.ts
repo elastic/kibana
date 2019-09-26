@@ -22,7 +22,7 @@ export const createGETArtifactsRoute = (libs: FleetServerLib) => ({
     validate: {
       params: Joi.object({
         path: Joi.string()
-          .regex(/^beats\//)
+          .regex(/^(beats\/|GPG-KEY-elasticsearch)/)
           .max(100),
       }),
     },
@@ -32,7 +32,8 @@ export const createGETArtifactsRoute = (libs: FleetServerLib) => ({
     h: FrameworkResponseToolkit
   ): Promise<FrameworkResponseObject> => {
     const { path } = request.params;
-    const contentType = mime.getType(path);
+    const contentType =
+      path === 'GPG-KEY-elasticsearch' ? 'application/pgp-keys' : mime.getType(path);
     if (!contentType) {
       throw Boom.badRequest('Unsuported file type');
     }
