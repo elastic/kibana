@@ -23,7 +23,6 @@ const JAVA_LANG_DETACH_PORT = 2090;
 export class JavaLauncher extends AbstractLauncher {
   private needModuleArguments: boolean = true;
   private readonly gradleHomeFolder = '.gradle';
-  private readonly mavenSettingsFile = path.resolve('settings', 'settings.xml');
   constructor(
     readonly targetHost: string,
     readonly options: ServerOptions,
@@ -51,7 +50,7 @@ export class JavaLauncher extends AbstractLauncher {
             ),
             'java.configuration.maven.userSettings': path.resolve(
               this.installationPath,
-              this.mavenSettingsFile
+              'settings/settings.xml'
             ),
           },
         },
