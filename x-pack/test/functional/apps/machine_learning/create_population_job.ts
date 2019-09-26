@@ -74,6 +74,7 @@ export default function({ getService }: FtrProviderContext) {
         'Jul 12, 2019 @ 23:45:36.000'
       );
       await ml.jobWizardCommon.assertEventRateChartExists();
+      await ml.jobWizardCommon.assertEventRateChartHasData();
     });
 
     it('displays the pick fields step', async () => {

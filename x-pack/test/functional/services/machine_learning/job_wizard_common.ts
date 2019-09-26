@@ -163,6 +163,19 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
       });
     },
 
+    async getModelPlotSwitchCheckedState(): Promise<boolean> {
+      await this.ensureAdvancedSectionOpen();
+      return await testSubjects.isSelected(
+        'mlJobWizardAdvancedSection > mlJobWizardSwitchModelPlot'
+      );
+    },
+
+    async assertModelPlotSwitchCheckedState(expectedValue: boolean) {
+      await this.ensureAdvancedSectionOpen();
+      const actualCheckedState = await this.getModelPlotSwitchCheckedState();
+      expect(actualCheckedState).to.eql(expectedValue);
+    },
+
     async assertDedicatedIndexSwitchExists() {
       await this.ensureAdvancedSectionOpen();
       await testSubjects.existOrFail(

@@ -243,14 +243,7 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
         );
       }
       log.debug(`Clicking action button ${entryText} for job id ${jobId}`);
-      // await filteredButtons[0].clickMouseButton();
-      await this.delay(10000);
       await filteredButtons[0].click();
-      await this.delay(10000);
-    }
-
-    public delay(ms: number) {
-      return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     public async clickCloneJobAction(jobId: string) {

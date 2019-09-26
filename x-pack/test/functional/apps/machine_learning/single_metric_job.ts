@@ -70,7 +70,6 @@ export default function({ getService }: FtrProviderContext) {
     };
   }
 
-  // eslint-disable-next-line ban/ban
   describe('single metric', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
@@ -203,15 +202,7 @@ export default function({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('job cloning', function() {
-      it.skip('prepares the test', async () => {
-        await ml.navigation.navigateToMl();
-        await ml.navigation.navigateToJobManagement();
-
-        await ml.jobTable.waitForJobsToLoad();
-        await ml.jobTable.filterWithSearchString(jobId);
-      });
-
+    describe('job cloning', function() {
       it('clicks the clone action and loads the single metric wizard', async () => {
         await ml.jobTable.clickCloneJobAction(jobId);
         await ml.jobTypeSelection.assertSingleMetricJobWizardOpen();
@@ -280,7 +271,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('pre-fills the model plot switch', async () => {
         await ml.jobWizardCommon.assertModelPlotSwitchExists();
-        // TODO: assert value
+        await ml.jobWizardCommon.assertModelPlotSwitchCheckedState(true);
       });
 
       it('pre-fills the dedicated index switch', async () => {

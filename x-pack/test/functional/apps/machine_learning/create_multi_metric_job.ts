@@ -60,6 +60,7 @@ export default function({ getService }: FtrProviderContext) {
         'Feb 11, 2016 @ 23:59:54.000'
       );
       await ml.jobWizardCommon.assertEventRateChartExists();
+      await ml.jobWizardCommon.assertEventRateChartHasData();
     });
 
     it('displays the pick fields step', async () => {
