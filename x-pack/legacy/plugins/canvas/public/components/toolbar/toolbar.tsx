@@ -16,13 +16,45 @@ import {
   EuiModalFooter,
   EuiButton,
 } from '@elastic/eui';
+import { CanvasElement } from '../../../types';
+
+import { ComponentStrings } from '../../../i18n';
+
+// @ts-ignore untyped local
 import { Navbar } from '../navbar';
+// @ts-ignore untyped local
 import { WorkpadManager } from '../workpad_manager';
+// @ts-ignore untyped local
 import { PageManager } from '../page_manager';
+// @ts-ignore untyped local
 import { Expression } from '../expression';
 import { Tray } from './tray';
 
-export const Toolbar = props => {
+const { Toolbar: strings } = ComponentStrings;
+
+enum TrayType {
+  pageManager = 'pageManager',
+  expression = 'expression',
+}
+
+interface Props {
+  workpadName: string;
+
+  tray: TrayType | null;
+  setTray: (tray: TrayType | null) => void;
+
+  previousPage: () => void;
+  nextPage: () => void;
+  selectedPageNumber: number;
+  totalPages: number;
+
+  selectedElement: CanvasElement;
+
+  showWorkpadManager: boolean;
+  setShowWorkpadManager: (show: boolean) => void;
+}
+
+export const Toolbar = (props: Props) => {
   const {
     selectedElement,
     tray,
@@ -40,7 +72,7 @@ export const Toolbar = props => {
 
   const done = () => setTray(null);
 
-  const showHideTray = exp => {
+  const showHideTray = (exp: TrayType) => {
     if (tray && tray === exp) {
       return done();
     }
@@ -56,7 +88,7 @@ export const Toolbar = props => {
         <WorkpadManager onClose={closeWorkpadManager} />
         <EuiModalFooter>
           <EuiButton size="s" onClick={closeWorkpadManager}>
-            Dismiss
+            {strings.getWorkpadManagerCloseButtonLabel()}
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>
@@ -70,7 +102,7 @@ export const Toolbar = props => {
 
   return (
     <div className="canvasToolbar hide-for-sharing">
-      {trays[tray] && <Tray done={done}>{trays[tray]}</Tray>}
+      {tray !== null && <Tray done={done}>{trays[tray]}</Tray>}
       <Navbar>
         <EuiFlexGroup alignItems="center" gutterSize="none" className="canvasToolbar__controls">
           <EuiFlexItem grow={false}>
@@ -85,13 +117,12 @@ export const Toolbar = props => {
               onClick={previousPage}
               iconType="arrowLeft"
               disabled={selectedPageNumber <= 1}
-              aria-label="Previous Page"
+              aria-label={strings.getPreviousPageAriaLabel()}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="text" onClick={() => showHideTray('pageManager')}>
-              Page {selectedPageNumber}
-              {totalPages > 1 ? ` of ${totalPages}` : null}
+            <EuiButtonEmpty color="text" onClick={() => showHideTray(TrayType.pageManager)}>
+              {strings.getPageButtonLabel(selectedPageNumber, totalPages)}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -100,7 +131,7 @@ export const Toolbar = props => {
               onClick={nextPage}
               iconType="arrowRight"
               disabled={selectedPageNumber >= totalPages}
-              aria-label="Next Page"
+              aria-label={strings.getNextPageAriaLabel()}
             />
           </EuiFlexItem>
           <EuiFlexItem />
@@ -109,9 +140,9 @@ export const Toolbar = props => {
               <EuiButtonEmpty
                 color="text"
                 iconType="editorCodeBlock"
-                onClick={() => showHideTray('expression')}
+                onClick={() => showHideTray(TrayType.expression)}
               >
-                Expression editor
+                {strings.getEditorButtonLabel()}
               </EuiButtonEmpty>
             </EuiFlexItem>
           )}
@@ -125,7 +156,7 @@ export const Toolbar = props => {
 
 Toolbar.propTypes = {
   workpadName: PropTypes.string,
-  tray: PropTypes.node,
+  tray: PropTypes.string,
   setTray: PropTypes.func.isRequired,
   nextPage: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,
