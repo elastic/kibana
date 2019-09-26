@@ -24,7 +24,7 @@
       "config": {
         "buildNum": 8467,
         "dateFormat:tz": "UTC",
-        "defaultRoute": "/app/kibana/#/dashboard"
+        "defaultRoute": "/app/kibana/#dashboard"
       },
       "type": "config"
     }
