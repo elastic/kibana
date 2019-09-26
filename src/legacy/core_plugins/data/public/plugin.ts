@@ -27,6 +27,7 @@ import {
   LegacyDependenciesPluginSetup,
   LegacyDependenciesPluginStart,
 } from './shim/legacy_dependencies_plugin';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
 
 /**
  * Interface for any dependencies on other plugins' `setup` contracts.
@@ -103,12 +104,17 @@ export class DataPlugin implements Plugin<DataSetup, {}, DataPluginSetupDependen
     return this.setupApi;
   }
 
-  public start(core: CoreStart, { __LEGACY }: DataPluginStartDependencies) {
+  public start(
+    core: CoreStart,
+    data: DataPublicPluginStart,
+    { __LEGACY }: DataPluginStartDependencies
+  ) {
     const SearchBar = createSearchBar({
       core,
-      storage: __LEGACY.storage,
+      store: __LEGACY.storage,
       timefilter: this.setupApi.timefilter,
       filterManager: this.setupApi.filter.filterManager,
+      autocomplete: data.autocomplete,
     });
 
     return {

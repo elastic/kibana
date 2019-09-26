@@ -21,6 +21,7 @@ import React from 'react';
 import { Filter } from '@kbn/es-query';
 import { CoreStart } from 'src/core/public';
 import { Storage } from 'ui/storage';
+import { AutocompletePublicPluginStart } from 'src/plugins/data/public';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimefilterSetup } from '../../../timefilter';
 import { FilterManager, SearchBar } from '../../../';
@@ -28,9 +29,10 @@ import { SearchBarOwnProps } from '.';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
-  storage: Storage;
+  store: Storage;
   timefilter: TimefilterSetup;
   filterManager: FilterManager;
+  autocomplete: AutocompletePublicPluginStart;
 }
 
 const defaultFiltersUpdated = (filterManager: FilterManager) => {
@@ -50,19 +52,26 @@ const defaultOnRefreshChange = (timefilter: TimefilterSetup) => {
 
 export function createSearchBar({
   core,
-  storage,
+  store,
   timefilter,
   filterManager,
+  autocomplete,
 }: StatefulSearchBarDeps) {
   const timeRange = timefilter.timefilter.getTime();
   const refreshInterval = timefilter.timefilter.getRefreshInterval();
 
-  return (props: SearchBarOwnProps) => (
-    <KibanaContextProvider services={{ ...core }}>
+  // App name should come from the core application service.
+  // Until it's available, we'll ask the user to provide it for the pre-wired component.
+  return (props: SearchBarOwnProps & { appName: string }) => (
+    <KibanaContextProvider
+      services={{
+        appName: props.appName,
+        autocomplete,
+        store,
+        ...core,
+      }}
+    >
       <SearchBar
-        savedObjects={core.savedObjects}
-        notifications={core.notifications}
-        store={storage}
         timeHistory={timefilter.history}
         dateRangeFrom={timeRange.from}
         dateRangeTo={timeRange.to}

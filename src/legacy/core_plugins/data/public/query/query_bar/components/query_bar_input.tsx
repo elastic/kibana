@@ -25,7 +25,6 @@ import { EuiFieldText, EuiOutsideClickDetector, PopoverAnchorPosition } from '@e
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { debounce, compact, isEqual, omit } from 'lodash';
 import { PersistedLog } from 'ui/persisted_log';
-import { npStart } from 'ui/new_platform';
 
 import {
   AutocompleteSuggestion,
@@ -44,17 +43,11 @@ import { getQueryLog } from '../lib/get_query_log';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 import { IDataPluginServices } from '../../../types';
 
-// todo: related to https://github.com/elastic/kibana/pull/45762/files
-// Will be refactored after merge of related PR
-const getAutocompleteProvider = (language: string) =>
-  npStart.plugins.data.autocomplete.getProvider(language);
-
 interface Props {
   kibana: KibanaReactContextValue<IDataPluginServices>;
   intl: InjectedIntl;
   indexPatterns: Array<IndexPattern | string>;
   query: Query;
-  appName: string;
   disableAutoFocus?: boolean;
   screenTitle?: string;
   prepend?: React.ReactNode;
@@ -141,7 +134,7 @@ export class QueryBarInputUI extends Component<Props, State> {
 
     const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
 
-    const autocompleteProvider = getAutocompleteProvider(language);
+    const autocompleteProvider = this.services.autocomplete.getProvider(language);
     if (
       !autocompleteProvider ||
       !Array.isArray(this.state.indexPatterns) ||
@@ -406,7 +399,7 @@ export class QueryBarInputUI extends Component<Props, State> {
 
     this.persistedLog = this.props.persistedLog
       ? this.props.persistedLog
-      : getQueryLog(this.services.uiSettings, this.props.appName, this.props.query.language);
+      : getQueryLog(this.services.uiSettings, this.services.appName, this.props.query.language);
 
     this.fetchIndexPatterns().then(this.updateSuggestions);
   }
@@ -419,7 +412,7 @@ export class QueryBarInputUI extends Component<Props, State> {
 
     this.persistedLog = this.props.persistedLog
       ? this.props.persistedLog
-      : getQueryLog(this.services.uiSettings, this.props.appName, this.props.query.language);
+      : getQueryLog(this.services.uiSettings, this.services.appName, this.props.query.language);
 
     if (!isEqual(prevProps.indexPatterns, this.props.indexPatterns)) {
       this.fetchIndexPatterns().then(this.updateSuggestions);

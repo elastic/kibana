@@ -21,7 +21,6 @@ import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
 
 import classNames from 'classnames';
 import React, { useState, useEffect } from 'react';
-import { Storage } from 'ui/storage';
 import { documentationLinks } from 'ui/documentation_links';
 import { PersistedLog } from 'ui/persisted_log';
 
@@ -38,13 +37,13 @@ import { QueryBarInput } from './query_bar_input';
 import { getQueryLog } from '../lib/get_query_log';
 import { Query } from '../index';
 import { TimeHistoryContract } from '../../../timefilter';
+import { IDataPluginServices } from '../../../types';
 
 interface Props {
   query?: Query;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
   disableAutoFocus?: boolean;
-  appName: string;
   screenTitle?: string;
   indexPatterns?: Array<IndexPattern | string>;
   intl: InjectedIntl;
@@ -65,15 +64,15 @@ interface Props {
 function QueryBarTopRowUI(props: Props) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
 
-  const kibana = useKibana<{ store: Storage }>();
-  const { uiSettings, notifications, store } = kibana.services;
+  const kibana = useKibana<IDataPluginServices>();
+  const { uiSettings, notifications, store, appName } = kibana.services;
 
   const queryLanguage = props.query && props.query.language;
   let persistedLog: PersistedLog | undefined;
 
   useEffect(() => {
     if (!props.query) return;
-    persistedLog = getQueryLog(uiSettings!, props.appName, props.query.language);
+    persistedLog = getQueryLog(uiSettings!, appName, props.query.language);
   }, [queryLanguage]);
 
   function onClickSubmitButton(event: React.MouseEvent<HTMLButtonElement>) {
@@ -148,7 +147,6 @@ function QueryBarTopRowUI(props: Props) {
     return (
       <EuiFlexItem>
         <QueryBarInput
-          appName={props.appName}
           disableAutoFocus={props.disableAutoFocus}
           indexPatterns={props.indexPatterns!}
           prepend={props.prepend}

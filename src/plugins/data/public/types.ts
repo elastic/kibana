@@ -19,3 +19,12 @@
 
 export * from '../common/types';
 export * from './autocomplete_provider/types';
+
+import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
+export interface DataPublicPluginSetup {
+  autocomplete: AutocompletePublicPluginSetup;
+}
+
+export interface DataPublicPluginStart {
+  autocomplete: AutocompletePublicPluginStart;
+}

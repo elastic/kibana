@@ -56,7 +56,6 @@ interface SearchBarInjectedDeps {
 }
 
 export interface SearchBarOwnProps {
-  appName: string;
   indexPatterns?: IndexPattern[];
   customSubmitButton?: React.ReactNode;
   screenTitle?: string;
@@ -369,7 +368,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           query={this.state.query}
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}
-          appName={this.props.appName}
           indexPatterns={this.props.indexPatterns}
           prepend={this.props.showFilterBar ? savedQueryManagement : undefined}
           showDatePicker={this.props.showDatePicker}

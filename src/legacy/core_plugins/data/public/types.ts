@@ -18,11 +18,14 @@
  */
 
 import { UiSettingsClientContract, CoreStart } from 'src/core/public';
+import { AutocompletePublicPluginStart } from 'src/plugins/data/public';
 
 export interface IDataPluginServices extends Partial<CoreStart> {
+  appName: string;
   uiSettings: UiSettingsClientContract;
   savedObjects: CoreStart['savedObjects'];
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
   store: Storage;
+  autocomplete: AutocompletePublicPluginStart;
 }
