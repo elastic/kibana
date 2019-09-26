@@ -32,29 +32,9 @@ JOB:
   - x-pack-ciGroup2-18
   - x-pack-ciGroup2-19
   - x-pack-ciGroup2-20
-  - x-pack-ciGroup2-21
-  - x-pack-ciGroup2-22
-  - x-pack-ciGroup2-23
-  - x-pack-ciGroup2-24
-  - x-pack-ciGroup2-25
-  - x-pack-ciGroup2-26
-  - x-pack-ciGroup2-27
-  - x-pack-ciGroup2-28
-  - x-pack-ciGroup2-29
-  - x-pack-ciGroup2-20
-  - x-pack-ciGroup2-31
-  - x-pack-ciGroup2-32
-  - x-pack-ciGroup2-33
-  - x-pack-ciGroup2-34
-  - x-pack-ciGroup2-35
-  - x-pack-ciGroup2-36
-  - x-pack-ciGroup2-37
-  - x-pack-ciGroup2-38
-  - x-pack-ciGroup2-39
-  - x-pack-ciGroup2-40
-    #- x-pack-ciGroup3
-    #- x-pack-ciGroup4
-    #- x-pack-ciGroup5
+  #- x-pack-ciGroup3
+  #- x-pack-ciGroup4
+  #- x-pack-ciGroup5
   # - x-pack-visualRegression
 
 # `~` is yaml for `null`
