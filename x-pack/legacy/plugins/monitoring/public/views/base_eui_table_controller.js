@@ -46,7 +46,9 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
 
     this.pagination = {
       pageSize: 20,
+      initialPageSize: 20,
       pageIndex: 0,
+      initialPageIndex: 0,
       pageSizeOptions: PAGE_SIZE_OPTIONS
     };
 
@@ -95,6 +97,10 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
   }
 
   getPaginationRouteOptions() {
+    if (!this.pagination || !this.sorting) {
+      return {};
+    }
+
     return {
       pagination: {
         size: this.pagination.pageSize,
