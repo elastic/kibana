@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import pluginHelpers from '@kbn/plugin-helpers';
-import getFlags from './helpers/get_flags';
+import gulp from 'gulp';
 
-export default (gulp) => {
-  gulp.task('dev', ['prepare:dev'], () => pluginHelpers.run('start', { flags: getFlags() }));
+// @ts-ignore
+import { ensureAllBrowsersDownloaded } from '../legacy/plugins/reporting/server/browsers';
+
+export const prepareTask: gulp.TaskFunction = async () => {
+  await ensureAllBrowsersDownloaded();
 };

@@ -4,36 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('@kbn/plugin-helpers').babelRegister();
-require('dotenv').config({ silent: true });
+require('../src/setup_node_env');
 
-const path = require('path');
-const gulp = require('gulp');
-const mocha = require('gulp-mocha');
-const multiProcess = require('gulp-multi-process');
-const fancyLog = require('fancy-log');
-const pkg = require('./package.json');
+const { buildTask } = require('./tasks/build');
+const { devTask } = require('./tasks/dev');
+const { testOnlyTask, testTask, testBrowserTask, testBrowserDevTask, testServerTask } = require('./tasks/test');
+const { prepareTask } = require('./tasks/prepare');
 
-const buildDir = path.resolve(__dirname, 'build');
-const buildTarget = path.resolve(buildDir, 'plugin');
-const packageDir = path.resolve(buildDir, 'distributions');
-const coverageDir = path.resolve(__dirname, 'coverage');
-
-const gulpHelpers = {
-  buildDir,
-  buildTarget,
-  coverageDir,
-  log: fancyLog,
-  mocha,
-  multiProcess,
-  packageDir,
-  pkg,
+// export the tasks that are runnable from the CLI
+module.exports = {
+  build: buildTask,
+  dev: devTask,
+  prepare: prepareTask,
+  test: testTask,
+  testonly: testOnlyTask,
+  testserver: testServerTask,
+  testbrowser: testBrowserTask,
+  'testbrowser-dev': testBrowserDevTask,
 };
-
-require('./tasks/build')(gulp, gulpHelpers);
-require('./tasks/clean')(gulp, gulpHelpers);
-require('./tasks/dev')(gulp, gulpHelpers);
-require('./tasks/prepare')(gulp, gulpHelpers);
-require('./tasks/report')(gulp, gulpHelpers);
-require('./tasks/test')(gulp, gulpHelpers);
-require('./legacy/plugins/canvas/tasks')(gulp, gulpHelpers);
