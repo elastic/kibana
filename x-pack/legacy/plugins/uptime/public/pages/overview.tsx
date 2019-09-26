@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
+import styled from 'styled-components';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import {
   EmptyState,
@@ -43,6 +44,15 @@ export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
   query?: { text: string };
   queryText?: string;
 }) => void;
+
+const EuiFlexItemStyled = styled(EuiFlexItem)`
+  && {
+    min-width: 598px;
+    @media only screen and (max-width: 630px) {
+      min-width: initial;
+    }
+  }
+`;
 
 export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: Props) => {
   const { colors, setHeadingText } = useContext(UptimeSettingsContext);
@@ -118,11 +128,11 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
   return (
     <Fragment>
       <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={{}}>
-        <EuiFlexGroup gutterSize="xs">
-          <EuiFlexItem>
+        <EuiFlexGroup gutterSize="xs" wrap responsive>
+          <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>
             <KueryBar />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItemStyled grow={true}>
             <FilterGroup
               currentFilter={urlFilters}
               onFilterUpdate={(filtersKuery: string) => {
@@ -132,7 +142,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
               }}
               variables={sharedProps}
             />
-          </EuiFlexItem>
+          </EuiFlexItemStyled>
           {error && <OverviewPageParsingErrorCallout error={error} />}
         </EuiFlexGroup>
         <EuiSpacer size="s" />
