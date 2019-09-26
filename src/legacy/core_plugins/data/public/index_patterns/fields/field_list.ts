@@ -24,7 +24,14 @@ import { Field, FieldType, FieldSpec } from './field';
 
 type FieldMap = Map<Field['name'], Field>;
 
-export class FieldList extends Array<FieldType> {
+export interface FieldListInterface extends Array<Field> {
+  getByName(name: Field['name']): Field | undefined;
+  getByType(type: Field['type']): Field[];
+  add(field: FieldSpec): void;
+  remove(field: FieldType): void;
+}
+
+export class FieldList extends Array<Field> implements FieldListInterface {
   private byName: FieldMap = new Map();
   private groups: Map<Field['type'], FieldMap> = new Map();
   private indexPattern: IndexPattern;
@@ -38,7 +45,7 @@ export class FieldList extends Array<FieldType> {
     specs.map(field => this.add(field));
   }
 
-  getByName = (name: Field['name']) => this.byName.get(name); // not used??
+  getByName = (name: Field['name']) => this.byName.get(name);
   getByType = (type: Field['type']) => [...(this.groups.get(type) || new Map()).values()];
   add = (field: FieldSpec) => {
     const newField = new Field(this.indexPattern, field, this.shortDotsEnable, this.notifications);

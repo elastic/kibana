@@ -29,7 +29,7 @@ import { NotificationsSetup, SavedObjectsClientContract } from 'src/core/public'
 import { SavedObjectNotFound, DuplicateField } from '../../../../../../plugins/kibana_utils/public';
 
 import { IndexPatternMissingIndices } from '../errors';
-import { Field, FieldList, FieldType } from '../fields';
+import { Field, FieldList, FieldType, FieldListInterface } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { getRoutes } from '../utils';
 import { formatHitProvider } from './format_hit';
@@ -64,7 +64,7 @@ export class IndexPattern implements StaticIndexPattern {
   public type?: string;
   public fieldFormatMap: any;
   public typeMeta: any;
-  public fields: FieldList;
+  public fields: FieldListInterface;
   public timeFieldName: string | undefined;
   public formatHit: any;
   public formatField: any;
