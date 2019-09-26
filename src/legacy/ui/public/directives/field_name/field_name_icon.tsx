@@ -49,7 +49,7 @@ const typeToEuiIconMap: Record<string, IconMapEntry> = {
   string: { icon: 'string', color: colors[4] },
 };
 
-export function FieldNameIcon({ type, label = '', size = 's', useColor = false }: Props) {
+export function FieldNameIcon({ type, label, size = 's', useColor = false }: Props) {
   const euiIcon = typeToEuiIconMap[type] || defaultIcon;
 
   return (
