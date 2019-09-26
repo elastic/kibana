@@ -17,18 +17,18 @@
  * under the License.
  */
 
+import { KbnFieldTypeOptions, ES_FIELD_TYPES, KBN_FIELD_TYPES } from './types';
 
-import '../directives/chart/chart';
-import '../directives/timelion_interval/timelion_interval';
-import 'ui/state_management/app_state';
+export class KbnFieldType {
+  public readonly name: string;
+  public readonly sortable: boolean;
+  public readonly filterable: boolean;
+  public readonly esTypes: readonly ES_FIELD_TYPES[];
 
-import { uiModules } from 'ui/modules';
-
-uiModules
-  .get('kibana/timelion_vis', ['kibana'])
-  .controller('TimelionVisController', function ($scope) {
-    $scope.$on('timelionChartRendered', event => {
-      event.stopPropagation();
-      $scope.renderComplete();
-    });
-  });
+  constructor(options: Partial<KbnFieldTypeOptions> = {}) {
+    this.name = options.name || KBN_FIELD_TYPES.UNKNOWN;
+    this.sortable = options.sortable || false;
+    this.filterable = options.filterable || false;
+    this.esTypes = Object.freeze((options.esTypes || []).slice());
+  }
+}
