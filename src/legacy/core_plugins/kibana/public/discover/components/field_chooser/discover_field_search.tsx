@@ -77,8 +77,9 @@ export function DiscoverFieldSearch({ showFilter, onChange, onShowFilter, value 
         <EuiButtonIcon
           aria-expanded={showFilter}
           aria-label={filterBtnAriaLabel}
+          className={'toggleFieldFilterButton'}
           data-test-subj="toggleFieldFilterButton"
-          iconType="gear"
+          iconType="filter"
           onClick={() => onShowFilter()}
           size="m"
         />
