@@ -9,8 +9,8 @@ import Boom from 'boom';
 import { promisify } from 'util';
 import { createHash } from 'crypto';
 import path from 'path';
-import { HttpAdapter as HttpAdapterType } from './adapters/http_adapter/adapter_type';
-import { ArtifactStore } from './adapters/artifact_store/adapter_type';
+import { HttpAdapter as HttpAdapterType } from '../adapters/http_adapter/adapter_type';
+import { ArtifactsRepository } from '../repositories/artifacts/types';
 
 const pipelineAsync = promisify(pipeline);
 const ARTIFACT_BASE_PATH = 'https://artifacts.elastic.co/downloads';
@@ -19,7 +19,7 @@ const GCP_KEY_PATH = 'GPG-KEY-elasticsearch';
 
 export class ArtifactLib {
   constructor(
-    private readonly store: ArtifactStore,
+    private readonly store: ArtifactsRepository,
     private readonly httpAdapter: HttpAdapterType
   ) {}
 

@@ -5,13 +5,13 @@
  */
 
 import { PolicyLib } from './policy';
-import { InMemoryPolicyAdapter } from './adapters/policy/in_memory';
-import { FullPolicyFile } from './adapters/policy/adapter_type';
+import { InMemoryPoliciesRepository } from '../repositories/policies/in_memory';
+import { FullPolicyFile } from '../repositories/policies/types';
 
 describe('Policy lib', () => {
   describe('getFull', () => {
     it('return the policy from the policy adapter', async () => {
-      const adapter = new InMemoryPolicyAdapter();
+      const adapter = new InMemoryPoliciesRepository();
       adapter.policies['policy:1'] = ({
         id: 'policy:1',
         name: 'Policy',

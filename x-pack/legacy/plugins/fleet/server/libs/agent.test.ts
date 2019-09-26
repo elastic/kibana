@@ -7,12 +7,12 @@
 import { AgentLib } from './agent';
 import { TokenLib } from './token';
 import { PolicyLib } from './policy';
-import { InMemoryAgentAdapter } from './adapters/agent/in_memory';
-import { Agent } from './adapters/agent/adapter_type';
-import { TokenAdapter } from './adapters/tokens/default';
+import { InMemoryAgentsRepository } from '../repositories/agents/in_memory';
+import { Agent } from '../repositories/agents/types';
+import { TokensRepository } from '../repositories/tokens/types';
 import { FrameworkLib } from './framework';
-import { PolicyAdapter } from './adapters/policy/default';
-import { FrameworkUser } from './adapters/framework/adapter_types';
+import { PoliciesRepository } from '../repositories/policies/default';
+import { FrameworkUser } from '../adapters/framework/adapter_types';
 
 jest.mock('./token');
 jest.mock('./policy');
@@ -23,9 +23,9 @@ describe('Agent lib', () => {
   }
   describe('Enroll', () => {
     it('Should throw if the enrollment token is not valid', async () => {
-      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
-      const policy = new PolicyLib({} as PolicyAdapter);
-      const agentAdapter = new InMemoryAgentAdapter();
+      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
+      const policy = new PolicyLib({} as PoliciesRepository);
+      const agentAdapter = new InMemoryAgentsRepository();
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
       let error: Error | null = null;
@@ -46,9 +46,9 @@ describe('Agent lib', () => {
     });
 
     it('Should enroll a new PERMANENT agent', async () => {
-      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentAdapter();
-      const policy = new PolicyLib({} as PolicyAdapter);
+      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
+      const agentAdapter = new InMemoryAgentsRepository();
+      const policy = new PolicyLib({} as PoliciesRepository);
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
       const agent = await agentLib.enroll(
@@ -68,9 +68,9 @@ describe('Agent lib', () => {
     });
 
     it('Should allow to enroll a new PERMANENT agent again if this agent is active', async () => {
-      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentAdapter();
-      const policy = new PolicyLib({} as PolicyAdapter);
+      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
+      const agentAdapter = new InMemoryAgentsRepository();
+      const policy = new PolicyLib({} as PoliciesRepository);
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
       const agent1 = await agentLib.enroll(
@@ -99,9 +99,9 @@ describe('Agent lib', () => {
     });
 
     it('Should not enroll a new PERMANENT agent if this agent is already active', async () => {
-      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentAdapter();
-      const policy = new PolicyLib({} as PolicyAdapter);
+      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
+      const agentAdapter = new InMemoryAgentsRepository();
+      const policy = new PolicyLib({} as PoliciesRepository);
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
       await agentLib.enroll(getUser(), 'valid-enrollment-token', 'PERMANENT', undefined, 'agent-1');
@@ -124,9 +124,9 @@ describe('Agent lib', () => {
     });
 
     it('Should enroll a new EPHEMERAL_INSTANCE agent', async () => {
-      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentAdapter();
-      const policy = new PolicyLib({} as PolicyAdapter);
+      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
+      const agentAdapter = new InMemoryAgentsRepository();
+      const policy = new PolicyLib({} as PoliciesRepository);
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
       const agent = await agentLib.enroll(
@@ -145,9 +145,9 @@ describe('Agent lib', () => {
     });
 
     it('When enrolling a new EPHEMERAL_INSTANCE agent it should create a EPHEMERAL agent too', async () => {
-      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentAdapter();
-      const policy = new PolicyLib({} as PolicyAdapter);
+      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
+      const agentAdapter = new InMemoryAgentsRepository();
+      const policy = new PolicyLib({} as PoliciesRepository);
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
       const agent = await agentLib.enroll(
@@ -164,9 +164,9 @@ describe('Agent lib', () => {
       });
     });
     it('When enrolling multiple EPHEMERAL_INSTANCE agent it should create only one EPHEMERAL agent', async () => {
-      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentAdapter();
-      const policy = new PolicyLib({} as PolicyAdapter);
+      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
+      const agentAdapter = new InMemoryAgentsRepository();
+      const policy = new PolicyLib({} as PoliciesRepository);
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
       const agent1 = await agentLib.enroll(
@@ -192,10 +192,10 @@ describe('Agent lib', () => {
 
   describe('Delete', () => {
     it('should delete ephemeral instances', async () => {
-      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentAdapter();
+      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
+      const agentAdapter = new InMemoryAgentsRepository();
       agentAdapter.delete = jest.fn(async () => {});
-      const policy = new PolicyLib({} as PolicyAdapter);
+      const policy = new PolicyLib({} as PoliciesRepository);
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
       await agentLib.delete(getUser(), {
@@ -207,10 +207,10 @@ describe('Agent lib', () => {
     });
 
     it('should desactivate other agent', async () => {
-      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentAdapter();
+      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
+      const agentAdapter = new InMemoryAgentsRepository();
       agentAdapter.update = jest.fn(async () => {});
-      const policy = new PolicyLib({} as PolicyAdapter);
+      const policy = new PolicyLib({} as PoliciesRepository);
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
       await agentLib.delete(getUser(), {
@@ -226,9 +226,9 @@ describe('Agent lib', () => {
 
   describe('list', () => {
     it('should return all agents', async () => {
-      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
-      const policy = new PolicyLib({} as PolicyAdapter);
-      const agentAdapter = new InMemoryAgentAdapter();
+      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
+      const policy = new PolicyLib({} as PoliciesRepository);
+      const agentAdapter = new InMemoryAgentsRepository();
       agentAdapter.agents['agent:1'] = { id: 'agent:1' } as Agent;
       agentAdapter.agents['agent:2'] = { id: 'agent:2' } as Agent;
 
@@ -244,9 +244,9 @@ describe('Agent lib', () => {
 
   describe('checkin', () => {
     it('should throw if the agens do not exists', async () => {
-      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentAdapter();
-      const policy = new PolicyLib({} as PolicyAdapter);
+      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
+      const agentAdapter = new InMemoryAgentsRepository();
+      const policy = new PolicyLib({} as PoliciesRepository);
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
       await expect(
@@ -264,9 +264,9 @@ describe('Agent lib', () => {
     });
 
     it('should update events', async () => {
-      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
-      const policy = new PolicyLib({} as PolicyAdapter);
-      const agentAdapter = new InMemoryAgentAdapter();
+      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
+      const policy = new PolicyLib({} as PoliciesRepository);
+      const agentAdapter = new InMemoryAgentsRepository();
       agentAdapter.agents['agent:1'] = ({
         id: 'agent:1',
         actions: [],
@@ -314,9 +314,9 @@ describe('Agent lib', () => {
     });
 
     it('should not update agent metadata if none are provided', async () => {
-      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
-      const policy = new PolicyLib({} as PolicyAdapter);
-      const agentAdapter = new InMemoryAgentAdapter();
+      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
+      const policy = new PolicyLib({} as PoliciesRepository);
+      const agentAdapter = new InMemoryAgentsRepository();
       agentAdapter.agents['agent:1'] = ({
         id: 'agent:1',
         local_metadata: { key: 'local1' },
@@ -337,9 +337,9 @@ describe('Agent lib', () => {
     });
 
     it('should return the full policy for this agent', async () => {
-      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
-      const policyLib = new PolicyLib({} as PolicyAdapter);
-      const agentAdapter = new InMemoryAgentAdapter();
+      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
+      const policyLib = new PolicyLib({} as PoliciesRepository);
+      const agentAdapter = new InMemoryAgentsRepository();
       agentAdapter.agents['agent:1'] = ({
         id: 'agent:1',
         local_metadata: { key: 'local1' },
@@ -359,8 +359,8 @@ describe('Agent lib', () => {
     });
 
     it('should update agent metadata if provided', async () => {
-      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentAdapter();
+      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
+      const agentAdapter = new InMemoryAgentsRepository();
       agentAdapter.agents['agent:1'] = ({
         id: 'agent:1',
         local_metadata: { key: 'local1' },
@@ -370,7 +370,7 @@ describe('Agent lib', () => {
         active: true,
         policy_id: 'policy:1',
       } as unknown) as Agent;
-      const policy = new PolicyLib({} as PolicyAdapter);
+      const policy = new PolicyLib({} as PoliciesRepository);
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
       await agentLib.checkin(getUser(), 'agent:1', [], { key: 'local2' });
@@ -382,9 +382,9 @@ describe('Agent lib', () => {
     });
 
     it('should return new actions', async () => {
-      const policy = new PolicyLib({} as PolicyAdapter);
-      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentAdapter();
+      const policy = new PolicyLib({} as PoliciesRepository);
+      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
+      const agentAdapter = new InMemoryAgentsRepository();
       agentAdapter.agents['agent:1'] = ({
         id: 'agent:1',
         active: true,
@@ -421,9 +421,9 @@ describe('Agent lib', () => {
 
   describe('addAction', () => {
     it('should throw if the agent do not exists', async () => {
-      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentAdapter();
-      const policy = new PolicyLib({} as PolicyAdapter);
+      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
+      const agentAdapter = new InMemoryAgentsRepository();
+      const policy = new PolicyLib({} as PoliciesRepository);
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
       await expect(
@@ -434,8 +434,8 @@ describe('Agent lib', () => {
     });
 
     it('should add the action', async () => {
-      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentAdapter();
+      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
+      const agentAdapter = new InMemoryAgentsRepository();
       agentAdapter.agents['agent:1'] = {
         id: 'agent:1',
         actions: [],
@@ -447,7 +447,7 @@ describe('Agent lib', () => {
       };
       const spy = jest.spyOn(agentAdapter, 'update');
 
-      const policy = new PolicyLib({} as PolicyAdapter);
+      const policy = new PolicyLib({} as PoliciesRepository);
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
       const action = await agentLib.addAction(getUser(), 'agent:1', {

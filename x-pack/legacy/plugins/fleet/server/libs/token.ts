@@ -14,10 +14,10 @@ import {
   TokenType,
   Token,
   EnrollmentRuleData,
-} from './adapters/tokens/adapter_types';
-import { TokenAdapter } from './adapters/tokens/adapter_types';
+  TokensRepository,
+} from '../repositories/tokens/types';
 import { FrameworkLib } from './framework';
-import { FrameworkUser } from './adapters/framework/adapter_types';
+import { FrameworkUser } from '../adapters/framework/adapter_types';
 
 interface JWTToken {
   policy: { id: string; sharedId: string };
@@ -26,7 +26,7 @@ interface JWTToken {
 
 export class TokenLib {
   constructor(
-    private readonly adapter: TokenAdapter,
+    private readonly tokensRepository: TokensRepository,
     private readonly frameworkLib: FrameworkLib
   ) {}
 
@@ -100,7 +100,7 @@ export class TokenLib {
     );
     const tokenHash = await this.hashToken(token);
 
-    await this.adapter.create(user, {
+    await this.tokensRepository.create(user, {
       active: true,
       type: TokenType.ENROLMENT_TOKEN,
       tokenHash,
@@ -116,17 +116,17 @@ export class TokenLib {
     policyId: string,
     regenerate?: boolean
   ): Promise<Token | null> {
-    let token = await this.adapter.getByPolicyId(user, policyId);
+    let token = await this.tokensRepository.getByPolicyId(user, policyId);
 
     if (regenerate) {
       const policy = {
         id: policyId,
       };
       if (token) {
-        await this.adapter.delete(user, token.id);
+        await this.tokensRepository.delete(user, token.id);
       }
       await this.generateEnrolmentToken(user, policy);
-      token = await this.adapter.getByPolicyId(user, policyId);
+      token = await this.tokensRepository.getByPolicyId(user, policyId);
     }
 
     return token;
@@ -137,7 +137,7 @@ export class TokenLib {
     policyId: string,
     ruleData: EnrollmentRuleData
   ) {
-    const token = await this.adapter.getByPolicyId(user, policyId);
+    const token = await this.tokensRepository.getByPolicyId(user, policyId);
     if (!token) {
       throw Boom.notFound(`No token found for policy: ${policyId}`);
     }
@@ -148,7 +148,7 @@ export class TokenLib {
       created_at: new Date().toISOString(),
     };
 
-    await this.adapter.update(user, token.id, {
+    await this.tokensRepository.update(user, token.id, {
       enrollment_rules: token.enrollment_rules.concat([rule]),
     });
 
@@ -175,7 +175,7 @@ export class TokenLib {
       updated_at: new Date().toISOString(),
     };
 
-    await this.adapter.update(user, token.id, {
+    await this.tokensRepository.update(user, token.id, {
       enrollment_rules: [
         ...token.enrollment_rules.slice(0, ruleIndex),
         rule,
@@ -197,7 +197,7 @@ export class TokenLib {
       throw Boom.notFound(`Rule not found: ${ruleId}`);
     }
 
-    await this.adapter.update(user, token.id, {
+    await this.tokensRepository.update(user, token.id, {
       enrollment_rules: [
         ...token.enrollment_rules.slice(0, ruleIndex),
         ...token.enrollment_rules.slice(ruleIndex + 1),
@@ -207,7 +207,7 @@ export class TokenLib {
 
   public async deleteAllEnrollmentRulesForPolicy(user: FrameworkUser, policyId: string) {
     const token = await this._getTokenByPolicyIdOrThrow(user, policyId);
-    await this.adapter.update(user, token.id, {
+    await this.tokensRepository.update(user, token.id, {
       enrollment_rules: [],
     });
   }
@@ -226,7 +226,7 @@ export class TokenLib {
    * @param policyId
    */
   private async _getTokenByPolicyIdOrThrow(user: FrameworkUser, policyId: string) {
-    const token = await this.adapter.getByPolicyId(user, policyId);
+    const token = await this.tokensRepository.getByPolicyId(user, policyId);
     if (!token) {
       throw Boom.notFound(`No token found for policy: ${policyId}`);
     }
@@ -242,7 +242,7 @@ export class TokenLib {
 
   private async _verifyPersistedToken(user: FrameworkUser, token: string) {
     const tokenHash = await this.hashToken(token);
-    const persistedToken = await this.adapter.getByTokenHash(user, tokenHash);
+    const persistedToken = await this.tokensRepository.getByTokenHash(user, tokenHash);
     if (!persistedToken) {
       throw new Error('Token not found');
     }

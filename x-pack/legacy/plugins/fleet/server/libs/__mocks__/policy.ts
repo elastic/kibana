@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FullPolicyFile } from '../adapters/policy/adapter_type';
+import { FullPolicyFile } from '../../repositories/policies/types';
 
 /**
  * Mocked policy lib for test purpropse

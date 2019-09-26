@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import uuid from 'uuid/v4';
 import {
-  AgentAdapter,
+  AgentsRepository,
   Agent,
   SortOptions,
   NewAgent,
@@ -15,15 +15,15 @@ import {
   AgentEvent,
   AgentAction,
   AgentActionType,
-} from './adapters/agent/adapter_type';
+} from '../repositories/agents/types';
 import { TokenLib } from './token';
 import { PolicyLib } from './policy';
-import { FullPolicyFile } from './adapters/policy/adapter_type';
-import { FrameworkUser } from './adapters/framework/adapter_types';
+import { FullPolicyFile } from '../repositories/policies/types';
+import { FrameworkUser } from '../adapters/framework/adapter_types';
 
 export class AgentLib {
   constructor(
-    private readonly agentAdater: AgentAdapter,
+    private readonly agentsRepository: AgentsRepository,
     private readonly tokens: TokenLib,
     private readonly policy: PolicyLib
   ) {}
@@ -45,7 +45,9 @@ export class AgentLib {
     }
     const policy = verifyResponse.token.policy;
 
-    const existingAgent = sharedId ? await this.agentAdater.getBySharedId(user, sharedId) : null;
+    const existingAgent = sharedId
+      ? await this.agentsRepository.getBySharedId(user, sharedId)
+      : null;
 
     if (existingAgent && existingAgent.active === true) {
       throw new Error('Impossible to enroll an already active agent');
@@ -72,18 +74,18 @@ export class AgentLib {
 
     let agent;
     if (existingAgent) {
-      await this.agentAdater.update(user, existingAgent.id, agentData);
+      await this.agentsRepository.update(user, existingAgent.id, agentData);
 
       agent = {
         ...existingAgent,
         ...agentData,
       };
     } else {
-      agent = await this.agentAdater.create(user, agentData);
+      agent = await this.agentsRepository.create(user, agentData);
     }
 
     const accessToken = await this.tokens.generateAccessToken(agent.id, policy);
-    await this.agentAdater.update(user, agent.id, {
+    await this.agentsRepository.update(user, agent.id, {
       access_token: accessToken,
     });
 
@@ -95,17 +97,17 @@ export class AgentLib {
    */
   public async delete(user: FrameworkUser, agent: Agent) {
     if (agent.type === 'EPHEMERAL_INSTANCE') {
-      return this.agentAdater.delete(user, agent);
+      return this.agentsRepository.delete(user, agent);
     }
 
-    return this.agentAdater.update(user, agent.id, { active: false });
+    return this.agentsRepository.update(user, agent.id, { active: false });
   }
 
   /**
    * Get an agent by id
    */
   public async getById(user: FrameworkUser, id: string): Promise<Agent | null> {
-    return await this.agentAdater.getById(user, id);
+    return await this.agentsRepository.getById(user, id);
   }
 
   /**
@@ -120,7 +122,7 @@ export class AgentLib {
     events: AgentEvent[],
     localMetadata?: any
   ): Promise<{ actions: AgentAction[]; policy: FullPolicyFile }> {
-    const agent = await this.agentAdater.getById(user, agentId);
+    const agent = await this.agentsRepository.getById(user, agentId);
 
     if (!agent || !agent.active) {
       throw Boom.notFound('Agent not found or inactive');
@@ -144,7 +146,7 @@ export class AgentLib {
     }
 
     const policy = await this.policy.getFullPolicy(agent.policy_id);
-    await this.agentAdater.update(user, agent.id, updateData);
+    await this.agentsRepository.update(user, agent.id, updateData);
 
     return { actions, policy };
   }
@@ -154,7 +156,7 @@ export class AgentLib {
     agentId: string,
     actionData: { type: AgentActionType }
   ) {
-    const agent = await this.agentAdater.getById(user, agentId);
+    const agent = await this.agentsRepository.getById(user, agentId);
 
     if (!agent || !agent.active) {
       throw Boom.notFound('Agent not found or inactive');
@@ -166,7 +168,7 @@ export class AgentLib {
       created_at: new Date().toISOString(),
     };
 
-    await this.agentAdater.update(user, agent.id, {
+    await this.agentsRepository.update(user, agent.id, {
       actions: [action].concat(agent.actions),
     });
 
@@ -186,7 +188,7 @@ export class AgentLib {
     page?: number,
     perPage?: number
   ): Promise<{ agents: Agent[]; total: number }> {
-    return this.agentAdater.list(user, sortOptions, page, perPage);
+    return this.agentsRepository.list(user, sortOptions, page, perPage);
   }
 
   public _filterActionsForCheckin(agent: Agent): AgentAction[] {
@@ -199,13 +201,13 @@ export class AgentLib {
     policySharedId: string
   ): Promise<Agent> {
     const ephemeralParentId = `agents:ephemeral:${policySharedId}`;
-    const parentAgent = await this.agentAdater.getById(user, 'ephemeralParentId');
+    const parentAgent = await this.agentsRepository.getById(user, 'ephemeralParentId');
 
     if (parentAgent) {
       return parentAgent;
     }
 
-    return await this.agentAdater.create(
+    return await this.agentsRepository.create(
       user,
       {
         type: 'EPHEMERAL',

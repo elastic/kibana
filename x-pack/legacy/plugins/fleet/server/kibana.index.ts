@@ -5,7 +5,7 @@
  */
 
 import { compose } from './libs/compose/kibana';
-import { initRestApi } from './rest_api/init_api';
+import { initRestApi } from './routes/init_api';
 
 export const initServerWithKibana = (hapiServer: any) => {
   const libsRequestFactory = compose(hapiServer);
