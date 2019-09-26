@@ -176,7 +176,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     const internalRequest = req[internalInfraFrameworkRequest];
     const server = internalRequest.server;
     const getVisData = get(server, 'plugins.metrics.getVisData');
-    if (!isFunction(getVisData)) {
+    if (typeof getVisData !== 'function') {
       throw new Error('TSVB is not available');
     }
 
