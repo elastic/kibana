@@ -9,14 +9,17 @@ import { parse as parseUrl } from 'url';
 import { Page, SerializableOrJSHandle, EvaluateFn } from 'puppeteer';
 import { ViewZoomWidthHeight } from '../../../../export_types/common/layouts/layout';
 import { LevelLogger } from '../../../../server/lib';
+import { allowResponse } from '../../network_policy';
 import {
   ConditionalHeaders,
   ConditionalHeadersConditions,
   ElementPosition,
+  NetworkPolicy,
 } from '../../../../types';
 
 export interface ChromiumDriverOptions {
   inspect: boolean;
+  networkPolicy: NetworkPolicy;
 }
 
 interface WaitForSelectorOpts {
@@ -28,10 +31,12 @@ const WAIT_FOR_DELAY_MS: number = 100;
 export class HeadlessChromiumDriver {
   private readonly page: Page;
   private readonly inspect: boolean;
+  private readonly networkPolicy: NetworkPolicy;
 
-  constructor(page: Page, { inspect }: ChromiumDriverOptions) {
+  constructor(page: Page, { inspect, networkPolicy }: ChromiumDriverOptions) {
     this.page = page;
     this.inspect = inspect;
+    this.networkPolicy = networkPolicy;
   }
 
   public async open(
@@ -46,18 +51,7 @@ export class HeadlessChromiumDriver {
     await this.page.setRequestInterception(true);
     let interceptedCount = 0;
     this.page.on('request', (interceptedRequest: any) => {
-      let interceptedUrl = interceptedRequest.url();
       let isData = false;
-
-      // We check these URLs upstream, but if chrome somehow gets
-      // bamboozled into fetching this we need to fail right away
-      // as something very fishy is going on
-      if (interceptedUrl.startsWith('file://')) {
-        logger.error(`Got bogus URL "${interceptedUrl}", exiting job!`);
-        interceptedRequest.abort();
-        this.page.browser().close();
-        throw new Error(`Received bad URL to fetch ${interceptedUrl}`);
-      }
 
       if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedRequest.url())) {
         logger.debug(`Using custom headers for ${interceptedRequest.url()}`);
@@ -68,6 +62,7 @@ export class HeadlessChromiumDriver {
           },
         });
       } else {
+        let interceptedUrl = interceptedRequest.url();
         if (interceptedUrl.startsWith('data:')) {
           // `data:image/xyz;base64` can be very long URLs
           interceptedUrl = interceptedUrl.substring(0, 100) + '[truncated]';
@@ -79,6 +74,23 @@ export class HeadlessChromiumDriver {
       }
       interceptedCount = interceptedCount + (isData ? 0 : 1);
     });
+
+    if (this.networkPolicy.enabled) {
+      this.page.on('response', interceptedResponse => {
+        const interceptedUrl = interceptedResponse.url();
+        const allowed = allowResponse(
+          interceptedUrl,
+          this.networkPolicy.allow,
+          this.networkPolicy.deny
+        );
+
+        if (!allowed) {
+          logger.error(`Got bogus URL "${interceptedUrl}", exiting job!`);
+          this.page.browser().close();
+          throw new Error(`Received bad URL in response: ${interceptedUrl}`);
+        }
+      });
+    }
 
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
 

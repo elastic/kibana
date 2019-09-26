@@ -92,6 +92,11 @@ export const reporting = (kibana) => {
           timeout: Joi.number().integer().default(120000),
         }).default(),
         capture: Joi.object({
+          networkPolicy: Joi.object({
+            enabled: Joi.boolean().default(true),
+            allow: Joi.array().items(Joi.string()).default(['http:', 'https:', 'ws:', 'wss:', 'data:']),
+            deny: Joi.array().items(Joi.string()).default([]),
+          }).default(),
           zoom: Joi.number().integer().default(2),
           viewport: Joi.object({
             width: Joi.number().integer().default(1950),
@@ -113,7 +118,7 @@ export const reporting = (kibana) => {
                 is: false,
                 then: Joi.valid(false),
                 else: Joi.default(false),
-              }),
+              }).default(),
               disableSandbox: Joi.boolean().default(await getDefaultChromiumSandboxDisabled()),
               proxy: Joi.object({
                 enabled: Joi.boolean().default(false),
