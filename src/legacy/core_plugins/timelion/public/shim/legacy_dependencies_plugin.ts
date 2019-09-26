@@ -17,22 +17,28 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
+import { Plugin } from 'kibana/public';
+import { initTimelionLegacyModule } from './timelion_legacy_module';
 
-export default function Panel(name, config) {
+/** @internal */
+export interface LegacyDependenciesPluginStart {
+  $rootScope: any;
+  $compile: any;
+}
 
-  this.name = name;
-
-  this.help = config.help || '';
-
-  this.render = config.render;
-
-  if (!config.render) {
-    throw new Error (
-      i18n.translate('timelion.panels.noRenderFunctionErrorMessage', {
-        defaultMessage: 'Panel must have a rendering function'
-      })
-    );
+export class LegacyDependenciesPlugin
+  implements Plugin<void, Promise<LegacyDependenciesPluginStart>> {
+  public setup() {
+    initTimelionLegacyModule();
   }
 
+  public async start() {
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+
+    return {
+      $rootScope: $injector.get('$rootScope'),
+      $compile: $injector.get('$compile'),
+    } as LegacyDependenciesPluginStart;
+  }
 }

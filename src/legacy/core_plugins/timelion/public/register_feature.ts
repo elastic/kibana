@@ -17,18 +17,20 @@
  * under the License.
  */
 
+import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import { i18n } from '@kbn/i18n';
 
-import '../directives/chart/chart';
-import '../directives/timelion_interval/timelion_interval';
-import 'ui/state_management/app_state';
-
-import { uiModules } from 'ui/modules';
-
-uiModules
-  .get('kibana/timelion_vis', ['kibana'])
-  .controller('TimelionVisController', function ($scope) {
-    $scope.$on('timelionChartRendered', event => {
-      event.stopPropagation();
-      $scope.renderComplete();
-    });
-  });
+export const registerFeature = () => {
+  return {
+    id: 'timelion',
+    title: 'Timelion',
+    description: i18n.translate('timelion.registerFeatureDescription', {
+      defaultMessage:
+        'Use an expression language to analyze time series data and visualize the results.',
+    }),
+    icon: 'timelionApp',
+    path: '/app/timelion',
+    showOnHomePage: false,
+    category: FeatureCatalogueCategory.DATA,
+  };
+};

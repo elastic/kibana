@@ -17,33 +17,4 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
-import { TimeRange, Query } from 'src/plugins/data/public';
-
-const name = 'kibana_context';
-export type KIBANA_CONTEXT_NAME = 'kibana_context';
-
-export interface KibanaContext {
-  type: typeof name;
-  query?: Query;
-  filters?: Filter[];
-  timeRange?: TimeRange;
-}
-
-export const kibanaContext = () => ({
-  name,
-  from: {
-    null: () => {
-      return {
-        type: name,
-      };
-    },
-  },
-  to: {
-    null: () => {
-      return {
-        type: 'null',
-      };
-    },
-  },
-});
+export * from './legacy_dependencies_plugin';
