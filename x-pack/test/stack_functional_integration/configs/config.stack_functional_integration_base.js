@@ -18,13 +18,15 @@
  */
 
 
+import getConfigs from './get_configs';
+
 const serverConfig = require('../test/server_config');
 
 export default async function ({ readConfigFile }) {
-  const defaultConfig = await readConfigFile(require.resolve('../../functional/config'));
+  const defaultConfigs = await getConfigs(readConfigFile, '../../functional/config');
 
   return {
-    ...defaultConfig.getAll(),
+    ...defaultConfigs,
     junit: {
       reportName: 'Stack Functional Integration Tests'
     },
