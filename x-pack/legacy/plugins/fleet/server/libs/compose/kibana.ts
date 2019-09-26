@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import os from 'os';
 import { TokenLib } from '../token';
 import { AgentLib } from '../agent';
 import { FrameworkLib } from '../framework';
@@ -15,6 +16,9 @@ import { PolicyLib } from '../policy';
 import { EncryptedSavedObjects } from '../adapters/encrypted_saved_objects/default';
 import { FleetServerLib } from '../types';
 import { PolicyAdapter } from '../adapters/policy/default';
+import { ArtifactLib } from '../artifact';
+import { FileSystemArtifactStore } from '../adapters/artifact_store/file_system';
+import { HttpAdapter } from '../adapters/http_adapter/default';
 
 export function compose(server: any): FleetServerLib {
   const frameworkAdapter = new FrameworkAdapter(server);
@@ -33,9 +37,13 @@ export function compose(server: any): FleetServerLib {
   const tokens = new TokenLib(tokenAdapter, framework);
   const agents = new AgentLib(agentAdapter, tokens, policies);
 
+  const artifactStore = new FileSystemArtifactStore(os.tmpdir());
+  const artifacts = new ArtifactLib(artifactStore, new HttpAdapter());
+
   return {
     agents,
     tokens,
     policies,
+    artifacts,
   };
 }

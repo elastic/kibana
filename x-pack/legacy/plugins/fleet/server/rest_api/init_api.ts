@@ -18,6 +18,7 @@ import {
   createGetEnrollmentRulesRoute,
   createPostEnrollmentRulesRoute,
 } from './policy/rules';
+import { createGETArtifactsRoute } from './artifacts';
 
 export function initRestApi(server: Server, libs: FleetServerLib) {
   const frameworkAdapter = new HapiFrameworkAdapter(server);
@@ -25,6 +26,8 @@ export function initRestApi(server: Server, libs: FleetServerLib) {
   createAgentsRoutes(frameworkAdapter, libs);
   createTokensRoutes(frameworkAdapter, libs);
   createPolicyEnrollmentRoutes(frameworkAdapter, libs);
+
+  frameworkAdapter.registerRoute(createGETArtifactsRoute(libs));
 }
 
 function createAgentsRoutes(adapter: HapiFrameworkAdapter, libs: FleetServerLib) {
