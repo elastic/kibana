@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export * from 'src/plugins/embeddable/public';
-export * from 'src/plugins/embeddable/public/lib/test_samples';
+export * from '../../../../../../../src/plugins/embeddable/public';
+export * from '../../../../../../../src/plugins/embeddable/public/lib/test_samples';
