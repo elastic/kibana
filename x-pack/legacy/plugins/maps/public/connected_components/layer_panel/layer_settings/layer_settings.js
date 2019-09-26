@@ -14,7 +14,6 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiToolTip,
-  EuiIcon,
 } from '@elastic/eui';
 
 import { ValidatedRange } from '../../../components/validated_range';
@@ -37,7 +36,9 @@ export function LayerSettings(props) {
   };
 
   const onAlphaChange = alpha => {
-    props.updateAlpha(props.layerId, alpha);
+    const alphaDecimal = alpha / 100;
+
+    props.updateAlpha(props.layerId, alphaDecimal);
   };
 
   const onApplyGlobalQueryChange = event => {
@@ -60,8 +61,9 @@ export function LayerSettings(props) {
         onChange={onZoomChange}
         allowEmptyRange={false}
         compressed
-        prepend={<EuiIcon type="magnifyWithMinus" />}
-        append={<EuiIcon type="magnifyWithPlus" />}
+        prepend={i18n.translate('xpack.maps.layerPanel.settingsPanel.visibleZoom', {
+          defaultMessage: 'Zoom levels',
+        })}
       />
     );
   };
@@ -80,6 +82,8 @@ export function LayerSettings(props) {
   };
 
   const renderAlphaSlider = () => {
+    const alphaPercent = Math.round(props.alpha * 100);
+
     return (
       <EuiFormRow
         label={i18n.translate('xpack.maps.layerPanel.settingsPanel.layerTransparencyLabel', {
@@ -88,15 +92,19 @@ export function LayerSettings(props) {
         display="rowCompressed"
       >
         <ValidatedRange
-          min={0.0}
-          max={1.0}
-          step={0.05}
-          value={props.alpha}
+          min={0}
+          max={100}
+          step={5}
+          value={alphaPercent}
           onChange={onAlphaChange}
           showLabels
           showInput
           showRange
           compressed
+          append={i18n.translate('xpack.maps.layerPanel.settingsPanel.percentageLabel', {
+            defaultMessage: '%',
+            description: 'Percentage',
+          })}
         />
       </EuiFormRow>
     );
