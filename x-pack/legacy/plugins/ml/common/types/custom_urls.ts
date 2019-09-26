@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AnomalyRecordDoc } from './anomalies';
+
 export interface UrlConfig {
   url_name: string;
   url_value: string;
@@ -11,4 +13,9 @@ export interface UrlConfig {
 
 export interface KibanaUrlConfig extends UrlConfig {
   time_range: string;
+}
+
+export interface AnomalyRecordSource extends AnomalyRecordDoc {
+  earliest: string;
+  latest: string;
 }

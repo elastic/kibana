@@ -18,23 +18,21 @@ export interface AnomalyRecordDoc {
   initial_record_score: number;
   bucket_span: number;
   detector_index: number;
-  is_interim?: boolean;
+  is_interim: boolean;
   timestamp: number;
   partition_field_name?: string;
   partition_field_value?: string | number;
   function: string;
   function_description: string;
-  typical: number[];
+  typical?: number[];
   actual: number[];
-  influencers: Influencer[];
+  influencers?: Influencer[];
   by_field_name?: string;
+  field_name?: string;
   by_field_value?: string;
   multi_bucket_impact?: number;
   over_field_name?: string;
   over_field_value?: string;
-}
-
-export interface AnomalyRecordSource extends AnomalyRecordDoc {
-  earliest: string;
-  latest: string;
+  // TODO provide the causes resource interface.
+  causes?: any[];
 }

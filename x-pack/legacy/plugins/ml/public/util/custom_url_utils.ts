@@ -6,13 +6,13 @@
 
 // utility functions for handling custom URLs
 
-import _ from 'lodash';
+import { get, flow } from 'lodash';
 import moment from 'moment';
 
 import { parseInterval } from '../../common/util/parse_interval';
 import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils';
-import { UrlConfig, KibanaUrlConfig } from '../../common/types/custom_urls';
-import { AnomalyRecordSource, AnomalyRecordDoc } from '../../common/types/anomalies';
+import { UrlConfig, KibanaUrlConfig, AnomalyRecordSource } from '../../common/types/custom_urls';
+import { AnomalyRecordDoc } from '../../common/types/anomalies';
 
 // Value of custom_url time_range property indicating drilldown time range is calculated automatically
 // depending on the context in which the URL is being opened.
@@ -112,8 +112,10 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: AnomalyRecordSource) {
     ? escapeForElasticsearchQuery
     : escapeForKQL;
 
+  type GetResultTokenValue = (v: string) => string;
+
   // Compose callback for characters escaping and encoding.
-  const getResultTokenValue: (v: string) => string = _.flow(
+  const getResultTokenValue: GetResultTokenValue = flow(
     queryLanguageEscapeCallback,
     // Kibana URLs used rison encoding, so escape with ! any ! or ' characters
     (v: string): string => v.replace(/[!']/g, '!$&'),
@@ -131,11 +133,11 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: AnomalyRecordSource) {
         .map(v => v.split(':')[0])
         .map(name => {
           // Use lodash get to allow nested JSON fields to be retrieved.
-          const tokenValues: string[] = _.get(record, name) || null;
+          const tokenValues: string[] = get(record, name) || null;
           if (tokenValues === null) {
             return null;
           }
-          // Create a pair ``influencerField:value`.
+          // Create a pair `influencerField:value`.
           // In cases where there are multiple influencer field values for an anomaly
           // combine values with OR operator e.g. `influencerField:value or influencerField:another_value`.
           const result = tokenValues
@@ -148,7 +150,7 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: AnomalyRecordSource) {
     })
     .replace(/\$(\w+)\$/, (match, name: string) => {
       // Use lodash get to allow nested JSON fields to be retrieved.
-      const tokenValue: string | undefined = _.get(record, name);
+      const tokenValue: string | undefined = get(record, name);
       // If property not found string is not replaced.
       return tokenValue === undefined ? match : getResultTokenValue(tokenValue);
     });
