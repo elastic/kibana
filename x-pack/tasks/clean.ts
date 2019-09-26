@@ -7,7 +7,7 @@ import del from 'del';
 import gulp from 'gulp';
 import log from 'fancy-log';
 
-import { coverageDir, buildDir, packageDir } from '../constants';
+import { coverageDir, buildDir, packageDir } from './helpers/constants';
 
 export const cleanCoverageTask = async () => {
   log('Deleting', coverageDir);

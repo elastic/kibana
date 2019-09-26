@@ -13,7 +13,7 @@ import gulp from 'gulp';
 
 // @ts-ignore
 import { generateNoticeFromSource } from '../../src/dev';
-import { buildTarget } from '../constants';
+import { buildTarget } from './helpers/constants';
 import { cleanTask } from './clean';
 import { reportTask } from './report';
 import { prepareTask } from './prepare';
