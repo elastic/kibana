@@ -64,12 +64,12 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
     <>
       <EuiPanel paddingSize="s">
         <EuiTitle size="xs">
-          <h2>
+          <h3>
             <FormattedMessage
               id="kbnVislibVisTypes.editors.heatmap.basicSettingsTitle"
               defaultMessage="Basic settings"
             />
-          </h2>
+          </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
 
@@ -93,12 +93,12 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
 
       <EuiPanel paddingSize="s">
         <EuiTitle size="xs">
-          <h2>
+          <h3>
             <FormattedMessage
               id="kbnVislibVisTypes.editors.heatmap.heatmapSettingsTitle"
               defaultMessage="Heatmap settings"
             />
-          </h2>
+          </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
 

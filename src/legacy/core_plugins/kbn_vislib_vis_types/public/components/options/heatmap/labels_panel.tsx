@@ -62,12 +62,12 @@ function LabelsPanel({ valueAxis, setValue }: LabelsPanelProps) {
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
-        <h2>
+        <h3>
           <FormattedMessage
             id="kbnVislibVisTypes.controls.heatmapOptions.labelsTitle"
             defaultMessage="Labels"
           />
-        </h2>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
 
