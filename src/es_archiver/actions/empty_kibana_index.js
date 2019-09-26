@@ -20,12 +20,11 @@ import {
   migrateKibanaIndex,
   deleteKibanaIndices,
   createStats,
-  getEnabledKibanaPluginIds
 } from '../lib';
 
-export async function emptyKibanaIndexAction({ client, log, kibanaUrl }) {
+export async function emptyKibanaIndexAction({ client, log, kbnClient }) {
   const stats = createStats('emptyKibanaIndex', log);
-  const kibanaPluginIds = await getEnabledKibanaPluginIds(kibanaUrl);
+  const kibanaPluginIds = await kbnClient.getEnabledPluginIds();
 
   await deleteKibanaIndices({ client, stats });
   await migrateKibanaIndex({ client, log, stats, kibanaPluginIds });

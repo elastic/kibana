@@ -35,7 +35,6 @@ import {
   createIndexDocRecordsStream,
   migrateKibanaIndex,
   Progress,
-  getEnabledKibanaPluginIds,
   createDefaultSpace,
 } from '../lib';
 
@@ -49,11 +48,11 @@ const pipeline = (...streams) => streams
       .pipe(dest)
   ));
 
-export async function loadAction({ name, skipExisting, client, dataDir, log, kibanaUrl }) {
+export async function loadAction({ name, skipExisting, client, dataDir, log, kbnClient }) {
   const inputDir = resolve(dataDir, name);
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
-  const kibanaPluginIds = await getEnabledKibanaPluginIds(kibanaUrl);
+  const kibanaPluginIds = await kbnClient.getEnabledPluginIds();
 
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes
