@@ -44,8 +44,6 @@ export function VisualizeListingController($injector, createNewVis) {
   const kbnUrl = $injector.get('kbnUrl');
   const savedObjectClient = Private(SavedObjectsClientProvider);
 
-  this.visTypeAliases = visualizations.types.getAliases();
-
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
 
@@ -80,6 +78,7 @@ export function VisualizeListingController($injector, createNewVis) {
   // TODO: Extract this into an external service.
   const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
   const visualizationService = services.visualizations;
+  this.visTypeRegistry = visualizations.types;
 
   this.fetchItems = filter => {
     const isLabsEnabled = config.get('visualize:enableLabs');
