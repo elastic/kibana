@@ -6,14 +6,15 @@
 
 import uuid from 'uuid';
 import { npStart } from 'ui/new_platform';
+import { ActionToaster, AppToast } from '../toasters';
+import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import {
-  ViewMode,
-  APPLY_FILTER_ACTION,
   APPLY_FILTER_TRIGGER,
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
-} from '../../../../../../../src/plugins/embeddable/public';
-import { ActionToaster, AppToast } from '../toasters';
+  APPLY_FILTER_ACTION,
+  ViewMode,
+} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import {
   APPLY_SIEM_FILTER_ACTION_ID,
   ApplySiemFilterAction,
@@ -97,7 +98,7 @@ export const createEmbeddable = async (
   endDate: number,
   setQuery: SetQuery
 ): Promise<MapEmbeddable> => {
-  const factory = npStart.plugins.embeddable.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
+  const factory = start.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
   const state = {
     layerList: getLayerList(indexPatterns),

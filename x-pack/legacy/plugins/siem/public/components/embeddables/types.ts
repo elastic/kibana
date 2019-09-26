@@ -6,7 +6,11 @@
 
 import { Filter as ESFilterType } from '@kbn/es-query';
 import { TimeRange } from 'src/plugins/data/public';
-import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from 'src/plugins/embeddable/public';
+import {
+  EmbeddableInput,
+  EmbeddableOutput,
+  IEmbeddable,
+} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { inputsModel } from '../../store/inputs';
 
 export interface MapEmbeddableInput extends EmbeddableInput {

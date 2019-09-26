@@ -10,7 +10,8 @@ import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 
 import styled from 'styled-components';
-import { EmbeddablePanel } from '../../../../../../../src/plugins/embeddable/public';
+import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { EmbeddablePanel } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 
 import { Loader } from '../loader';
 import { useIndexPatterns } from '../ml_popover/hooks/use_index_patterns';
@@ -134,8 +135,8 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
               data-test-subj="embeddable-panel"
               embeddable={embeddable}
               getActions={npStart.plugins.uiActions.getTriggerCompatibleActions}
-              getEmbeddableFactory={npStart.plugins.embeddable.getEmbeddableFactory}
-              getAllEmbeddableFactories={npStart.plugins.embeddable.getEmbeddableFactories}
+              getEmbeddableFactory={start.getEmbeddableFactory}
+              getAllEmbeddableFactories={start.getEmbeddableFactories}
               notifications={npStart.core.notifications}
               overlays={npStart.core.overlays}
               inspector={npStart.plugins.inspector}
