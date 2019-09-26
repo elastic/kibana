@@ -18,7 +18,7 @@ import {
   EmbeddableOutput,
   IContainer,
   EmbeddableInput,
-} from '../../../../../../../src/plugins/embeddable/public';
+} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { Document, DOC_TYPE } from '../../persistence';
 import { ExpressionWrapper } from './expression_wrapper';
 

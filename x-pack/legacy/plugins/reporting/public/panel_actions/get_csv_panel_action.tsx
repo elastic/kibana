@@ -12,13 +12,13 @@ import { toastNotifications } from 'ui/notify';
 import chrome from 'ui/chrome';
 
 import { npSetup } from 'ui/new_platform';
+import { IAction, IncompatibleActionError } from '../../../../../../src/plugins/ui_actions/public';
+
 import {
   ViewMode,
   IEmbeddable,
   CONTEXT_MENU_TRIGGER,
-} from '../../../../../../src/plugins/embeddable/public';
-import { IAction, IncompatibleActionError } from '../../../../../../src/plugins/ui_actions/public';
-
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import {
   ISearchEmbeddable,
   SEARCH_EMBEDDABLE_TYPE,

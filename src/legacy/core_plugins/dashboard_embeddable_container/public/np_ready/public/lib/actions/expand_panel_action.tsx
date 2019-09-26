@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IEmbeddable } from '../embeddable_api';
+import { IEmbeddable } from '../../../../../../embeddable_api/public/np_ready/public';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 import {
   IAction,

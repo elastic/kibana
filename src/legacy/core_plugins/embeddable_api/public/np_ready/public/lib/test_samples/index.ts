@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export * from '../../../../../embeddable_api/public/np_ready/public';
+// eslint-disable-next-line
+export * from '../../../../../../../../plugins/embeddable/public/lib/test_samples';
