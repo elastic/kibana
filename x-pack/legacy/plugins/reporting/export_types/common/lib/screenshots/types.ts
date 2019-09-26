@@ -5,7 +5,6 @@
  */
 
 import { ElementPosition, ConditionalHeaders } from '../../../../types';
-import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
 import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
 
@@ -37,14 +36,21 @@ export interface Screenshot {
   description: any;
 }
 
-export interface ScreenShotOpts {
-  elementsPositionAndAttributes: ElementsPositionAndAttribute[];
-}
-
-export interface BrowserOpts {
-  browser: HeadlessBrowser;
-}
-
-export interface TimeRangeOpts {
-  timeRange: TimeRange;
+export interface PerformanceMetrics {
+  pageUrl: string;
+  timestamp: Date;
+  puppeteer: {
+    Timestamp: number;
+    Documents: number;
+    Frames: number;
+    JSEventListeners: number;
+    Nodes: number;
+    LayoutCount: number;
+    RecalcStyleCount: number;
+    LayoutDuration: number; // float
+    RecalcStyleDuration: number; // float
+    ScriptDuration: number; // float
+    TaskDuration: number; // float
+    JSHeapUsedSize: number;
+  };
 }

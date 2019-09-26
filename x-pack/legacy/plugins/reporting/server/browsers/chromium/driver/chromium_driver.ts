@@ -8,6 +8,7 @@ import open from 'opn';
 import { parse as parseUrl } from 'url';
 import { Page, SerializableOrJSHandle, EvaluateFn } from 'puppeteer';
 import { ViewZoomWidthHeight } from '../../../../export_types/common/layouts/layout';
+import { PerformanceMetrics } from '../../../../export_types/common/lib/screenshots/types';
 import { LevelLogger } from '../../../../server/lib';
 import {
   ConditionalHeaders,
@@ -78,6 +79,15 @@ export class HeadlessChromiumDriver {
 
     await this.waitForSelector(waitForSelector, {}, logger);
     logger.info(`handled ${interceptedCount} page requests`);
+  }
+
+  public async getMetrics(): Promise<PerformanceMetrics> {
+    const puppeteerMetrics = await this.page.metrics();
+    return {
+      pageUrl: this.page.url(),
+      timestamp: new Date(),
+      puppeteer: puppeteerMetrics,
+    };
   }
 
   public async screenshot(elementPosition: ElementPosition) {
