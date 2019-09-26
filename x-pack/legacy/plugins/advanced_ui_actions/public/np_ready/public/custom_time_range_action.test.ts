@@ -10,7 +10,7 @@ import { skip } from 'rxjs/operators';
 import * as Rx from 'rxjs';
 import { mount } from 'enzyme';
 
-import { EmbeddableFactory } from 'src/plugins/embeddable/public';
+import { EmbeddableFactory } from '../../../../../../../src/plugins/embeddable/public';
 import { TimeRangeEmbeddable, TimeRangeContainer, TIME_RANGE_EMBEDDABLE } from './test_helpers';
 import { TimeRangeEmbeddableFactory } from './test_helpers/time_range_embeddable_factory';
 import { CustomTimeRangeAction } from './custom_time_range_action';
@@ -21,7 +21,7 @@ import {
   HELLO_WORLD_EMBEDDABLE_TYPE,
   HelloWorldEmbeddable,
   HelloWorldContainer,
-} from 'src/plugins/embeddable/public/lib/test_samples';
+} from '../../../../../../../src/plugins/embeddable/public/lib/test_samples';
 /* eslint-enable */
 
 import { nextTick } from 'test_utils/enzyme_helpers';

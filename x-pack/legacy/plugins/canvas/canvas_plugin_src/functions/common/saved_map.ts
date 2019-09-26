@@ -6,7 +6,7 @@
 import { Filter as ESFilterType } from '@kbn/es-query';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { TimeRange } from 'src/plugins/data/public';
-import { EmbeddableInput } from 'src/plugins/embeddable/public';
+import { EmbeddableInput } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { buildEmbeddableFilters } from '../../../server/lib/build_embeddable_filters';
 import { Filter } from '../../../types';
 import {
