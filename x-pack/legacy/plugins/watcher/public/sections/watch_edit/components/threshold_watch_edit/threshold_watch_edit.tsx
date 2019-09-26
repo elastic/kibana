@@ -27,6 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TIME_UNITS } from '../../../../../common/constants';
+import { serializeThresholdWatch } from '../../../../../common/lib/serialization';
 import { ErrableFormRow, SectionError } from '../../../../components';
 import { fetchFields, getMatchingIndices, loadIndexPatterns } from '../../../../lib/api';
 import { aggTypes } from '../../../../models/watch/agg_types';
@@ -38,6 +39,7 @@ import { WatchVisualization } from './watch_visualization';
 import { WatchActionsPanel } from './threshold_watch_action_panel';
 import { getTimeUnitLabel } from '../../../../lib/get_time_unit_label';
 import { goToWatchList } from '../../../../lib/navigation';
+import { RequestFlyout } from '../request_flyout';
 
 const expressionFieldsWithValidation = [
   'aggField',
@@ -168,6 +170,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   } | null>(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
+  const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
 
   const { watch, setWatchProperty } = useContext(WatchContext);
 
@@ -217,6 +220,14 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   const andThresholdText = i18n.translate('xpack.watcher.sections.watchEdit.threshold.andLabel', {
     defaultMessage: 'AND',
   });
+
+  // Users might edit the request for use outside of the Watcher app. If they do make changes to it,
+  // we have no guarantee it will still be compatible with the threshold alert form, so we strip
+  // the metadata to avoid potential conflicts.
+  const requestPreviewWatchData = {
+    ...watch.upstreamJson,
+    includeMetadata: false,
+  };
 
   return (
     <EuiPageContent>
@@ -273,6 +284,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
             }}
           />
         </ErrableFormRow>
+        <EuiSpacer />
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem>
             <ErrableFormRow
@@ -869,47 +881,77 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
             <EuiSpacer />
           </Fragment>
         ) : null}
-        <EuiFlexGroup>
+
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              color="secondary"
-              data-test-subj="saveWatchButton"
-              type="submit"
-              iconType="check"
-              isDisabled={hasErrors || hasActionErrors}
-              isLoading={isSaving}
-              onClick={async () => {
-                setIsSaving(true);
-                const savedWatch = await onWatchSave(watch);
-                if (savedWatch && savedWatch.error) {
-                  setIsSaving(false);
-                  return setServerError(savedWatch.error);
-                }
-              }}
-            >
-              {watch.isNew ? (
+            <EuiFlexGroup gutterSize="m" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  color="secondary"
+                  data-test-subj="saveWatchButton"
+                  type="submit"
+                  iconType="check"
+                  isDisabled={hasErrors || hasActionErrors}
+                  isLoading={isSaving}
+                  onClick={async () => {
+                    setIsSaving(true);
+                    const savedWatch = await onWatchSave(watch);
+                    if (savedWatch && savedWatch.error) {
+                      setIsSaving(false);
+                      return setServerError(savedWatch.error);
+                    }
+                  }}
+                >
+                  {watch.isNew ? (
+                    <FormattedMessage
+                      id="xpack.watcher.sections.watchEdit.threshold.createButtonLabel"
+                      defaultMessage="Create alert"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.watcher.sections.watchEdit.threshold.saveButtonLabel"
+                      defaultMessage="Save alert"
+                    />
+                  )}
+                </EuiButton>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={() => goToWatchList()}>
+                  {i18n.translate('xpack.watcher.sections.watchEdit.threshold.cancelButtonLabel', {
+                    defaultMessage: 'Cancel',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={() => setIsRequestVisible(!isRequestVisible)}>
+              {isRequestVisible ? (
                 <FormattedMessage
-                  id="xpack.watcher.sections.watchEdit.threshold.createButtonLabel"
-                  defaultMessage="Create alert"
+                  id="xpack.watcher.sections.watchEdit.json.hideRequestButtonLabel"
+                  defaultMessage="Hide request"
                 />
               ) : (
                 <FormattedMessage
-                  id="xpack.watcher.sections.watchEdit.threshold.saveButtonLabel"
-                  defaultMessage="Save alert"
+                  id="xpack.watcher.sections.watchEdit.json.showRequestButtonLabel"
+                  defaultMessage="Show request"
                 />
               )}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => goToWatchList()}>
-              {i18n.translate('xpack.watcher.sections.watchEdit.threshold.cancelButtonLabel', {
-                defaultMessage: 'Cancel',
-              })}
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiForm>
+
+      {isRequestVisible ? (
+        <RequestFlyout
+          id={watch.id}
+          payload={serializeThresholdWatch(requestPreviewWatchData)}
+          close={() => setIsRequestVisible(false)}
+        />
+      ) : null}
     </EuiPageContent>
   );
 };
