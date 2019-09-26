@@ -27,7 +27,8 @@ import {
   ElasticsearchClientConfig,
   parseElasticsearchClientConfig,
 } from './elasticsearch_client_config';
-import { ScopedClusterClient } from './scoped_cluster_client';
+import { ScopedClusterClient, IScopedClusterClient } from './scoped_cluster_client';
+import { CallAPIOptions, APICaller } from './api_types';
 
 /**
  * Support Legacy platform request for the period of migration.
@@ -36,25 +37,6 @@ import { ScopedClusterClient } from './scoped_cluster_client';
  */
 
 const noop = () => undefined;
-/**
- * The set of options that defines how API call should be made and result be
- * processed.
- *
- * @public
- */
-export interface CallAPIOptions {
-  /**
-   * Indicates whether `401 Unauthorized` errors returned from the Elasticsearch API
-   * should be wrapped into `Boom` error instances with properly set `WWW-Authenticate`
-   * header that could have been returned by the API itself. If API didn't specify that
-   * then `Basic realm="Authorization Required"` is used as `WWW-Authenticate`.
-   */
-  wrap401Errors: boolean;
-  /**
-   * A signal object that allows you to abort the request via an AbortController object.
-   */
-  signal?: AbortSignal;
-}
 
 /**
  * Calls the Elasticsearch API endpoint with the specified parameters.
@@ -64,12 +46,12 @@ export interface CallAPIOptions {
  * Elasticsearch JS client.
  * @param options Options that affect the way we call the API and process the result.
  */
-async function callAPI(
+const callAPI = async (
   client: Client,
   endpoint: string,
   clientParams: Record<string, any> = {},
   options: CallAPIOptions = { wrap401Errors: true }
-): Promise<any> {
+) => {
   const clientPath = endpoint.split('.');
   const api: any = get(client, clientPath);
   if (!api) {
@@ -95,7 +77,7 @@ async function callAPI(
 
     throw ElasticsearchErrorHelpers.decorateNotAuthorizedError(err);
   }
-}
+};
 
 /**
  * Fake request object created manually by Kibana plugins.
@@ -107,13 +89,26 @@ export interface FakeRequest {
 }
 
 /**
+ * {@inheritdoc ClusterClient}
+ * @public
+ */
+export interface IClusterClient {
+  /** {@inheritdoc ClusterClient.callAsInternalUser} */
+  callAsInternalUser: APICaller;
+  /** {@inheritdoc ClusterClient.close} */
+  close(): void;
+  /** {@inheritdoc ClusterClient.asScoped} */
+  asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): IScopedClusterClient;
+}
+
+/**
  * Represents an Elasticsearch cluster API client and allows to call API on behalf
  * of the internal Kibana user and the actual user that is derived from the request
  * headers (via `asScoped(...)`).
  *
  * @public
  */
-export class ClusterClient {
+export class ClusterClient implements IClusterClient {
   /**
    * Raw Elasticsearch JS client that acts on behalf of the Kibana internal user.
    */
@@ -145,14 +140,14 @@ export class ClusterClient {
    * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
    * @param options - Options that affect the way we call the API and process the result.
    */
-  public callAsInternalUser = async (
+  public callAsInternalUser: APICaller = async (
     endpoint: string,
     clientParams: Record<string, any> = {},
     options?: CallAPIOptions
   ) => {
     this.assertIsNotClosed();
 
-    return await callAPI(this.client, endpoint, clientParams, options);
+    return await (callAPI.bind(null, this.client) as APICaller)(endpoint, clientParams, options);
   };
 
   /**
@@ -199,7 +194,7 @@ export class ClusterClient {
 
     return new ScopedClusterClient(
       this.callAsInternalUser,
-      this.callAsCurrentUser,
+      this.callAsCurrentUser as APICaller,
       filterHeaders(this.getHeaders(request), this.config.requestHeadersWhitelist)
     );
   }

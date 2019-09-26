@@ -9,7 +9,7 @@ Serves the same purpose as "normal" `ClusterClient` but exposes additional `call
 <b>Signature:</b>
 
 ```typescript
-export declare class ScopedClusterClient 
+export declare class ScopedClusterClient implements IScopedClusterClient 
 ```
 
 ## Constructors

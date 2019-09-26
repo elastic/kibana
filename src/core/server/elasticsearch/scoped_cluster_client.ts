@@ -19,17 +19,25 @@
 
 import { intersection, isObject } from 'lodash';
 import { Headers } from '../http/router';
-import { CallAPIOptions } from './cluster_client';
+import { APICaller, CallAPIOptions } from './api_types';
 
 /** @public */
 export { Headers };
 
-/** @public */
-export type APICaller = (
-  endpoint: string,
-  clientParams: Record<string, any>,
-  options?: CallAPIOptions
-) => Promise<unknown>;
+/**
+ * {@inheritDoc ScopedClusterClient}
+ * @public
+ */
+export interface IScopedClusterClient {
+  /**
+   * {@inheritdoc ScopedClusterClient.callAsInternalUser}
+   */
+  callAsInternalUser: APICaller;
+  /**
+   * {@inheritdoc ScopedClusterClient.callAsCurrentUser}
+   */
+  callAsCurrentUser: APICaller;
+}
 
 /**
  * Serves the same purpose as "normal" `ClusterClient` but exposes additional
@@ -39,7 +47,7 @@ export type APICaller = (
  *
  * @public
  */
-export class ScopedClusterClient {
+export class ScopedClusterClient implements IScopedClusterClient {
   constructor(
     private readonly internalAPICaller: APICaller,
     private readonly scopedAPICaller: APICaller,

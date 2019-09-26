@@ -9,7 +9,7 @@ Represents an Elasticsearch cluster API client and allows to call API on behalf 
 <b>Signature:</b>
 
 ```typescript
-export declare class ClusterClient 
+export declare class ClusterClient implements IClusterClient 
 ```
 
 ## Constructors
@@ -22,7 +22,7 @@ export declare class ClusterClient
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [callAsInternalUser](./kibana-plugin-server.clusterclient.callasinternaluser.md) |  | <code>(endpoint: string, clientParams?: Record&lt;string, any&gt;, options?: CallAPIOptions &#124; undefined) =&gt; Promise&lt;any&gt;</code> | Calls specified endpoint with provided clientParams on behalf of the Kibana internal user. |
+|  [callAsInternalUser](./kibana-plugin-server.clusterclient.callasinternaluser.md) |  | <code>APICaller</code> | Calls specified endpoint with provided clientParams on behalf of the Kibana internal user. |
 
 ## Methods
 

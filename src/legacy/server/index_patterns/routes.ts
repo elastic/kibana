@@ -24,14 +24,18 @@ import {
   KibanaRequest,
   RequestHandlerContext,
   APICaller,
+  CallAPIOptions,
 } from '../../../core/server';
 import { IndexPatternsService } from './service';
 
 export function registerRoutes(core: InternalCoreSetup) {
   const getIndexPatternsService = async (request: KibanaRequest): Promise<IndexPatternsService> => {
     const client = await core.elasticsearch.dataClient$.pipe(first()).toPromise();
-    const callCluster: APICaller = (endpoint, params, options) =>
-      client.asScoped(request).callAsCurrentUser(endpoint, params, options);
+    const callCluster: APICaller = (
+      endpoint: string,
+      params?: Record<string, any>,
+      options?: CallAPIOptions
+    ) => client.asScoped(request).callAsCurrentUser(endpoint, params, options);
     return new Promise(resolve => resolve(new IndexPatternsService(callCluster)));
   };
 
