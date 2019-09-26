@@ -102,7 +102,6 @@
     "common.ui.aggTypes.buckets.intervalOptions.yearlyDisplayName": "每年",
     "common.ui.aggTypes.buckets.ipRangeLabel": "{fieldName} IP 范围",
     "common.ui.aggTypes.buckets.ipRangeTitle": "IPv4 范围",
-    "common.ui.aggTypes.buckets.ranges.rangesFormatMessage": "{from} 至 {to}",
     "common.ui.aggTypes.buckets.rangesLabel": "{fieldName} 范围",
     "common.ui.aggTypes.buckets.rangeTitle": "范围",
     "common.ui.aggTypes.buckets.significantTerms.excludeLabel": "排除",
