@@ -57,7 +57,7 @@ const defaultEditor = function ($rootScope, $compile) {
       }
     }
 
-    render({ uiState, timeRange, filters }) {
+    render({ uiState, timeRange, filters, appState }) {
       let $scope;
 
       const updateScope = () => {
@@ -84,7 +84,7 @@ const defaultEditor = function ($rootScope, $compile) {
           $scope.stageEditableVis = () => {
             $scope.oldState = $scope.vis.getSerializableState($scope.state);
             $scope.vis.setCurrentState($scope.state);
-            $scope.vis.updateState();
+            $scope.$emit('render');
             $scope.vis.dirty = false;
           };
           $scope.resetEditableVis = () => {
@@ -167,12 +167,14 @@ const defaultEditor = function ($rootScope, $compile) {
               listenOnChange: false,
               timeRange: timeRange,
               filters: filters,
+              appState: appState,
             });
           });
         } else {
           this._handler.update({
             timeRange: timeRange,
             filters: filters,
+            visParams: this.savedObj.vis.params,
           });
         }
 

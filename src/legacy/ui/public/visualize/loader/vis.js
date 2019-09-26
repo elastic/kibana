@@ -94,10 +94,6 @@ export function VisProvider(Private) {
       this.emit('update');
     }
 
-    forceReload() {
-      this.emit('reload');
-    }
-
     isHierarchical() {
       if (_.isFunction(this.type.hierarchicalData)) {
         return !!this.type.hierarchicalData(this);

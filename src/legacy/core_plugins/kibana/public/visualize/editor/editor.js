@@ -280,7 +280,7 @@ function VisEditor(
       defaultMessage: 'Refresh',
     }),
     run: function () {
-      vis.forceReload();
+      $scope.$broadcast('render');
     },
     testId: 'visualizeRefreshButton',
   }];
@@ -437,7 +437,7 @@ function VisEditor(
       $state.save();
       savedVis.searchSource.setField('query', $state.query);
       savedVis.searchSource.setField('filter', $state.filters);
-      $scope.vis.forceReload();
+      $scope.$broadcast('render');
     };
 
     // update the searchSource when filters update

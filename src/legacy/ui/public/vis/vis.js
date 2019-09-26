@@ -58,13 +58,6 @@ export function VisProvider(Private) {
       // Session state is for storing information that is transitory, and will not be saved with the visualization.
       // For instance, map bounds, which depends on the view port, browser window size, etc.
       this.sessionState = {};
-
-      this.API = {
-        events: {
-          filter: data => this.eventsSubject.next({ name: 'filterBucket', data }),
-          brush: data => this.eventsSubject.next({ name: 'brush', data }),
-        },
-      };
     }
 
     setCurrentState(state) {
@@ -96,15 +89,6 @@ export function VisProvider(Private) {
       if (updateCurrentState) {
         this.setCurrentState(this._state);
       }
-    }
-
-    updateState() {
-      this.setState(this.getCurrentState(true));
-      this.emit('update');
-    }
-
-    forceReload() {
-      this.emit('reload');
     }
 
     getCurrentState(includeDisabled) {

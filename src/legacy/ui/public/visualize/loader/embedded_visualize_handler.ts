@@ -134,15 +134,7 @@ export class EmbeddedVisualizeHandler {
   ) {
     const { searchSource, vis } = savedObject;
 
-    const {
-      uiState,
-      queryFilter,
-      timeRange,
-      filters,
-      query,
-      autoFetch = true,
-      Private,
-    } = params;
+    const { uiState, queryFilter, timeRange, filters, query, autoFetch = true, Private } = params;
 
     this.dataLoaderParams = {
       searchSource,
@@ -262,6 +254,10 @@ export class EmbeddedVisualizeHandler {
     }
 
     let fetchRequired = false;
+    if (params.hasOwnProperty('visParams') && !isEqual(this.vis.params, params.visParams)) {
+      fetchRequired = true;
+      this.vis.params = _.cloneDeep(params.visParams);
+    }
     if (
       params.hasOwnProperty('timeRange') &&
       !isEqual(this.dataLoaderParams.timeRange, params.timeRange)
