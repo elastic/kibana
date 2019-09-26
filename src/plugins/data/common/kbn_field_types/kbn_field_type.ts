@@ -17,16 +17,18 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { DataPublicPlugin } from './plugin';
+import { KbnFieldTypeOptions, ES_FIELD_TYPES, KBN_FIELD_TYPES } from './types';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DataPublicPlugin(initializerContext);
+export class KbnFieldType {
+  public readonly name: string;
+  public readonly sortable: boolean;
+  public readonly filterable: boolean;
+  public readonly esTypes: readonly ES_FIELD_TYPES[];
+
+  constructor(options: Partial<KbnFieldTypeOptions> = {}) {
+    this.name = options.name || KBN_FIELD_TYPES.UNKNOWN;
+    this.sortable = options.sortable || false;
+    this.filterable = options.filterable || false;
+    this.esTypes = Object.freeze((options.esTypes || []).slice());
+  }
 }
-
-export { DataPublicPlugin as Plugin };
-
-export * from '../common';
-export * from './autocomplete_provider';
-
-export * from './types';
