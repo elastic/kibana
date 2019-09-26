@@ -55,7 +55,7 @@
     "ora": "^1.4.0",
     "prettier": "^1.14.3",
     "read-pkg": "^5.2.0",
-    "rxjs": "^6.2.1",
+    "rxjs": "^6.5.3",
     "spawn-sync": "^1.0.15",
     "string-replace-loader": "^2.2.0",
     "strip-ansi": "^4.0.0",

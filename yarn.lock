@@ -24616,14 +24616,7 @@ rxjs@^6.1.0:
   dependencies:
     tslib "^1.9.0"
 
-rxjs@^6.2.1:
-  version "6.2.1"
-  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-6.2.1.tgz#246cebec189a6cbc143a3ef9f62d6f4c91813ca1"
-  integrity sha512-OwMxHxmnmHTUpgO+V7dZChf3Tixf4ih95cmXjzzadULziVl/FKhHScGLj4goEw9weePVOH2Q0+GcCBUhKCZc/g==
-  dependencies:
-    tslib "^1.9.0"
-
-rxjs@^6.3.3:
+rxjs@^6.3.3, rxjs@^6.5.3:
   version "6.5.3"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-6.5.3.tgz#510e26317f4db91a7eb1de77d9dd9ba0a4899a3a"
   integrity sha512-wuYsAYYFdWTAnAaPoKGNhfpWwKZbJW+HgAJ+mImp+Epl7BG8oNWBCTyRM8gba9k4lk8BgWdoYm21Mo/RYhhbgA==

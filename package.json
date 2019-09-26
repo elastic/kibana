@@ -234,7 +234,7 @@
     "resize-observer-polyfill": "^1.5.0",
     "rimraf": "2.7.1",
     "rison-node": "1.0.2",
-    "rxjs": "^6.2.1",
+    "rxjs": "^6.5.3",
     "script-loader": "0.7.2",
     "semver": "^5.5.0",
     "stream-stream": "^1.2.6",
