@@ -90,7 +90,7 @@ export default async function (kbnServer, server, config) {
     path: '/',
     method: 'GET',
     async handler(req, h) {
-      return h.redirect(req.getDefaultRoute());
+      return h.redirect(await req.getDefaultRoute());
     }
   });
 
