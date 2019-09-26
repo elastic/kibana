@@ -17,25 +17,19 @@
  * under the License.
  */
 
-import { visFactory } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { TimelionRequestHandlerProvider } from './timelion_request_handler';
+// @ts-ignore
 import { DefaultEditorSize } from 'ui/vis/editor_size';
-import { AngularVisController } from '../../../../ui/public/vis/vis_types/angular_vis_type';
-
-// we also need to load the controller and directive used by the template
-import './timelion_vis_controller';
-import '../directives/timelion_expression_input';
-
+import { visFactory } from '../../../visualizations/public';
+import { getTimelionRequestHandler } from './timelion_request_handler';
 import visConfigTemplate from './timelion_vis.html';
 import editorConfigTemplate from './timelion_vis_params.html';
+import { TimelionVisualizationDependencies } from '../plugin';
+// @ts-ignore
+import { AngularVisController } from '../../../../ui/public/vis/vis_types/angular_vis_type';
 
-// register the provider with the visTypes registry so that other know it exists
-VisTypesRegistryProvider.register(TimelionVisProvider);
-
-export default function TimelionVisProvider(Private) {
-  const timelionRequestHandler = Private(TimelionRequestHandlerProvider);
+export function getTimelionVisualization(dependencies: TimelionVisualizationDependencies) {
+  const timelionRequestHandler = getTimelionRequestHandler(dependencies);
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
@@ -50,7 +44,7 @@ export default function TimelionVisProvider(Private) {
     visConfig: {
       defaults: {
         expression: '.es(*)',
-        interval: 'auto'
+        interval: 'auto',
       },
       template: visConfigTemplate,
     },
@@ -58,7 +52,7 @@ export default function TimelionVisProvider(Private) {
       optionsTemplate: editorConfigTemplate,
       defaultSize: DefaultEditorSize.MEDIUM,
     },
-    requestHandler: timelionRequestHandler.handler,
+    requestHandler: timelionRequestHandler,
     responseHandler: 'none',
     options: {
       showIndexSelection: false,

@@ -29,6 +29,8 @@ interface Props {
   onChange: (value: string | number | boolean) => void;
   placeholder: string;
   intl: InjectedIntl;
+  controlOnly?: boolean;
+  className?: string;
 }
 
 class ValueInputTypeUI extends Component<Props> {
@@ -42,6 +44,8 @@ class ValueInputTypeUI extends Component<Props> {
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
+            controlOnly={this.props.controlOnly}
+            className={this.props.className}
           />
         );
         break;
@@ -51,6 +55,8 @@ class ValueInputTypeUI extends Component<Props> {
             placeholder={this.props.placeholder}
             value={typeof value === 'string' ? parseFloat(value) : value}
             onChange={this.onChange}
+            controlOnly={this.props.controlOnly}
+            className={this.props.className}
           />
         );
         break;
@@ -61,6 +67,8 @@ class ValueInputTypeUI extends Component<Props> {
             value={value}
             onChange={this.onChange}
             isInvalid={!isEmpty(value) && !validateParams(value, this.props.type)}
+            controlOnly={this.props.controlOnly}
+            className={this.props.className}
           />
         );
         break;
@@ -71,6 +79,8 @@ class ValueInputTypeUI extends Component<Props> {
             value={value}
             onChange={this.onChange}
             isInvalid={!isEmpty(value) && !validateParams(value, this.props.type)}
+            controlOnly={this.props.controlOnly}
+            className={this.props.className}
           />
         );
         break;
@@ -96,6 +106,7 @@ class ValueInputTypeUI extends Component<Props> {
             ]}
             value={value}
             onChange={this.onBoolChange}
+            className={this.props.className}
           />
         );
         break;
