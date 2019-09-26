@@ -19,14 +19,15 @@ import {
 } from '@elastic/charts';
 import { getOr, get } from 'lodash/fp';
 import {
-  ChartConfigsData,
+  ChartSeriesData,
   ChartHolder,
   getSeriesStyle,
   WrappedByAutoSizer,
-  getTheme,
   ChartSeriesConfigs,
   browserTimezone,
   chartDefaultSettings,
+  getChartHeight,
+  getChartWidth,
 } from './common';
 import { AutoSizer } from '../auto_sizer';
 
@@ -52,9 +53,9 @@ const getSeriesLineStyle = (): RecursivePartial<AreaSeriesStyle> => {
 
 // https://ela.st/multi-areaseries
 export const AreaChartBaseComponent = React.memo<{
-  data: ChartConfigsData[];
-  width: number | null | undefined;
-  height: number | null | undefined;
+  data: ChartSeriesData[];
+  width: string | null | undefined;
+  height: string | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
 }>(({ data, ...chartConfigs }) => {
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
@@ -68,7 +69,7 @@ export const AreaChartBaseComponent = React.memo<{
   return chartConfigs.width && chartConfigs.height ? (
     <div style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}>
       <Chart>
-        <Settings {...settings} theme={getTheme()} />
+        <Settings {...settings} />
         {data.map(series => {
           const seriesKey = series.key;
           const seriesSpecId = getSpecId(seriesKey);
@@ -89,23 +90,15 @@ export const AreaChartBaseComponent = React.memo<{
           ) : null;
         })}
 
-        {xTickFormatter ? (
-          <Axis
-            id={xAxisId}
-            position={Position.Bottom}
-            showOverlappingTicks={false}
-            tickFormat={xTickFormatter}
-            tickSize={0}
-          />
-        ) : (
-          <Axis id={xAxisId} position={Position.Bottom} showOverlappingTicks={false} tickSize={0} />
-        )}
+        <Axis
+          id={xAxisId}
+          position={Position.Bottom}
+          showOverlappingTicks={false}
+          tickFormat={xTickFormatter}
+          tickSize={0}
+        />
 
-        {yTickFormatter ? (
-          <Axis id={yAxisId} position={Position.Left} tickSize={0} tickFormat={yTickFormatter} />
-        ) : (
-          <Axis id={yAxisId} position={Position.Left} tickSize={0} />
-        )}
+        <Axis id={yAxisId} position={Position.Left} tickSize={0} tickFormat={yTickFormatter} />
       </Chart>
     </div>
   ) : null;
@@ -114,9 +107,9 @@ export const AreaChartBaseComponent = React.memo<{
 AreaChartBaseComponent.displayName = 'AreaChartBaseComponent';
 
 export const AreaChartWithCustomPrompt = React.memo<{
-  data: ChartConfigsData[] | null | undefined;
-  height: number | null | undefined;
-  width: number | null | undefined;
+  data: ChartSeriesData[] | null | undefined;
+  height: string | null | undefined;
+  width: string | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
 }>(({ data, height, width, configs }) => {
   return data != null &&
@@ -129,28 +122,35 @@ export const AreaChartWithCustomPrompt = React.memo<{
     ) ? (
     <AreaChartBaseComponent height={height} width={width} data={data} configs={configs} />
   ) : (
-    <ChartHolder />
+    <ChartHolder height={height} width={width} />
   );
 });
 
 AreaChartWithCustomPrompt.displayName = 'AreaChartWithCustomPrompt';
 
 export const AreaChart = React.memo<{
-  areaChart: ChartConfigsData[] | null | undefined;
+  areaChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
-}>(({ areaChart, configs }) => (
-  <AutoSizer detectAnyWindowResize={false} content>
-    {({ measureRef, content: { height, width } }) => (
-      <WrappedByAutoSizer innerRef={measureRef}>
-        <AreaChartWithCustomPrompt
-          data={areaChart}
-          height={height}
-          width={width}
-          configs={configs}
-        />
-      </WrappedByAutoSizer>
-    )}
-  </AutoSizer>
-));
+}>(({ areaChart, configs }) => {
+  const customHeight = get('customHeight', configs);
+  const customWidth = get('customWidth', configs);
+
+  return get(`0.value.length`, areaChart) ? (
+    <AutoSizer detectAnyWindowResize={false} content>
+      {({ measureRef, content: { height, width } }) => (
+        <WrappedByAutoSizer innerRef={measureRef} height={getChartHeight(customHeight, height)}>
+          <AreaChartWithCustomPrompt
+            data={areaChart}
+            height={getChartHeight(customHeight, height)}
+            width={getChartWidth(customWidth, width)}
+            configs={configs}
+          />
+        </WrappedByAutoSizer>
+      )}
+    </AutoSizer>
+  ) : (
+    <ChartHolder height={getChartHeight(customHeight)} width={getChartWidth(customWidth)} />
+  );
+});
 
 AreaChart.displayName = 'AreaChart';

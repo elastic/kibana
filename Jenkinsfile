@@ -6,8 +6,8 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
       ansiColor('xterm') {
         catchError {
           parallel([
-            'intake-agent': legacyJobRunner('intake'),
-            'firefox-smoke-agent': legacyJobRunner('firefoxSmoke'),
+            'kibana-intake-agent': legacyJobRunner('kibana-intake'),
+            'x-pack-intake-agent': legacyJobRunner('x-pack-intake'),
             'kibana-oss-agent': withWorkers('kibana-oss-tests', { buildOss() }, [
               'oss-ciGroup1': getOssCiGroupWorker(1),
               'oss-ciGroup2': getOssCiGroupWorker(2),
@@ -15,14 +15,14 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               'oss-ciGroup4': getOssCiGroupWorker(4),
               'oss-ciGroup5': getOssCiGroupWorker(5),
               'oss-ciGroup6': getOssCiGroupWorker(6),
-              // 'oss-ciGroup7': getOssCiGroupWorker(7),
-              // 'oss-ciGroup8': getOssCiGroupWorker(8),
-              // 'oss-ciGroup9': getOssCiGroupWorker(9),
-              // 'oss-ciGroup10': getOssCiGroupWorker(10),
-              // 'oss-ciGroup11': getOssCiGroupWorker(11),
-              // 'oss-ciGroup12': getOssCiGroupWorker(12),
+              'oss-ciGroup7': getOssCiGroupWorker(7),
+              'oss-ciGroup8': getOssCiGroupWorker(8),
+              'oss-ciGroup9': getOssCiGroupWorker(9),
+              'oss-ciGroup10': getOssCiGroupWorker(10),
+              'oss-ciGroup11': getOssCiGroupWorker(11),
+              'oss-ciGroup12': getOssCiGroupWorker(12),
+              'oss-firefoxSmoke': getPostBuildWorker('firefoxSmoke', { runbld './test/scripts/jenkins_firefox_smoke.sh' }),
               // 'oss-visualRegression': getPostBuildWorker('visualRegression', { runbld './test/scripts/jenkins_visual_regression.sh' }),
-              // 'oss-firefoxSmoke': getPostBuildWorker('firefoxSmoke', { runbld './test/scripts/jenkins_firefox_smoke.sh' }),
             ]),
             'kibana-xpack-agent': withWorkers('kibana-xpack-tests', { buildXpack() }, [
               'xpack-ciGroup1': getXpackCiGroupWorker(1),
@@ -30,12 +30,12 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               'xpack-ciGroup3': getXpackCiGroupWorker(3),
               'xpack-ciGroup4': getXpackCiGroupWorker(4),
               'xpack-ciGroup5': getXpackCiGroupWorker(5),
-              // 'xpack-ciGroup6': getXpackCiGroupWorker(6),
-              // 'xpack-ciGroup7': getXpackCiGroupWorker(7),
-              // 'xpack-ciGroup8': getXpackCiGroupWorker(8),
-              // 'xpack-ciGroup9': getXpackCiGroupWorker(9),
-              // 'xpack-ciGroup10': getXpackCiGroupWorker(10),
-              // 'xpack-firefoxSmoke': getPostBuildWorker('xpack-firefoxSmoke', { runbld './test/scripts/jenkins_xpack_firefox_smoke.sh' }),
+              'xpack-ciGroup6': getXpackCiGroupWorker(6),
+              'xpack-ciGroup7': getXpackCiGroupWorker(7),
+              'xpack-ciGroup8': getXpackCiGroupWorker(8),
+              'xpack-ciGroup9': getXpackCiGroupWorker(9),
+              'xpack-ciGroup10': getXpackCiGroupWorker(10),
+              'xpack-firefoxSmoke': getPostBuildWorker('xpack-firefoxSmoke', { runbld './test/scripts/jenkins_xpack_firefox_smoke.sh' }),
               // 'xpack-visualRegression': getPostBuildWorker('xpack-visualRegression', { runbld './test/scripts/jenkins_xpack_visual_regression.sh' }),
             ]),
           ])
@@ -78,6 +78,10 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
       } finally {
         catchError {
           uploadAllGcsArtifacts(name)
+        }
+
+        catchError {
+          runbldJunit()
         }
 
         catchError {
@@ -143,7 +147,7 @@ def legacyJobRunner(name) {
         ]) {
           jobRunner('linux && immutable') {
             try {
-              runbld '.ci/run.sh'
+              runbld('.ci/run.sh', true)
             } finally {
               catchError {
                 uploadAllGcsArtifacts(name)
@@ -253,8 +257,14 @@ def sendKibanaMail() {
   }
 }
 
-def runbld(script) {
-  sh '#!/usr/local/bin/runbld\n' + script
+def runbld(script, enableJunitProcessing = false) {
+  def extraConfig = enableJunitProcessing ? "" : "--config ${env.WORKSPACE}/kibana/.ci/runbld_no_junit.yml"
+
+  sh "/usr/local/bin/runbld -d '${pwd()}' ${extraConfig} ${script}"
+}
+
+def runbldJunit() {
+  sh "/usr/local/bin/runbld -d '${pwd()}' ${env.WORKSPACE}/kibana/test/scripts/jenkins_runbld_junit.sh"
 }
 
 def bash(script) {
