@@ -26,8 +26,6 @@ import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 import { SearchBarProps } from '../../../../core_plugins/data/public';
 
-const { SearchBar } = data.ui;
-
 type Props = Partial<SearchBarProps> & {
   appName: string;
   config?: TopNavMenuData[];
@@ -44,6 +42,7 @@ type Props = Partial<SearchBarProps> & {
  **/
 
 export function TopNavMenu(props: Props) {
+  const { SearchBar } = data.ui;
   const { config, showSearchBar, ...searchBarProps } = props;
   function renderItems() {
     if (!config) return;

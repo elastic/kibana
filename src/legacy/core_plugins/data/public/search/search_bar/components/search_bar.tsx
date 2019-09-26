@@ -330,11 +330,11 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   public componentDidMount() {
+    this.services = this.props.kibana.services;
     if (this.filterBarRef) {
       this.setFilterBarHeight();
       this.ro.observe(this.filterBarRef);
     }
-    this.services = this.props.kibana.services;
     if (this.services.savedObjects) {
       this.savedQueryService = createSavedQueryService(this.services.savedObjects.client);
     }

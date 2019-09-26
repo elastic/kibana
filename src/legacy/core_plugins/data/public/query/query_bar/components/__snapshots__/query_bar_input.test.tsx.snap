@@ -90,6 +90,7 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
       <Provider
         services={
           Object {
+            "appName": "test",
             "http": Object {
               "addLoadingCount": [MockFunction],
               "basePath": Object {
@@ -178,7 +179,6 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
         }
       >
         <InjectIntl(enhancedType)
-          appName="test"
           disableAutoFocus={true}
           indexPatterns={
             Array [
@@ -211,7 +211,6 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
           screenTitle="Another Screen"
         >
           <enhancedType
-            appName="test"
             disableAutoFocus={true}
             indexPatterns={
               Array [
@@ -345,7 +344,6 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
             screenTitle="Another Screen"
           >
             <QueryBarInputUI
-              appName="test"
               disableAutoFocus={true}
               indexPatterns={
                 Array [
@@ -484,6 +482,7 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                     "openModal": [Function],
                   },
                   "services": Object {
+                    "appName": "test",
                     "http": Object {
                       "addLoadingCount": [MockFunction],
                       "basePath": Object {
@@ -868,6 +867,7 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
       <Provider
         services={
           Object {
+            "appName": "test",
             "http": Object {
               "addLoadingCount": [MockFunction],
               "basePath": Object {
@@ -956,7 +956,6 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
         }
       >
         <InjectIntl(enhancedType)
-          appName="test"
           indexPatterns={
             Array [
               Object {
@@ -988,7 +987,6 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
           screenTitle="Another Screen"
         >
           <enhancedType
-            appName="test"
             indexPatterns={
               Array [
                 Object {
@@ -1121,7 +1119,6 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
             screenTitle="Another Screen"
           >
             <QueryBarInputUI
-              appName="test"
               indexPatterns={
                 Array [
                   Object {
@@ -1259,6 +1256,7 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                     "openModal": [Function],
                   },
                   "services": Object {
+                    "appName": "test",
                     "http": Object {
                       "addLoadingCount": [MockFunction],
                       "basePath": Object {
@@ -1643,6 +1641,7 @@ exports[`QueryBarInput Should render the given query 1`] = `
       <Provider
         services={
           Object {
+            "appName": "test",
             "http": Object {
               "addLoadingCount": [MockFunction],
               "basePath": Object {
@@ -1731,7 +1730,6 @@ exports[`QueryBarInput Should render the given query 1`] = `
         }
       >
         <InjectIntl(enhancedType)
-          appName="test"
           indexPatterns={
             Array [
               Object {
@@ -1763,7 +1761,6 @@ exports[`QueryBarInput Should render the given query 1`] = `
           screenTitle="Another Screen"
         >
           <enhancedType
-            appName="test"
             indexPatterns={
               Array [
                 Object {
@@ -1896,7 +1893,6 @@ exports[`QueryBarInput Should render the given query 1`] = `
             screenTitle="Another Screen"
           >
             <QueryBarInputUI
-              appName="test"
               indexPatterns={
                 Array [
                   Object {
@@ -2034,6 +2030,7 @@ exports[`QueryBarInput Should render the given query 1`] = `
                     "openModal": [Function],
                   },
                   "services": Object {
+                    "appName": "test",
                     "http": Object {
                       "addLoadingCount": [MockFunction],
                       "basePath": Object {

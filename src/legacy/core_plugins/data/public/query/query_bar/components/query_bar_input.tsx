@@ -389,9 +389,11 @@ export class QueryBarInputUI extends Component<Props, State> {
     this.setState({ index });
   };
 
-  public componentDidMount() {
+  public componentWillMount() {
     this.services = this.props.kibana.services;
+  }
 
+  public componentDidMount() {
     const parsedQuery = fromUser(toUser(this.props.query.query));
     if (!isEqual(this.props.query.query, parsedQuery)) {
       this.onChange({ ...this.props.query, query: parsedQuery });
