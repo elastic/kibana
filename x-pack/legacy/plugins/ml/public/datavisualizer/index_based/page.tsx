@@ -5,6 +5,7 @@
  */
 
 import React, { FC, Fragment, useEffect, useState } from 'react';
+import { Subscription } from 'rxjs';
 
 // @ts-ignore
 import { decorateQuery, luceneStringToDsl } from '@kbn/es-query';
@@ -31,6 +32,7 @@ import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';
 // @ts-ignore
 import { isFullLicense } from '../../license/check_license';
 import { FullTimeRangeSelector } from '../../components/full_time_range_selector';
+import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { useKibanaContext, SavedSearchQuery } from '../../contexts/kibana';
 // @ts-ignore
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
@@ -166,11 +168,14 @@ export const Page: FC = () => {
   const [nonMetricFieldQuery, setNonMetricFieldQuery] = useState(defaults.nonMetricFieldQuery);
 
   useEffect(() => {
-    const timeUpdateSubscription = timefilter.getTimeUpdate$().subscribe(loadOverallStats);
-    return () => {
-      timeUpdateSubscription.unsubscribe();
+    const subscriptions = new Subscription();
+    subscriptions.add(timefilter.getTimeUpdate$().subscribe(() => loadOverallStats()));
+    subscriptions.add(mlTimefilterRefresh$.subscribe(() => loadOverallStats()));
+
+    return function cleanup() {
+      subscriptions.unsubscribe();
     };
-  }, []);
+  });
 
   useEffect(() => {
     // Check for a saved search being passed in.
