@@ -31,15 +31,15 @@ import {
 import { getSampleDashboardInput } from '../lib/test_helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
-} from '../../../../../embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddable,
   ContactCardEmbeddableOutput,
-} from '../../../../../embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable';
-import { embeddablePluginMock } from '../../../../../embeddable_api/public/np_ready/public/mocks';
-import { createEditModeAction } from '../../../../../embeddable_api/public/np_ready/public/lib/test_samples/actions/edit_mode_action';
+  createEditModeAction,
+  ContactCardEmbeddableFactory,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from 'src/plugins/embeddable/public/lib/test_samples';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 // eslint-disable-next-line
 import { inspectorPluginMock } from '../../../../../../../plugins/inspector/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../plugins/kibana_react/public';

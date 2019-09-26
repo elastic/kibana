@@ -28,7 +28,7 @@ import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { Moment } from 'moment';
 
 import { DashboardContainer } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
-import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
+import { ViewMode } from 'src/plugins/embeddable/public';
 import { Query } from '../../../data/public';
 
 import { getAppStateDefaults, migrateAppState } from './lib';

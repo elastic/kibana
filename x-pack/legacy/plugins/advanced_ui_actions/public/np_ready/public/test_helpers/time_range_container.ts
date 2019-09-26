@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimeRange } from '../../../../../../../../src/plugins/data/public';
 import {
   ContainerInput,
   Container,
   ContainerOutput,
   GetEmbeddableFactory,
-} from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+} from 'src/plugins/embeddable/public';
+import { TimeRange } from '../../../../../../../../src/plugins/data/public';
 
 /**
  * interfaces are not allowed to specify a sub-set of the required types until

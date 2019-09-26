@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from '../../../../../embeddable_api/public/np_ready/public';
+export * from 'src/plugins/embeddable/public';

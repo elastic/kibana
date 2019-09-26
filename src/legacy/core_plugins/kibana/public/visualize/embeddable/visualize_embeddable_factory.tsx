@@ -52,8 +52,8 @@ import {
   ErrorEmbeddable,
   Container,
   EmbeddableOutput,
-} from '../../../../embeddable_api/public/np_ready/public';
-import { setup } from '../../../../embeddable_api/public/np_ready/public/legacy';
+} from 'src/plugins/embeddable/public';
+import { npSetup } from 'ui/new_platform';
 import { showNewVisModal } from '../wizard';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
@@ -184,5 +184,8 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
 }
 
 VisualizeEmbeddableFactory.createVisualizeEmbeddableFactory().then(embeddableFactory => {
-  setup.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
+  npSetup.plugins.embeddable.registerEmbeddableFactory(
+    VISUALIZE_EMBEDDABLE_TYPE,
+    embeddableFactory
+  );
 });

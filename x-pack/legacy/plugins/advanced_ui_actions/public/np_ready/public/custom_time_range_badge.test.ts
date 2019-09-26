@@ -10,7 +10,7 @@ import { skip } from 'rxjs/operators';
 import * as Rx from 'rxjs';
 import { mount } from 'enzyme';
 
-import { EmbeddableFactory } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { EmbeddableFactory } from 'src/plugins/embeddable/public';
 import { TimeRangeEmbeddable, TimeRangeContainer, TIME_RANGE_EMBEDDABLE } from './test_helpers';
 import { TimeRangeEmbeddableFactory } from './test_helpers/time_range_embeddable_factory';
 import { CustomTimeRangeBadge } from './custom_time_range_badge';

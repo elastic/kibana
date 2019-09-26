@@ -36,7 +36,7 @@ import {
   EmbeddableOutput,
   Embeddable,
   Container,
-} from '../../../../embeddable_api/public/np_ready/public';
+} from 'src/plugins/embeddable/public';
 import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 

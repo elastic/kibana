@@ -14,11 +14,7 @@ import {
 } from './apply_siem_filter_action';
 // @ts-ignore Missing type defs as maps moves to Typescript
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../maps/common/constants';
-import {
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-} from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/embeddables';
+import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from 'src/plugins/embeddable/public';
 import { Filter } from '@kbn/es-query';
 
 // Using type narrowing to remove all the any's -- https://github.com/elastic/kibana/pull/43965/files#r318796100

@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '../../../../embeddable_api/public/np_ready/public';
+import { ViewMode } from 'src/plugins/embeddable/public';
 import { TopNavIds } from './top_nav_ids';
 import { NavAction } from '../types';
 

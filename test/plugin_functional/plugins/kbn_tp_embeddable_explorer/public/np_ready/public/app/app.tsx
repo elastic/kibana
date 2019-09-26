@@ -19,10 +19,7 @@
 import { EuiTab } from '@elastic/eui';
 import React, { Component } from 'react';
 import { CoreStart } from 'src/core/public';
-import {
-  GetEmbeddableFactory,
-  GetEmbeddableFactories,
-} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { GetEmbeddableFactory, GetEmbeddableFactories } from 'src/plugins/embeddable/public';
 import { TGetActionsCompatibleWithTrigger } from '../../../../../../../../src/plugins/ui_actions/public';
 import { ContactCardEmbeddableExample } from './hello_world_embeddable_example';
 import { HelloWorldContainerExample } from './hello_world_container_example';

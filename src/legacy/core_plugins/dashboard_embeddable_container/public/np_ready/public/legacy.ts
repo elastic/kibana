@@ -24,20 +24,16 @@ import { ExitFullScreenButton } from 'ui/exit_full_screen';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 import { plugin } from '.';
-import {
-  setup as embeddableSetup,
-  start as embeddableStart,
-} from '../../../../embeddable_api/public/np_ready/public/legacy';
 
 const pluginInstance = plugin({} as any);
 
 export const setup = pluginInstance.setup(npSetup.core, {
-  embeddable: embeddableSetup,
+  embeddable: npSetup.plugins.embeddable,
   uiActions: npSetup.plugins.uiActions,
 });
 
 export const start = pluginInstance.start(npStart.core, {
-  embeddable: embeddableStart,
+  embeddable: npStart.plugins.embeddable,
   inspector: npStart.plugins.inspector,
   __LEGACY: {
     SavedObjectFinder,

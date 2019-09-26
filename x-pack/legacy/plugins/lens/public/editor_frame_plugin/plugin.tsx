@@ -10,8 +10,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup, CoreStart } from 'src/core/public';
 import chrome, { Chrome } from 'ui/chrome';
 import { npSetup, npStart } from 'ui/new_platform';
-import { Plugin as EmbeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { start as embeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { Plugin as EmbeddablePlugin } from '../../../../../../src/plugins/embeddable/public';
 import {
   setup as dataSetup,
   start as dataStart,
@@ -40,7 +39,7 @@ export interface EditorFrameSetupPlugins {
 export interface EditorFrameStartPlugins {
   data: typeof dataStart;
   expressions: typeof expressionsStart;
-  embeddables: ReturnType<EmbeddablePlugin['start']>;
+  embeddable: ReturnType<EmbeddablePlugin['start']>;
   chrome: Chrome;
 }
 
@@ -64,7 +63,7 @@ export class EditorFramePlugin {
   }
 
   public start(core: CoreStart, plugins: EditorFrameStartPlugins): EditorFrameStart {
-    plugins.embeddables.registerEmbeddableFactory(
+    plugins.embeddable.registerEmbeddableFactory(
       'lens',
       new EmbeddableFactory(
         plugins.chrome,
@@ -134,7 +133,7 @@ export const editorFrameStart = () =>
     data: dataStart,
     expressions: expressionsStart,
     chrome,
-    embeddables: embeddablePlugin,
+    embeddable: npStart.plugins.embeddable,
   });
 
 export const editorFrameStop = () => editorFrame.stop();
