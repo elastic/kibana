@@ -141,7 +141,7 @@
     "jest": "^24.9.0",
     "jest-cli": "^24.9.0",
     "jest-styled-components": "^6.3.3",
-    "jsdom": "^12.0.0",
+    "jsdom": "^12.2.0",
     "madge": "3.4.4",
     "mocha": "3.5.3",
     "mocha-junit-reporter": "^1.23.1",
