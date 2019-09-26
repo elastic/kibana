@@ -20,7 +20,7 @@ import {
 import { npStart } from 'ui/new_platform';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
-import { EuiIcon, EuiText, IconType } from '@elastic/eui';
+import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
@@ -147,9 +147,8 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
     return (
       <EuiText className="lnsChart__empty" textAlign="center" color="subdued" size="xs">
-        <p>
-          <EuiIcon type={icon} color="subdued" size="l" />
-        </p>
+        <EuiIcon type={icon} color="subdued" size="l" />
+        <EuiSpacer size="s" />
         <p>
           <FormattedMessage
             id="xpack.lens.xyVisualization.noDataLabel"
