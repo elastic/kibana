@@ -79,18 +79,6 @@ export async function getPipelines(req, logstashIndexPattern, pipelineIds, metri
   checkParam(metricSet, 'metricSet in logstash/getPipelines');
 
   const filters = [];
-  if (pipelineIds) {
-    filters.push({
-      nested: {
-        path: 'logstash_stats.pipelines',
-        query: {
-          terms: {
-            'logstash_stats.pipelines.id': pipelineIds
-          }
-        }
-      }
-    });
-  }
 
   const metricsResponse = await getMetrics(req, logstashIndexPattern, metricSet, filters, metricOptions);
   return _handleResponse(metricsResponse, pipelineIds);
