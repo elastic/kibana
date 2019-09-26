@@ -94,7 +94,7 @@ function FilterRow({
           services={{
             appName: 'filtersAgg',
             store: localStorage,
-            autcomplete: npStart.plugins.data.autocomplete,
+            autocomplete: npStart.plugins.data.autocomplete,
             ...npStart.core,
           }}
         >

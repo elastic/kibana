@@ -39,6 +39,7 @@ export interface DataPluginSetupDependencies {
 }
 
 export interface DataPluginStartDependencies {
+  data: DataPublicPluginStart;
   __LEGACY: LegacyDependenciesPluginStart;
 }
 
@@ -56,6 +57,20 @@ export interface DataSetup {
 }
 
 /**
+ * Interface for this plugin's returned `start` contract.
+ *
+ * @public
+ */
+export interface DataStart {
+  indexPatterns: IndexPatternsSetup;
+  filter: FilterSetup;
+  query: QuerySetup;
+  search: SearchSetup;
+  timefilter: TimefilterSetup;
+  ui: any;
+}
+
+/**
  * Data Plugin - public
  *
  * This is the entry point for the entire client-side public contract of the plugin.
@@ -66,7 +81,9 @@ export interface DataSetup {
  * in the setup/start interfaces. The remaining items exported here are either types,
  * or static code.
  */
-export class DataPlugin implements Plugin<DataSetup, {}, DataPluginSetupDependencies> {
+export class DataPlugin
+  implements
+    Plugin<DataSetup, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
   // Exposed services, sorted alphabetically
   private readonly filter: FilterService = new FilterService();
   private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
@@ -104,11 +121,7 @@ export class DataPlugin implements Plugin<DataSetup, {}, DataPluginSetupDependen
     return this.setupApi;
   }
 
-  public start(
-    core: CoreStart,
-    data: DataPublicPluginStart,
-    { __LEGACY }: DataPluginStartDependencies
-  ) {
+  public start(core: CoreStart, { __LEGACY, data }: DataPluginStartDependencies) {
     const SearchBar = createSearchBar({
       core,
       store: __LEGACY.storage,

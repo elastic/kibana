@@ -21,7 +21,6 @@ import 'ngreact';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import { TopNavMenu } from '../../../core_plugins/kibana_react/public';
-import { start as data } from '../../../core_plugins/data/public/legacy';
 
 const module = uiModules.get('kibana');
 
@@ -41,14 +40,10 @@ module.directive('kbnTopNav', () => {
       // of the config array's disableButton function return value changes.
       child.setAttribute('disabled-buttons', 'disabledButtons');
 
-      // Pass in storage
-      child.setAttribute('time-history', 'timeHistory');
-
       // Append helper directive
       elem.append(child);
 
       const linkFn = ($scope, _, $attr) => {
-        $scope.timeHistory = data.timefilter.history;
 
         // Watch config changes
         $scope.$watch(() => {
@@ -82,14 +77,12 @@ module.directive('kbnTopNavHelper', (reactDirective) => {
   return reactDirective(
     wrapInI18nContext(TopNavMenu),
     [
-      ['name', { watchDepth: 'reference' }],
       ['config', { watchDepth: 'value' }],
       ['disabledButtons', { watchDepth: 'reference' }],
 
       ['query', { watchDepth: 'reference' }],
       ['savedQuery', { watchDepth: 'reference' }],
       ['intl', { watchDepth: 'reference' }],
-      ['timeHistory', { watchDepth: 'reference' }],
 
       ['onQuerySubmit', { watchDepth: 'reference' }],
       ['onFiltersUpdated', { watchDepth: 'reference' }],

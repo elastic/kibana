@@ -27,7 +27,6 @@ export interface SearchBarProps {
   initialQuery?: string;
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
   onQuerySubmit: (query: string) => void;
-  overlays: CoreStart['overlays'];
 }
 
 function queryToString(query: Query, indexPattern: IndexPattern) {

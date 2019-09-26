@@ -22,7 +22,7 @@ export function GraphApp(props: GraphAppProps) {
       services={{
         appName: 'graph',
         store: localStorage,
-        autcomplete: npStart.plugins.data.autocomplete,
+        autocomplete: npStart.plugins.data.autocomplete,
         ...npStart.core,
       }}
     >
