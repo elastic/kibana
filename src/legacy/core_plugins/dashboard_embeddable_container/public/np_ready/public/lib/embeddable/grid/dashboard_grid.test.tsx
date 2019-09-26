@@ -30,8 +30,7 @@ import { getSampleDashboardInput } from '../../test_helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from 'src/plugins/embeddable/public/lib/test_samples';
+} from '../../../../../../../embeddable_api/public/np_ready/public/lib/test_samples';
 import { KibanaContextProvider } from '../../../../../../../../../plugins/kibana_react/public';
 
 let dashboardContainer: DashboardContainer | undefined;

@@ -26,14 +26,12 @@ import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helper
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
-  // eslint-disable-next-line
-} from 'src/plugins/embeddable/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
+} from '../../../../../../embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddable,
   ContactCardEmbeddableOutput,
-  // eslint-disable-next-line
-} from 'src/plugins/embeddable/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable';
+} from '../../../../../../embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable';
 
 const options: DashboardContainerOptions = {
   application: {} as any,
