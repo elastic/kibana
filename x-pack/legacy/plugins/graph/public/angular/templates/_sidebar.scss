@@ -64,19 +64,8 @@
 }
 
 /**
- * Link summary / Venn Diagram
+ * Link summary
  */
-
-.gphLinkSummary__venn {
-  .venn1 {
-    fill: $euiColorDanger;
-    fill-opacity:0.5;
-  }
-  .venn2 {
-    fill: $euiColorPrimary;
-    fill-opacity:0.5;
-  }
-}
 
 .gphLinkSummary__term--1 {
   color:$euiColorDanger;

@@ -53,6 +53,7 @@ beforeEach(async () => {
     notifications: {} as any,
     overlays: {} as any,
     savedObjectMetaData: {} as any,
+    uiActions: {} as any,
   };
   const input = getSampleDashboardInput({
     panels: {

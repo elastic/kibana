@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import {
   Chart,
@@ -19,13 +19,14 @@ import {
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, IconType } from '@elastic/eui';
+import { EuiIcon, EuiText, IconType } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
 import { IInterpreterRenderFunction } from '../../../../../../src/legacy/core_plugins/expressions/public';
 import { LensMultiTable } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
+import { VisualizationContainer } from '../visualization_container';
 
 export interface XYChartProps {
   data: LensMultiTable;
@@ -37,6 +38,16 @@ export interface XYRender {
   as: 'lens_xy_chart_renderer';
   value: XYChartProps;
 }
+
+export interface XYChartProps {
+  data: LensMultiTable;
+  args: XYArgs;
+}
+
+type XYChartRenderProps = XYChartProps & {
+  formatFactory: FormatFactory;
+  timeZone: string;
+};
 
 export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs, XYRender> = ({
   name: 'lens_xy_chart',
@@ -85,11 +96,6 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs
   // TODO the typings currently don't support custom type args. As soon as they do, this can be removed
 } as unknown) as ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs, XYRender>;
 
-export interface XYChartProps {
-  data: LensMultiTable;
-  args: XYArgs;
-}
-
 export const getXyChartRenderer = (dependencies: {
   formatFactory: FormatFactory;
   timeZone: string;
@@ -104,7 +110,7 @@ export const getXyChartRenderer = (dependencies: {
   render: async (domNode: Element, config: XYChartProps, _handlers: unknown) => {
     ReactDOM.render(
       <I18nProvider>
-        <XYChart {...config} {...dependencies} />
+        <XYChartReportable {...config} {...dependencies} />
       </I18nProvider>,
       domNode
     );
@@ -115,33 +121,41 @@ function getIconForSeriesType(seriesType: SeriesType): IconType {
   return visualizationTypes.find(c => c.id === seriesType)!.icon || 'empty';
 }
 
-export function XYChart({
-  data,
-  args,
-  formatFactory,
-  timeZone,
-}: XYChartProps & {
-  formatFactory: FormatFactory;
-  timeZone: string;
-}) {
+const MemoizedChart = React.memo(XYChart);
+
+export function XYChartReportable(props: XYChartRenderProps) {
+  const [isReady, setIsReady] = useState(false);
+
+  // It takes a cycle for the XY chart to render. This prevents
+  // reporting from printing a blank chart placeholder.
+  useEffect(() => {
+    setIsReady(true);
+  }, []);
+
+  return (
+    <VisualizationContainer isReady={isReady}>
+      <MemoizedChart {...props} />
+    </VisualizationContainer>
+  );
+}
+
+export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderProps) {
   const { legend, layers, isHorizontal } = args;
 
   if (Object.values(data.tables).every(table => table.rows.length === 0)) {
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
     return (
-      <EuiFlexGroup gutterSize="s" direction="column" alignItems="center" justifyContent="center">
-        <EuiFlexItem>
+      <EuiText className="lnsChart__empty" textAlign="center" color="subdued" size="xs">
+        <p>
           <EuiIcon type={icon} color="subdued" size="l" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText color="subdued" size="xs">
-            <FormattedMessage
-              id="xpack.lens.xyVisualization.noDataLabel"
-              defaultMessage="No results found"
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </p>
+        <p>
+          <FormattedMessage
+            id="xpack.lens.xyVisualization.noDataLabel"
+            defaultMessage="No results found"
+          />
+        </p>
+      </EuiText>
     );
   }
 
@@ -163,7 +177,7 @@ export function XYChart({
   }
 
   return (
-    <Chart className="lnsChart">
+    <Chart className="lnsXyExpression__chart">
       <Settings
         showLegend={legend.isVisible}
         legendPosition={legend.position}

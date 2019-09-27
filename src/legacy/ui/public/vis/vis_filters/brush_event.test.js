@@ -17,42 +17,15 @@
  * under the License.
  */
 
-import './brush_event.test.mocks';
-
-jest.mock('ui/chrome',
-  () => ({
-    getBasePath: () => `/some/base/path`,
-    getUiSettingsClient: () => {
-      return {
-        get: (key) => {
-          switch (key) {
-            case 'timepicker:timeDefaults':
-              return { from: 'now-15m', to: 'now' };
-            case 'timepicker:refreshIntervalDefaults':
-              return { pause: false, value: 0 };
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        }
-      };
-    },
-  }), { virtual: true });
 
 import _ from 'lodash';
 import moment from 'moment';
 import expect from '@kbn/expect';
 import { onBrushEvent } from './brush_event';
-import { timefilter } from 'ui/timefilter';
 
 describe('brushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;
   const JAN_01_2014 = 1388559600000;
-
-  let $state;
-
-  const baseState = {
-    filters: [],
-  };
 
   const baseEvent = {
     aggConfigs: [{
@@ -89,7 +62,6 @@ describe('brushEvent', () => {
       id: 'logstash-*',
       timeFieldName: 'time'
     };
-    $state = _.cloneDeep(baseState);
   });
 
   test('should be a function', () => {
@@ -98,9 +70,8 @@ describe('brushEvent', () => {
 
   test('ignores event when data.xAxisField not provided', () => {
     const event = _.cloneDeep(baseEvent);
-    onBrushEvent(event, $state);
-    expect($state)
-      .not.have.property('$newFilters');
+    const filters = onBrushEvent(event);
+    expect(filters.length).to.equal(0);
   });
 
   describe('handles an event when the x-axis field is a date field', () => {
@@ -120,20 +91,17 @@ describe('brushEvent', () => {
       test('by ignoring the event when range spans zero time', () => {
         const event = _.cloneDeep(dateEvent);
         event.range = [JAN_01_2014, JAN_01_2014];
-        onBrushEvent(event, $state);
-        expect($state)
-          .not.have.property('$newFilters');
+        const filters = onBrushEvent(event);
+        expect(filters.length).to.equal(0);
       });
 
       test('by updating the timefilter', () => {
         const event = _.cloneDeep(dateEvent);
         event.range = [JAN_01_2014, JAN_01_2014 + DAY_IN_MS];
-        onBrushEvent(event, $state);
-        const { from, to } = timefilter.getTime();
+        const filters = onBrushEvent(event);
+        expect(filters[0].range.time.gte).to.be(new Date(JAN_01_2014).toISOString());
         // Set to a baseline timezone for comparison.
-        expect(from).to.be(new Date(JAN_01_2014).toISOString());
-        // Set to a baseline timezone for comparison.
-        expect(to).to.be(new Date(JAN_01_2014 + DAY_IN_MS).toISOString());
+        expect(filters[0].range.time.lt).to.be(new Date(JAN_01_2014 + DAY_IN_MS).toISOString());
       });
     });
 
@@ -155,19 +123,15 @@ describe('brushEvent', () => {
         const rangeBegin = JAN_01_2014;
         const rangeEnd = rangeBegin + DAY_IN_MS;
         event.range = [rangeBegin, rangeEnd];
-        onBrushEvent(event, $state);
-        expect($state)
-          .to.have.property('$newFilters');
-        expect($state.filters.length)
-          .to.equal(0);
-        expect($state.$newFilters.length)
+        const filters = onBrushEvent(event);
+        expect(filters.length)
           .to.equal(1);
-        expect($state.$newFilters[0].range.anotherTimeField.gte)
+        expect(filters[0].range.anotherTimeField.gte)
           .to.equal(moment(rangeBegin).toISOString());
-        expect($state.$newFilters[0].range.anotherTimeField.lt)
+        expect(filters[0].range.anotherTimeField.lt)
           .to.equal(moment(rangeEnd).toISOString());
-        expect($state.$newFilters[0].range.anotherTimeField).to.have.property('format');
-        expect($state.$newFilters[0].range.anotherTimeField.format)
+        expect(filters[0].range.anotherTimeField).to.have.property('format');
+        expect(filters[0].range.anotherTimeField.format)
           .to.equal('strict_date_optional_time');
       });
     });
@@ -189,73 +153,21 @@ describe('brushEvent', () => {
     test('by ignoring the event when range does not span at least 2 values', () => {
       const event = _.cloneDeep(numberEvent);
       event.range = [1];
-      onBrushEvent(event, $state);
-      expect($state).not.have.property('$newFilters');
+      const filters = onBrushEvent(event);
+      expect(filters.length).to.equal(0);
     });
 
     test('by creating a new filter', () => {
       const event = _.cloneDeep(numberEvent);
       event.range = [1, 2, 3, 4];
-      onBrushEvent(event, $state);
-      expect($state)
-        .to.have.property('$newFilters');
-      expect($state.filters.length)
-        .to.equal(0);
-      expect($state.$newFilters.length)
+      const filters = onBrushEvent(event);
+      expect(filters.length)
         .to.equal(1);
-      expect($state.$newFilters[0].range.numberField.gte)
+      expect(filters[0].range.numberField.gte)
         .to.equal(1);
-      expect($state.$newFilters[0].range.numberField.lt)
+      expect(filters[0].range.numberField.lt)
         .to.equal(4);
-      expect($state.$newFilters[0].range.numberField).not.to.have.property('format');
-    });
-
-    test('by updating the existing range filter', () => {
-      const event = _.cloneDeep(numberEvent);
-      event.range = [3, 7];
-      $state.filters.push({
-        meta: {
-          key: 'numberField'
-        },
-        range: { gte: 1, lt: 4 }
-      });
-      onBrushEvent(event, $state);
-      expect($state)
-        .not.have.property('$newFilters');
-      expect($state.filters.length)
-        .to.equal(1);
-      expect($state.filters[0].range.numberField.gte)
-        .to.equal(3);
-      expect($state.filters[0].range.numberField.lt)
-        .to.equal(7);
-    });
-
-    test('by updating the existing scripted filter', () => {
-      const event = _.cloneDeep(numberEvent);
-      event.range = [3, 7];
-      event.aggConfigs[0].params.field.scripted = true;
-      $state.filters.push({
-        meta: {
-          key: 'numberField'
-        },
-        script: {
-          script: {
-            params: {
-              gte: 1,
-              lt: 4
-            }
-          }
-        }
-      });
-      onBrushEvent(event, $state);
-      expect($state)
-        .not.have.property('$newFilters');
-      expect($state.filters.length)
-        .to.equal(1);
-      expect($state.filters[0].script.script.params.gte)
-        .to.equal(3);
-      expect($state.filters[0].script.script.params.lt)
-        .to.equal(7);
+      expect(filters[0].range.numberField).not.to.have.property('format');
     });
   });
 });
