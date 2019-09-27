@@ -8,7 +8,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
-import { InternalCoreStart } from 'src/core/public';
+import { LegacyCoreStart } from 'src/core/public';
 import { KibanaCoreContextProvider } from '../../../observability/public';
 import { history } from '../utils/history';
 import { LocationProvider } from '../context/LocationContext';
@@ -54,7 +54,7 @@ const App = () => {
 };
 
 export class Plugin {
-  public start(core: InternalCoreStart) {
+  public start(core: LegacyCoreStart) {
     const { i18n } = core;
     ReactDOM.render(
       <KibanaCoreContextProvider core={core}>

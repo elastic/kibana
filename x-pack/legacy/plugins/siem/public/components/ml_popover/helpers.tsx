@@ -77,6 +77,14 @@ export const getIndexPatternTitles = (indexPatterns: IndexPatternSavedObject[]):
   indexPatterns.reduce((acc: string[], v) => [...acc, v.attributes.title], []);
 
 /**
+ * Given an array of titles this will always return the same string for usage within
+ * useEffect and other shallow compare areas.
+ * This won't return a stable reference for case sensitive strings intentionally for speed.
+ * @param patterns string[] string array that will return a stable reference regardless of ordering or case sensitivity.
+ */
+export const getStablePatternTitles = (patterns: string[]) => patterns.sort().join();
+
+/**
  * Returns a mapping of indexPatternTitle to indexPatternId
  *
  * @param indexPatterns IndexPatternSavedObject[] as provided from the useIndexPatterns() hook

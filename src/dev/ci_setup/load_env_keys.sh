@@ -31,13 +31,17 @@ function retry {
 }
 
 if [ -z "$VAULT_SECRET_ID" ]; then
-  echo ""
-  echo ""
-  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
-  echo "    VAULT_SECRET_ID not set, not loading tokens into env";
-  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
-  echo ""
-  echo ""
+  if [ -n "$GITHUB_TOKEN" ] && [ -n "$KIBANA_CI_REPORTER_KEY" ] && [ -n "$PERCY_TOKEN" ]; then
+    echo " -- secrets already loaded from vault";
+  else
+    echo ""
+    echo ""
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+    echo "    VAULT_SECRET_ID not set, not loading tokens into env";
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+    echo ""
+    echo ""
+  fi
 else
   set +x
 

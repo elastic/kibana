@@ -370,6 +370,14 @@
         ],
       },
       {
+        groupSlug: 'history',
+        groupName: 'history related packages',
+        packageNames: [
+          'history',
+          '@types/history',
+        ],
+      },
+      {
         groupSlug: 'humps',
         groupName: 'humps related packages',
         packageNames: [
@@ -447,6 +455,14 @@
         packageNames: [
           'minimatch',
           '@types/minimatch',
+        ],
+      },
+      {
+        groupSlug: 'mkdirp',
+        groupName: 'mkdirp related packages',
+        packageNames: [
+          'mkdirp',
+          '@types/mkdirp',
         ],
       },
       {
@@ -618,14 +634,6 @@
         ],
       },
       {
-        groupSlug: 'history',
-        groupName: 'history related packages',
-        packageNames: [
-          'history',
-          '@types/history',
-        ],
-      },
-      {
         groupSlug: 'jsdom',
         groupName: 'jsdom related packages',
         packageNames: [
@@ -663,14 +671,6 @@
         packageNames: [
           'mime',
           '@types/mime',
-        ],
-      },
-      {
-        groupSlug: 'mkdirp',
-        groupName: 'mkdirp related packages',
-        packageNames: [
-          'mkdirp',
-          '@types/mkdirp',
         ],
       },
       {

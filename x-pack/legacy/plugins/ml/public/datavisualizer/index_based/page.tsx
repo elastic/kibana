@@ -5,6 +5,7 @@
  */
 
 import React, { FC, Fragment, useEffect, useState } from 'react';
+import { merge } from 'rxjs';
 
 // @ts-ignore
 import { decorateQuery, luceneStringToDsl } from '@kbn/es-query';
@@ -25,18 +26,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { KBN_FIELD_TYPES, ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
+import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';
 // @ts-ignore
 import { isFullLicense } from '../../license/check_license';
 import { FullTimeRangeSelector } from '../../components/full_time_range_selector';
+import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { useKibanaContext, SavedSearchQuery } from '../../contexts/kibana';
 // @ts-ignore
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
 // @ts-ignore
 import { timeBasedIndexCheck } from '../../util/index_utils';
-// @ts-ignore
-import { MlTimeBuckets } from '../../util/ml_time_buckets';
+import { TimeBuckets } from '../../util/time_buckets';
 import { FieldRequestConfig, FieldVisConfig } from './common';
 import { ActionsPanel } from './components/actions_panel';
 import { FieldsPanel } from './components/fields_panel';
@@ -166,11 +168,14 @@ export const Page: FC = () => {
   const [nonMetricFieldQuery, setNonMetricFieldQuery] = useState(defaults.nonMetricFieldQuery);
 
   useEffect(() => {
-    const timeUpdateSubscription = timefilter.getTimeUpdate$().subscribe(loadOverallStats);
+    const timeUpdateSubscription = merge(
+      timefilter.getTimeUpdate$(),
+      mlTimefilterRefresh$
+    ).subscribe(loadOverallStats);
     return () => {
       timeUpdateSubscription.unsubscribe();
     };
-  }, []);
+  });
 
   useEffect(() => {
     // Check for a saved search being passed in.
@@ -270,7 +275,7 @@ export const Page: FC = () => {
 
     // Obtain the interval to use for date histogram aggregations
     // (such as the document count chart). Aim for 75 bars.
-    const buckets = new MlTimeBuckets();
+    const buckets = new TimeBuckets();
 
     const tf = timefilter as any;
     let earliest: number | undefined;

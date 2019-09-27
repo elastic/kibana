@@ -31,6 +31,7 @@ interface OwnProps {
   flowTargeted: FlowTargetNew;
   id: string;
   indexPattern: StaticIndexPattern;
+  isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   showMorePagesIndicator: boolean;
@@ -39,6 +40,7 @@ interface OwnProps {
 }
 
 interface NetworkTopNFlowTableReduxProps {
+  activePage: number;
   limit: number;
   topNFlowSort: NetworkTopNFlowSortField;
 }
@@ -80,11 +82,13 @@ export const NetworkTopNFlowTableId = 'networkTopSourceFlow-top-talkers';
 class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowTableProps> {
   public render() {
     const {
+      activePage,
       data,
       fakeTotalCount,
       flowTargeted,
       id,
       indexPattern,
+      isInspect,
       limit,
       loading,
       loadPage,
@@ -115,16 +119,19 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
 
     return (
       <PaginatedTable
+        activePage={activePage}
         columns={getNetworkTopNFlowColumns(
           indexPattern,
           flowTargeted,
           type,
           NetworkTopNFlowTableId
         )}
+        dataTestSubj={`table-${tableType}`}
         headerCount={totalCount}
         headerTitle={headerTitle}
         headerUnit={i18n.UNIT(totalCount)}
         id={id}
+        isInspect={isInspect}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
@@ -143,7 +150,6 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
         updateLimitPagination={newLimit =>
           updateTopNFlowLimit({ limit: newLimit, networkType: type, tableType })
         }
-        updateProps={{ totalCount, topNFlowSort, field }}
       />
     );
   }

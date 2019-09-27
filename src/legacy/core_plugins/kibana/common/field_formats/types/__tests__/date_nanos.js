@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import moment from 'moment-timezone';
 import { createDateNanosFormat, analysePatternForFract, formatWithNanos } from '../date_nanos';
-import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
+import { FieldFormat } from '../../../../../../../plugins/data/common/field_formats';
 
 const DateFormat = createDateNanosFormat(FieldFormat);
 

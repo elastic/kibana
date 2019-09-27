@@ -18,7 +18,6 @@
  */
 
 import 'ui/registry/field_formats';
-import 'uiExports/autocompleteProviders';
 import 'uiExports/contextMenuActions';
 import 'uiExports/devTools';
 import 'uiExports/docViews';
@@ -33,18 +32,12 @@ import 'uiExports/savedObjectTypes';
 import 'uiExports/search';
 import 'uiExports/shareContextMenuExtensions';
 import 'uiExports/visEditorTypes';
-import 'uiExports/visRequestHandlers';
-import 'uiExports/visResponseHandlers';
 import 'uiExports/visTypes';
 import 'uiExports/visualize';
 
 import { i18n } from '@kbn/i18n';
 
 import { capabilities } from 'ui/capabilities';
-// @ts-ignore
-import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-// @ts-ignore
-import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 
 import chrome from 'ui/chrome';
 import { getVisualizeLoader } from 'ui/visualize/loader';
@@ -54,13 +47,13 @@ import { VisTypesRegistry, VisTypesRegistryProvider } from 'ui/registry/vis_type
 
 import { IPrivate } from 'ui/private';
 import { SavedObjectAttributes } from 'kibana/server';
+import { npSetup } from 'ui/new_platform';
 import {
   EmbeddableFactory,
   ErrorEmbeddable,
   Container,
   EmbeddableOutput,
-} from '../../../../embeddable_api/public/np_ready/public';
-import { setup } from '../../../../embeddable_api/public/np_ready/public/legacy';
+} from '../../../../../../plugins/embeddable/public';
 import { showNewVisModal } from '../wizard';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
@@ -191,5 +184,8 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
 }
 
 VisualizeEmbeddableFactory.createVisualizeEmbeddableFactory().then(embeddableFactory => {
-  setup.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
+  npSetup.plugins.embeddable.registerEmbeddableFactory(
+    VISUALIZE_EMBEDDABLE_TYPE,
+    embeddableFactory
+  );
 });

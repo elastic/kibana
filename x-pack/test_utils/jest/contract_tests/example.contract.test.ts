@@ -17,7 +17,8 @@ const { callWhenOnline, memorize } = Slapshot;
 let servers: { kbnServer: any; shutdown: () => void };
 let esArchiver: EsArchiver;
 
-describe('Example contract tests', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/44250
+describe.skip('Example contract tests', () => {
   beforeAll(async () => {
     await callWhenOnline(async () => {
       servers = await createKibanaServer();

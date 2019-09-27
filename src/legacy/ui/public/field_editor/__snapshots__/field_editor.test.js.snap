@@ -906,16 +906,16 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
               "value": "boolean",
             },
             Object {
-              "text": "geo_point",
-              "value": "geo_point",
-            },
-            Object {
               "text": "object",
               "value": "object",
             },
             Object {
               "text": "nested",
               "value": "nested",
+            },
+            Object {
+              "text": "geo_point",
+              "value": "geo_point",
             },
             Object {
               "text": "geo_shape",
@@ -934,12 +934,12 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
               "value": "_source",
             },
             Object {
-              "text": "unknown",
-              "value": "unknown",
-            },
-            Object {
               "text": "conflict",
               "value": "conflict",
+            },
+            Object {
+              "text": "unknown",
+              "value": "unknown",
             },
           ]
         }
@@ -1243,6 +1243,9 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       />
     </eui-form-row>
     <div>
+      <eui-spacer
+        size="m"
+      />
       <eui-call-out
         color="warning"
         iconType="alert"

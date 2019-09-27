@@ -6,19 +6,15 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { IEmbeddable, Embeddable, EmbeddableInput } from 'src/plugins/embeddable/public';
+import {
+  IAction,
+  IncompatibleActionError,
+} from '../../../../../../../src/plugins/ui_actions/public';
 import { TimeRange } from '../../../../../../../src/plugins/data/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../../../src/legacy/core_plugins/kibana/public/discover/embeddable/search_embeddable';
 import { VisualizeEmbeddable } from '../../../../../../../src/legacy/core_plugins/kibana/public/visualize/embeddable/visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../../../src/legacy/core_plugins/kibana/public/visualize/embeddable/constants';
-
-import {
-  Action,
-  IEmbeddable,
-  ActionContext,
-  IncompatibleActionError,
-  Embeddable,
-  EmbeddableInput,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 
 import { CustomizeTimeRangeModal } from './customize_time_range_modal';
 import { OpenModal, CommonlyUsedRange } from './types';
@@ -41,11 +37,17 @@ function isVisualizeEmbeddable(
   return embeddable.type === VISUALIZE_EMBEDDABLE_TYPE;
 }
 
-export class CustomTimeRangeAction extends Action {
+interface ActionContext {
+  embeddable: Embeddable<TimeRangeInput>;
+}
+
+export class CustomTimeRangeAction implements IAction<ActionContext> {
   public readonly type = CUSTOM_TIME_RANGE;
   private openModal: OpenModal;
   private dateFormat?: string;
   private commonlyUsedRanges: CommonlyUsedRange[];
+  public readonly id = CUSTOM_TIME_RANGE;
+  public order = 7;
 
   constructor({
     openModal,
@@ -56,8 +58,6 @@ export class CustomTimeRangeAction extends Action {
     dateFormat: string;
     commonlyUsedRanges: CommonlyUsedRange[];
   }) {
-    super(CUSTOM_TIME_RANGE);
-    this.order = 7;
     this.openModal = openModal;
     this.dateFormat = dateFormat;
     this.commonlyUsedRanges = commonlyUsedRanges;
@@ -76,10 +76,11 @@ export class CustomTimeRangeAction extends Action {
   public async isCompatible({ embeddable }: ActionContext) {
     const isInputControl =
       isVisualizeEmbeddable(embeddable) &&
-      embeddable.getOutput().visTypeName === 'input_control_vis';
+      (embeddable as VisualizeEmbeddable).getOutput().visTypeName === 'input_control_vis';
 
     const isMarkdown =
-      isVisualizeEmbeddable(embeddable) && embeddable.getOutput().visTypeName === 'markdown';
+      isVisualizeEmbeddable(embeddable) &&
+      (embeddable as VisualizeEmbeddable).getOutput().visTypeName === 'markdown';
     return Boolean(
       embeddable &&
         hasTimeRange(embeddable) &&

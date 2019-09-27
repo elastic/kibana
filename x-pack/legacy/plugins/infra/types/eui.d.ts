@@ -9,10 +9,6 @@
  *       package includes them.
  */
 
-declare module '@elastic/eui' {
-  export const EuiWrappingPopover: React.SFC<any>;
-}
-
 import { IconType, ToolTipPositions } from '@elastic/eui';
 import { CommonProps } from '@elastic/eui/src/components/common';
 import moment from 'moment';
@@ -44,13 +40,6 @@ declare module '@elastic/eui' {
 
   type EuiHeaderBreadcrumbsProps = EuiBreadcrumbsProps;
   export const EuiHeaderBreadcrumbs: React.SFC<EuiHeaderBreadcrumbsProps>;
-
-  interface EuiOutsideClickDetectorProps {
-    children: React.ReactNode;
-    isDisabled?: boolean;
-    onOutsideClick: React.MouseEventHandler<Element>;
-  }
-  export const EuiOutsideClickDetector: React.SFC<EuiOutsideClickDetectorProps>;
 
   interface EuiFormControlLayoutIconProps {
     type: IconType;
