@@ -113,11 +113,9 @@ export const EventsThContent = styled.div.attrs({
   className: 'siemEventsTable__thContent',
 })<{ textAlign?: string }>`
   ${({ textAlign, theme }) => css`
-    // flex: 1;
     font-size: ${theme.eui.euiFontSizeXS};
     font-weight: ${theme.eui.euiFontWeightSemiBold};
     line-height: ${theme.eui.euiLineHeight};
-    // max-width: 100%;
     min-width: 0;
     padding: ${theme.eui.paddingSizes.xs};
     text-align: ${textAlign};
@@ -204,10 +202,8 @@ export const EventsTdContent = styled.div.attrs({
   className: 'siemEventsTable__tdContent',
 })<{ textAlign?: string }>`
   ${({ textAlign, theme }) => css`
-    // flex: 1;
     font-size: ${theme.eui.euiFontSizeXS};
     line-height: ${theme.eui.euiLineHeight};
-    // max-width: 100%;
     min-width: 0;
     padding: ${theme.eui.paddingSizes.xs};
     text-align: ${textAlign};
