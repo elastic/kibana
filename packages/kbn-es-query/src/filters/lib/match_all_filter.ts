@@ -19,14 +19,15 @@
 
 import { Filter, FilterMeta } from './meta_filter';
 
-export type PhrasesFilterMeta = FilterMeta & {
-  params: string[]; // The unformatted values
-  field?: string;
+export interface MatchAllFilterMeta extends FilterMeta {
+  field: any;
+  formattedValue: string;
+}
+
+export type MatchAllFilter = Filter & {
+  meta: MatchAllFilterMeta;
+  match_all: any;
 };
 
-export type PhrasesFilter = Filter & {
-  meta: PhrasesFilterMeta;
-};
-
-export const isPhrasesFilter = (filter: any): filter is PhrasesFilter =>
-  filter && filter.meta.type === 'phrases';
+export const isMatchAllFilter = (filter: any): filter is MatchAllFilter =>
+  filter && filter.match_all;

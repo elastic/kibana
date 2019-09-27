@@ -16,26 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { CustomFilter, buildEmptyFilter, buildQueryFilter } from '@kbn/es-query';
+import { mapDefault } from './map_default';
 
-import { keys, find, get } from 'lodash';
-import { Filter, isRangeFilter } from '@kbn/es-query';
-import { IndexPatterns } from '../../../index_patterns';
+describe('filter manager utilities', () => {
+  describe('mapDefault()', () => {
+    test('should return the key and value for matching filters', async () => {
+      const filter: CustomFilter = buildQueryFilter({ match_all: {} }, 'index');
+      const result = await mapDefault(filter);
 
-export async function extractTimeFilter(indexPatterns: IndexPatterns, filters: Filter[]) {
-  // Assume all the index patterns are the same since they will be added
-  // from the same visualization.
-  const id: string = get(filters, '[0].meta.index');
-  if (id == null) return;
+      expect(result).toHaveProperty('key', 'query');
+      expect(result).toHaveProperty('value', '{"match_all":{}}');
+    });
 
-  const indexPattern = await indexPatterns.get(id);
+    test('should return undefined if there is no valid key', async () => {
+      const filter = buildEmptyFilter(true) as CustomFilter;
 
-  return find(filters, (obj: Filter) => {
-    let key;
-
-    if (isRangeFilter(obj)) {
-      key = keys(obj.range)[0];
-    }
-
-    return Boolean(key && key === indexPattern.timeFieldName);
+      try {
+        await mapDefault(filter);
+      } catch (e) {
+        expect(e).toBe(filter);
+      }
+    });
   });
-}
+});

@@ -16,17 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Filter } from '@kbn/es-query';
 
-import { Filter, FilterMeta } from './meta_filter';
-
-export type PhrasesFilterMeta = FilterMeta & {
-  params: string[]; // The unformatted values
-  field?: string;
+const noop = () => {
+  throw new Error('No mappings have been found for filter.');
 };
 
-export type PhrasesFilter = Filter & {
-  meta: PhrasesFilterMeta;
+export const generateMappingChain = (fn: Function, next: Function = noop) => {
+  return async (filter: Filter) => {
+    return await fn(filter).catch((result: any) => {
+      if (result === filter) {
+        return next(filter);
+      }
+      throw result;
+    });
+  };
 };
-
-export const isPhrasesFilter = (filter: any): filter is PhrasesFilter =>
-  filter && filter.meta.type === 'phrases';
