@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PolicyAdapter, FullPolicyFile } from './adapters/policy/adapter_type';
+import { PoliciesRepository, FullPolicyFile } from '../repositories/policies/types';
 
 export class PolicyLib {
-  constructor(private readonly policyAdapter: PolicyAdapter) {}
+  constructor(private readonly policyAdapter: PoliciesRepository) {}
 
   public async getFullPolicy(policyId: string): Promise<FullPolicyFile> {
     return await this.policyAdapter.getFullPolicy(policyId);

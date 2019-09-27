@@ -5,8 +5,8 @@
  */
 
 import { ArtifactLib } from './artifact';
-import { InMemoryArtifactStore } from './adapters/artifact_store/in_memory';
-import { InMemoryHttpAdapter } from './adapters/http_adapter/in_memory';
+import { InMemoryArtifactRepository } from '../repositories/artifacts/in_memory';
+import { InMemoryHttpAdapter } from '../adapters/http_adapter/in_memory';
 
 async function readStreamAsString(stream: NodeJS.ReadableStream): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -28,7 +28,7 @@ async function readStreamAsString(stream: NodeJS.ReadableStream): Promise<string
 describe('Artifact lib', () => {
   describe('download', () => {
     it('should download the artifacts and set it in cache if there is no cache', async () => {
-      const store = new InMemoryArtifactStore();
+      const store = new InMemoryArtifactRepository();
       const httpAdapter = new InMemoryHttpAdapter();
       httpAdapter.responses[
         'https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.3.2-i386.deb'
@@ -45,7 +45,7 @@ describe('Artifact lib', () => {
     });
 
     it('should download the artifacts and not verify it if the user ask for an asc file', async () => {
-      const store = new InMemoryArtifactStore();
+      const store = new InMemoryArtifactRepository();
       const httpAdapter = new InMemoryHttpAdapter();
       httpAdapter.responses[
         'https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.3.2-i386.rpm.asc'
@@ -59,7 +59,7 @@ describe('Artifact lib', () => {
     });
 
     it('should allow to download GPG-KEY-elasticsearch', async () => {
-      const store = new InMemoryArtifactStore();
+      const store = new InMemoryArtifactRepository();
       const httpAdapter = new InMemoryHttpAdapter();
       httpAdapter.responses['https://artifacts.elastic.co/GPG-KEY-elasticsearch'] = Buffer.from(
         `GPG-KEY-elasticsearch`
@@ -73,7 +73,7 @@ describe('Artifact lib', () => {
     });
 
     it('should throw if the sha512 is not valid', async () => {
-      const store = new InMemoryArtifactStore();
+      const store = new InMemoryArtifactRepository();
       const httpAdapter = new InMemoryHttpAdapter();
       httpAdapter.responses[
         'https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.3.2-i386.deb'
@@ -89,7 +89,7 @@ describe('Artifact lib', () => {
     });
 
     it('should use the cache if an entry exists', async () => {
-      const store = new InMemoryArtifactStore();
+      const store = new InMemoryArtifactRepository();
       store.cache['beats/filebeat/filebeat-7.3.2-i386.deb'] = Buffer.from('testartifcat');
 
       const httpAdapter = new InMemoryHttpAdapter();

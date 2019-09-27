@@ -8,10 +8,10 @@ import { sign } from 'jsonwebtoken';
 import { createHmac } from 'crypto';
 import { TokenLib } from './token';
 import { FrameworkLib } from './framework';
-import { MemoryTokenAdapter } from './adapters/tokens/memory';
-import { FrameworkAdapter } from './adapters/framework/default';
-import { TokenType, Token } from './adapters/tokens/adapter_types';
-import { FrameworkUser } from './adapters/framework/adapter_types';
+import { MemoryTokensRepository } from '../repositories/tokens/memory';
+import { FrameworkAdapter } from '../adapters/framework/default';
+import { TokenType, Token } from '../repositories/tokens/types';
+import { FrameworkUser } from '../adapters/framework/adapter_types';
 
 jest.mock('./framework');
 
@@ -40,7 +40,7 @@ function getUser() {
 describe('Token Lib', () => {
   describe('verify', () => {
     it('should verify a valid token', async () => {
-      const tokenAdapter = new MemoryTokenAdapter();
+      const tokenAdapter = new MemoryTokensRepository();
       const token = generateJWTToken();
       const tokenHash = hashJWTToken(token);
       tokenAdapter.create(getUser(), {
@@ -60,7 +60,7 @@ describe('Token Lib', () => {
     });
 
     it('should not verify a inactive token', async () => {
-      const tokenAdapter = new MemoryTokenAdapter();
+      const tokenAdapter = new MemoryTokensRepository();
       const token = generateJWTToken();
       const tokenHash = hashJWTToken(token);
       tokenAdapter.create(getUser(), {
@@ -81,7 +81,7 @@ describe('Token Lib', () => {
     });
 
     it('should not verify a token not persisted', async () => {
-      const tokenAdapter = new MemoryTokenAdapter();
+      const tokenAdapter = new MemoryTokensRepository();
       const token = generateJWTToken();
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
@@ -94,7 +94,7 @@ describe('Token Lib', () => {
     });
 
     it('should not verify invalid token', async () => {
-      const tokenAdapter = new MemoryTokenAdapter();
+      const tokenAdapter = new MemoryTokensRepository();
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
       const res = await tokens.verify(getUser(), 'iamnotavalidtoken');
@@ -107,7 +107,7 @@ describe('Token Lib', () => {
 
   describe('generateEnrolmentToken', () => {
     it('should generate a valid token', async () => {
-      const tokenAdapter = new MemoryTokenAdapter();
+      const tokenAdapter = new MemoryTokensRepository();
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
       const token = await tokens.generateEnrolmentToken(getUser(), {
@@ -118,7 +118,7 @@ describe('Token Lib', () => {
     });
 
     it('should persit the generated token', async () => {
-      const tokenAdapter = new MemoryTokenAdapter();
+      const tokenAdapter = new MemoryTokensRepository();
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
       const token = await tokens.generateEnrolmentToken(getUser(), {
@@ -137,7 +137,7 @@ describe('Token Lib', () => {
 
   describe('getEnrollmentTokenForPolicy', () => {
     it('should return null if there is no token for that policy', async () => {
-      const tokenAdapter = new MemoryTokenAdapter();
+      const tokenAdapter = new MemoryTokensRepository();
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
       const token = await tokens.getEnrollmentTokenForPolicy(getUser(), 'policy:do-not-exists');
@@ -146,7 +146,7 @@ describe('Token Lib', () => {
     });
 
     it('should return the token for a given policy', async () => {
-      const tokenAdapter = new MemoryTokenAdapter();
+      const tokenAdapter = new MemoryTokensRepository();
       tokenAdapter.tokens['token:1'] = {
         id: 'token:1',
         policy_id: 'policy:1',
@@ -168,7 +168,7 @@ describe('Token Lib', () => {
     });
 
     it('should regenerate a token for a given policy if the regenerate flag is true', async () => {
-      const tokenAdapter = new MemoryTokenAdapter();
+      const tokenAdapter = new MemoryTokensRepository();
       tokenAdapter.tokens['tokens-0'] = {
         id: 'tokens-0',
         policy_id: 'policy:1',

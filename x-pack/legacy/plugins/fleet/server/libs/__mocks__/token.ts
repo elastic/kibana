@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TokenVerificationResponse, TokenType } from '../adapters/tokens/adapter_types';
-import { FrameworkUser } from '../adapters/framework/adapter_types';
+import { TokenVerificationResponse, TokenType } from '../../repositories/tokens/types';
+import { FrameworkUser } from '../../adapters/framework/adapter_types';
 
 export class TokenLib {
   private accessTokenId = 1;
