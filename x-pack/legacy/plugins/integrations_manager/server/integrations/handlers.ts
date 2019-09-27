@@ -71,7 +71,12 @@ export async function handleRequestInstall(req: InstallAssetRequest, extra: Extr
 
   const savedObjectsClient = getClient(req);
   const callCluster = getClusterAccessor(extra.context.esClient, req);
-  const object = await installIntegration({ savedObjectsClient, pkgkey, asset, callCluster });
+  const object = await installIntegration({
+    savedObjectsClient,
+    pkgkey,
+    asset,
+    callCluster,
+  });
 
   return object;
 }

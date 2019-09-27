@@ -17,16 +17,17 @@ import { cacheGet, cacheSet } from './cache';
 import { ArchiveEntry, untarBuffer } from './extract';
 import { fetchUrl, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
+import { integrationsManagerConfigStore } from '../config';
 
 export { ArchiveEntry } from './extract';
 
-const REGISTRY = process.env.REGISTRY || 'http://integrations-registry.app.elstc.co';
 export interface SearchParams {
   category?: CategoryId;
 }
 
 export async function fetchList(params?: SearchParams): Promise<RegistryList> {
-  const url = new URL(`${REGISTRY}/search`);
+  const { registryUrl } = integrationsManagerConfigStore.getConfig();
+  const url = new URL(`${registryUrl}/search`);
   if (params && params.category) {
     url.searchParams.set('category', params.category);
   }
@@ -35,11 +36,13 @@ export async function fetchList(params?: SearchParams): Promise<RegistryList> {
 }
 
 export async function fetchInfo(key: string): Promise<RegistryPackage> {
-  return fetchUrl(`${REGISTRY}/package/${key}`).then(JSON.parse);
+  const { registryUrl } = integrationsManagerConfigStore.getConfig();
+  return fetchUrl(`${registryUrl}/package/${key}`).then(JSON.parse);
 }
 
 export async function fetchCategories(): Promise<CategorySummaryList> {
-  return fetchUrl(`${REGISTRY}/categories`).then(JSON.parse);
+  const { registryUrl } = integrationsManagerConfigStore.getConfig();
+  return fetchUrl(`${registryUrl}/categories`).then(JSON.parse);
 }
 
 export async function getArchiveInfo(
@@ -96,7 +99,8 @@ async function getOrFetchArchiveBuffer(key: string): Promise<Buffer> {
 }
 
 async function fetchArchiveBuffer(key: string): Promise<Buffer> {
-  return getResponseStream(`${REGISTRY}/package/${key}`).then(streamToBuffer);
+  const { registryUrl } = integrationsManagerConfigStore.getConfig();
+  return getResponseStream(`${registryUrl}/package/${key}`).then(streamToBuffer);
 }
 
 export function getAsset(key: string) {

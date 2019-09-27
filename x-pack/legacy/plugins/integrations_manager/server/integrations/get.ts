@@ -21,12 +21,16 @@ export async function getCategories() {
 }
 
 export async function getIntegrations(
-  options: { savedObjectsClient: SavedObjectsClientContract } & Registry.SearchParams
+  options: {
+    savedObjectsClient: SavedObjectsClientContract;
+  } & Registry.SearchParams
 ) {
   const { savedObjectsClient } = options;
-  const registryItems = await Registry.fetchList({ category: options.category }).then(items =>
-    items.map(item => Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }))
-  );
+  const registryItems = await Registry.fetchList({ category: options.category }).then(items => {
+    return items.map(item =>
+      Object.assign({}, item, { title: item.title || nameAsTitle(item.name) })
+    );
+  });
   const searchObjects = registryItems.map(({ name, version }) => ({
     type: SAVED_OBJECT_TYPE,
     id: `${name}-${version}`,

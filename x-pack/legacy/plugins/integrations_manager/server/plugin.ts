@@ -4,23 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Observable } from 'rxjs';
 import {
   ClusterClient,
   CoreStart,
   ElasticsearchServiceSetup,
   HttpServiceSetup,
+  PluginInitializerContext,
 } from 'src/core/server';
+import { IntegrationsManagerConfigSchema, integrationsManagerConfigStore } from './config';
 import { PLUGIN } from '../common/constants';
 import { fetchList } from './registry';
 import { routes } from './routes';
+
+export type IntegrationsManagerPluginInitializerContext = Pick<PluginInitializerContext, 'config'>;
 
 export interface CoreSetup {
   elasticsearch: ElasticsearchServiceSetup;
   http: HttpServiceSetup;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginInitializerContext {}
 
 export type PluginSetup = ReturnType<Plugin['setup']>;
 export type PluginStart = ReturnType<Plugin['start']>;
@@ -29,7 +31,14 @@ export interface PluginContext {
 }
 
 export class Plugin {
-  constructor(initializerContext: PluginInitializerContext) {}
+  public config$: Observable<IntegrationsManagerConfigSchema>;
+
+  constructor(initializerContext: IntegrationsManagerPluginInitializerContext) {
+    this.config$ = initializerContext.config.create<IntegrationsManagerConfigSchema>();
+    this.config$.subscribe(configValue => {
+      integrationsManagerConfigStore.updateConfig(configValue);
+    });
+  }
   public setup(core: CoreSetup) {
     const { http, elasticsearch } = core;
     const { server } = http;

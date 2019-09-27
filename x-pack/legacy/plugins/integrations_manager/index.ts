@@ -5,13 +5,20 @@
  */
 
 import { resolve } from 'path';
+import JoiNamespace from 'joi';
+import { BehaviorSubject } from 'rxjs';
 import { LegacyPluginInitializer, LegacyPluginOptions } from 'src/legacy/types';
-import KbnServer, { Server } from 'src/legacy/server/kbn_server';
+import KbnServer from 'src/legacy/server/kbn_server';
 import { Feature } from '../../../plugins/features/server/feature';
 import { PLUGIN } from './common/constants';
 import manifest from './kibana.json';
-import { CoreSetup, Plugin as ServerPlugin, PluginInitializerContext } from './server/plugin';
+import {
+  CoreSetup,
+  Plugin as ServerPlugin,
+  IntegrationsManagerPluginInitializerContext,
+} from './server/plugin';
 import { mappings, savedObjectSchemas } from './server/saved_objects';
+import { getConfigSchema } from './server/config';
 
 const ROOT = `plugins/${PLUGIN.ID}`;
 
@@ -64,17 +71,31 @@ const pluginOptions: LegacyPluginOptions = {
   },
   configPrefix: PLUGIN.CONFIG_PREFIX,
   publicDir: resolve(__dirname, 'public'),
-  config: undefined,
+  config(Joi: typeof JoiNamespace) {
+    return getConfigSchema(Joi);
+  },
   deprecations: undefined,
   preInit: undefined,
-  init(server: Server) {
+  // yes, any. See https://github.com/elastic/kibana/blob/master/x-pack/legacy/plugins/infra/server/lib/adapters/configuration/kibana_configuration_adapter.ts#L49-L58
+  // for a way around it, but this is Legacy Platform and I'm not sure these hoops are worth jumping through.
+  init(server: any) {
     server.plugins.xpack_main.registerFeature(feature);
 
     // convert hapi instance to KbnServer
     // `kbnServer.server` is the same hapi instance
     // `kbnServer.newPlatform` has important values
     const kbnServer = (server as unknown) as KbnServer;
-    const initializerContext: PluginInitializerContext = {};
+
+    const getConfig$ = () =>
+      new BehaviorSubject(server.config().get(PLUGIN.CONFIG_PREFIX)).asObservable();
+
+    const initializerContext: IntegrationsManagerPluginInitializerContext = {
+      config: {
+        create: getConfig$,
+        createIfExists: getConfig$,
+      },
+    };
+
     const coreSetup: CoreSetup = kbnServer.newPlatform.setup.core;
 
     new ServerPlugin(initializerContext).setup(coreSetup);

@@ -19,11 +19,20 @@ export async function installIntegration(options: {
 }) {
   const { savedObjectsClient, pkgkey, asset, callCluster } = options;
   // install any assets (in ES, as Saved Objects, etc) as required. Get references to them
-  const toSave = await installAssets({ savedObjectsClient, pkgkey, asset, callCluster });
+  const toSave = await installAssets({
+    savedObjectsClient,
+    pkgkey,
+    asset,
+    callCluster,
+  });
 
   if (toSave.length) {
     // saved those references in the integration manager's state object
-    const saved = await saveInstallationReferences({ savedObjectsClient, pkgkey, toSave });
+    const saved = await saveInstallationReferences({
+      savedObjectsClient,
+      pkgkey,
+      toSave,
+    });
     return saved;
   }
 
