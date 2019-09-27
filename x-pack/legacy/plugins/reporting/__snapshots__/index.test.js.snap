@@ -17,6 +17,17 @@ Object {
     "concurrency": 4,
     "loadDelay": 3000,
     "maxAttempts": 1,
+    "networkPolicy": Object {
+      "allow": Array [
+        "http:",
+        "https:",
+        "ws:",
+        "wss:",
+        "data:",
+      ],
+      "deny": Array [],
+      "enabled": true,
+    },
     "settleTime": 1000,
     "timeout": 20000,
     "viewport": Object {
@@ -80,6 +91,17 @@ Object {
     "concurrency": 4,
     "loadDelay": 3000,
     "maxAttempts": 3,
+    "networkPolicy": Object {
+      "allow": Array [
+        "http:",
+        "https:",
+        "ws:",
+        "wss:",
+        "data:",
+      ],
+      "deny": Array [],
+      "enabled": true,
+    },
     "settleTime": 1000,
     "timeout": 20000,
     "viewport": Object {
@@ -142,6 +164,17 @@ Object {
     "concurrency": 4,
     "loadDelay": 3000,
     "maxAttempts": 1,
+    "networkPolicy": Object {
+      "allow": Array [
+        "http:",
+        "https:",
+        "ws:",
+        "wss:",
+        "data:",
+      ],
+      "deny": Array [],
+      "enabled": true,
+    },
     "settleTime": 1000,
     "timeout": 20000,
     "viewport": Object {
@@ -205,6 +238,17 @@ Object {
     "concurrency": 4,
     "loadDelay": 3000,
     "maxAttempts": 3,
+    "networkPolicy": Object {
+      "allow": Array [
+        "http:",
+        "https:",
+        "ws:",
+        "wss:",
+        "data:",
+      ],
+      "deny": Array [],
+      "enabled": true,
+    },
     "settleTime": 1000,
     "timeout": 20000,
     "viewport": Object {

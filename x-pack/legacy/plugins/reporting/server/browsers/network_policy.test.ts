@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Response } from 'puppeteer';
 import { allowResponse } from './network_policy';
 
 describe('Network Policy', () => {
@@ -61,11 +60,6 @@ describe('Network Policy', () => {
     it('when the allow list is malformed', () => {
       const url = 'https://kibana.com/bad/route';
       expect(allowResponse(url, ['  '], [])).toBe(false);
-    });
-
-    it('when the deny list is malformed', () => {
-      const url = 'https://kibana.com/bad/route';
-      expect(allowResponse(url, [], [])).toBe(false);
     });
 
     it('when the protocol is in the deny list', () => {

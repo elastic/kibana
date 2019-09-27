@@ -52,6 +52,14 @@ export class HeadlessChromiumDriver {
     let interceptedCount = 0;
     this.page.on('request', (interceptedRequest: any) => {
       let isData = false;
+      let interceptedUrl = interceptedRequest.url();
+
+      // We should never ever let file protocol requests go through
+      if (interceptedUrl.startsWith('file://')) {
+        logger.error(`Got file-protocol URL: "${interceptedUrl}", closing browser.`);
+        this.page.browser().close();
+        throw new Error(`Received bad URL outgoing URL: ${interceptedUrl}`);
+      }
 
       if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedRequest.url())) {
         logger.debug(`Using custom headers for ${interceptedRequest.url()}`);
@@ -62,7 +70,6 @@ export class HeadlessChromiumDriver {
           },
         });
       } else {
-        let interceptedUrl = interceptedRequest.url();
         if (interceptedUrl.startsWith('data:')) {
           // `data:image/xyz;base64` can be very long URLs
           interceptedUrl = interceptedUrl.substring(0, 100) + '[truncated]';
@@ -85,7 +92,7 @@ export class HeadlessChromiumDriver {
         );
 
         if (!allowed) {
-          logger.error(`Got bogus URL "${interceptedUrl}", exiting job!`);
+          logger.error(`Got bad URL "${interceptedUrl}", closing browser.`);
           this.page.browser().close();
           throw new Error(`Received bad URL in response: ${interceptedUrl}`);
         }
