@@ -15,6 +15,7 @@ else
   branchBootstrapCache="$HOME/.kibana/bootstrap_cache/$(jq -r .branch package.json).tar"
 
   if [ -f "$branchBootstrapCache" ]; then
+    echo "extracting bootstrap_cache from $branchBootstrapCache";
     tar -xf "$branchBootstrapCache";
   else
     echo ""
