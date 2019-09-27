@@ -74,7 +74,7 @@ export function getCreateTaskRunnerFunction({
         const services = getServices(fakeRequest);
         // Ensure API key is still valid and user has access
         const {
-          attributes: { alertTypeParams, actions, interval, throttle, muted, mutedInstanceIds },
+          attributes: { alertTypeParams, actions, interval, throttle, muteAll, mutedInstanceIds },
           references,
         } = await services.savedObjectsClient.get<RawAlert>('alert', alertId);
 
@@ -128,7 +128,7 @@ export function getCreateTaskRunnerFunction({
           Object.keys(alertInstances).map(alertInstanceId => {
             const alertInstance = alertInstances[alertInstanceId];
             if (alertInstance.hasScheduledActions(throttle)) {
-              if (muted || mutedInstanceIds.includes(alertInstanceId)) {
+              if (muteAll || mutedInstanceIds.includes(alertInstanceId)) {
                 return;
               }
               const { actionGroup, context, state } = alertInstance.getSechduledActionOptions()!;
