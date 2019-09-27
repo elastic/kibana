@@ -12,7 +12,7 @@ import { isLeft } from 'fp-ts/lib/Either';
 import { FrameworkRequest } from '../../adapters/framework/adapter_types';
 import { ReturnTypeCheckin } from '../../../common/return_types';
 import { TokenType } from '../../repositories/tokens/types';
-import { RuntimeAgentEvent, AgentEvent } from '../../repositories/agents/types';
+import { RuntimeAgentEvent, AgentEvent } from '../../repositories/agent_events/types';
 import { FleetServerLib } from '../../libs/types';
 
 type CheckinRequest = FrameworkRequest<{

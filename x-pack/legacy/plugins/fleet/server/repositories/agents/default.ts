@@ -36,7 +36,6 @@ export class AgentsRepository implements AgentsRepositoryType {
         local_metadata: JSON.stringify(agent.local_metadata || {}),
         user_provided_metadata: JSON.stringify(agent.user_provided_metadata || {}),
         actions: [],
-        events: [],
       },
       options
     );
@@ -98,9 +97,9 @@ export class AgentsRepository implements AgentsRepositoryType {
    * @param newData
    */
   public async update(user: FrameworkUser, id: string, newData: Partial<Agent>) {
-    const updateData: Partial<SavedObjectAgentAttributes> = ({ ...newData } as unknown) as Partial<
-      SavedObjectAgentAttributes
-    >;
+    const { local_metadata, user_provided_metadata, ...data } = newData;
+    const updateData: Partial<SavedObjectAgentAttributes> = { ...data };
+
     if (newData.local_metadata) {
       updateData.local_metadata = JSON.stringify(newData.local_metadata);
     }

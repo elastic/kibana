@@ -14,26 +14,6 @@ export const RuntimeAgentType = t.union([
   t.literal('TEMPORARY'),
 ]);
 
-export const RuntimeAgentEvent = t.interface(
-  {
-    type: t.union([t.literal('STATE'), t.literal('ERROR'), t.literal('ACTION_RESULT')]),
-    timestamp: t.string,
-    event: t.type({
-      type: t.union([
-        t.literal('RUNNING'),
-        t.literal('STARTING'),
-        t.literal('IN_PROGRESS'),
-        t.literal('CONFIG'),
-        t.literal('FAILED'),
-        t.literal('STOPPED'),
-        t.literal('DATA_DUMP'),
-      ]),
-      message: t.string,
-    }),
-  },
-  'AgentEvent'
-);
-
 const RuntimeAgentActionType = t.union([
   t.literal('DATA_DUMP'),
   t.literal('RESUME'),
@@ -93,7 +73,6 @@ export const RuntimeAgent = t.intersection([
   t.interface({
     ...newAgentProperties,
     id: t.string,
-    events: t.array(RuntimeAgentEvent),
     actions: t.array(RuntimeAgentAction),
   }),
   t.partial({
@@ -118,7 +97,6 @@ export const RuntimeSavedObjectAgentAttributes = t.intersection([
     id: t.string,
     user_provided_metadata: t.string,
     local_metadata: t.string,
-    events: t.array(RuntimeAgentEvent),
     actions: t.array(RuntimeAgentAction),
   }),
 ]);
@@ -128,7 +106,6 @@ export type Agent = t.TypeOf<typeof RuntimeAgent>;
 export type NewAgent = t.TypeOf<typeof NewRuntimeAgent>;
 
 export type AgentAction = t.TypeOf<typeof RuntimeAgentAction>;
-export type AgentEvent = t.TypeOf<typeof RuntimeAgentEvent>;
 
 export enum SortOptions {
   EnrolledAtASC,

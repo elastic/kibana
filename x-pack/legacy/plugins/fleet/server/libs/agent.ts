@@ -12,7 +12,6 @@ import {
   SortOptions,
   NewAgent,
   AgentType,
-  AgentEvent,
   AgentAction,
   AgentActionType,
 } from '../repositories/agents/types';
@@ -20,10 +19,12 @@ import { TokenLib } from './token';
 import { PolicyLib } from './policy';
 import { FullPolicyFile } from '../repositories/policies/types';
 import { FrameworkUser } from '../adapters/framework/adapter_types';
+import { AgentEventsRepository, AgentEvent } from '../repositories/agent_events/types';
 
 export class AgentLib {
   constructor(
     private readonly agentsRepository: AgentsRepository,
+    private readonly agentEventsRepository: AgentEventsRepository,
     private readonly tokens: TokenLib,
     private readonly policy: PolicyLib
   ) {}
@@ -97,10 +98,11 @@ export class AgentLib {
    */
   public async delete(user: FrameworkUser, agent: Agent) {
     if (agent.type === 'EPHEMERAL_INSTANCE') {
-      return this.agentsRepository.delete(user, agent);
+      await this.agentEventsRepository.deleteEventsForAgent(user, agent.id);
+      return await this.agentsRepository.delete(user, agent);
     }
 
-    return this.agentsRepository.update(user, agent.id, { active: false });
+    return await this.agentsRepository.update(user, agent.id, { active: false });
   }
 
   /**
@@ -108,6 +110,18 @@ export class AgentLib {
    */
   public async getById(user: FrameworkUser, id: string): Promise<Agent | null> {
     return await this.agentsRepository.getById(user, id);
+  }
+
+  /**
+   * Get events for a given agent
+   */
+  public async getEventsById(
+    user: FrameworkUser,
+    agentId: string,
+    page: number = 1,
+    perPage: number = 25
+  ): Promise<{ items: AgentEvent[]; total: number }> {
+    return await this.agentEventsRepository.getEventsForAgent(user, agentId, page, perPage);
   }
 
   /**
@@ -136,7 +150,6 @@ export class AgentLib {
     });
 
     const updateData: Partial<Agent> = {
-      events: events.concat(agent.events),
       last_checkin: now,
       actions: updatedActions,
     };
@@ -147,6 +160,9 @@ export class AgentLib {
 
     const policy = await this.policy.getFullPolicy(agent.policy_id);
     await this.agentsRepository.update(user, agent.id, updateData);
+    if (events.length > 0) {
+      await this.agentEventsRepository.createEventsForAgent(user, agent.id, events);
+    }
 
     return { actions, policy };
   }

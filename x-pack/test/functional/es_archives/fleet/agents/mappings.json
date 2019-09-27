@@ -117,20 +117,34 @@
                 "sent_at": { "type": "date" },
                 "created_at": { "type": "date" }
               }
+            }
+          }
+        },
+        "agent_events": {
+          "properties": {
+            "created_at": {
+              "type": "date"
             },
-            "events": {
-              "type": "nested",
-              "properties": {
-                "type": { "type": "keyword" },
-                "timestamp": { "type": "date" },
-                "event": {
-                  "type": "object",
-                  "properties": {
-                    "type": { "type": "keyword" },
-                    "message": { "type": "text" }
-                  }
-                }
-              }
+            "type": {
+              "type": "keyword"
+            },
+            "agent_id": {
+              "type": "keyword"
+            },
+            "subtype": {
+              "type": "keyword"
+            },
+            "timestamp": {
+              "type": "date"
+            },
+            "message": {
+              "type": "text"
+            },
+            "payload": {
+              "type": "text"
+            },
+            "data": {
+              "type": "text"
             }
           }
         },

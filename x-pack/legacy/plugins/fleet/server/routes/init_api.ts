@@ -12,13 +12,14 @@ import { createCheckinAgentsRoute } from './agents/checkin';
 import { createGetEnrollmentTokenRoute } from './policy/tokens';
 import { FleetServerLib } from '../libs/types';
 import { HapiFrameworkAdapter } from '../adapters/framework/hapi_framework_adapter';
-import { createAgentsAddActionRoute } from './agents/add_action';
+import { createAgentsAddActionRoute } from './agents/actions';
 import {
   createDeleteEnrollmentRuleRoute,
   createGetEnrollmentRulesRoute,
   createPostEnrollmentRulesRoute,
 } from './policy/rules';
 import { createGETArtifactsRoute } from './artifacts';
+import { createGETAgentEventsRoute } from './agents/events';
 
 export function initRestApi(server: Server, libs: FleetServerLib) {
   const frameworkAdapter = new HapiFrameworkAdapter(server);
@@ -36,6 +37,7 @@ function createAgentsRoutes(adapter: HapiFrameworkAdapter, libs: FleetServerLib)
   adapter.registerRoute(createEnrollAgentsRoute(libs));
   adapter.registerRoute(createCheckinAgentsRoute(libs));
   adapter.registerRoute(createAgentsAddActionRoute(libs));
+  adapter.registerRoute(createGETAgentEventsRoute(libs));
 }
 
 function createTokensRoutes(adapter: HapiFrameworkAdapter, libs: FleetServerLib) {
