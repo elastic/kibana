@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export * from '../common/types';
 export * from './autocomplete_provider/types';

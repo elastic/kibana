@@ -4,104 +4,56 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose } from '../../compose/test_compose';
-import { UMServerLibs } from '../../lib';
+import { UMAuthDomain } from '../auth';
 
 describe('Auth domain lib', () => {
-  let libs: UMServerLibs;
-  let request: any;
-
-  const createLibs = (xpack: any) => {
-    libs = compose({ xpack });
-  };
+  let domain: UMAuthDomain;
+  let mockAdapter: any;
+  let mockGetLicenseType: jest.Mock<any, any>;
+  let mockLicenseIsActive: jest.Mock<any, any>;
 
   beforeEach(() => {
-    request = {};
-    createLibs({
-      info: {
-        license: {
-          type: 'platinum',
-          isActive: true,
-        },
-      },
-    });
+    mockAdapter = jest.fn();
+    mockGetLicenseType = jest.fn();
+    mockLicenseIsActive = jest.fn();
+    domain = new UMAuthDomain(mockAdapter, {});
   });
 
-  it('throws for empty request authentication field', () => {
-    expect(() => libs.auth.requestIsValid(request)).toThrowErrorMatchingSnapshot();
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('throws for null license information', () => {
-    createLibs({
-      info: {
-        license: {
-          isActive: true,
-        },
-      },
-    });
-
-    expect(() => libs.auth.requestIsValid(request)).toThrowErrorMatchingSnapshot();
+  it('throws for null license', () => {
+    mockGetLicenseType.mockReturnValue(null);
+    mockAdapter.getLicenseType = mockGetLicenseType;
+    expect(() => domain.requestIsValid({})).toThrowErrorMatchingSnapshot();
   });
 
-  it('returns false for un-authenticated request', () => {
-    request = {
-      auth: { isAuthenticated: false },
-    };
-    expect(libs.auth.requestIsValid(request)).toBe(false);
+  it('throws for unsupported license type', () => {
+    mockGetLicenseType.mockReturnValue('oss');
+    mockAdapter.getLicenseType = mockGetLicenseType;
+    expect(() => domain.requestIsValid({})).toThrowErrorMatchingSnapshot();
   });
 
-  it('throws when license is not active', () => {
-    createLibs({
-      info: {
-        license: {
-          type: 'platinum',
-          isActive: false,
-        },
-      },
-    });
-    expect(() => libs.auth.requestIsValid(request)).toThrowErrorMatchingSnapshot();
+  it('throws for inactive license', () => {
+    mockLicenseIsActive.mockReturnValue(false);
+    mockAdapter.licenseIsActive = mockLicenseIsActive;
+    expect(() => domain.requestIsValid({})).toThrowErrorMatchingSnapshot();
   });
 
-  it('throws when license type not supported', () => {
-    createLibs({
-      info: {
-        license: {
-          type: 'oss',
-          isActive: true,
-        },
-      },
-    });
-    expect(() => libs.auth.requestIsValid(request)).toThrowErrorMatchingSnapshot();
+  it('throws if request is not authenticated', () => {
+    mockGetLicenseType.mockReturnValue('basic');
+    mockLicenseIsActive.mockReturnValue(true);
+    mockAdapter.getLicenseType = mockGetLicenseType;
+    mockAdapter.licenseIsActive = mockLicenseIsActive;
+    expect(() => domain.requestIsValid({})).toThrowErrorMatchingSnapshot();
   });
 
-  it('returns true for authenticated request and valid active basic license', () => {
-    createLibs({
-      info: {
-        license: {
-          type: 'basic',
-          isActive: true,
-        },
-      },
-    });
-    request = { auth: { isAuthenticated: true } };
-    expect(libs.auth.requestIsValid(request)).toBe(true);
-  });
-
-  it('returns true for authenticated request and valid active license', () => {
-    createLibs({
-      info: {
-        license: {
-          type: 'platinum',
-          isActive: true,
-        },
-      },
-    });
-    request = { auth: { isAuthenticated: true } };
-    expect(libs.auth.requestIsValid(request)).toBe(true);
-  });
-
-  it('returns false for valid license but un-authenticated request', () => {
-    request = { auth: { isAuthenticated: false } };
-    expect(libs.auth.requestIsValid(request)).toBe(false);
+  it('accepts request if authenticated', () => {
+    mockGetLicenseType.mockReturnValue('basic');
+    mockLicenseIsActive.mockReturnValue(true);
+    mockAdapter.getLicenseType = mockGetLicenseType;
+    mockAdapter.licenseIsActive = mockLicenseIsActive;
+    expect(domain.requestIsValid({ auth: { isAuthenticated: true } })).toEqual(true);
   });
 });
