@@ -23,9 +23,14 @@
   flex-grow: 0;
 }
 
+/**
+ * 1. Don't cut off the shadow of the field items
+ */
+
 .lnsInnerIndexPatternDataPanel__listWrapper {
   @include euiOverflowShadow;
   @include euiScrollBar;
+  margin-left: -$euiSize; /* 1 */
   position: relative;
   flex-grow: 1;
   overflow: auto;
@@ -35,8 +40,8 @@
   padding-top: $euiSizeS;
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
+  left: $euiSize; /* 1 */
+  right: $euiSizeXS; /* 1 */
 }
 
 .lnsInnerIndexPatternDataPanel__filterButton {
