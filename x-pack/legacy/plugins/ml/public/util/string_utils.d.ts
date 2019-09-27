@@ -5,3 +5,9 @@
  */
 
 export function escapeForElasticsearchQuery(str: string): string;
+
+export function replaceStringTokens(
+  str: string,
+  valuesByTokenName: {},
+  encodeForURI: boolean
+): string;
