@@ -20,8 +20,7 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import { EuiText } from '@elastic/eui';
-import { EuiButton } from '@elastic/eui';
+import { EuiText, EuiButton } from '@elastic/eui';
 
 export const NewVisHelp = () => (
   <EuiText>
