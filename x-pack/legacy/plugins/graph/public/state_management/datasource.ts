@@ -6,7 +6,7 @@
 
 import actionCreatorFactory, { Action } from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
-import { takeLatest, put, call, select } from 'redux-saga/effects';
+import { takeLatest, put, call, select, cps } from 'redux-saga/effects';
 import { i18n } from '@kbn/i18n';
 import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { GraphState, GraphStoreDependencies } from './store';

@@ -8,13 +8,13 @@ import React from 'react';
 import { EuiTab, EuiListGroupItem, EuiButton, EuiAccordion, EuiFieldText } from '@elastic/eui';
 import * as Rx from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { Settings, SettingsProps } from './settings';
+import { SettingsComponent, AngularProps, StateProps, DispatchProps } from './settings';
 import { act } from 'react-testing-library';
 import { ReactWrapper } from 'enzyme';
 import { UrlTemplateForm } from './url_template_form';
 
 describe('settings', () => {
-  const props: jest.Mocked<SettingsProps> = {
+  const props: jest.Mocked<StateProps & DispatchProps> = {
     advancedSettings: {
       maxValuesPerDoc: 5,
       minDocCount: 10,
@@ -22,7 +22,54 @@ describe('settings', () => {
       useSignificance: true,
       timeoutMillis: 10000,
     },
-    updateAdvancedSettings: jest.fn(),
+    updateSettings: jest.fn(),
+    urlTemplates: [
+      {
+        description: 'template',
+        encoder: {
+          description: 'test encoder description',
+          encode: jest.fn(),
+          id: 'test',
+          title: 'test encoder',
+          type: 'esq',
+        },
+        url: 'http://example.org',
+        icon: {
+          class: 'test',
+          code: '1',
+          label: 'test',
+        },
+      },
+    ],
+    removeTemplate: jest.fn(),
+    saveTemplate: jest.fn(),
+    allFields: [
+      {
+        selected: false,
+        color: 'black',
+        name: 'B',
+        type: 'string',
+        icon: {
+          class: 'test',
+          code: '1',
+          label: 'test',
+        },
+      },
+      {
+        selected: false,
+        color: 'red',
+        name: 'C',
+        type: 'string',
+        icon: {
+          class: 'test',
+          code: '1',
+          label: 'test',
+        },
+      },
+    ],
+  };
+
+  const angularProps: jest.Mocked<AngularProps> = {
     blacklistedNodes: [
       {
         x: 0,
@@ -60,59 +107,15 @@ describe('settings', () => {
       },
     ],
     unblacklistNode: jest.fn(),
-    urlTemplates: [
-      {
-        description: 'template',
-        encoder: {
-          description: 'test encoder description',
-          encode: jest.fn(),
-          id: 'test',
-          title: 'test encoder',
-          type: 'esq',
-        },
-        url: 'http://example.org',
-        icon: {
-          class: 'test',
-          code: '1',
-          label: 'test',
-        },
-      },
-    ],
-    removeUrlTemplate: jest.fn(),
-    saveUrlTemplate: jest.fn(),
-    allFields: [
-      {
-        selected: false,
-        color: 'black',
-        name: 'B',
-        type: 'string',
-        icon: {
-          class: 'test',
-          code: '1',
-          label: 'test',
-        },
-      },
-      {
-        selected: false,
-        color: 'red',
-        name: 'C',
-        type: 'string',
-        icon: {
-          class: 'test',
-          code: '1',
-          label: 'test',
-        },
-      },
-    ],
     canEditDrillDownUrls: true,
   };
 
-  let subject: Rx.BehaviorSubject<jest.Mocked<SettingsProps>>;
+  let subject: Rx.BehaviorSubject<jest.Mocked<AngularProps>>;
   let instance: ReactWrapper;
 
   beforeEach(() => {
-    subject = new Rx.BehaviorSubject(props);
-    instance = mountWithIntl(<Settings observable={subject.asObservable()} />);
+    subject = new Rx.BehaviorSubject(angularProps);
+    instance = mountWithIntl(<SettingsComponent observable={subject.asObservable()} {...props} />);
   });
 
   function toTab(tab: string) {
@@ -139,25 +142,9 @@ describe('settings', () => {
         HTMLInputElement
       >);
 
-      expect(props.updateAdvancedSettings).toHaveBeenCalledWith(
+      expect(props.updateSettings).toHaveBeenCalledWith(
         expect.objectContaining({ sampleSize: 13 })
       );
-    });
-
-    it('should update on new data', () => {
-      act(() => {
-        subject.next({
-          ...props,
-          advancedSettings: {
-            ...props.advancedSettings,
-            sampleSize: 13,
-          },
-        });
-      });
-
-      instance.update();
-
-      expect(input('Sample size').prop('value')).toEqual(13);
     });
   });
 
@@ -173,13 +160,46 @@ describe('settings', () => {
       ]);
     });
 
+    it('should update on new data', () => {
+      act(() => {
+        subject.next({
+          ...angularProps,
+          blacklistedNodes: [
+            {
+              x: 0,
+              y: 0,
+              scaledSize: 10,
+              parent: null,
+              color: 'black',
+              data: {
+                field: 'A',
+                term: '1',
+              },
+              label: 'blacklisted node 3',
+              icon: {
+                class: 'test',
+                code: '1',
+                label: 'test',
+              },
+            },
+          ],
+        });
+      });
+
+      instance.update();
+
+      expect(instance.find(EuiListGroupItem).map(item => item.prop('label'))).toEqual([
+        'blacklisted node 3',
+      ]);
+    });
+
     it('should delete node', () => {
       instance
         .find(EuiListGroupItem)
         .at(0)
         .prop('extraAction')!.onClick!({} as any);
 
-      expect(props.unblacklistNode).toHaveBeenCalledWith(props.blacklistedNodes![0]);
+      expect(angularProps.unblacklistNode).toHaveBeenCalledWith(angularProps.blacklistedNodes![0]);
     });
 
     it('should delete all nodes', () => {
@@ -188,8 +208,8 @@ describe('settings', () => {
         .find(EuiButton)
         .simulate('click');
 
-      expect(props.unblacklistNode).toHaveBeenCalledWith(props.blacklistedNodes![0]);
-      expect(props.unblacklistNode).toHaveBeenCalledWith(props.blacklistedNodes![1]);
+      expect(angularProps.unblacklistNode).toHaveBeenCalledWith(angularProps.blacklistedNodes![0]);
+      expect(angularProps.unblacklistNode).toHaveBeenCalledWith(angularProps.blacklistedNodes![1]);
     });
   });
 
@@ -226,7 +246,7 @@ describe('settings', () => {
       templateForm(0)
         .find('EuiButtonEmpty[data-test-subj="graphRemoveUrlTemplate"]')
         .simulate('click');
-      expect(props.removeUrlTemplate).toHaveBeenCalledWith(props.urlTemplates[0]);
+      expect(props.removeTemplate).toHaveBeenCalledWith(props.urlTemplates[0]);
     });
 
     it('should update url template', () => {
@@ -236,9 +256,12 @@ describe('settings', () => {
           .find('form')
           .simulate('submit');
       });
-      expect(props.saveUrlTemplate).toHaveBeenCalledWith(0, {
-        ...props.urlTemplates[0],
-        description: 'Updated title',
+      expect(props.saveTemplate).toHaveBeenCalledWith({
+        index: 0,
+        template: {
+          ...props.urlTemplates[0],
+          description: 'Updated title',
+        },
       });
     });
 
@@ -256,10 +279,10 @@ describe('settings', () => {
           .find('form')
           .simulate('submit');
       });
-      expect(props.saveUrlTemplate).toHaveBeenCalledWith(
-        -1,
-        expect.objectContaining({ description: 'Title', url: 'test-url' })
-      );
+      expect(props.saveTemplate).toHaveBeenCalledWith({
+        index: -1,
+        template: expect.objectContaining({ description: 'Title', url: 'test-url' }),
+      });
     });
   });
 });

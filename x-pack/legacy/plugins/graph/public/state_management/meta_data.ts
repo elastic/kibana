@@ -6,7 +6,7 @@
 
 import actionCreatorFactory, { Action } from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { select, takeLatest } from 'redux-saga/effects';
+import { select, takeLatest, call } from 'redux-saga/effects';
 import { i18n } from '@kbn/i18n';
 import { GraphState, GraphStoreDependencies } from './store';
 import { reset } from './global';
@@ -40,7 +40,7 @@ export const metaDataSelector = (state: GraphState) => state.metaData;
  * Saga updating the breadcrumb when the shown workspace changes.
  */
 export const syncBreadcrumbSaga = ({ chrome, changeUrl }: GraphStoreDependencies) => {
-  function* syncBreadcrumb(action: Action<Partial<MetaDataState>>) {
+  function* syncBreadcrumb() {
     const metaData = metaDataSelector(yield select());
     setBreadcrumbs({
       chrome,
@@ -54,6 +54,8 @@ export const syncBreadcrumbSaga = ({ chrome, changeUrl }: GraphStoreDependencies
     });
   }
   return function*() {
+    // initial sync
+    yield call(syncBreadcrumb);
     yield takeLatest(updateMetaData, syncBreadcrumb);
   };
 };

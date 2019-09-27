@@ -50,19 +50,19 @@ const tabs = [
  * These props are wired in the angular scope and are passed in via observable
  * to catch update outside updates
  */
-interface AngularProps {
+export interface AngularProps {
   blacklistedNodes: WorkspaceNode[];
   unblacklistNode: (node: WorkspaceNode) => void;
   canEditDrillDownUrls: boolean;
 }
 
-interface StateProps {
+export interface StateProps {
   advancedSettings: AdvancedSettings;
   urlTemplates: UrlTemplate[];
   allFields: WorkspaceField[];
 }
 
-interface DispatchProps {
+export interface DispatchProps {
   updateSettings: (advancedSettings: AdvancedSettings) => void;
   removeTemplate: (urlTemplate: UrlTemplate) => void;
   saveTemplate: (props: { index: number; template: UrlTemplate }) => void;
@@ -74,7 +74,7 @@ interface AsObservable<P> {
 
 export interface SettingsProps extends AsObservable<AngularProps>, StateProps, DispatchProps {}
 
-function SettingsComponent({ observable, ...props }: SettingsProps) {
+export function SettingsComponent({ observable, ...props }: SettingsProps) {
   const [angularProps, setAngularProps] = useState<AngularProps | undefined>(undefined);
   const [activeTab, setActiveTab] = useState(0);
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import createSagaMiddleware from 'redux-saga';
+import createSagaMiddleware, { SagaMiddleware } from 'redux-saga';
 import { combineReducers, createStore, Store, AnyAction, Dispatch, applyMiddleware } from 'redux';
 import { CoreStart } from 'src/core/public';
 import { Chrome } from 'ui/chrome';
@@ -56,21 +56,20 @@ export interface GraphStoreDependencies {
   chrome: Chrome;
 }
 
-export const createGraphStore = (deps: GraphStoreDependencies) => {
-  const sagaMiddleware = createSagaMiddleware();
-
-  // hook in reducers
-  const rootReducer = combineReducers({
+export function createRootReducer(basePath: string) {
+  return combineReducers({
     fields: fieldsReducer,
-    urlTemplates: urlTemplatesReducer(deps.basePath),
+    urlTemplates: urlTemplatesReducer(basePath),
     advancedSettings: advancedSettingsReducer,
     datasource: datasourceReducer,
     metaData: metaDataReducer,
   });
+}
 
-  const store = createStore(rootReducer, applyMiddleware(sagaMiddleware));
-
-  // hook in sagas
+export function registerSagas(
+  sagaMiddleware: SagaMiddleware<object>,
+  deps: GraphStoreDependencies
+) {
   sagaMiddleware.run(datasourceSaga(deps));
   sagaMiddleware.run(loadingSaga(deps));
   sagaMiddleware.run(savingSaga(deps));
@@ -79,6 +78,16 @@ export const createGraphStore = (deps: GraphStoreDependencies) => {
   sagaMiddleware.run(syncSettingsSaga(deps));
   sagaMiddleware.run(updateSaveButtonSaga(deps));
   sagaMiddleware.run(syncBreadcrumbSaga(deps));
+}
+
+export const createGraphStore = (deps: GraphStoreDependencies) => {
+  const sagaMiddleware = createSagaMiddleware();
+
+  const rootReducer = createRootReducer(deps.basePath);
+
+  const store = createStore(rootReducer, applyMiddleware(sagaMiddleware));
+
+  registerSagas(sagaMiddleware, deps);
 
   return store;
 };

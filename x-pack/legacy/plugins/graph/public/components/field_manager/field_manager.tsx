@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { bindActionCreators } from 'redux';
@@ -24,7 +23,7 @@ import { WorkspaceField } from '../../types';
 
 export type UpdateableFieldProperties = 'hopSize' | 'lastValidHopSize' | 'color' | 'icon';
 
-function FieldManagerComponent(props: {
+export function FieldManagerComponent(props: {
   allFields: WorkspaceField[];
   fieldMap: Record<string, WorkspaceField>;
   selectedFields: WorkspaceField[];
@@ -36,18 +35,16 @@ function FieldManagerComponent(props: {
   deselectField: (fieldName: string) => void;
 }) {
   return (
-    <I18nProvider>
-      <EuiFlexGroup gutterSize="s" className="gphFieldManager" alignItems="center">
-        {props.selectedFields.map(field => (
-          <EuiFlexItem key={field.name} grow={false}>
-            <FieldEditor {...props} field={field} />
-          </EuiFlexItem>
-        ))}
-        <EuiFlexItem grow={false}>
-          <FieldPicker {...props} />
+    <EuiFlexGroup gutterSize="s" className="gphFieldManager" alignItems="center">
+      {props.selectedFields.map(field => (
+        <EuiFlexItem key={field.name} grow={false}>
+          <FieldEditor {...props} field={field} />
         </EuiFlexItem>
-      </EuiFlexGroup>
-    </I18nProvider>
+      ))}
+      <EuiFlexItem grow={false}>
+        <FieldPicker {...props} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 

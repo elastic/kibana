@@ -57,12 +57,8 @@ import {
 } from './helpers/as_observable';
 import {
   createGraphStore,
-  loadFields,
-  fieldsSelector,
   requestDatasource,
   datasourceSelector,
-  selectedFieldsSelector,
-  liveResponseFieldsSelector,
   hasFieldsSelector
 } from './state_management';
 
@@ -111,7 +107,8 @@ app.directive('graphApp', function (reactDirective) {
     ['uiSettings', { watchDepth: 'reference' }],
     ['http', { watchDepth: 'reference' }],
     ['initialQuery', { watchDepth: 'reference' }],
-    ['overlays', { watchDepth: 'reference' }]
+    ['overlays', { watchDepth: 'reference' }],
+    ['confirmWipeWorkspace', { watchDepth: 'reference' }],
   ]);
 });
 
@@ -313,7 +310,7 @@ app.controller('graphuiPlugin', function (
     notifyAngular: () => {
       $scope.$digest();
     },
-    chrome
+    chrome,
   });
 
   $scope.spymode = 'request';
@@ -344,14 +341,14 @@ app.controller('graphuiPlugin', function (
     }
   };
 
-  function canWipeWorkspace(yesFn, noFn) {
-    if (selectedFieldsSelector(store.getState()).length === 0 && $scope.workspace === null) {
-      yesFn();
+  function canWipeWorkspace(callback) {
+    if (!hasFieldsSelector(store.getState())) {
+      callback();
       return;
     }
     const confirmModalOptions = {
-      onConfirm: yesFn,
-      onCancel: noFn || (() => {}),
+      onConfirm: callback,
+      onCancel: (() => {}),
       confirmButtonText: i18n.translate('xpack.graph.clearWorkspace.confirmButtonLabel', {
         defaultMessage: 'Continue',
       }),
@@ -363,13 +360,7 @@ app.controller('graphuiPlugin', function (
       defaultMessage: 'Once you discard changes made to a workspace, there is no getting them back.',
     }), confirmModalOptions);
   }
-
-  $scope.uiSelectIndex = function (proposedIndex) {
-    canWipeWorkspace(function () {
-      $scope.indexSelected(proposedIndex);
-    });
-  };
-
+  $scope.confirmWipeWorkspace = canWipeWorkspace;
 
   $scope.clickEdge = function (edge) {
     if (edge.inferred) {

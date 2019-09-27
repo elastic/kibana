@@ -40,6 +40,7 @@ export interface SearchBarProps {
   uiSettings: CoreStart['uiSettings'];
   http: CoreStart['http'];
   overlays: CoreStart['overlays'];
+  confirmWipeWorkspace: (onConfirm: () => void) => void;
 }
 
 function queryToString(query: Query, indexPattern: IndexPattern) {
@@ -69,6 +70,7 @@ export function SearchBarComponent(props: SearchBarProps) {
     http,
     initialQuery,
     indexPatternProvider,
+    confirmWipeWorkspace,
   } = props;
   const [query, setQuery] = useState<Query>({ language: 'kuery', query: initialQuery || '' });
   const [currentIndexPattern, setCurrentIndexPattern] = useState<IndexPattern | undefined>(
@@ -123,7 +125,9 @@ export function SearchBarComponent(props: SearchBarProps) {
                     className="gphSearchBar__datasourceButton"
                     data-test-subj="graphDatasourceButton"
                     onClick={() => {
-                      openSourceModal(props, onIndexPatternSelected);
+                      confirmWipeWorkspace(() => {
+                        openSourceModal(props, onIndexPatternSelected);
+                      });
                     }}
                   >
                     {currentIndexPattern
