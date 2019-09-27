@@ -131,6 +131,13 @@
         ],
       },
       {
+        groupSlug: 'moment',
+        groupName: 'moment related packages',
+        packagePatterns: [
+          '(\\b|_)moment(\\b|_)',
+        ],
+      },
+      {
         groupSlug: 'graphql',
         groupName: 'graphql related packages',
         packagePatterns: [
@@ -463,14 +470,6 @@
         packageNames: [
           'mkdirp',
           '@types/mkdirp',
-        ],
-      },
-      {
-        groupSlug: 'moment-timezone',
-        groupName: 'moment-timezone related packages',
-        packageNames: [
-          'moment-timezone',
-          '@types/moment-timezone',
         ],
       },
       {
