@@ -101,7 +101,10 @@ export async function migrateKibanaIndex({ client, log, kibanaPluginIds }) {
       error: log.error.bind(log),
     },
     version: kibanaVersion,
-    ...uiExports,
+    savedObjectSchemas: uiExports.savedObjectSchemas,
+    savedObjectMappings: uiExports.savedObjectMappings,
+    savedObjectMigrations: uiExports.savedObjectMigrations,
+    savedObjectValidations: uiExports.savedObjectValidations,
     callCluster: (path, ...args) => _.get(client, path).call(client, ...args),
   };
 

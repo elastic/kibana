@@ -22,7 +22,10 @@ import { ObjectToConfigAdapter } from './object_to_config_adapter';
 
 import { IConfigService } from './config_service';
 
-const createConfigServiceMock = () => {
+const createConfigServiceMock = ({
+  atPath = {},
+  getConfig$ = {},
+}: { atPath?: unknown; getConfig$?: Record<string, any> } = {}) => {
   const mocked: jest.Mocked<IConfigService> = {
     atPath: jest.fn(),
     getConfig$: jest.fn(),
@@ -32,8 +35,8 @@ const createConfigServiceMock = () => {
     isEnabledAtPath: jest.fn(),
     setSchema: jest.fn(),
   };
-  mocked.atPath.mockReturnValue(new BehaviorSubject({}));
-  mocked.getConfig$.mockReturnValue(new BehaviorSubject(new ObjectToConfigAdapter({})));
+  mocked.atPath.mockReturnValue(new BehaviorSubject(atPath));
+  mocked.getConfig$.mockReturnValue(new BehaviorSubject(new ObjectToConfigAdapter(getConfig$)));
   mocked.getUsedPaths.mockResolvedValue([]);
   mocked.getUnusedPaths.mockResolvedValue([]);
   mocked.isEnabledAtPath.mockResolvedValue(true);

@@ -92,7 +92,7 @@ export class SavedObjectsService
       config: coreSetup.legacy.pluginExtendedConfig,
       savedObjectsConfig,
       kibanaConfig,
-      callCluster: retryCallCluster(adminClient.callAsInternalUser.bind(adminClient)),
+      callCluster: retryCallCluster(adminClient.callAsInternalUser),
     });
 
     return ({} as any) as Promise<SavedObjectsServiceSetup>;

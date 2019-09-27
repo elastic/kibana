@@ -24,15 +24,15 @@ import { loggingServiceMock } from './logging/logging_service.mock';
 import { configServiceMock } from './config/config_service.mock';
 import { ILoggingService } from './logging';
 
-function create(
-  env?: Env,
-  logger?: jest.Mocked<ILoggingService>,
-  configService?: jest.Mocked<IConfigService>
-): CoreContext {
-  env = env || Env.createDefault(getEnvOptions());
-  logger = logger || loggingServiceMock.create();
-  configService = configService || configServiceMock.create();
-
+function create({
+  env = Env.createDefault(getEnvOptions()),
+  logger = loggingServiceMock.create(),
+  configService = configServiceMock.create(),
+}: {
+  env?: Env;
+  logger?: jest.Mocked<ILoggingService>;
+  configService?: jest.Mocked<IConfigService>;
+} = {}): CoreContext {
   return { coreId: Symbol(), env, logger, configService };
 }
 
