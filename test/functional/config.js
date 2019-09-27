@@ -24,18 +24,18 @@ export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
 
   return {
-    // testFiles: [
-    //   require.resolve('./apps/console'),
-    //   require.resolve('./apps/getting_started'),
-    //   require.resolve('./apps/context'),
-    //   require.resolve('./apps/dashboard'),
-    //   require.resolve('./apps/discover'),
-    //   require.resolve('./apps/home'),
-    //   require.resolve('./apps/management'),
-    //   require.resolve('./apps/status_page'),
-    //   require.resolve('./apps/timelion'),
-    //   require.resolve('./apps/visualize'),
-    // ],
+    testFiles: [
+      require.resolve('./apps/console'),
+      require.resolve('./apps/getting_started'),
+      require.resolve('./apps/context'),
+      require.resolve('./apps/dashboard'),
+      require.resolve('./apps/discover'),
+      require.resolve('./apps/home'),
+      require.resolve('./apps/management'),
+      require.resolve('./apps/status_page'),
+      require.resolve('./apps/timelion'),
+      require.resolve('./apps/visualize'),
+    ],
     pageObjects,
     services,
     servers: commonConfig.get('servers'),
