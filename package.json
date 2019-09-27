@@ -328,6 +328,7 @@
     "@types/mustache": "^0.8.31",
     "@types/node": "^10.12.27",
     "@types/opn": "^5.1.0",
+    "@types/pngjs": "^3.3.2",
     "@types/podium": "^1.0.0",
     "@types/prop-types": "^15.5.3",
     "@types/react": "^16.8.0",
