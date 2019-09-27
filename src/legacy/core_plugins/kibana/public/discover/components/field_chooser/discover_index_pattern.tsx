@@ -61,6 +61,14 @@ export function DiscoverIndexPattern({
     );
   }
 
+  /**
+   * catches a EuiComboBox related 'Can't perform a React state update on an unmounted component'
+   * warning in console by delaying the hiding/removal of the EuiComboBox a bit
+   */
+  function hideCombo() {
+    setTimeout(() => setShowCombo(false), 50);
+  }
+
   return (
     <EuiComboBox
       compressed={true}
@@ -68,14 +76,14 @@ export function DiscoverIndexPattern({
       data-test-subj="index-pattern-selection"
       fullWidth={true}
       isClearable={false}
-      onBlur={() => setShowCombo(false)}
+      onBlur={() => hideCombo()}
       onChange={choices => {
         const newSelected = choices[0] && findIndexPattern(choices[0].value);
         if (newSelected) {
           setSelected(newSelected);
-          setIndexPattern!(newSelected.id);
+          setIndexPattern(newSelected.id);
         }
-        setShowCombo(false);
+        hideCombo();
       }}
       inputRef={el => {
         // auto focus input element when combo box is displayed
