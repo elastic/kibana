@@ -32,7 +32,7 @@ describe('Console Proxy Route', () => {
 
   beforeEach(() => {
     request = async (method, path, response) => {
-      sandbox.stub(requestModule, 'request').callsFake(createResponseStub(response));
+      sandbox.stub(requestModule, 'sendRequest').callsFake(createResponseStub(response));
       const server = new Server();
       server.route(
         createProxyRoute({

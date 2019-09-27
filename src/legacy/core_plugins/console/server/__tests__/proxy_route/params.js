@@ -26,7 +26,7 @@ import { Server } from 'hapi';
 
 import { createProxyRoute } from '../../';
 
-import { createResponseStub, readLastHeaders } from './stubs';
+import { createResponseStub } from './stubs';
 
 describe('Console Proxy Route', () => {
   const sandbox = sinon.createSandbox();
@@ -34,7 +34,7 @@ describe('Console Proxy Route', () => {
   let setup;
 
   beforeEach(() => {
-    sandbox.stub(requestModule, 'request').callsFake(createResponseStub());
+    sandbox.stub(requestModule, 'sendRequest').callsFake(createResponseStub());
 
     setup = () => {
       const server = new Server();
@@ -83,7 +83,7 @@ describe('Console Proxy Route', () => {
           });
 
           expect(statusCode).to.be(200);
-          sinon.assert.calledOnce(requestModule.request);
+          sinon.assert.calledOnce(requestModule.sendRequest);
         });
       });
       describe('all match', () => {
@@ -102,7 +102,7 @@ describe('Console Proxy Route', () => {
           });
 
           expect(statusCode).to.be(200);
-          sinon.assert.calledOnce(requestModule.request);
+          sinon.assert.calledOnce(requestModule.sendRequest);
         });
       });
     });
@@ -155,13 +155,12 @@ describe('Console Proxy Route', () => {
           url: '/api/console/proxy?method=HEAD&path=/index/type/id',
         });
 
-        sinon.assert.calledOnce(requestModule.request);
-        const opts = requestModule.request.getCall(0).args[0];
+        sinon.assert.calledOnce(requestModule.sendRequest);
+        const opts = requestModule.sendRequest.getCall(0).args[0];
         expect(opts).to.have.property('timeout', timeout);
         expect(opts).to.have.property('agent', agent);
-        const lastHeaders = readLastHeaders();
-        expect(lastHeaders).to.have.property('foo', 'bar');
-        expect(lastHeaders).to.have.property('baz', 'bop');
+        expect(opts.headers).to.have.property('foo', 'bar');
+        expect(opts.headers).to.have.property('baz', 'bop');
       });
     });
 

@@ -26,7 +26,7 @@ import * as requestModule from '../../request';
 
 import { createProxyRoute } from '../../';
 
-import { createResponseStub, readLastHeaders } from './stubs';
+import { createResponseStub } from './stubs';
 
 describe('Console Proxy Route', () => {
   const sandbox = sinon.createSandbox();
@@ -34,7 +34,7 @@ describe('Console Proxy Route', () => {
   let setup;
 
   beforeEach(() => {
-    sandbox.stub(requestModule, 'request').callsFake(createResponseStub());
+    sandbox.stub(requestModule, 'sendRequest').callsFake(createResponseStub());
 
     setup = () => {
       const server = new Server();
@@ -77,8 +77,8 @@ describe('Console Proxy Route', () => {
 
       resp.destroy();
 
-      sinon.assert.calledOnce(requestModule.request);
-      const headers = readLastHeaders();
+      sinon.assert.calledOnce(requestModule.sendRequest);
+      const { headers } = requestModule.sendRequest.getCall(0).args[0];
       expect(headers)
         .to.have.property('x-forwarded-for')
         .and.not.be('');

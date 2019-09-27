@@ -32,7 +32,7 @@ describe('Console Proxy Route', () => {
   let request;
 
   beforeEach(() => {
-    sandbox.stub(requestModule, 'request').callsFake(createResponseStub());
+    sandbox.stub(requestModule, 'sendRequest').callsFake(createResponseStub());
 
     request = async (method, path) => {
       const server = new Server();
@@ -64,30 +64,30 @@ describe('Console Proxy Route', () => {
       describe('contains full url', () => {
         it('treats the url as a path', async () => {
           await request('GET', 'http://evil.com/test');
-          sinon.assert.calledOnce(requestModule.request);
-          const args = requestModule.request.getCall(0).args;
-          expect(args[0].uri).to.be('http://localhost:9200/http://evil.com/test?pretty=true');
+          sinon.assert.calledOnce(requestModule.sendRequest);
+          const args = requestModule.sendRequest.getCall(0).args;
+          expect(args[0].uri.href).to.be('http://localhost:9200/http://evil.com/test?pretty=true');
         });
       });
       describe('is missing', () => {
         it('returns a 400 error', async () => {
           const { statusCode } = await request('GET', undefined);
           expect(statusCode).to.be(400);
-          sinon.assert.notCalled(requestModule.request);
+          sinon.assert.notCalled(requestModule.sendRequest);
         });
       });
       describe('is empty', () => {
         it('returns a 400 error', async () => {
           const { statusCode } = await request('GET', '');
           expect(statusCode).to.be(400);
-          sinon.assert.notCalled(requestModule.request);
+          sinon.assert.notCalled(requestModule.sendRequest);
         });
       });
       describe('starts with a slash', () => {
         it('combines well with the base url', async () => {
           await request('GET', '/index/type/id');
-          sinon.assert.calledOnce(requestModule.request);
-          expect(requestModule.request.getCall(0).args[0].uri).to.be(
+          sinon.assert.calledOnce(requestModule.sendRequest);
+          expect(requestModule.sendRequest.getCall(0).args[0].uri.href).to.be(
             'http://localhost:9200/index/type/id?pretty=true'
           );
         });
@@ -95,8 +95,8 @@ describe('Console Proxy Route', () => {
       describe(`doesn't start with a slash`, () => {
         it('combines well with the base url', async () => {
           await request('GET', 'index/type/id');
-          sinon.assert.calledOnce(requestModule.request);
-          expect(requestModule.request.getCall(0).args[0].uri).to.be(
+          sinon.assert.calledOnce(requestModule.sendRequest);
+          expect(requestModule.sendRequest.getCall(0).args[0].uri.href).to.be(
             'http://localhost:9200/index/type/id?pretty=true'
           );
         });
@@ -107,29 +107,29 @@ describe('Console Proxy Route', () => {
         it('returns a 400 error', async () => {
           const { statusCode } = await request(null, '/');
           expect(statusCode).to.be(400);
-          sinon.assert.notCalled(requestModule.request);
+          sinon.assert.notCalled(requestModule.sendRequest);
         });
       });
       describe('is empty', () => {
         it('returns a 400 error', async () => {
           const { statusCode } = await request('', '/');
           expect(statusCode).to.be(400);
-          sinon.assert.notCalled(requestModule.request);
+          sinon.assert.notCalled(requestModule.sendRequest);
         });
       });
       describe('is an invalid http method', () => {
         it('returns a 400 error', async () => {
           const { statusCode } = await request('foo', '/');
           expect(statusCode).to.be(400);
-          sinon.assert.notCalled(requestModule.request);
+          sinon.assert.notCalled(requestModule.sendRequest);
         });
       });
       describe('is mixed case', () => {
         it('sends a request with the exact method', async () => {
           const { statusCode } = await request('HeAd', '/');
           expect(statusCode).to.be(200);
-          sinon.assert.calledOnce(requestModule.request);
-          expect(requestModule.request.getCall(0).args[0].method).to.be('HeAd');
+          sinon.assert.calledOnce(requestModule.sendRequest);
+          expect(requestModule.sendRequest.getCall(0).args[0].method).to.be('HeAd');
         });
       });
     });

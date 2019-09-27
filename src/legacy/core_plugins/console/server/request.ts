@@ -51,7 +51,7 @@ export const sendRequest = ({ method, headers, agent, uri, timeout, payload }: A
     method: method.toUpperCase(),
     host: uri.hostname,
     port: uri.port !== '' ? Number(uri.port) : undefined,
-    protocol: 'http:',
+    protocol: uri.protocol,
     path: `${uri.pathname}${uri.search || ''}`,
     headers: {
       ...headers,
@@ -80,11 +80,13 @@ export const sendRequest = ({ method, headers, agent, uri, timeout, payload }: A
   const onError = () => reject();
   req.once('error', onError);
 
-  const timeoutPromise = new Promise<any>((_, timeoutReject) => {
+  const timeoutPromise = new Promise<any>((timeoutResolve, timeoutReject) => {
     setTimeout(() => {
       if (!req.aborted && !req.socket) req.abort();
       if (!resolved) {
         timeoutReject(Boom.gatewayTimeout('Client request timeout'));
+      } else {
+        timeoutResolve();
       }
     }, timeout);
   });
