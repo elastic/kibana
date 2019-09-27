@@ -9,7 +9,6 @@ import JoiNamespace from 'joi';
 import { Legacy } from 'kibana';
 import moment from 'moment';
 import { resolve } from 'path';
-import { take } from 'rxjs/operators';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 
 import { APP_TITLE } from './common/constants';
@@ -126,22 +125,24 @@ export const code = (kibana: any) =>
         }).default(),
       }).default();
     },
-    async init(server: ServerFacade, options: any) {
-      const { config$ } = server.newPlatform.setup.plugins.code;
-      const currentConfig = await config$.pipe(take(1)).toPromise();
+    async init(server: ServerFacade) {
+      // @ts-ignore
+      const { config } = server.newPlatform.setup.plugins.code;
 
-      if (!options.ui.enabled) {
+      if (!config.ui.enabled) {
         return;
       }
 
-      const initializerContext = {} as PluginInitializerContext;
+      const initializerContext = {
+        config,
+      } as PluginInitializerContext;
       const coreSetup = ({
         http: { server },
       } as any) as CoreSetup;
 
       // Set up with the new platform plugin lifecycle API.
       const plugin = codePlugin(initializerContext);
-      plugin.setup(coreSetup, options);
+      plugin.setup(coreSetup);
 
       // @ts-ignore
       const kbnServer = this.kbnServer;

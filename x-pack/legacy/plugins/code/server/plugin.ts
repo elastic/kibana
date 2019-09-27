@@ -7,8 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import crypto from 'crypto';
 import * as _ from 'lodash';
-import { Observable } from 'rxjs';
-import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 
 import { XPackMainPlugin } from '../../xpack_main/xpack_main';
 import { GitOperations } from './git_operations';
@@ -57,13 +56,8 @@ import { initWorkers } from './init_workers';
 import { ClusterNodeAdapter } from './distributed/cluster/cluster_node_adapter';
 import { NodeRepositoriesService } from './distributed/cluster/node_repositories_service';
 import { initCodeUsageCollector } from './usage_collector';
-import { CodeConfig } from '.';
 
-export interface CodeSetup {
-  config$: Observable<CodeConfig>;
-}
-
-export class CodePlugin implements Plugin<CodeSetup> {
+export class CodePlugin {
   private isCodeNode = false;
 
   private gitOps: GitOperations | null = null;
@@ -81,14 +75,11 @@ export class CodePlugin implements Plugin<CodeSetup> {
     this.serverOptions = {} as ServerOptions;
   }
 
-  // TODO: options is not a valid param for the setup() api
-  // of the new platform. Will need to pass through the configs
-  // correctly in the new platform.
-  public setup(core: CoreSetup, options: any) {
+  public setup(core: CoreSetup) {
     const { server } = core.http as any;
 
     this.log = new Logger(server);
-    this.serverOptions = new ServerOptions(options, server.config());
+    this.serverOptions = new ServerOptions(this.initContext.config, server.config());
 
     const xpackMainPlugin: XPackMainPlugin = server.plugins.xpack_main;
     xpackMainPlugin.registerFeature({
@@ -120,10 +111,6 @@ export class CodePlugin implements Plugin<CodeSetup> {
         },
       },
     });
-
-    return {
-      config$: this.initContext.config.create<CodeConfig>(),
-    };
   }
 
   // TODO: CodeStart will not have the register route api.
