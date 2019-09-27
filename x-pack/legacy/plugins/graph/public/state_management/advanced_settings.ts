@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import actionCreatorFactory from 'typescript-fsa';
+import actionCreatorFactory, { Action } from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
-import { GraphState } from './store';
+import { takeLatest } from 'redux-saga/effects';
+import { GraphState, GraphStoreDependencies } from './store';
 import { AdvancedSettings } from '../types';
 import { reset } from './global';
 
@@ -31,3 +32,23 @@ export const advancedSettingsReducer = reducerWithInitialState(initialSettings)
   .build();
 
 export const settingsSelector = (state: GraphState) => state.advancedSettings;
+
+/**
+ * Saga making sure the advanced settings are always synced up to the workspace instance.
+ *
+ * Won't be necessary once the workspace is moved to redux
+ */
+export const syncSettingsSaga = ({ getWorkspace, notifyAngular }: GraphStoreDependencies) => {
+  function* syncSettings(action: Action<AdvancedSettingsState>) {
+    const workspace = getWorkspace();
+    if (!workspace) {
+      return;
+    }
+    workspace.options.exploreControls = action.payload;
+    notifyAngular();
+  }
+
+  return function*() {
+    yield takeLatest(updateSettings.match, syncSettings);
+  };
+};

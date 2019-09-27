@@ -209,6 +209,7 @@ export function savedWorkspaceToAppState(
 
   // ================== advanced settings =============================
   const advancedSettings = Object.assign(
+    {},
     defaultAdvancedSettings,
     persistedWorkspaceState.exploreControls
   );

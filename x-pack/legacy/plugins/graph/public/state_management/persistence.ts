@@ -26,7 +26,6 @@ const actionCreator = actionCreatorFactory('x-pack/graph');
 export const loadSavedWorkspace = actionCreator<GraphWorkspaceSavedObject>('LOAD_WORKSPACE');
 export const saveWorkspace = actionCreator<void>('SAVE_WORKSPACE');
 
-
 // TODO add error handling for things that could throw
 
 /**
@@ -41,100 +40,107 @@ export const loadingSaga = ({
   indexPatterns,
   notifications,
   indexPatternProvider,
-}: Pick<
-  GraphStoreDependencies,
-  'createWorkspace' | 'getWorkspace' | 'indexPatterns' | 'notifications' | 'indexPatternProvider'
->) =>
-  function*() {
-    function* deserializeWorkspace(action: Action<GraphWorkspaceSavedObject>) {
-      const selectedIndex = lookupIndexPattern(action.payload, indexPatterns);
-      if (!selectedIndex) {
-        notifications.toasts.addDanger(
-          i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
-            defaultMessage: 'Index pattern not found',
-          })
-        );
-        return;
-      }
-
-      const indexPattern = yield call(indexPatternProvider.get, selectedIndex.id);
-
-      createWorkspace(selectedIndex.attributes.title);
-
-      const { urlTemplates, advancedSettings, allFields } = savedWorkspaceToAppState(
-        action.payload,
-        indexPattern,
-        // workspace won't be null because it's created in the same call stack
-        getWorkspace()!
-      );
-
-      // put everything in the store
-      yield put(
-        updateMetaData({
-          title: action.payload.title,
-          description: action.payload.description,
-          savedObjectId: action.payload.id,
+}: GraphStoreDependencies) => {
+  function* deserializeWorkspace(action: Action<GraphWorkspaceSavedObject>) {
+    const selectedIndex = lookupIndexPattern(action.payload, indexPatterns);
+    if (!selectedIndex) {
+      notifications.toasts.addDanger(
+        i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
+          defaultMessage: 'Index pattern not found',
         })
       );
-      yield put(
-        setDatasource({
-          type: 'indexpattern',
-          id: selectedIndex.id,
-          title: selectedIndex.attributes.title,
-        })
-      );
-      yield put(loadFields(allFields));
-      yield put(updateSettings(advancedSettings));
-      yield put(loadTemplates(urlTemplates));
-
-      // workspace won't be null because it's created in the same call stack
-      getWorkspace()!.runLayout();
+      return;
     }
 
+    const indexPattern = yield call(indexPatternProvider.get, selectedIndex.id);
+    const initialSettings = settingsSelector(yield select());
+
+    createWorkspace(selectedIndex.attributes.title, initialSettings);
+
+    const { urlTemplates, advancedSettings, allFields } = savedWorkspaceToAppState(
+      action.payload,
+      indexPattern,
+      // workspace won't be null because it's created in the same call stack
+      getWorkspace()!
+    );
+
+    // put everything in the store
+    yield put(
+      updateMetaData({
+        title: action.payload.title,
+        description: action.payload.description,
+        savedObjectId: action.payload.id,
+      })
+    );
+    yield put(
+      setDatasource({
+        type: 'indexpattern',
+        id: selectedIndex.id,
+        title: selectedIndex.attributes.title,
+      })
+    );
+    yield put(loadFields(allFields));
+    yield put(updateSettings(advancedSettings));
+    yield put(loadTemplates(urlTemplates));
+
+    // workspace won't be null because it's created in the same call stack
+    getWorkspace()!.runLayout();
+  }
+
+  return function*() {
     yield takeLatest(loadSavedWorkspace.match, deserializeWorkspace);
   };
+};
 
 /**
  * Saga handling saving of current state.
  *
  * It will serialize everything and save it using the saved objects client
  */
-export const savingSaga = (deps: GraphStoreDependencies) =>
-  function*() {
-    function* persistWorkspace() {
-      const savedWorkspace = deps.getSavedWorkspace();
-      const state: GraphState = yield select();
-      const workspace = deps.getWorkspace();
-      const selectedDatasource = datasourceSelector(state).current;
-      if (!workspace || selectedDatasource.type === 'none') {
-        return;
-      }
-
-      const savedObjectId = yield cps(
-        showModal,
-        deps,
-        workspace,
-        savedWorkspace,
-        state,
-        selectedDatasource
-      );
-      if (savedObjectId) {
-        yield put(updateMetaData({ savedObjectId }));
-      }
+export const savingSaga = (deps: GraphStoreDependencies) => {
+  function* persistWorkspace() {
+    const savedWorkspace = deps.getSavedWorkspace();
+    const state: GraphState = yield select();
+    const workspace = deps.getWorkspace();
+    const selectedDatasource = datasourceSelector(state).current;
+    if (!workspace || selectedDatasource.type === 'none') {
+      return;
     }
 
+    const savedObjectId = yield cps(showModal, {
+      deps,
+      workspace,
+      savedWorkspace,
+      state,
+      selectedDatasource,
+    });
+    if (savedObjectId) {
+      yield put(updateMetaData({ savedObjectId }));
+    }
+  }
+
+  return function*() {
     yield takeLatest(saveWorkspace.match, persistWorkspace);
   };
+};
 
 function showModal(
-  deps: GraphStoreDependencies,
-  workspace: Workspace,
-  savedWorkspace: GraphWorkspaceSavedObject,
-  state: GraphState,
-  selectedDatasource: IndexpatternDatasource,
+  {
+    deps,
+    workspace,
+    savedWorkspace,
+    state,
+    selectedDatasource,
+  }: {
+    deps: GraphStoreDependencies;
+    workspace: Workspace;
+    savedWorkspace: GraphWorkspaceSavedObject;
+    state: GraphState;
+    selectedDatasource: IndexpatternDatasource;
+  },
   savingCallback: (error: unknown, id?: string) => void
 ) {
-  const saveWorkspace: SaveWorkspaceHandler = async (
+  const saveWorkspaceHandler: SaveWorkspaceHandler = async (
     saveOptions,
     userHasConfirmedSaveWorkspaceData
   ) => {
@@ -182,6 +188,6 @@ function showModal(
     hasData: workspace.nodes.length > 0 || workspace.blacklistedNodes.length > 0,
     workspace: savedWorkspace,
     showSaveModal: deps.showSaveModal,
-    saveWorkspace,
+    saveWorkspace: saveWorkspaceHandler,
   });
 }

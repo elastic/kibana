@@ -6,13 +6,14 @@
 
 import actionCreatorFactory, { Action } from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
-import { takeLatest, put, call } from 'redux-saga/effects';
+import { takeLatest, put, call, select } from 'redux-saga/effects';
 import { i18n } from '@kbn/i18n';
+import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { GraphState, GraphStoreDependencies } from './store';
 import { reset } from './global';
 import { loadFields } from './fields';
 import { mapFields } from '../services/persistence';
-import { IndexPattern } from 'src/legacy/core_plugins/data/public';
+import { settingsSelector } from './advanced_settings';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/datasource');
 
@@ -72,31 +73,33 @@ export const datasourceSelector = (state: GraphState) => state.datasource;
 /**
  * Saga loading field information when the datasource is switched. This will overwrite current settings
  * in fields.
- * 
+ *
  * TODO: Carry over fields than can be carried over because they also exist in the target index pattern
  */
 export const datasourceSaga = ({
   indexPatternProvider,
   notifications,
-  createWorkspace
-}: GraphStoreDependencies) =>
-  function*() {
-    function* fetchFields(action: Action<IndexpatternDatasource>) {
-      try {
-        const indexPattern: IndexPattern = yield call(indexPatternProvider.get, action.payload.id);
-        yield put(loadFields(mapFields(indexPattern)));
-        yield put(datasourceLoaded());
-        createWorkspace(indexPattern.title);
-      } catch (e) {
-        // in case of errors, reset the datasource and show notification
-        yield put(setDatasource({ type: 'none' }));
-        notifications.toasts.addDanger(
-          i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
-            defaultMessage: 'Index pattern not found',
-          })
-        );
-      }
+  createWorkspace,
+}: GraphStoreDependencies) => {
+  function* fetchFields(action: Action<IndexpatternDatasource>) {
+    try {
+      const indexPattern: IndexPattern = yield call(indexPatternProvider.get, action.payload.id);
+      yield put(loadFields(mapFields(indexPattern)));
+      yield put(datasourceLoaded());
+      const advancedSettings = settingsSelector(yield select());
+      createWorkspace(indexPattern.title, advancedSettings);
+    } catch (e) {
+      // in case of errors, reset the datasource and show notification
+      yield put(setDatasource({ type: 'none' }));
+      notifications.toasts.addDanger(
+        i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
+          defaultMessage: 'Index pattern not found',
+        })
+      );
     }
+  }
 
+  return function*() {
     yield takeLatest(requestDatasource.match, fetchFields);
   };
+};

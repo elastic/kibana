@@ -10,13 +10,13 @@ import { GraphWorkspaceSavedObject, GraphSavePolicy } from '../types';
 import { SaveModal, OnSaveGraphProps } from '../components/save_modal';
 
 export type SaveWorkspaceHandler = (
-    saveOptions: {
-      confirmOverwrite: boolean;
-      isTitleDuplicateConfirmed: boolean;
-      onTitleDuplicate: () => void;
-    },
-    dataConsent: boolean
-  ) => Promise<SaveResult>;
+  saveOptions: {
+    confirmOverwrite: boolean;
+    isTitleDuplicateConfirmed: boolean;
+    onTitleDuplicate: () => void;
+  },
+  dataConsent: boolean
+) => Promise<SaveResult>;
 
 export function openSaveModal({
   savePolicy,

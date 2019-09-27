@@ -8,7 +8,7 @@ import actionCreatorFactory, { Action } from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { createSelector } from 'reselect';
 import { select, takeLatest } from 'redux-saga/effects';
-import { WorkspaceField  } from '../types';
+import { WorkspaceField } from '../types';
 import { GraphState, GraphStoreDependencies } from './store';
 import { reset } from './global';
 import { setDatasource } from './datasource';
@@ -63,6 +63,24 @@ export const liveResponseFieldsSelector = createSelector(
   selectedFieldsSelector,
   fields => fields.filter(field => field.hopSize && field.hopSize > 0)
 );
+export const hasFieldsSelector = createSelector(
+  selectedFieldsSelector,
+  fields => fields.length > 0
+);
+
+/**
+ * Saga making notifying angular when fields are selected to re-calculate the state of the save button.
+ *
+ * Won't be necessary once the workspace is moved to redux
+ */
+export const updateSaveButtonSaga = ({ notifyAngular }: GraphStoreDependencies) => {
+  function* notify() {
+    notifyAngular();
+  }
+  return function*() {
+    yield takeLatest(matchesOne(selectField, deselectField), notify);
+  };
+};
 
 /**
  * Saga making sure the fields in the store are always synced with the fields
@@ -70,20 +88,20 @@ export const liveResponseFieldsSelector = createSelector(
  *
  * Won't be necessary once the workspace is moved to redux
  */
-export const syncFieldsSaga = ({ getWorkspace }: Pick<GraphStoreDependencies, 'getWorkspace'>) =>
-  function*() {
-    function* syncFields() {
-      const workspace = getWorkspace();
-      if (!workspace) {
-        return;
-      }
-
-      const selectedFields = selectedFieldsSelector(yield select());
-      workspace.options.vertex_fields = selectedFields;
+export const syncFieldsSaga = ({ getWorkspace }: GraphStoreDependencies) => {
+  function* syncFields() {
+    const workspace = getWorkspace();
+    if (!workspace) {
+      return;
     }
 
+    const selectedFields = selectedFieldsSelector(yield select());
+    workspace.options.vertex_fields = selectedFields;
+  }
+  return function*() {
     yield takeLatest(matchesOne(loadFields, selectField, deselectField), syncFields);
   };
+};
 
 /**
  * Saga making sure the field styles (icons and colors) are applied to nodes currently active
@@ -91,35 +109,36 @@ export const syncFieldsSaga = ({ getWorkspace }: Pick<GraphStoreDependencies, 'g
  *
  * Won't be necessary once the workspace is moved to redux
  */
-export const syncNodeStyleSaga = ({ getWorkspace, notifyAngular }: GraphStoreDependencies) =>
-  function*() {
-    function* syncNodeStyle(action: Action<InferActionType<typeof updateFieldProperties>>) {
-      const workspace = getWorkspace();
-      if (!workspace) {
-        return;
-      }
-      const newColor = action.payload.fieldProperties.color;
-      if (newColor) {
-        workspace.nodes.forEach(function(node) {
-          if (node.data.field === action.payload.fieldName) {
-            node.color = newColor;
-          }
-        });
-      }
-      const newIcon = action.payload.fieldProperties.icon;
-
-      if (newIcon) {
-        workspace.nodes.forEach(function(node) {
-          if (node.data.field === action.payload.fieldName) {
-            node.icon = newIcon;
-          }
-        });
-      }
-      notifyAngular();
-
-      const selectedFields = selectedFieldsSelector(yield select());
-      workspace.options.vertex_fields = selectedFields;
+export const syncNodeStyleSaga = ({ getWorkspace, notifyAngular }: GraphStoreDependencies) => {
+  function* syncNodeStyle(action: Action<InferActionType<typeof updateFieldProperties>>) {
+    const workspace = getWorkspace();
+    if (!workspace) {
+      return;
     }
+    const newColor = action.payload.fieldProperties.color;
+    if (newColor) {
+      workspace.nodes.forEach(function(node) {
+        if (node.data.field === action.payload.fieldName) {
+          node.color = newColor;
+        }
+      });
+    }
+    const newIcon = action.payload.fieldProperties.icon;
 
+    if (newIcon) {
+      workspace.nodes.forEach(function(node) {
+        if (node.data.field === action.payload.fieldName) {
+          node.icon = newIcon;
+        }
+      });
+    }
+    notifyAngular();
+
+    const selectedFields = selectedFieldsSelector(yield select());
+    workspace.options.vertex_fields = selectedFields;
+  }
+
+  return function*() {
     yield takeLatest(updateFieldProperties.match, syncNodeStyle);
   };
+};

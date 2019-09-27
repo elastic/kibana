@@ -154,7 +154,7 @@ export const SearchBar = connect(
   (state: GraphState) => {
     const datasource = datasourceSelector(state);
     return {
-      currentIndexPattern:
+      currentDatasource:
         datasource.current.type === 'indexpattern' ? datasource.current : undefined,
     };
   },

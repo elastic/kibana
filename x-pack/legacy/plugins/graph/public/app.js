@@ -8,8 +8,8 @@ import _ from 'lodash';
 import d3 from 'd3';
 import { i18n } from '@kbn/i18n';
 import 'ace';
-import rison from 'rison-node';
 import React from 'react';
+import { Provider } from 'react-redux';
 
 // import the uiExports that we want to "use"
 import 'uiExports/fieldFormats';
@@ -50,7 +50,7 @@ import gws from './angular/graph_client_workspace.js';
 import { SavedWorkspacesProvider } from './angular/services/saved_workspaces';
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
 import { openSourceModal } from './services/source_modal';
-import { createCachedIndexPatterProvider } from './services/index_pattern_cache';
+import { createCachedIndexPatternProvider } from './services/index_pattern_cache';
 import { urlTemplateRegex } from  './helpers/url_template';
 import {
   asAngularSyncedObservable,
@@ -62,7 +62,8 @@ import {
   requestDatasource,
   datasourceSelector,
   selectedFieldsSelector,
-  liveResponseFieldsSelector
+  liveResponseFieldsSelector,
+  hasFieldsSelector
 } from './state_management';
 
 import './angular/directives/graph_inspect';
@@ -102,6 +103,7 @@ app.directive('graphApp', function (reactDirective) {
   return reactDirective(GraphApp, [
     ['store', { watchDepth: 'reference' }],
     ['currentIndexPattern', { watchDepth: 'reference' }],
+    ['indexPatternProvider', { watchDepth: 'reference' }],
     ['isLoading', { watchDepth: 'reference' }],
     ['onIndexPatternSelected', { watchDepth: 'reference' }],
     ['onQuerySubmit', { watchDepth: 'reference' }],
@@ -227,21 +229,6 @@ app.controller('graphuiPlugin', function (
       });
   }
 
-  function updateBreadcrumbs() {
-    setBreadcrumbs({
-      chrome,
-      savedWorkspace: $route.current.locals.savedWorkspace,
-      navigateTo: () => {
-        // TODO this should be wrapped into canWipeWorkspace,
-        // but the check is too simple right now. Change this
-        // once actual state-diffing is in place.
-        $scope.$evalAsync(() => {
-          kbnUrl.changePath(getHomePath());
-        });
-      }
-    });
-  }
-
   // Replacement function for graphClientWorkspace's comms so
   // that it works with Kibana.
   function callNodeProxy(indexName, query, responseHandler) {
@@ -285,13 +272,13 @@ app.controller('graphuiPlugin', function (
       });
   };
 
-  $scope.indexPatternProvider = createCachedIndexPatterProvider($route.current.locals.GetIndexPatternProvider.get);
+  $scope.indexPatternProvider = createCachedIndexPatternProvider($route.current.locals.GetIndexPatternProvider.get);
 
   const store = createGraphStore({
     basePath: chrome.getBasePath(),
     indexPatternProvider: $scope.indexPatternProvider,
     indexPatterns: $route.current.locals.indexPatterns,
-    createWorkspace: (indexPattern) => {
+    createWorkspace: (indexPattern, exploreControls) => {
       const options = {
         indexName: indexPattern,
         vertex_fields: [],
@@ -305,14 +292,7 @@ app.controller('graphuiPlugin', function (
         },
         graphExploreProxy: callNodeProxy,
         searchProxy: callSearchNodeProxy,
-        exploreControls: {
-          useSignificance: true,
-          sampleSize: 2000,
-          timeoutMillis: 5000,
-          sampleDiversityField: null,
-          maxValuesPerDoc: 1,
-          minDocCount: 3
-        }
+        exploreControls,
       };
       $scope.workspace = gws.createWorkspace(options);
     },
@@ -332,7 +312,8 @@ app.controller('graphuiPlugin', function (
     },
     notifyAngular: () => {
       $scope.$digest();
-    }
+    },
+    chrome
   });
 
   $scope.spymode = 'request';
@@ -556,7 +537,7 @@ app.controller('graphuiPlugin', function (
         }
       },
       disableButton: function () {
-        return allSavingDisabled || selectedFieldsSelector(store.getState());
+        return allSavingDisabled || !hasFieldsSelector(store.getState());
       },
       run: () => {
         store.dispatch({
@@ -585,7 +566,6 @@ app.controller('graphuiPlugin', function (
     },
   });
 
-  let currentSettingsFlyout;
   $scope.topNavMenu.push({
     key: 'settings',
     disableButton: function () { return datasourceSelector(store.getState()).type === 'none'; },
@@ -596,39 +576,24 @@ app.controller('graphuiPlugin', function (
       defaultMessage: 'Settings',
     }),
     run: () => {
-      if (currentSettingsFlyout) {
-        currentSettingsFlyout.close();
-        return;
-      }
       const settingsObservable = asAngularSyncedObservable(() => ({
-        advancedSettings: { ...$scope.exploreControls },
-        updateAdvancedSettings: (updatedSettings) => {
-          $scope.exploreControls = updatedSettings;
-          if ($scope.workspace) {
-            $scope.workspace.options.exploreControls = updatedSettings;
-          }
-        },
         blacklistedNodes: $scope.workspace ? [...$scope.workspace.blacklistedNodes] : undefined,
         unblacklistNode: $scope.workspace ? $scope.workspace.unblacklist : undefined,
-        urlTemplates: [...$scope.urlTemplates],
-        removeUrlTemplate: $scope.removeUrlTemplate,
-        saveUrlTemplate: $scope.saveUrlTemplate,
-        allFields: [...$scope.allFields],
         canEditDrillDownUrls: chrome.getInjected('canEditDrillDownUrls')
       }), $scope.$digest.bind($scope));
-      currentSettingsFlyout = npStart.core.overlays.openFlyout(<Settings observable={settingsObservable} />, {
-        size: 'm',
-        closeButtonAriaLabel: i18n.translate('xpack.graph.settings.closeLabel', { defaultMessage: 'Close' }),
-        'data-test-subj': 'graphSettingsFlyout',
-        ownFocus: true,
-        className: 'gphSettingsFlyout',
-        maxWidth: 520,
-      });
-      currentSettingsFlyout.onClose.then(() => { currentSettingsFlyout = null; });
+      npStart.core.overlays.openFlyout(
+        <Provider store={store}>
+          <Settings observable={settingsObservable} />
+        </Provider>, {
+          size: 'm',
+          closeButtonAriaLabel: i18n.translate('xpack.graph.settings.closeLabel', { defaultMessage: 'Close' }),
+          'data-test-subj': 'graphSettingsFlyout',
+          ownFocus: true,
+          className: 'gphSettingsFlyout',
+          maxWidth: 520,
+        });
     },
   });
-
-  updateBreadcrumbs();
 
   $scope.menus = {
     showSettings: false,

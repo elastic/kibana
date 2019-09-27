@@ -7,13 +7,31 @@
 import createSagaMiddleware from 'redux-saga';
 import { combineReducers, createStore, Store, AnyAction, Dispatch, applyMiddleware } from 'redux';
 import { CoreStart } from 'src/core/public';
-import { fieldsReducer, FieldsState, syncNodeStyleSaga, syncFieldsSaga } from './fields';
+import { Chrome } from 'ui/chrome';
+import {
+  fieldsReducer,
+  FieldsState,
+  syncNodeStyleSaga,
+  syncFieldsSaga,
+  updateSaveButtonSaga,
+} from './fields';
 import { UrlTemplatesState, urlTemplatesReducer } from './url_templates';
-import { AdvancedSettingsState, advancedSettingsReducer } from './advanced_settings';
+import {
+  AdvancedSettingsState,
+  advancedSettingsReducer,
+  syncSettingsSaga,
+} from './advanced_settings';
 import { DatasourceState, datasourceReducer, datasourceSaga } from './datasource';
-import { IndexPatternProvider, Workspace, IndexPatternSavedObject, GraphSavePolicy, GraphWorkspaceSavedObject } from '../types';
+import {
+  IndexPatternProvider,
+  Workspace,
+  IndexPatternSavedObject,
+  GraphSavePolicy,
+  GraphWorkspaceSavedObject,
+  AdvancedSettings,
+} from '../types';
 import { loadingSaga, savingSaga } from './persistence';
-import { metaDataReducer, MetaDataState } from './meta_data';
+import { metaDataReducer, MetaDataState, syncBreadcrumbSaga } from './meta_data';
 
 export interface GraphState {
   fields: FieldsState;
@@ -27,7 +45,7 @@ export interface GraphStoreDependencies {
   basePath: string;
   indexPatternProvider: IndexPatternProvider;
   indexPatterns: IndexPatternSavedObject[];
-  createWorkspace: (index: string) => void;
+  createWorkspace: (index: string, advancedSettings: AdvancedSettings) => void;
   getWorkspace: () => Workspace | null;
   getSavedWorkspace: () => GraphWorkspaceSavedObject;
   notifications: CoreStart['notifications'];
@@ -35,6 +53,7 @@ export interface GraphStoreDependencies {
   savePolicy: GraphSavePolicy;
   changeUrl: (newUrl: string) => void;
   notifyAngular: () => void;
+  chrome: Chrome;
 }
 
 export const createGraphStore = (deps: GraphStoreDependencies) => {
@@ -57,6 +76,9 @@ export const createGraphStore = (deps: GraphStoreDependencies) => {
   sagaMiddleware.run(savingSaga(deps));
   sagaMiddleware.run(syncFieldsSaga(deps));
   sagaMiddleware.run(syncNodeStyleSaga(deps));
+  sagaMiddleware.run(syncSettingsSaga(deps));
+  sagaMiddleware.run(updateSaveButtonSaga(deps));
+  sagaMiddleware.run(syncBreadcrumbSaga(deps));
 
   return store;
 };
