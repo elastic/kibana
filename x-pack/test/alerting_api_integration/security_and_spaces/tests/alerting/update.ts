@@ -66,7 +66,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 enabled: true,
                 updatedBy: user.username,
                 apiKeyOwner: user.username,
-                muted: false,
+                muteAll: false,
                 mutedInstanceIds: [],
                 scheduledTaskId: createdAlert.scheduledTaskId,
               });

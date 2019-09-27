@@ -64,7 +64,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 throttle: '1m',
                 updatedBy: user.username,
                 apiKeyOwner: user.username,
-                muted: false,
+                muteAll: false,
                 mutedInstanceIds: [],
               });
               expect(typeof response.body.scheduledTaskId).to.be('string');

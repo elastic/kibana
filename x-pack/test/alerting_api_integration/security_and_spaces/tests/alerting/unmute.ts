@@ -59,7 +59,7 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.muted).to.eql(false);
+              expect(updatedAlert.muteAll).to.eql(false);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

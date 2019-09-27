@@ -60,7 +60,7 @@ interface CreateOptions {
     Alert,
     Exclude<
       keyof Alert,
-      'createdBy' | 'updatedBy' | 'apiKey' | 'apiKeyOwner' | 'muted' | 'mutedInstanceIds'
+      'createdBy' | 'updatedBy' | 'apiKey' | 'apiKeyOwner' | 'muteAll' | 'mutedInstanceIds'
     >
   >;
   options?: {
@@ -122,7 +122,7 @@ export class AlertsClient {
         ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
         : undefined,
       alertTypeParams: validatedAlertTypeParams,
-      muted: false,
+      muteAll: false,
       mutedInstanceIds: [],
     });
     const createdAlert = await this.savedObjectsClient.create('alert', rawAlert, {
@@ -309,14 +309,14 @@ export class AlertsClient {
   public async mute({ id }: { id: string }) {
     const {
       references,
-      attributes: { muted },
+      attributes: { muteAll },
     } = await this.savedObjectsClient.get('alert', id);
-    if (!muted) {
+    if (!muteAll) {
       await this.savedObjectsClient.update(
         'alert',
         id,
         {
-          muted: true,
+          muteAll: true,
           mutedInstanceIds: [],
           updatedBy: await this.getUserName(),
         },
@@ -328,14 +328,14 @@ export class AlertsClient {
   public async unmute({ id }: { id: string }) {
     const {
       references,
-      attributes: { muted },
+      attributes: { muteAll },
     } = await this.savedObjectsClient.get('alert', id);
-    if (muted) {
+    if (muteAll) {
       await this.savedObjectsClient.update(
         'alert',
         id,
         {
-          muted: false,
+          muteAll: false,
           mutedInstanceIds: [],
           updatedBy: await this.getUserName(),
         },
@@ -353,7 +353,7 @@ export class AlertsClient {
   }) {
     const existingObject = await this.savedObjectsClient.get('alert', alertId);
     const mutedInstanceIds = existingObject.attributes.mutedInstanceIds || [];
-    if (!existingObject.attributes.muted && !mutedInstanceIds.includes(alertInstanceId)) {
+    if (!existingObject.attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
       mutedInstanceIds.push(alertInstanceId);
       await this.savedObjectsClient.update(
         'alert',
@@ -379,7 +379,7 @@ export class AlertsClient {
   }) {
     const existingObject = await this.savedObjectsClient.get('alert', alertId);
     const mutedInstanceIds = existingObject.attributes.mutedInstanceIds || [];
-    if (!existingObject.attributes.muted && mutedInstanceIds.includes(alertInstanceId)) {
+    if (!existingObject.attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
       await this.savedObjectsClient.update(
         'alert',
         alertId,

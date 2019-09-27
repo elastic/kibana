@@ -45,7 +45,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         scheduledTaskId: response.body.scheduledTaskId,
         updatedBy: null,
         throttle: '1m',
-        muted: false,
+        muteAll: false,
         mutedInstanceIds: [],
       });
       expect(typeof response.body.scheduledTaskId).to.be('string');

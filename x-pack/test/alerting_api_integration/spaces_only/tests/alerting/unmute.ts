@@ -34,7 +34,7 @@ export default function createUnmuteTests({ getService }: FtrProviderContext) {
         .get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .expect(200);
-      expect(updatedAlert.muted).to.eql(false);
+      expect(updatedAlert.muteAll).to.eql(false);
     });
   });
 }

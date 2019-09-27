@@ -42,7 +42,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         scheduledTaskId: response.body.scheduledTaskId,
         updatedBy: null,
         throttle: '1m',
-        muted: false,
+        muteAll: false,
         mutedInstanceIds: [],
       });
     });

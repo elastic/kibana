@@ -150,31 +150,31 @@ describe('create()', () => {
     expect(savedObjectsClient.create.mock.calls[0]).toHaveLength(3);
     expect(savedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
     expect(savedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
-            Object {
-              "actions": Array [
-                Object {
-                  "actionRef": "action_0",
-                  "group": "default",
-                  "params": Object {
-                    "foo": true,
-                  },
-                },
-              ],
-              "alertTypeId": "123",
-              "alertTypeParams": Object {
-                "bar": true,
-              },
-              "apiKey": undefined,
-              "apiKeyOwner": undefined,
-              "createdBy": "elastic",
-              "enabled": true,
-              "interval": "10s",
-              "muted": false,
-              "mutedInstanceIds": Array [],
-              "throttle": null,
-              "updatedBy": "elastic",
-            }
-        `);
+      Object {
+        "actions": Array [
+          Object {
+            "actionRef": "action_0",
+            "group": "default",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "alertTypeId": "123",
+        "alertTypeParams": Object {
+          "bar": true,
+        },
+        "apiKey": undefined,
+        "apiKeyOwner": undefined,
+        "createdBy": "elastic",
+        "enabled": true,
+        "interval": "10s",
+        "muteAll": false,
+        "mutedInstanceIds": Array [],
+        "throttle": null,
+        "updatedBy": "elastic",
+      }
+    `);
     expect(savedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
                                                                                                                   Object {
                                                                                                                     "references": Array [
@@ -528,7 +528,7 @@ describe('create()', () => {
         enabled: true,
         interval: '10s',
         throttle: null,
-        muted: false,
+        muteAll: false,
         mutedInstanceIds: [],
       },
       {
@@ -744,7 +744,7 @@ describe('mute()', () => {
       id: '1',
       type: 'alert',
       attributes: {
-        muted: false,
+        muteAll: false,
       },
       references: [],
     });
@@ -753,7 +753,7 @@ describe('mute()', () => {
     expect(savedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
-      { muted: true, mutedInstanceIds: [], updatedBy: 'elastic' },
+      { muteAll: true, mutedInstanceIds: [], updatedBy: 'elastic' },
       { references: [] }
     );
   });
@@ -764,7 +764,7 @@ describe('mute()', () => {
       id: '1',
       type: 'alert',
       attributes: {
-        muted: true,
+        muteAll: true,
       },
       references: [],
     });
@@ -781,7 +781,7 @@ describe('unmute()', () => {
       id: '1',
       type: 'alert',
       attributes: {
-        muted: true,
+        muteAll: true,
       },
       references: [],
     });
@@ -790,7 +790,7 @@ describe('unmute()', () => {
     expect(savedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
-      { muted: false, mutedInstanceIds: [], updatedBy: 'elastic' },
+      { muteAll: false, mutedInstanceIds: [], updatedBy: 'elastic' },
       { references: [] }
     );
   });
@@ -801,7 +801,7 @@ describe('unmute()', () => {
       id: '1',
       type: 'alert',
       attributes: {
-        muted: false,
+        muteAll: false,
       },
       references: [],
     });
@@ -869,7 +869,7 @@ describe('muteInstance()', () => {
         enabled: true,
         scheduledTaskId: 'task-123',
         mutedInstanceIds: [],
-        muted: true,
+        muteAll: true,
       },
       references: [],
     });
@@ -937,7 +937,7 @@ describe('unmuteInstance()', () => {
         enabled: true,
         scheduledTaskId: 'task-123',
         mutedInstanceIds: [],
-        muted: true,
+        muteAll: true,
       },
       references: [],
     });
