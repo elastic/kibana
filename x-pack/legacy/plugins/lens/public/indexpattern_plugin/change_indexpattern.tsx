@@ -74,7 +74,7 @@ export function ChangeIndexPattern({
         panelPaddingSize="s"
         ownFocus
       >
-        <div style={{ minWidth: 300 }}>
+        <div style={{ width: 320 }}>
           <EuiSelectable
             {...selectableProps}
             searchable
