@@ -17,26 +17,31 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { trunc } from 'lodash';
+import { FieldFormat } from '../../../../../../plugins/data/common/';
 
 const omission = '...';
 
-export function createTruncateFormat(FieldFormat) {
-  return class TruncateFormat extends FieldFormat {
-    _convert(val) {
-      const length = this.param('fieldLength');
+export function createTruncateFormat(BaseFieldFormat: typeof FieldFormat) {
+  class TruncateFormat extends BaseFieldFormat {
+    static id = 'truncate';
+    static title = 'Truncated String';
+    static fieldType = ['string'];
+  }
+
+  TruncateFormat.prototype._convert = {
+    text(val: any) {
+      const length = this.param('fieldLength') as any;
       if (length > 0) {
-        return _.trunc(val, {
-          'length': length + omission.length,
-          'omission': omission
+        return trunc(val, {
+          length: length + omission.length,
+          omission,
         });
       }
 
       return val;
-    }
-
-    static id = 'truncate';
-    static title = 'Truncated String';
-    static fieldType = ['string'];
+    },
   };
+
+  return TruncateFormat;
 }

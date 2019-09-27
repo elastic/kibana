@@ -22,10 +22,10 @@ import { IFieldFormat, FieldFormatConvert, TextContextTypeConvert } from '../typ
 
 import { asPrettyString } from '../utils';
 
-const CONTEXT_TYPE = 'text';
+export const TEXT_CONTEXT_TYPE = 'text';
 
 const getConvertFn = (fieldFormatConvert: FieldFormatConvert): TextContextTypeConvert =>
-  (fieldFormatConvert[CONTEXT_TYPE] || asPrettyString) as TextContextTypeConvert;
+  (fieldFormatConvert[TEXT_CONTEXT_TYPE] || asPrettyString) as TextContextTypeConvert;
 
 export const setup = (
   format: IFieldFormat,
@@ -42,5 +42,5 @@ export const setup = (
     return JSON.stringify(value.map(recurse));
   };
 
-  return { [CONTEXT_TYPE]: recurse };
+  return { [TEXT_CONTEXT_TYPE]: recurse };
 };

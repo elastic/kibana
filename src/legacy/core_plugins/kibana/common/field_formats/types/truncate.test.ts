@@ -17,35 +17,33 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { createTruncateFormat } from '../truncate';
-import { FieldFormat } from '../../../../../../../plugins/data/common/field_formats';
+import { createTruncateFormat } from './truncate';
+import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
 
 const TruncateFormat = createTruncateFormat(FieldFormat);
 
-describe('String TruncateFormat', function () {
-
-  it('truncate large string', function () {
+describe('String TruncateFormat', function() {
+  test('truncate large string', function() {
     const truncate = new TruncateFormat({ fieldLength: 4 });
 
-    expect(truncate.convert('This is some text')).to.be('This...');
+    expect(truncate.convert('This is some text')).toBe('This...');
   });
 
-  it('does not truncate large string when field length is not a string', function () {
+  test('does not truncate large string when field length is not a string', function() {
     const truncate = new TruncateFormat({ fieldLength: 'not number' });
 
-    expect(truncate.convert('This is some text')).to.be('This is some text');
+    expect(truncate.convert('This is some text')).toBe('This is some text');
   });
 
-  it('does not truncate large string when field length is null', function () {
+  test('does not truncate large string when field length is null', function() {
     const truncate = new TruncateFormat({ fieldLength: null });
 
-    expect(truncate.convert('This is some text')).to.be('This is some text');
+    expect(truncate.convert('This is some text')).toBe('This is some text');
   });
 
-  it('does not truncate large string when field length larger than the text', function () {
+  test('does not truncate large string when field length larger than the text', function() {
     const truncate = new TruncateFormat({ fieldLength: 100000 });
 
-    expect(truncate.convert('This is some text')).to.be('This is some text');
+    expect(truncate.convert('This is some text')).toBe('This is some text');
   });
 });

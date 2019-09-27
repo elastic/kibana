@@ -21,9 +21,9 @@ import { isFunction, transform, size, cloneDeep, get, defaults } from 'lodash';
 import { createCustomFieldFormat } from './converters/custom';
 import { ContentType, FieldFormatConvert, FieldFormatConvertFunction } from './types';
 
-import { htmlContentTypeSetup, textContentTypeSetup } from './content_types';
+import { htmlContentTypeSetup, textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types';
 
-const DEFAULT_CONTEXT_TYPE = 'text';
+const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
 
 export abstract class FieldFormat {
   /**
