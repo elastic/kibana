@@ -151,6 +151,7 @@ const FlyoutPaneComponent = React.memo<Props>(
               <TimelineResizeHandle data-test-subj="flyout-resize-handle" height={flyoutHeight} />
             }
             id={timelineId}
+            height={`${flyoutHeight}`}
             onResize={onResize}
             render={renderFlyout}
           />
