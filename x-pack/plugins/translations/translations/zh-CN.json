@@ -4553,7 +4553,6 @@
     "xpack.graph.savedWorkspace.workspaceNameTitle": "新建 Graph 工作空间",
     "xpack.graph.savedWorkspaces.graphWorkspaceLabel": "Graph 工作空间",
     "xpack.graph.savedWorkspaces.graphWorkspacesLabel": "Graph 工作空间",
-    "xpack.graph.saveWorkspace.disabledWarning": "已禁用保存",
     "xpack.graph.saveWorkspace.successNotification.noDataSavedText": "配置会被保存，但不保存数据",
     "xpack.graph.saveWorkspace.successNotificationTitle": "已保存“{workspaceTitle}”",
     "xpack.graph.serverSideErrors.expiredLicenseErrorMessage": "Graph 不可用 - 许可已过期。",
