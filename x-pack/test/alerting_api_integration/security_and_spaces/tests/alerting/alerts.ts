@@ -568,7 +568,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'superuser at space1':
-              await alertUtils.mute(response.body.id);
+              await alertUtils.muteAll(response.body.id);
               await alertUtils.enable(response.body.id);
               // Wait until alerts schedule actions twice to ensure actions had a chance to skip execution once
               await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
@@ -645,8 +645,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'superuser at space1':
               await alertUtils.muteInstance(response.body.id, '1');
-              await alertUtils.mute(response.body.id);
-              await alertUtils.unmute(response.body.id);
+              await alertUtils.muteAll(response.body.id);
+              await alertUtils.unmuteAll(response.body.id);
               await alertUtils.enable(response.body.id);
               // Wait until alerts scheduled actions twice to ensure actions had a chance to execute once
               await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);

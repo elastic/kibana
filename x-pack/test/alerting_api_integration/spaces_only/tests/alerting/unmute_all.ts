@@ -27,8 +27,8 @@ export default function createUnmuteTests({ getService }: FtrProviderContext) {
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
 
-      await alertUtils.mute(createdAlert.id);
-      await alertUtils.unmute(createdAlert.id);
+      await alertUtils.muteAll(createdAlert.id);
+      await alertUtils.unmuteAll(createdAlert.id);
 
       const { body: updatedAlert } = await supertestWithoutAuth
         .get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}`)

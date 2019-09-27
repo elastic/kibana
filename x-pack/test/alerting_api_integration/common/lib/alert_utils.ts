@@ -72,7 +72,7 @@ export class AlertUtils {
     return request;
   }
 
-  public getMuteRequest(alertId: string) {
+  public getMuteAllRequest(alertId: string) {
     const request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}/_mute_all`)
       .set('kbn-xsrf', 'foo');
@@ -82,7 +82,7 @@ export class AlertUtils {
     return request;
   }
 
-  public getUnmuteRequest(alertId: string) {
+  public getUnmuteAllRequest(alertId: string) {
     const request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}/_unmute_all`)
       .set('kbn-xsrf', 'foo');
@@ -134,12 +134,12 @@ export class AlertUtils {
     await this.getDisableRequest(alertId).expect(204, '');
   }
 
-  public async mute(alertId: string) {
-    await this.getMuteRequest(alertId).expect(204, '');
+  public async muteAll(alertId: string) {
+    await this.getMuteAllRequest(alertId).expect(204, '');
   }
 
-  public async unmute(alertId: string) {
-    await this.getUnmuteRequest(alertId).expect(204, '');
+  public async unmuteAll(alertId: string) {
+    await this.getUnmuteAllRequest(alertId).expect(204, '');
   }
 
   public async muteInstance(alertId: string, instanceId: string) {

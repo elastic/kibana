@@ -32,7 +32,7 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'alert');
 
-          const response = await alertUtils.getMuteRequest(createdAlert.id);
+          const response = await alertUtils.getMuteAllRequest(createdAlert.id);
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':

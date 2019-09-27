@@ -37,7 +37,7 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
             .set('kbn-xsrf', 'foo')
             .expect(204, '');
 
-          const response = await alertUtils.getUnmuteRequest(createdAlert.id);
+          const response = await alertUtils.getUnmuteAllRequest(createdAlert.id);
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
