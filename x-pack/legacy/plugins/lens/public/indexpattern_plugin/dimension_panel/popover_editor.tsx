@@ -22,12 +22,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import {
-  IndexPatternColumn,
-  OperationType,
-  IndexPattern,
-  IndexPatternField,
-} from '../indexpattern';
+import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { IndexPatternDimensionPanelProps, OperationFieldSupportMatrix } from './dimension_panel';
 import {
   operationDefinitionMap,
@@ -39,6 +34,7 @@ import { deleteColumn, changeColumn } from '../state_helpers';
 import { FieldSelect } from './field_select';
 import { hasField } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
+import { IndexPattern, IndexPatternField } from '../types';
 
 const operationPanels = getOperationDisplay();
 

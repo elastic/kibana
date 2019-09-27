@@ -5,9 +5,9 @@
  */
 
 import _ from 'lodash';
-
-import { IndexPatternPrivateState, IndexPatternColumn, IndexPattern } from './indexpattern';
+import { IndexPatternColumn } from './indexpattern';
 import { buildColumn, operationDefinitionMap } from './operations';
+import { IndexPattern, IndexPatternPrivateState } from './types';
 
 function getExpressionForLayer(
   indexPattern: IndexPattern,

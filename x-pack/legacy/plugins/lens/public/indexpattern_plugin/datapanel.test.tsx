@@ -7,12 +7,12 @@
 import { shallow, mount } from 'enzyme';
 import React, { ChangeEvent } from 'react';
 import { EuiComboBox } from '@elastic/eui';
-import { IndexPatternPrivateState, IndexPatternColumn } from './indexpattern';
 import { createMockedDragDropContext } from './mocks';
 import { InnerIndexPatternDataPanel, IndexPatternDataPanel, MemoizedDataPanel } from './datapanel';
 import { FieldItem } from './field_item';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
+import { IndexPatternPrivateState } from './types';
 
 jest.mock('ui/new_platform');
 jest.mock('./loader');
@@ -21,6 +21,7 @@ jest.mock('../../../../../../src/legacy/ui/public/registry/field_formats');
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
 const initialState: IndexPatternPrivateState = {
+  indexPatternRefs: [],
   currentIndexPatternId: '1',
   showEmptyFields: false,
   layers: {
@@ -210,6 +211,7 @@ describe('IndexPattern Data Panel', () => {
   beforeEach(() => {
     core = coreMock.createSetup();
     defaultProps = {
+      indexPatternRefs: [],
       dragDropContext: createMockedDragDropContext(),
       currentIndexPatternId: '1',
       indexPatterns: initialState.indexPatterns,
@@ -227,43 +229,16 @@ describe('IndexPattern Data Panel', () => {
     };
   });
 
-  it('should update index pattern of layer on switch if it is a single empty one', async () => {
-    const setStateSpy = jest.fn();
-    const wrapper = shallow(
-      <IndexPatternDataPanel
-        {...defaultProps}
-        state={{
-          ...initialState,
-          layers: { first: { indexPatternId: '1', columnOrder: [], columns: {} } },
-        }}
-        setState={setStateSpy}
-        dragDropContext={{ dragging: {}, setDragging: () => {} }}
-      />
-    );
-
-    act(() => {
-      wrapper.find(MemoizedDataPanel).prop('setShowIndexPatternSwitcher')!(true);
-    });
-    wrapper.find(MemoizedDataPanel).prop('onChangeIndexPattern')!('2');
-
-    expect(setStateSpy).toHaveBeenCalledWith({
-      ...initialState,
-      layers: { first: { indexPatternId: '2', columnOrder: [], columns: {} } },
-      currentIndexPatternId: '2',
-    });
-  });
-
-  it('should not update index pattern of layer on switch if there are more than one', async () => {
+  it('should call change index pattern callback', async () => {
     const setStateSpy = jest.fn();
     const state = {
       ...initialState,
-      layers: {
-        first: { indexPatternId: '1', columnOrder: [], columns: {} },
-        second: { indexPatternId: '1', columnOrder: [], columns: {} },
-      },
+      layers: { first: { indexPatternId: '1', columnOrder: [], columns: {} } },
     };
+    const changeIndexPattern = jest.fn();
     const wrapper = shallow(
       <IndexPatternDataPanel
+        changeIndexPattern={changeIndexPattern}
         {...defaultProps}
         state={state}
         setState={setStateSpy}
@@ -276,36 +251,7 @@ describe('IndexPattern Data Panel', () => {
     });
     wrapper.find(MemoizedDataPanel).prop('onChangeIndexPattern')!('2');
 
-    expect(setStateSpy).toHaveBeenCalledWith({ ...state, currentIndexPatternId: '2' });
-  });
-
-  it('should not update index pattern of layer on switch if there are columns configured', async () => {
-    const setStateSpy = jest.fn();
-    const state = {
-      ...initialState,
-      layers: {
-        first: {
-          indexPatternId: '1',
-          columnOrder: ['col1'],
-          columns: { col1: {} as IndexPatternColumn },
-        },
-      },
-    };
-    const wrapper = shallow(
-      <IndexPatternDataPanel
-        {...defaultProps}
-        state={state}
-        setState={setStateSpy}
-        dragDropContext={{ dragging: {}, setDragging: () => {} }}
-      />
-    );
-
-    act(() => {
-      wrapper.find(MemoizedDataPanel).prop('setShowIndexPatternSwitcher')!(true);
-    });
-    wrapper.find(MemoizedDataPanel).prop('onChangeIndexPattern')!('2');
-
-    expect(setStateSpy).toHaveBeenCalledWith({ ...state, currentIndexPatternId: '2' });
+    expect(changeIndexPattern).toHaveBeenCalledWith('2', state, setStateSpy);
   });
 
   it('should render a warning if there are no index patterns', () => {

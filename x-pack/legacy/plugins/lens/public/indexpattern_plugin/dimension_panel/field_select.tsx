@@ -13,10 +13,11 @@ import {
   // @ts-ignore
   EuiHighlight,
 } from '@elastic/eui';
-import { OperationType, IndexPattern, IndexPatternField } from '../indexpattern';
+import { OperationType } from '../indexpattern';
 import { FieldIcon } from '../field_icon';
 import { DataType } from '../../types';
 import { OperationFieldSupportMatrix } from './dimension_panel';
+import { IndexPattern, IndexPatternField } from '../types';
 
 export type FieldChoice =
   | { type: 'field'; field: string; operationType?: OperationType }

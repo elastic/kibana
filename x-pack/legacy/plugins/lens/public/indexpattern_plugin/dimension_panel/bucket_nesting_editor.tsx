@@ -8,7 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiHorizontalRule, EuiSwitch, EuiSelect } from '@elastic/eui';
-import { IndexPatternLayer } from '../indexpattern';
+import { IndexPatternLayer } from '../types';
 
 function nestColumn(columnOrder: string[], outer: string, inner: string) {
   const result = columnOrder.filter(c => c !== inner);

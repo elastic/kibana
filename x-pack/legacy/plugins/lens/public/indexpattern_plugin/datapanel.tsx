@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mapValues, uniq, indexBy } from 'lodash';
+import { uniq, indexBy } from 'lodash';
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import {
   EuiComboBox,
@@ -30,12 +30,24 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Query } from 'src/plugins/data/common';
-import { DatasourceDataPanelProps, DataType } from '../types';
-import { IndexPatternPrivateState, IndexPatternField, IndexPattern } from './indexpattern';
+import { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import { FieldItem } from './field_item';
 import { FieldIcon } from './field_icon';
-import { updateLayerIndexPattern } from './state_helpers';
+import {
+  IndexPattern,
+  IndexPatternPrivateState,
+  IndexPatternField,
+  IndexPatternRef,
+} from './types';
+
+type Props = DatasourceDataPanelProps<IndexPatternPrivateState> & {
+  changeIndexPattern: (
+    id: string,
+    state: IndexPatternPrivateState,
+    setState: StateSetter<IndexPatternPrivateState>
+  ) => void;
+};
 
 // TODO the typings for EuiContextMenuPanel are incorrect - watchedItemProps is missing. This can be removed when the types are adjusted
 const FixedEuiContextMenuPanel = (EuiContextMenuPanel as unknown) as React.FunctionComponent<
@@ -57,11 +69,6 @@ const fieldTypeNames: Record<DataType, string> = {
   ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP' }),
 };
 
-function isSingleEmptyLayer(layerMap: IndexPatternPrivateState['layers']) {
-  const layers = Object.values(layerMap);
-  return layers.length === 1 && layers[0].columnOrder.length === 0;
-}
-
 export function IndexPatternDataPanel({
   setState,
   state,
@@ -69,22 +76,13 @@ export function IndexPatternDataPanel({
   core,
   query,
   dateRange,
-}: DatasourceDataPanelProps<IndexPatternPrivateState>) {
-  const { indexPatterns, currentIndexPatternId } = state;
+  changeIndexPattern,
+}: Props) {
+  const { indexPatternRefs, indexPatterns, currentIndexPatternId } = state;
   const [showIndexPatternSwitcher, setShowIndexPatternSwitcher] = useState(false);
 
   const onChangeIndexPattern = useCallback(
-    (newIndexPattern: string) => {
-      setState({
-        ...state,
-        layers: isSingleEmptyLayer(state.layers)
-          ? mapValues(state.layers, layer =>
-              updateLayerIndexPattern(layer, indexPatterns[newIndexPattern])
-            )
-          : state.layers,
-        currentIndexPatternId: newIndexPattern,
-      });
-    },
+    (id: string) => changeIndexPattern(id, state, setState),
     [state, setState]
   );
 
@@ -116,6 +114,7 @@ export function IndexPatternDataPanel({
       showIndexPatternSwitcher={showIndexPatternSwitcher}
       setShowIndexPatternSwitcher={setShowIndexPatternSwitcher}
       currentIndexPatternId={currentIndexPatternId}
+      indexPatternRefs={indexPatternRefs}
       indexPatterns={indexPatterns}
       query={query}
       dateRange={dateRange}
@@ -149,6 +148,7 @@ interface DataPanelState {
 
 export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   currentIndexPatternId,
+  indexPatternRefs,
   indexPatterns,
   query,
   dateRange,
@@ -162,6 +162,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   core,
 }: Partial<DatasourceDataPanelProps> & {
   currentIndexPatternId: string;
+  indexPatternRefs: IndexPatternRef[];
   indexPatterns: Record<string, IndexPattern>;
   dateRange: DatasourceDataPanelProps['dateRange'];
   query: Query;
@@ -362,7 +363,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             ) : (
               <EuiComboBox
                 data-test-subj="indexPattern-switcher"
-                options={Object.values(indexPatterns).map(({ title, id }) => ({
+                options={indexPatternRefs.map(({ title, id }) => ({
                   label: title,
                   value: id,
                 }))}

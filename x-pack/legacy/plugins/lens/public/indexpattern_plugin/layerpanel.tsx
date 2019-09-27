@@ -11,40 +11,34 @@ import {
   // @ts-ignore
   EuiHighlight,
   EuiButtonEmpty,
-  EuiIcon,
-  EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-import { DatasourceLayerPanelProps, StateSetter } from '../types';
-import { IndexPatternPrivateState, IndexPatternLayer } from './indexpattern';
-import { isLayerTransferable, updateLayerIndexPattern } from './state_helpers';
+import { DatasourceLayerPanelProps } from '../types';
+import { IndexPatternLayer, IndexPatternRef, IndexPatternPrivateState } from './types';
 
 export interface IndexPatternLayerPanelProps extends DatasourceLayerPanelProps {
   state: IndexPatternPrivateState;
-  setState: StateSetter<IndexPatternPrivateState>;
+  onChangeIndexPattern: (newId: string) => Promise<void>;
 }
 
 function LayerPanelChooser({
-  indexPatterns,
+  indexPatternRefs,
   layer,
   onChangeIndexPattern,
   onExitChooser,
 }: {
-  indexPatterns: IndexPatternPrivateState['indexPatterns'];
+  indexPatternRefs: IndexPatternRef[];
   layer: IndexPatternLayer;
-  onChangeIndexPattern: (newId: string) => void;
+  onChangeIndexPattern: (newId: string) => Promise<void>;
   onExitChooser: () => void;
 }) {
-  const currentIndexPatternId = layer.indexPatternId;
-  const indexPatternList = Object.values(indexPatterns)
-    .filter(indexPattern => indexPattern.id !== layer.indexPatternId)
-    .map(indexPattern => ({
-      ...indexPattern,
-      isTransferable: isLayerTransferable(layer, indexPattern),
-    }));
+  const [indexPatternList, [currentRef]] = _.partition(
+    indexPatternRefs,
+    p => p.id !== layer.indexPatternId
+  );
+
   return (
     <EuiComboBox
       fullWidth
@@ -60,34 +54,18 @@ function LayerPanelChooser({
       }}
       selectedOptions={[
         {
-          label: indexPatterns[currentIndexPatternId].title,
-          value: indexPatterns[currentIndexPatternId].id,
+          label: currentRef.title,
+          value: currentRef.id,
         },
       ]}
       singleSelection={{ asPlainText: true }}
       isClearable={false}
       onBlur={onExitChooser}
-      onChange={choices => {
-        onChangeIndexPattern(choices[0].value!.id);
-      }}
+      onChange={choices => onChangeIndexPattern(choices[0].value!.id)}
       renderOption={(option, searchValue, contentClassName) => {
-        const { label, value } = option;
+        const { label } = option;
         return (
           <span className={contentClassName}>
-            {value && value.isTransferable ? (
-              <EuiIcon type="empty" />
-            ) : (
-              <EuiIconTip
-                type="minusInCircle"
-                content={i18n.translate(
-                  'xpack.lens.indexPattern.lossyIndexPatternSwitchDescription',
-                  {
-                    defaultMessage:
-                      'Not all operations are compatible with this index pattern and will be removed on switching.',
-                  }
-                )}
-              />
-            )}
             <EuiHighlight search={searchValue}>{label}</EuiHighlight>
           </span>
         );
@@ -96,7 +74,7 @@ function LayerPanelChooser({
   );
 }
 
-export function LayerPanel({ state, setState, layerId }: IndexPatternLayerPanelProps) {
+export function LayerPanel({ state, layerId, onChangeIndexPattern }: IndexPatternLayerPanelProps) {
   const [isChooserOpen, setChooserOpen] = useState(false);
 
   return (
@@ -105,26 +83,14 @@ export function LayerPanel({ state, setState, layerId }: IndexPatternLayerPanelP
         {isChooserOpen ? (
           <EuiFlexItem>
             <LayerPanelChooser
-              indexPatterns={state.indexPatterns}
+              indexPatternRefs={state.indexPatternRefs}
               layer={state.layers[layerId]}
               onExitChooser={() => {
                 setChooserOpen(false);
               }}
-              onChangeIndexPattern={newId => {
-                setState({
-                  ...state,
-                  currentIndexPatternId: newId,
-                  layers: {
-                    ...state.layers,
-                    [layerId]: updateLayerIndexPattern(
-                      state.layers[layerId],
-                      state.indexPatterns[newId]
-                    ),
-                  },
-                });
-
-                setChooserOpen(false);
-              }}
+              onChangeIndexPattern={newId =>
+                onChangeIndexPattern(newId).then(() => setChooserOpen(false))
+              }
             />
           </EuiFlexItem>
         ) : (

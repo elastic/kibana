@@ -8,7 +8,6 @@ import React from 'react';
 import { DateHistogramIndexPatternColumn } from './date_histogram';
 import { dateHistogramOperation } from '.';
 import { shallow } from 'enzyme';
-import { IndexPatternPrivateState } from '../../indexpattern';
 import { EuiRange, EuiSwitch } from '@elastic/eui';
 import {
   UiSettingsClientContract,
@@ -17,6 +16,7 @@ import {
 } from 'src/core/public';
 import { Storage } from 'ui/storage';
 import { createMockedIndexPattern } from '../../mocks';
+import { IndexPatternPrivateState } from '../../types';
 
 jest.mock('ui/new_platform');
 
@@ -26,6 +26,7 @@ describe('date_histogram', () => {
 
   beforeEach(() => {
     state = {
+      indexPatternRefs: [],
       currentIndexPatternId: '1',
       showEmptyFields: false,
       indexPatterns: {

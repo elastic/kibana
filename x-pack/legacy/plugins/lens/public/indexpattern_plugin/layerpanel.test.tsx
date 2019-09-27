@@ -6,17 +6,21 @@
 
 import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
-import { IndexPatternPrivateState } from './indexpattern';
 import { act } from 'react-dom/test-utils';
 import { IndexPatternLayerPanelProps, LayerPanel } from './layerpanel';
-import { updateLayerIndexPattern } from './state_helpers';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
+import { IndexPatternPrivateState } from './types';
 
 jest.mock('ui/new_platform');
 jest.mock('./state_helpers');
 
 const initialState: IndexPatternPrivateState = {
+  indexPatternRefs: [
+    { id: '1', title: 'my-fake-index-pattern' },
+    { id: '2', title: 'my-fake-restricted-pattern' },
+    { id: '3', title: 'my-compatible-pattern' },
+  ],
   currentIndexPatternId: '1',
   showEmptyFields: false,
   layers: {
@@ -173,7 +177,7 @@ describe('Layer Data Panel', () => {
     defaultProps = {
       layerId: 'first',
       state: initialState,
-      setState: jest.fn(),
+      onChangeIndexPattern: jest.fn(async () => {}),
     };
   });
 
@@ -200,18 +204,6 @@ describe('Layer Data Panel', () => {
     ).toEqual(['my-fake-restricted-pattern', 'my-compatible-pattern']);
   });
 
-  it('should indicate whether the switch can be made without lossing data', () => {
-    const instance = mount(<LayerPanel {...defaultProps} />);
-    clickLabel(instance);
-
-    expect(
-      instance
-        .find(EuiComboBox)
-        .prop('options')!
-        .map(option => (option.value as { isTransferable: boolean }).isTransferable)
-    ).toEqual([false, true]);
-  });
-
   it('should switch data panel to target index pattern', () => {
     const instance = mount(<LayerPanel {...defaultProps} />);
     clickLabel(instance);
@@ -225,29 +217,6 @@ describe('Layer Data Panel', () => {
       ]);
     });
 
-    expect(defaultProps.setState).toHaveBeenCalledWith(
-      expect.objectContaining({
-        currentIndexPatternId: '3',
-      })
-    );
-  });
-
-  it('should switch using updateLayerIndexPattern', () => {
-    const instance = mount(<LayerPanel {...defaultProps} />);
-    clickLabel(instance);
-
-    act(() => {
-      instance.find(EuiComboBox).prop('onChange')!([
-        {
-          label: 'my-compatible-pattern',
-          value: defaultProps.state.indexPatterns['3'],
-        },
-      ]);
-    });
-
-    expect(updateLayerIndexPattern).toHaveBeenCalledWith(
-      defaultProps.state.layers.first,
-      defaultProps.state.indexPatterns['3']
-    );
+    expect(defaultProps.onChangeIndexPattern).toHaveBeenCalledWith('3');
   });
 });
