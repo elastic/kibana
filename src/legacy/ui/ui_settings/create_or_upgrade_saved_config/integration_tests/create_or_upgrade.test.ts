@@ -79,7 +79,7 @@ describe('createOrUpgradeSavedConfig()', () => {
   afterAll(() => {
     esServer.stop();
     kbn.stop();
-  });
+  }, 30000);
 
   it('upgrades the previous version on each increment', async function() {
     jest.setTimeout(30000);

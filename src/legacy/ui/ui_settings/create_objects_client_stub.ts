@@ -17,7 +17,24 @@
  * under the License.
  */
 
-export {
-  createObjectsClientStub,
-  savedObjectsClientErrors,
-} from './create_objects_client_stub';
+import sinon from 'sinon';
+import { SavedObjectsClient } from '../../../../src/core/server';
+
+export const savedObjectsClientErrors = SavedObjectsClient.errors;
+
+export interface SavedObjectsClientStub {
+  update: sinon.SinonStub<any[], any>;
+  get: sinon.SinonStub<any[], any>;
+  create: sinon.SinonStub<any[], any>;
+  errors: typeof savedObjectsClientErrors;
+}
+
+export function createObjectsClientStub(esDocSource = {}): SavedObjectsClientStub {
+  const savedObjectsClient = {
+    update: sinon.stub(),
+    get: sinon.stub().returns({ attributes: esDocSource }),
+    create: sinon.stub(),
+    errors: savedObjectsClientErrors,
+  };
+  return savedObjectsClient;
+}
