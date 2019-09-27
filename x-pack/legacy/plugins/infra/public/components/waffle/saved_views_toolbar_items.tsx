@@ -99,13 +99,13 @@ export const SavedViewsToolbarControls = (props: Props) => {
 const getErrorToast = (type: 'create' | 'find') => {
   if (type === 'create') {
     return {
-      title: i18n.translate('xpack.infra.savedView.error.title', {
+      title: i18n.translate('xpack.infra.savedView.createError.title', {
         defaultMessage: `An error occured saving view.`,
       }),
     };
   } else if (type === 'find') {
     return {
-      title: i18n.translate('xpack.infra.savedView.error.title', {
+      title: i18n.translate('xpack.infra.savedView.findError.title', {
         defaultMessage: `An error occurred while loading views.`,
       }),
     };
