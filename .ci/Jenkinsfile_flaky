@@ -10,6 +10,9 @@ def worker = getWorkerFromParams(IS_XPACK, JOB, CI_GROUP)
 
 def workerFailures = []
 
+currentBuild.displayName += trunc(" ${params.GITHUB_OWNER}:${params.branch_specifier}", 24)
+currentBuild.description = "${params.CI_GROUP}<br />Executions: ${params.NUMBER_EXECUTIONS}"
+
 stage("Kibana Pipeline") {
   timeout(time: 180, unit: 'MINUTES') {
     timestamps {
@@ -26,6 +29,8 @@ stage("Kibana Pipeline") {
             }
           }, getWorkerMap(params.NUMBER_EXECUTIONS.toInteger(), worker, workerFailures))()
         }
+
+        currentBuild.description += ", Failures: ${workerFailures.size()}"
 
         if (workerFailures.size() > 0) {
           print "There were ${workerFailures.size()} test suite failures."
@@ -257,4 +262,12 @@ def getWorkerMap(numberOfExecutions, worker, workerFailures, maxWorkers = 14) {
   }
 
   return workerMap
+}
+
+def trunc(str, length) {
+  if (str.size() >= length) {
+    return str.take(length) + "..."
+  }
+
+  return str;
 }
