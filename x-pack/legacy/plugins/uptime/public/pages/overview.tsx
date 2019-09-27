@@ -158,7 +158,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
           successColor={colors.success}
           variables={{
             ...sharedProps,
-            pagination: pagination || undefined,
+            pagination,
           }}
         />
       </EmptyState>

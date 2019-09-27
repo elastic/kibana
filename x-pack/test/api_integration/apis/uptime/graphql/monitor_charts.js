@@ -48,7 +48,7 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorChartsQuery });
 
-      expectFixtureEql(data, 'monitor_charts');
+      expectFixtureEql(data, 'monitor_charts_empty_sets');
     });
   });
 }
