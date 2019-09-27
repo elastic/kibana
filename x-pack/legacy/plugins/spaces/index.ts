@@ -23,6 +23,7 @@ import { initSpaceSelectorView } from './server/routes/views';
 
 export interface SpacesPlugin {
   getSpaceId: SpacesServiceSetup['getSpaceId'];
+  getActiveSpace: SpacesServiceSetup['getActiveSpace'];
   spaceIdToNamespace: SpacesServiceSetup['spaceIdToNamespace'];
   namespaceToSpaceId: SpacesServiceSetup['namespaceToSpaceId'];
   getBasePath: SpacesServiceSetup['getBasePath'];
@@ -183,6 +184,7 @@ export const spaces = (kibana: Record<string, any>) =>
       initSpaceSelectorView(server);
 
       server.expose('getSpaceId', (request: any) => spacesService.getSpaceId(request));
+      server.expose('getActiveSpace', spacesService.getActiveSpace);
       server.expose('spaceIdToNamespace', spacesService.spaceIdToNamespace);
       server.expose('namespaceToSpaceId', spacesService.namespaceToSpaceId);
       server.expose('getBasePath', spacesService.getBasePath);
