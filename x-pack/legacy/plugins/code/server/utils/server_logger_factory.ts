@@ -5,13 +5,13 @@
  */
 
 import { Logger } from '../log';
-import { LoggerFactory } from './log_factory';
-import { ServerFacade } from '../..';
+import { LoggerFactory as CodeLoggerFactory } from './log_factory';
+import { LoggerFactory } from '../../../../../../src/core/server';
 
-export class ServerLoggerFactory implements LoggerFactory {
-  constructor(private readonly server: ServerFacade) {}
+export class ServerLoggerFactory implements CodeLoggerFactory {
+  constructor(private readonly loggerFactory: LoggerFactory, private readonly verbose: boolean) {}
 
   public getLogger(tags: string[]): Logger {
-    return new Logger(this.server, tags);
+    return new Logger(this.loggerFactory, this.verbose, tags);
   }
 }

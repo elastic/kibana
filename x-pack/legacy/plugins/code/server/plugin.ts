@@ -78,8 +78,8 @@ export class CodePlugin {
   public setup(core: CoreSetup) {
     const { server } = core.http as any;
 
-    this.log = new Logger(server);
     this.serverOptions = new ServerOptions(this.initContext.config, server.config());
+    this.log = new Logger(this.initContext.logger, this.serverOptions.verbose);
 
     const xpackMainPlugin: XPackMainPlugin = server.plugins.xpack_main;
     xpackMainPlugin.registerFeature({
@@ -166,7 +166,7 @@ export class CodePlugin {
 
     const { gitOps, lspService } = initLocalService(
       server,
-      this.log,
+      this.initContext.logger,
       this.serverOptions,
       codeServices,
       esClient,
@@ -214,7 +214,7 @@ export class CodePlugin {
 
     const { gitOps, lspService } = initLocalService(
       server,
-      this.log,
+      this.initContext.logger,
       this.serverOptions,
       codeServices,
       esClient,
@@ -290,7 +290,8 @@ export class CodePlugin {
       codeServices,
       repoIndexInitializerFactory,
       repoConfigController,
-      this.serverOptions
+      this.serverOptions,
+      this.log
     );
     repositorySearchRoute(codeServerRouter, this.log);
     if (this.serverOptions.enableCommitIndexing) {
@@ -302,7 +303,7 @@ export class CodePlugin {
     workspaceRoute(codeServerRouter, this.serverOptions, codeServices);
     symbolByQnameRoute(codeServerRouter, this.log);
     installRoute(codeServerRouter, codeServices);
-    lspRoute(codeServerRouter, codeServices, this.serverOptions);
+    lspRoute(codeServerRouter, codeServices, this.serverOptions, this.log);
     setupRoute(codeServerRouter, codeServices);
     statusRoute(codeServerRouter, codeServices);
   }

@@ -9,7 +9,7 @@ import JoiNamespace from 'joi';
 import { Legacy } from 'kibana';
 import moment from 'moment';
 import { resolve } from 'path';
-import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup } from 'src/core/server';
 
 import { APP_TITLE } from './common/constants';
 import { codePlugin } from './server';
@@ -127,15 +127,11 @@ export const code = (kibana: any) =>
     },
     async init(server: ServerFacade) {
       // @ts-ignore
-      const { config } = server.newPlatform.setup.plugins.code;
-
-      if (!config.ui.enabled) {
+      const initializerContext = server.newPlatform.setup.plugins.code;
+      if (!initializerContext.config.ui.enabled) {
         return;
       }
 
-      const initializerContext = {
-        config,
-      } as PluginInitializerContext;
       const coreSetup = ({
         http: { server },
       } as any) as CoreSetup;

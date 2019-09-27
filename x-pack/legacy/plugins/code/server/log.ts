@@ -7,19 +7,18 @@
 import { inspect } from 'util';
 import { Logger as VsLogger } from 'vscode-jsonrpc';
 
-import { ServerFacade } from '..';
+import { LoggerFactory } from '../../../../../src/core/server';
 
 export class Logger implements VsLogger {
-  private readonly verbose: boolean = false;
-  constructor(private server: ServerFacade, private baseTags: string[] = ['code']) {
-    if (server) {
-      this.verbose = this.server.config().get('xpack.code.verbose');
-    }
-  }
+  constructor(
+    private readonly logger: LoggerFactory,
+    private readonly verbose: boolean = false,
+    private readonly baseTags: string[] = []
+  ) {}
 
   // Return a new logger with new tags
   public addTags(tags: string[]): Logger {
-    return new Logger(this.server, this.baseTags.concat(tags));
+    return new Logger(this.logger, this.verbose, this.baseTags.concat(tags));
   }
 
   public info(msg: string | any) {
@@ -28,7 +27,7 @@ export class Logger implements VsLogger {
         colors: process.stdout.isTTY,
       });
     }
-    this.server.log([...this.baseTags, 'info'], msg);
+    this.logger.get(...this.baseTags).info(msg);
   }
 
   public error(msg: string | any) {
@@ -42,11 +41,11 @@ export class Logger implements VsLogger {
       });
     }
 
-    this.server.log([...this.baseTags, 'error'], msg);
+    this.logger.get(...this.baseTags).error(msg);
   }
 
-  public log(message: string): void {
-    this.info(message);
+  public log(msg: string): void {
+    this.logger.get(...this.baseTags).info(msg);
   }
 
   public debug(msg: string | any) {
@@ -56,9 +55,9 @@ export class Logger implements VsLogger {
       });
     }
     if (this.verbose) {
-      this.server.log([...this.baseTags, 'info'], msg);
+      this.logger.get(...this.baseTags).info(msg);
     } else {
-      this.server.log([...this.baseTags, 'debug'], msg);
+      this.logger.get(...this.baseTags).debug(msg);
     }
   }
 
@@ -73,7 +72,7 @@ export class Logger implements VsLogger {
       });
     }
 
-    this.server.log([...this.baseTags, 'warning'], msg);
+    this.logger.get(...this.baseTags).warn(msg);
   }
 
   // Log subprocess stdout
@@ -84,9 +83,9 @@ export class Logger implements VsLogger {
       });
     }
     if (this.verbose) {
-      this.server.log([...this.baseTags, 'info', 'stdout'], msg);
+      this.logger.get(...this.baseTags).info(msg);
     } else {
-      this.server.log([...this.baseTags, 'debug', 'stdout'], msg);
+      this.logger.get(...this.baseTags).debug(msg);
     }
   }
 
@@ -98,9 +97,9 @@ export class Logger implements VsLogger {
       });
     }
     if (this.verbose) {
-      this.server.log([...this.baseTags, 'error', 'stderr'], msg);
+      this.logger.get(...this.baseTags).error(msg);
     } else {
-      this.server.log([...this.baseTags, 'debug', 'stderr'], msg);
+      this.logger.get(...this.baseTags).debug(msg);
     }
   }
 }

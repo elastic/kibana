@@ -6,7 +6,11 @@
 
 import { first } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext, RecursiveReadonly } from '../../../../src/core/server';
+import {
+  LoggerFactory,
+  PluginInitializerContext,
+  RecursiveReadonly,
+} from '../../../../src/core/server';
 import { deepFreeze } from '../../../../src/core/utils';
 import { CodeConfigSchema } from './config';
 
@@ -15,6 +19,7 @@ import { CodeConfigSchema } from './config';
  */
 export interface PluginSetupContract {
   config: TypeOf<typeof CodeConfigSchema>;
+  logger: LoggerFactory;
 }
 
 /**
@@ -29,7 +34,10 @@ export class CodePlugin {
       .pipe(first())
       .toPromise();
 
-    return deepFreeze({ config });
+    return deepFreeze({
+      config,
+      logger: this.initializerContext.logger,
+    });
   }
 
   public start() {

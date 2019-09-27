@@ -76,6 +76,8 @@ export class ServerOptions {
 
   public readonly clusterEnabled: boolean = this.options.clustering.enabled;
 
+  public readonly verbose: boolean = this.options.verbose;
+
   public readonly codeNodes: CodeNode[] = this.options.clustering.codeNodes;
 
   constructor(private options: any, private config: any) {}
