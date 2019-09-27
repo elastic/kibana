@@ -21,7 +21,7 @@ export default function({ getService }: FtrProviderContext) {
   const aggAndFieldIdentifiers = ['Min(responsetime)', 'Max(responsetime)', 'Mean(responsetime)'];
   const splitField = 'airline';
   const bucketSpan = '15m';
-  const memoryLimit = '20MB';
+  const memoryLimit = '20mb';
 
   function getExpectedRow(expectedJobId: string, expectedJobGroups: string[]) {
     return {

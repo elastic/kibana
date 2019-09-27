@@ -35,7 +35,7 @@ export default function({ getService }: FtrProviderContext) {
     },
   ];
   const bucketSpan = '2h';
-  const memoryLimit = '8MB';
+  const memoryLimit = '8mb';
 
   function getExpectedRow(expectedJobId: string, expectedJobGroups: string[]) {
     return {
