@@ -287,7 +287,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
      * @param comboBoxSelector data-test-subj selector
      */
     public async clearInputField(comboBoxSelector: string): Promise<void> {
-      log.debug(`comboBox.clear, comboBoxSelector:${comboBoxSelector}`);
+      log.debug(`comboBox.clearInputField, comboBoxSelector:${comboBoxSelector}`);
       const comboBoxElement = await testSubjects.find(comboBoxSelector);
       const input = await comboBoxElement.findByTagName('input');
       await input.clearValueWithKeyboard();
