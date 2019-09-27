@@ -45,15 +45,15 @@ import { getVisualizeLoader } from 'ui/visualize/loader';
 import { Legacy } from 'kibana';
 
 import { SavedObjectAttributes } from 'kibana/server';
+import { npSetup } from 'ui/new_platform';
 import {
   EmbeddableFactory,
   ErrorEmbeddable,
   Container,
   EmbeddableOutput,
-} from '../../../../embeddable_api/public/np_ready/public';
+} from '../../../../../../plugins/embeddable/public';
 import { setup } from '../../../../embeddable_api/public/np_ready/public/legacy';
 import { start as visualizations } from '../../../../visualizations/public/legacy';
-
 import { showNewVisModal } from '../wizard';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
@@ -183,5 +183,8 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
 }
 
 VisualizeEmbeddableFactory.createVisualizeEmbeddableFactory().then(embeddableFactory => {
-  setup.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
+  npSetup.plugins.embeddable.registerEmbeddableFactory(
+    VISUALIZE_EMBEDDABLE_TYPE,
+    embeddableFactory
+  );
 });

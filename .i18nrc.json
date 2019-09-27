@@ -13,7 +13,7 @@
     "dashboardEmbeddableContainer": "src/legacy/core_plugins/dashboard_embeddable_container",
     "kbn": "src/legacy/core_plugins/kibana",
     "kbnDocViews": "src/legacy/core_plugins/kbn_doc_views",
-    "embeddableApi": "src/legacy/core_plugins/embeddable_api",
+    "embeddableApi": "src/plugins/embeddable",
     "kbnVislibVisTypes": "src/legacy/core_plugins/kbn_vislib_vis_types",
     "visTypeMarkdown": "src/legacy/core_plugins/vis_type_markdown",
     "visTypeMetric": "src/legacy/core_plugins/vis_type_metric",

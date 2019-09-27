@@ -17,9 +17,8 @@ import { i18n } from '@kbn/i18n';
 
 const TransactionBreakdownHeader: React.FC<{
   showChart: boolean;
-  hideShowChartButton: boolean;
   onToggleClick: () => void;
-}> = ({ showChart, onToggleClick, hideShowChartButton }) => {
+}> = ({ showChart, onToggleClick }) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -50,23 +49,21 @@ const TransactionBreakdownHeader: React.FC<{
           </h3>
         </EuiTitle>
       </EuiFlexItem>
-      {!hideShowChartButton ? (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="xs"
-            iconType={showChart ? 'arrowDown' : 'arrowRight'}
-            onClick={() => onToggleClick()}
-          >
-            {showChart
-              ? i18n.translate('xpack.apm.transactionBreakdown.hideChart', {
-                  defaultMessage: 'Hide chart'
-                })
-              : i18n.translate('xpack.apm.transactionBreakdown.showChart', {
-                  defaultMessage: 'Show chart'
-                })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      ) : null}
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          size="xs"
+          iconType={showChart ? 'arrowDown' : 'arrowRight'}
+          onClick={() => onToggleClick()}
+        >
+          {showChart
+            ? i18n.translate('xpack.apm.transactionBreakdown.hideChart', {
+                defaultMessage: 'Hide chart'
+              })
+            : i18n.translate('xpack.apm.transactionBreakdown.showChart', {
+                defaultMessage: 'Show chart'
+              })}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { setup as visualizations } from '../../visualizations/public/legacy';
-
-import './controls/line_interpolation_option';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
 import histogramVisTypeProvider from './histogram';
 import lineVisTypeProvider from './line';
