@@ -60,20 +60,20 @@ const fullyMatchingIds = async (
       const location = locBucket.key;
       const topSource = locBucket.top.hits.hits[0]._source;
       const checkGroup = topSource.monitor.check_group;
+      const status = topSource.summary.down > 0 ? 'down' : 'up';
 
-      const mlcg: MonitorLocCheckGroup = {
+      // This monitor doesn't match, so just skip ahead and don't add it to the output
+      if (queryContext.statusFilter && queryContext.statusFilter !== status) {
+        continue MonitorLoop;
+      }
+
+      groups.push({
         monitorId,
         location,
         checkGroup,
-        status: topSource.summary.down > 0 ? 'down' : 'up',
+        status,
         summaryTimestamp: topSource['@timestamp'],
-      };
-
-      // This monitor doesn't match, so just skip ahead and don't add it to the output
-      if (queryContext.statusFilter && queryContext.statusFilter !== mlcg.status) {
-        continue MonitorLoop;
-      }
-      groups.push(mlcg);
+      });
     }
 
     // We only truly match the monitor if one of the most recent check groups was found in the potential matches phase
@@ -95,10 +95,10 @@ export const mostRecentCheckGroups = async (
       size: 0,
       query: {
         bool: {
-          must: [
+          filter: [
             { terms: { 'monitor.id': potentialMatchMonitorIDs } },
             // only match summary docs because we only want the latest *complete* check group.
-            { exists: { field: 'summary.down' } },
+            { exists: { field: 'summary' } },
           ],
         },
       },
