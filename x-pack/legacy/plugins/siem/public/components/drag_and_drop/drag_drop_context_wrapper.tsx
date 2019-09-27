@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultTo, noop } from 'lodash/fp';
+import { defaultTo, isEqual, noop } from 'lodash/fp';
 import * as React from 'react';
 import { DragDropContext, DropResult, DragStart } from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
@@ -80,6 +80,12 @@ export const DragDropContextWrapperComponent = React.memo<Props>(
         {children}
       </DragDropContext>
     );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.children === nextProps.children &&
+      prevProps.dataProviders === nextProps.dataProviders
+    ); // prevent re-renders when data providers are added or removed, but all other props are the same
   }
 );
 
