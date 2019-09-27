@@ -16,7 +16,7 @@
     http="pluginDependencies.http"
     overlays="pluginDependencies.overlays"
     is-loading="loading"
-    is-initialized="!!workspace"
+    is-initialized="!!workspace || savedWorkspace.id"
     initial-query="initialQuery"
     state="reduxState"
     dispatch="reduxDispatch"
