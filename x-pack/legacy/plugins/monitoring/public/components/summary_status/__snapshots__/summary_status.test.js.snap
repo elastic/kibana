@@ -28,20 +28,16 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
           class="euiTitle euiTitle--xsmall euiStat__title"
         >
           Status: 
-          <span
-            class="kuiStatusText"
-          >
-            <svg
-              alt="Status: yellow"
-              class="euiIcon euiIcon--large euiIcon--warning euiIcon-isLoading"
-              data-test-subj="statusIcon"
-              focusable="false"
-              height="16"
-              viewBox="0 0 16 16"
-              width="16"
-              xmlns="http://www.w3.org/2000/svg"
-            />
-          </span>
+          <svg
+            alt="Status: yellow"
+            class="euiIcon euiIcon--large euiIcon--warning euiIcon-isLoading"
+            data-test-subj="statusIcon"
+            focusable="false"
+            height="16"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          />
            Yellow
         </p>
         <p
@@ -209,20 +205,16 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
           class="euiTitle euiTitle--xsmall euiStat__title"
         >
           Status: 
-          <span
-            class="kuiStatusText"
-          >
-            <svg
-              alt="Status: green"
-              class="euiIcon euiIcon--large euiIcon--success euiIcon-isLoading"
-              data-test-subj="statusIcon"
-              focusable="false"
-              height="16"
-              viewBox="0 0 16 16"
-              width="16"
-              xmlns="http://www.w3.org/2000/svg"
-            />
-          </span>
+          <svg
+            alt="Status: green"
+            class="euiIcon euiIcon--large euiIcon--success euiIcon-isLoading"
+            data-test-subj="statusIcon"
+            focusable="false"
+            height="16"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          />
            Green
         </p>
         <p

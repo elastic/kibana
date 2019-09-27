@@ -28,7 +28,26 @@ exports[`Storyshots arguments/AxisConfig simple 1`] = `
       />
       <span
         className="euiSwitch__track"
-      />
+      >
+        <svg
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
+          focusable="false"
+          height={16}
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+        <svg
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
+          focusable="false"
+          height={16}
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </span>
     </span>
   </div>
 </div>
@@ -62,7 +81,26 @@ exports[`Storyshots arguments/AxisConfig/components simple template 1`] = `
       />
       <span
         className="euiSwitch__track"
-      />
+      >
+        <svg
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
+          focusable="false"
+          height={16}
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+        <svg
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
+          focusable="false"
+          height={16}
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </span>
     </span>
   </div>
 </div>
