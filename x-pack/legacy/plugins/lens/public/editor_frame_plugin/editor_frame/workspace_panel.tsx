@@ -6,8 +6,9 @@
 
 import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiImage, EuiText } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
+import chrome from 'ui/chrome';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import { Action } from './state_management';
 import { Datasource, Visualization, FramePublicAPI } from '../../types';
@@ -87,12 +88,20 @@ export function InnerWorkspacePanel({
 
   function renderEmptyWorkspace() {
     return (
-      <p data-test-subj="empty-workspace">
-        <FormattedMessage
-          id="xpack.lens.editorFrame.emptyWorkspace"
-          defaultMessage="This is the workspace panel. Drop fields here"
+      <EuiText textAlign="center" grow={false} color="subdued" data-test-subj="empty-workspace">
+        <h3>Your workspace awaits</h3>
+        <EuiImage
+          style={{ width: 360 }}
+          url={chrome.addBasePath('/plugins/lens/assets/lens_app_graphic_2x.png')}
+          alt=""
         />
-      </p>
+        <p>
+          <FormattedMessage
+            id="xpack.lens.editorFrame.emptyWorkspace"
+            defaultMessage="To create your visualization, drop some fields here."
+          />
+        </p>
+      </EuiText>
     );
   }
 
