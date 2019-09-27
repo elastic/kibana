@@ -24,12 +24,14 @@ import { httpServerMock } from './http_server.mocks';
 describe('BasePath', () => {
   describe('serverBasePath', () => {
     it('defaults to an empty string', () => {
-      let basePath = new BasePath();
+      const basePath = new BasePath();
       expect(basePath.serverBasePath).toBe('');
-
-      basePath = new BasePath('/server');
-      expect(basePath.serverBasePath).toBe('/server');
     });
+
+    it('returns the server base path', () => {
+      const basePath = new BasePath('/server');
+      expect(basePath.serverBasePath).toBe('/server');
+    })
   });
 
   describe('#get()', () => {
