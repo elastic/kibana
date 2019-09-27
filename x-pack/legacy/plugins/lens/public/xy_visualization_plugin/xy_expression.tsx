@@ -133,7 +133,7 @@ export function XYChartReportable(props: XYChartRenderProps) {
   }, []);
 
   return (
-    <VisualizationContainer className="lnsXyExpression__chart" isReady={isReady}>
+    <VisualizationContainer className="lnsXyExpression__container" isReady={isReady}>
       <MemoizedChart {...props} />
     </VisualizationContainer>
   );
