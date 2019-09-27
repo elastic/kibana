@@ -18,12 +18,12 @@
  */
 
 
-import getConfigs from './get_configs';
+import getAllConfigs from './get_all_configs';
 
 const serverConfig = require('../test/server_config');
 
 export default async function ({ readConfigFile }) {
-  const defaultConfigs = await getConfigs(readConfigFile, '../../functional/config');
+  const defaultConfigs = await getAllConfigs(readConfigFile, '../../functional/config');
 
   return {
     ...defaultConfigs,

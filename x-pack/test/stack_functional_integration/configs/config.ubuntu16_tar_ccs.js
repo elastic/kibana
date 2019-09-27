@@ -17,23 +17,15 @@
  * under the License.
  */
 
-// import {
-//   KibanaSupertestProvider,
-//   KibanaSupertestWithoutAuthProvider,
-//   ElasticsearchSupertestProvider,
-// } from './services';
-
-const serverConfig = require('../test/server_config');
+import getAllConfigs from './get_all_configs';
 
 export default async function ({ readConfigFile }) {
-  const defaultConfig = await readConfigFile(require.resolve('../../functional/config'));
-  // const commonConfig = await readConfigFile(require.resolve('../common/config'));
-  // const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
+  const baseConfigs = await getAllConfigs(readConfigFile, './config.stack_functional_integration_base');
 
   return {
-    ...defaultConfig.getAll(),
+    ...baseConfigs,
     junit: {
-      reportName: 'Stack Functional Integration Tests - ubuntu16_tar_ccs'
+      reportName: `${baseConfigs.junit.reportName} - ubuntu16_tar_ccs`
     },
     testFiles: [
       require.resolve('../test/functional/apps/telemetry'),
@@ -42,7 +34,5 @@ export default async function ({ readConfigFile }) {
       // require.resolve('./test/functional/apps/packetbeat'),
       // require.resolve('./test/functional/apps/monitoring'),
     ],
-    servers: serverConfig.servers,
-    apps: serverConfig.apps,
   };
 }

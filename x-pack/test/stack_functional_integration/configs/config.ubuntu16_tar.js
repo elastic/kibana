@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import getConfigs from './get_configs';
+import getAllConfigs from './get_all_configs';
 
 export default async function ({ readConfigFile }) {
-  const baseConfigs = await getConfigs(readConfigFile, './config.stack_functional_integration_base');
+  const baseConfigs = await getAllConfigs(readConfigFile, './config.stack_functional_integration_base');
 
   return {
     ...baseConfigs,
