@@ -17,13 +17,77 @@
  * under the License.
  */
 
-import requestLib from 'request';
-import util from 'util';
+import http from 'http';
+import https from 'https';
+import net from 'net';
+import stream from 'stream';
+import Boom from 'boom';
+import { URL } from 'url';
 
-// Separate module for easier mocking during testing.
+interface Args {
+  method: string;
+  agent: http.Agent;
+  uri: URL;
+  payload: stream.Stream;
+  timeout: number;
+  headers: http.OutgoingHttpHeaders;
+}
 
-// We use the request library because Hapi, Axios, and Superagent don't support GET requests
-// with bodies, but ES APIs do. Similarly with DELETE requests with bodies. If we need to
-// deprecate use of this library, we can also solve this issue with Node's http library.
-// See #39170 for details.
-export const request = util.promisify(requestLib);
+// We use a modified version of Hapi's Wreck because  Hapi, Axios, and Superagent don't support GET requests
+// with bodies, but ES APIs do. Similarly with DELETE requests with bodies. Another library, `request`
+// diverged too much from current behaviour.
+export const sendRequest = ({ method, headers, agent, uri, timeout, payload }: Args) => {
+  const client = uri.protocol === 'https:' ? https : http;
+  let resolved = false;
+
+  let resolve: any;
+  let reject: any;
+  const reqPromise = new Promise<http.ServerResponse>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+
+  const req = client.request({
+    method: method.toUpperCase(),
+    host: uri.hostname,
+    port: uri.port !== '' ? Number(uri.port) : undefined,
+    protocol: 'http:',
+    path: `${uri.pathname}${uri.search || ''}`,
+    headers: {
+      ...headers,
+      'content-type': 'application/json',
+      'transfer-encoding': 'chunked',
+      host: uri.hostname,
+    },
+    agent,
+  });
+
+  req.once('response', res => {
+    resolved = true;
+    resolve(res);
+  });
+
+  req.once('socket', (socket: net.Socket) => {
+    if (!socket.connecting) {
+      payload.pipe(req);
+    } else {
+      socket.once('connect', () => {
+        payload.pipe(req);
+      });
+    }
+  });
+
+  const onError = () => reject();
+  req.once('error', onError);
+
+  const timeoutPromise = new Promise<any>((_, timeoutReject) => {
+    setTimeout(() => {
+      if (!req.aborted && !req.socket) req.abort();
+      if (!resolved) {
+        timeoutReject(Boom.gatewayTimeout('Client request timeout'));
+      }
+    }, timeout);
+  });
+
+  return Promise.race<http.ServerResponse>([reqPromise, timeoutPromise]);
+};

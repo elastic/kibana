@@ -20,9 +20,8 @@
 import Joi from 'joi';
 import Boom from 'boom';
 import { trimLeft, trimRight } from 'lodash';
-import { request } from './request';
+import { sendRequest } from './request';
 import * as url from 'url';
-import * as qs from 'querystring';
 
 function toURL(base, path) {
   const urlResult = new url.URL(`${trimRight(base, '/')}/${trimLeft(path, '/')}`);
@@ -66,6 +65,10 @@ export const createProxyRoute = ({
   method: 'POST',
   config: {
     tags: ['access:console'],
+    payload: {
+      output: 'stream',
+      parse: false,
+    },
     validate: {
       query: Joi.object()
         .keys({
@@ -107,13 +110,12 @@ export const createProxyRoute = ({
         ...getProxyHeaders(req),
       };
 
-      const esResponse = await request({
+      const esIncomingMessage = await sendRequest({
         method,
         headers: requestHeaders,
-        uri: uri.toString(),
+        uri,
         timeout,
-        body: payload ? JSON.stringify(payload) : undefined,
-        qs: qs.parse(uri.searchParams.toString() || ''),
+        payload,
         agent,
       });
 
@@ -121,23 +123,22 @@ export const createProxyRoute = ({
         statusCode,
         statusMessage,
         headers: responseHeaders,
-        body,
-      } = esResponse;
+      } = esIncomingMessage;
 
       const { warning } = responseHeaders;
 
       if (method.toUpperCase() !== 'HEAD') {
         return h
-          .response(body)
+          .response(esIncomingMessage)
           .code(statusCode)
-          .type(responseHeaders['content-type'] || 'text/plain')
+          .header('warning', warning);
+      } else {
+        return h
+          .response(`${statusCode} - ${statusMessage}`)
+          .code(statusCode)
+          .type('text/plain')
           .header('warning', warning);
       }
-      return h
-        .response(`${statusCode} - ${statusMessage}`)
-        .code(statusCode)
-        .type('text/plain')
-        .header('warning', warning);
     },
   },
 });
