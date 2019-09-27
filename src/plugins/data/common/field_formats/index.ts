@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { FieldFormat } from './field_format';
+export { FieldFormat, DEFAULT_CONTEXT_TYPE } from './field_format';
 export { getHighlightRequest, asPrettyString, getHighlightHtml } from './utils';
