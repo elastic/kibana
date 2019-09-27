@@ -82,9 +82,9 @@ export default function({ getService }: FtrProviderContext) {
           response: expectTypeRequired,
         },
         filterWithUnAllowedType: {
-          description: 'Internal Server Error',
-          statusCode: 500,
-          response: expectFilterInternalServerError,
+          description: 'forbidden',
+          statusCode: 403,
+          response: createExpectRbacForbidden('globaltype'),
         },
       },
     });
@@ -214,9 +214,9 @@ export default function({ getService }: FtrProviderContext) {
           response: expectTypeRequired,
         },
         filterWithUnAllowedType: {
-          description: 'Internal Server Error',
-          statusCode: 500,
-          response: expectFilterInternalServerError,
+          description: 'forbidden',
+          statusCode: 403,
+          response: createExpectRbacForbidden('globaltype'),
         },
       },
     });
@@ -544,9 +544,9 @@ export default function({ getService }: FtrProviderContext) {
           response: expectTypeRequired,
         },
         filterWithUnAllowedType: {
-          description: 'Internal Server Error',
-          statusCode: 500,
-          response: expectFilterInternalServerError,
+          description: 'forbidden',
+          statusCode: 403,
+          response: createExpectRbacForbidden('globaltype'),
         },
       },
     });
@@ -610,9 +610,9 @@ export default function({ getService }: FtrProviderContext) {
           response: expectTypeRequired,
         },
         filterWithUnAllowedType: {
-          description: 'Internal Server Error',
-          statusCode: 500,
-          response: expectFilterInternalServerError,
+          description: 'forbidden',
+          statusCode: 403,
+          response: createExpectRbacForbidden('globaltype'),
         },
       },
     });
@@ -676,9 +676,9 @@ export default function({ getService }: FtrProviderContext) {
           response: expectTypeRequired,
         },
         filterWithUnAllowedType: {
-          description: 'Internal Server Error',
-          statusCode: 500,
-          response: expectFilterInternalServerError,
+          description: 'forbidden',
+          statusCode: 403,
+          response: createExpectRbacForbidden('globaltype'),
         },
       },
     });
@@ -742,9 +742,9 @@ export default function({ getService }: FtrProviderContext) {
           response: expectTypeRequired,
         },
         filterWithUnAllowedType: {
-          description: 'Internal Server Error',
-          statusCode: 500,
-          response: expectFilterInternalServerError,
+          description: 'forbidden',
+          statusCode: 403,
+          response: createExpectRbacForbidden('globaltype'),
         },
       },
     });

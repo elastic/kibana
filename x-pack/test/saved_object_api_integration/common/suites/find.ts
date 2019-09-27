@@ -251,7 +251,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
               .get(
                 `${getUrlPrefix(
                   spaceId
-                )}/api/saved_objects/_find?filter=global.attributes.name: *global*`
+                )}/api/saved_objects/_find?filter=global.attributes.name:*global*`
               )
               .auth(user.username, user.password)
               .expect(tests.filterWithNoType.statusCode)
