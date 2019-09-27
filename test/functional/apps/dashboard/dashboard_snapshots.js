@@ -70,7 +70,6 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.dashboard.saveDashboard('area');
       await PageObjects.common.closeToast();
       await PageObjects.dashboard.clickFullScreenMode();
-      // await PageObjects.common.sleep(500);
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickExpandPanelToggle();
 
