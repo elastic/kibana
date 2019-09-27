@@ -8,7 +8,14 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiFormRow,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { MetricSelect, METRIC_AGGREGATION_VALUES } from './metric_select';
 import { SingleFieldSelect } from './single_field_select';
@@ -43,7 +50,7 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
         label={i18n.translate('xpack.maps.metricsEditor.selectFieldLabel', {
           defaultMessage: 'Field',
         })}
-        display="rowCompressed"
+        display="columnCompressed"
       >
         <SingleFieldSelect
           placeholder={i18n.translate('xpack.maps.metricsEditor.selectFieldPlaceholder', {
@@ -67,7 +74,7 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
         label={i18n.translate('xpack.maps.metricsEditor.customLabel', {
           defaultMessage: 'Custom label',
         })}
-        display="rowCompressed"
+        display="columnCompressed"
       >
         <EuiFieldText
           onChange={onLabelChange}
@@ -80,12 +87,20 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
 
   return (
     <Fragment>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xxs">
+            <h4>Metric</h4>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{removeButton}</EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
       <EuiFormRow
         label={i18n.translate('xpack.maps.metricsEditor.aggregationLabel', {
           defaultMessage: 'Aggregation',
         })}
-        labelAppend={removeButton}
-        display="rowCompressed"
+        display="columnCompressed"
       >
         <MetricSelect
           onChange={onAggChange}
