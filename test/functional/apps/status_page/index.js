@@ -32,9 +32,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show the kibana plugin as ready', async function () {
-      if (Math.random() <= 0.3) {
-        expect(true).to.equal(false);
-      }
       await retry.tryForTime(6000, async () => {
         const text = await testSubjects.getVisibleText('statusBreakdown');
         expect(text.indexOf('plugin:kibana')).to.be.above(-1);
