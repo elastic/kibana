@@ -22,8 +22,17 @@ import { SavedObject } from 'kibana/server';
 import { DiscoverIndexPatternTitle } from './discover_index_pattern_title';
 
 export interface DiscoverIndexPatternProps {
+  /**
+   * list of available index patterns, if length > 1, component offers a "change" link
+   */
   indexPatternList: SavedObject[];
+  /**
+   * currently selected index pattern, due to angular issues it's undefined at first rendering
+   */
   selectedIndexPattern: SavedObject;
+  /**
+   * triggered when user selects a new index pattern
+   */
   setIndexPattern: (id: string) => void;
 }
 
@@ -54,8 +63,8 @@ export function DiscoverIndexPattern({
   if (!showCombo) {
     return (
       <DiscoverIndexPatternTitle
+        isChangeable={indexPatternList.length > 1}
         onChange={() => setShowCombo(true)}
-        changeable={indexPatternList.length > 1}
         title={selected.attributes ? selected.attributes.title : ''}
       />
     );

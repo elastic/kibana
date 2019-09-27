@@ -25,7 +25,7 @@ export interface DiscoverIndexPatternTitleProps {
   /**
    * determines whether the change link is displayed
    */
-  changeable: boolean;
+  isChangeable: boolean;
   /**
    * function triggered when the change link is clicked
    */
@@ -41,7 +41,7 @@ export interface DiscoverIndexPatternTitleProps {
  * and if changeable is true, a link is provided to change the index pattern
  */
 export function DiscoverIndexPatternTitle({
-  changeable,
+  isChangeable,
   onChange,
   title,
 }: DiscoverIndexPatternTitleProps) {
@@ -54,7 +54,7 @@ export function DiscoverIndexPatternTitle({
           </EuiTitle>
         </EuiToolTip>
       </EuiFlexItem>
-      {changeable && (
+      {isChangeable && (
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={

@@ -2,7 +2,7 @@
 
 exports[`DiscoverIndexPattern A single index pattern is just displayed 1`] = `
 <DiscoverIndexPatternTitle
-  changeable={false}
+  isChangeable={false}
   onChange={[Function]}
   title="test1"
 />
