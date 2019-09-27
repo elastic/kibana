@@ -12,7 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import moment from 'moment';
 import { CoreStart } from 'src/core/public';
+import 'ui/autoload/all';
+import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
+// @ts-ignore
+import { uiModules } from 'ui/modules';
 
 import { APP_TITLE } from '../common/constants';
 import { App } from './components/app';
@@ -24,6 +28,16 @@ export function startApp(coreStart: CoreStart) {
   if (chrome.getInjected('codeUiEnabled')) {
     // TODO the entire Kibana uses moment, we might need to move it to a more common place
     moment.locale(i18n.getLocale());
+
+    const app = uiModules.get('apps/code');
+    app.config(($locationProvider: any) => {
+      $locationProvider.html5Mode({
+        enabled: false,
+        requireBase: false,
+        rewriteLinks: false,
+      });
+    });
+    app.config((stateManagementConfigProvider: any) => stateManagementConfigProvider.disable());
 
     function RootController($scope: any, $element: any, $http: any) {
       const domNode = $element[0];
