@@ -59,11 +59,10 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
 
   public async waitUntilFrameworkReady(): Promise<void> {
     const $injector = await this.onKibanaReady();
-    const Private: any = $injector.get('Private');
 
     let xpackInfo: any;
     try {
-      xpackInfo = Private(this.XPackInfoProvider);
+      xpackInfo = this.XPackInfoProvider;
     } catch (e) {
       xpackInfo = false;
     }
@@ -88,7 +87,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
             ? xpackInfo.get(`features.${this.PLUGIN_ID}.security.available`, false)
             : false,
         },
-        settings: xpackInfo ? xpackInfo.get(`features.${this.PLUGIN_ID}.settings`) : {},
+        settings: xpackInfo ? xpackInfo.get(`features.${this.PLUGIN_ID}.settings`, {}) : {},
       };
     } catch (e) {
       throw new Error(`Unexpected data structure from XPackInfoProvider, ${JSON.stringify(e)}`);
