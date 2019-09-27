@@ -4,6 +4,12 @@ set -e
 
 source src/dev/ci_setup/setup_env.sh true
 
+echo " -- KIBANA_DIR='$KIBANA_DIR'"
+echo " -- XPACK_DIR='$XPACK_DIR'"
+echo " -- PARENT_DIR='$PARENT_DIR'"
+echo " -- KIBANA_PKG_BRANCH='$KIBANA_PKG_BRANCH'"
+echo " -- TEST_ES_SNAPSHOT_VERSION='$TEST_ES_SNAPSHOT_VERSION'"
+
 ###
 ### check that we seem to be in a kibana project
 ### Disable git automatic lineend handling

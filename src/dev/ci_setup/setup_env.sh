@@ -15,7 +15,7 @@ OS="linux"
 if [[ "$UNAME" = *"MINGW64_NT"* ]]; then
   OS="win"
 fi
-echo " -- OS=$OS"
+echo " -- Running on OS: $OS"
 
 ###
 ### Since the Jenkins logging output collector doesn't look like a TTY
@@ -37,14 +37,9 @@ fi
 
 
 export KIBANA_DIR="$dir"
-echo " -- KIBANA_DIR='$KIBANA_DIR'"
-
 export XPACK_DIR="$KIBANA_DIR/x-pack"
-echo " -- XPACK_DIR='$XPACK_DIR'"
-
 parentDir="$(cd "$KIBANA_DIR/.."; pwd)"
 export PARENT_DIR="$parentDir"
-echo " -- PARENT_DIR='$PARENT_DIR'"
 
 ###
 ### download node
@@ -91,7 +86,6 @@ fi
 ###
 kbnBranch="$(node -e "console.log(require('./package.json').branch)")"
 export KIBANA_PKG_BRANCH="$kbnBranch"
-echo " -- KIBANA_PKG_BRANCH='$KIBANA_PKG_BRANCH'"
 
 
 ###
@@ -159,6 +153,6 @@ if [[ -d "$ES_DIR" && -f "$ES_JAVA_PROP_PATH" ]]; then
     exit 1
   fi
 
-  echo " -- JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA"
+  echo "Setting JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA"
   export JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA
 fi
