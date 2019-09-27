@@ -106,7 +106,7 @@ export function MetricChart({
   }
 
   return (
-    <VisualizationContainer reportTitle={title} className="lnsMetricContainer">
+    <VisualizationContainer reportTitle={title} className="lnsMetricExpression__container">
       <AutoScale>
         <div data-test-subj="lns_metric_value" style={{ fontSize: '60pt', fontWeight: 600 }}>
           {value}
