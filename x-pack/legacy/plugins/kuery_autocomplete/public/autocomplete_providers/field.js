@@ -32,7 +32,14 @@ export function getSuggestionsProvider({ indexPatterns }) {
   return function getFieldSuggestions({ start, end, prefix, suffix, nestedPath = '' }) {
     const search = `${nestedPath ? `${nestedPath}.` : ''}${prefix}${suffix}`.trim().toLowerCase();
     const fieldNames = allFields.map(field => field.name);
-    const matchingFieldNames = fieldNames.filter(name => name.toLowerCase().includes(search) && name !== search);
+    const matchingFieldNames = fieldNames.filter(name => {
+      const field = allFields.find(patternField => patternField.name === name);
+      return (
+        !nestedPath
+        || (nestedPath && (field.subType && field.subType.nested && field.subType.nested.path.includes(nestedPath)))
+      )
+      && name.toLowerCase().includes(search) && name !== search;
+    });
     const sortedFieldNames = sortPrefixFirst(matchingFieldNames.sort(keywordComparator), search);
     const suggestions = sortedFieldNames.map(fieldName => {
       const field = allFields.find(patternField => patternField.name === fieldName);
