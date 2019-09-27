@@ -79,7 +79,7 @@ export function runTypeCheckCli() {
     process.exit();
   }
 
-  const tscArgs = ['--noEmit', '--pretty', ...(opts['skip-lib-check'] ? ['--skipLibCheck'] : [])];
+  const tscArgs = ['--pretty', ...(opts['skip-lib-check'] ? ['--skipLibCheck'] : [])];
   const projects = filterProjectsByFlag(opts.project);
 
   if (!projects.length) {

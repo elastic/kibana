@@ -3,6 +3,7 @@
   "exclude": [],
   "include": ["./**/*"],
   "compilerOptions": {
+    "outDir": "../../../../../build/.cache/apm/cypress",
     "types": ["cypress", "node"]
   }
 }

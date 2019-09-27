@@ -10,6 +10,7 @@
     "target"
   ],
   "compilerOptions": {
+    "outDir": "../../build/.cache/packages/kbn-i18n",
     "declaration": true,
     "declarationDir": "./target/types",
     "types": [

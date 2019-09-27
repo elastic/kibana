@@ -3,4 +3,7 @@
   "include": [
     "index.d.ts"
   ],
+  "compilerOptions": {
+    "outDir": "../../build/.cache/packages/kbn-test-subj-selector"
+  }
 }

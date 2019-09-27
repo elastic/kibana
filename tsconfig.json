@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "incremental": true,
+    "outDir": "build/.cache/kibana",
     "baseUrl": ".",
     "paths": {
       // Allows for importing from `kibana` package for the exported types.
@@ -67,5 +69,5 @@
     // file, but if we did it during development IDEs would not be able to find
     // the tsconfig.json file for public files correctly.
     // "src/**/public/**/*"
-  ]
+  ],
 }

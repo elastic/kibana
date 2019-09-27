@@ -15,7 +15,7 @@
     "**/typespec_tests.ts"
   ],
   "compilerOptions": {
-    "outDir": ".",
+    "outDir": "../build/.cache/x-pack",
     "paths": {
       "kibana/public": ["src/core/public"],
       "kibana/server": ["src/core/server"],

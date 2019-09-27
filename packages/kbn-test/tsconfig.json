@@ -4,5 +4,8 @@
     "types/**/*",
     "src/functional_test_runner/**/*",
     "src/mocha/xml.ts"
-  ]
+  ],
+  "compilerOptions": {
+    "outDir": "../../build/.cache/packages/kbn-test"
+  }
 }

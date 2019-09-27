@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
+    "outDir": "../build/.cache/x-pack/test",
     "types": [
       "mocha",
       "node"

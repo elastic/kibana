@@ -3,6 +3,7 @@
   "compilerOptions": {
     "declaration": true,
     "declarationDir": "./target/types",
+    "outDir": "../../build/.cache/packages/kbn-analytics",
     "stripInternal": true,
     "declarationMap": true,
     "types": [

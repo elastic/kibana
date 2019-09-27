@@ -2,5 +2,8 @@
   "extends": "../../tsconfig.json",
   "include": [
     "expect.js.d.ts"
-  ]
+  ],
+  "compilerOptions": {
+    "outDir": "../../build/.cache/packages/kbn-expect"
+  }
 }

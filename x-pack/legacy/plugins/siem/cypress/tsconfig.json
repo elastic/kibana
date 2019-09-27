@@ -5,6 +5,7 @@
     "./**/*"
   ],
   "compilerOptions": {
+    "outDir": "../../../../../build/.cache/siem/cypress",
     "types": [
       "cypress",
       "node"
