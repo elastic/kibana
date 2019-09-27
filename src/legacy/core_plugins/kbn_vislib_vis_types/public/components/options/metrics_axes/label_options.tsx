@@ -18,7 +18,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -58,6 +58,7 @@ function LabelOptions({ stateParams, setValue, axis, axesName, index }: LabelOpt
 
   return (
     <>
+      <EuiSpacer size="m" />
       <EuiTitle size="xxs">
         <h3>
           <FormattedMessage
@@ -66,6 +67,7 @@ function LabelOptions({ stateParams, setValue, axis, axesName, index }: LabelOpt
           />
         </h3>
       </EuiTitle>
+      <EuiSpacer size="s" />
 
       <SwitchOption
         label={i18n.translate(
@@ -92,6 +94,8 @@ function LabelOptions({ stateParams, setValue, axis, axesName, index }: LabelOpt
         value={axis.labels.filter}
         setValue={setAxisLabel}
       />
+
+      <EuiSpacer size="m" />
 
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
