@@ -5,7 +5,7 @@
  */
 
 import isEqual from 'lodash/fp/isEqual';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 
 interface Measurement {
@@ -35,15 +35,15 @@ export const AutoSizer = React.memo<AutoSizerProps>(
     const element = useRef<HTMLElement | null>(null);
     const resizeObserver = useRef<ResizeObserver | null>(null);
     const windowWidth = useRef(-1);
-    const [boundsMeasurement, setBoundsMeasurement] = useState<Measurement>({
+    const boundsMeasurement = useRef<Measurement>({
       height: 0,
       width: 0,
     });
-    const [contentMeasurement, setContentMeasurement] = useState<Measurement>({
+    const contentMeasurement = useRef<Measurement>({
       height: 0,
       width: 0,
     });
-    const [windowMeasurement, setWindowMeasurement] = useState<Measurement>({
+    const windowMeasurement = useRef<Measurement>({
       height: 0,
       width: 0,
     });
@@ -66,7 +66,7 @@ export const AutoSizer = React.memo<AutoSizerProps>(
             height: element.current.getBoundingClientRect().height,
             width: element.current.getBoundingClientRect().width,
           }
-        : boundsMeasurement;
+        : boundsMeasurement.current;
 
       const windowMeasurementNow: Measurement = {
         width: window.innerWidth,
@@ -85,18 +85,19 @@ export const AutoSizer = React.memo<AutoSizerProps>(
       }
       windowWidth.current = window.innerWidth;
       const contentRect = content && entry ? entry.contentRect : null;
+
       const contentMeasurementNow: Measurement =
         contentRect && entry
           ? {
               height: entry.contentRect.height,
               width: entry.contentRect.width,
             }
-          : contentMeasurement;
+          : contentMeasurement.current;
 
       if (
-        isEqual(boundsMeasurementNow, boundsMeasurement) &&
-        isEqual(contentMeasurementNow, contentMeasurement) &&
-        isEqual(windowMeasurementNow, windowMeasurement)
+        isEqual(boundsMeasurementNow, boundsMeasurement.current) &&
+        isEqual(contentMeasurementNow, contentMeasurement.current) &&
+        isEqual(windowMeasurementNow, windowMeasurement.current)
       ) {
         return;
       }
@@ -105,10 +106,9 @@ export const AutoSizer = React.memo<AutoSizerProps>(
         if (!resizeObserver) {
           return;
         }
-
-        setBoundsMeasurement(boundsMeasurementNow);
-        setContentMeasurement(contentMeasurementNow);
-        setWindowMeasurement(windowMeasurementNow);
+        boundsMeasurement.current = boundsMeasurementNow;
+        contentMeasurement.current = contentMeasurementNow;
+        windowMeasurement.current = windowMeasurementNow;
         if (onResize) {
           onResize({
             bounds: boundsMeasurementNow,
@@ -143,9 +143,9 @@ export const AutoSizer = React.memo<AutoSizerProps>(
       };
     }, []);
     return children({
-      bounds: boundsMeasurement,
-      content: contentMeasurement,
-      windowMeasurement,
+      bounds: boundsMeasurement.current,
+      content: contentMeasurement.current,
+      windowMeasurement: windowMeasurement.current,
       measureRef: storeRef,
     });
   }
