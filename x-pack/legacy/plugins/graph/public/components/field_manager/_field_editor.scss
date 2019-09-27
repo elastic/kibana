@@ -1,0 +1,18 @@
+.gphFieldEditor__badge {
+  @include gphFieldBadgeSize;
+}
+
+.gphFieldEditor__badge--disabled,
+.gphFieldEditor__badge--disabled:focus {
+  opacity: 0.7;
+  text-decoration: line-through;
+}
+
+.gphFieldEditor__badgeIcon {
+  width: auto;
+  margin-right: $euiSizeXS;
+}
+
+.gphFieldEditor__displayForm {
+  padding: $euiSizeS;
+}

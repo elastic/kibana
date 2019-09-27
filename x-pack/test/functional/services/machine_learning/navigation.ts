@@ -50,6 +50,10 @@ export function MachineLearningNavigationProvider({
       ]);
     },
 
+    async navigateToOverview() {
+      await this.navigateToArea('mlMainTab overview', 'mlPageOverview');
+    },
+
     async navigateToAnomalyDetection() {
       await this.navigateToArea('mlMainTab anomalyDetection', 'mlPageJobManagement');
       await this.assertTabsExist('mlSubTab', [
