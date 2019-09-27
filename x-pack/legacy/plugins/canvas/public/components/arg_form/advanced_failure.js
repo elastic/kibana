@@ -11,6 +11,10 @@ import { EuiTextArea, EuiButton, EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@
 import { fromExpression, toExpression } from '@kbn/interpreter/common';
 import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
 
+import { ComponentStrings } from '../../../i18n';
+
+const { ArgFormAdvancedFailure: strings } = ComponentStrings;
+
 export const AdvancedFailureComponent = props => {
   const {
     onValueChange,
@@ -40,7 +44,12 @@ export const AdvancedFailureComponent = props => {
 
   return (
     <div>
-      <EuiFormRow display="rowCompressed" id={argId} isInvalid={!valid} error="Invalid Expression">
+      <EuiFormRow
+        display="rowCompressed"
+        id={argId}
+        isInvalid={!valid}
+        error={strings.getRowErrorMessage()}
+      >
         <EuiTextArea
           id={argId}
           isInvalid={!valid}
@@ -53,11 +62,11 @@ export const AdvancedFailureComponent = props => {
       <EuiSpacer size="s" />
       <div>
         <EuiButton disabled={!valid} onClick={e => valueChange(e)} size="s" type="submit">
-          Apply
+          {strings.getApplyButtonLabel()}
         </EuiButton>
         {defaultValue && defaultValue.length && (
           <EuiButtonEmpty size="s" color="danger" onClick={confirmReset}>
-            Reset
+            {strings.getResetButtonLabel()}
           </EuiButtonEmpty>
         )}
       </div>
