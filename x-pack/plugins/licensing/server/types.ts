@@ -124,7 +124,7 @@ export interface LicensingRequestContext {
   license: ILicense;
 }
 
-declare module 'kibana/server' {
+declare module 'src/core/server' {
   interface RequestHandlerContext {
     licensing: LicensingRequestContext;
   }

@@ -5,7 +5,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { first, map, take } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 import moment from 'moment';
 import {
   CoreSetup,
@@ -18,6 +18,7 @@ import { Poller } from '../../../../src/core/utils/poller';
 import { LicensingConfigType, LicensingPluginSetup, ILicense } from './types';
 import { LicensingConfig } from './licensing_config';
 import { License } from './license';
+import { createRouteHandlerContext } from './licensing_route_handler_context';
 
 export class Plugin implements CorePlugin<LicensingPluginSetup> {
   private readonly logger: Logger;
@@ -123,10 +124,7 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
 
     const license$ = poller.subject$.asObservable();
 
-    core.http.registerRouteHandlerContext('licensing', async () => {
-      const license = await license$.pipe(take(1)).toPromise();
-      return { license };
-    });
+    core.http.registerRouteHandlerContext('licensing', createRouteHandlerContext(license$));
 
     return {
       license$,
