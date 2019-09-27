@@ -232,6 +232,18 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.shareWebsiteFlyout.flyoutTitle', {
         defaultMessage: 'Share on a website',
       }),
+    getUnsupportedRendererResult: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.unsupportedRendererResult', {
+        defaultMessage: 'These elements will not be rendered.',
+      }),
+    getUnsupportedRendererWarning: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.unsupportedRendererWarning', {
+        defaultMessage:
+          'This workpad contains render functions that are not supported by the Shareable {CANVAS} Runtime:',
+        values: {
+          CANVAS,
+        },
+      }),
     getWorkpadStepTitle: () =>
       i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.downloadWorkpadTitle', {
         defaultMessage: 'Download workpad',

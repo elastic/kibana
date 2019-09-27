@@ -69,7 +69,7 @@ export interface ExpressionContext {
 }
 
 export interface ResolvedArgType {
-  expressionRenderable: ExpressionRenderable;
+  expressionRenderable?: ExpressionRenderable;
   expressionContext: ExpressionContext;
 }
 
