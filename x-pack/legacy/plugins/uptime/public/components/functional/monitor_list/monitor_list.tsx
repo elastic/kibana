@@ -70,64 +70,74 @@ export const MonitorListComponent = (props: Props) => {
   const prevPagePagination = get<string>(data, 'monitorStates.prevPagePagination');
 
   return (
-    <EuiPanel>
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.uptime.monitorList.monitoringStatusTitle"
-            defaultMessage="Monitor status"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiBasicTable
-        error={errors ? formatUptimeGraphQLErrorList(errors) : errors}
-        loading={loading}
-        isExpandable={true}
-        hasActions={true}
-        itemId="monitor_id"
-        itemIdToExpandedRowMap={drawerIds.reduce((map: ExpandedRowMap, id: string) => {
-          return {
-            ...map,
-            [id]: (
-              <MonitorListDrawer
-                condensedCheckLimit={CLIENT_DEFAULTS.CONDENSED_CHECK_LIMIT}
-                summary={
-                  items ? items.find(({ monitor_id: monitorId }) => monitorId === id) : undefined
-                }
-                successColor={successColor}
-                dangerColor={dangerColor}
-              />
-            ),
-          };
-        }, {})}
-        items={items}
-        // TODO: not needed without sorting and pagination
-        // onChange={onChange}
-        noItemsMessage={
-          hasActiveFilters
-            ? i18n.translate('xpack.uptime.monitorList.noItemForSelectedFiltersMessage', {
-                defaultMessage: 'No monitors found for selected filter criteria',
-                description:
-                  'This message is show if there are no monitors in the table and some filter or search criteria exists',
-              })
-            : i18n.translate('xpack.uptime.monitorList.noItemMessage', {
-                defaultMessage: 'No uptime monitors found',
-                description:
-                  'This message is shown if the monitors table is rendered but has no items.',
-              })
-        }
-        columns={[
-          {
-            align: 'left',
-            field: 'state.monitor.status',
-            name: i18n.translate('xpack.uptime.monitorList.statusColumnLabel', {
-              defaultMessage: 'Status',
-            }),
-            render: (status: string, { state: { timestamp } }: MonitorSummary) => {
-              return <MonitorListStatusColumn status={status} timestamp={timestamp} />;
+    <Fragment>
+      <EuiPanel>
+        <EuiTitle size="xs">
+          <h5>
+            <FormattedMessage
+              id="xpack.uptime.monitorList.monitoringStatusTitle"
+              defaultMessage="Monitor status"
+            />
+          </h5>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiBasicTable
+          aria-label={i18n.translate('xpack.uptime.monitorList.table.description', {
+            defaultMessage:
+              'Monitor Status table with columns for Status, Name, URL, IP, Downtime History and Integrations. The table is currently displaying {length} items.',
+            values: { length: items.length },
+          })}
+          error={errors ? formatUptimeGraphQLErrorList(errors) : errors}
+          loading={loading}
+          isExpandable={true}
+          hasActions={true}
+          itemId="monitor_id"
+          itemIdToExpandedRowMap={drawerIds.reduce((map: ExpandedRowMap, id: string) => {
+            return {
+              ...map,
+              [id]: (
+                <MonitorListDrawer
+                  condensedCheckLimit={CLIENT_DEFAULTS.CONDENSED_CHECK_LIMIT}
+                  summary={
+                    items ? items.find(({ monitor_id: monitorId }) => monitorId === id) : undefined
+                  }
+                  successColor={successColor}
+                  dangerColor={dangerColor}
+                />
+              ),
+            };
+          }, {})}
+          items={items}
+          // TODO: not needed without sorting and pagination
+          // onChange={onChange}
+          noItemsMessage={
+            hasActiveFilters
+              ? i18n.translate('xpack.uptime.monitorList.noItemForSelectedFiltersMessage', {
+                  defaultMessage: 'No monitors found for selected filter criteria',
+                  description:
+                    'This message is show if there are no monitors in the table and some filter or search criteria exists',
+                })
+              : i18n.translate('xpack.uptime.monitorList.noItemMessage', {
+                  defaultMessage: 'No uptime monitors found',
+                  description:
+                    'This message is shown if the monitors table is rendered but has no items.',
+                })
+          }
+          // TODO: reintegrate pagination in future release
+          // pagination={pagination}
+          // TODO: reintegrate sorting in future release
+          // sorting={sorting}
+          columns={[
+            {
+              align: 'left',
+              field: 'state.monitor.status',
+              name: i18n.translate('xpack.uptime.monitorList.statusColumnLabel', {
+                defaultMessage: 'Status',
+              }),
+              render: (status: string, { state: { timestamp } }: MonitorSummary) => {
+                return <MonitorListStatusColumn status={status} timestamp={timestamp} />;
+              },
             },
-          },
           {
             align: 'left',
             field: 'state.monitor.name',
@@ -239,6 +249,7 @@ export const MonitorListComponent = (props: Props) => {
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
+    </Fragment>
   );
 };
 

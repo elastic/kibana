@@ -12,6 +12,7 @@ import { IInterpreterRenderFunction } from '../../../../../../src/legacy/core_pl
 import { MetricConfig } from './types';
 import { LensMultiTable } from '../types';
 import { AutoScale } from './auto_scale';
+import { VisualizationContainer } from '../visualization_container';
 
 export interface MetricChartProps {
   data: LensMultiTable;
@@ -105,7 +106,8 @@ export function MetricChart({
   }
 
   return (
-    <div
+    <VisualizationContainer
+      reportTitle={title}
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -126,6 +128,6 @@ export function MetricChart({
           </div>
         )}
       </AutoScale>
-    </div>
+    </VisualizationContainer>
   );
 }

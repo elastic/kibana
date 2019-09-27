@@ -10,7 +10,7 @@ export { RepositoryDeleteProvider } from './repository_delete_provider';
 export { RepositoryForm } from './repository_form';
 export { RepositoryVerificationBadge } from './repository_verification_badge';
 export { RepositoryTypeLogo } from './repository_type_logo';
-export { SectionError } from './section_error';
+export { SectionError, Error } from './section_error';
 export { SectionLoading } from './section_loading';
 export { SnapshotDeleteProvider } from './snapshot_delete_provider';
 export { RestoreSnapshotForm } from './restore_snapshot_form';
