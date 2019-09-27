@@ -93,7 +93,7 @@ export class Assigned extends React.Component {
     const data = sortBy(this.props.data, sortByName).map(this.createChild);
     return (
       <td>
-        <EuiFlexGrid columns={3} className="monChildren">
+        <EuiFlexGrid columns={3} gutterSize="m" className="monChildren">
           {data}
         </EuiFlexGrid>
       </td>

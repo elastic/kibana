@@ -8,7 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { Shard } from './shard';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGrid } from '@elastic/eui';
 
 export class Unassigned extends React.Component {
   static displayName = i18n.translate(
@@ -39,9 +39,9 @@ export class Unassigned extends React.Component {
     const shards = _.sortBy(this.props.shards, 'shard').map(this.createShard);
     return (
       <td className="monUnassigned" data-test-subj="clusterView-Unassigned">
-        <EuiFlexGroup wrap className="monChildren">
+        <EuiFlexGrid columns={3} gutterSize="m" className="monChildren">
           {shards}
-        </EuiFlexGroup>
+        </EuiFlexGrid>
       </td>
     );
   }
