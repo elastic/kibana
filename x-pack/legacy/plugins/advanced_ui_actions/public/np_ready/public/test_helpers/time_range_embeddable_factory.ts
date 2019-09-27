@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EmbeddableInput, IContainer, EmbeddableFactory } from 'src/plugins/embeddable/public';
+import {
+  EmbeddableInput,
+  IContainer,
+  EmbeddableFactory,
+} from '../../../../../../../../src/plugins/embeddable/public';
 import { TimeRange } from '../../../../../../../../src/plugins/data/public';
 import { TIME_RANGE_EMBEDDABLE, TimeRangeEmbeddable } from './time_range_embeddable';
 
