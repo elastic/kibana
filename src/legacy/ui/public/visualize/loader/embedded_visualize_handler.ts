@@ -357,35 +357,13 @@ export class EmbeddedVisualizeHandler {
 
   /**
    * Returns a promise, that will resolve (without a value) once the first rendering of
-   * the visualization has finished. If you want to listen to consecutive rendering
-   * events, look into the `addRenderCompleteListener` method.
+   * the visualization has finished.
    *
    * @returns Promise, that resolves as soon as the visualization is done rendering
    *    for the first time.
    */
   public whenFirstRenderComplete(): Promise<void> {
     return this.firstRenderComplete;
-  }
-
-  /**
-   * Adds a listener to be called whenever the visualization finished rendering.
-   * This can be called multiple times, when the visualization rerenders, e.g. due
-   * to new data.
-   *
-   * @param {function} listener The listener to be notified about complete renders.
-   */
-  public addRenderCompleteListener(listener: () => void) {
-    this.listeners.addListener(RENDER_COMPLETE_EVENT, listener);
-  }
-
-  /**
-   * Removes a previously registered render complete listener from this handler.
-   * This listener will no longer be called when the visualization finished rendering.
-   *
-   * @param {function} listener The listener to remove from this handler.
-   */
-  public removeRenderCompleteListener(listener: () => void) {
-    this.listeners.removeListener(RENDER_COMPLETE_EVENT, listener);
   }
 
   /**

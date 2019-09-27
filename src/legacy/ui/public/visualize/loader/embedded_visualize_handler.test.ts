@@ -287,12 +287,4 @@ describe('EmbeddedVisualizeHandler', () => {
   describe('whenFirstRenderComplete', () => {
     // TODO
   });
-
-  describe('addRenderCompleteListener', () => {
-    // TODO
-  });
-
-  describe('removeRenderCompleteListener', () => {
-    // TODO
-  });
 });

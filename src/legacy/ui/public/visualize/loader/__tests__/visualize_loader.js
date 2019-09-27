@@ -373,43 +373,6 @@ describe('visualize loader', () => {
         expect(spy.calledOnce).to.be(true);
       });
 
-      it('should add listeners via addRenderCompleteListener that triggers on renderComplete events', async () => {
-        const container = newContainer();
-        const handler = loader.embedVisualizationWithSavedObject(container[0], createSavedObject(), {});
-        const spy = sinon.spy();
-        handler.addRenderCompleteListener(spy);
-        expect(spy.notCalled).to.be(true);
-        dispatchRenderComplete(container.find('[data-test-subj="visualizationLoader"]')[0]);
-        await timeout();
-        expect(spy.calledOnce).to.be(true);
-      });
-
-      it('should call render complete listeners once per renderComplete event', async () => {
-        const container = newContainer();
-        const handler = loader.embedVisualizationWithSavedObject(container[0], createSavedObject(), {});
-        const spy = sinon.spy();
-        handler.addRenderCompleteListener(spy);
-        expect(spy.notCalled).to.be(true);
-        dispatchRenderComplete(container.find('[data-test-subj="visualizationLoader"]')[0]);
-        dispatchRenderComplete(container.find('[data-test-subj="visualizationLoader"]')[0]);
-        dispatchRenderComplete(container.find('[data-test-subj="visualizationLoader"]')[0]);
-        expect(spy.callCount).to.be(3);
-      });
-
-      it('should successfully remove listeners from render complete', async () => {
-        const container = newContainer();
-        const handler = loader.embedVisualizationWithSavedObject(container[0], createSavedObject(), {});
-        const spy = sinon.spy();
-        handler.addRenderCompleteListener(spy);
-        expect(spy.notCalled).to.be(true);
-        dispatchRenderComplete(container.find('[data-test-subj="visualizationLoader"]')[0]);
-        expect(spy.calledOnce).to.be(true);
-        spy.resetHistory();
-        handler.removeRenderCompleteListener(spy);
-        dispatchRenderComplete(container.find('[data-test-subj="visualizationLoader"]')[0]);
-        expect(spy.notCalled).to.be(true);
-      });
-
 
       it('should allow updating and deleting data attributes', () => {
         const container = newContainer();
