@@ -72,19 +72,24 @@ describe('CoordinateMapsVisualizationTest', function () {
   let imageComparator;
 
   let getManifestStub;
+
+  ngMock.inject(($injector) => {
+    const serviceSettings = $injector.get('serviceSettings');
+    const uiSettings = $injector.get('config');
+
+    dependencies = {
+      serviceSettings,
+      uiSettings,
+      $injector,
+    };
+
+    visualizationsSetup.types.registerVisualization(() => createTileMapTypeDefinition(dependencies));
+  });
+
   beforeEach(ngMock.module('kibana'));
   beforeEach(
     ngMock.inject((Private, $injector) => {
       const serviceSettings = $injector.get('serviceSettings');
-      const uiSettings = $injector.get('config');
-
-      dependencies = {
-        serviceSettings,
-        uiSettings,
-        $injector,
-      };
-
-      visualizationsSetup.types.registerVisualization(() => createTileMapTypeDefinition(dependencies));
 
       Vis = Private(visModule.VisProvider);
       CoordinateMapsVisualization = createTileMapVisualization(dependencies);
