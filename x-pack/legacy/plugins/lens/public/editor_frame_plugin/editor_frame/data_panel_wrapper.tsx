@@ -32,6 +32,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
         type: 'UPDATE_DATASOURCE_STATE',
         updater,
         datasourceId: props.activeDatasource!,
+        clearStagedPreview: true,
       });
     },
     [props.dispatch, props.activeDatasource]
@@ -53,7 +54,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
       {Object.keys(props.datasourceMap).length > 1 && (
         <EuiPopover
           id="datasource-switch"
-          className="lnsDatasourceSwitch"
+          className="lnsDataPanelWrapper__switchSource"
           button={
             <EuiButtonIcon
               aria-label={i18n.translate('xpack.lens.dataPanelWrapper.switchDatasource', {
@@ -97,7 +98,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
       )}
       {props.activeDatasource && !props.datasourceIsLoading && (
         <NativeRenderer
-          className="lnsSidebarContainer"
+          className="lnsDataPanelWrapper"
           render={props.datasourceMap[props.activeDatasource].renderDataPanel}
           nativeProps={datasourceProps}
         />

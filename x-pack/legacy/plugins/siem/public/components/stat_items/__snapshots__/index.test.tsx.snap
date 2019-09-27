@@ -34,12 +34,16 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
       narrowDateRange={[MockFunction]}
       to={1560837600000}
     >
-      <FlexItem>
+      <FlexItem
+        data-test-subj="stat-item"
+      >
         <EuiFlexItem
-          className="sc-bZQynM kpuYFd"
+          className="sc-ifAKCX cFdETZ"
+          data-test-subj="stat-item"
         >
           <div
-            className="euiFlexItem sc-bZQynM kpuYFd"
+            className="euiFlexItem sc-ifAKCX cFdETZ"
+            data-test-subj="stat-item"
           >
             <EuiPanel
               onMouseEnter={[Function]}
@@ -114,7 +118,7 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                                 showInspect={false}
                               >
                                 <div
-                                  className="sc-EHOje wlqEL"
+                                  className="sc-bxivhb fEneUz"
                                   data-test-subj="transparent-inspect-container"
                                 >
                                   <EuiButtonIcon
@@ -184,10 +188,10 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                       key="stat-items-field-hosts"
                     >
                       <EuiFlexItem
-                        className="sc-bZQynM kpuYFd"
+                        className="sc-ifAKCX cFdETZ"
                       >
                         <div
-                          className="euiFlexItem sc-bZQynM kpuYFd"
+                          className="euiFlexItem sc-ifAKCX cFdETZ"
                         >
                           <EuiFlexGroup
                             alignItems="center"
@@ -199,22 +203,22 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                             >
                               <FlexItem>
                                 <EuiFlexItem
-                                  className="sc-bZQynM kpuYFd"
+                                  className="sc-ifAKCX cFdETZ"
                                 >
                                   <div
-                                    className="euiFlexItem sc-bZQynM kpuYFd"
+                                    className="euiFlexItem sc-ifAKCX cFdETZ"
                                   >
                                     <StatValue>
                                       <EuiTitle
-                                        className="sc-gzVnrw dJnFxB"
+                                        className="sc-EHOje koezUx"
                                       >
                                         <p
-                                          className="euiTitle euiTitle--medium sc-gzVnrw dJnFxB"
+                                          className="euiTitle euiTitle--medium sc-EHOje koezUx"
                                           data-test-subj="stat-title"
                                         >
                                           <EmptyWrapper>
                                             <span
-                                              className="sc-htpNat bijuWJ"
+                                              className="sc-bdVaJa cSuzWb"
                                             >
                                               —
                                             </span>
@@ -284,12 +288,16 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
       narrowDateRange={[MockFunction]}
       to={1560837600000}
     >
-      <FlexItem>
+      <FlexItem
+        data-test-subj="stat-item"
+      >
         <EuiFlexItem
-          className="sc-bZQynM kpuYFd"
+          className="sc-ifAKCX cFdETZ"
+          data-test-subj="stat-item"
         >
           <div
-            className="euiFlexItem sc-bZQynM kpuYFd"
+            className="euiFlexItem sc-ifAKCX cFdETZ"
+            data-test-subj="stat-item"
           >
             <EuiPanel
               onMouseEnter={[Function]}
@@ -364,7 +372,7 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                                 showInspect={false}
                               >
                                 <div
-                                  className="sc-EHOje wlqEL"
+                                  className="sc-bxivhb fEneUz"
                                   data-test-subj="transparent-inspect-container"
                                 >
                                   <EuiButtonIcon
@@ -434,10 +442,10 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                       key="stat-items-field-hosts"
                     >
                       <EuiFlexItem
-                        className="sc-bZQynM kpuYFd"
+                        className="sc-ifAKCX cFdETZ"
                       >
                         <div
-                          className="euiFlexItem sc-bZQynM kpuYFd"
+                          className="euiFlexItem sc-ifAKCX cFdETZ"
                         >
                           <EuiFlexGroup
                             alignItems="center"
@@ -450,22 +458,22 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                               0
                               <FlexItem>
                                 <EuiFlexItem
-                                  className="sc-bZQynM kpuYFd"
+                                  className="sc-ifAKCX cFdETZ"
                                 >
                                   <div
-                                    className="euiFlexItem sc-bZQynM kpuYFd"
+                                    className="euiFlexItem sc-ifAKCX cFdETZ"
                                   >
                                     <StatValue>
                                       <EuiTitle
-                                        className="sc-gzVnrw dJnFxB"
+                                        className="sc-EHOje koezUx"
                                       >
                                         <p
-                                          className="euiTitle euiTitle--medium sc-gzVnrw dJnFxB"
+                                          className="euiTitle euiTitle--medium sc-EHOje koezUx"
                                           data-test-subj="stat-title"
                                         >
                                           <EmptyWrapper>
                                             <span
-                                              className="sc-htpNat bijuWJ"
+                                              className="sc-bdVaJa cSuzWb"
                                             >
                                               —
                                             </span>
@@ -604,12 +612,16 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
     narrowDateRange={[MockFunction]}
     to={1560837600000}
   >
-    <FlexItem>
+    <FlexItem
+      data-test-subj="stat-item"
+    >
       <EuiFlexItem
-        className="sc-bZQynM kpuYFd"
+        className="sc-ifAKCX cFdETZ"
+        data-test-subj="stat-item"
       >
         <div
-          className="euiFlexItem sc-bZQynM kpuYFd"
+          className="euiFlexItem sc-ifAKCX cFdETZ"
+          data-test-subj="stat-item"
         >
           <EuiPanel
             onMouseEnter={[Function]}
@@ -684,7 +696,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               showInspect={false}
                             >
                               <div
-                                className="sc-EHOje dUUqHB"
+                                className="sc-bxivhb fGGQew"
                                 data-test-subj="transparent-inspect-container"
                               >
                                 <EuiButtonIcon
@@ -754,10 +766,10 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                     key="stat-items-field-uniqueSourceIps"
                   >
                     <EuiFlexItem
-                      className="sc-bZQynM kpuYFd"
+                      className="sc-ifAKCX cFdETZ"
                     >
                       <div
-                        className="euiFlexItem sc-bZQynM kpuYFd"
+                        className="euiFlexItem sc-ifAKCX cFdETZ"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -771,11 +783,11 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               grow={false}
                             >
                               <EuiFlexItem
-                                className="sc-bZQynM kpuYFd"
+                                className="sc-ifAKCX cFdETZ"
                                 grow={false}
                               >
                                 <div
-                                  className="euiFlexItem euiFlexItem--flexGrowZero sc-bZQynM kpuYFd"
+                                  className="euiFlexItem euiFlexItem--flexGrowZero sc-ifAKCX cFdETZ"
                                 >
                                   <EuiIcon
                                     color="#DB1374"
@@ -814,17 +826,17 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             </FlexItem>
                             <FlexItem>
                               <EuiFlexItem
-                                className="sc-bZQynM kpuYFd"
+                                className="sc-ifAKCX cFdETZ"
                               >
                                 <div
-                                  className="euiFlexItem sc-bZQynM kpuYFd"
+                                  className="euiFlexItem sc-ifAKCX cFdETZ"
                                 >
                                   <StatValue>
                                     <EuiTitle
-                                      className="sc-gzVnrw dJnFxB"
+                                      className="sc-EHOje koezUx"
                                     >
                                       <p
-                                        className="euiTitle euiTitle--medium sc-gzVnrw dJnFxB"
+                                        className="euiTitle euiTitle--medium sc-EHOje koezUx"
                                         data-test-subj="stat-title"
                                       >
                                         1,714
@@ -845,10 +857,10 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                     key="stat-items-field-uniqueDestinationIps"
                   >
                     <EuiFlexItem
-                      className="sc-bZQynM kpuYFd"
+                      className="sc-ifAKCX cFdETZ"
                     >
                       <div
-                        className="euiFlexItem sc-bZQynM kpuYFd"
+                        className="euiFlexItem sc-ifAKCX cFdETZ"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -862,11 +874,11 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               grow={false}
                             >
                               <EuiFlexItem
-                                className="sc-bZQynM kpuYFd"
+                                className="sc-ifAKCX cFdETZ"
                                 grow={false}
                               >
                                 <div
-                                  className="euiFlexItem euiFlexItem--flexGrowZero sc-bZQynM kpuYFd"
+                                  className="euiFlexItem euiFlexItem--flexGrowZero sc-ifAKCX cFdETZ"
                                 >
                                   <EuiIcon
                                     color="#490092"
@@ -905,17 +917,17 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             </FlexItem>
                             <FlexItem>
                               <EuiFlexItem
-                                className="sc-bZQynM kpuYFd"
+                                className="sc-ifAKCX cFdETZ"
                               >
                                 <div
-                                  className="euiFlexItem sc-bZQynM kpuYFd"
+                                  className="euiFlexItem sc-ifAKCX cFdETZ"
                                 >
                                   <StatValue>
                                     <EuiTitle
-                                      className="sc-gzVnrw dJnFxB"
+                                      className="sc-EHOje koezUx"
                                     >
                                       <p
-                                        className="euiTitle euiTitle--medium sc-gzVnrw dJnFxB"
+                                        className="euiTitle euiTitle--medium sc-EHOje koezUx"
                                         data-test-subj="stat-title"
                                       >
                                         2,359
@@ -945,10 +957,10 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                 >
                   <FlexItem>
                     <EuiFlexItem
-                      className="sc-bZQynM kpuYFd"
+                      className="sc-ifAKCX cFdETZ"
                     >
                       <div
-                        className="euiFlexItem sc-bZQynM kpuYFd"
+                        className="euiFlexItem sc-ifAKCX cFdETZ"
                       >
                         <BarChart
                           barChart={
@@ -980,6 +992,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               "axis": Object {
                                 "xTickFormatter": [Function],
                               },
+                              "customHeight": 74,
                               "series": Object {
                                 "xScaleType": "ordinal",
                                 "yScaleType": "linear",
@@ -991,112 +1004,19 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             }
                           }
                         >
-                          <AutoSizer
-                            content={true}
-                            detectAnyWindowResize={false}
-                          >
-                            <WrappedByAutoSizer
-                              innerRef={[Function]}
-                            >
-                              <div
-                                className="sc-bwzfXH ffMqh"
-                              >
-                                <BarChartWithCustomPrompt
-                                  configs={
-                                    Object {
-                                      "axis": Object {
-                                        "xTickFormatter": [Function],
-                                      },
-                                      "series": Object {
-                                        "xScaleType": "ordinal",
-                                        "yScaleType": "linear",
-                                      },
-                                      "settings": Object {
-                                        "onElementClick": [Function],
-                                        "rotation": 90,
-                                      },
-                                    }
-                                  }
-                                  data={
-                                    Array [
-                                      Object {
-                                        "color": "#DB1374",
-                                        "key": "uniqueSourceIps",
-                                        "value": Array [
-                                          Object {
-                                            "x": "uniqueSourceIps",
-                                            "y": "1714",
-                                          },
-                                        ],
-                                      },
-                                      Object {
-                                        "color": "#490092",
-                                        "key": "uniqueDestinationIps",
-                                        "value": Array [
-                                          Object {
-                                            "x": "uniqueDestinationIps",
-                                            "y": 2354,
-                                          },
-                                        ],
-                                      },
-                                    ]
-                                  }
-                                >
-                                  <BarChartBaseComponent
-                                    configs={
-                                      Object {
-                                        "axis": Object {
-                                          "xTickFormatter": [Function],
-                                        },
-                                        "series": Object {
-                                          "xScaleType": "ordinal",
-                                          "yScaleType": "linear",
-                                        },
-                                        "settings": Object {
-                                          "onElementClick": [Function],
-                                          "rotation": 90,
-                                        },
-                                      }
-                                    }
-                                    data={
-                                      Array [
-                                        Object {
-                                          "color": "#DB1374",
-                                          "key": "uniqueSourceIps",
-                                          "value": Array [
-                                            Object {
-                                              "x": "uniqueSourceIps",
-                                              "y": "1714",
-                                            },
-                                          ],
-                                        },
-                                        Object {
-                                          "color": "#490092",
-                                          "key": "uniqueDestinationIps",
-                                          "value": Array [
-                                            Object {
-                                              "x": "uniqueDestinationIps",
-                                              "y": 2354,
-                                            },
-                                          ],
-                                        },
-                                      ]
-                                    }
-                                  />
-                                </BarChartWithCustomPrompt>
-                              </div>
-                            </WrappedByAutoSizer>
-                          </AutoSizer>
+                          <div
+                            className="barchart"
+                          />
                         </BarChart>
                       </div>
                     </EuiFlexItem>
                   </FlexItem>
                   <FlexItem>
                     <EuiFlexItem
-                      className="sc-bZQynM kpuYFd"
+                      className="sc-ifAKCX cFdETZ"
                     >
                       <div
-                        className="euiFlexItem sc-bZQynM kpuYFd"
+                        className="euiFlexItem sc-ifAKCX cFdETZ"
                       >
                         <AreaChart
                           areaChart={
@@ -1145,6 +1065,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                 "xTickFormatter": [Function],
                                 "yTickFormatter": [Function],
                               },
+                              "customHeight": 74,
                               "series": Object {
                                 "xScaleType": "time",
                                 "yScaleType": "linear",
@@ -1155,134 +1076,9 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             }
                           }
                         >
-                          <AutoSizer
-                            content={true}
-                            detectAnyWindowResize={false}
-                          >
-                            <WrappedByAutoSizer
-                              innerRef={[Function]}
-                            >
-                              <div
-                                className="sc-bwzfXH ffMqh"
-                              >
-                                <AreaChartWithCustomPrompt
-                                  configs={
-                                    Object {
-                                      "axis": Object {
-                                        "xTickFormatter": [Function],
-                                        "yTickFormatter": [Function],
-                                      },
-                                      "series": Object {
-                                        "xScaleType": "time",
-                                        "yScaleType": "linear",
-                                      },
-                                      "settings": Object {
-                                        "onBrushEnd": [MockFunction],
-                                      },
-                                    }
-                                  }
-                                  data={
-                                    Array [
-                                      Object {
-                                        "color": "#DB1374",
-                                        "key": "uniqueSourceIpsHistogram",
-                                        "value": Array [
-                                          Object {
-                                            "x": 1556888400000,
-                                            "y": 565975,
-                                          },
-                                          Object {
-                                            "x": 1556931600000,
-                                            "y": 1084366,
-                                          },
-                                          Object {
-                                            "x": 1556974800000,
-                                            "y": 12280,
-                                          },
-                                        ],
-                                      },
-                                      Object {
-                                        "color": "#490092",
-                                        "key": "uniqueDestinationIpsHistogram",
-                                        "value": Array [
-                                          Object {
-                                            "x": 1556888400000,
-                                            "y": 565975,
-                                          },
-                                          Object {
-                                            "x": 1556931600000,
-                                            "y": 1084366,
-                                          },
-                                          Object {
-                                            "x": 1556974800000,
-                                            "y": 12280,
-                                          },
-                                        ],
-                                      },
-                                    ]
-                                  }
-                                >
-                                  <AreaChartBaseComponent
-                                    configs={
-                                      Object {
-                                        "axis": Object {
-                                          "xTickFormatter": [Function],
-                                          "yTickFormatter": [Function],
-                                        },
-                                        "series": Object {
-                                          "xScaleType": "time",
-                                          "yScaleType": "linear",
-                                        },
-                                        "settings": Object {
-                                          "onBrushEnd": [MockFunction],
-                                        },
-                                      }
-                                    }
-                                    data={
-                                      Array [
-                                        Object {
-                                          "color": "#DB1374",
-                                          "key": "uniqueSourceIpsHistogram",
-                                          "value": Array [
-                                            Object {
-                                              "x": 1556888400000,
-                                              "y": 565975,
-                                            },
-                                            Object {
-                                              "x": 1556931600000,
-                                              "y": 1084366,
-                                            },
-                                            Object {
-                                              "x": 1556974800000,
-                                              "y": 12280,
-                                            },
-                                          ],
-                                        },
-                                        Object {
-                                          "color": "#490092",
-                                          "key": "uniqueDestinationIpsHistogram",
-                                          "value": Array [
-                                            Object {
-                                              "x": 1556888400000,
-                                              "y": 565975,
-                                            },
-                                            Object {
-                                              "x": 1556931600000,
-                                              "y": 1084366,
-                                            },
-                                            Object {
-                                              "x": 1556974800000,
-                                              "y": 12280,
-                                            },
-                                          ],
-                                        },
-                                      ]
-                                    }
-                                  />
-                                </AreaChartWithCustomPrompt>
-                              </div>
-                            </WrappedByAutoSizer>
-                          </AutoSizer>
+                          <div
+                            className="areachart"
+                          />
                         </AreaChart>
                       </div>
                     </EuiFlexItem>

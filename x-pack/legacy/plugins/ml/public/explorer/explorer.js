@@ -36,7 +36,7 @@ import {
 import { ExplorerSwimlane } from './explorer_swimlane';
 import { KqlFilterBar } from '../components/kql_filter_bar';
 import { formatHumanReadableDateTime } from '../util/date_utils';
-import { getBoundsRoundedToInterval } from 'plugins/ml/util/ml_time_buckets';
+import { getBoundsRoundedToInterval } from '../util/time_buckets';
 import { getSelectedJobIds } from '../components/job_selector/job_select_service_utils';
 import { InfluencersList } from '../components/influencers_list';
 import { ALLOW_CELL_RANGE_SELECTION, dragSelect$, explorer$ } from './explorer_dashboard_service';
@@ -159,7 +159,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       dateFormatTz: PropTypes.string.isRequired,
       globalState: PropTypes.object.isRequired,
       jobSelectService: PropTypes.object.isRequired,
-      MlTimeBuckets: PropTypes.func.isRequired,
+      TimeBuckets: PropTypes.func.isRequired,
     };
 
     state = getExplorerDefaultState();
@@ -365,13 +365,13 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     }
 
     getSwimlaneBucketInterval(selectedJobs) {
-      const { MlTimeBuckets } = this.props;
+      const { TimeBuckets } = this.props;
 
       const swimlaneWidth = getSwimlaneContainerWidth(this.state.noInfluencersConfigured);
       // Bucketing interval should be the maximum of the chart related interval (i.e. time range related)
       // and the max bucket span for the jobs shown in the chart.
       const bounds = timefilter.getActiveBounds();
-      const buckets = new MlTimeBuckets();
+      const buckets = new TimeBuckets();
       buckets.setInterval('auto');
       buckets.setBounds(bounds);
 
@@ -1074,7 +1074,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         globalState,
         intl,
         jobSelectService,
-        MlTimeBuckets,
+        TimeBuckets,
       } = this.props;
 
       const {
@@ -1206,7 +1206,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                   chartWidth={swimlaneWidth}
                   filterActive={filterActive}
                   maskAll={maskAll}
-                  MlTimeBuckets={MlTimeBuckets}
+                  TimeBuckets={TimeBuckets}
                   swimlaneCellClick={this.swimlaneCellClick}
                   swimlaneData={overallSwimlaneData}
                   swimlaneType={SWIMLANE_TYPE.OVERALL}
@@ -1282,7 +1282,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                         chartWidth={swimlaneWidth}
                         filterActive={filterActive}
                         maskAll={maskAll}
-                        MlTimeBuckets={MlTimeBuckets}
+                        TimeBuckets={TimeBuckets}
                         swimlaneCellClick={this.swimlaneCellClick}
                         swimlaneData={viewBySwimlaneData}
                         swimlaneType={SWIMLANE_TYPE.VIEW_BY}

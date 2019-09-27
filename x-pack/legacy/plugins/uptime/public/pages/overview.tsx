@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
+import styled from 'styled-components';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import {
   EmptyState,
@@ -44,26 +45,20 @@ export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
   queryText?: string;
 }) => void;
 
-export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: Props) => {
-  const { absoluteStartDate, absoluteEndDate, colors, setHeadingText } = useContext(
-    UptimeSettingsContext
-  );
-  const [getUrlParams, updateUrl] = useUrlParams();
-  const params = getUrlParams();
-  const {
-    dateRangeStart,
-    dateRangeEnd,
-    filters: urlFilters,
-    // TODO: reintegrate pagination in future release
-    // monitorListPageIndex,
-    // monitorListPageSize,
-    // TODO: reintegrate sorting in future release
-    // monitorListSortDirection,
-    // monitorListSortField,
-    search,
-    statusFilter,
-  } = params;
+const EuiFlexItemStyled = styled(EuiFlexItem)`
+  && {
+    min-width: 598px;
+    @media only screen and (max-width: 630px) {
+      min-width: initial;
+    }
+  }
+`;
 
+export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: Props) => {
+  const { colors, setHeadingText } = useContext(UptimeSettingsContext);
+  const [getUrlParams, updateUrl] = useUrlParams();
+  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
+  const { dateRangeStart, dateRangeEnd, filters: urlFilters, search, statusFilter } = params;
   const [indexPattern, setIndexPattern] = useState<any>(undefined);
 
   useEffect(() => {
@@ -132,11 +127,11 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
   return (
     <Fragment>
       <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={{}}>
-        <EuiFlexGroup gutterSize="xs">
-          <EuiFlexItem>
+        <EuiFlexGroup gutterSize="xs" wrap responsive>
+          <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>
             <KueryBar />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItemStyled grow={true}>
             <FilterGroup
               currentFilter={urlFilters}
               onFilterUpdate={(filtersKuery: string) => {
@@ -146,7 +141,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
               }}
               variables={sharedProps}
             />
-          </EuiFlexItem>
+          </EuiFlexItemStyled>
           {error && <OverviewPageParsingErrorCallout error={error} />}
         </EuiFlexGroup>
         <EuiSpacer size="s" />
@@ -156,8 +151,8 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
           </EuiFlexItem>
           <EuiFlexItem grow={8}>
             <SnapshotHistogram
-              absoluteStartDate={absoluteStartDate}
-              absoluteEndDate={absoluteEndDate}
+              absoluteStartDate={absoluteDateRangeStart}
+              absoluteEndDate={absoluteDateRangeEnd}
               successColor={colors.success}
               dangerColor={colors.danger}
               variables={sharedProps}
@@ -167,8 +162,8 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <MonitorList
-          absoluteStartDate={absoluteStartDate}
-          absoluteEndDate={absoluteEndDate}
+          absoluteStartDate={absoluteDateRangeStart}
+          absoluteEndDate={absoluteDateRangeEnd}
           dangerColor={colors.danger}
           hasActiveFilters={!!filters}
           implementsCustomErrorState={true}

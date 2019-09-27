@@ -276,7 +276,7 @@ This factory returns an instance of `AlertInstance`. The alert instance class ha
 
 There needs to be a way to map alert context into action parameters. For this, we started off by adding template support. Any string within the `params` of an alert saved object's `actions` will be processed as a template and can inject context or state values. 
 
-When an alert instance executes, the first argument is the `group` of actions to execute and the second is the context the alert exposes to templates. We iterate through each action params attributes recursively and render templates if they are a string. Templates have access to the `context` (provided by second argument of `.scheduleActions(...)` on an alert instance) and the alert instance's `state` (provided by the most recent `replaceState` call on an alert instance).
+When an alert instance executes, the first argument is the `group` of actions to execute and the second is the context the alert exposes to templates. We iterate through each action params attributes recursively and render templates if they are a string. Templates have access to the `context` (provided by second argument of `.scheduleActions(...)` on an alert instance) and the alert instance's `state` (provided by the most recent `replaceState` call on an alert instance) as well as `alertId` and `alertInstanceId`.
 
 ### Examples
 
@@ -297,6 +297,7 @@ Below is an example of an alert that takes advantage of templating:
 ```
 {
   ...
+  id: "123",
   actions: [
     {
       "group": "default",
@@ -305,7 +306,7 @@ Below is an example of an alert that takes advantage of templating:
         "from": "example@elastic.co",
         "to": ["destination@elastic.co"],
         "subject": "A notification about {{context.server}}"
-        "body": "The server {{context.server}} has a CPU usage of {{state.cpuUsage}}%"
+        "body": "The server {{context.server}} has a CPU usage of {{state.cpuUsage}}%. This message for {{alertInstanceId}} was created by the alert {{alertId}}."
       }
     }
   ]
@@ -319,7 +320,7 @@ The templating system will take the alert and alert type as described above and 
   "from": "example@elastic.co",
   "to": ["destination@elastic.co"],
   "subject": "A notification about server_1"
-  "body": "The server server_1 has a CPU usage of 80%"
+  "body": "The server server_1 has a CPU usage of 80%. This message for server_1 was created by the alert 123"
 }
 ```
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useMemo, useEffect, useCallback } from 'react';
-import { EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -66,6 +66,8 @@ function GridPanel({ stateParams, setValue, hasHistogramAgg }: VisOptionsProps<B
           />
         </h2>
       </EuiTitle>
+
+      <EuiSpacer size="m" />
 
       <SwitchOption
         disabled={hasHistogramAgg}

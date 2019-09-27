@@ -7,14 +7,12 @@
 import React from 'react';
 import { prettyDuration, commonDurationRanges } from '@elastic/eui';
 
-import { TimeRange } from '../../../../../../../src/plugins/data/public';
+import { IEmbeddable, Embeddable, EmbeddableInput } from 'src/plugins/embeddable/public';
 import {
-  Action,
-  IEmbeddable,
+  IAction,
   IncompatibleActionError,
-  Embeddable,
-  EmbeddableInput,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+} from '../../../../../../../src/plugins/ui_actions/public';
+import { TimeRange } from '../../../../../../../src/plugins/data/public';
 
 import { CustomizeTimeRangeModal } from './customize_time_range_modal';
 import { doesInheritTimeRange } from './does_inherit_time_range';
@@ -36,8 +34,10 @@ interface ActionContext {
   embeddable: Embeddable<TimeRangeInput>;
 }
 
-export class CustomTimeRangeBadge extends Action<ActionContext> {
+export class CustomTimeRangeBadge implements IAction<ActionContext> {
   public readonly type = CUSTOM_TIME_RANGE_BADGE;
+  public readonly id = CUSTOM_TIME_RANGE_BADGE;
+  public order = 7;
   private openModal: OpenModal;
   private dateFormat: string;
   private commonlyUsedRanges: CommonlyUsedRange[];
@@ -51,8 +51,6 @@ export class CustomTimeRangeBadge extends Action<ActionContext> {
     dateFormat: string;
     commonlyUsedRanges: CommonlyUsedRange[];
   }) {
-    super(CUSTOM_TIME_RANGE_BADGE);
-    this.order = 7;
     this.openModal = openModal;
     this.dateFormat = dateFormat;
     this.commonlyUsedRanges = commonlyUsedRanges;

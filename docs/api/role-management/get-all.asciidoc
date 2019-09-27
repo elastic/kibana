@@ -6,7 +6,7 @@
 
 Retrieves all {kib} roles.
 
-experimental["This API is *experimental* and may be changed or removed completely in a future release. The underlying mechanism of enforcing role based access control is stable, but the APIs for managing the roles are currently experimental."]
+experimental["The underlying mechanism of enforcing role-based access control is stable, but the APIs for managing the roles are experimental."]
 
 [[role-management-api-get-prereqs]]
 ==== Prerequisite 

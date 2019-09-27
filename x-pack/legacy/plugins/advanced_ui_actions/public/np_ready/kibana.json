@@ -2,7 +2,8 @@
   "id": "advanced_ui_actions",
   "version": "kibana",
   "requiredPlugins": [
-    "embeddable"
+    "embeddable",
+    "ui_actions"
   ],
   "server": false,
   "ui": true
