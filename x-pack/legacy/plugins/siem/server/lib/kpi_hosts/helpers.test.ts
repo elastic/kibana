@@ -8,12 +8,14 @@ import { isKpiHostDetailsQuery } from './helpers';
 import { mockKpiHostsOptions, mockKpiHostDetailsOptions } from './mock';
 
 describe('helpers', () => {
-  describe.each([[mockKpiHostsOptions, false], [mockKpiHostDetailsOptions, true]])(
-    'isHostDetails',
-    (option, expected) => {
-      test(`it should tell if it is kpiHostDetails option`, () => {
-        expect(isKpiHostDetailsQuery(option)).toBe(expected);
-      });
-    }
-  );
+  const table: Array<[typeof mockKpiHostDetailsOptions, boolean]> = [
+    [mockKpiHostsOptions, false],
+    [mockKpiHostDetailsOptions, true],
+  ];
+
+  describe.each(table)('isHostDetails', (option, expected) => {
+    test(`it should tell if it is kpiHostDetails option`, () => {
+      expect(isKpiHostDetailsQuery(option)).toBe(expected);
+    });
+  });
 });

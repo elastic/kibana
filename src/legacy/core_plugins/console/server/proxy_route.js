@@ -34,12 +34,13 @@ function toURL(base, path) {
   return urlResult;
 }
 
-function extendCommaList(obj, property, value) {
-  obj[property] = (obj[property] ? obj[property] + ',' : '') + value;
-}
-
 function getProxyHeaders(req) {
-  const headers = {};
+  const headers = Object.create(null);
+
+  // Scope this proto-unsafe functionality to where it is being used.
+  function extendCommaList(obj, property, value) {
+    obj[property] = (obj[property] ? obj[property] + ',' : '') + value;
+  }
 
   if (req.info.remotePort && req.info.remoteAddress) {
     // see https://git.io/vytQ7
