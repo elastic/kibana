@@ -138,117 +138,120 @@ export const MonitorListComponent = (props: Props) => {
                 return <MonitorListStatusColumn status={status} timestamp={timestamp} />;
               },
             },
-          {
-            align: 'left',
-            field: 'state.monitor.name',
-            name: i18n.translate('xpack.uptime.monitorList.nameColumnLabel', {
-              defaultMessage: 'Name',
-            }),
-            render: (name: string, summary: MonitorSummary) => (
-              <MonitorPageLink
-                id={summary.monitor_id}
-                linkParameters={linkParameters}
-                location={undefined}
-              >
-                {name ? name : `Unnamed - ${summary.monitor_id}`}
-              </MonitorPageLink>
-            ),
-            sortable: true,
-          },
-          {
-            align: 'left',
-            field: 'state.url.full',
-            name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
-              defaultMessage: 'URL',
-            }),
-            render: (url: string, summary: MonitorSummary) => (
-              <Fragment>
-                <EuiLink href={url} target="_blank" color="text">
-                  {url} <EuiIcon size="s" type="popout" color="subbdued" />
-                </EuiLink>
-              </Fragment>
-            ),
-            sortable: true,
-          },
-          {
-            field: 'histogram.points',
-            name: i18n.translate('xpack.uptime.monitorList.monitorHistoryColumnLabel', {
-              defaultMessage: 'Downtime history',
-            }),
-            mobileOptions: {
-              show: false,
+            {
+              align: 'left',
+              field: 'state.monitor.name',
+              name: i18n.translate('xpack.uptime.monitorList.nameColumnLabel', {
+                defaultMessage: 'Name',
+              }),
+              render: (name: string, summary: MonitorSummary) => (
+                <MonitorPageLink
+                  id={summary.monitor_id}
+                  linkParameters={linkParameters}
+                  location={undefined}
+                >
+                  {name ? name : `Unnamed - ${summary.monitor_id}`}
+                </MonitorPageLink>
+              ),
+              sortable: true,
             },
-            render: (histogramSeries: SummaryHistogramPoint[] | null) => (
-              <MonitorBarSeries
-                absoluteStartDate={absoluteStartDate}
-                absoluteEndDate={absoluteEndDate}
-                dangerColor={dangerColor}
-                histogramSeries={histogramSeries}
-              />
-            ),
-          },
-          {
-            id: 'actions',
-            align: 'right',
-            field: 'state',
-            hasActions: true,
-            mobileOptions: {
-              header: false,
+            {
+              align: 'left',
+              field: 'state.url.full',
+              name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
+                defaultMessage: 'URL',
+              }),
+              render: (url: string, summary: MonitorSummary) => (
+                <Fragment>
+                  <EuiLink href={url} target="_blank" color="text">
+                    {url} <EuiIcon size="s" type="popout" color="subbdued" />
+                  </EuiLink>
+                </Fragment>
+              ),
+              sortable: true,
             },
-            name: i18n.translate('xpack.uptime.monitorList.observabilityIntegrationsColumnLabel', {
-              defaultMessage: 'Integrations',
-              description:
-                'The heading column of some action buttons that will take users to other Observability apps',
-            }),
-            render: (state: any, summary: MonitorSummary) => (
-              <MonitorListActionsPopover summary={summary} />
-            ),
-          },
-          {
-            align: 'left',
-            field: 'monitor_id',
-            name: '',
-            sortable: true,
-            width: '40px',
-            isExpander: true,
-            render: (id: string) => {
-              return (
-                <EuiButtonIcon
-                  aria-label={i18n.translate(
-                    'xpack.uptime.monitorList.expandDrawerButton.ariaLabel',
-                    {
-                      defaultMessage: 'Expand row for monitor with ID {id}',
-                      description:
-                        'The user can click a button on this table and expand further details.',
-                      values: {
-                        id,
-                      },
-                    }
-                  )}
-                  iconType={drawerIds.find(item => item === id) ? 'arrowUp' : 'arrowDown'}
-                  onClick={() => {
-                    if (drawerIds.find(i => id === i)) {
-                      updateDrawerIds(drawerIds.filter(p => p !== id));
-                    } else {
-                      updateDrawerIds([...drawerIds, id]);
-                    }
-                  }}
+            {
+              field: 'histogram.points',
+              name: i18n.translate('xpack.uptime.monitorList.monitorHistoryColumnLabel', {
+                defaultMessage: 'Downtime history',
+              }),
+              mobileOptions: {
+                show: false,
+              },
+              render: (histogramSeries: SummaryHistogramPoint[] | null) => (
+                <MonitorBarSeries
+                  absoluteStartDate={absoluteStartDate}
+                  absoluteEndDate={absoluteEndDate}
+                  dangerColor={dangerColor}
+                  histogramSeries={histogramSeries}
                 />
-              );
+              ),
             },
-          },
-        ]}
-      />
-      <EuiSpacer size="s" />
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <OverviewPageLink pagination={prevPagePagination} direction="prev" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <OverviewPageLink pagination={nextPagePagination} direction="next" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+            {
+              id: 'actions',
+              align: 'right',
+              field: 'state',
+              hasActions: true,
+              mobileOptions: {
+                header: false,
+              },
+              name: i18n.translate(
+                'xpack.uptime.monitorList.observabilityIntegrationsColumnLabel',
+                {
+                  defaultMessage: 'Integrations',
+                  description:
+                    'The heading column of some action buttons that will take users to other Observability apps',
+                }
+              ),
+              render: (state: any, summary: MonitorSummary) => (
+                <MonitorListActionsPopover summary={summary} />
+              ),
+            },
+            {
+              align: 'left',
+              field: 'monitor_id',
+              name: '',
+              sortable: true,
+              width: '40px',
+              isExpander: true,
+              render: (id: string) => {
+                return (
+                  <EuiButtonIcon
+                    aria-label={i18n.translate(
+                      'xpack.uptime.monitorList.expandDrawerButton.ariaLabel',
+                      {
+                        defaultMessage: 'Expand row for monitor with ID {id}',
+                        description:
+                          'The user can click a button on this table and expand further details.',
+                        values: {
+                          id,
+                        },
+                      }
+                    )}
+                    iconType={drawerIds.find(item => item === id) ? 'arrowUp' : 'arrowDown'}
+                    onClick={() => {
+                      if (drawerIds.find(i => id === i)) {
+                        updateDrawerIds(drawerIds.filter(p => p !== id));
+                      } else {
+                        updateDrawerIds([...drawerIds, id]);
+                      }
+                    }}
+                  />
+                );
+              },
+            },
+          ]}
+        />
+        <EuiSpacer size="s" />
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <OverviewPageLink pagination={prevPagePagination} direction="prev" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <OverviewPageLink pagination={nextPagePagination} direction="next" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
     </Fragment>
   );
 };

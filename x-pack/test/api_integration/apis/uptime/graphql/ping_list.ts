@@ -36,6 +36,7 @@ export default function({ getService }: any) {
         allPings: { pings },
       } = data;
       expect(pings).length(10);
+
       expectPingFixtureEql(data, 'ping_list');
     });
 
@@ -65,7 +66,7 @@ export default function({ getService }: any) {
 
     it('returns a list of pings for a monitor ID', async () => {
       const SIZE = 15;
-      const MONITOR_ID = 'auto-tcp-0X81440A68E839814C';
+      const MONITOR_ID = '0001-up';
       const getPingsQuery = {
         operationName: 'PingList',
         query: pingsQueryString,
@@ -87,7 +88,7 @@ export default function({ getService }: any) {
 
     it('returns a list of pings sorted ascending', async () => {
       const SIZE = 5;
-      const MONITOR_ID = 'auto-tcp-0X81440A68E839814C';
+      const MONITOR_ID = '0001-up';
       const getPingsQuery = {
         operationName: 'PingList',
         query: pingsQueryString,
@@ -105,6 +106,7 @@ export default function({ getService }: any) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getPingsQuery });
+
       expectPingFixtureEql(data, 'ping_list_sort');
     });
   });
