@@ -185,6 +185,9 @@ Refresh the page to apply the changes.
 === Search settings
 
 [horizontal]
+`courier:batchSearches`:: When disabled, dashboard panels will load individually, and search requests will terminate when
+users navigate away or update the query. When enabled, dashboard panels will load together when all of the data is loaded,
+and searches will not terminate.
 `courier:customRequestPreference`:: {ref}/search-request-body.html#request-body-search-preference[Request preference] 
 to use when `courier:setRequestPreference` is set to "custom".
 `courier:ignoreFilterIfFieldNotInIndex`:: Skips filters that apply to fields that don't exist in the index for a visualization. 
@@ -203,6 +206,16 @@ be inconsistent because different shards might be in different refresh states.
 `search:includeFrozen`:: Includes {ref}/frozen-indices.html[frozen indices] in results. 
 Searching through frozen indices
 might increase the search time. This setting is off by default. Users must opt-in to include frozen indices.
+
+[float]
+[[kibana-siem-settings]]
+=== SIEM settings
+
+[horizontal]
+`siem:defaultAnomalyScore`:: The threshold above which anomalies are displayed in the SIEM app.
+`siem:defaultIndex`:: A comma-delimited list of Elasticsearch indices from which the SIEM app collects events. 
+`siem:refreshIntervalDefaults`:: The default refresh interval for the SIEM time filter, in milliseconds.
+`siem:timeDefaults`:: The default period of time in the SIEM time filter.
 
 [float]
 [[kibana-timelion-settings]]

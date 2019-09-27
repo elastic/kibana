@@ -6,10 +6,10 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import { uniqueId, startsWith } from 'lodash';
+import { npStart } from 'ui/new_platform';
 import { EuiCallOut } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AutocompleteSuggestion, getAutocompleteProvider } from 'ui/autocomplete_providers';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { Typeahead } from './typeahead';
@@ -17,6 +17,7 @@ import { getIndexPattern } from '../../../lib/adapters/index_pattern';
 import { UptimeSettingsContext } from '../../../contexts';
 import { useUrlParams } from '../../../hooks';
 import { toStaticIndexPattern } from '../../../lib/helper';
+import { AutocompleteSuggestion } from '../../../../../../../../src/plugins/data/public';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -26,6 +27,9 @@ interface State {
   suggestions: AutocompleteSuggestion[];
   isLoadingIndexPattern: boolean;
 }
+
+const getAutocompleteProvider = (language: string) =>
+  npStart.plugins.data.autocomplete.getProvider(language);
 
 function convertKueryToEsQuery(kuery: string, indexPattern: StaticIndexPattern) {
   const ast = fromKueryExpression(kuery);
