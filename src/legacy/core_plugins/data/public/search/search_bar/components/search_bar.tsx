@@ -414,7 +414,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
               filters={this.props.filters!}
               onFiltersUpdated={this.props.onFiltersUpdated}
               indexPatterns={this.props.indexPatterns!}
-              savedObjectsClient={this.props.savedObjectsClient}
+              savedObjects={this.props.savedObjects}
               showSaveQuery={this.props.showSaveQuery}
             />
           </div>
