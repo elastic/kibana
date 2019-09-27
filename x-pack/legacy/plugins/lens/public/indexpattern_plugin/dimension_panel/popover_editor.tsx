@@ -19,6 +19,7 @@ import {
   EuiLink,
   EuiButtonIcon,
   EuiTextColor,
+  EuiSpacer,
 } from '@elastic/eui';
 import classNames from 'classnames';
 import {
@@ -72,6 +73,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
     setState,
     layerId,
     currentIndexPattern,
+    uniqueLabel,
   } = props;
   const { operationByDocument, operationByField, fieldByOperation } = operationFieldSupportMatrix;
   const [isPopoverOpen, setPopoverOpen] = useState(false);
@@ -219,7 +221,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
               defaultMessage: 'Edit configuration',
             })}
           >
-            {selectedColumn.label}
+            {uniqueLabel}
           </EuiLink>
         ) : (
           <>
@@ -286,6 +288,11 @@ export function PopoverEditor(props: PopoverEditorProps) {
                   column = changeField(selectedColumn, currentIndexPattern, fieldMap[choice.field]);
                 } else {
                   // Otherwise we'll use the buildColumn method to calculate a new column
+                  const compatibleOperations =
+                    ('field' in choice &&
+                      operationFieldSupportMatrix.operationByField[choice.field]) ||
+                    [];
+
                   column = buildColumn({
                     columns: props.state.layers[props.layerId].columns,
                     field: 'field' in choice ? fieldMap[choice.field] : undefined,
@@ -294,7 +301,8 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     suggestedPriority: props.suggestedPriority,
                     op:
                       incompatibleSelectedOperationType ||
-                      ('field' in choice ? choice.operationType : undefined),
+                      ('field' in choice ? choice.operationType : undefined) ||
+                      compatibleOperations[0],
                     asDocumentOperation: choice.type === 'document',
                   });
                 }
@@ -326,6 +334,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     })}
                     color="danger"
                     iconType="cross"
+                    size="s"
                   >
                     <p>
                       <FormattedMessage
@@ -346,17 +355,20 @@ export function PopoverEditor(props: PopoverEditorProps) {
                   ></EuiCallOut>
                 )}
                 {!incompatibleSelectedOperationType && ParamEditor && (
-                  <ParamEditor
-                    state={state}
-                    setState={setState}
-                    columnId={columnId}
-                    currentColumn={state.layers[layerId].columns[columnId]}
-                    storage={props.storage}
-                    uiSettings={props.uiSettings}
-                    savedObjectsClient={props.savedObjectsClient}
-                    layerId={layerId}
-                    http={props.http}
-                  />
+                  <>
+                    <ParamEditor
+                      state={state}
+                      setState={setState}
+                      columnId={columnId}
+                      currentColumn={state.layers[layerId].columns[columnId]}
+                      storage={props.storage}
+                      uiSettings={props.uiSettings}
+                      savedObjectsClient={props.savedObjectsClient}
+                      layerId={layerId}
+                      http={props.http}
+                    />
+                    <EuiSpacer size="m" />
+                  </>
                 )}
                 {!incompatibleSelectedOperationType && selectedColumn && (
                   <EuiFormRow
@@ -364,8 +376,10 @@ export function PopoverEditor(props: PopoverEditorProps) {
                       defaultMessage: 'Label',
                       description: 'Label of a column of data',
                     })}
+                    display="rowCompressed"
                   >
                     <EuiFieldText
+                      compressed
                       data-test-subj="indexPattern-label-edit"
                       value={selectedColumn.label}
                       onChange={e => {
