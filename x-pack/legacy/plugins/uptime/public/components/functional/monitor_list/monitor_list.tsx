@@ -69,196 +69,176 @@ export const MonitorListComponent = (props: Props) => {
   const nextPagePagination = get<string>(data, 'monitorStates.nextPagePagination');
   const prevPagePagination = get<string>(data, 'monitorStates.prevPagePagination');
 
-  const paginationLinkForSummary = (pagination: string | null, direction: string = 'next') => {
-    const icon = direction === 'prev' ? 'arrowLeft' : 'arrowRight';
-
-    if (!pagination) {
-      return <EuiIcon type={icon} color={'ghost'} />;
-    }
-
-    return (
-      <OverviewPageLink pagination={pagination}>
-        <EuiIcon type={icon} />
-      </OverviewPageLink>
-    );
-  };
-
   return (
-    <Fragment>
-      <EuiPanel>
-        <EuiTitle size="xs">
-          <h5>
-            <FormattedMessage
-              id="xpack.uptime.monitorList.monitoringStatusTitle"
-              defaultMessage="Monitor status"
-            />
-          </h5>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiBasicTable
-          error={errors ? formatUptimeGraphQLErrorList(errors) : errors}
-          loading={loading}
-          isExpandable={true}
-          hasActions={true}
-          itemId="monitor_id"
-          itemIdToExpandedRowMap={drawerIds.reduce((map: ExpandedRowMap, id: string) => {
-            return {
-              ...map,
-              [id]: (
-                <MonitorListDrawer
-                  condensedCheckLimit={CLIENT_DEFAULTS.CONDENSED_CHECK_LIMIT}
-                  summary={
-                    items ? items.find(({ monitor_id: monitorId }) => monitorId === id) : undefined
-                  }
-                  successColor={successColor}
-                  dangerColor={dangerColor}
-                />
-              ),
-            };
-          }, {})}
-          items={items}
-          // TODO: not needed without sorting and pagination
-          // onChange={onChange}
-          noItemsMessage={
-            hasActiveFilters
-              ? i18n.translate('xpack.uptime.monitorList.noItemForSelectedFiltersMessage', {
-                  defaultMessage: 'No monitors found for selected filter criteria',
-                  description:
-                    'This message is show if there are no monitors in the table and some filter or search criteria exists',
-                })
-              : i18n.translate('xpack.uptime.monitorList.noItemMessage', {
-                  defaultMessage: 'No uptime monitors found',
-                  description:
-                    'This message is shown if the monitors table is rendered but has no items.',
-                })
-          }
-          columns={[
-            {
-              align: 'left',
-              field: 'state.monitor.status',
-              name: i18n.translate('xpack.uptime.monitorList.statusColumnLabel', {
-                defaultMessage: 'Status',
-              }),
-              render: (status: string, { state: { timestamp } }: MonitorSummary) => {
-                return <MonitorListStatusColumn status={status} timestamp={timestamp} />;
-              },
-            },
-            {
-              align: 'left',
-              field: 'state.monitor.name',
-              name: i18n.translate('xpack.uptime.monitorList.nameColumnLabel', {
-                defaultMessage: 'Name',
-              }),
-              render: (name: string, summary: MonitorSummary) => (
-                <MonitorPageLink
-                  id={summary.monitor_id}
-                  linkParameters={linkParameters}
-                  location={undefined}
-                >
-                  {name ? name : `Unnamed - ${summary.monitor_id}`}
-                </MonitorPageLink>
-              ),
-              sortable: true,
-            },
-            {
-              align: 'left',
-              field: 'state.url.full',
-              name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
-                defaultMessage: 'URL',
-              }),
-              render: (url: string, summary: MonitorSummary) => (
-                <Fragment>
-                  <EuiLink href={url} target="_blank" color="text">
-                    {url} <EuiIcon size="s" type="popout" color="subbdued" />
-                  </EuiLink>
-                </Fragment>
-              ),
-              sortable: true,
-            },
-            {
-              field: 'histogram.points',
-              name: i18n.translate('xpack.uptime.monitorList.monitorHistoryColumnLabel', {
-                defaultMessage: 'Downtime history',
-              }),
-              mobileOptions: {
-                show: false,
-              },
-              render: (histogramSeries: SummaryHistogramPoint[] | null) => (
-                <MonitorBarSeries
-                  absoluteStartDate={absoluteStartDate}
-                  absoluteEndDate={absoluteEndDate}
-                  dangerColor={dangerColor}
-                  histogramSeries={histogramSeries}
-                />
-              ),
-            },
-            {
-              id: 'actions',
-              align: 'right',
-              field: 'state',
-              hasActions: true,
-              mobileOptions: {
-                header: false,
-              },
-              name: i18n.translate(
-                'xpack.uptime.monitorList.observabilityIntegrationsColumnLabel',
-                {
-                  defaultMessage: 'Integrations',
-                  description:
-                    'The heading column of some action buttons that will take users to other Observability apps',
+    <EuiPanel>
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.uptime.monitorList.monitoringStatusTitle"
+            defaultMessage="Monitor status"
+          />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiBasicTable
+        error={errors ? formatUptimeGraphQLErrorList(errors) : errors}
+        loading={loading}
+        isExpandable={true}
+        hasActions={true}
+        itemId="monitor_id"
+        itemIdToExpandedRowMap={drawerIds.reduce((map: ExpandedRowMap, id: string) => {
+          return {
+            ...map,
+            [id]: (
+              <MonitorListDrawer
+                condensedCheckLimit={CLIENT_DEFAULTS.CONDENSED_CHECK_LIMIT}
+                summary={
+                  items ? items.find(({ monitor_id: monitorId }) => monitorId === id) : undefined
                 }
-              ),
-              render: (state: any, summary: MonitorSummary) => (
-                <MonitorListActionsPopover summary={summary} />
-              ),
+                successColor={successColor}
+                dangerColor={dangerColor}
+              />
+            ),
+          };
+        }, {})}
+        items={items}
+        // TODO: not needed without sorting and pagination
+        // onChange={onChange}
+        noItemsMessage={
+          hasActiveFilters
+            ? i18n.translate('xpack.uptime.monitorList.noItemForSelectedFiltersMessage', {
+                defaultMessage: 'No monitors found for selected filter criteria',
+                description:
+                  'This message is show if there are no monitors in the table and some filter or search criteria exists',
+              })
+            : i18n.translate('xpack.uptime.monitorList.noItemMessage', {
+                defaultMessage: 'No uptime monitors found',
+                description:
+                  'This message is shown if the monitors table is rendered but has no items.',
+              })
+        }
+        columns={[
+          {
+            align: 'left',
+            field: 'state.monitor.status',
+            name: i18n.translate('xpack.uptime.monitorList.statusColumnLabel', {
+              defaultMessage: 'Status',
+            }),
+            render: (status: string, { state: { timestamp } }: MonitorSummary) => {
+              return <MonitorListStatusColumn status={status} timestamp={timestamp} />;
             },
-            {
-              align: 'left',
-              field: 'monitor_id',
-              name: '',
-              sortable: true,
-              width: '40px',
-              isExpander: true,
-              render: (id: string) => {
-                return (
-                  <EuiButtonIcon
-                    aria-label={i18n.translate(
-                      'xpack.uptime.monitorList.expandDrawerButton.ariaLabel',
-                      {
-                        defaultMessage: 'Expand row for monitor with ID {id}',
-                        description:
-                          'The user can click a button on this table and expand further details.',
-                        values: {
-                          id,
-                        },
-                      }
-                    )}
-                    iconType={drawerIds.find(item => item === id) ? 'arrowUp' : 'arrowDown'}
-                    onClick={() => {
-                      if (drawerIds.find(i => id === i)) {
-                        updateDrawerIds(drawerIds.filter(p => p !== id));
-                      } else {
-                        updateDrawerIds([...drawerIds, id]);
-                      }
-                    }}
-                  />
-                );
-              },
+          },
+          {
+            align: 'left',
+            field: 'state.monitor.name',
+            name: i18n.translate('xpack.uptime.monitorList.nameColumnLabel', {
+              defaultMessage: 'Name',
+            }),
+            render: (name: string, summary: MonitorSummary) => (
+              <MonitorPageLink
+                id={summary.monitor_id}
+                linkParameters={linkParameters}
+                location={undefined}
+              >
+                {name ? name : `Unnamed - ${summary.monitor_id}`}
+              </MonitorPageLink>
+            ),
+            sortable: true,
+          },
+          {
+            align: 'left',
+            field: 'state.url.full',
+            name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
+              defaultMessage: 'URL',
+            }),
+            render: (url: string, summary: MonitorSummary) => (
+              <Fragment>
+                <EuiLink href={url} target="_blank" color="text">
+                  {url} <EuiIcon size="s" type="popout" color="subbdued" />
+                </EuiLink>
+              </Fragment>
+            ),
+            sortable: true,
+          },
+          {
+            field: 'histogram.points',
+            name: i18n.translate('xpack.uptime.monitorList.monitorHistoryColumnLabel', {
+              defaultMessage: 'Downtime history',
+            }),
+            mobileOptions: {
+              show: false,
             },
-          ]}
-        />
+            render: (histogramSeries: SummaryHistogramPoint[] | null) => (
+              <MonitorBarSeries
+                absoluteStartDate={absoluteStartDate}
+                absoluteEndDate={absoluteEndDate}
+                dangerColor={dangerColor}
+                histogramSeries={histogramSeries}
+              />
+            ),
+          },
+          {
+            id: 'actions',
+            align: 'right',
+            field: 'state',
+            hasActions: true,
+            mobileOptions: {
+              header: false,
+            },
+            name: i18n.translate('xpack.uptime.monitorList.observabilityIntegrationsColumnLabel', {
+              defaultMessage: 'Integrations',
+              description:
+                'The heading column of some action buttons that will take users to other Observability apps',
+            }),
+            render: (state: any, summary: MonitorSummary) => (
+              <MonitorListActionsPopover summary={summary} />
+            ),
+          },
+          {
+            align: 'left',
+            field: 'monitor_id',
+            name: '',
+            sortable: true,
+            width: '40px',
+            isExpander: true,
+            render: (id: string) => {
+              return (
+                <EuiButtonIcon
+                  aria-label={i18n.translate(
+                    'xpack.uptime.monitorList.expandDrawerButton.ariaLabel',
+                    {
+                      defaultMessage: 'Expand row for monitor with ID {id}',
+                      description:
+                        'The user can click a button on this table and expand further details.',
+                      values: {
+                        id,
+                      },
+                    }
+                  )}
+                  iconType={drawerIds.find(item => item === id) ? 'arrowUp' : 'arrowDown'}
+                  onClick={() => {
+                    if (drawerIds.find(i => id === i)) {
+                      updateDrawerIds(drawerIds.filter(p => p !== id));
+                    } else {
+                      updateDrawerIds([...drawerIds, id]);
+                    }
+                  }}
+                />
+              );
+            },
+          },
+        ]}
+      />
+      <EuiSpacer size="s" />
+      <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <span>
-                {paginationLinkForSummary(prevPagePagination, 'prev')}
-                {paginationLinkForSummary(nextPagePagination, 'next')}
-              </span>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <OverviewPageLink pagination={prevPagePagination} direction="prev" />
         </EuiFlexItem>
-      </EuiPanel>
-    </Fragment>
+        <EuiFlexItem grow={false}>
+          <OverviewPageLink pagination={nextPagePagination} direction="next" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };
 
