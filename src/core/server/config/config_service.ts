@@ -27,7 +27,7 @@ import { Logger, LoggerFactory } from '../logging';
 import { hasConfigPathIntersection } from './config';
 
 /** @internal */
-export type ConfigServiceContract = PublicMethodsOf<ConfigService>;
+export type IConfigService = PublicMethodsOf<ConfigService>;
 
 /** @internal */
 export class ConfigService {

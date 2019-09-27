@@ -20,11 +20,10 @@
 import { BehaviorSubject } from 'rxjs';
 import { ObjectToConfigAdapter } from './object_to_config_adapter';
 
-import { ConfigService } from './config_service';
+import { IConfigService } from './config_service';
 
-type ConfigServiceContract = PublicMethodsOf<ConfigService>;
 const createConfigServiceMock = () => {
-  const mocked: jest.Mocked<ConfigServiceContract> = {
+  const mocked: jest.Mocked<IConfigService> = {
     atPath: jest.fn(),
     getConfig$: jest.fn(),
     optionalAtPath: jest.fn(),

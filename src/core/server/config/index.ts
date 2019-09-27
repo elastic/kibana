@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { ConfigService, ConfigServiceContract } from './config_service';
+export { ConfigService, IConfigService } from './config_service';
 export { RawConfigService } from './raw_config_service';
 export { Config, ConfigPath, isConfigPath, hasConfigPathIntersection } from './config';
 export { ObjectToConfigAdapter } from './object_to_config_adapter';

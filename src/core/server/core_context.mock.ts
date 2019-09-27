@@ -19,11 +19,11 @@
 
 import { CoreContext } from './core_context';
 import { getEnvOptions } from './config/__mocks__/env';
-import { Env, ConfigServiceContract } from './config';
+import { Env, IConfigService } from './config';
 import { loggingServiceMock } from './logging/logging_service.mock';
 import { configServiceMock } from './config/config_service.mock';
 
-function create(configService?: jest.Mocked<ConfigServiceContract>): CoreContext {
+function create(configService?: jest.Mocked<IConfigService>): CoreContext {
   const env = Env.createDefault(getEnvOptions());
   const logger = loggingServiceMock.create();
   configService = configService || configServiceMock.create();
