@@ -451,6 +451,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               closePopover={() => setLocalState(s => ({ ...localState, isTypeFilterOpen: false }))}
               button={
                 <EuiFacetButton
+                  data-test-subj="lnsIndexPatternFiltersToggle"
                   className="lnsInnerIndexPatternDataPanel__filterButton"
                   quantity={localState.typeFilter.length}
                   icon={<EuiIcon type="filter" />}
