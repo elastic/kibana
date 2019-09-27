@@ -24,7 +24,7 @@ export function unmuteAlertRoute(server: Hapi.Server) {
     },
     async handler(request: UnmuteRequest, h: Hapi.ResponseToolkit) {
       const alertsClient = request.getAlertsClient!();
-      await alertsClient.unmute(request.params);
+      await alertsClient.unmuteAll(request.params);
       return h.response();
     },
   });

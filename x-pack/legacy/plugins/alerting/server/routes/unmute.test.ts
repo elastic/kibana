@@ -18,5 +18,5 @@ test('unmutes an alert', async () => {
 
   const { statusCode } = await server.inject(request);
   expect(statusCode).toBe(204);
-  expect(alertsClient.unmute).toHaveBeenCalledWith({ id: '1' });
+  expect(alertsClient.unmuteAll).toHaveBeenCalledWith({ id: '1' });
 });

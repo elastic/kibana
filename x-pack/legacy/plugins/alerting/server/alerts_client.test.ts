@@ -749,7 +749,7 @@ describe('mute()', () => {
       references: [],
     });
 
-    await alertsClient.mute({ id: '1' });
+    await alertsClient.muteAll({ id: '1' });
     expect(savedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
@@ -769,7 +769,7 @@ describe('mute()', () => {
       references: [],
     });
 
-    await alertsClient.mute({ id: '1' });
+    await alertsClient.muteAll({ id: '1' });
     expect(savedObjectsClient.update).not.toHaveBeenCalled();
   });
 });
@@ -786,7 +786,7 @@ describe('unmute()', () => {
       references: [],
     });
 
-    await alertsClient.unmute({ id: '1' });
+    await alertsClient.unmuteAll({ id: '1' });
     expect(savedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
@@ -806,7 +806,7 @@ describe('unmute()', () => {
       references: [],
     });
 
-    await alertsClient.unmute({ id: '1' });
+    await alertsClient.unmuteAll({ id: '1' });
     expect(savedObjectsClient.update).not.toHaveBeenCalled();
   });
 });

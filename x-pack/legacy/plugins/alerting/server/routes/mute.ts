@@ -24,7 +24,7 @@ export function muteAlertRoute(server: Hapi.Server) {
     },
     async handler(request: MuteRequest, h: Hapi.ResponseToolkit) {
       const alertsClient = request.getAlertsClient!();
-      await alertsClient.mute(request.params);
+      await alertsClient.muteAll(request.params);
       return h.response();
     },
   });

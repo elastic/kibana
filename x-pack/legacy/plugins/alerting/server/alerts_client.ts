@@ -306,7 +306,7 @@ export class AlertsClient {
     }
   }
 
-  public async mute({ id }: { id: string }) {
+  public async muteAll({ id }: { id: string }) {
     const {
       references,
       attributes: { muteAll },
@@ -325,7 +325,7 @@ export class AlertsClient {
     }
   }
 
-  public async unmute({ id }: { id: string }) {
+  public async unmuteAll({ id }: { id: string }) {
     const {
       references,
       attributes: { muteAll },

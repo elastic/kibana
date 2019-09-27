@@ -18,5 +18,5 @@ test('mutes an alert', async () => {
 
   const { statusCode } = await server.inject(request);
   expect(statusCode).toBe(204);
-  expect(alertsClient.mute).toHaveBeenCalledWith({ id: '1' });
+  expect(alertsClient.muteAll).toHaveBeenCalledWith({ id: '1' });
 });
