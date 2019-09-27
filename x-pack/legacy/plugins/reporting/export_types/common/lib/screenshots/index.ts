@@ -12,6 +12,7 @@ import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/br
 import {
   ElementsPositionAndAttribute,
   PerformanceMetrics,
+  Screenshot,
   ScreenshotObservableOpts,
   TimeRange,
 } from './types';
@@ -27,6 +28,13 @@ import { getTimeRange } from './get_time_range';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getScreenshots } from './get_screenshots';
 
+// NOTE: Typescript does not throw an error if this interface has errors!
+interface ScreenshotResults {
+  metrics: PerformanceMetrics;
+  timeRange: TimeRange;
+  screenshots: Screenshot[];
+}
+
 export function screenshotsObservableFactory(server: KbnServer) {
   const browserDriverFactory: HeadlessChromiumDriverFactory = server.plugins.reporting.browserDriverFactory; // prettier-ignore
   const config = server.config();
@@ -38,7 +46,7 @@ export function screenshotsObservableFactory(server: KbnServer) {
     conditionalHeaders,
     layout,
     browserTimezone,
-  }: ScreenshotObservableOpts): Rx.Observable<{ metrics: PerformanceMetrics }> {
+  }: ScreenshotObservableOpts): Rx.Observable<ScreenshotResults> {
     const create$ = browserDriverFactory.create({
       viewport: layout.getBrowserViewport(),
       browserTimezone,
