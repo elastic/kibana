@@ -4,16 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { License } from '../common/license';
+import { License } from './license';
+import { RawLicense } from './types';
 
-export function hasLicenseInfoChanged(currentLicense: License, newLicense: any) {
-  if ((currentLicense && !newLicense) || (newLicense && !currentLicense)) {
-    return true;
+export function hasLicenseInfoChanged(
+  currentLicense: License | undefined,
+  newLicense: RawLicense | undefined
+) {
+  if (currentLicense && newLicense) {
+    return (
+      newLicense.type !== currentLicense.type ||
+      newLicense.status !== currentLicense.status ||
+      newLicense.expiry_date_in_millis !== currentLicense.expiryDateInMillis
+    );
   }
 
-  return (
-    newLicense.type !== currentLicense.type ||
-    newLicense.status !== currentLicense.status ||
-    newLicense.expiry_date_in_millis !== currentLicense.expiryDateInMillis
-  );
+  return (currentLicense && !newLicense) || (newLicense && !currentLicense);
 }

@@ -11,7 +11,7 @@ import {
   PluginInitializerContext,
 } from 'src/core/public';
 import { Poller } from '../../../../src/core/utils/poller';
-import { LicensingPluginSetup, ILicensingPlugin } from '../common/types';
+import { LicensingPluginSetup, ILicensingPlugin, ObjectifiedLicense } from '../common/types';
 import {
   API_ROUTE,
   LICENSING_SESSION,
@@ -23,7 +23,7 @@ import { License } from '../common/license';
 import { hasLicenseInfoChanged } from '../common/has_license_info_changed';
 
 export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugin {
-  private core!: CoreSetup;
+  private http!: CoreSetup['http'];
   private poller!: Poller<License>;
   private refresher?: Promise<void>;
   private removeInterceptor!: () => void;
@@ -44,7 +44,7 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
     return json;
   }
 
-  private setSession(license: any, signature?: string) {
+  private setSession(license: ObjectifiedLicense, signature?: string) {
     sessionStorage.setItem(LICENSING_SESSION, JSON.stringify(license));
 
     if (signature) {
@@ -59,7 +59,7 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
 
   private async next() {
     try {
-      const response = await this.core.http.get(API_ROUTE);
+      const response = await this.http.get(API_ROUTE);
       const rawLicense = response && response.license;
       const features = (response && response.features) || {};
       const currentLicense = this.poller.subject$.getValue();
@@ -94,14 +94,14 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
   }
 
   private intercept() {
-    this.core.http.intercept({
+    this.removeInterceptor = this.http.intercept({
       response: httpResponse => {
         const signature = httpResponse.response!.headers.get(SIGNATURE_HEADER) || '';
 
         if (signature !== this.signature) {
           this.signature = signature;
 
-          if (!httpResponse.request.url.includes(API_ROUTE)) {
+          if (!httpResponse.request!.url.includes(API_ROUTE)) {
             this.refresh();
           }
         }
@@ -117,7 +117,7 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
     const { license, features = {} } = this.getSession();
     const initialLicense = new License({ plugin: this, license, features });
 
-    this.core = core;
+    this.http = core.http;
     this.intercept();
     this.poller = new Poller<License>(this.pollingFrequency, initialLicense, () => this.next());
 

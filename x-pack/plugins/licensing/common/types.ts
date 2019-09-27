@@ -46,6 +46,16 @@ export interface RawFeatures {
   };
 }
 
+/** @public */
+export interface ObjectifiedLicense {
+  license: {
+    type: LicenseType;
+    isActive: boolean;
+    expiryDateInMillis: number;
+  };
+  features: any[];
+}
+
 /**
  * @public
  * Results from checking if a particular license type meets the minimum
@@ -135,7 +145,7 @@ export interface ILicense {
   /**
    * Receive a serialized plain object of the license.
    */
-  toObject(): any;
+  toObject(): ObjectifiedLicense;
 
   /**
    * A specific API for interacting with the specific features of the license.
@@ -147,7 +157,7 @@ export interface ILicense {
 /** @public */
 export interface ILicensingPlugin {
   refresh(): void;
-  sign?(serialized: string): string;
+  sign(serialized: string): string;
 }
 
 /** @public */

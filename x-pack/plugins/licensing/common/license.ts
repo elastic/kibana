@@ -99,10 +99,6 @@ export class License implements ILicense {
       return this._signature;
     }
 
-    if (!this.plugin.sign) {
-      return '';
-    }
-
     this._signature = this.plugin.sign(JSON.stringify(this.toObject()));
 
     return this._signature;
