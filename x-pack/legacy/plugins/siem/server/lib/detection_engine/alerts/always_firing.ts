@@ -22,24 +22,33 @@ export const alwaysFiringAlertType: AlertType = {
         count: 1,
       });
     } else {
-      console.log('not an empty object, changing it...');
+      const instanceState = instance.getState();
+      // console.log('not an empty object, changing it with', instanceState.count++);
+      instance.replaceState({
+        count: instanceState.count + 1,
+      });
     }
+
+    instance.scheduleActions('default');
   },
 };
 
 // Testing, not using at the moment.
 export const rateLimitedActionType: ActionType = {
-  id: 'test.rate-limit',
-  name: 'Test: Rate Limit',
+  id: 'siem.signals',
+  name: 'SIEM: Signals',
   maxAttempts: 2,
   validate: {
     params: schema.object({
       index: schema.string(),
-      reference: schema.string(),
-      retryAt: schema.number(),
     }),
   },
   async executor({ config, params, services }: ActionTypeExecutorOptions) {
+    console.log('I am in the executor of the action and am returning status of ok', params);
+    return {
+      status: 'ok',
+    };
+    /*
     await services.callCluster('index', {
       index: params.index,
       refresh: 'wait_for',
@@ -54,5 +63,6 @@ export const rateLimitedActionType: ActionType = {
       status: 'error',
       retry: new Date(params.retryAt),
     };
+    */
   },
 };
