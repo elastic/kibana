@@ -9,7 +9,7 @@
     "kbn:bootstrap": "node legacy/plugins/canvas/scripts/storybook --clean",
     "start": "gulp dev",
     "build": "gulp build",
-    "testonly": "gulp testonly",
+    "testonly": "gulp test",
     "test": "gulp test",
     "test:browser:dev": "gulp testbrowser-dev",
     "test:browser": "gulp testbrowser",

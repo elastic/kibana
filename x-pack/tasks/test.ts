@@ -6,14 +6,13 @@
 
 // @ts-ignore
 import pluginHelpers from '@kbn/plugin-helpers';
-import gulp from 'gulp';
 // @ts-ignore
 import { createAutoJUnitReporter } from '@kbn/test';
 // @ts-ignore
 import mocha from 'gulp-mocha';
+import gulp from 'gulp';
 
 import { getEnabledPlugins } from './helpers/flags';
-import { cleanCoverageTask } from './clean';
 
 export const testServerTask = async () => {
   const pluginIds = await getEnabledPlugins();
@@ -57,5 +56,4 @@ export const testBrowserDevTask = async () => {
   });
 };
 
-export const testOnlyTask = gulp.series(testServerTask, testBrowserTask);
-export const testTask = gulp.series(cleanCoverageTask, testOnlyTask);
+export const testTask = gulp.series(testServerTask, testBrowserTask);
