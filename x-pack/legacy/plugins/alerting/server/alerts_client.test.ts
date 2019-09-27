@@ -737,7 +737,7 @@ describe('disable()', () => {
   });
 });
 
-describe('mute()', () => {
+describe('muteAll()', () => {
   test('mutes an alert', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     savedObjectsClient.get.mockResolvedValueOnce({
@@ -774,7 +774,7 @@ describe('mute()', () => {
   });
 });
 
-describe('unmute()', () => {
+describe('unmuteAll()', () => {
   test('unmutes an alert', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     savedObjectsClient.get.mockResolvedValueOnce({
