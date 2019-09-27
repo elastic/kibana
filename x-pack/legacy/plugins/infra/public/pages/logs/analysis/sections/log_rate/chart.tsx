@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import {
@@ -12,20 +12,17 @@ import {
   Chart,
   getAxisId,
   getSpecId,
-  AreaSeries,
   LineSeries,
   niceTimeFormatter,
   Settings,
   TooltipValue,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiCheckbox } from '@elastic/eui';
 import { getColorsMap, isDarkMode, getChartTheme } from '../../chart_helpers';
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
 import { useLogEntryRateGraphData } from '../../../../../containers/logs/log_analysis/log_analysis_graph_data/log_entry_rate';
 import { useKibanaUiSetting } from '../../../../../utils/use_kibana_ui_setting';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 
-const areaSeriesColour = 'rgb(224, 237, 255)';
 const lineSeriesColour = 'rgb(49, 133, 252)';
 
 interface Props {
@@ -35,7 +32,7 @@ interface Props {
 }
 
 export const ChartView = ({ data, setTimeRange, timeRange }: Props) => {
-  const { areaSeries, lineSeries, anomalySeries } = useLogEntryRateGraphData({ data });
+  const { lineSeries, anomalySeries } = useLogEntryRateGraphData({ data });
 
   const dateFormatter = useMemo(
     () =>
@@ -45,7 +42,6 @@ export const ChartView = ({ data, setTimeRange, timeRange }: Props) => {
     [lineSeries, timeRange]
   );
 
-  const areaSpecId = getSpecId('modelBounds');
   const lineSpecId = getSpecId('averageValues');
   const anomalySpecId = getSpecId('anomalies');
 
@@ -59,8 +55,6 @@ export const ChartView = ({ data, setTimeRange, timeRange }: Props) => {
     [dateFormat]
   );
 
-  const [isShowingModelBounds, setIsShowingModelBounds] = useState<boolean>(true);
-
   const handleBrushEnd = useCallback(
     (startTime: number, endTime: number) => {
       setTimeRange({
@@ -73,19 +67,6 @@ export const ChartView = ({ data, setTimeRange, timeRange }: Props) => {
 
   return (
     <>
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiCheckbox
-            id={'showModelBoundsCheckbox'}
-            label={showModelBoundsLabel}
-            aria-label={showModelBoundsLabel}
-            checked={isShowingModelBounds}
-            onChange={e => {
-              setIsShowingModelBounds(e.target.checked);
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
       <div style={{ height: 400, width: '100%' }}>
         <Chart className="log-entry-rate-chart">
           <Axis
@@ -105,33 +86,6 @@ export const ChartView = ({ data, setTimeRange, timeRange }: Props) => {
             position="left"
             tickFormat={value => Number(value).toFixed(0)}
           />
-          {isShowingModelBounds ? (
-            <AreaSeries
-              id={areaSpecId}
-              name={i18n.translate('xpack.infra.logs.analysis.logRateSectionAreaSeriesName', {
-                defaultMessage: 'Expected',
-              })}
-              xScaleType="time"
-              yScaleType="linear"
-              xAccessor="x"
-              yAccessors={['max']}
-              y0Accessors={['min']}
-              data={areaSeries}
-              yScaleToDataExtent
-              curve={2}
-              areaSeriesStyle={
-                !isDarkMode()
-                  ? {
-                      line: { stroke: areaSeriesColour },
-                      area: { fill: areaSeriesColour, visible: true, opacity: 0.8 },
-                    }
-                  : undefined
-              }
-              customSeriesColors={
-                !isDarkMode() ? getColorsMap(areaSeriesColour, areaSpecId) : undefined
-              }
-            />
-          ) : null}
           <LineSeries
             id={lineSpecId}
             name={i18n.translate('xpack.infra.logs.analysis.logRateSectionLineSeriesName', {
@@ -189,8 +143,3 @@ export const ChartView = ({ data, setTimeRange, timeRange }: Props) => {
     </>
   );
 };
-
-const showModelBoundsLabel = i18n.translate(
-  'xpack.infra.logs.analysis.logRateSectionModelBoundsCheckboxLabel',
-  { defaultMessage: 'Show model bounds' }
-);

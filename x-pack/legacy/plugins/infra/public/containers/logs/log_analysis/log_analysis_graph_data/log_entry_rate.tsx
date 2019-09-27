@@ -7,12 +7,6 @@
 import { useMemo } from 'react';
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../common/http_api/log_analysis';
 
-interface LogRateAreaSeriesDataPoint {
-  x: number;
-  min: number | null;
-  max: number | null;
-}
-type LogRateAreaSeries = LogRateAreaSeriesDataPoint[];
 type LogRateLineSeriesDataPoint = [number, number | null];
 type LogRateLineSeries = LogRateLineSeriesDataPoint[];
 type LogRateAnomalySeriesDataPoint = [number, number];
@@ -23,48 +17,37 @@ export const useLogEntryRateGraphData = ({
 }: {
   data: GetLogEntryRateSuccessResponsePayload['data'] | null;
 }) => {
-  const areaSeries: LogRateAreaSeries = useMemo(() => {
-    if (!data || (data && data.histogramBuckets && !data.histogramBuckets.length)) {
-      return [];
-    }
-    return data.histogramBuckets.reduce((acc: any, bucket) => {
-      acc.push({
-        x: bucket.startTime,
-        min: bucket.modelLowerBoundStats.min,
-        max: bucket.modelUpperBoundStats.max,
-      });
-      return acc;
-    }, []);
-  }, [data]);
-
   const lineSeries: LogRateLineSeries = useMemo(() => {
-    if (!data || (data && data.histogramBuckets && !data.histogramBuckets.length)) {
+    if (!data) {
       return [];
     }
-    return data.histogramBuckets.reduce((acc: any, bucket) => {
-      acc.push([bucket.startTime, bucket.logEntryRateStats.avg]);
-      return acc;
-    }, []);
+
+    return data.histogramBuckets.map(bucket => [
+      bucket.startTime,
+      bucket.dataSets.length > 0 ? bucket.dataSets[0].averageActualLogEntryRate : null,
+    ]);
   }, [data]);
 
   const anomalySeries: LogRateAnomalySeries = useMemo(() => {
-    if (!data || (data && data.histogramBuckets && !data.histogramBuckets.length)) {
+    if (!data) {
       return [];
     }
-    return data.histogramBuckets.reduce((acc: any, bucket) => {
-      if (bucket.anomalies.length > 0) {
-        bucket.anomalies.forEach(anomaly => {
-          acc.push([anomaly.startTime, anomaly.actualLogEntryRate]);
-        });
-        return acc;
-      } else {
-        return acc;
+
+    return data.histogramBuckets.reduce<Array<[number, number]>>((acc, bucket) => {
+      if (bucket.dataSets.length === 0) {
+        return [];
       }
+
+      return [
+        ...acc,
+        ...bucket.dataSets[0].anomalies.map(
+          anomaly => [anomaly.startTime, anomaly.actualLogEntryRate] as [number, number]
+        ),
+      ];
     }, []);
   }, [data]);
 
   return {
-    areaSeries,
     lineSeries,
     anomalySeries,
   };

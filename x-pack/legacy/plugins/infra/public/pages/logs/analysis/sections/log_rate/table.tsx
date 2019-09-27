@@ -37,8 +37,8 @@ export const TableView = ({ data }: Props) => {
 
   const formattedAnomalies = useMemo(() => {
     return data.histogramBuckets.reduce((acc: any, bucket) => {
-      if (bucket.anomalies.length > 0) {
-        bucket.anomalies.forEach(anomaly => {
+      if (bucket.dataSets.length > 0) {
+        bucket.dataSets[0].anomalies.forEach(anomaly => {
           const formattedAnomaly = {
             startTime: moment(anomaly.startTime).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
             anomalyScore: Number(anomaly.anomalyScore).toFixed(3),

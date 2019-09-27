@@ -128,7 +128,8 @@ export const AnalysisResultsContent = ({
     } else {
       if (logEntryRate.histogramBuckets && logEntryRate.histogramBuckets.length) {
         return logEntryRate.histogramBuckets.reduce(
-          (acc, bucket) => acc + bucket.anomalies.length,
+          (acc, bucket) =>
+            acc + (bucket.dataSets.length > 0 ? bucket.dataSets[0].anomalies.length : 0),
           0
         );
       } else {
