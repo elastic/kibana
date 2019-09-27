@@ -17,37 +17,6 @@ import {
   EuiKeyboardAccessible,
 } from '@elastic/eui';
 
-function getColor(classes) {
-  const classList = classes.split(' ');
-
-  if (classList.includes('emergency')) {
-    return 'danger';
-  }
-
-  if (classList.includes('unassigned')) {
-    if (classList.includes('replica')) {
-      return 'warning';
-    }
-    return 'danger';
-  }
-
-  if (classList.includes('relocating')) {
-    return 'accent';
-  }
-
-  if (classList.includes('initializing')) {
-    return 'default';
-  }
-
-  if (classList.includes('primary')) {
-    return 'primary';
-  }
-
-  if (classList.includes('replica')) {
-    return 'secondary';
-  }
-}
-
 function sortByName(item) {
   if (item.type === 'node') {
     return [!item.master, item.name];
@@ -65,9 +34,6 @@ export class Assigned extends React.Component {
   createShard = shard => {
     const type = shard.primary ? 'primary' : 'replica';
     const key = `${shard.index}.${shard.node}.${type}.${shard.state}.${shard.shard}`;
-    const classes = calculateClass(shard);
-    const color = getColor(classes);
-    console.log(color, 'COLOR');
     return <Shard shard={shard} key={key} />;
   };
 
@@ -98,7 +64,6 @@ export class Assigned extends React.Component {
     const status = shardStats ? shardStats.status : undefined;
     return (
       <EuiFlexItem
-        // grow={false}
         className={calculateClass(data, initialClasses.join(' '))}
         key={key}
         data-test-subj={`clusterView-Assigned-${key}`}
@@ -112,9 +77,13 @@ export class Assigned extends React.Component {
             {name}
             {master}
           </EuiFlexItem>
-          <EuiFlexItem className="monHealth" grow={false}>
-            <EuiIcon type="dot" color={colorToColorTypeMap[status]} />
-          </EuiFlexItem>
+          {status ? (
+            <EuiFlexItem className="monHealth" grow={false}>
+              <EuiIcon type="dot" color={colorToColorTypeMap[status]} />
+            </EuiFlexItem>
+          ) : (
+            undefined
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
     );

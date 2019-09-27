@@ -25,25 +25,7 @@ monitoring-shard-allocation {
   }
 
   .monChild {
-    // float: left;
-    // align-self: center;
-    // background-color: $euiColorLightestShade;
-    // margin: $euiSizeS;
     padding: 0 $euiSizeS;
-    // border: 1px solid $euiColorMediumShade;
-    // border-radius: $euiSizeXS;
-
-    // &.index {
-    //   border-left: $euiSizeXS solid $euiColorSuccess;
-
-    //   &.red {
-    //     border-left: $euiSizeXS solid $euiColorDanger;
-    //   }
-
-    //   &.yellow {
-    //     border-left: $euiSizeXS solid $euiColorWarning;
-    //   }
-    // }
 
     .shardLegendItem {
       align-items: center;
@@ -51,6 +33,10 @@ monitoring-shard-allocation {
 
     .monHealth {
       margin-left: auto;
+    }
+
+    .euiBadge {
+      border-radius: 0;
     }
 
     .monTitle {
@@ -88,10 +74,6 @@ monitoring-shard-allocation {
   }
 
   .shard {
-    // align-self: center;
-    // padding: $euiSizeXS $euiSizeS;
     font-size: $euiSizeM;
-    // position: relative;
-    // display: inline-block;
   }
 }
