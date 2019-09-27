@@ -43,7 +43,7 @@ function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
   return fieldA.name.localeCompare(fieldB.name, undefined, { sensitivity: 'base' });
 }
 
-const supportedFieldTypes = ['string', 'number', 'boolean', 'date'];
+const supportedFieldTypes = new Set(['string', 'number', 'boolean', 'date', 'ip']);
 const PAGINATION_SIZE = 50;
 
 const fieldTypeNames: Record<DataType, string> = {
@@ -51,6 +51,7 @@ const fieldTypeNames: Record<DataType, string> = {
   number: i18n.translate('xpack.lens.datatypes.number', { defaultMessage: 'number' }),
   boolean: i18n.translate('xpack.lens.datatypes.boolean', { defaultMessage: 'boolean' }),
   date: i18n.translate('xpack.lens.datatypes.date', { defaultMessage: 'date' }),
+  ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP' }),
 };
 
 function isSingleEmptyLayer(layerMap: IndexPatternPrivateState['layers']) {
@@ -228,7 +229,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   );
 
   const displayedFields = allFields.filter(field => {
-    if (!supportedFieldTypes.includes(field.type)) {
+    if (!supportedFieldTypes.has(field.type)) {
       return false;
     }
 
