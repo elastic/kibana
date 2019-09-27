@@ -71,7 +71,6 @@ export function DiscoverIndexPattern({
 
   return (
     <EuiComboBox
-      compressed={true}
       className="index-pattern-selection"
       data-test-subj="index-pattern-selection"
       fullWidth={true}
