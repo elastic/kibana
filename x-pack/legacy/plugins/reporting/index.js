@@ -94,7 +94,7 @@ export const reporting = (kibana) => {
         capture: Joi.object({
           networkPolicy: Joi.object({
             enabled: Joi.boolean().default(true),
-            allow: Joi.array().items(Joi.string()).default(['http:', 'https:', 'ws:', 'wss:', 'data:']),
+            allow: Joi.array().items(Joi.string().invalid('file:')).default(['http:', 'https:', 'ws:', 'wss:', 'data:']),
             deny: Joi.array().items(Joi.string()).default([]),
           }).default(),
           zoom: Joi.number().integer().default(2),
