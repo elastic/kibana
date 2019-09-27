@@ -17,23 +17,37 @@
  * under the License.
  */
 
-import { createTestServers } from '../../../../../../test_utils/kbn_server';
+import { UnwrapPromise } from '@kbn/utility-types';
+import { SavedObjectsClientContract } from 'src/core/server';
 
-let kbnServer;
-let services;
-let servers;
-let esServer;
-let kbn;
+import KbnServer from '../../../../../server/kbn_server';
+import { createTestServers } from '../../../../../../test_utils/kbn_server';
+import { CallCluster } from '../../../../../../legacy/core_plugins/elasticsearch';
+
+let kbnServer: KbnServer;
+let servers: ReturnType<typeof createTestServers>;
+let esServer: UnwrapPromise<ReturnType<typeof servers['startES']>>;
+let kbn: UnwrapPromise<ReturnType<typeof servers['startKibana']>>;
+
+interface AllServers {
+  kbnServer: KbnServer;
+  savedObjectsClient: SavedObjectsClientContract;
+  callCluster: CallCluster;
+  uiSettings: any;
+  deleteKibanaIndex: typeof deleteKibanaIndex;
+}
+
+let services: AllServers;
 
 export async function startServers() {
   servers = createTestServers({
-    adjustTimeout: (t) => this.timeout(t),
+    adjustTimeout: t => jest.setTimeout(t),
     settings: {
       kbn: {
         uiSettings: {
           overrides: {
             foo: 'bar',
-          }
+          },
         },
       },
     },
@@ -43,9 +57,9 @@ export async function startServers() {
   kbnServer = kbn.kbnServer;
 }
 
-async function deleteKibanaIndex(callCluster) {
+async function deleteKibanaIndex(callCluster: CallCluster) {
   const kibanaIndices = await callCluster('cat.indices', { index: '.kibana*', format: 'json' });
-  const indexNames = kibanaIndices.map(x => x.index);
+  const indexNames = kibanaIndices.map((x: any) => x.index);
   if (!indexNames.length) {
     return;
   }
@@ -65,9 +79,9 @@ export function getServices() {
   const callCluster = esServer.es.getCallCluster();
 
   const savedObjects = kbnServer.server.savedObjects;
-  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient();
+  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient({});
 
-  const uiSettings = kbnServer.server.uiSettingsServiceFactory({
+  const uiSettings = (kbnServer.server as any).uiSettingsServiceFactory({
     savedObjectsClient,
   });
 
@@ -83,10 +97,10 @@ export function getServices() {
 }
 
 export async function stopServers() {
-  services = null;
-  kbnServer = null;
+  services = null!;
+  kbnServer = null!;
   if (servers) {
-    esServer.stop();
-    kbn.stop();
+    await esServer.stop();
+    await kbn.stop();
   }
 }

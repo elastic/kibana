@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import sinon from 'sinon';
+export { startServers, getServices, stopServers } from './servers';
 
-export function assertSinonMatch(value, match) {
-  const stub = sinon.stub();
-  stub(value);
-  sinon.assert.calledWithExactly(stub, match);
-}
+export { chance } from './chance';
+
+export { assertSinonMatch } from './assert';

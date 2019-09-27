@@ -76,9 +76,9 @@ describe('createOrUpgradeSavedConfig()', () => {
     ]);
   });
 
-  afterAll(() => {
-    esServer.stop();
-    kbn.stop();
+  afterAll(async () => {
+    await esServer.stop();
+    await kbn.stop();
   }, 30000);
 
   it('upgrades the previous version on each increment', async function() {
