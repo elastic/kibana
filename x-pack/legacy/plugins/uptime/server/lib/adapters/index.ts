@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMSavedObjectsAdapter } from './types';
-
-export class UMMemorySavedObjectsAdapter implements UMSavedObjectsAdapter {
-  public async getUptimeIndexPattern(): Promise<any> {
-    return {};
-  }
-}
+export * from './auth';
+export * from './database';
+export * from './framework';
+export * from './monitor_states';
+export * from './monitors';
+export * from './pings';
+export * from './saved_objects';
+export * from './telemetry';
