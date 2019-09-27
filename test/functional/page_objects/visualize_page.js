@@ -633,8 +633,8 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async changeHeatmapColorNumbers(value = 6) {
-      const input = await testSubjects.find(`heatmapOptionsColorsNumberInput`);
-      await input.clearValue();
+      const input = await testSubjects.find(`heatmapColorsNumber`);
+      await input.clearValueWithKeyboard();
       await input.type(`${value}`);
     }
 
@@ -647,26 +647,16 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async clickEnableCustomRanges() {
-      await testSubjects.click('heatmapEnableCustomRanges');
+      await testSubjects.click('heatmapUseCustomRanges');
     }
 
     async clickAddRange() {
-      await testSubjects.click(`heatmapAddRangeButton`);
+      await testSubjects.click(`heatmapColorRange__addRangeButton`);
     }
 
-    async isCustomRangeTableShown() {
-      await testSubjects.exists('heatmapCustomRangesTable');
-    }
-
-    async addCustomRange(from, to) {
-      const table = await testSubjects.find('heatmapCustomRangesTable');
-      const lastRow = await table.findByCssSelector('tr:last-child');
-      const fromCell = await lastRow.findByCssSelector('td:first-child input');
-      await fromCell.clearValue();
-      await fromCell.type(`${from}`, { charByChar: true });
-      const toCell = await lastRow.findByCssSelector('td:nth-child(2) input');
-      await toCell.clearValue();
-      await toCell.type(`${to}`, { charByChar: true });
+    async setCustomRangeByIndex(index, from, to) {
+      await testSubjects.setValue(`heatmapColorRange${index}__from`, from);
+      await testSubjects.setValue(`heatmapColorRange${index}__to`, to);
     }
 
     async clickYAxisOptions(axisId) {
