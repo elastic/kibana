@@ -150,7 +150,6 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
               <EuiFlexItem grow={false}>
                 <EuiStat
                   title={stats.snapshotsFailed}
-                  titleColor={stats.snapshotsFailed > 0 ? 'danger' : 'default'}
                   description={i18n.translate(
                     'xpack.snapshotRestore.policyDetails.snapshotsFailedStat',
                     {
@@ -175,7 +174,6 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
               <EuiFlexItem grow={false}>
                 <EuiStat
                   title={stats.snapshotDeletionFailures}
-                  titleColor={stats.snapshotDeletionFailures > 0 ? 'danger' : 'default'}
                   description={i18n.translate(
                     'xpack.snapshotRestore.policyDetails.snapshotDeletionFailuresStat',
                     {
