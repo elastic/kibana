@@ -31,10 +31,15 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
           <span
             class="kuiStatusText"
           >
-            <img
+            <svg
               alt="Status: yellow"
+              class="euiIcon euiIcon--large euiIcon--warning euiIcon-isLoading"
               data-test-subj="statusIcon"
-              src="../plugins/monitoring/icons/health-yellow.svg"
+              focusable="false"
+              height="16"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
             />
           </span>
            Yellow
@@ -207,10 +212,15 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
           <span
             class="kuiStatusText"
           >
-            <img
+            <svg
               alt="Status: green"
+              class="euiIcon euiIcon--large euiIcon--success euiIcon-isLoading"
               data-test-subj="statusIcon"
-              src="../plugins/monitoring/icons/health-green.svg"
+              focusable="false"
+              height="16"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
             />
           </span>
            Green
