@@ -18,7 +18,7 @@
  */
 
 import { trunc } from 'lodash';
-import { FieldFormat } from '../../../../../../plugins/data/common/';
+import { FieldFormat, DEFAULT_CONTEXT_TYPE } from '../../../../../../plugins/data/common/';
 
 const omission = '...';
 
@@ -30,7 +30,7 @@ export function createTruncateFormat(BaseFieldFormat: typeof FieldFormat) {
   }
 
   TruncateFormat.prototype._convert = {
-    text(val: any) {
+    [DEFAULT_CONTEXT_TYPE](val: any) {
       const length = this.param('fieldLength') as any;
       if (length > 0) {
         return trunc(val, {
