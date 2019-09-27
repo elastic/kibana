@@ -3670,10 +3670,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/pngjs@^3.3.1":
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/@types/pngjs/-/pngjs-3.3.1.tgz#47d97bd29dd6372856050e9e5e366517dd1ba2d8"
-  integrity sha512-kcYYpvggAVtJmVp8ojGWkYGi1Q2lJS787f16IOfd7/fUJ0yUasn9XnxIRWQ/gY8eID8MV9h4IgpJU3j/UNJ6QQ==
+"@types/pngjs@^3.3.2":
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/@types/pngjs/-/pngjs-3.3.2.tgz#8ed3bd655ab3a92ea32ada7a21f618e63b93b1d4"
+  integrity sha512-/SBsv93rVnjByzcau24rBwb+N7BHFp2LateaXz1e7m7M0Wzck/ymXTNdWVrCtkuMbwTHAnfdc3X/I/5szsTEAA==
   dependencies:
     "@types/node" "*"
 
