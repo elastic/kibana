@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { IEmbeddable, Embeddable, EmbeddableInput } from 'src/plugins/embeddable/public';
 import {
   IAction,
   IncompatibleActionError,
@@ -14,12 +15,6 @@ import { TimeRange } from '../../../../../../../src/plugins/data/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../../../src/legacy/core_plugins/kibana/public/discover/embeddable/search_embeddable';
 import { VisualizeEmbeddable } from '../../../../../../../src/legacy/core_plugins/kibana/public/visualize/embeddable/visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../../../src/legacy/core_plugins/kibana/public/visualize/embeddable/constants';
-
-import {
-  IEmbeddable,
-  Embeddable,
-  EmbeddableInput,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 
 import { CustomizeTimeRangeModal } from './customize_time_range_modal';
 import { OpenModal, CommonlyUsedRange } from './types';

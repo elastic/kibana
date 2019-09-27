@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
+import { AutocompleteSuggestion } from '../../../../../../src/plugins/data/public';
 import { ElasticsearchAdapter } from './adapters/elasticsearch/adapter_types';
 
 interface HiddenFields {

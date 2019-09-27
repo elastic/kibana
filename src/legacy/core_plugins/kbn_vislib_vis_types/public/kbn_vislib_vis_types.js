@@ -18,7 +18,6 @@
  */
 
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import './controls/line_interpolation_option';
 
 import histogramVisTypeProvider from './histogram';
 import lineVisTypeProvider from './line';
