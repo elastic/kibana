@@ -80,12 +80,6 @@ export const DragDropContextWrapperComponent = React.memo<Props>(
         {children}
       </DragDropContext>
     );
-  },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.children === nextProps.children &&
-      prevProps.dataProviders !== nextProps.dataProviders
-    ); // prevent re-renders when data providers are added or removed, but all other props are the same
   }
 );
 
