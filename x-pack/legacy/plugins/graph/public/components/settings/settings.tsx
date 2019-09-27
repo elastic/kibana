@@ -72,9 +72,12 @@ interface AsObservable<P> {
   observable: Readonly<Rx.Observable<P>>;
 }
 
-export interface SettingsProps extends AsObservable<AngularProps>, StateProps, DispatchProps {}
+export interface SettingsProps extends AngularProps, StateProps, DispatchProps {}
 
-export function SettingsComponent({ observable, ...props }: SettingsProps) {
+export function SettingsComponent({
+  observable,
+  ...props
+}: AsObservable<AngularProps> & StateProps & DispatchProps) {
   const [angularProps, setAngularProps] = useState<AngularProps | undefined>(undefined);
   const [activeTab, setActiveTab] = useState(0);
 

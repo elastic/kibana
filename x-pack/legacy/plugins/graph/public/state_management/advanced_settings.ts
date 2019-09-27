@@ -39,7 +39,7 @@ export const settingsSelector = (state: GraphState) => state.advancedSettings;
  * Won't be necessary once the workspace is moved to redux
  */
 export const syncSettingsSaga = ({ getWorkspace, notifyAngular }: GraphStoreDependencies) => {
-  function* syncSettings(action: Action<AdvancedSettingsState>) {
+  function* syncSettings(action: Action<AdvancedSettingsState>): IterableIterator<void> {
     const workspace = getWorkspace();
     if (!workspace) {
       return;

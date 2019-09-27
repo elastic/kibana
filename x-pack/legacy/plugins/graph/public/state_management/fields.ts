@@ -74,7 +74,7 @@ export const hasFieldsSelector = createSelector(
  * Won't be necessary once the workspace is moved to redux
  */
 export const updateSaveButtonSaga = ({ notifyAngular }: GraphStoreDependencies) => {
-  function* notify() {
+  function* notify(): IterableIterator<void> {
     notifyAngular();
   }
   return function*() {

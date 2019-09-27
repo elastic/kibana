@@ -5,12 +5,25 @@
  */
 
 import { appStateToSavedWorkspace } from './serialize';
-import { GraphWorkspaceSavedObject, Workspace, WorkspaceEdge, AppState } from '../../types';
+import {
+  GraphWorkspaceSavedObject,
+  Workspace,
+  WorkspaceEdge,
+  UrlTemplate,
+  AdvancedSettings,
+  WorkspaceField,
+} from '../../types';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
-import { IndexPattern } from 'src/legacy/core_plugins/data/public';
+import { IndexpatternDatasource } from '../../state_management';
 
 describe('serialize', () => {
-  let appState: AppState;
+  let appState: {
+    workspace: Workspace;
+    urlTemplates: UrlTemplate[];
+    advancedSettings: AdvancedSettings;
+    selectedIndex: IndexpatternDatasource;
+    selectedFields: WorkspaceField[];
+  };
 
   beforeEach(() => {
     appState = {
@@ -21,29 +34,6 @@ describe('serialize', () => {
         maxValuesPerDoc: 1,
         minDocCount: 3,
       },
-      allFields: [
-        {
-          color: 'black',
-          icon: { class: 'a', code: '', label: '' },
-          name: 'field1',
-          selected: true,
-          type: 'string',
-        },
-        {
-          color: 'black',
-          icon: { class: 'b', code: '', label: '' },
-          name: 'field2',
-          selected: true,
-          type: 'string',
-        },
-        {
-          color: 'black',
-          icon: { class: 'c', code: '', label: '' },
-          name: 'field3',
-          selected: false,
-          type: 'string',
-        },
-      ],
       selectedFields: [
         {
           color: 'black',
@@ -61,8 +51,10 @@ describe('serialize', () => {
         },
       ],
       selectedIndex: {
+        type: 'indexpattern',
+        id: '123',
         title: 'Testindexpattern',
-      } as IndexPattern,
+      },
       urlTemplates: [
         {
           description: 'Template',
