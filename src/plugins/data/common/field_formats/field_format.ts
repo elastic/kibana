@@ -23,7 +23,7 @@ import { ContentType, FieldFormatConvert, FieldFormatConvertFunction } from './t
 
 import { htmlContentTypeSetup, textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types';
 
-const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
+export const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
 
 export abstract class FieldFormat {
   /**

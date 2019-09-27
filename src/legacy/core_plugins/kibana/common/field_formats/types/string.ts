@@ -18,6 +18,8 @@
  */
 
 import { asPrettyString } from '../../../../../../plugins/data/common/field_formats';
+import { FieldFormat, DEFAULT_CONTEXT_TYPE } from '../../../../../../plugins/data/common/';
+// @ts-ignore
 import { shortenDottedString } from '../../utils/shorten_dotted_string';
 
 const TRANSFORM_OPTIONS = [
@@ -27,19 +29,19 @@ const TRANSFORM_OPTIONS = [
   { kind: 'title', text: 'Title Case' },
   { kind: 'short', text: 'Short Dots' },
   { kind: 'base64', text: 'Base64 Decode' },
-  { kind: 'urlparam', text: 'URL Param Decode' }
+  { kind: 'urlparam', text: 'URL Param Decode' },
 ];
 const DEFAULT_TRANSFORM_OPTION = false;
 
-export function createStringFormat(FieldFormat) {
-  return class StringFormat extends FieldFormat {
+export function createStringFormat(BaseFieldFormat: typeof FieldFormat) {
+  class StringFormat extends BaseFieldFormat {
     getParamDefaults() {
       return {
-        transform: DEFAULT_TRANSFORM_OPTION
+        transform: DEFAULT_TRANSFORM_OPTION,
       };
     }
 
-    _base64Decode(val) {
+    protected base64Decode(val: any) {
       try {
         return Buffer.from(val, 'base64').toString('utf8');
       } catch (e) {
@@ -47,20 +49,10 @@ export function createStringFormat(FieldFormat) {
       }
     }
 
-    _toTitleCase(val) {
-      return val.replace(/\w\S*/g, txt => { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
-    }
-
-    _convert(val) {
-      switch (this.param('transform')) {
-        case 'lower': return String(val).toLowerCase();
-        case 'upper': return String(val).toUpperCase();
-        case 'title': return this._toTitleCase(val);
-        case 'short': return shortenDottedString(val);
-        case 'base64': return this._base64Decode(val);
-        case 'urlparam': return decodeURIComponent(val);
-        default: return asPrettyString(val);
-      }
+    protected toTitleCase(val: string) {
+      return val.replace(/\w\S*/g, txt => {
+        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+      });
     }
 
     static id = 'string';
@@ -76,8 +68,31 @@ export function createStringFormat(FieldFormat) {
       'string',
       'murmur3',
       'unknown',
-      'conflict'
+      'conflict',
     ];
     static transformOptions = TRANSFORM_OPTIONS;
+  }
+
+  StringFormat.prototype._convert = {
+    [DEFAULT_CONTEXT_TYPE](this: StringFormat, val: any) {
+      switch (this.param('transform')) {
+        case 'lower':
+          return String(val).toLowerCase();
+        case 'upper':
+          return String(val).toUpperCase();
+        case 'title':
+          return this.toTitleCase(val);
+        case 'short':
+          return shortenDottedString(val);
+        case 'base64':
+          return this.base64Decode(val);
+        case 'urlparam':
+          return decodeURIComponent(val);
+        default:
+          return asPrettyString(val);
+      }
+    },
   };
+
+  return StringFormat;
 }
