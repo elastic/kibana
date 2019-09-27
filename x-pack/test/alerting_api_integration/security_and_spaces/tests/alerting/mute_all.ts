@@ -14,7 +14,7 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('mute', () => {
+  describe('mute_all', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());

@@ -15,5 +15,5 @@ export { disableAlertRoute } from './disable';
 export { updateApiKeyRoute } from './update_api_key';
 export { muteAlertInstanceRoute } from './mute_instance';
 export { unmuteAlertInstanceRoute } from './unmute_instance';
-export { muteAlertRoute } from './mute';
-export { unmuteAlertRoute } from './unmute';
+export { muteAllAlertRoute } from './mute_all';
+export { unmuteAllAlertRoute } from './unmute_all';

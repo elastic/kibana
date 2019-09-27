@@ -10,16 +10,16 @@ import { AlertUtils, getUrlPrefix, getTestAlertData, ObjectRemover } from '../..
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function createUnmuteTests({ getService }: FtrProviderContext) {
+export default function createMuteTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('unmute', () => {
+  describe('mute_all', () => {
     const objectRemover = new ObjectRemover(supertestWithoutAuth);
     const alertUtils = new AlertUtils({ space: Spaces.space1, supertestWithoutAuth });
 
     after(() => objectRemover.removeAll());
 
-    it('should handle unmute alert request appropriately', async () => {
+    it('should handle mute alert request appropriately', async () => {
       const { body: createdAlert } = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
         .set('kbn-xsrf', 'foo')
@@ -28,13 +28,12 @@ export default function createUnmuteTests({ getService }: FtrProviderContext) {
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
 
       await alertUtils.mute(createdAlert.id);
-      await alertUtils.unmute(createdAlert.id);
 
       const { body: updatedAlert } = await supertestWithoutAuth
         .get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .expect(200);
-      expect(updatedAlert.muteAll).to.eql(false);
+      expect(updatedAlert.muteAll).to.eql(true);
     });
   });
 }

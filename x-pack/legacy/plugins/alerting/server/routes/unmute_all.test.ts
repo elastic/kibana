@@ -5,18 +5,18 @@
  */
 
 import { createMockServer } from './_mock_server';
-import { muteAlertRoute } from './mute';
+import { unmuteAllAlertRoute } from './unmute_all';
 
 const { server, alertsClient } = createMockServer();
-muteAlertRoute(server);
+unmuteAllAlertRoute(server);
 
-test('mutes an alert', async () => {
+test('unmutes an alert', async () => {
   const request = {
     method: 'POST',
-    url: '/api/alert/1/_mute_all',
+    url: '/api/alert/1/_unmute_all',
   };
 
   const { statusCode } = await server.inject(request);
   expect(statusCode).toBe(204);
-  expect(alertsClient.muteAll).toHaveBeenCalledWith({ id: '1' });
+  expect(alertsClient.unmuteAll).toHaveBeenCalledWith({ id: '1' });
 });

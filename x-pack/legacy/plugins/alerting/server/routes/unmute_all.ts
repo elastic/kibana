@@ -6,25 +6,25 @@
 
 import Hapi from 'hapi';
 
-interface MuteRequest extends Hapi.Request {
+interface UnmuteAllRequest extends Hapi.Request {
   params: {
     id: string;
   };
 }
 
-export function muteAlertRoute(server: Hapi.Server) {
+export function unmuteAllAlertRoute(server: Hapi.Server) {
   server.route({
     method: 'POST',
-    path: '/api/alert/{id}/_mute_all',
+    path: '/api/alert/{id}/_unmute_all',
     options: {
       tags: ['access:alerting-all'],
       response: {
         emptyStatusCode: 204,
       },
     },
-    async handler(request: MuteRequest, h: Hapi.ResponseToolkit) {
+    async handler(request: UnmuteAllRequest, h: Hapi.ResponseToolkit) {
       const alertsClient = request.getAlertsClient!();
-      await alertsClient.muteAll(request.params);
+      await alertsClient.unmuteAll(request.params);
       return h.response();
     },
   });

@@ -14,7 +14,7 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('unmute', () => {
+  describe('unmute_all', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
