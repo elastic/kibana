@@ -20,7 +20,7 @@
 
 import getAllConfigs from './get_all_configs';
 
-const serverConfig = require('../test/server_config');
+const serverConfig = require('./server_config');
 
 export default async function ({ readConfigFile }) {
   const defaultConfigs = await getAllConfigs(readConfigFile, '../../functional/config');
