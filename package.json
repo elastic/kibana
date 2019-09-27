@@ -107,7 +107,7 @@
     "@babel/register": "^7.5.5",
     "@elastic/charts": "^12.0.2",
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "14.2.0",
+    "@elastic/eui": "14.3.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.3",
