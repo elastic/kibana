@@ -12,7 +12,15 @@ import { CursorDirection, MonitorSummary, SortOrder } from '../../../../../commo
 import { enrichMonitorGroups } from './enrich_monitor_groups';
 import { MonitorGroupIterator } from './monitor_group_iterator';
 
-// Gets a single page of results per the settings in the provided queryContext. These results are very minimal,
+/**
+ *
+ * Gets a single page of results per the settings in the provided queryContext. These results are very minimal,
+ * just monitor IDs and check groups. This takes an optional `MonitorGroupEnricher` that post-processes the minimal
+ * data, decorating it appropriately. The function also takes a fetcher, which does all the actual fetching.
+ * @param queryContext defines the criteria for the data on the current page
+ * @param monitorGroupFetcher performs paginated monitor fetching
+ * @param monitorEnricher decorates check group results with additional data
+ */
 // just monitor IDs and check groups. This takes an optional `MonitorGroupEnricher` that post-processes the minimal
 // data, decorating it appropriately. The function also takes a fetcher, which does all the actual fetching.
 export const fetchPage = async (

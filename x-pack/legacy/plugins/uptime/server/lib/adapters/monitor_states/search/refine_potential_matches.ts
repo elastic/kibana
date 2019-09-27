@@ -9,7 +9,13 @@ import { QueryContext } from '../elasticsearch_monitor_states_adapter';
 import { CursorDirection } from '../../../../../common/graphql/types';
 import { MonitorGroups, MonitorLocCheckGroup } from './fetch_page';
 
-// This is the second phase of the query, it determines whether the provided check groups are the latest complete
+/**
+ * Determines whether the provided check groups are the latest complete check groups for their associated monitor ID's.
+ * If provided check groups are not the latest complete group, they are discarded.
+ * @param queryContext the data and resources needed to perform the query
+ * @param potentialMatchMonitorIDs the monitor ID's of interest
+ * @param potentialMatchCheckGroups the check groups to filter for the latest match per ID
+ */
 // check groups for their associated monitor IDs. If not, it discards the result.
 export const refinePotentialMatches = async (
   queryContext: QueryContext,
@@ -26,7 +32,7 @@ export const refinePotentialMatches = async (
     potentialMatchCheckGroups
   );
 
-  // Return the monitor groups filtering out things potential matches that weren't current
+  // Return the monitor groups filtering out potential matches that weren't current
   const matches: MonitorGroups[] = potentialMatchMonitorIDs
     .map((id: string) => {
       return { id, groups: recentGroupsMatchingStatus.get(id) || [] };

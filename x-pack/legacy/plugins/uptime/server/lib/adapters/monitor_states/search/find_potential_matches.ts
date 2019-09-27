@@ -11,7 +11,14 @@ import { INDEX_NAMES } from '../../../../../common/constants';
 
 // This is the first phase of the query. In it, we find the most recent check groups that matched the given query.
 // Note that these check groups may not be the most recent groups for the matching monitor ID! We'll filter those
-// out in the next phase.
+/**
+ * This is the first phase of the query. In it, we find the most recent check groups that matched the given query.
+ * Note that these check groups may not be the most recent groups for the matching monitor ID. They'll be filtered
+ * out in the next phase.
+ * @param queryContext the data and resources needed to perform the query
+ * @param searchAfter indicates where Elasticsearch should continue querying on subsequent requests, if at all
+ * @param size the minimum size of the matches to chunk
+ */
 export const findPotentialMatches = async (
   queryContext: QueryContext,
   searchAfter: any,
