@@ -16,7 +16,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
 } from '@elastic/eui';
-import { SectionError, SectionLoading } from '../../../components';
+import { SectionError, SectionLoading, Error } from '../../../components';
 import { TemplateTable } from './template_table';
 import { loadIndexTemplates } from '../../../services/api';
 import { Template } from '../../../../common/types';
@@ -87,7 +87,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
             defaultMessage="Error loading templates"
           />
         }
-        error={error}
+        error={error as Error}
       />
     );
   } else if (Array.isArray(templates) && templates.length === 0) {

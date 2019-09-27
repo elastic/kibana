@@ -29,22 +29,18 @@
 
 import { EventEmitter } from 'events';
 import _ from 'lodash';
+import '../render_complete/directive';
 import { VisTypesRegistryProvider } from '../registry/vis_types';
 import { AggConfigs } from '../agg_types/agg_configs';
 import { PersistedState } from '../persisted_state';
-import { FilterBarQueryFilterProvider } from '../filter_manager/query_filter';
 import { updateVisualizationConfig } from './vis_update';
 import { SearchSourceProvider } from '../courier/search_source';
-import { SavedObjectsClientProvider } from '../saved_objects';
 
-import { timefilter } from '../timefilter';
 import '../directives/bind';
 
-export function VisProvider(Private, indexPatterns, getAppState) {
+export function VisProvider(Private, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
-  const queryFilter = Private(FilterBarQueryFilterProvider);
   const SearchSource = Private(SearchSourceProvider);
-  const savedObjectsClient = Private(SavedObjectsClientProvider);
 
   class Vis extends EventEmitter {
     constructor(indexPattern, visState) {
@@ -66,11 +62,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
       this.sessionState = {};
 
       this.API = {
-        savedObjectsClient: savedObjectsClient,
         SearchSource: SearchSource,
-        indexPatterns: indexPatterns,
-        timeFilter: timefilter,
-        queryFilter: queryFilter,
         events: {
           filter: data => this.eventsSubject.next({ name: 'filterBucket', data }),
           brush: data => this.eventsSubject.next({ name: 'brush', data }),

@@ -37,6 +37,7 @@ function isSortableByColumn(column: IndexPatternColumn) {
 }
 
 const DEFAULT_SIZE = 3;
+const supportedTypes = new Set(['string', 'boolean', 'ip']);
 
 export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'terms';
@@ -54,11 +55,11 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
   }),
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
-      (type === 'string' || type === 'boolean') &&
+      supportedTypes.has(type) &&
       aggregatable &&
       (!aggregationRestrictions || aggregationRestrictions.terms)
     ) {
-      return { dataType: type, isBucketed: true, scale: 'ordinal' };
+      return { dataType: type as DataType, isBucketed: true, scale: 'ordinal' };
     }
   },
   isTransferable: (column, newIndexPattern) => {
@@ -66,7 +67,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
 
     return Boolean(
       newField &&
-        newField.type === 'string' &&
+        supportedTypes.has(newField.type) &&
         newField.aggregatable &&
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms)
     );
@@ -174,6 +175,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
           label={i18n.translate('xpack.lens.indexPattern.terms.size', {
             defaultMessage: 'Number of values',
           })}
+          display="columnCompressed"
         >
           <FixedEuiRange
             min={1}
@@ -181,6 +183,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             step={1}
             value={currentColumn.params.size}
             showInput
+            showLabels
+            compressed
             onChange={(
               e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>
             ) =>
@@ -203,8 +207,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
           label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
             defaultMessage: 'Order by',
           })}
+          display="columnCompressed"
         >
           <EuiSelect
+            compressed
             data-test-subj="indexPattern-terms-orderBy"
             options={orderOptions}
             value={toValue(currentColumn.params.orderBy)}
@@ -228,8 +234,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
           label={i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
             defaultMessage: 'Order direction',
           })}
+          display="columnCompressed"
         >
           <EuiSelect
+            compressed
             data-test-subj="indexPattern-terms-orderDirection"
             options={[
               {

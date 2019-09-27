@@ -8,6 +8,7 @@ files:
     - 'x-pack/legacy/plugins/security/**/*.s+(a|c)ss'
     - 'x-pack/legacy/plugins/canvas/**/*.s+(a|c)ss'
     - 'x-pack/legacy/plugins/monitoring/**/*.s+(a|c)ss'
+    - 'x-pack/legacy/plugins/lens/**/*.s+(a|c)ss'
 rules:
   quotes:
     - 2

@@ -34,7 +34,7 @@ import { Inspector } from '../../inspector';
 import { Adapters } from '../../inspector/types';
 import { PersistedState } from '../../persisted_state';
 import { IPrivate } from '../../private';
-import { RenderCompleteHelper } from '../../render_complete';
+import { RenderCompleteHelper } from '../../../../../plugins/kibana_utils/public';
 import { AppState } from '../../state_management/app_state';
 import { timefilter } from '../../timefilter';
 import { Vis } from '../../vis';
@@ -221,6 +221,16 @@ export class EmbeddedVisualizeHandler {
       if (this.actions[event.name]) {
         event.data.aggConfigs = getTableAggs(this.vis);
         const newFilters = this.actions[event.name](event.data) || [];
+        if (event.name === 'brush') {
+          const fieldName = newFilters[0].meta.key;
+          const $state = this.vis.API.getAppState();
+          const existingFilter = $state.filters.find(
+            (filter: any) => filter.meta && filter.meta.key === fieldName
+          );
+          if (existingFilter) {
+            Object.assign(existingFilter, newFilters[0]);
+          }
+        }
         visFilters.pushFilters(newFilters);
       }
     });
