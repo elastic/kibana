@@ -21,8 +21,14 @@
     dispatch="reduxDispatch"
   ></graph-app>
 
-  <div class="gphGraph__container" id="GraphSvgContainer">
-    <svg class="gphGraph" width="100%" height="100%" pointer-events="all" id="graphSvg" ng-click="hideAllConfigPanels()">
+  <div class="gphGraph__container" id="GraphSvgContainer" ng-click="hideAllConfigPanels()">
+    <graph-visualization
+      nodes="workspace.nodes"
+      edges="workspace.edges"
+      edge-click="clickEdge"
+      node-click="nodeClick"
+    ></graph-visualization>
+    <!-- <svg class="gphGraph" width="100%" height="100%" pointer-events="all" id="graphSvg" >
       <g id="svgRootGroup">
         <g>
           <line ng-repeat="edge in workspace.edges" class="edge" ng-attr-x1="{{edge.topSrc.kx}}" ng-attr-y1="{{edge.topSrc.ky}}"
@@ -34,10 +40,6 @@
             ng-class="{selectedNode:n.isSelected}" ng-attr-style="fill:{{n.color}}" />
           <text class="fa gphNode__text gphNode__text--lowOpacity" transform="translate(0,5)" text-anchor="middle" ng-attr-x="{{n.kx}}"
             ng-attr-y="{{n.ky}}" ng-if="n.icon" ng-click="nodeClick(n, $event)">{{n.icon.code}}</text>
-
-          <!-- Using 2 strategies for rendering labels - small text uses SVG for performance,
-            larger text uses HTML for word-wrapping capabilities but can be jittery.
-          -->
 
           <text ng-if="n.label.length<30" class="gphNode__label" text-anchor="middle" transform="translate(0,22)"
             ng-attr-x="{{n.kx}}" ng-attr-y="{{n.ky}}" ng-click="nodeClick(n, $event)">
@@ -61,25 +63,7 @@
           </g>
         </g>
       </g>
-    </svg>
-
-    <!--
-            Experiment with group/ungroup buttons that reveal-on-zoom on nodes.
-
-     <g ng-if="workspace.selectedNodes.length>1||(workspace.selectedNodes.length>0&&workspace.selectedNodes[0] !== n)">
-      <g ng-if="zoomLevel>10" transform="translate(-1,-7)">
-        <rect class="SvgZoomedIconButton" ng-attr-x="{{n.kx}}" ng-attr-y="{{n.ky}}" transform="translate(-1.5,-1.2)" ng-click="workspace.groupSelections(n)" width="6.5" height="2.2" rx="0.2" ry="0.2" />
-        <text class="SvgZoomedButtonText" transform="translate(3,0.3)" text-anchor="middle" ng-attr-x="{{n.kx}}" ng-attr-y="{{n.ky}}" ng-click="workspace.groupSelections(n)">group</text>
-        <text class="SvgZoomedIconButtonText" transform="translate(-0.2,0.6)" text-anchor="middle" ng-attr-x="{{n.kx}}" ng-attr-y="{{n.ky}}" ng-click="workspace.groupSelections(n)">&#xf247</text>
-      </g>
-    </g>
-    <g ng-if="zoomLevel>10" transform="translate(8,12.5)">
-      <rect class="SvgZoomedIconButton" ng-attr-x="{{n.kx}}" ng-attr-y="{{n.ky}}" transform="translate(-1.5,-1.2)" ng-click="workspace.ungroup(n)" width="7" height="2" rx="0.2" ry="0.2" />
-      <text class="SvgZoomedButtonText" transform="translate(3,0.3)" text-anchor="middle" ng-attr-x="{{n.kx}}" ng-attr-y="{{n.ky}}" ng-click="workspace.ungroup(n)">ungroup</text>
-      <text class="SvgZoomedIconButtonText" transform="translate(-0.4,0.6)" text-anchor="middle" ng-attr-x="{{n.kx}}" ng-attr-y="{{n.ky}}" ng-click="workspace.ungroup(n)">&#xf09c</text>
-    </g>
-
-  -->
+    </svg> -->
 
     <div id="sidebar" class="gphSidebar" ng-if="workspace !== null">
 

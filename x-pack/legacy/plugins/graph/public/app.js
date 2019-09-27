@@ -45,6 +45,7 @@ import { GraphApp } from './components/app';
 import { VennDiagram } from './components/venn_diagram';
 import { Listing } from './components/listing';
 import { Settings } from './components/settings';
+import { GraphVisualization } from './components/graph_visualization';
 
 import gws from './angular/graph_client_workspace.js';
 import { SavedWorkspacesProvider } from './angular/services/saved_workspaces';
@@ -121,6 +122,11 @@ app.directive('graphApp', function (reactDirective) {
     ['overlays', { watchDepth: 'reference' }]
   ]);
 });
+
+app.directive('graphVisualization', function (reactDirective) {
+  return reactDirective(GraphVisualization);
+});
+
 
 if (uiRoutes.enable) {
   uiRoutes.enable();
