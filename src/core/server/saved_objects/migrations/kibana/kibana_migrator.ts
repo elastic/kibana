@@ -57,15 +57,15 @@ export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
  * Manages the shape of mappings and documents in the Kibana index.
  */
 export class KibanaMigrator {
-  private callCluster: CallCluster;
-  private config: Config;
-  private savedObjectsConfig: SavedObjectsConfigType;
-  private documentMigrator: VersionedTransformer;
-  private kibanaConfig: KibanaConfigType;
-  private log: Logger;
-  private mappingProperties: MappingProperties;
+  private readonly callCluster: CallCluster;
+  private readonly config: Config;
+  private readonly savedObjectsConfig: SavedObjectsConfigType;
+  private readonly documentMigrator: VersionedTransformer;
+  private readonly kibanaConfig: KibanaConfigType;
+  private readonly log: Logger;
+  private readonly mappingProperties: MappingProperties;
   private readonly schema: SavedObjectsSchema;
-  private serializer: SavedObjectsSerializer;
+  private readonly serializer: SavedObjectsSerializer;
   private migrationResult?: Promise<Array<{ status: string }>>;
 
   /**
@@ -75,7 +75,7 @@ export class KibanaMigrator {
     callCluster,
     config,
     kibanaConfig,
-    savedObjectsConfig: savedObjectsConfig,
+    savedObjectsConfig,
     kibanaVersion,
     logger,
     savedObjectMappings,

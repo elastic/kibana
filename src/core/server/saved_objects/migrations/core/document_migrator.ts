@@ -64,7 +64,7 @@ import Boom from 'boom';
 import _ from 'lodash';
 import cloneDeep from 'lodash.clonedeep';
 import Semver from 'semver';
-import { Logger } from 'src/core/server/logging';
+import { Logger } from '../../../logging';
 import { RawSavedObjectDoc } from '../../serialization';
 import { SavedObjectsMigrationVersion } from '../../types';
 import { MigrationLogger, SavedObjectsMigrationLogger } from './migration_logger';
