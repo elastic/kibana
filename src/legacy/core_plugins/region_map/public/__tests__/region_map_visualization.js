@@ -87,6 +87,8 @@ describe('RegionMapsVisualizationTests', function () {
     ],
   };
 
+  let visRegComplete = false;
+
   beforeEach(ngMock.module('kibana'));
 
   let getManifestStub;
@@ -106,7 +108,10 @@ describe('RegionMapsVisualizationTests', function () {
         uiSettings,
       };
 
-      visualizationsSetup.types.registerVisualization(() => createRegionMapTypeDefinition(dependencies));
+      if(!visRegComplete) {
+        visRegComplete = true;
+        visualizationsSetup.types.registerVisualization(() => createRegionMapTypeDefinition(dependencies));
+      }
 
       Vis = Private(visModule.VisProvider);
       RegionMapsVisualization = createRegionMapVisualization(dependencies);
