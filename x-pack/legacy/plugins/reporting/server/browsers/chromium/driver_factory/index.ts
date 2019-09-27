@@ -203,34 +203,42 @@ export class HeadlessChromiumDriverFactory {
   }
 
   getPageExit(browser: Browser, page: Page): Rx.Observable<never> {
-    // const pageError$: Rx.Observable<never> = Rx.fromEvent(page, 'error');
-    // const uncaughtExceptionPageError$: Rx.Observable<never> = Rx.fromEvent(page, 'pageerror');
+    const pageError$: Rx.Observable<never> = Rx.fromEvent(page, 'error').pipe(
+      mergeMap((err: Error) => Rx.throwError(err))
+    );
 
-    // const pageRequestFailed$: Rx.Observable<Error> = Rx.fromEvent(page, 'requestfailed').pipe(
-    //   mergeMap((req: PuppeteerRequest) => {
-    //     const failure = req.failure && req.failure();
-    //     if (failure) {
-    //       return Rx.of(new Error(`Request to [${req.url()}] failed! [${failure.errorText}]`));
-    //     }
-    //     return Rx.of(new Error(`Unknown failure!`));
-    //   })
-    // );
+    const uncaughtExceptionPageError$: Rx.Observable<never> = Rx.fromEvent(page, 'pageerror').pipe(
+      mergeMap((err: Error) => Rx.throwError(err))
+    );
 
-    const browserDisconnect$ = Rx.fromEvent(browser, 'disconnected').pipe(
-      mergeMap(() => {
-        return Rx.of(
-          new Error(
-            `Puppeteer was disconnected from the Chromium instance! Chromium has closed or crashed.`
-          )
-        );
+    // FIXME: log it but don't throwError?
+    const pageRequestFailed$: Rx.Observable<never> = Rx.fromEvent(page, 'requestfailed').pipe(
+      mergeMap((req: PuppeteerRequest) => {
+        const failure = req.failure && req.failure();
+        if (failure) {
+          return Rx.throwError(
+            new Error(`Request to [${req.url()}] failed! [${failure.errorText}]`)
+          );
+        }
+        return Rx.throwError(new Error(`Unknown failure!`));
       })
     );
 
+    const browserDisconnect$ = Rx.fromEvent(browser, 'disconnected').pipe(
+      mergeMap(() =>
+        Rx.throwError(
+          new Error(
+            `Puppeteer was disconnected from the Chromium instance! Chromium has closed or crashed.`
+          )
+        )
+      )
+    );
+
     return Rx.merge(
-      // pageError$,
-      // uncaughtExceptionPageError$,
-      // pageRequestFailed$,
+      pageError$,
+      uncaughtExceptionPageError$,
+      pageRequestFailed$,
       browserDisconnect$
-    ).pipe(mergeMap(err => Rx.throwError(err)));
+    );
   }
 }
