@@ -11,7 +11,7 @@ import { LoggerFactory } from '../../../../../../src/core/server';
 export class ServerLoggerFactory implements CodeLoggerFactory {
   constructor(private readonly loggerFactory: LoggerFactory, private readonly verbose: boolean) {}
 
-  public getLogger(tags: string[]): Logger {
+  public getLogger(tags: string[] = []): Logger {
     return new Logger(this.loggerFactory, this.verbose, tags);
   }
 }
