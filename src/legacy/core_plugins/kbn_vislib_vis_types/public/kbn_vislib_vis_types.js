@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { setup as visualizations } from '../../visualizations/public/legacy';
 
 import histogramVisTypeProvider from './histogram';
 import lineVisTypeProvider from './line';
