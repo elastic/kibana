@@ -25,7 +25,7 @@ interface ServiceMetricsProps {
 
 export function ServiceMetrics({ agentName }: ServiceMetricsProps) {
   const { urlParams } = useUrlParams();
-  const { serviceName } = urlParams;
+  const { serviceName, serviceNodeName } = urlParams;
   const { data } = useServiceMetricCharts(urlParams, agentName);
   const { start, end } = urlParams;
 
@@ -35,12 +35,13 @@ export function ServiceMetrics({ agentName }: ServiceMetricsProps) {
     () => ({
       filterNames: ['host', 'containerId', 'podName'],
       params: {
-        serviceName
+        serviceName,
+        serviceNodeName
       },
       projection: PROJECTION.METRICS,
       showCount: false
     }),
-    [serviceName]
+    [serviceName, serviceNodeName]
   );
 
   return (

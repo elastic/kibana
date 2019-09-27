@@ -23,6 +23,7 @@ import { getTransactionsProjection } from '../../common/projections/transactions
 import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 import { jsonRt } from '../../common/runtime_types/json_rt';
+import { getJvmsProjection } from '../../common/projections/jvms';
 
 export const uiFiltersEnvironmentsRoute = createRoute(() => ({
   path: '/api/apm/ui_filters/environments',
@@ -169,15 +170,21 @@ export const transactionsLocalFiltersRoute = createLocalFiltersRoute({
 export const metricsLocalFiltersRoute = createLocalFiltersRoute({
   path: '/api/apm/ui_filters/local_filters/metrics',
   getProjection: ({ setup, query }) => {
-    const { serviceName } = query;
+    const { serviceName, serviceNodeName } = query;
     return getMetricsProjection({
       setup,
-      serviceName
+      serviceName,
+      serviceNodeName
     });
   },
-  queryRt: t.type({
-    serviceName: t.string
-  })
+  queryRt: t.intersection([
+    t.type({
+      serviceName: t.string
+    }),
+    t.partial({
+      serviceNodeName: t.string
+    })
+  ])
 });
 
 export const errorGroupsLocalFiltersRoute = createLocalFiltersRoute({
@@ -187,6 +194,19 @@ export const errorGroupsLocalFiltersRoute = createLocalFiltersRoute({
     return getErrorGroupsProjection({
       setup,
       serviceName
+    });
+  },
+  queryRt: t.type({
+    serviceName: t.string
+  })
+});
+
+export const jvmsLocalFiltersRoute = createLocalFiltersRoute({
+  path: '/api/apm/ui_filters/local_filters/jvms',
+  getProjection: ({ setup, query }) => {
+    return getJvmsProjection({
+      setup,
+      serviceName: query.serviceName
     });
   },
   queryRt: t.type({

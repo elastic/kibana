@@ -15,6 +15,11 @@ import { BreadcrumbRoute } from '../ProvideBreadcrumbs';
 import { RouteName } from './route_names';
 import { Settings } from '../../Settings';
 import { toQuery } from '../../../shared/Links/url_helpers';
+import { ServiceNodeMetrics } from '../../ServiceNodeMetrics';
+
+const metricsBreadcrumb = i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
+  defaultMessage: 'Metrics'
+});
 
 interface RouteParams {
   serviceName: string;
@@ -94,7 +99,6 @@ export const routes: BreadcrumbRoute[] = [
     }),
     name: RouteName.ERRORS
   },
-
   // transactions
   {
     exact: true,
@@ -110,10 +114,26 @@ export const routes: BreadcrumbRoute[] = [
     exact: true,
     path: '/services/:serviceName/metrics',
     component: () => <ServiceDetails tab="metrics" />,
-    breadcrumb: i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
-      defaultMessage: 'Metrics'
-    }),
+    breadcrumb: metricsBreadcrumb,
     name: RouteName.METRICS
+  },
+  // node metrics
+  {
+    exact: true,
+    path: '/services/:serviceName/metrics/node/:serviceNodeName',
+    component: () => <ServiceNodeMetrics />,
+    breadcrumb: metricsBreadcrumb,
+    name: RouteName.NODE_METRICS
+  },
+  // jvms
+  {
+    exact: true,
+    path: '/services/:serviceName/jvm',
+    component: () => <ServiceDetails tab="jvms" />,
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.jvmsTitle', {
+      defaultMessage: 'JVMs'
+    }),
+    name: RouteName.JVMS
   },
   {
     exact: true,
