@@ -17,16 +17,19 @@
  * under the License.
  */
 
-import { Filter, FilterMeta } from './meta_filter';
+import { Filter, FILTERS } from '@kbn/es-query';
+import { find, keys, get } from 'lodash';
 
-export type PhrasesFilterMeta = FilterMeta & {
-  params: string[]; // The unformatted values
-  field?: string;
+export const mapDefault = async (filter: Filter) => {
+  const metaProperty = /(^\$|meta)/;
+  const key = find(keys(filter), item => !item.match(metaProperty));
+
+  if (key) {
+    const type = FILTERS.CUSTOM;
+    const value = JSON.stringify(get(filter, key, {}));
+
+    return { type, key, value };
+  }
+
+  throw filter;
 };
-
-export type PhrasesFilter = Filter & {
-  meta: PhrasesFilterMeta;
-};
-
-export const isPhrasesFilter = (filter: any): filter is PhrasesFilter =>
-  filter && filter.meta.type === 'phrases';

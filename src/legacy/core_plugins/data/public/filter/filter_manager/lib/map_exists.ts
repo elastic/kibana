@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import { Filter, FilterMeta } from './meta_filter';
+import { Filter, isExistsFilter, FILTERS } from '@kbn/es-query';
+import { get } from 'lodash';
 
-export type PhrasesFilterMeta = FilterMeta & {
-  params: string[]; // The unformatted values
-  field?: string;
+export const mapExists = async (filter: Filter) => {
+  if (isExistsFilter(filter)) {
+    return {
+      type: FILTERS.EXISTS,
+      value: FILTERS.EXISTS,
+      key: get(filter, 'exists.field'),
+    };
+  }
+  throw filter;
 };
-
-export type PhrasesFilter = Filter & {
-  meta: PhrasesFilterMeta;
-};
-
-export const isPhrasesFilter = (filter: any): filter is PhrasesFilter =>
-  filter && filter.meta.type === 'phrases';

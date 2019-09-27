@@ -16,17 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Filter, FILTERS, isQueryStringFilter } from '@kbn/es-query';
 
-import { Filter, FilterMeta } from './meta_filter';
+export const mapQueryString = async (filter: Filter) => {
+  if (isQueryStringFilter(filter)) {
+    return {
+      type: FILTERS.QUERY_STRING,
+      key: 'query',
+      value: filter.query.query_string.query,
+    };
+  }
 
-export type PhrasesFilterMeta = FilterMeta & {
-  params: string[]; // The unformatted values
-  field?: string;
+  throw filter;
 };
-
-export type PhrasesFilter = Filter & {
-  meta: PhrasesFilterMeta;
-};
-
-export const isPhrasesFilter = (filter: any): filter is PhrasesFilter =>
-  filter && filter.meta.type === 'phrases';

@@ -17,16 +17,14 @@
  * under the License.
  */
 
-import { Filter, FilterMeta } from './meta_filter';
+import { Filter, isPhrasesFilter } from '@kbn/es-query';
 
-export type PhrasesFilterMeta = FilterMeta & {
-  params: string[]; // The unformatted values
-  field?: string;
+export const mapPhrases = async (filter: Filter) => {
+  if (!isPhrasesFilter(filter)) {
+    throw filter;
+  }
+
+  const { type, key, value, params } = filter.meta;
+
+  return { type, key, value, params };
 };
-
-export type PhrasesFilter = Filter & {
-  meta: PhrasesFilterMeta;
-};
-
-export const isPhrasesFilter = (filter: any): filter is PhrasesFilter =>
-  filter && filter.meta.type === 'phrases';
