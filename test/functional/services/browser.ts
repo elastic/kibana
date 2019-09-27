@@ -128,9 +128,9 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      */
     public async getCurrentUrl(): Promise<string> {
       // strip _t=Date query param when url is read
-      let current;
+      let current: string;
       if (this.isInternetExplorer) {
-        current = await driver.executeScript<string>('return window.document.location.href');
+        current = await driver.executeScript('return window.document.location.href');
       } else {
         current = await driver.getCurrentUrl();
       }

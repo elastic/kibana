@@ -23,7 +23,6 @@ import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
 import { Builder, Capabilities, By, Key, logging, until } from 'selenium-webdriver';
-// import ieCapabilities from 'selenium-webdriver/lib/capabilities';
 // @ts-ignore types not available
 import chrome from 'selenium-webdriver/chrome';
 // @ts-ignore types not available

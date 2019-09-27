@@ -65,8 +65,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await this.clickNewVisualization();
       // have to move the mouse to get the help flyout to appear on IE11
       // see https://github.com/elastic/kibana/issues/45333
-      const logo = await testSubjects.find('logo');
-      await logo.moveMouseTo();
+      await globalNav.moveMouseToLogo();
       await this.waitForVisualizationSelectPage();
     }
 

@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard']);
+  const globalNav = getService('globalNav');
 
   describe('empty dashboard', () => {
     before(async () => {
@@ -43,8 +44,7 @@ export default function ({ getService, getPageObjects }) {
       await testSubjects.click('emptyDashboardAddPanelButton');
       // have to move the mouse to get the help flyout to appear on IE11
       // see https://github.com/elastic/kibana/issues/45333
-      const logo = await testSubjects.find('logo');
-      await logo.moveMouseTo();
+      await globalNav.moveMouseToLogo();
       const isAddPanelOpen = await dashboardAddPanel.isAddPanelOpen();
       expect(isAddPanelOpen).to.be(true);
     });
