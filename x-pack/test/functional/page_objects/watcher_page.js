@@ -24,8 +24,9 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
     }
 
     async createThresholdAlert(name, index, timeField, timeUnit) {
-      await testSubjects.click('createThresholdAlertButton');
-      const thresholdName = await testSubjects.find('thresholdWatchName');
+      await testSubjects.click('createWatchButton');
+      await testSubjects.click('thresholdWatchCreateLink');
+      const thresholdName = await testSubjects.find('nameInput');
       await thresholdName.setValue(name);
       await testSubjects.setValue(index);
       console.log(timeField, timeUnit);

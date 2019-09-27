@@ -8,24 +8,24 @@ import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
 
 const watchID = 'watchID';
-const watchName = 'watch Name';
+const watchName = 'testWatch';
 const updatedName = 'updatedName';
 export default function ({ getService, getPageObjects }) {
-  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
+  //TODO: Add test data to be used for threshold watch.
+  // const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['security', 'common', 'header', 'settings', 'watcher']);
 
   describe('threshold watch', function () {
     before('initialize tests', async () => {
-      await browser.setWindowSize(1600, 1000);
       await PageObjects.common.navigateToApp('settings');
       await testSubjects.click('watcher');
-      await PageObjects.watcher.deleteAllWatches();
     });
 
     it('create and save a new threshold watch', async () => {
-      await PageObjects.watcher.createThresholdAlert(watchID, watchName);
+      //TODO: Continue modifying this method for the threshold alert.
+      // await PageObjects.watcher.createThresholdAlert(watchName, index, timeField, timeUnit);
       const watch = await PageObjects.watcher.getWatch(watchID);
       expect(watch.id).to.be(watchID);
       expect(watch.name).to.be(watchName);
