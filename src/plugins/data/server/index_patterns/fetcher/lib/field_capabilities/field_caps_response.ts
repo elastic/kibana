@@ -18,7 +18,7 @@
  */
 
 import { uniq } from 'lodash';
-import { castEsToKbnFieldTypeName } from '../../../../../../../legacy/utils';
+import { castEsToKbnFieldTypeName } from '../../../../../common';
 import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
 import { FieldDescriptor } from '../../../fetcher';
 
