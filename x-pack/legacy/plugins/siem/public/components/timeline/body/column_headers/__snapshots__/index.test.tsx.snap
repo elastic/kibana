@@ -3,11 +3,6 @@
 exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
 <EventsThead
   data-test-subj="column-headers"
-  style={
-    Object {
-      "minWidth": 1000,
-    }
-  }
 >
   <EventsTrHeader>
     <EventsThGroupActions

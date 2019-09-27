@@ -112,7 +112,7 @@ describe('Body', () => {
 
       expect(
         wrapper
-          .find('[data-test-subj="events-table"]')
+          .find('[data-test-subj="timeline-body"]')
           .first()
           .exists()
       ).toEqual(true);

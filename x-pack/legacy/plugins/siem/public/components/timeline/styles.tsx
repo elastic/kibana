@@ -15,15 +15,14 @@ import styled, { css } from 'styled-components';
 export const OFFSET_SCROLLBAR = 17;
 
 /**
- * EVENTS TABLE
+ * TIMELINE BODY
  */
 
-export const EventsTable = styled.div.attrs({
-  className: 'siemEventsTable',
-  role: 'table',
-})<{ tableHeight: number }>`
-  ${({ tableHeight, theme }) => css`
-    height: ${tableHeight + 'px'};
+export const TimelineBody = styled.div.attrs({
+  className: 'siemTimeline__body',
+})<{ bodyHeight: number }>`
+  ${({ bodyHeight, theme }) => css`
+    height: ${bodyHeight + 'px'};
     overflow: auto;
     scrollbar-width: thin;
 
@@ -44,6 +43,16 @@ export const EventsTable = styled.div.attrs({
     }
   `}
 `;
+TimelineBody.displayName = 'TimelineBody';
+
+/**
+ * EVENTS TABLE
+ */
+
+export const EventsTable = styled.div.attrs({
+  className: 'siemEventsTable',
+  role: 'table',
+})``;
 EventsTable.displayName = 'EventsTable';
 
 /* EVENTS HEAD */

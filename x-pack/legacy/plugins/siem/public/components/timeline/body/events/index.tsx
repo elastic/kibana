@@ -33,7 +33,6 @@ interface Props {
   onPinEvent: OnPinEvent;
   onUpdateColumns: OnUpdateColumns;
   onUnPinEvent: OnUnPinEvent;
-  minWidth: number;
   pinnedEventIds: Readonly<Record<string, boolean>>;
   rowRenderers: RowRenderer[];
   toggleColumn: (column: ColumnHeader) => void;
@@ -55,7 +54,6 @@ export const Events = React.memo<Props>(
     getNotesByIds,
     id,
     isEventViewer = false,
-    minWidth,
     onColumnResized,
     onPinEvent,
     onUpdateColumns,
@@ -65,7 +63,7 @@ export const Events = React.memo<Props>(
     toggleColumn,
     updateNote,
   }) => (
-    <EventsTbody data-test-subj="events" style={{ minWidth }}>
+    <EventsTbody data-test-subj="events">
       {data.map((event, i) => (
         <StatefulEvent
           actionsColumnWidth={actionsColumnWidth}

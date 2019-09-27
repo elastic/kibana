@@ -53,7 +53,6 @@ interface Props {
   sort: Sort;
   timelineId: string;
   toggleColumn: (column: ColumnHeader) => void;
-  minWidth: number;
 }
 
 /** Renders the timeline header columns */
@@ -72,15 +71,11 @@ export const ColumnHeaders = React.memo<Props>(
     sort,
     timelineId,
     toggleColumn,
-    minWidth,
   }) => {
     const { isResizing, setIsResizing } = isContainerResizing();
 
-    // Passing the styles directly to the component because the width is
-    // being calculated and is recommended by Styled Components for performance
-    // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
     return (
-      <EventsThead data-test-subj="column-headers" style={{ minWidth }}>
+      <EventsThead data-test-subj="column-headers">
         <EventsTrHeader>
           <EventsThGroupActions
             actionsColumnWidth={actionsColumnWidth}
@@ -145,6 +140,7 @@ export const ColumnHeaders = React.memo<Props>(
                         innerRef={dragProvided.innerRef}
                         isDragging={dragSnapshot.isDragging}
                         position="relative"
+                        // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
                         style={{
                           flexBasis: header.width + 'px',
                           ...dragProvided.draggableProps.style,
