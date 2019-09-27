@@ -9,7 +9,7 @@ import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { Repository } from '../../../../../common/types';
-import { SectionError, SectionLoading } from '../../../components';
+import { SectionError, SectionLoading, Error } from '../../../components';
 import { BASE_PATH, UIM_REPOSITORY_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { useLoadRepositories } from '../../../services/http';
@@ -88,7 +88,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
             defaultMessage="Error loading repositories"
           />
         }
-        error={error}
+        error={error as Error}
       />
     );
   } else if (repositories && repositories.length === 0) {

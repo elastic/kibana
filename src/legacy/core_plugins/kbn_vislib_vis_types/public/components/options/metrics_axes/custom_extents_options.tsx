@@ -96,7 +96,7 @@ function CustomExtentsOptions({
       {axis.scale.defaultYExtents && (
         <>
           <NumberInputOption
-            error={!isBoundsMarginValid ? [invalidBoundsMarginMessage] : undefined}
+            error={!isBoundsMarginValid && invalidBoundsMarginMessage}
             isInvalid={!isBoundsMarginValid}
             label={i18n.translate(
               'kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBounds.boundsMargin',
