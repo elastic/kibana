@@ -18,14 +18,21 @@
  */
 
 import moment from 'moment';
+import { FieldFormat, DEFAULT_CONTEXT_TYPE } from '../../../../../../plugins/data/common/';
 
-export function createRelativeDateFormat(FieldFormat) {
-  return class RelativeDateFormat extends FieldFormat {
-    constructor(params) {
+export function createRelativeDateFormat(BaseFieldFormat: typeof FieldFormat) {
+  class RelativeDateFormat extends BaseFieldFormat {
+    static id = 'relative_date';
+    static title = 'Relative Date';
+    static fieldType = 'date';
+
+    constructor(params: any) {
       super(params);
     }
+  }
 
-    _convert(val) {
+  RelativeDateFormat.prototype._convert = {
+    [DEFAULT_CONTEXT_TYPE](val: any) {
       if (val === null || val === undefined) {
         return '-';
       }
@@ -36,10 +43,8 @@ export function createRelativeDateFormat(FieldFormat) {
       } else {
         return val;
       }
-    }
-
-    static id = 'relative_date';
-    static title = 'Relative Date';
-    static fieldType = 'date';
+    },
   };
+
+  return RelativeDateFormat;
 }

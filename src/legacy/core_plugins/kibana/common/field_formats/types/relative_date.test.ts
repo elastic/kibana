@@ -17,32 +17,31 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
 import moment from 'moment-timezone';
-import { createRelativeDateFormat } from '../relative_date';
-import { FieldFormat } from '../../../../../../../plugins/data/common/field_formats';
+import { createRelativeDateFormat } from './relative_date';
+import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
 
 const RelativeDateFormat = createRelativeDateFormat(FieldFormat);
 
-describe('Relative Date Format', function () {
-  let convert;
+describe('Relative Date Format', function() {
+  let convert: any;
 
-  beforeEach(function () {
+  beforeEach(function() {
     const relativeDate = new RelativeDateFormat({});
-    convert = relativeDate.convert.bind(relativeDate);
+    convert = relativeDate.convert.bind(relativeDate) as Function;
   });
 
-  it('decoding an undefined or null date should return a "-"', function () {
-    expect(convert(null)).to.be('-');
-    expect(convert(undefined)).to.be('-');
+  test('decoding an undefined or null date should return a "-"', function() {
+    expect(convert(null)).toBe('-');
+    expect(convert(undefined)).toBe('-');
   });
 
-  it('decoding invalid date should echo invalid value', function () {
-    expect(convert('not a valid date')).to.be('not a valid date');
+  test('decoding invalid date should echo invalid value', function() {
+    expect(convert('not a valid date')).toBe('not a valid date');
   });
 
-  it('should parse date values', function () {
+  test('should parse date values', function() {
     const val = '2017-08-13T20:24:09.904Z';
-    expect(convert(val)).to.be(moment(val).fromNow());
+    expect(convert(val)).toBe(moment(val).fromNow());
   });
 });
