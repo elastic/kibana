@@ -10,7 +10,7 @@ import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { SlmPolicyPayload } from '../../../../common/types';
 import { TIME_UNITS } from '../../../../common/constants';
 
-import { SectionError, SectionLoading, PolicyForm } from '../../components';
+import { SectionError, SectionLoading, PolicyForm, Error } from '../../components';
 import { BASE_PATH } from '../../constants';
 import { useAppDependencies } from '../../index';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
@@ -114,7 +114,7 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
 
   const renderError = () => {
     if (errorLoadingPolicy) {
-      const notFound = errorLoadingPolicy.status === 404;
+      const notFound = (errorLoadingPolicy as any).status === 404;
       const errorObject = notFound
         ? {
             data: {
@@ -135,7 +135,7 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
               defaultMessage="Error loading policy details"
             />
           }
-          error={errorObject}
+          error={errorObject as Error}
         />
       );
     }
@@ -149,7 +149,7 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
               defaultMessage="Error loading available indices"
             />
           }
-          error={errorLoadingIndices}
+          error={errorLoadingIndices as Error}
         />
       );
     }
