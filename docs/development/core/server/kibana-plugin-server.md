@@ -116,7 +116,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [APICaller](./kibana-plugin-server.apicaller.md) |  |
 |  [AuthenticationHandler](./kibana-plugin-server.authenticationhandler.md) |  |
 |  [AuthHeaders](./kibana-plugin-server.authheaders.md) | Auth Headers map |
-|  [BasePathContract](./kibana-plugin-server.basepathcontract.md) | Access or manipulate the Kibana base path[BasePath](./kibana-plugin-server.basepath.md) |
 |  [ConfigPath](./kibana-plugin-server.configpath.md) |  |
 |  [ElasticsearchClientConfig](./kibana-plugin-server.elasticsearchclientconfig.md) |  |
 |  [GetAuthHeaders](./kibana-plugin-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |
@@ -124,6 +123,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [Headers](./kibana-plugin-server.headers.md) | Http request headers to read. |
 |  [HttpResponsePayload](./kibana-plugin-server.httpresponsepayload.md) | Data send to the client as a response payload. |
 |  [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |  |
+|  [IBasePath](./kibana-plugin-server.ibasepath.md) | Access or manipulate the Kibana base path[BasePath](./kibana-plugin-server.basepath.md) |
 |  [IContextHandler](./kibana-plugin-server.icontexthandler.md) | A function registered by a plugin to perform some action. |
 |  [IContextProvider](./kibana-plugin-server.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [IsAuthenticated](./kibana-plugin-server.isauthenticated.md) | Return authentication status for a request. |

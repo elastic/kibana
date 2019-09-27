@@ -58,4 +58,4 @@ export { OnPostAuthHandler, OnPostAuthToolkit } from './lifecycle/on_post_auth';
 export { SessionStorageFactory, SessionStorage } from './session_storage';
 export { SessionStorageCookieOptions } from './cookie_session_storage';
 export * from './types';
-export { BasePath, BasePathContract } from './base_path_service';
+export { BasePath, IBasePath } from './base_path_service';

@@ -34,7 +34,7 @@ import {
 import { SessionStorageFactory } from './session_storage';
 import { AuthStateStorage, GetAuthState, IsAuthenticated } from './auth_state_storage';
 import { AuthHeadersStorage, GetAuthHeaders } from './auth_headers_storage';
-import { BasePath, BasePathContract } from './base_path_service';
+import { BasePath, IBasePath } from './base_path_service';
 
 /**
  * Kibana HTTP Service provides own abstraction for work with HTTP stack.
@@ -149,7 +149,7 @@ export interface HttpServerSetup {
    */
   registerOnPostAuth: (handler: OnPostAuthHandler) => void;
   /** {@link BasePath} */
-  basePath: BasePathContract;
+  basePath: IBasePath;
   auth: {
     get: GetAuthState;
     isAuthenticated: IsAuthenticated;

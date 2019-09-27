@@ -102,4 +102,4 @@ export class BasePath {
  * {@link BasePath}
  * @public
  */
-export type BasePathContract = Pick<BasePath, keyof BasePath>;
+export type IBasePath = Pick<BasePath, keyof BasePath>;
