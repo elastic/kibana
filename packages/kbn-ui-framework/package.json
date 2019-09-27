@@ -52,7 +52,7 @@
     "imports-loader": "^0.8.0",
     "jquery": "^3.4.1",
     "keymirror": "0.1.1",
-    "moment": "^2.20.1",
+    "moment": "^2.24.0",
     "node-sass": "^4.9.4",
     "postcss": "^7.0.5",
     "postcss-loader": "^3.0.0",
