@@ -131,8 +131,6 @@ kibana_vars=(
     xpack.reporting.capture.viewport.height
     xpack.reporting.capture.viewport.width
     xpack.reporting.capture.zoom
-    xpack.reporting.csv.checkForFormulas
-    xpack.reporting.csv.enablePanelActionDownload
     xpack.reporting.csv.maxSizeBytes
     xpack.reporting.csv.scroll.duration
     xpack.reporting.csv.scroll.size
