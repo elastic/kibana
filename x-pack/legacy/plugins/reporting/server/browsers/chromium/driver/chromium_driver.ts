@@ -50,6 +50,7 @@ export class HeadlessChromiumDriver {
     logger.info(`opening url ${url}`);
     await this.page.setRequestInterception(true);
     let interceptedCount = 0;
+
     this.page.on('request', (interceptedRequest: any) => {
       let isData = false;
       let interceptedUrl = interceptedRequest.url();
@@ -82,22 +83,21 @@ export class HeadlessChromiumDriver {
       interceptedCount = interceptedCount + (isData ? 0 : 1);
     });
 
-    if (this.networkPolicy.enabled) {
-      this.page.on('response', interceptedResponse => {
-        const interceptedUrl = interceptedResponse.url();
-        const allowed = allowResponse(
-          interceptedUrl,
-          this.networkPolicy.allow,
-          this.networkPolicy.deny
-        );
+    this.page.on('response', interceptedResponse => {
+      const interceptedUrl = interceptedResponse.url();
+      const isMalicious = interceptedUrl.startsWith('file://');
+      let allowed = true;
 
-        if (!allowed) {
-          logger.error(`Got bad URL "${interceptedUrl}", closing browser.`);
-          this.page.browser().close();
-          throw new Error(`Received bad URL in response: ${interceptedUrl}`);
-        }
-      });
-    }
+      if (this.networkPolicy.enabled) {
+        allowed = allowResponse(interceptedUrl, this.networkPolicy.allow, this.networkPolicy.deny);
+      }
+
+      if (isMalicious || !allowed) {
+        logger.error(`Got bad URL "${interceptedUrl}", closing browser.`);
+        this.page.browser().close();
+        throw new Error(`Received bad URL in response: ${interceptedUrl}`);
+      }
+    });
 
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
 
