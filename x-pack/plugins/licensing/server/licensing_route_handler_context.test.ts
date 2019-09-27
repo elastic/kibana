@@ -11,8 +11,7 @@ import { createRouteHandlerContext } from './licensing_route_handler_context';
 
 describe('licensingRouteHandlerContext', () => {
   it('provides the initial license value', async () => {
-    const { license } = await setup();
-    const license$ = new BehaviorSubject<ILicense>(license);
+    const { license$, license } = await setup();
 
     const context = createRouteHandlerContext(license$);
 

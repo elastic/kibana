@@ -121,7 +121,6 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
   public async setup(core: CoreSetup) {
     const config = await this.config$.pipe(first()).toPromise();
     const poller = this.create(config, core);
-
     const license$ = poller.subject$.asObservable();
 
     core.http.registerRouteHandlerContext('licensing', createRouteHandlerContext(license$));
