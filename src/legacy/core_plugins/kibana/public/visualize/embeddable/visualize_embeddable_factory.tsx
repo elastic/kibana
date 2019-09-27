@@ -52,7 +52,6 @@ import {
   Container,
   EmbeddableOutput,
 } from '../../../../../../plugins/embeddable/public';
-import { setup } from '../../../../embeddable_api/public/np_ready/public/legacy';
 import { start as visualizations } from '../../../../visualizations/public/legacy';
 import { showNewVisModal } from '../wizard';
 import { SavedVisualizations } from '../types';
