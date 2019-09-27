@@ -253,5 +253,12 @@ export const schema = Joi.object()
         fixedHeaderHeight: Joi.number().default(50),
       })
       .default(),
+
+    // settings for the stack functional integration tests
+    stackFunctionalIntegrationTests: Joi.object()
+      .keys({
+        pathToProvisionedEnvFile: Joi.string().default('this is a hardcoded path')
+      })
+      .default(),
   })
   .default();

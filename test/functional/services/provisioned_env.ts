@@ -17,22 +17,24 @@
  * under the License.
  */
 
+import dotEnv, { DotenvParseOutput } from 'dotenv';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-import getAllConfigs from './get_all_configs';
-import serverConfig from './server_config';
-import { resolve } from 'path';
+export async function ProvisionedEnvProvider({ getService }: FtrProviderContext) {
+  const log = getService('log');
+  const config = getService('config');
 
-export default async ({ readConfigFile }) => {
-  const defaultConfigs = await getAllConfigs(readConfigFile, '../../functional/config');
-  return {
-    ...defaultConfigs,
-    junit: {
-      reportName: 'Stack Functional Integration Tests'
-    },
-    servers: serverConfig.servers,
-    apps: serverConfig.apps,
-    stackFunctionalIntegrationTests: {
-      pathToProvisionedEnvFile: resolve(__dirname, '../../../../../integration-test/qa/envvars.sh')
-    },
-  };
+  class ProvisionedEnv {
+    public readonly pathToEnvFile: string =
+      config.get('stackFunctionalIntegrationTests.pathToProvisionedEnvFile');
+    public readonly envObj: DotenvParseOutput | undefined;
+
+
+    constructor() {
+      log.debug(`Get environment file from integration-test repo at path: \n${this.pathToEnvFile}`)
+      this.envObj = dotEnv.config({ path: this.pathToEnvFile}).parsed;
+    }
+  }
+
+  return new ProvisionedEnv();
 }

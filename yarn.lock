@@ -3283,6 +3283,13 @@
   resolved "https://registry.yarnpkg.com/@types/delete-empty/-/delete-empty-2.0.0.tgz#1647ae9e68f708a6ba778531af667ec55bc61964"
   integrity sha512-sq+kwx8zA9BSugT9N+Jr8/uWjbHMZ+N/meJEzRyT3gmLq/WMtx/iSIpvdpmBUi/cvXl6Kzpvve8G2ESkabFwmg==
 
+"@types/dotenv@^6.1.1":
+  version "6.1.1"
+  resolved "https://registry.yarnpkg.com/@types/dotenv/-/dotenv-6.1.1.tgz#f7ce1cc4fe34f0a4373ba99fefa437b0bec54b46"
+  integrity sha512-ftQl3DtBvqHl9L16tpqqzA4YzCSXZfi7g8cQceTz5rOlYtk/IZbFjAv3mLOQlNIgOaylCQWQoBdDQHPgEBJPHg==
+  dependencies:
+    "@types/node" "*"
+
 "@types/elasticsearch@^5.0.33":
   version "5.0.33"
   resolved "https://registry.yarnpkg.com/@types/elasticsearch/-/elasticsearch-5.0.33.tgz#b0fd37dc674f498223b6d68c313bdfd71f4d812b"
