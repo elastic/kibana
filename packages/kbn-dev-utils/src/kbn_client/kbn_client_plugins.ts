@@ -16,17 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  migrateKibanaIndex,
-  deleteKibanaIndices,
-  createStats,
-} from '../lib';
 
-export async function emptyKibanaIndexAction({ client, log, kbnClient }) {
-  const stats = createStats('emptyKibanaIndex', log);
-  const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
+import { KbnClientStatus } from './kbn_client_status';
 
-  await deleteKibanaIndices({ client, stats });
-  await migrateKibanaIndex({ client, log, stats, kibanaPluginIds });
-  return stats;
+const PLUGIN_STATUS_ID = /^plugin:(.+?)@/;
+
+export class KbnClientPlugins {
+  constructor(private readonly status: KbnClientStatus) {}
+  /**
+   * Get a list of plugin ids that are enabled on the server
+   */
+  public async getEnabledIds() {
+    const pluginIds: string[] = [];
+    const apiResp = await this.status.get();
+
+    for (const status of apiResp.status.statuses) {
+      if (status.id) {
+        const match = status.id.match(PLUGIN_STATUS_ID);
+        if (match) {
+          pluginIds.push(match[1]);
+        }
+      }
+    }
+
+    return pluginIds;
+  }
 }

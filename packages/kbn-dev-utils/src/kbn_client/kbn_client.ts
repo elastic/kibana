@@ -17,160 +17,37 @@
  * under the License.
  */
 
-import Url from 'url';
-
-import Axios, { AxiosError, AxiosResponse } from 'axios';
 import { ToolingLog } from '../tooling_log';
-
-interface AxiosRequestError extends AxiosError {
-  response: undefined;
-}
-
-interface AxiosResponseError<T> extends AxiosError {
-  response: AxiosResponse<T>;
-}
-
-const delay = (ms: number) =>
-  new Promise(resolve => {
-    setTimeout(resolve, ms);
-  });
-
-const isAxiosRequestError = (error: any): error is AxiosRequestError => {
-  return error && error.code === undefined && error.response === undefined;
-};
-
-const isAxiosResponseError = (error: any): error is AxiosResponseError<any> => {
-  return error && error.code !== undefined && error.response !== undefined;
-};
-
-const isConcliftOnGetError = (error: any) => {
-  return (
-    isAxiosResponseError(error) && error.config.method === 'GET' && error.response.status === 409
-  );
-};
-
-const PLUGIN_STATUS_ID = /^plugin:(.+?)@/;
-const MAX_ATTEMPTS = 5;
-
-interface ReqOptions {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  path: string;
-  body?: any;
-  attempt?: number;
-}
-
-interface Status {
-  state: 'green' | 'red' | 'yellow';
-  title?: string;
-  id?: string;
-  icon: string;
-  message: string;
-  uiColor: string;
-  since: string;
-}
-
-interface ApiResponseStatus {
-  name: string;
-  uuid: string;
-  version: {
-    number: string;
-    build_hash: string;
-    build_number: number;
-    build_snapshot: boolean;
-  };
-  status: {
-    overall: Status;
-    statuses: Status[];
-  };
-  metrics: unknown;
-}
+import { KbnClientRequester } from './kbn_client_requester';
+import { KbnClientStatus } from './kbn_client_status';
+import { KbnClientPlugins } from './kbn_client_plugins';
+import { KbnClientVersion } from './kbn_client_version';
+import { KbnClientSavedObjects } from './kbn_client_saved_objects';
+import { KbnClientUiSettings, UiSettingValues } from './kbn_client_ui_settings';
 
 export class KbnClient {
+  readonly requester = new KbnClientRequester(this.log, this.kibanaUrls);
+  readonly status = new KbnClientStatus(this.requester);
+  readonly plugins = new KbnClientPlugins(this.status);
+  readonly version = new KbnClientVersion(this.status);
+  readonly savedObjects = new KbnClientSavedObjects(this.log, this.requester);
+  readonly uiSettings = new KbnClientUiSettings(this.log, this.requester, this.uiSettingDefaults);
+
   /**
    * Basic Kibana server client that implements common behaviors for talking
    * to the Kibana server from dev tooling.
    *
    * @param log ToolingLog
    * @param kibanaUrls Array of kibana server urls to send requests to
+   * @param uiSettingDefaults Map of uiSetting values that will be merged with all uiSetting resets
    */
-  constructor(private readonly log: ToolingLog, private readonly kibanaUrls: string[]) {
-    if (!this.kibanaUrls.length) {
+  constructor(
+    private readonly log: ToolingLog,
+    private readonly kibanaUrls: string[],
+    private readonly uiSettingDefaults?: UiSettingValues
+  ) {
+    if (!kibanaUrls.length) {
       throw new Error('missing Kibana urls');
-    }
-  }
-
-  /**
-   * Get the current server status
-   */
-  public async getStatus() {
-    return await this.request<ApiResponseStatus>({
-      method: 'GET',
-      path: 'api/status',
-    });
-  }
-
-  /**
-   * Get a list of plugin ids that are enabled on the server
-   */
-  public async getEnabledPluginIds() {
-    const pluginIds: string[] = [];
-    const apiResp = await this.getStatus();
-
-    for (const status of apiResp.status.statuses) {
-      if (status.id) {
-        const match = status.id.match(PLUGIN_STATUS_ID);
-        if (match) {
-          pluginIds.push(match[1]);
-        }
-      }
-    }
-
-    return pluginIds;
-  }
-
-  private pickUrl() {
-    const url = this.kibanaUrls.shift()!;
-    this.kibanaUrls.push(url);
-    return url;
-  }
-
-  private async request<T>(options: ReqOptions): Promise<T> {
-    const url = Url.resolve(this.pickUrl(), options.path);
-    const attempt = options.attempt === undefined ? 1 : options.attempt;
-
-    try {
-      const response = await Axios.request<T>({
-        method: options.method,
-        url,
-        data: options.body,
-        headers: {
-          'kbn-xsrf': 'kbn-client',
-        },
-      });
-
-      return response.data;
-    } catch (error) {
-      let retryWarning: string | undefined;
-      if (isAxiosRequestError(error)) {
-        retryWarning = `${options.method} ${url} request failed to get a response (attempt=${attempt})`;
-      } else if (isConcliftOnGetError(error)) {
-        retryWarning = `Conflict on GET (path=${options.path}, attempt=${attempt})`;
-      }
-
-      if (retryWarning) {
-        if (attempt < MAX_ATTEMPTS) {
-          this.log.warning(retryWarning);
-          await delay(1000 * attempt);
-          return await this.request<T>({
-            ...options,
-            attempt: attempt + 1,
-          });
-        }
-
-        throw new Error(retryWarning + ' and ran out of retries');
-      }
-
-      throw error;
     }
   }
 }

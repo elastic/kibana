@@ -52,7 +52,7 @@ export async function loadAction({ name, skipExisting, client, dataDir, log, kbn
   const inputDir = resolve(dataDir, name);
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
-  const kibanaPluginIds = await kbnClient.getEnabledPluginIds();
+  const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
 
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes

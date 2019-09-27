@@ -37,7 +37,7 @@ import {
 export async function unloadAction({ name, client, dataDir, log, kbnClient }) {
   const inputDir = resolve(dataDir, name);
   const stats = createStats(name, log);
-  const kibanaPluginIds = await kbnClient.getEnabledPluginIds();
+  const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
 
   const files = prioritizeMappings(await readDirectory(inputDir));
   for (const filename of files) {
