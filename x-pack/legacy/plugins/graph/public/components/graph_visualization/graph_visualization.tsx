@@ -16,13 +16,13 @@ import { makeNodeId } from '../../services/persistence';
  * a separate data structure when the layouting is migrated
  */
 
-interface GroupAwareWorkspaceNode extends WorkspaceNode {
+export interface GroupAwareWorkspaceNode extends WorkspaceNode {
   kx: number;
   ky: number;
   numChildren: number;
 }
 
-interface GroupAwareWorkspaceEdge extends WorkspaceEdge {
+export interface GroupAwareWorkspaceEdge extends WorkspaceEdge {
   topTarget: GroupAwareWorkspaceNode;
   topSrc: GroupAwareWorkspaceNode;
 }
@@ -107,8 +107,6 @@ export function GraphVisualization({
               <g
                 key={makeNodeId(node.data.field, node.data.term)}
                 onClick={e => {
-                  e.preventDefault();
-                  console.log('clicky');
                   nodeClick(node, e);
                 }}
                 onMouseDown={e => {
