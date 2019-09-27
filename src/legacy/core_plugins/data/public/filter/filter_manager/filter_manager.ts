@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Filter, isFilterPinned, FilterStateStore } from '@kbn/es-query';
+import { Filter, isFilterPinned, isRangeFilter, FilterStateStore } from '@kbn/es-query';
 
 import _ from 'lodash';
 import { Subject } from 'rxjs';
@@ -191,7 +191,10 @@ export class FilterManager {
 
   public async addFiltersAndChangeTimeFilter(filters: Filter[]) {
     const timeFilter = await extractTimeFilter(this.indexPatterns, filters);
-    if (timeFilter) changeTimeFilter(this.timefilter, timeFilter);
+
+    if (isRangeFilter(timeFilter)) {
+      changeTimeFilter(this.timefilter, timeFilter);
+    }
     return this.addFilters(filters.filter(filter => filter !== timeFilter));
   }
 

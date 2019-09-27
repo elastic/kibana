@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Filter } from '@kbn/es-query';
+import { RangeFilter } from '@kbn/es-query';
 import { changeTimeFilter } from './change_time_filter';
 import { TimeRange } from 'src/plugins/data/public';
 import { timefilterServiceMock } from '../../../timefilter/timefilter_service.mock';
@@ -42,7 +42,7 @@ describe('changeTimeFilter()', () => {
 
   test('should change the timefilter to match the range gt/lt', () => {
     const filter: any = { range: { '@timestamp': { gt, lt } } };
-    changeTimeFilter(timefilter, filter as Filter);
+    changeTimeFilter(timefilter, filter as RangeFilter);
 
     const { to, from } = timefilter.getTime();
 
@@ -52,7 +52,7 @@ describe('changeTimeFilter()', () => {
 
   test('should change the timefilter to match the range gte/lte', () => {
     const filter: any = { range: { '@timestamp': { gte: gt, lte: lt } } };
-    changeTimeFilter(timefilter, filter as Filter);
+    changeTimeFilter(timefilter, filter as RangeFilter);
 
     const { to, from } = timefilter.getTime();
 
