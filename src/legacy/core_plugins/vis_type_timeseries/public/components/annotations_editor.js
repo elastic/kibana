@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
 import { collectionActions } from './lib/collection_actions';
-import { ES_TYPES } from '../../common/es_types';
+import { ES_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { AddDeleteButtons } from './add_delete_buttons';
 import { ColorPicker } from './color_picker';
 import { FieldSelect } from './aggs/field_select';
@@ -57,7 +57,7 @@ function newAnnotation() {
   };
 }
 
-const RESTRICT_FIELDS = [ES_TYPES.DATE];
+const RESTRICT_FIELDS = [ES_FIELD_TYPES.DATE];
 
 export class AnnotationsEditor extends Component {
   constructor(props) {
