@@ -322,6 +322,34 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                         <p>
                           Start creating your visualization by selecting a type for that visualization.
                         </p>
+                        <p>
+                          <strong>
+                            Try Lens, our new, intuitive way to create visualizations.
+                          </strong>
+                        </p>
+                        <button
+                          class="euiButton euiButton--primary euiButton--small euiButton--iconRight euiButton--fill"
+                          type="button"
+                        >
+                          <span
+                            class="euiButton__content"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
+                              focusable="false"
+                              height="16"
+                              viewBox="0 0 16 16"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            />
+                            <span
+                              class="euiButton__text"
+                            >
+                              Go to Lens
+                            </span>
+                          </span>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -586,6 +614,34 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                 <p>
                                   Start creating your visualization by selecting a type for that visualization.
                                 </p>
+                                <p>
+                                  <strong>
+                                    Try Lens, our new, intuitive way to create visualizations.
+                                  </strong>
+                                </p>
+                                <button
+                                  class="euiButton euiButton--primary euiButton--small euiButton--iconRight euiButton--fill"
+                                  type="button"
+                                >
+                                  <span
+                                    class="euiButton__content"
+                                  >
+                                    <svg
+                                      aria-hidden="true"
+                                      class="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
+                                      focusable="false"
+                                      height="16"
+                                      viewBox="0 0 16 16"
+                                      width="16"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    />
+                                    <span
+                                      class="euiButton__text"
+                                    >
+                                      Go to Lens
+                                    </span>
+                                  </span>
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -793,6 +849,34 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   <p>
                                     Start creating your visualization by selecting a type for that visualization.
                                   </p>
+                                  <p>
+                                    <strong>
+                                      Try Lens, our new, intuitive way to create visualizations.
+                                    </strong>
+                                  </p>
+                                  <button
+                                    class="euiButton euiButton--primary euiButton--small euiButton--iconRight euiButton--fill"
+                                    type="button"
+                                  >
+                                    <span
+                                      class="euiButton__content"
+                                    >
+                                      <svg
+                                        aria-hidden="true"
+                                        class="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
+                                        focusable="false"
+                                        height="16"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      />
+                                      <span
+                                        class="euiButton__text"
+                                      >
+                                        Go to Lens
+                                      </span>
+                                    </span>
+                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -1244,6 +1328,62 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                         Start creating your visualization by selecting a type for that visualization.
                                       </FormattedMessage>
                                     </p>
+                                    <p>
+                                      <strong>
+                                        <FormattedMessage
+                                          defaultMessage="Try Lens, our new, intuitive way to create visualizations."
+                                          id="kbn.visualize.newVisWizard.tryLensText"
+                                          values={Object {}}
+                                        >
+                                          Try Lens, our new, intuitive way to create visualizations.
+                                        </FormattedMessage>
+                                      </strong>
+                                    </p>
+                                    <EuiButton
+                                      fill={true}
+                                      iconSide="right"
+                                      iconType="popout"
+                                      size="s"
+                                    >
+                                      <button
+                                        className="euiButton euiButton--primary euiButton--small euiButton--iconRight euiButton--fill"
+                                        type="button"
+                                      >
+                                        <span
+                                          className="euiButton__content"
+                                        >
+                                          <EuiIcon
+                                            aria-hidden="true"
+                                            className="euiButton__icon"
+                                            size="m"
+                                            type="popout"
+                                          >
+                                            <EuiIconEmpty
+                                              aria-hidden="true"
+                                              className="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
+                                              focusable="false"
+                                              style={null}
+                                            >
+                                              <svg
+                                                aria-hidden="true"
+                                                className="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
+                                                focusable="false"
+                                                height={16}
+                                                style={null}
+                                                viewBox="0 0 16 16"
+                                                width={16}
+                                                xmlns="http://www.w3.org/2000/svg"
+                                              />
+                                            </EuiIconEmpty>
+                                          </EuiIcon>
+                                          <span
+                                            className="euiButton__text"
+                                          >
+                                            Go to Lens
+                                          </span>
+                                        </span>
+                                      </button>
+                                    </EuiButton>
                                   </div>
                                 </EuiText>
                               </NewVisHelp>
@@ -1598,6 +1738,34 @@ exports[`NewVisModal should render as expected 1`] = `
                         <p>
                           Start creating your visualization by selecting a type for that visualization.
                         </p>
+                        <p>
+                          <strong>
+                            Try Lens, our new, intuitive way to create visualizations.
+                          </strong>
+                        </p>
+                        <button
+                          class="euiButton euiButton--primary euiButton--small euiButton--iconRight euiButton--fill"
+                          type="button"
+                        >
+                          <span
+                            class="euiButton__content"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
+                              focusable="false"
+                              height="16"
+                              viewBox="0 0 16 16"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            />
+                            <span
+                              class="euiButton__text"
+                            >
+                              Go to Lens
+                            </span>
+                          </span>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -1859,6 +2027,34 @@ exports[`NewVisModal should render as expected 1`] = `
                                 <p>
                                   Start creating your visualization by selecting a type for that visualization.
                                 </p>
+                                <p>
+                                  <strong>
+                                    Try Lens, our new, intuitive way to create visualizations.
+                                  </strong>
+                                </p>
+                                <button
+                                  class="euiButton euiButton--primary euiButton--small euiButton--iconRight euiButton--fill"
+                                  type="button"
+                                >
+                                  <span
+                                    class="euiButton__content"
+                                  >
+                                    <svg
+                                      aria-hidden="true"
+                                      class="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
+                                      focusable="false"
+                                      height="16"
+                                      viewBox="0 0 16 16"
+                                      width="16"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    />
+                                    <span
+                                      class="euiButton__text"
+                                    >
+                                      Go to Lens
+                                    </span>
+                                  </span>
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -2063,6 +2259,34 @@ exports[`NewVisModal should render as expected 1`] = `
                                   <p>
                                     Start creating your visualization by selecting a type for that visualization.
                                   </p>
+                                  <p>
+                                    <strong>
+                                      Try Lens, our new, intuitive way to create visualizations.
+                                    </strong>
+                                  </p>
+                                  <button
+                                    class="euiButton euiButton--primary euiButton--small euiButton--iconRight euiButton--fill"
+                                    type="button"
+                                  >
+                                    <span
+                                      class="euiButton__content"
+                                    >
+                                      <svg
+                                        aria-hidden="true"
+                                        class="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
+                                        focusable="false"
+                                        height="16"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      />
+                                      <span
+                                        class="euiButton__text"
+                                      >
+                                        Go to Lens
+                                      </span>
+                                    </span>
+                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -2502,6 +2726,62 @@ exports[`NewVisModal should render as expected 1`] = `
                                         Start creating your visualization by selecting a type for that visualization.
                                       </FormattedMessage>
                                     </p>
+                                    <p>
+                                      <strong>
+                                        <FormattedMessage
+                                          defaultMessage="Try Lens, our new, intuitive way to create visualizations."
+                                          id="kbn.visualize.newVisWizard.tryLensText"
+                                          values={Object {}}
+                                        >
+                                          Try Lens, our new, intuitive way to create visualizations.
+                                        </FormattedMessage>
+                                      </strong>
+                                    </p>
+                                    <EuiButton
+                                      fill={true}
+                                      iconSide="right"
+                                      iconType="popout"
+                                      size="s"
+                                    >
+                                      <button
+                                        className="euiButton euiButton--primary euiButton--small euiButton--iconRight euiButton--fill"
+                                        type="button"
+                                      >
+                                        <span
+                                          className="euiButton__content"
+                                        >
+                                          <EuiIcon
+                                            aria-hidden="true"
+                                            className="euiButton__icon"
+                                            size="m"
+                                            type="popout"
+                                          >
+                                            <EuiIconEmpty
+                                              aria-hidden="true"
+                                              className="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
+                                              focusable="false"
+                                              style={null}
+                                            >
+                                              <svg
+                                                aria-hidden="true"
+                                                className="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
+                                                focusable="false"
+                                                height={16}
+                                                style={null}
+                                                viewBox="0 0 16 16"
+                                                width={16}
+                                                xmlns="http://www.w3.org/2000/svg"
+                                              />
+                                            </EuiIconEmpty>
+                                          </EuiIcon>
+                                          <span
+                                            className="euiButton__text"
+                                          >
+                                            Go to Lens
+                                          </span>
+                                        </span>
+                                      </button>
+                                    </EuiButton>
                                   </div>
                                 </EuiText>
                               </NewVisHelp>
