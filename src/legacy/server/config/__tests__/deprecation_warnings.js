@@ -99,12 +99,11 @@ describe('config/deprecation warnings', function () {
         }
       })
       .filter(Boolean)
-      .filter(line => {
-        console.log(line);
-        return line.type === 'log' &&
+      .filter(line =>
+        line.type === 'log' &&
         line.tags.includes('deprecation') &&
-        line.tags.includes('warning');
-      });
+        line.tags.includes('warning')
+      );
 
     expect(deprecationLines).to.have.length(1);
     expect(deprecationLines[0]).to.have.property('message', 'uiSettings.enabled is deprecated and is no longer used');

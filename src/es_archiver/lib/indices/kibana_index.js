@@ -94,6 +94,7 @@ export async function migrateKibanaIndex({ client, log, kibanaPluginIds }) {
       index: '.kibana',
     },
     logger: {
+      trace: log.verbose.bind(log),
       debug: log.debug.bind(log),
       info: log.info.bind(log),
       warn: log.warning.bind(log),

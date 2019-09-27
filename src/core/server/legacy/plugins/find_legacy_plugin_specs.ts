@@ -24,8 +24,6 @@ import {
   defaultConfig,
   // @ts-ignore
 } from '../../../../legacy/plugin_discovery/find_plugin_specs.js';
-// @ts-ignore
-import { transformDeprecations } from '../../../../../src/legacy/server/config/transform_deprecations.js';
 import { LoggerFactory } from '../../logging';
 import { collectUiExports as collectLegacyUiExports } from '../../../../legacy/ui/ui_exports/collect_ui_exports';
 import { Config } from '../../config';

@@ -43,13 +43,12 @@ export function uiRenderMixin(kbnServer, server, config) {
   kbnServer.afterPluginsInit(() => {
     const { defaultInjectedVarProviders = [] } = kbnServer.uiExports;
     defaultInjectedVars = defaultInjectedVarProviders
-      .reduce((allDefaults, { fn, pluginSpec }) => {
-        const fnValue = fn(kbnServer.server, pluginSpec.readConfigValue(kbnServer.config, []));
-        return mergeVariables(
+      .reduce((allDefaults, { fn, pluginSpec }) => (
+        mergeVariables(
           allDefaults,
-          fnValue
-        );
-      }, {});
+          fn(kbnServer.server, pluginSpec.readConfigValue(kbnServer.config, []))
+        )
+      ), {});
   });
 
   // render all views from ./views

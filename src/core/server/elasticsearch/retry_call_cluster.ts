@@ -22,15 +22,24 @@ import { defer, throwError, iif, timer } from 'rxjs';
 import elasticsearch from 'elasticsearch';
 import { CallAPIOptions } from '.';
 
+/**
+ * Retries the provided Elasticsearch API call when a `NoConnections` error is
+ * encountered. The API call will be retried once a second, indefinitely, until
+ * a successful response or a different error is received.
+ *
+ * @param apiCaller
+ */
+
+// TODO: Replace with APICaller from './scoped_cluster_client' once #46668 is merged
 export function retryCallCluster(
-  callFn: (
+  apiCaller: (
     endpoint: string,
     clientParams: Record<string, any>,
     options?: CallAPIOptions
   ) => Promise<any>
 ) {
   return (endpoint: string, clientParams: Record<string, any> = {}, options?: CallAPIOptions) => {
-    return defer(() => callFn(endpoint, clientParams, options))
+    return defer(() => apiCaller(endpoint, clientParams, options))
       .pipe(
         retryWhen(errors =>
           errors.pipe(

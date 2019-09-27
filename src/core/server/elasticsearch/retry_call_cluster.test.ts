@@ -44,9 +44,9 @@ describe('retryCallCluster', () => {
         ? Promise.reject(new Error('unknown error'))
         : i === 2
         ? Promise.resolve('success')
-        : i === 3
+        : i === 3 || i === 4
         ? Promise.reject(new elasticsearch.errors.NoConnections())
-        : i === 4
+        : i === 5
         ? Promise.reject(new Error('unknown error'))
         : null;
     });

@@ -72,6 +72,7 @@ export interface LegacyServiceStartDeps {
   plugins: Record<string, unknown>;
 }
 
+/** @internal */
 export interface LegacyServiceSetup {
   pluginSpecs: LegacyPluginSpec[];
   uiExports: SavedObjectsLegacyUiExports;

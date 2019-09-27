@@ -22,10 +22,15 @@ import { getEnvOptions } from './config/__mocks__/env';
 import { Env, IConfigService } from './config';
 import { loggingServiceMock } from './logging/logging_service.mock';
 import { configServiceMock } from './config/config_service.mock';
+import { ILoggingService } from './logging';
 
-function create(configService?: jest.Mocked<IConfigService>): CoreContext {
-  const env = Env.createDefault(getEnvOptions());
-  const logger = loggingServiceMock.create();
+function create(
+  env?: Env,
+  logger?: jest.Mocked<ILoggingService>,
+  configService?: jest.Mocked<IConfigService>
+): CoreContext {
+  env = env || Env.createDefault(getEnvOptions());
+  logger = logger || loggingServiceMock.create();
   configService = configService || configServiceMock.create();
 
   return { coreId: Symbol(), env, logger, configService };
