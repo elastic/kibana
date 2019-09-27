@@ -8,65 +8,41 @@ import React from 'react';
 import { EuiTab, EuiListGroupItem, EuiButton, EuiAccordion, EuiFieldText } from '@elastic/eui';
 import * as Rx from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { SettingsComponent, AngularProps, StateProps, DispatchProps } from './settings';
+import { Settings, AngularProps } from './settings';
 import { act } from 'react-testing-library';
 import { ReactWrapper } from 'enzyme';
 import { UrlTemplateForm } from './url_template_form';
+import {
+  GraphStore,
+  updateSettings,
+  loadFields,
+  saveTemplate,
+  removeTemplate,
+} from '../../state_management';
+import { createMockGraphStore } from '../../state_management/mocks';
+import { Provider } from 'react-redux';
+import { UrlTemplate } from '../../types';
 
 describe('settings', () => {
-  const props: jest.Mocked<StateProps & DispatchProps> = {
-    advancedSettings: {
-      maxValuesPerDoc: 5,
-      minDocCount: 10,
-      sampleSize: 12,
-      useSignificance: true,
-      timeoutMillis: 10000,
+  let store: GraphStore;
+  let dispatchSpy: jest.Mock;
+
+  const initialTemplate: UrlTemplate = {
+    description: 'template',
+    encoder: {
+      description: 'test encoder description',
+      encode: jest.fn(),
+      id: 'test',
+      title: 'test encoder',
+      type: 'esq',
     },
-    updateSettings: jest.fn(),
-    urlTemplates: [
-      {
-        description: 'template',
-        encoder: {
-          description: 'test encoder description',
-          encode: jest.fn(),
-          id: 'test',
-          title: 'test encoder',
-          type: 'esq',
-        },
-        url: 'http://example.org',
-        icon: {
-          class: 'test',
-          code: '1',
-          label: 'test',
-        },
-      },
-    ],
-    removeTemplate: jest.fn(),
-    saveTemplate: jest.fn(),
-    allFields: [
-      {
-        selected: false,
-        color: 'black',
-        name: 'B',
-        type: 'string',
-        icon: {
-          class: 'test',
-          code: '1',
-          label: 'test',
-        },
-      },
-      {
-        selected: false,
-        color: 'red',
-        name: 'C',
-        type: 'string',
-        icon: {
-          class: 'test',
-          code: '1',
-          label: 'test',
-        },
-      },
-    ],
+    url: 'http://example.org',
+    icon: {
+      class: 'test',
+      code: '1',
+      label: 'test',
+    },
+    isDefault: false,
   };
 
   const angularProps: jest.Mocked<AngularProps> = {
@@ -114,8 +90,56 @@ describe('settings', () => {
   let instance: ReactWrapper;
 
   beforeEach(() => {
+    store = createMockGraphStore({ includeSagas: false }).store;
+    store.dispatch(
+      updateSettings({
+        maxValuesPerDoc: 5,
+        minDocCount: 10,
+        sampleSize: 12,
+        useSignificance: true,
+        timeoutMillis: 10000,
+      })
+    );
+    store.dispatch(
+      loadFields([
+        {
+          selected: false,
+          color: 'black',
+          name: 'B',
+          type: 'string',
+          icon: {
+            class: 'test',
+            code: '1',
+            label: 'test',
+          },
+        },
+        {
+          selected: false,
+          color: 'red',
+          name: 'C',
+          type: 'string',
+          icon: {
+            class: 'test',
+            code: '1',
+            label: 'test',
+          },
+        },
+      ])
+    );
+    store.dispatch(
+      saveTemplate({
+        index: -1,
+        template: initialTemplate,
+      })
+    );
+    dispatchSpy = jest.fn(store.dispatch);
+    store.dispatch = dispatchSpy;
     subject = new Rx.BehaviorSubject(angularProps);
-    instance = mountWithIntl(<SettingsComponent observable={subject.asObservable()} {...props} />);
+    instance = mountWithIntl(
+      <Provider store={store}>
+        <Settings observable={subject.asObservable()} />
+      </Provider>
+    );
   });
 
   function toTab(tab: string) {
@@ -142,8 +166,13 @@ describe('settings', () => {
         HTMLInputElement
       >);
 
-      expect(props.updateSettings).toHaveBeenCalledWith(
-        expect.objectContaining({ sampleSize: 13 })
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        updateSettings(
+          expect.objectContaining({
+            timeoutMillis: 10000,
+            sampleSize: 13,
+          })
+        )
       );
     });
   });
@@ -246,7 +275,7 @@ describe('settings', () => {
       templateForm(0)
         .find('EuiButtonEmpty[data-test-subj="graphRemoveUrlTemplate"]')
         .simulate('click');
-      expect(props.removeTemplate).toHaveBeenCalledWith(props.urlTemplates[0]);
+      expect(dispatchSpy).toHaveBeenCalledWith(removeTemplate(initialTemplate));
     });
 
     it('should update url template', () => {
@@ -256,13 +285,9 @@ describe('settings', () => {
           .find('form')
           .simulate('submit');
       });
-      expect(props.saveTemplate).toHaveBeenCalledWith({
-        index: 0,
-        template: {
-          ...props.urlTemplates[0],
-          description: 'Updated title',
-        },
-      });
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        saveTemplate({ index: 0, template: { ...initialTemplate, description: 'Updated title' } })
+      );
     });
 
     it('should add url template', async () => {
@@ -279,10 +304,12 @@ describe('settings', () => {
           .find('form')
           .simulate('submit');
       });
-      expect(props.saveTemplate).toHaveBeenCalledWith({
-        index: -1,
-        template: expect.objectContaining({ description: 'Title', url: 'test-url' }),
-      });
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        saveTemplate({
+          index: -1,
+          template: expect.objectContaining({ description: 'Title', url: 'test-url' }),
+        })
+      );
     });
   });
 });

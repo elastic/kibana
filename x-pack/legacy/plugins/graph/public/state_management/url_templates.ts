@@ -12,9 +12,15 @@ import rison from 'rison-node';
 import { GraphState } from './store';
 import { UrlTemplate } from '../types';
 import { reset } from './global';
-import { setDatasource, IndexpatternDatasource } from './datasource';
+import {
+  setDatasource,
+  IndexpatternDatasource,
+  NoDatasource,
+  requestDatasource,
+} from './datasource';
 import { outlinkEncoders } from '../helpers/outlink_encoders';
 import { urlTemplatePlaceholder } from '../helpers/url_template';
+import { matchesOne } from './helpers';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/urlTemplates');
 
@@ -69,7 +75,7 @@ function generateDefaultTemplate(
 export const urlTemplatesReducer = (basePath: string) =>
   reducerWithInitialState(initialTemplates)
     .case(reset, () => initialTemplates)
-    .case(setDatasource, (templates, datasource) => {
+    .cases([requestDatasource, setDatasource], (templates, datasource) => {
       if (datasource.type === 'none') {
         return initialTemplates;
       }

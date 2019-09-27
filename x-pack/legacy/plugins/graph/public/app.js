@@ -101,7 +101,6 @@ app.directive('graphApp', function (reactDirective) {
     ['currentIndexPattern', { watchDepth: 'reference' }],
     ['indexPatternProvider', { watchDepth: 'reference' }],
     ['isLoading', { watchDepth: 'reference' }],
-    ['onIndexPatternSelected', { watchDepth: 'reference' }],
     ['onQuerySubmit', { watchDepth: 'reference' }],
     ['savedObjects', { watchDepth: 'reference' }],
     ['uiSettings', { watchDepth: 'reference' }],

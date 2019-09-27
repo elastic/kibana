@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchBarComponent, SearchBarProps } from './search_bar';
+import { SearchBar } from './search_bar';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React, { ReactElement } from 'react';
 import { CoreStart } from 'src/core/public';
@@ -13,6 +13,10 @@ import { QueryBarInput, IndexPattern } from 'src/legacy/core_plugins/data/public
 
 jest.mock('ui/new_platform');
 import { openSourceModal } from '../services/source_modal';
+import { GraphStore, setDatasource } from '../state_management';
+import { ReactWrapper } from 'enzyme';
+import { createMockGraphStore } from '../state_management/mocks';
+import { Provider } from 'react-redux';
 
 jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
 jest.mock('../../../../../../src/legacy/core_plugins/data/public', () => ({
@@ -22,37 +26,51 @@ jest.mock('../../../../../../src/legacy/core_plugins/data/public', () => ({
 const waitForIndexPatternFetch = () => new Promise(r => setTimeout(r));
 
 describe('search_bar', () => {
-  const defaultProps: SearchBarProps = {
+  const defaultProps = {
     isLoading: false,
-    onIndexPatternSelected: () => {},
-    onQuerySubmit: () => {},
+    onQuerySubmit: jest.fn(),
     savedObjects: {} as CoreStart['savedObjects'],
     uiSettings: {} as CoreStart['uiSettings'],
     http: {} as CoreStart['http'],
     overlays: {} as CoreStart['overlays'],
     indexPatternProvider: {
-      get: () => Promise.resolve(({ fields: [] } as unknown) as IndexPattern),
+      get: jest.fn(() => Promise.resolve(({ fields: [] } as unknown) as IndexPattern)),
     },
-    currentDatasource: { type: 'indexpattern', id: '123', title: 'test-pattern' },
-    confirmWipeWorkspace: callback => {
+    confirmWipeWorkspace: (callback: () => void) => {
       callback();
     },
   };
+  let instance: ReactWrapper;
+  let store: GraphStore;
+
+  beforeEach(() => {
+    store = createMockGraphStore({ includeSagas: false }).store;
+    store.dispatch(
+      setDatasource({
+        type: 'indexpattern',
+        id: '123',
+        title: 'test-index',
+      })
+    );
+  });
+
+  function mountSearchBar() {
+    jest.clearAllMocks();
+    instance = mountWithIntl(
+      <Provider store={store}>
+        <SearchBar {...defaultProps} />
+      </Provider>
+    );
+  }
 
   it('should render search bar and fetch index pattern', () => {
-    const fetchIndexPattern = jest.fn(() => Promise.resolve({} as IndexPattern));
-    mountWithIntl(
-      <SearchBarComponent {...defaultProps} indexPatternProvider={{ get: fetchIndexPattern }} />
-    );
+    mountSearchBar();
 
-    expect(fetchIndexPattern).toHaveBeenCalledWith('123');
+    expect(defaultProps.indexPatternProvider.get).toHaveBeenCalledWith('123');
   });
 
   it('should render search bar and submit queries', async () => {
-    const querySubmit = jest.fn();
-    const instance = mountWithIntl(
-      <SearchBarComponent {...defaultProps} onQuerySubmit={querySubmit} />
-    );
+    mountSearchBar();
 
     await waitForIndexPatternFetch();
 
@@ -64,14 +82,11 @@ describe('search_bar', () => {
       instance.find('form').simulate('submit', { preventDefault: () => {} });
     });
 
-    expect(querySubmit).toHaveBeenCalledWith('testQuery');
+    expect(defaultProps.onQuerySubmit).toHaveBeenCalledWith('testQuery');
   });
 
   it('should translate kql query into JSON dsl', async () => {
-    const querySubmit = jest.fn();
-    const instance = mountWithIntl(
-      <SearchBarComponent {...defaultProps} onQuerySubmit={querySubmit} />
-    );
+    mountSearchBar();
 
     await waitForIndexPatternFetch();
 
@@ -83,17 +98,14 @@ describe('search_bar', () => {
       instance.find('form').simulate('submit', { preventDefault: () => {} });
     });
 
-    const parsedQuery = JSON.parse(querySubmit.mock.calls[0][0]);
+    const parsedQuery = JSON.parse(defaultProps.onQuerySubmit.mock.calls[0][0]);
     expect(parsedQuery).toEqual({
       bool: { should: [{ match: { test: 'abc' } }], minimum_should_match: 1 },
     });
   });
 
   it('should open index pattern picker', () => {
-    const indexPatternSelected = jest.fn();
-    const instance = mountWithIntl(
-      <SearchBarComponent {...defaultProps} onIndexPatternSelected={indexPatternSelected} />
-    );
+    mountSearchBar();
 
     // pick the button component out of the tree because
     // it's part of a popover and thus not covered by enzyme
