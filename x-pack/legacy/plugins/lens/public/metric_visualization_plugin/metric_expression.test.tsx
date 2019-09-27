@@ -53,18 +53,8 @@ describe('metric_expression', () => {
       expect(shallow(<MetricChart data={data} args={args} formatFactory={x => x as FieldFormat} />))
         .toMatchInlineSnapshot(`
         <VisualizationContainer
+          className="lnsMetricExpression__container"
           reportTitle="My fanci metric chart"
-          style={
-            Object {
-              "alignItems": "center",
-              "display": "flex",
-              "flexDirection": "column",
-              "height": "100%",
-              "justifyContent": "center",
-              "textAlign": "center",
-              "width": "100%",
-            }
-          }
         >
           <AutoScale>
             <div
@@ -106,18 +96,8 @@ describe('metric_expression', () => {
         )
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
+          className="lnsMetricExpression__container"
           reportTitle="My fanci metric chart"
-          style={
-            Object {
-              "alignItems": "center",
-              "display": "flex",
-              "flexDirection": "column",
-              "height": "100%",
-              "justifyContent": "center",
-              "textAlign": "center",
-              "width": "100%",
-            }
-          }
         >
           <AutoScale>
             <div
