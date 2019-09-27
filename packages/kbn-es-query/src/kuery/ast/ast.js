@@ -79,7 +79,3 @@ export function doesKueryExpressionHaveLuceneSyntaxError(expression) {
     return (e.message.startsWith('Lucene'));
   }
 }
-
-export function buildKueryNode(functionName, ...functionArgs) {
-  return nodeTypes.function.buildNode(functionName, ...functionArgs);
-}

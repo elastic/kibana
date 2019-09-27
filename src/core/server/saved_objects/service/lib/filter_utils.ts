@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { fromKueryExpression, KueryNode, buildKueryNode } from '@kbn/es-query';
+import { fromKueryExpression, KueryNode, nodeTypes } from '@kbn/es-query';
 import { get, set } from 'lodash';
 
 import { SavedObjectsIndexPattern, SavedObjectsIndexPatternField } from './cache_index_patterns';
@@ -64,7 +64,10 @@ export const validateConvertFilterToKueryNode = (
           set(
             filterKueryNode,
             path,
-            buildKueryNode('and', [buildKueryNode('is', 'type', itemType[0]), existingKueryNode])
+            nodeTypes.function.buildNode('and', [
+              nodeTypes.function.buildNode('is', 'type', itemType[0]),
+              existingKueryNode,
+            ])
           );
         }
       } else {
