@@ -26,7 +26,12 @@ export interface ChunkResult {
   searchAfter: any;
 }
 
-// This is the heart of this query in some sense. Since we're pulling 'chunks' using the raw queries that may be full of
+/**
+ * This class exists to simplify the process of querying for page data. Because the raw queries responsible for fetching pages
+ * pull data in `chunks`, and those chunks can be full of matches or void of results that would require additional
+ * querying, this class provides a `next` function that is cleaner to call. `next` provides the next matching result,
+ * which may require many subsequent fetches, while keeping the external API clean.
+ */
 // matches, or may simple be empty results that tell us a to keep looking for more, this class exists to simplify things.
 // The idea is that you can call next() on it and receive the next matching result, even if internally we need to fetch
 // multiple chunks to find that result.

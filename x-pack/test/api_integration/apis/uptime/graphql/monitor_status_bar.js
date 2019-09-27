@@ -47,7 +47,6 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorStatusBarQuery });
 
-      console.log('RESPONSE DATA',  JSON.stringify(res.body.data.monitorStatus));
 
       expectFixtureEql(res.body.data.monitorStatus, 'monitor_status_by_id');
     });
