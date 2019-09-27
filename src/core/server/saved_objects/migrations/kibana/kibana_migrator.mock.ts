@@ -29,7 +29,7 @@ const createMigrator = (
   } = { savedObjectMappings: [] }
 ) => {
   const mockMigrator: jest.Mocked<PublicMethodsOf<KibanaMigrator>> = {
-    awaitMigration: jest.fn(),
+    runMigrations: jest.fn(),
     getActiveMappings: jest.fn(),
     migrateDocument: jest.fn(),
   };

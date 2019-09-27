@@ -108,7 +108,7 @@ export async function migrateKibanaIndex({ client, log, kibanaPluginIds }) {
     callCluster: (path, ...args) => _.get(client, path).call(client, ...args),
   };
 
-  return await new KibanaMigrator(migratorOptions).awaitMigration();
+  return await new KibanaMigrator(migratorOptions).runMigrations();
 }
 
 async function loadKibanaVersion() {

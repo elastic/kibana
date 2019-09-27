@@ -107,15 +107,15 @@ export class KibanaMigrator {
    *    The promise resolves with an array of migration statuses, one for each
    *    elasticsearch index which was migrated.
    */
-  public awaitMigration(skipMigrations: boolean = false): Promise<Array<{ status: string }>> {
+  public runMigrations(skipMigrations: boolean = false): Promise<Array<{ status: string }>> {
     if (this.migrationResult === undefined) {
-      this.migrationResult = this.runMigrations(skipMigrations);
+      this.migrationResult = this.runMigrationsInternal(skipMigrations);
     }
 
     return this.migrationResult;
   }
 
-  private runMigrations(skipMigrations: boolean) {
+  private runMigrationsInternal(skipMigrations: boolean) {
     if (skipMigrations) {
       this.log.warn(
         'Skipping Saved Object migrations on startup. Note: Individual documents will still be migrated when read or written.'

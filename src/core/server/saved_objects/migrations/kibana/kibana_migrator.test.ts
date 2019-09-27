@@ -57,10 +57,10 @@ describe('KibanaMigrator', () => {
     });
   });
 
-  describe('awaitMigration', () => {
+  describe('runMigrations', () => {
     it('resolves isMigrated if migrations were skipped', async () => {
       const skipMigrations = true;
-      const result = await new KibanaMigrator(mockOptions()).awaitMigration(skipMigrations);
+      const result = await new KibanaMigrator(mockOptions()).runMigrations(skipMigrations);
       expect(result).toEqual([{ status: 'skipped' }, { status: 'skipped' }]);
     });
 
@@ -70,8 +70,8 @@ describe('KibanaMigrator', () => {
 
       options.callCluster = clusterStub;
       const migrator = new KibanaMigrator(options);
-      await migrator.awaitMigration();
-      await migrator.awaitMigration();
+      await migrator.runMigrations();
+      await migrator.runMigrations();
 
       // callCluster with "cat.templates" is called by "deleteIndexTemplates" function
       // and should only be done once

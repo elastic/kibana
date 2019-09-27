@@ -117,7 +117,7 @@ export class SavedObjectsService
       .pipe(first())
       .toPromise();
     const skipMigrations = cliArgs.optimize || savedObjectsConfig.skip;
-    await this.migrator!.awaitMigration(skipMigrations);
+    await this.migrator!.runMigrations(skipMigrations);
 
     return { migrator: this.migrator! };
   }
