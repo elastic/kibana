@@ -25,4 +25,8 @@ export type SavedQueryFilterMeta = FilterMeta & {
 
 export type SavedQueryFilter = Filter & {
   meta: SavedQueryFilterMeta;
+  saved_query: string;
 };
+
+export const isSavedQueryFilter = (filter: any): filter is SavedQueryFilter =>
+  filter && filter.meta && filter.meta.type === 'savedQuery';

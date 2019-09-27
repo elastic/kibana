@@ -84,6 +84,9 @@ const translateToQuery = function (filter, {
  * @returns {object}
  */
 const cleanFilter = function (filter) {
+  if (filter.meta && filter.meta.type && filter.meta.type === 'savedQuery') {
+    return _.omit(filter, ['meta', '$state', 'saved_query']);
+  }
   return _.omit(filter, ['meta', '$state']);
 };
 

@@ -23,7 +23,8 @@ export function buildSavedQueryFilter(savedQueryId) {
       type: 'savedQuery',
       key: savedQueryId,
       params: savedQueryId
-    }
+    },
+    saved_query: savedQueryId,
   };
   return filter;
 }

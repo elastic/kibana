@@ -31,7 +31,7 @@ import { QueryStringFilter, isQueryStringFilter } from './query_string_filter';
 import { RangeFilter, isRangeFilter, isScriptedRangeFilter } from './range_filter';
 import { MatchAllFilter, isMatchAllFilter } from './match_all_filter';
 import { MissingFilter, isMissingFilter } from './missing_filter';
-import { SavedQueryFilter, SavedQueryFilterMeta } from './saved_query_filter';
+import { SavedQueryFilter, SavedQueryFilterMeta, isSavedQueryFilter } from './saved_query_filter';
 
 export {
   CustomFilter,
@@ -57,6 +57,7 @@ export {
   isMissingFilter,
   SavedQueryFilter,
   SavedQueryFilterMeta,
+  isSavedQueryFilter,
 };
 
 // Any filter associated with a field (used in the filter bar/editor)
@@ -81,5 +82,5 @@ export enum FILTERS {
   RANGE = 'range',
   GEO_BOUNDING_BOX = 'geo_bounding_box',
   GEO_POLYGON = 'geo_polygon',
-  SAVED_QUERY = 'saved_query',
+  SAVED_QUERY = 'savedQuery',
 }

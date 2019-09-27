@@ -16,13 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Filter, FILTERS, isSavedQueryFilter } from '@kbn/es-query';
 
-
-export async function mapSavedQuery(filter) {
-  if (!filter.meta || filter.meta.type !== 'savedQuery') {
+export const mapSavedQuery = async (filter: Filter) => {
+  if (!isSavedQueryFilter(filter)) {
     throw filter;
   } else {
-    const { type, key, params } = filter.meta;
-    return { type, key, params };
+    return {
+      type: FILTERS.SAVED_QUERY,
+      key: filter.meta.key,
+      params: filter.meta.params,
+    };
   }
-}
+};
