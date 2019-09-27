@@ -7,6 +7,7 @@
 import React, { useRef } from 'react';
 import classNames from 'classnames';
 import d3, { ZoomEvent } from 'd3';
+import { isColorDark, hexToRgb } from '@elastic/eui';
 import { WorkspaceNode, WorkspaceEdge } from '../../types';
 import { makeNodeId } from '../../services/persistence';
 
@@ -91,9 +92,9 @@ export function GraphVisualization({
                 onClick={() => {
                   edgeClick(edge);
                 }}
-                className={classNames('edge', {
-                  selectedEdge: edge.isSelected,
-                  inferredEdge: edge.inferred,
+                className={classNames('gphEdge', {
+                  'gphEdge--selected': edge.isSelected,
+                  'gphEdge--inferred': edge.inferred,
                 })}
                 style={{ strokeWidth: edge.width }}
                 strokeLinecap="round"
@@ -121,12 +122,16 @@ export function GraphVisualization({
                   cx={node.kx}
                   cy={node.ky}
                   r={node.scaledSize}
-                  className={classNames('gphNode__circle', { selectedNode: node.isSelected })}
+                  className={classNames('gphNode__circle', {
+                    'gphNode__circle--selected': node.isSelected,
+                  })}
                   style={{ fill: node.color }}
                 />
                 {node.icon && (
                   <text
-                    className="fa gphNode__text gphNode__text--lowOpacity"
+                    className={classNames('fa gphNode__text gphNode__text--lowOpacity', {
+                      'gphNode__text--inverse': isColorDark(...hexToRgb(node.color)),
+                    })}
                     transform="translate(0,5)"
                     textAnchor="middle"
                     x={node.kx}

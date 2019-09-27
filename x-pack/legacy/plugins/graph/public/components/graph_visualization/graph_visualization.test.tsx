@@ -57,7 +57,7 @@ describe('graph_visualization', () => {
       y: 9,
     },
     {
-      color: 'blue',
+      color: 'yellow',
       data: {
         field: 'C',
         term: '3',
@@ -156,7 +156,7 @@ describe('graph_visualization', () => {
       />
     );
     instance
-      .find('.edge')
+      .find('.gphEdge')
       .first()
       .simulate('click');
     expect(edgeClickSpy).toHaveBeenCalledWith(edges[0]);

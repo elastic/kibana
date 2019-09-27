@@ -1,33 +1,4 @@
 /**
- * Nodes
- */
-
-.gphNode-disabled{
-  opacity:0.3;
-}
-
-.gphNode__circle {
-  fill: $euiColorMediumShade;
-
-  // SASSTODO: Can't definitively change modifier class
-  // because it's not easy to tell what's a class and what's
-  // part of the data object since they are named the same
-  &.selectedNode {
-    stroke-width: $euiSizeXS;
-    stroke: transparentize($euiColorPrimary, .25);
-  }
-}
-
-.gphNode__text {
-  fill: $euiColorDarkestShade;
-
-  &--lowOpacity{
-    fill-opacity: 0.5;
-  }
-}
-
-
-/**
  * Forms
  */
 

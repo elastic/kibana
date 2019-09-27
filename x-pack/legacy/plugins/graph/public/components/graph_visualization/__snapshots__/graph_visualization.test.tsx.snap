@@ -12,7 +12,7 @@ exports[`graph_visualization should render to svg elements 1`] = `
   <g>
     <g>
       <line
-        className="edge selectedEdge"
+        className="gphEdge gphEdge--selected"
         key="A..1-B..2"
         onClick={[Function]}
         strokeLinecap="round"
@@ -27,7 +27,7 @@ exports[`graph_visualization should render to svg elements 1`] = `
         y2={9}
       />
       <line
-        className="edge selectedEdge"
+        className="gphEdge gphEdge--selected"
         key="B..2-C..3"
         onClick={[Function]}
         strokeLinecap="round"
@@ -49,7 +49,7 @@ exports[`graph_visualization should render to svg elements 1`] = `
       onMouseDown={[Function]}
     >
       <circle
-        className="gphNode__circle selectedNode"
+        className="gphNode__circle gphNode__circle--selected"
         cx={5}
         cy={5}
         r={10}
@@ -60,7 +60,7 @@ exports[`graph_visualization should render to svg elements 1`] = `
         }
       />
       <text
-        className="fa gphNode__text gphNode__text--lowOpacity"
+        className="fa gphNode__text gphNode__text--lowOpacity gphNode__text--inverse"
         textAnchor="middle"
         transform="translate(0,5)"
         x={5}
@@ -114,7 +114,7 @@ exports[`graph_visualization should render to svg elements 1`] = `
         }
       />
       <text
-        className="fa gphNode__text gphNode__text--lowOpacity"
+        className="fa gphNode__text gphNode__text--lowOpacity gphNode__text--inverse"
         textAnchor="middle"
         transform="translate(0,5)"
         x={7}
@@ -145,12 +145,12 @@ exports[`graph_visualization should render to svg elements 1`] = `
         r={10}
         style={
           Object {
-            "fill": "blue",
+            "fill": "yellow",
           }
         }
       />
       <text
-        className="fa gphNode__text gphNode__text--lowOpacity"
+        className="fa gphNode__text gphNode__text--lowOpacity gphNode__text--inverse"
         textAnchor="middle"
         transform="translate(0,5)"
         x={12}
