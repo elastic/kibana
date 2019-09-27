@@ -1,61 +1,33 @@
 JOB:
-  # - kibana-intake
-  # - x-pack-intake
-  # - kibana-firefoxSmoke
-  # - kibana-ciGroup1
-  # - kibana-ciGroup2
-  # - kibana-ciGroup3
-  # - kibana-ciGroup4
-  # - kibana-ciGroup5
-  # - kibana-ciGroup6
-  # - kibana-ciGroup7
-  # - kibana-ciGroup8
-  # - kibana-ciGroup9
-  # - kibana-ciGroup10
-  # - kibana-ciGroup11
-  - kibana-ciGroup12-1
-  - kibana-ciGroup12-2
-  - kibana-ciGroup12-3
-  - kibana-ciGroup12-4
-  - kibana-ciGroup12-5
-  - kibana-ciGroup12-6
-  - kibana-ciGroup12-7
-  - kibana-ciGroup12-8
-  - kibana-ciGroup12-9
-  - kibana-ciGroup12-10
-  - kibana-ciGroup12-12
-  - kibana-ciGroup12-13
-  - kibana-ciGroup12-14
-  - kibana-ciGroup12-15
-  - kibana-ciGroup12-16
-  - kibana-ciGroup12-17
-  - kibana-ciGroup12-18
-  - kibana-ciGroup12-19
-  - kibana-ciGroup12-20
-  - kibana-ciGroup12-21
-  - kibana-ciGroup12-22
-  - kibana-ciGroup12-23
-  - kibana-ciGroup12-24
-  - kibana-ciGroup12-25
-  - kibana-ciGroup12-26
-  - kibana-ciGroup12-27
-  - kibana-ciGroup12-28
-  - kibana-ciGroup12-29
-  - kibana-ciGroup12-30
+  - kibana-intake
+  - x-pack-intake
+  - kibana-firefoxSmoke
+  - kibana-ciGroup1
+  - kibana-ciGroup2
+  - kibana-ciGroup3
+  - kibana-ciGroup4
+  - kibana-ciGroup5
+  - kibana-ciGroup6
+  - kibana-ciGroup7
+  - kibana-ciGroup8
+  - kibana-ciGroup9
+  - kibana-ciGroup10
+  - kibana-ciGroup11
+  - kibana-ciGroup12
   # - kibana-visualRegression
 
   # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
-  # - x-pack-firefoxSmoke
-  # - x-pack-ciGroup1
-  # - x-pack-ciGroup2
-  # - x-pack-ciGroup3
-  # - x-pack-ciGroup4
-  # - x-pack-ciGroup5
-  # - x-pack-ciGroup6
-  # - x-pack-ciGroup7
-  # - x-pack-ciGroup8
-  # - x-pack-ciGroup9
-  # - x-pack-ciGroup10
+  - x-pack-firefoxSmoke
+  - x-pack-ciGroup1
+  - x-pack-ciGroup2
+  - x-pack-ciGroup3
+  - x-pack-ciGroup4
+  - x-pack-ciGroup5
+  - x-pack-ciGroup6
+  - x-pack-ciGroup7
+  - x-pack-ciGroup8
+  - x-pack-ciGroup9
+  - x-pack-ciGroup10
   # - x-pack-visualRegression
 
 # `~` is yaml for `null`
