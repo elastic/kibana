@@ -24,11 +24,11 @@ stage("Kibana Pipeline") {
             } else {
               buildXpack()
             }
-          }, getWorkerMap(params.NUMBER_EXECUTIONS.toInteger(), worker))()
+          }, getWorkerMap(params.NUMBER_EXECUTIONS.toInteger(), worker, workerFailures))()
         }
 
-        if (workerFailures.size > 0) {
-          print "There were ${workerFailures.size} test suite failures."
+        if (workerFailures.size() > 0) {
+          print "There were ${workerFailures.size()} test suite failures."
           print "The executions that failed were:"
           print workerFailures.join("\n")
           print "Please check 'Test Result' and 'Pipeline Steps' pages for more info"
@@ -232,7 +232,7 @@ def getWorkerFromParams(isXpack, job, ciGroup) {
   }
 }
 
-def getWorkerMap(numberOfExecutions, worker, maxWorkers = 14) {
+def getWorkerMap(numberOfExecutions, worker, workerFailures, maxWorkers = 14) {
   def workerMap = [:]
   def numberOfWorkers = Math.min(numberOfExecutions, maxWorkers)
 
