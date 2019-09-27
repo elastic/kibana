@@ -171,7 +171,7 @@ export abstract class FieldFormat {
     return createCustomFieldFormat(convertFn);
   }
 
-  private static setupContentType(
+  static setupContentType(
     fieldFormat: IFieldFormat,
     convert: Partial<FieldFormatConvert> | FieldFormatConvertFunction = {}
   ): FieldFormatConvert {
