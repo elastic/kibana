@@ -18,7 +18,7 @@
  */
 
 import { ToolingLog } from '../tooling_log';
-import { KbnClientRequester } from './kbn_client_requester';
+import { KbnClientRequester, ReqOptions } from './kbn_client_requester';
 import { KbnClientStatus } from './kbn_client_status';
 import { KbnClientPlugins } from './kbn_client_plugins';
 import { KbnClientVersion } from './kbn_client_version';
@@ -26,7 +26,7 @@ import { KbnClientSavedObjects } from './kbn_client_saved_objects';
 import { KbnClientUiSettings, UiSettingValues } from './kbn_client_ui_settings';
 
 export class KbnClient {
-  readonly requester = new KbnClientRequester(this.log, this.kibanaUrls);
+  private readonly requester = new KbnClientRequester(this.log, this.kibanaUrls);
   readonly status = new KbnClientStatus(this.requester);
   readonly plugins = new KbnClientPlugins(this.status);
   readonly version = new KbnClientVersion(this.status);
@@ -49,5 +49,12 @@ export class KbnClient {
     if (!kibanaUrls.length) {
       throw new Error('missing Kibana urls');
     }
+  }
+
+  /**
+   * Make a direct request to the Kibana server
+   */
+  async request(options: ReqOptions) {
+    return await this.requester.request(options);
   }
 }

@@ -48,7 +48,7 @@ export const uriencode = (
 
 const MAX_ATTEMPTS = 5;
 
-interface ReqOptions {
+export interface ReqOptions {
   description?: string;
   path: string;
   query?: Record<string, any>;
