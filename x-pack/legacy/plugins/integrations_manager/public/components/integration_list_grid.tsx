@@ -9,7 +9,7 @@ import { IntegrationList, IntegrationListItem } from '../../common/types';
 import { IntegrationCard, BadgeProps } from './integration_card';
 
 type ListProps = {
-  controls: ReactNode;
+  controls?: ReactNode;
   title: string;
   list: IntegrationList;
 } & BadgeProps;

@@ -7,26 +7,31 @@
 import React from 'react';
 import { Search as LocalSearch } from 'js-search';
 import { IntegrationList, IntegrationListItem } from '../../../common/types';
-import { getIntegrations } from '../../data';
 import { SearchResults } from './search_results';
 
-type SearchField = keyof IntegrationListItem;
+export { LocalSearch };
+export type SearchField = keyof IntegrationListItem;
+export const searchIdField: SearchField = 'name';
+export const fieldsToSearch: SearchField[] = ['description', 'name', 'title'];
 
-const idField: SearchField = 'name';
-const fieldsToSearch: SearchField[] = ['description', 'name', 'title'];
-const localSearch = new LocalSearch(idField);
-fieldsToSearch.forEach(field => localSearch.addIndex(field));
+interface SearchIntegrationsProps {
+  searchTerm: string;
+  localSearchRef: React.MutableRefObject<LocalSearch | null>;
+  allIntegrations: IntegrationList;
+}
 
-let allIntegrations: IntegrationList = [];
-(async function buildLocalSearch() {
-  allIntegrations = await getIntegrations();
-  localSearch.addDocuments(allIntegrations);
-})();
+export function SearchIntegrations({
+  searchTerm,
+  localSearchRef,
+  allIntegrations,
+}: SearchIntegrationsProps) {
+  // this means the search index hasn't been built yet.
+  // i.e. the intial fetch of all integrations hasn't finished
+  if (!localSearchRef.current) return <div>Still fetching matches. Try again in a moment.</div>;
 
-export function SearchIntegrations({ term }: { term: string }) {
-  const matches = localSearch.search(term) as IntegrationList;
-  const matchingIds = matches.map(match => match[idField]);
-  const filtered = allIntegrations.filter(item => matchingIds.includes(item[idField]));
+  const matches = localSearchRef.current.search(searchTerm) as IntegrationList;
+  const matchingIds = matches.map(match => match[searchIdField]);
+  const filtered = allIntegrations.filter(item => matchingIds.includes(item[searchIdField]));
 
-  return <SearchResults term={term} results={filtered} />;
+  return <SearchResults term={searchTerm} results={filtered} />;
 }
