@@ -28,42 +28,6 @@
       edge-click="clickEdge"
       node-click="nodeClick"
     ></graph-visualization>
-    <!-- <svg class="gphGraph" width="100%" height="100%" pointer-events="all" id="graphSvg" >
-      <g id="svgRootGroup">
-        <g>
-          <line ng-repeat="edge in workspace.edges" class="edge" ng-attr-x1="{{edge.topSrc.kx}}" ng-attr-y1="{{edge.topSrc.ky}}"
-            ng-attr-x2="{{edge.topTarget.kx}}" ng-attr-y2="{{edge.topTarget.ky}}" ng-click="clickEdge(edge)" ng-class="{'selectedEdge':edge.isSelected, 'inferredEdge':edge.inferred}"
-            ng-attr-style="stroke-width:{{edge.width}}px" stroke-linecap="round" />
-        </g>
-        <g ng-repeat="n in workspace.nodes" ng-if="!n.parent">
-          <circle class="gphNode__circle" ng-attr-r="{{n.scaledSize}}" ng-attr-cx="{{n.kx}}" ng-attr-cy="{{n.ky}}" ng-click="nodeClick(n, $event)"
-            ng-class="{selectedNode:n.isSelected}" ng-attr-style="fill:{{n.color}}" />
-          <text class="fa gphNode__text gphNode__text--lowOpacity" transform="translate(0,5)" text-anchor="middle" ng-attr-x="{{n.kx}}"
-            ng-attr-y="{{n.ky}}" ng-if="n.icon" ng-click="nodeClick(n, $event)">{{n.icon.code}}</text>
-
-          <text ng-if="n.label.length<30" class="gphNode__label" text-anchor="middle" transform="translate(0,22)"
-            ng-attr-x="{{n.kx}}" ng-attr-y="{{n.ky}}" ng-click="nodeClick(n, $event)">
-            {{n.label}}
-          </text>
-          <foreignObject ng-if="n.label.length>=30" width="100" height="20" transform="translate(-50,15)" ng-attr-x="{{n.kx}}"
-            ng-attr-y="{{n.ky}}" ng-click="nodeClick(n, $event)">
-
-            <body xmlns="http://www.w3.org/1999/xhtml">
-              <p class="gphNode__label gphNode__label--html gphNoUserSelect">{{n.label}}</p>
-            </body>
-          </foreignObject>
-
-          <g ng-if="n.numChildren>0">
-            <circle r="5" class="gphNode__markerCircle" transform="translate(10,10)" ng-attr-cx="{{n.kx}}" ng-attr-cy="{{n.ky}}"
-              ng-click="nodeClick(n, $event)" />
-            <text class="gphNode__markerText" text-anchor="middle" transform="translate(10,12)" ng-attr-x="{{n.kx}}"
-              ng-attr-y="{{n.ky}}" ng-click="nodeClick(n, $event)">{{n.numChildren}}
-            </text>
-
-          </g>
-        </g>
-      </g>
-    </svg> -->
 
     <div id="sidebar" class="gphSidebar" ng-if="workspace !== null">
 
