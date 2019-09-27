@@ -59,9 +59,9 @@ export const SavedViewsToolbarControls = (props: Props) => {
 
   useEffect(() => {
     if (createError) {
-      toastNotifications.addWarning(getErrorToast('create'));
+      toastNotifications.addWarning(getErrorToast('create')!);
     } else if (findError) {
-      toastNotifications.addWarning(getErrorToast('find'));
+      toastNotifications.addWarning(getErrorToast('find')!);
     }
   }, [createError, findError]);
 
