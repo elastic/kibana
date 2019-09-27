@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import { EuiCard, EuiIcon, ICON_TYPES } from '@elastic/eui';
+import styled from 'styled-components';
 import { useLinks } from '../hooks';
 import { IntegrationListItem, IntegrationInfo } from '../../common/types';
 
@@ -13,6 +14,12 @@ export interface BadgeProps {
 }
 
 type IntegrationCardProps = (IntegrationListItem | IntegrationInfo) & BadgeProps;
+
+// adding the `href` causes EuiCard to use a `a` instead of a `button`
+// `a` tags use `euiLinkColor` which results in blueish Badge text
+const Card = styled(EuiCard)`
+  color: inherit;
+`;
 
 export function IntegrationCard({
   description,
@@ -46,7 +53,7 @@ export function IntegrationCard({
   }
 
   return (
-    <EuiCard
+    <Card
       betaBadgeLabel={showInstalledBadge && status === 'installed' ? 'Installed' : ''}
       layout="horizontal"
       title={title}
