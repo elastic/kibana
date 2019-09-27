@@ -78,7 +78,6 @@ export class AdvancedJobCreator extends JobCreator {
     }
   }
 
-  // create a new detector object, applying the overall split field
   private _createDetector(
     agg: Aggregation,
     field: Field,
