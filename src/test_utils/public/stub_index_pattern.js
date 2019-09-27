@@ -58,7 +58,7 @@ export default function () {
     };
 
     this.stubSetFieldFormat = function (fieldName, id, params) {
-      const FieldFormat = fieldFormats.byId[id];
+      const FieldFormat = fieldFormats.getType(id);
       this.fieldFormatMap[fieldName] = new FieldFormat(params);
       this._reindexFields();
     };
