@@ -26,7 +26,7 @@ import {
   SavedQueryFilter,
 } from './lib';
 import { RangeFilterParams } from './lib/range_filter';
-import { SavedQueryFilterParams } from './lib/saved_query_filter';
+import { SavedQuery } from './lib/saved_query_filter';
 
 export * from './lib';
 
@@ -58,4 +58,4 @@ export function buildRangeFilter(
   formattedValue?: string
 ): RangeFilter;
 
-export function buildSavedQueryFilter(params: string): SavedQueryFilter;
+export function buildSavedQueryFilter(savedQuery: SavedQuery): SavedQueryFilter;

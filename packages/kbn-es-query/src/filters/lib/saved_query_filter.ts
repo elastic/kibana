@@ -19,8 +19,38 @@
 
 import { Filter, FilterMeta } from './meta_filter';
 
+interface TimeRange {
+  from: string;
+  to: string;
+}
+
+interface RefreshInterval {
+  pause: boolean;
+  value: number;
+}
+interface Query {
+  query: string | { [key: string]: any };
+}
+
+type SavedQueryTimeFilter = TimeRange & {
+  refreshInterval: RefreshInterval;
+};
+interface SavedQueryAttributes {
+  title: string;
+  description: string;
+  query: Query;
+  filters?: Filter[];
+  timefilter?: SavedQueryTimeFilter;
+}
+export interface SavedQuery {
+  id: string;
+  attributes: SavedQueryAttributes;
+}
+interface SavedQueryParams {
+  savedQuery: SavedQuery;
+}
 export type SavedQueryFilterMeta = FilterMeta & {
-  params: string[]; // The saved query id
+  params: SavedQueryParams; // the full saved query
 };
 
 export type SavedQueryFilter = Filter & {

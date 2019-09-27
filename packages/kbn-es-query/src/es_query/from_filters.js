@@ -47,7 +47,6 @@ const translateToQuery = function (filter, {
   queryStringOptions = {},
   dateFormatTZ = null,
   ignoreFilterIfFieldNotInIndex = false,
-  allSavedQueries = [],
 }) {
   if (!filter) return;
 
@@ -56,9 +55,12 @@ const translateToQuery = function (filter, {
   }
   if (filter.meta && filter.meta.type && filter.meta.type === 'savedQuery') {
     // do stuff: generate raw dsl that's done in the savedQuery filter constructor at the moment
-    const savedQuery = allSavedQueries.find((savedQuery) => filter.meta.key === savedQuery.id);
+    const savedQuery = filter.meta.params.savedQuery;
     const query = _.get(savedQuery, 'attributes.query');
     const filters = _.get(savedQuery, 'attributes.filters', []);
+    if (savedQuery.attributes.timefilter) {
+      // pass the timefilter right through, should there be one.
+    }
     const convertedQuery = buildEsQuery(
       indexPattern,
       [query],
@@ -67,7 +69,7 @@ const translateToQuery = function (filter, {
     filter.query = { ...convertedQuery };
 
     // timefilter addition
-    // TODO: should we also handle the refresh interval part of the timefilter?
+
     // const convertedTimeFilter = get(params, 'savedQuery.attributes.timefilter', null); // should already be an EsQuery
     // if (convertedTimeFilter) {
     //   const filtersWithTimefilter = [...convertedQuery.bool.filter, convertedTimeFilter];
@@ -96,8 +98,7 @@ export function buildQueryFromFilters(
   ignoreFilterIfFieldNotInIndex,
   allowLeadingWildcards,
   queryStringOptions,
-  dateFormatTZ,
-  allSavedQueries) {
+  dateFormatTZ) {
   return {
     must: [],
     filter: filters
@@ -105,7 +106,7 @@ export function buildQueryFromFilters(
       .filter(filter => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
       .map((filter) => translateToQuery(
         filter,
-        { indexPattern, allowLeadingWildcards, queryStringOptions, dateFormatTZ, ignoreFilterIfFieldNotInIndex, allSavedQueries }))
+        { indexPattern, allowLeadingWildcards, queryStringOptions, dateFormatTZ, ignoreFilterIfFieldNotInIndex }))
       .map(cleanFilter)
       .map(filter => {
         return migrateFilter(filter, indexPattern);
@@ -116,7 +117,7 @@ export function buildQueryFromFilters(
       .filter(filter => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
       .map((filter) => translateToQuery(
         filter,
-        { indexPattern, allowLeadingWildcards, queryStringOptions, dateFormatTZ, ignoreFilterIfFieldNotInIndex, allSavedQueries }))
+        { indexPattern, allowLeadingWildcards, queryStringOptions, dateFormatTZ, ignoreFilterIfFieldNotInIndex }))
       .map(cleanFilter)
       .map(filter => {
         return migrateFilter(filter, indexPattern);

@@ -17,14 +17,17 @@
  * under the License.
  */
 
-export function buildSavedQueryFilter(savedQueryId) {
+export function buildSavedQueryFilter(savedQuery) {
   const filter = {
     meta: {
       type: 'savedQuery',
-      key: savedQueryId,
-      params: savedQueryId
+      key: savedQuery.id,
+      params: {
+        savedQuery: { ...savedQuery }
+      }
     },
-    saved_query: savedQueryId,
+    saved_query: savedQuery.id,
   };
   return filter;
 }
+
