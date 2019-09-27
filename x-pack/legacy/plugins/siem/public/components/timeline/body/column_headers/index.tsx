@@ -126,6 +126,8 @@ export const ColumnHeaders = React.memo<Props>(
                 {columnHeaders.map((header, i) => (
                   <Draggable
                     data-test-subj="draggable"
+                    // Required for drag events while hovering the sort button to work: https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/api/draggable.md#interactive-child-elements-within-a-draggable-
+                    disableInteractiveElementBlocking
                     draggableId={getDraggableFieldId({
                       contextId: `timeline-column-headers-${timelineId}`,
                       fieldId: header.id,
