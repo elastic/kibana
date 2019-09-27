@@ -3870,10 +3870,10 @@
     "@types/glob" "*"
     "@types/node" "*"
 
-"@types/selenium-webdriver@^3.0.16":
-  version "3.0.16"
-  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-3.0.16.tgz#50a4755f8e33edacd9c406729e9b930d2451902a"
-  integrity sha512-lMC2G0ItF2xv4UCiwbJGbnJlIuUixHrioOhNGHSCsYCJ8l4t9hMCUimCytvFv7qy6AfSzRxhRHoGa+UqaqwyeA==
+"@types/selenium-webdriver@^4.0.3":
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.0.3.tgz#388f12c464cc1fff5d4c84cb372f19b9ab9b5c81"
+  integrity sha512-aMKIG1IKwV9/gjhm9uICjvmy4s2SL/bF9fE2WEgLhfdrTLKSIsDMt9M2pTqhZlxllgQPa+EUddtkx4YFTSjadw==
 
 "@types/semver@^5.5.0":
   version "5.5.0"
@@ -24868,10 +24868,10 @@ select@^1.1.2:
   resolved "https://registry.yarnpkg.com/select/-/select-1.1.2.tgz#0e7350acdec80b1108528786ec1d4418d11b396d"
   integrity sha1-DnNQrN7ICxEIUoeG7B1EGNEbOW0=
 
-selenium-webdriver@^4.0.0-alpha.4:
-  version "4.0.0-alpha.4"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.0.0-alpha.4.tgz#73694490e02c941d9d0bf7a36f7c49beb9372512"
-  integrity sha512-etJt20d8qInkxMAHIm5SEpPBSS+CdxVcybnxzSIB/GlWErb8pIWrArz/VA6VfUW0/6tIcokepXQ5ufvdzqqk1A==
+selenium-webdriver@^4.0.0-alpha.5:
+  version "4.0.0-alpha.5"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.0.0-alpha.5.tgz#e4683b3dbf827d70df09a7e43bf02ebad20fa7c1"
+  integrity sha512-hktl3DSrhzM59yLhWzDGHIX9o56DvA+cVK7Dw6FcJR6qQ4CGzkaHeXQPcdrslkWMTeq0Ci9AmCxq0EMOvm2Rkg==
   dependencies:
     jszip "^3.1.5"
     rimraf "^2.6.3"

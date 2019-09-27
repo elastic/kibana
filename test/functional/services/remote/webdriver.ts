@@ -23,9 +23,7 @@ import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
 import { Builder, Capabilities, By, Key, logging, until } from 'selenium-webdriver';
-// @ts-ignore types not available
 import chrome from 'selenium-webdriver/chrome';
-// @ts-ignore types not available
 import firefox from 'selenium-webdriver/firefox';
 // @ts-ignore internal modules are not typed
 import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
@@ -93,7 +91,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
         const firefoxOptions = new firefox.Options();
         if (headlessBrowser === '1') {
           // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
-          firefoxOptions.addArguments('-headless');
+          firefoxOptions.headless();
         }
         return new Builder()
           .forBrowser(browserType)

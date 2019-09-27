@@ -18,7 +18,7 @@
  */
 
 import { delay } from 'bluebird';
-import { WebElement, WebDriver, By, IKey, until } from 'selenium-webdriver';
+import { WebElement, WebDriver, By, Key, until } from 'selenium-webdriver';
 // @ts-ignore not supported yet
 import { PNG } from 'pngjs';
 // @ts-ignore not supported yet
@@ -33,7 +33,6 @@ import { Browsers } from '../../remote/browsers';
 interface Driver {
   driver: WebDriver;
   By: typeof By;
-  Key: IKey;
   until: typeof until;
   LegacyActionSequence: any;
 }
@@ -55,7 +54,7 @@ const RETRY_CLICK_RETRY_ON_ERRORS = [
 
 export class WebElementWrapper {
   private By: typeof By = this.webDriver.By;
-  private Keys: IKey = this.webDriver.Key;
+  private Keys = Key;
   private driver: WebDriver = this.webDriver.driver;
   public LegacyAction: any = this.webDriver.LegacyActionSequence;
   public isW3CEnabled: boolean = (this.webDriver.driver as any).executor_.w3c === true;
@@ -310,7 +309,6 @@ export class WebElementWrapper {
    * @param  {string|string[]} keys
    * @return {Promise<void>}
    */
-  public async pressKeys<T extends IKey>(keys: T | T[]): Promise<void>;
   public async pressKeys<T extends string>(keys: T | T[]): Promise<void>;
   public async pressKeys(keys: string): Promise<void> {
     await this.retryCall(async function pressKeys(wrapper) {

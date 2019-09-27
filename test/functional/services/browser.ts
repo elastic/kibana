@@ -18,7 +18,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { IKey, logging } from 'selenium-webdriver';
+import { Key, logging } from 'selenium-webdriver';
 import { takeUntil } from 'rxjs/operators';
 
 import { modifyUrl } from '../../../src/core/utils';
@@ -31,9 +31,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const lifecycle = getService('lifecycle');
-  const { driver, Key, LegacyActionSequence, browserType } = await getService(
-    '__webdriver__'
-  ).init();
+  const { driver, LegacyActionSequence, browserType } = await getService('__webdriver__').init();
 
   const isW3CEnabled = (driver as any).executor_.w3c === true;
 
@@ -56,7 +54,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     /**
      * Keyboard events
      */
-    public readonly keys: IKey = Key;
+    public readonly keys = Key;
 
     /**
      * Browser name
@@ -265,7 +263,6 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async pressKeys(keys: string | string[]): Promise<void>;
-    public async pressKeys(...args: string[]): Promise<void>;
     public async pressKeys(...args: string[]): Promise<void> {
       const chord = this.keys.chord(...args);
       await this.getActions()
