@@ -18,6 +18,10 @@ import { hostLoad } from './host/host_load';
 import { hostMemoryUsage } from './host/host_memory_usage';
 import { hostNetworkTraffic } from './host/host_network_traffic';
 import { hostSystemOverview } from './host/host_system_overview';
+import { hostDockerOverview } from './host/host_docker_overview';
+import { hostDockerInfo } from './host/host_docker_info';
+import { hostDockerTop5ByCpu } from './host/host_docker_top_5_by_cpu';
+import { hostDockerTop5ByMemory } from './host/host_docker_top_5_by_memory';
 
 import { podCpuUsage } from './pod/pod_cpu_usage';
 import { podLogUsage } from './pod/pod_log_usage';
@@ -60,6 +64,10 @@ export const metricModels: InfraMetricModels = {
   [InfraMetric.hostLoad]: hostLoad,
   [InfraMetric.hostMemoryUsage]: hostMemoryUsage,
   [InfraMetric.hostNetworkTraffic]: hostNetworkTraffic,
+  [InfraMetric.hostDockerOverview]: hostDockerOverview,
+  [InfraMetric.hostDockerInfo]: hostDockerInfo,
+  [InfraMetric.hostDockerTop5ByCpu]: hostDockerTop5ByCpu,
+  [InfraMetric.hostDockerTop5ByMemory]: hostDockerTop5ByMemory,
 
   [InfraMetric.podOverview]: podOverview,
   [InfraMetric.podCpuUsage]: podCpuUsage,
