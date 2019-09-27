@@ -17,32 +17,27 @@
  * under the License.
  */
 import React from 'react';
-import { IContainer } from '../../../../containers';
+import { CoreStart } from 'src/core/public';
 import { ChangeViewFlyout } from './change_view_flyout';
-import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
-import { NotificationsStart } from '../../../../../../../../../../../core/public';
-import { KibanaReactOverlays } from '../../../../../../../../../../../plugins/kibana_react/public';
-import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from '../../../../embeddables';
+
+import {
+  IEmbeddable,
+  EmbeddableInput,
+  EmbeddableOutput,
+} from '../../../../../../embeddable_api/public/np_ready/public/lib/embeddables';
+
+import { IContainer } from '../../../../../../embeddable_api/public/np_ready/public/lib/containers';
+import { NotificationsStart } from '../../../../../../../../core/public';
 
 export async function openChangeViewFlyout(options: {
   embeddable: IContainer;
-  getFactory: GetEmbeddableFactory;
-  getAllFactories: GetEmbeddableFactories;
-  overlays: KibanaReactOverlays;
+  core: CoreStart;
+  savedobjectfinder: React.ComponentType<any>;
   notifications: NotificationsStart;
-  SavedObjectFinder: React.ComponentType<any>;
   viewToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
 }) {
-  const {
-    embeddable,
-    getFactory,
-    getAllFactories,
-    overlays,
-    notifications,
-    SavedObjectFinder,
-    viewToRemove,
-  } = options;
-  const flyoutSession = overlays.openFlyout(
+  const { embeddable, core, viewToRemove, savedobjectfinder, notifications } = options;
+  const flyoutSession = core.overlays.openFlyout(
     <ChangeViewFlyout
       container={embeddable}
       onClose={() => {
@@ -50,11 +45,9 @@ export async function openChangeViewFlyout(options: {
           flyoutSession.close();
         }
       }}
-      getFactory={getFactory}
-      getAllFactories={getAllFactories}
-      notifications={notifications}
-      SavedObjectFinder={SavedObjectFinder}
       viewToRemove={viewToRemove}
+      sof={savedobjectfinder}
+      notifications={notifications}
     />,
     {
       'data-test-subj': 'changeViewFlyout',

@@ -39,7 +39,6 @@ import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_a
 import { EditPanelAction } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
 import { Start as InspectorStartContract } from '../../../../../../../../plugins/inspector/public';
-import { ChangeViewAction } from './panel_header/panel_actions';
 
 interface Props {
   embeddable: IEmbeddable<any, any>;
@@ -221,13 +220,6 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         this.props.SavedObjectFinder
       ),
       new InspectPanelAction(this.props.inspector),
-      new ChangeViewAction(
-        this.props.getEmbeddableFactory,
-        this.props.getAllEmbeddableFactories,
-        this.props.overlays,
-        this.props.notifications,
-        this.props.SavedObjectFinder
-      ),
       new RemovePanelAction(),
       new EditPanelAction(this.props.getEmbeddableFactory),
     ];

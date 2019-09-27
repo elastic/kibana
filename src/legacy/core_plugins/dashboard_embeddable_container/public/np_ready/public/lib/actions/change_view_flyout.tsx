@@ -16,24 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { CoreSetup } from 'src/core/public';
+
+import { NotificationsStart } from 'src/core/public';
 import { DashboardPanelState } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
 
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 
-import { IContainer } from '../../../../containers';
-import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
-import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from '../../../../embeddables';
+import { IContainer } from '../../../../../../embeddable_api/public/np_ready/public/lib/containers';
+import {
+  IEmbeddable,
+  EmbeddableInput,
+  EmbeddableOutput,
+} from '../../../../../../embeddable_api/public/np_ready/public/lib/embeddables';
+
+import { start } from '../../../../../../embeddable_api/public/np_ready/public/legacy';
 
 interface Props {
-  onClose: () => void;
   container: IContainer;
-  getFactory: GetEmbeddableFactory;
-  getAllFactories: GetEmbeddableFactories;
-  notifications: CoreSetup['notifications'];
-  SavedObjectFinder: React.ComponentType<any>;
+  sof: React.ComponentType<any>;
+  onClose: () => void;
+  notifications: NotificationsStart;
   viewToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
 }
 
@@ -95,24 +100,24 @@ export class ChangeViewFlyout extends React.Component<Props> {
   };
 
   public render() {
-    const SavedObjectFinder = this.props.SavedObjectFinder;
+    const SavedObjectFinder = this.props.sof;
     const savedObjectsFinder = (
       <SavedObjectFinder
-        onChoose={this.onChangeView}
-        savedObjectMetaData={[...this.props.getAllFactories()]
+        noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
+          defaultMessage: 'No matching objects found.',
+        })}
+        savedObjectMetaData={[...start.getEmbeddableFactories()]
           .filter(
             embeddableFactory =>
               Boolean(embeddableFactory.savedObjectMetaData) && !embeddableFactory.isContainerType
           )
           .map(({ savedObjectMetaData }) => savedObjectMetaData as any)}
         showFilter={true}
-        noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
-          defaultMessage: 'No matching objects found.',
-        })}
+        onChoose={this.onChangeView}
       />
     );
 
-    const vtr = 'Replace view ' + this.props.viewToRemove.getTitle() + ' with...';
+    const vtr = 'Replace view ' + this.props.viewToRemove.getTitle() + ' with:';
 
     return (
       <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardChangeView">

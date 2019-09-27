@@ -20,7 +20,7 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { IUiActionsSetup, IUiActionsStart } from '../../../../../../plugins/ui_actions/public';
 import { CONTEXT_MENU_TRIGGER, Plugin as EmbeddablePlugin } from './lib/embeddable_api';
-import { ExpandPanelAction, DashboardContainerFactory } from './lib';
+import { ExpandPanelAction, ChangeViewAction, DashboardContainerFactory } from './lib';
 import { Start as InspectorStartContract } from '../../../../../../plugins/inspector/public';
 
 interface SetupDependencies {
@@ -54,6 +54,10 @@ export class DashboardEmbeddableContainerPublicPlugin
   public start(core: CoreStart, plugins: StartDependencies): Start {
     const { application, notifications, overlays } = core;
     const { embeddable, inspector, __LEGACY, uiActions } = plugins;
+
+    const changeViewAction = new ChangeViewAction(core, __LEGACY.SavedObjectFinder, notifications);
+    uiActions.registerAction(changeViewAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);
 
     const factory = new DashboardContainerFactory({
       application,
