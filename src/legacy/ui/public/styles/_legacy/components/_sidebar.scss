@@ -1,8 +1,8 @@
 // ONLY USED IN DISCOVER
 
 .sidebar-container {
-  padding-left: 0px !important;
-  padding-right: 0px !important;
+  padding-left: $euiSizeS !important;
+  padding-right: $euiSizeS !important;
   background-color: $euiColorLightestShade;
   border-right-color: transparent;
   border-bottom-color: transparent;
@@ -52,35 +52,35 @@
       }
     }
 
-      .sidebar-item-title,
-      .sidebar-item-text {
-        margin: 0;
-        padding: $euiSizeXS $euiSizeS;
-        text-align: center;
-        width: 100%;
-        border: none;
-        border-radius: 0;
-      }
+    .sidebar-item-title,
+    .sidebar-item-text {
+      margin: 0;
+      padding: $euiSizeXS 0;
+      text-align: center;
+      width: 100%;
+      border: none;
+      border-radius: 0;
+    }
 
-      .sidebar-item-title {
-        @include euiTextTruncate;
-        text-align: left;
+    .sidebar-item-title {
+      @include euiTextTruncate;
+      text-align: left;
 
-        &.full-title {
-          white-space: normal;
-        }
+      &.full-title {
+        white-space: normal;
       }
+    }
 
-      .sidebar-item-text {
-        background: $euiColorEmptyShade;
-      }
+    .sidebar-item-text {
+      background: $euiColorEmptyShade;
+    }
   }
 
     .sidebar-list-header {
-      padding-left: $euiSizeS;
-      padding-right: $euiSizeS;
-      color: $euiColorFullShade;
-      border: 1px solid transparent;
+      .sidebar-list-header-heading {
+        color: $euiColorDarkestShade;
+        border: 1px solid transparent;
+      }
 
       .sidebar-list-header-label {
         padding-left: $euiSizeS;
@@ -113,7 +113,7 @@
     }
   }
 
-  .index-pattern-selection {
-    padding: 0 $euiSizeS;
+  .index-pattern-selection:not(.euiComboBox) {
+    padding: $euiSizeS 0;
   }
 }
