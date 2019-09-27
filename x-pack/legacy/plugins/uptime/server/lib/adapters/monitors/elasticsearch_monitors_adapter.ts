@@ -438,6 +438,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const fields: { [key: string]: string } = {
       ids: 'monitor.id',
       schemes: 'monitor.type',
+      names: 'monitor.name',
       urls: 'url.full',
       ports: 'url.port',
       locations: 'observer.geo.name',
@@ -464,7 +465,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
 
     return Object.keys(fields).reduce((acc: { [key: string]: any[] }, field) => {
       const bucketName = fields[field];
-      acc[field] = aggregations[bucketName].buckets.map((b: { key: string | number }) => b.key);
+      acc[field] = aggregations[bucketName].buckets
+        .filter((b: { key: string | number }) => !!b.key)
+        .map((b: { key: string | number }) => b.key);
       return acc;
     }, {});
   }
