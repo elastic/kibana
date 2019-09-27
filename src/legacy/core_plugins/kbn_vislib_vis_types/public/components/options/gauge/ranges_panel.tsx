@@ -77,7 +77,6 @@ function RangesPanel({
         value={stateParams.gauge.percentageMode}
         setValue={setGaugeValue}
       />
-      <EuiSpacer size="s" />
 
       <ColorSchemaOptions
         disabled={stateParams.gauge.colorsRange.length < 2}
