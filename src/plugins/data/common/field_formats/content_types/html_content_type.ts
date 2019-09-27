@@ -21,7 +21,7 @@ import { FieldFormatConvert, IFieldFormat, HtmlConventTypeConvert } from '../typ
 
 import { asPrettyString, getHighlightHtml } from '../utils';
 
-const CONTEXT_TYPE = 'html';
+export const HTML_CONTEXT_TYPE = 'html';
 
 const getConvertFn = (
   format: IFieldFormat,
@@ -35,7 +35,7 @@ const getConvertFn = (
       : getHighlightHtml(formatted, hit.highlight[field.name]);
   };
 
-  return (fieldFormatConvert[CONTEXT_TYPE] || fallbackHtml) as HtmlConventTypeConvert;
+  return (fieldFormatConvert[HTML_CONTEXT_TYPE] || fallbackHtml) as HtmlConventTypeConvert;
 };
 
 export const setup = (
@@ -68,6 +68,6 @@ export const setup = (
   };
 
   return {
-    [CONTEXT_TYPE]: wrap,
+    [HTML_CONTEXT_TYPE]: wrap,
   };
 };

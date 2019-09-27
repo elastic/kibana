@@ -17,8 +17,13 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { getHighlightHtml, FieldFormat } from '../../../../../../plugins/data/common/field_formats';
+import { escape, memoize } from 'lodash';
+import {
+  getHighlightHtml,
+  FieldFormat,
+  TEXT_CONTEXT_TYPE,
+  HTML_CONTEXT_TYPE,
+} from '../../../../../../plugins/data/common/';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
 const whitelistUrlSchemes = ['http://', 'https://'];
@@ -34,7 +39,7 @@ export function createUrlFormat(BaseFieldFormat: typeof FieldFormat) {
   class UrlFormat extends BaseFieldFormat {
     constructor(params: any) {
       super(params);
-      this._compileTemplate = _.memoize(this._compileTemplate);
+      this.compileTemplate = memoize(this.compileTemplate);
     }
 
     getParamDefaults() {
@@ -45,28 +50,28 @@ export function createUrlFormat(BaseFieldFormat: typeof FieldFormat) {
       };
     }
 
-    _formatLabel(value: any, url: any) {
+    protected formatLabel(value: any, url: any) {
       const template = this.param('labelTemplate');
-      if (url == null) url = this._formatUrl(value);
+      if (url == null) url = this.formatUrl(value);
       if (!template) return url;
 
-      return this._compileTemplate(template)({
+      return this.compileTemplate(template)({
         value,
         url,
       });
     }
 
-    _formatUrl(value: any) {
+    protected formatUrl(value: any) {
       const template = this.param('urlTemplate');
       if (!template) return value;
 
-      return this._compileTemplate(template)({
+      return this.compileTemplate(template)({
         value: encodeURIComponent(value),
         rawValue: value,
       });
     }
 
-    _compileTemplate(template: string) {
+    protected compileTemplate(template: string) {
       const parts = template.split(templateMatchRE).map(function(part: string, i: number) {
         // trim all the odd bits, the variable names
         return i % 2 ? part.trim() : part;
@@ -107,13 +112,13 @@ export function createUrlFormat(BaseFieldFormat: typeof FieldFormat) {
   }
 
   UrlFormat.prototype._convert = {
-    text(value: any) {
-      return this._formatLabel(value);
+    [TEXT_CONTEXT_TYPE](value: any) {
+      return this.formatLabel(value);
     },
 
-    html(rawValue, field, hit, parsedUrl) {
-      const url = _.escape(this._formatUrl(rawValue));
-      const label = _.escape(this._formatLabel(rawValue, url));
+    [HTML_CONTEXT_TYPE](this: UrlFormat, rawValue, field, hit, parsedUrl) {
+      const url = escape(this.formatUrl(rawValue));
+      const label = escape(this.formatLabel(rawValue, url));
 
       switch (this.param('type')) {
         case 'audio':
