@@ -64,8 +64,6 @@ export const MonitorChartsComponent = ({
             <SnapshotHistogram
               absoluteStartDate={absoluteDateRangeStart}
               absoluteEndDate={absoluteDateRangeEnd}
-              successColor={colors.success}
-              dangerColor={colors.danger}
               variables={{ dateRangeStart, dateRangeEnd, monitorId }}
               height="400px"
             />

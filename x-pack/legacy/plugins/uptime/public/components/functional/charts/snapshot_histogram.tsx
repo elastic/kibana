@@ -16,7 +16,7 @@ import {
 } from '@elastic/charts';
 import { EuiEmptyPrompt, EuiTitle, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment } from 'react';
+import React, { Fragment, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { HistogramDataPoint } from '../../../../common/graphql/types';
 import { getColorsMap } from './get_colors_map';
@@ -24,6 +24,7 @@ import { getChartDateLabel } from '../../../lib/helper';
 import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
 import { snapshotHistogramQuery } from '../../../queries/snapshot_histogram_query';
 import { ChartWrapper } from './chart_wrapper';
+import { UptimeSettingsContext } from '../../../contexts';
 
 export interface SnapshotHistogramProps {
   /**
@@ -34,14 +35,6 @@ export interface SnapshotHistogramProps {
    * The date/time for the end of the timespan.
    */
   absoluteEndDate: number;
-  /**
-   * The color value that is used to represent up checks.
-   */
-  successColor: string;
-  /**
-   * The color value that is used to represent down checks.
-   */
-  dangerColor: string;
 
   /**
    * Height is needed, since by defauly charts takes height of 100%
@@ -58,8 +51,6 @@ type Props = UptimeGraphQLQueryProps<SnapshotHistogramQueryResult> & SnapshotHis
 export const SnapshotHistogramComponent = ({
   absoluteStartDate,
   absoluteEndDate,
-  dangerColor,
-  successColor,
   data,
   loading = false,
   height,
@@ -107,6 +98,9 @@ export const SnapshotHistogramComponent = ({
   const downMonitorsName = i18n.translate('xpack.uptime.snapshotHistogram.downMonitorsId', {
     defaultMessage: 'Down Monitors',
   });
+
+  const { colors } = useContext(UptimeSettingsContext);
+
   const downSpecId = getSpecId(downMonitorsName);
 
   const upMonitorsId = i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
@@ -154,10 +148,12 @@ export const SnapshotHistogramComponent = ({
               })}
             />
             <BarSeries
-              customSeriesColors={getColorsMap(successColor, upSpecId)}
-              data={histogram.map(({ x, upCount }) => [x, upCount || 0])}
-              id={upSpecId}
-              name={upMonitorsId}
+              customSeriesColors={getColorsMap(colors.danger, downSpecId)}
+              data={histogram.map(({ x, downCount }) => [x, downCount || 0])}
+              id={downSpecId}
+              name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
+                defaultMessage: 'Down',
+              })}
               stackAccessors={[0]}
               timeZone="local"
               xAccessor={0}
@@ -166,12 +162,10 @@ export const SnapshotHistogramComponent = ({
               yScaleType="linear"
             />
             <BarSeries
-              customSeriesColors={getColorsMap(dangerColor, downSpecId)}
-              data={histogram.map(({ x, downCount }) => [x, downCount || 0])}
-              id={downSpecId}
-              name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
-                defaultMessage: 'Down',
-              })}
+              customSeriesColors={getColorsMap(colors.gray, upSpecId)}
+              data={histogram.map(({ x, upCount }) => [x, upCount || 0])}
+              id={upSpecId}
+              name={upMonitorsId}
               stackAccessors={[0]}
               timeZone="local"
               xAccessor={0}
