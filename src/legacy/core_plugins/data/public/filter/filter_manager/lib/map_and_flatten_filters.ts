@@ -17,16 +17,13 @@
  * under the License.
  */
 
-import { Filter, FilterMeta } from './meta_filter';
+import { compact, flatten } from 'lodash';
+import { Filter } from '@kbn/es-query';
+import { mapFilter } from './map_filter';
+import { IndexPatterns } from '../../../index_patterns';
 
-export type PhrasesFilterMeta = FilterMeta & {
-  params: string[]; // The unformatted values
-  field?: string;
+export const mapAndFlattenFilters = (indexPatterns: IndexPatterns, filters: Filter[]) => {
+  const promises = compact(flatten(filters)).map((item: Filter) => mapFilter(indexPatterns, item));
+
+  return Promise.all(promises);
 };
-
-export type PhrasesFilter = Filter & {
-  meta: PhrasesFilterMeta;
-};
-
-export const isPhrasesFilter = (filter: any): filter is PhrasesFilter =>
-  filter && filter.meta.type === 'phrases';

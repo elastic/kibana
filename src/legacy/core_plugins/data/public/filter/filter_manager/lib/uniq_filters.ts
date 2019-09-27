@@ -16,17 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Filter } from '@kbn/es-query';
+import { each, union } from 'lodash';
+import { dedupFilters } from './dedup_filters';
 
-import { Filter, FilterMeta } from './meta_filter';
+/**
+ * Remove duplicate filters from an array of filters
+ *
+ * @param {array} filters The filters to remove duplicates from
+ * @param {object} comparatorOptions - Parameters to use for comparison
 
-export type PhrasesFilterMeta = FilterMeta & {
-  params: string[]; // The unformatted values
-  field?: string;
+ * @returns {object} The original filters array with duplicates removed
+ */
+export const uniqFilters = (filters: Filter[], comparatorOptions: any = {}) => {
+  let results: Filter[] = [];
+
+  each(filters, (filter: Filter) => {
+    results = union(results, dedupFilters(results, [filter]), comparatorOptions);
+  });
+
+  return results;
 };
-
-export type PhrasesFilter = Filter & {
-  meta: PhrasesFilterMeta;
-};
-
-export const isPhrasesFilter = (filter: any): filter is PhrasesFilter =>
-  filter && filter.meta.type === 'phrases';

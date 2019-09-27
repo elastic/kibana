@@ -18,19 +18,32 @@
  */
 
 import { Filter } from '@kbn/es-query';
-import { filter, isEqual } from 'lodash';
-
-const isEnabled = (f: Filter) => f && f.meta && !f.meta.disabled;
+import { filter, find } from 'lodash';
+import { compareFilters } from './compare_filters';
 
 /**
- * Checks to see if only disabled filters have been changed
+ * Combine 2 filter collections, removing duplicates
  *
- * @returns {bool} Only disabled filters
+ * @param {object} existingFilters - The filters to compare to
+ * @param {object} filters - The filters being added
+ * @param {object} comparatorOptions - Parameters to use for comparison
+ *
+ * @returns {object} An array of filters that were not in existing
  */
-export const onlyDisabledFiltersChanged = (newFilters?: Filter[], oldFilters?: Filter[]) => {
-  // If it's the same - compare only enabled filters
-  const newEnabledFilters = filter(newFilters || [], isEnabled);
-  const oldEnabledFilters = filter(oldFilters || [], isEnabled);
+export const dedupFilters = (
+  existingFilters: Filter[],
+  filters: Filter[],
+  comparatorOptions: any = {}
+) => {
+  if (!Array.isArray(filters)) {
+    filters = [filters];
+  }
 
-  return isEqual(oldEnabledFilters, newEnabledFilters);
+  return filter(
+    filters,
+    (f: Filter) =>
+      !find(existingFilters, (existingFilter: Filter) =>
+        compareFilters(existingFilter, f, comparatorOptions)
+      )
+  );
 };

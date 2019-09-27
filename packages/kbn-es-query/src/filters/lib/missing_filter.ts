@@ -19,14 +19,11 @@
 
 import { Filter, FilterMeta } from './meta_filter';
 
-export type PhrasesFilterMeta = FilterMeta & {
-  params: string[]; // The unformatted values
-  field?: string;
+export type MissingFilterMeta = FilterMeta;
+
+export type MissingFilter = Filter & {
+  meta: MissingFilterMeta;
+  missing: any;
 };
 
-export type PhrasesFilter = Filter & {
-  meta: PhrasesFilterMeta;
-};
-
-export const isPhrasesFilter = (filter: any): filter is PhrasesFilter =>
-  filter && filter.meta.type === 'phrases';
+export const isMissingFilter = (filter: any): filter is MissingFilter => filter && filter.missing;
