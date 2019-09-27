@@ -44,7 +44,7 @@
   flex-grow: 1;
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
 
   &:not(:empty) {
     line-height: $euiSizeL;

@@ -61,12 +61,12 @@ export function PanelHeader({
   badges,
   embeddable,
 }: PanelHeaderProps) {
-  const classes = classNames('embPanel__header', {
-    'embPanel__header--floater': !title || hidePanelTitles,
-  });
-
   const showTitle = !isViewMode || (title && !hidePanelTitles);
   const showPanelBar = badges.length > 0 || showTitle;
+
+  const classes = classNames('embPanel__header', {
+    'embPanel__header--floater': !showPanelBar,
+  });
 
   if (!showPanelBar) {
     return (
@@ -108,7 +108,7 @@ export function PanelHeader({
           }
         )}
       >
-        {showTitle || viewDescr ? (
+        {showTitle || viewDescr !== '' ? (
           <span className="embPanel__titleInner">
             <span className="embPanel__titleText">{title}</span>
 
