@@ -48,8 +48,8 @@ describe('Network Policy', () => {
 
   describe('denies requests', () => {
     it("when they're in the deny-list", () => {
-      const url = 'file://etc/passwd';
-      expect(allowResponse(url, [], ['file://etc/passwd'])).toBe(false);
+      const url = 'wss://hackes.com';
+      expect(allowResponse(url, [], ['wss://hackes.com'])).toBe(false);
     });
 
     it("when they're in both lists", () => {
