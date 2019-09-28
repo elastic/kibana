@@ -23065,6 +23065,11 @@ react-resize-detector@^4.0.5, react-resize-detector@^4.2.0:
     raf-schd "^4.0.0"
     resize-observer-polyfill "^1.5.1"
 
+react-reverse-portal@^1.0.2:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/react-reverse-portal/-/react-reverse-portal-1.0.3.tgz#38cd2d40f40862352dd63905f9b923f9c41f474b"
+  integrity sha512-mCtpp3BzPedmGTAMqT2v5U1hwnAvRfSqMusriON/GxnedT9gvNNTvai24NnrfKfQ78zqPo4e3N5nWPLpY7bORQ==
+
 react-router-dom@4.2.2:
   version "4.2.2"
   resolved "https://registry.yarnpkg.com/react-router-dom/-/react-router-dom-4.2.2.tgz#c8a81df3adc58bba8a76782e946cbd4eae649b8d"

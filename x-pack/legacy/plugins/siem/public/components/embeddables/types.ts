@@ -39,3 +39,32 @@ export type SetQuery = (params: {
   loading: boolean;
   refetch: inputsModel.Refetch;
 }) => void;
+
+interface MapFeature {
+  geometry: {
+    coordinates: [number];
+  };
+  id: number;
+  layerId: string;
+}
+
+export interface FeatureProperty {
+  _propertyKey: string;
+  _rawValue: string;
+}
+
+export interface RenderTooltipContentParams {
+  addFilters(): void;
+  closeTooltip(): void;
+  features: [MapFeature];
+  isLocked: boolean;
+  loadFeatureProperties?({
+    layerId,
+    featureId,
+  }: {
+    layerId: string;
+    featureId: number;
+  }): Promise<FeatureProperty[]>;
+}
+
+export type MapToolTipProps = Partial<RenderTooltipContentParams>;

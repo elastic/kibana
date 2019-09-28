@@ -16,6 +16,7 @@ import { connect } from 'react-redux';
 import styled, { css } from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
+import { EuiPortal } from '@elastic/eui';
 import { dragAndDropActions } from '../../store/drag_and_drop';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../timeline/helpers';
@@ -46,7 +47,7 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
       transition: background ${theme.eui.euiAnimSpeedFast} ease,
         color ${theme.eui.euiAnimSpeedFast} ease;
     }
-
+    z-index: 9999 !important;
     .euiBadge,
     .euiBadge__text {
       cursor: grab;
@@ -132,7 +133,7 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
     ${isDragging &&
       `
       .euiPageBody & {
-        z-index: ${theme.eui.euiZLevel9} !important;
+        z-index: z-index: 9999 !important;
       `}
   `}
 `;
@@ -147,6 +148,7 @@ interface OwnProps {
     provided: DraggableProvided,
     state: DraggableStateSnapshot
   ) => React.ReactNode;
+  usePortal?: boolean;
   width?: string;
 }
 
@@ -186,7 +188,7 @@ class DraggableWrapperComponent extends React.Component<Props> {
   }
 
   public render() {
-    const { dataProvider, render, width } = this.props;
+    const { dataProvider, render, usePortal = false, width } = this.props;
 
     return (
       <Wrapper data-test-subj="draggableWrapperDiv">
@@ -200,30 +202,34 @@ class DraggableWrapperComponent extends React.Component<Props> {
               >
                 {(provided, snapshot) => {
                   return (
-                    <ProviderContainer
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      innerRef={provided.innerRef}
-                      data-test-subj="providerContainer"
-                      isDragging={snapshot.isDragging}
-                      style={{
-                        ...provided.draggableProps.style,
-                      }}
-                    >
-                      {width != null && !snapshot.isDragging ? (
-                        <TruncatableText
-                          data-test-subj="draggable-truncatable-content"
-                          size="xs"
-                          width={width}
-                        >
-                          {render(dataProvider, provided, snapshot)}
-                        </TruncatableText>
-                      ) : (
-                        <span data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}>
-                          {render(dataProvider, provided, snapshot)}
-                        </span>
-                      )}
-                    </ProviderContainer>
+                    <ConditionalPortal usePortal={snapshot.isDragging && usePortal}>
+                      <ProviderContainer
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        innerRef={provided.innerRef}
+                        data-test-subj="providerContainer"
+                        isDragging={snapshot.isDragging}
+                        style={{
+                          ...provided.draggableProps.style,
+                        }}
+                      >
+                        {width != null && !snapshot.isDragging ? (
+                          <TruncatableText
+                            data-test-subj="draggable-truncatable-content"
+                            size="xs"
+                            width={width}
+                          >
+                            {render(dataProvider, provided, snapshot)}
+                          </TruncatableText>
+                        ) : (
+                          <span
+                            data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
+                          >
+                            {render(dataProvider, provided, snapshot)}
+                          </span>
+                        )}
+                      </ProviderContainer>
+                    </ConditionalPortal>
                   );
                 }}
               </Draggable>
@@ -243,3 +249,13 @@ export const DraggableWrapper = connect(
     unRegisterProvider: dragAndDropActions.unRegisterProvider,
   }
 )(DraggableWrapperComponent);
+
+/**
+ * Conditionally wraps children in an EuiPortal to ensure drag offsets are correct when dragging
+ * from containers that have css transforms
+ *
+ * See: https://github.com/atlassian/react-beautiful-dnd/issues/499
+ */
+const ConditionalPortal = React.memo<{ children: React.ReactNode; usePortal: boolean }>(
+  ({ children, usePortal }) => (usePortal ? <EuiPortal>{children}</EuiPortal> : <>{children}</>)
+);
