@@ -50,7 +50,7 @@ describe('Doc Table', function () {
       // Returns `val` if provided, otherwise generates fake data for the field.
       fakeRowVals = getFakeRowVals('formatted', 0, mapping);
       stubFieldFormatConverter = function ($root, field, val = null) {
-        $root.indexPattern.fields.byName[field].format.getConverterFor = () => (...args) => {
+        $root.indexPattern.fields.getByName(field).format.getConverterFor = () => (...args) => {
           if (val) {
             return val;
           }
@@ -252,7 +252,7 @@ describe('Doc Table', function () {
         $root.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
         // Stub field format converters for every field in the indexPattern
-        Object.keys($root.indexPattern.fields.byName).forEach(f =>
+        Object.keys($root.indexPattern.fields).forEach(f =>
           stubFieldFormatConverter($root, f)
         );
 
