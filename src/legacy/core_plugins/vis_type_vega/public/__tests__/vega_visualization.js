@@ -89,7 +89,7 @@ describe('VegaVisualizations', () => {
       imageComparator.destroy();
     });
 
-    it('should show vegalite graph and update on resize', async function () {
+    it('should show vegalite graph and update on resize (may fail in dev env)', async function () {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
@@ -112,7 +112,7 @@ describe('VegaVisualizations', () => {
       }
     });
 
-    it('should show vega graph', async function () {
+    it('should show vega graph (may fail in dev env)', async function () {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
@@ -128,7 +128,7 @@ describe('VegaVisualizations', () => {
       }
     });
 
-    it('should show vegatooltip on mouseover over a vega graph', async () => {
+    it('should show vegatooltip on mouseover over a vega graph (may fail in dev env)', async () => {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
