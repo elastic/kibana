@@ -118,9 +118,9 @@ uiRoutes
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      ip: function (Promise, indexPatterns, config, Private) {
+      ip: async function (Promise, indexPatterns, config, Private) {
         const State = Private(StateProvider);
-        const savedObjects = indexPatterns.getCache();
+        const savedObjects = await indexPatterns.getCache();
 
         /**
          *  In making the indexPattern modifiable it was placed in appState. Unfortunately,

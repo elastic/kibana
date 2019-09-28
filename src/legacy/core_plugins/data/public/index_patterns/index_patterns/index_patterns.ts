@@ -95,7 +95,10 @@ export class IndexPatterns {
       indexPatternCache.clearAll();
     }
   };
-  getCache = () => {
+  getCache = async () => {
+    if (!this.savedObjectsCache) {
+      await this.refreshSavedObjectsCache();
+    }
     return this.savedObjectsCache;
   };
 
