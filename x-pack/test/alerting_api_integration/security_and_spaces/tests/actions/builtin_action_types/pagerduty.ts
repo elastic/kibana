@@ -17,19 +17,13 @@ import {
 export default function pagerdutyTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('pagerduty action', () => {
     let simulatedActionId = '';
-    let pagerdutySimulatorURL: string = '<could not determine kibana url>';
-
-    // need to wait for kibanaServer to settle ...
-    before(() => {
-      const kibanaServer = getService('kibanaServer');
-      const kibanaUrl = kibanaServer.status && kibanaServer.status.kibanaServerUrl;
-      pagerdutySimulatorURL = `${kibanaUrl}${getExternalServiceSimulatorPath(
-        ExternalServiceSimulator.PAGERDUTY
-      )}`;
-    });
+    const pagerdutySimulatorURL = kibanaServer.resolveUrl(
+      getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY)
+    );
 
     after(() => esArchiver.unload('empty_kibana'));
 

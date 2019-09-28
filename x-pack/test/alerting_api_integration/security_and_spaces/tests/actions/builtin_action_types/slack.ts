@@ -17,19 +17,13 @@ import {
 export default function slackTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('slack action', () => {
     let simulatedActionId = '';
-    let slackSimulatorURL: string = '<could not determine kibana url>';
-
-    // need to wait for kibanaServer to settle ...
-    before(() => {
-      const kibanaServer = getService('kibanaServer');
-      const kibanaUrl = kibanaServer.status && kibanaServer.status.kibanaServerUrl;
-      slackSimulatorURL = `${kibanaUrl}${getExternalServiceSimulatorPath(
-        ExternalServiceSimulator.SLACK
-      )}`;
-    });
+    const slackSimulatorURL = kibanaServer.resolveUrl(
+      getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK)
+    );
 
     after(() => esArchiver.unload('empty_kibana'));
 

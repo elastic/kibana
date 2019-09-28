@@ -57,4 +57,8 @@ export class KbnClient {
   async request(options: ReqOptions) {
     return await this.requester.request(options);
   }
+
+  resolveUrl(relativeUrl: string) {
+    return this.requester.resolveUrl(relativeUrl);
+  }
 }

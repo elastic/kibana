@@ -71,6 +71,10 @@ export class KbnClientRequester {
     return url;
   }
 
+  public resolveUrl(relativeUrl: string = '/') {
+    return Url.resolve(this.pickUrl(), relativeUrl);
+  }
+
   async request<T>(options: ReqOptions): Promise<T> {
     const url = Url.resolve(this.pickUrl(), options.path);
     const description = options.description || `${options.method} ${url}`;
