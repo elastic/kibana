@@ -58,8 +58,11 @@ const translateToQuery = function (filter, {
     const savedQuery = filter.meta.params.savedQuery;
     const query = _.get(savedQuery, 'attributes.query');
     const filters = _.get(savedQuery, 'attributes.filters', []);
+    // timefilter addition
     if (savedQuery.attributes.timefilter) {
       // pass the timefilter right through, should there be one.
+      // filter.meta.params.savedQuery.attributes.timefilter will not yet be a range filter
+      // convert time at query time using similar methods that are used in the data plugin
     }
     const convertedQuery = buildEsQuery(
       indexPattern,
@@ -67,14 +70,6 @@ const translateToQuery = function (filter, {
       filters,
       { allowLeadingWildcards, queryStringOptions, dateFormatTZ, ignoreFilterIfFieldNotInIndex });
     filter.query = { ...convertedQuery };
-
-    // timefilter addition
-
-    // const convertedTimeFilter = get(params, 'savedQuery.attributes.timefilter', null); // should already be an EsQuery
-    // if (convertedTimeFilter) {
-    //   const filtersWithTimefilter = [...convertedQuery.bool.filter, convertedTimeFilter];
-    //   filter.query.bool.filter = [...filtersWithTimefilter];
-    // }
   }
 
   return filter;

@@ -72,9 +72,8 @@ describe('Filter Manager', function () {
           }
         }
       };
-      const testArgs = savedQueryTestItem.id;
-      expected = { meta: { type: 'savedQuery', key: 'foo', params: 'foo' } };
-      const actual = buildSavedQueryFilter(testArgs.params);
+      expected = { meta: { type: 'savedQuery', key: 'foo', params: { savedQuery: { ...savedQueryTestItem } }, saved_query: 'foo' } };
+      const actual = buildSavedQueryFilter(savedQueryTestItem);
       expect(actual).to.eql(expected);
     });
   });

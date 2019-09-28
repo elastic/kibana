@@ -39,7 +39,6 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React, { Component } from 'react';
 import { UiSettingsClientContract } from 'src/core/public';
-import { SavedQueryFilterParams } from '@kbn/es-query';
 import { Field, IndexPattern } from '../../../index_patterns';
 import { SavedQuery } from '../../../search/search_bar/index';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
@@ -62,8 +61,6 @@ import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
 import { SavedQueryService } from '../../../search/search_bar/lib/saved_query_service';
 import { SavedQuerySingleSelect, Option } from './saved_query_single_select';
-
-export type SavedQueryParamsPartial = Partial<SavedQueryFilterParams>;
 
 interface Props {
   filter: Filter;
@@ -455,7 +452,7 @@ class FilterEditorUI extends Component<Props, State> {
     const selectedSavedQuery = savedQueries.filter(
       savedQuery => savedQuery.id === selectedOption[0].label
     );
-    this.onSavedQueryChange(selectedSavedQuery, selectedOption, savedQueries);
+    this.onSavedQueryChange(selectedSavedQuery, savedQueries);
   };
   private renderSavedQueryEditor() {
     /* TODO:
@@ -564,7 +561,7 @@ class FilterEditorUI extends Component<Props, State> {
         return false;
       }
     } else if (isSavedQueryEditorOpen) {
-      return selectedSavedQuery && selectedSavedQuery[0].id === params;
+      return selectedSavedQuery && selectedSavedQuery[0].id === params.id;
     }
 
     return isFilterValid(indexPattern, field, operator, params);
@@ -613,7 +610,7 @@ class FilterEditorUI extends Component<Props, State> {
       get(this.state.selectedSavedQuery && this.state.selectedSavedQuery[0], 'id') ===
       get(selectedSavedQuery[0], 'id')
         ? this.state.params
-        : selectedSavedQuery[0].id;
+        : selectedSavedQuery[0];
     this.setState({ selectedSavedQuery, params });
   };
 

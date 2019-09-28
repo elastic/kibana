@@ -37,6 +37,7 @@ import { omit } from 'lodash';
 import { Ipv4Address } from '../../../../../../../../plugins/kibana_utils/public';
 import { Field, IndexPattern, isFilterable } from '../../../../index_patterns';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
+import { SavedQuery } from '../../../../search';
 
 export function getIndexPatternFromFilter(
   filter: Filter,
@@ -187,7 +188,7 @@ export function buildCustomFilter(
 
 export function buildFilterFromSavedQuery(
   disabled: boolean,
-  params: string,
+  params: SavedQuery,
   alias: string | null,
   store: FilterStateStore
 ): Filter {

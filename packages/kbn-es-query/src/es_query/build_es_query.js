@@ -40,8 +40,7 @@ export function buildEsQuery(
     queryStringOptions: {},
     ignoreFilterIfFieldNotInIndex: false,
     dateFormatTZ: null,
-  },
-  allSavedQueries = []) {
+  }) {
   queries = Array.isArray(queries) ? queries : [queries];
   filters = Array.isArray(filters) ? filters : [filters];
 
@@ -55,8 +54,7 @@ export function buildEsQuery(
     config.ignoreFilterIfFieldNotInIndex,
     config.allowLeadingWildcards,
     config.queryStringOptions,
-    config.dateFormatTZ,
-    allSavedQueries);
+    config.dateFormatTZ);
 
   return {
     bool: {
