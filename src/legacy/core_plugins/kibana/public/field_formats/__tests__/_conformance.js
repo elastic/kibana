@@ -83,6 +83,7 @@ export default describe('conformance', function () {
     expect(_.difference(fieldFormats.raw, formatIds.map(fieldFormats.getType))).to.eql([]);
   });
 
+  // todo
   describe('Bytes format', basicPatternTests('bytes', require('numeral')));
   describe('Percent Format', basicPatternTests('percent', require('numeral')));
   describe('Date Format', basicPatternTests('date', require('moment')));
