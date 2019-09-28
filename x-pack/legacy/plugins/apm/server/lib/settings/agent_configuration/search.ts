@@ -5,7 +5,6 @@
  */
 
 import { ESFilter } from 'elasticsearch';
-import { PromiseReturnType } from '../../../../typings/common';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT
@@ -13,9 +12,6 @@ import {
 import { Setup } from '../../helpers/setup_request';
 import { AgentConfiguration } from './configuration_types';
 
-export type SearchAgentConfigurationsAPIResponse = PromiseReturnType<
-  typeof searchConfigurations
->;
 export async function searchConfigurations({
   serviceName,
   environment,

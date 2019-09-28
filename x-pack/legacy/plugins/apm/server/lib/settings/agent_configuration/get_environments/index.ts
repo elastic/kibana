@@ -7,7 +7,7 @@
 import { getAllEnvironments } from './get_all_environments';
 import { Setup } from '../../../helpers/setup_request';
 import { PromiseReturnType } from '../../../../../typings/common';
-import { getUnavailableEnvironments } from './get_unavailable_environments';
+import { getExistingEnvironmentsForService } from './get_existing_environments_for_service';
 
 export type AgentConfigurationEnvironmentsAPIResponse = PromiseReturnType<
   typeof getEnvironments
@@ -20,15 +20,15 @@ export async function getEnvironments({
   serviceName: string;
   setup: Setup;
 }) {
-  const [allEnvironments, unavailableEnvironments] = await Promise.all([
+  const [allEnvironments, existingEnvironments] = await Promise.all([
     getAllEnvironments({ serviceName, setup }),
-    getUnavailableEnvironments({ serviceName, setup })
+    getExistingEnvironmentsForService({ serviceName, setup })
   ]);
 
   return allEnvironments.map(environment => {
     return {
       name: environment,
-      available: !unavailableEnvironments.includes(environment)
+      alreadyExists: existingEnvironments.includes(environment)
     };
   });
 }

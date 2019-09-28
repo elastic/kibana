@@ -7,14 +7,15 @@
 import * as t from 'io-ts';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceNames } from '../lib/settings/agent_configuration/get_service_names';
-import { createConfiguration } from '../lib/settings/agent_configuration/create_configuration';
-import { updateConfiguration } from '../lib/settings/agent_configuration/update_configuration';
+import { createOrUpdateConfiguration } from '../lib/settings/agent_configuration/create_or_update_configuration';
 import { searchConfigurations } from '../lib/settings/agent_configuration/search';
 import { listConfigurations } from '../lib/settings/agent_configuration/list_configurations';
 import { getEnvironments } from '../lib/settings/agent_configuration/get_environments';
 import { deleteConfiguration } from '../lib/settings/agent_configuration/delete_configuration';
 import { createRoute } from './create_route';
 import { transactionSampleRateRt } from '../../common/runtime_types/transaction_sample_rate_rt';
+import { transactionMaxSpansRt } from '../../common/runtime_types/transaction_max_spans_rt';
+import { getAgentNameByService } from '../lib/settings/agent_configuration/get_agent_name_by_service';
 
 // get list of configurations
 export const agentConfigurationRoute = createRoute(core => ({
@@ -57,17 +58,16 @@ export const listAgentConfigurationServicesRoute = createRoute(() => ({
 }));
 
 const agentPayloadRt = t.type({
-  settings: t.type({
-    transaction_sample_rate: transactionSampleRateRt
-  }),
+  agent_name: t.string,
   service: t.intersection([
-    t.type({
-      name: t.string
-    }),
-    t.partial({
-      environments: t.array(t.string)
-    })
-  ])
+    t.type({ name: t.string }),
+    t.partial({ environments: t.array(t.string) })
+  ]),
+  settings: t.type({
+    transaction_sample_rate: transactionSampleRateRt,
+    capture_body: t.string,
+    transaction_max_spans: transactionMaxSpansRt
+  })
 });
 
 // get environments for service
@@ -82,10 +82,7 @@ export const listAgentConfigurationEnvironmentsRoute = createRoute(() => ({
   handler: async (req, { path }) => {
     const setup = await setupRequest(req);
     const { serviceName } = path;
-    return await getEnvironments({
-      serviceName,
-      setup
-    });
+    return await getEnvironments({ serviceName, setup });
   }
 }));
 
@@ -97,10 +94,10 @@ export const createAgentConfigurationRoute = createRoute(() => ({
   },
   handler: async (req, { body }) => {
     const setup = await setupRequest(req);
-    return await createConfiguration({
-      configuration: body,
-      setup
-    });
+    const serviceName = body.service.name;
+    const agentName = await getAgentNameByService({ serviceName, setup });
+    const configuration = { ...body, agent_name: agentName };
+    return await createOrUpdateConfiguration({ configuration, setup });
   }
 }));
 
@@ -116,7 +113,7 @@ export const updateAgentConfigurationRoute = createRoute(() => ({
   handler: async (req, { path, body }) => {
     const setup = await setupRequest(req);
     const { configurationId } = path;
-    return await updateConfiguration({
+    return await createOrUpdateConfiguration({
       configurationId,
       configuration: body,
       setup

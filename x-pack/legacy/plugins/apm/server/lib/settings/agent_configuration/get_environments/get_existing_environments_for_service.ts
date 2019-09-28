@@ -12,7 +12,7 @@ import {
 } from '../../../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
 
-export async function getUnavailableEnvironments({
+export async function getExistingEnvironmentsForService({
   serviceName,
   setup
 }: {
