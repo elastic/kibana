@@ -60,7 +60,7 @@ import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
 import { SavedQueryService } from '../../../search/search_bar/lib/saved_query_service';
-import { SavedQuerySingleSelect, Option } from './saved_query_single_select';
+import { SavedQueryOption, SavedQueryPicker } from './saved_query_picker';
 
 interface Props {
   filter: Filter;
@@ -132,7 +132,18 @@ class FilterEditorUI extends Component<Props, State> {
         <div className="globalFilterItem__editorForm">
           <EuiForm>
             <EuiTabs display="condensed">
-              <EuiTab onClick={this.toggleRegularEditor}>
+              <EuiTab
+                onClick={this.toggleRegularEditor}
+                aria-label={
+                  this.state.isNewFilter
+                    ? i18n.translate('data.filter.filterEditor.tab.create', {
+                        defaultMessage: 'Create. Click to select.',
+                      })
+                    : i18n.translate('data.filter.filterEditor.tab.edit', {
+                        defaultMessage: 'Edit. Click to select.',
+                      })
+                }
+              >
                 {this.state.isNewFilter ? (
                   <FormattedMessage
                     id="data.filter.filterEditor.tabCreateFilterPopupTitle"
@@ -146,7 +157,18 @@ class FilterEditorUI extends Component<Props, State> {
                 )}
               </EuiTab>
               {this.props.showSaveQuery && (
-                <EuiTab onClick={this.toggleSavedQueryEditor}>
+                <EuiTab
+                  onClick={this.toggleSavedQueryEditor}
+                  aria-label={
+                    this.state.isNewFilter
+                      ? i18n.translate('data.filter.filterEditor.tab.useSavedQuery', {
+                          defaultMessage: 'Use a saved query. Click to select.',
+                        })
+                      : i18n.translate('data.filter.filterEditor.tab.changeSavedQuery', {
+                          defaultMessage: 'Change saved query. Click to select.',
+                        })
+                  }
+                >
                   {this.state.isNewFilter ? (
                     <FormattedMessage
                       id="data.filter.filterEditor.tabUseSavedQueryFilterPopupTitle"
@@ -447,25 +469,22 @@ class FilterEditorUI extends Component<Props, State> {
         );
     }
   }
-  // TODO: fix type
-  public onSavedQuerySelected = (selectedOption: Option[], savedQueries: SavedQuery[]) => {
+
+  public onSavedQuerySelected = (
+    selectedOption: SavedQueryOption[],
+    savedQueries: SavedQuery[]
+  ) => {
     const selectedSavedQuery = savedQueries.filter(
       savedQuery => savedQuery.id === selectedOption[0].label
     );
     this.onSavedQueryChange(selectedSavedQuery, savedQueries);
   };
   private renderSavedQueryEditor() {
-    /* TODO:
-    1. pass along the currently selected saved query name from the filter params (this.state.params) if a saved query filter is clicked in the filter bar
-      const savedQuery = this.state.selectedSavedQuery;
-      value={this.state.params}
-    2. Change SavedQuerySingleSelect back into a functional component that uses hooks
-    */
     return (
       <div>
         <EuiFlexGroup responsive={false} gutterSize="s">
           <EuiFlexItem>
-            <SavedQuerySingleSelect
+            <SavedQueryPicker
               savedQueryService={this.props.savedQueryService}
               onChange={this.onSavedQuerySelected}
             />

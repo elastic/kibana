@@ -1,0 +1,5 @@
+@import '@elastic/eui/src/components/form/variables';
+
+.kbnSavedQueryFilterEditor__text {
+  padding: $euiSizeM $euiSizeM ($euiSizeM / 2) $euiSizeM;
+}
