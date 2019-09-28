@@ -13,7 +13,8 @@ export const createLogEntryRateQuery = (
   startTime: number,
   endTime: number,
   bucketDuration: number,
-  size: number
+  size: number,
+  afterKey?: CompositeTimestampDataSetKey
 ) => ({
   allowNoIndices: true,
   body: {
@@ -46,6 +47,7 @@ export const createLogEntryRateQuery = (
     aggs: {
       timestamp_data_set_buckets: {
         composite: {
+          after: afterKey,
           size,
           sources: [
             {
@@ -130,31 +132,35 @@ const compositeTimestampDataSetKeyRT = rt.type({
   timestamp: rt.number,
 });
 
+export type CompositeTimestampDataSetKey = rt.TypeOf<typeof compositeTimestampDataSetKeyRT>;
+
+export const logRateModelPlotBucketRT = rt.type({
+  key: compositeTimestampDataSetKeyRT,
+  filter_records: rt.type({
+    doc_count: rt.number,
+    top_hits_record: rt.type({
+      hits: rt.type({
+        hits: rt.array(
+          rt.type({
+            _source: logRateMlRecordRT,
+          })
+        ),
+      }),
+    }),
+  }),
+  filter_model_plot: rt.type({
+    doc_count: rt.number,
+    average_actual: metricAggregationRT,
+  }),
+});
+
+export type LogRateModelPlotBucket = rt.TypeOf<typeof logRateModelPlotBucketRT>;
+
 export const logRateModelPlotResponseRT = rt.type({
   aggregations: rt.type({
     timestamp_data_set_buckets: rt.intersection([
       rt.type({
-        buckets: rt.array(
-          rt.type({
-            key: compositeTimestampDataSetKeyRT,
-            filter_records: rt.type({
-              doc_count: rt.number,
-              top_hits_record: rt.type({
-                hits: rt.type({
-                  hits: rt.array(
-                    rt.type({
-                      _source: logRateMlRecordRT,
-                    })
-                  ),
-                }),
-              }),
-            }),
-            filter_model_plot: rt.type({
-              doc_count: rt.number,
-              average_actual: metricAggregationRT,
-            }),
-          })
-        ),
+        buckets: rt.array(logRateModelPlotBucketRT),
       }),
       rt.partial({
         after_key: compositeTimestampDataSetKeyRT,

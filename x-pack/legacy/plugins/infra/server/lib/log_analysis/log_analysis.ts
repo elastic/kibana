@@ -11,7 +11,12 @@ import { getJobId } from '../../../common/log_analysis';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../adapters/framework';
 import { NoLogRateResultsIndexError } from './errors';
-import { logRateModelPlotResponseRT, createLogEntryRateQuery } from './queries';
+import {
+  logRateModelPlotResponseRT,
+  createLogEntryRateQuery,
+  LogRateModelPlotBucket,
+  CompositeTimestampDataSetKey,
+} from './queries';
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 
@@ -37,30 +42,42 @@ export class InfraLogAnalysis {
   ) {
     const logRateJobId = this.getJobIds(request, sourceId).logEntryRate;
 
-    // TODO: fetch all batches
-    const mlModelPlotResponse = await this.libs.framework.callWithRequest(
-      request,
-      'search',
-      createLogEntryRateQuery(
-        logRateJobId,
-        startTime,
-        endTime,
-        bucketDuration,
-        COMPOSITE_AGGREGATION_BATCH_SIZE
-      )
-    );
+    let mlModelPlotBuckets: LogRateModelPlotBucket[] = [];
+    let afterLatestBatchKey: CompositeTimestampDataSetKey | undefined;
 
-    if (mlModelPlotResponse._shards.total === 0) {
-      throw new NoLogRateResultsIndexError(
-        `Failed to find ml result index for job ${logRateJobId}.`
+    while (true) {
+      const mlModelPlotResponse = await this.libs.framework.callWithRequest(
+        request,
+        'search',
+        createLogEntryRateQuery(
+          logRateJobId,
+          startTime,
+          endTime,
+          bucketDuration,
+          COMPOSITE_AGGREGATION_BATCH_SIZE,
+          afterLatestBatchKey
+        )
       );
-    }
 
-    const mlModelPlotBuckets = pipe(
-      logRateModelPlotResponseRT.decode(mlModelPlotResponse),
-      map(response => response.aggregations.timestamp_data_set_buckets.buckets),
-      fold(throwErrors(createPlainError), identity)
-    );
+      if (mlModelPlotResponse._shards.total === 0) {
+        throw new NoLogRateResultsIndexError(
+          `Failed to find ml result index for job ${logRateJobId}.`
+        );
+      }
+
+      const { after_key: afterKey, buckets: latestBatchBuckets } = pipe(
+        logRateModelPlotResponseRT.decode(mlModelPlotResponse),
+        map(response => response.aggregations.timestamp_data_set_buckets),
+        fold(throwErrors(createPlainError), identity)
+      );
+
+      mlModelPlotBuckets = [...mlModelPlotBuckets, ...latestBatchBuckets];
+      afterLatestBatchKey = afterKey;
+
+      if (latestBatchBuckets.length < COMPOSITE_AGGREGATION_BATCH_SIZE) {
+        break;
+      }
+    }
 
     return mlModelPlotBuckets.reduce<
       Array<{
