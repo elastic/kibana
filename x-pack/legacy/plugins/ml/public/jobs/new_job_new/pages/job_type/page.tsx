@@ -1,0 +1,313 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPageContentBody,
+  EuiTitle,
+  EuiSpacer,
+  EuiCallOut,
+  EuiText,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiLink,
+  EuiIcon,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
+import { useKibanaContext } from '../../../../contexts/kibana';
+import { DataRecognizer } from '../../../../components/data_recognizer';
+
+export const Page: FC = () => {
+  const kibanaContext = useKibanaContext();
+
+  const { currentSavedSearch, currentIndexPattern } = kibanaContext;
+
+  const isTimeBasedIndex = timeBasedIndexCheck(currentIndexPattern);
+  const indexWarningTitle =
+    !isTimeBasedIndex && currentSavedSearch.id === undefined
+      ? i18n.translate('xpack.ml.newJob.wizard.jobType.indexPatternNotTimeBasedMessage', {
+          defaultMessage: 'Index pattern {indexPatternTitle} is not time based',
+          values: { indexPatternTitle: currentIndexPattern.title },
+        })
+      : i18n.translate(
+          'xpack.ml.newJob.wizard.jobType.indexPatternFromSavedSearchNotTimeBasedMessage',
+          {
+            defaultMessage:
+              '{savedSearchTitle} uses index pattern {indexPatternTitle} which is not time based',
+            values: {
+              savedSearchTitle: currentSavedSearch.title,
+              indexPatternTitle: currentIndexPattern.title,
+            },
+          }
+        );
+  const pageTitleLabel =
+    currentSavedSearch.id !== undefined
+      ? i18n.translate('xpack.ml.newJob.wizard.jobType.savedSearchPageTitleLabel', {
+          defaultMessage: 'saved search {savedSearchTitle}',
+          values: { savedSearchTitle: currentSavedSearch.title },
+        })
+      : i18n.translate('xpack.ml.newJob.wizard.jobType.indexPatternPageTitleLabel', {
+          defaultMessage: 'index pattern {indexPatternTitle}',
+          values: { indexPatternTitle: currentIndexPattern.title },
+        });
+
+  const recognizerResults = {
+    count: 0,
+  };
+
+  const getUrl = (basePath: string) => {
+    return currentSavedSearch.id === undefined
+      ? `${basePath}?index=${currentIndexPattern.id}`
+      : `${basePath}?savedSearchId=${currentSavedSearch.id}`;
+  };
+
+  const jobTypes = [
+    {
+      href: getUrl('#jobs/new_job/single_metric'),
+      icon: {
+        type: 'createSingleMetricJob',
+        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.singleMetricAriaLabel', {
+          defaultMessage: 'Single metric job',
+        }),
+      },
+      header: i18n.translate('xpack.ml.newJob.wizard.jobType.singleMetricTitle', {
+        defaultMessage: 'Single metric',
+      }),
+      text: i18n.translate('xpack.ml.newJob.wizard.jobType.singleMetricDescription', {
+        defaultMessage: 'Detect anomalies in a single time series.',
+      }),
+      id: 'mlJobTypeLinkSingleMetricJob',
+    },
+    {
+      href: getUrl('#jobs/new_job/multi_metric'),
+      icon: {
+        type: 'createMultiMetricJob',
+        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.multiMetricAriaLabel', {
+          defaultMessage: 'Multi metric job',
+        }),
+      },
+      header: i18n.translate('xpack.ml.newJob.wizard.jobType.multiMetricTitle', {
+        defaultMessage: 'Multi metric',
+      }),
+      text: i18n.translate('xpack.ml.newJob.wizard.jobType.multiMetricDescription', {
+        defaultMessage:
+          'Detect anomalies in multiple metrics by splitting a time series by a categorical field.',
+      }),
+      id: 'mlJobTypeLinkMultiMetricJob',
+    },
+    {
+      href: getUrl('#jobs/new_job/population'),
+      icon: {
+        type: 'createPopulationJob',
+        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.populationAriaLabel', {
+          defaultMessage: 'Population job',
+        }),
+      },
+      header: i18n.translate('xpack.ml.newJob.wizard.jobType.populationTitle', {
+        defaultMessage: 'Population',
+      }),
+      text: i18n.translate('xpack.ml.newJob.wizard.jobType.populationDescription', {
+        defaultMessage:
+          'Detect activity that is unusual compared to the behavior of the population.',
+      }),
+      id: 'mlJobTypeLinkPopulationJob',
+    },
+    {
+      href: getUrl('#jobs/new_job/advanced'),
+      icon: {
+        type: 'createAdvancedJob',
+        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.advancedAriaLabel', {
+          defaultMessage: 'Advanced job',
+        }),
+      },
+      header: i18n.translate('xpack.ml.newJob.wizard.jobType.advancedTitle', {
+        defaultMessage: 'Advanced',
+      }),
+      text: i18n.translate('xpack.ml.newJob.wizard.jobType.advancedDescription', {
+        defaultMessage:
+          'Use the full range of options to create a job for more advanced use cases.',
+      }),
+      id: 'mlJobTypeLinkAdvancedJob',
+    },
+  ];
+
+  return (
+    <EuiPage style={{ backgroundColor: 'inherit' }} data-test-subj="mlPageJobTypeSelection">
+      <EuiPageBody>
+        <EuiPageContentBody>
+          <EuiTitle>
+            <h2>
+              <FormattedMessage
+                id="xpack.ml.newJob.wizard.jobType.createJobFromTitle"
+                defaultMessage="Create a job from the {pageTitleLabel}"
+                values={{ pageTitleLabel }}
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer />
+
+          {isTimeBasedIndex === false && (
+            <EuiCallOut size="s" title={indexWarningTitle} color="warning" iconType="help">
+              <p>
+                <FormattedMessage
+                  id="xpack.ml.newJob.wizard.jobType.howToRunAnomalyDetectionDescription"
+                  defaultMessage="Anomaly detection can only be run over indices which are time based."
+                />
+              </p>
+              <EuiSpacer size="xxl" />
+            </EuiCallOut>
+          )}
+
+          <div hidden={recognizerResults.count === 0}>
+            <EuiText>
+              <EuiTitle size="s">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.ml.newJob.wizard.jobType.useSuppliedConfigurationTitle"
+                    defaultMessage="Use a supplied configuration"
+                  />
+                </h3>
+              </EuiTitle>
+
+              <p>
+                <FormattedMessage
+                  id="xpack.ml.newJob.wizard.jobType.useSuppliedConfigurationDescription"
+                  defaultMessage="The fields in your data have been recognized as matching known configurations.
+                Select to create a set of machine learning jobs and associated dashboards."
+                />
+              </p>
+            </EuiText>
+
+            <EuiSpacer size="m" />
+
+            <DataRecognizer
+              indexPattern={currentIndexPattern}
+              savedSearch={currentSavedSearch}
+              results={recognizerResults}
+            />
+
+            <EuiSpacer size="xxl" />
+          </div>
+
+          <EuiText>
+            <EuiTitle size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.ml.newJob.wizard.jobType.useWizardTitle"
+                  defaultMessage="Use a wizard"
+                />
+              </h3>
+            </EuiTitle>
+
+            <p>
+              <FormattedMessage
+                id="xpack.ml.newJob.wizard.jobType.useWizardDescription"
+                defaultMessage="Use one of the wizards to create a machine learning job to find anomalies in your data."
+              />
+            </p>
+          </EuiText>
+
+          <EuiSpacer size="m" />
+
+          <EuiFlexGrid gutterSize="l" columns={4}>
+            {jobTypes.map(({ href, icon, header, text, id }) => (
+              <EuiFlexItem key={id} style={{ cursor: !isTimeBasedIndex && 'not-allowed' }}>
+                <EuiLink
+                  href={href}
+                  data-test-subj={id}
+                  style={{ pointerEvents: !isTimeBasedIndex && 'none' }}
+                >
+                  <EuiPanel>
+                    <EuiFlexGroup gutterSize="l" responsive={true}>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon size="xl" type={icon.type} aria-label={icon.ariaLabel} />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiTitle size="s">
+                          <h3>{header}</h3>
+                        </EuiTitle>
+                        <EuiText color="subdued">
+                          <p>{text}</p>
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPanel>
+                </EuiLink>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGrid>
+
+          <EuiSpacer size="xxl" />
+
+          <EuiText>
+            <EuiTitle size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.ml.newJob.wizard.jobType.learnMoreAboutDataTitle"
+                  defaultMessage="Learn more about your data"
+                />
+              </h3>
+            </EuiTitle>
+
+            <p>
+              <FormattedMessage
+                id="xpack.ml.newJob.wizard.jobType.learnMoreAboutDataDescription"
+                defaultMessage="If you're not sure what type of job to create, first explore the fields and metrics in your data."
+              />
+            </p>
+          </EuiText>
+
+          <EuiSpacer size="m" />
+
+          <EuiFlexGrid gutterSize="l" columns={4}>
+            <EuiFlexItem>
+              <EuiLink href={getUrl('#jobs/new_job/datavisualizer')}>
+                <EuiPanel>
+                  <EuiFlexGroup gutterSize="l" responsive={true}>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon
+                        size="xl"
+                        type="dataVisualizer"
+                        aria-label={i18n.translate(
+                          'xpack.ml.newJob.wizard.jobType.dataVisualizerAriaLabel',
+                          { defaultMessage: 'Data Visualizer' }
+                        )}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiTitle size="s">
+                        <h3>
+                          <FormattedMessage
+                            id="xpack.ml.newJob.wizard.jobType.dataVisualizerTitle"
+                            defaultMessage="Data Visualizer"
+                          />
+                        </h3>
+                      </EuiTitle>
+                      <EuiText color="subdued">
+                        <p>
+                          <FormattedMessage
+                            id="xpack.ml.newJob.wizard.jobType.dataVisualizerDescription"
+                            defaultMessage="Learn more about the characteristics of your data and identify the fields for analysis with machine learning."
+                          />
+                        </p>
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPanel>
+              </EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGrid>
+        </EuiPageContentBody>
+      </EuiPageBody>
+    </EuiPage>
+  );
+};
