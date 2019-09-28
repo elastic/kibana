@@ -16,10 +16,10 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
-import { isValidLogRateView, LogRateView, LogRateViewSwitcher } from './log_rate_view_switcher';
-import { TableView } from './table';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { LogEntryRateBarChart } from './bar_chart';
+import { isValidLogRateView, LogRateView, LogRateViewSwitcher } from './log_rate_view_switcher';
+import { TableView } from './table';
 
 export const LogRateResults = ({
   isLoading,
