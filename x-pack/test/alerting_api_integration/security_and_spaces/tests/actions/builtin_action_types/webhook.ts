@@ -62,9 +62,14 @@ export default function webhookTest({ getService }: FtrProviderContext) {
   }
 
   describe('webhook action', () => {
-    const webhookSimulatorURL = kibanaServer.resolveUrl(
-      getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK)
-    );
+    let webhookSimulatorURL: string = '<could not determine kibana url>';
+
+    // need to wait for kibanaServer to settle ...
+    before(() => {
+      webhookSimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK)
+      );
+    });
 
     after(() => esArchiver.unload('empty_kibana'));
 

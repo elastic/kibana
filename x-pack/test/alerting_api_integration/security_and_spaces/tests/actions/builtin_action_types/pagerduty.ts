@@ -21,9 +21,14 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
   describe('pagerduty action', () => {
     let simulatedActionId = '';
-    const pagerdutySimulatorURL = kibanaServer.resolveUrl(
-      getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY)
-    );
+    let pagerdutySimulatorURL: string = '<could not determine kibana url>';
+
+    // need to wait for kibanaServer to settle ...
+    before(() => {
+      pagerdutySimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY)
+      );
+    });
 
     after(() => esArchiver.unload('empty_kibana'));
 

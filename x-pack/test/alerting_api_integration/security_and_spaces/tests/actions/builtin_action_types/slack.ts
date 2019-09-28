@@ -21,9 +21,14 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
   describe('slack action', () => {
     let simulatedActionId = '';
-    const slackSimulatorURL = kibanaServer.resolveUrl(
-      getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK)
-    );
+    let slackSimulatorURL: string = '<could not determine kibana url>';
+
+    // need to wait for kibanaServer to settle ...
+    before(() => {
+      slackSimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK)
+      );
+    });
 
     after(() => esArchiver.unload('empty_kibana'));
 
