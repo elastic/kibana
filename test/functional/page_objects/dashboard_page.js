@@ -72,6 +72,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async clickFullScreenMode() {
       log.debug(`clickFullScreenMode`);
       await testSubjects.click('dashboardFullScreenMode');
+      await testSubjects.exists('exitFullScreenModeLogo');
+      await this.waitForRenderComplete();
     }
 
     async fullScreenModeMenuItemExists() {
@@ -96,10 +98,12 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickExitFullScreenLogoButton() {
       await testSubjects.click('exitFullScreenModeLogo');
+      await this.waitForRenderComplete();
     }
 
     async clickExitFullScreenTextButton() {
       await testSubjects.click('exitFullScreenModeText');
+      await this.waitForRenderComplete();
     }
 
     async getDashboardIdFromCurrentUrl() {
