@@ -11,7 +11,7 @@ import { Storage } from 'ui/storage';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
 import { QueryBarTopRow } from '../../../../../../src/legacy/core_plugins/data/public/query/query_bar';
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { coreMock } from 'src/core/public/mocks';
 
 const dataStartMock = dataPluginMock.createStartContract();

@@ -10,10 +10,11 @@ import { CoreStart } from 'src/core/public';
 import { act } from 'react-dom/test-utils';
 import { IndexPattern, QueryBarInput } from 'src/legacy/core_plugins/data/public';
 
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
 
 jest.mock('ui/new_platform');
+
 import { openSourceModal } from '../services/source_modal';
 import { mount } from 'enzyme';
 
@@ -21,7 +22,11 @@ jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
 
 function wrapSearchBarInContext(testProps: SearchBarProps) {
   const services = {
-    uiSettings: {} as CoreStart['uiSettings'],
+    uiSettings: {
+      get: (key: string) => {
+        return 10;
+      },
+    } as CoreStart['uiSettings'],
     savedObjects: {} as CoreStart['savedObjects'],
     notifications: {} as CoreStart['notifications'],
     http: {} as CoreStart['http'],
