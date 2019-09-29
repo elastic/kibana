@@ -38,7 +38,7 @@ export interface Props {
   /** Handler to retrive an export URL based on the type of export requested. */
   getExportUrl: GetExportUrlFn;
   /** A warning, if applicable, about a Shareable Canvas having unsupported renderers. */
-  unsupportedRenderers: string[];
+  unsupportedRenderers?: string[];
 }
 
 /**
@@ -49,7 +49,7 @@ export const WorkpadExport: FunctionComponent<Props> = ({
   onCopy,
   onExport,
   getExportUrl,
-  unsupportedRenderers,
+  unsupportedRenderers = [],
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
