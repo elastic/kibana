@@ -104,7 +104,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
 
       $scope.inlineFilter = function inlineFilter($event, type) {
         const column = $($event.target).data().column;
-        const field = $scope.indexPattern.fields.byName[column];
+        const field = $scope.indexPattern.fields.getByName(column);
         $scope.filter(field, $scope.flattenedRow[column], type);
       };
 
