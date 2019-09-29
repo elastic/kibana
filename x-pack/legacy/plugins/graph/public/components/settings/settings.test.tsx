@@ -90,7 +90,7 @@ describe('settings', () => {
   let instance: ReactWrapper;
 
   beforeEach(() => {
-    store = createMockGraphStore({ includeSagas: false }).store;
+    store = createMockGraphStore({}).store;
     store.dispatch(
       updateSettings({
         maxValuesPerDoc: 5,

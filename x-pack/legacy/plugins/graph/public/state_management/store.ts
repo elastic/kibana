@@ -66,10 +66,7 @@ export function createRootReducer(basePath: string) {
   });
 }
 
-export function registerSagas(
-  sagaMiddleware: SagaMiddleware<object>,
-  deps: GraphStoreDependencies
-) {
+function registerSagas(sagaMiddleware: SagaMiddleware<object>, deps: GraphStoreDependencies) {
   sagaMiddleware.run(datasourceSaga(deps));
   sagaMiddleware.run(loadingSaga(deps));
   sagaMiddleware.run(savingSaga(deps));

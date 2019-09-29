@@ -8,15 +8,47 @@ import { Chrome } from 'ui/chrome';
 import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { NotificationsStart } from 'kibana/public';
 import createSagaMiddleware from 'redux-saga';
-import { createStore, applyMiddleware } from 'redux';
-import { GraphStoreDependencies, createRootReducer, registerSagas } from './store';
+import { createStore, applyMiddleware, AnyAction } from 'redux';
+import { GraphStoreDependencies, createRootReducer, GraphStore, GraphState } from './store';
 import { Workspace, GraphWorkspaceSavedObject, IndexPatternSavedObject } from '../types';
 
 jest.mock('ui/new_platform');
 
-export function createMockGraphStore({ includeSagas }: { includeSagas: boolean }) {
+export interface MockedGraphEnvironment {
+  store: GraphStore;
+  mockedDeps: jest.Mocked<GraphStoreDependencies>;
+}
+
+/**
+ * Creates a graph store with original reducers registered but mocked out dependencies.
+ * This can be used to test a component in a realistic stateful setting and to test sagas
+ * in their natural habitat by passing them in via options in the `sagas` array.
+ *
+ * The existing mocks are as barebone as possible, if you need specific values to be returned
+ * from mocked dependencies, you can pass in `mockedDepsOverwrites` via options.
+ */
+export function createMockGraphStore({
+  sagas = [],
+  mockedDepsOverwrites = {},
+  initialStateOverwrites,
+}: {
+  sagas?: Array<(deps: GraphStoreDependencies) => () => Iterator<unknown>>;
+  mockedDepsOverwrites?: Partial<jest.Mocked<GraphStoreDependencies>>;
+  initialStateOverwrites?: Partial<GraphState>;
+}): MockedGraphEnvironment {
+  const workspaceMock = ({
+    runLayout: jest.fn(),
+    nodes: [],
+    edges: [],
+    blacklistedNodes: [],
+  } as unknown) as Workspace;
+
+  const savedWorkspace = ({
+    save: jest.fn(),
+  } as unknown) as GraphWorkspaceSavedObject;
+
   const mockedDeps: jest.Mocked<GraphStoreDependencies> = {
-    basePath: '',
+    basePath: 'basepath',
     changeUrl: jest.fn(),
     chrome: ({
       breadcrumbs: {
@@ -24,8 +56,8 @@ export function createMockGraphStore({ includeSagas }: { includeSagas: boolean }
       },
     } as unknown) as Chrome,
     createWorkspace: jest.fn(),
-    getWorkspace: jest.fn(() => (({} as unknown) as Workspace)),
-    getSavedWorkspace: jest.fn(() => (({} as unknown) as GraphWorkspaceSavedObject)),
+    getWorkspace: jest.fn(() => workspaceMock),
+    getSavedWorkspace: jest.fn(() => savedWorkspace),
     indexPatternProvider: {
       get: jest.fn(() => Promise.resolve(({} as unknown) as IndexPattern)),
     },
@@ -39,18 +71,23 @@ export function createMockGraphStore({ includeSagas }: { includeSagas: boolean }
       },
     } as unknown) as NotificationsStart,
     notifyAngular: jest.fn(),
-    savePolicy: 'configAndDataWithConsent',
+    savePolicy: 'configAndData',
     showSaveModal: jest.fn(),
+    ...mockedDepsOverwrites,
   };
   const sagaMiddleware = createSagaMiddleware();
 
-  const rootReducer = createRootReducer('');
+  const rootReducer = createRootReducer(mockedDeps.basePath);
+  const initializedRootReducer = (state: GraphState | undefined, action: AnyAction) =>
+    rootReducer(state || (initialStateOverwrites as GraphState), action);
 
-  const store = createStore(rootReducer, applyMiddleware(sagaMiddleware));
+  const store = createStore(initializedRootReducer, applyMiddleware(sagaMiddleware));
 
-  if (includeSagas) {
-    registerSagas(sagaMiddleware, mockedDeps);
-  }
+  store.dispatch = jest.fn(store.dispatch);
+
+  sagas.forEach(sagaCreator => {
+    sagaMiddleware.run(sagaCreator(mockedDeps));
+  });
 
   return { store, mockedDeps };
 }

@@ -81,7 +81,6 @@ export const loadingSaga = ({
     yield put(updateSettings(advancedSettings));
     yield put(loadTemplates(urlTemplates));
 
-    // workspace won't be null because it's created in the same call stack
     getWorkspace()!.runLayout();
   }
 
@@ -162,15 +161,14 @@ function showModal(
         defaultMessage: 'Saved "{workspaceTitle}"',
         values: { workspaceTitle: savedWorkspace.title },
       });
-      let text;
-      if (!canSaveData && workspace.nodes.length > 0) {
-        text = i18n.translate('xpack.graph.saveWorkspace.successNotification.noDataSavedText', {
-          defaultMessage: 'The configuration was saved, but the data was not saved',
-        });
-      }
       deps.notifications.toasts.addSuccess({
         title,
-        text,
+        text:
+          !canSaveData && workspace.nodes.length > 0
+            ? i18n.translate('xpack.graph.saveWorkspace.successNotification.noDataSavedText', {
+                defaultMessage: 'The configuration was saved, but the data was not saved',
+              })
+            : undefined,
         'data-test-subj': 'saveGraphSuccess',
       });
       if (savedWorkspace.id !== metaDataSelector(state).savedObjectId) {

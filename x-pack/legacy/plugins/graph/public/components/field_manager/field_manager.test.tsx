@@ -23,7 +23,7 @@ describe('field_manager', () => {
   let dispatchSpy: jest.Mock;
 
   beforeEach(() => {
-    store = createMockGraphStore({ includeSagas: false }).store;
+    store = createMockGraphStore({}).store;
     store.dispatch(
       loadFields([
         {
