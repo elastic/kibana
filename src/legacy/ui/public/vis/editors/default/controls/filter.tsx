@@ -134,7 +134,7 @@ function FilterRow({
           />
         </EuiFormRow>
       ) : null}
-      <EuiSpacer />
+      <EuiSpacer size="m" />
     </EuiForm>
   );
 }

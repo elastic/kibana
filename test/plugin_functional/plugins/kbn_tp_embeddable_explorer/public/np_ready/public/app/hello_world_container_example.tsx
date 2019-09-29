@@ -20,16 +20,18 @@
 import React from 'react';
 import { Subscription } from 'rxjs';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
-import { TGetActionsCompatibleWithTrigger } from '../../../../../../../../src/plugins/ui_actions/public';
-import { CoreStart } from '../../../../../../../../src/core/public';
 import {
   EmbeddablePanel,
   GetEmbeddableFactory,
   GetEmbeddableFactories,
-} from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { HelloWorldContainer } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/embeddables/hello_world_container';
-import { CONTACT_CARD_EMBEDDABLE } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import { HELLO_WORLD_EMBEDDABLE_TYPE } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/embeddables/hello_world/hello_world_embeddable';
+} from '../../../../../../../../src/plugins/embeddable/public';
+import {
+  HelloWorldContainer,
+  CONTACT_CARD_EMBEDDABLE,
+  HELLO_WORLD_EMBEDDABLE_TYPE,
+} from '../../../../../../../../src/plugins/embeddable/public/lib/test_samples';
+import { TGetActionsCompatibleWithTrigger } from '../../../../../../../../src/plugins/ui_actions/public';
+import { CoreStart } from '../../../../../../../../src/core/public';
 import { Start as InspectorStartContract } from '../../../../../../../../src/plugins/inspector/public';
 
 interface Props {
