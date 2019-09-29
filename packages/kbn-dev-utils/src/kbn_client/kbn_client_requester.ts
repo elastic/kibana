@@ -93,16 +93,16 @@ export class KbnClientRequester {
 
       return response.data;
     } catch (error) {
-      let retryWarning: string | undefined;
+      let retryErrorMsg: string | undefined;
       if (isAxiosRequestError(error)) {
-        retryWarning = `[${description}] request failed (attempt=${attempt})`;
+        retryErrorMsg = `[${description}] request failed (attempt=${attempt})`;
       } else if (isConcliftOnGetError(error)) {
-        retryWarning = `Conflict on GET (path=${options.path}, attempt=${attempt})`;
+        retryErrorMsg = `Conflict on GET (path=${options.path}, attempt=${attempt})`;
       }
 
-      if (retryWarning) {
+      if (retryErrorMsg) {
         if (attempt < MAX_ATTEMPTS) {
-          this.log.warning(retryWarning);
+          this.log.error(retryErrorMsg);
           await delay(1000 * attempt);
           return await this.request<T>({
             ...options,
@@ -110,7 +110,7 @@ export class KbnClientRequester {
           });
         }
 
-        throw new Error(retryWarning + ' and ran out of retries');
+        throw new Error(retryErrorMsg + ' and ran out of retries');
       }
 
       throw error;
