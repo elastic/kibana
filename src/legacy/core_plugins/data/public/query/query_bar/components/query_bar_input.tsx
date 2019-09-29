@@ -23,7 +23,7 @@ import React from 'react';
 import { EuiFieldText, EuiOutsideClickDetector, PopoverAnchorPosition } from '@elastic/eui';
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { debounce, compact, isEqual, omit } from 'lodash';
+import { debounce, compact, isEqual } from 'lodash';
 import { PersistedLog } from 'ui/persisted_log';
 
 import {
@@ -389,11 +389,12 @@ export class QueryBarInputUI extends Component<Props, State> {
     this.setState({ index });
   };
 
-  public componentWillMount() {
+  public componentWillReceiveProps() {
     this.services = this.props.kibana.services;
   }
 
   public componentDidMount() {
+    this.services = this.props.kibana.services;
     const parsedQuery = fromUser(toUser(this.props.query.query));
     if (!isEqual(this.props.query.query, parsedQuery)) {
       this.onChange({ ...this.props.query, query: parsedQuery });
@@ -441,22 +442,6 @@ export class QueryBarInputUI extends Component<Props, State> {
   }
 
   public render() {
-    const rest = omit(this.props, [
-      'indexPatterns',
-      'intl',
-      'kibana',
-      'query',
-      'appName',
-      'disableAutoFocus',
-      'screenTitle',
-      'prepend',
-      'persistedLog',
-      'bubbleSubmitEvent',
-      'languageSwitcherPopoverAnchorPosition',
-      'onChange',
-      'onSubmit',
-    ]);
-
     return (
       <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
         <div
@@ -522,7 +507,6 @@ export class QueryBarInputUI extends Component<Props, State> {
                     onSelectLanguage={this.onSelectLanguage}
                   />
                 }
-                {...rest}
               />
             </div>
           </div>

@@ -83,6 +83,7 @@ function FilterRow({
     </div>
   );
 
+  // TODO: KibanaContextProvider should be raised to the top of the vis plugin
   return (
     <EuiForm>
       <EuiFormRow
