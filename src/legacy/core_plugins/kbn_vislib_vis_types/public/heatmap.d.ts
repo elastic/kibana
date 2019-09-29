@@ -17,14 +17,20 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-import lineInterpolationOptionTemplate from './line_interpolation_option.html';
-const module = uiModules.get('kibana');
+import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
+import { RangeValues } from 'ui/vis/editors/default/controls/ranges';
+import { TimeMarker } from 'ui/vislib/visualizations/time_marker';
+import { CommonVislibParams, ColorSchemaVislibParams, ValueAxis } from './types';
+import { Positions } from './utils/collections';
 
-module.directive('lineInterpolationOption', function () {
-  return {
-    restrict: 'E',
-    template: lineInterpolationOptionTemplate,
-    replace: true
-  };
-});
+export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaVislibParams {
+  type: 'heatmap';
+  addLegend: boolean;
+  enableHover: boolean;
+  colorsNumber: number | '';
+  colorsRange: RangeValues[];
+  valueAxes: ValueAxis[];
+  setColorRange: boolean;
+  percentageMode: boolean;
+  times: TimeMarker[];
+}
