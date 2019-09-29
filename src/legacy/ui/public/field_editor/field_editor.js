@@ -148,7 +148,7 @@ export class FieldEditorComponent extends PureComponent {
 
     this.setState({
       isReady: true,
-      isCreating: !indexPattern.fields.byName[field.name],
+      isCreating: !indexPattern.fields.getByName(field.name),
       isDeprecatedLang: this.deprecatedLangs.includes(field.lang),
       errors: [],
       scriptingLangs,

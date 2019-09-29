@@ -81,7 +81,7 @@ export class ESSearchSource extends AbstractESSource {
   async getNumberFields() {
     try {
       const indexPattern = await this._getIndexPattern();
-      return indexPattern.fields.byType.number.map(field => {
+      return indexPattern.fields.getByType('number').map(field => {
         return { name: field.name, label: field.name };
       });
     } catch (error) {
@@ -146,7 +146,7 @@ export class ESSearchSource extends AbstractESSource {
 
     const scriptFields = {};
     searchFilters.fieldNames.forEach(fieldName => {
-      const field = indexPattern.fields.byName[fieldName];
+      const field = indexPattern.fields.getByName(fieldName);
       if (field && field.scripted) {
         scriptFields[field.name] = {
           script: {

@@ -44,7 +44,7 @@ describe('Doc Table', function () {
       config = _config_;
       $parentScope = $rootScope;
       $parentScope.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      mapping = $parentScope.indexPattern.fields.byName;
+      mapping = $parentScope.indexPattern.fields;
 
       // Stub `getConverterFor` for a field in the indexPattern to return mock data.
       // Returns `val` if provided, otherwise generates fake data for the field.
