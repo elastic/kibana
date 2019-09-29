@@ -389,7 +389,7 @@ export class QueryBarInputUI extends Component<Props, State> {
     this.setState({ index });
   };
 
-  public componentWillReceiveProps() {
+  public componentWillMount() {
     this.services = this.props.kibana.services;
   }
 
