@@ -16,3 +16,4 @@ export const MAIN_ROOT = `/:resource/:org/:repo/${pathTypes}/:revision`;
 export const ADMIN = '/admin';
 export const SEARCH = '/search';
 export const INTEGRATIONS = '/integrations';
+export const APM_DEMO = '/apm-demo';
