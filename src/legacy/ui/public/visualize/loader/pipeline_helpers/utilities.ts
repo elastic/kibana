@@ -99,10 +99,14 @@ export const getFormat: FormatFactory = (mapping = {}) => {
   if (id === 'range') {
     const RangeFormat = FieldFormat.from((range: any) => {
       const format = getFieldFormat(id, mapping.params);
+      const gte = '\u2265';
+      const lt = '\u003c';
       return i18n.translate('common.ui.aggTypes.buckets.ranges.rangesFormatMessage', {
-        defaultMessage: '{from} to {to}',
+        defaultMessage: '{gte} {from} and {lt} {to}',
         values: {
+          gte,
           from: format.convert(range.gte),
+          lt,
           to: format.convert(range.lt),
         },
       });
