@@ -20,6 +20,7 @@ export async function getOptionsFromConfigFiles() {
 
   return {
     // defaults
+    backportCreatedLabels: [] as string[],
     fork: true,
     multiple: false,
     multipleCommits: false,

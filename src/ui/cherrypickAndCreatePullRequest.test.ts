@@ -2,10 +2,10 @@ import axios from 'axios';
 import * as logger from '../services/logger';
 import * as prompts from '../services/prompts';
 import { BackportOptions } from '../options/options';
-import { doBackportVersion } from './doBackportVersions';
+import { cherrypickAndCreatePullRequest } from './cherrypickAndCreatePullRequest';
 import { exec } from '../services/child-process-promisified';
 
-describe('doBackportVersion', () => {
+describe('cherrypickAndCreatePullRequest', () => {
   let axiosPostMock: jest.SpyInstance;
 
   beforeEach(() => {
@@ -33,33 +33,35 @@ describe('doBackportVersion', () => {
     beforeEach(async () => {
       execSpy = (exec as any) as jest.SpyInstance;
 
-      await doBackportVersion(
+      const options = {
+        apiHostname: 'api.github.com',
+        fork: true,
+        labels: ['backport'],
+        prDescription: 'myPrSuffix',
+        prTitle: '[{baseBranch}] {commitMessages}',
+        repoName: 'kibana',
+        repoOwner: 'elastic',
+        username: 'sqren'
+      } as BackportOptions;
+
+      const commits = [
         {
-          apiHostname: 'api.github.com',
-          fork: true,
-          labels: ['backport'],
-          prDescription: 'myPrSuffix',
-          prTitle: '[{baseBranch}] {commitMessages}',
-          repoName: 'kibana',
-          repoOwner: 'elastic',
-          username: 'sqren'
-        } as BackportOptions,
+          sha: 'mySha',
+          message: 'myCommitMessage (#1000)',
+          pullNumber: 1000
+        },
         {
-          commits: [
-            {
-              sha: 'mySha',
-              message: 'myCommitMessage (#1000)',
-              pullNumber: 1000
-            },
-            {
-              sha: 'mySha2',
-              message: 'myOtherCommitMessage (#2000)',
-              pullNumber: 2000
-            }
-          ],
-          baseBranch: '6.x'
+          sha: 'mySha2',
+          message: 'myOtherCommitMessage (#2000)',
+          pullNumber: 2000
         }
-      );
+      ];
+
+      await cherrypickAndCreatePullRequest({
+        options,
+        commits,
+        baseBranch: '6.x'
+      });
     });
 
     it('should make correct git commands', () => {
@@ -98,21 +100,21 @@ myPrSuffix`
 
   describe('when commit does not have a pull request reference', () => {
     beforeEach(async () => {
-      await doBackportVersion(
-        {
-          apiHostname: 'api.github.com',
-          fork: true,
-          labels: ['backport'],
-          prTitle: '[{baseBranch}] {commitMessages}',
-          repoName: 'kibana',
-          repoOwner: 'elastic',
-          username: 'sqren'
-        } as BackportOptions,
-        {
-          commits: [{ sha: 'mySha', message: 'myCommitMessage (mySha)' }],
-          baseBranch: '6.x'
-        }
-      );
+      const options = {
+        apiHostname: 'api.github.com',
+        fork: true,
+        labels: ['backport'],
+        prTitle: '[{baseBranch}] {commitMessages}',
+        repoName: 'kibana',
+        repoOwner: 'elastic',
+        username: 'sqren'
+      } as BackportOptions;
+
+      await cherrypickAndCreatePullRequest({
+        options,
+        commits: [{ sha: 'mySha', message: 'myCommitMessage (mySha)' }],
+        baseBranch: '6.x'
+      });
     });
 
     it('should create pull request', () => {
@@ -158,21 +160,21 @@ myPrSuffix`
 
       spyOn(prompts, 'confirmPrompt').and.returnValue(didResolve);
 
-      const promise = doBackportVersion(
-        {
-          apiHostname: 'api.github.com',
-          fork: true,
-          labels: ['backport'],
-          prTitle: '[{baseBranch}] {commitMessages}',
-          repoName: 'kibana',
-          repoOwner: 'elastic',
-          username: 'sqren'
-        } as BackportOptions,
-        {
-          commits: [{ sha: 'mySha', message: 'myCommitMessage' }],
-          baseBranch: '6.x'
-        }
-      );
+      const options = {
+        apiHostname: 'api.github.com',
+        fork: true,
+        labels: ['backport'],
+        prTitle: '[{baseBranch}] {commitMessages}',
+        repoName: 'kibana',
+        repoOwner: 'elastic',
+        username: 'sqren'
+      } as BackportOptions;
+
+      const promise = cherrypickAndCreatePullRequest({
+        options,
+        commits: [{ sha: 'mySha', message: 'myCommitMessage' }],
+        baseBranch: '6.x'
+      });
 
       return { logSpy, execSpy, promise };
     }

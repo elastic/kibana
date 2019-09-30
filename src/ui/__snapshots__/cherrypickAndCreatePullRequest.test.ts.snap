@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`doBackportVersion when cherry-picking fails and conflicts were not resolved 2`] = `
+exports[`cherrypickAndCreatePullRequest when cherry-picking fails and conflicts were not resolved 2`] = `
 Array [
   Array [
     "git reset --hard && git clean -d --force && git fetch elastic 6.x && git checkout -B backport/6.x/commit-mySha elastic/6.x --no-track",
@@ -17,7 +17,7 @@ Array [
 ]
 `;
 
-exports[`doBackportVersion when cherry-picking fails and conflicts were resolved 1`] = `
+exports[`cherrypickAndCreatePullRequest when cherry-picking fails and conflicts were resolved 1`] = `
 Array [
   Array [
     "git reset --hard && git clean -d --force && git fetch elastic 6.x && git checkout -B backport/6.x/commit-mySha elastic/6.x --no-track",
@@ -52,7 +52,7 @@ Array [
 ]
 `;
 
-exports[`doBackportVersion when commit has a pull request reference should make correct git commands 1`] = `
+exports[`cherrypickAndCreatePullRequest when commit has a pull request reference should make correct git commands 1`] = `
 Array [
   Array [
     "git reset --hard && git clean -d --force && git fetch elastic 6.x && git checkout -B backport/6.x/pr-1000_pr-2000 elastic/6.x --no-track",

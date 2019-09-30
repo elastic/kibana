@@ -13,6 +13,7 @@ describe('getOptionsFromConfigFiles', () => {
       accessToken: 'myAccessToken',
       all: false,
       apiHostname: 'api.github.com',
+      backportCreatedLabels: [],
       branchChoices: [
         { checked: false, name: '6.0' },
         { checked: false, name: '5.9' }

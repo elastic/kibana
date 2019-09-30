@@ -6,6 +6,7 @@ const validOptions: OptionsFromCliArgs = {
   all: false,
   apiHostname: 'api.github.com',
   author: undefined,
+  backportCreatedLabels: [],
   branchChoices: [],
   branches: ['branchA'],
   commitsCount: 10,

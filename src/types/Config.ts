@@ -18,6 +18,7 @@ export interface Config {
   all?: boolean;
   author?: string;
   apiHostname?: string;
+  backportCreatedLabels?: string[];
   commitsCount?: number;
   gitHostname?: string;
   labels?: string[];

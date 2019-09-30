@@ -17,38 +17,20 @@ import { confirmPrompt } from '../services/prompts';
 import { createPullRequest } from '../services/github/createPullRequest';
 import { getRepoPath } from '../services/env';
 import { getShortSha } from '../services/github/commitFormatters';
-import { consoleLog, logger } from '../services/logger';
+import { consoleLog } from '../services/logger';
 import { exec } from '../services/child-process-promisified';
+import { sequentially } from '../services/sequentially';
+import { withSpinner } from './withSpinner';
 
-export function doBackportVersions(
-  options: BackportOptions,
-  commits: CommitSelected[],
-  branches: string[]
-) {
-  return sequentially(branches, async baseBranch => {
-    try {
-      await doBackportVersion(options, { commits, baseBranch });
-    } catch (e) {
-      if (e instanceof HandledError) {
-        console.error(e.message);
-      } else {
-        console.error(e);
-        throw e;
-      }
-    }
-  });
-}
-
-export async function doBackportVersion(
-  options: BackportOptions,
-  {
-    commits,
-    baseBranch
-  }: {
-    commits: CommitSelected[];
-    baseBranch: string;
-  }
-) {
+export async function cherrypickAndCreatePullRequest({
+  options,
+  commits,
+  baseBranch
+}: {
+  options: BackportOptions;
+  commits: CommitSelected[];
+  baseBranch: string;
+}) {
   const featureBranch = getFeatureBranchName(baseBranch, commits);
   const commitMessages = commits
     .map(commit => ` - ${commit.message}`)
@@ -85,18 +67,13 @@ export async function doBackportVersion(
   await withSpinner({ text: 'Creating pull request' }, async spinner => {
     const payload = getPullRequestPayload(options, baseBranch, commits);
     const pullRequest = await createPullRequest(options, payload);
+
     if (options.labels.length > 0) {
-      await addLabelsToPullRequest(options, pullRequest.number);
+      await addLabelsToPullRequest(options, pullRequest.number, options.labels);
     }
+
     spinner.text = `Created pull request: ${pullRequest.html_url}`;
   });
-}
-
-function sequentially<T>(items: T[], handler: (item: T) => Promise<void>) {
-  return items.reduce(async (p, item) => {
-    await p;
-    return handler(item);
-  }, Promise.resolve());
 }
 
 function getFeatureBranchName(baseBranch: string, commits: CommitSelected[]) {
@@ -185,23 +162,4 @@ function getPullRequestPayload(
     head: getHeadBranchName(options, featureBranch),
     base: baseBranch
   };
-}
-
-async function withSpinner<T>(
-  { text }: { text: string },
-  fn: (spinner: ora.Ora) => Promise<T>
-): Promise<T> {
-  logger.info(text);
-  const spinner = ora(text).start();
-
-  try {
-    const res = await fn(spinner);
-    spinner.succeed();
-
-    return res;
-  } catch (e) {
-    logger.info(e.message);
-    spinner.fail();
-    throw e;
-  }
 }

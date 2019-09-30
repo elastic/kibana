@@ -34,6 +34,11 @@ export function getOptionsFromCliArgs(
       description: 'Show commits by specific author',
       type: 'string'
     })
+    .option('backportCreatedLabels', {
+      default: configOptions.backportCreatedLabels,
+      description: 'Pull request labels for the original PR',
+      type: 'array'
+    })
     .option('branches', {
       default: [] as string[],
       description: 'Branch(es) to backport to',
@@ -63,7 +68,7 @@ export function getOptionsFromCliArgs(
     })
     .option('labels', {
       default: configOptions.labels,
-      description: 'Pull request labels',
+      description: 'Pull request labels for the resulting backport PRs',
       type: 'array'
     })
     .option('multiple', {

@@ -24,6 +24,7 @@ describe('runWithOptions', () => {
       all: false,
       apiHostname: 'api.github.com',
       author: 'sqren',
+      backportCreatedLabels: [],
       branches: [],
       branchChoices: [
         { name: '6.x' },
