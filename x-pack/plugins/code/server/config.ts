@@ -7,13 +7,14 @@
 import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 
+// TODO: update these legacy imports to new ones.
 import {
   LanguageServers,
   LanguageServersDeveloping,
 } from '../../../legacy/plugins/code/server/lsp/language_servers';
 import { DEFAULT_WATERMARK_LOW_PERCENTAGE } from '../../../legacy/plugins/code/server/disk_watermark';
 
-const createCodeConfigSchame = () => {
+const createCodeConfigSchema = () => {
   const langSwitches: any = {};
   LanguageServers.forEach(lang => {
     langSwitches[lang.name] = schema.object({
@@ -30,6 +31,7 @@ const createCodeConfigSchame = () => {
     ui: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),
+    enabled: schema.boolean({ defaultValue: true }),
     queueIndex: schema.string({ defaultValue: '.code_internal-worker-queue' }),
     // 1 hour by default.
     queueTimeoutMs: schema.number({
@@ -107,4 +109,4 @@ const createCodeConfigSchame = () => {
   });
 };
 
-export const CodeConfigSchema = createCodeConfigSchame();
+export const CodeConfigSchema = createCodeConfigSchema();

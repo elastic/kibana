@@ -56,6 +56,7 @@ import { initWorkers } from './init_workers';
 import { ClusterNodeAdapter } from './distributed/cluster/cluster_node_adapter';
 import { NodeRepositoriesService } from './distributed/cluster/node_repositories_service';
 import { initCodeUsageCollector } from './usage_collector';
+import { PluginSetupContract } from '../../../../plugins/code/server/index';
 
 export class CodePlugin {
   private isCodeNode = false;
@@ -70,7 +71,7 @@ export class CodePlugin {
   private codeServices: CodeServices | null = null;
   private nodeService: NodeRepositoriesService | null = null;
 
-  constructor(private readonly initContext: PluginInitializerContext) {
+  constructor(private readonly initContext: PluginInitializerContext<PluginSetupContract>) {
     this.log = {} as Logger;
     this.serverOptions = {} as ServerOptions;
   }
@@ -78,8 +79,10 @@ export class CodePlugin {
   public setup(core: CoreSetup) {
     const { server } = core.http as any;
 
-    this.serverOptions = new ServerOptions(this.initContext.config, server.config());
-    this.log = new Logger(this.initContext.logger, this.serverOptions.verbose);
+    // @ts-ignore
+    this.serverOptions = new ServerOptions(this.initContext.legacy.config, server.config());
+    // @ts-ignore
+    this.log = new Logger(this.initContext.legacy.logger, this.serverOptions.verbose);
 
     const xpackMainPlugin: XPackMainPlugin = server.plugins.xpack_main;
     xpackMainPlugin.registerFeature({
@@ -162,11 +165,12 @@ export class CodePlugin {
 
     const codeServices = new CodeServices(clusterNodeAdapter);
 
-    this.queue = initQueue(server, this.log, esClient);
+    this.queue = initQueue(this.serverOptions, this.log, esClient);
 
     const { gitOps, lspService } = initLocalService(
       server,
-      this.initContext.logger,
+      // @ts-ignore
+      this.initContext.legacy.logger,
       this.serverOptions,
       codeServices,
       esClient,
@@ -210,11 +214,12 @@ export class CodePlugin {
       this.log
     );
 
-    this.queue = initQueue(server, this.log, esClient);
+    this.queue = initQueue(this.serverOptions, this.log, esClient);
 
     const { gitOps, lspService } = initLocalService(
       server,
-      this.initContext.logger,
+      // @ts-ignore
+      this.initContext.legacy.logger,
       this.serverOptions,
       codeServices,
       esClient,
@@ -302,7 +307,7 @@ export class CodePlugin {
     fileRoute(codeServerRouter, codeServices);
     workspaceRoute(codeServerRouter, this.serverOptions, codeServices);
     symbolByQnameRoute(codeServerRouter, this.log);
-    installRoute(codeServerRouter, codeServices);
+    installRoute(codeServerRouter, codeServices, this.serverOptions);
     lspRoute(codeServerRouter, codeServices, this.serverOptions, this.log);
     setupRoute(codeServerRouter, codeServices);
     statusRoute(codeServerRouter, codeServices);
@@ -340,7 +345,7 @@ export class CodePlugin {
 
   private initDevMode(server: any) {
     // @ts-ignore
-    const devMode: boolean = server.config().get('env.dev');
+    const devMode: boolean = this.serverOptions.devMode;
     server.injectUiAppVars('code', () => ({
       enableLangserversDeveloping: devMode,
     }));

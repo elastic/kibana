@@ -6,7 +6,7 @@
 
 import { Server } from 'hapi';
 
-import { LoggerFactory } from '../../../../../src/core/server';
+import { LoggerFactory } from 'src/core/server';
 import { ServerOptions } from './server_options';
 import { CodeServices } from './distributed/code_services';
 import { EsClient } from './lib/esqueue';
@@ -67,7 +67,7 @@ export function initLocalService(
   );
   codeServices.registerHandler(
     WorkspaceDefinition,
-    getWorkspaceHandler(serverLoggerFactory.getLogger(), lspService.workspaceHandler)
+    getWorkspaceHandler(serverLoggerFactory, lspService.workspaceHandler)
   );
   codeServices.registerHandler(SetupDefinition, setupServiceHandler);
 

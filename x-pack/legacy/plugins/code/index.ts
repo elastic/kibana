@@ -5,6 +5,7 @@
  */
 
 import { RequestQuery, ResponseToolkit, RouteOptions, ServerRoute } from 'hapi';
+import JoiNamespace from 'joi';
 import { Legacy } from 'kibana';
 import { resolve } from 'path';
 import { CoreSetup } from 'src/core/server';
@@ -41,10 +42,20 @@ export const code = (kibana: any) =>
       },
       hacks: ['plugins/code/hacks/toggle_app_link_in_nav'],
     },
+    config(Joi: typeof JoiNamespace) {
+      return Joi.object({
+        // Still keep this config item here for the injectDefaultVars
+        // in line 40 here.
+        ui: Joi.object({
+          enabled: Joi.boolean().default(true),
+        }).default(),
+        enabled: Joi.boolean().default(true),
+      });
+    },
     async init(server: ServerFacade) {
       // @ts-ignore
       const initializerContext = server.newPlatform.setup.plugins.code;
-      if (!initializerContext.config.ui.enabled) {
+      if (!initializerContext.legacy.config.ui.enabled) {
         return;
       }
 

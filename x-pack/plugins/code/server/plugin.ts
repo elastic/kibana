@@ -6,11 +6,7 @@
 
 import { first } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
-import {
-  LoggerFactory,
-  PluginInitializerContext,
-  RecursiveReadonly,
-} from '../../../../src/core/server';
+import { LoggerFactory, PluginInitializerContext, RecursiveReadonly } from 'src/core/server';
 import { deepFreeze } from '../../../../src/core/utils';
 import { CodeConfigSchema } from './config';
 
@@ -18,8 +14,10 @@ import { CodeConfigSchema } from './config';
  * Describes public Code plugin contract returned at the `setup` stage.
  */
 export interface PluginSetupContract {
-  config: TypeOf<typeof CodeConfigSchema>;
-  logger: LoggerFactory;
+  legacy: {
+    config: TypeOf<typeof CodeConfigSchema>;
+    logger: LoggerFactory;
+  };
 }
 
 /**
@@ -35,8 +33,10 @@ export class CodePlugin {
       .toPromise();
 
     return deepFreeze({
-      config,
-      logger: this.initializerContext.logger,
+      legacy: {
+        config,
+        logger: this.initializerContext.logger,
+      },
     });
   }
 
