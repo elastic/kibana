@@ -29,3 +29,22 @@
     display: flex;
   }
 }
+
+/*
+ * Wraps long snapshot name with ellipsis when it is rendered with an icon
+ */
+.snapshotRestorePolicyTableSnapshotFailureContainer {
+  max-width: 200px;
+  > .euiFlexItem:first-child {
+
+  }
+
+  > .euiFlexItem:last-child {
+      min-width: 0;
+      .euiText {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+  }
+}
