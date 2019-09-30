@@ -25,7 +25,7 @@ import Boom from 'boom';
 import { URL } from 'url';
 
 interface Args {
-  method: string;
+  method: 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head';
   agent: http.Agent;
   uri: URL;
   payload: stream.Stream;
@@ -33,10 +33,11 @@ interface Args {
   headers: http.OutgoingHttpHeaders;
 }
 
-// We use a modified version of Hapi's Wreck because  Hapi, Axios, and Superagent don't support GET requests
+// We use a modified version of Hapi's Wreck because Hapi, Axios, and Superagent don't support GET requests
 // with bodies, but ES APIs do. Similarly with DELETE requests with bodies. Another library, `request`
 // diverged too much from current behaviour.
 export const sendRequest = ({ method, headers, agent, uri, timeout, payload }: Args) => {
+  const { hostname, port, protocol, pathname, search } = uri;
   const client = uri.protocol === 'https:' ? https : http;
   let resolved = false;
 
@@ -49,15 +50,15 @@ export const sendRequest = ({ method, headers, agent, uri, timeout, payload }: A
 
   const req = client.request({
     method: method.toUpperCase(),
-    host: uri.hostname,
-    port: uri.port !== '' ? Number(uri.port) : undefined,
-    protocol: uri.protocol,
-    path: `${uri.pathname}${uri.search || ''}`,
+    host: hostname,
+    port: port === '' ? undefined : Number(port),
+    protocol,
+    path: `${pathname}${search || ''}`,
     headers: {
       ...headers,
       'content-type': 'application/json',
       'transfer-encoding': 'chunked',
-      host: uri.hostname,
+      host: hostname,
     },
     agent,
   });
