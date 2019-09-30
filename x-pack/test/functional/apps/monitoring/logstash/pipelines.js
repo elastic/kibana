@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
 export default function ({ getService, getPageObjects }) {
+  const PageObjects = getPageObjects(['common']);
   const overview = getService('monitoringClusterOverview');
   const pipelinesList = getService('monitoringLogstashPipelines');
   const lsClusterSummaryStatus = getService('monitoringLogstashSummaryStatus');
@@ -88,6 +89,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should filter for specific pipelines', async () => {
       await pipelinesList.setFilter('la');
+      await PageObjects.common.pressEnterKey();
       const rows = await pipelinesList.getRows();
       expect(rows.length).to.be(2);
       await pipelinesList.clearFilter();
