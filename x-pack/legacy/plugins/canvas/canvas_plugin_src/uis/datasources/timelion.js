@@ -78,9 +78,13 @@ const TimelionDatasource = ({ args, updateArgs, defaultIndex }) => {
       <EuiFormRow
         label={strings.getIntervalLabel()}
         helpText={strings.getIntervalHelp()}
-        compressed
+        display="rowCompressed"
       >
-        <EuiFieldText value={getInterval()} onChange={e => setArg('interval', e.target.value)} />
+        <EuiFieldText
+          compressed
+          value={getInterval()}
+          onChange={e => setArg('interval', e.target.value)}
+        />
       </EuiFormRow>
 
       <EuiSpacer size="m" />

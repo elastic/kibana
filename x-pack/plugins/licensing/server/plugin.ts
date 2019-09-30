@@ -18,6 +18,7 @@ import { Poller } from '../../../../src/core/utils/poller';
 import { LicensingConfigType, LicensingPluginSetup, ILicense } from './types';
 import { LicensingConfig } from './licensing_config';
 import { License } from './license';
+import { createRouteHandlerContext } from './licensing_route_handler_context';
 
 export class Plugin implements CorePlugin<LicensingPluginSetup> {
   private readonly logger: Logger;
@@ -120,9 +121,12 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
   public async setup(core: CoreSetup) {
     const config = await this.config$.pipe(first()).toPromise();
     const poller = this.create(config, core);
+    const license$ = poller.subject$.asObservable();
+
+    core.http.registerRouteHandlerContext('licensing', createRouteHandlerContext(license$));
 
     return {
-      license$: poller.subject$.asObservable(),
+      license$,
     };
   }
 
