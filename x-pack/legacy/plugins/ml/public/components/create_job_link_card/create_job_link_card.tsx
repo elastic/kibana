@@ -19,22 +19,26 @@ import {
 
 interface Props {
   iconType: IconType;
+  iconAreaLabel?: string;
   title: any;
   description: any;
   href?: string;
   onClick?: () => void;
   isDisabled?: boolean;
+  'data-test-subj'?: string;
 }
 
 // Component for rendering a card which links to the Create Job page, displaying an
 // icon, card title, description and link.
 export const CreateJobLinkCard: FC<Props> = ({
   iconType,
+  iconAreaLabel,
   title,
   description,
   onClick,
   href,
   isDisabled,
+  'data-test-subj': dateTestSubj,
 }) => (
   <EuiPanel style={{ cursor: isDisabled ? 'not-allowed' : undefined }}>
     {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
@@ -42,10 +46,11 @@ export const CreateJobLinkCard: FC<Props> = ({
       href={href}
       onClick={onClick}
       style={{ display: 'block', pointerEvents: isDisabled ? 'none' : undefined }}
+      data-test-subj={dateTestSubj}
     >
       <EuiFlexGroup gutterSize="l" responsive={true}>
         <EuiFlexItem grow={false} style={{ paddingTop: '8px' }}>
-          <EuiIcon size="xl" type={iconType} aria-label="" />
+          <EuiIcon size="xl" type={iconType} aria-label={iconAreaLabel} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="s">

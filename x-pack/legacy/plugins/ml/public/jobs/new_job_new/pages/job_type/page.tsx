@@ -230,8 +230,10 @@ export const Page: FC = () => {
           {jobTypes.map(({ href, icon, title, description, id }) => (
             <EuiFlexItem key={id}>
               <CreateJobLinkCard
+                data-test-subj={id}
                 href={href}
                 iconType={icon.type}
+                iconAreaLabel={icon.ariaLabel}
                 title={title}
                 description={description}
                 isDisabled={!isTimeBasedIndex}
