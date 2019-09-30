@@ -20,16 +20,20 @@
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 
+// @ts-ignore
 import { Config } from '../../../server/config';
 
-/* eslint-disable import/no-duplicates */
+// @ts-ignore
 import * as uiSettingsServiceFactoryNS from '../ui_settings_service_factory';
-import { uiSettingsServiceFactory } from '../ui_settings_service_factory';
+// @ts-ignore
 import * as getUiSettingsServiceForRequestNS from '../ui_settings_service_for_request';
-import { getUiSettingsServiceForRequest } from '../ui_settings_service_for_request';
-/* eslint-enable import/no-duplicates */
-
+// @ts-ignore
 import { uiSettingsMixin } from '../ui_settings_mixin';
+
+interface Decorators {
+  server: { [name: string]: any };
+  request: { [name: string]: any };
+}
 
 describe('uiSettingsMixin()', () => {
   const sandbox = sinon.createSandbox();
@@ -38,15 +42,15 @@ describe('uiSettingsMixin()', () => {
     const config = Config.withDefaultSchema({
       uiSettings: {
         overrides: {
-          foo: 'bar'
-        }
-      }
+          foo: 'bar',
+        },
+      },
     });
 
     // maps of decorations passed to `server.decorate()`
-    const decorations = {
+    const decorations: Decorators = {
       server: {},
-      request: {}
+      request: {},
     };
 
     // mock hapi server
@@ -54,12 +58,12 @@ describe('uiSettingsMixin()', () => {
       log: sinon.stub(),
       route: sinon.stub(),
       config: () => config,
-      addMemoizedFactoryToRequest(name, factory) {
-        this.decorate('request', name, function () {
+      addMemoizedFactoryToRequest(name: string, factory: (...args: any[]) => any) {
+        this.decorate('request', name, function(this: typeof server) {
           return factory(this);
         });
       },
-      decorate: sinon.spy((type, name, value) => {
+      decorate: sinon.spy((type: keyof Decorators, name: string, value: any) => {
         decorations[type][name] = value;
       }),
     };
@@ -91,28 +95,38 @@ describe('uiSettingsMixin()', () => {
   describe('server.uiSettingsServiceFactory()', () => {
     it('decorates server with "uiSettingsServiceFactory"', () => {
       const { decorations } = setup();
-      expect(decorations.server).to.have.property('uiSettingsServiceFactory').a('function');
+      expect(decorations.server)
+        .to.have.property('uiSettingsServiceFactory')
+        .a('function');
 
-      sandbox.stub(uiSettingsServiceFactoryNS, 'uiSettingsServiceFactory');
-      sinon.assert.notCalled(uiSettingsServiceFactory);
+      const uiSettingsServiceFactoryStub = sandbox.stub(
+        uiSettingsServiceFactoryNS,
+        'uiSettingsServiceFactory'
+      );
+      sinon.assert.notCalled(uiSettingsServiceFactoryStub);
       decorations.server.uiSettingsServiceFactory();
-      sinon.assert.calledOnce(uiSettingsServiceFactory);
+      sinon.assert.calledOnce(uiSettingsServiceFactoryStub);
     });
 
     it('passes `server` and `options` argument to factory', () => {
       const { decorations, server } = setup();
-      expect(decorations.server).to.have.property('uiSettingsServiceFactory').a('function');
+      expect(decorations.server)
+        .to.have.property('uiSettingsServiceFactory')
+        .a('function');
 
-      sandbox.stub(uiSettingsServiceFactoryNS, 'uiSettingsServiceFactory');
-      sinon.assert.notCalled(uiSettingsServiceFactory);
+      const uiSettingsServiceFactoryStub = sandbox.stub(
+        uiSettingsServiceFactoryNS,
+        'uiSettingsServiceFactory'
+      );
+      sinon.assert.notCalled(uiSettingsServiceFactoryStub);
       decorations.server.uiSettingsServiceFactory({
-        foo: 'bar'
+        foo: 'bar',
       });
-      sinon.assert.calledOnce(uiSettingsServiceFactory);
-      sinon.assert.calledWithExactly(uiSettingsServiceFactory, server, {
+      sinon.assert.calledOnce(uiSettingsServiceFactoryStub);
+      sinon.assert.calledWithExactly(uiSettingsServiceFactoryStub, server, {
         foo: 'bar',
         overrides: {
-          foo: 'bar'
+          foo: 'bar',
         },
         getDefaults: sinon.match.func,
       });
@@ -122,33 +136,45 @@ describe('uiSettingsMixin()', () => {
   describe('request.getUiSettingsService()', () => {
     it('exposes "getUiSettingsService" on requests', () => {
       const { decorations } = setup();
-      expect(decorations.request).to.have.property('getUiSettingsService').a('function');
+      expect(decorations.request)
+        .to.have.property('getUiSettingsService')
+        .a('function');
 
-      sandbox.stub(getUiSettingsServiceForRequestNS, 'getUiSettingsServiceForRequest');
-      sinon.assert.notCalled(getUiSettingsServiceForRequest);
+      const getUiSettingsServiceForRequestStub = sandbox.stub(
+        getUiSettingsServiceForRequestNS,
+        'getUiSettingsServiceForRequest'
+      );
+      sinon.assert.notCalled(getUiSettingsServiceForRequestStub);
       decorations.request.getUiSettingsService();
-      sinon.assert.calledOnce(getUiSettingsServiceForRequest);
+      sinon.assert.calledOnce(getUiSettingsServiceForRequestStub);
     });
 
     it('passes request to getUiSettingsServiceForRequest', () => {
       const { server, decorations } = setup();
-      expect(decorations.request).to.have.property('getUiSettingsService').a('function');
+      expect(decorations.request)
+        .to.have.property('getUiSettingsService')
+        .a('function');
 
-      sandbox.stub(getUiSettingsServiceForRequestNS, 'getUiSettingsServiceForRequest');
-      sinon.assert.notCalled(getUiSettingsServiceForRequest);
+      const getUiSettingsServiceForRequestStub = sandbox.stub(
+        getUiSettingsServiceForRequestNS,
+        'getUiSettingsServiceForRequest'
+      );
+      sinon.assert.notCalled(getUiSettingsServiceForRequestStub);
       const request = {};
       decorations.request.getUiSettingsService.call(request);
-      sinon.assert.calledWith(getUiSettingsServiceForRequest, server, request);
+      sinon.assert.calledWith(getUiSettingsServiceForRequestStub, server, request);
     });
   });
 
   describe('server.uiSettings()', () => {
     it('throws an error, links to pr', () => {
       const { decorations } = setup();
-      expect(decorations.server).to.have.property('uiSettings').a('function');
+      expect(decorations.server)
+        .to.have.property('uiSettings')
+        .a('function');
       expect(() => {
         decorations.server.uiSettings();
-      }).to.throwError('http://github.com');
+      }).to.throwError('http://github.com' as any); // incorrect typings
     });
   });
 });
