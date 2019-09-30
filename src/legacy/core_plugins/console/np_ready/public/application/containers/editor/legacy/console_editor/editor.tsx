@@ -62,7 +62,7 @@ const DEFAULT_INPUT_VALUE = `GET _search
 
 function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
   const {
-    services: { history },
+    services: { history, notifications },
     ResizeChecker,
     docLinkVersion,
   } = useAppContext();
@@ -197,6 +197,7 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
             autoIndent={(event: any) => {
               autoIndent(editorInstanceRef.current!, event);
             }}
+            addNotification={({ title }) => notifications.toasts.add({ title })}
           />
         </div>
         <div

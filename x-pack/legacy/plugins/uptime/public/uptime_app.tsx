@@ -154,7 +154,7 @@ const Application = (props: UptimeAppProps) => {
                             justifyContent="spaceBetween"
                             gutterSize="s"
                           >
-                            <EuiFlexItem grow={false}>
+                            <EuiFlexItem>
                               <EuiTitle>
                                 <h1>{headingText}</h1>
                               </EuiTitle>

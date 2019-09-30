@@ -10,7 +10,7 @@ export const createGetIndexPatternRoute = (libs: UMServerLibs) => ({
   method: 'GET',
   path: '/api/uptime/index_pattern',
   tags: ['access:uptime'],
-  handler: async (request: any): Promise<any> => {
-    return await libs.savedObjects.getUptimeIndexPattern(request);
+  handler: async (): Promise<any> => {
+    return await libs.savedObjects.getUptimeIndexPattern();
   },
 });
