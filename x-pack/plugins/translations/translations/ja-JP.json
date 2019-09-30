@@ -10238,7 +10238,7 @@
     "xpack.security.loginPage.requiresSecureConnectionTitle": "ログインにはセキュアな接続が必要です",
     "xpack.security.loginPage.unknownLayoutMessage": "詳細は Kibana ログを確認し、ページを更新して再試行してください。",
     "xpack.security.loginPage.unknownLayoutTitle": "サポートされていないログインフォームレイアウト。",
-    "xpack.security.loginPage.welcomeDescription": "Elastic Stack へのi入口",
+    "xpack.security.loginPage.welcomeDescription": "Elastic Stack への入口",
     "xpack.security.loginPage.welcomeTitle": "Kibana へようこそ",
     "xpack.security.loginPage.xpackUnavailableMessage": "この Kibana ディストリビューションの無料の機能をすべて使用するには、デフォルトの Elasticsearch をアップデートしてください。",
     "xpack.security.loginPage.xpackUnavailableTitle": "現在 Kibana に構成されている Elasticsearch クラスターへの接続をキャンセルします。",

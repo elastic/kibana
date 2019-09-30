@@ -122,7 +122,10 @@ kibana_vars=(
     xpack.monitoring.ui.container.elasticsearch.enabled
     xpack.monitoring.ui.container.logstash.enabled
     xpack.monitoring.ui.enabled
+    xpack.reporting.capture.browser.autoDownload
     xpack.reporting.capture.browser.chromium.disableSandbox
+    xpack.reporting.capture.browser.chromium.inspect
+    xpack.reporting.capture.browser.chromium.maxScreenshotDimension
     xpack.reporting.capture.browser.chromium.proxy.enabled
     xpack.reporting.capture.browser.chromium.proxy.server
     xpack.reporting.capture.browser.chromium.proxy.bypass
@@ -131,7 +134,14 @@ kibana_vars=(
     xpack.reporting.capture.loadDelay
     xpack.reporting.capture.settleTime
     xpack.reporting.capture.timeout
+    xpack.reporting.capture.viewport.height
+    xpack.reporting.capture.viewport.width
+    xpack.reporting.capture.zoom
+    xpack.reporting.csv.checkForFormulas
+    xpack.reporting.csv.enablePanelActionDownload
     xpack.reporting.csv.maxSizeBytes
+    xpack.reporting.csv.scroll.duration
+    xpack.reporting.csv.scroll.size
     xpack.reporting.enabled
     xpack.reporting.encryptionKey
     xpack.reporting.index
@@ -139,8 +149,14 @@ kibana_vars=(
     xpack.reporting.kibanaServer.hostname
     xpack.reporting.kibanaServer.port
     xpack.reporting.kibanaServer.protocol
+    xpack.reporting.poll.jobCompletionNotifier.interval
+    xpack.reporting.poll.jobCompletionNotifier.intervalErrorMultiplier
+    xpack.reporting.poll.jobsRefresh.interval
+    xpack.reporting.poll.jobsRefresh.intervalErrorMultiplier
     xpack.reporting.queue.indexInterval
+    xpack.reporting.queue.pollEnabled
     xpack.reporting.queue.pollInterval
+    xpack.reporting.queue.pollIntervalErrorMultiplier
     xpack.reporting.queue.timeout
     xpack.reporting.roles.allow
     xpack.searchprofiler.enabled
