@@ -5,7 +5,6 @@
  */
 
 import _ from 'lodash';
-import d3 from 'd3';
 import { i18n } from '@kbn/i18n';
 import 'ace';
 import rison from 'rison-node';
@@ -595,6 +594,10 @@ app.controller('graphuiPlugin', function (
       });
     }
   }
+
+  $scope.aceLoaded = (editor) => {
+    editor.$blockScrolling = Infinity;
+  };
 
   $scope.setDetail = function (data) {
     $scope.detail = data;
