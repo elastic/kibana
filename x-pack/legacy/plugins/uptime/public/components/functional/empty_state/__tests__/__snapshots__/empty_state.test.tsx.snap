@@ -169,7 +169,6 @@ exports[`EmptyState component does not render empty state with appropriate base 
                       />
                     </p>
                   }
-                  iconColor="subdued"
                   iconType="uptimeApp"
                   title={
                     <EuiTitle
@@ -426,7 +425,6 @@ exports[`EmptyState component doesn't render child components when count is fals
           </EuiTitle>
         </React.Fragment>
       }
-      iconColor="subdued"
     >
       <div
         className="euiEmptyPrompt"
@@ -641,7 +639,6 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                       />
                     </p>
                   }
-                  iconColor="subdued"
                   iconType="uptimeApp"
                   title={
                     <EuiTitle
@@ -1168,7 +1165,6 @@ exports[`EmptyState component renders loading state if no errors or doc count 1`
           </EuiTitle>
         </React.Fragment>
       }
-      iconColor="subdued"
     >
       <div
         className="euiEmptyPrompt"

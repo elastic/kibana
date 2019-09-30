@@ -56,7 +56,6 @@ exports[`IndexPatternsMissingPrompt renders correctly against snapshot 1`] = `
       </p>
     </React.Fragment>
   }
-  iconColor="subdued"
   iconType="gisApp"
   title={
     <h2>
