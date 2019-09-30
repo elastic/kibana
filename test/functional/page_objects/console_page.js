@@ -45,7 +45,7 @@ export function ConsolePageProvider({ getService }) {
     }
 
     async clickPlay() {
-      await testSubjects.click('send-request-button');
+      await testSubjects.click('sendRequestButton');
     }
 
     async collapseHelp() {
