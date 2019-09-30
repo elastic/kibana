@@ -21,11 +21,11 @@ import { FieldFormatConvert, IFieldFormat, HtmlConventTypeConvert } from '../typ
 
 import { asPrettyString, getHighlightHtml } from '../utils';
 
-const CONTEXT_TYPE = 'html';
+export const HTML_CONTEXT_TYPE = 'html';
 
 const getConvertFn = (
   format: IFieldFormat,
-  fieldFormatConvert: FieldFormatConvert
+  fieldFormatConvert: Partial<FieldFormatConvert>
 ): HtmlConventTypeConvert => {
   const fallbackHtml: HtmlConventTypeConvert = (value, field, hit) => {
     const formatted = escape(format.convert(value, 'text'));
@@ -35,13 +35,13 @@ const getConvertFn = (
       : getHighlightHtml(formatted, hit.highlight[field.name]);
   };
 
-  return (fieldFormatConvert[CONTEXT_TYPE] || fallbackHtml) as HtmlConventTypeConvert;
+  return (fieldFormatConvert[HTML_CONTEXT_TYPE] || fallbackHtml) as HtmlConventTypeConvert;
 };
 
 export const setup = (
   format: IFieldFormat,
-  fieldFormatConvert: FieldFormatConvert
-): FieldFormatConvert => {
+  fieldFormatConvert: Partial<FieldFormatConvert>
+): HtmlConventTypeConvert => {
   const convert = getConvertFn(format, fieldFormatConvert);
 
   const recurse: HtmlConventTypeConvert = (value, field, hit, meta) => {
@@ -67,7 +67,5 @@ export const setup = (
     return `<span ng-non-bindable>${recurse(value, field, hit, meta)}</span>`;
   };
 
-  return {
-    [CONTEXT_TYPE]: wrap,
-  };
+  return wrap;
 };

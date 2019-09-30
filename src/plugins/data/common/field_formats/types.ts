@@ -39,5 +39,6 @@ export type FieldFormatConvertFunction = HtmlConventTypeConvert | TextContextTyp
 
 /** @internal **/
 export interface FieldFormatConvert {
-  [key: string]: FieldFormatConvertFunction;
+  text: TextContextTypeConvert;
+  html: HtmlConventTypeConvert;
 }
