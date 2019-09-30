@@ -25,7 +25,6 @@ export const createGETInstallScript = (libs: FleetServerLib) => ({
   },
   handler: async (
     request: FrameworkRequest<{
-      query: { page: string };
       params: {
         osType: 'macos';
       };

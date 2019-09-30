@@ -8,5 +8,5 @@ import { InstallTemplateFunction } from './types';
 
 export const macosInstallTemplate: InstallTemplateFunction = variables => `#!/bin/sh
 
-echo "To install a agent node run:\nscripts/dev_agent --enrollmentToken=$(FLEET_ENROLLMENT_TOKEN)" --kibanaUrl=${variables.kibanaUrl}"
+echo "To install an agent run:\n node scripts/dev_agent --enrollmentToken=$(FLEET_ENROLLMENT_TOKEN)" --kibanaUrl=${variables.kibanaUrl}"
 `;
