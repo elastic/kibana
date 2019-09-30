@@ -10,11 +10,11 @@ import { AlertUtils, getUrlPrefix, getTestAlertData, ObjectRemover } from '../..
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function createUpdateApiKeyTests({ getService }: FtrProviderContext) {
+export default function createMuteAlertInstanceTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('update_api_key', () => {
+  describe('mute_instance', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
@@ -24,15 +24,15 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
       const alertUtils = new AlertUtils({ user, space, supertestWithoutAuth });
 
       describe(scenario.id, () => {
-        it('should handle update alert api key request appropriately', async () => {
+        it('should handle mute alert instance request appropriately', async () => {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
+            .send(getTestAlertData({ enabled: false }))
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'alert');
 
-          const response = await alertUtils.getUpdateApiKeyRequest(createdAlert.id);
+          const response = await alertUtils.getMuteInstanceRequest(createdAlert.id, '1');
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -54,28 +54,33 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.apiKeyOwner).to.eql(user.username);
+              expect(updatedAlert.mutedInstanceIds).to.eql(['1']);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
 
-        it(`shouldn't update alert api key from another space`, async () => {
+        it('should handle mute alert instance request appropriately and not duplicate mutedInstanceIds when muting an instance already muted', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix('other')}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
+            .send(getTestAlertData({ enabled: false }))
             .expect(200);
-          objectRemover.add('other', createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert');
 
-          const response = await alertUtils.getUpdateApiKeyRequest(createdAlert.id);
+          await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}/alert_instance/1/_mute`)
+            .set('kbn-xsrf', 'foo')
+            .expect(204, '');
 
-          expect(response.statusCode).to.eql(404);
+          const response = await alertUtils.getMuteInstanceRequest(createdAlert.id, '1');
+
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
+              expect(response.statusCode).to.eql(404);
               expect(response.body).to.eql({
                 statusCode: 404,
                 error: 'Not Found',
@@ -84,11 +89,14 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: `Saved object [alert/${createdAlert.id}] not found`,
-              });
+              expect(response.statusCode).to.eql(204);
+              expect(response.body).to.eql('');
+              const { body: updatedAlert } = await supertestWithoutAuth
+                .get(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+                .set('kbn-xsrf', 'foo')
+                .auth(user.username, user.password)
+                .expect(200);
+              expect(updatedAlert.mutedInstanceIds).to.eql(['1']);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
