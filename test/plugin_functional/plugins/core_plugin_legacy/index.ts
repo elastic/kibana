@@ -17,11 +17,21 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./applications'));
-    loadTestFile(require.resolve('./ui_plugins'));
-    loadTestFile(require.resolve('./server_plugins.js'));
-    loadTestFile(require.resolve('./legacy_plugins.js'));
+import KbnServer from 'src/legacy/server/kbn_server';
+
+// eslint-disable-next-line import/no-default-export
+export default function(kibana: any) {
+  return new kibana.Plugin({
+    id: 'core_plugin_legacy',
+    require: ['kibana'],
+    init(server: KbnServer) {
+      const { http } = server.newPlatform.setup.core;
+      const router = http.createRouter('');
+
+      router.get({ path: '/api/np-http-in-legacy', validate: false }, async (context, req, res) => {
+        const response = await context.core.elasticsearch.adminClient.callAsInternalUser('ping');
+        return res.ok({ body: `Pong in legacy via new platform: ${response}` });
+      });
+    },
   });
 }
