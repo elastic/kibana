@@ -75,6 +75,8 @@ export interface Alert {
   apiKey?: string;
   apiKeyOwner?: string;
   throttle: string | null;
+  muteAll: boolean;
+  mutedInstanceIds: string[];
 }
 
 export interface RawAlert extends SavedObjectAttributes {
@@ -89,6 +91,8 @@ export interface RawAlert extends SavedObjectAttributes {
   apiKey?: string;
   apiKeyOwner?: string;
   throttle: string | null;
+  muteAll: boolean;
+  mutedInstanceIds: string[];
 }
 
 export interface AlertingPlugin {
