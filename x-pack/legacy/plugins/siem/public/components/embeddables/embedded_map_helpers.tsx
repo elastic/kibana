@@ -12,15 +12,15 @@ import {
   APPLY_FILTER_TRIGGER,
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/triggers';
+  APPLY_FILTER_ACTION,
+  ViewMode,
+} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import {
   APPLY_SIEM_FILTER_ACTION_ID,
   ApplySiemFilterAction,
 } from './actions/apply_siem_filter_action';
-import { APPLY_FILTER_ACTION } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/actions';
 import { IndexPatternMapping, MapEmbeddable, SetQuery } from './types';
 import { getLayerList } from './map_config';
-import { ViewMode } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 // @ts-ignore Missing type defs as maps moves to Typescript
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../maps/common/constants';
 import * as i18n from './translations';

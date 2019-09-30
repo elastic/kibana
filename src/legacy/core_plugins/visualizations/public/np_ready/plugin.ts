@@ -30,17 +30,6 @@ interface VisualizationsPluginSetupDependencies {
   __LEGACY: {
     VisFiltersProvider: any;
     createFilter: any;
-
-    Vis: any;
-    VisFactoryProvider: any;
-    VisTypesRegistryProvider: any;
-  };
-}
-
-interface VisualizationsPluginStartDependencies {
-  __LEGACY: {
-    VisTypesRegistryProvider: any;
-    chrome: any;
   };
 }
 
@@ -69,41 +58,27 @@ export interface VisualizationsStart {
  */
 export class VisualizationsPlugin
   implements
-    Plugin<
-      VisualizationsSetup,
-      VisualizationsStart,
-      VisualizationsPluginSetupDependencies,
-      VisualizationsPluginStartDependencies
-    > {
+    Plugin<VisualizationsSetup, VisualizationsStart, VisualizationsPluginSetupDependencies> {
   private readonly filters: FiltersService = new FiltersService();
   private readonly types: TypesService = new TypesService();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { __LEGACY }: VisualizationsPluginSetupDependencies) {
-    const {
-      VisFiltersProvider,
-      createFilter,
-      Vis,
-      VisFactoryProvider,
-      VisTypesRegistryProvider,
-    } = __LEGACY;
+    const { VisFiltersProvider, createFilter } = __LEGACY;
 
     return {
       filters: this.filters.setup({
         VisFiltersProvider,
         createFilter,
       }),
-      types: this.types.setup({ Vis, VisFactoryProvider, VisTypesRegistryProvider }),
+      types: this.types.setup(),
     };
   }
 
-  public async start(core: CoreStart, { __LEGACY }: VisualizationsPluginStartDependencies) {
-    const { chrome, VisTypesRegistryProvider } = __LEGACY;
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private: any = $injector.get('Private');
+  public start(core: CoreStart) {
     return {
-      types: this.types.start({ VisTypesRegistryProvider, Private }),
+      types: this.types.start(),
     };
   }
 
