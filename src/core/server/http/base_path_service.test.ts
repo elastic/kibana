@@ -31,7 +31,7 @@ describe('BasePath', () => {
     it('returns the server base path', () => {
       const basePath = new BasePath('/server');
       expect(basePath.serverBasePath).toBe('/server');
-    })
+    });
   });
 
   describe('#get()', () => {
