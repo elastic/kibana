@@ -20,28 +20,27 @@ export interface GuidancePanelProps {
 
 function ListItem({
   children,
-  disabled,
-  selected,
+  state,
 }: {
+  state: 'done' | 'active' | 'disabled';
   children: ReactNode;
-  disabled: boolean;
-  selected: boolean;
 }) {
   return (
     <li
       className={classNames('gphGuidancePanel__item', {
-        'gphGuidancePanel__item--disabled': disabled,
+        'gphGuidancePanel__item--disabled': state === 'disabled',
       })}
-      aria-disabled={disabled}
+      aria-disabled={state === 'disabled'}
     >
-      {selected && (
-        <EuiIcon
-          color="secondary"
-          type="check"
-          className="gphGuidancePanel__itemIcon"
+      {state !== 'disabled' && (
+        <span
+          className={classNames('gphGuidancePanel__itemIcon', {
+            'gphGuidancePanel__itemIcon--done': state === 'done',
+          })}
           aria-hidden={true}
-          size="l"
-        />
+        >
+          <EuiIcon type={state === 'active' ? 'sortRight' : 'check'} />
+        </span>
       )}
       {children}
     </li>
@@ -67,7 +66,11 @@ export function GuidancePanel(props: GuidancePanelProps) {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText>
-                <h1>
+                <h1
+                  aria-label={i18n.translate('xpack.graph.guidancePanel.ariaLabel', {
+                    defaultMessage: "Let's get started building your first graph!",
+                  })}
+                >
                   {i18n.translate('xpack.graph.guidancePanel.title', {
                     defaultMessage: "Let's get started!",
                   })}
@@ -76,10 +79,10 @@ export function GuidancePanel(props: GuidancePanelProps) {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <ul className="gphGuidancePanel__list">
-                <ListItem disabled={false} selected={hasDatasource}>
+                <ListItem state={hasDatasource ? 'done' : 'active'}>
                   <FormattedMessage
                     id="xpack.graph.guidancePanel.datasourceItem.description"
-                    defaultMessage="Choose an {indexpattern} above"
+                    defaultMessage="Choose an {indexpattern}"
                     values={{
                       indexpattern: (
                         <EuiLink onClick={onOpenDatasourcePicker}>
@@ -94,7 +97,7 @@ export function GuidancePanel(props: GuidancePanelProps) {
                     }}
                   />
                 </ListItem>
-                <ListItem disabled={!hasDatasource} selected={hasFields}>
+                <ListItem state={hasFields ? 'done' : hasDatasource ? 'active' : 'disabled'}>
                   <FormattedMessage
                     id="xpack.graph.guidancePanel.fieldsItem.description"
                     defaultMessage="{fields} to explore"
@@ -112,7 +115,7 @@ export function GuidancePanel(props: GuidancePanelProps) {
                     }}
                   />
                 </ListItem>
-                <ListItem disabled={!hasFields} selected={false}>
+                <ListItem state={hasFields ? 'active' : 'disabled'}>
                   <FormattedMessage
                     id="xpack.graph.guidancePanel.nodesItem.description"
                     defaultMessage="Search for something in the search bar above to begin exploration. If you don't know where to start, you can also {topTerms}"

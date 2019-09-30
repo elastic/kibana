@@ -23,7 +23,7 @@
 }
 
 .gphGuidancePanel__item--disabled {
-  color: $euiColorMediumShade;
+  color: $euiColorDarkShade;
   pointer-events: none;
 
   button {
@@ -35,4 +35,11 @@
   position: absolute;
   left: 0;
   top: -$euiSizeXS;
+  padding: $euiSizeXS;
+
+  &--done {
+    background-color: $euiColorSecondary;
+    color: $euiColorEmptyShade;
+    border-radius: 50%;
+  }
 }
