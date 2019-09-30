@@ -8,6 +8,7 @@
 
 import PropTypes from 'prop-types';
 
+import { EuiFlexGrid } from '@elastic/eui';
 import React, { Component } from 'react';
 import { RecognizedResult } from './recognized_result';
 
@@ -57,9 +58,9 @@ export class DataRecognizer extends Component {
 
   render() {
     return (
-      <div className={this.className}>
+      <EuiFlexGrid className={this.className} gutterSize="l" columns={4}>
         {this.state.results}
-      </div>
+      </EuiFlexGrid>
     );
   }
 }

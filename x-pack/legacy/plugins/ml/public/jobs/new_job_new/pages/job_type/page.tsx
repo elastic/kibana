@@ -208,15 +208,11 @@ export const Page: FC = () => {
 
           <EuiSpacer size="m" />
 
-          <EuiFlexGrid gutterSize="l" columns={4}>
-            <EuiFlexItem>
-              <DataRecognizer
-                indexPattern={currentIndexPattern}
-                savedSearch={currentSavedSearch}
-                results={recognizerResults}
-              />
-            </EuiFlexItem>
-          </EuiFlexGrid>
+          <DataRecognizer
+            indexPattern={currentIndexPattern}
+            savedSearch={currentSavedSearch}
+            results={recognizerResults}
+          />
 
           <EuiSpacer size="xxl" />
         </div>

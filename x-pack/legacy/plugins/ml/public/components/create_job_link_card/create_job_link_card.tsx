@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, ReactElement } from 'react';
 
 import {
   EuiIcon,
@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 
 interface Props {
-  iconType: IconType;
+  iconType: IconType | ReactElement;
   iconAreaLabel?: string;
   title: any;
   description: any;
@@ -50,7 +50,11 @@ export const CreateJobLinkCard: FC<Props> = ({
     >
       <EuiFlexGroup gutterSize="l" responsive={true}>
         <EuiFlexItem grow={false} style={{ paddingTop: '8px' }}>
-          <EuiIcon size="xl" type={iconType} aria-label={iconAreaLabel} />
+          {typeof iconType === 'string' ? (
+            <EuiIcon size="xl" type={iconType} aria-label={iconAreaLabel} />
+          ) : (
+            iconType
+          )}
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="s">

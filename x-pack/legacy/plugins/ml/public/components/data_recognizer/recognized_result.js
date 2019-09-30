@@ -11,7 +11,9 @@ import PropTypes from 'prop-types';
 
 import {
   EuiIcon,
+  EuiFlexItem
 } from '@elastic/eui';
+import { CreateJobLinkCard } from '../create_job_link_card';
 
 export const RecognizedResult = ({
   config,
@@ -36,27 +38,15 @@ export const RecognizedResult = ({
   }
 
   return (
-    <div className="euiFlexItem">
-      <a href={href} className="euiLink synopsis">
-        <div className="euiPanel euiPanel--paddingMedium synopsisPanel">
-          <div className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
-            <div className="euiFlexItem euiFlexItem--flexGrowZero ml-data-recognizer-logo">
-              {logo}
-            </div>
-            <div className="euiFlexItem synopsisContent">
-              <h4 className="euiTitle euiTitle--small synopsisTitle">{config.title}</h4>
-              <div className="euiText synopsisBody">
-                <p>
-                  <span className="euiTextColor euiTextColor--subdued">
-                    {config.description}
-                  </span>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </a>
-    </div>
+    <EuiFlexItem>
+      <CreateJobLinkCard
+        data-test-subj={id}
+        href={href}
+        title={config.title}
+        description={config.description}
+        iconType={logo}
+      />
+    </EuiFlexItem>
   );
 };
 
