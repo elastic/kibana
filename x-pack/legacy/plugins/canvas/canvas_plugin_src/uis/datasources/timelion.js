@@ -76,10 +76,16 @@ const TimelionDatasource = ({ args, updateArgs, defaultIndex }) => {
       <EuiFormRow
         label="Interval"
         helpText="Accepts Elasticsearch date math: 1w, 5d, 10s, or auto"
-        compressed
+        display="rowCompressed"
       >
-        <EuiFieldText value={getInterval()} onChange={e => setArg('interval', e.target.value)} />
+        <EuiFieldText
+          compressed
+          value={getInterval()}
+          onChange={e => setArg('interval', e.target.value)}
+        />
       </EuiFormRow>
+
+      <EuiSpacer size="m" />
 
       <EuiCallOut color="warning" title="Some tips" size="s">
         <ul>

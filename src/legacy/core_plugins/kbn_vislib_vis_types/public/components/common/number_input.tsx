@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 
 interface NumberInputOptionProps<ParamName extends string> {
   disabled?: boolean;
-  error?: string[];
+  error?: ReactNode;
   isInvalid?: boolean;
   label?: React.ReactNode;
   max?: number;
@@ -52,6 +52,7 @@ function NumberInputOption<ParamName extends string>({
       <EuiFieldNumber
         data-test-subj={dataTestSubj}
         disabled={disabled}
+        compressed
         fullWidth
         isInvalid={isInvalid}
         step={step}

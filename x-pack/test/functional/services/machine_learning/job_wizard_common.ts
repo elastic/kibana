@@ -140,25 +140,13 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
       expect(actualModelMemoryLimit).to.eql(expectedValue);
     },
 
-    async assertMultiMetricSplitFieldInputExists() {
-      await testSubjects.existOrFail('mlJobWizardSplitFieldSelection > comboBoxInput');
-    },
-
-    async assertMultiMetricSplitFieldSelection(identifier: string) {
-      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-        'mlJobWizardSplitFieldSelection > comboBoxInput'
-      );
-      expect(comboBoxSelectedOptions.length).to.eql(1);
-      expect(comboBoxSelectedOptions[0]).to.eql(identifier);
-    },
-
     async assertInfluencerInputExists() {
-      await testSubjects.existOrFail('mlJobWizardInfluencerSelection > comboBoxInput');
+      await testSubjects.existOrFail('influencerSelect > comboBoxInput');
     },
 
     async assertInfluencerSelection(influencers: string[]) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-        'mlJobWizardInfluencerSelection > comboBoxInput'
+        'influencerSelect > comboBoxInput'
       );
       expect(comboBoxSelectedOptions).to.eql(influencers);
     },
@@ -174,24 +162,6 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
         await testSubjects.getVisibleText(`detector ${detectorPosition} > detectorTitle`)
       ).to.eql(aggAndFieldIdentifier);
       await testSubjects.existOrFail(`detector ${detectorPosition} > mlAnomalyChart ${chartType}`);
-    },
-
-    async assertDetectorSplitExists(splitField: string) {
-      await testSubjects.existOrFail(`dataSplit > dataSplitTitle ${splitField}`);
-      await testSubjects.existOrFail(`dataSplit > splitCard front`);
-      await testSubjects.existOrFail(`dataSplit > splitCard back`);
-    },
-
-    async assertDetectorSplitFrontCardTitle(frontCardTitle: string) {
-      expect(
-        await testSubjects.getVisibleText(`dataSplit > splitCard front > splitCardTitle`)
-      ).to.eql(frontCardTitle);
-    },
-
-    async assertDetectorSplitNumberOfBackCards(numberOfBackCards: number) {
-      expect(await testSubjects.findAll(`dataSplit > splitCard back`)).to.have.length(
-        numberOfBackCards
-      );
     },
 
     async clickNextButton() {
@@ -211,27 +181,25 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async setBucketSpan(bucketSpan: string) {
-      await testSubjects.setValue('mlJobWizardInputBucketSpan', bucketSpan);
+      await testSubjects.setValue('mlJobWizardInputBucketSpan', bucketSpan, { withKeyboard: true });
     },
 
     async setJobId(jobId: string) {
-      await testSubjects.setValue('mlJobWizardInputJobId', jobId);
+      await testSubjects.setValue('mlJobWizardInputJobId', jobId, { withKeyboard: true });
     },
 
     async setJobDescription(jobDescription: string) {
-      await testSubjects.setValue('mlJobWizardInputJobDescription', jobDescription);
+      await testSubjects.setValue('mlJobWizardInputJobDescription', jobDescription, {
+        withKeyboard: true,
+      });
     },
 
     async addJobGroup(jobGroup: string) {
       await comboBox.setCustom('mlJobWizardComboBoxJobGroups > comboBoxInput', jobGroup);
     },
 
-    async selectMultiMetricSplitField(identifier: string) {
-      await comboBox.set('mlJobWizardSplitFieldSelection > comboBoxInput', identifier);
-    },
-
     async addInfluencer(influencer: string) {
-      await comboBox.setCustom('mlJobWizardInfluencerSelection > comboBoxInput', influencer);
+      await comboBox.setCustom('influencerSelect > comboBoxInput', influencer);
     },
 
     async ensureAdvancedSectionOpen() {
@@ -250,7 +218,9 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async setModelMemoryLimit(modelMemoryLimit: string) {
-      await testSubjects.setValue('mlJobWizardInputModelMemoryLimit', modelMemoryLimit);
+      await testSubjects.setValue('mlJobWizardInputModelMemoryLimit', modelMemoryLimit, {
+        withKeyboard: true,
+      });
     },
 
     async createJobAndWaitForCompletion() {

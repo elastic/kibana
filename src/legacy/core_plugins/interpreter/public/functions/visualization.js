@@ -20,8 +20,9 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { IndexPatternsProvider } from '../../../data/public';
+import { setup as data } from '../../../data/public/legacy';
+import { start as visualizations } from '../../../visualizations/public/legacy';
+
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { PersistedState } from 'ui/persisted_state';
 
@@ -64,13 +65,12 @@ export const visualization = () => ({
   async fn(context, args, handlers) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private = $injector.get('Private');
-    const visTypes = Private(VisTypesRegistryProvider);
-    const indexPatterns = Private(IndexPatternsProvider);
+    const { indexPatterns } = data.indexPatterns;
     const queryFilter = Private(FilterBarQueryFilterProvider);
 
     const visConfigParams = JSON.parse(args.visConfig);
     const schemas = JSON.parse(args.schemas);
-    const visType = visTypes.byName[args.type || 'histogram'];
+    const visType = visualizations.types.get(args.type || 'histogram');
     const indexPattern = args.index ? await indexPatterns.get(args.index) : null;
 
     const uiStateParams = JSON.parse(args.uiState);

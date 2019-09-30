@@ -18,7 +18,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiFormRow, EuiIconTip, EuiRange } from '@elastic/eui';
+import { EuiFormRow, EuiIconTip, EuiRange, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AggControlProps } from './agg_control_props';
@@ -50,21 +50,24 @@ function RadiusRatioOptionControl({ editorStateParams, setValue }: AggControlPro
   }, []);
 
   return (
-    <EuiFormRow fullWidth={true} label={label}>
-      <EuiRange
-        compressed
-        fullWidth={true}
-        min={1}
-        max={100}
-        value={editorStateParams.radiusRatio || DEFAULT_VALUE}
-        onChange={(e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) =>
-          setValue(editorStateParams, PARAM_NAME, parseFloat(e.currentTarget.value))
-        }
-        showRange
-        showValue
-        valueAppend="%"
-      />
-    </EuiFormRow>
+    <>
+      <EuiFormRow fullWidth={true} label={label} compressed>
+        <EuiRange
+          compressed
+          fullWidth={true}
+          min={1}
+          max={100}
+          value={editorStateParams.radiusRatio || DEFAULT_VALUE}
+          onChange={(
+            e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>
+          ) => setValue(editorStateParams, PARAM_NAME, parseFloat(e.currentTarget.value))}
+          showRange
+          showValue
+          valueAppend="%"
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+    </>
   );
 }
 

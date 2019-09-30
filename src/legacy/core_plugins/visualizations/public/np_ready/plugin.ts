@@ -19,7 +19,7 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 
 import { FiltersService, FiltersSetup } from './filters';
-import { TypesService, TypesSetup } from './types';
+import { TypesService, TypesSetup, TypesStart } from './types';
 
 /**
  * Interface for any dependencies on other plugins' contracts.
@@ -30,15 +30,8 @@ interface VisualizationsPluginSetupDependencies {
   __LEGACY: {
     VisFiltersProvider: any;
     createFilter: any;
-
-    Vis: any;
-    VisFactoryProvider: any;
-    VisTypesRegistryProvider: any;
   };
 }
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface VisualizationsPluginStartDependencies {}
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -51,7 +44,9 @@ export interface VisualizationsSetup {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface VisualizationsStart {}
+export interface VisualizationsStart {
+  types: TypesStart;
+}
 
 /**
  * Visualizations Plugin - public
@@ -63,37 +58,28 @@ export interface VisualizationsStart {}
  */
 export class VisualizationsPlugin
   implements
-    Plugin<
-      VisualizationsSetup,
-      VisualizationsStart,
-      VisualizationsPluginSetupDependencies,
-      VisualizationsPluginStartDependencies
-    > {
+    Plugin<VisualizationsSetup, VisualizationsStart, VisualizationsPluginSetupDependencies> {
   private readonly filters: FiltersService = new FiltersService();
   private readonly types: TypesService = new TypesService();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { __LEGACY }: VisualizationsPluginSetupDependencies) {
-    const {
-      VisFiltersProvider,
-      createFilter,
-      Vis,
-      VisFactoryProvider,
-      VisTypesRegistryProvider,
-    } = __LEGACY;
+    const { VisFiltersProvider, createFilter } = __LEGACY;
 
     return {
       filters: this.filters.setup({
         VisFiltersProvider,
         createFilter,
       }),
-      types: this.types.setup({ Vis, VisFactoryProvider, VisTypesRegistryProvider }),
+      types: this.types.setup(),
     };
   }
 
-  public start(core: CoreStart, plugins: VisualizationsPluginStartDependencies) {
-    return {};
+  public start(core: CoreStart) {
+    return {
+      types: this.types.start(),
+    };
   }
 
   public stop() {

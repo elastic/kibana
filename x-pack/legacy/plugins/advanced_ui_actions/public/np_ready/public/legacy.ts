@@ -10,15 +10,12 @@ import { npSetup, npStart } from 'ui/new_platform';
 
 import { plugin } from '.';
 
-import {
-  setup as embeddableSetup,
-  start as embeddableStart,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
-
 const pluginInstance = plugin({} as any);
 export const setup = pluginInstance.setup(npSetup.core, {
-  embeddable: embeddableSetup,
+  embeddable: npSetup.plugins.embeddable,
+  uiActions: npSetup.plugins.uiActions,
 });
 export const start = pluginInstance.start(npStart.core, {
-  embeddable: embeddableStart,
+  embeddable: npStart.plugins.embeddable,
+  uiActions: npStart.plugins.uiActions,
 });

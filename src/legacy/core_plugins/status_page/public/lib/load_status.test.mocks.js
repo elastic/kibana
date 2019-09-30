@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { fatalErrorsServiceMock, notificationServiceMock } from '../../../../../core/public/mocks';
+import { fatalErrorsServiceMock, notificationServiceMock, overlayServiceMock } from '../../../../../core/public/mocks';
 
 jest.doMock('ui/new_platform', () => ({
   npSetup: {
@@ -25,5 +25,10 @@ jest.doMock('ui/new_platform', () => ({
       fatalErrors: fatalErrorsServiceMock.createSetupContract(),
       notifications: notificationServiceMock.createSetupContract(),
     }
+  },
+  npStart: {
+    core: {
+      overlays: overlayServiceMock.createStartContract(),
+    },
   },
 }));

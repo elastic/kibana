@@ -49,7 +49,7 @@ function ThresholdPanel({ stateParams, setValue, vis }: VisOptionsProps<BasicVis
           />
         </h2>
       </EuiTitle>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
 
       <SwitchOption
         label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.thresholdLine.showLabel', {
@@ -112,6 +112,7 @@ function ThresholdPanel({ stateParams, setValue, vis }: VisOptionsProps<BasicVis
             compressed
           >
             <EuiColorPicker
+              compressed
               color={stateParams.thresholdLine.color}
               fullWidth
               onChange={setThresholdLineColor}

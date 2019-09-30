@@ -17,53 +17,33 @@
  * under the License.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { debounce } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { BehaviorSubject, combineLatest } from 'rxjs';
-
-// @ts-ignore
-import mappings from '../../../../../public/quarantined/src/mappings';
-// @ts-ignore
-import init from '../../../../../public/quarantined/src/app';
 
 import { EditorOutput, Editor, ConsoleHistory } from '../editor';
-import { subscribeResizeChecker } from '../editor/legacy/subscribe_console_resize_checker';
+import { Settings } from '../settings';
 
-import {
-  AutocompleteOptions,
-  TopNavMenu,
-  WelcomePanel,
-  DevToolsSettingsModal,
-  HelpPanel,
-  PanelsContainer,
-  Panel,
-} from '../../components';
+// TODO: find out what this is: $(document.body).removeClass('fouc');
+
+import { TopNavMenu, WelcomePanel, HelpPanel, PanelsContainer, Panel } from '../../components';
 
 import { useAppContext } from '../../context';
-import { StorageKeys, DevToolsSettings } from '../../../services';
+import { StorageKeys } from '../../../services';
 
 import { getTopNavConfig } from './get_top_nav';
+import { useEditorReadContext } from '../editor';
 
 const INITIAL_PANEL_WIDTH = 50;
 const PANEL_MIN_WIDTH = '100px';
 
-// We only run certain initialization after we know all our editors have
-// been instantiated -- which is what we use the below streams for.
-const inputReadySubject$ = new BehaviorSubject<any>(null);
-const outputReadySubject$ = new BehaviorSubject<any>(null);
-const editorsReady$ = combineLatest(inputReadySubject$, outputReadySubject$);
-
 export function Main() {
   const {
-    services: { storage, settings, history },
-    docLinkVersion,
-    ResizeChecker,
+    services: { storage },
   } = useAppContext();
 
-  const [editorReady, setEditorReady] = useState<boolean>(false);
-  const [inputEditor, setInputEditor] = useState<any>(null);
-  const [outputEditor, setOutputEditor] = useState<any>(null);
+  const { editorsReady } = useEditorReadContext();
+
   const [showWelcome, setShowWelcomePanel] = useState(
     () => storage.get('version_welcome_shown') !== '@@SENSE_REVISION'
   );
@@ -73,14 +53,6 @@ export function Main() {
   const [showHelp, setShowHelp] = useState(false);
 
   const containerRef = useRef<null | HTMLDivElement>(null);
-
-  const onInputEditorReady = useCallback((value: any) => {
-    inputReadySubject$.next(value);
-  }, []);
-
-  const onOutputEditorReady = useCallback((value: any) => {
-    outputReadySubject$.next(value);
-  }, []);
 
   const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [
     INITIAL_PANEL_WIDTH,
@@ -94,116 +66,9 @@ export function Main() {
     []
   );
 
-  const [pastRequests, setPastRequests] = useState<any[]>(() => history.getHistory());
-
-  const sendCurrentRequest = useCallback(() => {
-    inputEditor.focus();
-    inputEditor.sendCurrentRequestToES(() => {
-      setPastRequests(history.getHistory());
-    }, outputEditor);
-  }, [inputEditor, outputEditor]);
-
-  const clearHistory = useCallback(() => {
-    history.clearHistory();
-    setPastRequests(history.getHistory());
-  }, []);
-
-  const restoreFromHistory = useCallback((req: any) => {
-    history.restoreFromHistory(req);
-  }, []);
-
   const renderConsoleHistory = () => {
-    return editorReady ? (
-      <ConsoleHistory
-        restoreFromHistory={restoreFromHistory}
-        clearHistory={clearHistory}
-        requests={pastRequests}
-        close={() => setShowHistory(false)}
-      />
-    ) : null;
+    return editorsReady ? <ConsoleHistory close={() => setShowHistory(false)} /> : null;
   };
-
-  const refreshAutocompleteSettings = (selectedSettings: any) => {
-    mappings.retrieveAutoCompleteInfo(selectedSettings);
-  };
-
-  const getAutocompleteDiff = (newSettings: DevToolsSettings, prevSettings: DevToolsSettings) => {
-    return Object.keys(newSettings.autocomplete).filter(key => {
-      // @ts-ignore
-      return prevSettings.autocomplete[key] !== newSettings.autocomplete[key];
-    });
-  };
-
-  const fetchAutocompleteSettingsIfNeeded = (
-    newSettings: DevToolsSettings,
-    prevSettings: DevToolsSettings
-  ) => {
-    // We'll only retrieve settings if polling is on. The expectation here is that if the user
-    // disables polling it's because they want manual control over the fetch request (possibly
-    // because it's a very expensive request given their cluster and bandwidth). In that case,
-    // they would be unhappy with any request that's sent automatically.
-    if (newSettings.polling) {
-      const autocompleteDiff = getAutocompleteDiff(newSettings, prevSettings);
-
-      const isSettingsChanged = autocompleteDiff.length > 0;
-      const isPollingChanged = prevSettings.polling !== newSettings.polling;
-
-      if (isSettingsChanged) {
-        // If the user has changed one of the autocomplete settings, then we'll fetch just the
-        // ones which have changed.
-        const changedSettings: any = autocompleteDiff.reduce(
-          (changedSettingsAccum: any, setting: string): any => {
-            changedSettingsAccum[setting] =
-              newSettings.autocomplete[setting as AutocompleteOptions];
-            return changedSettingsAccum;
-          },
-          {}
-        );
-        mappings.retrieveAutoCompleteInfo(changedSettings.autocomplete);
-      } else if (isPollingChanged) {
-        // If the user has turned polling on, then we'll fetch all selected autocomplete settings.
-        mappings.retrieveAutoCompleteInfo();
-      }
-    }
-  };
-
-  const onSaveSettings = async (newSettings: DevToolsSettings) => {
-    const prevSettings = settings.getCurrentSettings();
-    settings.updateSettings(newSettings);
-    fetchAutocompleteSettingsIfNeeded(newSettings, prevSettings);
-    setShowSettings(false);
-  };
-
-  useEffect(() => {
-    let resizerSubscriptions: Array<() => void> = [];
-    const readySubscription = editorsReady$.subscribe(([input, output]) => {
-      settings.registerOutput(output.editor);
-      settings.registerInput(input.editor);
-      history.setEditor(input.editor);
-
-      init(input.editor, output.editor, history);
-
-      // This may kick of a polling mechanic, needs to be refactored to more
-      // standard subscription pattern.
-      mappings.retrieveAutoCompleteInfo();
-
-      resizerSubscriptions = resizerSubscriptions.concat([
-        subscribeResizeChecker(ResizeChecker, containerRef.current!, input.editor, output.editor),
-        subscribeResizeChecker(ResizeChecker, input.element, input.editor),
-        subscribeResizeChecker(ResizeChecker, output.element, output.editor),
-      ]);
-
-      setInputEditor(input.editor);
-      setOutputEditor(output.editor);
-      setEditorReady(true);
-    });
-
-    return () => {
-      resizerSubscriptions.map(done => done());
-      readySubscription.unsubscribe();
-      mappings.clearSubscriptions();
-    };
-  }, []);
 
   return (
     <div className="consoleContainer" style={{ height: '100%', width: '100%' }} ref={containerRef}>
@@ -229,17 +94,13 @@ export function Main() {
               style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
               initialWidth={firstPanelWidth + '%'}
             >
-              <Editor
-                sendCurrentRequest={sendCurrentRequest}
-                onEditorReady={onInputEditorReady}
-                docLinkVersion={docLinkVersion}
-              />
+              <Editor />
             </Panel>
             <Panel
               style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
               initialWidth={secondPanelWidth + '%'}
             >
-              <EditorOutput onReady={onOutputEditorReady} />
+              <EditorOutput />
             </Panel>
           </PanelsContainer>
         </EuiFlexItem>
@@ -254,14 +115,7 @@ export function Main() {
         />
       ) : null}
 
-      {showSettings ? (
-        <DevToolsSettingsModal
-          onSaveSettings={onSaveSettings}
-          onClose={() => setShowSettings(false)}
-          refreshAutocompleteSettings={refreshAutocompleteSettings}
-          settings={settings.getCurrentSettings()}
-        />
-      ) : null}
+      {showSettings ? <Settings onClose={() => setShowSettings(false)} /> : null}
 
       {showHelp ? <HelpPanel onClose={() => setShowHelp(false)} /> : null}
     </div>

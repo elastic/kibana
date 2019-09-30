@@ -27,16 +27,22 @@ import { EuiIcon } from '@elastic/eui';
 import { useAppContext } from '../../../../context';
 import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
 import { ConsoleMenu } from '../../../../components';
+
 import { autoIndent, getDocumentation } from '../console_menu_actions';
 import { registerCommands } from './keyboard_shortcuts';
+import { applyCurrentSettings } from './apply_editor_settings';
 
 // @ts-ignore
 import { initializeInput } from '../../../../../../../public/quarantined/src/input';
+// @ts-ignore
+import mappings from '../../../../../../../public/quarantined/src/mappings';
+
+import { useEditorActionContext, useEditorReadContext } from '../../context';
+import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
+import { loadRemoteState } from './load_remote_editor_state';
 
 export interface EditorProps {
-  onEditorReady?: (editor: any) => void;
-  sendCurrentRequest?: () => void;
-  docLinkVersion: string;
+  previousStateLocation?: 'stored' | string;
 }
 
 const abs: CSSProperties = {
@@ -47,10 +53,22 @@ const abs: CSSProperties = {
   right: '0',
 };
 
-function Component({ onEditorReady, docLinkVersion, sendCurrentRequest = () => {} }: EditorProps) {
+const DEFAULT_INPUT_VALUE = `GET _search
+{
+  "query": {
+    "match_all": {}
+  }
+}`;
+
+function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
   const {
-    services: { history, settings },
+    services: { history, notifications },
+    ResizeChecker,
+    docLinkVersion,
   } = useAppContext();
+
+  const { settings } = useEditorReadContext();
+  const dispatch = useEditorActionContext();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
   const actionsRef = useRef<HTMLDivElement | null>(null);
@@ -70,21 +88,86 @@ function Component({ onEditorReady, docLinkVersion, sendCurrentRequest = () => {
   useEffect(() => {
     const $editor = $(editorRef.current!);
     const $actions = $(actionsRef.current!);
-    editorInstanceRef.current = initializeInput($editor, $actions, history, settings);
-    if (onEditorReady) {
-      onEditorReady({ editor: editorInstanceRef.current, element: editorRef.current! });
+    editorInstanceRef.current = initializeInput($editor, $actions);
+
+    if (previousStateLocation === 'stored') {
+      const { content } = history.getSavedEditorState() || {
+        content: DEFAULT_INPUT_VALUE,
+      };
+      editorInstanceRef.current.update(content);
+    } else {
+      loadRemoteState({ url: previousStateLocation, input: editorInstanceRef.current });
     }
 
+    function setupAutosave() {
+      let timer: number;
+      const saveDelay = 500;
+
+      return editorInstanceRef.current.getSession().on('change', function onChange() {
+        if (timer) {
+          clearTimeout(timer);
+        }
+        timer = window.setTimeout(saveCurrentState, saveDelay);
+      });
+    }
+
+    function saveCurrentState() {
+      try {
+        const content = editorInstanceRef.current.getValue();
+        history.updateCurrentState(content);
+      } catch (e) {
+        // Ignoring saving error
+      }
+    }
+
+    dispatch({
+      type: 'setInputEditor',
+      value: editorInstanceRef.current,
+    });
+
     setTextArea(editorRef.current!.querySelector('textarea'));
+
+    mappings.retrieveAutoCompleteInfo();
+
+    const unsubscribeResizer = subscribeResizeChecker(
+      ResizeChecker,
+      editorRef.current!,
+      editorInstanceRef.current
+    );
+    const unsubscribeAutoSave = setupAutosave();
+
+    return () => {
+      unsubscribeResizer();
+      unsubscribeAutoSave();
+      mappings.clearSubscriptions();
+    };
   }, []);
+
+  const sendCurrentRequestToES = () => {
+    dispatch({
+      type: 'sendRequestToEs',
+      value: {
+        isUsingTripleQuotes: settings.tripleQuotes,
+        isPolling: settings.polling,
+        callback: (esPath: any, esMethod: any, esData: any) =>
+          history.addToHistory(esPath, esMethod, esData),
+      },
+    });
+  };
+
+  useEffect(() => {
+    applyCurrentSettings(editorInstanceRef.current!, settings);
+    // Preserve legacy focus behavior after settings have updated.
+    editorInstanceRef.current!.focus();
+  }, [settings]);
 
   useEffect(() => {
     registerCommands({
       input: editorInstanceRef.current,
-      sendCurrentRequestToES: sendCurrentRequest,
+      sendCurrentRequestToES,
       openDocumentation,
     });
-  }, [sendCurrentRequest]);
+  }, []);
 
   return (
     <div style={abs} className="conApp">
@@ -97,7 +180,7 @@ function Component({ onEditorReady, docLinkVersion, sendCurrentRequest = () => {
             })}
           >
             <button
-              onClick={sendCurrentRequest}
+              onClick={sendCurrentRequestToES}
               data-test-subj="send-request-button"
               className="conApp__editorActionButton conApp__editorActionButton--success"
             >
@@ -114,6 +197,7 @@ function Component({ onEditorReady, docLinkVersion, sendCurrentRequest = () => {
             autoIndent={(event: any) => {
               autoIndent(editorInstanceRef.current!, event);
             }}
+            addNotification={({ title }) => notifications.toasts.add({ title })}
           />
         </div>
         <div
@@ -127,4 +211,4 @@ function Component({ onEditorReady, docLinkVersion, sendCurrentRequest = () => {
   );
 }
 
-export const Editor = React.memo(Component);
+export const Editor = React.memo(_Editor);

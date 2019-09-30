@@ -6,43 +6,29 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiFormRow,
-  EuiFlexGroup,
-  EuiFlexItem
-} from '@elastic/eui';
 import { ValidatedDualRange } from 'ui/validated_range';
 import { DEFAULT_MIN_SIZE, DEFAULT_MAX_SIZE } from '../../../vector_style_defaults';
 
-
-export function SizeRangeSelector({ minSize, maxSize, onChange }) {
-
+export function SizeRangeSelector({ minSize, maxSize, onChange, ...rest }) {
   const onSizeChange = ([min, max]) => {
     onChange({
       minSize: Math.max(DEFAULT_MIN_SIZE, parseInt(min, 10)),
-      maxSize: Math.min(DEFAULT_MAX_SIZE, parseInt(max, 10))
+      maxSize: Math.min(DEFAULT_MAX_SIZE, parseInt(max, 10)),
     });
   };
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiFormRow
-          compressed
-        >
-          <ValidatedDualRange
-            min={DEFAULT_MIN_SIZE}
-            max={DEFAULT_MAX_SIZE}
-            step={1}
-            value={[minSize, maxSize]}
-            showInput
-            showRange
-            onChange={onSizeChange}
-            allowEmptyRange={false}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <ValidatedDualRange
+      min={DEFAULT_MIN_SIZE}
+      max={DEFAULT_MAX_SIZE}
+      step={1}
+      value={[minSize, maxSize]}
+      showInput
+      showRange
+      onChange={onSizeChange}
+      allowEmptyRange={false}
+      {...rest}
+    />
   );
 }
 
