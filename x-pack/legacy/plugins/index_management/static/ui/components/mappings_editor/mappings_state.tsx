@@ -70,28 +70,29 @@ const reducer = (state: State, action: Action): State => {
 const StateContext = createContext<State | undefined>(undefined);
 const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
-const initialState: State = {
-  isValid: undefined,
-  configuration: {
-    data: {
-      raw: {},
-      format: () => ({} as Mappings),
-    },
-    validate: () => Promise.resolve(false),
-  },
-  properties: {
-    data: {},
-    status: 'idle',
-    isValid: true,
-  },
-};
-
 export interface Props {
   children: React.ReactNode;
+  defaultValue: { properties: { [key: string]: any } };
   onUpdate: OnUpdateHandler;
 }
 
-export const MappingsState = ({ children, onUpdate }: Props) => {
+export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: Props) => {
+  const initialState: State = {
+    isValid: undefined,
+    configuration: {
+      data: {
+        raw: {},
+        format: () => ({} as Mappings),
+      },
+      validate: () => Promise.resolve(false),
+    },
+    properties: {
+      data: defaultValue.properties,
+      status: 'idle',
+      isValid: true,
+    },
+  };
+
   const [state, dispatch] = useReducer(reducer, initialState);
   useEffect(() => {
     // console.log('State update', state);
@@ -112,7 +113,7 @@ export const MappingsState = ({ children, onUpdate }: Props) => {
       <DispatchContext.Provider value={dispatch}>{children}</DispatchContext.Provider>
     </StateContext.Provider>
   );
-};
+});
 
 export const useState = () => {
   const ctx = useContext(StateContext);

@@ -6,13 +6,7 @@
 
 import React from 'react';
 
-// import { OnFormUpdateArg } from './shared_imports';
-import {
-  ConfigurationForm,
-  CONFIGURATION_FIELDS,
-  // DocumentFields,
-  // DocumentFieldsState,
-} from './components';
+import { ConfigurationForm, CONFIGURATION_FIELDS, DocumentFields } from './components';
 
 import {
   MappingsState,
@@ -35,11 +29,12 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue = {} }: Props
       }),
       {} as MappingsConfiguration
     );
+  const propertiesDefaultValue = defaultValue.properties || {};
 
   return (
-    <MappingsState onUpdate={onUpdate}>
+    <MappingsState onUpdate={onUpdate} defaultValue={{ properties: propertiesDefaultValue }}>
       <ConfigurationForm defaultValue={configurationDefaultValue} />
-      <h2>Document Fields</h2>
+      <DocumentFields defaultValue={propertiesDefaultValue} />
     </MappingsState>
   );
 });

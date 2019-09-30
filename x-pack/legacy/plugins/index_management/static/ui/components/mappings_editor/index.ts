@@ -5,3 +5,5 @@
  */
 
 export * from './mappings_editor';
+
+export { OnUpdateHandler, Mappings } from './mappings_state';

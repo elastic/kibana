@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import React from 'react';
 
-export * from './configuration_form';
-
-export * from './document_fields';
+export const DocumentFieldsHeaders = () => {
+  return <h2>Document fields</h2>;
+};
