@@ -10,6 +10,7 @@ import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { ExternalRouteDeps } from '.';
+import { createLicensedRouteHandler } from '../../lib';
 
 export function initPutSpacesApi(deps: ExternalRouteDeps) {
   const { externalRouter, spacesService, getSavedObjects } = deps;
@@ -24,7 +25,7 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
         body: spaceSchema,
       },
     },
-    async (context, request, response) => {
+    createLicensedRouteHandler(async (context, request, response) => {
       const { SavedObjectsClient } = getSavedObjects();
       const spacesClient: SpacesClient = await spacesService.scopedClient(request);
 
@@ -42,6 +43,6 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
       }
 
       return response.ok({ body: result });
-    }
+    })
   );
 }

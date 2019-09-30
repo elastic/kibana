@@ -5,37 +5,45 @@
  */
 
 import * as Rx from 'rxjs';
-import * as kbnTestServer from '../../../../../../../src/test_utils/kbn_server';
-import { createSpaces, createLegacyAPI, createMockSavedObjectsRepository } from '../__fixtures__';
-import { CoreSetup } from 'src/core/server';
-import { loggingServiceMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import {
+  createSpaces,
+  createLegacyAPI,
+  createMockSavedObjectsRepository,
+  mockRouteContext,
+  mockRouteContextWithInvalidLicense,
+} from '../__fixtures__';
+import { CoreSetup, IRouter, kibanaResponseFactory } from 'src/core/server';
+import {
+  loggingServiceMock,
+  elasticsearchServiceMock,
+  httpServiceMock,
+  httpServerMock,
+} from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
 import { createOptionalPlugin } from '../../../../../../legacy/server/lib/optional_plugin';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { initPutSpacesApi } from './put';
+import { RouteSchemas } from 'src/core/server/http/router/route';
+import { ObjectType } from '@kbn/config-schema';
 
-jest.setTimeout(30000);
-describe('Spaces Public API', () => {
+describe('PUT /api/spaces/space', () => {
   const spacesSavedObjects = createSpaces();
   const spaces = spacesSavedObjects.map(s => ({ id: s.id, ...s.attributes }));
 
-  let root: ReturnType<typeof kbnTestServer.createRoot>;
-
-  const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
-
-  beforeAll(async () => {
-    root = kbnTestServer.createRoot();
-    const { http } = await root.setup();
-    const router = http.createRouter('/');
-
-    const log = loggingServiceMock.create().get('spaces');
+  const setup = async () => {
+    const httpService = httpServiceMock.createSetupContract();
+    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
 
     const legacyAPI = createLegacyAPI({ spaces });
 
+    const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
+
+    const log = loggingServiceMock.create().get('spaces');
+
     const service = new SpacesService(log, () => legacyAPI);
     const spacesService = await service.setup({
-      http: (http as unknown) as CoreSetup['http'],
+      http: (httpService as unknown) as CoreSetup['http'],
       elasticsearch: elasticsearchServiceMock.createSetupContract(),
       getSecurity: () =>
         createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
@@ -60,20 +68,20 @@ describe('Spaces Public API', () => {
     initPutSpacesApi({
       externalRouter: router,
       getSavedObjects: () => legacyAPI.savedObjects,
-      log: loggingServiceMock.create().get('spaces'),
+      log,
       spacesService,
     });
 
-    await root.start();
-  });
+    const [routeDefinition, routeHandler] = router.put.mock.calls[0];
 
-  afterAll(async () => await root.shutdown());
+    return {
+      routeValidation: routeDefinition.validate as RouteSchemas<ObjectType, ObjectType, ObjectType>,
+      routeHandler,
+      savedObjectsRepositoryMock,
+    };
+  };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  test('PUT /space should update an existing space with the provided ID', async () => {
+  it('should update an existing space with the provided ID', async () => {
     const payload = {
       id: 'a-space',
       name: 'my updated space',
@@ -81,9 +89,17 @@ describe('Spaces Public API', () => {
       disabledFeatures: [],
     };
 
-    const response = await kbnTestServer.request
-      .put(root, '/api/spaces/space/a-space')
-      .send(payload);
+    const { routeHandler, savedObjectsRepositoryMock } = await setup();
+
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        id: payload.id,
+      },
+      body: payload,
+      method: 'post',
+    });
+
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
     const { status } = response;
 
@@ -96,7 +112,7 @@ describe('Spaces Public API', () => {
     });
   });
 
-  test('PUT /space should allow an empty description', async () => {
+  it('should allow an empty description', async () => {
     const payload = {
       id: 'a-space',
       name: 'my updated space',
@@ -104,9 +120,17 @@ describe('Spaces Public API', () => {
       disabledFeatures: ['foo'],
     };
 
-    const response = await kbnTestServer.request
-      .put(root, '/api/spaces/space/a-space')
-      .send(payload);
+    const { routeHandler, savedObjectsRepositoryMock } = await setup();
+
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        id: payload.id,
+      },
+      body: payload,
+      method: 'post',
+    });
+
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
     const { status } = response;
 
@@ -119,16 +143,24 @@ describe('Spaces Public API', () => {
     });
   });
 
-  test('PUT /space should not require disabledFeatures', async () => {
+  it('should not require disabledFeatures', async () => {
     const payload = {
       id: 'a-space',
       name: 'my updated space',
       description: '',
     };
 
-    const response = await kbnTestServer.request
-      .put(root, '/api/spaces/space/a-space')
-      .send(payload);
+    const { routeHandler, routeValidation, savedObjectsRepositoryMock } = await setup();
+
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        id: payload.id,
+      },
+      body: routeValidation.body!.validate(payload),
+      method: 'post',
+    });
+
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
     const { status } = response;
 
@@ -141,21 +173,46 @@ describe('Spaces Public API', () => {
     });
   });
 
-  test.todo(`returns result of routePreCheckLicense`);
-
-  test('PUT /space should not allow a new space to be created', async () => {
+  it('should not allow a new space to be created', async () => {
     const payload = {
       id: 'a-new-space',
       name: 'my new space',
       description: 'with a description',
     };
 
-    const response = await kbnTestServer.request
-      .put(root, '/api/spaces/space/a-new-space')
-      .send(payload);
+    const { routeHandler } = await setup();
+
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        id: payload.id,
+      },
+      body: payload,
+      method: 'post',
+    });
+
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
     const { status } = response;
 
     expect(status).toEqual(404);
+  });
+
+  it(`returns http/403 when the license is invalid`, async () => {
+    const { routeHandler } = await setup();
+
+    const request = httpServerMock.createKibanaRequest({
+      method: 'post',
+    });
+
+    const response = await routeHandler(
+      mockRouteContextWithInvalidLicense,
+      request,
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toEqual(403);
+    expect(response.payload).toEqual({
+      message: 'License is invalid for spaces',
+    });
   });
 });

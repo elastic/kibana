@@ -13,6 +13,7 @@ import {
 import { ExternalRouteDeps } from '.';
 import { COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS } from '../../../lib/copy_to_spaces/copy_to_spaces';
 import { SPACE_ID_REGEX } from '../../../lib/space_schema';
+import { createLicensedRouteHandler } from '../../lib';
 
 interface CopyPayload {
   spaces: string[];
@@ -81,7 +82,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         }),
       },
     },
-    async (context, request, response) => {
+    createLicensedRouteHandler(async (context, request, response) => {
       const savedObjectsClient = getSavedObjects().getScopedSavedObjectsClient(
         request,
         COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS
@@ -103,7 +104,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         overwrite,
       });
       return response.ok({ body: copyResponse });
-    }
+    })
   );
 
   const retrySchema = schema.arrayOf(
@@ -158,7 +159,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         }),
       },
     },
-    async (context, request, response) => {
+    createLicensedRouteHandler(async (context, request, response) => {
       const savedObjectsClient = getSavedObjects().getScopedSavedObjectsClient(
         request,
         COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS
@@ -178,6 +179,6 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         }
       );
       return response.ok({ body: resolveConflictsResponse });
-    }
+    })
   );
 }

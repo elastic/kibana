@@ -7,7 +7,8 @@
 import { Legacy } from 'kibana';
 import { Logger, SavedObjectsService, IRouter } from 'src/core/server';
 import { initDeleteSpacesApi } from './delete';
-import { initGetSpacesApi } from './get';
+import { initGetSpaceApi } from './get';
+import { initGetAllSpacesApi } from './get_all';
 import { initPostSpacesApi } from './post';
 import { initPutSpacesApi } from './put';
 import { SpacesServiceSetup } from '../../../spaces_service/spaces_service';
@@ -24,7 +25,8 @@ export type ExternalRouteRequestFacade = Legacy.Request;
 
 export function initExternalSpacesApi(deps: ExternalRouteDeps) {
   initDeleteSpacesApi(deps);
-  initGetSpacesApi(deps);
+  initGetSpaceApi(deps);
+  initGetAllSpacesApi(deps);
   initPostSpacesApi(deps);
   initPutSpacesApi(deps);
   initCopyToSpacesApi(deps);

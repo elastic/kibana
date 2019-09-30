@@ -7,3 +7,4 @@
 export { createSpaces } from './create_spaces';
 export { createLegacyAPI } from './create_legacy_api';
 export { createMockSavedObjectsRepository } from './create_mock_so_repository';
+export { mockRouteContext, mockRouteContextWithInvalidLicense } from './route_contexts';

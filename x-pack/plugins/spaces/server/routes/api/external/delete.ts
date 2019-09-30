@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { wrapError } from '../../../lib/errors';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { ExternalRouteDeps } from '.';
+import { createLicensedRouteHandler } from '../../lib';
 
 export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
   const { externalRouter, getSavedObjects, spacesService } = deps;
@@ -21,7 +22,7 @@ export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
         }),
       },
     },
-    async (context, request, response) => {
+    createLicensedRouteHandler(async (context, request, response) => {
       const { SavedObjectsClient } = getSavedObjects();
       const spacesClient: SpacesClient = await spacesService.scopedClient(request);
 
@@ -37,6 +38,6 @@ export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
       }
 
       return response.noContent();
-    }
+    })
   );
 }

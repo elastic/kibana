@@ -4,37 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as Rx from 'rxjs';
-import * as kbnTestServer from '../../../../../../../src/test_utils/kbn_server';
-import { createSpaces, createLegacyAPI, createMockSavedObjectsRepository } from '../__fixtures__';
-import { initGetSpacesApi } from './get';
-import { CoreSetup } from 'src/core/server';
-import { loggingServiceMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import {
+  createSpaces,
+  createLegacyAPI,
+  createMockSavedObjectsRepository,
+  mockRouteContextWithInvalidLicense,
+  mockRouteContext,
+} from '../__fixtures__';
+import { initGetSpaceApi } from './get';
+import { CoreSetup, IRouter, kibanaResponseFactory } from 'src/core/server';
+import {
+  loggingServiceMock,
+  elasticsearchServiceMock,
+  httpServiceMock,
+  httpServerMock,
+} from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
 import { createOptionalPlugin } from '../../../../../../legacy/server/lib/optional_plugin';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { SpacesClient } from '../../../lib/spaces_client';
 
 jest.setTimeout(30000);
-describe('GET spaces', () => {
+describe('GET space', () => {
   const spacesSavedObjects = createSpaces();
   const spaces = spacesSavedObjects.map(s => ({ id: s.id, ...s.attributes }));
 
-  let root: ReturnType<typeof kbnTestServer.createRoot>;
-
-  beforeAll(async () => {
-    root = kbnTestServer.createRoot();
-    const { http } = await root.setup();
-    const router = http.createRouter('/');
-
-    const log = loggingServiceMock.create().get('spaces');
+  const setup = async () => {
+    const httpService = httpServiceMock.createSetupContract();
+    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
 
     const legacyAPI = createLegacyAPI({ spaces });
 
     const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
 
+    const log = loggingServiceMock.create().get('spaces');
+
     const service = new SpacesService(log, () => legacyAPI);
     const spacesService = await service.setup({
-      http: (http as unknown) as CoreSetup['http'],
+      http: (httpService as unknown) as CoreSetup['http'],
       elasticsearch: elasticsearchServiceMock.createSetupContract(),
       getSecurity: () =>
         createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
@@ -56,53 +63,64 @@ describe('GET spaces', () => {
       );
     });
 
-    initGetSpacesApi({
+    initGetSpaceApi({
       externalRouter: router,
       getSavedObjects: () => legacyAPI.savedObjects,
-      log: loggingServiceMock.create().get('spaces'),
+      log,
       spacesService,
     });
 
-    await root.start();
-  });
+    return {
+      routeHandler: router.get.mock.calls[0][1],
+    };
+  };
 
-  afterAll(async () => await root.shutdown());
+  it(`returns http/403 when the license is invalid`, async () => {
+    const { routeHandler } = await setup();
 
-  test(`'GET spaces' returns all available spaces`, async () => {
-    const response = await kbnTestServer.request.get(root, '/api/spaces/space');
+    const request = httpServerMock.createKibanaRequest({
+      method: 'get',
+    });
 
-    expect(response.status).toEqual(200);
-    expect(response.body).toEqual(spaces);
-  });
-
-  test(`'GET spaces' returns all available spaces with the 'any' purpose`, async () => {
-    const response = await kbnTestServer.request.get(root, '/api/spaces/space?purpose=any');
-
-    expect(response.status).toEqual(200);
-    expect(response.body).toEqual(spaces);
-  });
-
-  test(`'GET spaces' returns all available spaces with the 'copySavedObjectsIntoSpace' purpose`, async () => {
-    const response = await kbnTestServer.request.get(
-      root,
-      '/api/spaces/space?purpose=copySavedObjectsIntoSpace'
+    const response = await routeHandler(
+      mockRouteContextWithInvalidLicense,
+      request,
+      kibanaResponseFactory
     );
 
-    expect(response.status).toEqual(200);
-    expect(response.body).toEqual(spaces);
+    expect(response.status).toEqual(403);
+    expect(response.payload).toEqual({
+      message: 'License is invalid for spaces',
+    });
   });
 
-  test.todo(`returns result of routePreCheckLicense`);
+  it(`returns the space with that id`, async () => {
+    const { routeHandler } = await setup();
 
-  test(`'GET spaces/{id}' returns the space with that id`, async () => {
-    const response = await kbnTestServer.request.get(root, '/api/spaces/space/default');
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        id: 'default',
+      },
+      method: 'get',
+    });
+
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
     expect(response.status).toEqual(200);
-    expect(response.body).toEqual(spaces.find(s => s.id === 'default'));
+    expect(response.payload).toEqual(spaces.find(s => s.id === 'default'));
   });
 
-  test(`'GET spaces/{id}' returns 404 when retrieving a non-existent space`, async () => {
-    const response = await kbnTestServer.request.get(root, '/api/spaces/space/not-a-space');
+  it(`'GET spaces/{id}' returns 404 when retrieving a non-existent space`, async () => {
+    const { routeHandler } = await setup();
+
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        id: 'not-a-space',
+      },
+      method: 'get',
+    });
+
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
     expect(response.status).toEqual(404);
   });

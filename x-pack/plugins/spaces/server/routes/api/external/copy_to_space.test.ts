@@ -4,37 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as Rx from 'rxjs';
-import * as kbnTestServer from '../../../../../../../src/test_utils/kbn_server';
-import { createSpaces, createLegacyAPI, createMockSavedObjectsRepository } from '../__fixtures__';
-import { CoreSetup } from 'src/core/server';
-import { loggingServiceMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import {
+  createSpaces,
+  createLegacyAPI,
+  createMockSavedObjectsRepository,
+  mockRouteContext,
+  mockRouteContextWithInvalidLicense,
+} from '../__fixtures__';
+import { CoreSetup, IRouter, kibanaResponseFactory } from 'src/core/server';
+import {
+  loggingServiceMock,
+  elasticsearchServiceMock,
+  httpServiceMock,
+  httpServerMock,
+} from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
 import { createOptionalPlugin } from '../../../../../../legacy/server/lib/optional_plugin';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { initCopyToSpacesApi } from './copy_to_space';
+import { ObjectType } from '@kbn/config-schema';
+import { RouteSchemas } from 'src/core/server/http/router/route';
 
-jest.setTimeout(30000);
 describe('copy to space', () => {
   const spacesSavedObjects = createSpaces();
   const spaces = spacesSavedObjects.map(s => ({ id: s.id, ...s.attributes }));
 
-  let root: ReturnType<typeof kbnTestServer.createRoot>;
+  const setup = async () => {
+    const httpService = httpServiceMock.createSetupContract();
+    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
 
-  const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
+    const legacyAPI = createLegacyAPI({ spaces });
 
-  const legacyAPI = createLegacyAPI({ spaces });
-
-  beforeAll(async () => {
-    root = kbnTestServer.createRoot();
-    const { http } = await root.setup();
-    const router = http.createRouter('/');
+    const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
 
     const log = loggingServiceMock.create().get('spaces');
 
     const service = new SpacesService(log, () => legacyAPI);
     const spacesService = await service.setup({
-      http: (http as unknown) as CoreSetup['http'],
+      http: (httpService as unknown) as CoreSetup['http'],
       elasticsearch: elasticsearchServiceMock.createSetupContract(),
       getSecurity: () =>
         createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
@@ -59,29 +67,69 @@ describe('copy to space', () => {
     initCopyToSpacesApi({
       externalRouter: router,
       getSavedObjects: () => legacyAPI.savedObjects,
-      log: loggingServiceMock.create().get('spaces'),
+      log,
       spacesService,
     });
 
-    await root.start();
-  });
+    const [ctsRouteDefinition, ctsRouteHandler] = router.post.mock.calls[0];
+    const [resolveRouteDefinition, resolveRouteHandler] = router.post.mock.calls[1];
 
-  afterAll(async () => await root.shutdown());
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+    return {
+      copyToSpace: {
+        routeValidation: ctsRouteDefinition.validate as RouteSchemas<
+          ObjectType,
+          ObjectType,
+          ObjectType
+        >,
+        routeHandler: ctsRouteHandler,
+      },
+      resolveConflicts: {
+        routeValidation: resolveRouteDefinition.validate as RouteSchemas<
+          ObjectType,
+          ObjectType,
+          ObjectType
+        >,
+        routeHandler: resolveRouteHandler,
+      },
+      savedObjectsRepositoryMock,
+      legacyAPI,
+    };
+  };
 
   describe('POST /api/spaces/_copy_saved_objects', () => {
-    test.todo(`returns result of routePreCheckLicense`);
+    it(`returns http/403 when the license is invalid`, async () => {
+      const { copyToSpace } = await setup();
 
-    test(`uses a Saved Objects Client instance without the spaces wrapper`, async () => {
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+      });
+
+      const response = await copyToSpace.routeHandler(
+        mockRouteContextWithInvalidLicense,
+        request,
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toEqual(403);
+      expect(response.payload).toEqual({
+        message: 'License is invalid for spaces',
+      });
+    });
+
+    it(`uses a Saved Objects Client instance without the spaces wrapper`, async () => {
       const payload = {
         spaces: ['a-space'],
         objects: [],
       };
 
-      await kbnTestServer.request.post(root, '/api/spaces/_copy_saved_objects').send(payload);
+      const { copyToSpace, legacyAPI } = await setup();
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      await copyToSpace.routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
       expect(legacyAPI.savedObjects.getScopedSavedObjectsClient).toHaveBeenCalledWith(
         expect.any(Object),
@@ -91,81 +139,65 @@ describe('copy to space', () => {
       );
     });
 
-    test(`requires space IDs to be unique`, async () => {
+    it(`requires space IDs to be unique`, async () => {
       const payload = {
         spaces: ['a-space', 'a-space'],
         objects: [],
       };
 
-      const response = await kbnTestServer.request
-        .post(root, '/api/spaces/_copy_saved_objects')
-        .send(payload);
+      const { copyToSpace } = await setup();
 
-      const { status, body } = response;
-
-      expect(status).toEqual(400);
-      expect(body).toMatchInlineSnapshot(`
-                              Object {
-                                "error": "Bad Request",
-                                "message": "[request body.spaces]: duplicate space ids are not allowed",
-                                "statusCode": 400,
-                              }
-                      `);
+      expect(() =>
+        copyToSpace.routeValidation.body!.validate(payload)
+      ).toThrowErrorMatchingInlineSnapshot(`"[spaces]: duplicate space ids are not allowed"`);
     });
 
-    test(`requires well-formed space IDS`, async () => {
+    it(`requires well-formed space IDS`, async () => {
       const payload = {
         spaces: ['a-space', 'a-space-invalid-!@#$%^&*()'],
         objects: [],
       };
 
-      const response = await kbnTestServer.request
-        .post(root, '/api/spaces/_copy_saved_objects')
-        .send(payload);
+      const { copyToSpace } = await setup();
 
-      const { status, body } = response;
-
-      expect(status).toEqual(400);
-      expect(body).toMatchInlineSnapshot(`
-                              Object {
-                                "error": "Bad Request",
-                                "message": "[request body.spaces.1]: lower case, a-z, 0-9, \\"_\\", and \\"-\\" are allowed",
-                                "statusCode": 400,
-                              }
-                      `);
+      expect(() =>
+        copyToSpace.routeValidation.body!.validate(payload)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[spaces.1]: lower case, a-z, 0-9, \\"_\\", and \\"-\\" are allowed"`
+      );
     });
 
-    test(`requires objects to be unique`, async () => {
+    it(`requires objects to be unique`, async () => {
       const payload = {
         spaces: ['a-space'],
         objects: [{ type: 'foo', id: 'bar' }, { type: 'foo', id: 'bar' }],
       };
 
-      const response = await kbnTestServer.request
-        .post(root, '/api/spaces/_copy_saved_objects')
-        .send(payload);
+      const { copyToSpace } = await setup();
 
-      const { status, body } = response;
-
-      expect(status).toEqual(400);
-      expect(body).toMatchInlineSnapshot(`
-        Object {
-          "error": "Bad Request",
-          "message": "[request body.objects]: duplicate objects are not allowed",
-          "statusCode": 400,
-        }
-      `);
+      expect(() =>
+        copyToSpace.routeValidation.body!.validate(payload)
+      ).toThrowErrorMatchingInlineSnapshot(`"[objects]: duplicate objects are not allowed"`);
     });
 
-    test('does not allow namespace agnostic types to be copied (via "supportedTypes" property)', async () => {
+    it('does not allow namespace agnostic types to be copied (via "supportedTypes" property)', async () => {
       const payload = {
         spaces: ['a-space'],
         objects: [{ type: 'globalType', id: 'bar' }, { type: 'visualization', id: 'bar' }],
       };
 
-      const response = await kbnTestServer.request
-        .post(root, '/api/spaces/_copy_saved_objects')
-        .send(payload);
+      const { copyToSpace, legacyAPI } = await setup();
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      const response = await copyToSpace.routeHandler(
+        mockRouteContext,
+        request,
+        kibanaResponseFactory
+      );
 
       const { status } = response;
 
@@ -180,15 +212,24 @@ describe('copy to space', () => {
       });
     });
 
-    test('copies to multiple spaces', async () => {
+    it('copies to multiple spaces', async () => {
       const payload = {
         spaces: ['a-space', 'b-space'],
         objects: [{ type: 'visualization', id: 'bar' }],
       };
 
-      const response = await kbnTestServer.request
-        .post(root, '/api/spaces/_copy_saved_objects')
-        .send(payload);
+      const { copyToSpace, legacyAPI } = await setup();
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      const response = await copyToSpace.routeHandler(
+        mockRouteContext,
+        request,
+        kibanaResponseFactory
+      );
 
       const { status } = response;
 
@@ -211,9 +252,26 @@ describe('copy to space', () => {
   });
 
   describe('POST /api/spaces/_resolve_copy_saved_objects_errors', () => {
-    test.todo(`returns result of routePreCheckLicense`);
+    it(`returns http/403 when the license is invalid`, async () => {
+      const { resolveConflicts } = await setup();
 
-    test(`uses a Saved Objects Client instance without the spaces wrapper`, async () => {
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+      });
+
+      const response = await resolveConflicts.routeHandler(
+        mockRouteContextWithInvalidLicense,
+        request,
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toEqual(403);
+      expect(response.payload).toEqual({
+        message: 'License is invalid for spaces',
+      });
+    });
+
+    it(`uses a Saved Objects Client instance without the spaces wrapper`, async () => {
       const payload = {
         retries: {
           ['a-space']: [
@@ -227,9 +285,14 @@ describe('copy to space', () => {
         objects: [{ type: 'visualization', id: 'bar' }],
       };
 
-      await kbnTestServer.request
-        .post(root, '/api/spaces/_resolve_copy_saved_objects_errors')
-        .send(payload);
+      const { resolveConflicts, legacyAPI } = await setup();
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      await resolveConflicts.routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
       expect(legacyAPI.savedObjects.getScopedSavedObjectsClient).toHaveBeenCalledWith(
         expect.any(Object),
@@ -245,23 +308,14 @@ describe('copy to space', () => {
         objects: [{ type: 'foo', id: 'bar' }, { type: 'foo', id: 'bar' }],
       };
 
-      const response = await kbnTestServer.request
-        .post(root, '/api/spaces/_resolve_copy_saved_objects_errors')
-        .send(payload);
+      const { resolveConflicts } = await setup();
 
-      const { status, body } = response;
-
-      expect(status).toEqual(400);
-      expect(body).toMatchInlineSnapshot(`
-                Object {
-                  "error": "Bad Request",
-                  "message": "[request body.objects]: duplicate objects are not allowed",
-                  "statusCode": 400,
-                }
-            `);
+      expect(() =>
+        resolveConflicts.routeValidation.body!.validate(payload)
+      ).toThrowErrorMatchingInlineSnapshot(`"[objects]: duplicate objects are not allowed"`);
     });
 
-    test(`requires well-formed space ids`, async () => {
+    it(`requires well-formed space ids`, async () => {
       const payload = {
         retries: {
           ['invalid-space-id!@#$%^&*()']: [
@@ -275,23 +329,16 @@ describe('copy to space', () => {
         objects: [{ type: 'foo', id: 'bar' }],
       };
 
-      const response = await kbnTestServer.request
-        .post(root, '/api/spaces/_resolve_copy_saved_objects_errors')
-        .send(payload);
+      const { resolveConflicts } = await setup();
 
-      const { status, body } = response;
-
-      expect(status).toEqual(400);
-      expect(body).toMatchInlineSnapshot(`
-                        Object {
-                          "error": "Bad Request",
-                          "message": "[request body.retries]: Invalid space id: invalid-space-id!@#$%^&*()",
-                          "statusCode": 400,
-                        }
-                  `);
+      expect(() =>
+        resolveConflicts.routeValidation.body!.validate(payload)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[retries]: Invalid space id: invalid-space-id!@#$%^&*()"`
+      );
     });
 
-    test('does not allow namespace agnostic types to be copied (via "supportedTypes" property)', async () => {
+    it('does not allow namespace agnostic types to be copied (via "supportedTypes" property)', async () => {
       const payload = {
         retries: {
           ['a-space']: [
@@ -316,9 +363,18 @@ describe('copy to space', () => {
         ],
       };
 
-      const response = await kbnTestServer.request
-        .post(root, '/api/spaces/_resolve_copy_saved_objects_errors')
-        .send(payload);
+      const { resolveConflicts, legacyAPI } = await setup();
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      const response = await resolveConflicts.routeHandler(
+        mockRouteContext,
+        request,
+        kibanaResponseFactory
+      );
 
       const { status } = response;
 
@@ -333,7 +389,7 @@ describe('copy to space', () => {
       });
     });
 
-    test('resolves conflicts for multiple spaces', async () => {
+    it('resolves conflicts for multiple spaces', async () => {
       const payload = {
         objects: [{ type: 'visualization', id: 'bar' }],
         retries: {
@@ -354,9 +410,18 @@ describe('copy to space', () => {
         },
       };
 
-      const response = await kbnTestServer.request
-        .post(root, '/api/spaces/_resolve_copy_saved_objects_errors')
-        .send(payload);
+      const { resolveConflicts, legacyAPI } = await setup();
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      const response = await resolveConflicts.routeHandler(
+        mockRouteContext,
+        request,
+        kibanaResponseFactory
+      );
 
       const { status } = response;
 

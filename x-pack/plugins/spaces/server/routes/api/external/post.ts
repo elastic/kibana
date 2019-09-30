@@ -9,6 +9,7 @@ import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { ExternalRouteDeps } from '.';
+import { createLicensedRouteHandler } from '../../lib';
 
 export function initPostSpacesApi(deps: ExternalRouteDeps) {
   const { externalRouter, log, spacesService, getSavedObjects } = deps;
@@ -20,7 +21,7 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
         body: spaceSchema,
       },
     },
-    async (context, request, response) => {
+    createLicensedRouteHandler(async (context, request, response) => {
       log.debug(`Inside POST /api/spaces/space`);
       const { SavedObjectsClient } = getSavedObjects();
       const spacesClient: SpacesClient = await spacesService.scopedClient(request);
@@ -41,6 +42,6 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
         log.debug(`Error creating space: ${error}`);
         return response.customError(wrapError(error));
       }
-    }
+    })
   );
 }

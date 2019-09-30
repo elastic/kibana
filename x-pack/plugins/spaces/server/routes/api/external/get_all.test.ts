@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import * as Rx from 'rxjs';
 import {
   createSpaces,
@@ -12,7 +11,7 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { CoreSetup, IRouter, kibanaResponseFactory, RouteConfig } from 'src/core/server';
+import { CoreSetup, kibanaResponseFactory, IRouter } from 'src/core/server';
 import {
   loggingServiceMock,
   elasticsearchServiceMock,
@@ -23,11 +22,9 @@ import { SpacesService } from '../../../spaces_service';
 import { createOptionalPlugin } from '../../../../../../legacy/server/lib/optional_plugin';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { SpacesClient } from '../../../lib/spaces_client';
-import { initDeleteSpacesApi } from './delete';
-import { RouteSchemas } from 'src/core/server/http/router/route';
-import { ObjectType } from '@kbn/config-schema';
+import { initGetAllSpacesApi } from './get_all';
 
-describe('Spaces Public API', () => {
+describe('GET /spaces/space', () => {
   const spacesSavedObjects = createSpaces();
   const spaces = spacesSavedObjects.map(s => ({ id: s.id, ...s.attributes }));
 
@@ -65,53 +62,68 @@ describe('Spaces Public API', () => {
       );
     });
 
-    initDeleteSpacesApi({
+    initGetAllSpacesApi({
       externalRouter: router,
       getSavedObjects: () => legacyAPI.savedObjects,
       log,
       spacesService,
     });
 
-    const [routeDefinition, routeHandler] = router.delete.mock.calls[0];
-
     return {
-      routeValidation: routeDefinition.validate as RouteSchemas<ObjectType, ObjectType, ObjectType>,
-      routeHandler,
+      routeHandler: router.get.mock.calls[0][1],
     };
   };
 
-  it('requires a space id as part of the path', async () => {
-    const { routeValidation } = await setup();
-    expect(() => routeValidation.params!.validate({})).toThrowErrorMatchingInlineSnapshot(
-      `"[id]: expected value of type [string] but got [undefined]"`
-    );
-  });
-
-  it(`deletes the space`, async () => {
+  it(`returns all available spaces`, async () => {
     const { routeHandler } = await setup();
 
     const request = httpServerMock.createKibanaRequest({
-      params: {
-        id: 'a-space',
-      },
-      method: 'delete',
+      method: 'get',
     });
 
     const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
-    const { status } = response;
+    expect(response.status).toEqual(200);
+    expect(response.payload).toEqual(spaces);
+  });
 
-    expect(status).toEqual(204);
+  it(`returns all available spaces with the 'any' purpose`, async () => {
+    const { routeHandler } = await setup();
+
+    const request = httpServerMock.createKibanaRequest({
+      query: {
+        purpose: 'any',
+      },
+      method: 'get',
+    });
+
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+    expect(response.status).toEqual(200);
+    expect(response.payload).toEqual(spaces);
+  });
+
+  it(`returns all available spaces with the 'copySavedObjectsIntoSpace' purpose`, async () => {
+    const { routeHandler } = await setup();
+
+    const request = httpServerMock.createKibanaRequest({
+      query: {
+        purpose: 'copySavedObjectsIntoSpace',
+      },
+      method: 'get',
+    });
+
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+    expect(response.status).toEqual(200);
+    expect(response.payload).toEqual(spaces);
   });
 
   it(`returns http/403 when the license is invalid`, async () => {
     const { routeHandler } = await setup();
 
     const request = httpServerMock.createKibanaRequest({
-      params: {
-        id: 'a-space',
-      },
-      method: 'delete',
+      method: 'get',
     });
 
     const response = await routeHandler(
@@ -124,40 +136,5 @@ describe('Spaces Public API', () => {
     expect(response.payload).toEqual({
       message: 'License is invalid for spaces',
     });
-  });
-
-  it('throws when deleting a non-existent space', async () => {
-    const { routeHandler } = await setup();
-
-    const request = httpServerMock.createKibanaRequest({
-      params: {
-        id: 'not-a-space',
-      },
-      method: 'delete',
-    });
-
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
-
-    const { status } = response;
-
-    expect(status).toEqual(404);
-  });
-
-  it(`DELETE spaces/{id}' cannot delete reserved spaces`, async () => {
-    const { routeHandler } = await setup();
-
-    const request = httpServerMock.createKibanaRequest({
-      params: {
-        id: 'default',
-      },
-      method: 'delete',
-    });
-
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
-
-    const { status, payload } = response;
-
-    expect(status).toEqual(400);
-    expect(payload.message).toEqual('This Space cannot be deleted because it is reserved.');
   });
 });
