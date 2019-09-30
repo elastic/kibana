@@ -41,14 +41,12 @@ export class MyPlugin {
     const mySection = management.sections.register({
       id: 'my-section',
       title: 'My Main Section', // display name
-      description: 'hello', // not used in current UI, but possibly in future
       order: 10,
       euiIconType: 'iconName',
     });
     mySection.registerLink({
       id: 'my-link',
       title: 'My Link', // display name
-      description: 'hello', // not used in current UI, but possibly in future
       order: 20,
       async mount(context, params) {
         const { renderApp } = await import('./my-section');
@@ -149,7 +147,6 @@ interface SectionsServiceStart {
 type Register = (
   id: string,
   title: string,
-  description: string, // not used in current UI, but possibly in future
   order?: number,
   euiIconType?: string, // takes precedence over `icon` property.
   icon?: string, // URL to image file; fallback if no `euiIconType`
@@ -158,7 +155,6 @@ type Register = (
 type RegisterLink = (
   id: string;
   title: string;
-  description: string; // not used in current UI, but possibly in future
   order?: number;
   mount: ManagementSectionMount;
 ) => Link;
@@ -178,7 +174,6 @@ type ManagementSectionMount = (
 interface Link {
   id: string;
   title: string;
-  description: string;
   basePath: string;
   sectionId: string;
   order?: number;
@@ -187,7 +182,6 @@ interface Link {
 interface Section {
   id: string;
   title: string;
-  description: string;
   links: Link[];
   registerLink: RegisterLink;
   order?: number;
@@ -311,11 +305,6 @@ interface Options {
 
 - This removes the ability to infinitely nest sections within each other by making a distinction between a section header and a nav link.
   - So far we didn't seem to be using this feature anyway, but would like feedback on any use cases for it.
-
-# Unresolved questions
-
-- Do we need a field for a description? Currently there is no place for it in the UI, but it was added based on the mocks from the [reference section](#reference).
-- From a product perspective, what does the future of the Management section look like? There has been recent discussion around making Global vs Space-specific management areas (see links in [reference section](#reference)); if this is a feature we want in an `8.0` timeframe, we will probably need to resolve this question before moving forward. If this is something we plan for `8.x` and beyond, the current proposal remains mostly unaffected and we can add that as 
 
 # Reference
 
