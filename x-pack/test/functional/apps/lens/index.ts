@@ -22,13 +22,14 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload('logstash_functional');
-      await esArchiver.unload('visualize/default');
+      await esArchiver.unload('lens/basic');
     });
 
     describe('', function() {
       this.tags(['ciGroup4', 'skipFirefox']);
 
       loadTestFile(require.resolve('./smokescreen'));
+      loadTestFile(require.resolve('./lens_reporting'));
     });
   });
 }

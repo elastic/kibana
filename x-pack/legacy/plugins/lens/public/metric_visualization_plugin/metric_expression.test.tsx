@@ -52,7 +52,8 @@ describe('metric_expression', () => {
 
       expect(shallow(<MetricChart data={data} args={args} formatFactory={x => x as FieldFormat} />))
         .toMatchInlineSnapshot(`
-        <div
+        <VisualizationContainer
+          reportTitle="My fanci metric chart"
           style={
             Object {
               "alignItems": "center",
@@ -88,7 +89,7 @@ describe('metric_expression', () => {
               My fanci metric chart
             </div>
           </AutoScale>
-        </div>
+        </VisualizationContainer>
       `);
     });
 
@@ -104,34 +105,35 @@ describe('metric_expression', () => {
           />
         )
       ).toMatchInlineSnapshot(`
-        <div
-          style={
-            Object {
-              "alignItems": "center",
-              "display": "flex",
-              "flexDirection": "column",
-              "justifyContent": "center",
-              "maxHeight": "100%",
-              "maxWidth": "100%",
-              "textAlign": "center",
-            }
-          }
-        >
-          <AutoScale>
-            <div
-              data-test-subj="lns_metric_value"
-              style={
-                Object {
-                  "fontSize": "60pt",
-                  "fontWeight": 600,
-                }
-              }
-            >
-              10110
-            </div>
-          </AutoScale>
-        </div>
-      `);
+                <VisualizationContainer
+                  reportTitle="My fanci metric chart"
+                  style={
+                    Object {
+                      "alignItems": "center",
+                      "display": "flex",
+                      "flexDirection": "column",
+                      "justifyContent": "center",
+                      "maxHeight": "100%",
+                      "maxWidth": "100%",
+                      "textAlign": "center",
+                    }
+                  }
+                >
+                  <AutoScale>
+                    <div
+                      data-test-subj="lns_metric_value"
+                      style={
+                        Object {
+                          "fontSize": "60pt",
+                          "fontWeight": 600,
+                        }
+                      }
+                    >
+                      10110
+                    </div>
+                  </AutoScale>
+                </VisualizationContainer>
+            `);
     });
   });
 });
