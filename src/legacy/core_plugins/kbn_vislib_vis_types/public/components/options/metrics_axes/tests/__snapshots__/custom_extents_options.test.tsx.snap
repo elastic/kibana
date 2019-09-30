@@ -9,6 +9,7 @@ exports[`CustomExtentsOptions component should init with the default set of prop
     value={true}
   />
   <NumberInputOption
+    error={false}
     isInvalid={false}
     label="Bounds margin"
     min={0}

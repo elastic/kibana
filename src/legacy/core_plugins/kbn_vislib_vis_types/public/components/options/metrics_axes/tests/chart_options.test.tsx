@@ -25,11 +25,15 @@ import { LineOptions } from '../line_options';
 import {
   ChartTypes,
   ChartModes,
-  interpolationModes,
-  chartTypes,
-  chartModes,
+  getInterpolationModes,
+  getChartTypes,
+  getChartModes,
 } from '../../../../utils/collections';
 import { valueAxis, seriesParam } from './mocks';
+
+const interpolationModes = getInterpolationModes();
+const chartTypes = getChartTypes();
+const chartModes = getChartModes();
 
 describe('ChartOptions component', () => {
   let setParamByIndex: jest.Mock;

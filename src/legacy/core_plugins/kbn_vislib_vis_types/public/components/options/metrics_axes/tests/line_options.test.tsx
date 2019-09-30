@@ -21,11 +21,12 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { LineOptions, LineOptionsParams } from '../line_options';
 import { NumberInputOption } from '../../../common';
-import { interpolationModes } from '../../../../utils/collections';
+import { getInterpolationModes } from '../../../../utils/collections';
 import { seriesParam } from './mocks';
 
 const LINE_WIDTH = 'lineWidth';
 const DRAW_LINES = 'drawLinesBetweenPoints';
+const interpolationModes = getInterpolationModes();
 
 describe('LineOptions component', () => {
   let setChart: jest.Mock;

@@ -94,6 +94,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
         Object {
           "id": "ValueAxis-1",
           "labels": Object {
+            "color": "black",
             "filter": true,
             "show": true,
             "truncate": 0,
@@ -158,6 +159,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
             Object {
               "id": "ValueAxis-1",
               "labels": Object {
+                "color": "black",
                 "filter": true,
                 "show": true,
                 "truncate": 0,
@@ -182,6 +184,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
             Object {
               "id": "ValueAxis-2",
               "labels": Object {
+                "color": "black",
                 "filter": true,
                 "show": true,
                 "truncate": 0,
@@ -318,6 +321,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
         Object {
           "id": "ValueAxis-2",
           "labels": Object {
+            "color": "black",
             "filter": true,
             "show": true,
             "truncate": 0,
@@ -382,6 +386,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
             Object {
               "id": "ValueAxis-1",
               "labels": Object {
+                "color": "black",
                 "filter": true,
                 "show": true,
                 "truncate": 0,
@@ -406,6 +411,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
             Object {
               "id": "ValueAxis-2",
               "labels": Object {
+                "color": "black",
                 "filter": true,
                 "show": true,
                 "truncate": 0,

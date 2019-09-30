@@ -86,7 +86,6 @@ exports[`ValueAxisOptions component should init with the default set of props 1`
   />
   <SwitchOption
     label="Show axis lines and labels"
-    noStyle={true}
     paramName="show"
     setValue={[Function]}
     value={true}
@@ -107,6 +106,7 @@ exports[`ValueAxisOptions component should init with the default set of props 1`
       Object {
         "id": "ValueAxis-1",
         "labels": Object {
+          "color": "black",
           "filter": true,
           "show": true,
           "truncate": 0,
@@ -140,6 +140,7 @@ exports[`ValueAxisOptions component should init with the default set of props 1`
           Object {
             "id": "CategoryAxis-1",
             "labels": Object {
+              "color": "black",
               "filter": true,
               "show": true,
               "truncate": 0,
@@ -160,6 +161,7 @@ exports[`ValueAxisOptions component should init with the default set of props 1`
           Object {
             "id": "ValueAxis-1",
             "labels": Object {
+              "color": "black",
               "filter": true,
               "show": true,
               "truncate": 0,
@@ -258,13 +260,14 @@ exports[`ValueAxisOptions component should init with the default set of props 1`
     paddingSize="none"
   >
     <EuiSpacer
-      size="s"
+      size="m"
     />
     <CustomExtentsOptions
       axis={
         Object {
           "id": "ValueAxis-1",
           "labels": Object {
+            "color": "black",
             "filter": true,
             "show": true,
             "truncate": 0,
@@ -300,6 +303,7 @@ exports[`ValueAxisOptions component should init with the default set of props 1`
             Object {
               "id": "CategoryAxis-1",
               "labels": Object {
+                "color": "black",
                 "filter": true,
                 "show": true,
                 "truncate": 0,
@@ -320,6 +324,7 @@ exports[`ValueAxisOptions component should init with the default set of props 1`
             Object {
               "id": "ValueAxis-1",
               "labels": Object {
+                "color": "black",
                 "filter": true,
                 "show": true,
                 "truncate": 0,

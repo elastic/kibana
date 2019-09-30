@@ -21,6 +21,9 @@ exports[`ChartOptions component should init with the default set of props 1`] = 
     setValue={[Function]}
     value="ValueAxis-1"
   />
+  <EuiSpacer
+    size="m"
+  />
   <EuiFlexGroup
     gutterSize="s"
   >

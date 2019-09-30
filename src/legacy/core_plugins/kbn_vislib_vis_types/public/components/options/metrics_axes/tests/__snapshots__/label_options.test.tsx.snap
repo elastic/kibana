@@ -2,6 +2,9 @@
 
 exports[`LabelOptions component should init with the default set of props 1`] = `
 <Fragment>
+  <EuiSpacer
+    size="m"
+  />
   <EuiTitle
     size="xxs"
   >
@@ -13,6 +16,9 @@ exports[`LabelOptions component should init with the default set of props 1`] = 
       />
     </h3>
   </EuiTitle>
+  <EuiSpacer
+    size="s"
+  />
   <SwitchOption
     label="Show labels"
     paramName="show"
@@ -26,6 +32,9 @@ exports[`LabelOptions component should init with the default set of props 1`] = 
     paramName="filter"
     setValue={[Function]}
     value={true}
+  />
+  <EuiSpacer
+    size="m"
   />
   <EuiFlexGroup
     gutterSize="s"

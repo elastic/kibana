@@ -56,6 +56,7 @@ exports[`CategoryAxisPanel component should init with the default set of props 1
       Object {
         "id": "CategoryAxis-1",
         "labels": Object {
+          "color": "black",
           "filter": true,
           "show": true,
           "truncate": 0,

@@ -39,6 +39,7 @@ const axis = {
     show: true,
     filter: true,
     truncate: 0,
+    color: 'black',
   },
 };
 

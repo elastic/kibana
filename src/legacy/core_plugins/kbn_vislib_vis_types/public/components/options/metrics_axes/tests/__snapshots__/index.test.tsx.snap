@@ -28,6 +28,7 @@ exports[`MetricsAxisOptions component should init with the default set of props 
           Object {
             "id": "CategoryAxis-1",
             "labels": Object {
+              "color": "black",
               "filter": true,
               "show": true,
               "truncate": 0,
@@ -67,6 +68,7 @@ exports[`MetricsAxisOptions component should init with the default set of props 
           Object {
             "id": "ValueAxis-1",
             "labels": Object {
+              "color": "black",
               "filter": true,
               "show": true,
               "truncate": 0,
@@ -138,6 +140,7 @@ exports[`MetricsAxisOptions component should init with the default set of props 
           Object {
             "id": "CategoryAxis-1",
             "labels": Object {
+              "color": "black",
               "filter": true,
               "show": true,
               "truncate": 0,
@@ -177,6 +180,7 @@ exports[`MetricsAxisOptions component should init with the default set of props 
           Object {
             "id": "ValueAxis-1",
             "labels": Object {
+              "color": "black",
               "filter": true,
               "show": true,
               "truncate": 0,
@@ -239,6 +243,7 @@ exports[`MetricsAxisOptions component should init with the default set of props 
       Object {
         "id": "CategoryAxis-1",
         "labels": Object {
+          "color": "black",
           "filter": true,
           "show": true,
           "truncate": 0,
@@ -265,6 +270,7 @@ exports[`MetricsAxisOptions component should init with the default set of props 
           Object {
             "id": "CategoryAxis-1",
             "labels": Object {
+              "color": "black",
               "filter": true,
               "show": true,
               "truncate": 0,
@@ -304,6 +310,7 @@ exports[`MetricsAxisOptions component should init with the default set of props 
           Object {
             "id": "ValueAxis-1",
             "labels": Object {
+              "color": "black",
               "filter": true,
               "show": true,
               "truncate": 0,

@@ -26,13 +26,16 @@ import { LabelOptions } from '../label_options';
 import {
   ScaleTypes,
   Positions,
-  scaleTypes,
-  axisModes,
-  positions,
+  getScaleTypes,
+  getAxisModes,
+  getPositions,
 } from '../../../../utils/collections';
 import { valueAxis, categoryAxis } from './mocks';
 
 const POSITION = 'position';
+const positions = getPositions();
+const axisModes = getAxisModes();
+const scaleTypes = getScaleTypes();
 
 interface PositionOption {
   text: string;
