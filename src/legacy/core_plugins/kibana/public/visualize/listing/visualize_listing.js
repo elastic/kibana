@@ -21,7 +21,6 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 import 'ui/directives/kbn_href';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import chrome from 'ui/chrome';
 import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
@@ -29,7 +28,7 @@ import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
 import { VisualizeConstants } from '../visualize_constants';
-import { setup as visualizationsSetup } from '../../../../visualizations/public/legacy';
+import { start as visualizations } from '../../../../visualizations/public/legacy';
 import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('app/visualize', ['ngRoute', 'react']);
@@ -43,9 +42,6 @@ export function VisualizeListingController($injector, createNewVis) {
   const config = $injector.get('config');
   const kbnUrl = $injector.get('kbnUrl');
   const savedObjectClient = Private(SavedObjectsClientProvider);
-
-  this.visTypeRegistry = Private(VisTypesRegistryProvider);
-  this.visTypeAliases = visualizationsSetup.types.visTypeAliasRegistry.get();
 
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
@@ -81,6 +77,7 @@ export function VisualizeListingController($injector, createNewVis) {
   // TODO: Extract this into an external service.
   const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
   const visualizationService = services.visualizations;
+  this.visTypeRegistry = visualizations.types;
 
   this.fetchItems = filter => {
     const isLabsEnabled = config.get('visualize:enableLabs');

@@ -27,6 +27,7 @@
     "**/@types/node": "10.12.27"
   },
   "devDependencies": {
+    "@cypress/webpack-preprocessor": "^4.1.0",
     "@kbn/dev-utils": "1.0.0",
     "@kbn/es": "1.0.0",
     "@kbn/expect": "1.0.0",
@@ -183,7 +184,7 @@
     "@babel/runtime": "^7.5.5",
     "@elastic/ctags-langserver": "^0.1.10",
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "14.2.0",
+    "@elastic/eui": "14.3.0",
     "@elastic/javascript-typescript-langserver": "^0.3.3",
     "@elastic/lsp-extension": "^0.1.2",
     "@elastic/maki": "6.1.0",
@@ -250,7 +251,7 @@
     "graphql-tag": "^2.9.2",
     "graphql-tools": "^3.0.2",
     "h2o2": "^8.1.2",
-    "handlebars": "^4.1.2",
+    "handlebars": "^4.3.3",
     "history": "4.9.0",
     "history-extra": "^5.0.1",
     "humps": "2.0.1",
@@ -361,7 +362,7 @@
     "venn.js": "0.2.20",
     "vscode-languageserver": "^5.2.1",
     "wellknown": "^0.5.0",
-    "xml2js": "^0.4.19",
+    "xml2js": "^0.4.22",
     "xregexp": "4.2.4"
   },
   "engines": {
