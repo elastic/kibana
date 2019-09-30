@@ -54,7 +54,7 @@ export const CreateJobLinkCard: FC<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h3>{title}</h3>
+            <h4>{title}</h4>
           </EuiTitle>
           <EuiText color="subdued">
             <p>{description}</p>

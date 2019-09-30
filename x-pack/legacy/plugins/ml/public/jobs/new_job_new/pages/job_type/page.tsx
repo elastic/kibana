@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiPage,
@@ -25,6 +25,7 @@ import { CreateJobLinkCard } from '../../../../components/create_job_link_card';
 
 export const Page: FC = () => {
   const kibanaContext = useKibanaContext();
+  const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
 
   const { currentSavedSearch, currentIndexPattern } = kibanaContext;
 
@@ -59,6 +60,9 @@ export const Page: FC = () => {
 
   const recognizerResults = {
     count: 0,
+    onChange() {
+      setRecognizerResultsCount(recognizerResults.count);
+    },
   };
 
   const getUrl = (basePath: string) => {
@@ -175,7 +179,7 @@ export const Page: FC = () => {
           </>
         )}
 
-        <div hidden={recognizerResults.count === 0}>
+        <div hidden={recognizerResultsCount === 0}>
           <EuiText>
             <EuiTitle size="s">
               <h3>
@@ -197,11 +201,15 @@ export const Page: FC = () => {
 
           <EuiSpacer size="m" />
 
-          <DataRecognizer
-            indexPattern={currentIndexPattern}
-            savedSearch={currentSavedSearch}
-            results={recognizerResults}
-          />
+          <EuiFlexGrid gutterSize="l" columns={4}>
+            <EuiFlexItem>
+              <DataRecognizer
+                indexPattern={currentIndexPattern}
+                savedSearch={currentSavedSearch}
+                results={recognizerResults}
+              />
+            </EuiFlexItem>
+          </EuiFlexGrid>
 
           <EuiSpacer size="xxl" />
         </div>
