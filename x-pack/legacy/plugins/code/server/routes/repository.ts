@@ -19,6 +19,7 @@ import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { CodeServerRouter } from '../security';
 import { CodeServices } from '../distributed/code_services';
 import { RepositoryServiceDefinition } from '../distributed/apis';
+import { getReferenceHelper } from '../utils/repository_reference_helper';
 
 export function repositoryRoute(
   router: CodeServerRouter,
@@ -53,11 +54,18 @@ export function repositoryRoute(
       const repo = RepositoryUtils.buildRepository(repoUrl);
       const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
 
+      const refHelper = getReferenceHelper(req.getSavedObjectsClient());
       try {
         // Check if the repository already exists
         await repoObjectClient.getRepository(repo.uri);
         const msg = `Repository ${repoUrl} already exists. Skip clone.`;
         log.info(msg);
+        try {
+          await refHelper.createReference(repo.uri);
+          return repo;
+        } catch (e) {
+          // repository already exists, response with 304
+        }
         return h.response(msg).code(304); // Not Modified
       } catch (error) {
         log.info(`Repository ${repoUrl} does not exist. Go ahead with clone.`);
@@ -86,6 +94,11 @@ export function repositoryRoute(
           if (endpoint) {
             await repositoryService.clone(endpoint, payload);
           }
+          try {
+            await refHelper.createReference(repo.uri);
+          } catch (e) {
+            // repository already exists, response normally
+          }
           return repo;
         } catch (error2) {
           const msg = `Issue repository clone request for ${repoUrl} error`;
@@ -106,6 +119,13 @@ export function repositoryRoute(
       const repoUri: string = req.params.uri as string;
       const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
       try {
+        const noMoreRef = await getReferenceHelper(req.getSavedObjectsClient()).deleteReference(
+          repoUri
+        );
+        if (!noMoreRef) {
+          // not the last reference
+          return {};
+        }
         // Check if the repository already exists. If not, an error will be thrown.
         await repoObjectClient.getRepository(repoUri);
 
@@ -146,6 +166,7 @@ export function repositoryRoute(
     async handler(req: RequestFacade) {
       const repoUri = req.params.uri as string;
       try {
+        await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         return await repoObjectClient.getRepository(repoUri);
       } catch (error) {
@@ -164,25 +185,30 @@ export function repositoryRoute(
       const repoUri = req.params.uri as string;
       try {
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
+
         let gitStatus = null;
-        try {
-          gitStatus = await repoObjectClient.getRepositoryGitStatus(repoUri);
-        } catch (error) {
-          log.debug(`Get repository git status ${repoUri} error: ${error}`);
-        }
-
         let indexStatus = null;
-        try {
-          indexStatus = await repoObjectClient.getRepositoryIndexStatus(repoUri);
-        } catch (error) {
-          log.debug(`Get repository index status ${repoUri} error: ${error}`);
-        }
-
         let deleteStatus = null;
-        try {
-          deleteStatus = await repoObjectClient.getRepositoryDeleteStatus(repoUri);
-        } catch (error) {
-          log.debug(`Get repository delete status ${repoUri} error: ${error}`);
+        const hasRef = await getReferenceHelper(req.getSavedObjectsClient()).hasReference(repoUri);
+
+        if (hasRef) {
+          try {
+            gitStatus = await repoObjectClient.getRepositoryGitStatus(repoUri);
+          } catch (error) {
+            log.debug(`Get repository git status ${repoUri} error: ${error}`);
+          }
+
+          try {
+            indexStatus = await repoObjectClient.getRepositoryIndexStatus(repoUri);
+          } catch (error) {
+            log.debug(`Get repository index status ${repoUri} error: ${error}`);
+          }
+
+          try {
+            deleteStatus = await repoObjectClient.getRepositoryDeleteStatus(repoUri);
+          } catch (error) {
+            log.debug(`Get repository delete status ${repoUri} error: ${error}`);
+          }
         }
         return {
           gitStatus,
@@ -204,8 +230,9 @@ export function repositoryRoute(
     method: 'GET',
     async handler(req: RequestFacade) {
       try {
+        const uris = await getReferenceHelper(req.getSavedObjectsClient()).findReferences();
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
-        return await repoObjectClient.getAllRepositories();
+        return await repoObjectClient.getRepositories(uris);
       } catch (error) {
         const msg = `Get all repositories error`;
         log.error(msg);
@@ -226,6 +253,7 @@ export function repositoryRoute(
       const repoUri = req.params.uri as string;
       const reindex: boolean = (req.payload as any).reindex;
       try {
+        await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         const cloneStatus = await repoObjectClient.getRepositoryGitStatus(repoUri);
 
@@ -258,6 +286,7 @@ export function repositoryRoute(
 
       try {
         // Check if the repository exists
+        await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
         await repoObjectClient.getRepository(repoUri);
       } catch (error) {
         return Boom.badRequest(`Repository not existed for ${repoUri}`);
@@ -284,6 +313,7 @@ export function repositoryRoute(
     async handler(req: RequestFacade) {
       const repoUri = req.params.uri as string;
       try {
+        await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         return await repoObjectClient.getRepositoryConfig(repoUri);
       } catch (error) {

@@ -9,12 +9,16 @@ import Boom from 'boom';
 import { RequestFacade, RequestQueryFacade } from '../../';
 import {
   CommitSearchRequest,
+  CommitSearchResult,
   DocumentSearchRequest,
+  DocumentSearchResult,
   RepositorySearchRequest,
+  RepositorySearchResult,
   ResolveSnippetsRequest,
   StackTraceItem,
   StackTraceSnippetsRequest,
   SymbolSearchRequest,
+  SymbolSearchResult,
 } from '../../model';
 import { Logger } from '../log';
 import {
@@ -26,6 +30,7 @@ import {
 } from '../search';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { CodeServerRouter } from '../security';
+import { getReferenceHelper } from '../utils/repository_reference_helper';
 
 export function repositorySearchRoute(router: CodeServerRouter, log: Logger) {
   router.route({
@@ -38,9 +43,13 @@ export function repositorySearchRoute(router: CodeServerRouter, log: Logger) {
         page = parseInt(p as string, 10);
       }
 
-      let scope: string[] = [];
-      if (typeof repoScope === 'string') {
-        scope = repoScope.split(',');
+      const scope = await getScope(req, repoScope);
+      if (scope.length === 0) {
+        return {
+          total: 0,
+          took: 0,
+          repositories: [],
+        } as RepositorySearchResult;
       }
 
       const searchReq: RepositorySearchRequest = {
@@ -68,9 +77,13 @@ export function repositorySearchRoute(router: CodeServerRouter, log: Logger) {
         page = parseInt(p as string, 10);
       }
 
-      let scope: string[] = [];
-      if (typeof repoScope === 'string') {
-        scope = repoScope.split(',');
+      const scope = await getScope(req, repoScope);
+      if (scope.length === 0) {
+        return {
+          total: 0,
+          took: 0,
+          repositories: [],
+        } as RepositorySearchResult;
       }
 
       const searchReq: RepositorySearchRequest = {
@@ -100,11 +113,13 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
         page = parseInt(p as string, 10);
       }
 
-      let scope: string[] = [];
-      if (typeof repoScope === 'string') {
-        scope = [repoScope];
-      } else if (Array.isArray(repoScope)) {
-        scope = repoScope;
+      const scope = await getScope(req, repoScope);
+      if (scope.length === 0) {
+        return {
+          total: 0,
+          took: 0,
+          query: q,
+        } as DocumentSearchResult;
       }
 
       const searchReq: DocumentSearchRequest = {
@@ -134,9 +149,13 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
         page = parseInt(p as string, 10);
       }
 
-      let scope: string[] = [];
-      if (typeof repoScope === 'string') {
-        scope = repoScope.split(',');
+      const scope = await getScope(req, repoScope);
+      if (scope.length === 0) {
+        return {
+          total: 0,
+          took: 0,
+          query: q,
+        } as DocumentSearchResult;
       }
 
       const searchReq: DocumentSearchRequest = {
@@ -195,9 +214,13 @@ export function symbolSearchRoute(router: CodeServerRouter, log: Logger) {
       page = parseInt(p as string, 10);
     }
 
-    let scope: string[] = [];
-    if (typeof repoScope === 'string') {
-      scope = repoScope.split(',');
+    const scope = await getScope(req, repoScope);
+    if (scope.length === 0) {
+      return {
+        total: 0,
+        took: 0,
+        symbols: [],
+      } as SymbolSearchResult;
     }
 
     const searchReq: SymbolSearchRequest = {
@@ -238,11 +261,14 @@ export function commitSearchRoute(router: CodeServerRouter, log: Logger) {
         page = parseInt(p as string, 10);
       }
 
-      let scope: string[] = [];
-      if (typeof repoScope === 'string') {
-        scope = [repoScope];
-      } else if (Array.isArray(repoScope)) {
-        scope = repoScope;
+      const scope = await getScope(req, repoScope);
+      if (scope.length === 0) {
+        return {
+          total: 0,
+          took: 0,
+          query: q,
+          commits: [],
+        } as CommitSearchResult;
       }
 
       const searchReq: CommitSearchRequest = {
@@ -260,4 +286,16 @@ export function commitSearchRoute(router: CodeServerRouter, log: Logger) {
       }
     },
   });
+}
+
+async function getScope(req: RequestFacade, repoScope: string | string[]): Promise<string[]> {
+  let scope: string[] = await getReferenceHelper(req.getSavedObjectsClient()).findReferences();
+  if (typeof repoScope === 'string') {
+    const uriSet = new Set(repoScope.split(','));
+    scope = scope.filter(uri => uriSet.has(uri));
+  } else if (Array.isArray(repoScope)) {
+    const uriSet = new Set(repoScope);
+    scope = scope.filter(uri => uriSet.has(uri));
+  }
+  return scope;
 }
