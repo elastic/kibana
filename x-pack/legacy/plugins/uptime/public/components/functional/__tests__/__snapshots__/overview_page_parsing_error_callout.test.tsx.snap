@@ -4,7 +4,6 @@ exports[`OverviewPageParsingErrorCallout renders without errors when a valid err
 <EuiCallOut
   color="danger"
   iconType="alert"
-  size="m"
   title="Parsing error"
 >
   <p>
@@ -27,7 +26,6 @@ exports[`OverviewPageParsingErrorCallout renders without errors when an error wi
 <EuiCallOut
   color="danger"
   iconType="alert"
-  size="m"
   title="Parsing error"
 >
   <p>
