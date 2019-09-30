@@ -40,7 +40,7 @@ const TO_PLACEHOLDER = '+\u221E';
 const generateId = htmlIdGenerator();
 const isEmpty = (value: any) => value === undefined || value === null;
 
-interface RangeValues {
+export interface RangeValues {
   from?: number;
   to?: number;
 }
@@ -50,7 +50,7 @@ interface RangeValuesModel extends RangeValues {
 }
 
 interface RangesParamEditorProps {
-  dataTestSubj?: string;
+  'data-test-subj'?: string;
   error?: React.ReactNode;
   value?: RangeValues[];
   hidePlaceholders?: boolean;
@@ -62,8 +62,8 @@ interface RangesParamEditorProps {
 }
 
 function RangesParamEditor({
+  'data-test-subj': dataTestSubj = 'range',
   addRangeValues,
-  dataTestSubj = 'range',
   error,
   value = [],
   hidePlaceholders,
@@ -207,7 +207,12 @@ function RangesParamEditor({
 
         <EuiSpacer size="s" />
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAddRange} size="xs">
+          <EuiButtonEmpty
+            data-test-subj={`${dataTestSubj}__addRangeButton`}
+            iconType="plusInCircleFilled"
+            onClick={onAddRange}
+            size="xs"
+          >
             <FormattedMessage
               id="common.ui.aggTypes.ranges.addRangeButtonLabel"
               defaultMessage="Add range"
