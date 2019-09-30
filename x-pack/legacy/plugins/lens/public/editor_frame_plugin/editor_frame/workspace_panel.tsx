@@ -89,7 +89,12 @@ export function InnerWorkspacePanel({
   function renderEmptyWorkspace() {
     return (
       <EuiText textAlign="center" grow={false} color="subdued" data-test-subj="empty-workspace">
-        <h3>Your workspace awaits</h3>
+        <h3>
+          <FormattedMessage
+            id="xpack.lens.editorFrame.emptyWorkspaceHeading"
+            defaultMessage="Build a visualization"
+          />
+        </h3>
         <EuiImage
           style={{ width: 360 }}
           url={chrome.addBasePath('/plugins/lens/assets/lens_app_graphic_2x.png')}
@@ -98,7 +103,7 @@ export function InnerWorkspacePanel({
         <p>
           <FormattedMessage
             id="xpack.lens.editorFrame.emptyWorkspace"
-            defaultMessage="To create your visualization, drop some fields here."
+            defaultMessage="Drop some fields here."
           />
         </p>
       </EuiText>
