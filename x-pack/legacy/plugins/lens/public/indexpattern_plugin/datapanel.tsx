@@ -21,7 +21,8 @@ import {
   EuiText,
   EuiFormControlLayout,
   EuiSwitch,
-  EuiButtonIcon,
+  EuiFacetButton,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -355,6 +356,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
           <div className="lnsInnerIndexPatternDataPanel__filterWrapper">
             <EuiFormControlLayout
               icon="search"
+              fullWidth
               clear={{
                 title: i18n.translate('xpack.lens.indexPatterns.clearFiltersLabel', {
                   defaultMessage: 'Clear name and type filters',
@@ -372,7 +374,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               }}
             >
               <input
-                className="euiFieldText lnsInnerIndexPatternDataPanel__textField"
+                className="euiFieldText euiFieldText--fullWidth lnsInnerIndexPatternDataPanel__textField"
                 data-test-subj="lnsIndexPatternFieldSearch"
                 placeholder={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
                   defaultMessage: 'Search for fields',
