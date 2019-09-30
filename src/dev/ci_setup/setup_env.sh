@@ -82,31 +82,31 @@ if [[ "$installNode" == "true" ]]; then
       curl --silent "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
     fi
   fi
-fi
 
-###
-### "install" node into this shell
-###
-export PATH="$nodeBin:$PATH"
-
-if [[ "$installNode" == "true" || ! $(which yarn) ]]; then
   ###
-  ### downloading yarn
+  ### "install" node into this shell
   ###
-  yarnVersion="$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")"
-  npm install -g "yarn@^${yarnVersion}"
+  export PATH="$nodeBin:$PATH"
+
+  if [[ ! $(which yarn) ]]; then
+    ###
+    ### downloading yarn
+    ###
+    yarnVersion="$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")"
+    npm install -g "yarn@^${yarnVersion}"
+  fi
+
+  ###
+  ### setup yarn offline cache
+  ###
+  yarn config set yarn-offline-mirror "$cacheDir/yarn-offline-cache"
+
+  ###
+  ### "install" yarn into this shell
+  ###
+  yarnGlobalDir="$(yarn global bin)"
+  export PATH="$PATH:$yarnGlobalDir"
 fi
-
-###
-### setup yarn offline cache
-###
-yarn config set yarn-offline-mirror "$cacheDir/yarn-offline-cache"
-
-###
-### "install" yarn into this shell
-###
-yarnGlobalDir="$(yarn global bin)"
-export PATH="$PATH:$yarnGlobalDir"
 
 # use a proxy to fetch chromedriver/geckodriver asset
 export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
