@@ -52,7 +52,6 @@ export function Settings() {
   );
 
   const hasConfigurations = !isEmpty(data);
-
   return (
     <>
       <AddSettingsFlyout
