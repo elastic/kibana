@@ -280,7 +280,7 @@ app.directive('discFieldChooser', function ($location, config, $route) {
 
         if (prevFields) {
           fields.forEach(function (field) {
-            field.details = _.get(prevFields, ['byName', field.name, 'details']);
+            field.details = (prevFields.getByName(field.name) || {}).details;
           });
         }
 
