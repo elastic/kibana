@@ -17,20 +17,21 @@
  * under the License.
  */
 
+import { FieldFormat } from '../../../../../../plugins/data/common/';
 import { createNumeralFormat } from './_numeral';
 
-export function createPercentFormat(FieldFormat) {
-  return createNumeralFormat(FieldFormat, {
+export function createPercentFormat(BaseFieldFormat: typeof FieldFormat) {
+  return createNumeralFormat(BaseFieldFormat, {
     id: 'percent',
     title: 'Percentage',
-    getParamDefaults: (getConfig) => {
+    getParamDefaults: (getConfig: Function) => {
       return {
         pattern: getConfig('format:percent:defaultPattern'),
-        fractional: true
+        fractional: true,
       };
     },
-    afterConvert(val) {
+    afterConvert(val: any) {
       return this.param('fractional') ? val : val / 100;
-    }
+    },
   });
 }
