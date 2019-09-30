@@ -5,6 +5,7 @@
  */
 
 import { isEqual } from 'lodash';
+import { ErrorStrings } from '../../../i18n';
 import { getWorkpad, getFullWorkpadPersisted, getWorkpadPersisted } from '../selectors/workpad';
 import { getAssetIds } from '../selectors/assets';
 import { appReady } from '../actions/app';
@@ -15,6 +16,8 @@ import * as resolvedArgsActions from '../actions/resolved_args';
 import { update, updateAssets, updateWorkpad } from '../../lib/workpad_service';
 import { notify } from '../../lib/notify';
 import { canUserWrite } from '../selectors/app';
+
+const { esPersist: strings } = ErrorStrings;
 
 const workpadChanged = (before, after) => {
   const workpad = getWorkpad(before);
@@ -60,20 +63,15 @@ export const esPersistMiddleware = ({ getState }) => {
       switch (statusCode) {
         case 400:
           return notify.error(err.response, {
-            title: `Couldn't save your changes to Elasticsearch`,
+            title: strings.getSaveFailureTitle(),
           });
         case 413:
-          return notify.error(
-            `The server gave a response that the workpad data was too large. This
-              usually means uploaded image assets that are too large for Kibana or
-              a proxy. Try removing some assets in the asset manager.`,
-            {
-              title: `Couldn't save your changes to Elasticsearch`,
-            }
-          );
+          return notify.error(strings.getTooLargeErrorMessage(), {
+            title: strings.getSaveFailureTitle(),
+          });
         default:
           return notify.error(err, {
-            title: `Couldn't update workpad`,
+            title: strings.getUpdateFailureTitle(),
           });
       }
     };

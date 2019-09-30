@@ -6,8 +6,13 @@
 
 import chrome from 'ui/chrome';
 import { API_ROUTE } from '../../common/lib/constants';
+// @ts-ignore untyped local
 import { fetch } from '../../common/lib/fetch';
+import { ErrorStrings } from '../../i18n';
+// @ts-ignore untyped local
 import { notify } from './notify';
+
+const { esService: strings } = ErrorStrings;
 
 const basePath = chrome.getBasePath();
 const apiPath = basePath + API_ROUTE;
@@ -17,13 +22,15 @@ const AdvancedSettings = chrome.getUiSettingsClient();
 export const getFields = (index = '_all') => {
   return fetch
     .get(`${apiPath}/es_fields?index=${index}`)
-    .then(({ data: mapping }) =>
+    .then(({ data: mapping }: { data: object }) =>
       Object.keys(mapping)
         .filter(field => !field.startsWith('_')) // filters out meta fields
         .sort()
     )
-    .catch(err =>
-      notify.error(err, { title: `Couldn't fetch Elasticsearch fields for '${index}'` })
+    .catch((err: Error) =>
+      notify.error(err, {
+        title: strings.getFieldsFetchErrorMessage(index),
+      })
     );
 };
 
@@ -32,7 +39,7 @@ export const getIndices = () =>
     .find({
       type: 'index-pattern',
       fields: ['title'],
-      search_fields: ['title'],
+      searchFields: ['title'],
       perPage: 1000,
     })
     .then(resp => {
@@ -40,7 +47,7 @@ export const getIndices = () =>
         return savedObject.attributes.title;
       });
     })
-    .catch(err => notify.error(err, { title: `Couldn't fetch Elasticsearch indices` }));
+    .catch((err: Error) => notify.error(err, { title: strings.getIndicesFetchErrorMessage() }));
 
 export const getDefaultIndex = () => {
   const defaultIndexId = AdvancedSettings.get('defaultIndex');
@@ -49,6 +56,6 @@ export const getDefaultIndex = () => {
     ? savedObjectsClient
         .get('index-pattern', defaultIndexId)
         .then(defaultIndex => defaultIndex.attributes.title)
-        .catch(err => notify.error(err, { title: `Couldn't fetch default index` }))
+        .catch(err => notify.error(err, { title: strings.getDefaultIndexFetchErrorMessage() }))
     : Promise.resolve('');
 };
