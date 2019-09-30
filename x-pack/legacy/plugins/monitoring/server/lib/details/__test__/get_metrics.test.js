@@ -44,13 +44,19 @@ function getMockReq(metricsBuckets = []) {
               )
             })
         }
-      }
+      },
+      uiSettingsServiceFactory: () => ({
+        get: () => 'Browser'
+      }),
     },
     payload: {
       timeRange: { min, max }
     },
     params: {
       clusterUuid: '1234xyz'
+    },
+    getSavedObjectsClient: () => {
+
     }
   };
 }
