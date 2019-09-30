@@ -17,8 +17,6 @@
  * under the License.
  */
 
-const REGEX = /\n\n<!-- kibanaCiData = (.*) -->/;
-
 /**
  * Allows retrieving and setting key/value pairs on a Github Issue. Keys and values must be JSON-serializable.
  * Derived from https://github.com/probot/metadata/blob/6ae1523d5035ba727d09c0e7f77a6a154d9a4777/index.js
@@ -47,42 +45,35 @@ const REGEX = /\n\n<!-- kibanaCiData = (.*) -->/;
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-export const markdownMetadata = {
-  get(body, key = null, prefix = 'failed-test') {
-    const match = body.match(REGEX);
 
-    if (match) {
-      const data = JSON.parse(match[1])[prefix];
-      return key ? data && data[key] : data;
-    } else {
-      return null;
-    }
-  },
+const PREFIX = 'failed-test';
+const REGEX = /\n\n<!-- kibanaCiData = (.*) -->/;
 
-  /**
-   * Set data on the body. Can either be set individually with `key` and `value` OR
-   */
-  set(body, key, value, prefix = 'failed-test') {
-    let newData = {};
-    // If second arg is an object, use all supplied values.
-    if (typeof key === 'object') {
-      newData = key;
-      prefix = value || prefix;  // need to move third arg to prefix.
-    } else {
-      newData[key] = value;
-    }
+/**
+ * Parse metadata from issue body
+ */
+export function getIssueMetadata(body: string, key: string, defaultValue: any = undefined) {
+  const match = body.match(REGEX);
 
-    let data = {};
-
-    body = body.replace(REGEX, (_, json) => {
-      data = JSON.parse(json);
-      return '';
-    });
-
-    if (!data[prefix]) data[prefix] = {};
-
-    Object.assign(data[prefix], newData);
-
-    return `${body}\n\n<!-- kibanaCiData = ${JSON.stringify(data)} -->`;
+  if (match) {
+    const data = JSON.parse(match[1])[PREFIX];
+    return data && data[key] !== undefined ? data[key] : defaultValue;
+  } else {
+    return defaultValue;
   }
-};
+}
+
+/**
+ * Set data on the body.
+ */
+export function updateIssueMetadata(body: string, values: Record<string, any>) {
+  if (REGEX.test(body)) {
+    return body.replace(REGEX, (match, json) => {
+      const data = JSON.parse(json);
+      data[PREFIX] = Object.assign(data[PREFIX] || {}, values);
+      return match.replace(json, JSON.stringify(data));
+    });
+  }
+
+  return `${body}\n\n<!-- kibanaCiData = ${JSON.stringify({ [PREFIX]: values })} -->`;
+}

@@ -290,6 +290,6 @@ def buildXpack() {
 def runErrorReporter() {
   bash """
     source src/dev/ci_setup/setup_env.sh
-    node src/dev/failed_tests/cli
+    node scripts/report_failed_tests
   """
 }
