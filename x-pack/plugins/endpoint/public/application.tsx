@@ -23,93 +23,18 @@ import {
 } from '@elastic/eui';
 
 import { AppMountContext, AppMountParameters } from 'kibana/public';
+import { Nav } from './components/nav';
+import { Home } from './components/home';
+import { Management } from './components/management';
 
-const Home = () => (
-  <EuiPageBody>
-    <EuiPageHeader>
-      <EuiPageHeaderSection>
-        <EuiTitle size="l">
-          <h1>Welcome to Endpoint!</h1>
-        </EuiTitle>
-      </EuiPageHeaderSection>
-    </EuiPageHeader>
-    <EuiPageContent>
-      <EuiPageContentHeader>
-        <EuiPageContentHeaderSection>
-          <EuiTitle>
-            <h2>Home Page</h2>
-          </EuiTitle>
-        </EuiPageContentHeaderSection>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>Body Content</EuiPageContentBody>
-    </EuiPageContent>
-  </EuiPageBody>
-);
-
-const PageA = () => (
-  <EuiPageBody data-test-subj="fooAppPageA">
-    <EuiPageHeader>
-      <EuiPageHeaderSection>
-        <EuiTitle size="l">
-          <h1>Page A</h1>
-        </EuiTitle>
-      </EuiPageHeaderSection>
-    </EuiPageHeader>
-    <EuiPageContent>
-      <EuiPageContentHeader>
-        <EuiPageContentHeaderSection>
-          <EuiTitle>
-            <h2>Page A section title</h2>
-          </EuiTitle>
-        </EuiPageContentHeaderSection>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>Page A's content goes here</EuiPageContentBody>
-    </EuiPageContent>
-  </EuiPageBody>
-);
-
-type NavProps = RouteComponentProps & {
-  navigateToApp: AppMountContext['core']['application']['navigateToApp'];
-};
-const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
-  <EuiSideNav
-    items={[
-      {
-        name: 'Foo',
-        id: 'foo',
-        items: [
-          {
-            id: 'home',
-            name: 'Home',
-            onClick: () => history.push('/'),
-            'data-test-subj': 'fooNavHome',
-          },
-          {
-            id: 'page-a',
-            name: 'Page A',
-            onClick: () => history.push('/page-a'),
-            'data-test-subj': 'fooNavPageA',
-          },
-          {
-            id: 'linktobar',
-            name: 'Open Bar / Page B',
-            onClick: () => navigateToApp('bar', { path: 'page-b?query=here', state: 'foo!!' }),
-            'data-test-subj': 'fooNavBarPageB',
-          },
-        ],
-      },
-    ]}
-  />
-));
-
-const FooApp = ({ basename, context }: { basename: string; context: AppMountContext }) => (
+const EndpointRouter = ({ basename, context }: { basename: string; context: AppMountContext }) => (
   <Router basename={basename}>
     <EuiPage>
       <EuiPageSideBar>
         <Nav navigateToApp={context.core.application.navigateToApp} />
       </EuiPageSideBar>
       <Route path="/" exact component={Home} />
-      <Route path="/page-a" component={PageA} />
+      <Route path="/management" component={Management} />
     </EuiPage>
   </Router>
 );
@@ -118,7 +43,7 @@ export const renderApp = (
   context: AppMountContext,
   { appBasePath, element }: AppMountParameters
 ) => {
-  ReactDOM.render(<FooApp basename={appBasePath} context={context} />, element);
+  ReactDOM.render(<EndpointRouter basename={appBasePath} context={context} />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };
