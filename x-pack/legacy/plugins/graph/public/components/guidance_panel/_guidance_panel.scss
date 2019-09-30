@@ -13,7 +13,7 @@
   display: block;
   max-width: 420px;
   position: relative;
-  padding-left: $euiSizeL;
+  padding-left: $euiSizeXL;
   margin-bottom: $euiSizeL;
 
   button {
@@ -34,5 +34,5 @@
 .gphGuidancePanel__itemIcon {
   position: absolute;
   left: 0;
-  top: 0;
+  top: -$euiSizeXS;
 }

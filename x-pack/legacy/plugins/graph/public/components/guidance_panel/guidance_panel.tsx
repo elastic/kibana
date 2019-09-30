@@ -18,7 +18,15 @@ export interface GuidancePanelProps {
   hasFields: boolean;
 }
 
-function ListItem({ children, disabled }: { children: ReactNode; disabled: boolean }) {
+function ListItem({
+  children,
+  disabled,
+  selected,
+}: {
+  children: ReactNode;
+  disabled: boolean;
+  selected: boolean;
+}) {
   return (
     <li
       className={classNames('gphGuidancePanel__item', {
@@ -26,7 +34,15 @@ function ListItem({ children, disabled }: { children: ReactNode; disabled: boole
       })}
       aria-disabled={disabled}
     >
-      <EuiIcon type="check" className="gphGuidancePanel__itemIcon" aria-hidden={true} />
+      {selected && (
+        <EuiIcon
+          color="secondary"
+          type="check"
+          className="gphGuidancePanel__itemIcon"
+          aria-hidden={true}
+          size="l"
+        />
+      )}
       {children}
     </li>
   );
@@ -60,7 +76,7 @@ export function GuidancePanel(props: GuidancePanelProps) {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <ul className="gphGuidancePanel__list">
-                <ListItem disabled={false}>
+                <ListItem disabled={false} selected={hasDatasource}>
                   <FormattedMessage
                     id="xpack.graph.guidancePanel.datasourceItem.description"
                     defaultMessage="Choose an {indexpattern} above"
@@ -78,7 +94,7 @@ export function GuidancePanel(props: GuidancePanelProps) {
                     }}
                   />
                 </ListItem>
-                <ListItem disabled={!hasDatasource}>
+                <ListItem disabled={!hasDatasource} selected={hasFields}>
                   <FormattedMessage
                     id="xpack.graph.guidancePanel.fieldsItem.description"
                     defaultMessage="{fields} to explore"
@@ -96,7 +112,7 @@ export function GuidancePanel(props: GuidancePanelProps) {
                     }}
                   />
                 </ListItem>
-                <ListItem disabled={!hasFields}>
+                <ListItem disabled={!hasFields} selected={false}>
                   <FormattedMessage
                     id="xpack.graph.guidancePanel.nodesItem.description"
                     defaultMessage="Search for something in the search bar above to begin exploration. If you don't know where to start, you can also {topTerms}"
