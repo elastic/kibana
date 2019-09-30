@@ -1019,10 +1019,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@14.3.0":
-  version "14.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-14.3.0.tgz#256e1af8f6b15717904f8959742a23b3495ff0bb"
-  integrity sha512-gAbPNezBmndInYqqw6EvRYLn2VMYQgYuPQYA5UZ7TyHzwvoBiMpUw5nFzYhS2A/Xcmq/ON5Mu8RY3LGRAVBOvQ==
+"@elastic/eui@14.4.0":
+  version "14.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-14.4.0.tgz#ac09a476798dcdb1005616cccc149eda23ea2a90"
+  integrity sha512-dR7lYwUaIRXZjlUrJBq8GcGLPh6QfM3waQxUFI8lOnMVayJe3OOMNADCn8Oty6wNYIOrBWzZbW6w4bzInWF6oA==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"

@@ -184,7 +184,7 @@
     "@babel/runtime": "^7.5.5",
     "@elastic/ctags-langserver": "^0.1.10",
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "14.3.0",
+    "@elastic/eui": "14.4.0",
     "@elastic/javascript-typescript-langserver": "^0.3.3",
     "@elastic/lsp-extension": "^0.1.2",
     "@elastic/maki": "6.1.0",
