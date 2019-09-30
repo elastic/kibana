@@ -25,6 +25,7 @@ import {
   EuiLink,
   EuiSelect,
   EuiSwitch,
+  EuiFieldNumber
 } from '@elastic/eui';
 
 import {
@@ -68,23 +69,29 @@ export class UrlFormatEditor extends DefaultFormatEditor {
     };
   }
 
-  onTypeChange = (newType) => {
-    const { urlTemplate } = this.props.formatParams;
-    if(newType === 'img' && !urlTemplate) {
-      this.onChange({
-        type: newType,
-        urlTemplate: this.iconPattern,
-      });
-    } else if(newType !== 'img' && urlTemplate === this.iconPattern) {
-      this.onChange({
-        type: newType,
-        urlTemplate: null,
-      });
-    } else {
-      this.onChange({
-        type: newType,
-      });
+  sanitizeNumericValue = (val) => {
+    const sanitizedValue = parseInt(val);
+    if (isNaN(sanitizedValue)) {
+      return '';
     }
+    return sanitizedValue;
+  }
+
+  onTypeChange = (newType) => {
+    const { urlTemplate, width, height } = this.props.formatParams;
+    const params = {
+      type: newType
+    };
+    if (newType === 'img') {
+      params.width = width;
+      params.height = height;
+      if (!urlTemplate) {
+        params.urlTemplate = this.iconPattern;
+      }
+    } else if (newType !== 'img' && urlTemplate === this.iconPattern) {
+      params.urlTemplate = null;
+    }
+    this.onChange(params);
   }
 
   showUrlTemplateHelp = () => {
@@ -111,6 +118,44 @@ export class UrlFormatEditor extends DefaultFormatEditor {
     this.setState({
       showLabelTemplateHelp: false,
     });
+  }
+
+  renderWidthHeightParameters = () => {
+    const { error } = this.state;
+    const width = this.sanitizeNumericValue(this.props.formatParams.width);
+    const height = this.sanitizeNumericValue(this.props.formatParams.height);
+    return (
+      <Fragment>
+        <EuiFormRow
+          label={<FormattedMessage id="common.ui.fieldEditor.url.widthLabel" defaultMessage="Width" />}
+          isInvalid={!!error}
+          error={error}
+        >
+          <EuiFieldNumber
+            data-test-subj="urlEditorWidth"
+            placeholder={128}
+            value={width}
+            onChange={(e) => {
+              this.onChange({ width: e.target.value });
+            }}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={<FormattedMessage id="common.ui.fieldEditor.url.heightLabel" defaultMessage="Height" />}
+          isInvalid={!!error}
+          error={error}
+        >
+          <EuiFieldNumber
+            data-test-subj="urlEditorHeight"
+            placeholder={128}
+            value={height}
+            onChange={(e) => {
+              this.onChange({ height: e.target.value });
+            }}
+          />
+        </EuiFormRow>
+      </Fragment>
+    );
   }
 
   render() {
@@ -196,6 +241,10 @@ export class UrlFormatEditor extends DefaultFormatEditor {
             }}
           />
         </EuiFormRow>
+
+        {formatParams.type === 'img' ? (
+          this.renderWidthHeightParameters()
+        ) : null}
 
         <FormatEditorSamples
           samples={samples}

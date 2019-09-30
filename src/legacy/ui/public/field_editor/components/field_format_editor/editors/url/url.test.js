@@ -92,4 +92,17 @@ describe('UrlFormatEditor', () => {
     component.update();
     expect(component).toMatchSnapshot();
   });
+
+  it('should render width and height fields if image', async () => {
+    const component = shallow(
+      <UrlFormatEditor
+        fieldType={fieldType}
+        format={format}
+        formatParams={{ ...formatParams, ...{ type: 'img' } }}
+        onChange={onChange}
+        onError={onError}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
 });
