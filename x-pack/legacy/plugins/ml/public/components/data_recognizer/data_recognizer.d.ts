@@ -11,7 +11,7 @@ import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/type
 
 declare const DataRecognizer: FC<{
   indexPattern: IndexPattern;
-  savedSearch: SavedSearch;
+  savedSearch?: SavedSearch;
   results: {
     count: number;
     onChange?: Function;

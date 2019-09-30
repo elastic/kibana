@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContentBody,
+  EuiPageContent,
   EuiTitle,
   EuiSpacer,
   EuiCallOut,
@@ -22,9 +22,10 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { useKibanaContext } from '../../../../contexts/kibana';
 import { DataRecognizer } from '../../../../components/data_recognizer';
+import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
+import { timeBasedIndexCheck } from '../../../../util/index_utils';
 
 export const Page: FC = () => {
   const kibanaContext = useKibanaContext();
@@ -68,6 +69,15 @@ export const Page: FC = () => {
     return currentSavedSearch.id === undefined
       ? `${basePath}?index=${currentIndexPattern.id}`
       : `${basePath}?savedSearchId=${currentSavedSearch.id}`;
+  };
+
+  const addSelectionToRecentlyAccessed = () => {
+    const title =
+      currentSavedSearch.id === undefined ? currentIndexPattern.title : currentSavedSearch.title;
+    const url = getUrl('');
+    addItemToRecentlyAccessed('jobs/new_job/datavisualizer', title, url);
+
+    window.location.href = getUrl('#jobs/new_job/datavisualizer');
   };
 
   const jobTypes = [
@@ -141,9 +151,9 @@ export const Page: FC = () => {
   ];
 
   return (
-    <EuiPage style={{ backgroundColor: 'inherit' }} data-test-subj="mlPageJobTypeSelection">
+    <EuiPage data-test-subj="mlPageJobTypeSelection">
       <EuiPageBody>
-        <EuiPageContentBody>
+        <EuiPageContent>
           <EuiTitle>
             <h2>
               <FormattedMessage
@@ -156,15 +166,18 @@ export const Page: FC = () => {
           <EuiSpacer />
 
           {isTimeBasedIndex === false && (
-            <EuiCallOut size="s" title={indexWarningTitle} color="warning" iconType="help">
-              <p>
-                <FormattedMessage
-                  id="xpack.ml.newJob.wizard.jobType.howToRunAnomalyDetectionDescription"
-                  defaultMessage="Anomaly detection can only be run over indices which are time based."
-                />
-              </p>
+            <>
+              <EuiCallOut size="s" title={indexWarningTitle} color="warning" iconType="help">
+                <p>
+                  <FormattedMessage
+                    id="xpack.ml.newJob.wizard.jobType.howToRunAnomalyDetectionDescription"
+                    defaultMessage="Anomaly detection can only be run over indices which are time based."
+                  />
+                </p>
+              </EuiCallOut>
+
               <EuiSpacer size="xxl" />
-            </EuiCallOut>
+            </>
           )}
 
           <div hidden={recognizerResults.count === 0}>
@@ -220,13 +233,16 @@ export const Page: FC = () => {
 
           <EuiFlexGrid gutterSize="l" columns={4}>
             {jobTypes.map(({ href, icon, header, text, id }) => (
-              <EuiFlexItem key={id} style={{ cursor: !isTimeBasedIndex && 'not-allowed' }}>
-                <EuiLink
-                  href={href}
-                  data-test-subj={id}
-                  style={{ pointerEvents: !isTimeBasedIndex && 'none' }}
-                >
-                  <EuiPanel>
+              <EuiFlexItem
+                key={id}
+                style={{ cursor: !isTimeBasedIndex ? 'not-allowed' : undefined }}
+              >
+                <EuiPanel>
+                  <EuiLink
+                    href={href}
+                    data-test-subj={id}
+                    style={{ pointerEvents: !isTimeBasedIndex ? 'none' : undefined }}
+                  >
                     <EuiFlexGroup gutterSize="l" responsive={true}>
                       <EuiFlexItem grow={false}>
                         <EuiIcon size="xl" type={icon.type} aria-label={icon.ariaLabel} />
@@ -240,8 +256,8 @@ export const Page: FC = () => {
                         </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                  </EuiPanel>
-                </EuiLink>
+                  </EuiLink>
+                </EuiPanel>
               </EuiFlexItem>
             ))}
           </EuiFlexGrid>
@@ -270,7 +286,7 @@ export const Page: FC = () => {
 
           <EuiFlexGrid gutterSize="l" columns={4}>
             <EuiFlexItem>
-              <EuiLink href={getUrl('#jobs/new_job/datavisualizer')}>
+              <EuiLink onClick={addSelectionToRecentlyAccessed}>
                 <EuiPanel>
                   <EuiFlexGroup gutterSize="l" responsive={true}>
                     <EuiFlexItem grow={false}>
@@ -306,7 +322,7 @@ export const Page: FC = () => {
               </EuiLink>
             </EuiFlexItem>
           </EuiFlexGrid>
-        </EuiPageContentBody>
+        </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
   );

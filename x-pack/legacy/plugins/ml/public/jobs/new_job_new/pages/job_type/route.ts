@@ -7,15 +7,12 @@
 import uiRoutes from 'ui/routes';
 
 // @ts-ignore
-import { getCreateJobBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
-// @ts-ignore
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 // @ts-ignore
 import { checkLicenseExpired } from '../../../../license/check_license';
 import { checkCreateJobsPrivilege } from '../../../../privilege/check_privilege';
-// @ts-ignore
 import { loadCurrentIndexPattern, loadCurrentSavedSearch } from '../../../../util/index_utils';
-// @ts-ignore
+import { getCreateJobBreadcrumbs } from '../../../breadcrumbs';
 
 uiRoutes.when('/jobs/new_job/step/job_type', {
   template: '<ml-job-type-page />',
