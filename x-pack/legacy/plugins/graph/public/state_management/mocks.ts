@@ -40,6 +40,7 @@ export function createMockGraphStore({
     runLayout: jest.fn(),
     nodes: [],
     edges: [],
+    options: {},
     blacklistedNodes: [],
   } as unknown) as Workspace;
 

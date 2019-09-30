@@ -99,7 +99,10 @@ export const syncFieldsSaga = ({ getWorkspace }: GraphStoreDependencies) => {
     workspace.options.vertex_fields = selectedFields;
   }
   return function*() {
-    yield takeLatest(matchesOne(loadFields, selectField, deselectField), syncFields);
+    yield takeLatest(
+      matchesOne(loadFields, selectField, deselectField, updateFieldProperties),
+      syncFields
+    );
   };
 };
 
