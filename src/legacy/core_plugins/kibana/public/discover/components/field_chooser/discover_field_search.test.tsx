@@ -23,31 +23,36 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { DiscoverFieldSearch } from './discover_field_search';
 
 describe('DiscoverFieldSearch', () => {
-  const props = {
-    onChange: jest.fn(),
-    onShowFilter: jest.fn(),
-    showFilter: false,
-    value: 'test',
-  };
-
-  const comp = mountWithIntl(<DiscoverFieldSearch {...props} />);
-  const searchInput = findTestSubject(comp, 'fieldFilterSearchInput');
-  const filterBtn = findTestSubject(comp, 'toggleFieldFilterButton');
+  function mountComponent() {
+    const props = {
+      onChange: jest.fn(),
+      onShowFilter: jest.fn(),
+      showFilter: false,
+      value: 'test',
+    };
+    const comp = mountWithIntl(<DiscoverFieldSearch {...props} />);
+    const input = findTestSubject(comp, 'fieldFilterSearchInput');
+    const btn = findTestSubject(comp, 'toggleFieldFilterButton');
+    return { comp, input, btn, props };
+  }
 
   test('enter value', () => {
-    searchInput.simulate('change', { target: { value: 'new filter' } });
+    const { input, props } = mountComponent();
+    input.simulate('change', { target: { value: 'new filter' } });
     expect(props.onChange).toBeCalledTimes(1);
   });
 
   // this should work, but doesn't, have to do some research
-  test.skip('click toggle filter button', () => {
-    filterBtn.simulate('click');
+  test('click toggle filter button', () => {
+    const { btn, props } = mountComponent();
+    btn.simulate('click');
     expect(props.onShowFilter).toBeCalledTimes(1);
   });
 
   test('change showFilter value should change button label', () => {
-    const prevFilterBtnHTML = filterBtn.html();
+    const { btn, comp } = mountComponent();
+    const prevFilterBtnHTML = btn.html();
     comp.setProps({ showFilter: true });
-    expect(filterBtn.html()).not.toBe(prevFilterBtnHTML);
+    expect(btn.html()).not.toBe(prevFilterBtnHTML);
   });
 });

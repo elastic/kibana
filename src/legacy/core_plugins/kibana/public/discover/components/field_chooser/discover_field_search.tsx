@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
 export interface Props {
   /**
@@ -36,7 +36,7 @@ export interface Props {
   /**
    * the input value of the user
    */
-  value: string;
+  value?: string;
 }
 
 /**
@@ -74,15 +74,17 @@ export function DiscoverFieldSearch({ showFilter, onChange, onShowFilter, value 
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          aria-expanded={showFilter}
-          aria-label={filterBtnAriaLabel}
-          className="dscToggleFieldFilterButton"
-          data-test-subj="toggleFieldFilterButton"
-          iconType="filter"
-          onClick={() => onShowFilter()}
-          size="m"
-        />
+        <EuiToolTip content={filterBtnAriaLabel}>
+          <EuiButtonIcon
+            aria-expanded={showFilter}
+            aria-label={filterBtnAriaLabel}
+            className="dscToggleFieldFilterButton"
+            data-test-subj="toggleFieldFilterButton"
+            iconType="filter"
+            onClick={() => onShowFilter()}
+            size="m"
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
