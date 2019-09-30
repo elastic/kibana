@@ -45,6 +45,7 @@ export const IGNORE_FILE_GLOBS = [
   'packages/kbn-utility-types/test-d/**/*',
   '**/Jenkinsfile*',
   'Dockerfile*',
+  'vars/*',
 
   // Files in this directory must match a pre-determined name in some cases.
   'x-pack/legacy/plugins/canvas/.storybook/*',
