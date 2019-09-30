@@ -235,7 +235,7 @@ export class Flyout extends Component {
       <EuiText size="s">
         <EuiLink href={documentationUrl} target="_blank">
           {i18n.translate('xpack.monitoring.metricbeatMigration.flyout.learnMore', {
-            defaultMessage: 'Learn about this migration.'
+            defaultMessage: 'Learn about why.'
           })}
         </EuiLink>
       </EuiText>

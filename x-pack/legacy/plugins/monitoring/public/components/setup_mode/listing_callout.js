@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { formatProductName, getIdentifier } from './formatting';
 
 const MIGRATE_TO_MB_LABEL = i18n.translate('xpack.monitoring.setupMode.migrateToMetricbeat', {
-  defaultMessage: 'Migrate to Metricbeat',
+  defaultMessage: 'Monitor with Metricbeat',
 });
 
 export function ListingCallOut({ setupModeData, productName, customRenderer = null }) {

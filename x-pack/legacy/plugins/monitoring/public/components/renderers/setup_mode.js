@@ -130,8 +130,7 @@ export class SetupModeRenderer extends React.Component {
                   <EuiTextColor color="ghost">
                     <FormattedMessage
                       id="xpack.monitoring.setupMode.description"
-                      defaultMessage="You are in setup mode. Hover your pointer over the ({flagIcon}) icon
-                      for configuration options."
+                      defaultMessage="You are in setup mode. The ({flagIcon}) icon indicates configuration options."
                       values={{
                         flagIcon: (
                           <EuiIcon type="flag"/>
