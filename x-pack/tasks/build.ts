@@ -23,6 +23,7 @@ import { PKG_NAME } from './helpers/pkg';
 import { BUILD_VERSION } from './helpers/build_version';
 
 const BUILD_DIR = resolve(REPO_ROOT, 'x-pack/build');
+const PLUGIN_BUILD_DIR = resolve(BUILD_DIR, 'plugin');
 
 async function cleanBuildTask() {
   fancyLog('Deleting', BUILD_DIR);
@@ -41,12 +42,12 @@ async function reportTask() {
 async function pluginHelpersBuild() {
   await pluginHelpers.run('build', {
     skipArchive: true,
-    buildDestination: BUILD_DIR,
+    buildDestination: PLUGIN_BUILD_DIR,
   });
 }
 
 async function generateNoticeText() {
-  const buildRoot = resolve(BUILD_DIR, 'kibana/x-pack');
+  const buildRoot = resolve(PLUGIN_BUILD_DIR, 'kibana/x-pack');
   const log = new ToolingLog({
     level: 'info',
     writeTo: process.stdout,
