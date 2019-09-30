@@ -17,8 +17,7 @@ To access an elasticsearch instance that has live data you have two options:
 
 ##### A. Connect to Elasticsearch on Cloud (internal devs only)
 
-Add the following to the kibana config file (config/kibana.dev.yml):
-https://p.elstc.co/paste/wcp7hGUC#UkNNwAZg6cCasmUQNMw8ZXntSPuau5FMXCJkSnsvXU+
+Find the credentials for the cluster [here](https://github.com/elastic/apm-dev/blob/master/docs/credentials/apm-ui-clusters.md#apmelstcco)
 
 ##### B. Start Elastic Stack and APM data generators
 

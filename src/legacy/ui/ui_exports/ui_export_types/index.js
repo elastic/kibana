@@ -63,7 +63,6 @@ export {
   aliases,
   visualize,
   search,
-  autocompleteProviders,
   shareContextMenuExtensions,
 } from './ui_app_extensions';
 

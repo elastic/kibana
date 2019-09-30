@@ -117,17 +117,17 @@ describe('xy_suggestions', () => {
 
     expect(rest).toHaveLength(0);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "seriesType": "area_stacked",
-                "splitAccessor": "aaa",
-                "x": "date",
-                "y": Array [
-                  "bytes",
-                ],
-              },
-            ]
-        `);
+                  Array [
+                    Object {
+                      "seriesType": "area_stacked",
+                      "splitAccessor": "aaa",
+                      "x": "date",
+                      "y": Array [
+                        "bytes",
+                      ],
+                    },
+                  ]
+            `);
   });
 
   test('does not suggest multiple splits', () => {
@@ -161,18 +161,18 @@ describe('xy_suggestions', () => {
 
     expect(rest).toHaveLength(0);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "seriesType": "area_stacked",
-                "splitAccessor": "product",
-                "x": "date",
-                "y": Array [
-                  "price",
-                  "quantity",
-                ],
-              },
-            ]
-        `);
+                  Array [
+                    Object {
+                      "seriesType": "area_stacked",
+                      "splitAccessor": "product",
+                      "x": "date",
+                      "y": Array [
+                        "price",
+                        "quantity",
+                      ],
+                    },
+                  ]
+            `);
   });
 
   test('uses datasource provided title if available', () => {
@@ -380,6 +380,45 @@ describe('xy_suggestions', () => {
     });
   });
 
+  test('overwrites column to dimension mappings if a date dimension is added', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
+    const currentState: XYState = {
+      isHorizontal: false,
+      legend: { isVisible: true, position: 'bottom' },
+      preferredSeriesType: 'bar',
+      layers: [
+        {
+          accessors: ['price', 'quantity'],
+          layerId: 'first',
+          seriesType: 'bar',
+          splitAccessor: 'dummyCol',
+          xAccessor: 'product',
+        },
+      ],
+    };
+    const [suggestion, ...rest] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), numCol('quantity'), strCol('product'), dateCol('timestamp')],
+        layerId: 'first',
+        changeType: 'extended',
+      },
+      state: currentState,
+    });
+
+    expect(rest).toHaveLength(0);
+    expect(suggestion.state).toEqual({
+      ...currentState,
+      layers: [
+        {
+          ...currentState.layers[0],
+          xAccessor: 'timestamp',
+          splitAccessor: 'product',
+        },
+      ],
+    });
+  });
+
   test('handles two numeric values', () => {
     (generateId as jest.Mock).mockReturnValueOnce('ddd');
     const [suggestion] = getSuggestions({
@@ -392,17 +431,53 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "seriesType": "bar_stacked",
-                "splitAccessor": "ddd",
-                "x": "quantity",
-                "y": Array [
-                  "price",
-                ],
-              },
-            ]
-        `);
+                  Array [
+                    Object {
+                      "seriesType": "bar_stacked",
+                      "splitAccessor": "ddd",
+                      "x": "quantity",
+                      "y": Array [
+                        "price",
+                      ],
+                    },
+                  ]
+            `);
+  });
+
+  test('handles ip', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('ddd');
+    const [suggestion] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [
+          numCol('quantity'),
+          {
+            columnId: 'myip',
+            operation: {
+              dataType: 'ip',
+              label: 'Top 5 myip',
+              isBucketed: true,
+              scale: 'ordinal',
+            },
+          },
+        ],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+    });
+
+    expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "seriesType": "bar_stacked",
+          "splitAccessor": "ddd",
+          "x": "myip",
+          "y": Array [
+            "quantity",
+          ],
+        },
+      ]
+    `);
   });
 
   test('handles unbucketed suggestions', () => {
@@ -427,16 +502,16 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "seriesType": "bar_stacked",
-          "splitAccessor": "eee",
-          "x": "mybool",
-          "y": Array [
-            "num votes",
-          ],
-        },
-      ]
-    `);
+            Array [
+              Object {
+                "seriesType": "bar_stacked",
+                "splitAccessor": "eee",
+                "x": "mybool",
+                "y": Array [
+                  "num votes",
+                ],
+              },
+            ]
+        `);
   });
 });

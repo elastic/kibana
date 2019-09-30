@@ -41,7 +41,7 @@ function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
             />
           </h2>
         </EuiTitle>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
 
         <BasicOptions {...props} />
 

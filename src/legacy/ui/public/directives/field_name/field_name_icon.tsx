@@ -17,62 +17,63 @@
  * under the License.
  */
 import React from 'react';
+import { palettes, EuiIcon } from '@elastic/eui';
+import { IconSize } from '@elastic/eui/src/components/icon/icon';
 
-interface Props {
-  type: string;
+interface IconMapEntry {
+  icon: string;
+  color: string;
+}
+interface FieldNameIconProps {
+  type:
+    | 'boolean'
+    | 'conflict'
+    | 'date'
+    | 'geo_point'
+    | 'geo_shape'
+    | 'ip'
+    | 'murmur3'
+    | 'number'
+    | '_source'
+    | 'string'
+    | string;
   label: string;
+  size?: IconSize;
+  useColor?: boolean;
 }
 
-export function FieldNameIcon({ type, label }: Props) {
-  switch (type) {
-    case 'boolean':
-      return <span aria-label={label} className="dscField__icon kuiIcon fa-adjust"></span>;
+const { colors } = palettes.euiPaletteColorBlind;
 
-    case 'conflict':
-      return <span aria-label={label} className="dscField__icon kuiIcon fa-warning"></span>;
+// defaultIcon => a unknown datatype
+const defaultIcon = { icon: 'questionInCircle', color: colors[0] };
 
-    case 'date':
-      return <span aria-label={label} className="dscField__icon kuiIcon fa-clock-o"></span>;
+const typeToEuiIconMap: Partial<Record<string, IconMapEntry>> = {
+  boolean: { icon: 'invert', color: colors[5] },
+  // icon for an index pattern mapping conflict in discover
+  conflict: { icon: 'alert', color: colors[8] },
+  date: { icon: 'calendar', color: colors[7] },
+  geo_point: { icon: 'globe', color: colors[2] },
+  geo_shape: { icon: 'globe', color: colors[2] },
+  ip: { icon: 'storage', color: colors[8] },
+  // is a plugin's data type https://www.elastic.co/guide/en/elasticsearch/plugins/current/mapper-murmur3-usage.html
+  murmur3: { icon: 'document', color: colors[1] },
+  number: { icon: 'number', color: colors[0] },
+  _source: { icon: 'editorCodeBlock', color: colors[3] },
+  string: { icon: 'string', color: colors[4] },
+};
 
-    case 'geo_point':
-      return <span aria-label={label} className="dscField__icon kuiIcon fa-globe"></span>;
+/**
+ * Field icon displayed in discover doc_viewer + side bar
+ */
+export function FieldNameIcon({ type, label, size = 's', useColor = false }: FieldNameIconProps) {
+  const euiIcon = typeToEuiIconMap[type] || defaultIcon;
 
-    case 'geo_shape':
-      return <span aria-label={label} className="dscField__icon kuiIcon fa-globe"></span>;
-
-    case 'ip':
-      return <span aria-label={label} className="dscField__icon kuiIcon fa-laptop"></span>;
-
-    case 'murmur3':
-      return (
-        <span aria-label={label} className="dscField__icon">
-          <strong aria-hidden="true">h</strong>
-        </span>
-      );
-
-    case 'number':
-      return (
-        <span aria-label={label} className="dscField__icon">
-          <strong aria-hidden="true">#</strong>
-        </span>
-      );
-
-    case 'source':
-      // Note that this type is currently not provided, type for _source is undefined
-      return <span aria-label={label} className="dscField__icon kuiIcon fa-file-text-o"></span>;
-
-    case 'string':
-      return (
-        <span aria-label={label} className="dscField__icon">
-          <strong aria-hidden="true">t</strong>
-        </span>
-      );
-
-    default:
-      return (
-        <span aria-label={label} className="dscField__icon">
-          <strong aria-hidden="true">?</strong>
-        </span>
-      );
-  }
+  return (
+    <EuiIcon
+      type={euiIcon.icon}
+      aria-label={label || type}
+      size={size as IconSize}
+      color={useColor || type === 'conflict' ? euiIcon.color : undefined}
+    />
+  );
 }
