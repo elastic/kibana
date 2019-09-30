@@ -7,7 +7,8 @@
 import { EuiPanel } from '@elastic/eui';
 import { editor, IPosition, IRange } from 'monaco-editor';
 import React from 'react';
-import { ResizeChecker } from 'ui/resize_checker';
+
+import { ResizeChecker } from '../shared/resize_checker';
 import { monaco } from '../../monaco/monaco';
 import { registerEditor } from '../../monaco/single_selection_helper';
 

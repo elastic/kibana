@@ -6,14 +6,17 @@
 
 import { TransformFactory } from '../../../types/transforms';
 import { Arguments } from '../../functions/common/formatnumber';
+import { TransformStrings } from '../../strings';
+
+const { FormatNumber: strings } = TransformStrings;
 
 export const formatnumber: TransformFactory<Arguments> = () => ({
   name: 'formatnumber',
-  displayName: 'Number format',
+  displayName: strings.getDisplayName(),
   args: [
     {
       name: 'format',
-      displayName: 'Format',
+      displayName: strings.getFormatDisplayName(),
       argType: 'numberformat',
     },
   ],
