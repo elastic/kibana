@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams, Axis } from '../../../types';
 import { SelectOption, SwitchOption, TruncateLabelsOption } from '../../common';
-import { rotateOptions } from '../../../utils/collections';
+import { getRotateOptions } from '../../../utils/collections';
 
 interface LabelOptionsProps extends VisOptionsProps<BasicVislibParams> {
   axis: Axis;
@@ -55,6 +55,8 @@ function LabelOptions({ stateParams, setValue, axis, axesName, index }: LabelOpt
     },
     [setAxisLabel]
   );
+
+  const rotateOptions = useMemo(getRotateOptions, []);
 
   return (
     <>

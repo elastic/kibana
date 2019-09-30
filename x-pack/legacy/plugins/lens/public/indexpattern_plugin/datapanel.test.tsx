@@ -6,13 +6,13 @@
 
 import { shallow, mount } from 'enzyme';
 import React, { ChangeEvent } from 'react';
-import { EuiComboBox } from '@elastic/eui';
 import { createMockedDragDropContext } from './mocks';
 import { InnerIndexPatternDataPanel, IndexPatternDataPanel, MemoizedDataPanel } from './datapanel';
 import { FieldItem } from './field_item';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPrivateState } from './types';
+import { ChangeIndexPattern } from './change_indexpattern';
 
 jest.mock('ui/new_platform');
 jest.mock('./loader');
@@ -215,8 +215,6 @@ describe('IndexPattern Data Panel', () => {
       dragDropContext: createMockedDragDropContext(),
       currentIndexPatternId: '1',
       indexPatterns: initialState.indexPatterns,
-      showIndexPatternSwitcher: false,
-      setShowIndexPatternSwitcher: jest.fn(),
       onChangeIndexPattern: jest.fn(),
       core,
       dateRange: {
@@ -246,9 +244,6 @@ describe('IndexPattern Data Panel', () => {
       />
     );
 
-    act(() => {
-      wrapper.find(MemoizedDataPanel).prop('setShowIndexPatternSwitcher')!(true);
-    });
     wrapper.find(MemoizedDataPanel).prop('onChangeIndexPattern')!('2');
 
     expect(changeIndexPattern).toHaveBeenCalledWith('2', state, setStateSpy);
@@ -264,20 +259,7 @@ describe('IndexPattern Data Panel', () => {
   it('should call setState when the index pattern is switched', async () => {
     const wrapper = shallow(<InnerIndexPatternDataPanel {...defaultProps} />);
 
-    wrapper.find('[data-test-subj="indexPattern-switch-link"]').simulate('click');
-
-    expect(defaultProps.setShowIndexPatternSwitcher).toHaveBeenCalledWith(true);
-
-    wrapper.setProps({ showIndexPatternSwitcher: true });
-
-    const comboBox = wrapper.find(EuiComboBox);
-
-    comboBox.prop('onChange')!([
-      {
-        label: initialState.indexPatterns['2'].title,
-        value: '2',
-      },
-    ]);
+    wrapper.find(ChangeIndexPattern).prop('onChangeIndexPattern')('2');
 
     expect(defaultProps.onChangeIndexPattern).toHaveBeenCalledWith('2');
   });

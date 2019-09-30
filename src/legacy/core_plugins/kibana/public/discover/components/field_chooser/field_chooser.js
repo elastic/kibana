@@ -21,7 +21,7 @@ import 'ui/directives/css_truncate';
 import { i18n } from '@kbn/i18n';
 import 'ui/directives/field_name';
 import './discover_field';
-import 'ui/angular_ui_select';
+import './discover_index_pattern_directive';
 import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
@@ -61,8 +61,8 @@ app.directive('discFieldChooser', function ($location, config, $route) {
         (pattern) => pattern.id === $scope.indexPattern.id
       );
       $scope.indexPatternList = _.sortBy($scope.indexPatternList, o => o.get('title'));
-      $scope.setIndexPattern = function (pattern) {
-        $scope.state.index = pattern.id;
+      $scope.setIndexPattern = function (id) {
+        $scope.state.index = id;
         $scope.state.save();
       };
 

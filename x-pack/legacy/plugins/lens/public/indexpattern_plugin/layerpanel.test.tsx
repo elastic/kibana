@@ -5,12 +5,12 @@
  */
 
 import React from 'react';
-import { EuiComboBox } from '@elastic/eui';
-import { act } from 'react-dom/test-utils';
-import { IndexPatternLayerPanelProps, LayerPanel } from './layerpanel';
-import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
-import { ReactWrapper } from 'enzyme';
 import { IndexPatternPrivateState } from './types';
+import { IndexPatternLayerPanelProps, LayerPanel } from './layerpanel';
+import { shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
+import { ShallowWrapper } from 'enzyme';
+import { EuiSelectable, EuiSelectableList } from '@elastic/eui';
+import { ChangeIndexPattern } from './change_indexpattern';
 
 jest.mock('ui/new_platform');
 jest.mock('./state_helpers');
@@ -181,41 +181,46 @@ describe('Layer Data Panel', () => {
     };
   });
 
-  function clickLabel(instance: ReactWrapper) {
-    act(() => {
-      instance
-        .find('[data-test-subj="lns_layerIndexPatternLabel"]')
-        .first()
-        .simulate('click');
-    });
-
-    instance.update();
+  function getIndexPatternPickerList(instance: ShallowWrapper) {
+    return instance
+      .find(ChangeIndexPattern)
+      .first()
+      .dive()
+      .find(EuiSelectable);
   }
 
-  it('should list all index patterns but the current one', () => {
-    const instance = mount(<LayerPanel {...defaultProps} />);
-    clickLabel(instance);
-
-    expect(
+  function selectIndexPatternPickerOption(instance: ShallowWrapper, selectedLabel: string) {
+    const options: Array<{ label: string; checked?: 'on' | 'off' }> = getIndexPatternPickerOptions(
       instance
-        .find(EuiComboBox)
-        .prop('options')!
-        .map(option => option.label)
-    ).toEqual(['my-fake-restricted-pattern', 'my-compatible-pattern']);
+    ).map(option =>
+      option.label === selectedLabel
+        ? { ...option, checked: 'on' }
+        : { ...option, checked: undefined }
+    );
+    return getIndexPatternPickerList(instance).prop('onChange')!(options);
+  }
+
+  function getIndexPatternPickerOptions(instance: ShallowWrapper) {
+    return getIndexPatternPickerList(instance)
+      .dive()
+      .find(EuiSelectableList)
+      .prop('options');
+  }
+
+  it('should list all index patterns', () => {
+    const instance = shallow(<LayerPanel {...defaultProps} />);
+
+    expect(getIndexPatternPickerOptions(instance)!.map(option => option.label)).toEqual([
+      'my-fake-index-pattern',
+      'my-fake-restricted-pattern',
+      'my-compatible-pattern',
+    ]);
   });
 
   it('should switch data panel to target index pattern', () => {
-    const instance = mount(<LayerPanel {...defaultProps} />);
-    clickLabel(instance);
+    const instance = shallow(<LayerPanel {...defaultProps} />);
 
-    act(() => {
-      instance.find(EuiComboBox).prop('onChange')!([
-        {
-          label: 'my-compatible-pattern',
-          value: defaultProps.state.indexPatterns['3'],
-        },
-      ]);
-    });
+    selectIndexPatternPickerOption(instance, 'my-compatible-pattern');
 
     expect(defaultProps.onChangeIndexPattern).toHaveBeenCalledWith('3');
   });
