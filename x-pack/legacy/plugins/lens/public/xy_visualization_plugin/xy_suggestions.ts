@@ -29,11 +29,13 @@ const columnSortOrder = {
 function getIconForSeries(type: SeriesType): EuiIconType {
   switch (type) {
     case 'area':
-    case 'area_stacked':
       return 'visArea';
+    case 'area_stacked':
+      return 'visAreaStacked';
     case 'bar':
-    case 'bar_stacked':
       return 'visBarVertical';
+    case 'bar_stacked':
+      return 'visBarVerticalStacked';
     case 'line':
       return 'visLine';
     default:
