@@ -9,7 +9,7 @@ import { set } from 'lodash';
 /*
 watch.input.search.request.indices
  */
-function buildIndices({ index }) {
+function buildIndices(index) {
   if (Array.isArray(index)) {
     return index;
   }
@@ -22,7 +22,7 @@ function buildIndices({ index }) {
 /*
 watch.input.search.request.body.query.bool.filter.range
  */
-function buildRange({ timeWindowSize, timeWindowUnit, timeField }) {
+function buildRange(timeWindowSize, timeWindowUnit, timeField) {
   return {
     [timeField]: {
       gte: `{{ctx.trigger.scheduled_time}}||-${timeWindowSize}${timeWindowUnit}`,
@@ -35,12 +35,12 @@ function buildRange({ timeWindowSize, timeWindowUnit, timeField }) {
 /*
 watch.input.search.request.body.query
  */
-function buildQuery(watch) {
+function buildQuery(timeWindowSize, timeWindowUnit, timeField) {
   //TODO: This is where a saved search would be applied
   return {
     bool: {
       filter: {
-        range: buildRange(watch)
+        range: buildRange(timeWindowSize, timeWindowUnit, timeField)
       }
     }
   };
@@ -49,7 +49,7 @@ function buildQuery(watch) {
 /*
 watch.input.search.request.body.aggs
  */
-function buildAggs({ aggType, aggField, termField, termSize, termOrder }) {
+function buildAggs(aggType, aggField, termField, termSize, termOrder) {
   if (aggType === 'count' && !termField) {
     return null;
   }
@@ -107,13 +107,13 @@ function buildAggs({ aggType, aggField, termField, termSize, termOrder }) {
 /*
 watch.input.search.request.body
  */
-function buildBody(watch) {
+function buildBody(timeWindowSize, timeWindowUnit, timeField, aggType, aggField, termField, termSize, termOrder) {
   const result = {
     size: 0,
-    query: buildQuery(watch)
+    query: buildQuery(timeWindowSize, timeWindowUnit, timeField)
   };
 
-  const aggs = buildAggs(watch);
+  const aggs = buildAggs(aggType, aggField, termField, termSize, termOrder);
   if (Boolean(aggs)) {
     result.aggs = aggs;
   }
@@ -124,12 +124,12 @@ function buildBody(watch) {
 /*
 watch.input
  */
-export function buildInput(watch) {
+export function buildInput({ index, timeWindowSize, timeWindowUnit, timeField, aggType, aggField, termField, termSize, termOrder }) {
   return {
     search: {
       request: {
-        body: buildBody(watch),
-        indices: buildIndices(watch)
+        body: buildBody(timeWindowSize, timeWindowUnit, timeField, aggType, aggField, termField, termSize, termOrder),
+        indices: buildIndices(index)
       }
     }
   };

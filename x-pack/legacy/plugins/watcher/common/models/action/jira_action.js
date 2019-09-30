@@ -95,8 +95,6 @@ export class JiraAction extends BaseAction {
           }
         }),
       });
-
-      json.jira = {};
     }
 
     if (!get(json, 'jira.fields.project.key')) {
@@ -123,7 +121,7 @@ export class JiraAction extends BaseAction {
       });
     }
 
-    if (!json.jira.fields.summary) {
+    if (!get(json, 'jira.fields.summary')) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
         message: i18n.translate('xpack.watcher.models.jiraAction.actionJsonJiraSummaryPropertyMissingBadRequestMessage', {
