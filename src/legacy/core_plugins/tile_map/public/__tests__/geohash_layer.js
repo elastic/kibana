@@ -98,7 +98,7 @@ describe('geohash_layer', function () {
       // }
     ].forEach(function (test) {
 
-      it(test.options.mapType, async function () {
+      it(`${test.options.mapType} (may fail in dev env)`, async function () {
 
         const geohashGridOptions = test.options;
         const geohashLayer = new GeohashLayer(
