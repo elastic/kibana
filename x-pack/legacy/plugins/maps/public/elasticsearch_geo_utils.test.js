@@ -138,10 +138,13 @@ describe('hitsToGeoJson', () => {
   describe('dot in geoFieldName', () => {
     const indexPatternMock = {
       fields: {
-        byName: {
-          ['my.location']: {
-            type: 'geo_point'
-          }
+        getByName: name => {
+          const fields = {
+            ['my.location']: {
+              type: 'geo_point'
+            }
+          };
+          return fields[name];
         }
       }
     };
