@@ -18,37 +18,32 @@
  */
 
 import { defaults } from 'lodash';
+import { SavedObjectsClientContract } from 'src/core/server';
 
 import { getUpgradeableConfig } from './get_upgradeable_config';
 
-export async function createOrUpgradeSavedConfig(options) {
-  const {
-    savedObjectsClient,
-    version,
-    buildNum,
-    logWithMetadata,
-    onWriteError,
-  } = options;
+interface Options {
+  savedObjectsClient: SavedObjectsClientContract;
+  version: string;
+  buildNum: number;
+  logWithMetadata: (...params: any[]) => void;
+  onWriteError?: (error: Error, attributes: Record<string, any>) => void;
+}
+export async function createOrUpgradeSavedConfig(options: Options) {
+  const { savedObjectsClient, version, buildNum, logWithMetadata, onWriteError } = options;
 
   // try to find an older config we can upgrade
   const upgradeableConfig = await getUpgradeableConfig({
     savedObjectsClient,
-    version
+    version,
   });
 
   // default to the attributes of the upgradeableConfig if available
-  const attributes = defaults(
-    { buildNum },
-    upgradeableConfig ? upgradeableConfig.attributes : {}
-  );
+  const attributes = defaults({ buildNum }, upgradeableConfig ? upgradeableConfig.attributes : {});
 
   try {
     // create the new SavedConfig
-    await savedObjectsClient.create(
-      'config',
-      attributes,
-      { id: version }
-    );
+    await savedObjectsClient.create('config', attributes, { id: version });
   } catch (error) {
     if (onWriteError) {
       return onWriteError(error, attributes);
@@ -58,9 +53,13 @@ export async function createOrUpgradeSavedConfig(options) {
   }
 
   if (upgradeableConfig) {
-    logWithMetadata(['plugin', 'elasticsearch'], `Upgrade config from ${upgradeableConfig.id} to ${version}`, {
-      prevVersion: upgradeableConfig.id,
-      newVersion: version
-    });
+    logWithMetadata(
+      ['plugin', 'elasticsearch'],
+      `Upgrade config from ${upgradeableConfig.id} to ${version}`,
+      {
+        prevVersion: upgradeableConfig.id,
+        newVersion: version,
+      }
+    );
   }
 }

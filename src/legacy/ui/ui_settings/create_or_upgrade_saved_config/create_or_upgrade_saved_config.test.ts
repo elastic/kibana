@@ -21,9 +21,7 @@ import sinon from 'sinon';
 import expect from '@kbn/expect';
 import Chance from 'chance';
 
-// @ts-ignore
 import * as getUpgradeableConfigNS from './get_upgradeable_config';
-// @ts-ignore
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 
 const chance = new Chance();
@@ -45,7 +43,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
         id: options.id,
         version: 'foo',
       })),
-    };
+    } as any; // mute until we have savedObjects mocks
 
     async function run(options = {}) {
       const resp = await createOrUpgradeSavedConfig({
@@ -103,7 +101,12 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
         [chance.word()]: chance.sentence(),
       };
 
-      getUpgradeableConfig.returns({ id: prevVersion, attributes: savedAttributes });
+      getUpgradeableConfig.resolves({
+        id: prevVersion,
+        attributes: savedAttributes,
+        type: '',
+        references: [],
+      });
 
       await run();
 
@@ -125,7 +128,12 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
     it('should log a message for upgrades', async () => {
       const { getUpgradeableConfig, logWithMetadata, run } = setup();
 
-      getUpgradeableConfig.returns({ id: prevVersion, attributes: { buildNum: buildNum - 100 } });
+      getUpgradeableConfig.resolves({
+        id: prevVersion,
+        attributes: { buildNum: buildNum - 100 },
+        type: '',
+        references: [],
+      });
 
       await run();
       sinon.assert.calledOnce(logWithMetadata);
@@ -143,7 +151,12 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
     it('does not log when upgrade fails', async () => {
       const { getUpgradeableConfig, logWithMetadata, run, savedObjectsClient } = setup();
 
-      getUpgradeableConfig.returns({ id: prevVersion, attributes: { buildNum: buildNum - 100 } });
+      getUpgradeableConfig.resolves({
+        id: prevVersion,
+        attributes: { buildNum: buildNum - 100 },
+        type: '',
+        references: [],
+      });
 
       savedObjectsClient.create.callsFake(async () => {
         throw new Error('foo');
