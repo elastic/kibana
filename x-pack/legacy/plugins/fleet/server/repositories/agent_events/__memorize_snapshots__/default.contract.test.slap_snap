@@ -1,67 +1,8 @@
 
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"]} (1)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 20,
-    "total": 0,
-    "saved_objects": []
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events"} (2)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 20,
-    "total": 0,
-    "saved_objects": []
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","perPage":1000} (3)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 0,
-    "saved_objects": []
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (1)'] = {
-  "thrownError": "{\"type\":\"Error\",\"message\":\"Unsupported saved object type: 'agent_events': Bad Request\",\"name\":\"Error\",\"stack\":\"Error: Unsupported saved object type: 'agent_events': Bad Request\\n    at Function.createUnsupportedTypeError (/Users/nicolas/Workspace/kibana/src/core/server/saved_objects/service/lib/errors.ts:96:7)\\n    at SavedObjectsRepository.createUnsupportedTypeError [as create] (/Users/nicolas/Workspace/kibana/src/core/server/saved_objects/service/lib/repository.ts:156:38)\\n    at SavedObjectsClient.create (/Users/nicolas/Workspace/kibana/src/core/server/saved_objects/service/saved_objects_client.ts:147:35)\\n    at EncryptedSavedObjectsClientWrapper.create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/encrypted_saved_objects/server/lib/encrypted_saved_objects_client_wrapper.ts:49:44)\\n    at SpacesSavedObjectsClient.create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/spaces/server/lib/saved_objects_client/spaces_saved_objects_client.ts:74:30)\\n    at SODatabaseAdapter.create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/adapters/saved_objects_database/default.ts:66:39)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/adapters/saved_objects_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:62:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/adapters/saved_objects_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/repositories/agent_events/default.contract.test.ts:34:25)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/repositories/agent_events/default.contract.test.ts:86:13)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\",\"isBoom\":true,\"isServer\":false,\"data\":null,\"output\":{\"statusCode\":400,\"payload\":{\"message\":\"Unsupported saved object type: 'agent_events': Bad Request\",\"statusCode\":400,\"error\":\"Bad Request\"},\"headers\":{}}}",
-  "results": null
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"]} (2)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 20,
-    "total": 0,
-    "saved_objects": []
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events"} (3)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 20,
-    "total": 0,
-    "saved_objects": []
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","perPage":1000} (4)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 0,
-    "saved_objects": []
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (1)'] = {
+exports['AgentsEventsRepository createEventsForAgent Create events for an agent - create:agent_events (1)'] = {
   "results": {
     "type": "agent_events",
-    "id": "1ba60eb0-e158-11e9-87b7-0b5a514d4b91",
+    "id": "6655f160-e3cd-11e9-ab2b-f19194632c4a",
     "attributes": {
       "type": "STATE",
       "subtype": "STARTING",
@@ -70,1514 +11,18 @@ exports['AgentsRepository deleteEventsForAgent Delete correctly all events for t
       "agent_id": "agent:1"
     },
     "references": [],
-    "updated_at": "2019-09-27T18:53:34.874Z",
+    "updated_at": "2019-09-30T21:58:13.622Z",
     "version": "WzEsMV0="
   }
 }
 
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (2)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "1bf47cd0-e158-11e9-87b7-0b5a514d4b91",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:33+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T18:53:35.389Z",
-    "version": "WzMsMV0="
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (3)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "1c91f550-e158-11e9-87b7-0b5a514d4b91",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:34+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T18:53:36.420Z",
-    "version": "WzUsMV0="
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (4)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "1d2e3550-e158-11e9-87b7-0b5a514d4b91",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:2"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T18:53:37.445Z",
-    "version": "WzYsMV0="
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"]} (5)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 20,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "1ba60eb0-e158-11e9-87b7-0b5a514d4b91",
-        "references": [],
-        "updated_at": "2019-09-27T18:53:34.874Z",
-        "version": "WzEsMV0="
-      },
-      {
-        "type": "agent_events",
-        "id": "1bf47cd0-e158-11e9-87b7-0b5a514d4b91",
-        "references": [],
-        "updated_at": "2019-09-27T18:53:35.389Z",
-        "version": "WzMsMV0="
-      },
-      {
-        "type": "agent_events",
-        "id": "1c91f550-e158-11e9-87b7-0b5a514d4b91",
-        "references": [],
-        "updated_at": "2019-09-27T18:53:36.420Z",
-        "version": "WzUsMV0="
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events"} (6)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 20,
-    "total": 4,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "1ba60eb0-e158-11e9-87b7-0b5a514d4b91",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T18:53:34.874Z",
-        "version": "WzEsMV0="
-      },
-      {
-        "type": "agent_events",
-        "id": "1bf47cd0-e158-11e9-87b7-0b5a514d4b91",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T18:53:35.389Z",
-        "version": "WzMsMV0="
-      },
-      {
-        "type": "agent_events",
-        "id": "1c91f550-e158-11e9-87b7-0b5a514d4b91",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T18:53:36.420Z",
-        "version": "WzUsMV0="
-      },
-      {
-        "type": "agent_events",
-        "id": "1d2e3550-e158-11e9-87b7-0b5a514d4b91",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:2"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T18:53:37.445Z",
-        "version": "WzYsMV0="
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","perPage":1000} (7)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 4,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "1ba60eb0-e158-11e9-87b7-0b5a514d4b91",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T18:53:34.874Z",
-        "version": "WzEsMV0="
-      },
-      {
-        "type": "agent_events",
-        "id": "1bf47cd0-e158-11e9-87b7-0b5a514d4b91",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T18:53:35.389Z",
-        "version": "WzMsMV0="
-      },
-      {
-        "type": "agent_events",
-        "id": "1c91f550-e158-11e9-87b7-0b5a514d4b91",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T18:53:36.420Z",
-        "version": "WzUsMV0="
-      },
-      {
-        "type": "agent_events",
-        "id": "1d2e3550-e158-11e9-87b7-0b5a514d4b91",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:2"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T18:53:37.445Z",
-        "version": "WzYsMV0="
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:1ba60eb0-e158-11e9-87b7-0b5a514d4b91:{} (8)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:1bf47cd0-e158-11e9-87b7-0b5a514d4b91:{} (9)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:1c91f550-e158-11e9-87b7-0b5a514d4b91:{} (10)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:1d2e3550-e158-11e9-87b7-0b5a514d4b91:{} (11)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (1)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "8c135680-e158-11e9-a491-65ff527ea83c",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T18:56:43.496Z",
-    "version": "WzEsMV0="
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (2)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "8c848ee0-e158-11e9-a491-65ff527ea83c",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:33+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T18:56:44.238Z",
-    "version": "WzMsMV0="
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (3)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "8d20a7d0-e158-11e9-a491-65ff527ea83c",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:34+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T18:56:45.261Z",
-    "version": "WzQsMV0="
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (4)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "8dbc4b90-e158-11e9-a491-65ff527ea83c",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:2"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T18:56:46.281Z",
-    "version": "WzYsMV0="
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"],"perPage":1} (5)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "8c135680-e158-11e9-a491-65ff527ea83c",
-        "references": [],
-        "updated_at": "2019-09-27T18:56:43.496Z",
-        "version": "WzEsMV0="
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:8c135680-e158-11e9-a491-65ff527ea83c:{} (6)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events"} (7)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 20,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "8c848ee0-e158-11e9-a491-65ff527ea83c",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T18:56:44.238Z",
-        "version": "WzMsMV0="
-      },
-      {
-        "type": "agent_events",
-        "id": "8d20a7d0-e158-11e9-a491-65ff527ea83c",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T18:56:45.261Z",
-        "version": "WzQsMV0="
-      },
-      {
-        "type": "agent_events",
-        "id": "8dbc4b90-e158-11e9-a491-65ff527ea83c",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:2"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T18:56:46.281Z",
-        "version": "WzYsMV0="
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","perPage":1000} (8)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "8c848ee0-e158-11e9-a491-65ff527ea83c",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T18:56:44.238Z",
-        "version": "WzMsMV0="
-      },
-      {
-        "type": "agent_events",
-        "id": "8d20a7d0-e158-11e9-a491-65ff527ea83c",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T18:56:45.261Z",
-        "version": "WzQsMV0="
-      },
-      {
-        "type": "agent_events",
-        "id": "8dbc4b90-e158-11e9-a491-65ff527ea83c",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:2"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T18:56:46.281Z",
-        "version": "WzYsMV0="
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:8c848ee0-e158-11e9-a491-65ff527ea83c:{} (9)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:8d20a7d0-e158-11e9-a491-65ff527ea83c:{} (10)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:8dbc4b90-e158-11e9-a491-65ff527ea83c:{} (11)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (1)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "62ab4040-e159-11e9-ad1f-832b63c0fbda",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:02:43.523Z",
-    "version": "WzIsMV0="
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (2)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "630c9a20-e159-11e9-ad1f-832b63c0fbda",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:33+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:02:44.162Z",
-    "version": "WzMsMV0="
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (3)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "63aa12a0-e159-11e9-ad1f-832b63c0fbda",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:34+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:02:45.194Z",
-    "version": "WzUsMV0="
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (4)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "6446eee0-e159-11e9-ad1f-832b63c0fbda",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:2"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:02:46.221Z",
-    "version": "WzYsMV0="
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"],"perPage":1} (5)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "62ab4040-e159-11e9-ad1f-832b63c0fbda",
-        "references": [],
-        "updated_at": "2019-09-27T19:02:43.523Z",
-        "version": "WzIsMV0="
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:62ab4040-e159-11e9-ad1f-832b63c0fbda:{} (6)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"],"perPage":1} (7)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1,
-    "total": 2,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "630c9a20-e159-11e9-ad1f-832b63c0fbda",
-        "references": [],
-        "updated_at": "2019-09-27T19:02:44.162Z",
-        "version": "WzMsMV0="
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:630c9a20-e159-11e9-ad1f-832b63c0fbda:{} (8)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"],"perPage":1} (9)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1,
-    "total": 1,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "63aa12a0-e159-11e9-ad1f-832b63c0fbda",
-        "references": [],
-        "updated_at": "2019-09-27T19:02:45.194Z",
-        "version": "WzUsMV0="
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:63aa12a0-e159-11e9-ad1f-832b63c0fbda:{} (10)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"],"perPage":1} (11)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1,
-    "total": 0,
-    "saved_objects": []
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events"} (12)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 20,
-    "total": 1,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "6446eee0-e159-11e9-ad1f-832b63c0fbda",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:2"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:02:46.221Z",
-        "version": "WzYsMV0="
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","perPage":1000} (13)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 1,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "6446eee0-e159-11e9-ad1f-832b63c0fbda",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:2"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:02:46.221Z",
-        "version": "WzYsMV0="
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:6446eee0-e159-11e9-ad1f-832b63c0fbda:{} (14)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (1)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "aa0d5450-e159-11e9-9b64-85e2c0737336",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:04:43.284Z",
-    "version": "WzExLDFd"
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (2)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "aa3accf0-e159-11e9-9b64-85e2c0737336",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:33+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:04:43.583Z",
-    "version": "WzEyLDFd"
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (3)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "aad53830-e159-11e9-9b64-85e2c0737336",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:34+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:04:44.595Z",
-    "version": "WzEzLDFd"
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (4)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "ab7289a0-e159-11e9-9b64-85e2c0737336",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:2"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:04:45.626Z",
-    "version": "WzE0LDFd"
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"],"perPage":1000} (5)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "aa0d5450-e159-11e9-9b64-85e2c0737336",
-        "references": [],
-        "updated_at": "2019-09-27T19:04:43.284Z",
-        "version": "WzExLDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "aa3accf0-e159-11e9-9b64-85e2c0737336",
-        "references": [],
-        "updated_at": "2019-09-27T19:04:43.583Z",
-        "version": "WzEyLDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "aad53830-e159-11e9-9b64-85e2c0737336",
-        "references": [],
-        "updated_at": "2019-09-27T19:04:44.595Z",
-        "version": "WzEzLDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:aa0d5450-e159-11e9-9b64-85e2c0737336:{} (6)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:aa3accf0-e159-11e9-9b64-85e2c0737336:{} (7)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:aad53830-e159-11e9-9b64-85e2c0737336:{} (8)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"],"perPage":1000} (9)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 0,
-    "saved_objects": []
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events"} (10)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 20,
-    "total": 1,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "ab7289a0-e159-11e9-9b64-85e2c0737336",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:2"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:04:45.626Z",
-        "version": "WzE0LDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","perPage":1000} (11)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 1,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "ab7289a0-e159-11e9-9b64-85e2c0737336",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:2"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:04:45.626Z",
-        "version": "WzE0LDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:ab7289a0-e159-11e9-9b64-85e2c0737336:{} (12)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (1)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "4f9df910-e15a-11e9-806b-695a5fea61fa",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:09:21.057Z",
-    "version": "WzE5LDFd"
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - bulkCreate:[{"attributes":{"agent_id":"agent:1","type":"STATE","subtype":"STARTING","timestamp":"2019-09-27T18:50:33+0000","message":"..."},"type":"agent_events"},{"attributes":{"agent_id":"agent:1","type":"STATE","subtype":"STARTING","timestamp":"2019-09-27T18:50:34+0000","message":"..."},"type":"agent_events"}]:{} (2)'] = {
+exports['AgentsEventsRepository createEventsForAgent Create events for an agent - bulkCreate:[{"attributes":{"agent_id":"agent:1","type":"STATE","subtype":"STARTING","timestamp":"2019-09-27T18:50:33+0000","message":"..."},"type":"agent_events"},{"attributes":{"agent_id":"agent:1","type":"STATE","subtype":"STARTING","timestamp":"2019-09-27T18:50:34+0000","message":"..."},"type":"agent_events"}]:{} (2)'] = {
   "results": {
     "saved_objects": [
       {
-        "id": "agent_events:4fd13e10-e15a-11e9-806b-695a5fea61fa",
+        "id": "agent_events:66c702b0-e3cd-11e9-ab2b-f19194632c4a",
         "type": "agent_events",
-        "updated_at": "2019-09-27T19:09:21.393Z",
-        "version": "WzIwLDFd",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "..."
-        },
-        "references": []
-      },
-      {
-        "id": "agent_events:4fd16520-e15a-11e9-806b-695a5fea61fa",
-        "type": "agent_events",
-        "updated_at": "2019-09-27T19:09:21.393Z",
-        "version": "WzIxLDFd",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "..."
-        },
-        "references": []
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events"} (3)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 20,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "4f9df910-e15a-11e9-806b-695a5fea61fa",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:09:21.057Z",
-        "version": "WzE5LDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "4fd13e10-e15a-11e9-806b-695a5fea61fa",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "..."
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:09:21.393Z",
-        "version": "WzIwLDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "4fd16520-e15a-11e9-806b-695a5fea61fa",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "..."
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:09:21.393Z",
-        "version": "WzIxLDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","perPage":1000} (4)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "4f9df910-e15a-11e9-806b-695a5fea61fa",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:09:21.057Z",
-        "version": "WzE5LDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "4fd13e10-e15a-11e9-806b-695a5fea61fa",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "..."
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:09:21.393Z",
-        "version": "WzIwLDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "4fd16520-e15a-11e9-806b-695a5fea61fa",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "..."
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:09:21.393Z",
-        "version": "WzIxLDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:4f9df910-e15a-11e9-806b-695a5fea61fa:{} (5)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:4fd13e10-e15a-11e9-806b-695a5fea61fa:{} (6)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:4fd16520-e15a-11e9-806b-695a5fea61fa:{} (7)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (8)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "52585e20-e15a-11e9-806b-695a5fea61fa",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:09:25.634Z",
-    "version": "WzI1LDFd"
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (9)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "52f3dad0-e15a-11e9-806b-695a5fea61fa",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:33+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:09:26.653Z",
-    "version": "WzI2LDFd"
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (10)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "538f5780-e15a-11e9-806b-695a5fea61fa",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:34+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:09:27.672Z",
-    "version": "WzI3LDFd"
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (11)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "542a5f00-e15a-11e9-806b-695a5fea61fa",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:2"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:09:28.688Z",
-    "version": "WzI4LDFd"
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"],"perPage":1000} (12)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "52585e20-e15a-11e9-806b-695a5fea61fa",
-        "references": [],
-        "updated_at": "2019-09-27T19:09:25.634Z",
-        "version": "WzI1LDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "52f3dad0-e15a-11e9-806b-695a5fea61fa",
-        "references": [],
-        "updated_at": "2019-09-27T19:09:26.653Z",
-        "version": "WzI2LDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "538f5780-e15a-11e9-806b-695a5fea61fa",
-        "references": [],
-        "updated_at": "2019-09-27T19:09:27.672Z",
-        "version": "WzI3LDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:52585e20-e15a-11e9-806b-695a5fea61fa:{} (13)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:52f3dad0-e15a-11e9-806b-695a5fea61fa:{} (14)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:538f5780-e15a-11e9-806b-695a5fea61fa:{} (15)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"],"perPage":1000} (16)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 0,
-    "saved_objects": []
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events"} (17)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 20,
-    "total": 1,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "542a5f00-e15a-11e9-806b-695a5fea61fa",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:2"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:09:28.688Z",
-        "version": "WzI4LDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","perPage":1000} (18)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 1,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "542a5f00-e15a-11e9-806b-695a5fea61fa",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:2"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:09:28.688Z",
-        "version": "WzI4LDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:542a5f00-e15a-11e9-806b-695a5fea61fa:{} (19)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - create:agent_events (1)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "785d7dd0-e15a-11e9-98f8-7f945fbad5d0",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:10:29.421Z",
-    "version": "WzMzLDFd"
-  }
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - bulkCreate:[{"attributes":{"agent_id":"agent:1","type":"STATE","subtype":"STARTING","timestamp":"2019-09-27T18:50:33+0000","message":"..."},"type":"agent_events"},{"attributes":{"agent_id":"agent:1","type":"STATE","subtype":"STARTING","timestamp":"2019-09-27T18:50:34+0000","message":"..."},"type":"agent_events"}]:{} (2)'] = {
-  "results": {
-    "saved_objects": [
-      {
-        "id": "agent_events:78af6e60-e15a-11e9-98f8-7f945fbad5d0",
-        "type": "agent_events",
-        "updated_at": "2019-09-27T19:10:29.958Z",
-        "version": "WzM0LDFd",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "..."
-        },
-        "references": []
-      },
-      {
-        "id": "agent_events:78af9570-e15a-11e9-98f8-7f945fbad5d0",
-        "type": "agent_events",
-        "updated_at": "2019-09-27T19:10:29.958Z",
-        "version": "WzM1LDFd",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "..."
-        },
-        "references": []
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - find:{"type":"agent_events"} (3)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 20,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "785d7dd0-e15a-11e9-98f8-7f945fbad5d0",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:10:29.421Z",
-        "version": "WzMzLDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "78af6e60-e15a-11e9-98f8-7f945fbad5d0",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "..."
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:10:29.958Z",
-        "version": "WzM0LDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "78af9570-e15a-11e9-98f8-7f945fbad5d0",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "..."
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:10:29.958Z",
-        "version": "WzM1LDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - find:{"type":"agent_events","perPage":1000} (4)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "785d7dd0-e15a-11e9-98f8-7f945fbad5d0",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:10:29.421Z",
-        "version": "WzMzLDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "78af6e60-e15a-11e9-98f8-7f945fbad5d0",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "..."
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:10:29.958Z",
-        "version": "WzM0LDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "78af9570-e15a-11e9-98f8-7f945fbad5d0",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "..."
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:10:29.958Z",
-        "version": "WzM1LDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - delete:agent_events:785d7dd0-e15a-11e9-98f8-7f945fbad5d0:{} (5)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - delete:agent_events:78af6e60-e15a-11e9-98f8-7f945fbad5d0:{} (6)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - delete:agent_events:78af9570-e15a-11e9-98f8-7f945fbad5d0:{} (7)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (1)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "7b1fd220-e15a-11e9-98f8-7f945fbad5d0",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:10:34.049Z",
-    "version": "WzM5LDFd"
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (2)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "7bbc3930-e15a-11e9-98f8-7f945fbad5d0",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:33+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:10:35.075Z",
-    "version": "WzQwLDFd"
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (3)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "7c585220-e15a-11e9-98f8-7f945fbad5d0",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:34+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:10:36.098Z",
-    "version": "WzQxLDFd"
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (4)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "7cf380b0-e15a-11e9-98f8-7f945fbad5d0",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:2"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:10:37.115Z",
-    "version": "WzQyLDFd"
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"],"perPage":1000} (5)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "7b1fd220-e15a-11e9-98f8-7f945fbad5d0",
-        "references": [],
-        "updated_at": "2019-09-27T19:10:34.049Z",
-        "version": "WzM5LDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "7bbc3930-e15a-11e9-98f8-7f945fbad5d0",
-        "references": [],
-        "updated_at": "2019-09-27T19:10:35.075Z",
-        "version": "WzQwLDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "7c585220-e15a-11e9-98f8-7f945fbad5d0",
-        "references": [],
-        "updated_at": "2019-09-27T19:10:36.098Z",
-        "version": "WzQxLDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:7b1fd220-e15a-11e9-98f8-7f945fbad5d0:{} (6)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:7bbc3930-e15a-11e9-98f8-7f945fbad5d0:{} (7)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:7c585220-e15a-11e9-98f8-7f945fbad5d0:{} (8)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"],"perPage":1000} (9)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 0,
-    "saved_objects": []
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events"} (10)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 20,
-    "total": 1,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "7cf380b0-e15a-11e9-98f8-7f945fbad5d0",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:2"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:10:37.115Z",
-        "version": "WzQyLDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","perPage":1000} (11)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 1,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "7cf380b0-e15a-11e9-98f8-7f945fbad5d0",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:2"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:10:37.115Z",
-        "version": "WzQyLDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:7cf380b0-e15a-11e9-98f8-7f945fbad5d0:{} (12)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - create:agent_events (1)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "a6fc7560-e15a-11e9-b2d0-d925c6578f36",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:11:47.637Z",
-    "version": "WzEsMV0="
-  }
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - bulkCreate:[{"attributes":{"agent_id":"agent:1","type":"STATE","subtype":"STARTING","timestamp":"2019-09-27T18:50:33+0000","message":"..."},"type":"agent_events"},{"attributes":{"agent_id":"agent:1","type":"STATE","subtype":"STARTING","timestamp":"2019-09-27T18:50:34+0000","message":"..."},"type":"agent_events"}]:{} (2)'] = {
-  "results": {
-    "saved_objects": [
-      {
-        "id": "agent_events:a7637490-e15a-11e9-b2d0-d925c6578f36",
-        "type": "agent_events",
-        "updated_at": "2019-09-27T19:11:48.312Z",
+        "updated_at": "2019-09-30T21:58:14.363Z",
         "version": "WzMsMV0=",
         "attributes": {
           "agent_id": "agent:1",
@@ -1589,9 +34,9 @@ exports['AgentsRepository createEventsForAgent Create events for an agent - bulk
         "references": []
       },
       {
-        "id": "agent_events:a7637491-e15a-11e9-b2d0-d925c6578f36",
+        "id": "agent_events:66c702b1-e3cd-11e9-ab2b-f19194632c4a",
         "type": "agent_events",
-        "updated_at": "2019-09-27T19:11:48.312Z",
+        "updated_at": "2019-09-30T21:58:14.363Z",
         "version": "WzQsMV0=",
         "attributes": {
           "agent_id": "agent:1",
@@ -1606,7 +51,7 @@ exports['AgentsRepository createEventsForAgent Create events for an agent - bulk
   }
 }
 
-exports['AgentsRepository createEventsForAgent Create events for an agent - find:{"type":"agent_events"} (3)'] = {
+exports['AgentsEventsRepository createEventsForAgent Create events for an agent - find:{"type":"agent_events"} (3)'] = {
   "results": {
     "page": 1,
     "per_page": 20,
@@ -1614,7 +59,7 @@ exports['AgentsRepository createEventsForAgent Create events for an agent - find
     "saved_objects": [
       {
         "type": "agent_events",
-        "id": "a6fc7560-e15a-11e9-b2d0-d925c6578f36",
+        "id": "6655f160-e3cd-11e9-ab2b-f19194632c4a",
         "attributes": {
           "type": "STATE",
           "subtype": "STARTING",
@@ -1623,12 +68,12 @@ exports['AgentsRepository createEventsForAgent Create events for an agent - find
           "agent_id": "agent:1"
         },
         "references": [],
-        "updated_at": "2019-09-27T19:11:47.637Z",
+        "updated_at": "2019-09-30T21:58:13.622Z",
         "version": "WzEsMV0="
       },
       {
         "type": "agent_events",
-        "id": "a7637490-e15a-11e9-b2d0-d925c6578f36",
+        "id": "66c702b0-e3cd-11e9-ab2b-f19194632c4a",
         "attributes": {
           "agent_id": "agent:1",
           "type": "STATE",
@@ -1637,12 +82,12 @@ exports['AgentsRepository createEventsForAgent Create events for an agent - find
           "message": "..."
         },
         "references": [],
-        "updated_at": "2019-09-27T19:11:48.312Z",
+        "updated_at": "2019-09-30T21:58:14.363Z",
         "version": "WzMsMV0="
       },
       {
         "type": "agent_events",
-        "id": "a7637491-e15a-11e9-b2d0-d925c6578f36",
+        "id": "66c702b1-e3cd-11e9-ab2b-f19194632c4a",
         "attributes": {
           "agent_id": "agent:1",
           "type": "STATE",
@@ -1651,14 +96,14 @@ exports['AgentsRepository createEventsForAgent Create events for an agent - find
           "message": "..."
         },
         "references": [],
-        "updated_at": "2019-09-27T19:11:48.312Z",
+        "updated_at": "2019-09-30T21:58:14.363Z",
         "version": "WzQsMV0="
       }
     ]
   }
 }
 
-exports['AgentsRepository createEventsForAgent Create events for an agent - find:{"type":"agent_events","perPage":1000} (4)'] = {
+exports['AgentsEventsRepository createEventsForAgent Create events for an agent - find:{"type":"agent_events","perPage":1000} (4)'] = {
   "results": {
     "page": 1,
     "per_page": 1000,
@@ -1666,7 +111,7 @@ exports['AgentsRepository createEventsForAgent Create events for an agent - find
     "saved_objects": [
       {
         "type": "agent_events",
-        "id": "a6fc7560-e15a-11e9-b2d0-d925c6578f36",
+        "id": "6655f160-e3cd-11e9-ab2b-f19194632c4a",
         "attributes": {
           "type": "STATE",
           "subtype": "STARTING",
@@ -1675,12 +120,12 @@ exports['AgentsRepository createEventsForAgent Create events for an agent - find
           "agent_id": "agent:1"
         },
         "references": [],
-        "updated_at": "2019-09-27T19:11:47.637Z",
+        "updated_at": "2019-09-30T21:58:13.622Z",
         "version": "WzEsMV0="
       },
       {
         "type": "agent_events",
-        "id": "a7637490-e15a-11e9-b2d0-d925c6578f36",
+        "id": "66c702b0-e3cd-11e9-ab2b-f19194632c4a",
         "attributes": {
           "agent_id": "agent:1",
           "type": "STATE",
@@ -1689,12 +134,12 @@ exports['AgentsRepository createEventsForAgent Create events for an agent - find
           "message": "..."
         },
         "references": [],
-        "updated_at": "2019-09-27T19:11:48.312Z",
+        "updated_at": "2019-09-30T21:58:14.363Z",
         "version": "WzMsMV0="
       },
       {
         "type": "agent_events",
-        "id": "a7637491-e15a-11e9-b2d0-d925c6578f36",
+        "id": "66c702b1-e3cd-11e9-ab2b-f19194632c4a",
         "attributes": {
           "agent_id": "agent:1",
           "type": "STATE",
@@ -1703,29 +148,29 @@ exports['AgentsRepository createEventsForAgent Create events for an agent - find
           "message": "..."
         },
         "references": [],
-        "updated_at": "2019-09-27T19:11:48.312Z",
+        "updated_at": "2019-09-30T21:58:14.363Z",
         "version": "WzQsMV0="
       }
     ]
   }
 }
 
-exports['AgentsRepository createEventsForAgent Create events for an agent - delete:agent_events:a6fc7560-e15a-11e9-b2d0-d925c6578f36:{} (5)'] = {
+exports['AgentsEventsRepository createEventsForAgent Create events for an agent - delete:agent_events:6655f160-e3cd-11e9-ab2b-f19194632c4a:{} (5)'] = {
   "results": {}
 }
 
-exports['AgentsRepository createEventsForAgent Create events for an agent - delete:agent_events:a7637490-e15a-11e9-b2d0-d925c6578f36:{} (6)'] = {
+exports['AgentsEventsRepository createEventsForAgent Create events for an agent - delete:agent_events:66c702b0-e3cd-11e9-ab2b-f19194632c4a:{} (6)'] = {
   "results": {}
 }
 
-exports['AgentsRepository createEventsForAgent Create events for an agent - delete:agent_events:a7637491-e15a-11e9-b2d0-d925c6578f36:{} (7)'] = {
+exports['AgentsEventsRepository createEventsForAgent Create events for an agent - delete:agent_events:66c702b1-e3cd-11e9-ab2b-f19194632c4a:{} (7)'] = {
   "results": {}
 }
 
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (1)'] = {
+exports['AgentsEventsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (1)'] = {
   "results": {
     "type": "agent_events",
-    "id": "a9d1dc80-e15a-11e9-b2d0-d925c6578f36",
+    "id": "69367c10-e3cd-11e9-ab2b-f19194632c4a",
     "attributes": {
       "type": "STATE",
       "subtype": "STARTING",
@@ -1734,15 +179,15 @@ exports['AgentsRepository deleteEventsForAgent Delete correctly all events for t
       "agent_id": "agent:1"
     },
     "references": [],
-    "updated_at": "2019-09-27T19:11:52.392Z",
+    "updated_at": "2019-09-30T21:58:18.449Z",
     "version": "WzksMV0="
   }
 }
 
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (2)'] = {
+exports['AgentsEventsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (2)'] = {
   "results": {
     "type": "agent_events",
-    "id": "aa6c95e0-e15a-11e9-b2d0-d925c6578f36",
+    "id": "69d13570-e3cd-11e9-ab2b-f19194632c4a",
     "attributes": {
       "type": "STATE",
       "subtype": "STARTING",
@@ -1751,15 +196,15 @@ exports['AgentsRepository deleteEventsForAgent Delete correctly all events for t
       "agent_id": "agent:1"
     },
     "references": [],
-    "updated_at": "2019-09-27T19:11:53.406Z",
+    "updated_at": "2019-09-30T21:58:19.463Z",
     "version": "WzEwLDFd"
   }
 }
 
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (3)'] = {
+exports['AgentsEventsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (3)'] = {
   "results": {
     "type": "agent_events",
-    "id": "ab08fcf0-e15a-11e9-b2d0-d925c6578f36",
+    "id": "6a6c3cf0-e3cd-11e9-ab2b-f19194632c4a",
     "attributes": {
       "type": "STATE",
       "subtype": "STARTING",
@@ -1768,15 +213,15 @@ exports['AgentsRepository deleteEventsForAgent Delete correctly all events for t
       "agent_id": "agent:1"
     },
     "references": [],
-    "updated_at": "2019-09-27T19:11:54.431Z",
+    "updated_at": "2019-09-30T21:58:20.479Z",
     "version": "WzExLDFd"
   }
 }
 
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (4)'] = {
+exports['AgentsEventsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (4)'] = {
   "results": {
     "type": "agent_events",
-    "id": "aba36830-e15a-11e9-b2d0-d925c6578f36",
+    "id": "6b076b80-e3cd-11e9-ab2b-f19194632c4a",
     "attributes": {
       "type": "STATE",
       "subtype": "STARTING",
@@ -1785,12 +230,12 @@ exports['AgentsRepository deleteEventsForAgent Delete correctly all events for t
       "agent_id": "agent:2"
     },
     "references": [],
-    "updated_at": "2019-09-27T19:11:55.443Z",
+    "updated_at": "2019-09-30T21:58:21.496Z",
     "version": "WzEyLDFd"
   }
 }
 
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"],"perPage":1000} (5)'] = {
+exports['AgentsEventsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"],"perPage":1000} (5)'] = {
   "results": {
     "page": 1,
     "per_page": 1000,
@@ -1798,42 +243,42 @@ exports['AgentsRepository deleteEventsForAgent Delete correctly all events for t
     "saved_objects": [
       {
         "type": "agent_events",
-        "id": "a9d1dc80-e15a-11e9-b2d0-d925c6578f36",
+        "id": "69367c10-e3cd-11e9-ab2b-f19194632c4a",
         "references": [],
-        "updated_at": "2019-09-27T19:11:52.392Z",
+        "updated_at": "2019-09-30T21:58:18.449Z",
         "version": "WzksMV0="
       },
       {
         "type": "agent_events",
-        "id": "aa6c95e0-e15a-11e9-b2d0-d925c6578f36",
+        "id": "69d13570-e3cd-11e9-ab2b-f19194632c4a",
         "references": [],
-        "updated_at": "2019-09-27T19:11:53.406Z",
+        "updated_at": "2019-09-30T21:58:19.463Z",
         "version": "WzEwLDFd"
       },
       {
         "type": "agent_events",
-        "id": "ab08fcf0-e15a-11e9-b2d0-d925c6578f36",
+        "id": "6a6c3cf0-e3cd-11e9-ab2b-f19194632c4a",
         "references": [],
-        "updated_at": "2019-09-27T19:11:54.431Z",
+        "updated_at": "2019-09-30T21:58:20.479Z",
         "version": "WzExLDFd"
       }
     ]
   }
 }
 
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:a9d1dc80-e15a-11e9-b2d0-d925c6578f36:{} (6)'] = {
+exports['AgentsEventsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:69367c10-e3cd-11e9-ab2b-f19194632c4a:{} (6)'] = {
   "results": {}
 }
 
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:aa6c95e0-e15a-11e9-b2d0-d925c6578f36:{} (7)'] = {
+exports['AgentsEventsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:69d13570-e3cd-11e9-ab2b-f19194632c4a:{} (7)'] = {
   "results": {}
 }
 
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:ab08fcf0-e15a-11e9-b2d0-d925c6578f36:{} (8)'] = {
+exports['AgentsEventsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:6a6c3cf0-e3cd-11e9-ab2b-f19194632c4a:{} (8)'] = {
   "results": {}
 }
 
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"],"perPage":1000} (9)'] = {
+exports['AgentsEventsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"],"perPage":1000} (9)'] = {
   "results": {
     "page": 1,
     "per_page": 1000,
@@ -1842,7 +287,7 @@ exports['AgentsRepository deleteEventsForAgent Delete correctly all events for t
   }
 }
 
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events"} (10)'] = {
+exports['AgentsEventsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events"} (10)'] = {
   "results": {
     "page": 1,
     "per_page": 20,
@@ -1850,7 +295,7 @@ exports['AgentsRepository deleteEventsForAgent Delete correctly all events for t
     "saved_objects": [
       {
         "type": "agent_events",
-        "id": "aba36830-e15a-11e9-b2d0-d925c6578f36",
+        "id": "6b076b80-e3cd-11e9-ab2b-f19194632c4a",
         "attributes": {
           "type": "STATE",
           "subtype": "STARTING",
@@ -1859,14 +304,14 @@ exports['AgentsRepository deleteEventsForAgent Delete correctly all events for t
           "agent_id": "agent:2"
         },
         "references": [],
-        "updated_at": "2019-09-27T19:11:55.443Z",
+        "updated_at": "2019-09-30T21:58:21.496Z",
         "version": "WzEyLDFd"
       }
     ]
   }
 }
 
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","perPage":1000} (11)'] = {
+exports['AgentsEventsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","perPage":1000} (11)'] = {
   "results": {
     "page": 1,
     "per_page": 1000,
@@ -1874,7 +319,7 @@ exports['AgentsRepository deleteEventsForAgent Delete correctly all events for t
     "saved_objects": [
       {
         "type": "agent_events",
-        "id": "aba36830-e15a-11e9-b2d0-d925c6578f36",
+        "id": "6b076b80-e3cd-11e9-ab2b-f19194632c4a",
         "attributes": {
           "type": "STATE",
           "subtype": "STARTING",
@@ -1883,361 +328,21 @@ exports['AgentsRepository deleteEventsForAgent Delete correctly all events for t
           "agent_id": "agent:2"
         },
         "references": [],
-        "updated_at": "2019-09-27T19:11:55.443Z",
+        "updated_at": "2019-09-30T21:58:21.496Z",
         "version": "WzEyLDFd"
       }
     ]
   }
 }
 
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:aba36830-e15a-11e9-b2d0-d925c6578f36:{} (12)'] = {
+exports['AgentsEventsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:6b076b80-e3cd-11e9-ab2b-f19194632c4a:{} (12)'] = {
   "results": {}
 }
 
-exports['AgentsRepository createEventsForAgent Create events for an agent - create:agent_events (1)'] = {
+exports['AgentsEventsRepository getEventsForAgent Get events for the agent - create:agent_events (1)'] = {
   "results": {
     "type": "agent_events",
-    "id": "b1ec2eb0-e15b-11e9-95d0-277ec3aea7cb",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:19:15.483Z",
-    "version": "WzEsMV0="
-  }
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - bulkCreate:[{"attributes":{"agent_id":"agent:1","type":"STATE","subtype":"STARTING","timestamp":"2019-09-27T18:50:33+0000","message":"..."},"type":"agent_events"},{"attributes":{"agent_id":"agent:1","type":"STATE","subtype":"STARTING","timestamp":"2019-09-27T18:50:34+0000","message":"..."},"type":"agent_events"}]:{} (2)'] = {
-  "results": {
-    "saved_objects": [
-      {
-        "id": "agent_events:b25be070-e15b-11e9-95d0-277ec3aea7cb",
-        "type": "agent_events",
-        "updated_at": "2019-09-27T19:19:16.215Z",
-        "version": "WzMsMV0=",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "..."
-        },
-        "references": []
-      },
-      {
-        "id": "agent_events:b25be071-e15b-11e9-95d0-277ec3aea7cb",
-        "type": "agent_events",
-        "updated_at": "2019-09-27T19:19:16.215Z",
-        "version": "WzQsMV0=",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "..."
-        },
-        "references": []
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - find:{"type":"agent_events"} (3)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 20,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "b1ec2eb0-e15b-11e9-95d0-277ec3aea7cb",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:19:15.483Z",
-        "version": "WzEsMV0="
-      },
-      {
-        "type": "agent_events",
-        "id": "b25be070-e15b-11e9-95d0-277ec3aea7cb",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "..."
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:19:16.215Z",
-        "version": "WzMsMV0="
-      },
-      {
-        "type": "agent_events",
-        "id": "b25be071-e15b-11e9-95d0-277ec3aea7cb",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "..."
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:19:16.215Z",
-        "version": "WzQsMV0="
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - find:{"type":"agent_events","perPage":1000} (4)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "b1ec2eb0-e15b-11e9-95d0-277ec3aea7cb",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:19:15.483Z",
-        "version": "WzEsMV0="
-      },
-      {
-        "type": "agent_events",
-        "id": "b25be070-e15b-11e9-95d0-277ec3aea7cb",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "..."
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:19:16.215Z",
-        "version": "WzMsMV0="
-      },
-      {
-        "type": "agent_events",
-        "id": "b25be071-e15b-11e9-95d0-277ec3aea7cb",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "..."
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:19:16.215Z",
-        "version": "WzQsMV0="
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - delete:agent_events:b1ec2eb0-e15b-11e9-95d0-277ec3aea7cb:{} (5)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - delete:agent_events:b25be070-e15b-11e9-95d0-277ec3aea7cb:{} (6)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - delete:agent_events:b25be071-e15b-11e9-95d0-277ec3aea7cb:{} (7)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (1)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "b4cbcf00-e15b-11e9-95d0-277ec3aea7cb",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:19:20.304Z",
-    "version": "WzksMV0="
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (2)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "b568d250-e15b-11e9-95d0-277ec3aea7cb",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:33+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:19:21.333Z",
-    "version": "WzEwLDFd"
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (3)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "b605ae90-e15b-11e9-95d0-277ec3aea7cb",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:34+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:19:22.361Z",
-    "version": "WzExLDFd"
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (4)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "b6a1a070-e15b-11e9-95d0-277ec3aea7cb",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:2"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:19:23.383Z",
-    "version": "WzEyLDFd"
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"],"perPage":1000} (5)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "b4cbcf00-e15b-11e9-95d0-277ec3aea7cb",
-        "references": [],
-        "updated_at": "2019-09-27T19:19:20.304Z",
-        "version": "WzksMV0="
-      },
-      {
-        "type": "agent_events",
-        "id": "b568d250-e15b-11e9-95d0-277ec3aea7cb",
-        "references": [],
-        "updated_at": "2019-09-27T19:19:21.333Z",
-        "version": "WzEwLDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "b605ae90-e15b-11e9-95d0-277ec3aea7cb",
-        "references": [],
-        "updated_at": "2019-09-27T19:19:22.361Z",
-        "version": "WzExLDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:b4cbcf00-e15b-11e9-95d0-277ec3aea7cb:{} (6)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:b568d250-e15b-11e9-95d0-277ec3aea7cb:{} (7)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:b605ae90-e15b-11e9-95d0-277ec3aea7cb:{} (8)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"],"perPage":1000} (9)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 0,
-    "saved_objects": []
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events"} (10)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 20,
-    "total": 1,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "b6a1a070-e15b-11e9-95d0-277ec3aea7cb",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:2"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:19:23.383Z",
-        "version": "WzEyLDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","perPage":1000} (11)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 1,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "b6a1a070-e15b-11e9-95d0-277ec3aea7cb",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:2"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:19:23.383Z",
-        "version": "WzEyLDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:b6a1a070-e15b-11e9-95d0-277ec3aea7cb:{} (12)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository getEventsForAgent Get events for the agent - create:agent_events (1)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "b9c6fc50-e15b-11e9-95d0-277ec3aea7cb",
+    "id": "6e11c550-e3cd-11e9-ab2b-f19194632c4a",
     "attributes": {
       "type": "STATE",
       "subtype": "STARTING",
@@ -2248,15 +353,15 @@ exports['AgentsRepository getEventsForAgent Get events for the agent - create:ag
       "agent_id": "agent:1"
     },
     "references": [],
-    "updated_at": "2019-09-27T19:19:28.661Z",
+    "updated_at": "2019-09-30T21:58:26.597Z",
     "version": "WzE3LDFd"
   }
 }
 
-exports['AgentsRepository getEventsForAgent Get events for the agent - create:agent_events (2)'] = {
+exports['AgentsEventsRepository getEventsForAgent Get events for the agent - create:agent_events (2)'] = {
   "results": {
     "type": "agent_events",
-    "id": "ba62c720-e15b-11e9-95d0-277ec3aea7cb",
+    "id": "6eac0980-e3cd-11e9-ab2b-f19194632c4a",
     "attributes": {
       "type": "STATE",
       "subtype": "STARTING",
@@ -2265,15 +370,15 @@ exports['AgentsRepository getEventsForAgent Get events for the agent - create:ag
       "agent_id": "agent:1"
     },
     "references": [],
-    "updated_at": "2019-09-27T19:19:29.682Z",
+    "updated_at": "2019-09-30T21:58:27.608Z",
     "version": "WzE4LDFd"
   }
 }
 
-exports['AgentsRepository getEventsForAgent Get events for the agent - create:agent_events (3)'] = {
+exports['AgentsEventsRepository getEventsForAgent Get events for the agent - create:agent_events (3)'] = {
   "results": {
     "type": "agent_events",
-    "id": "baffa360-e15b-11e9-95d0-277ec3aea7cb",
+    "id": "6f471100-e3cd-11e9-ab2b-f19194632c4a",
     "attributes": {
       "type": "STATE",
       "subtype": "STARTING",
@@ -2282,15 +387,15 @@ exports['AgentsRepository getEventsForAgent Get events for the agent - create:ag
       "agent_id": "agent:1"
     },
     "references": [],
-    "updated_at": "2019-09-27T19:19:30.710Z",
+    "updated_at": "2019-09-30T21:58:28.624Z",
     "version": "WzE5LDFd"
   }
 }
 
-exports['AgentsRepository getEventsForAgent Get events for the agent - create:agent_events (4)'] = {
+exports['AgentsEventsRepository getEventsForAgent Get events for the agent - create:agent_events (4)'] = {
   "results": {
     "type": "agent_events",
-    "id": "bb9b9540-e15b-11e9-95d0-277ec3aea7cb",
+    "id": "6fe28db0-e3cd-11e9-ab2b-f19194632c4a",
     "attributes": {
       "type": "STATE",
       "subtype": "STARTING",
@@ -2299,12 +404,12 @@ exports['AgentsRepository getEventsForAgent Get events for the agent - create:ag
       "agent_id": "agent:2"
     },
     "references": [],
-    "updated_at": "2019-09-27T19:19:31.732Z",
+    "updated_at": "2019-09-30T21:58:29.643Z",
     "version": "WzIwLDFd"
   }
 }
 
-exports['AgentsRepository getEventsForAgent Get events for the agent - find:{"type":"agent_events","search":"agent:1","searchFields":["agent_id"],"perPage":25,"page":1} (5)'] = {
+exports['AgentsEventsRepository getEventsForAgent Get events for the agent - find:{"type":"agent_events","search":"agent:1","searchFields":["agent_id"],"perPage":25,"page":1} (5)'] = {
   "results": {
     "page": 1,
     "per_page": 25,
@@ -2312,7 +417,7 @@ exports['AgentsRepository getEventsForAgent Get events for the agent - find:{"ty
     "saved_objects": [
       {
         "type": "agent_events",
-        "id": "b9c6fc50-e15b-11e9-95d0-277ec3aea7cb",
+        "id": "6e11c550-e3cd-11e9-ab2b-f19194632c4a",
         "attributes": {
           "type": "STATE",
           "subtype": "STARTING",
@@ -2323,12 +428,12 @@ exports['AgentsRepository getEventsForAgent Get events for the agent - find:{"ty
           "agent_id": "agent:1"
         },
         "references": [],
-        "updated_at": "2019-09-27T19:19:28.661Z",
+        "updated_at": "2019-09-30T21:58:26.597Z",
         "version": "WzE3LDFd"
       },
       {
         "type": "agent_events",
-        "id": "ba62c720-e15b-11e9-95d0-277ec3aea7cb",
+        "id": "6eac0980-e3cd-11e9-ab2b-f19194632c4a",
         "attributes": {
           "type": "STATE",
           "subtype": "STARTING",
@@ -2337,12 +442,12 @@ exports['AgentsRepository getEventsForAgent Get events for the agent - find:{"ty
           "agent_id": "agent:1"
         },
         "references": [],
-        "updated_at": "2019-09-27T19:19:29.682Z",
+        "updated_at": "2019-09-30T21:58:27.608Z",
         "version": "WzE4LDFd"
       },
       {
         "type": "agent_events",
-        "id": "baffa360-e15b-11e9-95d0-277ec3aea7cb",
+        "id": "6f471100-e3cd-11e9-ab2b-f19194632c4a",
         "attributes": {
           "type": "STATE",
           "subtype": "STARTING",
@@ -2351,14 +456,14 @@ exports['AgentsRepository getEventsForAgent Get events for the agent - find:{"ty
           "agent_id": "agent:1"
         },
         "references": [],
-        "updated_at": "2019-09-27T19:19:30.710Z",
+        "updated_at": "2019-09-30T21:58:28.624Z",
         "version": "WzE5LDFd"
       }
     ]
   }
 }
 
-exports['AgentsRepository getEventsForAgent Get events for the agent - find:{"type":"agent_events","perPage":1000} (6)'] = {
+exports['AgentsEventsRepository getEventsForAgent Get events for the agent - find:{"type":"agent_events","perPage":1000} (6)'] = {
   "results": {
     "page": 1,
     "per_page": 1000,
@@ -2366,7 +471,7 @@ exports['AgentsRepository getEventsForAgent Get events for the agent - find:{"ty
     "saved_objects": [
       {
         "type": "agent_events",
-        "id": "b9c6fc50-e15b-11e9-95d0-277ec3aea7cb",
+        "id": "6e11c550-e3cd-11e9-ab2b-f19194632c4a",
         "attributes": {
           "type": "STATE",
           "subtype": "STARTING",
@@ -2377,12 +482,12 @@ exports['AgentsRepository getEventsForAgent Get events for the agent - find:{"ty
           "agent_id": "agent:1"
         },
         "references": [],
-        "updated_at": "2019-09-27T19:19:28.661Z",
+        "updated_at": "2019-09-30T21:58:26.597Z",
         "version": "WzE3LDFd"
       },
       {
         "type": "agent_events",
-        "id": "ba62c720-e15b-11e9-95d0-277ec3aea7cb",
+        "id": "6eac0980-e3cd-11e9-ab2b-f19194632c4a",
         "attributes": {
           "type": "STATE",
           "subtype": "STARTING",
@@ -2391,12 +496,12 @@ exports['AgentsRepository getEventsForAgent Get events for the agent - find:{"ty
           "agent_id": "agent:1"
         },
         "references": [],
-        "updated_at": "2019-09-27T19:19:29.682Z",
+        "updated_at": "2019-09-30T21:58:27.608Z",
         "version": "WzE4LDFd"
       },
       {
         "type": "agent_events",
-        "id": "baffa360-e15b-11e9-95d0-277ec3aea7cb",
+        "id": "6f471100-e3cd-11e9-ab2b-f19194632c4a",
         "attributes": {
           "type": "STATE",
           "subtype": "STARTING",
@@ -2405,12 +510,12 @@ exports['AgentsRepository getEventsForAgent Get events for the agent - find:{"ty
           "agent_id": "agent:1"
         },
         "references": [],
-        "updated_at": "2019-09-27T19:19:30.710Z",
+        "updated_at": "2019-09-30T21:58:28.624Z",
         "version": "WzE5LDFd"
       },
       {
         "type": "agent_events",
-        "id": "bb9b9540-e15b-11e9-95d0-277ec3aea7cb",
+        "id": "6fe28db0-e3cd-11e9-ab2b-f19194632c4a",
         "attributes": {
           "type": "STATE",
           "subtype": "STARTING",
@@ -2419,1121 +524,25 @@ exports['AgentsRepository getEventsForAgent Get events for the agent - find:{"ty
           "agent_id": "agent:2"
         },
         "references": [],
-        "updated_at": "2019-09-27T19:19:31.732Z",
+        "updated_at": "2019-09-30T21:58:29.643Z",
         "version": "WzIwLDFd"
       }
     ]
   }
 }
 
-exports['AgentsRepository getEventsForAgent Get events for the agent - delete:agent_events:b9c6fc50-e15b-11e9-95d0-277ec3aea7cb:{} (7)'] = {
+exports['AgentsEventsRepository getEventsForAgent Get events for the agent - delete:agent_events:6e11c550-e3cd-11e9-ab2b-f19194632c4a:{} (7)'] = {
   "results": {}
 }
 
-exports['AgentsRepository getEventsForAgent Get events for the agent - delete:agent_events:ba62c720-e15b-11e9-95d0-277ec3aea7cb:{} (8)'] = {
+exports['AgentsEventsRepository getEventsForAgent Get events for the agent - delete:agent_events:6eac0980-e3cd-11e9-ab2b-f19194632c4a:{} (8)'] = {
   "results": {}
 }
 
-exports['AgentsRepository getEventsForAgent Get events for the agent - delete:agent_events:baffa360-e15b-11e9-95d0-277ec3aea7cb:{} (9)'] = {
+exports['AgentsEventsRepository getEventsForAgent Get events for the agent - delete:agent_events:6f471100-e3cd-11e9-ab2b-f19194632c4a:{} (9)'] = {
   "results": {}
 }
 
-exports['AgentsRepository getEventsForAgent Get events for the agent - delete:agent_events:bb9b9540-e15b-11e9-95d0-277ec3aea7cb:{} (10)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - create:agent_events (1)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "ec2a9d00-e15b-11e9-a775-459c28d9ef29",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:20:53.199Z",
-    "version": "WzQ3LDFd"
-  }
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - bulkCreate:[{"attributes":{"agent_id":"agent:1","type":"STATE","subtype":"STARTING","timestamp":"2019-09-27T18:50:33+0000","message":"..."},"type":"agent_events"},{"attributes":{"agent_id":"agent:1","type":"STATE","subtype":"STARTING","timestamp":"2019-09-27T18:50:34+0000","message":"..."},"type":"agent_events"}]:{} (2)'] = {
-  "results": {
-    "saved_objects": [
-      {
-        "id": "agent_events:ec64e6e0-e15b-11e9-a775-459c28d9ef29",
-        "type": "agent_events",
-        "updated_at": "2019-09-27T19:20:53.582Z",
-        "version": "WzQ4LDFd",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "..."
-        },
-        "references": []
-      },
-      {
-        "id": "agent_events:ec64e6e1-e15b-11e9-a775-459c28d9ef29",
-        "type": "agent_events",
-        "updated_at": "2019-09-27T19:20:53.582Z",
-        "version": "WzQ5LDFd",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "..."
-        },
-        "references": []
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - find:{"type":"agent_events"} (3)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 20,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "ec2a9d00-e15b-11e9-a775-459c28d9ef29",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:20:53.199Z",
-        "version": "WzQ3LDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "ec64e6e0-e15b-11e9-a775-459c28d9ef29",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "..."
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:20:53.582Z",
-        "version": "WzQ4LDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "ec64e6e1-e15b-11e9-a775-459c28d9ef29",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "..."
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:20:53.582Z",
-        "version": "WzQ5LDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - find:{"type":"agent_events","perPage":1000} (4)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "ec2a9d00-e15b-11e9-a775-459c28d9ef29",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:20:53.199Z",
-        "version": "WzQ3LDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "ec64e6e0-e15b-11e9-a775-459c28d9ef29",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "..."
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:20:53.582Z",
-        "version": "WzQ4LDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "ec64e6e1-e15b-11e9-a775-459c28d9ef29",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "..."
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:20:53.582Z",
-        "version": "WzQ5LDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - delete:agent_events:ec2a9d00-e15b-11e9-a775-459c28d9ef29:{} (5)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - delete:agent_events:ec64e6e0-e15b-11e9-a775-459c28d9ef29:{} (6)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - delete:agent_events:ec64e6e1-e15b-11e9-a775-459c28d9ef29:{} (7)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (1)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "eed41220-e15b-11e9-a775-459c28d9ef29",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:20:57.666Z",
-    "version": "WzUzLDFd"
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (2)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "ef6f8ed0-e15b-11e9-a775-459c28d9ef29",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:33+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:20:58.685Z",
-    "version": "WzU0LDFd"
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (3)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "f009fa10-e15b-11e9-a775-459c28d9ef29",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:34+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:20:59.697Z",
-    "version": "WzU1LDFd"
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (4)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "f0a66120-e15b-11e9-a775-459c28d9ef29",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:2"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:21:00.722Z",
-    "version": "WzU2LDFd"
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"],"perPage":1000} (5)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "eed41220-e15b-11e9-a775-459c28d9ef29",
-        "references": [],
-        "updated_at": "2019-09-27T19:20:57.666Z",
-        "version": "WzUzLDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "ef6f8ed0-e15b-11e9-a775-459c28d9ef29",
-        "references": [],
-        "updated_at": "2019-09-27T19:20:58.685Z",
-        "version": "WzU0LDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "f009fa10-e15b-11e9-a775-459c28d9ef29",
-        "references": [],
-        "updated_at": "2019-09-27T19:20:59.697Z",
-        "version": "WzU1LDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:eed41220-e15b-11e9-a775-459c28d9ef29:{} (6)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:ef6f8ed0-e15b-11e9-a775-459c28d9ef29:{} (7)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:f009fa10-e15b-11e9-a775-459c28d9ef29:{} (8)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"],"perPage":1000} (9)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 0,
-    "saved_objects": []
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events"} (10)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 20,
-    "total": 1,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "f0a66120-e15b-11e9-a775-459c28d9ef29",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:2"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:21:00.722Z",
-        "version": "WzU2LDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","perPage":1000} (11)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 1,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "f0a66120-e15b-11e9-a775-459c28d9ef29",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:2"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:21:00.722Z",
-        "version": "WzU2LDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:f0a66120-e15b-11e9-a775-459c28d9ef29:{} (12)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository getEventsForAgent Get events for the agent - create:agent_events (1)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "f3aff7a0-e15b-11e9-a775-459c28d9ef29",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "payload": "{\"previous_state\": \"STOPPED\"}",
-      "data": "{serializedDATA}",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:21:05.818Z",
-    "version": "WzYxLDFd"
-  }
-}
-
-exports['AgentsRepository getEventsForAgent Get events for the agent - create:agent_events (2)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "f44b2630-e15b-11e9-a775-459c28d9ef29",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:33+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:21:06.835Z",
-    "version": "WzYyLDFd"
-  }
-}
-
-exports['AgentsRepository getEventsForAgent Get events for the agent - create:agent_events (3)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "f4e62db0-e15b-11e9-a775-459c28d9ef29",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:34+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:21:07.850Z",
-    "version": "WzYzLDFd"
-  }
-}
-
-exports['AgentsRepository getEventsForAgent Get events for the agent - create:agent_events (4)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "f58023c0-e15b-11e9-a775-459c28d9ef29",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:2"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T19:21:08.860Z",
-    "version": "WzY0LDFd"
-  }
-}
-
-exports['AgentsRepository getEventsForAgent Get events for the agent - find:{"type":"agent_events","search":"agent:1","searchFields":["agent_id"],"perPage":25,"page":1} (5)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 25,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "f3aff7a0-e15b-11e9-a775-459c28d9ef29",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "payload": "{\"previous_state\": \"STOPPED\"}",
-          "data": "{serializedDATA}",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:21:05.818Z",
-        "version": "WzYxLDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "f44b2630-e15b-11e9-a775-459c28d9ef29",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:21:06.835Z",
-        "version": "WzYyLDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "f4e62db0-e15b-11e9-a775-459c28d9ef29",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:21:07.850Z",
-        "version": "WzYzLDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository getEventsForAgent Get events for the agent - find:{"type":"agent_events","perPage":1000} (6)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 4,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "f3aff7a0-e15b-11e9-a775-459c28d9ef29",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "payload": "{\"previous_state\": \"STOPPED\"}",
-          "data": "{serializedDATA}",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:21:05.818Z",
-        "version": "WzYxLDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "f44b2630-e15b-11e9-a775-459c28d9ef29",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:21:06.835Z",
-        "version": "WzYyLDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "f4e62db0-e15b-11e9-a775-459c28d9ef29",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:21:07.850Z",
-        "version": "WzYzLDFd"
-      },
-      {
-        "type": "agent_events",
-        "id": "f58023c0-e15b-11e9-a775-459c28d9ef29",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:2"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T19:21:08.860Z",
-        "version": "WzY0LDFd"
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository getEventsForAgent Get events for the agent - delete:agent_events:f3aff7a0-e15b-11e9-a775-459c28d9ef29:{} (7)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository getEventsForAgent Get events for the agent - delete:agent_events:f44b2630-e15b-11e9-a775-459c28d9ef29:{} (8)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository getEventsForAgent Get events for the agent - delete:agent_events:f4e62db0-e15b-11e9-a775-459c28d9ef29:{} (9)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository getEventsForAgent Get events for the agent - delete:agent_events:f58023c0-e15b-11e9-a775-459c28d9ef29:{} (10)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - create:agent_events (1)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "50a12cb0-e164-11e9-90bc-7f32bd2851d3",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T20:20:57.723Z",
-    "version": "WzE0NywxXQ=="
-  }
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - bulkCreate:[{"attributes":{"agent_id":"agent:1","type":"STATE","subtype":"STARTING","timestamp":"2019-09-27T18:50:33+0000","message":"..."},"type":"agent_events"},{"attributes":{"agent_id":"agent:1","type":"STATE","subtype":"STARTING","timestamp":"2019-09-27T18:50:34+0000","message":"..."},"type":"agent_events"}]:{} (2)'] = {
-  "results": {
-    "saved_objects": [
-      {
-        "id": "agent_events:51180a60-e164-11e9-90bc-7f32bd2851d3",
-        "type": "agent_events",
-        "updated_at": "2019-09-27T20:20:58.502Z",
-        "version": "WzE0OCwxXQ==",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "..."
-        },
-        "references": []
-      },
-      {
-        "id": "agent_events:51183170-e164-11e9-90bc-7f32bd2851d3",
-        "type": "agent_events",
-        "updated_at": "2019-09-27T20:20:58.502Z",
-        "version": "WzE0OSwxXQ==",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "..."
-        },
-        "references": []
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - find:{"type":"agent_events"} (3)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 20,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "50a12cb0-e164-11e9-90bc-7f32bd2851d3",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T20:20:57.723Z",
-        "version": "WzE0NywxXQ=="
-      },
-      {
-        "type": "agent_events",
-        "id": "51180a60-e164-11e9-90bc-7f32bd2851d3",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "..."
-        },
-        "references": [],
-        "updated_at": "2019-09-27T20:20:58.502Z",
-        "version": "WzE0OCwxXQ=="
-      },
-      {
-        "type": "agent_events",
-        "id": "51183170-e164-11e9-90bc-7f32bd2851d3",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "..."
-        },
-        "references": [],
-        "updated_at": "2019-09-27T20:20:58.502Z",
-        "version": "WzE0OSwxXQ=="
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - find:{"type":"agent_events","perPage":1000} (4)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "50a12cb0-e164-11e9-90bc-7f32bd2851d3",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T20:20:57.723Z",
-        "version": "WzE0NywxXQ=="
-      },
-      {
-        "type": "agent_events",
-        "id": "51180a60-e164-11e9-90bc-7f32bd2851d3",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "..."
-        },
-        "references": [],
-        "updated_at": "2019-09-27T20:20:58.502Z",
-        "version": "WzE0OCwxXQ=="
-      },
-      {
-        "type": "agent_events",
-        "id": "51183170-e164-11e9-90bc-7f32bd2851d3",
-        "attributes": {
-          "agent_id": "agent:1",
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "..."
-        },
-        "references": [],
-        "updated_at": "2019-09-27T20:20:58.502Z",
-        "version": "WzE0OSwxXQ=="
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - delete:agent_events:50a12cb0-e164-11e9-90bc-7f32bd2851d3:{} (5)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - delete:agent_events:51180a60-e164-11e9-90bc-7f32bd2851d3:{} (6)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository createEventsForAgent Create events for an agent - delete:agent_events:51183170-e164-11e9-90bc-7f32bd2851d3:{} (7)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (1)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "5388bc40-e164-11e9-90bc-7f32bd2851d3",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T20:21:02.596Z",
-    "version": "WzE1MywxXQ=="
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (2)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "5423ead0-e164-11e9-90bc-7f32bd2851d3",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:33+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T20:21:03.613Z",
-    "version": "WzE1NCwxXQ=="
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (3)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "54becb40-e164-11e9-90bc-7f32bd2851d3",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:34+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T20:21:04.628Z",
-    "version": "WzE1NSwxXQ=="
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - create:agent_events (4)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "555a47f0-e164-11e9-90bc-7f32bd2851d3",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:2"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T20:21:05.647Z",
-    "version": "WzE1NiwxXQ=="
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"],"perPage":1000} (5)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "5388bc40-e164-11e9-90bc-7f32bd2851d3",
-        "references": [],
-        "updated_at": "2019-09-27T20:21:02.596Z",
-        "version": "WzE1MywxXQ=="
-      },
-      {
-        "type": "agent_events",
-        "id": "5423ead0-e164-11e9-90bc-7f32bd2851d3",
-        "references": [],
-        "updated_at": "2019-09-27T20:21:03.613Z",
-        "version": "WzE1NCwxXQ=="
-      },
-      {
-        "type": "agent_events",
-        "id": "54becb40-e164-11e9-90bc-7f32bd2851d3",
-        "references": [],
-        "updated_at": "2019-09-27T20:21:04.628Z",
-        "version": "WzE1NSwxXQ=="
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:5388bc40-e164-11e9-90bc-7f32bd2851d3:{} (6)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:5423ead0-e164-11e9-90bc-7f32bd2851d3:{} (7)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:54becb40-e164-11e9-90bc-7f32bd2851d3:{} (8)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","fields":["id"],"search":"agent:1","searchFields":["agent_id"],"perPage":1000} (9)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 0,
-    "saved_objects": []
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events"} (10)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 20,
-    "total": 1,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "555a47f0-e164-11e9-90bc-7f32bd2851d3",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:2"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T20:21:05.647Z",
-        "version": "WzE1NiwxXQ=="
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - find:{"type":"agent_events","perPage":1000} (11)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 1,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "555a47f0-e164-11e9-90bc-7f32bd2851d3",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:2"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T20:21:05.647Z",
-        "version": "WzE1NiwxXQ=="
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository deleteEventsForAgent Delete correctly all events for the agent - delete:agent_events:555a47f0-e164-11e9-90bc-7f32bd2851d3:{} (12)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository getEventsForAgent Get events for the agent - create:agent_events (1)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "5866c4a0-e164-11e9-90bc-7f32bd2851d3",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "payload": "{\"previous_state\": \"STOPPED\"}",
-      "data": "{serializedDATA}",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T20:21:10.762Z",
-    "version": "WzE2MSwxXQ=="
-  }
-}
-
-exports['AgentsRepository getEventsForAgent Get events for the agent - create:agent_events (2)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "5901cc20-e164-11e9-90bc-7f32bd2851d3",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:33+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T20:21:11.778Z",
-    "version": "WzE2MiwxXQ=="
-  }
-}
-
-exports['AgentsRepository getEventsForAgent Get events for the agent - create:agent_events (3)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "599d6fe0-e164-11e9-90bc-7f32bd2851d3",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:34+0000",
-      "message": "...",
-      "agent_id": "agent:1"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T20:21:12.798Z",
-    "version": "WzE2MywxXQ=="
-  }
-}
-
-exports['AgentsRepository getEventsForAgent Get events for the agent - create:agent_events (4)'] = {
-  "results": {
-    "type": "agent_events",
-    "id": "5a3765f0-e164-11e9-90bc-7f32bd2851d3",
-    "attributes": {
-      "type": "STATE",
-      "subtype": "STARTING",
-      "timestamp": "2019-09-27T18:50:32+0000",
-      "message": "...",
-      "agent_id": "agent:2"
-    },
-    "references": [],
-    "updated_at": "2019-09-27T20:21:13.807Z",
-    "version": "WzE2NCwxXQ=="
-  }
-}
-
-exports['AgentsRepository getEventsForAgent Get events for the agent - find:{"type":"agent_events","search":"agent:1","searchFields":["agent_id"],"perPage":25,"page":1} (5)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 25,
-    "total": 3,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "5866c4a0-e164-11e9-90bc-7f32bd2851d3",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "payload": "{\"previous_state\": \"STOPPED\"}",
-          "data": "{serializedDATA}",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T20:21:10.762Z",
-        "version": "WzE2MSwxXQ=="
-      },
-      {
-        "type": "agent_events",
-        "id": "5901cc20-e164-11e9-90bc-7f32bd2851d3",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T20:21:11.778Z",
-        "version": "WzE2MiwxXQ=="
-      },
-      {
-        "type": "agent_events",
-        "id": "599d6fe0-e164-11e9-90bc-7f32bd2851d3",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T20:21:12.798Z",
-        "version": "WzE2MywxXQ=="
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository getEventsForAgent Get events for the agent - find:{"type":"agent_events","perPage":1000} (6)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 1000,
-    "total": 4,
-    "saved_objects": [
-      {
-        "type": "agent_events",
-        "id": "5866c4a0-e164-11e9-90bc-7f32bd2851d3",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "payload": "{\"previous_state\": \"STOPPED\"}",
-          "data": "{serializedDATA}",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T20:21:10.762Z",
-        "version": "WzE2MSwxXQ=="
-      },
-      {
-        "type": "agent_events",
-        "id": "5901cc20-e164-11e9-90bc-7f32bd2851d3",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:33+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T20:21:11.778Z",
-        "version": "WzE2MiwxXQ=="
-      },
-      {
-        "type": "agent_events",
-        "id": "599d6fe0-e164-11e9-90bc-7f32bd2851d3",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:34+0000",
-          "message": "...",
-          "agent_id": "agent:1"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T20:21:12.798Z",
-        "version": "WzE2MywxXQ=="
-      },
-      {
-        "type": "agent_events",
-        "id": "5a3765f0-e164-11e9-90bc-7f32bd2851d3",
-        "attributes": {
-          "type": "STATE",
-          "subtype": "STARTING",
-          "timestamp": "2019-09-27T18:50:32+0000",
-          "message": "...",
-          "agent_id": "agent:2"
-        },
-        "references": [],
-        "updated_at": "2019-09-27T20:21:13.807Z",
-        "version": "WzE2NCwxXQ=="
-      }
-    ]
-  }
-}
-
-exports['AgentsRepository getEventsForAgent Get events for the agent - delete:agent_events:5866c4a0-e164-11e9-90bc-7f32bd2851d3:{} (7)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository getEventsForAgent Get events for the agent - delete:agent_events:5901cc20-e164-11e9-90bc-7f32bd2851d3:{} (8)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository getEventsForAgent Get events for the agent - delete:agent_events:599d6fe0-e164-11e9-90bc-7f32bd2851d3:{} (9)'] = {
-  "results": {}
-}
-
-exports['AgentsRepository getEventsForAgent Get events for the agent - delete:agent_events:5a3765f0-e164-11e9-90bc-7f32bd2851d3:{} (10)'] = {
+exports['AgentsEventsRepository getEventsForAgent Get events for the agent - delete:agent_events:6fe28db0-e3cd-11e9-ab2b-f19194632c4a:{} (10)'] = {
   "results": {}
 }

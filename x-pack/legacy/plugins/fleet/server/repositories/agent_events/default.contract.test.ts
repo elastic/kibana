@@ -13,7 +13,7 @@ import { MemorizeSODatabaseAdapter } from '../../adapters/saved_objects_database
 import { FrameworkUser, internalAuthData } from '../../adapters/framework/adapter_types';
 import { AgentEvent } from '../agent_events/types';
 
-describe('AgentsRepository', () => {
+describe('AgentsEventsRepository', () => {
   let repository: AgentEventsRepository;
   let soAdapter: SODatabaseAdapterType;
   let servers: any;
