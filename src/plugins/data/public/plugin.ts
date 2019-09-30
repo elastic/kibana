@@ -18,20 +18,34 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { ExpressionsService } from './expressions/expressions_service';
+import { AutocompleteProviderRegister } from './autocomplete_provider';
 
-export class DataPublicPlugin implements Plugin<{}> {
-  expressions = new ExpressionsService();
+export interface DataPublicPluginSetup {
+  autocomplete: Pick<AutocompleteProviderRegister, 'addProvider' | 'getProvider'>;
+}
+
+export interface DataPublicPluginStart {
+  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
+}
+
+export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
+  private readonly autocomplete = new AutocompleteProviderRegister();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup) {
-    const expressions = this.expressions.setup();
+  public setup(core: CoreSetup): DataPublicPluginSetup {
     return {
-      expressions,
+      autocomplete: this.autocomplete,
     };
   }
 
-  public start(core: CoreStart) {}
-  public stop() {}
+  public start(core: CoreStart): DataPublicPluginStart {
+    return {
+      autocomplete: this.autocomplete,
+    };
+  }
+
+  public stop() {
+    this.autocomplete.clearProviders();
+  }
 }

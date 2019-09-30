@@ -19,11 +19,8 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
             <EuiButton
               color="danger"
               disabled={true}
-              fill={false}
-              iconSide="left"
               onClick={[MockFunction]}
               size="s"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Delete item"
@@ -58,11 +55,8 @@ exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = 
             <EuiButton
               color="danger"
               disabled={false}
-              fill={false}
-              iconSide="left"
               onClick={[MockFunction]}
               size="s"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Delete item"

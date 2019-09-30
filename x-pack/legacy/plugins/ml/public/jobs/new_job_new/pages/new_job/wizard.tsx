@@ -18,7 +18,7 @@ import { PickFieldsStep } from '../components/pick_fields_step';
 import { JobDetailsStep } from '../components/job_details_step';
 import { ValidationStep } from '../components/validation_step';
 import { SummaryStep } from '../components/summary_step';
-import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
+import { TimeBuckets } from '../../../../util/time_buckets';
 import { useKibanaContext } from '../../../../contexts/kibana';
 
 import { JobCreatorContext, JobCreatorContextValue } from '../components/job_creator_context';
@@ -34,7 +34,7 @@ interface Props {
   jobCreator: JobCreatorType;
   chartLoader: ChartLoader;
   resultsLoader: ResultsLoader;
-  chartInterval: MlTimeBuckets;
+  chartInterval: TimeBuckets;
   jobValidator: JobValidator;
   existingJobsAndGroups: ExistingJobsAndGroups;
   skipTimeRangeStep: boolean;
@@ -86,11 +86,9 @@ export const Wizard: FC<Props> = ({
   );
 
   useEffect(() => {
-    // IIFE to run the validation. the useEffect callback can't be async
-    (async () => {
-      await jobValidator.validate();
+    jobValidator.validate(() => {
       setJobValidatorUpdate(jobValidatorUpdated);
-    })();
+    });
 
     // if the job config has changed, reset the highestStep
     // compare a stringified config to ensure the configs have actually changed

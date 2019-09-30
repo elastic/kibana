@@ -37,7 +37,7 @@ import {
 } from '@elastic/eui';
 import { memoizeLast } from 'ui/utils/memoize';
 import { VisType } from 'ui/vis';
-import { VisTypeAlias } from '../../../../../visualizations/public/np_ready/public';
+import { VisTypeAlias } from '../../../../../visualizations/public';
 import { NewVisHelp } from './new_vis_help';
 import { VisHelpText } from './vis_help_text';
 import { VisTypeIcon } from './vis_type_icon';
@@ -201,7 +201,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       });
     }
 
-    return sortByOrder(entries, ['highlighted', 'title'], ['desc', 'asc']);
+    return sortByOrder(entries, ['highlighted', 'isPromoted', 'title'], ['desc', 'asc', 'asc']);
   }
 
   private renderVisType = (visType: VisTypeListEntry | VisTypeAliasListEntry) => {

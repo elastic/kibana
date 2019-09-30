@@ -36,9 +36,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ES_TYPES } from '../../../../common/es_types';
+import { ES_FIELD_TYPES } from '../../../../../../../plugins/data/common';
 
-const RESTRICT_FIELDS = [ES_TYPES.NUMBER];
+const RESTRICT_FIELDS = [ES_FIELD_TYPES.NUMBER];
 
 export const PercentileRankAgg = props => {
   const { series, panel, fields } = props;
@@ -77,6 +77,7 @@ export const PercentileRankAgg = props => {
               defaultMessage="Aggregation"
             />
           </EuiFormLabel>
+          <EuiSpacer size="xs" />
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -88,7 +89,12 @@ export const PercentileRankAgg = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('field')}
-            label={<FormattedMessage id="visTypeTimeseries.percentileRank.fieldLabel" defaultMessage="Field" />}
+            label={
+              <FormattedMessage
+                id="visTypeTimeseries.percentileRank.fieldLabel"
+                defaultMessage="Field"
+              />
+            }
           >
             <FieldSelect
               fields={fields}

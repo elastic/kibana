@@ -21,17 +21,27 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
-import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
+import { UiSettingsClientContract, CoreStart } from 'src/core/public';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
-import { SearchBar, SearchBarProps } from '../../../../core_plugins/data/public';
+import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
+import {
+  SearchBar,
+  SearchBarProps,
+  TimeHistoryContract,
+} from '../../../../core_plugins/data/public';
 
 type Props = Partial<SearchBarProps> & {
   name: string;
-  uiSettings: UiSettingsClientContract;
-  savedObjectsClient: SavedObjectsClientContract;
   config?: TopNavMenuData[];
   showSearchBar?: boolean;
+
+  // Search Bar dependencies
+  uiSettings?: UiSettingsClientContract;
+  savedObjects?: CoreStart['savedObjects'];
+  notifications?: CoreStart['notifications'];
+  timeHistory?: TimeHistoryContract;
+  http?: CoreStart['http'];
 };
 
 /*
@@ -57,35 +67,52 @@ export function TopNavMenu(props: Props) {
 
   function renderSearchBar() {
     // Validate presense of all required fields
-    if (!props.showSearchBar || !props.savedObjectsClient) return;
+    if (
+      !props.showSearchBar ||
+      !props.savedObjects ||
+      !props.http ||
+      !props.notifications ||
+      !props.timeHistory
+    )
+      return;
     return (
-      <SearchBar
-        savedObjectsClient={props.savedObjectsClient}
-        query={props.query}
-        filters={props.filters}
-        uiSettings={props.uiSettings}
-        showQueryBar={props.showQueryBar}
-        showQueryInput={props.showQueryInput}
-        showFilterBar={props.showFilterBar}
-        showDatePicker={props.showDatePicker}
-        appName={props.appName!}
-        screenTitle={props.screenTitle!}
-        onQuerySubmit={props.onQuerySubmit}
-        onFiltersUpdated={props.onFiltersUpdated}
-        dateRangeFrom={props.dateRangeFrom}
-        dateRangeTo={props.dateRangeTo}
-        isRefreshPaused={props.isRefreshPaused}
-        showAutoRefreshOnly={props.showAutoRefreshOnly}
-        onRefreshChange={props.onRefreshChange}
-        refreshInterval={props.refreshInterval}
-        indexPatterns={props.indexPatterns}
-        store={props.store}
-        savedQuery={props.savedQuery}
-        showSaveQuery={props.showSaveQuery}
-        onClearSavedQuery={props.onClearSavedQuery}
-        onSaved={props.onSaved}
-        onSavedQueryUpdated={props.onSavedQueryUpdated}
-      />
+      <KibanaContextProvider
+        services={{
+          uiSettings: props.uiSettings,
+          http: props.http,
+          notifications: props.notifications,
+          savedObjects: props.savedObjects,
+        }}
+      >
+        <SearchBar
+          notifications={props.notifications}
+          savedObjects={props.savedObjects}
+          timeHistory={props.timeHistory}
+          query={props.query}
+          filters={props.filters}
+          showQueryBar={props.showQueryBar}
+          showQueryInput={props.showQueryInput}
+          showFilterBar={props.showFilterBar}
+          showDatePicker={props.showDatePicker}
+          appName={props.appName!}
+          screenTitle={props.screenTitle!}
+          onQuerySubmit={props.onQuerySubmit}
+          onFiltersUpdated={props.onFiltersUpdated}
+          dateRangeFrom={props.dateRangeFrom}
+          dateRangeTo={props.dateRangeTo}
+          isRefreshPaused={props.isRefreshPaused}
+          showAutoRefreshOnly={props.showAutoRefreshOnly}
+          onRefreshChange={props.onRefreshChange}
+          refreshInterval={props.refreshInterval}
+          indexPatterns={props.indexPatterns}
+          store={props.store}
+          savedQuery={props.savedQuery}
+          showSaveQuery={props.showSaveQuery}
+          onClearSavedQuery={props.onClearSavedQuery}
+          onSaved={props.onSaved}
+          onSavedQueryUpdated={props.onSavedQueryUpdated}
+        />
+      </KibanaContextProvider>
     );
   }
 

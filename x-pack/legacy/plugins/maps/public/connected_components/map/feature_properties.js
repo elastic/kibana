@@ -30,7 +30,6 @@ export class FeatureProperties extends React.Component {
 
   componentDidUpdate() {
     this._loadProperties();
-    this.props.reevaluateTooltipPosition();
   }
 
   componentWillUnmount() {

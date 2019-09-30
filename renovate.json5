@@ -131,6 +131,13 @@
         ],
       },
       {
+        groupSlug: 'moment',
+        groupName: 'moment related packages',
+        packagePatterns: [
+          '(\\b|_)moment(\\b|_)',
+        ],
+      },
+      {
         groupSlug: 'graphql',
         groupName: 'graphql related packages',
         packagePatterns: [
@@ -458,11 +465,11 @@
         ],
       },
       {
-        groupSlug: 'moment-timezone',
-        groupName: 'moment-timezone related packages',
+        groupSlug: 'mkdirp',
+        groupName: 'mkdirp related packages',
         packageNames: [
-          'moment-timezone',
-          '@types/moment-timezone',
+          'mkdirp',
+          '@types/mkdirp',
         ],
       },
       {
@@ -487,6 +494,14 @@
         packageNames: [
           'opn',
           '@types/opn',
+        ],
+      },
+      {
+        groupSlug: 'pngjs',
+        groupName: 'pngjs related packages',
+        packageNames: [
+          'pngjs',
+          '@types/pngjs',
         ],
       },
       {
@@ -666,14 +681,6 @@
         ],
       },
       {
-        groupSlug: 'mkdirp',
-        groupName: 'mkdirp related packages',
-        packageNames: [
-          'mkdirp',
-          '@types/mkdirp',
-        ],
-      },
-      {
         groupSlug: 'nock',
         groupName: 'nock related packages',
         packageNames: [
@@ -711,14 +718,6 @@
         packageNames: [
           'papaparse',
           '@types/papaparse',
-        ],
-      },
-      {
-        groupSlug: 'pngjs',
-        groupName: 'pngjs related packages',
-        packageNames: [
-          'pngjs',
-          '@types/pngjs',
         ],
       },
       {

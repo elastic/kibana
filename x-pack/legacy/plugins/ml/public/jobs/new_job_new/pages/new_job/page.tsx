@@ -23,7 +23,7 @@ import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { useKibanaContext } from '../../../../contexts/kibana';
 import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
-import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
+import { TimeBuckets } from '../../../../util/time_buckets';
 import { newJobDefaults } from '../../../new_job/utils/new_job_defaults';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
 import { expandCombinedJobConfig } from '../../common/job_creator/configs';
@@ -63,8 +63,22 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     if (skipTimeRangeStep === false) {
       jobCreator.jobId = '';
     }
+
     mlJobService.tempJobCloningObjects.skipTimeRangeStep = false;
     mlJobService.tempJobCloningObjects.job = undefined;
+
+    if (
+      mlJobService.tempJobCloningObjects.start !== undefined &&
+      mlJobService.tempJobCloningObjects.end !== undefined
+    ) {
+      // auto select the start and end dates for the time range picker
+      jobCreator.setTimeRange(
+        mlJobService.tempJobCloningObjects.start,
+        mlJobService.tempJobCloningObjects.end
+      );
+      mlJobService.tempJobCloningObjects.start = undefined;
+      mlJobService.tempJobCloningObjects.end = undefined;
+    }
   } else {
     jobCreator.bucketSpan = DEFAULT_BUCKET_SPAN;
 
@@ -80,14 +94,14 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       jobCreator.modelPlot = true;
     }
 
-    if (kibanaContext.currentSavedSearch.id === undefined) {
+    if (kibanaContext.currentSavedSearch.id !== undefined) {
       // Jobs created from saved searches cannot be cloned in the wizard as the
       // ML job config holds no reference to the saved search ID.
       jobCreator.createdBy = null;
     }
   }
 
-  const chartInterval = new MlTimeBuckets();
+  const chartInterval = new TimeBuckets();
   chartInterval.setBarTarget(BAR_TARGET);
   chartInterval.setMaxBars(MAX_BARS);
   chartInterval.setInterval('auto');
@@ -109,7 +123,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
   return (
     <Fragment>
-      <EuiPage style={{ backgroundColor: '#FFF' }} data-test-subj="mlPageJobWizard">
+      <EuiPage style={{ backgroundColor: 'inherit' }} data-test-subj="mlPageJobWizard">
         <EuiPageBody>
           <EuiPageContentBody>
             <Wizard

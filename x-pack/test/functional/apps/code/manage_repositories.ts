@@ -19,7 +19,7 @@ export default function manageRepositoriesFunctionalTests({
 
   describe('Manage Repositories', function() {
     this.tags('smoke');
-    const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
+    const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
 
     describe('Manage Repositories', () => {
       before(async () => {
@@ -29,7 +29,7 @@ export default function manageRepositoriesFunctionalTests({
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
       });
 
       it('import repository', async () => {

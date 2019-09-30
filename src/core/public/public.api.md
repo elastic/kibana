@@ -397,15 +397,21 @@ export interface HttpErrorRequest {
     // (undocumented)
     error: Error;
     // (undocumented)
-    request?: Request;
+    request: Request;
 }
 
 // @public (undocumented)
-export interface HttpErrorResponse extends HttpResponse {
+export interface HttpErrorResponse {
+    // (undocumented)
+    body?: HttpBody;
     // Warning: (ae-forgotten-export) The symbol "HttpFetchError" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
     error: Error | HttpFetchError;
+    // (undocumented)
+    request?: Request;
+    // (undocumented)
+    response?: Response;
 }
 
 // @public (undocumented)
@@ -433,10 +439,18 @@ export interface HttpHeadersInit {
     [name: string]: any;
 }
 
+// Warning: (ae-missing-release-tag) "HttpInterceptController" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export class HttpInterceptController {
+    // (undocumented)
+    halt(): void;
+    // (undocumented)
+    readonly halted: boolean;
+    }
+
 // @public (undocumented)
 export interface HttpInterceptor {
-    // Warning: (ae-forgotten-export) The symbol "HttpInterceptController" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     request?(request: Request, controller: HttpInterceptController): Promise<Request> | Request | void;
     // (undocumented)
@@ -482,7 +496,7 @@ export interface HttpResponse {
     // (undocumented)
     body?: HttpBody;
     // (undocumented)
-    request: Request;
+    request?: Request;
     // (undocumented)
     response?: Response;
 }
@@ -596,6 +610,25 @@ export interface NotificationsStart {
     toasts: ToastsStart;
 }
 
+// @public
+export type OverlayBannerMount = (element: HTMLElement) => OverlayBannerUnmount;
+
+// @public (undocumented)
+export interface OverlayBannersStart {
+    add(mount: OverlayBannerMount, priority?: number): string;
+    // Warning: (ae-forgotten-export) The symbol "OverlayBanner" needs to be exported by the entry point index.d.ts
+    // 
+    // @internal (undocumented)
+    get$(): Observable<OverlayBanner[]>;
+    // (undocumented)
+    getComponent(): JSX.Element;
+    remove(id: string): boolean;
+    replace(id: string | undefined, mount: OverlayBannerMount, priority?: number): string;
+}
+
+// @public
+export type OverlayBannerUnmount = () => void;
+
 // Warning: (ae-missing-release-tag) "OverlayRef" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 // 
 // @public (undocumented)
@@ -606,6 +639,8 @@ export interface OverlayRef {
 
 // @public (undocumented)
 export interface OverlayStart {
+    // (undocumented)
+    banners: OverlayBannersStart;
     // (undocumented)
     openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
         closeButtonAriaLabel?: string;

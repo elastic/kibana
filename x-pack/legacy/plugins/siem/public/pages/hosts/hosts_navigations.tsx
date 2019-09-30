@@ -7,6 +7,7 @@
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { getOr, omit } from 'lodash/fp';
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import * as i18n from './translations';
 
 import { HostsTable, UncommonProcessTable } from '../../components/page/hosts';
@@ -24,6 +25,9 @@ import { ESTermQuery } from '../../../common/typed_json';
 import { HostsTableType } from '../../store/hosts/model';
 import { StatefulEventsViewer } from '../../components/events_viewer';
 import { NavTab } from '../../components/navigation/types';
+import { EventsOverTimeQuery } from '../../containers/events/events_over_time';
+import { EventsOverTimeHistogram } from '../../components/page/hosts/events_over_time';
+import { UpdateDateRange } from '../../components/charts/common';
 
 const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/hosts/${tabName}`;
 const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) => {
@@ -146,6 +150,7 @@ interface OwnProps {
   kqlQueryExpression: string;
 }
 export type HostsComponentsQueryProps = OwnProps & {
+  deleteQuery?: ({ id }: { id: string }) => void;
   indexPattern: StaticIndexPattern;
   skip: boolean;
   setQuery: ({
@@ -159,7 +164,9 @@ export type HostsComponentsQueryProps = OwnProps & {
     loading: boolean;
     refetch: Refetch;
   }) => void;
-  narrowDateRange?: NarrowDateRange;
+  updateDateRange?: UpdateDateRange;
+  filterQueryExpression?: string;
+  hostName?: string;
 };
 
 export type AnomaliesQueryTabBodyProps = OwnProps & {
@@ -173,6 +180,7 @@ const HostsTableManage = manageQuery(HostsTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 
 export const HostsQueryTabBody = ({
+  deleteQuery,
   endDate,
   filterQuery,
   indexPattern,
@@ -190,13 +198,15 @@ export const HostsQueryTabBody = ({
       startDate={startDate}
       type={type}
     >
-      {({ hosts, totalCount, loading, pageInfo, loadPage, id, inspect, refetch }) => (
+      {({ hosts, totalCount, loading, pageInfo, loadPage, id, inspect, isInspected, refetch }) => (
         <HostsTableManage
+          deleteQuery={deleteQuery}
           data={hosts}
           fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
           id={id}
           indexPattern={indexPattern}
           inspect={inspect}
+          isInspect={isInspected}
           loading={loading}
           loadPage={loadPage}
           refetch={refetch}
@@ -211,6 +221,7 @@ export const HostsQueryTabBody = ({
 };
 
 export const AuthenticationsQueryTabBody = ({
+  deleteQuery,
   endDate,
   filterQuery,
   skip,
@@ -227,26 +238,41 @@ export const AuthenticationsQueryTabBody = ({
       startDate={startDate}
       type={type}
     >
-      {({ authentications, totalCount, loading, pageInfo, loadPage, id, inspect, refetch }) => (
-        <AuthenticationTableManage
-          data={authentications}
-          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-          id={id}
-          inspect={inspect}
-          loading={loading}
-          loadPage={loadPage}
-          refetch={refetch}
-          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-          setQuery={setQuery}
-          totalCount={totalCount}
-          type={type}
-        />
-      )}
+      {({
+        authentications,
+        totalCount,
+        loading,
+        pageInfo,
+        loadPage,
+        id,
+        inspect,
+        isInspected,
+        refetch,
+      }) => {
+        return (
+          <AuthenticationTableManage
+            data={authentications}
+            deleteQuery={deleteQuery}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+            id={id}
+            inspect={inspect}
+            isInspect={isInspected}
+            loading={loading}
+            loadPage={loadPage}
+            refetch={refetch}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+            setQuery={setQuery}
+            totalCount={totalCount}
+            type={type}
+          />
+        );
+      }}
     </AuthenticationsQuery>
   );
 };
 
 export const UncommonProcessTabBody = ({
+  deleteQuery,
   endDate,
   filterQuery,
   skip,
@@ -263,12 +289,24 @@ export const UncommonProcessTabBody = ({
       startDate={startDate}
       type={type}
     >
-      {({ uncommonProcesses, totalCount, loading, pageInfo, loadPage, id, inspect, refetch }) => (
+      {({
+        uncommonProcesses,
+        totalCount,
+        loading,
+        pageInfo,
+        loadPage,
+        id,
+        inspect,
+        isInspected,
+        refetch,
+      }) => (
         <UncommonProcessTableManage
+          deleteQuery={deleteQuery}
           data={uncommonProcesses}
           fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
           id={id}
           inspect={inspect}
+          isInspect={isInspected}
           loading={loading}
           loadPage={loadPage}
           refetch={refetch}
@@ -301,20 +339,49 @@ export const AnomaliesTabBody = ({
     />
   );
 };
+const EventsOverTimeManage = manageQuery(EventsOverTimeHistogram);
 
 export const EventsTabBody = ({
   endDate,
   kqlQueryExpression,
   startDate,
+  setQuery,
+  filterQuery,
+  updateDateRange = () => {},
 }: HostsComponentsQueryProps) => {
   const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
 
   return (
-    <StatefulEventsViewer
-      end={endDate}
-      id={HOSTS_PAGE_TIMELINE_ID}
-      kqlQueryExpression={kqlQueryExpression}
-      start={startDate}
-    />
+    <>
+      <EventsOverTimeQuery
+        endDate={endDate}
+        filterQuery={filterQuery}
+        sourceId="default"
+        startDate={startDate}
+        type={hostsModel.HostsType.page}
+      >
+        {({ eventsOverTime, loading, id, inspect, refetch, totalCount }) => (
+          <EventsOverTimeManage
+            data={eventsOverTime!}
+            endDate={endDate}
+            id={id}
+            inspect={inspect}
+            loading={loading}
+            updateDateRange={updateDateRange}
+            refetch={refetch}
+            setQuery={setQuery}
+            startDate={startDate}
+            totalCount={totalCount}
+          />
+        )}
+      </EventsOverTimeQuery>
+      <EuiSpacer size="l" />
+      <StatefulEventsViewer
+        end={endDate}
+        id={HOSTS_PAGE_TIMELINE_ID}
+        kqlQueryExpression={kqlQueryExpression}
+        start={startDate}
+      />
+    </>
   );
 };

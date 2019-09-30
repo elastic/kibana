@@ -192,7 +192,6 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
       <EuiCallOut
         color="warning"
         iconType="help"
-        size="m"
         title={
           <FormattedMessage
             defaultMessage="Rerun job"
@@ -225,12 +224,9 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
             flush="left"
-            iconSide="left"
             iconType="cross"
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Close"
@@ -243,13 +239,9 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
           grow={false}
         >
           <EuiButton
-            color="primary"
             fill={true}
-            iconSide="left"
             isDisabled={false}
             onClick={[Function]}
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Save"
@@ -466,7 +458,6 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
       <EuiCallOut
         color="warning"
         iconType="help"
-        size="m"
         title={
           <FormattedMessage
             defaultMessage="Rerun job"
@@ -499,12 +490,9 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
             flush="left"
-            iconSide="left"
             iconType="cross"
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Close"
@@ -517,13 +505,9 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
           grow={false}
         >
           <EuiButton
-            color="primary"
             fill={true}
-            iconSide="left"
             isDisabled={false}
             onClick={[Function]}
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Save"
@@ -718,7 +702,6 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
       <EuiCallOut
         color="warning"
         iconType="help"
-        size="m"
         title={
           <FormattedMessage
             defaultMessage="Rerun job"
@@ -751,12 +734,9 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
             flush="left"
-            iconSide="left"
             iconType="cross"
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Close"
@@ -769,13 +749,9 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
           grow={false}
         >
           <EuiButton
-            color="primary"
             fill={true}
-            iconSide="left"
             isDisabled={true}
             onClick={[Function]}
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Save"
@@ -881,12 +857,9 @@ exports[`RuleEditorFlyout renders the select action component for a detector wit
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
             flush="left"
-            iconSide="left"
             iconType="cross"
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Close"
