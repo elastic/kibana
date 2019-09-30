@@ -6,19 +6,17 @@
 import React, { Fragment, ReactNode } from 'react';
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { IntegrationList, IntegrationListItem } from '../../common/types';
-import { IntegrationCard } from './integration_card';
+import { IntegrationCard, BadgeProps } from './integration_card';
 
-interface ListProps {
-  controls: ReactNode;
+type ListProps = {
+  controls?: ReactNode;
   title: string;
   list: IntegrationList;
-}
+} & BadgeProps;
 
-export function IntegrationListGrid({ controls, title, list }: ListProps) {
-  if (!list.length) return null;
-
+export function IntegrationListGrid({ controls, title, list, showInstalledBadge }: ListProps) {
   const controlsContent = <ControlsColumn title={title} controls={controls} />;
-  const gridContent = <GridColumn list={list} />;
+  const gridContent = <GridColumn list={list} showInstalledBadge={showInstalledBadge} />;
 
   return (
     <Fragment>
@@ -32,15 +30,22 @@ export function IntegrationListGrid({ controls, title, list }: ListProps) {
   );
 }
 
-function GridItem(item: IntegrationListItem) {
+type GridItemProps = IntegrationListItem & BadgeProps;
+
+function GridItem(item: GridItemProps) {
   return (
     <EuiFlexItem>
-      <IntegrationCard {...item} />
+      <IntegrationCard {...item} showInstalledBadge={item.showInstalledBadge} />
     </EuiFlexItem>
   );
 }
 
-function ControlsColumn({ controls, title }: { controls: ReactNode; title: string }) {
+interface ControlsColumnProps {
+  controls: ReactNode;
+  title: string;
+}
+
+function ControlsColumn({ controls, title }: ControlsColumnProps) {
   return (
     <Fragment>
       <EuiText>
@@ -55,11 +60,19 @@ function ControlsColumn({ controls, title }: { controls: ReactNode; title: strin
   );
 }
 
-function GridColumn({ list }: { list: IntegrationList }) {
+type GridColumnProps = {
+  list: IntegrationList;
+} & BadgeProps;
+
+function GridColumn({ list, showInstalledBadge }: GridColumnProps) {
   return (
     <EuiFlexGrid gutterSize="l" columns={3}>
       {list.map(item => (
-        <GridItem key={`${item.name}-${item.version}`} {...item} />
+        <GridItem
+          key={`${item.name}-${item.version}`}
+          {...item}
+          showInstalledBadge={showInstalledBadge}
+        />
       ))}
     </EuiFlexGrid>
   );

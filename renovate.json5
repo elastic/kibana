@@ -650,6 +650,14 @@
         ],
       },
       {
+        groupSlug: 'js-search',
+        groupName: 'js-search related packages',
+        packageNames: [
+          'js-search',
+          '@types/js-search',
+        ],
+      },
+      {
         groupSlug: 'jsdom',
         groupName: 'jsdom related packages',
         packageNames: [

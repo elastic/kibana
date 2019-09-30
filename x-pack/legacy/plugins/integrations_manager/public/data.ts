@@ -20,7 +20,9 @@ import {
   IntegrationsGroupedByStatus,
 } from '../common/types';
 
-let _fetch: HttpHandler;
+const defaultClient: HttpHandler = (path, options?) => fetch(path, options).then(res => res.json());
+
+let _fetch: HttpHandler = defaultClient;
 
 export function setClient(client: HttpHandler): void {
   _fetch = client;
