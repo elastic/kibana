@@ -50,7 +50,6 @@ export default async function ({ readConfigFile }) {
         'dateFormat:tz': 'UTC',
         'telemetry:optIn': false,
         'state:storeInSessionStorage': true,
-        'notifications:lifetime:info': 10000,
       },
     },
 
