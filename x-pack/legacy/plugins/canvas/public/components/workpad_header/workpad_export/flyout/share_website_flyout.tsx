@@ -15,6 +15,7 @@ import {
   EuiFlyoutBody,
   EuiTitle,
   EuiLink,
+  EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -30,6 +31,7 @@ interface Props {
   onCopy: OnCopyFn;
   onExport: OnExportFn;
   onClose: OnCloseFn;
+  unsupportedRenderers?: string[];
 }
 
 const steps = (onExport: OnExportFn, onCopy: OnCopyFn) => [
@@ -47,7 +49,7 @@ const steps = (onExport: OnExportFn, onCopy: OnCopyFn) => [
   },
 ];
 
-export const ShareWebsiteFlyout = ({ onCopy, onExport, onClose }: Props) => {
+export const ShareWebsiteFlyout = ({ onCopy, onExport, onClose, unsupportedRenderers }: Props) => {
   const link = (
     <EuiLink
       style={{ textDecoration: 'underline' }}
@@ -77,6 +79,25 @@ export const ShareWebsiteFlyout = ({ onCopy, onExport, onClose }: Props) => {
     </div>
   );
 
+  let warningText = null;
+
+  if (unsupportedRenderers && unsupportedRenderers.length > 0) {
+    const warning = [
+      <EuiText size="s">
+        {strings.getUnsupportedRendererWarning()}
+        {unsupportedRenderers.map((fn, index) => [
+          <EuiCode>{fn}</EuiCode>,
+          index < unsupportedRenderers.length - 1 ? ', ' : '',
+        ])}
+      </EuiText>,
+      <EuiSpacer size="xs" />,
+    ];
+    warningText = [
+      <EuiCallOut title={warning} color="warning" size="s" iconType="alert" />,
+      <EuiSpacer />,
+    ];
+  }
+
   return (
     <EuiFlyout onClose={() => onClose('share')} maxWidth>
       <EuiFlyoutHeader hasBorder>
@@ -91,6 +112,7 @@ export const ShareWebsiteFlyout = ({ onCopy, onExport, onClose }: Props) => {
         <EuiSpacer />
         <EuiCallOut size="s" title={title} iconType="iInCircle"></EuiCallOut>
         <EuiSpacer />
+        {warningText}
         <EuiSteps steps={steps(onExport, onCopy)} />
       </EuiFlyoutBody>
     </EuiFlyout>

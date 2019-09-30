@@ -9,7 +9,12 @@ import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { jobCompletionNotifications } from '../../../../../reporting/public/lib/job_completion_notifications';
 // @ts-ignore Untyped local
-import { getWorkpad, getPages, getRenderedWorkpad } from '../../../state/selectors/workpad';
+import {
+  getWorkpad,
+  getPages,
+  getRenderedWorkpad,
+  getRenderedWorkpadExpressions,
+} from '../../../state/selectors/workpad';
 // @ts-ignore Untyped local
 import { getReportingBrowserType } from '../../../state/selectors/app';
 // @ts-ignore Untyped local
@@ -30,12 +35,26 @@ import { CanvasRenderedWorkpad } from '../../../../shareable_runtime/types';
 // @ts-ignore Untyped local.
 import { fetch, arrayBufferFetch } from '../../../../common/lib/fetch';
 import { API_ROUTE_SHAREABLE_ZIP } from '../../../../common/lib/constants';
+import { renderFunctionNames } from '../../../../shareable_runtime/supported_renderers';
 
 import { ComponentStrings } from '../../../../i18n';
 const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
 
+const getUnsupportedRenderers = (state: State) => {
+  const renderers: string[] = [];
+  const expressions = getRenderedWorkpadExpressions(state);
+  expressions.forEach(expression => {
+    if (!renderFunctionNames.includes(expression)) {
+      renderers.push(expression);
+    }
+  });
+
+  return renderers;
+};
+
 const mapStateToProps = (state: State) => ({
   workpad: getWorkpad(state),
+  unsupportedRenderers: getUnsupportedRenderers(state),
   renderedWorkpad: getRenderedWorkpad(state),
   pageCount: getPages(state).length,
   enabled: getReportingBrowserType(state) === 'chromium',
@@ -57,12 +76,20 @@ interface Props {
   renderedWorkpad: CanvasRenderedWorkpad;
   pageCount: number;
   enabled: boolean;
+  unsupportedRenderers: string[];
 }
 
 export const WorkpadExport = compose<ComponentProps, {}>(
   connect(mapStateToProps),
   withProps(
-    ({ workpad, pageCount, enabled, renderedWorkpad }: Props): ComponentProps => ({
+    ({
+      workpad,
+      pageCount,
+      enabled,
+      renderedWorkpad,
+      unsupportedRenderers,
+    }: Props): ComponentProps => ({
+      unsupportedRenderers,
       enabled,
       getExportUrl: type => {
         if (type === 'pdf') {

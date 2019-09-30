@@ -42,3 +42,5 @@ export const renderFunctions = [
   table,
   text,
 ];
+
+export const renderFunctionNames = renderFunctions.map(fn => fn.name);

@@ -452,3 +452,25 @@ export function getRenderedWorkpad(state: State) {
     ...rest,
   };
 }
+
+export function getRenderedWorkpadExpressions(state: State) {
+  const workpad = getRenderedWorkpad(state);
+  const { pages } = workpad;
+  const expressions: string[] = [];
+
+  pages.forEach(page =>
+    page.elements.forEach(element => {
+      if (element && element.expressionRenderable) {
+        const { value } = element.expressionRenderable;
+        if (value) {
+          const { as } = value;
+          if (!expressions.includes(as)) {
+            expressions.push(as);
+          }
+        }
+      }
+    })
+  );
+
+  return expressions;
+}

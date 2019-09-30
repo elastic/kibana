@@ -20,6 +20,18 @@ storiesOf('components/Export/WorkpadExport', module)
       }}
     />
   ))
+  .add('unsupported renderers', () => (
+    <WorkpadExport
+      enabled={true}
+      onCopy={action('onCopy')}
+      onExport={action('onExport')}
+      getExportUrl={(type: string) => {
+        action(`getExportUrl('${type}')`);
+        return type;
+      }}
+      unsupportedRenderers={['rendererOne', 'rendererTwo']}
+    />
+  ))
   .add('disabled', () => (
     <WorkpadExport
       enabled={false}

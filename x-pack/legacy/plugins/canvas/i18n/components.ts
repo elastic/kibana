@@ -232,6 +232,14 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.shareWebsiteFlyout.flyoutTitle', {
         defaultMessage: 'Share on a website',
       }),
+    getUnsupportedRendererWarning: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.unsupportedRendererWarning', {
+        defaultMessage:
+          'This workpad contains render functions that are not supported by the {CANVAS} Shareable Workpad Runtime. These elements will not be rendered:',
+        values: {
+          CANVAS,
+        },
+      }),
     getWorkpadStepTitle: () =>
       i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.downloadWorkpadTitle', {
         defaultMessage: 'Download workpad',
@@ -245,7 +253,7 @@ export const ComponentStrings = {
     getStepDescription: () =>
       i18n.translate('xpack.canvas.shareWebsiteFlyout.runtimeStep.description', {
         defaultMessage:
-          'In order to render a shareable Workpad, you also need to include the {CANVAS} Shareable Workpad Runtime. You can skip this step if the runtime is already included on your website.',
+          'In order to render a Shareable Workpad, you also need to include the {CANVAS} Shareable Workpad Runtime. You can skip this step if the runtime is already included on your website.',
         values: {
           CANVAS,
         },
@@ -284,7 +292,7 @@ export const ComponentStrings = {
     getParametersDescription: () =>
       i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.parametersDescription', {
         defaultMessage:
-          'There are a number of inline parameters to configure the shareable Workpad.',
+          'There are a number of inline parameters to configure the Shareable Workpad.',
       }),
     getParametersTitle: () =>
       i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.parametersLabel', {

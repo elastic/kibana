@@ -7,3 +7,4 @@
 import { RendererFactory } from '../types';
 
 export const renderFunctions: RendererFactory[];
+export const renderFunctionNames: string[];

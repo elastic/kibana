@@ -37,6 +37,8 @@ export interface Props {
   onExport: OnExportFn;
   /** Handler to retrive an export URL based on the type of export requested. */
   getExportUrl: GetExportUrlFn;
+  /** A warning, if applicable, about a Shareable Canvas having unsupported renderers. */
+  unsupportedRenderers?: string[];
 }
 
 /**
@@ -47,6 +49,7 @@ export const WorkpadExport: FunctionComponent<Props> = ({
   onCopy,
   onExport,
   getExportUrl,
+  unsupportedRenderers = [],
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
@@ -139,7 +142,12 @@ export const WorkpadExport: FunctionComponent<Props> = ({
   );
 
   const flyout = showFlyout ? (
-    <ShareWebsiteFlyout onClose={onClose} onCopy={onCopy} onExport={onExport} />
+    <ShareWebsiteFlyout
+      onClose={onClose}
+      onCopy={onCopy}
+      onExport={onExport}
+      unsupportedRenderers={unsupportedRenderers}
+    />
   ) : null;
 
   return (
