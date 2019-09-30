@@ -99,7 +99,7 @@ export function SavedQueryPicker({ savedQueryService, onChange }: SavedQueryPick
                 'data.filter.filterEditor.savedQueryFilterPicker.savedQueryFilterCopyUsageText',
                 {
                   defaultMessage:
-                    'Filters create a copy of a saved query. Changes will not change the filter.',
+                    'Filters create a copy of a saved query and not a reference to it. Changes to a saved query will not change the filter.',
                 }
               )}
             </p>

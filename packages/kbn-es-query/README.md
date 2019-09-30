@@ -7,13 +7,13 @@ This module is responsible for generating Elasticsearch queries for Kibana. See 
 This folder contains the code that combines Lucene/KQL queries and filters into an Elasticsearch query.
 
 ```javascript
-buildEsQuery(indexPattern, queries, filters, config, savedQueries)
+buildEsQuery(indexPattern, queries, filters, config)
 ```
 
 Generates the Elasticsearch query DSL from combining the queries and filters provided.
 
 ```javascript
-buildQueryFromFilters(filters, indexPattern, ignoreFilterIfFieldNotInIndex, allowLeadingWildcards, queryStringOptions, dateFormatTZ, allSavedQueries)
+buildQueryFromFilters(filters, indexPattern, ignoreFilterIfFieldNotInIndex, allowLeadingWildcards, queryStringOptions, dateFormatTZ)
 ```
 
 Generates the Elasticsearch query DSL from the given filters.
@@ -76,7 +76,7 @@ Creates a filter (`RangeFilter`) where the value for the given field is in the g
 buildSavedQueryFilter(savedQueryId)
 ```
 
-Creates a filter (`SavedQueryFilter`) corresponding to a saved query. `params` should contain the saved query id.
+Creates a filter (`SavedQueryFilter`) corresponding to a saved query. `params` should be an object containing the saved query.
 
 ## kuery
 

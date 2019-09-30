@@ -22,9 +22,7 @@ export function buildSavedQueryFilter(savedQuery) {
     meta: {
       type: 'savedQuery',
       key: savedQuery.id,
-      params: {
-        savedQuery: { ...savedQuery }
-      }
+      params: { savedQuery }
     },
     saved_query: savedQuery.id,
   };

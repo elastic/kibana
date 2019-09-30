@@ -121,5 +121,49 @@ describe('build query', function () {
 
       expect(result.filter).to.eql(expectedESQueries);
     });
+    it('should convert a saved query into an ES query', function () {
+      expect(new Error('implement me'));
+      // const savedQueryFilter = {
+      //   meta: {
+      //     type: 'savedQuery',
+      //     params: {
+      //       savedQuery: {
+      //         description: 'success filter',
+      //         id: 'Ok responses',
+      //         attributes: {
+      //           query: { query: { 'response.keyword': '200' } },
+      //           filters: [],
+      //         }
+      //       }
+      //     }
+      //   },
+      //   saved_query: 'Ok responses'
+      // };
+      // const expectedESQueries = [{
+      //   query: {
+      //     bool: {
+      //       must: [],
+      //       filter: [
+      //         {
+      //           bool: {
+      //             should: [
+      //               {
+      //                 match_phrase: {
+      //                   'response.keyword': '200'
+      //                 }
+      //               }
+      //             ],
+      //             minimum_should_match: 1
+      //           }
+      //         }
+      //       ],
+      //       should: [],
+      //       must_not: []
+      //     }
+      //   }
+      // }, ];
+      // const result = buildQueryFromFilters([savedQueryFilter]);
+      // expect(result.filter).to.eql(expectedESQueries);
+    });
   });
 });

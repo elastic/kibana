@@ -18,9 +18,50 @@
  */
 
 import _ from 'lodash';
+import dateMath from '@elastic/datemath';
 import { migrateFilter } from './migrate_filter';
 import { filterMatchesIndex } from './filter_matches_index';
 import { buildEsQuery } from './build_es_query';
+
+
+const calculateBounds = function (timeRange) {
+  return {
+    min: dateMath.parse(timeRange.from),
+    max: dateMath.parse(timeRange.to, { roundUp: true })
+  };
+};
+
+/**
+ * Translate a saved query timefilter into a query
+ * @param  {Object} indexPattern - The indexPattern from which to extract the time filter
+ * @param  {Object} timeRange - The saved query time range bounds
+ * @return {Object} the query version of that filter
+ */
+const getEsTimeFilter = function (indexPattern, timeRange) {
+  if (!indexPattern) {
+    return;
+  }
+  const timefield = indexPattern.fields.find(
+    field => field.name === indexPattern.timeFieldName
+  );
+  if (!timefield) {
+    return;
+  }
+  const bounds = calculateBounds(timeRange);
+  if (!bounds) {
+    return;
+  }
+  const filter = {
+    range: { [timefield.name]: { format: 'strict_date_optional_time' } },
+  };
+  if (bounds.min) {
+    filter.range[timefield.name].gte = bounds.min.toISOString();
+  }
+  if (bounds.max) {
+    filter.range[timefield.name].lte = bounds.max.toISOString();
+  }
+  return filter;
+};
 
 /**
  * Create a filter that can be reversed for filters with negate set
@@ -57,12 +98,13 @@ const translateToQuery = function (filter, {
     // do stuff: generate raw dsl that's done in the savedQuery filter constructor at the moment
     const savedQuery = filter.meta.params.savedQuery;
     const query = _.get(savedQuery, 'attributes.query');
-    const filters = _.get(savedQuery, 'attributes.filters', []);
+    let filters = _.get(savedQuery, 'attributes.filters', []);
+    let timefilter = _.get(savedQuery, 'attributes.timefilter');
     // timefilter addition
-    if (savedQuery.attributes.timefilter) {
-      // pass the timefilter right through, should there be one.
-      // filter.meta.params.savedQuery.attributes.timefilter will not yet be a range filter
-      // convert time at query time using similar methods that are used in the data plugin
+    if (timefilter) {
+      const timeRange = { from: timefilter.from, to: timefilter.to };
+      timefilter = getEsTimeFilter(indexPattern, timeRange);
+      filters = [...filters, timefilter];
     }
     const convertedQuery = buildEsQuery(
       indexPattern,
@@ -119,3 +161,4 @@ export function buildQueryFromFilters(
       }),
   };
 }
+
