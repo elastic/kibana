@@ -8,9 +8,10 @@ import { EuiTitle, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { SelectWithPlaceholder } from '../../../../shared/SelectWithPlaceholder';
-import { FETCH_STATUS } from '../../../../../hooks/useFetcher';
+import { useFetcher } from '../../../../../hooks/useFetcher';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../../common/environment_filter_values';
 import { Config } from '../index';
+import { callApmApi } from '../../../../../services/rest/callApmApi';
 const t = (id: string, defaultMessage: string) =>
   i18n.translate(`xpack.apm.settings.agentConf.flyOut.serviceSection.${id}`, {
     defaultMessage
@@ -24,23 +25,39 @@ interface Props {
   setEnvironment: (env: string) => void;
   serviceName?: string;
   setServiceName: (env: string) => void;
-  serviceNames: string[];
-  serviceNamesStatus?: FETCH_STATUS;
-  environments: Array<{ name: string; alreadyExists: boolean }>;
-  environmentStatus?: FETCH_STATUS;
 }
 
-export function FlyoutServiceSection({
+export function ServiceSection({
   selectedConfig,
   environment,
   setEnvironment,
   serviceName,
-  setServiceName,
-  serviceNames,
-  serviceNamesStatus,
-  environments,
-  environmentStatus
+  setServiceName
 }: Props) {
+  const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher(
+    () => {
+      return callApmApi({
+        pathname: '/api/apm/settings/agent-configuration/services',
+        forceCache: true
+      });
+    },
+    [],
+    { preservePreviousData: false }
+  );
+  const { data: environments = [], status: environmentStatus } = useFetcher(
+    () => {
+      if (serviceName) {
+        return callApmApi({
+          pathname:
+            '/api/apm/settings/agent-configuration/services/{serviceName}/environments',
+          params: { path: { serviceName } }
+        });
+      }
+    },
+    [serviceName],
+    { preservePreviousData: false }
+  );
+
   const environmentOptions = environments.map(({ name, alreadyExists }) => ({
     disabled: alreadyExists,
     text:

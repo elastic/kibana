@@ -42,23 +42,23 @@ export function AgentConfigurations() {
 
   const hasConfigurations = !isEmpty(data);
 
+  const onClose = () => {
+    setSelectedConfig(null);
+    setIsFlyoutOpen(false);
+  };
+
   return (
     <>
       {isFlyoutOpen && (
         <AddEditFlyout
           selectedConfig={selectedConfig}
-          onClose={() => {
-            setSelectedConfig(null);
-            setIsFlyoutOpen(false);
-          }}
+          onClose={onClose}
           onSaved={() => {
-            setSelectedConfig(null);
-            setIsFlyoutOpen(false);
+            onClose();
             refetch();
           }}
           onDeleted={() => {
-            setSelectedConfig(null);
-            setIsFlyoutOpen(false);
+            onClose();
             refetch();
           }}
         />

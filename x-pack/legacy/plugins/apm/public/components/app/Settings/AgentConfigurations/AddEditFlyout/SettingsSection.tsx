@@ -16,10 +16,9 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { SelectWithPlaceholder } from '../../../../shared/SelectWithPlaceholder';
 const t = (id: string, defaultMessage: string) =>
-  i18n.translate(
-    `xpack.apm.settings.agentConf.flyOut.ConfigurationSection.${id}`,
-    { defaultMessage }
-  );
+  i18n.translate(`xpack.apm.settings.agentConf.flyOut.settingsSection.${id}`, {
+    defaultMessage
+  });
 
 interface ConfigOption {
   value: string;
@@ -33,7 +32,7 @@ interface Props {
   transactionMaxSpans: ConfigOption;
 }
 
-export function FlyoutConfigurationSection({
+export function SettingsSection({
   sampleRate,
   captureBody,
   transactionMaxSpans
@@ -41,7 +40,7 @@ export function FlyoutConfigurationSection({
   return (
     <>
       <EuiTitle size="xs">
-        <h3>{t('title', 'Configuration')}</h3>
+        <h3>{t('title', 'Settings')}</h3>
       </EuiTitle>
 
       <EuiSpacer size="m" />

@@ -25,13 +25,12 @@ import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { isRight } from 'fp-ts/lib/Either';
 import { transactionSampleRateRt } from '../../../../../../common/runtime_types/transaction_sample_rate_rt';
-import { useFetcher } from '../../../../../hooks/useFetcher';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../../common/environment_filter_values';
 import { callApmApi } from '../../../../../services/rest/callApmApi';
 import { trackEvent } from '../../../../../../../infra/public/hooks/use_track_metric';
 import { Config } from '../index';
-import { FlyoutConfigurationSection } from './FlyoutConfigurationSection';
-import { FlyoutServiceSection } from './FlyoutServiceSection';
+import { SettingsSection } from './SettingsSection';
+import { ServiceSection } from './ServiceSection';
 import { DeleteSection } from './DeleteSection';
 import { transactionMaxSpansRt } from '../../../../../../common/runtime_types/transaction_max_spans_rt';
 const t = (id: string, defaultMessage: string, values?: Record<string, any>) =>
@@ -55,7 +54,7 @@ export function AddEditFlyout({
 }: Props) {
   const [isSaving, setIsSaving] = useState(false);
 
-  // config conditions
+  // config conditions (servie)
   const [serviceName, setServiceName] = useState<string>(
     selectedConfig ? selectedConfig.service.name : ''
   );
@@ -78,30 +77,6 @@ export function AddEditFlyout({
     (
       idx(selectedConfig, _ => _.settings.transaction_max_spans) || ''
     ).toString()
-  );
-
-  const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher(
-    () => {
-      return callApmApi({
-        pathname: '/api/apm/settings/agent-configuration/services',
-        forceCache: true
-      });
-    },
-    [],
-    { preservePreviousData: false }
-  );
-  const { data: environments = [], status: environmentStatus } = useFetcher(
-    () => {
-      if (serviceName) {
-        return callApmApi({
-          pathname:
-            '/api/apm/settings/agent-configuration/services/{serviceName}/environments',
-          params: { path: { serviceName } }
-        });
-      }
-    },
-    [serviceName],
-    { preservePreviousData: false }
   );
 
   const isSampleRateValid = isRight(transactionSampleRateRt.decode(sampleRate));
@@ -170,21 +145,17 @@ export function AddEditFlyout({
                 }
               }}
             >
-              <FlyoutServiceSection
+              <ServiceSection
                 selectedConfig={selectedConfig}
                 environment={environment}
                 setEnvironment={setEnvironment}
                 serviceName={serviceName}
                 setServiceName={setServiceName}
-                serviceNames={serviceNames}
-                serviceNamesStatus={serviceNamesStatus}
-                environments={environments}
-                environmentStatus={environmentStatus}
               />
 
               <EuiSpacer />
 
-              <FlyoutConfigurationSection
+              <SettingsSection
                 sampleRate={{
                   value: sampleRate,
                   set: setSampleRate,
