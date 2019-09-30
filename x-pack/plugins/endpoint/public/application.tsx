@@ -25,11 +25,11 @@ import {
 import { AppMountContext, AppMountParameters } from 'kibana/public';
 
 const Home = () => (
-  <EuiPageBody data-test-subj="fooAppHome">
+  <EuiPageBody>
     <EuiPageHeader>
       <EuiPageHeaderSection>
         <EuiTitle size="l">
-          <h1>Welcome to Foo!</h1>
+          <h1>Welcome to Endpoint!</h1>
         </EuiTitle>
       </EuiPageHeaderSection>
     </EuiPageHeader>
@@ -37,11 +37,11 @@ const Home = () => (
       <EuiPageContentHeader>
         <EuiPageContentHeaderSection>
           <EuiTitle>
-            <h2>Bar home page section title</h2>
+            <h2>Home Page</h2>
           </EuiTitle>
         </EuiPageContentHeaderSection>
       </EuiPageContentHeader>
-      <EuiPageContentBody>Wow what a home page this is!</EuiPageContentBody>
+      <EuiPageContentBody>Body Content</EuiPageContentBody>
     </EuiPageContent>
   </EuiPageBody>
 );
