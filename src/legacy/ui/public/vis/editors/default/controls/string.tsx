@@ -39,6 +39,7 @@ function StringParamEditor({
 
   return (
     <EuiFormRow
+      className="visEditorAggParam__string"
       label={aggParam.displayName || aggParam.name}
       fullWidth={true}
       compressed

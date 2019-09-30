@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SectionError } from './section_error';
+export { SectionError, Error } from './section_error';
 export { SectionLoading } from './section_loading';
 export { NoMatch } from './no_match';
 export { PageErrorForbidden } from './page_error';

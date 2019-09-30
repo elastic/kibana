@@ -407,15 +407,21 @@ export interface HttpErrorRequest {
     // (undocumented)
     error: Error;
     // (undocumented)
-    request?: Request;
+    request: Request;
 }
 
 // @public (undocumented)
-export interface HttpErrorResponse extends HttpResponse {
+export interface HttpErrorResponse {
+    // (undocumented)
+    body?: HttpBody;
     // Warning: (ae-forgotten-export) The symbol "HttpFetchError" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
     error: Error | HttpFetchError;
+    // (undocumented)
+    request?: Request;
+    // (undocumented)
+    response?: Response;
 }
 
 // @public (undocumented)
@@ -443,10 +449,18 @@ export interface HttpHeadersInit {
     [name: string]: any;
 }
 
+// Warning: (ae-missing-release-tag) "HttpInterceptController" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export class HttpInterceptController {
+    // (undocumented)
+    halt(): void;
+    // (undocumented)
+    readonly halted: boolean;
+    }
+
 // @public (undocumented)
 export interface HttpInterceptor {
-    // Warning: (ae-forgotten-export) The symbol "HttpInterceptController" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     request?(request: Request, controller: HttpInterceptController): Promise<Request> | Request | void;
     // (undocumented)
@@ -492,7 +506,7 @@ export interface HttpResponse {
     // (undocumented)
     body?: HttpBody;
     // (undocumented)
-    request: Request;
+    request?: Request;
     // (undocumented)
     response?: Response;
 }
