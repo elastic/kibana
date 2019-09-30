@@ -19,8 +19,6 @@
 
 import { cloneDeep } from 'lodash';
 import { IKey } from 'selenium-webdriver';
-import request from 'request';
-
 import Jimp, { Bitmap } from 'jimp';
 import { modifyUrl } from '../../../src/core/utils';
 import { WebElementWrapper } from './lib/web_element_wrapper';
@@ -31,6 +29,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
   const { driver, Key, LegacyActionSequence, browserType } = await getService(
     '__webdriver__'
   ).init();
+  const log = getService('log');
 
   const isW3CEnabled = (driver as any).executor_.w3c === true;
 

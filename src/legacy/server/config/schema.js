@@ -173,7 +173,7 @@ export default () => Joi.object({
     watchPort: Joi.number().default(5602),
     watchHost: Joi.string().hostname().default('localhost'),
     watchPrebuild: Joi.boolean().default(false),
-    watchProxyTimeout: Joi.number().default(10 * 60000),
+    watchProxyTimeout: Joi.number().default(5 * 60000),
     useBundleCache: Joi.boolean().default(Joi.ref('$prod')),
     sourceMaps: Joi.when('$prod', {
       is: true,

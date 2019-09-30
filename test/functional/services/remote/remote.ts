@@ -23,7 +23,6 @@ import { resolve } from 'path';
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { logging } from 'selenium-webdriver';
-import del from 'del';
 // @ts-ignore
 import mkdirp from 'mkdirp';
 
@@ -59,8 +58,8 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     log.info(
       `Chromedriver version: ${caps.get('chrome').chromedriverVersion}, w3c=${isW3CEnabled}`
     );
-
-    del.sync(coverageDir);
+    // We are running xpack tests with different configs and cleanup will delete collected coverage
+    // del.sync(coverageDir);
     mkdirp.sync(coverageDir);
 
     logSubscription = pollForLogEntry$(
