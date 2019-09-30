@@ -19,7 +19,6 @@
 
 import expect from '@kbn/expect';
 
-// @ts-ignore
 import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
 // @ts-ignore
 import { pkg } from '../../../utils';
