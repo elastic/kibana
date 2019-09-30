@@ -131,6 +131,13 @@
         ],
       },
       {
+        groupSlug: 'moment',
+        groupName: 'moment related packages',
+        packagePatterns: [
+          '(\\b|_)moment(\\b|_)',
+        ],
+      },
+      {
         groupSlug: 'graphql',
         groupName: 'graphql related packages',
         packagePatterns: [
@@ -466,14 +473,6 @@
         ],
       },
       {
-        groupSlug: 'moment-timezone',
-        groupName: 'moment-timezone related packages',
-        packageNames: [
-          'moment-timezone',
-          '@types/moment-timezone',
-        ],
-      },
-      {
         groupSlug: 'mustache',
         groupName: 'mustache related packages',
         packageNames: [
@@ -495,6 +494,14 @@
         packageNames: [
           'opn',
           '@types/opn',
+        ],
+      },
+      {
+        groupSlug: 'pngjs',
+        groupName: 'pngjs related packages',
+        packageNames: [
+          'pngjs',
+          '@types/pngjs',
         ],
       },
       {
@@ -719,14 +726,6 @@
         packageNames: [
           'papaparse',
           '@types/papaparse',
-        ],
-      },
-      {
-        groupSlug: 'pngjs',
-        groupName: 'pngjs related packages',
-        packageNames: [
-          'pngjs',
-          '@types/pngjs',
         ],
       },
       {
