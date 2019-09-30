@@ -96,6 +96,7 @@ export class ConsoleMenu extends Component<Props, State> {
       <EuiButtonIcon
         iconType="wrench"
         onClick={this.onButtonClick}
+        data-test-subj="toggleConsoleMenu"
         // @ts-ignore
         aria-label={
           <FormattedMessage
@@ -123,6 +124,7 @@ export class ConsoleMenu extends Component<Props, State> {
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="Open documentation"
+        data-test-subj="consoleMenuOpenDocs"
         onClick={() => {
           this.openDocs();
         }}
@@ -132,7 +134,11 @@ export class ConsoleMenu extends Component<Props, State> {
           defaultMessage="Open documentation"
         />
       </EuiContextMenuItem>,
-      <EuiContextMenuItem key="Auto indent" onClick={this.autoIndent}>
+      <EuiContextMenuItem
+        data-test-subj="consoleMenuAutoIndent"
+        key="Auto indent"
+        onClick={this.autoIndent}
+      >
         <FormattedMessage
           id="console.requestOptions.autoIndentButtonLabel"
           defaultMessage="Auto indent"

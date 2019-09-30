@@ -98,7 +98,7 @@ function Component({ onEditorReady, docLinkVersion, sendCurrentRequest = () => {
           >
             <button
               onClick={sendCurrentRequest}
-              data-test-subj="send-request-button"
+              data-test-subj="sendRequestButton"
               className="conApp__editorActionButton conApp__editorActionButton--success"
             >
               <EuiIcon type="play" />
