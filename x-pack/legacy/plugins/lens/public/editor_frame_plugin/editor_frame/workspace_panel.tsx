@@ -17,6 +17,11 @@ import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { buildExpression } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
 
+const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
+const emptyStateGraphicURL = IS_DARK_THEME
+  ? '/plugins/lens/assets/lens_app_graphic_dark_2x.png'
+  : '/plugins/lens/assets/lens_app_graphic_light_2x.png';
+
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
   visualizationMap: Record<string, Visualization>;
@@ -95,11 +100,7 @@ export function InnerWorkspacePanel({
             defaultMessage="Build a visualization"
           />
         </h3>
-        <EuiImage
-          style={{ width: 360 }}
-          url={chrome.addBasePath('/plugins/lens/assets/lens_app_graphic_2x.png')}
-          alt=""
-        />
+        <EuiImage style={{ width: 360 }} url={chrome.addBasePath(emptyStateGraphicURL)} alt="" />
         <p>
           <FormattedMessage
             id="xpack.lens.editorFrame.emptyWorkspace"
