@@ -119,7 +119,8 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
     if (onInit) {
       // In case the visualization implementation has an isLoaded function, we
       // call that and wait for the result to resolve (in case it was a promise).
-      const visLoaded = this.visualization.isLoaded && this.visualization.isLoaded();
+      const visLoaded =
+        this.visualization && this.visualization.isLoaded && this.visualization.isLoaded();
       Promise.resolve(visLoaded).then(onInit);
     }
 
