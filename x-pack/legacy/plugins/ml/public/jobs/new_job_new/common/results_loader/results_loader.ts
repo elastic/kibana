@@ -6,15 +6,9 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { parseInterval } from 'ui/utils/parse_interval';
-import {
-  SingleMetricJobCreator,
-  MultiMetricJobCreator,
-  isMultiMetricJobCreator,
-  PopulationJobCreator,
-  isPopulationJobCreator,
-} from '../job_creator';
+import { JobCreatorType, isMultiMetricJobCreator } from '../job_creator';
 import { mlResultsService, ModelPlotOutputResults } from '../../../../services/results_service';
-import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
+import { TimeBuckets } from '../../../../util/time_buckets';
 import { getSeverityType } from '../../../../../common/util/anomaly_utils';
 import { ANOMALY_SEVERITY } from '../../../../../common/constants/anomalies';
 import { getScoresByRecord } from './searches';
@@ -57,13 +51,11 @@ const LAST_UPDATE_DELAY_MS = 500;
 
 export type ResultsSubscriber = (results: Results) => void;
 
-type AnyJobCreator = SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator;
-
 export class ResultsLoader {
   private _results$: BehaviorSubject<Results>;
   private _resultsSearchRunning = false;
-  private _jobCreator: AnyJobCreator;
-  private _chartInterval: MlTimeBuckets;
+  private _jobCreator: JobCreatorType;
+  private _chartInterval: TimeBuckets;
   private _lastModelTimeStamp: number = 0;
   private _lastResultsTimeout: any = null;
   private _chartLoader: ChartLoader;
@@ -77,7 +69,7 @@ export class ResultsLoader {
   private _detectorSplitFieldFilters: SplitFieldWithValue | null = null;
   private _splitFieldFiltersLoaded: boolean = false;
 
-  constructor(jobCreator: AnyJobCreator, chartInterval: MlTimeBuckets, chartLoader: ChartLoader) {
+  constructor(jobCreator: JobCreatorType, chartInterval: TimeBuckets, chartLoader: ChartLoader) {
     this._jobCreator = jobCreator;
     this._chartInterval = chartInterval;
     this._results$ = new BehaviorSubject(this._results);
@@ -249,7 +241,11 @@ export class ResultsLoader {
   }
 
   private async _populateDetectorSplitFieldFilters() {
-    if (isMultiMetricJobCreator(this._jobCreator) || isPopulationJobCreator(this._jobCreator)) {
+    // only apply a split filter for multi-metric jobs
+    // for population jobs, the swimlane will not be 100% accurate as it's not
+    // filtering for the front card. this is a trade off to save loading
+    // lots of data.
+    if (isMultiMetricJobCreator(this._jobCreator)) {
       if (this._jobCreator.splitField !== null) {
         const fieldValues = await this._chartLoader.loadFieldExampleValues(
           this._jobCreator.splitField

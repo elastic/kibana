@@ -13,7 +13,6 @@ import { searchConfigurations } from '../lib/settings/agent_configuration/search
 import { listConfigurations } from '../lib/settings/agent_configuration/list_configurations';
 import { getEnvironments } from '../lib/settings/agent_configuration/get_environments';
 import { deleteConfiguration } from '../lib/settings/agent_configuration/delete_configuration';
-import { createApmAgentConfigurationIndex } from '../lib/settings/agent_configuration/create_agent_config_index';
 import { createRoute } from './create_route';
 import { transactionSampleRateRt } from '../../common/runtime_types/transaction_sample_rate_rt';
 
@@ -21,12 +20,8 @@ import { transactionSampleRateRt } from '../../common/runtime_types/transaction_
 export const agentConfigurationRoute = createRoute(core => ({
   path: '/api/apm/settings/agent-configuration',
   handler: async req => {
-    await createApmAgentConfigurationIndex(core.http.server);
-
     const setup = await setupRequest(req);
-    return await listConfigurations({
-      setup
-    });
+    return await listConfigurations({ setup });
   }
 }));
 
@@ -131,6 +126,7 @@ export const updateAgentConfigurationRoute = createRoute(() => ({
 
 // Lookup single configuration
 export const agentConfigurationSearchRoute = createRoute(core => ({
+  method: 'POST',
   path: '/api/apm/settings/agent-configuration/search',
   params: {
     body: t.type({
@@ -141,11 +137,7 @@ export const agentConfigurationSearchRoute = createRoute(core => ({
     })
   },
   handler: async (req, { body }, h) => {
-    const [setup] = await Promise.all([
-      setupRequest(req),
-      createApmAgentConfigurationIndex(core.http.server)
-    ]);
-
+    const setup = await setupRequest(req);
     const config = await searchConfigurations({
       serviceName: body.service.name,
       environment: body.service.environment,

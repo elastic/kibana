@@ -159,6 +159,8 @@ export interface InfraIndexField {
   searchable: boolean;
   /** Whether the field's values can be aggregated */
   aggregatable: boolean;
+  /** Whether the field should be displayed based on event.module and a ECS allowed list */
+  displayable: boolean;
 }
 /** A consecutive sequence of log entries */
 export interface InfraLogEntryInterval {
@@ -334,6 +336,8 @@ export interface InfraMetricData {
 
 export interface InfraDataSeries {
   id: string;
+
+  label: string;
 
   data: InfraDataPoint[];
 }
@@ -600,6 +604,10 @@ export enum InfraMetric {
   hostLoad = 'hostLoad',
   hostMemoryUsage = 'hostMemoryUsage',
   hostNetworkTraffic = 'hostNetworkTraffic',
+  hostDockerOverview = 'hostDockerOverview',
+  hostDockerInfo = 'hostDockerInfo',
+  hostDockerTop5ByCpu = 'hostDockerTop5ByCpu',
+  hostDockerTop5ByMemory = 'hostDockerTop5ByMemory',
   podOverview = 'podOverview',
   podCpuUsage = 'podCpuUsage',
   podMemoryUsage = 'podMemoryUsage',
@@ -1123,6 +1131,8 @@ export namespace InfraIndexFieldResolvers {
     searchable?: SearchableResolver<boolean, TypeParent, Context>;
     /** Whether the field's values can be aggregated */
     aggregatable?: AggregatableResolver<boolean, TypeParent, Context>;
+    /** Whether the field should be displayed based on event.module and a ECS allowed list */
+    displayable?: DisplayableResolver<boolean, TypeParent, Context>;
   }
 
   export type NameResolver<R = string, Parent = InfraIndexField, Context = InfraContext> = Resolver<
@@ -1141,6 +1151,11 @@ export namespace InfraIndexFieldResolvers {
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
   export type AggregatableResolver<
+    R = boolean,
+    Parent = InfraIndexField,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type DisplayableResolver<
     R = boolean,
     Parent = InfraIndexField,
     Context = InfraContext
@@ -1684,6 +1699,8 @@ export namespace InfraDataSeriesResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraDataSeries> {
     id?: IdResolver<string, TypeParent, Context>;
 
+    label?: LabelResolver<string, TypeParent, Context>;
+
     data?: DataResolver<InfraDataPoint[], TypeParent, Context>;
   }
 
@@ -1692,6 +1709,11 @@ export namespace InfraDataSeriesResolvers {
     Parent,
     Context
   >;
+  export type LabelResolver<
+    R = string,
+    Parent = InfraDataSeries,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
   export type DataResolver<
     R = InfraDataPoint[],
     Parent = InfraDataSeries,

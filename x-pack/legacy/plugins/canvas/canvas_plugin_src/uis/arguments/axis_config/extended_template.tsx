@@ -6,7 +6,7 @@
 
 import React, { Fragment, ChangeEvent, PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { EuiSelect, EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiSelect, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import { ExpressionAST } from '../../../../types';
@@ -82,9 +82,15 @@ export class ExtendedTemplate extends PureComponent<Props> {
 
     return (
       <Fragment>
-        <EuiFormRow label="Position" compressed>
-          <EuiSelect value={position} options={options} onChange={this.setArgValue('position')} />
+        <EuiFormRow label="Position" display="rowCompressed">
+          <EuiSelect
+            compressed
+            value={position}
+            options={options}
+            onChange={this.setArgValue('position')}
+          />
         </EuiFormRow>
+        <EuiSpacer size="s" />
       </Fragment>
     );
   }

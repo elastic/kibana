@@ -12,7 +12,9 @@ import first from 'lodash/fp/first';
 import get from 'lodash/fp/get';
 import has from 'lodash/fp/has';
 import zip from 'lodash/fp/zip';
-
+import { pipe } from 'fp-ts/lib/pipeable';
+import { map, fold } from 'fp-ts/lib/Either';
+import { identity, constant } from 'fp-ts/lib/function';
 import { compareTimeKeys, isTimeKey, TimeKey } from '../../../../common/time';
 import { JsonObject } from '../../../../common/typed_json';
 import {
@@ -165,13 +167,15 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
 
     const response = await this.framework.callWithRequest<any, {}>(request, 'search', query);
 
-    return LogSummaryResponseRuntimeType.decode(response)
-      .map(logSummaryResponse =>
+    return pipe(
+      LogSummaryResponseRuntimeType.decode(response),
+      map(logSummaryResponse =>
         logSummaryResponse.aggregations.count_by_date.buckets.map(
           convertDateRangeBucketToSummaryBucket
         )
-      )
-      .getOrElse([]);
+      ),
+      fold(constant([]), identity)
+    );
   }
 
   public async getLogItem(

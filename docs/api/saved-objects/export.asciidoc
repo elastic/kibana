@@ -1,33 +1,45 @@
 [[saved-objects-api-export]]
-=== Export Objects
+=== Export objects API
+++++
+<titleabbrev>Export objects</titleabbrev>
+++++
 
-beta[This functionality is *beta*. It's on track to become a stable, permanent feature of {kib}. Caution should be exercised because it is possible a breaking change to these APIs will occur in a minor version, but we’ll avoid this wherever possible. ]
+experimental[] Retrieve a set of saved objects that you want to import into {kib}.
 
-The export saved objects API enables you to retrieve a set of saved objects that can later be imported into Kibana.
-
-Note: You cannot access this endpoint via the Console in Kibana.
-
+[[saved-objects-api-export-request]]
 ==== Request
 
 `POST /api/saved_objects/_export`
 
-==== Request Body
-`type` (optional)::
-  (array|string) The saved object type(s) that the export should be limited to
-`objects` (optional)::
-  (array) A list of objects to export
-`includeReferencesDeep` (optional)::
-  (boolean) This will make the exported objects include all the referenced objects needed
+[[saved-objects-api-export-request-request-body]]
+==== Request body
 
-Note: At least `type` or `objects` must be passed in.
+`type`::
+  (Optional, array|string) The saved object types to include in the export.
+  
+`objects`::
+  (Optional, array) A list of objects to export.
+  
+`includeReferencesDeep`::
+  (Optional, boolean) Includes all of the referenced objects in the exported objects.
 
+TIP: You must include `type` or `objects` in the request body.
+
+[[saved-objects-api-export-request-response-body]]
 ==== Response body
 
-The response body will have a format of newline delimited JSON.
+The format of the response body includes newline delimited JSON.
 
+[[export-objects-api-create-request-codes]]
+==== Response code
+
+`200`:: 
+    Indicates a successful call.
+
+[[ssaved-objects-api-create-example]]
 ==== Examples
 
-The following example exports all index pattern saved objects.
+Export all index pattern saved objects:
 
 [source,js]
 --------------------------------------------------
@@ -38,9 +50,7 @@ POST api/saved_objects/_export
 --------------------------------------------------
 // KIBANA
 
-A successful call returns a response code of `200` along with the exported objects as the response body.
-
-The following example exports specific saved objects.
+Export a specific saved object:
 
 [source,js]
 --------------------------------------------------

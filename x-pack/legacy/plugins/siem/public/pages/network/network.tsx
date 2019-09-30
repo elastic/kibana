@@ -12,6 +12,7 @@ import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 
 import { ActionCreator } from 'typescript-fsa';
+import { RouteComponentProps } from 'react-router-dom';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
@@ -35,6 +36,7 @@ import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from
 import { InputsModelId } from '../../store/inputs/constants';
 import { EmbeddedMap } from '../../components/embeddables/embedded_map';
 import { NetworkFilter } from '../../containers/network';
+import { SpyRoute } from '../../utils/route/spy_routes';
 
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
@@ -49,7 +51,7 @@ interface NetworkComponentReduxProps {
   }>;
 }
 
-type NetworkComponentProps = NetworkComponentReduxProps;
+type NetworkComponentProps = NetworkComponentReduxProps & Partial<RouteComponentProps<{}>>;
 const mediaMatch = window.matchMedia(
   'screen and (min-width: ' + euiLightVars.euiBreakpoints.xl + ')'
 );
@@ -73,24 +75,28 @@ export const getFlexDirection = () => {
 };
 
 const NetworkComponent = React.memo<NetworkComponentProps>(
-  ({ filterQuery, queryExpression, setAbsoluteRangeDatePicker }) => {
-    return (
+  ({ filterQuery, queryExpression, setAbsoluteRangeDatePicker }) => (
+    <>
       <WithSource sourceId="default">
         {({ indicesExist, indexPattern }) =>
           indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
             <StickyContainer>
-              <FiltersGlobal>
-                <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.page} />
-              </FiltersGlobal>
-
-              <HeaderPage
-                subtitle={<LastEventTime indexKey={LastEventIndexKey.network} />}
-                title={i18n.PAGE_TITLE}
-              />
-
               <GlobalTime>
                 {({ to, from, setQuery, isInitializing }) => (
                   <>
+                    <FiltersGlobal>
+                      <NetworkKql
+                        indexPattern={indexPattern}
+                        setQuery={setQuery}
+                        type={networkModel.NetworkType.page}
+                      />
+                    </FiltersGlobal>
+
+                    <HeaderPage
+                      subtitle={<LastEventTime indexKey={LastEventIndexKey.network} />}
+                      title={i18n.PAGE_TITLE}
+                    />
+
                     <NetworkFilter indexPattern={indexPattern} type={networkModel.NetworkType.page}>
                       {({ applyFilterQueryFromKueryExpression }) => (
                         <EmbeddedMap
@@ -120,9 +126,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                           from={from}
                           to={to}
                           narrowDateRange={(min: number, max: number) => {
-                            setTimeout(() => {
-                              setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-                            }, 500);
+                            setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
                           }}
                         />
                       )}
@@ -144,6 +148,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                           {({
                             id,
                             inspect,
+                            isInspected,
                             loading,
                             loadPage,
                             networkTopNFlow,
@@ -158,6 +163,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                               id={id}
                               indexPattern={indexPattern}
                               inspect={inspect}
+                              isInspect={isInspected}
                               loading={loading}
                               loadPage={loadPage}
                               refetch={refetch}
@@ -187,6 +193,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                           {({
                             id,
                             inspect,
+                            isInspected,
                             loading,
                             loadPage,
                             networkTopNFlow,
@@ -201,6 +208,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                               id={id}
                               indexPattern={indexPattern}
                               inspect={inspect}
+                              isInspect={isInspected}
                               loading={loading}
                               loadPage={loadPage}
                               refetch={refetch}
@@ -236,6 +244,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                         loadPage,
                         id,
                         inspect,
+                        isInspected,
                         refetch,
                       }) => (
                         <NetworkDnsTableManage
@@ -243,6 +252,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                           fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                           id={id}
                           inspect={inspect}
+                          isInspect={isInspected}
                           loading={loading}
                           loadPage={loadPage}
                           refetch={refetch}
@@ -277,14 +287,14 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
           ) : (
             <>
               <HeaderPage title={i18n.PAGE_TITLE} />
-
               <NetworkEmptyPage />
             </>
           )
         }
       </WithSource>
-    );
-  }
+      <SpyRoute />
+    </>
+  )
 );
 
 NetworkComponent.displayName = 'NetworkComponent';

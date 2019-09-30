@@ -32,7 +32,6 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
       <EuiCallOut
         color="warning"
         iconType="help"
-        size="m"
         title={
           <FormattedMessage
             defaultMessage="Index Pattern Conflicts"
@@ -129,11 +128,8 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
-          color="primary"
-          iconSide="left"
           onClick={[MockFunction]}
           size="s"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Cancel"
@@ -146,14 +142,11 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="importSavedObjectsConfirmBtn"
           fill={true}
-          iconSide="left"
           isLoading={false}
           onClick={[Function]}
           size="s"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Confirm all changes"
@@ -248,7 +241,6 @@ exports[`Flyout conflicts should handle errors 1`] = `
 <EuiCallOut
   color="warning"
   iconType="help"
-  size="m"
   title={
     <FormattedMessage
       defaultMessage="Import failed"
@@ -277,7 +269,6 @@ exports[`Flyout errors should display unsupported type errors properly 1`] = `
 <EuiCallOut
   color="warning"
   iconType="help"
-  size="m"
   title={
     <FormattedMessage
       defaultMessage="Import failed"
@@ -336,7 +327,6 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
       <EuiCallOut
         color="warning"
         iconType="help"
-        size="m"
         title={
           <FormattedMessage
             defaultMessage="Support for JSON files is going away"
@@ -361,7 +351,6 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
       <EuiCallOut
         color="warning"
         iconType="help"
-        size="m"
         title={
           <FormattedMessage
             defaultMessage="Index Pattern Conflicts"
@@ -469,11 +458,8 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
-          color="primary"
-          iconSide="left"
           onClick={[MockFunction]}
           size="s"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Cancel"
@@ -486,14 +472,11 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="importSavedObjectsConfirmBtn"
           fill={true}
-          iconSide="left"
           isLoading={false}
           onClick={[Function]}
           size="s"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Confirm all changes"
@@ -512,7 +495,6 @@ Array [
   <EuiCallOut
     color="warning"
     iconType="help"
-    size="m"
     title={
       <FormattedMessage
         defaultMessage="Support for JSON files is going away"
@@ -532,7 +514,6 @@ Array [
   <EuiCallOut
     color="warning"
     iconType="help"
-    size="m"
     title={
       <FormattedMessage
         defaultMessage="Index Pattern Conflicts"
@@ -565,7 +546,6 @@ Array [
   </EuiCallOut>,
   <EuiCallOut
     color="danger"
-    size="m"
     title={
       <FormattedMessage
         defaultMessage="Sorry, there was an error"
@@ -609,6 +589,7 @@ exports[`Flyout should render import step 1`] = `
     <EuiForm>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={
@@ -635,6 +616,7 @@ exports[`Flyout should render import step 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         labelType="label"
@@ -663,11 +645,8 @@ exports[`Flyout should render import step 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
-          color="primary"
-          iconSide="left"
           onClick={[MockFunction]}
           size="s"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Cancel"
@@ -680,14 +659,11 @@ exports[`Flyout should render import step 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="importSavedObjectsImportBtn"
           fill={true}
-          iconSide="left"
           isLoading={false}
           onClick={[Function]}
           size="s"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Import"

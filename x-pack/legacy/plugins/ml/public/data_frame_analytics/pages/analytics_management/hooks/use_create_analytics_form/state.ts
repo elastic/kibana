@@ -32,6 +32,7 @@ export interface State {
     jobId: DataFrameAnalyticsId;
     jobIdExists: boolean;
     jobIdEmpty: boolean;
+    jobIdInvalidMaxLength: boolean;
     jobIdValid: boolean;
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
@@ -65,6 +66,7 @@ export const getInitialState = (): State => ({
     jobId: '',
     jobIdExists: false,
     jobIdEmpty: true,
+    jobIdInvalidMaxLength: false,
     jobIdValid: false,
     sourceIndex: '',
     sourceIndexNameEmpty: true,
@@ -92,7 +94,12 @@ export const getJobConfigFromFormState = (
 ): DeepPartial<DataFrameAnalyticsConfig> => {
   return {
     source: {
-      index: formState.sourceIndex,
+      // If a Kibana index patterns includes commas, we need to split
+      // the into an array of indices to be in the correct format for
+      // the data frame analytics API.
+      index: formState.sourceIndex.includes(',')
+        ? formState.sourceIndex.split(',').map(d => d.trim())
+        : formState.sourceIndex,
     },
     dest: {
       index: formState.destinationIndex,

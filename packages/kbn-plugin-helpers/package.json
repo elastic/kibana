@@ -16,7 +16,7 @@
     "@babel/core": "^7.5.5",
     "argv-split": "^2.0.1",
     "commander": "^3.0.0",
-    "del": "^4.0.0",
+    "del": "^4.1.1",
     "execa": "^1.0.0",
     "globby": "^8.0.1",
     "gulp-babel": "^8.0.0",
@@ -27,6 +27,6 @@
     "node-sass": "^4.9.4",
     "through2": "^2.0.3",
     "through2-map": "^3.0.0",
-    "vinyl-fs": "^3.0.0"
+    "vinyl-fs": "^3.0.3"
   }
 }

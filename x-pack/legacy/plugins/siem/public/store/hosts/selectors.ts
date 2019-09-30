@@ -10,7 +10,7 @@ import { createSelector } from 'reselect';
 import { isFromKueryExpressionValid } from '../../lib/keury';
 import { State } from '../reducer';
 
-import { GenericHostsModel, HostsType } from './model';
+import { GenericHostsModel, HostsType, HostsTableType } from './model';
 
 const selectHosts = (state: State, hostsType: HostsType): GenericHostsModel =>
   get(hostsType, state.hosts);
@@ -24,7 +24,7 @@ export const authenticationsSelector = () =>
 export const hostsSelector = () =>
   createSelector(
     selectHosts,
-    hosts => hosts.queries.hosts
+    hosts => hosts.queries[HostsTableType.hosts]
   );
 
 export const eventsSelector = () =>

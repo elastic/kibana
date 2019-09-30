@@ -26,17 +26,12 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 import { VisProvider } from 'ui/vis';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { createTableVisTypeDefinition } from '../../table_vis_type';
-import { visualizations } from '../../../../visualizations/public';
-
 describe('Table Vis - AggTableGroup Directive', function () {
   let $rootScope;
   let $compile;
   let Vis;
   let indexPattern;
   let tableAggResponse;
-  let legacyDependencies;
   const tabifiedData = {};
 
   const init = () => {
@@ -49,8 +44,8 @@ describe('Table Vis - AggTableGroup Directive', function () {
         { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
         { type: 'terms', schema: 'split', params: { field: 'extension' } },
         { type: 'terms', schema: 'segment', params: { field: 'geo.src' } },
-        { type: 'terms', schema: 'segment', params: { field: 'machine.os' } }
-      ]
+        { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
+      ],
     });
     vis2.aggs.aggs.forEach(function (agg, i) {
       agg.id = 'agg_' + (i + 1);
@@ -59,25 +54,29 @@ describe('Table Vis - AggTableGroup Directive', function () {
   };
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($injector, Private) {
-    legacyDependencies = {
-      // eslint-disable-next-line new-cap
-      createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization
-    };
+  beforeEach(
+    ngMock.inject(function ($injector, Private) {
+      // this is provided in table_vis_controller.js
+      // tech debt that will be resolved through further deangularization and moving tests to jest
+      /*
+      legacyDependencies = {
+        // eslint-disable-next-line new-cap
+        createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
+      };
 
-    visualizations.types.VisTypesRegistryProvider.register(() =>
-      createTableVisTypeDefinition(legacyDependencies)
-    );
+      visualizationsSetup.types.registerVisualization(() => createTableVisTypeDefinition(legacyDependencies));
+      */
 
-    tableAggResponse = legacyResponseHandlerProvider().handler;
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    Vis = Private(VisProvider);
+      tableAggResponse = legacyResponseHandlerProvider().handler;
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      Vis = Private(VisProvider);
 
-    $rootScope = $injector.get('$rootScope');
-    $compile = $injector.get('$compile');
+      $rootScope = $injector.get('$rootScope');
+      $compile = $injector.get('$compile');
 
-    init();
-  }));
+      init();
+    })
+  );
 
   let $scope;
   beforeEach(function () {
@@ -88,13 +87,18 @@ describe('Table Vis - AggTableGroup Directive', function () {
   });
 
   it('renders a simple split response properly', async function () {
-    $scope.dimensions = { metrics: [{ accessor: 0, format: { id: 'number' }, params: {} }], buckets: [] };
+    $scope.dimensions = {
+      metrics: [{ accessor: 0, format: { id: 'number' }, params: {} }],
+      buckets: [],
+    };
     $scope.group = await tableAggResponse(tabifiedData.metricOnly, $scope.dimensions);
     $scope.sort = {
       columnIndex: null,
-      direction: null
+      direction: null,
     };
-    const $el = $('<kbn-agg-table-group dimensions="dimensions" group="group"></kbn-agg-table-group>');
+    const $el = $(
+      '<kbn-agg-table-group dimensions="dimensions" group="group"></kbn-agg-table-group>'
+    );
 
     $compile($el)($scope);
     $scope.$digest();
@@ -104,10 +108,12 @@ describe('Table Vis - AggTableGroup Directive', function () {
   });
 
   it('renders nothing if the table list is empty', function () {
-    const $el = $('<kbn-agg-table-group dimensions="dimensions" group="group"></kbn-agg-table-group>');
+    const $el = $(
+      '<kbn-agg-table-group dimensions="dimensions" group="group"></kbn-agg-table-group>'
+    );
 
     $scope.group = {
-      tables: []
+      tables: [],
     };
 
     $compile($el)($scope);
@@ -121,10 +127,19 @@ describe('Table Vis - AggTableGroup Directive', function () {
     $scope.dimensions = {
       splitRow: [{ accessor: 0, params: {} }],
       buckets: [{ accessor: 2, params: {} }, { accessor: 4, params: {} }],
-      metrics: [{ accessor: 1, params: {} }, { accessor: 3, params: {} }, { accessor: 5, params: {} }]
+      metrics: [
+        { accessor: 1, params: {} },
+        { accessor: 3, params: {} },
+        { accessor: 5, params: {} },
+      ],
     };
-    const group = $scope.group = await tableAggResponse(tabifiedData.threeTermBuckets, $scope.dimensions);
-    const $el = $('<kbn-agg-table-group dimensions="dimensions" group="group"></kbn-agg-table-group>');
+    const group = ($scope.group = await tableAggResponse(
+      tabifiedData.threeTermBuckets,
+      $scope.dimensions
+    ));
+    const $el = $(
+      '<kbn-agg-table-group dimensions="dimensions" group="group"></kbn-agg-table-group>'
+    );
     $compile($el)($scope);
     $scope.$digest();
 

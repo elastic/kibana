@@ -18,7 +18,6 @@
  */
 
 import 'ui/registry/field_formats';
-import 'uiExports/autocompleteProviders';
 import 'uiExports/contextMenuActions';
 import 'uiExports/devTools';
 import 'uiExports/docViews';
@@ -33,40 +32,34 @@ import 'uiExports/savedObjectTypes';
 import 'uiExports/search';
 import 'uiExports/shareContextMenuExtensions';
 import 'uiExports/visEditorTypes';
-import 'uiExports/visRequestHandlers';
-import 'uiExports/visResponseHandlers';
 import 'uiExports/visTypes';
 import 'uiExports/visualize';
 
 import { i18n } from '@kbn/i18n';
 
 import { capabilities } from 'ui/capabilities';
-// @ts-ignore
-import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-// @ts-ignore
-import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 
 import chrome from 'ui/chrome';
 import { getVisualizeLoader } from 'ui/visualize/loader';
 
 import { Legacy } from 'kibana';
-import { VisTypesRegistry, VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
-import { IPrivate } from 'ui/private';
 import { SavedObjectAttributes } from 'kibana/server';
+import { npSetup } from 'ui/new_platform';
 import {
   EmbeddableFactory,
   ErrorEmbeddable,
   Container,
   EmbeddableOutput,
-} from '../../../../embeddable_api/public/np_ready/public';
-import { setup } from '../../../../embeddable_api/public/np_ready/public/legacy';
+} from '../../../../../../plugins/embeddable/public';
+import { start as visualizations } from '../../../../visualizations/public/legacy';
 import { showNewVisModal } from '../wizard';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getIndexPattern } from './get_index_pattern';
 import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+import { TypesStart } from '../../../../visualizations/public/np_ready/types';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -79,17 +72,13 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   VisualizationAttributes
 > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
-  private readonly visTypes: VisTypesRegistry;
+  private readonly visTypes: TypesStart;
 
   static async createVisualizeEmbeddableFactory(): Promise<VisualizeEmbeddableFactory> {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get<IPrivate>('Private');
-    const visTypes = Private(VisTypesRegistryProvider);
-
-    return new VisualizeEmbeddableFactory(visTypes);
+    return new VisualizeEmbeddableFactory(visualizations.types);
   }
 
-  constructor(visTypes: VisTypesRegistry) {
+  constructor(visTypes: TypesStart) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('kbn.visualize.savedObjectName', { defaultMessage: 'Visualization' }),
@@ -99,21 +88,23 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
             return 'visualizeApp';
           }
           return (
-            visTypes.byName[JSON.parse(savedObject.attributes.visState).type].icon || 'visualizeApp'
+            visTypes.get(JSON.parse(savedObject.attributes.visState).type).icon || 'visualizeApp'
           );
         },
         getTooltipForSavedObject: savedObject => {
           if (!visTypes) {
             return '';
           }
-          return `${savedObject.attributes.title} (${visTypes.byName[JSON.parse(savedObject.attributes.visState).type].title})`;
+          return `${savedObject.attributes.title} (${
+            visTypes.get(JSON.parse(savedObject.attributes.visState).type).title
+          })`;
         },
         showSavedObject: savedObject => {
           if (!visTypes) {
             return false;
           }
           const typeName: string = JSON.parse(savedObject.attributes.visState).type;
-          const visType = visTypes.byName[typeName];
+          const visType = visTypes.get(typeName);
           if (!visType) {
             return false;
           }
@@ -191,5 +182,8 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
 }
 
 VisualizeEmbeddableFactory.createVisualizeEmbeddableFactory().then(embeddableFactory => {
-  setup.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
+  npSetup.plugins.embeddable.registerEmbeddableFactory(
+    VISUALIZE_EMBEDDABLE_TYPE,
+    embeddableFactory
+  );
 });

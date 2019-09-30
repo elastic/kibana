@@ -24,17 +24,16 @@ import { i18n } from '@kbn/i18n';
 
 import chrome from 'ui/chrome';
 import { VisType } from 'ui/vis';
-import { VisTypeAlias } from 'plugins/visualizations';
 import { VisualizeConstants } from '../visualize_constants';
 
 import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
+import { TypesStart } from '../../../../visualizations/public/np_ready/types';
 
 interface TypeSelectionProps {
   isOpen: boolean;
   onClose: () => void;
-  visTypesRegistry: VisType[];
-  visTypeAliases?: VisTypeAlias[];
+  visTypesRegistry: TypesStart;
   editorParams?: string[];
 }
 
@@ -90,7 +89,6 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
             showExperimental={this.isLabsEnabled}
             onVisTypeSelected={this.onVisTypeSelected}
             visTypesRegistry={this.props.visTypesRegistry}
-            visTypeAliases={this.props.visTypeAliases}
           />
         </EuiModal>
       );

@@ -20,9 +20,9 @@
 import React from 'react';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterRange } from './create_filter/range';
-import { FieldFormat } from '../../../field_formats/field_format';
+import { FieldFormat } from '../../../../../plugins/data/common/field_formats';
 import { RangeKey } from './range_key';
-import { RangesParamEditor } from '../controls/ranges';
+import { RangesParamEditor } from '../../vis/editors/default/controls/ranges';
 import { i18n } from '@kbn/i18n';
 
 const keyCaches = new WeakMap();
@@ -66,12 +66,16 @@ export const rangeBucketAgg = new BucketAggType({
 
     const RangeFormat = FieldFormat.from(function (range) {
       const format = agg.fieldOwnFormatter();
+      const gte = '\u2265';
+      const lt = '\u003c';
       return i18n.translate('common.ui.aggTypes.buckets.ranges.rangesFormatMessage', {
-        defaultMessage: '{from} to {to}',
+        defaultMessage: '{gte} {from} and {lt} {to}',
         values: {
+          gte,
           from: format(range.gte),
-          to: format(range.lt)
-        }
+          lt,
+          to: format(range.lt),
+        },
       });
     });
 

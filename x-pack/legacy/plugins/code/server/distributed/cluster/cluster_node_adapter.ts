@@ -40,8 +40,8 @@ import { ClusterNodeEndpoint } from './cluster_node_endpoint';
  * - serve request locally if the requested resource is on the local node, otherwise reject it
  */
 export class ClusterNodeAdapter implements ServiceHandlerAdapter {
-  private readonly clusterService: ClusterService;
-  private readonly clusterMembershipService: ClusterMembershipService;
+  readonly clusterService: ClusterService;
+  readonly clusterMembershipService: ClusterMembershipService;
   private readonly schedulerService: ResourceSchedulerService;
   private readonly handlers: Map<any, any> = new Map<any, any>();
   // used to forward requests

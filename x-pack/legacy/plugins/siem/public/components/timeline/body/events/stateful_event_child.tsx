@@ -32,6 +32,7 @@ interface Props {
   onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;
   showNotes: boolean;
+  timelineId: string;
   updateNote: UpdateNote;
   onToggleExpanded: (eventId: string) => () => void;
   onToggleShowNotes: (eventId: string) => () => void;
@@ -67,6 +68,7 @@ export const StatefulEventChild = React.memo<Props>(
     onUnPinEvent,
     pinnedEventIds,
     showNotes,
+    timelineId,
     onToggleShowNotes,
     updateNote,
   }) => (
@@ -90,6 +92,7 @@ export const StatefulEventChild = React.memo<Props>(
           onUnPinEvent={onUnPinEvent}
           pinnedEventIds={pinnedEventIds}
           showNotes={showNotes}
+          timelineId={timelineId}
           toggleShowNotes={onToggleShowNotes(id)}
           updateNote={updateNote}
         />

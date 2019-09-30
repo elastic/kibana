@@ -6,7 +6,7 @@
 
 import { ActionsPlugin } from '../../../actions';
 import { ConcreteTaskInstance } from '../../../task_manager';
-import { createFireHandler } from './create_fire_handler';
+import { createExecutionHandler } from './create_execution_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
 import { AlertInstance } from './alert_instance';
 import { getNextRunAt } from './get_next_run_at';
@@ -21,7 +21,7 @@ import {
   SpaceIdToNamespaceFunction,
 } from '../types';
 
-interface CreateTaskRunnerFunctionOptions {
+export interface CreateTaskRunnerFunctionOptions {
   isSecurityEnabled: boolean;
   getServices: GetServicesFunction;
   alertType: AlertType;
@@ -74,7 +74,7 @@ export function getCreateTaskRunnerFunction({
         const services = getServices(fakeRequest);
         // Ensure API key is still valid and user has access
         const {
-          attributes: { alertTypeParams, actions, interval },
+          attributes: { alertTypeParams, actions, interval, throttle, muteAll, mutedInstanceIds },
           references,
         } = await services.savedObjectsClient.get<RawAlert>('alert', alertId);
 
@@ -95,11 +95,14 @@ export function getCreateTaskRunnerFunction({
           };
         });
 
-        const fireHandler = createFireHandler({
+        const executionHandler = createExecutionHandler({
+          alertId,
+          log: services.log,
           executeAction,
           apiKey,
           actions: actionsWithIds,
           spaceId,
+          alertType,
         });
         const alertInstances: Record<string, AlertInstance> = {};
         const alertInstancesData = taskInstance.state.alertInstances || {};
@@ -124,17 +127,18 @@ export function getCreateTaskRunnerFunction({
         await Promise.all(
           Object.keys(alertInstances).map(alertInstanceId => {
             const alertInstance = alertInstances[alertInstanceId];
-
-            // Unpersist any alert instances that were not explicitly fired in this alert execution
-            if (!alertInstance.shouldFire()) {
+            if (alertInstance.hasScheduledActions(throttle)) {
+              if (muteAll || mutedInstanceIds.includes(alertInstanceId)) {
+                return;
+              }
+              const { actionGroup, context, state } = alertInstance.getScheduledActionOptions()!;
+              alertInstance.updateLastScheduledActions(actionGroup);
+              alertInstance.unscheduleActions();
+              return executionHandler({ actionGroup, context, state, alertInstanceId });
+            } else {
+              // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
               delete alertInstances[alertInstanceId];
-              return;
             }
-
-            const { actionGroup, context, state } = alertInstance.getFireOptions()!;
-            alertInstance.replaceMeta({ lastFired: Date.now() });
-            alertInstance.resetFire();
-            return fireHandler(actionGroup, context, state);
           })
         );
 

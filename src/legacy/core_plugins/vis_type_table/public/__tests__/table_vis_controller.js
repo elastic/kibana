@@ -28,7 +28,7 @@ import { AppStateProvider } from 'ui/state_management/app_state';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 
 import { createTableVisTypeDefinition } from '../table_vis_type';
-import { visualizations } from '../../../visualizations/public';
+import { setup as visualizationsSetup } from '../../../visualizations/public/legacy';
 
 describe('Table Vis - Controller', async function () {
   let $rootScope;
@@ -43,69 +43,77 @@ describe('Table Vis - Controller', async function () {
   let tabifiedResponse;
   let legacyDependencies;
 
-  beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
-  beforeEach(ngMock.inject(function ($injector) {
+  ngMock.inject(function ($injector) {
     Private = $injector.get('Private');
     legacyDependencies = {
       // eslint-disable-next-line new-cap
-      createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization
+      createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
     };
 
-    visualizations.types.VisTypesRegistryProvider.register(() =>
+    visualizationsSetup.types.registerVisualization(() =>
       createTableVisTypeDefinition(legacyDependencies)
     );
+  });
 
-    $rootScope = $injector.get('$rootScope');
-    $compile = $injector.get('$compile');
-    fixtures = require('fixtures/fake_hierarchical_data');
-    AppState = Private(AppStateProvider);
-    Vis = Private(VisProvider);
-    tableAggResponse =  legacyResponseHandlerProvider().handler;
-  }));
+  beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
+  beforeEach(
+    ngMock.inject(function ($injector) {
+      Private = $injector.get('Private');
+      $rootScope = $injector.get('$rootScope');
+      $compile = $injector.get('$compile');
+      fixtures = require('fixtures/fake_hierarchical_data');
+      AppState = Private(AppStateProvider);
+      Vis = Private(VisProvider);
+      tableAggResponse = legacyResponseHandlerProvider().handler;
+    })
+  );
 
   function OneRangeVis(params) {
-    return new Vis(
-      Private(FixturesStubbedLogstashIndexPatternProvider),
-      {
-        type: 'table',
-        params: params || {},
-        aggs: [
-          { type: 'count', schema: 'metric' },
-          {
-            type: 'range',
-            schema: 'bucket',
-            params: {
-              field: 'bytes',
-              ranges: [
-                { from: 0, to: 1000 },
-                { from: 1000, to: 2000 }
-              ]
-            }
-          }
-        ]
-      }
-    );
+    return new Vis(Private(FixturesStubbedLogstashIndexPatternProvider), {
+      type: 'table',
+      params: params || {},
+      aggs: [
+        { type: 'count', schema: 'metric' },
+        {
+          type: 'range',
+          schema: 'bucket',
+          params: {
+            field: 'bytes',
+            ranges: [{ from: 0, to: 1000 }, { from: 1000, to: 2000 }],
+          },
+        },
+      ],
+    });
   }
 
   const dimensions = {
-    buckets: [{
-      accessor: 0,
-    }], metrics: [{
-      accessor: 1,
-      format: { id: 'range' },
-    }]
+    buckets: [
+      {
+        accessor: 0,
+      },
+    ],
+    metrics: [
+      {
+        accessor: 1,
+        format: { id: 'range' },
+      },
+    ],
   };
 
   // basically a parameterized beforeEach
   function initController(vis) {
-    vis.aggs.aggs.forEach(function (agg, i) { agg.id = 'agg_' + (i + 1); });
+    vis.aggs.aggs.forEach(function (agg, i) {
+      agg.id = 'agg_' + (i + 1);
+    });
 
     tabifiedResponse = tabifyAggResponse(vis.aggs, fixtures.oneRangeBucket);
     $rootScope.vis = vis;
     $rootScope.visParams = vis.params;
     $rootScope.uiState = new AppState({ uiState: {} }).makeStateful('uiState');
     $rootScope.renderComplete = () => {};
-    $rootScope.newScope = function (scope) { $scope = scope; };
+    $rootScope.newScope = function (scope) {
+      $scope = scope;
+    };
 
     $el = $('<div>')
       .attr('ng-controller', 'KbnTableVisController')
@@ -157,7 +165,7 @@ describe('Table Vis - Controller', async function () {
   it('sets the sort on the scope when it is passed as a vis param', async function () {
     const sortObj = {
       columnIndex: 1,
-      direction: 'asc'
+      direction: 'asc',
     };
     const vis = new OneRangeVis({ sort: sortObj });
     initController(vis);
@@ -181,7 +189,6 @@ describe('Table Vis - Controller', async function () {
   });
 
   it('passes partialRows:true to tabify based on the vis params', function () {
-
     const vis = new OneRangeVis({ showPartialRows: true });
     initController(vis);
 
@@ -189,7 +196,6 @@ describe('Table Vis - Controller', async function () {
   });
 
   it('passes partialRows:false to tabify based on the vis params', function () {
-
     const vis = new OneRangeVis({ showPartialRows: false });
     initController(vis);
 
