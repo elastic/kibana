@@ -8,6 +8,7 @@ exports[`AdvancedSettingsSubtitle renders as expected 1`] = `
   <EuiCallOut
     color="primary"
     iconType="spacesApp"
+    size="m"
     title={
       <p>
         <FormattedMessage

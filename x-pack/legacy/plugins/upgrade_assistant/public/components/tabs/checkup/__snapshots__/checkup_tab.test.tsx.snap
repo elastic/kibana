@@ -25,6 +25,7 @@ exports[`CheckupTab render with deprecations 1`] = `
   <EuiCallOut
     color="warning"
     iconType="help"
+    size="m"
     title={
       <FormattedMessage
         defaultMessage="Back up your indices now"
@@ -311,6 +312,7 @@ exports[`CheckupTab render with error 1`] = `
   <EuiCallOut
     color="warning"
     iconType="help"
+    size="m"
     title={
       <FormattedMessage
         defaultMessage="Back up your indices now"
@@ -380,6 +382,7 @@ exports[`CheckupTab render without deprecations 1`] = `
   <EuiCallOut
     color="warning"
     iconType="help"
+    size="m"
     title={
       <FormattedMessage
         defaultMessage="Back up your indices now"

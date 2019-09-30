@@ -6,6 +6,7 @@ exports[`WarningsFlyoutStep renders 1`] = `
     <EuiCallOut
       color="danger"
       iconType="alert"
+      size="m"
       title={
         <FormattedMessage
           defaultMessage="This index requires destructive changes that can't be undone"

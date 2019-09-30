@@ -211,8 +211,10 @@ exports[`Overview that overview page shows a message if there is no beats data 1
         stats={Array []}
       />
       <EuiCallOut
+        color="primary"
         data-test-subj="noRecentActivityMessage"
         iconType="gear"
+        size="m"
         title="Hi there! This area is where your latest Beats activity would show up, but you don't seem to have any activity within the last day."
       />
       <EuiSpacer

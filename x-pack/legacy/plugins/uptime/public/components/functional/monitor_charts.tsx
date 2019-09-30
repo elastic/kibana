@@ -6,12 +6,11 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment } from 'react';
 import { MonitorChart } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { monitorChartsQuery } from '../../queries';
 import { DurationChart } from './charts';
-import { UptimeSettingsContext } from '../../contexts';
 import { SnapshotHistogram } from './charts/snapshot_histogram';
 import { useUrlParams } from '../../hooks';
 
@@ -45,7 +44,6 @@ export const MonitorChartsComponent = ({
       monitorChartsData: { locationDurationLines },
     } = data;
 
-    const { colors } = useContext(UptimeSettingsContext);
     const [getUrlParams] = useUrlParams();
     const { absoluteDateRangeStart, absoluteDateRangeEnd } = getUrlParams();
 

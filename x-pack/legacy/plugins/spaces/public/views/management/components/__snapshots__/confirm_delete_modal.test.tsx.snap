@@ -67,6 +67,7 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
         <EuiSpacer />
         <EuiCallOut
           color="warning"
+          size="m"
         >
           <EuiText>
             <FormattedMessage

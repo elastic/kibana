@@ -110,8 +110,10 @@ exports[`AnnotationsTable Initialization with job config prop. 1`] = `
 
 exports[`AnnotationsTable Minimal initialization without props. 1`] = `
 <EuiCallOut
+  color="primary"
   iconType="iInCircle"
   role="alert"
+  size="m"
   title={
     <FormattedMessage
       defaultMessage="No annotations created for this job"

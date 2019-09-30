@@ -242,6 +242,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
   <EuiCallOut
     color="danger"
     iconType="cross"
+    size="m"
     title={
       <FormattedMessage
         defaultMessage="Index lifecycle error"

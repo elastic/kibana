@@ -1254,6 +1254,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                       <EuiCallOut
                         className="euiForm__errors"
                         color="danger"
+                        size="m"
                         title="Please address the errors in your form."
                       >
                         <div
@@ -1705,6 +1706,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                       <EuiCallOut
                         className="euiForm__errors"
                         color="danger"
+                        size="m"
                         title="Please address the errors in your form."
                       >
                         <div
@@ -2156,6 +2158,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                       <EuiCallOut
                         className="euiForm__errors"
                         color="danger"
+                        size="m"
                         title="Please address the errors in your form."
                       >
                         <div
@@ -2603,6 +2606,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                       <EuiCallOut
                         className="euiForm__errors"
                         color="danger"
+                        size="m"
                         title="Please address the errors in your form."
                       >
                         <div
