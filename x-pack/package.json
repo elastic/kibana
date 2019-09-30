@@ -27,6 +27,7 @@
     "**/@types/node": "10.12.27"
   },
   "devDependencies": {
+    "@cypress/webpack-preprocessor": "^4.1.0",
     "@kbn/dev-utils": "1.0.0",
     "@kbn/es": "1.0.0",
     "@kbn/expect": "1.0.0",
