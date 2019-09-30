@@ -172,7 +172,7 @@ describe('CoordinateMapsVisualizationTest', function () {
       imageComparator.destroy();
     });
 
-    it('should initialize OK', async function () {
+    it('should initialize OK (may fail in dev env)', async function () {
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
       await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
@@ -211,7 +211,7 @@ describe('CoordinateMapsVisualizationTest', function () {
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('should toggle back&forth OK between mapTypes', async function () {
+    it('should toggle back&forth OK between mapTypes (may fail in dev env)', async function () {
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
       await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
@@ -244,7 +244,7 @@ describe('CoordinateMapsVisualizationTest', function () {
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('should toggle to different color schema ok', async function () {
+    it('should toggle to different color schema ok (may fail in dev env)', async function () {
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
       await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
