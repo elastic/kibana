@@ -25,7 +25,7 @@ import { IConfigService } from './config_service';
 const createConfigServiceMock = ({
   atPath = {},
   getConfig$ = {},
-}: { atPath?: unknown; getConfig$?: Record<string, any> } = {}) => {
+}: { atPath?: Record<string, any>; getConfig$?: Record<string, any> } = {}) => {
   const mocked: jest.Mocked<IConfigService> = {
     atPath: jest.fn(),
     getConfig$: jest.fn(),
