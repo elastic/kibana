@@ -390,7 +390,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         const element = await this.byCssSelector(selector, timeout);
         if (element) {
-          //await element.moveMouseTo();
+          // await element.moveMouseTo();
           await element.click();
         } else {
           throw new Error(`Element with css='${selector}' is not found`);
