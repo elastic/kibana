@@ -103,6 +103,7 @@ function LayerSettings({
           idSelected={layer.seriesType}
           onChange={seriesType => setSeriesType(seriesType as SeriesType)}
           isIconOnly
+          buttonSize="compressed"
         />
       </EuiFormRow>
       <EuiPopoverFooter className="eui-textCenter">
