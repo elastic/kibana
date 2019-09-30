@@ -32,7 +32,7 @@ const FieldsBrowserContainer = styled.div<{ width: number }>`
     left: 0;
     padding: ${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.m};
     position: absolute;
-    top: 100%;
+    top: calc(100% + ${theme.eui.euiSize});
     width: ${width}px;
     z-index: 9990;
   `}
