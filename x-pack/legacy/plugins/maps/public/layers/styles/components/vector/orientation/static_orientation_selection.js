@@ -10,8 +10,7 @@ import { staticOrientationShape } from '../style_option_shapes';
 import { ValidatedRange } from '../../../../../components/validated_range';
 
 export function StaticOrientationSelection({ onChange, styleOptions }) {
-
-  const onOrientationChange = (orientation) => {
+  const onOrientationChange = orientation => {
     onChange({ orientation });
   };
 
@@ -22,12 +21,13 @@ export function StaticOrientationSelection({ onChange, styleOptions }) {
       value={styleOptions.orientation}
       onChange={onOrientationChange}
       showInput
-      showRange
+      showLabels
+      compressed
     />
   );
 }
 
 StaticOrientationSelection.propTypes = {
   styleOptions: staticOrientationShape.isRequired,
-  onChange: PropTypes.func.isRequired
+  onChange: PropTypes.func.isRequired,
 };

@@ -412,9 +412,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async setIndexType(indexType) {
       log.debug(`Set index type to: ${indexType}`);
-      await find.clickByCssSelector(
-        `select[data-test-subj="fileImportIndexSelect"] > option[value="${indexType}"]`
-      );
+      await testSubjects.selectValue('fileImportIndexSelect', indexType);
     }
 
     async indexTypeOptionExists(indexType) {

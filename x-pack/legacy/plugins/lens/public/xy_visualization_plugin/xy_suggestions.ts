@@ -21,8 +21,9 @@ import { generateId } from '../id_generator';
 const columnSortOrder = {
   date: 0,
   string: 1,
-  boolean: 2,
-  number: 3,
+  ip: 2,
+  boolean: 3,
+  number: 4,
 };
 
 function getIconForSeries(type: SeriesType): EuiIconType {
@@ -119,7 +120,14 @@ function getBucketMappings(table: TableSuggestion, currentState?: State) {
   const currentXColumnIndex = prioritizedBuckets.findIndex(
     ({ columnId }) => columnId === currentLayer.xAccessor
   );
-  if (currentXColumnIndex) {
+  const currentXDataType =
+    currentXColumnIndex > -1 && prioritizedBuckets[currentXColumnIndex].operation.dataType;
+
+  if (
+    currentXDataType &&
+    // make sure time gets mapped to x dimension even when changing current bucket/dimension mapping
+    (currentXDataType === 'date' || prioritizedBuckets[0].operation.dataType !== 'date')
+  ) {
     const [x] = prioritizedBuckets.splice(currentXColumnIndex, 1);
     prioritizedBuckets.unshift(x);
   }
@@ -127,7 +135,7 @@ function getBucketMappings(table: TableSuggestion, currentState?: State) {
   const currentSplitColumnIndex = prioritizedBuckets.findIndex(
     ({ columnId }) => columnId === currentLayer.splitAccessor
   );
-  if (currentSplitColumnIndex) {
+  if (currentSplitColumnIndex > -1) {
     const [splitBy] = prioritizedBuckets.splice(currentSplitColumnIndex, 1);
     prioritizedBuckets.push(splitBy);
   }
@@ -261,9 +269,13 @@ function getSeriesType(
   changeType: TableChangeType
 ): SeriesType {
   const defaultType = xValue.operation.dataType === 'date' ? 'area_stacked' : 'bar_stacked';
-  if (changeType === 'initial') {
-    return defaultType;
-  } else {
+  const preferredSeriesType = (currentState && currentState.preferredSeriesType) || defaultType;
+  const isDateCompatible =
+    preferredSeriesType === 'area' ||
+    preferredSeriesType === 'line' ||
+    preferredSeriesType === 'area_stacked';
+
+  if (changeType !== 'initial') {
     const oldLayer = getExistingLayer(currentState, layerId);
     return (
       (oldLayer && oldLayer.seriesType) ||
@@ -271,6 +283,12 @@ function getSeriesType(
       defaultType
     );
   }
+
+  if (xValue.operation.dataType === 'date') {
+    return isDateCompatible ? preferredSeriesType : defaultType;
+  }
+
+  return isDateCompatible ? defaultType : preferredSeriesType;
 }
 
 function getSuggestionTitle(
