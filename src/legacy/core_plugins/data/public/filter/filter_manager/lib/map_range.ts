@@ -20,7 +20,7 @@
 import { Filter, RangeFilter, FILTERS, isRangeFilter, isScriptedRangeFilter } from '@kbn/es-query';
 import { get, has } from 'lodash';
 import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
-import { IndexPatterns, IndexPattern } from '../../../index_patterns';
+import { IndexPatterns, IndexPattern, Field } from '../../../index_patterns';
 
 const getFirstRangeKey = (filter: RangeFilter) => filter.range && Object.keys(filter.range)[0];
 const getRangeByKey = (filter: RangeFilter, key: string) => get(filter, ['range', key]);
@@ -45,7 +45,7 @@ function getParams(filter: RangeFilter, indexPattern?: IndexPattern) {
   // external factors e.g. a reindex. We only need the index in order to grab the field formatter, so we fallback
   // on displaying the raw value if the index is invalid.
   if (key && indexPattern && indexPattern.fields.getByName(key)) {
-    const convert = indexPattern.fields.getByName(key).format.getConverterFor('text');
+    const convert = (indexPattern.fields.getByName(key) as Field).format.getConverterFor('text');
     value = `${convert(left)} to ${convert(right)}`;
   }
 
