@@ -9,7 +9,7 @@ import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
-import { PushedData } from './util/pushed_data';
+import { InjectedData } from './util/injected_data';
 import { MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER, SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../reducers/util';
@@ -29,10 +29,10 @@ export class AbstractLayer {
     } else {
       this._dataRequests = [];
     }
-    if (this._descriptor.__pushedData) {
-      this._pushedData = new PushedData(this._descriptor.__pushedData);
+    if (this._descriptor.__injectedData) {
+      this._injectedData = new InjectedData(this._descriptor.__injectedData);
     } else {
-      this._pushedData = null;
+      this._injectedData = null;
     }
   }
 
@@ -45,7 +45,7 @@ export class AbstractLayer {
     const layerDescriptor = { ...options };
 
     layerDescriptor.__dataRequests = _.get(options, '__dataRequests', []);
-    layerDescriptor.__pushedData = _.get(options, '__pushedData', null);
+    layerDescriptor.__injectedData = _.get(options, '__injectedData', null);
     layerDescriptor.id = _.get(options, 'id', uuid());
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
     layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
@@ -284,8 +284,8 @@ export class AbstractLayer {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === id);
   }
 
-  getPushedData() {
-    return this._pushedData ? this._pushedData.getData() : null;
+  getInjectedData() {
+    return this._injectedData ? this._injectedData.getData() : null;
   }
 
   isLayerLoading() {

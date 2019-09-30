@@ -115,7 +115,7 @@ export class AbstractSource {
     return AbstractSource.isIndexingSource;
   }
 
-  isPushedData() {
+  isInjectedData() {
     return false;
   }
 

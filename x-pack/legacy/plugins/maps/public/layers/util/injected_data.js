@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export class PushedData {
+export class InjectedData {
 
   constructor(data) {
     this._descriptor = { data };

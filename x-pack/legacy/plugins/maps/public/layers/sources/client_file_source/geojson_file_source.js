@@ -95,7 +95,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
         }
         : geojsonFile;
 
-      onPreviewSource(source, { __pushedData: featureCollection });
+      onPreviewSource(source, { __injectedData: featureCollection });
     };
   };
 
@@ -138,7 +138,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
     return GeojsonFileSource.isIndexingSource;
   }
 
-  isPushedData() {
+  isInjectedData() {
     return true;
   }
 }
