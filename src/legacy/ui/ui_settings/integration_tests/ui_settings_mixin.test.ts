@@ -23,9 +23,7 @@ import expect from '@kbn/expect';
 // @ts-ignore
 import { Config } from '../../../server/config';
 
-// @ts-ignore
 import * as uiSettingsServiceFactoryNS from '../ui_settings_service_factory';
-// @ts-ignore
 import * as getUiSettingsServiceForRequestNS from '../ui_settings_service_for_request';
 // @ts-ignore
 import { uiSettingsMixin } from '../ui_settings_mixin';
@@ -163,7 +161,12 @@ describe('uiSettingsMixin()', () => {
       sinon.assert.notCalled(getUiSettingsServiceForRequestStub);
       const request = {};
       decorations.request.getUiSettingsService.call(request);
-      sinon.assert.calledWith(getUiSettingsServiceForRequestStub, server, request);
+      sinon.assert.calledWith(getUiSettingsServiceForRequestStub, server as any, request as any, {
+        overrides: {
+          foo: 'bar',
+        },
+        getDefaults: sinon.match.func,
+      });
     });
   });
 

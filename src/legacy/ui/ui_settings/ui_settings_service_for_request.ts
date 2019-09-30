@@ -17,8 +17,11 @@
  * under the License.
  */
 
+import { Legacy } from 'kibana';
 import { uiSettingsServiceFactory } from './ui_settings_service_factory';
+import { IUiSettingsService, UiSettingsServiceOptions } from './ui_settings_service';
 
+type Options = Pick<UiSettingsServiceOptions, 'getDefaults' | 'overrides'>;
 /**
  *  Get/create an instance of UiSettingsService bound to a specific request.
  *  Each call is cached (keyed on the request object itself) and subsequent
@@ -28,20 +31,20 @@ import { uiSettingsServiceFactory } from './ui_settings_service_factory';
  *  @param {Hapi.Server} server
  *  @param {Hapi.Request} request
  *  @param {Object} [options={}]
- *  @property {AsyncFunction} [options.getDefaults] async function that returns defaults/details about
- *                            the uiSettings.
- *  @return {UiSettingsService}
+
+ *  @return {IUiSettingsService}
  */
-export function getUiSettingsServiceForRequest(server, request, options = {}) {
-  const {
-    getDefaults,
-    overrides,
-  } = options;
+export function getUiSettingsServiceForRequest(
+  server: Legacy.Server,
+  request: Legacy.Request,
+  options: Options
+): IUiSettingsService {
+  const { getDefaults, overrides } = options;
 
   const uiSettingsService = uiSettingsServiceFactory(server, {
     getDefaults,
     overrides,
-    savedObjectsClient: request.getSavedObjectsClient()
+    savedObjectsClient: request.getSavedObjectsClient(),
   });
 
   return uiSettingsService;

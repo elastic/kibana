@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Server } from 'hapi';
+import { Legacy } from 'kibana';
 import {
   IUiSettingsService,
   UiSettingsService,
@@ -30,7 +30,10 @@ type Options = Pick<UiSettingsServiceOptions, 'savedObjectsClient' | 'getDefault
  *
  *  @return {IUiSettingsService}
  */
-export function uiSettingsServiceFactory(server: Server, options: Options): IUiSettingsService {
+export function uiSettingsServiceFactory(
+  server: Legacy.Server,
+  options: Options
+): IUiSettingsService {
   const config = server.config();
 
   const { savedObjectsClient, getDefaults, overrides } = options;
