@@ -73,6 +73,7 @@ export interface LegacyPluginOptions {
     visTypes: string[];
     embeddableActions?: string[];
     embeddableFactories?: string[];
+    uiSettingDefaults?: Record<string, any>;
   }>;
   uiCapabilities?: Capabilities;
   publicDir: any;

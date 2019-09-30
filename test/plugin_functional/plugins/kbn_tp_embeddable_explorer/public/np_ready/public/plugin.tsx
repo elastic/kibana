@@ -36,7 +36,7 @@ import {
   createSendMessageAction,
   HelloWorldEmbeddableFactory,
   ContactCardEmbeddableFactory,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples';
+} from './embeddable_api';
 import { App } from './app';
 
 export interface SetupDependencies {
