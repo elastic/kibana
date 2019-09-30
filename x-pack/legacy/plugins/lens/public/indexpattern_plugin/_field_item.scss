@@ -1,6 +1,6 @@
 .lnsFieldItem {
   @include euiFontSizeS;
-  background: $euiColorEmptyShade;
+  background: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
   border-radius: $euiBorderRadius;
   margin-bottom: $euiSizeXS;
 }
@@ -14,7 +14,8 @@
 }
 
 .lnsFieldItem--missing {
-  background: $euiColorLightestShade;
+  background: lightOrDarkTheme(transparentize($euiColorMediumShade, .9), $euiColorEmptyShade);
+  color: $euiColorDarkShade;
 }
 
 .lnsFieldItem__info {
