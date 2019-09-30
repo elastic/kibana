@@ -20,21 +20,16 @@
 import sinon from 'sinon';
 import $ from 'jquery';
 
-import mappings from '../mappings';
-import init from '../app';
+import { loadRemoteState } from './load_remote_editor_state';
 
-const history = { getSavedEditorState() {}, };
-
-describe('console app initialization', () => {
+describe('[Legacy Console] loading remote editor state', () => {
   const sandbox = sinon.createSandbox();
 
-  let inputMock;
-  let outputMock;
-  let ajaxDoneStub;
+  let inputMock: any;
+  let ajaxDoneStub: any;
   beforeEach(() => {
     ajaxDoneStub = sinon.stub();
-    sandbox.stub($, 'ajax').returns({ done: ajaxDoneStub });
-    sandbox.stub(mappings, 'retrieveAutoCompleteInfo');
+    sandbox.stub($, 'ajax').returns({ done: ajaxDoneStub } as any);
 
     inputMock = {
       update: sinon.stub(),
@@ -42,10 +37,6 @@ describe('console app initialization', () => {
       highlightCurrentRequestsAndUpdateActionBar: sinon.stub(),
       updateActionsBar: sinon.stub(),
       getSession: sinon.stub().returns({ on() {} }),
-    };
-
-    outputMock = {
-      update: sinon.stub(),
     };
   });
 
@@ -57,13 +48,17 @@ describe('console app initialization', () => {
     const mockContent = {};
     ajaxDoneStub.yields(mockContent);
 
-    init(inputMock, outputMock, history, 'https://state.link.com/content');
+    loadRemoteState({
+      input: inputMock,
+      url: 'https://state.link.com/content',
+    });
 
-    sinon.assert.calledOnce($.ajax);
-    sinon.assert.calledWithExactly($.ajax, {
+    sinon.assert.calledOnce($.ajax as any);
+    sinon.assert.calledWithExactly($.ajax as any, {
       url: 'https://state.link.com/content',
       dataType: 'text',
       kbnXsrfToken: false,
+      headers: {},
     });
 
     sinon.assert.calledTwice(inputMock.moveToNextRequestEdge);
@@ -72,19 +67,19 @@ describe('console app initialization', () => {
     sinon.assert.calledOnce(inputMock.updateActionsBar);
     sinon.assert.calledOnce(inputMock.update);
     sinon.assert.calledWithExactly(inputMock.update, sinon.match.same(mockContent));
-
-    sinon.assert.calledOnce(outputMock.update);
-    sinon.assert.calledWithExactly(outputMock.update, '');
   });
 
   it('correctly loads state from GitHub API HTTPS links.', () => {
     const mockContent = {};
     ajaxDoneStub.yields(mockContent);
 
-    init(inputMock, outputMock, history, 'https://api.github.com/content');
+    loadRemoteState({
+      input: inputMock,
+      url: 'https://api.github.com/content',
+    });
 
-    sinon.assert.calledOnce($.ajax);
-    sinon.assert.calledWithExactly($.ajax, {
+    sinon.assert.calledOnce($.ajax as any);
+    sinon.assert.calledWithExactly($.ajax as any, {
       url: 'https://api.github.com/content',
       dataType: 'text',
       kbnXsrfToken: false,
@@ -97,8 +92,5 @@ describe('console app initialization', () => {
     sinon.assert.calledOnce(inputMock.updateActionsBar);
     sinon.assert.calledOnce(inputMock.update);
     sinon.assert.calledWithExactly(inputMock.update, sinon.match.same(mockContent));
-
-    sinon.assert.calledOnce(outputMock.update);
-    sinon.assert.calledWithExactly(outputMock.update, '');
   });
 });
