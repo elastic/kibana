@@ -271,10 +271,9 @@ identifies this Kibana instance.
 `server.port:`:: *Default: 5601* Kibana is served by a back end server. This
 setting specifies the port to use.
 
-`server.rewriteBasePath:`:: *Default: false* Specifies whether Kibana should
+`server.rewriteBasePath:`:: *Default: true* Specifies whether Kibana should
 rewrite requests that are prefixed with `server.basePath` or require that they
-are rewritten by your reverse proxy. This setting was effectively always `false`
-before Kibana 6.3 and will default to `true` starting in Kibana 7.0.
+are rewritten by your reverse proxy.
 
 `server.socketTimeout:`:: *Default: "120000"* The number of milliseconds to wait before closing an
 inactive socket.
