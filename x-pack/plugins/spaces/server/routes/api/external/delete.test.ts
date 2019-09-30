@@ -12,7 +12,7 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { CoreSetup, IRouter, kibanaResponseFactory, RouteConfig } from 'src/core/server';
+import { CoreSetup, IRouter, kibanaResponseFactory } from 'src/core/server';
 import {
   loggingServiceMock,
   elasticsearchServiceMock,
