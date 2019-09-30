@@ -94,15 +94,12 @@ export function createUrlFormat(FieldFormat) {
     }
 
     _generateImgHtml(url, imageLabel) {
-      const width = this.param('width');
-      const height = this.param('height');
-      if (width || height) {
-        const maxWidth = width ? `${width}px` : 'auto';
-        const maxHeight = height ? `${height}px` : 'auto';
-        return `<img src="${url}" alt="${imageLabel}" style="width:auto; height:auto; max-width:${maxWidth}; max-height:${maxHeight};">`;
-      }
-      // default behavior
-      return `<img src="${url}" alt="${imageLabel}">`;
+      const isValidWidth = !isNaN(parseInt(this.param('width')));
+      const isValidHeight = !isNaN(parseInt(this.param('height')));
+      const maxWidth = isValidWidth ? `${this.param('width')}px` : 'none';
+      const maxHeight = isValidHeight ? `${this.param('height')}px` : 'none';
+
+      return `<img src="${url}" alt="${imageLabel}" style="width:auto; height:auto; max-width:${maxWidth}; max-height:${maxHeight};">`;
     }
 
     static id = 'url';

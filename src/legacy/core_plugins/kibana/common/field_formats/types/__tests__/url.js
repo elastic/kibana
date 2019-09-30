@@ -44,7 +44,8 @@ describe('UrlFormat', function () {
       const url = new UrlFormat({ type: 'img' });
 
       expect(url.convert('http://elastic.co', 'html'))
-        .to.be('<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co"></span>');
+        .to.be('<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+        'style="width:auto; height:auto; max-width:none; max-height:none;"></span>');
     });
 
     it('with correct width and height set', function () {
@@ -60,7 +61,7 @@ describe('UrlFormat', function () {
 
       expect(url.convert('http://elastic.co', 'html'))
         .to.be('<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
-        'style="width:auto; height:auto; max-width:auto; max-height:55px;"></span>');
+        'style="width:auto; height:auto; max-width:none; max-height:55px;"></span>');
     });
 
     it('with correct width and height set if no height specified', function () {
@@ -68,7 +69,23 @@ describe('UrlFormat', function () {
 
       expect(url.convert('http://elastic.co', 'html'))
         .to.be('<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
-        'style="width:auto; height:auto; max-width:22px; max-height:auto;"></span>');
+        'style="width:auto; height:auto; max-width:22px; max-height:none;"></span>');
+    });
+
+    it('only accepts valid numbers for width', function () {
+      const url = new UrlFormat({ type: 'img', width: 'not a number' });
+
+      expect(url.convert('http://elastic.co', 'html'))
+        .to.be('<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+        'style="width:auto; height:auto; max-width:none; max-height:none;"></span>');
+    });
+
+    it('only accepts valid numbers for height', function () {
+      const url = new UrlFormat({ type: 'img', height: 'not a number' });
+
+      expect(url.convert('http://elastic.co', 'html'))
+        .to.be('<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+        'style="width:auto; height:auto; max-width:none; max-height:none;"></span>');
     });
   });
 

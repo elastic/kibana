@@ -133,7 +133,6 @@ export class UrlFormatEditor extends DefaultFormatEditor {
         >
           <EuiFieldNumber
             data-test-subj="urlEditorWidth"
-            placeholder={128}
             value={width}
             onChange={(e) => {
               this.onChange({ width: e.target.value });
@@ -147,7 +146,6 @@ export class UrlFormatEditor extends DefaultFormatEditor {
         >
           <EuiFieldNumber
             data-test-subj="urlEditorHeight"
-            placeholder={128}
             value={height}
             onChange={(e) => {
               this.onChange({ height: e.target.value });
@@ -242,9 +240,7 @@ export class UrlFormatEditor extends DefaultFormatEditor {
           />
         </EuiFormRow>
 
-        {formatParams.type === 'img' ? (
-          this.renderWidthHeightParameters()
-        ) : null}
+        { formatParams.type === 'img' && this.renderWidthHeightParameters() }
 
         <FormatEditorSamples
           samples={samples}

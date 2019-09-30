@@ -541,7 +541,6 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
       fullWidth={false}
       isLoading={false}
       onChange={[Function]}
-      placeholder={128}
       value=""
     />
   </EuiFormRow>
@@ -567,7 +566,6 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
       fullWidth={false}
       isLoading={false}
       onChange={[Function]}
-      placeholder={128}
       value=""
     />
   </EuiFormRow>

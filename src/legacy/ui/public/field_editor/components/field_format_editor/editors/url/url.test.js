@@ -98,7 +98,7 @@ describe('UrlFormatEditor', () => {
       <UrlFormatEditor
         fieldType={fieldType}
         format={format}
-        formatParams={{ ...formatParams, ...{ type: 'img' } }}
+        formatParams={{ ...formatParams, type: 'img' }}
         onChange={onChange}
         onError={onError}
       />
