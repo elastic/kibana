@@ -76,8 +76,8 @@ export class ChartTarget extends React.Component {
       .value();
   }
 
-  getOptions() {
-    const opts = getChartOptions({
+  async getOptions() {
+    const opts = await getChartOptions({
       yaxis: { tickFormatter: this.props.tickFormatter },
       xaxis: this.props.timeRange
     });
@@ -88,12 +88,12 @@ export class ChartTarget extends React.Component {
     };
   }
 
-  renderChart() {
+  async renderChart() {
     const { target } = this.refs;
     const { series } = this.props;
     const data = this.filterData(series, this.props.seriesToShow);
 
-    this.plot = $.plot(target, data, this.getOptions());
+    this.plot = $.plot(target, data, await this.getOptions());
 
     this._handleResize = () => {
       if (!this.plot) { return; }

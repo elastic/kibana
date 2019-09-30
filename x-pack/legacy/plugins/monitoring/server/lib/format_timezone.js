@@ -16,6 +16,9 @@ import moment from 'moment';
  * @param {*} timezone The timezone to convert into
  */
 export const formatUTCTimestampForTimezone = (utcTimestamp, timezone) => {
+  if (timezone === 'Browser') {
+    return utcTimestamp;
+  }
   const offsetInMinutes = moment.tz(timezone).utcOffset();
   const offsetTimestamp = utcTimestamp + (offsetInMinutes * 1 * 60 * 1000);
   return offsetTimestamp;
