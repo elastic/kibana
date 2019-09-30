@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from 'elasticsearch';
+import { ESFilter, SearchResponse } from 'elasticsearch';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT
@@ -44,5 +44,7 @@ export async function searchConfigurations({
   };
 
   const resp = await client.search<AgentConfiguration>(params);
-  return resp.hits.hits[0];
+
+  type FirstHit = SearchResponse<AgentConfiguration>['hits']['hits'][0];
+  return resp.hits.hits[0] as FirstHit | undefined;
 }

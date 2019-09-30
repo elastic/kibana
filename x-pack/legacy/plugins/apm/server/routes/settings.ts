@@ -16,6 +16,7 @@ import { createRoute } from './create_route';
 import { transactionSampleRateRt } from '../../common/runtime_types/transaction_sample_rate_rt';
 import { transactionMaxSpansRt } from '../../common/runtime_types/transaction_max_spans_rt';
 import { getAgentNameByService } from '../lib/settings/agent_configuration/get_agent_name_by_service';
+import { markAppliedByAgent } from '../lib/settings/agent_configuration/mark_applied_by_agent';
 
 // get list of configurations
 export const agentConfigurationRoute = createRoute(core => ({
@@ -121,7 +122,7 @@ export const updateAgentConfigurationRoute = createRoute(() => ({
   }
 }));
 
-// Lookup single configuration
+// Lookup single configuration (used by APM Server)
 export const agentConfigurationSearchRoute = createRoute(core => ({
   method: 'POST',
   path: '/api/apm/settings/agent-configuration/search',
@@ -130,7 +131,8 @@ export const agentConfigurationSearchRoute = createRoute(core => ({
       service: t.intersection([
         t.type({ name: t.string }),
         t.partial({ environment: t.string })
-      ])
+      ]),
+      etag: t.string
     })
   },
   handler: async (req, { body }, h) => {
@@ -143,6 +145,10 @@ export const agentConfigurationSearchRoute = createRoute(core => ({
 
     if (!config) {
       return h.response().code(404);
+    }
+
+    if (body.etag === config._source.etag) {
+      markAppliedByAgent({ id: config._id, body: config._source, setup });
     }
 
     return config;

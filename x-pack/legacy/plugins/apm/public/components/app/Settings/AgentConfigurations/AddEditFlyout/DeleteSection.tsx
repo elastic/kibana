@@ -23,11 +23,11 @@ const t = (id: string, defaultMessage: string, values?: Record<string, any>) =>
   });
 
 interface Props {
-  onDelete: () => void;
+  onDeleted: () => void;
   selectedConfig: Config;
 }
 
-export function DeleteSection({ onDelete, selectedConfig }: Props) {
+export function DeleteSection({ onDeleted, selectedConfig }: Props) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   return (
@@ -61,7 +61,7 @@ export function DeleteSection({ onDelete, selectedConfig }: Props) {
           setIsDeleting(true);
           await deleteConfig(selectedConfig);
           setIsDeleting(false);
-          onDelete();
+          onDeleted();
         }}
       >
         {t('buttonLabel', 'Delete')}

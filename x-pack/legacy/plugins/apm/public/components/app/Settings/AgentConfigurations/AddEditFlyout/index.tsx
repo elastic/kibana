@@ -42,15 +42,15 @@ const t = (id: string, defaultMessage: string, values?: Record<string, any>) =>
 
 interface Props {
   onClose: () => void;
-  onSave: () => void;
-  onDelete: () => void;
+  onSaved: () => void;
+  onDeleted: () => void;
   selectedConfig: Config | null;
 }
 
 export function AddEditFlyout({
   onClose,
-  onSave,
-  onDelete,
+  onSaved,
+  onDeleted,
   selectedConfig
 }: Props) {
   const [isSaving, setIsSaving] = useState(false);
@@ -136,7 +136,7 @@ export function AddEditFlyout({
       configurationId: selectedConfig ? selectedConfig.id : undefined
     });
     setIsSaving(false);
-    onSave();
+    onSaved();
   };
 
   return (
@@ -204,7 +204,7 @@ export function AddEditFlyout({
               {selectedConfig ? (
                 <DeleteSection
                   selectedConfig={selectedConfig}
-                  onDelete={onDelete}
+                  onDeleted={onDeleted}
                 />
               ) : null}
             </form>

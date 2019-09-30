@@ -57,12 +57,12 @@ export function AgentConfigurations() {
             setSelectedConfig(null);
             setIsFlyoutOpen(false);
           }}
-          onSave={() => {
+          onSaved={() => {
             setSelectedConfig(null);
             setIsFlyoutOpen(false);
             refetch();
           }}
-          onDelete={() => {
+          onDeleted={() => {
             setSelectedConfig(null);
             setIsFlyoutOpen(false);
             refetch();

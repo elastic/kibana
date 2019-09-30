@@ -7,8 +7,14 @@
 import React from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { EuiEmptyPrompt, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiHealth
+} from '@elastic/eui';
 import { isEmpty } from 'lodash';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
@@ -31,6 +37,14 @@ export function AgentConfigurationList({
   setSelectedConfig: React.Dispatch<React.SetStateAction<Config | null>>;
 }) {
   const columns: Array<ITableColumn<Config>> = [
+    {
+      field: 'applied_by_agent',
+      name: t('appliedByAgentColumnLabel', 'Applied by agent'),
+      sortable: true,
+      render: (value: boolean) => (
+        <EuiHealth color={value ? 'success' : theme.euiColorLightShade} />
+      )
+    },
     {
       field: 'service.name',
       name: t('serviceNameColumnLabel', 'Service name'),
