@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup } from 'src/core/server';
-import { initStatsRoute } from './index_stats';
+import { LensServerOptions } from '../server_options';
 import { initFieldsRoute } from './field_stats';
+import { existingFieldsRoute } from './existing_fields';
 
-export function setupRoutes(setup: CoreSetup) {
-  initStatsRoute(setup);
-  initFieldsRoute(setup);
+export function setupRoutes(opts: LensServerOptions) {
+  initFieldsRoute(opts);
+  existingFieldsRoute(opts);
 }

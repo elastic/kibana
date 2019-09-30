@@ -9,6 +9,14 @@ import { isColumnTransferable } from './operations';
 import { operationDefinitionMap, IndexPatternColumn } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
 
+export function fieldExists(
+  existingFields: IndexPatternPrivateState['existingFields'],
+  indexPatternId: string,
+  fieldName: string
+) {
+  return existingFields[indexPatternId] && existingFields[indexPatternId][fieldName];
+}
+
 export function updateColumnParam<
   C extends IndexPatternColumn & { params: object },
   K extends keyof C['params']

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './api';
-export * from './constants';
-export * from './types';
+export interface ExistingFields {
+  id: string;
+  existingFieldNames: string[];
+}

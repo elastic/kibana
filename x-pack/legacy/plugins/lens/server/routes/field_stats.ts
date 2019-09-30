@@ -8,14 +8,13 @@ import Boom from 'boom';
 import DateMath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
 import { AggregationSearchResponse } from 'elasticsearch';
-import { CoreSetup } from 'src/core/server';
 import { FieldStatsResponse } from '../../common';
+import { LensServerOptions } from '../server_options';
 
 const SHARD_SIZE = 5000;
 
-export async function initFieldsRoute(setup: CoreSetup) {
-  const router = setup.http.createRouter();
-  router.post(
+export async function initFieldsRoute(opts: LensServerOptions) {
+  opts.router.post(
     {
       path: '/index_stats/{indexPatternTitle}/field',
       validate: {

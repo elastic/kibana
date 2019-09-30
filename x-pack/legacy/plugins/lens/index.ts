@@ -11,7 +11,7 @@ import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import { CoreSetup } from 'src/core/server';
 import mappings from './mappings.json';
 import { PLUGIN_ID, getEditPath, BASE_API_URL } from './common';
-import { lensServerPlugin } from './server';
+import { LensServer } from './server';
 
 const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 
@@ -83,7 +83,7 @@ export const lens: LegacyPluginInitializer = kibana => {
       });
 
       // Set up with the new platform plugin lifecycle API.
-      const plugin = lensServerPlugin();
+      const plugin = new LensServer(server.savedObjects.getScopedSavedObjectsClient);
       plugin.setup(({
         http: {
           ...kbnServer.newPlatform.setup.core.http,

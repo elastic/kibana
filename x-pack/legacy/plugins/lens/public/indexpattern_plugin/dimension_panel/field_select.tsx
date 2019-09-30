@@ -17,7 +17,8 @@ import { OperationType } from '../indexpattern';
 import { FieldIcon } from '../field_icon';
 import { DataType } from '../../types';
 import { OperationFieldSupportMatrix } from './dimension_panel';
-import { IndexPattern, IndexPatternField } from '../types';
+import { IndexPattern, IndexPatternField, IndexPatternPrivateState } from '../types';
+import { fieldExists } from '../state_helpers';
 
 export type FieldChoice =
   | { type: 'field'; field: string; operationType?: OperationType }
@@ -33,6 +34,7 @@ export interface FieldSelectProps {
   operationFieldSupportMatrix: OperationFieldSupportMatrix;
   onChoose: (choice: FieldChoice) => void;
   onDeleteColumn: () => void;
+  existingFields: IndexPatternPrivateState['existingFields'];
 }
 
 export function FieldSelect({
@@ -45,6 +47,7 @@ export function FieldSelect({
   operationFieldSupportMatrix,
   onChoose,
   onDeleteColumn,
+  existingFields,
 }: FieldSelectProps) {
   const { operationByDocument, operationByField } = operationFieldSupportMatrix;
 
@@ -101,7 +104,7 @@ export function FieldSelect({
                   ? selectedColumnOperationType
                   : undefined,
             },
-            exists: fieldMap[field].exists || false,
+            exists: fieldExists(existingFields, currentIndexPattern.id, field),
             compatible: isCompatibleWithCurrentOperation(field),
           }))
           .filter(field => showEmptyFields || field.exists)

@@ -255,6 +255,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
           <EuiFlexItem>
             <FieldSelect
               currentIndexPattern={currentIndexPattern}
+              existingFields={state.existingFields}
               showEmptyFields={state.showEmptyFields}
               fieldMap={fieldMap}
               operationFieldSupportMatrix={operationFieldSupportMatrix}

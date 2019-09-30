@@ -6,7 +6,11 @@
 
 import _ from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/public';
+import {
+  SavedObjectsClientContract,
+  SavedObjectAttributes,
+  HttpServiceBase,
+} from 'src/core/public';
 import { SimpleSavedObject } from 'src/core/public';
 import { StateSetter } from '../types';
 import {
@@ -17,6 +21,7 @@ import {
   IndexPatternField,
 } from './types';
 import { updateLayerIndexPattern } from './state_helpers';
+import { DateRange, ExistingFields } from '../../common';
 
 interface SavedIndexPatternAttributes extends SavedObjectAttributes {
   title: string;
@@ -42,6 +47,7 @@ interface SavedRestrictionsObject {
   >;
 }
 
+type SetState = StateSetter<IndexPatternPrivateState>;
 type SavedRestrictionsInfo = SavedRestrictionsObject | undefined;
 type SavedObjectsClient = Pick<SavedObjectsClientContract, 'find' | 'bulkGet'>;
 
@@ -106,6 +112,7 @@ export async function loadInitialState({
       indexPatternRefs,
       indexPatterns,
       showEmptyFields: false,
+      existingFields: {},
     };
   }
 
@@ -115,6 +122,7 @@ export async function loadInitialState({
     indexPatterns,
     layers: {},
     showEmptyFields: false,
+    existingFields: {},
   };
 }
 
@@ -127,7 +135,7 @@ export async function changeIndexPattern({
   id: string;
   savedObjectsClient: SavedObjectsClient;
   state: IndexPatternPrivateState;
-  setState: StateSetter<IndexPatternPrivateState>;
+  setState: SetState;
 }) {
   const indexPatterns = await loadIndexPatterns({
     savedObjectsClient,
@@ -159,7 +167,7 @@ export async function changeLayerIndexPattern({
   layerId: string;
   savedObjectsClient: SavedObjectsClient;
   state: IndexPatternPrivateState;
-  setState: StateSetter<IndexPatternPrivateState>;
+  setState: SetState;
 }) {
   const indexPatterns = await loadIndexPatterns({
     savedObjectsClient,
@@ -193,6 +201,45 @@ async function loadIndexPatternRefs(
     id: String(o.id),
     title: (o.attributes as { title: string }).title,
   }));
+}
+
+export async function syncEmptyFields({
+  indexPatternIds,
+  dateRange,
+  fetchJson,
+  setState,
+}: {
+  dateRange: DateRange;
+  indexPatternIds: string[];
+  fetchJson: HttpServiceBase['get'];
+  setState: SetState;
+}) {
+  const emptinessInfo = await Promise.all(
+    indexPatternIds.map(
+      id =>
+        fetchJson(`/api/lens/existing_fields/${id}`, {
+          query: (dateRange as unknown) as Record<string, string>,
+        }) as Promise<ExistingFields>
+    )
+  );
+
+  setState(state => ({
+    ...state,
+    existingFields: emptinessInfo.reduce((acc, info) => {
+      acc[info.id] = booleanMap(info.existingFieldNames);
+      return acc;
+    }, state.existingFields),
+  }));
+}
+
+function booleanMap(keys: string[]) {
+  return keys.reduce(
+    (acc, key) => {
+      acc[key] = true;
+      return acc;
+    },
+    {} as Record<string, boolean>
+  );
 }
 
 function isSingleEmptyLayer(layerMap: IndexPatternPrivateState['layers']) {

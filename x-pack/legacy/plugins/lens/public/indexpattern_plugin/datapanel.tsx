@@ -7,7 +7,8 @@
 import { uniq, indexBy } from 'lodash';
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import {
-  EuiLoadingSpinner,
+  // @ts-ignore
+  EuiHighlight,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
@@ -36,6 +37,8 @@ import {
   IndexPatternField,
   IndexPatternRef,
 } from './types';
+import { syncEmptyFields } from './loader';
+import { fieldExists } from './state_helpers';
 
 type Props = DatasourceDataPanelProps<IndexPatternPrivateState> & {
   changeIndexPattern: (
@@ -82,28 +85,24 @@ export function IndexPatternDataPanel({
     [state, setState]
   );
 
-  const updateFieldsWithCounts = useCallback(
-    (indexPatternId: string, allFields: IndexPattern['fields']) => {
-      setState(prevState => {
-        return {
-          ...prevState,
-          indexPatterns: {
-            ...prevState.indexPatterns,
-            [indexPatternId]: {
-              ...prevState.indexPatterns[indexPatternId],
-              hasExistence: true,
-              fields: allFields,
-            },
-          },
-        };
-      });
-    },
-    [currentIndexPatternId, indexPatterns[currentIndexPatternId]]
-  );
-
   const onToggleEmptyFields = useCallback(() => {
     setState(prevState => ({ ...prevState, showEmptyFields: !prevState.showEmptyFields }));
   }, [setState]);
+
+  const indexPatternIds = _.uniq(
+    Object.values(state.layers)
+      .map(l => l.indexPatternId)
+      .concat(state.currentIndexPatternId)
+  ).filter(id => state.indexPatterns[id]);
+
+  useEffect(() => {
+    syncEmptyFields({
+      dateRange,
+      indexPatternIds,
+      fetchJson: core.http.get,
+      setState,
+    });
+  }, [dateRange, indexPatternIds.join(',')]);
 
   return (
     <MemoizedDataPanel
@@ -117,23 +116,12 @@ export function IndexPatternDataPanel({
       onToggleEmptyFields={onToggleEmptyFields}
       core={core}
       onChangeIndexPattern={onChangeIndexPattern}
-      updateFieldsWithCounts={
-        !indexPatterns[currentIndexPatternId].hasExistence ? updateFieldsWithCounts : undefined
-      }
+      existingFields={state.existingFields}
     />
   );
 }
 
-type OverallFields = Record<
-  string,
-  {
-    count: number;
-    cardinality: number;
-  }
->;
-
 interface DataPanelState {
-  isLoading: boolean;
   nameFilter: string;
   typeFilter: DataType[];
   isTypeFilterOpen: boolean;
@@ -147,10 +135,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   dateRange,
   dragDropContext,
   onChangeIndexPattern,
-  updateFieldsWithCounts,
   showEmptyFields,
   onToggleEmptyFields,
   core,
+  existingFields,
 }: Partial<DatasourceDataPanelProps> & {
   currentIndexPatternId: string;
   indexPatternRefs: IndexPatternRef[];
@@ -162,7 +150,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   showEmptyFields: boolean;
   onToggleEmptyFields: () => void;
   onChangeIndexPattern: (newId: string) => void;
-  updateFieldsWithCounts?: (indexPatternId: string, fields: IndexPattern['fields']) => void;
+  existingFields: IndexPatternPrivateState['existingFields'];
 }) {
   if (Object.keys(indexPatterns).length === 0) {
     return (
@@ -194,7 +182,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   }
 
   const [localState, setLocalState] = useState<DataPanelState>({
-    isLoading: false,
     nameFilter: '',
     typeFilter: [],
     isTypeFilterOpen: false,
@@ -242,14 +229,14 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     }
 
     if (!showEmptyFields) {
-      const indexField =
-        currentIndexPattern && currentIndexPattern.hasExistence && fieldByName[field.name];
+      const indexField = currentIndexPattern && fieldByName[field.name];
+      const exists =
+        indexField && fieldExists(existingFields, currentIndexPatternId, indexField.name);
       if (localState.typeFilter.length > 0) {
-        return (
-          indexField && indexField.exists && localState.typeFilter.includes(field.type as DataType)
-        );
+        return exists && localState.typeFilter.includes(field.type as DataType);
       }
-      return indexField && indexField.exists;
+
+      return exists;
     }
 
     if (localState.typeFilter.length > 0) {
@@ -260,60 +247,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   });
 
   const paginatedFields = displayedFields.sort(sortFields).slice(0, pageSize);
-
-  // Side effect: Fetch field existence data when the index pattern is switched
-  useEffect(() => {
-    if (localState.isLoading || currentIndexPattern.hasExistence || !updateFieldsWithCounts) {
-      return;
-    }
-
-    setLocalState(s => ({ ...s, isLoading: true }));
-
-    core.http
-      .post(`/api/lens/index_stats/${currentIndexPattern.title}`, {
-        body: JSON.stringify({
-          fromDate: dateRange.fromDate,
-          toDate: dateRange.toDate,
-          size: 500,
-          timeFieldName: currentIndexPattern.timeFieldName,
-          fields: allFields
-            .filter(field => field.aggregatable)
-            .map(field => ({
-              name: field.name,
-              type: field.type,
-            })),
-        }),
-      })
-      .then((results: OverallFields) => {
-        setLocalState(s => ({
-          ...s,
-          isLoading: false,
-        }));
-
-        if (!updateFieldsWithCounts) {
-          return;
-        }
-
-        updateFieldsWithCounts(
-          currentIndexPatternId,
-          allFields.map(field => {
-            const matching = results[field.name];
-            if (!matching) {
-              return { ...field, exists: false };
-            }
-            return {
-              ...field,
-              exists: true,
-              cardinality: matching.cardinality,
-              count: matching.count,
-            };
-          })
-        );
-      })
-      .catch(() => {
-        setLocalState(s => ({ ...s, isLoading: false }));
-      });
-  }, [currentIndexPatternId]);
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
@@ -478,8 +411,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             onScroll={lazyScroll}
           >
             <div className="lnsInnerIndexPatternDataPanel__list">
-              {localState.isLoading && <EuiLoadingSpinner />}
-
               {paginatedFields.map(field => {
                 const overallField = fieldByName[field.name];
                 return (
@@ -489,14 +420,17 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     key={field.name}
                     field={field}
                     highlight={localState.nameFilter.toLowerCase()}
-                    exists={overallField ? !!overallField.exists : false}
+                    exists={
+                      overallField &&
+                      fieldExists(existingFields, currentIndexPatternId, overallField.name)
+                    }
                     dateRange={dateRange}
                     query={query}
                   />
                 );
               })}
 
-              {!localState.isLoading && paginatedFields.length === 0 && (
+              {paginatedFields.length === 0 && (
                 <EuiText>
                   {showEmptyFields
                     ? i18n.translate('xpack.lens.indexPatterns.hiddenFieldsLabel', {

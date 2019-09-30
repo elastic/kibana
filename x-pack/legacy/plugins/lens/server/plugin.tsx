@@ -6,12 +6,20 @@
 
 import { Plugin, CoreSetup } from 'src/core/server';
 import { setupRoutes } from './routes';
+import { ScopedSavedObjectsProvider } from './server_options';
 
 export class LensServer implements Plugin<{}, {}, {}, {}> {
-  constructor() {}
+  private getScopedSavedObjectsClient: ScopedSavedObjectsProvider;
+
+  constructor(getScopedSavedObjectsClient: ScopedSavedObjectsProvider) {
+    this.getScopedSavedObjectsClient = getScopedSavedObjectsClient;
+  }
 
   setup(core: CoreSetup) {
-    setupRoutes(core);
+    setupRoutes({
+      getScopedSavedObjectsClient: this.getScopedSavedObjectsClient,
+      router: core.http.createRouter(),
+    });
 
     return {};
   }
