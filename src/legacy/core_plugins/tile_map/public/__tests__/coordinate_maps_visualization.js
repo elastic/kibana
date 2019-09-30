@@ -60,6 +60,7 @@ mockRawData();
 
 const THRESHOLD = 0.45;
 const PIXEL_DIFF = 64;
+let visRegComplete = false;
 
 describe('CoordinateMapsVisualizationTest', function () {
   let domNode;
@@ -84,7 +85,11 @@ describe('CoordinateMapsVisualizationTest', function () {
         $injector,
       };
 
-      visualizationsSetup.types.registerVisualization(() => createTileMapTypeDefinition(dependencies));
+      if(!visRegComplete) {
+        visRegComplete = true;
+        visualizationsSetup.types.registerVisualization(() => createTileMapTypeDefinition(dependencies));
+      }
+
 
       Vis = Private(visModule.VisProvider);
       CoordinateMapsVisualization = createTileMapVisualization(dependencies);

@@ -27,6 +27,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { DataPublicPlugin as Plugin };
 
 export * from '../common';
-
 export * from './autocomplete_provider';
+
 export * from './types';

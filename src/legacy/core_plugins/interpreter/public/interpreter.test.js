@@ -36,7 +36,9 @@ jest.mock('@kbn/interpreter/common', () => ({
 }));
 
 const mockInterpreter = {
-  interpretAst: jest.fn(),
+  interpreter: {
+    interpretAst: jest.fn(),
+  }
 };
 jest.mock('./lib/interpreter', () => ({
   initializeInterpreter: jest.fn().mockReturnValue(Promise.resolve(mockInterpreter)),
@@ -71,12 +73,6 @@ describe('interpreter/interpreter', () => {
     it('initializes interpreter', async () => {
       await getInterpreter();
       expect(initializeInterpreter).toHaveBeenCalledTimes(1);
-      expect(initializeInterpreter.mock.calls[0][0]).toMatchObject({
-        ajaxStream: expect.any(Function),
-        http: expect.any(Object),
-        typesRegistry: expect.any(Function),
-        functionsRegistry: expect.any(Function),
-      });
     });
 
     it('only initializes interpreter once', async () => {
@@ -110,15 +106,15 @@ describe('interpreter/interpreter', () => {
     it('calls interpreter.interpretAst with the provided params', async () => {
       const params = [{}];
       await interpretAst(...params);
-      expect(mockInterpreter.interpretAst).toHaveBeenCalledTimes(1);
-      expect(mockInterpreter.interpretAst).toHaveBeenCalledWith(...params);
+      expect(mockInterpreter.interpreter.interpretAst).toHaveBeenCalledTimes(1);
+      expect(mockInterpreter.interpreter.interpretAst).toHaveBeenCalledWith(...params);
     });
 
     it('calls interpreter.interpretAst each time', async () => {
       const params = [{}];
       await interpretAst(...params);
       await interpretAst(...params);
-      expect(mockInterpreter.interpretAst).toHaveBeenCalledTimes(2);
+      expect(mockInterpreter.interpreter.interpretAst).toHaveBeenCalledTimes(2);
     });
   });
 
