@@ -36,6 +36,7 @@ import { Executor } from 'selenium-webdriver/lib/http';
 // @ts-ignore internal modules are not typed
 import { getLogger } from 'selenium-webdriver/lib/logging';
 
+import { resolve, delimiter } from 'path';
 import { preventParallelCalls } from './prevent_parallel_calls';
 
 import { Browsers } from './browsers';
@@ -106,12 +107,11 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
 
       case 'ie':
         // https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/ie_exports_Options.html
-        if (process.env.PWD.includes('x-pack')) {
-          process.env.PATH = '..\\node_modules\\iedriver\\lib\\iedriver\\;' + process.env.PATH;
-        } else {
-          process.env.PATH = 'node_modules\\iedriver\\lib\\iedriver\\;' + process.env.PATH;
-        }
-        // console.log(`${process.env['PATH']}`);
+        const driverPath = resolve(
+          __dirname,
+          '..\\..\\..\\..\\node_modules\\iedriver\\lib\\iedriver'
+        );
+        process.env.PATH = driverPath + delimiter + process.env.PATH;
 
         const ieCapabilities = Capabilities.ie();
         ieCapabilities.set('se:ieOptions', {
