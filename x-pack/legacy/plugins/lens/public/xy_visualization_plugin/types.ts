@@ -10,6 +10,13 @@ import {
   ExpressionFunction,
   ArgumentType,
 } from '../../../../../../src/legacy/core_plugins/interpreter/public';
+
+import chartAreaSVG from '../assets/chart_area.svg';
+import chartAreaStackedSVG from '../assets/chart_area_stacked.svg';
+import chartBarSVG from '../assets/chart_bar.svg';
+import chartBarStackedSVG from '../assets/chart_bar_stacked.svg';
+import chartLineSVG from '../assets/chart_line.svg';
+
 import { VisualizationType } from '..';
 
 export interface LegendConfig {
@@ -217,6 +224,7 @@ export const visualizationTypes: VisualizationType[] = [
   {
     id: 'bar',
     icon: 'visBarVertical',
+    largeIcon: chartBarSVG,
     label: i18n.translate('xpack.lens.xyVisualization.barLabel', {
       defaultMessage: 'Bar',
     }),
@@ -224,6 +232,7 @@ export const visualizationTypes: VisualizationType[] = [
   {
     id: 'bar_stacked',
     icon: 'visBarVertical',
+    largeIcon: chartBarStackedSVG,
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarLabel', {
       defaultMessage: 'Stacked Bar',
     }),
@@ -231,6 +240,7 @@ export const visualizationTypes: VisualizationType[] = [
   {
     id: 'line',
     icon: 'visLine',
+    largeIcon: chartLineSVG,
     label: i18n.translate('xpack.lens.xyVisualization.lineLabel', {
       defaultMessage: 'Line',
     }),
@@ -238,6 +248,7 @@ export const visualizationTypes: VisualizationType[] = [
   {
     id: 'area',
     icon: 'visArea',
+    largeIcon: chartAreaSVG,
     label: i18n.translate('xpack.lens.xyVisualization.areaLabel', {
       defaultMessage: 'Area',
     }),
@@ -245,6 +256,7 @@ export const visualizationTypes: VisualizationType[] = [
   {
     id: 'area_stacked',
     icon: 'visArea',
+    largeIcon: chartAreaStackedSVG,
     label: i18n.translate('xpack.lens.xyVisualization.stackedAreaLabel', {
       defaultMessage: 'Stacked Area',
     }),

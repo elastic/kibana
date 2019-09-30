@@ -64,7 +64,7 @@ function VisualizationSummary(props: Props) {
   return (
     <>
       {description.icon && (
-        <EuiIcon className="lnsChartSwitch__summaryIcon" type={description.icon} />
+        <EuiIcon size="xl" className="lnsChartSwitch__summaryIcon" type={description.icon} />
       )}
       {description.label}
     </>
@@ -157,6 +157,7 @@ export function ChartSwitch(props: Props) {
           v.visualizationTypes.map(t => ({
             visualizationId: v.id,
             ...t,
+            icon: t.largeIcon || t.icon,
           }))
         )
       ).map(visualizationType => ({
@@ -225,7 +226,7 @@ export function ChartSwitch(props: Props) {
             }
             betaBadgeIconType={v.selection.dataLoss !== 'nothing' ? 'alert' : undefined}
           >
-            <EuiIcon type={v.icon || 'empty'} size="l" />
+            <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} size="l" />
           </EuiKeyPadMenuItemButton>
         ))}
       </EuiKeyPadMenu>

@@ -19,6 +19,7 @@ import {
 } from '../types';
 import { generateId } from '../id_generator';
 import { NativeRenderer } from '../native_renderer';
+import chartTableSVG from '../assets/chart_datatable.svg';
 
 export interface LayerState {
   layerId: string;
@@ -97,6 +98,7 @@ export const datatableVisualization: Visualization<
     {
       id: 'lnsDatatable',
       icon: 'visTable',
+      largeIcon: chartTableSVG,
       label: i18n.translate('xpack.lens.datatable.label', {
         defaultMessage: 'Datatable',
       }),
@@ -105,7 +107,7 @@ export const datatableVisualization: Visualization<
 
   getDescription(state) {
     return {
-      icon: 'visTable',
+      icon: chartTableSVG,
       label: i18n.translate('xpack.lens.datatable.label', {
         defaultMessage: 'Datatable',
       }),
@@ -168,7 +170,7 @@ export const datatableVisualization: Visualization<
             },
           ],
         },
-        previewIcon: 'visTable',
+        previewIcon: chartTableSVG,
         // dont show suggestions for reduced versions or single-line tables
         hide: table.changeType === 'reduced' || !table.isMultiRow,
       },

@@ -14,6 +14,7 @@ import { MetricConfigPanel } from './metric_config_panel';
 import { Visualization, FramePublicAPI } from '../types';
 import { State, PersistableState } from './types';
 import { generateId } from '../id_generator';
+import chartMetricSVG from '../assets/chart_metric.svg';
 
 const toExpression = (
   state: State,
@@ -46,6 +47,7 @@ export const metricVisualization: Visualization<State, PersistableState> = {
     {
       id: 'lnsMetric',
       icon: 'visMetric',
+      largeIcon: chartMetricSVG,
       label: i18n.translate('xpack.lens.metric.label', {
         defaultMessage: 'Metric',
       }),
@@ -54,7 +56,7 @@ export const metricVisualization: Visualization<State, PersistableState> = {
 
   getDescription() {
     return {
-      icon: 'visMetric',
+      icon: chartMetricSVG,
       label: i18n.translate('xpack.lens.metric.label', {
         defaultMessage: 'Metric',
       }),

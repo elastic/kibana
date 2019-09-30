@@ -19,6 +19,7 @@ import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins
 import { SuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
 import { getSuggestions, Suggestion } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
+import chartTableSVG from '../../..assets/chart_datatable.svg';
 
 jest.mock('./suggestion_helpers');
 
@@ -279,7 +280,7 @@ describe('suggestion_panel', () => {
 
     expect(passedExpression).toMatchInlineSnapshot(`
       "kibana
-      | kibana_context timeRange=\\"{\\\\\\"from\\\\\\":\\\\\\"now-7d\\\\\\",\\\\\\"to\\\\\\":\\\\\\"now\\\\\\"}\\" query=\\"{\\\\\\"query\\\\\\":\\\\\\"\\\\\\",\\\\\\"language\\\\\\":\\\\\\"lucene\\\\\\"}\\" 
+      | kibana_context timeRange=\\"{\\\\\\"from\\\\\\":\\\\\\"now-7d\\\\\\",\\\\\\"to\\\\\\":\\\\\\"now\\\\\\"}\\" query=\\"{\\\\\\"query\\\\\\":\\\\\\"\\\\\\",\\\\\\"language\\\\\\":\\\\\\"lucene\\\\\\"}\\"
       | lens_merge_tables layerIds=\\"first\\" tables={datasource_expression}
       | test
       | expression"
@@ -291,7 +292,7 @@ describe('suggestion_panel', () => {
     getSuggestionsMock.mockReturnValue([
       {
         datasourceState: {},
-        previewIcon: 'visTable',
+        previewIcon: chartTableSVG,
         score: 0.5,
         visualizationState: suggestion1State,
         visualizationId: 'vis',
@@ -319,6 +320,6 @@ describe('suggestion_panel', () => {
     const wrapper = mount(<SuggestionPanel {...defaultProps} />);
 
     expect(wrapper.find(EuiIcon)).toHaveLength(1);
-    expect(wrapper.find(EuiIcon).prop('type')).toEqual('visTable');
+    expect(wrapper.find(EuiIcon).prop('type')).toEqual(chartTableSVG);
   });
 });

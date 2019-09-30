@@ -11,3 +11,9 @@
   margin-right: $euiSizeS;
   transform: translateY(-2px);
 }
+
+// Targeting img as this won't target normal EuiIcon's only the custom svgs's
+img.lnsChartSwitch__chartIcon { // sass-lint:disable-line no-qualifying-elements
+  // The large icons aren't square so max out the width to fill the height
+  width: 100%;
+}

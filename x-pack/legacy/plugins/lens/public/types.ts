@@ -5,7 +5,7 @@
  */
 
 import { Ast } from '@kbn/interpreter/common';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { EuiIconType, IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'src/core/public';
 import { Query } from 'src/plugins/data/common';
 import { KibanaDatatable } from '../../../../../src/legacy/core_plugins/interpreter/common';
@@ -292,6 +292,7 @@ export interface FramePublicAPI {
 export interface VisualizationType {
   id: string;
   icon?: EuiIconType | string;
+  largeIcon?: IconType;
   label: string;
 }
 

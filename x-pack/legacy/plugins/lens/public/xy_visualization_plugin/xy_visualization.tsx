@@ -38,7 +38,7 @@ function getDescription(state?: State) {
   const seriesTypes = _.unique(state.layers.map(l => l.seriesType));
 
   return {
-    icon: visualizationType.icon,
+    icon: visualizationType.largeIcon || visualizationType.icon,
     label:
       seriesTypes.length === 1
         ? visualizationType.label
