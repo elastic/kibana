@@ -18,7 +18,7 @@
  */
 
 import { ReactNode, ChangeEvent, FormEvent, MouseEvent, MutableRefObject } from 'react';
-import { Subject } from './lib';
+import { Subject, Subscription } from './lib';
 
 // This type will convert all optional property to required ones
 // Comes from https://github.com/microsoft/TypeScript/issues/15012#issuecomment-365453623
@@ -27,8 +27,9 @@ type Required<T> = T extends object ? { [P in keyof T]-?: NonNullable<T[P]> } : 
 export interface FormHook<T extends object = FormData> {
   readonly isSubmitted: boolean;
   readonly isSubmitting: boolean;
-  readonly isValid: boolean;
+  readonly isValid: boolean | undefined;
   submit: (e?: FormEvent<HTMLFormElement> | MouseEvent) => Promise<{ data: T; isValid: boolean }>;
+  subscribe: (handler: OnUpdateHandler<T>) => Subscription;
   setFieldValue: (fieldName: string, value: FieldValue) => void;
   setFieldErrors: (fieldName: string, errors: ValidationError[]) => void;
   getFields: () => FieldsMap;
@@ -38,7 +39,7 @@ export interface FormHook<T extends object = FormData> {
   readonly __formData$: MutableRefObject<Subject<T>>;
   __addField: (field: FieldHook) => void;
   __removeField: (fieldNames: string | string[]) => void;
-  __validateFields: (fieldNames?: string[]) => Promise<boolean>;
+  __validateFields: (fieldNames: string[]) => Promise<boolean>;
   __updateFormDataAt: (field: string, value: unknown) => T;
   __readFieldConfigFromSchema: (fieldName: string) => FieldConfig;
 }
@@ -46,6 +47,7 @@ export interface FormHook<T extends object = FormData> {
 export interface FormSchema<T extends object = FormData> {
   [key: string]: FormSchemaEntry<T>;
 }
+
 type FormSchemaEntry<T extends object> =
   | FieldConfig<T>
   | Array<FieldConfig<T>>
@@ -59,6 +61,17 @@ export interface FormConfig<T extends object = FormData> {
   deserializer?: SerializerFunc;
   options?: FormOptions;
 }
+
+export interface OnFormUpdateArg<T extends object> {
+  data: {
+    raw: { [key: string]: any };
+    format: () => T;
+  };
+  validate: () => Promise<boolean>;
+  isValid?: boolean;
+}
+
+export type OnUpdateHandler<T extends object> = (arg: OnFormUpdateArg<T>) => void;
 
 export interface FormOptions {
   errorDisplayDelay?: number;
@@ -77,6 +90,7 @@ export interface FieldHook {
   readonly errors: ValidationError[];
   readonly isPristine: boolean;
   readonly isValidating: boolean;
+  readonly isValidated: boolean;
   readonly isChangingValue: boolean;
   readonly form: FormHook<any>;
   getErrorsMessages: (args?: {

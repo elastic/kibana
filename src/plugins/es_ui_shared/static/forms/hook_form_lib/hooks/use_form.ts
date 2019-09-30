@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { get } from 'lodash';
 
-import { FormHook, FormData, FieldConfig, FieldsMap, FormConfig } from '../types';
-import { mapFormFields, flattenObject, unflattenObject, Subject } from '../lib';
+import { FormHook, FieldHook, FormData, FieldConfig, FieldsMap, FormConfig } from '../types';
+import { mapFormFields, flattenObject, unflattenObject, Subject, Subscription } from '../lib';
 
 const DEFAULT_ERROR_DISPLAY_TIMEOUT = 500;
 const DEFAULT_OPTIONS = {
@@ -49,8 +49,9 @@ export function useForm<T extends object = FormData>(
     Object.keys(defaultValue).length === 0 ? defaultValue : deserializer(defaultValue);
   const [isSubmitted, setSubmitted] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
-  const [isValid, setIsValid] = useState(true);
+  const [isValid, setIsValid] = useState<boolean | undefined>(undefined);
   const fieldsRefs = useRef<FieldsMap>({});
+  const formUpdateSubscribers = useRef<Subscription[]>([]);
 
   // formData$ is an observable we can subscribe to in order to receive live
   // update of the raw form data. As an observable it does not trigger any React
@@ -58,6 +59,13 @@ export function useForm<T extends object = FormData>(
   // The <FormDataProvider> component is the one in charge of reading this observable
   // and updating its state to trigger the necessary view render.
   const formData$ = useRef<Subject<T>>(new Subject<T>(flattenObject(defaultValue) as T));
+
+  useEffect(() => {
+    return () => {
+      formUpdateSubscribers.current.forEach(subscription => subscription.unsubscribe());
+      formUpdateSubscribers.current = [];
+    };
+  }, []);
 
   // -- HELPERS
   // ----------------------------------
@@ -78,6 +86,12 @@ export function useForm<T extends object = FormData>(
     return fields;
   };
 
+  const updateFormDataAt: FormHook<T>['__updateFormDataAt'] = (path, value) => {
+    const currentFormData = formData$.current.value;
+    formData$.current.next({ ...currentFormData, [path]: value });
+    return formData$.current.value;
+  };
+
   // -- API
   // ----------------------------------
   const getFormData: FormHook<T>['getFormData'] = (getDataOptions = { unflatten: true }) =>
@@ -93,34 +107,52 @@ export function useForm<T extends object = FormData>(
           {} as T
         );
 
-  const updateFormDataAt: FormHook<T>['__updateFormDataAt'] = (path, value) => {
-    const currentFormData = formData$.current.value;
-    formData$.current.next({ ...currentFormData, [path]: value });
-    return formData$.current.value;
+  const isFieldValid = (field: FieldHook) =>
+    field.getErrorsMessages() === null && !field.isValidating;
+
+  const updateFormValidity = () => {
+    const fieldsArray = fieldsToArray();
+    const areAllFieldsValidated = fieldsArray.every(field => field.isValidated);
+
+    if (!areAllFieldsValidated) {
+      // If *not* all the fiels have been validated, the validity of the form is unknown, thus still "undefined"
+      return;
+    }
+
+    const isFormValid = fieldsArray.every(isFieldValid);
+
+    setIsValid(isFormValid);
+    return isFormValid;
   };
 
-  /**
-   * When a field value changes, validateFields() is called with the field name + any other fields
-   * declared in the "fieldsToValidateOnChange" (see the field config).
-   *
-   * When this method is called _without_ providing any fieldNames, we only need to validate fields that are pristine
-   * as the fields that are dirty have already been validated when their value changed.
-   */
   const validateFields: FormHook<T>['__validateFields'] = async fieldNames => {
     const fieldsToValidate = fieldNames
-      ? fieldNames.map(name => fieldsRefs.current[name]).filter(field => field !== undefined)
-      : fieldsToArray().filter(field => field.isPristine); // only validate fields that haven't been changed
+      .map(name => fieldsRefs.current[name])
+      .filter(field => field !== undefined);
+
+    if (fieldsToValidate.length === 0) {
+      // Nothing to validate
+      return true;
+    }
 
     const formData = getFormData({ unflatten: false });
-
     await Promise.all(fieldsToValidate.map(field => field.validate({ formData })));
+    updateFormValidity();
 
-    const isFormValid = fieldsToArray().every(
-      field => field.getErrorsMessages() === null && !field.isValidating
-    );
-    setIsValid(isFormValid);
+    return fieldsToValidate.every(isFieldValid);
+  };
 
-    return isFormValid;
+  const validateAllFields = async (): Promise<boolean> => {
+    const fieldsToValidate = fieldsToArray().filter(field => !field.isValidated);
+
+    if (fieldsToValidate.length === 0) {
+      // Nothing left to validate, all fields are already validated.
+      return isValid!;
+    }
+
+    await validateFields(fieldsToValidate.map(field => field.path));
+
+    return updateFormValidity()!;
   };
 
   const addField: FormHook<T>['__addField'] = field => {
@@ -174,16 +206,28 @@ export function useForm<T extends object = FormData>(
     }
     setSubmitting(true);
 
-    const isFormValid = await validateFields();
+    const isFormValid = await validateAllFields();
     const formData = serializer(getFormData() as T);
 
     if (onSubmit) {
-      await onSubmit(formData, isFormValid);
+      await onSubmit(formData, isFormValid!);
     }
 
     setSubmitting(false);
 
-    return { data: formData, isValid: isFormValid };
+    return { data: formData, isValid: isFormValid! };
+  };
+
+  const subscribe: FormHook<T>['subscribe'] = handler => {
+    const format = () => serializer(getFormData() as T);
+    const validate = async () => await validateAllFields();
+
+    const subscription = formData$.current.subscribe(raw => {
+      handler({ isValid, data: { raw, format }, validate });
+    });
+
+    formUpdateSubscribers.current.push(subscription);
+    return subscription;
   };
 
   const form: FormHook<T> = {
@@ -191,6 +235,7 @@ export function useForm<T extends object = FormData>(
     isSubmitting,
     isValid,
     submit: submitForm,
+    subscribe,
     setFieldValue,
     setFieldErrors,
     getFields,
