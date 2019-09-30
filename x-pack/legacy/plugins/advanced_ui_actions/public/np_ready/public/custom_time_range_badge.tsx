@@ -7,16 +7,12 @@
 import React from 'react';
 import { prettyDuration, commonDurationRanges } from '@elastic/eui';
 
+import { IEmbeddable, Embeddable, EmbeddableInput } from 'src/plugins/embeddable/public';
 import {
   IAction,
   IncompatibleActionError,
 } from '../../../../../../../src/plugins/ui_actions/public';
 import { TimeRange } from '../../../../../../../src/plugins/data/public';
-import {
-  IEmbeddable,
-  Embeddable,
-  EmbeddableInput,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 
 import { CustomizeTimeRangeModal } from './customize_time_range_modal';
 import { doesInheritTimeRange } from './does_inherit_time_range';

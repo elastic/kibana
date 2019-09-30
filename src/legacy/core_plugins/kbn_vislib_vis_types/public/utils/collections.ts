@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { colorSchemas } from 'ui/vislib/components/color/colormaps';
 
 export enum Positions {
   RIGHT = 'right',
@@ -26,7 +27,7 @@ export enum Positions {
   BOTTOM = 'bottom',
 }
 
-const positions = [
+const getPositions = () => [
   {
     text: i18n.translate('kbnVislibVisTypes.legendPositions.topText', {
       defaultMessage: 'Top',
@@ -59,7 +60,7 @@ export enum ChartTypes {
   HISTOGRAM = 'histogram',
 }
 
-const chartTypes = [
+const getChartTypes = () => [
   {
     text: i18n.translate('kbnVislibVisTypes.chartTypes.lineText', {
       defaultMessage: 'Line',
@@ -85,7 +86,7 @@ export enum ChartModes {
   STACKED = 'stacked',
 }
 
-const chartModes = [
+const getChartModes = () => [
   {
     text: i18n.translate('kbnVislibVisTypes.chartModes.normalText', {
       defaultMessage: 'Normal',
@@ -106,7 +107,7 @@ export enum InterpolationModes {
   STEP_AFTER = 'step-after',
 }
 
-const interpolationModes = [
+const getInterpolationModes = () => [
   {
     text: i18n.translate('kbnVislibVisTypes.interpolationModes.straightText', {
       defaultMessage: 'Straight',
@@ -138,7 +139,7 @@ export enum ScaleTypes {
   SQUARE_ROOT = 'square root',
 }
 
-const scaleTypes = [
+const getScaleTypes = () => [
   {
     text: i18n.translate('kbnVislibVisTypes.scaleTypes.linearText', {
       defaultMessage: 'Linear',
@@ -166,7 +167,7 @@ export enum AxisModes {
   SILHOUETTE = 'silhouette',
 }
 
-const axisModes = [
+const getAxisModes = () => [
   {
     text: i18n.translate('kbnVislibVisTypes.axisModes.normalText', {
       defaultMessage: 'Normal',
@@ -205,7 +206,7 @@ export enum ThresholdLineStyles {
   DOT_DASHED = 'dot-dashed',
 }
 
-const thresholdLineStyles = [
+const getThresholdLineStyles = () => [
   {
     value: ThresholdLineStyles.FULL,
     text: i18n.translate('kbnVislibVisTypes.thresholdLine.style.fullText', {
@@ -226,7 +227,7 @@ const thresholdLineStyles = [
   },
 ];
 
-const rotateOptions = [
+const getRotateOptions = () => [
   {
     text: i18n.translate('kbnVislibVisTypes.categoryAxis.rotate.horizontalText', {
       defaultMessage: 'Horizontal',
@@ -247,15 +248,86 @@ const rotateOptions = [
   },
 ];
 
+export enum GaugeTypes {
+  ARC = 'Arc',
+  CIRCLE = 'Circle',
+}
+
+export enum GaugeColorModes {
+  LABELS = 'Labels',
+  NONE = 'None',
+}
+
+const getGaugeTypes = () => [
+  {
+    text: i18n.translate('kbnVislibVisTypes.gauge.gaugeTypes.arcText', {
+      defaultMessage: 'Arc',
+    }),
+    value: GaugeTypes.ARC,
+  },
+  {
+    text: i18n.translate('kbnVislibVisTypes.gauge.gaugeTypes.circleText', {
+      defaultMessage: 'Circle',
+    }),
+    value: GaugeTypes.CIRCLE,
+  },
+];
+
+export enum Alignments {
+  AUTOMATIC = 'automatic',
+  HORIZONTAL = 'horizontal',
+  VERTICAL = 'vertical',
+}
+
+const getAlignments = () => [
+  {
+    text: i18n.translate('kbnVislibVisTypes.gauge.alignmentAutomaticTitle', {
+      defaultMessage: 'Automatic',
+    }),
+    value: Alignments.AUTOMATIC,
+  },
+  {
+    text: i18n.translate('kbnVislibVisTypes.gauge.alignmentHorizontalTitle', {
+      defaultMessage: 'Horizontal',
+    }),
+    value: Alignments.HORIZONTAL,
+  },
+  {
+    text: i18n.translate('kbnVislibVisTypes.gauge.alignmentVerticalTitle', {
+      defaultMessage: 'Vertical',
+    }),
+    value: Alignments.VERTICAL,
+  },
+];
+
 const getConfigCollections = () => ({
-  legendPositions: positions,
-  positions,
-  chartTypes,
-  axisModes,
-  scaleTypes,
-  chartModes,
-  interpolationModes,
-  thresholdLineStyles,
+  legendPositions: getPositions(),
+  positions: getPositions(),
+  chartTypes: getChartTypes(),
+  axisModes: getAxisModes(),
+  scaleTypes: getScaleTypes(),
+  chartModes: getChartModes(),
+  interpolationModes: getInterpolationModes(),
+  thresholdLineStyles: getThresholdLineStyles(),
 });
 
-export { getConfigCollections, rotateOptions };
+const getGaugeCollections = () => ({
+  gaugeTypes: getGaugeTypes(),
+  alignments: getAlignments(),
+  colorSchemas,
+});
+
+const getHeatmapCollections = () => ({
+  legendPositions: getPositions(),
+  scales: getScaleTypes(),
+  colorSchemas,
+});
+
+export {
+  getConfigCollections,
+  getGaugeCollections,
+  getHeatmapCollections,
+  getPositions,
+  getRotateOptions,
+  getScaleTypes,
+};
