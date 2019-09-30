@@ -5,23 +5,25 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { IUiActionsStart } from 'src/plugins/ui_actions/public';
+import { IUiActionsStart, IUiActionsSetup } from 'src/plugins/ui_actions/public';
 import {
-  Plugin as EmbeddablePlugin,
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+  Setup as EmbeddableSetup,
+  Start as EmbeddableStart,
+} from '../../../../../../../src/plugins/embeddable/public';
 import { CustomTimeRangeAction } from './custom_time_range_action';
 
 import { CustomTimeRangeBadge } from './custom_time_range_badge';
 import { CommonlyUsedRange } from './types';
 
 interface SetupDependencies {
-  embeddable: ReturnType<EmbeddablePlugin['setup']>;
+  embeddable: EmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
+  uiActions: IUiActionsSetup;
 }
 
 interface StartDependencies {
-  embeddable: ReturnType<EmbeddablePlugin['start']>;
+  embeddable: EmbeddableStart;
   uiActions: IUiActionsStart;
 }
 
@@ -32,9 +34,9 @@ export class AdvancedUiActionsPublicPlugin
   implements Plugin<Setup, Start, SetupDependencies, StartDependencies> {
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { embeddable }: SetupDependencies): Setup {}
+  public setup(core: CoreSetup, { uiActions }: SetupDependencies): Setup {}
 
-  public start(core: CoreStart, { embeddable, uiActions }: StartDependencies): Start {
+  public start(core: CoreStart, { uiActions }: StartDependencies): Start {
     const dateFormat = core.uiSettings.get('dateFormat') as string;
     const commonlyUsedRanges = core.uiSettings.get('timepicker:quickRanges') as CommonlyUsedRange[];
     const timeRangeAction = new CustomTimeRangeAction({

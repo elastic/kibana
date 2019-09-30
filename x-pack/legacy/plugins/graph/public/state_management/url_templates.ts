@@ -12,15 +12,9 @@ import rison from 'rison-node';
 import { GraphState } from './store';
 import { UrlTemplate } from '../types';
 import { reset } from './global';
-import {
-  setDatasource,
-  IndexpatternDatasource,
-  NoDatasource,
-  requestDatasource,
-} from './datasource';
+import { setDatasource, IndexpatternDatasource, requestDatasource } from './datasource';
 import { outlinkEncoders } from '../helpers/outlink_encoders';
 import { urlTemplatePlaceholder } from '../helpers/url_template';
-import { matchesOne } from './helpers';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/urlTemplates');
 
