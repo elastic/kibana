@@ -6,23 +6,56 @@
 
 import React, { FC } from 'react';
 
-import { EuiCard, EuiIcon, IconType } from '@elastic/eui';
+import {
+  EuiIcon,
+  IconType,
+  EuiText,
+  EuiTitle,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiPanel,
+  EuiLink,
+} from '@elastic/eui';
 
 interface Props {
   iconType: IconType;
-  title: string;
-  description: string;
-  onClick(): void;
+  title: any;
+  description: any;
+  href?: string;
+  onClick?: () => void;
+  isDisabled?: boolean;
 }
 
 // Component for rendering a card which links to the Create Job page, displaying an
 // icon, card title, description and link.
-export const CreateJobLinkCard: FC<Props> = ({ iconType, title, description, onClick }) => (
-  <EuiCard
-    layout="horizontal"
-    icon={<EuiIcon size="xl" type={iconType} />}
-    title={title}
-    description={description}
-    onClick={onClick}
-  />
+export const CreateJobLinkCard: FC<Props> = ({
+  iconType,
+  title,
+  description,
+  onClick,
+  href,
+  isDisabled,
+}) => (
+  <EuiPanel style={{ cursor: isDisabled ? 'not-allowed' : undefined }}>
+    {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+    <EuiLink
+      href={href}
+      onClick={onClick}
+      style={{ display: 'block', pointerEvents: isDisabled ? 'none' : undefined }}
+    >
+      <EuiFlexGroup gutterSize="l" responsive={true}>
+        <EuiFlexItem grow={false} style={{ paddingTop: '8px' }}>
+          <EuiIcon size="xl" type={iconType} aria-label="" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h3>{title}</h3>
+          </EuiTitle>
+          <EuiText color="subdued">
+            <p>{description}</p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiLink>
+  </EuiPanel>
 );
