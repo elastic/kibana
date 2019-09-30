@@ -4,7 +4,7 @@ see {kibana-ref}/secure-reporting.html[Securing Reporting].
 
 To configure a watch to email reports, you use the `reporting` attachment type
 in an `email` action. For more information, see
-{stack-ov}/actions-email.html#configuring-email[Configuring Email Accounts].
+{ref}/actions-email.html#configuring-email[Configuring email accounts].
 
 For example, the following watch generates a PDF report and emails the report every hour:
 
@@ -46,7 +46,7 @@ PUT _watcher/watch/error_report
 
 <1> You must configure at least one email account to enable Watcher to send email.
 For more information, see
-{xpack-ref}/actions-email.html#configuring-email[Configuring Email Accounts].
+{ref}/actions-email.html#configuring-email[Configuring email accounts].
 <2> This is an example POST URL. You can copy and paste the URL for any
 report from the Kibana UI.
 <3> Optional, default is 40
