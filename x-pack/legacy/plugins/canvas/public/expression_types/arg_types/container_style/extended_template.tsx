@@ -12,12 +12,15 @@ import { AppearanceForm } from './appearance_form';
 import { CanvasWorkpad } from '../.../../../../../types';
 import { Arguments as AppearanceArguments } from './appearance_form';
 import { Arguments as BorderArguments } from './border_form';
+import { ArgTypesStrings } from '../../../../i18n';
 
 export { BorderStyle } from './border_form';
 
 export interface Arguments extends BorderArguments, AppearanceArguments {}
 export type ArgumentTypes = Partial<BorderArguments & AppearanceArguments>;
 export type Argument = keyof ArgumentTypes;
+
+const { ContainerStyle: strings } = ArgTypesStrings;
 
 interface Props {
   getArgValue: <T extends Argument>(arg: T) => Arguments[T];
@@ -32,7 +35,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = ({
 }) => (
   <div>
     <EuiTitle size="xxxs" textTransform="uppercase">
-      <h6>Appearance</h6>
+      <h6>{strings.getAppearanceTitle()}</h6>
     </EuiTitle>
     <EuiSpacer size="xs" />
     <EuiSpacer size="xs" />
@@ -44,7 +47,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = ({
     />
     <EuiSpacer size="m" />
     <EuiTitle size="xxxs" textTransform="uppercase">
-      <h6>Border</h6>
+      <h6>{strings.getBorderTitle()}</h6>
     </EuiTitle>
     <EuiSpacer size="xs" />
     <EuiSpacer size="xs" />

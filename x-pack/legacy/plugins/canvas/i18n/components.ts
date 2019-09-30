@@ -214,6 +214,32 @@ export const ComponentStrings = {
         defaultMessage: 'Closes keyboard shortcuts reference',
       }),
   },
+  TextStylePicker: {
+    getAlignLeftLabel: () =>
+      i18n.translate('xpack.canvas.textStylePicker.alignLeftAriaLabel', {
+        defaultMessage: 'Align left',
+      }),
+    getAlignCenterLabel: () =>
+      i18n.translate('xpack.canvas.textStylePicker.alignCenterAriaLabel', {
+        defaultMessage: 'Align center',
+      }),
+    getAlignRightLabel: () =>
+      i18n.translate('xpack.canvas.textStylePicker.alignRightAriaLabel', {
+        defaultMessage: 'Align right',
+      }),
+    getBoldLabel: () =>
+      i18n.translate('xpack.canvas.textStylePicker.boldAriaLabel', {
+        defaultMessage: 'Bold',
+      }),
+    getItalicLabel: () =>
+      i18n.translate('xpack.canvas.textStylePicker.italicAriaLabel', {
+        defaultMessage: 'Italic',
+      }),
+    getUnderlineLabel: () =>
+      i18n.translate('xpack.canvas.textStylePicker.underlineAriaLabel', {
+        defaultMessage: 'Underline',
+      }),
+  },
   Toolbar: {
     getEditorButtonLabel: () =>
       i18n.translate('xpack.canvas.toolbar.editorButtonLabel', {

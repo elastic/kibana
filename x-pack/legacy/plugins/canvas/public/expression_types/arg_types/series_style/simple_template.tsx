@@ -13,8 +13,10 @@ import { ColorPickerPopover } from '../../../components/color_picker_popover';
 // @ts-ignore Untyped local
 import { TooltipIcon } from '../../../components/tooltip_icon';
 import { ExpressionAST, CanvasWorkpad } from '../../../../types';
+import { ArgTypesStrings } from '../../../../i18n';
 
 const { set, del } = immutable;
+const { SeriesStyle: strings } = ArgTypesStrings;
 
 interface Arguments {
   color: string;
@@ -49,11 +51,14 @@ export const SimpleTemplate: FunctionComponent<Props> = props => {
       {!color || color.length === 0 ? (
         <Fragment>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">Color&nbsp;</EuiText>
+            <EuiText size="s">{strings.getColorLabel()}&nbsp;</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              <EuiLink aria-label="Color: Auto" onClick={() => handleChange('color', '#000000')}>
+              <EuiLink
+                aria-label={`${strings.getColorLabel()}: Auto`}
+                onClick={() => handleChange('color', '#000000')}
+              >
                 Auto <EuiIcon type="bolt" />
               </EuiLink>
             </EuiText>
@@ -63,7 +68,7 @@ export const SimpleTemplate: FunctionComponent<Props> = props => {
         <Fragment>
           <EuiFlexItem grow={false}>
             <label htmlFor="series-style">
-              <EuiText size="s">Color&nbsp;</EuiText>
+              <EuiText size="s">{strings.getColorLabel()}&nbsp;</EuiText>
             </label>
           </EuiFlexItem>
           <EuiFlexItem style={{ fontSize: 0 }}>
@@ -79,18 +84,14 @@ export const SimpleTemplate: FunctionComponent<Props> = props => {
               iconType="cross"
               color="danger"
               onClick={() => handleChange('color', '')}
-              aria-label="Remove Series Color"
+              aria-label={strings.getRemoveAriaLabel()}
             />
           </EuiFlexItem>
         </Fragment>
       )}
       {name !== 'defaultStyle' && (!labels || labels.length === 0) && (
         <EuiFlexItem grow={false}>
-          <TooltipIcon
-            position="left"
-            icon="warning"
-            content="Data has no series to style, add a color dimension"
-          />
+          <TooltipIcon position="left" icon="warning" content={strings.getNoSeriesTooltip()} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

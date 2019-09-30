@@ -12,6 +12,9 @@ import { ESFieldsSelect } from '../../components/es_fields_select';
 import { ESFieldSelect } from '../../components/es_field_select';
 import { ESIndexSelect } from '../../components/es_index_select';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
+import { DataSourceStrings } from '../../../i18n';
+
+const { ESDocs: strings } = DataSourceStrings;
 
 const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
   const setArg = (name, value) => {
@@ -64,36 +67,38 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
     setArg('index', defaultIndex);
   }
 
-  const sortOptions = [{ value: 'asc', text: 'Ascending' }, { value: 'desc', text: 'Descending' }];
+  const sortOptions = [
+    { value: 'asc', text: strings.getAscendingOption() },
+    { value: 'desc', text: strings.getDescendingOption() },
+  ];
 
   return (
     <div>
-      <EuiCallOut size="s" title="Be careful" color="warning">
-        <p>
-          The Elasticsearch Docs datasource is used to pull documents directly from Elasticsearch
-          without the use of aggregations. It is best used with low volume datasets and in
-          situations where you need to view raw documents or plot exact, non-aggregated values on a
-          chart.
-        </p>
+      <EuiCallOut size="s" title={strings.getWarningTitle()} color="warning">
+        <p>{strings.getWarning()}</p>
       </EuiCallOut>
 
       <EuiSpacer size="m" />
 
-      <EuiFormRow label="Index" helpText="Enter an index name or select an index pattern">
+      <EuiFormRow label={strings.getIndexTitle()} helpText={strings.getIndexLabel()}>
         <ESIndexSelect value={index} onChange={index => setArg('index', index)} />
       </EuiFormRow>
 
-      <EuiFormRow label="Query" helpText="Lucene query string syntax" compressed>
+      <EuiFormRow label={strings.getQueryTitle()} helpText={strings.getQueryLabel()} compressed>
         <EuiFieldText value={getQuery()} onChange={e => setArg(getArgName(), e.target.value)} />
       </EuiFormRow>
-      <EuiFormRow label="Sort Field" helpText="Document sort field">
+      <EuiFormRow label={strings.getSortFieldTitle()} helpText={strings.getSortFieldLabel()}>
         <ESFieldSelect
           index={index}
           value={sortField}
           onChange={field => setArg('sort', [field, sortOrder].join(', '))}
         />
       </EuiFormRow>
-      <EuiFormRow label="Sort Order" helpText="Document sort order" compressed>
+      <EuiFormRow
+        label={strings.getSortOrderTitle()}
+        helpText={strings.getSortOrderLabel()}
+        compressed
+      >
         <EuiSelect
           value={sortOrder.toLowerCase()}
           onChange={e => setArg('sort', [sortField, e.target.value].join(', '))}
@@ -101,12 +106,8 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
         />
       </EuiFormRow>
       <EuiFormRow
-        label="Fields"
-        helpText={
-          fields.length <= 10
-            ? 'The fields to extract. Kibana scripted fields are not currently available'
-            : 'This datasource performs best with 10 or fewer fields'
-        }
+        label={strings.getFieldsTitle()}
+        helpText={fields.length <= 10 ? strings.getFieldsLabel() : strings.getFieldsWarningLabel()}
       >
         <ESFieldsSelect
           index={index}
@@ -126,8 +127,8 @@ EsdocsDatasource.propTypes = {
 
 export const esdocs = () => ({
   name: 'esdocs',
-  displayName: 'Elasticsearch raw documents',
-  help: 'Pull back raw documents from elasticsearch',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   image: 'logoElasticsearch',
   template: templateFromReactComponent(EsdocsDatasource),
 });

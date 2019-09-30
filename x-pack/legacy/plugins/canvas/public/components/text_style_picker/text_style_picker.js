@@ -9,7 +9,10 @@ import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 import { FontPicker } from '../font_picker';
 import { ColorPickerPopover } from '../color_picker_popover';
+import { ComponentStrings } from '../../../i18n';
 import { fontSizes } from './font_sizes';
+
+const { TextStylePicker: strings } = ComponentStrings;
 
 export const TextStylePicker = ({
   family,
@@ -25,17 +28,17 @@ export const TextStylePicker = ({
   const alignmentButtons = [
     {
       id: 'left',
-      label: 'Align left',
+      label: strings.getAlignLeftLabel(),
       iconType: 'editorAlignLeft',
     },
     {
       id: 'center',
-      label: 'Align center',
+      label: strings.getAlignCenterLabel(),
       iconType: 'editorAlignCenter',
     },
     {
       id: 'right',
-      label: 'Align right',
+      label: strings.getAlignRightLabel(),
       iconType: 'editorAlignRight',
     },
   ];
@@ -43,17 +46,17 @@ export const TextStylePicker = ({
   const styleButtons = [
     {
       id: 'bold',
-      label: 'Bold',
+      label: strings.getBoldLabel(),
       iconType: 'editorBold',
     },
     {
       id: 'italic',
-      label: 'Italic',
+      label: strings.getItalicLabel(),
       iconType: 'editorItalic',
     },
     {
       id: 'underline',
-      label: 'Underline',
+      label: strings.getUnderlineLabel(),
       iconType: 'editorUnderline',
     },
   ];

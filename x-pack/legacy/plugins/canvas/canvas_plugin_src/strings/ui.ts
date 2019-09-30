@@ -389,6 +389,20 @@ export const DataSourceStrings = {
 };
 
 export const ModelStrings = {
+  Math: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.mathTitle', {
+        defaultMessage: 'Measure',
+      }),
+    getValueDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.math.args.valueTitle', {
+        defaultMessage: 'Value',
+      }),
+    getValueHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.math.args.valueLabel', {
+        defaultMessage: 'Function and column to use in extracting a value from the datasource',
+      }),
+  },
   PointSeries: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.models.pointSeriesTitle', {
@@ -593,6 +607,10 @@ export const ViewStrings = {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.metricTitle', {
         defaultMessage: 'Metric',
+      }),
+    getNumberDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.numberArgTitle', {
+        defaultMessage: 'Number',
       }),
     getLabelDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.metric.args.labelArgTitle', {

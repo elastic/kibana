@@ -10,8 +10,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@el
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import { ExpressionAST } from '../../../../types';
+import { ArgTypesStrings } from '../../../../i18n';
 
 const { set, del } = immutable;
+const { SeriesStyle: strings } = ArgTypesStrings;
 
 export interface Arguments {
   label: string;
@@ -59,7 +61,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = props => {
   // TODO: add fill and stack options
   // TODO: add label name auto-complete
   const values = [
-    { value: 0, text: 'None' },
+    { value: 0, text: strings.getNoneOption() },
     { value: 1, text: '1' },
     { value: 2, text: '2' },
     { value: 3, text: '3' },
@@ -67,14 +69,14 @@ export const ExtendedTemplate: FunctionComponent<Props> = props => {
     { value: 5, text: '5' },
   ];
 
-  const labelOptions = [{ value: '', text: 'Select Series' }];
+  const labelOptions = [{ value: '', text: strings.getSelectSeriesOption() }];
   labels.sort().forEach(val => labelOptions.push({ value: val, text: val }));
 
   return (
     <div>
       {name !== 'defaultStyle' && (
         <Fragment>
-          <EuiFormRow label="Series Identifier" display="rowCompressed">
+          <EuiFormRow label={strings.getSeriesIdentifierLabel()} display="rowCompressed">
             <EuiSelect
               compressed
               value={selectedSeries}
@@ -91,7 +93,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = props => {
           <EuiFlexGroup gutterSize="s">
             {fields.includes('lines') && (
               <EuiFlexItem>
-                <EuiFormRow label="Line" display="rowCompressed">
+                <EuiFormRow label={strings.getLineLabel()} display="rowCompressed">
                   <EuiSelect
                     value={get(chainArgs, 'lines.0', 0)}
                     options={values}
@@ -103,7 +105,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = props => {
             )}
             {fields.includes('bars') && (
               <EuiFlexItem>
-                <EuiFormRow label="Bar" display="rowCompressed">
+                <EuiFormRow label={strings.getBarLabel()} display="rowCompressed">
                   <EuiSelect
                     value={get(chainArgs, 'bars.0', 0)}
                     options={values}
@@ -115,7 +117,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = props => {
             )}
             {fields.includes('points') && (
               <EuiFlexItem>
-                <EuiFormRow label="Point" display="rowCompressed">
+                <EuiFormRow label={strings.getPointLabel()} display="rowCompressed">
                   <EuiSelect
                     value={get(chainArgs, 'points.0', 0)}
                     options={values}
