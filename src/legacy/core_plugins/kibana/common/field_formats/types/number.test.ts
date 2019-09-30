@@ -17,11 +17,27 @@
  * under the License.
  */
 
-import { createNumeralFormat } from './_numeral';
+import { createNumberFormat } from './number';
+import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
 
-export function createNumberFormat(FieldFormat) {
-  return createNumeralFormat(FieldFormat, {
-    id: 'number',
-    title: 'Number'
+const NumberFormat = createNumberFormat(FieldFormat);
+
+describe('NumberFormat', function() {
+  const config: Record<any, any> = {};
+
+  config['format:number:defaultPattern'] = '0,0.[000]';
+
+  const getConfig = (key: any) => config[key];
+
+  test('default pattern', () => {
+    const formatter = new NumberFormat({}, getConfig);
+
+    expect(formatter.convert(12.345678)).toBe('12.346');
   });
-}
+
+  test('custom pattern', () => {
+    const formatter = new NumberFormat({ pattern: '0,0' }, getConfig);
+
+    expect(formatter.convert('12.345678')).toBe('12');
+  });
+});
