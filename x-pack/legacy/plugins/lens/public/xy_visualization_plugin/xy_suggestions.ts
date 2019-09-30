@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { IconType } from '@elastic/eui/src/components/icon/icon';
 import {
   SuggestionRequest,
   VisualizationSuggestion,
@@ -26,7 +26,7 @@ const columnSortOrder = {
   number: 4,
 };
 
-function getIconForSeries(type: SeriesType): EuiIconType {
+function getIconForSeries(type: SeriesType): IconType {
   switch (type) {
     case 'area':
       return 'visArea';
