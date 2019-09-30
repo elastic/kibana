@@ -5,7 +5,7 @@
  */
 
 import { FormSchema, FIELD_TYPES, VALIDATION_TYPES, fieldValidators } from '../../shared_imports';
-import { MappingsConfiguration } from './configuration_form';
+import { MappingsConfiguration } from '../../mappings_state';
 
 const { containsCharsField } = fieldValidators;
 

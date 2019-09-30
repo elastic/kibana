@@ -7,6 +7,7 @@
 export {
   useForm,
   UseField,
+  getUseField,
   Form,
   FormSchema,
   FIELD_TYPES,

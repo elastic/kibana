@@ -5,32 +5,30 @@
  */
 import React, { useEffect } from 'react';
 
-import { useForm, UseField, Form, OnFormUpdateArg } from '../../shared_imports';
+import { useForm, getUseField, Form, OnFormUpdateArg } from '../../shared_imports';
 import { FormRow, Field } from '../../shared_imports';
 import { DYNAMIC_SETTING_OPTIONS } from '../../field_configuration';
+import { MappingsConfiguration, useDispatch } from '../../mappings_state';
 import { schema } from './form.schema';
 
 export type ConfigurationUpdateHandler = (arg: OnFormUpdateArg<MappingsConfiguration>) => void;
 
-export interface MappingsConfiguration {
-  dynamic: boolean | string;
-  date_detection: boolean;
-  numeric_detection: boolean;
-  dynamic_date_formats: string[];
-}
-
 interface Props {
-  onUpdate: ConfigurationUpdateHandler;
-  defaultValue?: any;
+  defaultValue?: MappingsConfiguration;
 }
 
-export const ConfigurationForm = React.memo(({ onUpdate, defaultValue }: Props) => {
+const UseField = getUseField({ component: Field });
+
+export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
   const { form } = useForm<MappingsConfiguration>({ schema, defaultValue });
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const subscription = form.subscribe(onUpdate);
+    const subscription = form.subscribe(updatedConfiguration => {
+      dispatch({ type: 'updateConfiguration', value: updatedConfiguration });
+    });
     return subscription.unsubscribe;
-  }, [form, onUpdate]);
+  }, [form]);
 
   return (
     <Form form={form} className="mappings-editor">
@@ -40,11 +38,10 @@ export const ConfigurationForm = React.memo(({ onUpdate, defaultValue }: Props) 
           componentProps={{
             euiFieldProps: { options: DYNAMIC_SETTING_OPTIONS },
           }}
-          component={Field}
         />
-        <UseField path="date_detection" component={Field} />
-        <UseField path="numeric_detection" component={Field} />
-        <UseField path="dynamic_date_formats" component={Field} />
+        <UseField path="date_detection" />
+        <UseField path="numeric_detection" />
+        <UseField path="dynamic_date_formats" />
       </FormRow>
     </Form>
   );

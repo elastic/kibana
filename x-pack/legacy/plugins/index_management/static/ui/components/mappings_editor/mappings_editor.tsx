@@ -4,81 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useRef, useCallback } from 'react';
+import React from 'react';
 
-import { OnFormUpdateArg } from './shared_imports';
+// import { OnFormUpdateArg } from './shared_imports';
 import {
   ConfigurationForm,
-  ConfigurationUpdateHandler,
-  MappingsConfiguration,
-  // PropertiesProvider,
+  CONFIGURATION_FIELDS,
   // DocumentFields,
   // DocumentFieldsState,
 } from './components';
 
-export interface Mappings extends MappingsConfiguration {
-  properties: any;
-}
-
-export interface OnUpdateHandlerArg {
-  isValid?: boolean;
-  getData: DataGetterHandler;
-  validate: ValidityGetterHandler;
-}
-
-export type OnUpdateHandler = (arg: OnUpdateHandlerArg) => void;
-
-export type DataGetterHandler = () => Mappings;
-export type ValidityGetterHandler = () => Promise<boolean>;
+import {
+  MappingsState,
+  Props as MappingsStateProps,
+  MappingsConfiguration,
+} from './mappings_state';
 
 interface Props {
-  onUpdate: OnUpdateHandler;
-  defaultValue?: Record<string, any>;
+  onUpdate: MappingsStateProps['onUpdate'];
+  defaultValue?: { [key: string]: any };
 }
 
 export const MappingsEditor = React.memo(({ onUpdate, defaultValue = {} }: Props) => {
-  const configurationForm = useRef<OnFormUpdateArg<MappingsConfiguration> | undefined>(undefined);
-
-  const onMappingsDataUpdate = async () => {
-    if (configurationForm.current === undefined) {
-      return;
-    }
-
-    const isMappingsEditorValid = configurationForm.current.isValid; // for now we only check configurationForm
-
-    const getData = (): Mappings => {
-      const configurationData = configurationForm.current!.data.format();
-      const properties = {};
-
-      return { ...configurationData, properties };
-    };
-
-    const validate = async () => {
-      const isConfigurationFormValid = await configurationForm.current!.validate();
-
-      return isConfigurationFormValid;
-    };
-
-    onUpdate({ isValid: isMappingsEditorValid, getData, validate });
-  };
-
-  const onConfigurationFormUpdate = useCallback<ConfigurationUpdateHandler>(data => {
-    configurationForm.current = data;
-
-    onMappingsDataUpdate();
-  }, []);
+  const configurationDefaultValue = Object.entries(defaultValue)
+    .filter(([key]) => CONFIGURATION_FIELDS.includes(key))
+    .reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        [key]: value,
+      }),
+      {} as MappingsConfiguration
+    );
 
   return (
-    <div className="mappings-editor">
-      {/* Global Mappings configuration */}
-      <h2>Global configuration</h2>
-      <ConfigurationForm onUpdate={onConfigurationFormUpdate} defaultValue={defaultValue} />
-
-      {/* Document fields */}
+    <MappingsState onUpdate={onUpdate}>
+      <ConfigurationForm defaultValue={configurationDefaultValue} />
       <h2>Document Fields</h2>
-      {/* <PropertiesProvider defaultValue={defaultValue.properties}>
-          <DocumentFields onUpdate={onDocumentFieldsUpdate} />
-        </PropertiesProvider> */}
-    </div>
+    </MappingsState>
   );
 });
