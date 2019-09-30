@@ -1,19 +1,21 @@
 === Refreshing the Search Results
-You can configure a refresh interval to automatically refresh the page with the latest index data. This periodically
-resubmits the search query.
+As more documents are added to the indices you're searching, the search results
+shown in Discover and used to display visualizations get stale. You can
+configure a refresh interval to periodically resubmit your searches to
+retrieve the latest results.
 
-When a refresh interval is set, it is displayed to the left of the Time Filter in the menu bar.
+To enable auto refresh:
 
-To set the refresh interval:
-
-. Click the *Time Filter* image:images/TimeFilter.jpg[Time Filter].
-. Click the *Refresh Interval* tab.
-. Choose a refresh interval from the list.
+. Click the time filter.
+. In the *Refresh every* field, enter the refresh rate, then select the interval from the dropdown.
+. Click *Start*.
 
 To automatically refresh the data, click the image:images/autorefresh.png[] *Auto-refresh* button when the time picker
 is open and select an autorefresh interval:
 
 image::images/autorefresh-intervals.png[]
 
-When auto-refresh is enabled, Kibana's top bar displays a pause button and the auto-refresh interval:
-image:images/autorefresh-pause.png[]. Click the *Pause* button to pause auto-refresh.
+To disable auto refresh, click *Stop*.
+
+NOTE: If auto refresh is not enabled, you can manually refresh visualizations
+by clicking *Refresh*.

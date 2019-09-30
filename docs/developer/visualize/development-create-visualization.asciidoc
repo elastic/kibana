@@ -275,7 +275,7 @@ VisTypesRegistryProvider.register(MyNewVisType);
 [[development-visualization-request-handlers]]
 === Visualization Request Handlers
 Request handler gets called when one of the following keys on AppState change:
-`vis`, `query`, `filters` or `uiState` and when timepicker is updated. On top
+`vis`, `query`, `filters` or `uiState` and when the time filter is updated. On top
 of that it will also get called on force refresh.
 
 By default visualizations will use the `courier` request handler. They can also choose to use any of the other provided 

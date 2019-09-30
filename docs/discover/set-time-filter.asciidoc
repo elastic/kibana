@@ -9,18 +9,19 @@ range in the histogram.
 
 
 [float]
-=== Filter with the time picker
+=== Specify the time range
 
 To quickly select from popular time range options, click the calendar 
 dropdown image:infrastructure/images/time-filter-calendar.png[]. 
 
 [role="screenshot"]
-image::images/Timepicker-View.png[Time picker menu]
+image::images/Timepicker-View.png[Time filter menu]
 
-With the time picker, you can choose from:
+With the time filter, you can choose from:
 
 * *Quick select* to choose a recent time range, and use the back and forward arrows to move through the time ranges.
 * *Commonly used* to choose a time range from options such as *Last 15 minutes*, *Today*, and *Week to date*.
+* *Recently used date ranges* to choose a previously selected data range that you recently used.
 * *Refresh every* to specify an auto-refresh rate.
 
 For control over the start and end times, 

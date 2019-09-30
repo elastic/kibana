@@ -180,16 +180,13 @@ retrieve the latest results.
 
 To enable auto refresh:
 
-. Click the *Time Picker* image:images/time-picker.jpg[Time Picker] in the
-Kibana toolbar.
-. Click *Auto refresh*.
-. Choose a refresh interval from the list.
+. Click the time filter.
+. In the *Refresh every* field, enter the refresh rate, then select the interval from the dropdown.
+. Click *Start*.
 +
 image::images/autorefresh-intervals.png[]
 
-When auto refresh is enabled, the refresh interval is displayed next to the
-Time Picker, along with a Pause button. To temporarily disable auto refresh,
-click *Pause*.
+To disable auto refresh, click *Stop*.
 
 NOTE: If auto refresh is not enabled, you can manually refresh visualizations
 by clicking *Refresh*.

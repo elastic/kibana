@@ -30,7 +30,7 @@ If so, <<xpack-logs-configuring, configure the logs source data>> to change the 
 [[logs-time]]
 === Specify the time and date
 
-Click the time selector image:logs/images/logs-time-selector.png[time selector icon] to choose the timeframe for the logs.
+Click the time filter image:logs/images/logs-time-selector.png[time filter icon] to choose the timeframe for the logs.
 Log entries for the time you specify appear in the middle of the page, with the earlier entries above and the later entries below.
 
 To quickly jump to a nearby point in time, click the minimap timeline to the right.
