@@ -31,6 +31,7 @@ const getMockConcreteTaskInstance = () => {
     state: any;
     taskType: string;
     params: any;
+    owner: string | null;
   } = {
     id: 'hy8o99o83',
     sequenceNumber: 1,
@@ -44,6 +45,7 @@ const getMockConcreteTaskInstance = () => {
     state: {},
     taskType: 'nice_task',
     params: { abc: 'def' },
+    owner: null,
   };
   return concrete;
 };
@@ -92,19 +94,19 @@ describe('addMiddlewareToChain', () => {
       .beforeSave({ taskInstance: getMockTaskInstance() })
       .then((saveOpts: any) => {
         expect(saveOpts).toMatchInlineSnapshot(`
-Object {
-  "taskInstance": Object {
-    "params": Object {
-      "abc": "def",
-      "m1": true,
-      "m2": true,
-      "m3": true,
-    },
-    "state": Object {},
-    "taskType": "nice_task",
-  },
-}
-`);
+          Object {
+            "taskInstance": Object {
+              "params": Object {
+                "abc": "def",
+                "m1": true,
+                "m2": true,
+                "m3": true,
+              },
+              "state": Object {},
+              "taskType": "nice_task",
+            },
+          }
+        `);
       });
   });
 
@@ -145,29 +147,30 @@ Object {
       .beforeRun(getMockRunContext(getMockConcreteTaskInstance()))
       .then(contextOpts => {
         expect(contextOpts).toMatchInlineSnapshot(`
-Object {
-  "kbnServer": Object {},
-  "m1": true,
-  "m2": true,
-  "m3": true,
-  "taskInstance": Object {
-    "attempts": 0,
-    "id": "hy8o99o83",
-    "params": Object {
-      "abc": "def",
-    },
-    "primaryTerm": 1,
-    "retryAt": null,
-    "runAt": 2018-09-18T05:33:09.588Z,
-    "scheduledAt": 2018-09-18T05:33:09.588Z,
-    "sequenceNumber": 1,
-    "startedAt": null,
-    "state": Object {},
-    "status": "idle",
-    "taskType": "nice_task",
-  },
-}
-`);
+          Object {
+            "kbnServer": Object {},
+            "m1": true,
+            "m2": true,
+            "m3": true,
+            "taskInstance": Object {
+              "attempts": 0,
+              "id": "hy8o99o83",
+              "owner": null,
+              "params": Object {
+                "abc": "def",
+              },
+              "primaryTerm": 1,
+              "retryAt": null,
+              "runAt": 2018-09-18T05:33:09.588Z,
+              "scheduledAt": 2018-09-18T05:33:09.588Z,
+              "sequenceNumber": 1,
+              "startedAt": null,
+              "state": Object {},
+              "status": "idle",
+              "taskType": "nice_task",
+            },
+          }
+        `);
       });
   });
 });

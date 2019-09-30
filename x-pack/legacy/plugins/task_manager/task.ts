@@ -136,7 +136,7 @@ export interface TaskDictionary<T extends TaskDefinition> {
   [taskType: string]: T;
 }
 
-export type TaskStatus = 'idle' | 'running' | 'failed';
+export type TaskStatus = 'idle' | 'claiming' | 'running' | 'failed';
 
 /*
  * A task instance represents all of the data required to store, fetch,
@@ -209,6 +209,11 @@ export interface TaskInstance {
    * and then query such tasks to provide a glimpse at only reporting tasks, rather than at all tasks.
    */
   scope?: string[];
+
+  /**
+   * The random uuid of the Kibana instance which claimed ownership of the task last
+   */
+  owner?: string | null;
 }
 
 /**
@@ -268,4 +273,9 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * any state, this will be the empy object: {}
    */
   state: Record<string, any>;
+
+  /**
+   * The random uuid of the Kibana instance which claimed ownership of the task last
+   */
+  owner: string | null;
 }

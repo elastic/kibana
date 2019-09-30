@@ -6,8 +6,9 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
+import uuid from 'uuid';
 import { TaskDictionary, TaskDefinition, TaskInstance, TaskStatus } from './task';
-import { FetchOpts, TaskStore } from './task_store';
+import { FetchOpts, StoreOpts, OwnershipClaimingOpts, TaskStore } from './task_store';
 import { mockLogger } from './test_utils';
 import { SavedObjectsClientMock } from 'src/core/server/mocks';
 import { SavedObjectsSerializer, SavedObjectsSchema, SavedObjectAttributes } from 'src/core/server';
@@ -60,6 +61,7 @@ describe('TaskStore', () => {
       );
       const store = new TaskStore({
         index: 'tasky',
+        kibanaId: '',
         serializer,
         callCluster,
         maxAttempts: 2,
@@ -159,6 +161,7 @@ describe('TaskStore', () => {
       const callCluster = sinon.spy(async (name: string, params?: any) => ({ hits: { hits } }));
       const store = new TaskStore({
         index: 'tasky',
+        kibanaId: '',
         serializer,
         callCluster,
         maxAttempts: 2,
@@ -350,6 +353,7 @@ describe('TaskStore', () => {
       const callCluster = sinon.spy(async (name: string, params?: any) => ({ hits: { hits: [] } }));
       const store = new TaskStore({
         index: 'tasky',
+        kibanaId: '',
         serializer,
         callCluster,
         definitions: taskDefinitions,
@@ -549,6 +553,309 @@ describe('TaskStore', () => {
     });
   });
 
+  describe('claimAvailableTasks', () => {
+    async function testClaimAvailableTasks({
+      opts = {},
+      hits = generateFakeTasks(1),
+      claimingOpts,
+    }: {
+      opts: Partial<StoreOpts>;
+      hits?: any[];
+      claimingOpts: OwnershipClaimingOpts;
+    }) {
+      const callCluster = sinon.spy(async (name: string, params?: any) =>
+        name === 'updateByQuery' ? { total: hits.length } : { hits: { hits } }
+      );
+      const store = new TaskStore({
+        callCluster,
+        maxAttempts: 2,
+        definitions: taskDefinitions,
+        serializer,
+        savedObjectsRepository: savedObjectsClient,
+        kibanaId: '',
+        index: '',
+        ...opts,
+      });
+
+      const result = await store.claimAvailableTasks(claimingOpts);
+
+      sinon.assert.calledTwice(callCluster);
+      sinon.assert.calledWithMatch(callCluster, 'updateByQuery', {
+        body: { size: claimingOpts.size },
+      });
+      sinon.assert.calledWithMatch(callCluster, 'search', { body: { size: claimingOpts.size } });
+
+      return {
+        result,
+        args: Object.assign({}, ...callCluster.args.map(([name, args]) => ({ [name]: args }))),
+      };
+    }
+
+    test('it returns normally with no tasks when the index does not exist.', async () => {
+      const callCluster = sinon.spy(async (name: string, params?: any) => ({ total: 0 }));
+      const store = new TaskStore({
+        index: 'tasky',
+        kibanaId: '',
+        serializer,
+        callCluster,
+        definitions: taskDefinitions,
+        maxAttempts: 2,
+        savedObjectsRepository: savedObjectsClient,
+      });
+      const result = await store.claimAvailableTasks({ retryAt: new Date(), size: 10 });
+      sinon.assert.calledOnce(callCluster);
+      sinon.assert.calledWithMatch(callCluster, 'updateByQuery', {
+        ignoreUnavailable: true,
+        body: {
+          size: 10,
+        },
+      });
+      expect(result.length).toBe(0);
+    });
+
+    test('it filters claimed tasks down by supported types, maxAttempts, status, and runAt', async () => {
+      const maxAttempts = _.random(2, 43);
+      const customMaxAttempts = _.random(44, 100);
+      const {
+        args: {
+          updateByQuery: {
+            body: { query },
+          },
+        },
+      } = await testClaimAvailableTasks({
+        opts: {
+          maxAttempts,
+          definitions: {
+            foo: {
+              type: 'foo',
+              title: '',
+              createTaskRunner: jest.fn(),
+            },
+            bar: {
+              type: 'bar',
+              title: '',
+              maxAttempts: customMaxAttempts,
+              createTaskRunner: jest.fn(),
+            },
+          },
+        },
+        claimingOpts: { retryAt: new Date(), size: 10 },
+      });
+      expect(query).toMatchObject({
+        bool: {
+          must: [
+            { term: { type: 'task' } },
+            {
+              bool: {
+                must: [
+                  {
+                    bool: {
+                      should: [
+                        {
+                          bool: {
+                            must: [
+                              { term: { 'task.status': 'idle' } },
+                              { range: { 'task.runAt': { lte: 'now' } } },
+                            ],
+                          },
+                        },
+                        {
+                          bool: {
+                            must: [
+                              {
+                                bool: {
+                                  should: [
+                                    { term: { 'task.status': 'running' } },
+                                    { term: { 'task.status': 'claiming' } },
+                                  ],
+                                },
+                              },
+                              { range: { 'task.retryAt': { lte: 'now' } } },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      should: [
+                        { exists: { field: 'task.interval' } },
+                        {
+                          bool: {
+                            must: [
+                              { term: { 'task.taskType': 'foo' } },
+                              {
+                                range: {
+                                  'task.attempts': {
+                                    lt: maxAttempts,
+                                  },
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        {
+                          bool: {
+                            must: [
+                              { term: { 'task.taskType': 'bar' } },
+                              {
+                                range: {
+                                  'task.attempts': {
+                                    lt: customMaxAttempts,
+                                  },
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    test('it claims tasks by setting their owner, status and retryAt', async () => {
+      const kibanaId = uuid.v1();
+      const retryAt = new Date(Date.now());
+      const {
+        args: {
+          updateByQuery: {
+            body: { script },
+          },
+        },
+      } = await testClaimAvailableTasks({
+        opts: {
+          kibanaId,
+        },
+        claimingOpts: {
+          retryAt,
+          size: 10,
+        },
+      });
+      expect(script).toMatchObject({
+        source: `ctx._source.owner=params.ownerId; ctx._source.status=params.status; ctx._source.retryAt=params.retryAt;`,
+        lang: 'painless',
+        params: {
+          ownerId: kibanaId,
+          retryAt,
+          status: 'claiming',
+        },
+      });
+    });
+
+    test('it returns task objects', async () => {
+      const kibanaId = uuid.v1();
+      const retryAt = new Date(Date.now());
+      const runAt = new Date();
+      const tasks = [
+        {
+          _id: 'aaa',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'foo',
+              interval: undefined,
+              attempts: 0,
+              status: 'idle',
+              params: '{ "hello": "world" }',
+              state: '{ "baby": "Henhen" }',
+              user: 'jimbo',
+              scope: ['reporting'],
+              owner: kibanaId,
+            },
+          },
+          _seq_no: 1,
+          _primary_term: 2,
+          sort: ['a', 1],
+        },
+        {
+          _id: 'bbb',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'bar',
+              interval: '5m',
+              attempts: 2,
+              status: 'running',
+              params: '{ "shazm": 1 }',
+              state: '{ "henry": "The 8th" }',
+              user: 'dabo',
+              scope: ['reporting', 'ceo'],
+              owner: kibanaId,
+            },
+          },
+          _seq_no: 3,
+          _primary_term: 4,
+          sort: ['b', 2],
+        },
+      ];
+      const {
+        result,
+        args: {
+          search: {
+            body: { query },
+          },
+        },
+      } = await testClaimAvailableTasks({
+        opts: {
+          kibanaId,
+        },
+        claimingOpts: {
+          retryAt,
+          size: 10,
+        },
+        hits: tasks,
+      });
+
+      expect(query.bool.must).toContainEqual({
+        bool: {
+          filter: {
+            term: {
+              owner: kibanaId,
+            },
+          },
+        },
+      });
+
+      expect(result).toMatchObject([
+        {
+          attempts: 0,
+          id: 'aaa',
+          interval: undefined,
+          params: { hello: 'world' },
+          runAt,
+          scope: ['reporting'],
+          state: { baby: 'Henhen' },
+          status: 'idle',
+          taskType: 'foo',
+          user: 'jimbo',
+          owner: kibanaId,
+        },
+        {
+          attempts: 2,
+          id: 'bbb',
+          interval: '5m',
+          params: { shazm: 1 },
+          runAt,
+          scope: ['reporting', 'ceo'],
+          state: { henry: 'The 8th' },
+          status: 'running',
+          taskType: 'bar',
+          user: 'dabo',
+          owner: kibanaId,
+        },
+      ]);
+    });
+  });
+
   describe('update', () => {
     test('refreshes the index, handles versioning', async () => {
       const task = {
@@ -563,6 +870,7 @@ describe('TaskStore', () => {
         attempts: 3,
         status: 'idle' as TaskStatus,
         version: '123',
+        owner: null,
       };
 
       savedObjectsClient.update.mockImplementation(
@@ -579,6 +887,7 @@ describe('TaskStore', () => {
 
       const store = new TaskStore({
         index: 'tasky',
+        kibanaId: '',
         serializer,
         callCluster: jest.fn(),
         maxAttempts: 2,
@@ -604,6 +913,7 @@ describe('TaskStore', () => {
           status: task.status,
           taskType: task.taskType,
           user: undefined,
+          owner: null,
         },
         { version: '123' }
       );
@@ -626,6 +936,7 @@ describe('TaskStore', () => {
       const callCluster = jest.fn();
       const store = new TaskStore({
         index: 'tasky',
+        kibanaId: '',
         serializer,
         callCluster,
         maxAttempts: 2,
@@ -638,3 +949,16 @@ describe('TaskStore', () => {
     });
   });
 });
+
+function generateFakeTasks(count: number = 1) {
+  return _.times(count, () => ({
+    _id: 'aaa',
+    _source: {
+      type: 'task',
+      task: {},
+    },
+    _seq_no: _.random(1, 5),
+    _primary_term: _.random(1, 5),
+    sort: ['a', _.random(1, 5)],
+  }));
+}

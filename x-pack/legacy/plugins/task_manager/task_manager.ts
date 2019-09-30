@@ -77,6 +77,7 @@ export class TaskManager {
       index: opts.config.get('xpack.task_manager.index'),
       maxAttempts: opts.config.get('xpack.task_manager.max_attempts'),
       definitions: this.definitions,
+      kibanaId: opts.config.get('server.uuid'),
     });
     const pool = new TaskPool({
       logger: this.logger,

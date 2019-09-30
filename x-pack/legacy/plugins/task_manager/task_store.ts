@@ -27,21 +27,42 @@ import {
 export interface StoreOpts {
   callCluster: ElasticJs;
   index: string;
+  kibanaId: string;
   maxAttempts: number;
   definitions: TaskDictionary<TaskDefinition>;
   savedObjectsRepository: SavedObjectsClientContract;
   serializer: SavedObjectsSerializer;
 }
 
-export interface FetchOpts {
+export interface SearchOpts {
   searchAfter?: any[];
-  sort?: object[];
+  sort?: object | object[];
   query?: object;
+  size?: number;
+  seq_no_primary_term?: boolean;
+  search_after?: any[];
+}
+
+export interface FetchOpts extends SearchOpts {
+  sort?: object[];
+}
+
+export interface UpdateByQueryOpts extends SearchOpts {
+  script?: object;
+}
+
+export interface OwnershipClaimingOpts {
+  retryAt: Date;
+  size: number;
 }
 
 export interface FetchResult {
   searchAfter: any[];
   docs: ConcreteTaskInstance[];
+}
+
+export interface UpdateByQueryResult {
+  total: number;
 }
 
 /**
@@ -51,6 +72,7 @@ export interface FetchResult {
 export class TaskStore {
   public readonly maxAttempts: number;
   public readonly index: string;
+  public readonly kibanaId: string;
   private callCluster: ElasticJs;
   private definitions: TaskDictionary<TaskDefinition>;
   private savedObjectsRepository: SavedObjectsClientContract;
@@ -69,6 +91,7 @@ export class TaskStore {
   constructor(opts: StoreOpts) {
     this.callCluster = opts.callCluster;
     this.index = opts.index;
+    this.kibanaId = opts.kibanaId;
     this.maxAttempts = opts.maxAttempts;
     this.definitions = opts.definitions;
     this.serializer = opts.serializer;
@@ -197,6 +220,142 @@ export class TaskStore {
   }
 
   /**
+   * Claims available tasks from the index, which are ready to be run.
+   * - runAt is now or past
+   * - is not currently claimed by any instance of Kibana
+   * - has a type that is in our task definitions
+   *
+   * @param {OwnershipClaimingOpts} options
+   * @returns {Promise<ConcreteTaskInstance[]>}
+   */
+  public async claimAvailableTasks(opts: OwnershipClaimingOpts): Promise<ConcreteTaskInstance[]> {
+    const total = await this.markAvailableTasksAsClaimed(opts);
+    const docs = total > 0 ? await this.sweepForClaimedTasks(opts) : Promise.resolve([]);
+    return docs;
+  }
+
+  private async markAvailableTasksAsClaimed({
+    size,
+    retryAt,
+  }: OwnershipClaimingOpts): Promise<number> {
+    const { total } = await this.updateByQuery({
+      query: {
+        bool: {
+          must: [
+            // Either a task with idle status and runAt <= now or
+            // status running with a retryAt <= now.
+            {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        { term: { 'task.status': 'idle' } },
+                        { range: { 'task.runAt': { lte: 'now' } } },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      must: [
+                        {
+                          bool: {
+                            should: [
+                              { term: { 'task.status': 'running' } },
+                              { term: { 'task.status': 'claiming' } },
+                            ],
+                          },
+                        },
+                        { range: { 'task.retryAt': { lte: 'now' } } },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            // Either task has an interval or the attempts < the maximum configured
+            {
+              bool: {
+                should: [
+                  { exists: { field: 'task.interval' } },
+                  ...Object.entries(this.definitions).map(([type, definition]) => ({
+                    bool: {
+                      must: [
+                        { term: { 'task.taskType': type } },
+                        {
+                          range: {
+                            'task.attempts': {
+                              lt: definition.maxAttempts || this.maxAttempts,
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  })),
+                ],
+              },
+            },
+          ],
+        },
+      },
+      size,
+      sort: {
+        _script: {
+          type: 'number',
+          order: 'asc',
+          script: {
+            lang: 'expression',
+            source: `doc['task.retryAt'].value || doc['task.runAt'].value`,
+          },
+        },
+      },
+      seq_no_primary_term: true,
+      script: {
+        source: `ctx._source.owner=params.ownerId; ctx._source.status=params.status; ctx._source.retryAt=params.retryAt;`,
+        lang: 'painless',
+        params: {
+          ownerId: this.kibanaId,
+          retryAt,
+          status: 'claiming',
+        },
+      },
+    });
+    return total;
+  }
+
+  /**
+   * Fetches tasks from the index, which are owned by the current Kibana instance
+   */
+  private async sweepForClaimedTasks({
+    size,
+  }: OwnershipClaimingOpts): Promise<ConcreteTaskInstance[]> {
+    const { docs } = await this.search({
+      query: {
+        bool: {
+          filter: {
+            term: {
+              owner: this.kibanaId,
+            },
+          },
+        },
+      },
+      size,
+      sort: {
+        _script: {
+          type: 'number',
+          order: 'asc',
+          script: {
+            lang: 'expression',
+            source: `doc['task.retryAt'].value || doc['task.runAt'].value`,
+          },
+        },
+      },
+      seq_no_primary_term: true,
+    });
+
+    return docs;
+  }
+  /**
    * Updates the specified doc in the index, returning the doc
    * with its version up to date.
    *
@@ -224,12 +383,8 @@ export class TaskStore {
     await this.savedObjectsRepository.delete('task', id);
   }
 
-  private async search(opts: any = {}): Promise<FetchResult> {
-    const originalQuery = opts.query;
-    const queryOnlyTasks = { term: { type: 'task' } };
-    const query = originalQuery
-      ? { bool: { must: [queryOnlyTasks, originalQuery] } }
-      : queryOnlyTasks;
+  private async search(opts: SearchOpts = {}): Promise<FetchResult> {
+    const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
 
     const result = await this.callCluster('search', {
       index: this.index,
@@ -248,6 +403,23 @@ export class TaskStore {
         .map(doc => omit(doc, 'namespace') as SavedObject)
         .map(savedObjectToConcreteTaskInstance),
       searchAfter: (rawDocs.length && rawDocs[rawDocs.length - 1].sort) || [],
+    };
+  }
+
+  private async updateByQuery(opts: UpdateByQueryOpts = {}): Promise<UpdateByQueryResult> {
+    const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
+    const result = await this.callCluster('updateByQuery', {
+      index: this.index,
+      ignoreUnavailable: true,
+      body: {
+        ...opts,
+        query,
+      },
+    });
+
+    const { total } = result;
+    return {
+      total,
     };
   }
 }
@@ -300,4 +472,17 @@ function parseJSONField(json: string, fieldName: string, id: string) {
   } catch (error) {
     throw new Error(`Task "${id}"'s ${fieldName} field has invalid JSON: ${json}`);
   }
+}
+
+function ensureQueryOnlyReturnsTaskObjects(opts: SearchOpts): SearchOpts {
+  const originalQuery = opts.query;
+  const queryOnlyTasks = { term: { type: 'task' } };
+  const query = originalQuery
+    ? { bool: { must: [queryOnlyTasks, originalQuery] } }
+    : queryOnlyTasks;
+
+  return {
+    ...opts,
+    query,
+  };
 }

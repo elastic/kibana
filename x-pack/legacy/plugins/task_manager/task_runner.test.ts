@@ -619,6 +619,7 @@ describe('TaskManagerRunner', () => {
           state: {},
           status: 'idle',
           user: 'example',
+          owner: null,
         },
         opts.instance || {}
       ),

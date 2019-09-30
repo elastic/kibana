@@ -36,6 +36,9 @@
       },
       "scope": {
         "type": "keyword"
+      },
+      "owner": {
+        "type": "keyword"
       }
     }
   }
