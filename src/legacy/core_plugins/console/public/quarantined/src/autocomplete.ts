@@ -17,24 +17,33 @@
  * under the License.
  */
 
+import _ from 'lodash';
+import ace, { Editor as AceEditor, IEditSession } from 'brace';
+import { i18n } from '@kbn/i18n';
+
 import {
   getTopLevelUrlCompleteComponents,
   getEndpointBodyCompleteComponents,
   getGlobalAutocompleteComponents,
-  getUnmatchedEndpointComponents
+  getUnmatchedEndpointComponents,
+  // @ts-ignore
 } from './kb';
+// @ts-ignore
 import utils from './utils';
+// @ts-ignore
 import { populateContext } from './autocomplete/engine';
+// @ts-ignore
 import { URL_PATH_END_MARKER } from './autocomplete/components';
-import _ from 'lodash';
-import ace from 'brace';
-import { i18n } from '@kbn/i18n';
+import { creatTokenIterator } from '../../../np_ready/public/application/factories';
+
+import { Position, Token, Range } from '../../../np_ready/public/interfaces';
+import { LegacyEditor } from '../../../np_ready/public/application/models';
 
 const AceRange = ace.acequire('ace/range').Range;
 
-let LAST_EVALUATED_TOKEN = null;
+let LAST_EVALUATED_TOKEN: any = null;
 
-function isUrlParamsToken(token) {
+function isUrlParamsToken(token: any) {
   switch ((token || {}).type) {
     case 'url.param':
     case 'url.equal':
@@ -46,16 +55,20 @@ function isUrlParamsToken(token) {
       return false;
   }
 }
-function getCurrentMethodAndTokenPaths(editor, pos, forceEndOfUrl) {
-  const tokenIter = editor.iterForPosition(pos.row, pos.column);
+function getCurrentMethodAndTokenPaths(
+  editor: LegacyEditor,
+  pos: Position,
+  forceEndOfUrl?: boolean
+) {
+  const tokenIter = editor.iterForPosition(pos.lineNumber, pos.column);
   const startPos = pos;
-  let bodyTokenPath = [];
-  const ret = {};
+  let bodyTokenPath: any = [];
+  const ret: any = {};
 
   const STATES = {
     looking_for_key: 0, // looking for a key but without jumping over anything but white space and colon.
     looking_for_scope_start: 1, // skip everything until scope start
-    start: 3
+    start: 3,
   };
   let state = STATES.start;
 
@@ -68,8 +81,7 @@ function getCurrentMethodAndTokenPaths(editor, pos, forceEndOfUrl) {
       t = tokenIter.stepBackward();
       state = STATES.looking_for_scope_start;
     }
-  }
-  else {
+  } else {
     if (startPos.column === 0) {
       // empty lines do no have tokens, move one back
       t = tokenIter.stepBackward();
@@ -81,7 +93,6 @@ function getCurrentMethodAndTokenPaths(editor, pos, forceEndOfUrl) {
 
   // climb one scope at a time and get the scope key
   for (; t && t.type.indexOf('url') === -1 && t.type !== 'method'; t = tokenIter.stepBackward()) {
-
     if (t.type !== 'whitespace') {
       walkedSomeBody = true;
     } // marks we saw something
@@ -120,8 +131,8 @@ function getCurrentMethodAndTokenPaths(editor, pos, forceEndOfUrl) {
             t = tokenIter.stepBackward();
           }
         }
-        if (!t) // oops we run out.. we don't know what's up return null;
-        {
+        if (!t) {
+          // oops we run out.. we don't know what's up return null;
           return {};
         }
         continue;
@@ -134,16 +145,15 @@ function getCurrentMethodAndTokenPaths(editor, pos, forceEndOfUrl) {
             break;
           }
         }
-        if (!t) // oops we run out.. we don't know what's up return null;
-        {
+        if (!t) {
+          // oops we run out.. we don't know what's up return null;
           return {};
         }
         continue;
       case 'punctuation.start_triple_quote':
         if (state === STATES.start) {
           state = STATES.looking_for_key;
-        }
-        else if (state === STATES.looking_for_key) {
+        } else if (state === STATES.looking_for_key) {
           state = STATES.looking_for_scope_start;
         }
         bodyTokenPath.unshift('"""');
@@ -154,8 +164,7 @@ function getCurrentMethodAndTokenPaths(editor, pos, forceEndOfUrl) {
       case 'text':
         if (state === STATES.start) {
           state = STATES.looking_for_key;
-        }
-        else if (state === STATES.looking_for_key) {
+        } else if (state === STATES.looking_for_key) {
           state = STATES.looking_for_scope_start;
         }
 
@@ -171,7 +180,6 @@ function getCurrentMethodAndTokenPaths(editor, pos, forceEndOfUrl) {
           state = STATES.looking_for_key;
         }
         break; // skip white space
-
     }
   }
 
@@ -180,7 +188,7 @@ function getCurrentMethodAndTokenPaths(editor, pos, forceEndOfUrl) {
     return {};
   }
   ret.urlTokenPath = [];
-  if (tokenIter.getCurrentTokenRow() === startPos.row) {
+  if (tokenIter.getCurrentTokenRow() === startPos.lineNumber) {
     if (t && (t.type === 'url.part' || t.type === 'url.param' || t.type === 'url.value')) {
       // we are forcing the end of the url for the purposes of determining an endpoint
       if (forceEndOfUrl && t.type === 'url.part') {
@@ -201,26 +209,23 @@ function getCurrentMethodAndTokenPaths(editor, pos, forceEndOfUrl) {
 
   ret.urlParamsTokenPath = null;
   ret.requestStartRow = tokenIter.getCurrentTokenRow();
-  let curUrlPart;
+  let curUrlPart: any;
 
   while (t && isUrlParamsToken(t)) {
     switch (t.type) {
       case 'url.value':
         if (Array.isArray(curUrlPart)) {
           curUrlPart.unshift(t.value);
-        }
-        else if (curUrlPart) {
+        } else if (curUrlPart) {
           curUrlPart = [t.value, curUrlPart];
-        }
-        else {
+        } else {
           curUrlPart = t.value;
         }
         break;
       case 'url.comma':
         if (!curUrlPart) {
           curUrlPart = [];
-        }
-        else if (!Array.isArray(curUrlPart)) {
+        } else if (!Array.isArray(curUrlPart)) {
           curUrlPart = [curUrlPart];
         }
         break;
@@ -247,19 +252,16 @@ function getCurrentMethodAndTokenPaths(editor, pos, forceEndOfUrl) {
       case 'url.part':
         if (Array.isArray(curUrlPart)) {
           curUrlPart.unshift(t.value);
-        }
-        else if (curUrlPart) {
+        } else if (curUrlPart) {
           curUrlPart = [t.value, curUrlPart];
-        }
-        else {
+        } else {
           curUrlPart = t.value;
         }
         break;
       case 'url.comma':
         if (!curUrlPart) {
           curUrlPart = [];
-        }
-        else if (!Array.isArray(curUrlPart)) {
+        } else if (!Array.isArray(curUrlPart)) {
           curUrlPart = [curUrlPart];
         }
         break;
@@ -278,13 +280,11 @@ function getCurrentMethodAndTokenPaths(editor, pos, forceEndOfUrl) {
   }
 
   if (!ret.bodyTokenPath && !ret.urlParamsTokenPath) {
-
     if (ret.urlTokenPath.length > 0) {
-    //   // started on the url, first token is current token
+      //   // started on the url, first token is current token
       ret.otherTokenValues = ret.urlTokenPath[0];
     }
-  }
-  else {
+  } else {
     // mark the url as completed.
     ret.urlTokenPath.push(URL_PATH_END_MARKER);
   }
@@ -294,15 +294,18 @@ function getCurrentMethodAndTokenPaths(editor, pos, forceEndOfUrl) {
   }
   return ret;
 }
-export function getEndpointFromPosition(editor, pos) {
+export function getEndpointFromPosition(editor: LegacyEditor, pos: Position) {
   const context = { ...getCurrentMethodAndTokenPaths(editor, pos, true) };
   const components = getTopLevelUrlCompleteComponents(context.method);
   populateContext(context.urlTokenPath, context, editor, true, components);
   return context.endpoint;
 }
-export default function (editor) {
 
-  function isUrlPathToken(token) {
+// eslint-disable-next-line
+export default function(ed: AceEditor) {
+  const editor = new LegacyEditor(ed);
+
+  function isUrlPathToken(token: Token) {
     switch ((token || {}).type) {
       case 'url.slash':
       case 'url.comma':
@@ -313,31 +316,29 @@ export default function (editor) {
     }
   }
 
-  function addMetaToTermsList(list, meta, template) {
-    return _.map(list, function (t) {
+  function addMetaToTermsList(list: any, meta: any, template: string) {
+    return _.map(list, function(t: any) {
       if (typeof t !== 'object') {
         t = { name: t };
       }
-      return _.defaults(t, { meta: meta, template: template });
+      return _.defaults(t, { meta, template });
     });
   }
 
-  function applyTerm(term) {
-    const session = editor.getSession();
-
+  function applyTerm(term: any) {
     const context = term.context;
 
     // make sure we get up to date replacement info.
-    addReplacementInfoToContext(context, editor.getCursorPosition(), term.insertValue);
+    addReplacementInfoToContext(context, editor.getCurrentPosition(), term.insertValue);
 
     let termAsString;
     if (context.autoCompleteType === 'body') {
-      termAsString = typeof term.insertValue === 'string' ? '"' + term.insertValue + '"' : term.insertValue + '';
+      termAsString =
+        typeof term.insertValue === 'string' ? '"' + term.insertValue + '"' : term.insertValue + '';
       if (term.insertValue === '[' || term.insertValue === '{') {
         termAsString = '';
       }
-    }
-    else {
+    } else {
       termAsString = term.insertValue + '';
     }
 
@@ -352,23 +353,27 @@ export default function (editor) {
       } else {
         indentedTemplateLines = utils.jsonToString(term.template, true).split('\n');
       }
-      let currentIndentation = session.getLine(context.rangeToReplace.start.row);
-      currentIndentation = currentIndentation.match(/^\s*/)[0];
-      for (let i = 1; i < indentedTemplateLines.length; i++) // skip first line
-      {indentedTemplateLines[i] = currentIndentation + indentedTemplateLines[i];}
+      let currentIndentation = editor.getLineValue({
+        lineNumber: context.rangeToReplace.start.row,
+      });
+      currentIndentation = currentIndentation.match(/^\s*/)![0];
+      for (
+        let i = 1;
+        i < indentedTemplateLines.length;
+        i++ // skip first line
+      ) {
+        indentedTemplateLines[i] = currentIndentation + indentedTemplateLines[i];
+      }
 
       valueToInsert += ': ' + indentedTemplateLines.join('\n');
       templateInserted = true;
-    }
-    else {
+    } else {
       templateInserted = true;
       if (term.value === '[') {
         valueToInsert += '[]';
-      }
-      else if (term.value === '{') {
+      } else if (term.value === '{') {
         valueToInsert += '{}';
-      }
-      else {
+      } else {
         templateInserted = false;
       }
     }
@@ -379,9 +384,8 @@ export default function (editor) {
     removeChangeListener();
 
     if (context.rangeToReplace.start.column !== context.rangeToReplace.end.column) {
-      session.replace(context.rangeToReplace, valueToInsert);
-    }
-    else {
+      editor.replace(context.rangeToReplace, valueToInsert);
+    } else {
       editor.insert(valueToInsert);
     }
 
@@ -390,8 +394,11 @@ export default function (editor) {
     // go back to see whether we have one of ( : { & [ do not require a comma. All the rest do.
     let newPos = {
       row: context.rangeToReplace.start.row,
-      column: context.rangeToReplace.start.column + termAsString.length + context.prefixToAdd.length
-      + (templateInserted ? 0 : context.suffixToAdd.length)
+      column:
+        context.rangeToReplace.start.column +
+        termAsString.length +
+        context.prefixToAdd.length +
+        (templateInserted ? 0 : context.suffixToAdd.length),
     };
 
     const tokenIter = editor.iterForPosition(newPos.row, newPos.column);
@@ -401,13 +408,19 @@ export default function (editor) {
       let nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
       switch (nonEmptyToken ? nonEmptyToken.type : 'NOTOKEN') {
         case 'paren.rparen':
-          newPos = { row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn() };
+          newPos = {
+            row: tokenIter.getCurrentTokenRow(),
+            column: tokenIter.getCurrentTokenColumn(),
+          };
           break;
         case 'punctuation.colon':
           nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
           if ((nonEmptyToken || {}).type === 'paren.lparen') {
             nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
-            newPos = { row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn() };
+            newPos = {
+              row: tokenIter.getCurrentTokenRow(),
+              column: tokenIter.getCurrentTokenColumn(),
+            };
             if (nonEmptyToken && nonEmptyToken.value.indexOf('"') === 0) {
               newPos.column++;
             } // don't stand on "
@@ -416,7 +429,10 @@ export default function (editor) {
         case 'paren.lparen':
         case 'punctuation.comma':
           tokenIter.stepForward();
-          newPos = { row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn() };
+          newPos = {
+            row: tokenIter.getCurrentTokenRow(),
+            column: tokenIter.getCurrentTokenColumn(),
+          };
           break;
       }
       editor.moveCursorToPosition(newPos);
@@ -426,15 +442,15 @@ export default function (editor) {
     addChangeListener();
   }
 
-  function getAutoCompleteContext(editor, session, pos) {
+  function getAutoCompleteContext(ctxEditor: LegacyEditor, pos: Position) {
     // deduces all the parameters need to position and insert the auto complete
-    const context = {
+    const context: any = {
       autoCompleteSet: null, // instructions for what can be here
       endpoint: null,
       urlPath: null,
       method: null,
       activeScheme: null,
-      editor: editor
+      editor: ctxEditor,
     };
 
     //  context.updatedForToken = session.getTokenAt(pos.row, pos.column);
@@ -453,7 +469,7 @@ export default function (editor) {
         addUrlParamsAutoCompleteSetToContext(context, pos);
         break;
       case 'method':
-        addMethodAutoCompleteSetToContext(context, pos);
+        addMethodAutoCompleteSetToContext(context);
         break;
       case 'body':
         addBodyAutoCompleteSetToContext(context, pos);
@@ -473,16 +489,16 @@ export default function (editor) {
     return context;
   }
 
-  function getAutoCompleteType(pos) {
+  function getAutoCompleteType(pos: Position) {
     // return "method", "path" or "body" to determine auto complete type.
 
     let rowMode = editor.parser.getRowParseMode();
 
-    //noinspection JSBitwiseOperatorUsage
+    // eslint-disable-next-line no-bitwise
     if (rowMode & editor.parser.MODE.IN_REQUEST) {
       return 'body';
     }
-    //noinspection JSBitwiseOperatorUsage
+    // eslint-disable-next-line no-bitwise
     if (rowMode & editor.parser.MODE.REQUEST_START) {
       // on url path, url params or method.
       const tokenIter = editor.iterForPosition(pos.row, pos.column);
@@ -524,27 +540,27 @@ export default function (editor) {
     }
 
     // after start to avoid single line url only requests
-    //noinspection JSBitwiseOperatorUsage
+    // eslint-disable-next-line no-bitwise
     if (rowMode & editor.parser.MODE.REQUEST_END) {
       return 'body';
     }
 
     // in between request on an empty
-    if ((editor.getSession().getLine(pos.row) || '').trim() === '') {
+    if ((editor.getLineValue({ lineNumber: pos.lineNumber }) || '').trim() === '') {
       // check if the previous line is a single line begging of a new request
-      rowMode = editor.parser.getRowParseMode(pos.row - 1);
-      //noinspection JSBitwiseOperatorUsage
-      if ((rowMode & editor.parser.MODE.REQUEST_START) && (rowMode & editor.parser.MODE.REQUEST_END)) {
+      rowMode = editor.parser.getRowParseMode(pos.lineNumber - 1);
+      // eslint-disable-next-line no-bitwise
+      if (rowMode & editor.parser.MODE.REQUEST_START && rowMode & editor.parser.MODE.REQUEST_END) {
         return 'body';
       }
-      //o.w suggest a method
+      // o.w suggest a method
       return 'method';
     }
 
     return null;
   }
 
-  function addReplacementInfoToContext(context, pos, replacingTerm) {
+  function addReplacementInfoToContext(context: any, pos: Position, replacingTerm?: any) {
     // extract the initial value, rangeToReplace & textBoxPosition
 
     // Scenarios for current token:
@@ -554,9 +570,9 @@ export default function (editor) {
     //   - Broken scenario { , bla|
     //   - Nice token, broken before: {, "bla"
 
-    const session = editor.getSession();
-
-    context.updatedForToken = _.clone(session.getTokenAt(pos.row, pos.column));
+    context.updatedForToken = _.clone(
+      editor.getTokenAt({ lineNumber: pos.lineNumber, column: pos.column })
+    );
     if (!context.updatedForToken) {
       context.updatedForToken = { value: '', start: pos.column };
     } // empty line
@@ -581,31 +597,40 @@ export default function (editor) {
       case 'url.part':
       case 'url.param':
       case 'url.value':
-        context.rangeToReplace = new AceRange(
-          pos.row, anchorToken.start, pos.row,
-          context.updatedForToken.start + context.updatedForToken.value.length
-        );
+        context.rangeToReplace = {
+          start: { lineNumber: pos.lineNumber, column: anchorToken.column },
+          end: {
+            lineNumber: pos.lineNumber,
+            column: context.updatedForToken.column + context.updatedForToken.value.length,
+          },
+        } as Range;
         context.replacingToken = true;
         break;
       default:
         if (replacingTerm && context.updatedForToken.value === replacingTerm) {
-          context.rangeToReplace = new AceRange(
-            pos.row, anchorToken.start, pos.row,
-            context.updatedForToken.start + context.updatedForToken.value.length
-          );
+          context.rangeToReplace = {
+            start: { lineNumber: pos.lineNumber, column: anchorToken.column },
+            end: {
+              lineNumber: pos.lineNumber,
+              column: context.updatedForToken.column + context.updatedForToken.value.length,
+            },
+          } as Range;
           context.replacingToken = true;
-        }
-        else {
+        } else {
           // standing on white space, quotes or another punctuation - no replacing
-          context.rangeToReplace = new AceRange(
-            pos.row, pos.column, pos.row, pos.column
-          );
+          context.rangeToReplace = {
+            start: { lineNumber: pos.lineNumber, column: pos.column },
+            end: { lineNumber: pos.lineNumber, column: pos.column },
+          } as Range;
           context.replacingToken = false;
         }
         break;
     }
 
-    context.textBoxPosition = { row: context.rangeToReplace.start.row, column: context.rangeToReplace.start.column };
+    context.textBoxPosition = {
+      row: context.rangeToReplace.start.row,
+      column: context.rangeToReplace.start.column,
+    };
 
     switch (context.autoCompleteType) {
       case 'path':
@@ -656,7 +681,8 @@ export default function (editor) {
         context.addTemplate = true;
         // extend range to replace to include all up to token
         context.rangeToReplace.end.row = tokenIter.getCurrentTokenRow();
-        context.rangeToReplace.end.column = tokenIter.getCurrentTokenColumn() + nonEmptyToken.value.length;
+        context.rangeToReplace.end.column =
+          tokenIter.getCurrentTokenColumn() + nonEmptyToken.value.length;
 
         // move one more time to check if we need a trailing comma
         nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
@@ -683,19 +709,18 @@ export default function (editor) {
     let insertingRelativeToToken; // -1 is before token, 0 middle, +1 after token
     if (context.replacingToken) {
       insertingRelativeToToken = 0;
-    }
-    else {
+    } else {
       const pos = editor.getCursorPosition();
       if (pos.column === context.updatedForToken.start) {
         insertingRelativeToToken = -1;
-      }
-      else if (pos.column < context.updatedForToken.start + context.updatedForToken.value.length) {
+      } else if (
+        pos.column <
+        context.updatedForToken.start + context.updatedForToken.value.length
+      ) {
         insertingRelativeToToken = 0;
-      }
-      else {
+      } else {
         insertingRelativeToToken = 1;
       }
-
     }
     // we should actually look at what's happening before this token
     if (editor.parser.isEmptyToken(nonEmptyToken) || insertingRelativeToToken <= 0) {
@@ -718,12 +743,12 @@ export default function (editor) {
     return context;
   }
 
-  function addUrlParamsPrefixSuffixToContext(context) {
+  function addUrlParamsPrefixSuffixToContext(context: any) {
     context.prefixToAdd = '';
     context.suffixToAdd = '';
   }
 
-  function addMethodPrefixSuffixToContext(context) {
+  function addMethodPrefixSuffixToContext(context: any) {
     context.prefixToAdd = '';
     context.suffixToAdd = '';
     const tokenIter = editor.iterForCurrentLoc();
@@ -736,12 +761,12 @@ export default function (editor) {
     }
   }
 
-  function addPathPrefixSuffixToContext(context) {
+  function addPathPrefixSuffixToContext(context: any) {
     context.prefixToAdd = '';
     context.suffixToAdd = '';
   }
 
-  function addMethodAutoCompleteSetToContext(context) {
+  function addMethodAutoCompleteSetToContext(context: any) {
     context.autoCompleteSet = ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'].map((m, i) => ({
       name: m,
       score: -i,
@@ -749,8 +774,7 @@ export default function (editor) {
     }));
   }
 
-
-  function addPathAutoCompleteSetToContext(context, pos) {
+  function addPathAutoCompleteSetToContext(context: any, pos: Position) {
     const ret = getCurrentMethodAndTokenPaths(editor, pos);
     context.method = ret.method;
     context.token = ret.token;
@@ -758,7 +782,6 @@ export default function (editor) {
     context.urlTokenPath = ret.urlTokenPath;
     const components = getTopLevelUrlCompleteComponents(context.method);
     populateContext(ret.urlTokenPath, context, editor, true, components);
-
 
     context.autoCompleteSet = addMetaToTermsList(context.autoCompleteSet, 'endpoint');
   }
@@ -768,53 +791,73 @@ export default function (editor) {
     context.method = ret.method;
     context.otherTokenValues = ret.otherTokenValues;
     context.urlTokenPath = ret.urlTokenPath;
-    if (!ret.urlTokenPath) { // zero length tokenPath is true
+    if (!ret.urlTokenPath) {
+      // zero length tokenPath is true
 
-      console.log('Can\'t extract a valid url token path.');
+      // console.log("Can't extract a valid url token path.");
       return context;
     }
 
-    populateContext(ret.urlTokenPath, context, editor, false, getTopLevelUrlCompleteComponents(context.method));
+    populateContext(
+      ret.urlTokenPath,
+      context,
+      editor,
+      false,
+      getTopLevelUrlCompleteComponents(context.method)
+    );
 
     if (!context.endpoint) {
-      console.log('couldn\'t resolve an endpoint.');
+      // console.log("couldn't resolve an endpoint.");
       return context;
     }
 
-    if (!ret.urlParamsTokenPath) { // zero length tokenPath is true
-      console.log('Can\'t extract a valid urlParams token path.');
+    if (!ret.urlParamsTokenPath) {
+      // zero length tokenPath is true
+      // console.log("Can't extract a valid urlParams token path.");
       return context;
     }
-    let tokenPath = [];
+    let tokenPath: any[] = [];
     const currentParam = ret.urlParamsTokenPath.pop();
     if (currentParam) {
       tokenPath = Object.keys(currentParam); // single key object
       context.otherTokenValues = currentParam[tokenPath[0]];
     }
 
-    populateContext(tokenPath, context, editor, true,
-      context.endpoint.paramsAutocomplete.getTopLevelComponents(context.method));
+    populateContext(
+      tokenPath,
+      context,
+      editor,
+      true,
+      context.endpoint.paramsAutocomplete.getTopLevelComponents(context.method)
+    );
     return context;
   }
 
-  function addBodyAutoCompleteSetToContext(context, pos) {
-
+  function addBodyAutoCompleteSetToContext(context: any, pos: Position) {
     const ret = getCurrentMethodAndTokenPaths(editor, pos);
     context.method = ret.method;
     context.otherTokenValues = ret.otherTokenValues;
     context.urlTokenPath = ret.urlTokenPath;
     context.requestStartRow = ret.requestStartRow;
-    if (!ret.urlTokenPath) { // zero length tokenPath is true
-      console.log('Can\'t extract a valid url token path.');
+    if (!ret.urlTokenPath) {
+      // zero length tokenPath is true
+      // console.log("Can't extract a valid url token path.");
       return context;
     }
 
-    populateContext(ret.urlTokenPath, context, editor, false, getTopLevelUrlCompleteComponents(context.method));
+    populateContext(
+      ret.urlTokenPath,
+      context,
+      editor,
+      false,
+      getTopLevelUrlCompleteComponents(context.method)
+    );
 
     context.bodyTokenPath = ret.bodyTokenPath;
-    if (!ret.bodyTokenPath) { // zero length tokenPath is true
+    if (!ret.bodyTokenPath) {
+      // zero length tokenPath is true
 
-      console.log('Can\'t extract a valid body token path.');
+      // console.log("Can't extract a valid body token path.");
       return context;
     }
 
@@ -824,8 +867,7 @@ export default function (editor) {
     let components;
     if (context.endpoint) {
       components = context.endpoint.bodyAutocompleteRootComponents;
-    }
-    else {
+    } else {
       components = getUnmatchedEndpointComponents();
     }
     populateContext(ret.bodyTokenPath, context, editor, true, components);
@@ -833,30 +875,28 @@ export default function (editor) {
     return context;
   }
 
-
-
-  const evaluateCurrentTokenAfterAChange = _.debounce(function evaluateCurrentTokenAfterAChange(pos) {
-    const session = editor.getSession();
-    let currentToken = session.getTokenAt(pos.row, pos.column);
+  const evaluateCurrentTokenAfterAChange = _.debounce(function evaluateCurrentTokenAfterAChange(
+    pos: Position
+  ) {
+    let currentToken = editor.getTokenAt(pos.row, pos.column);
 
     if (!currentToken) {
-      if (pos.row === 0) {
+      if (pos.lineNumber === 0) {
         LAST_EVALUATED_TOKEN = null;
         return;
       }
-      currentToken = { start: 0, value: '' }; // empty row
+      currentToken = { column: 0, value: '' }; // empty row
     }
 
-    currentToken.row = pos.row; // extend token with row. Ace doesn't supply it by default
+    currentToken.lineNumber = pos.lineNumber; // extend token with row. Ace doesn't supply it by default
     if (editor.parser.isEmptyToken(currentToken)) {
       // empty token. check what's coming next
-      const nextToken = session.getTokenAt(pos.row, pos.column + 1);
+      const nextToken = editor.getTokenAt(pos.lineNumber, pos.column + 1);
       if (editor.parser.isEmptyToken(nextToken)) {
         // Empty line, or we're not on the edge of current token. Save the current position as base
         currentToken.start = pos.column;
         LAST_EVALUATED_TOKEN = currentToken;
-      }
-      else {
+      } else {
         nextToken.row = pos.row;
         LAST_EVALUATED_TOKEN = nextToken;
       }
@@ -868,8 +908,11 @@ export default function (editor) {
       return; // wait for the next typing.
     }
 
-    if (LAST_EVALUATED_TOKEN.start !== currentToken.start || LAST_EVALUATED_TOKEN.row !== currentToken.row
-      || LAST_EVALUATED_TOKEN.value === currentToken.value) {
+    if (
+      LAST_EVALUATED_TOKEN.start !== currentToken.start ||
+      LAST_EVALUATED_TOKEN.row !== currentToken.row ||
+      LAST_EVALUATED_TOKEN.value === currentToken.value
+    ) {
       // not on the same place or nothing changed, cache and wait for the next time
       LAST_EVALUATED_TOKEN = currentToken;
       return;
@@ -886,63 +929,67 @@ export default function (editor) {
     }
 
     LAST_EVALUATED_TOKEN = currentToken;
-    editor.execCommand('startAutocomplete');
-  }, 100);
+    ed.execCommand('startAutocomplete');
+  },
+  100);
 
   function editorChangeListener() {
-    const cursor = editor.selection.lead;
-    if (editor.__ace.completer && editor.__ace.completer.activated) {
+    const cursor = (ed as any).selection.lead;
+    if ((ed as any).__ace.completer && (ed as any).__ace.completer.activated) {
       return;
     }
     evaluateCurrentTokenAfterAChange(cursor);
   }
 
   function addChangeListener() {
-    editor.on('changeSelection', editorChangeListener);
+    ed.on('changeSelection', editorChangeListener);
   }
 
   function removeChangeListener() {
-    editor.off('changeSelection', editorChangeListener);
+    ed.off('changeSelection', editorChangeListener);
   }
 
-  function getCompletions(aceEditor, session, pos, prefix, callback) {
+  function getCompletions(
+    aceEditor: AceEditor,
+    session: IEditSession,
+    pos: any,
+    prefix: any,
+    callback: any
+  ) {
     try {
-
-      const context = getAutoCompleteContext(editor, session, pos);
+      const context = getAutoCompleteContext(editor, pos);
       if (!context) {
         callback(null, []);
-      }
-      else {
+      } else {
         const terms = _.map(
-          context
-            .autoCompleteSet
-            .filter(term => Boolean(term) && term.name != null),
-          function (term) {
+          context.autoCompleteSet.filter((term: any) => Boolean(term) && term.name != null),
+          function(term: any) {
             if (typeof term !== 'object') {
               term = {
-                name: term
+                name: term,
               };
             } else {
               term = _.clone(term);
             }
-            const defaults = {
+            const defaults: any = {
               value: term.name,
               meta: 'API',
               score: 0,
-              context: context,
+              context,
             };
             // we only need out custom insertMatch behavior for the body
             if (context.autoCompleteType === 'body') {
               defaults.completer = {
-                insertMatch: function () {
+                insertMatch() {
                   return applyTerm(term);
-                }
+                },
               };
             }
             return _.defaults(term, defaults);
-          });
+          }
+        );
 
-        terms.sort(function (t1, t2) {
+        terms.sort(function(t1: any, t2: any) {
           /* score sorts from high to low */
           if (t1.score > t2.score) {
             return -1;
@@ -960,16 +1007,18 @@ export default function (editor) {
           return 1;
         });
 
-        callback(null, _.map(terms, function (t, i) {
-          t.insertValue = t.insertValue || t.value;
-          t.value = '' + t.value; // normalize to strings
-          t.score = -i;
-          return t;
-        }));
+        callback(
+          null,
+          _.map(terms, function(t: any, i: any) {
+            t.insertValue = t.insertValue || t.value;
+            t.value = '' + t.value; // normalize to strings
+            t.score = -i;
+            return t;
+          })
+        );
       }
-    }
-    catch (e) {
-      console.log('error while getting completion terms', e);
+    } catch (e) {
+      // console.log('error while getting completion terms', e);
       callback(e, null);
     }
   }
@@ -979,32 +1028,43 @@ export default function (editor) {
   // Hook into Ace
 
   // disable standard context based autocompletion.
-  ace.define('ace/autocomplete/text_completer', ['require', 'exports', 'module'], function (require, exports) {
-    exports.getCompletions = function (editor, session, pos, prefix, callback) {
+  // @ts-ignore
+  ace.define('ace/autocomplete/text_completer', ['require', 'exports', 'module'], function(
+    require: any,
+    exports: any
+  ) {
+    exports.getCompletions = function(
+      innerEditor: any,
+      session: any,
+      pos: any,
+      prefix: any,
+      callback: any
+    ) {
       callback(null, []);
     };
   });
 
   const langTools = ace.acequire('ace/ext/language_tools');
 
-  langTools.setCompleters([{
-    identifierRegexps: [
-      /[a-zA-Z_0-9\.\$\-\u00A2-\uFFFF]/ // adds support for dot character
-    ],
-    getCompletions: getCompletions
-  }]);
+  langTools.setCompleters([
+    {
+      identifierRegexps: [
+        /[a-zA-Z_0-9\.\$\-\u00A2-\uFFFF]/, // adds support for dot character
+      ],
+      getCompletions,
+    },
+  ]);
 
-  editor.setOptions({
-    enableBasicAutocompletion: true
+  ed.setOptions({
+    enableBasicAutocompletion: true,
   });
-  editor.$blockScrolling = Infinity;
+  ed.$blockScrolling = Infinity;
   return {
-
     _test: {
-      getCompletions: getCompletions,
-      addReplacementInfoToContext: addReplacementInfoToContext,
-      addChangeListener: addChangeListener,
-      removeChangeListener: removeChangeListener
-    }
+      getCompletions,
+      addReplacementInfoToContext,
+      addChangeListener,
+      removeChangeListener,
+    },
   };
 }

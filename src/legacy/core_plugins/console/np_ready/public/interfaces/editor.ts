@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { TokenIterator } from './token_iterator';
+import { TokensProvider } from './tokens_provider';
 
 export interface Position {
   /**
@@ -40,16 +40,6 @@ export interface Range {
   start: Position;
   // TODO: document
   end: Position;
-}
-
-export interface GetTokenIteratorArgs {
-  position: Position;
-
-  /**
-   * The direction in which calling 'next' on the iterator will move through the set of tokens.
-   * Default to backward if not specified
-   */
-  direction?: 'forward' | 'backward';
 }
 
 // TODO: document
@@ -78,11 +68,25 @@ export interface Editor {
    */
   getLineValue(args: { lineNumber: number }): string;
 
+  // TODO: document
+  insert(value: string): void;
+
+  // TODO: document
+  replace(rangeToReplace: Range, value: string): void;
+
+  // TODO: document
+  clearSelection(): void;
+
+  // TODO: document
+  moveCursorToPosition(pos: Position): void;
+
+  // TODO: document
+  getTokenAt(pos: Position): Token | null;
+
   /**
-   * Get an iterator, with a direction and a position, to traverse
-   * tokens in the document content.
+   * Get an iterable token provider
    */
-  getTokenIteratorForPosition(args: GetTokenIteratorArgs): TokenIterator;
+  getTokenProvider(): TokensProvider;
 
   /**
    * Get the contents of the editor between two points.
@@ -90,7 +94,7 @@ export interface Editor {
   getValueInRange(range: Range): string;
 
   /**
-   * Get the mode of a specific line as enumerated by LINE_MODE.
+   * Get the mode at the end of a specific line.
    */
-  getLineMode(args: { lineNumber: number }): LINE_MODE;
+  getLineMode(args: { lineNumber: number }): string;
 }
