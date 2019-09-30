@@ -18,9 +18,8 @@
  */
 import getAllConfigs from './get_all_configs';
 
-export default async function ({ readConfigFile }) {
+export default async ({ readConfigFile }) => {
   const baseConfigs = await getAllConfigs(readConfigFile, './config.stack_functional_integration_base');
-
   return {
     ...baseConfigs,
     junit: {
@@ -28,7 +27,7 @@ export default async function ({ readConfigFile }) {
     },
     testFiles: [
       require.resolve('../test/functional/apps/telemetry'),
-      // require.resolve('./test/functional/apps/monitoring'),
+      require.resolve('../test/functional/apps/monitoring'),
     ],
   };
 }
