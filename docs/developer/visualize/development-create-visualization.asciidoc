@@ -64,7 +64,7 @@ The list of common parameters:
 - *responseHandler*: <string> one of the available response handlers or a <function> for a custom response handler
 - *editor*: <string> one of the available editors or Editor class for custom one
 - *editorConfig*: object holding editor parameters
-- *options.showTimePicker*: <bool> show or hide time picker (defaults to true)
+- *options.showTimePicker*: <bool> show or hide time filter (defaults to true)
 - *options.showQueryBar*: <bool> show or hide query bar (defaults to true)
 - *options.showFilterBar*: <bool> show or hide filter bar (defaults to true)
 - *options.showIndexSelection*: <bool> show or hide index selection (defaults to true)
@@ -417,7 +417,7 @@ The `vis` object holds the visualization state and is the window into kibana:
 - *vis.getUiState()*: gets UI state of visualization
 - *vis.uiStateVal(name, val)*: updates a property in UI state
 - *vis.isEditorMode()*: returns true if in editor mode
-- *vis.API.timeFilter*: allows you to access time picker
+- *vis.API.timeFilter*: allows you to access time filter
 - *vis.API.queryFilter*: gives you access to queryFilter
 - *vis.API.events.click*: default click handler
 - *vis.API.events.brush*: default brush handler
@@ -430,12 +430,12 @@ visualization's render method.
 For the parameters that should not be saved with the visualization you should use the UI state. 
 These hold viewer-specific state, such as popup open/closed, custom colors applied to the series etc.
 
-You can access filter bar and time picker through the objects defined on `vis.API`
+You can access the filter bar and time filter through the objects defined on `vis.API`
 
 [[development-vis-timefilter]]
 ==== timeFilter
 
-Update the timefilter time values and call update() method on it to update time picker
+Update the timefilter time values and call update() method on it to update the time filter
 
 ["source","js"]
 -----------

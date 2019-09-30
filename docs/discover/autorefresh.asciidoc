@@ -10,8 +10,8 @@ To enable auto refresh:
 . In the *Refresh every* field, enter the refresh rate, then select the interval from the dropdown.
 . Click *Start*.
 
-To automatically refresh the data, click the image:images/autorefresh.png[] *Auto-refresh* button when the time picker
-is open and select an autorefresh interval:
+To automatically refresh the data, click the image:images/autorefresh.png[] *Auto-refresh* button when the time filter
+is open and select an auto refresh interval:
 
 image::images/autorefresh-intervals.png[]
 
