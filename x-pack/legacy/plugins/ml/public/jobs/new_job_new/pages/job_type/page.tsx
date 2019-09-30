@@ -243,7 +243,7 @@ export const Page: FC = () => {
               <CreateJobLinkCard
                 data-test-subj={id}
                 href={href}
-                iconType={icon.type}
+                icon={icon.type}
                 iconAreaLabel={icon.ariaLabel}
                 title={title}
                 description={description}
@@ -278,7 +278,7 @@ export const Page: FC = () => {
         <EuiFlexGrid gutterSize="l" columns={4}>
           <EuiFlexItem>
             <CreateJobLinkCard
-              iconType="dataVisualizer"
+              icon="dataVisualizer"
               iconAreaLabel={i18n.translate(
                 'xpack.ml.newJob.wizard.jobType.dataVisualizerAriaLabel',
                 {

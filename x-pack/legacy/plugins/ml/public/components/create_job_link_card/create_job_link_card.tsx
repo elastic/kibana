@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 
 interface Props {
-  iconType: IconType | ReactElement;
+  icon: IconType | ReactElement;
   iconAreaLabel?: string;
   title: any;
   description: any;
@@ -31,7 +31,7 @@ interface Props {
 // Component for rendering a card which links to the Create Job page, displaying an
 // icon, card title, description and link.
 export const CreateJobLinkCard: FC<Props> = ({
-  iconType,
+  icon,
   iconAreaLabel,
   title,
   description,
@@ -50,10 +50,10 @@ export const CreateJobLinkCard: FC<Props> = ({
     >
       <EuiFlexGroup gutterSize="l" responsive={true}>
         <EuiFlexItem grow={false} style={{ paddingTop: '8px' }}>
-          {typeof iconType === 'string' ? (
-            <EuiIcon size="xl" type={iconType} aria-label={iconAreaLabel} />
+          {typeof icon === 'string' ? (
+            <EuiIcon size="xl" type={icon} aria-label={iconAreaLabel} />
           ) : (
-            iconType
+            icon
           )}
         </EuiFlexItem>
         <EuiFlexItem>

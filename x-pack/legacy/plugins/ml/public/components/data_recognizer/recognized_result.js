@@ -44,7 +44,7 @@ export const RecognizedResult = ({
         href={href}
         title={config.title}
         description={config.description}
-        iconType={logo}
+        icon={logo}
       />
     </EuiFlexItem>
   );

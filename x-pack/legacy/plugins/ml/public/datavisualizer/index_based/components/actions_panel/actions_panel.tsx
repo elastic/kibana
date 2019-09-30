@@ -80,7 +80,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
       </EuiText>
       <EuiSpacer size="m" />
       <CreateJobLinkCard
-        iconType="createAdvancedJob"
+        icon="createAdvancedJob"
         title={i18n.translate('xpack.ml.datavisualizer.actionsPanel.advancedTitle', {
           defaultMessage: 'Advanced',
         })}
