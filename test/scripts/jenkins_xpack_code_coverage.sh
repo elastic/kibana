@@ -29,8 +29,10 @@ fi
 echo " -> Running functional and api tests"
 cd "$XPACK_DIR"
 
+export NODE_OPTIONS=--max_old_space_size=8192
+
 checks-reporter-with-killswitch "X-Pack Functional tests code coverage / Group ${CI_GROUP}" \
-  node --max-old-space-size=8192 scripts/functional_tests_coverage \
+  node scripts/functional_tests_coverage \
     --debug \
     --include-tag "ciGroup$CI_GROUP"
 

@@ -11,7 +11,7 @@ fi
 export TEST_BROWSER_HEADLESS=1
 
 checks-reporter-with-killswitch " Functional tests with code coverage / Group ${CI_GROUP}" \
-  node --max-old-space-size=8192 scripts/functional_tests_coverage \
+  node scripts/functional_tests_coverage \
     --debug \
     --include-tag "ciGroup$CI_GROUP"
 # if [ "$CI_GROUP" == "1" ]; then
