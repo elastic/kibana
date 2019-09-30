@@ -18,7 +18,7 @@ import { FieldIcon } from '../field_icon';
 import { DataType } from '../../types';
 import { OperationFieldSupportMatrix } from './dimension_panel';
 import { IndexPattern, IndexPatternField, IndexPatternPrivateState } from '../types';
-import { fieldExists } from '../state_helpers';
+import { fieldExists } from '../pure_helpers';
 
 export type FieldChoice =
   | { type: 'field'; field: string; operationType?: OperationType }

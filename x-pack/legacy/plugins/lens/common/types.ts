@@ -8,3 +8,8 @@ export interface ExistingFields {
   id: string;
   existingFieldNames: string[];
 }
+
+export interface DateRange {
+  fromDate: string;
+  toDate: string;
+}

@@ -5,11 +5,13 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/public';
+import _ from 'lodash';
 import {
   loadInitialState,
   loadIndexPatterns,
   changeIndexPattern,
   changeLayerIndexPattern,
+  syncExistingFields,
 } from './loader';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 
@@ -315,6 +317,7 @@ describe('loader', () => {
         currentIndexPatternId: 'b',
         indexPatternRefs: [],
         indexPatterns: {},
+        existingFields: {},
         layers: {},
         showEmptyFields: true,
       };
@@ -341,6 +344,7 @@ describe('loader', () => {
       const state: IndexPatternPrivateState = {
         currentIndexPatternId: 'b',
         indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: {
           a: sampleIndexPatterns.a,
         },
@@ -406,6 +410,44 @@ describe('loader', () => {
             },
             indexPatternId: 'b',
           },
+        },
+      });
+    });
+  });
+
+  describe('syncExistingFields', () => {
+    it('should call once for each index pattern', async () => {
+      const setState = jest.fn();
+      const fetchJson = jest.fn(async (url: string) => {
+        const id = _.last(url.split('/'));
+        return {
+          id,
+          existingFieldNames: ['field_1', 'field_2'].map(fieldName => `${id}_${fieldName}`),
+        };
+      });
+
+      await syncExistingFields({
+        dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
+        fetchJson,
+        indexPatternIds: ['a', 'b', 'c'],
+        setState,
+      });
+
+      expect(fetchJson).toHaveBeenCalledTimes(3);
+      expect(setState).toHaveBeenCalledTimes(1);
+
+      const [fn] = setState.mock.calls[0];
+      const newState = fn({
+        foo: 'bar',
+        existingFields: {},
+      });
+
+      expect(newState).toEqual({
+        foo: 'bar',
+        existingFields: {
+          a: { a_field_1: true, a_field_2: true },
+          b: { b_field_1: true, b_field_2: true },
+          c: { c_field_1: true, c_field_2: true },
         },
       });
     });

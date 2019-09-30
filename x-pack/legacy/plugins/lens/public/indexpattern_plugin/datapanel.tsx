@@ -37,8 +37,8 @@ import {
   IndexPatternField,
   IndexPatternRef,
 } from './types';
-import { syncEmptyFields } from './loader';
-import { fieldExists } from './state_helpers';
+import { syncExistingFields } from './loader';
+import { fieldExists } from './pure_helpers';
 
 type Props = DatasourceDataPanelProps<IndexPatternPrivateState> & {
   changeIndexPattern: (
@@ -89,20 +89,20 @@ export function IndexPatternDataPanel({
     setState(prevState => ({ ...prevState, showEmptyFields: !prevState.showEmptyFields }));
   }, [setState]);
 
-  const indexPatternIds = _.uniq(
+  const indexPatternIds = uniq(
     Object.values(state.layers)
       .map(l => l.indexPatternId)
-      .concat(state.currentIndexPatternId)
-  ).filter(id => state.indexPatterns[id]);
+      .concat(currentIndexPatternId)
+  ).sort((a, b) => a.localeCompare(b));
 
   useEffect(() => {
-    syncEmptyFields({
+    syncExistingFields({
       dateRange,
       indexPatternIds,
-      fetchJson: core.http.get,
       setState,
+      fetchJson: core.http.get,
     });
-  }, [dateRange, indexPatternIds.join(',')]);
+  }, [dateRange.fromDate, dateRange.toDate, indexPatternIds.join(',')]);
 
   return (
     <MemoizedDataPanel
@@ -139,6 +139,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   onToggleEmptyFields,
   core,
   existingFields,
+  state,
 }: Partial<DatasourceDataPanelProps> & {
   currentIndexPatternId: string;
   indexPatternRefs: IndexPatternRef[];
@@ -188,7 +189,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   });
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
-
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
   const allFields = currentIndexPattern.fields;
   const fieldByName = indexBy(allFields, 'name');

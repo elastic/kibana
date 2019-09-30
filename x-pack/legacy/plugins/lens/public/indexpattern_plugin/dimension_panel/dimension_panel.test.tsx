@@ -91,6 +91,14 @@ describe('IndexPatternDimensionPanel', () => {
       indexPatterns: expectedIndexPatterns,
       currentIndexPatternId: '1',
       showEmptyFields: false,
+      existingFields: {
+        1: {
+          timestamp: true,
+          bytes: true,
+          memory: true,
+          source: true,
+        },
+      },
       layers: {
         first: {
           indexPatternId: '1',
@@ -199,6 +207,28 @@ describe('IndexPatternDimensionPanel', () => {
       'memory',
       'source',
     ]);
+  });
+
+  it('should hide fields that have no data', () => {
+    const props = {
+      ...defaultProps,
+      state: {
+        ...defaultProps.state,
+        existingFields: {
+          1: {
+            timestamp: true,
+            source: true,
+          },
+        },
+      },
+    };
+    wrapper = mount(<IndexPatternDimensionPanel {...props} />);
+
+    openPopover();
+
+    const options = wrapper.find(EuiComboBox).prop('options');
+
+    expect(options![1].options!.map(({ label }) => label)).toEqual(['timestamp', 'source']);
   });
 
   it('should indicate fields which are imcompatible for the operation of the current column', () => {
@@ -947,6 +977,7 @@ describe('IndexPatternDimensionPanel', () => {
     function dragDropState(): IndexPatternPrivateState {
       return {
         indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: {
           foo: {
             id: 'foo',

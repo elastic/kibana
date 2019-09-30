@@ -15,13 +15,11 @@ import { IndexPatternPrivateState } from './types';
 import { ChangeIndexPattern } from './change_indexpattern';
 
 jest.mock('ui/new_platform');
-jest.mock('./loader');
 jest.mock('../../../../../../src/legacy/ui/public/registry/field_formats');
-
-const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
 const initialState: IndexPatternPrivateState = {
   indexPatternRefs: [],
+  existingFields: {},
   currentIndexPatternId: '1',
   showEmptyFields: false,
   layers: {
@@ -212,6 +210,7 @@ describe('IndexPattern Data Panel', () => {
     core = coreMock.createSetup();
     defaultProps = {
       indexPatternRefs: [],
+      existingFields: {},
       dragDropContext: createMockedDragDropContext(),
       currentIndexPatternId: '1',
       indexPatterns: initialState.indexPatterns,
@@ -265,91 +264,177 @@ describe('IndexPattern Data Panel', () => {
   });
 
   describe('loading existence data', () => {
-    beforeEach(() => {
-      core.http.post.mockClear();
-    });
-
-    it('loads existence data and updates the index pattern', async () => {
-      core.http.post.mockResolvedValue({
-        timestamp: {
-          exists: true,
-          cardinality: 500,
-          count: 500,
-        },
+    async function testExistenceLoading(stateChanges?: unknown, propChanges?: unknown) {
+      const setState = jest.fn();
+      core.http.get = jest.fn(async (url: string) => {
+        const parts = url.split('/');
+        const id = parts[parts.length - 1];
+        return {
+          id,
+          existingFieldNames: ['field_1', 'field_2'].map(fieldName => `${id}_${fieldName}`),
+        };
       });
-      const updateFields = jest.fn();
-      mount(<InnerIndexPatternDataPanel {...defaultProps} updateFieldsWithCounts={updateFields} />);
-
-      await waitForPromises();
-
-      expect(core.http.post).toHaveBeenCalledWith(`/api/lens/index_stats/my-fake-index-pattern`, {
-        body: JSON.stringify({
-          fromDate: 'now-7d',
-          toDate: 'now',
-          size: 500,
-          timeFieldName: 'timestamp',
-          fields: [
-            {
-              name: 'timestamp',
-              type: 'date',
+      const props = {
+        ...defaultProps,
+        changeIndexPattern: jest.fn(),
+        setState,
+        dragDropContext: { dragging: {}, setDragging: () => {} },
+        dateRange: { fromDate: '2019-01-01', toDate: '2020-01-01' },
+        state: {
+          ...defaultProps.state,
+          indexPatternRefs: [],
+          currentIndexPatternId: 'a',
+          indexPatterns: {
+            a: { id: 'a', title: 'aaa', fields: [] },
+            b: { id: 'b', title: 'bbb', fields: [] },
+          },
+          layers: {
+            1: {
+              indexPatternId: 'a',
             },
-            {
-              name: 'bytes',
-              type: 'number',
-            },
-            {
-              name: 'memory',
-              type: 'number',
-            },
-            {
-              name: 'unsupported',
-              type: 'geo',
-            },
-            {
-              name: 'source',
-              type: 'string',
-            },
-            {
-              name: 'client',
-              type: 'ip',
-            },
-          ],
-        }),
-      });
-
-      expect(updateFields).toHaveBeenCalledWith('1', [
-        {
-          name: 'timestamp',
-          type: 'date',
-          exists: true,
-          cardinality: 500,
-          count: 500,
-          aggregatable: true,
-          searchable: true,
-        },
-        ...defaultProps.indexPatterns['1'].fields
-          .slice(1)
-          .map(field => ({ ...field, exists: false })),
-      ]);
-    });
-
-    it('does not attempt to load existence data if the index pattern has it', async () => {
-      const updateFields = jest.fn();
-      const newIndexPatterns = {
-        ...defaultProps.indexPatterns,
-        '1': {
-          ...defaultProps.indexPatterns['1'],
-          hasExistence: true,
-        },
+          },
+        } as IndexPatternPrivateState,
       };
+      const inst = mount(<IndexPatternDataPanel {...props} />);
+      inst.update();
 
-      const props = { ...defaultProps, indexPatterns: newIndexPatterns };
+      if (stateChanges || propChanges) {
+        act(() => {
+          ((inst.setProps as unknown) as (props: unknown) => {})({
+            ...props,
+            ...(propChanges || {}),
+            state: {
+              ...props.state,
+              ...(stateChanges || {}),
+            },
+          });
+          inst.update();
+        });
+      }
 
-      mount(<InnerIndexPatternDataPanel {...props} updateFieldsWithCounts={updateFields} />);
+      return setState;
+    }
 
-      await waitForPromises();
+    it('loads existence data', async () => {
+      const setState = await testExistenceLoading();
 
-      expect(core.http.post).not.toHaveBeenCalled();
+      expect(setState).toHaveBeenCalledTimes(1);
+
+      const nextState = setState.mock.calls[0][0]({
+        existingFields: {},
+      });
+
+      expect(nextState.existingFields).toEqual({
+        a: {
+          a_field_1: true,
+          a_field_2: true,
+        },
+      });
+    });
+
+    it('loads existence data for current index pattern id', async () => {
+      const setState = await testExistenceLoading({ currentIndexPatternId: 'b' });
+
+      expect(setState).toHaveBeenCalledTimes(2);
+
+      const nextState = setState.mock.calls[1][0]({
+        existingFields: {},
+      });
+
+      expect(nextState.existingFields).toEqual({
+        a: {
+          a_field_1: true,
+          a_field_2: true,
+        },
+        b: {
+          b_field_1: true,
+          b_field_2: true,
+        },
+      });
+    });
+
+    it('does not load existence data if date and index pattern ids are unchanged', async () => {
+      const setState = await testExistenceLoading({
+        currentIndexPatternId: 'a',
+        dateRange: { fromDate: '2019-01-01', toDate: '2020-01-01' },
+      });
+
+      expect(setState).toHaveBeenCalledTimes(1);
+    });
+
+    it('loads existence data if date range changes', async () => {
+      const setState = await testExistenceLoading(undefined, {
+        dateRange: { fromDate: '2019-01-01', toDate: '2020-01-02' },
+      });
+
+      expect(setState).toHaveBeenCalledTimes(2);
+      expect(core.http.get).toHaveBeenCalledTimes(2);
+
+      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
+        query: {
+          fromDate: '2019-01-01',
+          toDate: '2020-01-01',
+        },
+      });
+
+      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
+        query: {
+          fromDate: '2019-01-01',
+          toDate: '2020-01-02',
+        },
+      });
+
+      const nextState = setState.mock.calls[1][0]({
+        existingFields: {},
+      });
+
+      expect(nextState.existingFields).toEqual({
+        a: {
+          a_field_1: true,
+          a_field_2: true,
+        },
+      });
+    });
+
+    it('loads existence data if layer index pattern changes', async () => {
+      const setState = await testExistenceLoading({
+        layers: {
+          1: {
+            indexPatternId: 'b',
+          },
+        },
+      });
+
+      expect(setState).toHaveBeenCalledTimes(2);
+
+      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
+        query: {
+          fromDate: '2019-01-01',
+          toDate: '2020-01-01',
+        },
+      });
+
+      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/b', {
+        query: {
+          fromDate: '2019-01-01',
+          toDate: '2020-01-01',
+        },
+      });
+
+      const nextState = setState.mock.calls[1][0]({
+        existingFields: {},
+      });
+
+      expect(nextState.existingFields).toEqual({
+        a: {
+          a_field_1: true,
+          a_field_2: true,
+        },
+        b: {
+          b_field_1: true,
+          b_field_2: true,
+        },
+      });
     });
   });
 
@@ -470,7 +555,6 @@ describe('IndexPattern Data Panel', () => {
           ...defaultProps.indexPatterns,
           '1': {
             ...defaultProps.indexPatterns['1'],
-            hasExistence: true,
             fields: defaultProps.indexPatterns['1'].fields.map(field => ({
               ...field,
               exists: field.type === 'number',
@@ -482,7 +566,16 @@ describe('IndexPattern Data Panel', () => {
     });
 
     it('should list all supported fields in the pattern sorted alphabetically', async () => {
-      const wrapper = shallow(<InnerIndexPatternDataPanel {...emptyFieldsTestProps} />);
+      const props = {
+        ...emptyFieldsTestProps,
+        existingFields: {
+          1: {
+            bytes: true,
+            memory: true,
+          },
+        },
+      };
+      const wrapper = shallow(<InnerIndexPatternDataPanel {...props} />);
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
         'bytes',

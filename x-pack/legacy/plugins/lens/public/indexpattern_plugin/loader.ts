@@ -203,7 +203,7 @@ async function loadIndexPatternRefs(
   }));
 }
 
-export async function syncEmptyFields({
+export async function syncExistingFields({
   indexPatternIds,
   dateRange,
   fetchJson,
