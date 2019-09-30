@@ -1,5 +1,7 @@
 #!/bin/groovy
 
+library identifier: 'repo-library', retriever: legacySCM(scm)
+
 // Looks like 'oss:ciGroup:1' or 'oss:firefoxSmoke'
 def JOB_PARTS = params.CI_GROUP.split(':')
 def IS_XPACK = JOB_PARTS[0] == 'xpack'
