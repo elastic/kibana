@@ -865,6 +865,22 @@
         ],
       },
       {
+        groupSlug: 'parse-link-header',
+        groupName: 'parse-link-header related packages',
+        packageNames: [
+          'parse-link-header',
+          '@types/parse-link-header',
+        ],
+      },
+      {
+        groupSlug: 'xml2js',
+        groupName: 'xml2js related packages',
+        packageNames: [
+          'xml2js',
+          '@types/xml2js',
+        ],
+      },
+      {
         packagePatterns: [
           '^@kbn/.*',
         ],
