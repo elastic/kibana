@@ -157,7 +157,11 @@ export function AddSettingFlyoutBody({
             placeholder={selectPlaceholderLabel}
             isLoading={environmentStatus === 'loading'}
             options={environmentOptions}
-            value={environment}
+            value={
+              selectedConfig
+                ? environment || ENVIRONMENT_NOT_DEFINED
+                : environment
+            }
             disabled={!serviceName || Boolean(selectedConfig)}
             onChange={e => {
               e.preventDefault();
