@@ -14,9 +14,11 @@ The simple fetching of the correct EUI theme; a **React hook**.
 import { npStart } from 'ui/new_platform';
 import { Chart, Settings } from '@elastic/charts';
 
-<Chart>
-  <Settings theme={npStart.plugins.eui_utils.useChartsTheme()} />
-</Chart>;
+export const YourComponent = () => (
+  <Chart>
+    <Settings theme={npStart.plugins.eui_utils.useChartsTheme()} />
+  </Chart>
+);
 ```
 
 ### `getChartsTheme$`
