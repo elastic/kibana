@@ -17,26 +17,27 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { createBytesFormat } from '../bytes';
-import { FieldFormat } from '../../../../../../../plugins/data/common/field_formats';
+import { createBytesFormat } from './bytes';
+import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
 
 const BytesFormat = createBytesFormat(FieldFormat);
 
-describe('BytesFormat', function () {
+describe('BytesFormat', function() {
+  const config: Record<any, any> = {};
 
-  const config = {};
   config['format:bytes:defaultPattern'] = '0,0.[000]b';
-  const getConfig = (key) => config[key];
 
-  it('default pattern', ()=> {
+  const getConfig = (key: any) => config[key];
+
+  test('default pattern', () => {
     const formatter = new BytesFormat({}, getConfig);
-    expect(formatter.convert(5150000)).to.be('4.911MB');
+
+    expect(formatter.convert(5150000)).toBe('4.911MB');
   });
 
-  it('custom pattern', ()=> {
+  test('custom pattern', () => {
     const formatter = new BytesFormat({ pattern: '0,0b' }, getConfig);
-    expect(formatter.convert('5150000')).to.be('5MB');
-  });
 
+    expect(formatter.convert('5150000')).toBe('5MB');
+  });
 });

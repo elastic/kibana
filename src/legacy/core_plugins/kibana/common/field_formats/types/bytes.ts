@@ -18,10 +18,11 @@
  */
 
 import { createNumeralFormat } from './_numeral';
+import { FieldFormat } from '../../../../../../plugins/data/common/';
 
-export function createBytesFormat(FieldFormat) {
-  return createNumeralFormat(FieldFormat, {
+export function createBytesFormat(BaseFieldFormat: typeof FieldFormat) {
+  return createNumeralFormat(BaseFieldFormat, {
     id: 'bytes',
-    title: 'Bytes'
+    title: 'Bytes',
   });
 }
