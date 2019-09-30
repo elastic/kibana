@@ -19,10 +19,12 @@
 
 import { TokenIterator, Position, Token, TokensProvider } from '../../interfaces';
 
-function colIsInTokenRange(column: number, token: Token) {
-  return (
-    token.position.column <= column && token.position.column + (token.value.length - 1) >= column
-  );
+function isColumnInTokenRange(column: number, token: Token) {
+  if (column < token.position.column) {
+    return false;
+  }
+
+  return column <= token.position.column + token.value.length - 1;
 }
 
 export class TokenIteratorImpl implements TokenIterator {
@@ -34,7 +36,7 @@ export class TokenIteratorImpl implements TokenIterator {
     this.currentPosition = { ...startPosition };
     this.tokensLineCache = this.provider.getTokens(startPosition.lineNumber) || [];
     this.currentTokenIdx = this.tokensLineCache.findIndex(token =>
-      colIsInTokenRange(startPosition.column, token)
+      isColumnInTokenRange(startPosition.column, token)
     );
   }
 
@@ -55,10 +57,8 @@ export class TokenIteratorImpl implements TokenIterator {
     return this.provider.getTokenAt(this.currentPosition);
   }
 
-  private step(direction: 'forward' | 'backward'): Token | null {
-    const forward = direction === 'forward';
-    const stepValue = forward ? 1 : -1;
-    const nextIdx = this.currentTokenIdx + stepValue;
+  private step(direction: 1 | -1): Token | null {
+    const nextIdx = this.currentTokenIdx + direction;
 
     let nextToken = this.tokensLineCache[nextIdx];
     // Check current row
@@ -68,7 +68,7 @@ export class TokenIteratorImpl implements TokenIterator {
     }
 
     // Check next line
-    const nextLineNumber = this.getLineOffset() + stepValue;
+    const nextLineNumber = this.getLineOffset() + direction;
     const nextLineTokens = this.provider.getTokens(nextLineNumber);
     if (nextLineTokens) {
       this.updateLineTokens(nextLineTokens);
@@ -81,11 +81,11 @@ export class TokenIteratorImpl implements TokenIterator {
   }
 
   stepForward(): Token | null {
-    return this.step('forward');
+    return this.step(1);
   }
 
   stepBackward(): Token | null {
-    return this.step('backward');
+    return this.step(-1);
   }
 
   getCurrentPosition(): Position {

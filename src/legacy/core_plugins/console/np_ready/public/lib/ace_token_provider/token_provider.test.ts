@@ -84,7 +84,7 @@ describe('Ace (legacy) token provider', () => {
 
   describe('#getTokens', () => {
     describe('base cases', () => {
-      test('case 1', function(cb) {
+      test('case 1 - only url', function(cb) {
         runTest({
           input: `GET http://somehost/_search`,
           expectedTokens: [
@@ -102,7 +102,7 @@ describe('Ace (legacy) token provider', () => {
         });
       });
 
-      test('case 2', function(cb) {
+      test('case 2 - basic auth in host name', function(cb) {
         runTest({
           input: `GET http://test:user@somehost/`,
           expectedTokens: [
@@ -119,7 +119,7 @@ describe('Ace (legacy) token provider', () => {
         });
       });
 
-      test('case 3', function(cb) {
+      test('case 3 - handles empty lines', function(cb) {
         runTest({
           input: `POST abc
 
@@ -138,7 +138,7 @@ describe('Ace (legacy) token provider', () => {
     });
 
     describe('with newlines', () => {
-      test('case 1', function(cb) {
+      test('case 1 - newlines base case', function(cb) {
         runTest({
           input: `GET http://test:user@somehost/
 {
@@ -158,7 +158,7 @@ describe('Ace (legacy) token provider', () => {
     });
 
     describe('edge cases', () => {
-      test('case 1', function(cb) {
+      test('case 1 - getting token outside of document', function(cb) {
         runTest({
           input: `GET http://test:user@somehost/
 {

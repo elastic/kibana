@@ -20,8 +20,15 @@
 import { Token } from './token';
 import { Position } from './editor';
 
+/**
+ * Describes a kind of object that provides tokens.
+ */
 export interface TokensProvider {
-  // TODO: document
+  /**
+   * Special values in this interface are `null` and an empty array `[]`.
+   * - `null` means that we are outside of the document range (i.e., have requested tokens for a non-existent line).
+   * - An empty array means that we are on an empty line.
+   */
   getTokens(lineNumber: number): Token[] | null;
   // TODO: document
   getTokenAt(pos: Position): Token | null;
