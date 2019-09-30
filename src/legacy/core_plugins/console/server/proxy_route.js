@@ -104,7 +104,7 @@ export const createProxyRoute = ({
 
       // Because this can technically be provided by a settings-defined proxy config, we need to
       // preserve these property names to maintain BWC.
-      const { timeout, agent, headers } = getConfigForReq(req, uri.toString());
+      const { timeout, agent, headers, rejectUnauthorized } = getConfigForReq(req, uri.toString());
 
       const requestHeaders = {
         ...headers,
@@ -117,6 +117,7 @@ export const createProxyRoute = ({
         uri,
         timeout,
         payload,
+        rejectUnauthorized,
         agent,
       });
 

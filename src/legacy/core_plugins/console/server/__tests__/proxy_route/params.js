@@ -134,6 +134,7 @@ describe('Console Proxy Route', () => {
 
         const timeout = Math.round(Math.random() * 10000);
         const agent = new Agent();
+        const rejectUnauthorized = !!Math.round(Math.random());
         const headers = {
           foo: 'bar',
           baz: 'bop',
@@ -146,6 +147,7 @@ describe('Console Proxy Route', () => {
               timeout,
               agent,
               headers,
+              rejectUnauthorized,
             }),
           })
         );
@@ -159,6 +161,7 @@ describe('Console Proxy Route', () => {
         const opts = requestModule.sendRequest.getCall(0).args[0];
         expect(opts).to.have.property('timeout', timeout);
         expect(opts).to.have.property('agent', agent);
+        expect(opts).to.have.property('rejectUnauthorized', rejectUnauthorized);
         expect(opts.headers).to.have.property('foo', 'bar');
         expect(opts.headers).to.have.property('baz', 'bop');
       });
