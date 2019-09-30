@@ -16,17 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { Legacy } from 'kibana';
 import Joi from 'joi';
 
-async function handleRequest(request) {
-  const { changes } = request.payload;
+async function handleRequest(request: Legacy.Request) {
+  const { changes } = request.payload as any;
   const uiSettings = request.getUiSettingsService();
 
   await uiSettings.setMany(changes);
 
   return {
-    settings: await uiSettings.getUserProvided()
+    settings: await uiSettings.getUserProvided(),
   };
 }
 
@@ -35,12 +35,16 @@ export const setManyRoute = {
   method: 'POST',
   config: {
     validate: {
-      payload: Joi.object().keys({
-        changes: Joi.object().unknown(true).required()
-      }).required()
+      payload: Joi.object()
+        .keys({
+          changes: Joi.object()
+            .unknown(true)
+            .required(),
+        })
+        .required(),
     },
-    handler(request) {
+    handler(request: Legacy.Request) {
       return handleRequest(request);
-    }
-  }
+    },
+  },
 };
