@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useEffect, useState } from 'react';
+import React, { Fragment, SFC, useContext, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { metadata } from 'ui/metadata';
@@ -12,7 +12,7 @@ import { toastNotifications } from 'ui/notify';
 
 import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import { useKibanaContext } from '../../../../../../../ml/public/contexts/kibana';
+import { isKibanaContextInitialized, KibanaContext } from '../../../../lib/kibana';
 import { isValidIndexName } from '../../../../../../../ml/common/util/es_utils';
 
 import { api } from '../../../../services/api_service';
@@ -54,7 +54,7 @@ interface Props {
 }
 
 export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange }) => {
-  const kibanaContext = useKibanaContext();
+  const kibanaContext = useContext(KibanaContext);
 
   const defaults = { ...getDefaultStepDetailsState(), ...overrides };
 
@@ -72,6 +72,57 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
   const [isContinuousModeEnabled, setContinuousModeEnabled] = useState(
     defaults.isContinuousModeEnabled
   );
+
+  // fetch existing transform IDs and indices once for form validation
+  useEffect(() => {
+    // use an IIFE to avoid returning a Promise to useEffect.
+    (async function() {
+      if (isKibanaContextInitialized(kibanaContext)) {
+        try {
+          setTransformIds(
+            (await api.getTransforms()).transforms.map(
+              (transform: TransformPivotConfig) => transform.id
+            )
+          );
+        } catch (e) {
+          toastNotifications.addDanger(
+            i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
+              defaultMessage: 'An error occurred getting the existing transform Ids: {error}',
+              values: { error: JSON.stringify(e) },
+            })
+          );
+        }
+
+        try {
+          setIndexNames((await ml.getIndices()).map(index => index.name));
+        } catch (e) {
+          toastNotifications.addDanger(
+            i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {
+              defaultMessage: 'An error occurred getting the existing index names: {error}',
+              values: { error: JSON.stringify(e) },
+            })
+          );
+        }
+
+        try {
+          setIndexPatternTitles(await kibanaContext.indexPatterns.getTitles());
+        } catch (e) {
+          toastNotifications.addDanger(
+            i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexPatternTitles', {
+              defaultMessage:
+                'An error occurred getting the existing index pattern titles: {error}',
+              values: { error: JSON.stringify(e) },
+            })
+          );
+        }
+      }
+    })();
+  }, [kibanaContext.initialized]);
+
+  if (!isKibanaContextInitialized(kibanaContext)) {
+    return null;
+  }
+
   const dateFieldNames = kibanaContext.currentIndexPattern.fields
     .filter(f => f.type === 'date')
     .map(f => f.name)
@@ -82,49 +133,6 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
   );
   const [continuousModeDelay, setContinuousModeDelay] = useState(defaults.continuousModeDelay);
   const isContinuousModeDelayValid = delayValidator(continuousModeDelay);
-
-  // fetch existing transform IDs and indices once for form validation
-  useEffect(() => {
-    // use an IIFE to avoid returning a Promise to useEffect.
-    (async function() {
-      try {
-        setTransformIds(
-          (await api.getTransforms()).transforms.map(
-            (transform: TransformPivotConfig) => transform.id
-          )
-        );
-      } catch (e) {
-        toastNotifications.addDanger(
-          i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
-            defaultMessage: 'An error occurred getting the existing transform Ids: {error}',
-            values: { error: JSON.stringify(e) },
-          })
-        );
-      }
-
-      try {
-        setIndexNames((await ml.getIndices()).map(index => index.name));
-      } catch (e) {
-        toastNotifications.addDanger(
-          i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {
-            defaultMessage: 'An error occurred getting the existing index names: {error}',
-            values: { error: JSON.stringify(e) },
-          })
-        );
-      }
-
-      try {
-        setIndexPatternTitles(await kibanaContext.indexPatterns.getTitles());
-      } catch (e) {
-        toastNotifications.addDanger(
-          i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexPatternTitles', {
-            defaultMessage: 'An error occurred getting the existing index pattern titles: {error}',
-            values: { error: JSON.stringify(e) },
-          })
-        );
-      }
-    })();
-  }, []);
 
   const transformIdExists = transformIds.some(id => transformId === id);
   const transformIdEmpty = transformId === '';

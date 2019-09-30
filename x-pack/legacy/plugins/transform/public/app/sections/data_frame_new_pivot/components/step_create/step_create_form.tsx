@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useEffect, useState } from 'react';
+import React, { Fragment, SFC, useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 
 import { api } from '../../../../services/api_service';
-import { useKibanaContext } from '../../../../../../../ml/public/contexts/kibana/use_kibana_context';
+import { isKibanaContextInitialized, KibanaContext } from '../../../../lib/kibana';
 import { useUiChromeContext } from '../../../../../../../ml/public/contexts/ui/use_ui_chrome_context';
 import { PROGRESS_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../../ml/common/constants/jobs_list';
 
@@ -69,12 +69,17 @@ export const StepCreateForm: SFC<Props> = React.memo(
       undefined
     );
 
-    const kibanaContext = useKibanaContext();
-    const baseUrl = useUiChromeContext().addBasePath(kibanaContext.kbnBaseUrl);
+    const kibanaContext = useContext(KibanaContext);
 
     useEffect(() => {
       onChange({ created, started, indexPatternId });
     }, [created, started, indexPatternId]);
+
+    if (!isKibanaContextInitialized(kibanaContext)) {
+      return null;
+    }
+
+    const baseUrl = useUiChromeContext().addBasePath(kibanaContext.kbnBaseUrl);
 
     async function createTransform() {
       setCreated(true);

@@ -14,6 +14,7 @@ import { BASE_PATH, DEFAULT_SECTION } from './constants';
 import { useAppDependencies } from './index';
 import { AuthorizationContext, WithPrivileges, NotAuthorizedSection } from './lib/authorization';
 
+import { Page as NewTransform } from './sections/data_frame_new_pivot/page';
 import { Page as TransformManagement } from './sections/transform_management/page';
 
 export const App: React.FunctionComponent = () => {
@@ -24,17 +25,21 @@ export const App: React.FunctionComponent = () => {
   } = useAppDependencies();
   const { apiError } = useContext(AuthorizationContext);
 
-  return apiError ? (
-    <SectionError
-      title={
-        <FormattedMessage
-          id="xpack.transform.app.checkingPrivilegesErrorMessage"
-          defaultMessage="Error fetching user privileges from the server."
-        />
-      }
-      error={apiError}
-    />
-  ) : (
+  if (apiError) {
+    return (
+      <SectionError
+        title={
+          <FormattedMessage
+            id="xpack.transform.app.checkingPrivilegesErrorMessage"
+            defaultMessage="Error fetching user privileges from the server."
+          />
+        }
+        error={apiError}
+      />
+    );
+  }
+
+  return (
     <WithPrivileges
       privileges={APP_GET_TRANSFORM_CLUSTER_PRIVILEGES.map(name => `cluster.${name}`)}
     >
@@ -49,10 +54,11 @@ export const App: React.FunctionComponent = () => {
         ) : hasPrivileges ? (
           <div data-test-subj="transformApp">
             <Switch>
+              <Route path={`${BASE_PATH}/new_transform/:savedObjectId`} component={NewTransform} />
               <Route
                 exact
                 path={`${BASE_PATH}/transform_management`}
-                component={() => <TransformManagement />}
+                component={TransformManagement}
               />
               <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />
             </Switch>

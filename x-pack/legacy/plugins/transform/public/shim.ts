@@ -18,6 +18,7 @@ import { HashRouter } from 'react-router-dom';
 
 // @ts-ignore: allow traversal to fail on x-pack build
 import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
+import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/types';
 
 export interface AppCore {
   i18n: {
@@ -30,6 +31,10 @@ export interface AppCore {
   notification: {
     fatalError: typeof fatalError;
     toastNotifications: typeof toastNotifications;
+  };
+  savedSearches: {
+    getClient(): any;
+    setClient(client: any): void;
   };
 }
 
@@ -76,6 +81,9 @@ export function createShim(): { core: Core; plugins: Plugins } {
   // This is an Angular service, which is why we use this provider pattern
   // to access it within our React app.
   let httpClient: ng.IHttpService;
+  // This is an Angular service, which is why we use this provider pattern
+  // to access it within our React app.
+  let savedSearches: SavedSearchLoader;
 
   let reactRouter: HashRouter | undefined;
 
@@ -117,6 +125,12 @@ export function createShim(): { core: Core; plugins: Plugins } {
       },
       docTitle: {
         change: docTitle.change,
+      },
+      savedSearches: {
+        setClient: (client: any): void => {
+          savedSearches = client;
+        },
+        getClient: (): any => savedSearches,
       },
     },
     plugins: {

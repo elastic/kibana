@@ -5,6 +5,8 @@
  */
 import { unmountComponentAtNode } from 'react-dom';
 
+import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/types';
+
 import { PLUGIN } from '../common/constants';
 import { CLIENT_BASE_PATH, renderReact } from './app';
 import { AppCore, AppPlugins } from './app/types';
@@ -21,7 +23,16 @@ const REACT_ROOT_ID = 'transformReactRoot';
 
 export class Plugin {
   public start(core: Core, plugins: Plugins): void {
-    const { i18n, routing, http, chrome, notification, documentation, docTitle } = core;
+    const {
+      i18n,
+      routing,
+      http,
+      chrome,
+      notification,
+      documentation,
+      docTitle,
+      savedSearches: coreSavedSearches,
+    } = core;
     const { management, uiMetric } = plugins;
 
     // Register management section
@@ -31,7 +42,7 @@ export class Plugin {
       display: i18n.translate('xpack.transform.appName', {
         defaultMessage: 'Transforms',
       }),
-      order: 7,
+      order: 3,
       url: `#${CLIENT_BASE_PATH}`,
     });
 
@@ -57,11 +68,18 @@ export class Plugin {
     routing.registerAngularRoute(`${CLIENT_BASE_PATH}/:section?/:subsection?/:view?/:id?`, {
       template,
       controllerAs: 'transformController',
-      controller: ($scope: any, $route: any, $http: ng.IHttpService, $q: any) => {
+      controller: (
+        $scope: any,
+        $route: any,
+        $http: ng.IHttpService,
+        $q: any,
+        savedSearches: SavedSearchLoader
+      ) => {
         // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
         // e.g. to check license status per request.
         http.setClient($http);
         httpService.init(http.getClient(), chrome);
+        coreSavedSearches.setClient(savedSearches);
 
         // Angular Lifecycle
         const appRoute = $route.current;
@@ -90,7 +108,7 @@ export class Plugin {
           if (elem) {
             renderReact(
               elem,
-              { i18n, notification } as AppCore,
+              { i18n, notification, savedSearches: coreSavedSearches } as AppCore,
               { management: { sections: management.sections } } as AppPlugins
             );
           }

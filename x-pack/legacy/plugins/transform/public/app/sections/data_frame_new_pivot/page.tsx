@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment } from 'react';
+import React from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -20,10 +21,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { KibanaProvider } from '../../lib/kibana/kibana_context';
+
 import { Wizard } from './components/wizard';
 
-export const Page: FC = () => (
-  <Fragment>
+type Props = RouteComponentProps<{ savedObjectId: string }>;
+export const Page = ({ match }: Props) => (
+  <KibanaProvider savedObjectId={match.params.savedObjectId}>
     <EuiPage>
       <EuiPageBody>
         <EuiPageContentHeader>
@@ -56,5 +60,5 @@ export const Page: FC = () => (
         </EuiPageContentBody>
       </EuiPageBody>
     </EuiPage>
-  </Fragment>
+  </KibanaProvider>
 );

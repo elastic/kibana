@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useRef, useState } from 'react';
+import React, { Fragment, SFC, useContext, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
-import { useKibanaContext } from '../../../../../../../ml/public/contexts/kibana';
+import { isKibanaContextInitialized, KibanaContext } from '../../../../lib/kibana';
 
 import { getCreateRequestBody } from '../../../../common';
 
@@ -63,9 +63,7 @@ const StepDefine: SFC<DefinePivotStepProps> = ({
 };
 
 export const Wizard: SFC = React.memo(() => {
-  const kibanaContext = useKibanaContext();
-
-  const indexPattern = kibanaContext.currentIndexPattern;
+  const kibanaContext = useContext(KibanaContext);
 
   // The current WIZARD_STEP
   const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE);
@@ -83,14 +81,21 @@ export const Wizard: SFC = React.memo(() => {
       <StepDetailsSummary {...stepDetailsState} />
     );
 
+  // The CREATE state
+  const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
+
+  if (!isKibanaContextInitialized(kibanaContext)) {
+    // TODO proper loading indicator
+    return null;
+  }
+
+  const indexPattern = kibanaContext.currentIndexPattern;
+
   const transformConfig = getCreateRequestBody(
     indexPattern.title,
     stepDefineState,
     stepDetailsState
   );
-
-  // The CREATE state
-  const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
 
   const stepCreate =
     currentStep === WIZARD_STEPS.CREATE ? (

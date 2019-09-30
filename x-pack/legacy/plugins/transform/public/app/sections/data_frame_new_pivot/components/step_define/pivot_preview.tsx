@@ -30,7 +30,7 @@ import { dictionaryToArray } from '../../../../../../../ml/common/types/common';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
 
-import { useCurrentIndexPattern } from '../../../../../../../ml/public/contexts/kibana';
+import { useCurrentIndexPattern } from '../../../../lib/kibana';
 
 import {
   getFlattenedFields,

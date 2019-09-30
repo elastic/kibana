@@ -5,6 +5,7 @@
  */
 
 import React, { useContext, useState, FC } from 'react';
+import { Redirect } from 'react-router-dom';
 
 import { EuiButton, EuiModal, EuiOverlayMask, EuiToolTip } from '@elastic/eui';
 
@@ -19,11 +20,16 @@ import {
   AuthorizationContext,
 } from '../../../../lib/authorization';
 
-// import { moveToTransformWizard } from '../../../../common';
+import { BASE_PATH } from '../../../../constants';
 
 export const CreateTransformButton: FC = () => {
   const [isSearchSelectionVisible, setIsSearchSelectionVisible] = useState(false);
+  const [savedObjectId, setSavedObjectId] = useState<string | null>(null);
   const { capabilities } = useContext(AuthorizationContext);
+
+  if (savedObjectId !== null) {
+    return <Redirect to={`${BASE_PATH}/new_transform/${savedObjectId}`} />;
+  }
 
   const disabled =
     !capabilities.canCreateTransform ||
@@ -32,7 +38,6 @@ export const CreateTransformButton: FC = () => {
 
   const onCloseModal = () => setIsSearchSelectionVisible(false);
   const onOpenModal = () => setIsSearchSelectionVisible(true);
-  const onSearchSelected = (arg: any) => {};
 
   const fakeVisType = {
     name: 'transform',
@@ -57,7 +62,7 @@ export const CreateTransformButton: FC = () => {
       {isSearchSelectionVisible && (
         <EuiOverlayMask>
           <EuiModal onClose={onCloseModal} className="transformNewTransformSearchDialog">
-            <SearchSelection onSearchSelected={onSearchSelected} visType={fakeVisType} />
+            <SearchSelection onSearchSelected={setSavedObjectId} visType={fakeVisType} />
           </EuiModal>
         </EuiOverlayMask>
       )}

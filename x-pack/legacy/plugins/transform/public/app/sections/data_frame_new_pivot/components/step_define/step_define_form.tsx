@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useEffect, useState } from 'react';
+import React, { Fragment, SFC, useContext, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -37,11 +37,12 @@ import { PivotPreview } from './pivot_preview';
 import { KqlFilterBar } from '../../../../../../../ml/public/components/kql_filter_bar';
 import { SwitchModal } from './switch_modal';
 
+import { SavedSearchQuery } from '../../../../../../../ml/public/contexts/kibana';
 import {
-  useKibanaContext,
+  isKibanaContextInitialized,
+  KibanaContext,
   KibanaContextValue,
-  SavedSearchQuery,
-} from '../../../../../../../ml/public/contexts/kibana';
+} from '../../../../lib/kibana';
 
 import {
   AggName,
@@ -83,11 +84,11 @@ export function getDefaultStepDefineState(
     isAdvancedPivotEditorEnabled: false,
     isAdvancedSourceEditorEnabled: false,
     searchString:
-      kibanaContext.currentSavedSearch.id !== undefined
+      isKibanaContextInitialized(kibanaContext) && kibanaContext.currentSavedSearch !== undefined
         ? kibanaContext.combinedQuery
         : defaultSearch,
     searchQuery:
-      kibanaContext.currentSavedSearch.id !== undefined
+      isKibanaContextInitialized(kibanaContext) && kibanaContext.currentSavedSearch !== undefined
         ? kibanaContext.combinedQuery
         : defaultSearch,
     sourceConfigUpdated: false,
@@ -196,9 +197,7 @@ interface Props {
 }
 
 export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange }) => {
-  const kibanaContext = useKibanaContext();
-
-  const indexPattern = kibanaContext.currentIndexPattern;
+  const kibanaContext = useContext(KibanaContext);
 
   const defaults = { ...getDefaultStepDefineState(kibanaContext), ...overrides };
 
@@ -225,6 +224,12 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
 
   // The list of selected group by fields
   const [groupByList, setGroupByList] = useState(defaults.groupByList);
+
+  if (!isKibanaContextInitialized(kibanaContext)) {
+    return null;
+  }
+
+  const indexPattern = kibanaContext.currentIndexPattern;
 
   const {
     groupByOptions,
@@ -502,56 +507,58 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     <EuiFlexGroup>
       <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
         <EuiForm>
-          {kibanaContext.currentSavedSearch.id === undefined && typeof searchString === 'string' && (
-            <Fragment>
-              <EuiFormRow
-                label={i18n.translate('xpack.transform.stepDefineForm.indexPatternLabel', {
-                  defaultMessage: 'Index pattern',
-                })}
-                helpText={
-                  disabledQuery
-                    ? i18n.translate('xpack.transform.stepDefineForm.indexPatternHelpText', {
-                        defaultMessage:
-                          'An optional query for this index pattern is not supported. The number of supported index fields is {maxIndexFields} whereas this index has {numIndexFields} fields.',
-                        values: {
-                          maxIndexFields,
-                          numIndexFields,
-                        },
-                      })
-                    : ''
-                }
-              >
-                <span>{kibanaContext.currentIndexPattern.title}</span>
-              </EuiFormRow>
-              {!disabledQuery && (
-                <Fragment>
-                  {!isAdvancedSourceEditorEnabled && (
-                    <EuiFormRow
-                      label={i18n.translate('xpack.transform.stepDefineForm.queryLabel', {
-                        defaultMessage: 'Query',
-                      })}
-                      helpText={i18n.translate('xpack.transform.stepDefineForm.queryHelpText', {
-                        defaultMessage: 'Use a query to filter the source data (optional).',
-                      })}
-                    >
-                      <KqlFilterBar
-                        indexPattern={indexPattern}
-                        onSubmit={searchHandler}
-                        initialValue={searchString === defaultSearch ? emptySearch : searchString}
-                        placeholder={i18n.translate(
-                          'xpack.transform.stepDefineForm.queryPlaceholder',
-                          {
-                            defaultMessage: 'e.g. {example}',
-                            values: { example: 'method : "GET" or status : "404"' },
-                          }
-                        )}
-                      />
-                    </EuiFormRow>
-                  )}
-                </Fragment>
-              )}
-            </Fragment>
-          )}
+          {kibanaContext.currentSavedSearch !== undefined &&
+            kibanaContext.currentSavedSearch.id === undefined &&
+            typeof searchString === 'string' && (
+              <Fragment>
+                <EuiFormRow
+                  label={i18n.translate('xpack.transform.stepDefineForm.indexPatternLabel', {
+                    defaultMessage: 'Index pattern',
+                  })}
+                  helpText={
+                    disabledQuery
+                      ? i18n.translate('xpack.transform.stepDefineForm.indexPatternHelpText', {
+                          defaultMessage:
+                            'An optional query for this index pattern is not supported. The number of supported index fields is {maxIndexFields} whereas this index has {numIndexFields} fields.',
+                          values: {
+                            maxIndexFields,
+                            numIndexFields,
+                          },
+                        })
+                      : ''
+                  }
+                >
+                  <span>{indexPattern.title}</span>
+                </EuiFormRow>
+                {!disabledQuery && (
+                  <Fragment>
+                    {!isAdvancedSourceEditorEnabled && (
+                      <EuiFormRow
+                        label={i18n.translate('xpack.transform.stepDefineForm.queryLabel', {
+                          defaultMessage: 'Query',
+                        })}
+                        helpText={i18n.translate('xpack.transform.stepDefineForm.queryHelpText', {
+                          defaultMessage: 'Use a query to filter the source data (optional).',
+                        })}
+                      >
+                        <KqlFilterBar
+                          indexPattern={indexPattern}
+                          onSubmit={searchHandler}
+                          initialValue={searchString === defaultSearch ? emptySearch : searchString}
+                          placeholder={i18n.translate(
+                            'xpack.transform.stepDefineForm.queryPlaceholder',
+                            {
+                              defaultMessage: 'e.g. {example}',
+                              values: { example: 'method : "GET" or status : "404"' },
+                            }
+                          )}
+                        />
+                      </EuiFormRow>
+                    )}
+                  </Fragment>
+                )}
+              </Fragment>
+            )}
 
           {isAdvancedSourceEditorEnabled && (
             <Fragment>
@@ -598,65 +605,67 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
               </EuiFormRow>
             </Fragment>
           )}
-          {kibanaContext.currentSavedSearch.id === undefined && (
-            <EuiFormRow>
-              <EuiFlexGroup gutterSize="none">
-                <EuiFlexItem>
-                  <EuiSwitch
-                    label={i18n.translate(
-                      'xpack.transform.stepDefineForm.advancedEditorSourceConfigSwitchLabel',
-                      {
-                        defaultMessage: 'Advanced query editor',
-                      }
-                    )}
-                    checked={isAdvancedSourceEditorEnabled}
-                    onChange={() => {
-                      if (isAdvancedSourceEditorEnabled && sourceConfigUpdated) {
-                        setAdvancedSourceEditorSwitchModalVisible(true);
-                        return;
-                      }
+          {kibanaContext.currentSavedSearch !== undefined &&
+            kibanaContext.currentSavedSearch.id === undefined && (
+              <EuiFormRow>
+                <EuiFlexGroup gutterSize="none">
+                  <EuiFlexItem>
+                    <EuiSwitch
+                      label={i18n.translate(
+                        'xpack.transform.stepDefineForm.advancedEditorSourceConfigSwitchLabel',
+                        {
+                          defaultMessage: 'Advanced query editor',
+                        }
+                      )}
+                      checked={isAdvancedSourceEditorEnabled}
+                      onChange={() => {
+                        if (isAdvancedSourceEditorEnabled && sourceConfigUpdated) {
+                          setAdvancedSourceEditorSwitchModalVisible(true);
+                          return;
+                        }
 
-                      toggleAdvancedSourceEditor();
-                    }}
-                  />
-                  {isAdvancedSourceEditorSwitchModalVisible && (
-                    <SwitchModal
-                      onCancel={() => setAdvancedSourceEditorSwitchModalVisible(false)}
-                      onConfirm={() => {
-                        setAdvancedSourceEditorSwitchModalVisible(false);
-                        toggleAdvancedSourceEditor(true);
+                        toggleAdvancedSourceEditor();
                       }}
-                      type={'source'}
                     />
-                  )}
-                </EuiFlexItem>
-                {isAdvancedSourceEditorEnabled && (
-                  <EuiButton
-                    size="s"
-                    fill
-                    onClick={applyAdvancedSourceEditorChanges}
-                    disabled={!isAdvancedSourceEditorApplyButtonEnabled}
-                  >
-                    {i18n.translate(
-                      'xpack.transform.stepDefineForm.advancedSourceEditorApplyButtonText',
-                      {
-                        defaultMessage: 'Apply changes',
-                      }
+                    {isAdvancedSourceEditorSwitchModalVisible && (
+                      <SwitchModal
+                        onCancel={() => setAdvancedSourceEditorSwitchModalVisible(false)}
+                        onConfirm={() => {
+                          setAdvancedSourceEditorSwitchModalVisible(false);
+                          toggleAdvancedSourceEditor(true);
+                        }}
+                        type={'source'}
+                      />
                     )}
-                  </EuiButton>
-                )}
-              </EuiFlexGroup>
-            </EuiFormRow>
-          )}
-          {kibanaContext.currentSavedSearch.id !== undefined && (
-            <EuiFormRow
-              label={i18n.translate('xpack.transform.stepDefineForm.savedSearchLabel', {
-                defaultMessage: 'Saved search',
-              })}
-            >
-              <span>{kibanaContext.currentSavedSearch.title}</span>
-            </EuiFormRow>
-          )}
+                  </EuiFlexItem>
+                  {isAdvancedSourceEditorEnabled && (
+                    <EuiButton
+                      size="s"
+                      fill
+                      onClick={applyAdvancedSourceEditorChanges}
+                      disabled={!isAdvancedSourceEditorApplyButtonEnabled}
+                    >
+                      {i18n.translate(
+                        'xpack.transform.stepDefineForm.advancedSourceEditorApplyButtonText',
+                        {
+                          defaultMessage: 'Apply changes',
+                        }
+                      )}
+                    </EuiButton>
+                  )}
+                </EuiFlexGroup>
+              </EuiFormRow>
+            )}
+          {kibanaContext.currentSavedSearch !== undefined &&
+            kibanaContext.currentSavedSearch.id !== undefined && (
+              <EuiFormRow
+                label={i18n.translate('xpack.transform.stepDefineForm.savedSearchLabel', {
+                  defaultMessage: 'Saved search',
+                })}
+              >
+                <span>{kibanaContext.currentSavedSearch.title}</span>
+              </EuiFormRow>
+            )}
 
           {!isAdvancedPivotEditorEnabled && (
             <Fragment>
