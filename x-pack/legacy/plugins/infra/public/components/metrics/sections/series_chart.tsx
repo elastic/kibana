@@ -22,7 +22,7 @@ import { InfraDataSeries } from '../../../graphql/types';
 interface Props {
   id: string;
   name: string;
-  color: string;
+  color: string | null;
   series: InfraDataSeries;
   type: InfraMetricLayoutVisualizationType;
   stack: boolean | undefined;
@@ -57,7 +57,7 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
     specId: getSpecId(id),
   };
   const customColors: CustomSeriesColorsMap = new Map();
-  customColors.set(colors, color);
+  customColors.set(colors, color || '#999');
   return (
     <AreaSeries
       id={getSpecId(id)}
@@ -68,7 +68,7 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
       yAccessors={['value']}
       data={series.data}
       areaSeriesStyle={style}
-      customSeriesColors={customColors}
+      customSeriesColors={color ? customColors : void 0}
       stackAccessors={stack ? ['timestamp'] : void 0}
     />
   );
@@ -77,7 +77,7 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
 export const BarChart = ({ id, color, series, name, type, stack }: Props) => {
   const style: RecursivePartial<BarSeriesStyle> = {
     rectBorder: {
-      stroke: color,
+      stroke: color || void 0,
       strokeWidth: 1,
       visible: true,
     },
@@ -90,7 +90,7 @@ export const BarChart = ({ id, color, series, name, type, stack }: Props) => {
     specId: getSpecId(id),
   };
   const customColors: CustomSeriesColorsMap = new Map();
-  customColors.set(colors, color);
+  customColors.set(colors, color || '#999');
   return (
     <BarSeries
       id={getSpecId(id)}

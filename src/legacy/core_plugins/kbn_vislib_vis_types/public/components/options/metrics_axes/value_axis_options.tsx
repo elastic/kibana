@@ -157,7 +157,6 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
         label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.showLabel', {
           defaultMessage: 'Show axis lines and labels',
         })}
-        noStyle={true}
         paramName="show"
         value={axis.show}
         setValue={setValueAxis}
@@ -203,7 +202,7 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
         )}
       >
         <>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
           <CustomExtentsOptions
             axis={axis}
             setValueAxisScale={setValueAxisScale}

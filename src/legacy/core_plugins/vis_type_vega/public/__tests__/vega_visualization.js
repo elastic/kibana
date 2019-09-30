@@ -55,6 +55,7 @@ describe('VegaVisualizations', () => {
   let vis;
   let imageComparator;
   let vegaVisualizationDependencies;
+  let visRegComplete = false;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(
@@ -65,9 +66,12 @@ describe('VegaVisualizations', () => {
         uiSettings: $injector.get('config'),
       };
 
-      visualizationsSetup.types.registerVisualization(() =>
-        createVegaTypeDefinition(vegaVisualizationDependencies)
-      );
+      if(!visRegComplete) {
+        visRegComplete = true;
+        visualizationsSetup.types.registerVisualization(() =>
+          createVegaTypeDefinition(vegaVisualizationDependencies)
+        );
+      }
 
       Vis = Private(visModule.VisProvider);
 
