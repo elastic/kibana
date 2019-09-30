@@ -15,5 +15,6 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./enrollment_rules'));
     loadTestFile(require.resolve('./get_enrollment_token'));
     loadTestFile(require.resolve('./artifacts'));
+    loadTestFile(require.resolve('./install'));
   });
 }

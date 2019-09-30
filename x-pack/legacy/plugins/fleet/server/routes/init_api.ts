@@ -20,6 +20,7 @@ import {
 } from './policy/rules';
 import { createGETArtifactsRoute } from './artifacts';
 import { createGETAgentEventsRoute } from './agents/events';
+import { createGETInstallScript } from './install';
 
 export function initRestApi(server: Server, libs: FleetServerLib) {
   const frameworkAdapter = new HapiFrameworkAdapter(server);
@@ -29,6 +30,7 @@ export function initRestApi(server: Server, libs: FleetServerLib) {
   createPolicyEnrollmentRoutes(frameworkAdapter, libs);
 
   frameworkAdapter.registerRoute(createGETArtifactsRoute(libs));
+  frameworkAdapter.registerRoute(createGETInstallScript(libs));
 }
 
 function createAgentsRoutes(adapter: HapiFrameworkAdapter, libs: FleetServerLib) {

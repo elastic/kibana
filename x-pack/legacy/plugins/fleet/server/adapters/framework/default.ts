@@ -12,4 +12,8 @@ export class FrameworkAdapter implements FrameworkAdapterType {
   public getSetting(settingPath: string): string {
     return this.server.config().get(settingPath);
   }
+
+  public getServerInfo() {
+    return this.server.info;
+  }
 }

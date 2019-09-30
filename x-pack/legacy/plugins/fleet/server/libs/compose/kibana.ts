@@ -20,6 +20,7 @@ import { ArtifactLib } from '../artifact';
 import { FileSystemArtifactRepository } from '../../repositories/artifacts/file_system';
 import { HttpAdapter } from '../../adapters/http_adapter/default';
 import { AgentEventsRepository } from '../../repositories/agent_events/default';
+import { InstallLib } from '../install';
 
 export function compose(server: any): FleetServerLib {
   const frameworkAdapter = new FrameworkAdapter(server);
@@ -42,10 +43,13 @@ export function compose(server: any): FleetServerLib {
   const artifactRepository = new FileSystemArtifactRepository(os.tmpdir());
   const artifacts = new ArtifactLib(artifactRepository, new HttpAdapter());
 
+  const install = new InstallLib(framework);
+
   return {
     agents,
     tokens,
     policies,
     artifacts,
+    install,
   };
 }
