@@ -21,12 +21,16 @@ import { i18n } from '@kbn/i18n';
 
 // @ts-ignore
 import { Schemas } from 'ui/vis/editors/default/schemas';
-// @ts-ignore
-import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
+
+import { AggGroupNames } from 'ui/vis/editors/default';
+import { colorSchemas, ColorSchemas } from 'ui/vislib/components/color/colormaps';
+
 // @ts-ignore
 import { MetricVisComponent } from './components/metric_vis_controller';
 
 import { visFactory } from '../../visualizations/public';
+import { MetricVisOptions } from './components/metric_vis_options';
+import { ColorModes } from '../../kbn_vislib_vis_types/public/utils/collections';
 
 export const createMetricVisTypeDefinition = () => {
   return visFactory.createReactVisualization({
@@ -45,8 +49,8 @@ export const createMetricVisTypeDefinition = () => {
         metric: {
           percentageMode: false,
           useRanges: false,
-          colorSchema: 'Green to Red',
-          metricColorMode: 'None',
+          colorSchema: ColorSchemas.GreenToRed,
+          metricColorMode: ColorModes.NONE,
           colorsRange: [{ from: 0, to: 10000 }],
           labels: {
             show: true,
@@ -66,33 +70,30 @@ export const createMetricVisTypeDefinition = () => {
       collections: {
         metricColorMode: [
           {
-            id: 'None',
-            label: i18n.translate('visTypeMetric.colorModes.noneOptionLabel', {
+            value: ColorModes.NONE,
+            text: i18n.translate('visTypeMetric.colorModes.noneOptionLabel', {
               defaultMessage: 'None',
             }),
           },
           {
-            id: 'Labels',
-            label: i18n.translate('visTypeMetric.colorModes.labelsOptionLabel', {
+            value: ColorModes.LABELS,
+            text: i18n.translate('visTypeMetric.colorModes.labelsOptionLabel', {
               defaultMessage: 'Labels',
             }),
           },
           {
-            id: 'Background',
-            label: i18n.translate('visTypeMetric.colorModes.backgroundOptionLabel', {
+            value: ColorModes.BACKGROUND,
+            text: i18n.translate('visTypeMetric.colorModes.backgroundOptionLabel', {
               defaultMessage: 'Background',
             }),
           },
         ],
-        colorSchemas: Object.values(vislibColorMaps).map((value: any) => ({
-          id: value.id,
-          label: value.label,
-        })),
+        colorSchemas,
       },
-      optionsTemplate: '<metric-vis-params></metric-vis-params>',
+      optionsTemplate: MetricVisOptions,
       schemas: new Schemas([
         {
-          group: 'metrics',
+          group: AggGroupNames.Metrics,
           name: 'metric',
           title: i18n.translate('visTypeMetric.schemas.metricTitle', { defaultMessage: 'Metric' }),
           min: 1,
@@ -118,7 +119,7 @@ export const createMetricVisTypeDefinition = () => {
           ],
         },
         {
-          group: 'buckets',
+          group: AggGroupNames.Buckets,
           name: 'group',
           title: i18n.translate('visTypeMetric.schemas.splitGroupTitle', {
             defaultMessage: 'Split group',

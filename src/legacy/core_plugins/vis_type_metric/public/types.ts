@@ -16,16 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { once } from 'lodash';
 
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-// @ts-ignore
-import 'ui/directives/inequality';
-// @ts-ignore
-import { MetricVisParams } from '../components/metric_vis_params';
+import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
+import { RangeValues } from 'ui/vis/editors/default/controls/ranges';
+import { ColorModes } from '../../kbn_vislib_vis_types/public/utils/collections';
+import { Labels, Style } from '../../kbn_vislib_vis_types/public/types';
 
-/** @internal */
-export const initMetricVisLegacyModule = once((): void => {
-  uiModules.get('kibana/metric_vis', ['kibana']).directive('metricVisParams', MetricVisParams);
-});
+export const visType = 'metric';
+
+export interface DimensionsVisParam {
+  metrics: any;
+  bucket?: any;
+}
+
+export interface MetricVisParam {
+  percentageMode: boolean;
+  useRanges: boolean;
+  colorSchema: ColorSchemas;
+  metricColorMode: ColorModes;
+  colorsRange: RangeValues[];
+  labels: Labels;
+  invertColors: boolean;
+  style: Style;
+}
+
+export interface VisParams {
+  addTooltip: boolean;
+  addLegend: boolean;
+  dimensions: DimensionsVisParam;
+  metric: MetricVisParam;
+  type: typeof visType;
+}
