@@ -15,7 +15,7 @@ describe('licensingRouteHandlerContext', () => {
 
     const context = createRouteHandlerContext(license$);
 
-    const { license: contextResult } = await context({});
+    const { license: contextResult } = await context({}, {} as any, {} as any);
 
     expect(contextResult).toBe(license);
   });
@@ -29,7 +29,7 @@ describe('licensingRouteHandlerContext', () => {
     const latestLicense = (Symbol() as unknown) as ILicense;
     license$.next(latestLicense);
 
-    const { license: contextResult } = await context({});
+    const { license: contextResult } = await context({}, {} as any, {} as any);
 
     expect(contextResult).toBe(latestLicense);
   });
