@@ -81,6 +81,7 @@ import { searchRequestQueue } from '../search_request_queue';
 import { FetchSoonProvider } from '../fetch';
 import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../../plugins/data/common/field_formats';
+import { filterDocvalueFields } from './filter_docvalue_fields';
 
 const FIELDS = [
   'type',
@@ -571,9 +572,7 @@ export function SearchSourceProvider(Promise, Private, config) {
           const fields = flatData.fields;
           if (fields) {
             // filter out the docvalue_fields, and script_fields to only include those that we are concerned with
-            flatData.body.docvalue_fields = flatData.body.docvalue_fields.filter(docValue => {
-              return fields.includes(docValue.field);
-            });
+            flatData.body.docvalue_fields = filterDocvalueFields(flatData.body.docvalue_fields, fields);
             flatData.body.script_fields = _.pick(flatData.body.script_fields, fields);
 
             // request the remaining fields from both stored_fields and _source
