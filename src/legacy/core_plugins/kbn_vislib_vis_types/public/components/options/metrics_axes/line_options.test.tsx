@@ -19,9 +19,9 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { LineOptions, LineOptionsParams } from '../line_options';
-import { NumberInputOption } from '../../../common';
-import { getInterpolationModes } from '../../../../utils/collections';
+import { LineOptions, LineOptionsParams } from './line_options';
+import { NumberInputOption } from '../../common';
+import { getInterpolationModes } from '../../../utils/collections';
 import { seriesParam } from './mocks';
 
 const LINE_WIDTH = 'lineWidth';

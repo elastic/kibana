@@ -19,14 +19,9 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { ValueAxesPanel, ValueAxesPanelProps } from '../value_axes_panel';
-import { ValueAxis, SeriesParam } from '../../../../types';
-import {
-  Positions,
-  getScaleTypes,
-  getAxisModes,
-  getPositions,
-} from '../../../../utils/collections';
+import { ValueAxesPanel, ValueAxesPanelProps } from './value_axes_panel';
+import { ValueAxis, SeriesParam } from '../../../types';
+import { Positions, getScaleTypes, getAxisModes, getPositions } from '../../../utils/collections';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { valueAxis, seriesParam } from './mocks';
 

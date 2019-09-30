@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Axis, ValueAxis, SeriesParam } from '../../../../types';
+import { Axis, ValueAxis, SeriesParam } from '../../../types';
 import {
   ChartTypes,
   ChartModes,
@@ -25,7 +25,7 @@ import {
   ScaleTypes,
   Positions,
   AxisTypes,
-} from '../../../../utils/collections';
+} from '../../../utils/collections';
 
 const defaultValueAxisId = 'ValueAxis-1';
 

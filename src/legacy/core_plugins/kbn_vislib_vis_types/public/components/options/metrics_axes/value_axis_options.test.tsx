@@ -19,17 +19,17 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { ValueAxisOptions, ValueAxisOptionsParams } from '../value_axis_options';
-import { Axis } from '../../../../types';
-import { TextInputOption } from '../../../common';
-import { LabelOptions } from '../label_options';
+import { ValueAxisOptions, ValueAxisOptionsParams } from './value_axis_options';
+import { Axis } from '../../../types';
+import { TextInputOption } from '../../common';
+import { LabelOptions } from './label_options';
 import {
   ScaleTypes,
   Positions,
   getScaleTypes,
   getAxisModes,
   getPositions,
-} from '../../../../utils/collections';
+} from '../../../utils/collections';
 import { valueAxis, categoryAxis } from './mocks';
 
 const POSITION = 'position';

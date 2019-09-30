@@ -19,8 +19,8 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { LabelOptions, LabelOptionsProps } from '../label_options';
-import { TruncateLabelsOption } from '../../../common';
+import { LabelOptions, LabelOptionsProps } from './label_options';
+import { TruncateLabelsOption } from '../../common';
 import { valueAxis, categoryAxis } from './mocks';
 
 const FILTER = 'filter';

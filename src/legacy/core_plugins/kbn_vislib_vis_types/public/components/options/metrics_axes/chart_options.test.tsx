@@ -19,16 +19,16 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { ChartOptions, ChartOptionsParams } from '../chart_options';
-import { SeriesParam } from '../../../../types';
-import { LineOptions } from '../line_options';
+import { ChartOptions, ChartOptionsParams } from './chart_options';
+import { SeriesParam } from '../../../types';
+import { LineOptions } from './line_options';
 import {
   ChartTypes,
   ChartModes,
   getInterpolationModes,
   getChartTypes,
   getChartModes,
-} from '../../../../utils/collections';
+} from '../../../utils/collections';
 import { valueAxis, seriesParam } from './mocks';
 
 const interpolationModes = getInterpolationModes();

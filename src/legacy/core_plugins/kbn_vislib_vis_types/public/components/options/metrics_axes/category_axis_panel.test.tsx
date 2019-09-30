@@ -19,10 +19,10 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { CategoryAxisPanel, CategoryAxisPanelProps } from '../category_axis_panel';
-import { Axis } from '../../../../types';
-import { Positions, getPositions } from '../../../../utils/collections';
-import { LabelOptions } from '../label_options';
+import { CategoryAxisPanel, CategoryAxisPanelProps } from './category_axis_panel';
+import { Axis } from '../../../types';
+import { Positions, getPositions } from '../../../utils/collections';
+import { LabelOptions } from './label_options';
 import { categoryAxis } from './mocks';
 
 const positions = getPositions();

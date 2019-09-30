@@ -19,24 +19,24 @@
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { MetricsAxisOptions } from '../index';
-import { BasicVislibParams, SeriesParam, ValueAxis } from '../../../../types';
-import { ValidationVisOptionsProps } from '../../../common';
-import { Positions } from '../../../../utils/collections';
-import { ValueAxesPanel } from '../value_axes_panel';
-import { CategoryAxisPanel } from '../category_axis_panel';
-import { ChartTypes } from '../../../../utils/collections';
+import { MetricsAxisOptions } from './index';
+import { BasicVislibParams, SeriesParam, ValueAxis } from '../../../types';
+import { ValidationVisOptionsProps } from '../../common';
+import { Positions } from '../../../utils/collections';
+import { ValueAxesPanel } from './value_axes_panel';
+import { CategoryAxisPanel } from './category_axis_panel';
+import { ChartTypes } from '../../../utils/collections';
 import { AggConfig } from 'ui/vis';
 import { AggType } from 'ui/agg_types';
 import { defaultValueAxisId, valueAxis, seriesParam, categoryAxis } from './mocks';
 
-jest.mock('../series_panel', () => ({
+jest.mock('./series_panel', () => ({
   SeriesPanel: () => 'SeriesPanel',
 }));
-jest.mock('../category_axis_panel', () => ({
+jest.mock('./category_axis_panel', () => ({
   CategoryAxisPanel: () => 'CategoryAxisPanel',
 }));
-jest.mock('../value_axes_panel', () => ({
+jest.mock('./value_axes_panel', () => ({
   ValueAxesPanel: () => 'ValueAxesPanel',
 }));
 

@@ -19,8 +19,8 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { CustomExtentsOptions, CustomExtentsOptionsProps } from '../custom_extents_options';
-import { YExtents } from '../y_extents';
+import { CustomExtentsOptions, CustomExtentsOptionsProps } from './custom_extents_options';
+import { YExtents } from './y_extents';
 import { valueAxis } from './mocks';
 
 const BOUNDS_MARGIN = 'boundsMargin';
