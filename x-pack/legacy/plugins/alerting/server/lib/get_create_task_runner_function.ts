@@ -131,7 +131,7 @@ export function getCreateTaskRunnerFunction({
               if (muteAll || mutedInstanceIds.includes(alertInstanceId)) {
                 return;
               }
-              const { actionGroup, context, state } = alertInstance.getSechduledActionOptions()!;
+              const { actionGroup, context, state } = alertInstance.getScheduledActionOptions()!;
               alertInstance.updateLastScheduledActions(actionGroup);
               alertInstance.unscheduleActions();
               return executionHandler({ actionGroup, context, state, alertInstanceId });
