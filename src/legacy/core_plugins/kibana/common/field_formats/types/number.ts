@@ -17,26 +17,12 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { createNumberFormat } from '../number';
-import { FieldFormat } from '../../../../../../../plugins/data/common/field_formats';
+import { createNumeralFormat } from './_numeral';
+import { FieldFormat } from '../../../../../../plugins/data/common/';
 
-const NumberFormat = createNumberFormat(FieldFormat);
-
-describe('NumberFormat', function () {
-
-  const config = {};
-  config['format:number:defaultPattern'] = '0,0.[000]';
-  const getConfig = (key) => config[key];
-
-  it('default pattern', ()=> {
-    const formatter = new NumberFormat({}, getConfig);
-    expect(formatter.convert(12.345678)).to.be('12.346');
+export function createNumberFormat(BaseFieldFormat: typeof FieldFormat) {
+  return createNumeralFormat(BaseFieldFormat, {
+    id: 'number',
+    title: 'Number',
   });
-
-  it('custom pattern', ()=> {
-    const formatter = new NumberFormat({ pattern: '0,0' }, getConfig);
-    expect(formatter.convert('12.345678')).to.be('12');
-  });
-
-});
+}
