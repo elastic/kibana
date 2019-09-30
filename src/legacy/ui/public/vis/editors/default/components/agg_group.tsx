@@ -21,6 +21,7 @@ import React, { useEffect, useReducer, useMemo } from 'react';
 import {
   EuiTitle,
   EuiDragDropContext,
+  DragDropContextProps,
   EuiDroppable,
   EuiDraggable,
   EuiSpacer,
@@ -110,11 +111,7 @@ function DefaultEditorAggGroup({
     setValidity(isGroupValid);
   }, [isGroupValid]);
 
-  interface DragDropResultProps {
-    source: { index: number };
-    destination?: { index: number } | null;
-  }
-  const onDragEnd = ({ source, destination }: DragDropResultProps) => {
+  const onDragEnd: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
       const orderedGroup = Array.from(group);
       const [removed] = orderedGroup.splice(source.index, 1);
