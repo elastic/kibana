@@ -152,8 +152,8 @@ export const Page: FC = () => {
 
   return (
     <EuiPage data-test-subj="mlPageJobTypeSelection">
-      <EuiPageBody>
-        <EuiPageContent>
+      <EuiPageBody restrictWidth={1200}>
+        <EuiPageContent horizontalPosition="center" grow={true}>
           <EuiTitle>
             <h2>
               <FormattedMessage
@@ -249,7 +249,7 @@ export const Page: FC = () => {
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiTitle size="s">
-                          <h3>{header}</h3>
+                          <h4>{header}</h4>
                         </EuiTitle>
                         <EuiText color="subdued">
                           <p>{text}</p>
