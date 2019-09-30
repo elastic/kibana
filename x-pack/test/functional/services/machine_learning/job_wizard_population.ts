@@ -26,6 +26,7 @@ export function MachineLearningJobWizardPopulationProvider({ getService }: FtrPr
 
     async selectPopulationField(identifier: string) {
       await comboBox.set('populationSplitFieldSelect > comboBoxInput', identifier);
+      await this.assertPopulationFieldSelection(identifier);
     },
 
     async assertDetectorSplitFieldInputExists(detectorPosition: number) {
@@ -47,6 +48,7 @@ export function MachineLearningJobWizardPopulationProvider({ getService }: FtrPr
         `detector ${detectorPosition} > byFieldSelect  > comboBoxInput`,
         identifier
       );
+      await this.assertDetectorSplitFieldSelection(detectorPosition, identifier);
     },
 
     async assertDetectorSplitExists(detectorPosition: number) {

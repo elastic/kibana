@@ -22,7 +22,7 @@ import { openSourceModal } from '../services/source_modal';
 
 const localStorage = new Storage(window.localStorage);
 
-interface SearchBarProps {
+export interface SearchBarProps {
   isLoading: boolean;
   currentIndexPattern?: IndexPattern;
   initialQuery?: string;

@@ -16,7 +16,7 @@ import d3 from 'd3';
 import angular from 'angular';
 import moment from 'moment';
 
-import { TimeBuckets } from 'ui/time_buckets';
+import { TimeBuckets } from '../../../../../util/time_buckets';
 import { numTicksForDateFormat } from 'plugins/ml/util/chart_utils';
 
 import { uiModules } from 'ui/modules';
