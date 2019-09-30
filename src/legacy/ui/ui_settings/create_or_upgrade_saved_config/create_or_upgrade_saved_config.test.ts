@@ -21,12 +21,14 @@ import sinon from 'sinon';
 import expect from '@kbn/expect';
 import Chance from 'chance';
 
-import * as getUpgradeableConfigNS from '../get_upgradeable_config';
-import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
+// @ts-ignore
+import * as getUpgradeableConfigNS from './get_upgradeable_config';
+// @ts-ignore
+import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 
 const chance = new Chance();
 
-describe('uiSettings/createOrUpgradeSavedConfig', function () {
+describe('uiSettings/createOrUpgradeSavedConfig', function() {
   const sandbox = sinon.createSandbox();
   afterEach(() => sandbox.restore());
 
@@ -42,7 +44,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
         type,
         id: options.id,
         version: 'foo',
-      }))
+      })),
     };
 
     async function run(options = {}) {
@@ -51,7 +53,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
         version,
         buildNum,
         logWithMetadata,
-        ...options
+        ...options,
       });
 
       sinon.assert.calledOnce(getUpgradeableConfig);
@@ -70,44 +72,45 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
     };
   }
 
-  describe('nothing is upgradeable', function () {
+  describe('nothing is upgradeable', function() {
     it('should create config with current version and buildNum', async () => {
       const { run, savedObjectsClient } = setup();
 
       await run();
 
       sinon.assert.calledOnce(savedObjectsClient.create);
-      sinon.assert.calledWithExactly(savedObjectsClient.create, 'config', {
-        buildNum,
-      }, {
-        id: version
-      });
+      sinon.assert.calledWithExactly(
+        savedObjectsClient.create,
+        'config',
+        {
+          buildNum,
+        },
+        {
+          id: version,
+        }
+      );
     });
   });
 
   describe('something is upgradeable', () => {
     it('should merge upgraded attributes with current build number in new config', async () => {
-      const {
-        run,
-        getUpgradeableConfig,
-        savedObjectsClient
-      } = setup();
+      const { run, getUpgradeableConfig, savedObjectsClient } = setup();
 
       const savedAttributes = {
         buildNum: buildNum - 100,
         [chance.word()]: chance.sentence(),
         [chance.word()]: chance.sentence(),
-        [chance.word()]: chance.sentence()
+        [chance.word()]: chance.sentence(),
       };
 
-      getUpgradeableConfig
-        .returns({ id: prevVersion, attributes: savedAttributes });
+      getUpgradeableConfig.returns({ id: prevVersion, attributes: savedAttributes });
 
       await run();
 
       sinon.assert.calledOnce(getUpgradeableConfig);
       sinon.assert.calledOnce(savedObjectsClient.create);
-      sinon.assert.calledWithExactly(savedObjectsClient.create,
+      sinon.assert.calledWithExactly(
+        savedObjectsClient.create,
         'config',
         {
           ...savedAttributes,
@@ -122,12 +125,12 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
     it('should log a message for upgrades', async () => {
       const { getUpgradeableConfig, logWithMetadata, run } = setup();
 
-      getUpgradeableConfig
-        .returns({ id: prevVersion, attributes: { buildNum: buildNum - 100 } });
+      getUpgradeableConfig.returns({ id: prevVersion, attributes: { buildNum: buildNum - 100 } });
 
       await run();
       sinon.assert.calledOnce(logWithMetadata);
-      sinon.assert.calledWithExactly(logWithMetadata,
+      sinon.assert.calledWithExactly(
+        logWithMetadata,
         ['plugin', 'elasticsearch'],
         sinon.match('Upgrade'),
         sinon.match({
@@ -140,8 +143,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
     it('does not log when upgrade fails', async () => {
       const { getUpgradeableConfig, logWithMetadata, run, savedObjectsClient } = setup();
 
-      getUpgradeableConfig
-        .returns({ id: prevVersion, attributes: { buildNum: buildNum - 100 } });
+      getUpgradeableConfig.returns({ id: prevVersion, attributes: { buildNum: buildNum - 100 } });
 
       savedObjectsClient.create.callsFake(async () => {
         throw new Error('foo');
@@ -171,7 +173,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
       await run({ onWriteError });
       sinon.assert.calledOnce(onWriteError);
       sinon.assert.calledWithExactly(onWriteError, error, {
-        buildNum
+        buildNum,
       });
     });
 
@@ -195,9 +197,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
 
       try {
         await run({
-          onWriteError: (error) => (
-            Promise.reject(new Error(`${error.message} bar`))
-          )
+          onWriteError: (error: Error) => Promise.reject(new Error(`${error.message} bar`)),
         });
         throw new Error('expected run() to reject');
       } catch (error) {
@@ -214,9 +214,9 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
 
       try {
         await run({
-          onWriteError: (error) => {
+          onWriteError: (error: Error) => {
             throw new Error(`${error.message} bar`);
-          }
+          },
         });
         throw new Error('expected run() to reject');
       } catch (error) {
@@ -233,7 +233,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
 
       try {
         await run({
-          onWriteError: undefined
+          onWriteError: undefined,
         });
         throw new Error('expected run() to reject');
       } catch (error) {
