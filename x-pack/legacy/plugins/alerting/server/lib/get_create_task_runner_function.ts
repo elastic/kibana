@@ -128,7 +128,7 @@ export function getCreateTaskRunnerFunction({
           Object.keys(alertInstances).map(alertInstanceId => {
             const alertInstance = alertInstances[alertInstanceId];
             if (alertInstance.hasScheduledActions(throttle)) {
-              const { actionGroup, context, state } = alertInstance.getSechduledActionOptions()!;
+              const { actionGroup, context, state } = alertInstance.getScheduledActionOptions()!;
               alertInstance.updateLastScheduledActions(actionGroup);
               alertInstance.unscheduleActions();
               return executionHandler({ actionGroup, context, state, alertInstanceId });
