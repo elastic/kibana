@@ -35,7 +35,7 @@ export async function runWithOptions(options: BackportOptions) {
   });
 
   if (backportSucceeded && options.backportCreatedLabels.length > 0) {
-    Promise.all(
+    await Promise.all(
       commits.map(async ({ pullNumber }) => {
         if (pullNumber) {
           return withSpinner(
