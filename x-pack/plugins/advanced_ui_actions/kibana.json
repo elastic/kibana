@@ -1,5 +1,5 @@
 {
-  "id": "advanced_ui_actions",
+  "id": "advancedUiActions",
   "version": "kibana",
   "requiredPlugins": [
     "embeddable",
