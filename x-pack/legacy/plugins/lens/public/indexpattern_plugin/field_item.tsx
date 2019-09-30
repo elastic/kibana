@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import chrome from 'ui/chrome';
 import DateMath from '@elastic/datemath';
 import {
   EuiFlexGroup,
@@ -19,6 +20,7 @@ import {
   EuiPopoverFooter,
   EuiPopoverTitle,
 } from '@elastic/eui';
+import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import {
   Chart,
   Axis,
@@ -43,6 +45,8 @@ import { FieldIcon, getColorForDataType } from './field_icon';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { BucketedAggregation, FieldStatsResponse } from '../../common';
 
+const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
+const chartTheme = IS_DARK_THEME ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme;
 export interface FieldItemProps {
   core: DatasourceDataPanelProps['core'];
   field: IndexPatternField;
@@ -358,7 +362,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
         <Chart data-test-subj="lnsFieldListPanel-histogram" size={{ height: 200, width: 300 - 32 }}>
           <Settings
             tooltip={{ type: TooltipType.None }}
-            theme={{ chartMargins: { top: 0, bottom: 0, left: 0, right: 0 } }}
+            theme={chartTheme}
             xDomain={
               fromDate && toDate
                 ? {
@@ -396,11 +400,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     } else if (showingHistogram || !topValues || !topValues.buckets.length) {
       return wrapInPopover(
         <Chart data-test-subj="lnsFieldListPanel-histogram" size={{ height: 200, width: '100%' }}>
-          <Settings
-            rotation={90}
-            tooltip={{ type: TooltipType.None }}
-            theme={{ chartMargins: { top: 0, bottom: 0, left: 0, right: 0 } }}
-          />
+          <Settings rotation={90} tooltip={{ type: TooltipType.None }} theme={chartTheme} />
 
           <Axis
             id={getAxisId('key')}
