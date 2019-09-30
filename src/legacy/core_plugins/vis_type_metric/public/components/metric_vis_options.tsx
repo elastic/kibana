@@ -130,7 +130,10 @@ function MetricVisOptions({
         <ColorSchemaOptions
           colorSchema={stateParams.metric.colorSchema}
           colorSchemas={vis.type.editorConfig.collections.colorSchemas}
-          disabled={stateParams.metric.metricColorMode === ColorModes.NONE}
+          disabled={
+            stateParams.metric.colorsRange.length === 1 ||
+            stateParams.metric.metricColorMode === ColorModes.NONE
+          }
           invertColors={stateParams.metric.invertColors}
           setValue={setMetricValue as SetColorSchemaOptionsValue}
           uiState={uiState}
