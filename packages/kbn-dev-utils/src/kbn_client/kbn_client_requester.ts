@@ -38,12 +38,14 @@ export const uriencode = (
     throw new Error('strings and values passed to `uriencode` template tag are unbalanced');
   }
 
-  let url = queue.shift()!;
-  while (values.length) {
-    url += encodeURIComponent(values.shift()!);
-    url += queue.shift()!;
-  }
-  return url;
+  // pull the first string off the queue, there is one less item in `values`
+  // since the values are always wrapped in strings, so we shift the extra string
+  // off the queue to balance the queue and values array.
+  const leadingString = queue.shift()!;
+  return queue.reduce(
+    (acc, string, i) => `${acc}${encodeURIComponent(values[i])}${string}`,
+    leadingString
+  );
 };
 
 const MAX_ATTEMPTS = 5;
