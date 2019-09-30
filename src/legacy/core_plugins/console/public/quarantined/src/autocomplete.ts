@@ -34,12 +34,10 @@ import utils from './utils';
 import { populateContext } from './autocomplete/engine';
 // @ts-ignore
 import { URL_PATH_END_MARKER } from './autocomplete/components';
-import { creatTokenIterator } from '../../../np_ready/public/application/factories';
+import { createTokenIterator } from '../../../np_ready/public/application/factories';
 
 import { Position, Token, Range } from '../../../np_ready/public/interfaces';
 import { LegacyEditor } from '../../../np_ready/public/application/models';
-
-const AceRange = ace.acequire('ace/range').Range;
 
 let LAST_EVALUATED_TOKEN: any = null;
 
@@ -60,7 +58,10 @@ function getCurrentMethodAndTokenPaths(
   pos: Position,
   forceEndOfUrl?: boolean
 ) {
-  const tokenIter = editor.iterForPosition(pos.lineNumber, pos.column);
+  const tokenIter = createTokenIterator({
+    editor,
+    position: pos,
+  });
   const startPos = pos;
   let bodyTokenPath: any = [];
   const ret: any = {};
@@ -198,7 +199,7 @@ function getCurrentMethodAndTokenPaths(
       // we are on the same line as cursor and dealing with a url. Current token is not part of the context
       t = tokenIter.stepBackward();
       // This will force method parsing
-      while (t.type === 'whitespace') {
+      while (t!.type === 'whitespace') {
         t = tokenIter.stepBackward();
       }
     }
@@ -272,7 +273,7 @@ function getCurrentMethodAndTokenPaths(
         }
         break;
     }
-    t = editor.parser.prevNonEmptyToken(tokenIter);
+    t = tokenIter.prevNonEmptyToken();
   }
 
   if (curUrlPart) {
@@ -305,8 +306,8 @@ export function getEndpointFromPosition(editor: LegacyEditor, pos: Position) {
 export default function(ed: AceEditor) {
   const editor = new LegacyEditor(ed);
 
-  function isUrlPathToken(token: Token) {
-    switch ((token || {}).type) {
+  function isUrlPathToken(token: Token | null) {
+    switch ((token || ({} as any)).type) {
       case 'url.slash':
       case 'url.comma':
       case 'url.part':
@@ -393,7 +394,7 @@ export default function(ed: AceEditor) {
 
     // go back to see whether we have one of ( : { & [ do not require a comma. All the rest do.
     let newPos = {
-      row: context.rangeToReplace.start.row,
+      lineNumber: context.rangeToReplace.start.lineNumber,
       column:
         context.rangeToReplace.start.column +
         termAsString.length +
@@ -401,26 +402,23 @@ export default function(ed: AceEditor) {
         (templateInserted ? 0 : context.suffixToAdd.length),
     };
 
-    const tokenIter = editor.iterForPosition(newPos.row, newPos.column);
+    const tokenIter = createTokenIterator({
+      editor,
+      position: newPos,
+    });
 
     if (context.autoCompleteType === 'body') {
       // look for the next place stand, just after a comma, {
-      let nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
+      let nonEmptyToken = tokenIter.nextNonEmptyToken();
       switch (nonEmptyToken ? nonEmptyToken.type : 'NOTOKEN') {
         case 'paren.rparen':
-          newPos = {
-            row: tokenIter.getCurrentTokenRow(),
-            column: tokenIter.getCurrentTokenColumn(),
-          };
+          newPos = tokenIter.getCurrentPosition();
           break;
         case 'punctuation.colon':
-          nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
+          nonEmptyToken = tokenIter.nextNonEmptyToken();
           if ((nonEmptyToken || {}).type === 'paren.lparen') {
-            nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
-            newPos = {
-              row: tokenIter.getCurrentTokenRow(),
-              column: tokenIter.getCurrentTokenColumn(),
-            };
+            nonEmptyToken = tokenIter.nextNonEmptyToken();
+            newPos = tokenIter.getCurrentPosition();
             if (nonEmptyToken && nonEmptyToken.value.indexOf('"') === 0) {
               newPos.column++;
             } // don't stand on "
@@ -429,10 +427,7 @@ export default function(ed: AceEditor) {
         case 'paren.lparen':
         case 'punctuation.comma':
           tokenIter.stepForward();
-          newPos = {
-            row: tokenIter.getCurrentTokenRow(),
-            column: tokenIter.getCurrentTokenColumn(),
-          };
+          newPos = tokenIter.getCurrentPosition();
           break;
       }
       editor.moveCursorToPosition(newPos);
@@ -501,19 +496,22 @@ export default function(ed: AceEditor) {
     // eslint-disable-next-line no-bitwise
     if (rowMode & editor.parser.MODE.REQUEST_START) {
       // on url path, url params or method.
-      const tokenIter = editor.iterForPosition(pos.row, pos.column);
+      const tokenIter = createTokenIterator({
+        editor,
+        position: pos,
+      });
       let t = tokenIter.getCurrentToken();
 
-      while (t.type === 'url.comma') {
+      while (t!.type === 'url.comma') {
         t = tokenIter.stepBackward();
       }
-      switch (t.type) {
+      switch (t!.type) {
         case 'method':
           return 'method';
         case 'whitespace':
-          t = editor.parser.prevNonEmptyToken(tokenIter);
+          t = tokenIter.prevNonEmptyToken();
 
-          switch ((t || {}).type) {
+          switch ((t || ({} as any)).type) {
             case 'method':
               // we moved one back
               return 'path';
@@ -657,8 +655,11 @@ export default function(ed: AceEditor) {
     context.prefixToAdd = '';
     context.suffixToAdd = '';
 
-    let tokenIter = editor.iterForCurrentLoc();
-    let nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
+    let tokenIter = createTokenIterator({
+      editor,
+      position: editor.getCurrentPosition()!,
+    });
+    let nonEmptyToken = tokenIter.nextNonEmptyToken();
     switch (nonEmptyToken ? nonEmptyToken.type : 'NOTOKEN') {
       case 'NOTOKEN':
       case 'paren.lparen':

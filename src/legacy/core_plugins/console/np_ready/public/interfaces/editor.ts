@@ -18,6 +18,7 @@
  */
 
 import { TokensProvider } from './tokens_provider';
+import { Token } from './token';
 
 export interface Position {
   /**
@@ -94,7 +95,10 @@ export interface Editor {
   getValueInRange(range: Range): string;
 
   /**
-   * Get the mode at the end of a specific line.
+   * Get the lexer state at the end of a specific line.
    */
-  getLineMode(args: { lineNumber: number }): string;
+  getLineState(args: { lineNumber: number }): string;
+
+  // TODO: document
+  // getLineMode(args: { lineNumber: number }): LINE_MODE;
 }

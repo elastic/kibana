@@ -23,7 +23,6 @@ const MODE = {
   MULTI_DOC_CUR_DOC_END: 8,
   REQUEST_END: 16,
   BETWEEN_REQUESTS: 32
-
 };
 
 function RowParser(editor) {

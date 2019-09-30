@@ -18,13 +18,13 @@
  */
 
 import { Editor as IAceEditor, Range as AceRange } from 'brace';
-import { Editor, Position, Range, TokensProvider } from '../../interfaces';
+import { Editor, Position, Range, Token, TokensProvider } from '../../interfaces';
 import { AceTokensProvider } from '../../lib/ace_token_provider';
 
 export class LegacyEditor implements Editor {
   constructor(private readonly editor: IAceEditor) {}
 
-  getLineMode({ lineNumber }: { lineNumber: number }) {
+  getLineState({ lineNumber }: { lineNumber: number }) {
     const session = this.editor.getSession();
     return session.getState(lineNumber - 1);
   }
@@ -59,5 +59,33 @@ export class LegacyEditor implements Editor {
       lineNumber: cursorPosition.row + 1,
       column: cursorPosition.column + 1,
     };
+  }
+
+  clearSelection(): void {
+    this.editor.clearSelection();
+  }
+
+  getTokenAt(pos: Position): Token | null {
+    const provider = this.getTokenProvider();
+    return provider.getTokenAt(pos);
+  }
+
+  insert(value: string): void {
+    this.editor.insert(value);
+  }
+
+  moveCursorToPosition(pos: Position): void {
+    this.editor.moveCursorToPosition({ row: pos.lineNumber - 1, column: pos.column - 1 });
+  }
+
+  replace({ start, end }: Range, value: string): void {
+    const aceRange = new AceRange(
+      start.lineNumber - 1,
+      start.column - 1,
+      end.lineNumber - 1,
+      end.column - 1
+    );
+    const session = this.editor.getSession();
+    session.replace(aceRange, value);
   }
 }

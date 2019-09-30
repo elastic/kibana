@@ -91,4 +91,8 @@ export class TokenIteratorImpl implements TokenIterator {
   getCurrentPosition(): Position {
     return this.currentPosition;
   }
+
+  getCurrentTokenLineNumber(): number | null {
+    return this.currentPosition.lineNumber;
+  }
 }

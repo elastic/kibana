@@ -24,7 +24,7 @@ interface Dependencies {
   editor: Editor;
 }
 
-export function creatTokenIterator({ editor, position }: Dependencies) {
+export function createTokenIterator({ editor, position }: Dependencies) {
   const provider = editor.getTokenProvider();
   return new TokenIteratorImpl(provider, position);
 }
