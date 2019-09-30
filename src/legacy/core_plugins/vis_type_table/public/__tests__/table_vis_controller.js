@@ -43,19 +43,22 @@ describe('Table Vis - Controller', async function () {
   let tabifiedResponse;
   let legacyDependencies;
 
+  ngMock.inject(function ($injector) {
+    Private = $injector.get('Private');
+    legacyDependencies = {
+      // eslint-disable-next-line new-cap
+      createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
+    };
+
+    visualizationsSetup.types.registerVisualization(() =>
+      createTableVisTypeDefinition(legacyDependencies)
+    );
+  });
+
   beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
   beforeEach(
     ngMock.inject(function ($injector) {
       Private = $injector.get('Private');
-      legacyDependencies = {
-        // eslint-disable-next-line new-cap
-        createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
-      };
-
-      visualizationsSetup.types.registerVisualization(() =>
-        createTableVisTypeDefinition(legacyDependencies)
-      );
-
       $rootScope = $injector.get('$rootScope');
       $compile = $injector.get('$compile');
       fixtures = require('fixtures/fake_hierarchical_data');
