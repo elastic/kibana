@@ -304,7 +304,7 @@ export interface Visualization<T = unknown, P = unknown> {
   getDescription: (
     state: T
   ) => {
-    icon?: EuiIconType | string;
+    icon?: EuiIconType | IconType | string;
     label: string;
   };
 
