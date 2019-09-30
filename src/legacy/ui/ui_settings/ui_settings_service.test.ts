@@ -21,9 +21,7 @@ import expect from '@kbn/expect';
 import Chance from 'chance';
 import sinon from 'sinon';
 
-// @ts-ignore
 import { UiSettingsService } from './ui_settings_service';
-// @ts-ignore
 import * as createOrUpgradeSavedConfigNS from './create_or_upgrade_saved_config/create_or_upgrade_saved_config';
 import { createObjectsClientStub, savedObjectsClientErrors } from './create_objects_client_stub';
 
@@ -43,7 +41,7 @@ describe('ui settings', () => {
   const sandbox = sinon.createSandbox();
 
   function setup(options: SetupOptions = {}) {
-    const { getDefaults, defaults = {}, overrides, esDocSource = {} } = options;
+    const { getDefaults, defaults = {}, overrides = {}, esDocSource = {} } = options;
 
     const savedObjectsClient = createObjectsClientStub(esDocSource);
 
@@ -233,7 +231,7 @@ describe('ui settings', () => {
       });
 
       try {
-        await uiSettings.setMany(['bar', 'foo']);
+        await uiSettings.setMany({ baz: 'baz', foo: 'foo' });
       } catch (error) {
         expect(error.message).to.be('Unable to update "foo" because it is overridden');
       }
@@ -489,7 +487,7 @@ describe('ui settings', () => {
     it('pulls user configuration from ES', async () => {
       const esDocSource = {};
       const { uiSettings, assertGetQuery } = setup({ esDocSource });
-      await uiSettings.get();
+      await uiSettings.get('any');
       assertGetQuery();
     });
 

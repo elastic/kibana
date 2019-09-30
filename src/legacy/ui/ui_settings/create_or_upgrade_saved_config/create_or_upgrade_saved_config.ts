@@ -18,7 +18,7 @@
  */
 
 import { defaults } from 'lodash';
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectAttribute } from 'src/core/server';
 
 import { getUpgradeableConfig } from './get_upgradeable_config';
 
@@ -27,9 +27,14 @@ interface Options {
   version: string;
   buildNum: number;
   logWithMetadata: (...params: any[]) => void;
-  onWriteError?: (error: Error, attributes: Record<string, any>) => void;
+  onWriteError?: <T extends SavedObjectAttribute = any>(
+    error: Error,
+    attributes: Record<string, any>
+  ) => Record<string, T> | undefined;
 }
-export async function createOrUpgradeSavedConfig(options: Options) {
+export async function createOrUpgradeSavedConfig<T extends SavedObjectAttribute = any>(
+  options: Options
+): Promise<Record<string, T> | undefined> {
   const { savedObjectsClient, version, buildNum, logWithMetadata, onWriteError } = options;
 
   // try to find an older config we can upgrade
