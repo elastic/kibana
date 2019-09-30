@@ -112,7 +112,7 @@ export const ChartSection = ({
       <EuiTitle size="xs">
         <h3 id={section.id}>{section.label}</h3>
       </EuiTitle>
-      <div style={{ height: 250, marginBottom: 16 }}>
+      <div className="infrastructureChart" style={{ height: 250, marginBottom: 16 }}>
         <Chart>
           <Axis
             id={getAxisId('timestamp')}
@@ -127,7 +127,7 @@ export const ChartSection = ({
                 key={`series-${section.id}-${series.id}`}
                 id={`series-${section.id}-${series.id}`}
                 series={series}
-                name={getChartName(section, series.id)}
+                name={getChartName(section, series.id, series.label)}
                 type={getChartType(section, series.id)}
                 color={getChartColor(section, series.id)}
                 stack={visConfig.stacked}
