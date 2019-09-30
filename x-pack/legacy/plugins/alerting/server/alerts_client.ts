@@ -196,9 +196,8 @@ export class AlertsClient {
   }
 
   public async update({ id, data }: UpdateOptions) {
-    const existingObject = await this.savedObjectsClient.get('alert', id);
-    const { alertTypeId } = existingObject.attributes;
-    const alertType = this.alertTypeRegistry.get(alertTypeId);
+    const { attributes, version } = await this.savedObjectsClient.get('alert', id);
+    const alertType = this.alertTypeRegistry.get(attributes.alertTypeId);
     const apiKey = await this.createAPIKey();
 
     // Validate
@@ -211,7 +210,7 @@ export class AlertsClient {
       'alert',
       id,
       {
-        ...existingObject.attributes,
+        ...attributes,
         ...data,
         alertTypeParams: validatedAlertTypeParams,
         actions,
@@ -222,15 +221,15 @@ export class AlertsClient {
           : null,
       },
       {
+        version,
         references,
-        version: existingObject.version,
       }
     );
     return this.getAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
   }
 
   public async updateApiKey({ id }: { id: string }) {
-    const existingObject = await this.savedObjectsClient.get('alert', id);
+    const { references, version, attributes } = await this.savedObjectsClient.get('alert', id);
 
     const apiKey = await this.createAPIKey();
     const username = await this.getUserName();
@@ -238,7 +237,7 @@ export class AlertsClient {
       'alert',
       id,
       {
-        ...existingObject.attributes,
+        ...attributes,
         updatedBy: username,
         apiKeyOwner: apiKey.created ? username : null,
         apiKey: apiKey.created
@@ -246,27 +245,27 @@ export class AlertsClient {
           : null,
       },
       {
-        version: existingObject.version,
-        references: existingObject.references,
+        version,
+        references,
       }
     );
   }
 
   public async enable({ id }: { id: string }) {
-    const existingObject = await this.savedObjectsClient.get('alert', id);
-    if (existingObject.attributes.enabled === false) {
+    const { attributes, version, references } = await this.savedObjectsClient.get('alert', id);
+    if (attributes.enabled === false) {
       const apiKey = await this.createAPIKey();
       const scheduledTask = await this.scheduleAlert(
         id,
-        existingObject.attributes.alertTypeId,
-        existingObject.attributes.interval
+        attributes.alertTypeId,
+        attributes.interval
       );
       const username = await this.getUserName();
       await this.savedObjectsClient.update(
         'alert',
         id,
         {
-          ...existingObject.attributes,
+          ...attributes,
           enabled: true,
           updatedBy: username,
           apiKeyOwner: apiKey.created ? username : null,
@@ -276,21 +275,21 @@ export class AlertsClient {
             : null,
         },
         {
-          version: existingObject.version,
-          references: existingObject.references,
+          version,
+          references,
         }
       );
     }
   }
 
   public async disable({ id }: { id: string }) {
-    const existingObject = await this.savedObjectsClient.get('alert', id);
-    if (existingObject.attributes.enabled === true) {
+    const { attributes, version, references } = await this.savedObjectsClient.get('alert', id);
+    if (attributes.enabled === true) {
       await this.savedObjectsClient.update(
         'alert',
         id,
         {
-          ...existingObject.attributes,
+          ...attributes,
           enabled: false,
           scheduledTaskId: null,
           apiKey: null,
@@ -298,11 +297,11 @@ export class AlertsClient {
           updatedBy: await this.getUserName(),
         },
         {
-          version: existingObject.version,
-          references: existingObject.references,
+          version,
+          references,
         }
       );
-      await this.taskManager.remove(existingObject.attributes.scheduledTaskId);
+      await this.taskManager.remove(attributes.scheduledTaskId);
     }
   }
 
@@ -351,9 +350,9 @@ export class AlertsClient {
     alertId: string;
     alertInstanceId: string;
   }) {
-    const existingObject = await this.savedObjectsClient.get('alert', alertId);
-    const mutedInstanceIds = existingObject.attributes.mutedInstanceIds || [];
-    if (!existingObject.attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
+    const { attributes, version, references } = await this.savedObjectsClient.get('alert', alertId);
+    const mutedInstanceIds = attributes.mutedInstanceIds || [];
+    if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
       mutedInstanceIds.push(alertInstanceId);
       await this.savedObjectsClient.update(
         'alert',
@@ -363,8 +362,8 @@ export class AlertsClient {
           updatedBy: await this.getUserName(),
         },
         {
-          version: existingObject.version,
-          references: existingObject.references,
+          version,
+          references,
         }
       );
     }
@@ -377,9 +376,9 @@ export class AlertsClient {
     alertId: string;
     alertInstanceId: string;
   }) {
-    const existingObject = await this.savedObjectsClient.get('alert', alertId);
-    const mutedInstanceIds = existingObject.attributes.mutedInstanceIds || [];
-    if (!existingObject.attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
+    const { attributes, version, references } = await this.savedObjectsClient.get('alert', alertId);
+    const mutedInstanceIds = attributes.mutedInstanceIds || [];
+    if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
       await this.savedObjectsClient.update(
         'alert',
         alertId,
@@ -388,8 +387,8 @@ export class AlertsClient {
           mutedInstanceIds: mutedInstanceIds.filter((id: string) => id !== alertInstanceId),
         },
         {
-          version: existingObject.version,
-          references: existingObject.references,
+          version,
+          references,
         }
       );
     }
