@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-
 import { ExpressionRendererProps } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import { Visualization, FramePublicAPI, TableSuggestion } from '../../types';
 import {
@@ -62,7 +61,7 @@ describe('workspace_panel', () => {
       />
     );
 
-    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(1);
+    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(2);
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
@@ -83,7 +82,7 @@ describe('workspace_panel', () => {
       />
     );
 
-    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(1);
+    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(2);
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
@@ -104,7 +103,7 @@ describe('workspace_panel', () => {
       />
     );
 
-    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(1);
+    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(2);
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 

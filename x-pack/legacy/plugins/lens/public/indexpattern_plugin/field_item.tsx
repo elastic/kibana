@@ -169,7 +169,7 @@ export function FieldItem(props: FieldItemProps) {
                   togglePopover();
                 }
               }}
-              aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButton', {
+              aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonAriaLabel', {
                 defaultMessage:
                   'Click or Enter for information about {fieldName}. Or, drag field into visualization.',
                 values: { fieldName: field.name },
@@ -308,7 +308,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     title = (
       <>
         {i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
-          defaultMessage: 'Top Values',
+          defaultMessage: 'Top values',
         })}
       </>
     );
