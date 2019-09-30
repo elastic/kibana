@@ -1,39 +1,14 @@
 <section class="sidebar-list" aria-label="{{::'kbn.discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel' | i18n: {defaultMessage: 'Index and fields'} }}">
-  <div ng-show="indexPatternList.length > 1">
-    <ui-select
-      class="index-pattern-selection"
-      ng-model="selectedIndexPattern"
-      on-select="setIndexPattern($item)"
-    >
-      <ui-select-match>
-        <span
-          class="uiSelectMatch--ellipsis"
-          tooltip="{{$select.selected.get('title')}}"
-          tooltip-append-to-body="true"
-        >
-          {{$select.selected.get('title')}}
-        </span>
-      </ui-select-match>
-      <ui-select-choices repeat="pattern in indexPatternList | filter:$select.search">
-        <div ng-bind-html="pattern.get('title') | highlight: $select.search"></div>
-      </ui-select-choices>
-    </ui-select>
-  </div>
-  <div ng-hide="indexPatternList.length > 1">
-    <div class="index-pattern">
-      <h2
-        class="index-pattern-label"
-        id="index_pattern_id"
-        tabindex="0"
-        css-truncate>
-
-        {{ indexPattern.title }}</h2>
-    </div>
-  </div>
+  <discover-index-pattern-select
+    selected-index-pattern="selectedIndexPattern"
+    set-index-pattern="setIndexPattern"
+    index-pattern-list="indexPatternList"
+  >
+  </discover-index-pattern-select>
 
   <div class="dscSidebar__listHeader sidebar-list-header" ng-if="fields.length">
     <h3
-      class="euiFlexItem euiTitle euiTitle--xxsmall"
+      class="euiFlexItem euiTitle euiTitle--xxxsmall sidebar-list-header-heading"
       id="selected_fields"
       tabindex="0"
       i18n-id="kbn.discover.fieldChooser.filter.selectedFieldsTitle"
@@ -54,7 +29,7 @@
 
   <div class="sidebar-list-header sidebar-item euiFlexGroup euiFlexGroup--gutterMedium" ng-if="fields.length">
     <h3
-      class="euiFlexItem euiTitle euiTitle--xxsmall"
+      class="euiFlexItem euiTitle euiTitle--xxxsmall sidebar-list-header-heading"
       id="available_fields"
       tabindex="0"
       i18n-id="kbn.discover.fieldChooser.filter.availableFieldsTitle"
