@@ -171,7 +171,7 @@ export function FieldItem(props: FieldItemProps) {
               }}
               aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButton', {
                 defaultMessage:
-                  'Click or Enter to see contents of {fieldName}. Or, drag field into visualization.',
+                  'Click or Enter for information about {fieldName}. Or, drag field into visualization.',
                 values: { fieldName: field.name },
               })}
             >
@@ -185,7 +185,7 @@ export function FieldItem(props: FieldItemProps) {
                 anchorClassName="lnsFieldItem__infoIcon"
                 content={i18n.translate('xpack.lens.indexPattern.fieldStatsButton', {
                   defaultMessage:
-                    'Click to see contents of {fieldName}. Or, drag field into visualization.',
+                    'Click for information about {fieldName}. Or, drag field into visualization.',
                   values: { fieldName: field.name },
                 })}
                 type="iInCircle"
