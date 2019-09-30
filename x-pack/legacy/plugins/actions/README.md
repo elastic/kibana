@@ -19,9 +19,10 @@ action types.
 
 ## Usage
 
-1. Develop and register an action type (see action types -> example).
-2. Create an action by using the RESTful API (see actions -> create action).
-3. Use alerts to execute actions or execute manually (see firing actions).
+1. Enable the actions plugin in the `kibana.yml` by setting `xpack.actions.enabled: true`.
+2. Develop and register an action type (see action types -> example).
+3. Create an action by using the RESTful API (see actions -> create action).
+4. Use alerts to execute actions or execute manually (see firing actions).
 
 ## Kibana Actions Configuration
 Implemented under the [Actions Config](./server/actions_config.ts).
