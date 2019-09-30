@@ -26,7 +26,7 @@ import $ from 'jquery';
 import { initializeInput } from '../../../../public/quarantined/src/input.js';
 
 import { AceTokensProvider } from '.';
-import { Token, TokensProvider } from '../../interfaces';
+import { Position, Token, TokensProvider } from '../../interfaces';
 
 describe('Ace (legacy) token provider', () => {
   let aceEditor: Editor & { $el: any; autocomplete: any; update: any };
@@ -64,25 +64,25 @@ describe('Ace (legacy) token provider', () => {
     aceEditor.update('', done);
   });
 
-  const runTest = ({
-    input,
-    expectedTokens,
-    cb,
-    lineNumber = 1,
-  }: {
-    input: string;
-    expectedTokens: Token[] | null;
-    cb: () => void;
-    lineNumber?: number;
-  }) => {
-    aceEditor.update(input, function() {
-      const tokens = tokenProvider.getTokens(lineNumber);
-      expect(tokens).toEqual(expectedTokens);
-      cb();
-    });
-  };
-
   describe('#getTokens', () => {
+    const runTest = ({
+      input,
+      expectedTokens,
+      cb,
+      lineNumber = 1,
+    }: {
+      input: string;
+      expectedTokens: Token[] | null;
+      cb: () => void;
+      lineNumber?: number;
+    }) => {
+      aceEditor.update(input, function() {
+        const tokens = tokenProvider.getTokens(lineNumber);
+        expect(tokens).toEqual(expectedTokens);
+        cb();
+      });
+    };
+
     describe('base cases', () => {
       test('case 1 - only url', function(cb) {
         runTest({
@@ -183,6 +183,64 @@ describe('Ace (legacy) token provider', () => {
           expectedTokens: [],
           cb,
           lineNumber: 5,
+        });
+      });
+    });
+  });
+
+  describe('#getTokenAt', () => {
+    const runTest = ({
+      input,
+      expectedToken,
+      cb,
+      position,
+    }: {
+      input: string;
+      expectedToken: Token | null;
+      cb: () => void;
+      position: Position;
+    }) => {
+      aceEditor.update(input, function() {
+        const tokens = tokenProvider.getTokenAt(position);
+        expect(tokens).toEqual(expectedToken);
+        cb();
+      });
+    };
+
+    describe('base cases', () => {
+      it('case 1 - gets a token from the url', cb => {
+        const input = `GET http://test:user@somehost/`;
+        runTest({
+          input,
+          expectedToken: {
+            position: { lineNumber: 1, column: 5 },
+            type: 'url.protocol_host',
+            value: 'http://test:user@somehost',
+          },
+          cb,
+          position: { lineNumber: 1, column: 5 },
+        });
+
+        runTest({
+          input,
+          expectedToken: {
+            position: { lineNumber: 1, column: input.length },
+            type: 'url.slash',
+            value: '/',
+          },
+          cb,
+          position: { lineNumber: 1, column: input.length },
+        });
+      });
+    });
+
+    describe('special cases', () => {
+      it('case 1 - handles input outside of range', cb => {
+        runTest({
+          input: `GET abc`,
+          expectedToken: null,
+          cb,
+          position: { lineNumber: 1, column: 99 },
         });
       });
     });

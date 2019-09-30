@@ -50,7 +50,7 @@ const extractTokenFromAceTokenRow = (
 ) => {
   let acc = '';
   for (const token of aceTokens) {
-    const start = acc.length;
+    const start = acc.length + 1;
     acc += token.value;
     const end = acc.length;
     if (column < start) continue;
