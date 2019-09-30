@@ -1,93 +1,34 @@
 JOB:
-  # - kibana-intake
-  # - x-pack-intake
-  # - kibana-firefoxSmoke
-  # - kibana-ciGroup1
-  # - kibana-ciGroup2
-  # - kibana-ciGroup3
-  # - kibana-ciGroup4
-  # - kibana-ciGroup5
-  # - kibana-ciGroup6
-  # - kibana-ciGroup7
-  # - kibana-ciGroup8
-  # - kibana-ciGroup9
-  # - kibana-ciGroup10
-  # - kibana-ciGroup11
-  # - kibana-ciGroup12
-  # # - kibana-visualRegression
+  - kibana-intake
+  - x-pack-intake
+  - kibana-firefoxSmoke
+  - kibana-ciGroup1
+  - kibana-ciGroup2
+  - kibana-ciGroup3
+  - kibana-ciGroup4
+  - kibana-ciGroup5
+  - kibana-ciGroup6
+  - kibana-ciGroup7
+  - kibana-ciGroup8
+  - kibana-ciGroup9
+  - kibana-ciGroup10
+  - kibana-ciGroup11
+  - kibana-ciGroup12
+  # - kibana-visualRegression
 
-  # # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
-  # - x-pack-firefoxSmoke
-  # - x-pack-ciGroup1
-  - x-pack-ciGroup2-0
-  - x-pack-ciGroup2-1
-  - x-pack-ciGroup2-2
-  - x-pack-ciGroup2-3
-  - x-pack-ciGroup2-4
-  - x-pack-ciGroup2-5
-  - x-pack-ciGroup2-6
-  - x-pack-ciGroup2-7
-  - x-pack-ciGroup2-8
-  - x-pack-ciGroup2-9
-  - x-pack-ciGroup2-10
-  - x-pack-ciGroup2-11
-  - x-pack-ciGroup2-12
-  - x-pack-ciGroup2-13
-  - x-pack-ciGroup2-14
-  - x-pack-ciGroup2-15
-  - x-pack-ciGroup2-16
-  - x-pack-ciGroup2-17
-  - x-pack-ciGroup2-18
-  - x-pack-ciGroup2-19
-  - x-pack-ciGroup2-20
-  - x-pack-ciGroup2-21
-  - x-pack-ciGroup2-22
-  - x-pack-ciGroup2-23
-  - x-pack-ciGroup2-24
-  - x-pack-ciGroup2-25
-  - x-pack-ciGroup2-26
-  - x-pack-ciGroup2-27
-  - x-pack-ciGroup2-28
-  - x-pack-ciGroup2-29
-  - x-pack-ciGroup2-30
-  - x-pack-ciGroup2-31
-  - x-pack-ciGroup2-32
-  - x-pack-ciGroup2-33
-  - x-pack-ciGroup2-34
-  - x-pack-ciGroup2-35
-  - x-pack-ciGroup2-36
-  - x-pack-ciGroup2-37
-  - x-pack-ciGroup2-38
-  - x-pack-ciGroup2-39
-  - x-pack-ciGroup2-40
-  - x-pack-ciGroup2-41
-  - x-pack-ciGroup2-42
-  - x-pack-ciGroup2-43
-  - x-pack-ciGroup2-44
-  - x-pack-ciGroup2-45
-  - x-pack-ciGroup2-46
-  - x-pack-ciGroup2-47
-  - x-pack-ciGroup2-48
-  - x-pack-ciGroup2-49
-  - x-pack-ciGroup2-50
-  - x-pack-ciGroup2-51
-  - x-pack-ciGroup2-52
-  - x-pack-ciGroup2-53
-  - x-pack-ciGroup2-54
-  - x-pack-ciGroup2-55
-  - x-pack-ciGroup2-56
-  - x-pack-ciGroup2-57
-  - x-pack-ciGroup2-58
-  - x-pack-ciGroup2-59
-  # - x-pack-ciGroup3
-  # - x-pack-ciGroup4
-  # - x-pack-ciGroup5
-  # - x-pack-ciGroup6
-  # - x-pack-ciGroup7
-  # - x-pack-ciGroup8
-  # - x-pack-ciGroup9
-  # - x-pack-ciGroup10
-  # # - x-pack-visualRegression
+  # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
+  - x-pack-firefoxSmoke
+  - x-pack-ciGroup1
+  - x-pack-ciGroup2
+  - x-pack-ciGroup3
+  - x-pack-ciGroup4
+  - x-pack-ciGroup5
+  - x-pack-ciGroup6
+  - x-pack-ciGroup7
+  - x-pack-ciGroup8
+  - x-pack-ciGroup9
+  - x-pack-ciGroup10
+  # - x-pack-visualRegression
 
 # `~` is yaml for `null`
 exclude: ~
