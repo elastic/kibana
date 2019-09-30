@@ -9,6 +9,7 @@ import { GraphQLSchema } from 'graphql';
 import { Legacy } from 'kibana';
 
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
+import { get } from 'lodash';
 import { InfraMetricModel } from '../metrics/adapter_types';
 import {
   InfraBackendFrameworkAdapter,
@@ -174,28 +175,33 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
   ) {
     const internalRequest = req[internalInfraFrameworkRequest];
     const server = internalRequest.server;
+    const getVisData = get(server, 'plugins.metrics.getVisData');
+    if (typeof getVisData !== 'function') {
+      throw new Error('TSVB is not available');
+    }
 
     // getBasePath returns randomized base path AND spaces path
     const basePath = internalRequest.getBasePath();
     const url = `${basePath}/api/metrics/vis/data`;
 
-    const request = {
-      url,
-      method: 'POST',
-      headers: internalRequest.headers,
-      payload: {
-        timerange,
-        panels: [model],
-        filters,
-      },
-    };
-
-    const res = await server.inject(request);
-    if (res.statusCode !== 200) {
-      throw res;
-    }
-
-    return res.result as InfraTSVBResponse;
+    // For the following request we need a copy of the instnace of the internal request
+    // but modified for our TSVB request. This will ensure all the instance methods
+    // are available along with our overriden values
+    const request = Object.assign(
+      Object.create(Object.getPrototypeOf(internalRequest)),
+      internalRequest,
+      {
+        url,
+        method: 'POST',
+        payload: {
+          timerange,
+          panels: [model],
+          filters,
+        },
+      }
+    );
+    const result = await getVisData(request);
+    return result as InfraTSVBResponse;
   }
 }
 

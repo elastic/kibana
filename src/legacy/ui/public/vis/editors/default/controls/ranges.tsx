@@ -154,6 +154,16 @@ function RangesParamEditor({
             [isFromValid, isToValid] = validateRange({ from, to }, index);
           }
 
+          const fromPrepend = i18n.translate(
+            'common.ui.aggTypes.ranges.greaterThanOrEqualPrepend',
+            {
+              defaultMessage: '\u2265',
+            }
+          );
+          const toPrepend = i18n.translate('common.ui.aggTypes.ranges.lessThanPrepend', {
+            defaultMessage: '\u003c',
+          });
+
           return (
             <Fragment key={id}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -169,6 +179,7 @@ function RangesParamEditor({
                     fullWidth={true}
                     compressed={true}
                     isInvalid={!isFromValid}
+                    prepend={fromPrepend}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -186,6 +197,7 @@ function RangesParamEditor({
                     fullWidth={true}
                     compressed={true}
                     isInvalid={!isToValid}
+                    prepend={toPrepend}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
