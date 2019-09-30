@@ -30,16 +30,16 @@
 import { EventEmitter } from 'events';
 import _ from 'lodash';
 import '../render_complete/directive';
-import { VisTypesRegistryProvider } from '../registry/vis_types';
 import { AggConfigs } from '../agg_types/agg_configs';
 import { PersistedState } from '../persisted_state';
 import { updateVisualizationConfig } from './vis_update';
 import { SearchSource } from '../courier';
+import { start as visualizations } from '../../../core_plugins/visualizations/public/legacy';
 
 import '../directives/bind';
 
 export function VisProvider(Private, getAppState) {
-  const visTypes = Private(VisTypesRegistryProvider);
+  const visTypes = visualizations.types;
 
   class Vis extends EventEmitter {
     constructor(indexPattern, visState) {
@@ -74,7 +74,7 @@ export function VisProvider(Private, getAppState) {
       this.title = state.title || '';
       const type = state.type || this.type;
       if (_.isString(type)) {
-        this.type = visTypes.byName[type];
+        this.type = visTypes.get(type);
         if (!this.type) {
           throw new Error(`Invalid type "${type}"`);
         }

@@ -54,7 +54,7 @@ import { encodeRevisionString } from '../../../common/uri_util';
 import { history } from '../../utils/url';
 import { Editor } from '../editor/editor';
 import { CloneStatus } from './clone_status';
-import { CommitHistory } from './commit_history';
+import { CommitHistory } from '../commits';
 import { Directory } from './directory';
 import { ErrorPanel } from './error_panel';
 import { NotFound } from './not_found';
