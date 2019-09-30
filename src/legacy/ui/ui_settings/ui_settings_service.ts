@@ -23,7 +23,7 @@ import Boom from 'boom';
 import { SavedObjectsClientContract, SavedObjectAttribute } from 'src/core/server';
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 
-interface Options {
+export interface UiSettingsServiceOptions {
   type: string;
   id: string;
   buildNum: number;
@@ -62,7 +62,7 @@ interface UiSettingsParams {
   type?: UiSettingsType;
 }
 
-interface IUiSettingsService {
+export interface IUiSettingsService {
   getDefaults: () => Promise<Record<string, UiSettingsParams>>;
   get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
   getAll: <T extends SavedObjectAttribute = any>() => Promise<Record<string, T>>;
@@ -80,15 +80,15 @@ interface IUiSettingsService {
  *  @class UiSettingsService
  */
 export class UiSettingsService implements IUiSettingsService {
-  private readonly _type: Options['type'];
-  private readonly _id: Options['id'];
-  private readonly _buildNum: Options['buildNum'];
-  private readonly _savedObjectsClient: Options['savedObjectsClient'];
-  private readonly _overrides: Options['overrides'];
-  private readonly _getDefaults: NonNullable<Options['getDefaults']>;
-  private readonly _logWithMetadata: NonNullable<Options['logWithMetadata']>;
+  private readonly _type: UiSettingsServiceOptions['type'];
+  private readonly _id: UiSettingsServiceOptions['id'];
+  private readonly _buildNum: UiSettingsServiceOptions['buildNum'];
+  private readonly _savedObjectsClient: UiSettingsServiceOptions['savedObjectsClient'];
+  private readonly _overrides: UiSettingsServiceOptions['overrides'];
+  private readonly _getDefaults: NonNullable<UiSettingsServiceOptions['getDefaults']>;
+  private readonly _logWithMetadata: NonNullable<UiSettingsServiceOptions['logWithMetadata']>;
 
-  constructor(options: Options) {
+  constructor(options: UiSettingsServiceOptions) {
     const {
       type,
       id,

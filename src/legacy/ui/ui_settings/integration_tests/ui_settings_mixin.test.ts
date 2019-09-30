@@ -123,7 +123,8 @@ describe('uiSettingsMixin()', () => {
         foo: 'bar',
       });
       sinon.assert.calledOnce(uiSettingsServiceFactoryStub);
-      sinon.assert.calledWithExactly(uiSettingsServiceFactoryStub, server, {
+      sinon.assert.calledWithExactly(uiSettingsServiceFactoryStub, server as any, {
+        // @ts-ignore foo doesn't exist on Hapi.Server
         foo: 'bar',
         overrides: {
           foo: 'bar',
