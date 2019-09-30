@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { SavedObjectsClientContract } from 'src/core/server';
 import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
 
 /**
@@ -26,18 +26,22 @@ import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
  *  @property {string} version
  *  @return {Promise<SavedConfig|undefined>}
  */
-export async function getUpgradeableConfig({ savedObjectsClient, version }) {
+export async function getUpgradeableConfig({
+  savedObjectsClient,
+  version,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  version: string;
+}) {
   // attempt to find a config we can upgrade
   const { saved_objects: savedConfigs } = await savedObjectsClient.find({
     type: 'config',
     page: 1,
     perPage: 1000,
     sortField: 'buildNum',
-    sortOrder: 'desc'
+    sortOrder: 'desc',
   });
 
   // try to find a config that we can upgrade
-  return savedConfigs.find(savedConfig => (
-    isConfigVersionUpgradeable(savedConfig.id, version)
-  ));
+  return savedConfigs.find(savedConfig => isConfigVersionUpgradeable(savedConfig.id, version));
 }
