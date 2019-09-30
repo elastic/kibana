@@ -19,12 +19,8 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Embeddable, IContainer, ContainerInput } from 'src/plugins/embeddable/public';
 import { TimeRange } from '../../../../../../../src/plugins/data/public';
-import {
-  Embeddable,
-  IContainer,
-  ContainerInput,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { TimeRangeInput } from './custom_time_range_action';
 import { doesInheritTimeRange } from './does_inherit_time_range';
 import { CommonlyUsedRange } from './types';
@@ -134,23 +130,26 @@ export class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, 
           </EuiFormRow>
         </EuiModalBody>
         <EuiModalFooter>
-          <EuiFlexGroup gutterSize="s" responsive={false}>
-            <EuiFlexItem>
-              <EuiButtonEmpty
-                onClick={this.inheritFromParent}
-                color="danger"
-                data-test-subj="removePerPanelTimeRangeButton"
-                disabled={this.state.inheritTimeRange}
-              >
-                {i18n.translate(
-                  'xpack.advancedUiActions.customizePanelTimeRange.modal.removeButtonTitle',
-                  {
-                    defaultMessage: 'Remove',
-                  }
-                )}
-              </EuiButtonEmpty>
+          <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="spaceBetween">
+            <EuiFlexItem grow={true}>
+              <div>
+                <EuiButtonEmpty
+                  onClick={this.inheritFromParent}
+                  color="danger"
+                  data-test-subj="removePerPanelTimeRangeButton"
+                  disabled={this.state.inheritTimeRange}
+                  flush="left"
+                >
+                  {i18n.translate(
+                    'xpack.advancedUiActions.customizePanelTimeRange.modal.removeButtonTitle',
+                    {
+                      defaultMessage: 'Remove',
+                    }
+                  )}
+                </EuiButtonEmpty>
+              </div>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={this.cancel} data-test-subj="cancelPerPanelTimeRangeButton">
                 {i18n.translate(
                   'xpack.advancedUiActions.customizePanelTimeRange.modal.cancelButtonTitle',
@@ -160,7 +159,7 @@ export class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, 
                 )}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiButton data-test-subj="addPerPanelTimeRangeButton" onClick={this.addToPanel} fill>
                 {this.state.inheritTimeRange
                   ? i18n.translate(
