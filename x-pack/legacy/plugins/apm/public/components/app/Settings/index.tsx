@@ -52,10 +52,10 @@ export function Settings() {
   );
 
   const hasConfigurations = !isEmpty(data);
-
   return (
     <>
       <AddSettingsFlyout
+        // key={selectedConfig ? selectedConfig.id : 0}
         isOpen={isFlyoutOpen}
         selectedConfig={selectedConfig}
         onClose={() => {
