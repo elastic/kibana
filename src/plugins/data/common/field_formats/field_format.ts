@@ -187,5 +187,4 @@ export abstract class FieldFormat {
   }
 }
 
-export type FieldFormatConvert = { [key: string]: Function } | FieldFormatConvertFunction;
 export type IFieldFormat = PublicMethodsOf<FieldFormat>;
