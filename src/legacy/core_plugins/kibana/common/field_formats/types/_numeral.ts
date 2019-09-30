@@ -17,38 +17,49 @@
  * under the License.
  */
 
-import _ from 'lodash';
+// @ts-ignore
 import numeral from '@elastic/numeral';
+// @ts-ignore
 import numeralLanguages from '@elastic/numeral/languages';
+import { assign, has } from 'lodash';
+import { DEFAULT_CONTEXT_TYPE, FieldFormat } from '../../../../../../plugins/data/common/';
 
 const numeralInst = numeral();
 
-numeralLanguages.forEach(function (numeralLanguage) {
+numeralLanguages.forEach(function(numeralLanguage: Record<any, any>) {
   numeral.language(numeralLanguage.id, numeralLanguage.lang);
 });
 
-export function createNumeralFormat(FieldFormat, opts) {
-  class NumeralFormat extends FieldFormat {
+export function createNumeralFormat(BaseFieldFormat: typeof FieldFormat, opts: Record<any, any>) {
+  class NumeralFormat extends BaseFieldFormat {
     static id = opts.id;
     static title = opts.title;
     static fieldType = 'number';
 
-    constructor(params, getConfig) {
+    private getConfig: Function;
+
+    constructor(params: any, getConfig: Function) {
       super(params);
       this.getConfig = getConfig;
     }
 
     getParamDefaults() {
-      if (_.has(opts, 'getParamDefaults')) {
+      if (has(opts, 'getParamDefaults')) {
         return opts.getParamDefaults(this.getConfig);
       }
 
       return {
-        pattern: this.getConfig(`format:${opts.id}:defaultPattern`)
+        pattern: this.getConfig(`format:${opts.id}:defaultPattern`),
       };
     }
+  }
 
-    _convert(val) {
+  if (opts.prototype) {
+    assign(NumeralFormat.prototype, opts.prototype);
+  }
+
+  NumeralFormat.prototype._convert = {
+    [DEFAULT_CONTEXT_TYPE](val: any) {
       if (val === -Infinity) return '-∞';
       if (val === +Infinity) return '+∞';
       if (typeof val !== 'number') {
@@ -58,22 +69,17 @@ export function createNumeralFormat(FieldFormat, opts) {
       if (isNaN(val)) return '';
 
       const previousLocale = numeral.language();
-      const defaultLocale = this.getConfig && this.getConfig('format:number:defaultLocale') || 'en';
+      const defaultLocale =
+        (this.getConfig && this.getConfig('format:number:defaultLocale')) || 'en';
       numeral.language(defaultLocale);
 
       const formatted = numeralInst.set(val).format(this.param('pattern'));
 
       numeral.language(previousLocale);
 
-      return opts.afterConvert
-        ? opts.afterConvert.call(this, formatted)
-        : formatted;
-    }
-  }
-
-  if (opts.prototype) {
-    _.assign(NumeralFormat.prototype, opts.prototype);
-  }
+      return opts.afterConvert ? opts.afterConvert.call(this, formatted) : formatted;
+    },
+  };
 
   return NumeralFormat;
 }

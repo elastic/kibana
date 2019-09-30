@@ -17,26 +17,27 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { createPercentFormat } from '../percent';
-import { FieldFormat } from '../../../../../../../plugins/data/common/field_formats';
+import { createPercentFormat } from './percent';
+import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
 
 const PercentFormat = createPercentFormat(FieldFormat);
 
-describe('PercentFormat', function () {
+describe('PercentFormat', function() {
+  const config: Record<any, any> = {};
 
-  const config = {};
   config['format:percent:defaultPattern'] = '0,0.[000]%';
-  const getConfig = (key) => config[key];
 
-  it('default pattern', ()=> {
+  const getConfig = (key: any) => config[key];
+
+  test('default pattern', () => {
     const formatter = new PercentFormat({}, getConfig);
-    expect(formatter.convert(0.99999)).to.be('99.999%');
+
+    expect(formatter.convert(0.99999)).toBe('99.999%');
   });
 
-  it('custom pattern', ()=> {
+  test('custom pattern', () => {
     const formatter = new PercentFormat({ pattern: '0,0%' }, getConfig);
-    expect(formatter.convert('0.99999')).to.be('100%');
-  });
 
+    expect(formatter.convert('0.99999')).toBe('100%');
+  });
 });
