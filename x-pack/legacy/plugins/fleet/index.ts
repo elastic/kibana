@@ -33,6 +33,7 @@ export function fleet(kibana: any) {
       //   euiIconType: 'apmApp',
       //   order: 8000,
       // },
+      managementSections: ['plugins/fleet'],
       savedObjectSchemas: {
         agents: {
           isNamespaceAgnostic: true,

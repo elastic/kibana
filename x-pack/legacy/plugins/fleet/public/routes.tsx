@@ -11,6 +11,7 @@ import { Loading } from './components/loading';
 import { ChildRoutes } from './components/navigation/child_routes';
 import { URLStateProps, WithURLState } from './hooks/with_url_state';
 import { FrontendLibs } from './lib/types';
+import { routeMap } from './pages';
 
 interface RouterProps {
   libs: FrontendLibs;
@@ -25,6 +26,20 @@ export class AppRoutes extends Component<RouterProps, RouterState> {
     this.state = {
       loading: true,
     };
+  }
+
+  public async componentWillMount() {
+    if (this.state.loading === true) {
+      try {
+        await this.props.libs.framework.waitUntilFrameworkReady();
+      } catch (e) {
+        // Silently swallow error
+      }
+
+      this.setState({
+        loading: false,
+      });
+    }
   }
 
   public render() {
@@ -48,7 +63,8 @@ export class AppRoutes extends Component<RouterProps, RouterState> {
           )}
 
           {/* Ensure security is eanabled for elastic and kibana */}
-          {!get(this.props.libs.framework.info, 'security.enabled', true) && (
+          {/* TODO: Disabled for now as we don't have this info set up on backend yet */}
+          {/* {!get(this.props.libs.framework.info, 'security.enabled', true) && (
             <Route
               render={props =>
                 !props.location.pathname.includes('/error') ? (
@@ -56,17 +72,17 @@ export class AppRoutes extends Component<RouterProps, RouterState> {
                 ) : null
               }
             />
-          )}
+          )} */}
 
           {/* This app does not make use of a homepage. The mainpage is overview/enrolled_agents */}
-          <Route path="/" exact={true} render={() => <Redirect to="/overview/enrolled_agents" />} />
+          {/* <Route path="/" exact={true} render={() => <Redirect to="/overview/enrolled_agents" />} /> */}
         </Switch>
 
         {/* Render routes from the FS */}
         <WithURLState>
           {(URLProps: URLStateProps) => (
             <ChildRoutes
-              routes={[]}
+              routes={routeMap}
               {...URLProps}
               {...{
                 libs: this.props.libs,
