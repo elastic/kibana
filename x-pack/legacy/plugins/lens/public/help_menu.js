@@ -5,27 +5,35 @@
  */
 
 import React, { Fragment, PureComponent } from 'react';
-import { EuiHorizontalRule, EuiSpacer, EuiLink, EuiText, EuiIcon } from '@elastic/eui';
-// import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
+import { EuiHorizontalRule, EuiSpacer, EuiLink, EuiText, EuiIcon, EuiButton } from '@elastic/eui';
+import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 import { i18n } from '@kbn/i18n';
-// import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+const docsPage = undefined;
 
 export class HelpMenu extends PureComponent {
   render() {
     return (
       <Fragment>
         <EuiHorizontalRule margin="none" />
-        {/* Leaving the below in for future addition of docs link */}
-        {/* <EuiSpacer />
-        <EuiButton
-          fill
-          iconType="popout"
-          href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/maps.html`}
-          target="_blank"
-        >
-          <FormattedMessage id="xpack.maps.helpMenu.docLabel" defaultMessage="Maps documentation" />
-        </EuiButton> */}
-        <EuiSpacer />
+        {docsPage && (
+          <>
+            <EuiSpacer />
+            <EuiButton
+              fill
+              iconType="popout"
+              href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/${docsPage}.html`}
+              target="_blank"
+            >
+              <FormattedMessage
+                id="xpack.maps.helpMenu.docLabel"
+                defaultMessage="Maps documentation"
+              />
+            </EuiButton>
+            <EuiSpacer />
+          </>
+        )}
         <EuiText size="s">
           <EuiIcon type="logoGithub" color="primary" /> &nbsp;
           <EuiLink href="https://github.com/elastic/kibana/issues/new" target="_blank">
