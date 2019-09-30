@@ -20,12 +20,12 @@ export function IntegrationListGrid({ controls, title, list, showInstalledBadge 
 
   return (
     <Fragment>
-      <EuiSpacer size="xl" />
+      <EuiSpacer size="l" />
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>{controlsContent}</EuiFlexItem>
         <EuiFlexItem grow={3}>{gridContent}</EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="xl" />
+      <EuiSpacer size="xxl" />
     </Fragment>
   );
 }
@@ -51,7 +51,7 @@ function ControlsColumn({ controls, title }: ControlsColumnProps) {
       <EuiText>
         <h2>{title}</h2>
       </EuiText>
-      <EuiSpacer size="xl" />
+      <EuiSpacer size="l" />
       <EuiFlexGroup>
         <EuiFlexItem grow={2}>{controls}</EuiFlexItem>
         <EuiFlexItem grow={1} />

@@ -40,8 +40,12 @@ export function Home() {
     />
   ) : (
     <Fragment>
-      <InstalledIntegrations list={state.installedIntegrations} />
-      {state.installedIntegrations.length ? <EuiHorizontalRule margin="l" /> : null}
+      {state.installedIntegrations.length ? (
+        <Fragment>
+          <InstalledIntegrations list={state.installedIntegrations} />
+          <EuiHorizontalRule margin="l" />
+        </Fragment>
+      ) : null}
       <AvailableIntegrations {...state} />
     </Fragment>
   );

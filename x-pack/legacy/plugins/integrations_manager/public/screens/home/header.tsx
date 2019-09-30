@@ -92,7 +92,7 @@ function HeroCopy() {
 function HeroImage() {
   const { toAssets } = useLinks();
   const FlexGroup = styled(EuiFlexGroup)`
-    margin-bottom: -6px; // puts image directly on EuiHorizontalRule
+    margin-bottom: -2px; // puts image directly on EuiHorizontalRule
   `;
   return (
     <FlexGroup gutterSize="none" justifyContent="flexEnd">
