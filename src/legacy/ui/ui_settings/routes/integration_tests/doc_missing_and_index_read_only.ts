@@ -20,11 +20,7 @@
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 
-import {
-  getServices,
-  chance,
-  assertSinonMatch,
-} from './lib';
+import { getServices, chance, assertSinonMatch } from './lib';
 
 export function docMissingAndIndexReadOnlySuite() {
   // ensure the kibana index has no documents
@@ -35,15 +31,15 @@ export function docMissingAndIndexReadOnlySuite() {
     await kbnServer.inject({
       method: 'POST',
       url: '/api/kibana/settings/defaultIndex',
-      payload: { value: 'abc' }
+      payload: { value: 'abc' },
     });
 
     // delete all docs from kibana index to ensure savedConfig is not found
     await callCluster('deleteByQuery', {
       index: kbnServer.config.get('kibana.index'),
       body: {
-        query: { match_all: {} }
-      }
+        query: { match_all: {} },
+      },
     });
 
     // set the index to read only
@@ -52,10 +48,10 @@ export function docMissingAndIndexReadOnlySuite() {
       body: {
         index: {
           blocks: {
-            read_only: true
-          }
-        }
-      }
+            read_only: true,
+          },
+        },
+      },
     });
   });
 
@@ -68,10 +64,10 @@ export function docMissingAndIndexReadOnlySuite() {
       body: {
         index: {
           blocks: {
-            read_only: false
-          }
-        }
-      }
+            read_only: false,
+          },
+        },
+      },
     });
   });
 
@@ -81,20 +77,20 @@ export function docMissingAndIndexReadOnlySuite() {
 
       const { statusCode, result } = await kbnServer.inject({
         method: 'GET',
-        url: '/api/kibana/settings'
+        url: '/api/kibana/settings',
       });
 
       expect(statusCode).to.be(200);
       assertSinonMatch(result, {
         settings: {
           buildNum: {
-            userValue: sinon.match.number
+            userValue: sinon.match.number,
           },
           foo: {
             userValue: 'bar',
-            isOverridden: true
-          }
-        }
+            isOverridden: true,
+          },
+        },
       });
     });
   });
@@ -107,14 +103,14 @@ export function docMissingAndIndexReadOnlySuite() {
       const { statusCode, result } = await kbnServer.inject({
         method: 'POST',
         url: '/api/kibana/settings/defaultIndex',
-        payload: { value: defaultIndex }
+        payload: { value: defaultIndex },
       });
 
       expect(statusCode).to.be(403);
       assertSinonMatch(result, {
         error: 'Forbidden',
         message: sinon.match('index read-only'),
-        statusCode: 403
+        statusCode: 403,
       });
     });
   });
@@ -128,15 +124,15 @@ export function docMissingAndIndexReadOnlySuite() {
         method: 'POST',
         url: '/api/kibana/settings',
         payload: {
-          changes: { defaultIndex }
-        }
+          changes: { defaultIndex },
+        },
       });
 
       expect(statusCode).to.be(403);
       assertSinonMatch(result, {
         error: 'Forbidden',
         message: sinon.match('index read-only'),
-        statusCode: 403
+        statusCode: 403,
       });
     });
   });
@@ -147,14 +143,14 @@ export function docMissingAndIndexReadOnlySuite() {
 
       const { statusCode, result } = await kbnServer.inject({
         method: 'DELETE',
-        url: '/api/kibana/settings/defaultIndex'
+        url: '/api/kibana/settings/defaultIndex',
       });
 
       expect(statusCode).to.be(403);
       assertSinonMatch(result, {
         error: 'Forbidden',
         message: sinon.match('index read-only'),
-        statusCode: 403
+        statusCode: 403,
       });
     });
   });

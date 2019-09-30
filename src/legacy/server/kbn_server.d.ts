@@ -77,6 +77,7 @@ declare module 'hapi' {
       name: string,
       factoryFn: (request: Request) => Record<string, any>
     ) => void;
+    uiSettingsServiceFactory: (options: any) => any;
   }
 
   interface Request {
@@ -118,6 +119,7 @@ export default class KbnServer {
   public close(): Promise<void>;
   public afterPluginsInit(callback: () => void): void;
   public applyLoggingConfiguration(settings: any): void;
+  public config: KibanaConfig;
 }
 
 // Re-export commonly used hapi types.
