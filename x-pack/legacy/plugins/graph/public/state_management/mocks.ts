@@ -41,6 +41,7 @@ export function createMockGraphStore({ includeSagas }: { includeSagas: boolean }
     notifyAngular: jest.fn(),
     savePolicy: 'configAndDataWithConsent',
     showSaveModal: jest.fn(),
+    setLiveResponseFields: jest.fn(),
   };
   const sagaMiddleware = createSagaMiddleware();
 
