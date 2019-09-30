@@ -3,7 +3,7 @@
   "version": "kibana",
   "requiredPlugins": [
     "embeddable",
-    "ui_actions"
+    "uiActions"
   ],
   "server": false,
   "ui": true

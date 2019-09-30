@@ -9,12 +9,11 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { skip } from 'rxjs/operators';
 import * as Rx from 'rxjs';
 import { mount } from 'enzyme';
-
-import { EmbeddableFactory } from '../../../../../../../src/plugins/embeddable/public';
+import { EmbeddableFactory } from '../../../../src/plugins/embeddable/public';
 import { TimeRangeEmbeddable, TimeRangeContainer, TIME_RANGE_EMBEDDABLE } from './test_helpers';
 import { TimeRangeEmbeddableFactory } from './test_helpers/time_range_embeddable_factory';
 import { CustomTimeRangeBadge } from './custom_time_range_badge';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '../../../../src/core/public/mocks';
 import { ReactElement } from 'react';
 import { nextTick } from 'test_utils/enzyme_helpers';
 
