@@ -8,7 +8,7 @@ import {
   KibanaRequest,
   Logger,
   HttpServiceSetup,
-  ClusterClient,
+  IClusterClient,
   Headers,
 } from '../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../common/model';
@@ -21,7 +21,7 @@ import { Tokens } from '../tokens';
  */
 export interface AuthenticationProviderOptions {
   basePath: HttpServiceSetup['basePath'];
-  client: PublicMethodsOf<ClusterClient>;
+  client: IClusterClient;
   logger: Logger;
   tokens: PublicMethodsOf<Tokens>;
 }

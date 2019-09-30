@@ -25,9 +25,7 @@ export function mockScopedClusterClient(
   client: MockAuthenticationProviderOptions['client'],
   requestMatcher: sinon.SinonMatcher = sinon.match.any
 ) {
-  console.log(ScopedClusterClient);
   const scopedClusterClient = sinon.createStubInstance(ScopedClusterClient);
-  console.log(Object.keys(scopedClusterClient));
   client.asScoped.withArgs(requestMatcher).returns(scopedClusterClient);
   return scopedClusterClient;
 }
