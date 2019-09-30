@@ -20,6 +20,7 @@ import {
   RepositoryIndexStatusReservedField,
   RepositoryRandomPathReservedField,
   RepositoryReservedField,
+  RepositorySearchIndexWithScope,
 } from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
 
@@ -52,6 +53,34 @@ export class RepositoryObjectClient {
 
   public async getRepositoryRandomStr(repoUri: RepositoryUri): Promise<string> {
     return await this.getRepositoryObject(repoUri, RepositoryRandomPathReservedField);
+  }
+
+  public async getRepositories(uris: string[]): Promise<Repository[]> {
+    if (uris.length === 0) {
+      return [];
+    }
+    const res = await this.esClient.search({
+      index: RepositorySearchIndexWithScope(uris),
+      body: {
+        query: {
+          bool: {
+            filter: {
+              exists: {
+                field: RepositoryReservedField,
+              },
+            },
+          },
+        },
+      },
+      from: 0,
+      size: 10000,
+    });
+    const hits: any[] = res.hits.hits;
+    const repos: Repository[] = hits.map(hit => {
+      const repo: Repository = hit._source[RepositoryReservedField];
+      return repo;
+    });
+    return repos;
   }
 
   public async getAllRepositories(): Promise<Repository[]> {
