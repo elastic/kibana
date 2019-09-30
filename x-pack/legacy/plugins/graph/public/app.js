@@ -292,6 +292,9 @@ app.controller('graphuiPlugin', function (
       };
       $scope.workspace = gws.createWorkspace(options);
     },
+    setLiveResponseFields: (fields) => {
+      $scope.liveResponseFields = fields;
+    },
     getWorkspace: () => {
       return $scope.workspace;
     },

@@ -29,6 +29,7 @@ import {
   GraphSavePolicy,
   GraphWorkspaceSavedObject,
   AdvancedSettings,
+  WorkspaceField,
 } from '../types';
 import { loadingSaga, savingSaga } from './persistence';
 import { metaDataReducer, MetaDataState, syncBreadcrumbSaga } from './meta_data';
@@ -53,6 +54,7 @@ export interface GraphStoreDependencies {
   savePolicy: GraphSavePolicy;
   changeUrl: (newUrl: string) => void;
   notifyAngular: () => void;
+  setLiveResponseFields: (fields: WorkspaceField[]) => void;
   chrome: Chrome;
 }
 
