@@ -8,19 +8,20 @@ import { EuiToolTip } from '@elastic/eui';
 import moment from 'moment-timezone';
 
 interface Props {
+  /**
+   * timestamp in milliseconds
+   */
   time: number;
 }
 
-const TimestampSummaryItem = (props: Props) => {
+export function TimestampTooltip(props: Props) {
   const time = moment.tz(props.time, moment.tz.guess());
   const relativeTimeLabel = time.fromNow();
-  const absoluteTimeLabel = time.format('MMM Do YYYY HH:mm:ss.SSS zz');
+  const absoluteTimeLabel = time.format('MMM Do YYYY, HH:mm:ss.SSS (ZZ zz)');
 
   return (
     <EuiToolTip content={absoluteTimeLabel}>
       <>{relativeTimeLabel}</>
     </EuiToolTip>
   );
-};
-
-export { TimestampSummaryItem };
+}

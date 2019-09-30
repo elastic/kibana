@@ -46,12 +46,6 @@ export function AgentConfigurations() {
     <>
       {isFlyoutOpen && (
         <AddEditFlyout
-          key={
-            // `key` is necessary to force a unique flyout instance for each configuration else the default values in `useState` won't work
-            selectedConfig
-              ? `${selectedConfig.service.name}_${selectedConfig.service.environment}`
-              : undefined
-          }
           selectedConfig={selectedConfig}
           onClose={() => {
             setSelectedConfig(null);

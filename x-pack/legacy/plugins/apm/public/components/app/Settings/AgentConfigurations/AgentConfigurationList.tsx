@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import {
   EuiEmptyPrompt,
@@ -20,6 +19,7 @@ import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { AgentConfigurationListAPIResponse } from '../../../../../server/lib/settings/agent_configuration/list_configurations';
 import { Config } from '.';
+import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 const t = (id: string, defaultMessage: string) =>
   i18n.translate(`xpack.apm.settings.agentConf.configTable.${id}`, {
     defaultMessage
@@ -66,7 +66,7 @@ export function AgentConfigurationList({
       field: 'service.environment',
       name: t('environmentColumnLabel', 'Service environment'),
       sortable: true,
-      render: (value: string) => value
+      render: (value: string) => value || t('environmentNotSetLabel', 'Not set')
     },
     {
       field: 'settings.transaction_sample_rate',
@@ -92,7 +92,7 @@ export function AgentConfigurationList({
       field: '@timestamp',
       name: t('lastUpdatedColumnLabel', 'Last updated'),
       sortable: true,
-      render: (value: number) => (value ? moment(value).fromNow() : null)
+      render: (value: number) => <TimestampTooltip time={value} />
     },
     {
       name: '',
