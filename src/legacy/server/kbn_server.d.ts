@@ -77,6 +77,7 @@ declare module 'hapi' {
       name: string,
       factoryFn: (request: Request) => Record<string, any>
     ) => void;
+    uiSettingsServiceFactory: (options: any) => any;
   }
 
   interface Request {

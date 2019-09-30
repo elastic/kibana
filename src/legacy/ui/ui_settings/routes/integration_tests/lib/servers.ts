@@ -29,7 +29,7 @@ let servers: ReturnType<typeof createTestServers>;
 let esServer: UnwrapPromise<ReturnType<typeof servers['startES']>>;
 let kbn: UnwrapPromise<ReturnType<typeof servers['startKibana']>>;
 
-interface AllServers {
+interface AllServices {
   kbnServer: KbnServer;
   savedObjectsClient: SavedObjectsClientContract;
   callCluster: CallCluster;
@@ -37,7 +37,7 @@ interface AllServers {
   deleteKibanaIndex: typeof deleteKibanaIndex;
 }
 
-let services: AllServers;
+let services: AllServices;
 
 export async function startServers() {
   servers = createTestServers({
@@ -81,7 +81,7 @@ export function getServices() {
   const savedObjects = kbnServer.server.savedObjects;
   const savedObjectsClient = savedObjects.getScopedSavedObjectsClient({});
 
-  const uiSettings = (kbnServer.server as any).uiSettingsServiceFactory({
+  const uiSettings = kbnServer.server.uiSettingsServiceFactory({
     savedObjectsClient,
   });
 
