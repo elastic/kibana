@@ -7,7 +7,7 @@
 import actionCreatorFactory, { Action } from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { createSelector } from 'reselect';
-import { select, takeLatest } from 'redux-saga/effects';
+import { select, takeLatest, takeEvery } from 'redux-saga/effects';
 import { WorkspaceField } from '../types';
 import { GraphState, GraphStoreDependencies } from './store';
 import { reset } from './global';
@@ -88,18 +88,22 @@ export const updateSaveButtonSaga = ({ notifyAngular }: GraphStoreDependencies) 
  *
  * Won't be necessary once the workspace is moved to redux
  */
-export const syncFieldsSaga = ({ getWorkspace }: GraphStoreDependencies) => {
+export const syncFieldsSaga = ({ getWorkspace, setLiveResponseFields }: GraphStoreDependencies) => {
   function* syncFields() {
     const workspace = getWorkspace();
     if (!workspace) {
       return;
     }
 
-    const selectedFields = selectedFieldsSelector(yield select());
-    workspace.options.vertex_fields = selectedFields;
+    const currentState = yield select();
+    workspace.options.vertex_fields = selectedFieldsSelector(currentState);
+    setLiveResponseFields(liveResponseFieldsSelector(currentState));
   }
   return function*() {
-    yield takeLatest(matchesOne(loadFields, selectField, deselectField), syncFields);
+    yield takeEvery(
+      matchesOne(loadFields, selectField, deselectField, updateFieldProperties),
+      syncFields
+    );
   };
 };
 
