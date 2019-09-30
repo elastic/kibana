@@ -23,16 +23,10 @@ import expect from '@kbn/expect';
 // @ts-ignore
 import { Config } from '../../../server/config';
 
-/* eslint-disable import/no-duplicates */
 // @ts-ignore
 import * as uiSettingsServiceFactoryNS from '../ui_settings_service_factory';
 // @ts-ignore
-import { uiSettingsServiceFactory } from '../ui_settings_service_factory';
-// @ts-ignore
 import * as getUiSettingsServiceForRequestNS from '../ui_settings_service_for_request';
-// @ts-ignore
-import { getUiSettingsServiceForRequest } from '../ui_settings_service_for_request';
-/* eslint-enable import/no-duplicates */
 // @ts-ignore
 import { uiSettingsMixin } from '../ui_settings_mixin';
 
@@ -105,10 +99,13 @@ describe('uiSettingsMixin()', () => {
         .to.have.property('uiSettingsServiceFactory')
         .a('function');
 
-      sandbox.stub(uiSettingsServiceFactoryNS, 'uiSettingsServiceFactory');
-      sinon.assert.notCalled(uiSettingsServiceFactory);
+      const uiSettingsServiceFactoryStub = sandbox.stub(
+        uiSettingsServiceFactoryNS,
+        'uiSettingsServiceFactory'
+      );
+      sinon.assert.notCalled(uiSettingsServiceFactoryStub);
       decorations.server.uiSettingsServiceFactory();
-      sinon.assert.calledOnce(uiSettingsServiceFactory);
+      sinon.assert.calledOnce(uiSettingsServiceFactoryStub);
     });
 
     it('passes `server` and `options` argument to factory', () => {
@@ -117,13 +114,16 @@ describe('uiSettingsMixin()', () => {
         .to.have.property('uiSettingsServiceFactory')
         .a('function');
 
-      sandbox.stub(uiSettingsServiceFactoryNS, 'uiSettingsServiceFactory');
-      sinon.assert.notCalled(uiSettingsServiceFactory);
+      const uiSettingsServiceFactoryStub = sandbox.stub(
+        uiSettingsServiceFactoryNS,
+        'uiSettingsServiceFactory'
+      );
+      sinon.assert.notCalled(uiSettingsServiceFactoryStub);
       decorations.server.uiSettingsServiceFactory({
         foo: 'bar',
       });
-      sinon.assert.calledOnce(uiSettingsServiceFactory);
-      sinon.assert.calledWithExactly(uiSettingsServiceFactory, server, {
+      sinon.assert.calledOnce(uiSettingsServiceFactoryStub);
+      sinon.assert.calledWithExactly(uiSettingsServiceFactoryStub, server, {
         foo: 'bar',
         overrides: {
           foo: 'bar',
@@ -140,10 +140,13 @@ describe('uiSettingsMixin()', () => {
         .to.have.property('getUiSettingsService')
         .a('function');
 
-      sandbox.stub(getUiSettingsServiceForRequestNS, 'getUiSettingsServiceForRequest');
-      sinon.assert.notCalled(getUiSettingsServiceForRequest);
+      const getUiSettingsServiceForRequestStub = sandbox.stub(
+        getUiSettingsServiceForRequestNS,
+        'getUiSettingsServiceForRequest'
+      );
+      sinon.assert.notCalled(getUiSettingsServiceForRequestStub);
       decorations.request.getUiSettingsService();
-      sinon.assert.calledOnce(getUiSettingsServiceForRequest);
+      sinon.assert.calledOnce(getUiSettingsServiceForRequestStub);
     });
 
     it('passes request to getUiSettingsServiceForRequest', () => {
@@ -152,11 +155,14 @@ describe('uiSettingsMixin()', () => {
         .to.have.property('getUiSettingsService')
         .a('function');
 
-      sandbox.stub(getUiSettingsServiceForRequestNS, 'getUiSettingsServiceForRequest');
-      sinon.assert.notCalled(getUiSettingsServiceForRequest);
+      const getUiSettingsServiceForRequestStub = sandbox.stub(
+        getUiSettingsServiceForRequestNS,
+        'getUiSettingsServiceForRequest'
+      );
+      sinon.assert.notCalled(getUiSettingsServiceForRequestStub);
       const request = {};
       decorations.request.getUiSettingsService.call(request);
-      sinon.assert.calledWith(getUiSettingsServiceForRequest, server, request);
+      sinon.assert.calledWith(getUiSettingsServiceForRequestStub, server, request);
     });
   });
 
