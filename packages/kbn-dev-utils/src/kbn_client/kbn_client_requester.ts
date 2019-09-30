@@ -48,7 +48,7 @@ export const uriencode = (
   );
 };
 
-const MAX_ATTEMPTS = 5;
+const DEFAULT_MAX_ATTEMPTS = 5;
 
 export interface ReqOptions {
   description?: string;
@@ -57,6 +57,7 @@ export interface ReqOptions {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   body?: any;
   attempt?: number;
+  maxAttempts?: number;
 }
 
 const delay = (ms: number) =>
@@ -81,6 +82,8 @@ export class KbnClientRequester {
     const url = Url.resolve(this.pickUrl(), options.path);
     const description = options.description || `${options.method} ${url}`;
     const attempt = options.attempt === undefined ? 1 : options.attempt;
+    const maxAttempts =
+      options.maxAttempts === undefined ? DEFAULT_MAX_ATTEMPTS : options.maxAttempts;
 
     try {
       const response = await Axios.request<T>({
@@ -103,7 +106,7 @@ export class KbnClientRequester {
       }
 
       if (retryErrorMsg) {
-        if (attempt < MAX_ATTEMPTS) {
+        if (attempt < maxAttempts) {
           this.log.error(retryErrorMsg);
           await delay(1000 * attempt);
           return await this.request<T>({
