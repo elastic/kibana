@@ -6,22 +6,17 @@
 
 import React, { useReducer, useEffect, createContext, useContext } from 'react';
 
-import { OnFormUpdateArg } from './shared_imports';
+import { reducer, MappingsConfiguration, MappingsProperties, State, Dispatch } from './reducer';
 
-export interface MappingsConfiguration {
-  dynamic: boolean | string;
-  date_detection: boolean;
-  numeric_detection: boolean;
-  dynamic_date_formats: string[];
-}
-
-export interface MappingsProperties {
-  [key: string]: any;
-}
-
-export type Mappings = MappingsConfiguration & {
+type Mappings = MappingsConfiguration & {
   properties: MappingsProperties;
 };
+
+export interface Types {
+  Mappings: Mappings;
+  MappingsConfiguration: MappingsConfiguration;
+  MappingsProperties: MappingsProperties;
+}
 
 export interface OnUpdateHandlerArg {
   isValid?: boolean;
@@ -30,42 +25,6 @@ export interface OnUpdateHandlerArg {
 }
 
 export type OnUpdateHandler = (arg: OnUpdateHandlerArg) => void;
-
-interface State {
-  isValid: boolean | undefined;
-  configuration: OnFormUpdateArg<MappingsConfiguration>;
-  properties: {
-    data: { [key: string]: any };
-    status: 'idle' | 'editing' | 'creating';
-    isValid: boolean | undefined;
-  };
-}
-
-type Action =
-  | { type: 'updateConfiguration'; value: OnFormUpdateArg<MappingsConfiguration> }
-  | { type: 'addProperty'; value: any };
-
-type Dispatch = (action: Action) => void;
-
-const reducer = (state: State, action: Action): State => {
-  switch (action.type) {
-    case 'updateConfiguration':
-      const isValid =
-        action.value.isValid === undefined || state.properties.isValid === undefined
-          ? undefined
-          : action.value.isValid && state.properties.isValid;
-
-      return {
-        ...state,
-        isValid,
-        configuration: action.value,
-      };
-    case 'addProperty':
-      return state;
-    default:
-      throw new Error(`Action "${action!.type}" not recognized.`);
-  }
-};
 
 const StateContext = createContext<State | undefined>(undefined);
 const DispatchContext = createContext<Dispatch | undefined>(undefined);
@@ -88,8 +47,10 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
     },
     properties: {
       data: defaultValue.properties,
-      status: 'idle',
       isValid: true,
+    },
+    documentFields: {
+      status: 'idle',
     },
   };
 

@@ -6,4 +6,4 @@
 
 export * from './mappings_editor';
 
-export { OnUpdateHandler, Mappings } from './mappings_state';
+export { OnUpdateHandler, Types } from './mappings_state';

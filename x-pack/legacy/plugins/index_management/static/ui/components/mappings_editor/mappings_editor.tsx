@@ -8,11 +8,7 @@ import React from 'react';
 
 import { ConfigurationForm, CONFIGURATION_FIELDS, DocumentFields } from './components';
 
-import {
-  MappingsState,
-  Props as MappingsStateProps,
-  MappingsConfiguration,
-} from './mappings_state';
+import { MappingsState, Props as MappingsStateProps, Types } from './mappings_state';
 
 interface Props {
   onUpdate: MappingsStateProps['onUpdate'];
@@ -27,7 +23,7 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue = {} }: Props
         ...acc,
         [key]: value,
       }),
-      {} as MappingsConfiguration
+      {} as Types['MappingsConfiguration']
     );
   const propertiesDefaultValue = defaultValue.properties || {};
 
