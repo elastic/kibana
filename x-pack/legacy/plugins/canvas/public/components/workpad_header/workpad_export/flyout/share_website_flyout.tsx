@@ -31,7 +31,7 @@ interface Props {
   onCopy: OnCopyFn;
   onExport: OnExportFn;
   onClose: OnCloseFn;
-  unsupportedRenderers: string[];
+  unsupportedRenderers?: string[];
 }
 
 const steps = (onExport: OnExportFn, onCopy: OnCopyFn) => [
@@ -80,11 +80,17 @@ export const ShareWebsiteFlyout = ({ onCopy, onExport, onClose, unsupportedRende
   );
 
   let warningText = null;
-  if (unsupportedRenderers.length > 0) {
+
+  if (unsupportedRenderers && unsupportedRenderers.length > 0) {
     const warning = [
-      <p>{strings.getUnsupportedRendererWarning()}</p>,
-      unsupportedRenderers.map(fn => [<EuiCode>{fn}</EuiCode>, <EuiSpacer size="xs" />]),
-      <p>{strings.getUnsupportedRendererResult()}</p>,
+      <EuiText size="s">
+        {strings.getUnsupportedRendererWarning()}
+        {unsupportedRenderers.map((fn, index) => [
+          <EuiCode>{fn}</EuiCode>,
+          index < unsupportedRenderers.length - 1 ? ', ' : '',
+        ])}
+      </EuiText>,
+      <EuiSpacer size="xs" />,
     ];
     warningText = [
       <EuiCallOut title={warning} color="warning" size="s" iconType="alert" />,

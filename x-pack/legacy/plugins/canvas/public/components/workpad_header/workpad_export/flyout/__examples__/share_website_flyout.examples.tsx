@@ -29,4 +29,12 @@ storiesOf('components/Export/ShareWebsiteFlyout', module)
       onExport={action('onExport')}
       onClose={action('onClose')}
     />
+  ))
+  .add('unsupported renderers', () => (
+    <ShareWebsiteFlyout
+      onCopy={action('onCopy')}
+      onExport={action('onExport')}
+      onClose={action('onClose')}
+      unsupportedRenderers={['rendererOne', 'rendererTwo']}
+    />
   ));
