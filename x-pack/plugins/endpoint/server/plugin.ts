@@ -5,26 +5,12 @@
  */
 
 import { Plugin, CoreSetup } from 'kibana/server';
-import { schema } from '@kbn/config-schema';
+import { routes } from './routes/management';
 
 export class EndpointPlugin implements Plugin {
   public setup(core: CoreSetup, deps: {}) {
-    core.http.createRouter().get(
-      {
-        path: '/endpoint/process-lineage',
-        validate: {
-          query: schema.object({
-            uniqueProcessID: schema.string(),
-            endpointID: schema.string(),
-          }),
-        },
-      },
-      async function(context, request, response) {
-        return response.ok({
-          body: JSON.stringify({ ok: true }),
-        });
-      }
-    );
+    const router = core.http.createRouter();
+    routes(router);
   }
 
   public start() {}
