@@ -1,6 +1,9 @@
 #!/bin/groovy
 
-library identifier: 'repo-library', retriever: legacySCM(scm)
+library 'kibana-pipeline-library@add-library-loader'
+kibanaLibrary.load()
+
+testLib.test()
 
 // Looks like 'oss:ciGroup:1' or 'oss:firefoxSmoke'
 def JOB_PARTS = params.CI_GROUP.split(':')
