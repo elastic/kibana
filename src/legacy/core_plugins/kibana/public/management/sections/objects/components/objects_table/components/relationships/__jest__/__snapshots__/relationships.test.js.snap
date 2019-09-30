@@ -34,10 +34,7 @@ exports[`Relationships should render dashboards normally 1`] = `
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <div>
-      <EuiCallOut
-        color="primary"
-        size="m"
-      >
+      <EuiCallOut>
         <p>
           Here are the saved objects related to MyDashboard. Deleting this dashboard affects its parent objects, but not its children.
         </p>
@@ -200,7 +197,6 @@ exports[`Relationships should render errors 1`] = `
   <EuiFlyoutBody>
     <EuiCallOut
       color="danger"
-      size="m"
       title={
         <FormattedMessage
           defaultMessage="Error"
@@ -249,10 +245,7 @@ exports[`Relationships should render index patterns normally 1`] = `
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <div>
-      <EuiCallOut
-        color="primary"
-        size="m"
-      >
+      <EuiCallOut>
         <p>
           Here are the saved objects related to MyIndexPattern*. Deleting this index-pattern affects its parent objects, but not its children.
         </p>
@@ -419,10 +412,7 @@ exports[`Relationships should render searches normally 1`] = `
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <div>
-      <EuiCallOut
-        color="primary"
-        size="m"
-      >
+      <EuiCallOut>
         <p>
           Here are the saved objects related to MySearch. Deleting this search affects its parent objects, but not its children.
         </p>
@@ -589,10 +579,7 @@ exports[`Relationships should render visualizations normally 1`] = `
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <div>
-      <EuiCallOut
-        color="primary"
-        size="m"
-      >
+      <EuiCallOut>
         <p>
           Here are the saved objects related to MyViz. Deleting this visualization affects its parent objects, but not its children.
         </p>
