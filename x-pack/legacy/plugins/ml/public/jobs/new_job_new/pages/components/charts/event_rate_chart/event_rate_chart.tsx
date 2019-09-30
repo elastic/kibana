@@ -32,9 +32,7 @@ export const EventRateChart: FC<Props> = ({
   return (
     <div
       style={{ width, height }}
-      data-test-subj={
-        eventRateChartData.length > 0 ? 'mlEventRateChart withData' : 'mlEventRateChart empty'
-      }
+      data-test-subj={`mlEventRateChart ${eventRateChartData.length ? 'withData' : 'empty'}`}
     >
       <LoadingWrapper height={height} hasData={eventRateChartData.length > 0} loading={loading}>
         <Chart>

@@ -79,7 +79,7 @@ export const PostSaveOptions: FC<Props> = ({ jobRunner }) => {
             datafeedState === DATAFEED_STATE.STARTING || datafeedState === DATAFEED_STATE.STARTED
           }
           onClick={startJobInRealTime}
-          data-test-subj="mlJobWizardButtonRunInRealtime"
+          data-test-subj="mlJobWizardButtonRunInRealTime"
         >
           <FormattedMessage
             id="xpack.ml.newJob.wizard.summaryStep.postSaveOptions.startJobInRealTime"
