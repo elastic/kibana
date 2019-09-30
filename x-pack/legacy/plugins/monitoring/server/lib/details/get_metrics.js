@@ -11,16 +11,21 @@ import { checkParam } from '../error_missing_required';
 import { getSeries } from './get_series';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
 
-export function getMetrics(req, indexPattern, metricSet = [], filters = [], metricOptions = {}) {
+export function getMetrics(req, indexPattern, metricSet = [], filters = [], metricOptions = {}, numOfBuckets = 0) {
   checkParam(indexPattern, 'indexPattern in details/getMetrics');
   checkParam(metricSet, 'metricSet in details/getMetrics');
 
   const config = req.server.config();
   // TODO: Pass in req parameters as explicit function parameters
-  const min = moment.utc(req.payload.timeRange.min).valueOf();
+  let min = moment.utc(req.payload.timeRange.min).valueOf();
   const max = moment.utc(req.payload.timeRange.max).valueOf();
   const minIntervalSeconds = config.get('xpack.monitoring.min_interval_seconds');
   const bucketSize = calculateTimeseriesInterval(min, max, minIntervalSeconds);
+
+  // If specified, adjust the time period to ensure we only return this many buckets
+  if (numOfBuckets > 0) {
+    min = max - (numOfBuckets * bucketSize * 1000);
+  }
 
   return Promise.map(metricSet, metric => {
     // metric names match the literal metric name, but they can be supplied in groups or individually

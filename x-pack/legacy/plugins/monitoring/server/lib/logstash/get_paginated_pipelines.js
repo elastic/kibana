@@ -7,10 +7,10 @@
 import { get } from 'lodash';
 import { filter } from '../pagination/filter';
 import { getLogstashPipelineIds } from './get_pipeline_ids';
-import { getSeries } from '../details/get_series';
 import { handleGetPipelinesResponse } from './get_pipelines';
 import { sortPipelines } from './sort_pipelines';
 import { paginate } from '../pagination/paginate';
+import { getMetrics } from '../details/get_metrics';
 
 /**
  * This function performs an optimization around the pipeline listing tables in the UI. To avoid
@@ -35,20 +35,12 @@ export async function getPaginatedPipelines(req, lsIndexPattern, metricSet, pagi
   // the necessary sort - we only need the last bucket of data so we
   // fetch the last two buckets of data (to ensure we have a single full bucekt),
   // then return the value from that last bucket
-  const bucketSize = 30;
-  const min = req.payload.timeRange.max - (2 * bucketSize * 1000);
-  const max = req.payload.timeRange.max;
-  const metricSeriesData = await Promise.all(
-    metricSet.map(metric => getSeries(req, lsIndexPattern, metric, { pageOfPipelines: pipelines }, [], { min, max, bucketSize }))
-  );
-  for (let i = 0; i < metricSet.length; i++) {
-    const seriesData = metricSeriesData[i];
-    const metric = metricSet[i];
-
-    const pipelineAggregationsData = handleGetPipelinesResponse({ [metric]: [seriesData ] }, pipelines.map(p => p.id));
-    for (const pipelineAggregationData of pipelineAggregationsData) {
-      for (const pipeline of pipelines) {
-        if (pipelineAggregationData.id === pipeline.id) {
+  const metricSeriesData = await getMetrics(req, lsIndexPattern, metricSet, [], { pageOfPipelines: pipelines }, 2);
+  const pipelineAggregationsData = handleGetPipelinesResponse(metricSeriesData, pipelines.map(p => p.id));
+  for (const pipelineAggregationData of pipelineAggregationsData) {
+    for (const pipeline of pipelines) {
+      if (pipelineAggregationData.id === pipeline.id) {
+        for (const metric of metricSet) {
           const dataSeries = get(pipelineAggregationData, `metrics.${metric}.data`, [[]]);
           pipeline[metric] = dataSeries[dataSeries.length - 1][1];
         }
