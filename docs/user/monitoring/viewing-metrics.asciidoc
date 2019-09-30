@@ -29,8 +29,8 @@ By default, data is retrieved from the cluster specified in the
 from a different cluster, set `xpack.monitoring.elasticsearch.hosts`.
 
 To learn more about typical monitoring architectures, 
-see {stack-ov}/how-monitoring-works.html[How monitoring works] and 
-{stack-ov}/monitoring-production.html[Monitoring in a production environment].
+see {ref}/how-monitoring-works.html[How monitoring works] and 
+{ref}/monitoring-production.html[Monitoring in a production environment].
 --
 
 . Verify that `xpack.monitoring.ui.enabled` is set to `true`, which is the
