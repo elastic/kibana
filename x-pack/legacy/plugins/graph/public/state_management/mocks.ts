@@ -74,6 +74,7 @@ export function createMockGraphStore({
     notifyAngular: jest.fn(),
     savePolicy: 'configAndData',
     showSaveModal: jest.fn(),
+    setLiveResponseFields: jest.fn(),
     ...mockedDepsOverwrites,
   };
   const sagaMiddleware = createSagaMiddleware();
