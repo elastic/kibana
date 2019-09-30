@@ -110,9 +110,10 @@ export class Flyout extends Component {
         );
       case INSTRUCTION_STEP_ENABLE_METRICBEAT:
       case INSTRUCTION_STEP_DISABLE_INTERNAL:
+        const esMonitoringUrls = esMonitoringUrl.split(',').map(url => `"${url}"`);
         const instructionSteps = getInstructionSteps(productName, product, activeStep, meta, {
           doneWithMigration: onClose,
-          esMonitoringUrl,
+          esMonitoringUrl: esMonitoringUrls,
           hasCheckedStatus: checkedStatusByStep[activeStep],
         });
 

@@ -133,7 +133,7 @@ export function NoData(props) {
             <EuiTextColor color="subdued">
               <FormattedMessage
                 id="xpack.monitoring.noData.setupInternalInstead"
-                defaultMessage="Or, set up with internal collection (deprecated)"
+                defaultMessage="Or, set up with internal collection"
               />
             </EuiTextColor>
           </EuiButtonEmpty>

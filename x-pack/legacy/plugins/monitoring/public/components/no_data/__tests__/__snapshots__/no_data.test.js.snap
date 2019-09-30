@@ -80,7 +80,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
             <span
               class="euiTextColor euiTextColor--subdued"
             >
-              Or, set up with internal collection (deprecated)
+              Or, set up with internal collection
             </span>
           </span>
         </span>
@@ -170,7 +170,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
             <span
               class="euiTextColor euiTextColor--subdued"
             >
-              Or, set up with internal collection (deprecated)
+              Or, set up with internal collection
             </span>
           </span>
         </span>
