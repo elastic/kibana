@@ -23,13 +23,13 @@ import http from 'http';
 import https from 'https';
 import url from 'url';
 
-const readFile = (file) => readFileSync(file, 'utf8');
+const readFile = (file: string) => readFileSync(file, 'utf8');
 
-const createAgent = (legacyConfig) => {
+const createAgent = (legacyConfig: any) => {
   const target = url.parse(_.head(legacyConfig.hosts));
-  if (!/^https/.test(target.protocol)) return new http.Agent();
+  if (!/^https/.test(target.protocol || '')) return new http.Agent();
 
-  const agentOptions = {};
+  const agentOptions: https.AgentOptions = {};
 
   const verificationMode = legacyConfig.ssl && legacyConfig.ssl.verificationMode;
   switch (verificationMode) {
@@ -40,7 +40,7 @@ const createAgent = (legacyConfig) => {
       agentOptions.rejectUnauthorized = true;
 
       // by default, NodeJS is checking the server identify
-      agentOptions.checkServerIdentity = _.noop;
+      agentOptions.checkServerIdentity = _.noop as any;
       break;
     case 'full':
       agentOptions.rejectUnauthorized = true;
@@ -49,8 +49,11 @@ const createAgent = (legacyConfig) => {
       throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
   }
 
-  if (legacyConfig.ssl && Array.isArray(legacyConfig.ssl.certificateAuthorities)
-      && legacyConfig.ssl.certificateAuthorities.length > 0) {
+  if (
+    legacyConfig.ssl &&
+    Array.isArray(legacyConfig.ssl.certificateAuthorities) &&
+    legacyConfig.ssl.certificateAuthorities.length > 0
+  ) {
     agentOptions.ca = legacyConfig.ssl.certificateAuthorities.map(readFile);
   }
 
@@ -68,9 +71,9 @@ const createAgent = (legacyConfig) => {
   return new https.Agent(agentOptions);
 };
 
-export const getElasticsearchProxyConfig = (legacyConfig) => {
+export const getElasticsearchProxyConfig = (legacyConfig: any) => {
   return {
     timeout: legacyConfig.requestTimeout.asMilliseconds(),
-    agent: createAgent(legacyConfig)
+    agent: createAgent(legacyConfig),
   };
 };

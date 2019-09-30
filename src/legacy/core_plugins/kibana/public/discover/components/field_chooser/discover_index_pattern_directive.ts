@@ -16,18 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// @ts-ignore
+import { uiModules } from 'ui/modules';
+import { wrapInI18nContext } from 'ui/i18n';
+import { DiscoverIndexPattern } from './discover_index_pattern';
 
-import { VisType } from '../vis';
-import { uiRegistry, UIRegistry } from './_registry';
+const app = uiModules.get('apps/discover');
 
-interface VisTypesRegistryAccessors {
-  byName: { [typeName: string]: VisType };
-}
-
-export type VisTypesRegistry = UIRegistry<VisType> & VisTypesRegistryAccessors;
-
-export const VisTypesRegistryProvider = uiRegistry<VisType, VisTypesRegistryAccessors>({
-  name: 'visTypes',
-  index: ['name'],
-  order: ['title'],
+app.directive('discoverIndexPatternSelect', function(reactDirective: any) {
+  return reactDirective(wrapInI18nContext(DiscoverIndexPattern), [
+    ['indexPatternList', { watchDepth: 'reference' }],
+    ['selectedIndexPattern', { watchDepth: 'reference' }],
+    ['setIndexPattern', { watchDepth: 'reference' }],
+  ]);
 });

@@ -80,4 +80,21 @@ describe('licensing plugin', () => {
 
     expect(licenseTypes).toEqual(['basic', 'gold', 'platinum']);
   });
+
+  test('provides a licensing context to http routes', async () => {
+    const { coreSetup, plugin: _plugin } = await setupOnly();
+
+    plugin = _plugin;
+
+    await plugin.setup(coreSetup);
+
+    expect(coreSetup.http.registerRouteHandlerContext.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "licensing",
+          [Function],
+        ],
+      ]
+    `);
+  });
 });
