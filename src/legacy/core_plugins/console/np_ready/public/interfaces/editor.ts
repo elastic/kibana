@@ -37,9 +37,9 @@ export interface Position {
 
 export interface Range {
   // TODO: document
-  a: Position;
+  start: Position;
   // TODO: document
-  b: Position;
+  end: Position;
 }
 
 export interface GetTokenIteratorArgs {
