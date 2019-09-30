@@ -11,9 +11,7 @@ import { getPipelines, processPipelinesAPIResponse } from '../../../../../lib/lo
 import { handleError } from '../../../../../lib/errors';
 import { prefixIndexPattern } from '../../../../../lib/ccs_utils';
 import { INDEX_PATTERN_LOGSTASH } from '../../../../../../common/constants';
-import { getLogstashPipelineIds } from '../../../../../lib/logstash/get_pipeline_ids';
-import { filter } from '../../../../../lib/pagination/filter';
-import { paginate } from '../../../../../lib/pagination/paginate';
+import { getPaginatedPipelines } from '../../../../../lib/logstash/get_paginated_pipelines';
 
 /**
  * Retrieve pipelines for a node
@@ -52,28 +50,28 @@ export function logstashNodePipelinesRoute(server) {
       const { clusterUuid, logstashUuid } = req.params;
       const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
 
-      const pipelines = await getLogstashPipelineIds(req, lsIndexPattern);
-
-      // Manually apply pagination/sorting/filtering concerns
-
-      // Filtering
-      const filteredPipelines = filter(pipelines, queryText, ['id']);
-
-      // Sorting
-      const sortedPipelines = sortByOrder(filteredPipelines, pipeline => pipeline[sort.field], sort.direction);
-
-      // Pagination
-      const pageOfPipelines = paginate(pagination, sortedPipelines);
-
-      // Just the IDs for the rest
-      const pipelineIds = pageOfPipelines.map(pipeline => pipeline.id);
-
       const throughputMetric = 'logstash_node_pipeline_throughput';
       const nodesCountMetric = 'logstash_node_pipeline_nodes_count';
       const metricSet = [
         throughputMetric,
         nodesCountMetric
       ];
+
+      // The client side fields do not match the server side metric names
+      // so adjust that here. See processPipelinesAPIResponse
+      const sortMetricSetMap = {
+        latestThroughput: throughputMetric,
+        latestNodesCount: nodesCountMetric
+      };
+      if (sort) {
+        sort.field = sortMetricSetMap[sort.field];
+      }
+
+      const { pageOfPipelines, totalPipelineCount }
+        = await getPaginatedPipelines(req, lsIndexPattern, metricSet, pagination, sort, queryText);
+
+      // Just the IDs for the rest
+      const pipelineIds = pageOfPipelines.map(pipeline => pipeline.id);
 
       const metricOptions = {
         pageOfPipelines,
@@ -97,7 +95,7 @@ export function logstashNodePipelinesRoute(server) {
         );
         return {
           ...response,
-          totalPipelineCount: pipelines.length
+          totalPipelineCount
         };
         return response;
       } catch (err) {

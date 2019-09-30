@@ -52,7 +52,7 @@ export class PipelineListing extends Component {
           defaultMessage: 'Events Emitted Rate'
         }),
         field: 'latestThroughput',
-        sortable: false,
+        sortable: true,
         render: (value, pipeline) => {
           const throughput = pipeline.metrics.throughput;
           return (
@@ -86,7 +86,7 @@ export class PipelineListing extends Component {
           defaultMessage: 'Number of Nodes'
         }),
         field: 'latestNodesCount',
-        sortable: false,
+        sortable: true,
         render: (value, pipeline) => {
           const nodesCount = pipeline.metrics.nodesCount;
           return (
@@ -156,13 +156,7 @@ export class PipelineListing extends Component {
               className={className || 'logstashNodesTable'}
               rows={data}
               columns={columns}
-              sorting={{
-                ...sorting,
-                sort: {
-                  ...sorting.sort,
-                  field: 'id'
-                }
-              }}
+              sorting={sorting}
               message={upgradeMessage}
               pagination={pagination}
               fetchMoreData={fetchMoreData}

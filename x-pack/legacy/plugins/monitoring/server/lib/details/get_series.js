@@ -219,6 +219,8 @@ function handleSeries(metric, min, max, bucketSizeInSeconds, response) {
 
   if (metric.debug) {
     console.log(`metric.debug field=${metric.field} bucketsCreated: ${countBuckets(get(response, 'aggregations.check'))}`);
+    console.log(`metric.debug`, { bucketsLength: buckets.length, firstUsableBucketIndex, lastUsableBucketIndex });
+    console.log('metric.debug response', JSON.stringify(response));
   }
 
   if (firstUsableBucketIndex <= lastUsableBucketIndex) {

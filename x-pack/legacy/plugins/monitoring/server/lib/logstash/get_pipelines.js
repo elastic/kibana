@@ -7,7 +7,7 @@ import { cloneDeep, last, omit } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { getMetrics } from '../details/get_metrics';
 
-export function _handleResponse(response, exclusivePipelineIds) {
+export function handleGetPipelinesResponse(response, exclusivePipelineIds) {
   const pipelinesById = {};
 
   const metrics = Object.keys(response);
@@ -42,14 +42,24 @@ export function _handleResponse(response, exclusivePipelineIds) {
     });
   });
 
-  // Convert pipelinesById map to array
+  // Convert pipelinesById map to array and preserve sorting
   const pipelines = [];
-  Object.keys(pipelinesById).forEach(pipelineId => {
-    pipelines.push({
-      id: pipelineId,
-      ...pipelinesById[pipelineId]
+  if (exclusivePipelineIds) {
+    for (const exclusivePipelineId of exclusivePipelineIds) {
+      pipelines.push({
+        id: exclusivePipelineId,
+        ...pipelinesById[exclusivePipelineId]
+      });
+    }
+  }
+  else {
+    Object.keys(pipelinesById).forEach(pipelineId => {
+      pipelines.push({
+        id: pipelineId,
+        ...pipelinesById[pipelineId]
+      });
     });
-  });
+  }
 
   return pipelines;
 }
@@ -81,5 +91,5 @@ export async function getPipelines(req, logstashIndexPattern, pipelineIds, metri
   const filters = [];
 
   const metricsResponse = await getMetrics(req, logstashIndexPattern, metricSet, filters, metricOptions);
-  return _handleResponse(metricsResponse, pipelineIds);
+  return handleGetPipelinesResponse(metricsResponse, pipelineIds);
 }

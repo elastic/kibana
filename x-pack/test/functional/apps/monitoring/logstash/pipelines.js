@@ -43,6 +43,9 @@ export default function ({ getService, getPageObjects }) {
       const rows = await pipelinesList.getRows();
       expect(rows.length).to.be(4);
 
+      await pipelinesList.clickIdCol();
+      await pipelinesList.clickIdCol(); // Click twice to sort asc
+
       const pipelinesAll = await pipelinesList.getPipelinesAll();
 
       const tableData = [

@@ -5,16 +5,12 @@
  */
 
 import Joi from 'joi';
-import { sortByOrder } from 'lodash';
 import { getClusterStatus } from '../../../../../lib/logstash/get_cluster_status';
 import { getPipelines, processPipelinesAPIResponse } from '../../../../../lib/logstash/get_pipelines';
 import { handleError } from '../../../../../lib/errors';
 import { prefixIndexPattern } from '../../../../../lib/ccs_utils';
 import { INDEX_PATTERN_LOGSTASH } from '../../../../../../common/constants';
-import { getLogstashPipelineIds } from '../../../../../lib/logstash/get_pipeline_ids';
-import { filter } from '../../../../../lib/pagination/filter';
-import { paginate } from '../../../../../lib/pagination/paginate';
-
+import { getPaginatedPipelines } from '../../../../../lib/logstash/get_paginated_pipelines';
 
 /**
  * Retrieve pipelines for a cluster
@@ -52,22 +48,6 @@ export function logstashClusterPipelinesRoute(server) {
       const clusterUuid = req.params.clusterUuid;
       const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
 
-      const pipelines = await getLogstashPipelineIds(req, lsIndexPattern);
-
-      // Manually apply pagination/sorting/filtering concerns
-
-      // Filtering
-      const filteredPipelines = filter(pipelines, queryText, ['id']);
-
-      // Sorting
-      const sortedPipelines = sort ? sortByOrder(filteredPipelines, pipeline => pipeline[sort.field], sort.direction) : filteredPipelines;
-
-      // Pagination
-      const pageOfPipelines = paginate(pagination, sortedPipelines);
-
-      // Just the IDs for the rest
-      const pipelineIds = pageOfPipelines.map(pipeline => pipeline.id);
-
       const throughputMetric = 'logstash_cluster_pipeline_throughput';
       const nodesCountMetric = 'logstash_cluster_pipeline_nodes_count';
 
@@ -76,21 +56,31 @@ export function logstashClusterPipelinesRoute(server) {
         nodesCountMetric
       ];
 
+      // The client side fields do not match the server side metric names
+      // so adjust that here. See processPipelinesAPIResponse
+      const sortMetricSetMap = {
+        latestThroughput: throughputMetric,
+        latestNodesCount: nodesCountMetric
+      };
+      if (sort) {
+        sort.field = sortMetricSetMap[sort.field];
+      }
+
+      const { pageOfPipelines, totalPipelineCount } =
+        await getPaginatedPipelines(req, lsIndexPattern, metricSet, pagination, sort, queryText);
+
+      // Just the IDs for the rest
+      const pipelineIds = pageOfPipelines.map(pipeline => pipeline.id);
+
       const metricOptions = {
         pageOfPipelines,
       };
 
       try {
         const pipelineData = await getPipelines(req, lsIndexPattern, pipelineIds, metricSet, metricOptions);
-        // We need to re-sort because the data from above comes back in random order
-        const pipelinesResponse = sort ? sortByOrder(
-          pipelineData,
-          pipeline => pipeline[sort.field],
-          sort.direction
-        ) : pipelineData;
         const response = await processPipelinesAPIResponse(
           {
-            pipelines: pipelinesResponse,
+            pipelines: pipelineData,
             clusterStatus: await getClusterStatus(req, lsIndexPattern, { clusterUuid })
           },
           throughputMetric,
@@ -98,7 +88,7 @@ export function logstashClusterPipelinesRoute(server) {
         );
         return {
           ...response,
-          totalPipelineCount: pipelines.length
+          totalPipelineCount
         };
       } catch (err) {
         throw handleError(err, req);

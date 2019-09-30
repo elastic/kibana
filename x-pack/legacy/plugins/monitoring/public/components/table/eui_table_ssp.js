@@ -14,6 +14,7 @@ import {
 export function EuiMonitoringSSPTable({
   rows: items,
   search = {},
+  pagination,
   columns: _columns,
   onTableChange,
   fetchMoreData,
@@ -22,8 +23,8 @@ export function EuiMonitoringSSPTable({
   const [isLoading, setIsLoading] = React.useState(false);
   const [queryText, setQueryText] = React.useState('');
   const [page, setPage] = React.useState({
-    index: props.pagination.pageIndex,
-    size: props.pagination.pageSize
+    index: pagination.pageIndex,
+    size: pagination.pageSize
   });
   const [sort, setSort] = React.useState(props.sorting);
 
@@ -66,6 +67,7 @@ export function EuiMonitoringSSPTable({
       <EuiBasicTable
         {...props}
         items={items}
+        pagination={pagination}
         onChange={onChange}
         loading={isLoading}
         columns={columns}
