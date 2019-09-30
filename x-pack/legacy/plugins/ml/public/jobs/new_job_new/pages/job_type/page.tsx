@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiFlexGrid,
   EuiFlexItem,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibanaContext } from '../../../../contexts/kibana';
@@ -173,8 +174,14 @@ export const Page: FC = () => {
                   defaultMessage="Anomaly detection can only be run over indices which are time based."
                 />
               </p>
+              <br />
+              <EuiLink href="#jobs/new_job">
+                <FormattedMessage
+                  id="xpack.ml.newJob.wizard.jobType.selectDifferentIndexLinkText"
+                  defaultMessage="Select a different index"
+                />
+              </EuiLink>
             </EuiCallOut>
-
             <EuiSpacer size="xxl" />
           </>
         )}
@@ -276,6 +283,12 @@ export const Page: FC = () => {
           <EuiFlexItem>
             <CreateJobLinkCard
               iconType="dataVisualizer"
+              iconAreaLabel={i18n.translate(
+                'xpack.ml.newJob.wizard.jobType.dataVisualizerAriaLabel',
+                {
+                  defaultMessage: 'Data Visualizer',
+                }
+              )}
               title={
                 <FormattedMessage
                   id="xpack.ml.newJob.wizard.jobType.dataVisualizerTitle"
