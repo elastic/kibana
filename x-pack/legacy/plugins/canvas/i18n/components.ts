@@ -241,6 +241,32 @@ export const ComponentStrings = {
         defaultMessage: 'Delete',
       }),
   },
+  TextStylePicker: {
+    getAlignCenterOption: () =>
+      i18n.translate('xpack.canvas.textStylePicker.alignCenterOption', {
+        defaultMessage: 'Align center',
+      }),
+    getAlignLeftOption: () =>
+      i18n.translate('xpack.canvas.textStylePicker.alignLeftOption', {
+        defaultMessage: 'Align left',
+      }),
+    getAlignRightOption: () =>
+      i18n.translate('xpack.canvas.textStylePicker.alignRightOption', {
+        defaultMessage: 'Align right',
+      }),
+    getStyleBoldOption: () =>
+      i18n.translate('xpack.canvas.textStylePicker.styleBoldOption', {
+        defaultMessage: 'Bold',
+      }),
+    getStyleItalicOption: () =>
+      i18n.translate('xpack.canvas.textStylePicker.styleItalicOption', {
+        defaultMessage: 'Italic',
+      }),
+    getStyleUnderlineOption: () =>
+      i18n.translate('xpack.canvas.textStylePicker.styleUnderlineOption', {
+        defaultMessage: 'Underline',
+      }),
+  },
   Toolbar: {
     getEditorButtonLabel: () =>
       i18n.translate('xpack.canvas.toolbar.editorButtonLabel', {
