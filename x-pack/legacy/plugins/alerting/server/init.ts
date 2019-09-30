@@ -28,6 +28,10 @@ import {
   enableAlertRoute,
   disableAlertRoute,
   updateApiKeyRoute,
+  muteAllAlertRoute,
+  unmuteAllAlertRoute,
+  muteAlertInstanceRoute,
+  unmuteAlertInstanceRoute,
 } from './routes';
 
 // Extend PluginProperties to indicate which plugins are guaranteed to exist
@@ -88,7 +92,12 @@ export function init(server: Server) {
   server.plugins.encrypted_saved_objects.registerType({
     type: 'alert',
     attributesToEncrypt: new Set(['apiKey']),
-    attributesToExcludeFromAAD: new Set(['scheduledTaskId']),
+    attributesToExcludeFromAAD: new Set([
+      'scheduledTaskId',
+      'muted',
+      'mutedInstanceIds',
+      'updatedBy',
+    ]),
   });
 
   function getServices(request: any): Services {
@@ -127,6 +136,10 @@ export function init(server: Server) {
   server.route(enableAlertRoute);
   server.route(disableAlertRoute);
   server.route(updateApiKeyRoute);
+  server.route(muteAllAlertRoute);
+  server.route(unmuteAllAlertRoute);
+  server.route(muteAlertInstanceRoute);
+  server.route(unmuteAlertInstanceRoute);
 
   // Expose functions
   server.decorate('request', 'getAlertsClient', function() {
