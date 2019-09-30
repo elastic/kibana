@@ -19,7 +19,7 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { Vis } from 'ui/vis';
 import { SeriesParam } from '../../../types';
@@ -42,6 +42,8 @@ function LineOptions({ chart, vis, setChart }: LineOptionsParams) {
 
   return (
     <>
+      <EuiSpacer size="m" />
+
       <SwitchOption
         label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.showLineLabel', {
           defaultMessage: 'Show line',
@@ -50,6 +52,8 @@ function LineOptions({ chart, vis, setChart }: LineOptionsParams) {
         value={chart.drawLinesBetweenPoints}
         setValue={setChart}
       />
+
+      <EuiSpacer size="m" />
 
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
@@ -78,6 +82,8 @@ function LineOptions({ chart, vis, setChart }: LineOptionsParams) {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
 
       <SwitchOption
         label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.showDotsLabel', {

@@ -36,7 +36,7 @@ export type VisualizationsSetup = VisualizationsSetup;
 export type VisualizationsStart = VisualizationsStart;
 
 /** @public types */
-export { VisTypeAlias } from './types';
+export { VisTypeAlias, VisType } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new VisualizationsPlugin(initializerContext);

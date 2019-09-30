@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { TemplateForm, SectionLoading, SectionError } from '../../components';
+import { TemplateForm, SectionLoading, SectionError, Error } from '../../components';
 import { setBreadcrumbs } from '../../services/set_breadcrumbs';
 import { decodePath, getTemplateDetailsLink } from '../../services/routing';
 import { Template } from '../../../common/types';
@@ -77,7 +77,7 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
             defaultMessage="Error loading template to clone"
           />
         }
-        error={templateToCloneError}
+        error={templateToCloneError as Error}
         data-test-subj="sectionError"
       />
     );
