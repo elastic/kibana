@@ -6,7 +6,6 @@
 
 import React, { useContext } from 'react';
 import {
-  EuiText,
   EuiHealth,
   EuiLink,
   EuiSpacer,
@@ -22,6 +21,7 @@ import { UptimeSettingsContext } from '../../../contexts';
 
 const ContainerDiv = styled.div`
   padding: 10px;
+  width: 100%;
 `;
 
 interface MonitorListDrawerProps {
@@ -51,11 +51,10 @@ export const MonitorListDrawer = ({ summary }: MonitorListDrawerProps) => {
   const displayMonitorStatus = (locations: CheckMonitor[], color: string, titleTxt: string) => {
     return (
       <>
-        <EuiText size="s">
-          <EuiHealth color={color} />
+        <EuiHealth color={color}>
           {titleTxt} in{' '}
           {locations.map((location, index) => (index ? ', ' : '') + (location.name || location.ip))}
-        </EuiText>
+        </EuiHealth>
         <EuiSpacer size="s" />
       </>
     );
