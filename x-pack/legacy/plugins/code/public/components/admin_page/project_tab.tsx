@@ -27,9 +27,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { get } from 'lodash';
 import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
-import { capabilities } from 'ui/capabilities';
+import { npStart } from 'ui/new_platform';
+
 import { Repository } from '../../../model';
 import { closeToast, importRepo, RepoStatus } from '../../actions';
 import { RootState } from '../../reducers';
@@ -250,7 +252,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
         project={repo}
         showStatus={true}
         status={status[repo.uri]}
-        enableManagement={capabilities.get().code.admin as boolean}
+        enableManagement={get(npStart.core.application.capabilities, 'code.admin') as boolean}
       />
     ));
 
@@ -292,7 +294,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
           <EuiFlexItem grow />
           <EuiFlexItem grow />
           <EuiFlexItem>
-            {(capabilities.get().code.admin as boolean) && (
+            {(get(npStart.core.application.capabilities, 'code.admin') as boolean) && (
               // @ts-ignore
               <EuiButton
                 className="codeButton__projectImport"
