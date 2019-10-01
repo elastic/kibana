@@ -12,10 +12,12 @@ import chrome from 'ui/chrome';
 import { SavedSearchLoader } from '../../../../../../src/legacy/core_plugins/kibana/public/discover/types';
 import { setup as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 
-let indexPatternCache: Array<SimpleSavedObject<SavedObjectAttributes>> = [];
+type IndexPatternSavedObject = SimpleSavedObject<SavedObjectAttributes>;
+
+let indexPatternCache: IndexPatternSavedObject[] = [];
 let fullIndexPatterns: IndexPatterns | null = null;
 
-export let refreshIndexPatterns: (() => Promise<any>) | null = null;
+export let refreshIndexPatterns: (() => Promise<IndexPatternSavedObject[]>) | null = null;
 
 export function loadIndexPatterns() {
   fullIndexPatterns = data.indexPatterns.indexPatterns;

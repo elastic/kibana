@@ -174,7 +174,6 @@ export const Page: FC = () => {
                   defaultMessage="Anomaly detection can only be run over indices which are time based."
                 />
               </p>
-              <br />
               <EuiLink href="#jobs/new_job">
                 <FormattedMessage
                   id="xpack.ml.newJob.wizard.jobType.selectDifferentIndexLinkText"
@@ -301,6 +300,7 @@ export const Page: FC = () => {
               }
               isDisabled={!isTimeBasedIndex}
               onClick={addSelectionToRecentlyAccessed}
+              href={getUrl('#jobs/new_job/datavisualizer')}
             />
           </EuiFlexItem>
         </EuiFlexGrid>

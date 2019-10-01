@@ -39,32 +39,43 @@ export const CreateJobLinkCard: FC<Props> = ({
   href,
   isDisabled,
   'data-test-subj': dateTestSubj,
-}) => (
-  <EuiPanel style={{ cursor: isDisabled ? 'not-allowed' : undefined }}>
-    {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-    <EuiLink
-      href={href}
-      onClick={onClick}
-      style={{ display: 'block', pointerEvents: isDisabled ? 'none' : undefined }}
-      data-test-subj={dateTestSubj}
-    >
-      <EuiFlexGroup gutterSize="l" responsive={true}>
-        <EuiFlexItem grow={false} style={{ paddingTop: '8px' }}>
-          {typeof icon === 'string' ? (
-            <EuiIcon size="xl" type={icon} aria-label={iconAreaLabel} />
-          ) : (
-            icon
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <h4>{title}</h4>
-          </EuiTitle>
-          <EuiText color="subdued">
-            <p>{description}</p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiLink>
-  </EuiPanel>
-);
+}) => {
+  const linkHrefAndOnClickProps = {
+    ...(href ? { href } : {}),
+    ...(onClick ? { onClick } : {}),
+  };
+  return (
+    <EuiPanel style={{ cursor: isDisabled ? 'not-allowed' : undefined }}>
+      <EuiLink
+        style={{
+          display: 'block',
+          pointerEvents: isDisabled ? 'none' : undefined,
+          background: 'transparent',
+          outline: 'none',
+        }}
+        data-test-subj={dateTestSubj}
+        color="subdued"
+        type="link"
+        {...linkHrefAndOnClickProps}
+      >
+        <EuiFlexGroup gutterSize="l" responsive={true}>
+          <EuiFlexItem grow={false} style={{ paddingTop: '8px' }}>
+            {typeof icon === 'string' ? (
+              <EuiIcon size="xl" type={icon} aria-label={iconAreaLabel} />
+            ) : (
+              icon
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <h4>{title}</h4>
+            </EuiTitle>
+            <EuiText color="subdued">
+              <p>{description}</p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiLink>
+    </EuiPanel>
+  );
+};
