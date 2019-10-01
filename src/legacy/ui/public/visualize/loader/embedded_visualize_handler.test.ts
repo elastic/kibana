@@ -279,12 +279,4 @@ describe('EmbeddedVisualizeHandler', () => {
       expect(response).toMatchSnapshot();
     });
   });
-
-  describe('render', () => {
-    // TODO
-  });
-
-  describe('whenFirstRenderComplete', () => {
-    // TODO
-  });
 });

@@ -14,8 +14,6 @@ exports[`EmbeddedVisualizeHandler update should add provided data- attributes to
   data-foo="bar"
   data-loading=""
   data-render-complete="false"
-  data-rendering-count="0"
-  data-shared-item=""
 />
 `;
 
@@ -24,7 +22,5 @@ exports[`EmbeddedVisualizeHandler update should remove null data- attributes fro
   data-baz="qux"
   data-loading=""
   data-render-complete="false"
-  data-rendering-count="0"
-  data-shared-item=""
 />
 `;
