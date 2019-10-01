@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IUiActionsSetup } from 'src/plugins/ui_actions/public';
+import { IUiActionsSetup, IUiActionsStart } from 'src/plugins/ui_actions/public';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { EmbeddableFactoryRegistry } from './types';
 import { createApi, EmbeddableApi } from './api';
@@ -27,13 +27,27 @@ export interface IEmbeddableSetupDependencies {
   uiActions: IUiActionsSetup;
 }
 
-export class EmbeddablePublicPlugin implements Plugin<any, any> {
+export interface IEmbeddableStartDependencies {
+  uiActions: IUiActionsStart;
+}
+
+export type IEmbeddableSetup = Pick<EmbeddableApi, 'registerEmbeddableFactory'>;
+export type IEmbeddableStart = EmbeddableApi;
+
+export class EmbeddablePublicPlugin
+  implements
+    Plugin<
+      IEmbeddableSetup,
+      IEmbeddableStart,
+      IEmbeddableSetupDependencies,
+      IEmbeddableStartDependencies
+    > {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private api!: EmbeddableApi;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { uiActions }: IEmbeddableSetupDependencies) {
+  public setup(core: CoreSetup, { uiActions }: IEmbeddableSetupDependencies): IEmbeddableSetup {
     ({ api: this.api } = createApi({
       embeddableFactories: this.embeddableFactories,
     }));
@@ -46,7 +60,7 @@ export class EmbeddablePublicPlugin implements Plugin<any, any> {
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, { uiActions }: IEmbeddableStartDependencies): IEmbeddableStart {
     return this.api;
   }
 
