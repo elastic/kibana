@@ -99,7 +99,7 @@ export function InnerWorkspacePanel({
         <h3>
           <FormattedMessage
             id="xpack.lens.editorFrame.emptyWorkspaceHeading"
-            defaultMessage="Build a visualization"
+            defaultMessage="Create a visualization"
           />
         </h3>
         <EuiImage
