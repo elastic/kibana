@@ -91,3 +91,12 @@ export const UseField = ({
 
   return component({ field, ...componentProps });
 };
+
+/**
+ * Get a <UseField /> component providing some common props for all instances.
+ * @param partialProps Partial props to apply to all <UseField /> instances
+ */
+export const getUseField = (partialProps: Partial<Props>) => (props: Partial<Props>) => {
+  const componentProps = { ...partialProps, ...props } as Props;
+  return <UseField {...componentProps} />;
+};
