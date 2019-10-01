@@ -24,15 +24,6 @@ import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 import { ViewMode } from '../types';
 
 /**
- * On DOM elements with this data attribute Reporting will listen for `renderComplete` event.
- */
-const ATTR_DATA_SHARED_ITEM = 'data-shared-item';
-/**
- * If this attribute is present, it means `renderComplete` was fired at least once.
- * Reporting uses this to check if they have to subscribe to `renderComplete` events.
- */
-const ATTR_DATA_RENDER_COMPLETE = 'data-render-complete';
-/**
  * If this attribute is present it specifies that `renderComplete` event has not been fired yet.
  */
 const ATTR_DATA_LOADING = 'data-loading';
@@ -161,7 +152,6 @@ export abstract class Embeddable<
    */
   private onRenderComplete = () => {
     this.firstRenderCompleteCallback();
-    this.domNode!.setAttribute(ATTR_DATA_RENDER_COMPLETE, '');
     this.domNode!.removeAttribute(ATTR_DATA_LOADING);
 
     const renderingCount = Number(this.domNode!.getAttribute(ATTR_DATA_RENDERING_COUNT) || 0);
@@ -174,7 +164,6 @@ export abstract class Embeddable<
 
     this.domNode = domNode;
     domNode.setAttribute(ATTR_DATA_LOADING, '');
-    domNode.setAttribute(ATTR_DATA_SHARED_ITEM, '');
     domNode.setAttribute(ATTR_DATA_RENDERING_COUNT, '0');
     domNode.addEventListener('renderComplete', this.onRenderComplete);
 
