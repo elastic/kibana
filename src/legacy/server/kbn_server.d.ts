@@ -40,6 +40,7 @@ import { CapabilitiesModifier } from './capabilities';
 import { IndexPatternsServiceFactory } from './index_patterns';
 import { Capabilities } from '../../core/public';
 import { IUiSettingsService } from '../../legacy/ui/ui_settings/ui_settings_service';
+import { UiSettingsServiceFactoryOptions } from '../../legacy/ui/ui_settings/ui_settings_service_factory';
 
 export interface KibanaConfig {
   get<T>(key: string): T;
@@ -78,7 +79,7 @@ declare module 'hapi' {
       name: string,
       factoryFn: (request: Request) => Record<string, any>
     ) => void;
-    uiSettingsServiceFactory: (options: any) => any;
+    uiSettingsServiceFactory: (options?: UiSettingsServiceFactoryOptions) => IUiSettingsService;
     logWithMetadata: (tags: string[], message: string, meta: Record<string, any>) => void;
   }
 

@@ -23,7 +23,10 @@ import {
   UiSettingsServiceOptions,
 } from './ui_settings_service';
 
-type Options = Pick<UiSettingsServiceOptions, 'savedObjectsClient' | 'getDefaults' | 'overrides'>;
+export type UiSettingsServiceFactoryOptions = Pick<
+  UiSettingsServiceOptions,
+  'savedObjectsClient' | 'getDefaults' | 'overrides'
+>;
 /**
  *  Create an instance of UiSettingsService that will use the
  *  passed `savedObjectsClient` to communicate with elasticsearch
@@ -32,7 +35,7 @@ type Options = Pick<UiSettingsServiceOptions, 'savedObjectsClient' | 'getDefault
  */
 export function uiSettingsServiceFactory(
   server: Legacy.Server,
-  options: Options
+  options: UiSettingsServiceFactoryOptions
 ): IUiSettingsService {
   const config = server.config();
 

@@ -27,8 +27,8 @@ export interface UiSettingsServiceOptions {
   type: string;
   id: string;
   buildNum: number;
-  overrides: Record<string, SavedObjectAttribute>;
   savedObjectsClient: SavedObjectsClientContract;
+  overrides?: Record<string, SavedObjectAttribute>;
   getDefaults?: () => Record<string, UiSettingsParams>;
   logWithMetadata?: Legacy.Server['logWithMetadata'];
 }
@@ -82,7 +82,7 @@ export class UiSettingsService implements IUiSettingsService {
   private readonly _id: UiSettingsServiceOptions['id'];
   private readonly _buildNum: UiSettingsServiceOptions['buildNum'];
   private readonly _savedObjectsClient: UiSettingsServiceOptions['savedObjectsClient'];
-  private readonly _overrides: UiSettingsServiceOptions['overrides'];
+  private readonly _overrides: NonNullable<UiSettingsServiceOptions['overrides']>;
   private readonly _getDefaults: NonNullable<UiSettingsServiceOptions['getDefaults']>;
   private readonly _logWithMetadata: NonNullable<UiSettingsServiceOptions['logWithMetadata']>;
 
