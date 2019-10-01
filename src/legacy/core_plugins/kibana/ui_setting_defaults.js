@@ -60,6 +60,12 @@ export function getUiSettingDefaults() {
         defaultMessage: 'Default route',
       }),
       value: '/app/kibana',
+      validation: {
+        regexString: '^\/',
+        message: i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteValidationMessage', {
+          defaultMessage: 'The route must start with a slash ("/")',
+        }),
+      },
       description:
         i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteText', {
           defaultMessage: 'This setting specifies the default route when opening Kibana. ' +

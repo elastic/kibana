@@ -143,6 +143,22 @@ const settings = {
     isOverridden: false,
     options: null,
   },
+  stringWithValidation: {
+    name: 'string:test-validation:setting',
+    ariaName: 'string test validation setting',
+    displayName: 'String test validation setting',
+    description: 'Description for String test validation setting',
+    type: 'string',
+    validation: {
+      regex: new RegExp('/^foo'),
+      message: 'must start with "foo"'
+    },
+    value: undefined,
+    defVal: 'foo-default',
+    isCustom: false,
+    isOverridden: false,
+    options: null,
+  }
 };
 const userValues = {
   array: ['user', 'value'],
@@ -153,6 +169,10 @@ const userValues = {
   number: 10,
   select: 'banana',
   string: 'foo',
+  stringWithValidation: 'fooUserValue'
+};
+const invalidUserValues = {
+  stringWithValidation: 'invalidUserValue'
 };
 const save = jest.fn(() => Promise.resolve());
 const clear = jest.fn(() => Promise.resolve());
@@ -391,6 +411,16 @@ describe('Field', () => {
 
         const userValue = userValues[type];
         const fieldUserValue = type === 'array' ? userValue.join(', ') : userValue;
+
+        if (setting.validation) {
+          const invalidUserValue = invalidUserValues[type];
+          it('should display an error when validation fails', async () => {
+            component.instance().onFieldChange({ target: { value: invalidUserValue } });
+            component.update();
+            const errorMessage = component.find('.euiFormErrorText').text();
+            expect(errorMessage).toEqual(setting.validation.message);
+          });
+        }
 
         it('should be able to change value and cancel', async () => {
           component.instance().onFieldChange({ target: { value: fieldUserValue } });

@@ -43,7 +43,7 @@ describe('Settings', function () {
           def = {
             value: 'the original',
             description: 'the one and only',
-            options: 'all the options'
+            options: 'all the options',
           };
         });
 
@@ -76,6 +76,18 @@ describe('Settings', function () {
             expect(invoke({ def }).type).to.equal('array');
           });
         });
+
+        describe('that contains a validation object', function () {
+          it('constructs a validation regex with message', function () {
+            def.validation = {
+              regexString: '^foo',
+              message: 'must start with "foo"'
+            };
+            const result = invoke({ def });
+            expect(result.validation.regex).to.be.a(RegExp);
+            expect(result.validation.message).to.equal('must start with "foo"');
+          });
+        });
       });
 
       describe('when not given a setting definition object', function () {
@@ -93,6 +105,10 @@ describe('Settings', function () {
 
         it('sets options to undefined', function () {
           expect(invoke().options).to.be.undefined;
+        });
+
+        it('sets validation to undefined', function () {
+          expect(invoke().validation).to.be.undefined;
         });
       });
     });
