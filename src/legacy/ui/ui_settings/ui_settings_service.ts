@@ -43,10 +43,10 @@ interface UserProvidedValue {
   isOverridden?: boolean;
 }
 
-type UiSettingsValue = UiSettingsParams & UserProvidedValue;
+type UiSettingsRawValue = UiSettingsParams & UserProvidedValue;
 
 type UserProvided = Record<string, UserProvidedValue>;
-type UiSettings = Record<string, UiSettingsValue>;
+type UiSettingsRaw = Record<string, UiSettingsRawValue>;
 
 type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
 
@@ -66,7 +66,7 @@ export interface IUiSettingsService {
   getDefaults: () => Promise<Record<string, UiSettingsParams>>;
   get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
   getAll: <T extends SavedObjectAttribute = any>() => Promise<Record<string, T>>;
-  getRaw: () => Promise<UiSettings>;
+  getRaw: () => Promise<UiSettingsRaw>;
   getUserProvided: () => Promise<UserProvided>;
   setMany: <T extends SavedObjectAttribute = any>(changes: Record<string, T>) => Promise<void>;
   set: <T extends SavedObjectAttribute = any>(key: string, value: T) => Promise<void>;
@@ -135,7 +135,7 @@ export class UiSettingsService implements IUiSettingsService {
   }
 
   // NOTE: should be a private method
-  async getRaw(): Promise<UiSettings> {
+  async getRaw(): Promise<UiSettingsRaw> {
     const userProvided = await this.getUserProvided();
     return defaultsDeep(userProvided, await this.getDefaults());
   }
