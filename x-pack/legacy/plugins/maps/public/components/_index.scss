@@ -4,7 +4,7 @@
 
 .mapMetricEditorPanel__metricEditor {
   padding: $euiSizeM 0;
-  border-top: 1px solid $euiColorLightShade;
+  border-top:  $euiBorderThin;
 
   &:first-child {
     padding-top: 0;
