@@ -88,7 +88,12 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
       await withProcRunner(log, async proc => {
         await proc.run('kibana', {
           cmd: 'yarn',
-          args: ['start', '--optimize.enabled=false', '--logging.json=false'],
+          args: [
+            'start',
+            '--optimize.enabled=false',
+            '--logging.json=false',
+            '--migrations.skip=true',
+          ],
           cwd: generatedPath,
           wait: /ispec_plugin.+Status changed from uninitialized to green - Ready/,
         });
