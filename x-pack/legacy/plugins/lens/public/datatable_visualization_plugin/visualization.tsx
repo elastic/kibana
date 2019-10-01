@@ -100,7 +100,7 @@ export const datatableVisualization: Visualization<
       icon: 'visTable',
       largeIcon: chartTableSVG,
       label: i18n.translate('xpack.lens.datatable.label', {
-        defaultMessage: 'Datatable',
+        defaultMessage: 'Data table',
       }),
     },
   ],
@@ -109,7 +109,7 @@ export const datatableVisualization: Visualization<
     return {
       icon: chartTableSVG,
       label: i18n.translate('xpack.lens.datatable.label', {
-        defaultMessage: 'Datatable',
+        defaultMessage: 'Data table',
       }),
     };
   },

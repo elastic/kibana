@@ -234,7 +234,7 @@ export const visualizationTypes: VisualizationType[] = [
     icon: 'visBarVerticalStacked',
     largeIcon: chartBarStackedSVG,
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarLabel', {
-      defaultMessage: 'Stacked Bar',
+      defaultMessage: 'Stacked bar',
     }),
   },
   {
@@ -258,7 +258,7 @@ export const visualizationTypes: VisualizationType[] = [
     icon: 'visAreaStacked',
     largeIcon: chartAreaStackedSVG,
     label: i18n.translate('xpack.lens.xyVisualization.stackedAreaLabel', {
-      defaultMessage: 'Stacked Area',
+      defaultMessage: 'Stacked area',
     }),
   },
 ];
