@@ -20,6 +20,8 @@ import {
   LogEntryColumnWidths,
 } from './log_entry_column';
 import { ASSUMED_SCROLLBAR_WIDTH } from './vertical_scroll_panel';
+import { WithLogPosition } from '../../../containers/logs/with_log_position';
+import { localizedDate } from '../../../utils/formatters/datetime';
 
 export const LogColumnHeaders: React.FunctionComponent<{
   columnConfigurations: LogColumnConfiguration[];
@@ -30,13 +32,16 @@ export const LogColumnHeaders: React.FunctionComponent<{
       {columnConfigurations.map(columnConfiguration => {
         if (isTimestampLogColumnConfiguration(columnConfiguration)) {
           return (
-            <LogColumnHeader
-              columnWidth={columnWidths[columnConfiguration.timestampColumn.id]}
-              data-test-subj="logColumnHeader timestampLogColumnHeader"
-              key={columnConfiguration.timestampColumn.id}
-            >
-              Timestamp
-            </LogColumnHeader>
+            <WithLogPosition key={columnConfiguration.timestampColumn.id}>
+              {({ firstVisiblePosition }) => (
+                <LogColumnHeader
+                  columnWidth={columnWidths[columnConfiguration.timestampColumn.id]}
+                  data-test-subj="logColumnHeader timestampLogColumnHeader"
+                >
+                  {firstVisiblePosition ? localizedDate(firstVisiblePosition.time) : 'Timestamp'}
+                </LogColumnHeader>
+              )}
+            </WithLogPosition>
           );
         } else if (isMessageLogColumnConfiguration(columnConfiguration)) {
           return (
