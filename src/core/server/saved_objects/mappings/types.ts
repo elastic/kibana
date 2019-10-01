@@ -42,6 +42,11 @@ export interface MappingProperties {
   [field: string]: FieldMapping;
 }
 
+export interface SavedObjectsMapping {
+  pluginId: string;
+  properties: MappingProperties;
+}
+
 export interface MappingMeta {
   // A dictionary of key -> md5 hash (e.g. 'dashboard': '24234qdfa3aefa3wa')
   // with each key being a root-level mapping property, and each value being

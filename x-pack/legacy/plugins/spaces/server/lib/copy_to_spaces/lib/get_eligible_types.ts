@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsService } from 'src/core/server';
+import { SavedObjectsLegacyService } from 'src/core/server';
 
-export function getEligibleTypes({ types, schema }: Pick<SavedObjectsService, 'schema' | 'types'>) {
+export function getEligibleTypes({
+  types,
+  schema,
+}: Pick<SavedObjectsLegacyService, 'schema' | 'types'>) {
   return types.filter(type => !schema.isNamespaceAgnostic(type));
 }
