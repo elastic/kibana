@@ -5,7 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
-import { Logger, SavedObjectsService, IRouter } from 'src/core/server';
+import { Logger, SavedObjectsLegacyService, IRouter } from 'src/core/server';
 import { initDeleteSpacesApi } from './delete';
 import { initGetSpaceApi } from './get';
 import { initGetAllSpacesApi } from './get_all';
@@ -16,7 +16,7 @@ import { initCopyToSpacesApi } from './copy_to_space';
 
 export interface ExternalRouteDeps {
   externalRouter: IRouter;
-  getSavedObjects: () => SavedObjectsService;
+  getSavedObjects: () => SavedObjectsLegacyService;
   spacesService: SpacesServiceSetup;
   log: Logger;
 }

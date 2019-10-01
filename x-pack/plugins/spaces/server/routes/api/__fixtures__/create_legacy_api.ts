@@ -6,7 +6,7 @@
 
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from 'src/legacy/utils/streams';
-import { SavedObjectsSchema, SavedObjectsService } from 'src/core/server';
+import { SavedObjectsSchema, SavedObjectsLegacyService } from 'src/core/server';
 import { LegacyAPI } from '../../../plugin';
 import { Space } from '../../../../common/model/space';
 import { createSpaces } from '.';
@@ -100,7 +100,7 @@ export const createLegacyAPI = ({
         isConflictError: jest.fn((e: any) => e.message.startsWith('conflict')),
       },
     },
-  } as unknown) as jest.Mocked<SavedObjectsService>;
+  } as unknown) as jest.Mocked<SavedObjectsLegacyService>;
 
   const legacyAPI: jest.Mocked<LegacyAPI> = {
     legacyConfig: {
