@@ -331,7 +331,8 @@ export class DashboardAppController {
       getDashboardTitle(
         dashboardStateManager.getTitle(),
         dashboardStateManager.getViewMode(),
-        dashboardStateManager.getIsDirty(timefilter)
+        dashboardStateManager.getIsDirty(timefilter),
+        dashboardStateManager.isNew()
       );
 
     // Push breadcrumbs to new header navigation
