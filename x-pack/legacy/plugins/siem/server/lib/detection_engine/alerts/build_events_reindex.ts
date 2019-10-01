@@ -9,12 +9,82 @@
 // build_events_query.ts and any scrolling/scaling solutions from that particular
 // file.
 
-export const buildEventsReIndex = () => {
+interface BuildEventsReIndexParams {
+  index: string[];
+  from: number;
+  to: number;
+  signalsIndex: string;
+  maxDocs: number;
+  kqlFilter: {};
+  severity: number;
+  description: string;
+  name: string;
+  timeDetected: number;
+  ruleRevision: number;
+  ruleId: string;
+  ruleType: string;
+  references: string[];
+}
+
+export const buildEventsReIndex = ({
+  index,
+  from,
+  to,
+  signalsIndex,
+  maxDocs,
+  kqlFilter,
+  severity,
+  description,
+  name,
+  timeDetected,
+  ruleRevision,
+  ruleId,
+  ruleType,
+  references,
+}: BuildEventsReIndexParams) => {
+  const indexPatterns = index.map(element => `"${element}"`).join(',');
+  const refs = references.map(element => `"${element}"`).join(',');
+  const filter = [
+    kqlFilter,
+    {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: from,
+                    },
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+          {
+            bool: {
+              should: [
+                {
+                  range: {
+                    '@timestamp': {
+                      lte: to,
+                    },
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    },
+  ];
   return {
     body: {
       source: {
-        // TODO: Make configurable via paramter passing
-        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+        index,
         sort: [
           {
             '@timestamp': 'desc',
@@ -26,59 +96,7 @@ export const buildEventsReIndex = () => {
         query: {
           bool: {
             filter: [
-              {
-                bool: {
-                  filter: [
-                    {
-                      bool: {
-                        // TODO: Make configurable via parameter passing for KQL compatible queries
-                        should: [
-                          {
-                            match_phrase: {
-                              'user.name': 'root',
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                    {
-                      bool: {
-                        filter: [
-                          {
-                            bool: {
-                              should: [
-                                {
-                                  range: {
-                                    '@timestamp': {
-                                      gte: 1567317600000, // TODO: Make configurable via parameter passing for date time
-                                    },
-                                  },
-                                },
-                              ],
-                              minimum_should_match: 1,
-                            },
-                          },
-                          {
-                            bool: {
-                              should: [
-                                {
-                                  range: {
-                                    '@timestamp': {
-                                      lte: 1569909599999, // TODO: Make configurable via parameter passing for date time
-                                    },
-                                  },
-                                },
-                              ],
-                              minimum_should_match: 1,
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
+              ...filter,
               {
                 match_all: {},
               },
@@ -87,20 +105,37 @@ export const buildEventsReIndex = () => {
         },
       },
       dest: {
-        index: 'signals',
+        index: signalsIndex,
       },
       script: {
-        // TODO: Make parts of the signals such as severity configurable as that can come from a rule
         source: `
-          def signal = [
-            "severity": 1,
-            "description": "User root activity"
+          String[] indexPatterns = new String[] {${indexPatterns}};
+          String[] references = new String[] {${refs}};
+
+          def parent = [
+            "id": ctx._id,
+            "type": "event",
+            "depth": 1
           ];
+
+          def signal = [
+            "rule_revision": "${ruleRevision}",
+            "rule_id": "${ruleId}",
+            "rule_type": "${ruleType}",
+            "parent": parent,
+            "name": "${name}",
+            "severity": ${severity},
+            "description": "${description}",
+            "time_detected": "${timeDetected}",
+            "index_patterns": indexPatterns,
+            "references": references
+          ];
+
           ctx._source.signal = signal;
         `,
         lang: 'painless',
       },
-      max_docs: 500000, // TODO: Make configurable via parameter passing
+      max_docs: maxDocs,
     },
   };
 };

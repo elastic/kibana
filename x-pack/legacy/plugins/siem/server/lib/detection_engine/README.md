@@ -1,6 +1,10 @@
 Temporary README.md for developers working on the backend detection engine
 for how to get started.
 
+See these two other pages for references:
+https://github.com/elastic/kibana/blob/master/x-pack/legacy/plugins/alerting/README.md
+https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/actions
+
 Since there is no UI yet and a lot of backend areas that are not created, you 
 should install the kbn-action and kbn-alert project from here:
 https://github.com/pmuellr/kbn-action
