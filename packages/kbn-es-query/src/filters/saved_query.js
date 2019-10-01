@@ -17,6 +17,8 @@
  * under the License.
  */
 
+// Creates an filter from a saved query
+// dsl is created at query time
 export function buildSavedQueryFilter(savedQuery) {
   const filter = {
     meta: {

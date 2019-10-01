@@ -92,10 +92,11 @@ const translateToQuery = function (filter, {
   if (!filter) return;
 
   if (filter.query) {
+    // we have dsl so we simply return it
     return filter.query;
   }
   if (filter.meta && filter.meta.type && filter.meta.type === 'savedQuery') {
-    // do stuff: generate raw dsl that's done in the savedQuery filter constructor at the moment
+    // generate raw dsl from the savedQuery filter
     const savedQuery = filter.meta.params.savedQuery;
     const query = _.get(savedQuery, 'attributes.query');
     let filters = _.get(savedQuery, 'attributes.filters', []);
