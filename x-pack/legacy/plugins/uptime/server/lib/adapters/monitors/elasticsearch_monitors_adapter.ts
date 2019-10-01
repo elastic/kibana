@@ -12,6 +12,7 @@ import {
   MonitorPageTitle,
   Ping,
   LocationDurationLine,
+  Error,
 } from '../../../../common/graphql/types';
 import {
   dropLatestBucket,
@@ -428,9 +429,40 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
   }
 
-  getMonitorDetails(request: any, monitorId: string, checkGroup: string): Promise<any> {
+  public async getMonitorDetails(
+    request: any,
+    monitorId: string,
+    checkGroup: string
+  ): Promise<any> {
+    const params = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        size: 1,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  'monitor.id': monitorId,
+                },
+              },
+              {
+                term: {
+                  'monitor.check_group': checkGroup,
+                },
+              },
+            ],
+          },
+        },
+      },
+    };
+
+    const result = await this.database.search(request, params);
+
+    const monitorError: Error | null = get(result, 'hits.hits[0]._source.error', null);
+
     return {
-      data: monitorId,
+      monitorError,
     };
   }
 }

@@ -16,8 +16,10 @@ import {
 } from '@elastic/eui';
 import { get } from 'lodash';
 import styled from 'styled-components';
+import { connect } from 'react-redux';
 import { MonitorSummary, CheckMonitor } from '../../../../common/graphql/types';
 import { UptimeSettingsContext } from '../../../contexts';
+import { AppState } from '../../../state';
 
 const ContainerDiv = styled.div`
   padding: 10px;
@@ -31,7 +33,7 @@ interface MonitorListDrawerProps {
 /**
  * The elements shown when the user expands the monitor list rows.
  */
-export const MonitorListDrawer = ({ summary }: MonitorListDrawerProps) => {
+export const MonitorListDrawerComponent = ({ summary }: MonitorListDrawerProps) => {
   const {
     colors: { success, danger },
   } = useContext(UptimeSettingsContext);
@@ -80,3 +82,14 @@ export const MonitorListDrawer = ({ summary }: MonitorListDrawerProps) => {
     </ContainerDiv>
   );
 };
+
+const mapStateToProps = (state: AppState) => ({
+  // monitorDetails: getMonitorDetails(state),
+});
+
+const mapDispatchToProps = (dispatch: any) => ({});
+
+export const MonitorListDrawer = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(MonitorListDrawerComponent);
