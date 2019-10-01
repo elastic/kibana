@@ -35,7 +35,7 @@ export function getDocumentation(editor: any, docLinkVersion: string): Promise<s
       }
       const position = requests[0].range.end;
       position.column = position.column - 1;
-      const endpoint = getEndpointFromPosition(editor, position);
+      const endpoint = getEndpointFromPosition(editor, position, editor.parser);
       if (endpoint && endpoint.documentation && endpoint.documentation.indexOf('http') !== -1) {
         const nextDocumentation = endpoint.documentation
           .replace('/master/', `/${docLinkVersion}/`)

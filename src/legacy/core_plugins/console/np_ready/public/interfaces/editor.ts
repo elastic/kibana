@@ -57,7 +57,7 @@ export interface Editor {
   /**
    * Get the current position of the cursor
    */
-  getCurrentPosition(): Position | null;
+  getCurrentPosition(): Position;
 
   /**
    * Get the contents of the editor

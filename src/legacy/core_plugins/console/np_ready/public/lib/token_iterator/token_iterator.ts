@@ -24,7 +24,7 @@ function isColumnInTokenRange(column: number, token: Token) {
     return false;
   }
 
-  return column <= token.position.column + token.value.length - 1;
+  return column <= token.position.column + token.value.length;
 }
 
 export class TokenIteratorImpl implements TokenIterator {
@@ -44,17 +44,17 @@ export class TokenIteratorImpl implements TokenIterator {
     this.tokensLineCache = tokens;
   }
 
-  private updatePosition(info: { idx: number; token: Token }) {
+  private updatePosition(info: { idx: number; position: Position }) {
     this.currentTokenIdx = info.idx;
-    this.currentPosition = { ...info.token.position };
-  }
-
-  private getLineOffset() {
-    return this.currentPosition.lineNumber - 1;
+    this.currentPosition = { ...info.position };
   }
 
   getCurrentToken(): Token | null {
-    return this.provider.getTokenAt(this.currentPosition);
+    return (
+      this.tokensLineCache.find(token =>
+        isColumnInTokenRange(this.currentPosition.column, token)
+      ) || null
+    );
   }
 
   private step(direction: 1 | -1): Token | null {
@@ -63,17 +63,32 @@ export class TokenIteratorImpl implements TokenIterator {
     let nextToken = this.tokensLineCache[nextIdx];
     // Check current row
     if (nextToken) {
-      this.updatePosition({ idx: this.currentTokenIdx + 1, token: nextToken });
+      this.updatePosition({ idx: this.currentTokenIdx + direction, position: nextToken.position });
       return nextToken;
     }
 
     // Check next line
-    const nextLineNumber = this.getLineOffset() + direction;
+    const nextLineNumber = this.currentPosition.lineNumber + direction;
     const nextLineTokens = this.provider.getTokens(nextLineNumber);
     if (nextLineTokens) {
       this.updateLineTokens(nextLineTokens);
-      nextToken = nextLineTokens[0];
-      this.updatePosition({ idx: 0, token: nextToken });
+      let idx: number;
+      if (direction > 0) {
+        nextToken = nextLineTokens[0];
+        idx = 0;
+      } else {
+        nextToken = nextLineTokens[nextLineTokens.length - 1];
+        idx = nextLineTokens.length - 1;
+      }
+      if (nextToken == null) {
+        idx = 0;
+      }
+
+      const nextPosition = nextToken
+        ? nextToken.position
+        : { column: 1, lineNumber: nextLineNumber };
+      this.updatePosition({ idx, position: nextPosition });
+      return nextToken || null;
     }
 
     // We have reached the beginning or the end

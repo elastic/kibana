@@ -131,7 +131,7 @@ function RowParser(editor) {
   this.prevNonEmptyToken = function (tokenIter) {
     let t = tokenIter.stepBackward();
     // empty rows return null token.
-    while ((t || tokenIter.getCurrentTokenRow() > 0) && this.isEmptyToken(t)) t = tokenIter.stepBackward();
+    while ((t || tokenIter.getCurrentPosition().lineNumber > 1) && this.isEmptyToken(t)) t = tokenIter.stepBackward();
     return t;
   };
 }

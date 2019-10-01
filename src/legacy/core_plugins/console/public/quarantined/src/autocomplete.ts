@@ -56,6 +56,7 @@ function isUrlParamsToken(token: any) {
 function getCurrentMethodAndTokenPaths(
   editor: LegacyEditor,
   pos: Position,
+  parser: any,
   forceEndOfUrl?: boolean
 ) {
   const tokenIter = createTokenIterator({
@@ -76,14 +77,14 @@ function getCurrentMethodAndTokenPaths(
   // initialization problems -
   let t = tokenIter.getCurrentToken();
   if (t) {
-    if (startPos.column === 0) {
+    if (startPos.column === 1) {
       // if we are at the beginning of the line, the current token is the one after cursor, not before which
       // deviates from the standard.
       t = tokenIter.stepBackward();
       state = STATES.looking_for_scope_start;
     }
   } else {
-    if (startPos.column === 0) {
+    if (startPos.column === 1) {
       // empty lines do no have tokens, move one back
       t = tokenIter.stepBackward();
       state = STATES.start;
@@ -184,12 +185,12 @@ function getCurrentMethodAndTokenPaths(
     }
   }
 
-  if (walkedSomeBody && (!bodyTokenPath || bodyTokenPath.length === 0)) {
+  if (walkedSomeBody && (!bodyTokenPath || bodyTokenPath.length === 1)) {
     // we had some content and still no path -> the cursor is position after a closed body -> no auto complete
     return {};
   }
   ret.urlTokenPath = [];
-  if (tokenIter.getCurrentTokenRow() === startPos.lineNumber) {
+  if (tokenIter.getCurrentPosition().lineNumber === startPos.lineNumber) {
     if (t && (t.type === 'url.part' || t.type === 'url.param' || t.type === 'url.value')) {
       // we are forcing the end of the url for the purposes of determining an endpoint
       if (forceEndOfUrl && t.type === 'url.part') {
@@ -209,7 +210,7 @@ function getCurrentMethodAndTokenPaths(
   ret.bodyTokenPath = bodyTokenPath;
 
   ret.urlParamsTokenPath = null;
-  ret.requestStartRow = tokenIter.getCurrentTokenRow();
+  ret.requestStartRow = tokenIter.getCurrentPosition().lineNumber;
   let curUrlPart: any;
 
   while (t && isUrlParamsToken(t)) {
@@ -273,7 +274,7 @@ function getCurrentMethodAndTokenPaths(
         }
         break;
     }
-    t = tokenIter.prevNonEmptyToken();
+    t = parser.prevNonEmptyToken(tokenIter);
   }
 
   if (curUrlPart) {
@@ -295,17 +296,31 @@ function getCurrentMethodAndTokenPaths(
   }
   return ret;
 }
-export function getEndpointFromPosition(editor: LegacyEditor, pos: Position) {
-  const context = { ...getCurrentMethodAndTokenPaths(editor, pos, true) };
+export function getEndpointFromPosition(editor: LegacyEditor, pos: Position, parser: any) {
+  const context = { ...getCurrentMethodAndTokenPaths(editor, pos, parser, true) };
   const components = getTopLevelUrlCompleteComponents(context.method);
   populateContext(context.urlTokenPath, context, editor, true, components);
   return context.endpoint;
 }
 
 // eslint-disable-next-line
-export default function(ed: AceEditor) {
-  const editor = new LegacyEditor(ed);
-
+export default function({
+  coreEditor: editor,
+  parser,
+  execCommand,
+  getCursor,
+  isCompleteActive,
+  addChangeListener,
+  removeChangeListener,
+}: {
+  coreEditor: LegacyEditor;
+  parser: any;
+  execCommand: (cmd: string) => void;
+  getCursor: () => any;
+  isCompleteActive: () => boolean;
+  addChangeListener: (fn: any) => void;
+  removeChangeListener: (fn: any) => void;
+}) {
   function isUrlPathToken(token: Token | null) {
     switch ((token || ({} as any)).type) {
       case 'url.slash':
@@ -317,7 +332,7 @@ export default function(ed: AceEditor) {
     }
   }
 
-  function addMetaToTermsList(list: any, meta: any, template: string) {
+  function addMetaToTermsList(list: any, meta: any, template?: string) {
     return _.map(list, function(t: any) {
       if (typeof t !== 'object') {
         t = { name: t };
@@ -355,7 +370,7 @@ export default function(ed: AceEditor) {
         indentedTemplateLines = utils.jsonToString(term.template, true).split('\n');
       }
       let currentIndentation = editor.getLineValue({
-        lineNumber: context.rangeToReplace.start.row,
+        lineNumber: context.rangeToReplace.start.lineNumber,
       });
       currentIndentation = currentIndentation.match(/^\s*/)![0];
       for (
@@ -382,7 +397,7 @@ export default function(ed: AceEditor) {
     valueToInsert = context.prefixToAdd + valueToInsert + context.suffixToAdd;
 
     // disable listening to the changes we are making.
-    removeChangeListener();
+    removeChangeListener(editorChangeListener);
 
     if (context.rangeToReplace.start.column !== context.rangeToReplace.end.column) {
       editor.replace(context.rangeToReplace, valueToInsert);
@@ -409,15 +424,15 @@ export default function(ed: AceEditor) {
 
     if (context.autoCompleteType === 'body') {
       // look for the next place stand, just after a comma, {
-      let nonEmptyToken = tokenIter.nextNonEmptyToken();
+      let nonEmptyToken = parser.nextNonEmptyToken(tokenIter);
       switch (nonEmptyToken ? nonEmptyToken.type : 'NOTOKEN') {
         case 'paren.rparen':
           newPos = tokenIter.getCurrentPosition();
           break;
         case 'punctuation.colon':
-          nonEmptyToken = tokenIter.nextNonEmptyToken();
-          if ((nonEmptyToken || {}).type === 'paren.lparen') {
-            nonEmptyToken = tokenIter.nextNonEmptyToken();
+          nonEmptyToken = parser.nextNonEmptyToken(tokenIter);
+          if ((nonEmptyToken || ({} as any)).type === 'paren.lparen') {
+            nonEmptyToken = parser.nextNonEmptyToken(tokenIter);
             newPos = tokenIter.getCurrentPosition();
             if (nonEmptyToken && nonEmptyToken.value.indexOf('"') === 0) {
               newPos.column++;
@@ -434,7 +449,7 @@ export default function(ed: AceEditor) {
     }
 
     // re-enable listening to typing
-    addChangeListener();
+    addChangeListener(editorChangeListener);
   }
 
   function getAutoCompleteContext(ctxEditor: LegacyEditor, pos: Position) {
@@ -487,14 +502,14 @@ export default function(ed: AceEditor) {
   function getAutoCompleteType(pos: Position) {
     // return "method", "path" or "body" to determine auto complete type.
 
-    let rowMode = editor.parser.getRowParseMode();
+    let rowMode = parser.getRowParseMode();
 
     // eslint-disable-next-line no-bitwise
-    if (rowMode & editor.parser.MODE.IN_REQUEST) {
+    if (rowMode & parser.MODE.IN_REQUEST) {
       return 'body';
     }
     // eslint-disable-next-line no-bitwise
-    if (rowMode & editor.parser.MODE.REQUEST_START) {
+    if (rowMode & parser.MODE.REQUEST_START) {
       // on url path, url params or method.
       const tokenIter = createTokenIterator({
         editor,
@@ -509,7 +524,7 @@ export default function(ed: AceEditor) {
         case 'method':
           return 'method';
         case 'whitespace':
-          t = tokenIter.prevNonEmptyToken();
+          t = parser.prevNonEmptyToken(tokenIter);
 
           switch ((t || ({} as any)).type) {
             case 'method':
@@ -539,16 +554,21 @@ export default function(ed: AceEditor) {
 
     // after start to avoid single line url only requests
     // eslint-disable-next-line no-bitwise
-    if (rowMode & editor.parser.MODE.REQUEST_END) {
+    if (rowMode & parser.MODE.REQUEST_END) {
       return 'body';
     }
 
     // in between request on an empty
     if ((editor.getLineValue({ lineNumber: pos.lineNumber }) || '').trim() === '') {
       // check if the previous line is a single line begging of a new request
-      rowMode = editor.parser.getRowParseMode(pos.lineNumber - 1);
+      rowMode = parser.getRowParseMode(pos.lineNumber - 1);
       // eslint-disable-next-line no-bitwise
-      if (rowMode & editor.parser.MODE.REQUEST_START && rowMode & editor.parser.MODE.REQUEST_END) {
+      if (
+        // eslint-disable-next-line no-bitwise
+        rowMode & parser.MODE.REQUEST_START &&
+        // eslint-disable-next-line no-bitwise
+        rowMode & parser.MODE.REQUEST_END
+      ) {
         return 'body';
       }
       // o.w suggest a method
@@ -572,7 +592,11 @@ export default function(ed: AceEditor) {
       editor.getTokenAt({ lineNumber: pos.lineNumber, column: pos.column })
     );
     if (!context.updatedForToken) {
-      context.updatedForToken = { value: '', start: pos.column };
+      context.updatedForToken = {
+        value: '',
+        type: '',
+        position: { column: pos.column, lineNumber: pos.lineNumber },
+      };
     } // empty line
 
     let anchorToken = context.createdWithToken;
@@ -599,7 +623,7 @@ export default function(ed: AceEditor) {
           start: { lineNumber: pos.lineNumber, column: anchorToken.column },
           end: {
             lineNumber: pos.lineNumber,
-            column: context.updatedForToken.column + context.updatedForToken.value.length,
+            column: context.updatedForToken.position.column + context.updatedForToken.value.length,
           },
         } as Range;
         context.replacingToken = true;
@@ -610,7 +634,8 @@ export default function(ed: AceEditor) {
             start: { lineNumber: pos.lineNumber, column: anchorToken.column },
             end: {
               lineNumber: pos.lineNumber,
-              column: context.updatedForToken.column + context.updatedForToken.value.length,
+              column:
+                context.updatedForToken.position.column + context.updatedForToken.value.length,
             },
           } as Range;
           context.replacingToken = true;
@@ -626,7 +651,7 @@ export default function(ed: AceEditor) {
     }
 
     context.textBoxPosition = {
-      row: context.rangeToReplace.start.row,
+      lineNumber: context.rangeToReplace.start.lineNumber,
       column: context.rangeToReplace.start.column,
     };
 
@@ -646,7 +671,7 @@ export default function(ed: AceEditor) {
     }
   }
 
-  function addBodyPrefixSuffixToContext(context) {
+  function addBodyPrefixSuffixToContext(context: any) {
     // Figure out what happens next to the token to see whether it needs trailing commas etc.
 
     // Templates will be used if not destroying existing structure.
@@ -659,7 +684,7 @@ export default function(ed: AceEditor) {
       editor,
       position: editor.getCurrentPosition()!,
     });
-    let nonEmptyToken = tokenIter.nextNonEmptyToken();
+    let nonEmptyToken = parser.nextNonEmptyToken(tokenIter);
     switch (nonEmptyToken ? nonEmptyToken.type : 'NOTOKEN') {
       case 'NOTOKEN':
       case 'paren.lparen':
@@ -671,22 +696,22 @@ export default function(ed: AceEditor) {
         // test if there is an empty object - if so we replace it
         context.addTemplate = false;
 
-        nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
+        nonEmptyToken = parser.nextNonEmptyToken(tokenIter);
         if (!(nonEmptyToken && nonEmptyToken.value === '{')) {
           break;
         }
-        nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
+        nonEmptyToken = parser.nextNonEmptyToken(tokenIter);
         if (!(nonEmptyToken && nonEmptyToken.value === '}')) {
           break;
         }
         context.addTemplate = true;
         // extend range to replace to include all up to token
-        context.rangeToReplace.end.row = tokenIter.getCurrentTokenRow();
+        context.rangeToReplace.end.lineNumber = tokenIter.getCurrentTokenLineNumber();
         context.rangeToReplace.end.column =
-          tokenIter.getCurrentTokenColumn() + nonEmptyToken.value.length;
+          parser.getCurrentTokenColumn(tokenIter) + nonEmptyToken.value.length;
 
         // move one more time to check if we need a trailing comma
-        nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
+        nonEmptyToken = parser.nextNonEmptyToken(tokenIter);
         switch (nonEmptyToken ? nonEmptyToken.type : 'NOTOKEN') {
           case 'NOTOKEN':
           case 'paren.rparen':
@@ -705,18 +730,18 @@ export default function(ed: AceEditor) {
     }
 
     // go back to see whether we have one of ( : { & [ do not require a comma. All the rest do.
-    tokenIter = editor.iterForCurrentLoc();
+    tokenIter = createTokenIterator({ editor, position: editor.getCurrentPosition() });
     nonEmptyToken = tokenIter.getCurrentToken();
     let insertingRelativeToToken; // -1 is before token, 0 middle, +1 after token
     if (context.replacingToken) {
       insertingRelativeToToken = 0;
     } else {
-      const pos = editor.getCursorPosition();
-      if (pos.column === context.updatedForToken.start) {
+      const pos = editor.getCurrentPosition();
+      if (pos.column === context.updatedForToken.position.column) {
         insertingRelativeToToken = -1;
       } else if (
         pos.column <
-        context.updatedForToken.start + context.updatedForToken.value.length
+        context.updatedForToken.position.column + context.updatedForToken.value.length
       ) {
         insertingRelativeToToken = 0;
       } else {
@@ -724,8 +749,8 @@ export default function(ed: AceEditor) {
       }
     }
     // we should actually look at what's happening before this token
-    if (editor.parser.isEmptyToken(nonEmptyToken) || insertingRelativeToToken <= 0) {
-      nonEmptyToken = editor.parser.prevNonEmptyToken(tokenIter);
+    if (parser.isEmptyToken(nonEmptyToken) || insertingRelativeToToken <= 0) {
+      nonEmptyToken = parser.prevNonEmptyToken(tokenIter);
     }
 
     switch (nonEmptyToken ? nonEmptyToken.type : 'NOTOKEN') {
@@ -752,11 +777,11 @@ export default function(ed: AceEditor) {
   function addMethodPrefixSuffixToContext(context: any) {
     context.prefixToAdd = '';
     context.suffixToAdd = '';
-    const tokenIter = editor.iterForCurrentLoc();
-    const row = tokenIter.getCurrentTokenRow();
-    const t = editor.parser.nextNonEmptyToken(tokenIter);
+    const tokenIter = createTokenIterator({ editor, position: editor.getCurrentPosition() });
+    const lineNumber = tokenIter.getCurrentPosition().lineNumber;
+    const t = parser.nextNonEmptyToken(tokenIter);
 
-    if (tokenIter.getCurrentTokenRow() !== row || !t) {
+    if (tokenIter.getCurrentPosition().lineNumber !== lineNumber || !t) {
       // we still have nothing next to the method, add a space..
       context.suffixToAdd = ' ';
     }
@@ -776,7 +801,7 @@ export default function(ed: AceEditor) {
   }
 
   function addPathAutoCompleteSetToContext(context: any, pos: Position) {
-    const ret = getCurrentMethodAndTokenPaths(editor, pos);
+    const ret = getCurrentMethodAndTokenPaths(editor, pos, parser);
     context.method = ret.method;
     context.token = ret.token;
     context.otherTokenValues = ret.otherTokenValues;
@@ -787,8 +812,8 @@ export default function(ed: AceEditor) {
     context.autoCompleteSet = addMetaToTermsList(context.autoCompleteSet, 'endpoint');
   }
 
-  function addUrlParamsAutoCompleteSetToContext(context, pos) {
-    const ret = getCurrentMethodAndTokenPaths(editor, pos);
+  function addUrlParamsAutoCompleteSetToContext(context: any, pos: Position) {
+    const ret = getCurrentMethodAndTokenPaths(editor, pos, parser);
     context.method = ret.method;
     context.otherTokenValues = ret.otherTokenValues;
     context.urlTokenPath = ret.urlTokenPath;
@@ -835,7 +860,7 @@ export default function(ed: AceEditor) {
   }
 
   function addBodyAutoCompleteSetToContext(context: any, pos: Position) {
-    const ret = getCurrentMethodAndTokenPaths(editor, pos);
+    const ret = getCurrentMethodAndTokenPaths(editor, pos, parser);
     context.method = ret.method;
     context.otherTokenValues = ret.otherTokenValues;
     context.urlTokenPath = ret.urlTokenPath;
@@ -879,26 +904,26 @@ export default function(ed: AceEditor) {
   const evaluateCurrentTokenAfterAChange = _.debounce(function evaluateCurrentTokenAfterAChange(
     pos: Position
   ) {
-    let currentToken = editor.getTokenAt(pos.row, pos.column);
+    let currentToken = editor.getTokenAt(pos)!;
 
     if (!currentToken) {
-      if (pos.lineNumber === 0) {
+      if (pos.lineNumber === 1) {
         LAST_EVALUATED_TOKEN = null;
         return;
       }
-      currentToken = { column: 0, value: '' }; // empty row
+      currentToken = { position: { column: 0, lineNumber: 0 }, value: '', type: '' }; // empty row
     }
 
-    currentToken.lineNumber = pos.lineNumber; // extend token with row. Ace doesn't supply it by default
-    if (editor.parser.isEmptyToken(currentToken)) {
+    currentToken.position.lineNumber = pos.lineNumber; // extend token with row. Ace doesn't supply it by default
+    if (parser.isEmptyToken(currentToken)) {
       // empty token. check what's coming next
-      const nextToken = editor.getTokenAt(pos.lineNumber, pos.column + 1);
-      if (editor.parser.isEmptyToken(nextToken)) {
+      const nextToken = editor.getTokenAt({ ...pos, column: pos.column + 1 })!;
+      if (parser.isEmptyToken(nextToken)) {
         // Empty line, or we're not on the edge of current token. Save the current position as base
-        currentToken.start = pos.column;
+        currentToken.position.column = pos.column;
         LAST_EVALUATED_TOKEN = currentToken;
       } else {
-        nextToken.row = pos.row;
+        nextToken.position.lineNumber = pos.lineNumber;
         LAST_EVALUATED_TOKEN = nextToken;
       }
       return;
@@ -910,8 +935,8 @@ export default function(ed: AceEditor) {
     }
 
     if (
-      LAST_EVALUATED_TOKEN.start !== currentToken.start ||
-      LAST_EVALUATED_TOKEN.row !== currentToken.row ||
+      LAST_EVALUATED_TOKEN.position.column !== currentToken.position.column ||
+      LAST_EVALUATED_TOKEN.position.lineNumber !== currentToken.position.lineNumber ||
       LAST_EVALUATED_TOKEN.value === currentToken.value
     ) {
       // not on the same place or nothing changed, cache and wait for the next time
@@ -930,24 +955,16 @@ export default function(ed: AceEditor) {
     }
 
     LAST_EVALUATED_TOKEN = currentToken;
-    ed.execCommand('startAutocomplete');
+    execCommand('startAutocomplete');
   },
   100);
 
   function editorChangeListener() {
-    const cursor = (ed as any).selection.lead;
-    if ((ed as any).__ace.completer && (ed as any).__ace.completer.activated) {
+    const cursor = getCursor();
+    if (isCompleteActive()) {
       return;
     }
     evaluateCurrentTokenAfterAChange(cursor);
-  }
-
-  function addChangeListener() {
-    ed.on('changeSelection', editorChangeListener);
-  }
-
-  function removeChangeListener() {
-    ed.off('changeSelection', editorChangeListener);
   }
 
   function getCompletions(
@@ -957,8 +974,12 @@ export default function(ed: AceEditor) {
     prefix: any,
     callback: any
   ) {
+    const position: Position = {
+      lineNumber: pos.row + 1,
+      column: pos.column + 1,
+    };
     try {
-      const context = getAutoCompleteContext(editor, pos);
+      const context = getAutoCompleteContext(editor, position);
       if (!context) {
         callback(null, []);
       } else {
@@ -1019,12 +1040,13 @@ export default function(ed: AceEditor) {
         );
       }
     } catch (e) {
-      // console.log('error while getting completion terms', e);
+      // eslint-disable-next-line no-console
+      console.error(e);
       callback(e, null);
     }
   }
 
-  addChangeListener();
+  addChangeListener(editorChangeListener);
 
   // Hook into Ace
 
@@ -1056,16 +1078,12 @@ export default function(ed: AceEditor) {
     },
   ]);
 
-  ed.setOptions({
-    enableBasicAutocompletion: true,
-  });
-  ed.$blockScrolling = Infinity;
   return {
     _test: {
       getCompletions,
       addReplacementInfoToContext,
-      addChangeListener,
-      removeChangeListener,
+      addChangeListener: () => addChangeListener(editorChangeListener),
+      removeChangeListener: () => removeChangeListener(editorChangeListener),
     },
   };
 }

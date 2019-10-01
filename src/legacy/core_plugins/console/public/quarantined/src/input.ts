@@ -17,14 +17,35 @@
  * under the License.
  */
 
+// @ts-ignore
 import Autocomplete from './autocomplete';
-const SenseEditor = require('./sense_editor/editor');
 
-let input;
-export function initializeInput($el, $actionsEl) {
+import { LegacyEditor } from '../../../np_ready/public/application/models';
+
+// @ts-ignore
+import SenseEditor from './sense_editor/editor';
+
+let input: any;
+export function initializeInput($el: HTMLElement, $actionsEl: HTMLElement) {
   input = new SenseEditor($el);
 
-  input.autocomplete = new Autocomplete(input);
+  // Autocomplete should not use any Ace functionality directly
+  // so we build a shim here.
+  const editorShim = {
+    coreEditor: new LegacyEditor(input),
+    parser: input.parser,
+    execCommand: (cmd: string) => input.execCommand(cmd),
+    getCursor: () => input.selection.lead,
+    isCompleteActive: () => input.__ace.completer && input.__ace.completer.activated,
+    addChangeListener: (fn: any) => input.on('changeSelection', fn),
+    removeChangeListener: (fn: any) => input.off('changeSelection', fn),
+  };
+
+  input.autocomplete = new (Autocomplete as any)(editorShim);
+  input.setOptions({
+    enableBasicAutocompletion: true,
+  });
+  input.$blockScrolling = Infinity;
   input.$actions = $actionsEl;
 
   /**
@@ -36,6 +57,7 @@ export function initializeInput($el, $actionsEl) {
   return input;
 }
 
+// eslint-disable-next-line
 export default function getInput() {
   return input;
 }

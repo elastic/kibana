@@ -53,7 +53,7 @@ export class LegacyEditor implements Editor {
     return session.getLine(lineNumber - 1);
   }
 
-  getCurrentPosition(): Position | null {
+  getCurrentPosition(): Position {
     const cursorPosition = this.editor.getCursorPosition();
     return {
       lineNumber: cursorPosition.row + 1,
