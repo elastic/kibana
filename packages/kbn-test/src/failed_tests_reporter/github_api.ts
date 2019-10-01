@@ -36,11 +36,11 @@ interface GithubIssue {
 export class GithubApi {
   private readonly x: AxiosInstance;
 
-  constructor(private readonly log: ToolingLog, private readonly dryRun: boolean, token: string) {
+  constructor(private readonly log: ToolingLog, private readonly token: string | undefined) {
     this.x = Axios.create({
       baseURL: 'https://api.github.com',
       headers: {
-        Authentication: `token ${token}`,
+        ...(token !== undefined ? { Authentication: `token ${token}` } : {}),
         'User-Agent': 'elastic/kibana#failed_test_reporter',
       },
     });
@@ -68,23 +68,29 @@ export class GithubApi {
   }
 
   async editIssueBody(issueNumber: number, newBody: string) {
-    await this.request({
-      method: 'PATCH',
-      url: Url.resolve(ISSUES_URL, encodeURIComponent(issueNumber)),
-      data: {
-        body: newBody,
+    await this.request(
+      {
+        method: 'PATCH',
+        url: Url.resolve(ISSUES_URL, encodeURIComponent(issueNumber)),
+        data: {
+          body: newBody,
+        },
       },
-    });
+      undefined
+    );
   }
 
   async addIssueComment(issueNumber: number, commentBody: string) {
-    await this.request({
-      method: 'POST',
-      url: Url.resolve(ISSUES_URL, `${encodeURIComponent(issueNumber)}/comments`),
-      data: {
-        body: commentBody,
+    await this.request(
+      {
+        method: 'POST',
+        url: Url.resolve(ISSUES_URL, `${encodeURIComponent(issueNumber)}/comments`),
+        data: {
+          body: commentBody,
+        },
       },
-    });
+      undefined
+    );
   }
 
   async createIssue(title: string, body: string, labels?: string[]) {
@@ -106,8 +112,8 @@ export class GithubApi {
     return resp.data.html_url;
   }
 
-  private async request<T>(options: AxiosRequestConfig, dryRunResponse?: T) {
-    if (this.dryRun) {
+  private async request<T>(options: AxiosRequestConfig, dryRunResponse: T) {
+    if (this.token === undefined) {
       this.log.debug(
         `Github API: ${options.method} ${options.url} ${JSON.stringify(options.data)}`
       );

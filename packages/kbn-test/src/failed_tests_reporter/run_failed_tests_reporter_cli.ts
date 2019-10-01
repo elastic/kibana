@@ -49,9 +49,15 @@ export function runFailedTestsReporterCli() {
             exitCode: 0,
           });
         }
+
+        if (!process.env.GITHUB_TOKEN) {
+          throw createFailError(
+            'GITHUB_TOKEN environment variable must be set, otherwise use --dry-run flag'
+          );
+        }
       }
 
-      const githubApi = new GithubApi(log, flags['dry-run'] as boolean, process.env.GITHUB_TOKEN);
+      const githubApi = new GithubApi(log, flags['dry-run'] ? undefined : process.env.GITHUB_TOKEN);
       const issues = await githubApi.getKibanaIssues();
       const files = await globby(['target/junit/**/*.xml'], { cwd: REPO_ROOT, absolute: true });
 

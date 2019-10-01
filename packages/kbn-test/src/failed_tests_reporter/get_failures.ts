@@ -79,8 +79,8 @@ const indent = (text: string) =>
     .map(l => `  ${l}`)
     .join('\n')}`;
 
-const getFailureText = (testCase: TestCase) => {
-  const [failureNode] = testCase.failure;
+const getFailureText = (failure: NonNullable<TestCase['failure']>) => {
+  const [failureNode] = failure;
 
   if (failureNode && typeof failureNode === 'object' && typeof failureNode._ === 'string') {
     return stripAnsi(failureNode._);
@@ -131,7 +131,9 @@ export async function getFailures(log: ToolingLog, testReportPath: string) {
   const failures: TestFailure[] = [];
   for (const testSuite of testSuites) {
     for (const testCase of testSuite.testcase) {
-      if (!testCase.failure) {
+      const { failure } = testCase;
+
+      if (!failure) {
         continue;
       }
 
@@ -139,7 +141,7 @@ export async function getFailures(log: ToolingLog, testReportPath: string) {
       const failureCase: TestFailure = {
         ...testCase.$,
         // Strip ANSI color characters
-        failure: getFailureText(testCase),
+        failure: getFailureText(failure),
       };
 
       if (isLikelyIrrelevant(failureCase)) {
