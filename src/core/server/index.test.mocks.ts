@@ -35,7 +35,11 @@ jest.doMock('./elasticsearch/elasticsearch_service', () => ({
   ElasticsearchService: jest.fn(() => mockElasticsearchService),
 }));
 
-export const mockLegacyService = { setup: jest.fn(), start: jest.fn(), stop: jest.fn() };
+export const mockLegacyService = {
+  setup: jest.fn().mockReturnValue({ uiExports: {} }),
+  start: jest.fn(),
+  stop: jest.fn(),
+};
 jest.mock('./legacy/legacy_service', () => ({
   LegacyService: jest.fn(() => mockLegacyService),
 }));
@@ -44,4 +48,10 @@ import { configServiceMock } from './config/config_service.mock';
 export const mockConfigService = configServiceMock.create();
 jest.doMock('./config/config_service', () => ({
   ConfigService: jest.fn(() => mockConfigService),
+}));
+
+import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
+export const mockSavedObjectsService = savedObjectsServiceMock.create();
+jest.doMock('./saved_objects/saved_objects_service', () => ({
+  SavedObjectsService: jest.fn(() => mockSavedObjectsService),
 }));
