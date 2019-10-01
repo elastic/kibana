@@ -5,8 +5,8 @@
  */
 
 import { VISUALIZATION_COLORS } from '@elastic/eui';
-import { MAX_SPACE_INITIALS } from './constants';
-import { Space } from './model/space';
+import { Space } from '../../common/model/space';
+import { MAX_SPACE_INITIALS } from '../../common';
 
 // code point for lowercase "a"
 const FALLBACK_CODE_POINT = 97;
