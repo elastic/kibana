@@ -61,6 +61,11 @@ export interface FetchResult {
   docs: ConcreteTaskInstance[];
 }
 
+export interface ClaimOwnershipResult {
+  claimedTasks: number;
+  docs: ConcreteTaskInstance[];
+}
+
 export interface UpdateByQueryResult {
   total: number;
 }
@@ -226,12 +231,15 @@ export class TaskStore {
    * - has a type that is in our task definitions
    *
    * @param {OwnershipClaimingOpts} options
-   * @returns {Promise<ConcreteTaskInstance[]>}
+   * @returns {Promise<ClaimOwnershipResult>}
    */
-  public async claimAvailableTasks(opts: OwnershipClaimingOpts): Promise<ConcreteTaskInstance[]> {
-    const total = await this.markAvailableTasksAsClaimed(opts);
-    const docs = total > 0 ? await this.sweepForClaimedTasks(opts) : Promise.resolve([]);
-    return docs;
+  public async claimAvailableTasks(opts: OwnershipClaimingOpts): Promise<ClaimOwnershipResult> {
+    const claimedTasks = await this.markAvailableTasksAsClaimed(opts);
+    const docs = claimedTasks > 0 ? await this.sweepForClaimedTasks(opts) : [];
+    return {
+      claimedTasks,
+      docs,
+    };
   }
 
   private async markAvailableTasksAsClaimed({

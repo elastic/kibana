@@ -602,7 +602,7 @@ describe('TaskStore', () => {
         maxAttempts: 2,
         savedObjectsRepository: savedObjectsClient,
       });
-      const result = await store.claimAvailableTasks({ retryAt: new Date(), size: 10 });
+      const { docs } = await store.claimAvailableTasks({ retryAt: new Date(), size: 10 });
       sinon.assert.calledOnce(callCluster);
       sinon.assert.calledWithMatch(callCluster, 'updateByQuery', {
         ignoreUnavailable: true,
@@ -610,7 +610,7 @@ describe('TaskStore', () => {
           size: 10,
         },
       });
-      expect(result.length).toBe(0);
+      expect(docs.length).toBe(0);
     });
 
     test('it filters claimed tasks down by supported types, maxAttempts, status, and runAt', async () => {
@@ -798,7 +798,7 @@ describe('TaskStore', () => {
         },
       ];
       const {
-        result,
+        result: { docs },
         args: {
           search: {
             body: { query },
@@ -825,7 +825,7 @@ describe('TaskStore', () => {
         },
       });
 
-      expect(result).toMatchObject([
+      expect(docs).toMatchObject([
         {
           attempts: 0,
           id: 'aaa',
