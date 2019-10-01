@@ -23,4 +23,5 @@ export interface UMMonitorsAdapter {
   ): Promise<any>;
   getFilterBar(request: any, dateRangeStart: string, dateRangeEnd: string): Promise<any>;
   getMonitorPageTitle(request: any, monitorId: string): Promise<MonitorPageTitle | null>;
+  getMonitorDetails(request: any, monitorId: string, checkGroup: string): Promise<any>;
 }

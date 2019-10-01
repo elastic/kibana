@@ -427,4 +427,10 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       name: get(pageTitle, 'monitor.name', null),
     };
   }
+
+  getMonitorDetails(request: any, monitorId: string, checkGroup: string): Promise<any> {
+    return {
+      data: monitorId,
+    };
+  }
 }
