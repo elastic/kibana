@@ -273,7 +273,7 @@ export interface VisualizationSuggestion<T = unknown> {
   /**
    * An EUI icon type shown instead of the preview expression.
    */
-  previewIcon: string;
+  previewIcon: IconType;
 }
 
 export interface FramePublicAPI {
