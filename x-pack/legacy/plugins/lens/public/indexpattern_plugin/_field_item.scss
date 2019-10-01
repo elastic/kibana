@@ -79,3 +79,8 @@
   min-width: 260px;
   max-width: 300px;
 }
+
+.lnsFieldItem__popoverButtonGroup {
+  // Enforce lowercase for buttons or else some browsers inherit all caps from popover title
+  text-transform: none;
+}

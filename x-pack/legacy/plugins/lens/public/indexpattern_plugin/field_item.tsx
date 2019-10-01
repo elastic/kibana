@@ -271,6 +271,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
   if (histogram && histogram.buckets.length && topValues && topValues.buckets.length) {
     title = (
       <EuiButtonGroup
+        className="lnsFieldItem__popoverButtonGroup"
         buttonSize="compressed"
         isFullWidth
         legend={i18n.translate('xpack.lens.indexPattern.fieldStatsDisplayToggle', {
