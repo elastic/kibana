@@ -127,6 +127,7 @@ function testInitialState(): IndexPatternPrivateState {
   return {
     currentIndexPatternId: '1',
     indexPatternRefs: [],
+    existingFields: {},
     indexPatterns: expectedIndexPatterns,
     layers: {
       first: {
@@ -306,6 +307,7 @@ describe('IndexPattern Data Source suggestions', () => {
       it('should make a metric suggestion for a number field if there is no time field', async () => {
         const state: IndexPatternPrivateState = {
           indexPatternRefs: [],
+          existingFields: {},
           currentIndexPatternId: '1',
           showEmptyFields: false,
           indexPatterns: {
@@ -509,6 +511,7 @@ describe('IndexPattern Data Source suggestions', () => {
       it('should make a metric suggestion for a number field if there is no time field', async () => {
         const state: IndexPatternPrivateState = {
           indexPatternRefs: [],
+          existingFields: {},
           currentIndexPatternId: '1',
           showEmptyFields: false,
           indexPatterns: {
@@ -929,6 +932,7 @@ describe('IndexPattern Data Source suggestions', () => {
         getDatasourceSuggestionsFromCurrentState({
           showEmptyFields: false,
           indexPatternRefs: [],
+          existingFields: {},
           indexPatterns: expectedIndexPatterns,
           layers: {
             first: {
@@ -1179,6 +1183,7 @@ describe('IndexPattern Data Source suggestions', () => {
       const initialState = testInitialState();
       const state: IndexPatternPrivateState = {
         indexPatternRefs: [],
+        existingFields: {},
         currentIndexPatternId: '1',
         indexPatterns: {
           1: {
@@ -1316,6 +1321,7 @@ describe('IndexPattern Data Source suggestions', () => {
       const initialState = testInitialState();
       const state: IndexPatternPrivateState = {
         indexPatternRefs: [],
+        existingFields: {},
         currentIndexPatternId: '1',
         indexPatterns: {
           1: {
@@ -1375,6 +1381,7 @@ describe('IndexPattern Data Source suggestions', () => {
       const initialState = testInitialState();
       const state: IndexPatternPrivateState = {
         indexPatternRefs: [],
+        existingFields: {},
         currentIndexPatternId: '1',
         indexPatterns: {
           1: {

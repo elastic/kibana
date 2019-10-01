@@ -30,6 +30,7 @@ describe('filter_ratio', () => {
   beforeEach(() => {
     state = {
       indexPatternRefs: [],
+      existingFields: {},
       indexPatterns: {
         1: {
           id: '1',

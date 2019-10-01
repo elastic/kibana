@@ -146,6 +146,7 @@ describe('getOperationTypesForField', () => {
   describe('buildColumn', () => {
     const state: IndexPatternPrivateState = {
       indexPatternRefs: [],
+      existingFields: {},
       currentIndexPatternId: '1',
       showEmptyFields: false,
       indexPatterns: expectedIndexPatterns,
