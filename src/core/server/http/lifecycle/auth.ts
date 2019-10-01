@@ -53,14 +53,14 @@ const authResult = {
 /**
  * Auth Headers map
  * @public
- * */
+ */
 
 export type AuthHeaders = Record<string, string | string[]>;
 
 /**
  * Result of an incoming request authentication.
  * @public
- * */
+ */
 export interface AuthResultParams {
   /**
    * Data to associate with an incoming request. Any downstream plugin may get access to the data.
@@ -91,7 +91,10 @@ const toolkit: AuthToolkit = {
   authenticated: authResult.authenticated,
 };
 
-/** @public */
+/**
+ * See {@link AuthToolkit}.
+ * @public
+ */
 export type AuthenticationHandler = (
   request: KibanaRequest,
   response: LifecycleResponseFactory,

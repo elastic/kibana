@@ -21,7 +21,7 @@ import { Observable } from 'rxjs';
 import { ToastsSetup } from './toasts_service';
 
 const createToastsApiMock = () => {
-  const api: jest.Mocked<PublicMethodsOf<ToastsSetup>> = {
+  const api: jest.Mocked<ToastsSetup> = {
     get$: jest.fn(() => new Observable()),
     add: jest.fn(),
     remove: jest.fn(),

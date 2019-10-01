@@ -425,23 +425,18 @@ export interface HttpErrorRequest {
 export interface HttpErrorResponse {
     // (undocumented)
     body?: HttpBody;
-    // Warning: (ae-forgotten-export) The symbol "HttpFetchError" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
-    error: Error | HttpFetchError;
+    error: Error | IHttpFetchError;
     // (undocumented)
     request?: Request;
     // (undocumented)
     response?: Response;
 }
 
-// @public (undocumented)
+// @public
 export interface HttpFetchOptions extends HttpRequestInit {
-    // (undocumented)
     headers?: HttpHeadersInit;
-    // (undocumented)
     prependBasePath?: boolean;
-    // (undocumented)
     query?: HttpFetchQuery;
 }
 
@@ -451,7 +446,7 @@ export interface HttpFetchQuery {
     [key: string]: string | number | boolean | undefined;
 }
 
-// @public (undocumented)
+// @public
 export type HttpHandler = (path: string, options?: HttpFetchOptions) => Promise<HttpBody>;
 
 // @public (undocumented)
@@ -460,56 +455,33 @@ export interface HttpHeadersInit {
     [name: string]: any;
 }
 
-// Warning: (ae-missing-release-tag) "HttpInterceptController" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
-export class HttpInterceptController {
-    // (undocumented)
-    halt(): void;
-    // (undocumented)
-    readonly halted: boolean;
-    }
-
-// @public (undocumented)
+// @public
 export interface HttpInterceptor {
-    // (undocumented)
-    request?(request: Request, controller: HttpInterceptController): Promise<Request> | Request | void;
-    // (undocumented)
-    requestError?(httpErrorRequest: HttpErrorRequest, controller: HttpInterceptController): Promise<Request> | Request | void;
-    // (undocumented)
-    response?(httpResponse: HttpResponse, controller: HttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
-    // (undocumented)
-    responseError?(httpErrorResponse: HttpErrorResponse, controller: HttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
+    request?(request: Request, controller: IHttpInterceptController): Promise<Request> | Request | void;
+    requestError?(httpErrorRequest: HttpErrorRequest, controller: IHttpInterceptController): Promise<Request> | Request | void;
+    response?(httpResponse: HttpResponse, controller: IHttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
+    responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
 }
 
-// @public (undocumented)
+// @public
 export interface HttpRequestInit {
+    // Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "kibana" does not have an export "RequestInit"
+    // 
     // (undocumented)
     body?: BodyInit | null;
-    // (undocumented)
     cache?: RequestCache;
-    // (undocumented)
     credentials?: RequestCredentials;
     // (undocumented)
     headers?: HttpHeadersInit;
-    // (undocumented)
     integrity?: string;
-    // (undocumented)
     keepalive?: boolean;
-    // (undocumented)
     method?: string;
-    // (undocumented)
     mode?: RequestMode;
-    // (undocumented)
     redirect?: RequestRedirect;
-    // (undocumented)
     referrer?: string;
-    // (undocumented)
     referrerPolicy?: ReferrerPolicy;
-    // (undocumented)
     signal?: AbortSignal | null;
-    // (undocumented)
-    window?: any;
+    window?: null;
 }
 
 // @public (undocumented)
@@ -524,44 +496,30 @@ export interface HttpResponse {
 
 // @public (undocumented)
 export interface HttpServiceBase {
-    // (undocumented)
-    addLoadingCount(count$: Observable<number>): void;
-    // (undocumented)
-    basePath: {
-        get: () => string;
-        prepend: (url: string) => string;
-        remove: (url: string) => string;
-    };
-    // (undocumented)
+    addLoadingCount(countSource$: Observable<number>): void;
+    // Warning: (ae-forgotten-export) The symbol "IBasePath" needs to be exported by the entry point index.d.ts
+    basePath: IBasePath;
     delete: HttpHandler;
-    // (undocumented)
     fetch: HttpHandler;
-    // (undocumented)
     get: HttpHandler;
-    // (undocumented)
     getLoadingCount$(): Observable<number>;
-    // (undocumented)
     head: HttpHandler;
-    // (undocumented)
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "HTTPInterceptor"
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "HTTPInterceptor"
     intercept(interceptor: HttpInterceptor): () => void;
-    // (undocumented)
     options: HttpHandler;
-    // (undocumented)
     patch: HttpHandler;
-    // (undocumented)
     post: HttpHandler;
-    // (undocumented)
     put: HttpHandler;
-    // (undocumented)
     removeAllInterceptors(): void;
-    // (undocumented)
+    // @internal (undocumented)
     stop(): void;
 }
 
-// @public (undocumented)
+// @public
 export type HttpSetup = HttpServiceBase;
 
-// @public (undocumented)
+// @public
 export type HttpStart = HttpServiceBase;
 
 // @public
@@ -579,6 +537,40 @@ export interface IContextContainer<THandler extends HandlerFunction<any>> {
 
 // @public
 export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: Partial<HandlerContextType<THandler>>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
+
+// @public (undocumented)
+export interface IHttpFetchError extends Error {
+    // (undocumented)
+    readonly body?: any;
+    // (undocumented)
+    readonly request: Request;
+    // (undocumented)
+    readonly response?: Response;
+}
+
+// @public
+export interface IHttpInterceptController {
+    halt(): void;
+    halted: boolean;
+}
+
+// @public (undocumented)
+export interface IToasts {
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
+    add(toastOrTitle: ToastInput): Toast;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
+    addDanger(toastOrTitle: ToastInput): Toast;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
+    addError(error: Error, options: ErrorToastOptions): Toast;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
+    addSuccess(toastOrTitle: ToastInput): Toast;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
+    addWarning(toastOrTitle: ToastInput): Toast;
+    get$(): Rx.Observable<Toast[]>;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "IToast"
+    remove(toasts: Toast): void;
+}
 
 // @public @deprecated
 export interface LegacyCoreSetup extends CoreSetup {
@@ -614,16 +606,12 @@ export interface LegacyNavLink {
 
 // @public (undocumented)
 export interface NotificationsSetup {
-    // Warning: (ae-forgotten-export) The symbol "ToastsSetup" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     toasts: ToastsSetup;
 }
 
 // @public (undocumented)
 export interface NotificationsStart {
-    // Warning: (ae-forgotten-export) The symbol "ToastsStart" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     toasts: ToastsStart;
 }
@@ -884,27 +872,10 @@ export { Toast }
 export type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
 
 // @public (undocumented)
-export class ToastsApi {
-    constructor(deps: {
-        uiSettings: UiSettingsClientContract;
-    });
-    // (undocumented)
-    add(toastOrTitle: ToastInput): Toast;
-    // (undocumented)
-    addDanger(toastOrTitle: ToastInput): Toast;
-    // (undocumented)
-    addError(error: Error, options: ErrorToastOptions): Toast;
-    // (undocumented)
-    addSuccess(toastOrTitle: ToastInput): Toast;
-    // (undocumented)
-    addWarning(toastOrTitle: ToastInput): Toast;
-    // (undocumented)
-    get$(): Rx.Observable<Toast[]>;
-    // (undocumented)
-    registerOverlays(overlays: OverlayStart): void;
-    // (undocumented)
-    remove(toast: Toast): void;
-    }
+export type ToastsSetup = IToasts;
+
+// @public (undocumented)
+export type ToastsStart = IToasts;
 
 // @public (undocumented)
 export class UiSettingsClient {

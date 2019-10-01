@@ -4,6 +4,7 @@
 
 ## AuthenticationHandler type
 
+See [AuthToolkit](./kibana-plugin-server.authtoolkit.md)<!-- -->.
 
 <b>Signature:</b>
 

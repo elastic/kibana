@@ -413,7 +413,7 @@ export interface AssistantAPIClientParams extends GenericParams {
 // Warning: (ae-forgotten-export) The symbol "AuthResult" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
 // 
-// @public (undocumented)
+// @public
 export type AuthenticationHandler = (request: KibanaRequest, response: LifecycleResponseFactory, toolkit: AuthToolkit) => AuthResult | KibanaResponse | Promise<AuthResult | KibanaResponse>;
 
 // @public
@@ -499,26 +499,11 @@ export type CoreId = symbol;
 // @public
 export interface CoreSetup {
     // (undocumented)
-    context: {
-        createContextContainer: ContextSetup['createContextContainer'];
-    };
+    context: ContextSetup;
     // (undocumented)
-    elasticsearch: {
-        adminClient$: Observable<IClusterClient>;
-        dataClient$: Observable<IClusterClient>;
-        createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => IClusterClient;
-    };
+    elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
-    http: {
-        createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
-        registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
-        registerAuth: HttpServiceSetup['registerAuth'];
-        registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
-        basePath: HttpServiceSetup['basePath'];
-        isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
-        registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(name: T, provider: RequestHandlerContextProvider<T>) => RequestHandlerContextContainer;
-        createRouter: () => IRouter;
-    };
+    http: HttpServiceSetup;
 }
 
 // @public
@@ -607,15 +592,9 @@ export class ElasticsearchErrorHelpers {
 
 // @public (undocumented)
 export interface ElasticsearchServiceSetup {
-    // (undocumented)
     readonly adminClient$: Observable<IClusterClient>;
     readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => IClusterClient;
-    // (undocumented)
     readonly dataClient$: Observable<IClusterClient>;
-    // (undocumented)
-    readonly legacy: {
-        readonly config$: Observable<ElasticsearchConfig>;
-    };
 }
 
 // @public
@@ -664,30 +643,16 @@ export interface HttpResponseOptions {
 export type HttpResponsePayload = undefined | string | Record<string, any> | Buffer | Stream;
 
 // @public
-export interface HttpServerSetup {
-    // (undocumented)
-    auth: {
-        get: GetAuthState;
-        isAuthenticated: IsAuthenticated;
-        getAuthHeaders: GetAuthHeaders;
-    };
-    // (undocumented)
+export interface HttpServiceSetup {
     basePath: IBasePath;
     createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;
+    createRouter: () => IRouter;
     isTlsEnabled: boolean;
     registerAuth: (handler: AuthenticationHandler) => void;
     registerOnPostAuth: (handler: OnPostAuthHandler) => void;
     registerOnPreAuth: (handler: OnPreAuthHandler) => void;
-    registerRouter: (router: IRouter) => void;
-    // (undocumented)
-    server: Server;
+    registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(contextName: T, provider: RequestHandlerContextProvider<T>) => RequestHandlerContextContainer;
 }
-
-// @public (undocumented)
-export type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
-    createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
-    registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(pluginOpaqueId: PluginOpaqueId, contextName: T, provider: RequestHandlerContextProvider<T>) => RequestHandlerContextContainer;
-};
 
 // @public (undocumented)
 export interface HttpServiceStart {
@@ -732,10 +697,14 @@ export interface IndexSettingsDeprecationInfo {
 export interface InternalCoreSetup {
     // (undocumented)
     context: ContextSetup;
+    // Warning: (ae-forgotten-export) The symbol "InternalElasticsearchServiceSetup" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
-    elasticsearch: ElasticsearchServiceSetup;
+    elasticsearch: InternalElasticsearchServiceSetup;
+    // Warning: (ae-forgotten-export) The symbol "InternalHttpServiceSetup" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
-    http: HttpServiceSetup;
+    http: InternalHttpServiceSetup;
 }
 
 // @internal (undocumented)
@@ -938,7 +907,7 @@ export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critica
 
 // Warning: (ae-forgotten-export) The symbol "OnPostAuthResult" needs to be exported by the entry point index.d.ts
 // 
-// @public (undocumented)
+// @public
 export type OnPostAuthHandler = (request: KibanaRequest, response: LifecycleResponseFactory, toolkit: OnPostAuthToolkit) => OnPostAuthResult | KibanaResponse | Promise<OnPostAuthResult | KibanaResponse>;
 
 // @public
@@ -948,7 +917,7 @@ export interface OnPostAuthToolkit {
 
 // Warning: (ae-forgotten-export) The symbol "OnPreAuthResult" needs to be exported by the entry point index.d.ts
 // 
-// @public (undocumented)
+// @public
 export type OnPreAuthHandler = (request: KibanaRequest, response: LifecycleResponseFactory, toolkit: OnPreAuthToolkit) => OnPreAuthResult | KibanaResponse | Promise<OnPreAuthResult | KibanaResponse>;
 
 // @public

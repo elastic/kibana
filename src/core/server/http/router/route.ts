@@ -50,9 +50,11 @@ export interface RouteConfigOptions {
  */
 export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType> {
   /**
-   * The endpoint _within_ the router path to register the route. E.g. if the
-   * router is registered at `/elasticsearch` and the route path is `/search`,
-   * the full path for the route is `/elasticsearch/search`.
+   * The endpoint _within_ the router path to register the route.
+   *
+   * @remarks
+   * E.g. if the router is registered at `/elasticsearch` and the route path is
+   * `/search`, the full path for the route is `/elasticsearch/search`.
    * Supports:
    *   - named path segments `path/{name}`.
    *   - optional path segments `path/{position?}`.
@@ -64,11 +66,14 @@ export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B exten
 
   /**
    * A schema created with `@kbn/config-schema` that every request will be validated against.
+   *
+   * @remarks
    * You *must* specify a validation schema to be able to read:
    *   - url path segments
    *   - request query
    *   - request body
    * To opt out of validating the request, specify `false`.
+   *
    * @example
    * ```ts
    *  import { schema } from '@kbn/config-schema';

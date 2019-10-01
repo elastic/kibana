@@ -4,13 +4,17 @@
 
 ## RouteConfig.validate property
 
-A schema created with `@kbn/config-schema` that every request will be validated against. You \*must\* specify a validation schema to be able to read: - url path segments - request query - request body To opt out of validating the request, specify `false`<!-- -->.
+A schema created with `@kbn/config-schema` that every request will be validated against.
 
 <b>Signature:</b>
 
 ```typescript
 validate: RouteSchemas<P, Q, B> | false;
 ```
+
+## Remarks
+
+You \*must\* specify a validation schema to be able to read: - url path segments - request query - request body To opt out of validating the request, specify `false`<!-- -->.
 
 ## Example
 

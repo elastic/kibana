@@ -37,6 +37,8 @@ interface RouterRoute {
 
 /**
  * Registers route handlers for specified resource path and method.
+ * See {@link RouteConfig} and {@link RequestHandler} for more information about arguments to route registrations.
+ *
  * @public
  */
 export interface IRouter {

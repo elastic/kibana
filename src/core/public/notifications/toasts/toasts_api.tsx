@@ -55,7 +55,60 @@ const normalizeToast = (toastOrTitle: ToastInput) => {
 };
 
 /** @public */
-export class ToastsApi {
+export interface IToasts {
+  /** Current array of toast messages to show to user. */
+  get$(): Rx.Observable<Toast[]>;
+
+  /**
+   * Adds a new toast to current array of toast.
+   *
+   * @param toastOrTitle - a {@link ToastInput}
+   * @returns a {@link Toast}
+   */
+  add(toastOrTitle: ToastInput): Toast;
+
+  /**
+   * Removes a toast from the current array of toasts if present.
+   * @param toast - a {@link Toast} returned by {@link IToast.add}
+   */
+  remove(toasts: Toast): void;
+
+  /**
+   * Adds a new toast pre-configured with the success color and check icon.
+   *
+   * @param toastOrTitle - a {@link ToastInput}
+   * @returns a {@link Toast}
+   */
+  addSuccess(toastOrTitle: ToastInput): Toast;
+
+  /**
+   * Adds a new toast pre-configured with the warning color and help icon.
+   *
+   * @param toastOrTitle - a {@link ToastInput}
+   * @returns a {@link Toast}
+   */
+  addWarning(toastOrTitle: ToastInput): Toast;
+
+  /**
+   * Adds a new toast pre-configured with the danger color and alert icon.
+   *
+   * @param toastOrTitle - a {@link ToastInput}
+   * @returns a {@link Toast}
+   */
+  addDanger(toastOrTitle: ToastInput): Toast;
+
+  /**
+   * Adds a new toast that displays an exception message with a button to open the full stacktrace in a modal.
+   *
+   * @param error - an `Error` instance.
+   * @param options - {@link ErrorToastOptions}
+   * @returns a {@link Toast}
+   */
+  addError(error: Error, options: ErrorToastOptions): Toast;
+}
+
+/** @internal */
+export class ToastsApi implements IToasts {
   private toasts$ = new Rx.BehaviorSubject<Toast[]>([]);
   private idCounter = 0;
   private uiSettings: UiSettingsClientContract;
