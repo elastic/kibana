@@ -7,7 +7,7 @@
 
 import datemath from '@elastic/datemath';
 import expect from '@kbn/expect';
-import getRolledUpData from './rollup_info';
+import mockRolledUpData from './hybrid_index_helper';
 
 export default function ({ getService, getPageObjects }) {
 
@@ -25,6 +25,8 @@ export default function ({ getService, getPageObjects }) {
       datemath.parse('now-3d', { forceNow: now }),
     ];
 
+    //This function just adds some stub indices that includes a timestamp and an arbritary metric. This is fine since we are not actually testing
+    //rollup functionality.
     async function loadDates(dates, prepend = 'to-be-rolled-up') {
       for (const day of dates) {
         await es.index({
@@ -53,8 +55,14 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.indexManagement.toggleRollupIndices();
 
+      const indices = await PageObjects.indexManagement.getIndexList();
+
       await log.debug('If the index exists then the rollup job has successfully' +
         'been created and is waiting to or has triggered.');
+
+      //If the index exists then the rollup job has successfully been created and is waiting to or has triggered.
+      const filteredIndices = indices.filter(i => i.indexName === indexName);
+      expect(filteredIndices.length).to.be.greaterThan(0);
 
       //Stop the running rollup job.
       await es.transport.request({
@@ -70,7 +78,7 @@ export default function ({ getService, getPageObjects }) {
       await log.debug('Create data for the rollup job to recognize.');
 
       await pastDates.map(async (day) => {
-        await es.index(await getRolledUpData(rollupJobName, day));
+        await es.index(await mockRolledUpData(rollupJobName, day));
       });
       await PageObjects.common.navigateToApp('rollupJob');
 

@@ -329,13 +329,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async clickCreateNewRollupButton() {
-      if (await testSubjects.isDisplayed('createRollupIndexPatternButton')) {
-        await this.clickIndexPatternType('Rollup');
-      }
-    }
-
-    async clickIndexPatternType(indexPatternType) {
-      await testSubjects.click(`create${indexPatternType}IndexPatternButton`);
+      await testSubjects.click('createRollupIndexPatternButton');
     }
 
     async getIndexPatternIdFromUrl() {
