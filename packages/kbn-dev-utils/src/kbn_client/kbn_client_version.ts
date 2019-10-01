@@ -17,23 +17,20 @@
  * under the License.
  */
 
-export class KibanaServerVersion {
-  constructor(kibanaStatus) {
-    this.kibanaStatus = kibanaStatus;
-    this._cachedVersionNumber;
-  }
+import { KbnClientStatus } from './kbn_client_status';
+
+export class KbnClientVersion {
+  private versionCache: string | undefined;
+
+  constructor(private readonly status: KbnClientStatus) {}
 
   async get() {
-    if (this._cachedVersionNumber) {
-      return this._cachedVersionNumber;
+    if (this.versionCache !== undefined) {
+      return this.versionCache;
     }
 
-    const status = await this.kibanaStatus.get();
-    if (status && status.version && status.version.number) {
-      this._cachedVersionNumber = status.version.number + (status.version.build_snapshot ? '-SNAPSHOT' : '');
-      return this._cachedVersionNumber;
-    }
-
-    throw new Error(`Unable to fetch Kibana Server status, received ${JSON.stringify(status)}`);
+    const status = await this.status.get();
+    this.versionCache = status.version.number + (status.version.build_snapshot ? '-SNAPSHOT' : '');
+    return this.versionCache;
   }
 }
