@@ -279,6 +279,7 @@ export class LogstashPipelineThroughputMetric extends LogstashMetric {
           by_pipeline_id: {
             terms: {
               field: 'logstash_stats.pipelines.id',
+              size: 1000,
               include: pageOfPipelines.map(pipeline => pipeline.id),
             },
             aggs: {
@@ -290,6 +291,7 @@ export class LogstashPipelineThroughputMetric extends LogstashMetric {
               by_pipeline_hash: {
                 terms: {
                   field: 'logstash_stats.pipelines.hash',
+                  size: 1000,
                   include: pageOfPipelines.map(pipeline => pipeline.hash),
                 },
                 aggs: {
@@ -301,6 +303,7 @@ export class LogstashPipelineThroughputMetric extends LogstashMetric {
                   by_ephemeral_id: {
                     terms: {
                       field: 'logstash_stats.pipelines.ephemeral_id',
+                      size: 1000,
                       include: pageOfPipelines.map(pipeline => pipeline.ephemeral_id),
                     },
                     aggs: {
@@ -367,6 +370,7 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
             by_pipeline_id: {
               terms: {
                 field: 'logstash_stats.pipelines.id',
+                size: 1000,
                 ...termAggExtras
               },
               aggs: {
