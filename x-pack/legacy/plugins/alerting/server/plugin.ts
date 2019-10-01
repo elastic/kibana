@@ -60,13 +60,17 @@ interface PluginsSetup {
 }
 
 export interface PluginSetupContract {
-  listTypes: AlertTypeRegistry['list'];
   registerType: AlertTypeRegistry['register'];
+}
+
+export interface PluginStartContract {
+  listTypes: AlertTypeRegistry['list'];
   getAlertsClientWithRequest: (request: Hapi.Request) => AlertsClient;
 }
 
 export class Plugin {
   private readonly logger: Logger;
+  private alertTypeRegistry?: AlertTypeRegistry;
   private alertsClientFactory?: AlertsClientFactory;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -131,7 +135,7 @@ export class Plugin {
       return spacesPlugin && spaceId ? spacesPlugin.spaceIdToNamespace(spaceId) : undefined;
     }
 
-    const alertTypeRegistry = new AlertTypeRegistry({
+    this.alertTypeRegistry = new AlertTypeRegistry({
       getServices,
       isSecurityEnabled: !!plugins.security,
       taskManager: plugins.task_manager,
@@ -157,7 +161,7 @@ export class Plugin {
     core.http.route(unmuteAlertInstanceRoute);
 
     this.alertsClientFactory = new AlertsClientFactory({
-      alertTypeRegistry,
+      alertTypeRegistry: this.alertTypeRegistry!,
       logger: this.logger,
       taskManager: plugins.task_manager,
       securityPluginSetup: plugins.security,
@@ -168,8 +172,13 @@ export class Plugin {
     });
 
     return {
-      registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
-      listTypes: alertTypeRegistry.list.bind(alertTypeRegistry),
+      registerType: this.alertTypeRegistry!.register.bind(this.alertTypeRegistry!),
+    };
+  }
+
+  public start() {
+    return {
+      listTypes: this.alertTypeRegistry!.list.bind(this.alertTypeRegistry!),
       getAlertsClientWithRequest: (request: Hapi.Request) =>
         this.alertsClientFactory!.create(request),
     };

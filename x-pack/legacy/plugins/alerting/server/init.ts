@@ -58,9 +58,13 @@ export function init(server: Server) {
   });
 
   const setupContract = plugin.setup(coreSetup, pluginsSetup);
+  const startContract = plugin.start();
 
   server.decorate('request', 'getAlertsClient', function() {
-    return setupContract.getAlertsClientWithRequest(this);
+    return startContract.getAlertsClientWithRequest(this);
   });
-  server.expose(setupContract);
+  server.expose({
+    ...setupContract,
+    ...startContract,
+  });
 }
