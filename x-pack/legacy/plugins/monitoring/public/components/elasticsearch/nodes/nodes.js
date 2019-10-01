@@ -322,13 +322,13 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
                 >
                   <p>
                     {i18n.translate('xpack.monitoring.elasticsearch.nodes.metricbeatMigration.disableInternalCollectionDescription', {
-                      defaultMessage: `Disable internal collection to finish the migration.`
+                      defaultMessage: `Disable self monitoring to finish the migration.`
                     })}
                   </p>
                   <EuiButton onClick={finishMigrationAction} size="s" color="warning" fill>
                     {i18n.translate(
                       'xpack.monitoring.elasticsearch.nodes.metricbeatMigration.disableInternalCollectionMigrationButtonLabel', {
-                        defaultMessage: 'Disable internal collection'
+                        defaultMessage: 'Disable self monitoring'
                       }
                     )}
                   </EuiButton>

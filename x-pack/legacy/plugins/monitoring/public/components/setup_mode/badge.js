@@ -18,7 +18,7 @@ const clickToMonitorWithMetricbeat = i18n.translate('xpack.monitoring.setupMode.
 });
 
 const clickToDisableInternalCollection = i18n.translate('xpack.monitoring.setupMode.clickToDisableInternalCollection', {
-  defaultMessage: 'Disable internal collection'
+  defaultMessage: 'Disable self monitoring'
 });
 
 const monitoredWithMetricbeat = i18n.translate('xpack.monitoring.setupMode.usingMetricbeatCollection', {
@@ -54,7 +54,7 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
           &nbsp;
           <EuiTextColor color="warning" size="xs">
             {i18n.translate('xpack.monitoring.setupMode.monitorAllNodes', {
-              defaultMessage: 'Some nodes use only internal collection'
+              defaultMessage: 'Some nodes use only self monitoring'
             })}
           </EuiTextColor>
         </Fragment>

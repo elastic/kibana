@@ -34,7 +34,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
   if (totalUniqueInstanceCount === 0) {
     if (mightExist) {
       const detectedText = i18n.translate('xpack.monitoring.setupMode.tooltip.detected', {
-        defaultMessage: 'No collection'
+        defaultMessage: 'No monitoring'
       });
       tooltip = (
         <EuiToolTip
@@ -71,7 +71,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
 
   else if (!allMonitoredByMetricbeat) {
     const internalCollection = i18n.translate('xpack.monitoring.euiTable.isInternalCollectorLabel', {
-      defaultMessage: 'Internal collection'
+      defaultMessage: 'Self monitoring'
     });
     tooltip = (
       <EuiToolTip
@@ -91,13 +91,13 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
   }
   else if (internalCollectionOn) {
     const internalAndMB = i18n.translate('xpack.monitoring.euiTable.isPartiallyMigratedLabel', {
-      defaultMessage: 'Internal collection is on'
+      defaultMessage: 'Self monitoring is on'
     });
     tooltip = (
       <EuiToolTip
         position="top"
         content={i18n.translate('xpack.monitoring.setupMode.tooltip.disableInternal', {
-          defaultMessage: `Metricbeat is monitoring all {identifierPlural}. View {identifierPlural} and disable internal collection.`,
+          defaultMessage: `Metricbeat is monitoring all {identifierPlural}. View {identifierPlural} and disable self monitoring.`,
           values: {
             identifierPlural: getIdentifier(productName, true)
           }
@@ -111,7 +111,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
   }
   else {
     const metricbeatCollection = i18n.translate('xpack.monitoring.euiTable.isFullyMigratedLabel', {
-      defaultMessage: 'Metricbeat collection'
+      defaultMessage: 'Metricbeat monitoring'
     });
     tooltip = (
       <EuiToolTip

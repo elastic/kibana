@@ -114,7 +114,7 @@ export function getDisableStatusStep(product, meta) {
       lastInternallyCollectedMessage = i18n.translate(
         'xpack.monitoring.metricbeatMigration.disableInternalCollection.partiallyMigratedStatusDescription',
         {
-          defaultMessage: 'Last internal collection was {secondsSinceLastInternalCollectionLabel} ago.',
+          defaultMessage: 'Last self monitoring was {secondsSinceLastInternalCollectionLabel} ago.',
           values: {
             secondsSinceLastInternalCollectionLabel
           }
@@ -131,7 +131,7 @@ export function getDisableStatusStep(product, meta) {
           color="warning"
           title={i18n.translate('xpack.monitoring.metricbeatMigration.partiallyMigratedStatusTitle',
             {
-              defaultMessage: `Data is still coming from internal collection`
+              defaultMessage: `Data is still coming from self monitoring`
             }
           )}
         >
@@ -167,7 +167,7 @@ export function getDisableStatusStep(product, meta) {
       >
         <p>
           {i18n.translate('xpack.monitoring.metricbeatMigration.disableInternalCollection.fullyMigratedStatusDescription', {
-            defaultMessage: 'We are not seeing any documents from internal collection. Migration complete!'
+            defaultMessage: 'We are not seeing any documents from self monitoring. Migration complete!'
           })}
         </p>
       </EuiCallOut>

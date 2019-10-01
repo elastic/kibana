@@ -102,7 +102,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
       <Fragment>
         <EuiCallOut
           title={i18n.translate('xpack.monitoring.setupMode.disableInternalCollectionTitle', {
-            defaultMessage: 'Disable internal collection',
+            defaultMessage: 'Disable self monitoring',
           })}
           color="warning"
           iconType="flag"
@@ -110,7 +110,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
           <p>
             {i18n.translate('xpack.monitoring.setupMode.disableInternalCollectionDescription', {
               defaultMessage: `Metricbeat is now monitoring your {product} {identifier}.
-              Disable internal collection to finish the migration.`,
+              Disable self monitoring to finish the migration.`,
               values: {
                 product: formatProductName(productName),
                 identifier: getIdentifier(productName, true)
@@ -134,7 +134,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
           >
             <p>
               {i18n.translate('xpack.monitoring.setupMode.migrateToMetricbeatDescription', {
-                defaultMessage: `These {product} {identifier} are monitored through internal collection.
+                defaultMessage: `These {product} {identifier} are monitored through self monitoring.
                 Migrate to monitor with Metricbeat.`,
                 values: {
                   product: formatProductName(productName),
@@ -157,7 +157,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
         >
           <p>
             {i18n.translate('xpack.monitoring.setupMode.migrateSomeToMetricbeatDescription', {
-              defaultMessage: `Some {product} {identifier} are monitored through internal collection. Migrate to monitor with Metricbeat.`,
+              defaultMessage: `Some {product} {identifier} are monitored through self monitoring. Migrate to monitor with Metricbeat.`,
               values: {
                 product: formatProductName(productName),
                 identifier: getIdentifier(productName, true)
