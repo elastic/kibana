@@ -63,7 +63,8 @@ export function getUiSettingDefaults() {
       description:
         i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteText', {
           defaultMessage: 'This setting specifies the default route when opening Kibana. ' +
-          'You can use this setting to modify the landing page when opening Kibana.',
+          'You can use this setting to modify the landing page when opening Kibana. ' +
+          'The route must start with a slash ("/").',
         }),
     },
     'query:queryString:options': {
