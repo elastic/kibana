@@ -56,20 +56,6 @@ export const mappings = {
           created_at: { type: 'date' },
         },
       },
-      events: {
-        type: 'nested',
-        properties: {
-          type: { type: 'keyword' },
-          timestamp: { type: 'date' },
-          event: {
-            type: 'object',
-            properties: {
-              type: { type: 'keyword' },
-              message: { type: 'text' },
-            },
-          },
-        },
-      },
     },
   },
   tokens: {
@@ -118,6 +104,17 @@ export const mappings = {
           updated_at: { type: 'date' },
         },
       },
+    },
+  },
+  agent_events: {
+    properties: {
+      type: { type: 'keyword' },
+      agent_id: { type: 'keyword' },
+      subtype: { type: 'keyword' },
+      timestamp: { type: 'date' },
+      message: { type: 'text' },
+      payload: { type: 'text' },
+      data: { type: 'text' },
     },
   },
 };

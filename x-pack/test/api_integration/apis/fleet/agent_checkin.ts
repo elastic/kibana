@@ -56,7 +56,8 @@ export default function({ getService }: FtrProviderContext) {
             {
               type: 'STATE',
               timestamp: '2019-01-04T14:32:03.36764-05:00',
-              event: { type: 'STARTING', message: 'State change: STARTING' },
+              subtype: 'STARTING',
+              message: 'State change: STARTING',
             },
           ],
           local_metadata: {
@@ -64,7 +65,6 @@ export default function({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-
       expect(apiResponse.action).to.be('checkin');
       expect(apiResponse.success).to.be(true);
       expect(apiResponse.actions).to.have.length(1);

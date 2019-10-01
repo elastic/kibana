@@ -13,7 +13,6 @@
         "type": "PERMANENT",
         "local_metadata": "{}",
         "user_provided_metadata": "{}",
-        "events": [],
         "actions": [{
           "id": "37ed51ff-e80f-4f2a-a62d-f4fa975e7d85",
           "created_at": "2019-09-04T15:04:07+0000",
@@ -44,7 +43,6 @@
         "type": "PERMANENT",
         "local_metadata": "{}",
         "user_provided_metadata": "{}",
-        "events": [],
         "actions": []
       }
     }
@@ -65,7 +63,6 @@
         "type": "PERMANENT",
         "local_metadata": "{}",
         "user_provided_metadata": "{}",
-        "events": [],
         "actions": []
       }
     }
@@ -86,7 +83,6 @@
         "type": "PERMANENT",
         "local_metadata": "{}",
         "user_provided_metadata": "{}",
-        "events": [],
         "actions": []
       }
     }
@@ -142,6 +138,44 @@
       "type": "policies",
       "references": [],
       "updated_at": "2019-09-20T17:30:22.950Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "events:event1",
+    "index": ".kibana",
+    "source": {
+      "type": "agent_events",
+      "agent_events": {
+        "agent_id": "agent1",
+        "type": "STATE",
+        "subtype": "STARTED",
+        "message": "State changed from STOPPED to STARTED",
+        "payload": "{\"previous_state\": \"STOPPED\"}",
+        "timestamp": "2019-09-20T17:30:22.950Z"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "events:event2",
+    "index": ".kibana",
+    "source": {
+      "type": "agent_events",
+      "agent_events": {
+        "agent_id": "agent1",
+        "type": "STATE",
+        "subtype": "STOPPED",
+        "message": "State changed from RUNNING to STOPPED",
+        "payload": "{\"previous_state\": \"RUNNING\"}",
+        "timestamp": "2019-09-20T17:30:25.950Z"
+      }
     }
   }
 }

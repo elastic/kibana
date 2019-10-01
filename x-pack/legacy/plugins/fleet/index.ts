@@ -40,6 +40,11 @@ export function fleet(kibana: any) {
           // TODO https://github.com/elastic/kibana/issues/46373
           // indexPattern: INDEX_NAMES.FLEET,
         },
+        events: {
+          isNamespaceAgnostic: true,
+          // TODO https://github.com/elastic/kibana/issues/46373
+          // indexPattern: INDEX_NAMES.EVENT,
+        },
         tokens: {
           isNamespaceAgnostic: true,
           // TODO https://github.com/elastic/kibana/issues/46373

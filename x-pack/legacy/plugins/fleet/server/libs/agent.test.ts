@@ -13,6 +13,7 @@ import { TokensRepository } from '../repositories/tokens/types';
 import { FrameworkLib } from './framework';
 import { PoliciesRepository } from '../repositories/policies/default';
 import { FrameworkUser } from '../adapters/framework/adapter_types';
+import { InMemoryAgentEventsRepository } from '../repositories/agent_events/in_memory';
 
 jest.mock('./token');
 jest.mock('./policy');
@@ -25,8 +26,9 @@ describe('Agent lib', () => {
     it('Should throw if the enrollment token is not valid', async () => {
       const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
       const policy = new PolicyLib({} as PoliciesRepository);
-      const agentAdapter = new InMemoryAgentsRepository();
-      const agentLib = new AgentLib(agentAdapter, token, policy);
+      const agentsRepository = new InMemoryAgentsRepository();
+      const agentsEventsRepository = new InMemoryAgentEventsRepository();
+      const agentLib = new AgentLib(agentsRepository, agentsEventsRepository, token, policy);
 
       let error: Error | null = null;
       try {
@@ -47,9 +49,10 @@ describe('Agent lib', () => {
 
     it('Should enroll a new PERMANENT agent', async () => {
       const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentsRepository();
+      const agentsRepository = new InMemoryAgentsRepository();
       const policy = new PolicyLib({} as PoliciesRepository);
-      const agentLib = new AgentLib(agentAdapter, token, policy);
+      const agentsEventsRepository = new InMemoryAgentEventsRepository();
+      const agentLib = new AgentLib(agentsRepository, agentsEventsRepository, token, policy);
 
       const agent = await agentLib.enroll(
         getUser(),
@@ -69,9 +72,10 @@ describe('Agent lib', () => {
 
     it('Should allow to enroll a new PERMANENT agent again if this agent is active', async () => {
       const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentsRepository();
+      const agentsRepository = new InMemoryAgentsRepository();
       const policy = new PolicyLib({} as PoliciesRepository);
-      const agentLib = new AgentLib(agentAdapter, token, policy);
+      const agentsEventsRepository = new InMemoryAgentEventsRepository();
+      const agentLib = new AgentLib(agentsRepository, agentsEventsRepository, token, policy);
 
       const agent1 = await agentLib.enroll(
         getUser(),
@@ -82,7 +86,7 @@ describe('Agent lib', () => {
       );
 
       // Desactivate this agent
-      agentAdapter.agents[agent1.id].active = false;
+      agentsRepository.agents[agent1.id].active = false;
 
       const agent2 = await agentLib.enroll(
         getUser(),
@@ -100,9 +104,10 @@ describe('Agent lib', () => {
 
     it('Should not enroll a new PERMANENT agent if this agent is already active', async () => {
       const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentsRepository();
+      const agentsRepository = new InMemoryAgentsRepository();
       const policy = new PolicyLib({} as PoliciesRepository);
-      const agentLib = new AgentLib(agentAdapter, token, policy);
+      const agentsEventsRepository = new InMemoryAgentEventsRepository();
+      const agentLib = new AgentLib(agentsRepository, agentsEventsRepository, token, policy);
 
       await agentLib.enroll(getUser(), 'valid-enrollment-token', 'PERMANENT', undefined, 'agent-1');
       let error: Error | null = null;
@@ -125,9 +130,10 @@ describe('Agent lib', () => {
 
     it('Should enroll a new EPHEMERAL_INSTANCE agent', async () => {
       const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentsRepository();
+      const agentsRepository = new InMemoryAgentsRepository();
       const policy = new PolicyLib({} as PoliciesRepository);
-      const agentLib = new AgentLib(agentAdapter, token, policy);
+      const agentsEventsRepository = new InMemoryAgentEventsRepository();
+      const agentLib = new AgentLib(agentsRepository, agentsEventsRepository, token, policy);
 
       const agent = await agentLib.enroll(
         getUser(),
@@ -146,9 +152,10 @@ describe('Agent lib', () => {
 
     it('When enrolling a new EPHEMERAL_INSTANCE agent it should create a EPHEMERAL agent too', async () => {
       const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentsRepository();
+      const agentsRepository = new InMemoryAgentsRepository();
       const policy = new PolicyLib({} as PoliciesRepository);
-      const agentLib = new AgentLib(agentAdapter, token, policy);
+      const agentsEventsRepository = new InMemoryAgentEventsRepository();
+      const agentLib = new AgentLib(agentsRepository, agentsEventsRepository, token, policy);
 
       const agent = await agentLib.enroll(
         getUser(),
@@ -157,7 +164,7 @@ describe('Agent lib', () => {
         undefined
       );
 
-      const parentAgent = agentAdapter.agents[agent.parent_id as string];
+      const parentAgent = agentsRepository.agents[agent.parent_id as string];
       expect(parentAgent).toBeDefined();
       expect(parentAgent).toMatchObject({
         type: 'EPHEMERAL',
@@ -165,9 +172,10 @@ describe('Agent lib', () => {
     });
     it('When enrolling multiple EPHEMERAL_INSTANCE agent it should create only one EPHEMERAL agent', async () => {
       const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentsRepository();
+      const agentsRepository = new InMemoryAgentsRepository();
       const policy = new PolicyLib({} as PoliciesRepository);
-      const agentLib = new AgentLib(agentAdapter, token, policy);
+      const agentsEventsRepository = new InMemoryAgentEventsRepository();
+      const agentLib = new AgentLib(agentsRepository, agentsEventsRepository, token, policy);
 
       const agent1 = await agentLib.enroll(
         getUser(),
@@ -182,7 +190,7 @@ describe('Agent lib', () => {
         undefined
       );
       expect(agent1.parent_id).toBe(agent2.parent_id);
-      const parentAgent = agentAdapter.agents[agent1.parent_id as string];
+      const parentAgent = agentsRepository.agents[agent1.parent_id as string];
       expect(parentAgent).toBeDefined();
       expect(parentAgent).toMatchObject({
         type: 'EPHEMERAL',
@@ -193,32 +201,34 @@ describe('Agent lib', () => {
   describe('Delete', () => {
     it('should delete ephemeral instances', async () => {
       const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentsRepository();
-      agentAdapter.delete = jest.fn(async () => {});
+      const agentsRepository = new InMemoryAgentsRepository();
+      agentsRepository.delete = jest.fn(async () => {});
       const policy = new PolicyLib({} as PoliciesRepository);
-      const agentLib = new AgentLib(agentAdapter, token, policy);
+      const agentsEventsRepository = new InMemoryAgentEventsRepository();
+      const agentLib = new AgentLib(agentsRepository, agentsEventsRepository, token, policy);
 
       await agentLib.delete(getUser(), {
         id: 'agent:1',
         type: 'EPHEMERAL_INSTANCE',
       } as Agent);
 
-      expect(agentAdapter.delete).toHaveBeenCalled();
+      expect(agentsRepository.delete).toHaveBeenCalled();
     });
 
     it('should desactivate other agent', async () => {
       const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentsRepository();
-      agentAdapter.update = jest.fn(async () => {});
+      const agentsRepository = new InMemoryAgentsRepository();
+      agentsRepository.update = jest.fn(async () => {});
       const policy = new PolicyLib({} as PoliciesRepository);
-      const agentLib = new AgentLib(agentAdapter, token, policy);
+      const agentsEventsRepository = new InMemoryAgentEventsRepository();
+      const agentLib = new AgentLib(agentsRepository, agentsEventsRepository, token, policy);
 
       await agentLib.delete(getUser(), {
         id: 'agent:1',
         type: 'PERMANENT',
       } as Agent);
 
-      expect(agentAdapter.update).toHaveBeenCalledWith({}, 'agent:1', {
+      expect(agentsRepository.update).toHaveBeenCalledWith({}, 'agent:1', {
         active: false,
       });
     });
@@ -228,11 +238,12 @@ describe('Agent lib', () => {
     it('should return all agents', async () => {
       const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
       const policy = new PolicyLib({} as PoliciesRepository);
-      const agentAdapter = new InMemoryAgentsRepository();
-      agentAdapter.agents['agent:1'] = { id: 'agent:1' } as Agent;
-      agentAdapter.agents['agent:2'] = { id: 'agent:2' } as Agent;
+      const agentsEventsRepository = new InMemoryAgentEventsRepository();
+      const agentsRepository = new InMemoryAgentsRepository();
+      agentsRepository.agents['agent:1'] = { id: 'agent:1' } as Agent;
+      agentsRepository.agents['agent:2'] = { id: 'agent:2' } as Agent;
 
-      const agentLib = new AgentLib(agentAdapter, token, policy);
+      const agentLib = new AgentLib(agentsRepository, agentsEventsRepository, token, policy);
 
       const res = await agentLib.list(getUser());
 
@@ -245,79 +256,64 @@ describe('Agent lib', () => {
   describe('checkin', () => {
     it('should throw if the agens do not exists', async () => {
       const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentsRepository();
+      const agentsRepository = new InMemoryAgentsRepository();
       const policy = new PolicyLib({} as PoliciesRepository);
-      const agentLib = new AgentLib(agentAdapter, token, policy);
+      const agentsEventsRepository = new InMemoryAgentEventsRepository();
+      const agentLib = new AgentLib(agentsRepository, agentsEventsRepository, token, policy);
 
       await expect(
         agentLib.checkin(getUser(), 'agent:1', [
           {
             timestamp: '2019-09-05T15:41:26+0000',
             type: 'STATE',
-            event: {
-              message: 'State changed from PAUSE to STARTING',
-              type: 'STARTING',
-            },
+            subtype: 'STARTING',
+            message: 'State changed from PAUSE to STARTING',
           },
         ])
       ).rejects.toThrowError(/Agent not found/);
     });
 
-    it('should update events', async () => {
+    it('should persist new events', async () => {
       const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
       const policy = new PolicyLib({} as PoliciesRepository);
-      const agentAdapter = new InMemoryAgentsRepository();
-      agentAdapter.agents['agent:1'] = ({
+      const agentsRepository = new InMemoryAgentsRepository();
+      const agentsEventsRepository = new InMemoryAgentEventsRepository();
+      agentsRepository.agents['agent:1'] = ({
         id: 'agent:1',
         actions: [],
         active: true,
         policy_id: 'policy:1',
-        events: [
-          {
-            timestamp: '2019-09-05T15:43:26+0000',
-            type: 'STATE',
-            event: {
-              message: 'State changed from RUNNING to STOPPED',
-              type: 'STOPPED',
-            },
-          },
-        ],
       } as unknown) as Agent;
-      const agentLib = new AgentLib(agentAdapter, token, policy);
+      const agentLib = new AgentLib(agentsRepository, agentsEventsRepository, token, policy);
 
       await agentLib.checkin(getUser(), 'agent:1', [
         {
           timestamp: '2019-09-05T15:41:26+0000',
           type: 'STATE',
-          event: {
-            message: 'State changed from PAUSE to STARTING',
-            type: 'STARTING',
-          },
+          subtype: 'STARTING',
+          message: 'State changed from PAUSE to STARTING',
         },
       ]);
 
-      const refreshAgent = (await agentAdapter.getById(getUser(), 'agent:1')) as Agent;
-      expect(refreshAgent.events).toHaveLength(2);
-      expect(refreshAgent.events[0]).toMatchObject({
+      const { items: events } = await agentsEventsRepository.getEventsForAgent(
+        getUser(),
+        'agent:1'
+      );
+      expect(events).toHaveLength(1);
+      expect(events[0]).toMatchObject({
+        timestamp: '2019-09-05T15:41:26+0000',
         type: 'STATE',
-        event: {
-          type: 'STARTING',
-        },
-      });
-
-      expect(refreshAgent.events[1]).toMatchObject({
-        type: 'STATE',
-        event: {
-          type: 'STOPPED',
-        },
+        subtype: 'STARTING',
+        message: 'State changed from PAUSE to STARTING',
       });
     });
 
     it('should not update agent metadata if none are provided', async () => {
       const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
       const policy = new PolicyLib({} as PoliciesRepository);
-      const agentAdapter = new InMemoryAgentsRepository();
-      agentAdapter.agents['agent:1'] = ({
+      const agentEventsRepository = new InMemoryAgentEventsRepository();
+      const agentRepository = new InMemoryAgentsRepository();
+      agentRepository.agents['agent:1'] = ({
         id: 'agent:1',
         local_metadata: { key: 'local1' },
         user_provided_metadata: { key: 'user1' },
@@ -326,11 +322,11 @@ describe('Agent lib', () => {
         active: true,
         policy_id: 'policy:1',
       } as unknown) as Agent;
-      const agentLib = new AgentLib(agentAdapter, token, policy);
+      const agentLib = new AgentLib(agentRepository, agentEventsRepository, token, policy);
 
       await agentLib.checkin(getUser(), 'agent:1', []);
 
-      const refreshAgent = (await agentAdapter.getById(getUser(), 'agent:1')) as Agent;
+      const refreshAgent = (await agentRepository.getById(getUser(), 'agent:1')) as Agent;
       expect(refreshAgent.local_metadata).toMatchObject({
         key: 'local1',
       });
@@ -339,8 +335,8 @@ describe('Agent lib', () => {
     it('should return the full policy for this agent', async () => {
       const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
       const policyLib = new PolicyLib({} as PoliciesRepository);
-      const agentAdapter = new InMemoryAgentsRepository();
-      agentAdapter.agents['agent:1'] = ({
+      const agentsRepository = new InMemoryAgentsRepository();
+      agentsRepository.agents['agent:1'] = ({
         id: 'agent:1',
         local_metadata: { key: 'local1' },
         user_provided_metadata: { key: 'user1' },
@@ -349,7 +345,8 @@ describe('Agent lib', () => {
         active: true,
         policy_id: 'policy:1',
       } as unknown) as Agent;
-      const agentLib = new AgentLib(agentAdapter, token, policyLib);
+      const agentEventsRepository = new InMemoryAgentEventsRepository();
+      const agentLib = new AgentLib(agentsRepository, agentEventsRepository, token, policyLib);
 
       const { policy } = await agentLib.checkin(getUser(), 'agent:1', []);
 
@@ -360,8 +357,9 @@ describe('Agent lib', () => {
 
     it('should update agent metadata if provided', async () => {
       const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentsRepository();
-      agentAdapter.agents['agent:1'] = ({
+      const agentsRepository = new InMemoryAgentsRepository();
+      const agentEventsRepository = new InMemoryAgentEventsRepository();
+      agentsRepository.agents['agent:1'] = ({
         id: 'agent:1',
         local_metadata: { key: 'local1' },
         user_provided_metadata: { key: 'user1' },
@@ -371,11 +369,11 @@ describe('Agent lib', () => {
         policy_id: 'policy:1',
       } as unknown) as Agent;
       const policy = new PolicyLib({} as PoliciesRepository);
-      const agentLib = new AgentLib(agentAdapter, token, policy);
+      const agentLib = new AgentLib(agentsRepository, agentEventsRepository, token, policy);
 
       await agentLib.checkin(getUser(), 'agent:1', [], { key: 'local2' });
 
-      const refreshAgent = (await agentAdapter.getById(getUser(), 'agent:1')) as Agent;
+      const refreshAgent = (await agentsRepository.getById(getUser(), 'agent:1')) as Agent;
       expect(refreshAgent.local_metadata).toMatchObject({
         key: 'local2',
       });
@@ -384,8 +382,8 @@ describe('Agent lib', () => {
     it('should return new actions', async () => {
       const policy = new PolicyLib({} as PoliciesRepository);
       const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentsRepository();
-      agentAdapter.agents['agent:1'] = ({
+      const agentsRepository = new InMemoryAgentsRepository();
+      agentsRepository.agents['agent:1'] = ({
         id: 'agent:1',
         active: true,
         policy_id: 'policy:1',
@@ -404,8 +402,8 @@ describe('Agent lib', () => {
         ],
         events: [],
       } as unknown) as Agent;
-
-      const agentLib = new AgentLib(agentAdapter, token, policy);
+      const agentEventsRepository = new InMemoryAgentEventsRepository();
+      const agentLib = new AgentLib(agentsRepository, agentEventsRepository, token, policy);
       const { actions } = await agentLib.checkin(getUser(), 'agent:1', []);
 
       expect(actions).toHaveLength(1);
@@ -414,7 +412,7 @@ describe('Agent lib', () => {
         id: 'this-a-unique-id',
       });
 
-      const refreshAgent = (await agentAdapter.getById(getUser(), 'agent:1')) as Agent;
+      const refreshAgent = (await agentsRepository.getById(getUser(), 'agent:1')) as Agent;
       expect(refreshAgent.actions[0].sent_at).toBeDefined();
     });
   });
@@ -422,9 +420,10 @@ describe('Agent lib', () => {
   describe('addAction', () => {
     it('should throw if the agent do not exists', async () => {
       const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentsRepository();
+      const agentsRepository = new InMemoryAgentsRepository();
       const policy = new PolicyLib({} as PoliciesRepository);
-      const agentLib = new AgentLib(agentAdapter, token, policy);
+      const agentEventsRepository = new InMemoryAgentEventsRepository();
+      const agentLib = new AgentLib(agentsRepository, agentEventsRepository, token, policy);
 
       await expect(
         agentLib.addAction(getUser(), 'agent:1', {
@@ -435,20 +434,20 @@ describe('Agent lib', () => {
 
     it('should add the action', async () => {
       const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
-      const agentAdapter = new InMemoryAgentsRepository();
-      agentAdapter.agents['agent:1'] = {
+      const agentsRepository = new InMemoryAgentsRepository();
+      agentsRepository.agents['agent:1'] = {
         id: 'agent:1',
         actions: [],
         active: true,
-        events: [],
         type: 'PERMANENT',
         policy_shared_id: 'config1',
         policy_id: 'config1',
       };
-      const spy = jest.spyOn(agentAdapter, 'update');
+      const spy = jest.spyOn(agentsRepository, 'update');
 
       const policy = new PolicyLib({} as PoliciesRepository);
-      const agentLib = new AgentLib(agentAdapter, token, policy);
+      const agentEventsRepository = new InMemoryAgentEventsRepository();
+      const agentLib = new AgentLib(agentsRepository, agentEventsRepository, token, policy);
 
       const action = await agentLib.addAction(getUser(), 'agent:1', {
         type: 'PAUSE',

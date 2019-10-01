@@ -19,6 +19,7 @@ import { PoliciesRepository } from '../../repositories/policies/default';
 import { ArtifactLib } from '../artifact';
 import { FileSystemArtifactRepository } from '../../repositories/artifacts/file_system';
 import { HttpAdapter } from '../../adapters/http_adapter/default';
+import { AgentEventsRepository } from '../../repositories/agent_events/default';
 
 export function compose(server: any): FleetServerLib {
   const frameworkAdapter = new FrameworkAdapter(server);
@@ -30,12 +31,13 @@ export function compose(server: any): FleetServerLib {
     server.plugins.elasticsearch
   );
   const encryptedObjectAdapter = new EncryptedSavedObjects(server.plugins.encrypted_saved_objects);
-  const agentRepository = new AgentsRepository(soDatabaseAdapter);
-  const tokenRepository = new TokensRepository(soDatabaseAdapter, encryptedObjectAdapter);
+  const agentsRepository = new AgentsRepository(soDatabaseAdapter);
+  const agentEventsRepository = new AgentEventsRepository(soDatabaseAdapter);
+  const tokensRepository = new TokensRepository(soDatabaseAdapter, encryptedObjectAdapter);
 
   const policies = new PolicyLib(policyAdapter);
-  const tokens = new TokenLib(tokenRepository, framework);
-  const agents = new AgentLib(agentRepository, tokens, policies);
+  const tokens = new TokenLib(tokensRepository, framework);
+  const agents = new AgentLib(agentsRepository, agentEventsRepository, tokens, policies);
 
   const artifactRepository = new FileSystemArtifactRepository(os.tmpdir());
   const artifacts = new ArtifactLib(artifactRepository, new HttpAdapter());

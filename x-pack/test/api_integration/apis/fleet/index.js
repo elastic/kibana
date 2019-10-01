@@ -11,6 +11,7 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./enroll_agent'));
     loadTestFile(require.resolve('./agent_checkin'));
     loadTestFile(require.resolve('./agent_actions'));
+    loadTestFile(require.resolve('./agent_events'));
     loadTestFile(require.resolve('./enrollment_rules'));
     loadTestFile(require.resolve('./get_enrollment_token'));
     loadTestFile(require.resolve('./artifacts'));
