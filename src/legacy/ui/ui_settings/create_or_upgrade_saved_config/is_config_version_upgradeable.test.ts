@@ -19,11 +19,13 @@
 
 import expect from '@kbn/expect';
 
-import { isConfigVersionUpgradeable } from '../is_config_version_upgradeable';
-import { pkg } from '../../../../utils';
+// @ts-ignore
+import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
+// @ts-ignore
+import { pkg } from '../../../utils';
 
-describe('savedObjects/health_check/isConfigVersionUpgradeable', function () {
-  function isUpgradeableTest(savedVersion, kibanaVersion, expected) {
+describe('savedObjects/health_check/isConfigVersionUpgradeable', function() {
+  function isUpgradeableTest(savedVersion: string, kibanaVersion: string, expected: boolean) {
     it(`should return ${expected} for config version ${savedVersion} and kibana version ${kibanaVersion}`, () => {
       expect(isConfigVersionUpgradeable(savedVersion, kibanaVersion)).to.be(expected);
     });
@@ -47,6 +49,6 @@ describe('savedObjects/health_check/isConfigVersionUpgradeable', function () {
   isUpgradeableTest('4.1.0-rc1-SNAPSHOT', '4.1.0-rc1', false);
   isUpgradeableTest('5.0.0-alpha11', '5.0.0', false);
   isUpgradeableTest('50.0.10-rc150-SNAPSHOT', '50.0.9', false);
-  isUpgradeableTest(undefined, pkg.version, false);
+  isUpgradeableTest(undefined as any, pkg.version, false);
   isUpgradeableTest('@@version', pkg.version, false);
 });

@@ -17,16 +17,13 @@
  * under the License.
  */
 
-import {
-  startServers,
-  stopServers,
-} from './lib';
+import { startServers, stopServers } from './lib';
 
 import { docExistsSuite } from './doc_exists';
 import { docMissingSuite } from './doc_missing';
 import { docMissingAndIndexReadOnlySuite } from './doc_missing_and_index_read_only';
 
-describe('uiSettings/routes', function () {
+describe('uiSettings/routes', function() {
   /**
    *  The "doc missing" and "index missing" tests verify how the uiSettings
    *  API behaves in between healthChecks, so they interact with the healthCheck
@@ -43,12 +40,13 @@ describe('uiSettings/routes', function () {
    *  stupidly fragile and timing sensitive. #14163 should fix that, but until then
    *  this is the most stable way I've been able to get this to work.
    */
-  this.slow(2000);
-  this.timeout(10000);
+  jest.setTimeout(10000);
 
-  before(startServers);
+  beforeAll(startServers);
+  /* eslint-disable jest/valid-describe */
   describe('doc missing', docMissingSuite);
   describe('doc missing and index readonly', docMissingAndIndexReadOnlySuite);
   describe('doc exists', docExistsSuite);
-  after(stopServers);
+  /* eslint-enable jest/valid-describe */
+  afterAll(stopServers);
 });

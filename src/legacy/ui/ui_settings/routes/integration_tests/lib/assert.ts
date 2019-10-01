@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 
-export function assertSinonMatch(value, match) {
+export function assertSinonMatch(value: any, match: any) {
   const stub = sinon.stub();
   stub(value);
   sinon.assert.calledWithExactly(stub, match);

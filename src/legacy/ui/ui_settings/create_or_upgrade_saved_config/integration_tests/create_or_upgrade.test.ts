@@ -19,20 +19,27 @@
 
 import sinon from 'sinon';
 import expect from '@kbn/expect';
+import { UnwrapPromise } from '@kbn/utility-types';
+import { SavedObjectsClientContract } from 'src/core/server';
 
+import KbnServer from '../../../../server/kbn_server';
 import { createTestServers } from '../../../../../test_utils/kbn_server';
+// @ts-ignore
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 
 describe('createOrUpgradeSavedConfig()', () => {
-  let savedObjectsClient;
-  let kbn;
-  let kbnServer;
-  let esServer;
-  let servers;
+  let savedObjectsClient: SavedObjectsClientContract;
+  let kbnServer: KbnServer;
+  let servers: ReturnType<typeof createTestServers>;
+  let esServer: UnwrapPromise<ReturnType<typeof servers['startES']>>;
+  let kbn: UnwrapPromise<ReturnType<typeof servers['startKibana']>>;
 
-  before(async function () {
+  beforeAll(async function() {
     servers = createTestServers({
-      adjustTimeout: (t) => this.timeout(t),
+      adjustTimeout: t => {
+        jest.setTimeout(t);
+      },
+      settings: {},
     });
     esServer = await servers.startES();
     kbn = await servers.startKibana();
@@ -69,14 +76,13 @@ describe('createOrUpgradeSavedConfig()', () => {
     ]);
   });
 
-  after(() => {
-    esServer.stop();
-    kbn.stop();
-  });
+  afterAll(async () => {
+    await esServer.stop();
+    await kbn.stop();
+  }, 30000);
 
-  it('upgrades the previous version on each increment', async function () {
-    this.timeout(30000);
-
+  it('upgrades the previous version on each increment', async function() {
+    jest.setTimeout(30000);
     // ------------------------------------
     // upgrade to 5.4.0
     await createOrUpgradeSavedConfig({
