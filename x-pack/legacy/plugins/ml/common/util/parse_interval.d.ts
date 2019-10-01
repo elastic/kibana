@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface Duration {
-  asSeconds(): number;
-  asMilliseconds(): number;
-}
+import { Duration } from 'moment';
+
 export function parseInterval(interval: string): Duration;

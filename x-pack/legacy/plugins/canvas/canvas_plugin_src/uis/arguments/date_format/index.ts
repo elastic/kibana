@@ -11,6 +11,9 @@ import { AdvancedSettings } from '../../../../public/lib/kibana_advanced_setting
 // @ts-ignore untyped local lib
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentFactory } from '../../../../types/arguments';
+import { ArgumentStrings } from '../../../strings';
+
+const { DateFormat: strings } = ArgumentStrings;
 
 const formatMap = {
   DEFAULT: AdvancedSettings.get('dateFormat'),
@@ -35,7 +38,7 @@ export const DateFormatArgInput = compose<ComponentProps, null>(withProps({ date
 
 export const dateFormat: ArgumentFactory<ComponentProps> = () => ({
   name: 'dateFormat',
-  displayName: 'Date Format',
-  help: 'Select or enter a MomentJS format',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   simpleTemplate: templateFromReactComponent(DateFormatArgInput),
 });

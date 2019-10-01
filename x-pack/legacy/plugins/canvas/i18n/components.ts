@@ -9,16 +9,16 @@ import { CANVAS, JSON, KIBANA, PDF, POST, URL } from './constants';
 
 export const ComponentStrings = {
   App: {
-    getLoadErrorTitle: () =>
-      i18n.translate('xpack.canvas.app.loadErrorTitle', {
-        defaultMessage: 'Canvas failed to load :(',
-      }),
     getLoadErrorMessage: (error: string) =>
       i18n.translate('xpack.canvas.app.loadErrorMessage', {
         defaultMessage: 'Message: {error}',
         values: {
           error,
         },
+      }),
+    getLoadErrorTitle: () =>
+      i18n.translate('xpack.canvas.app.loadErrorTitle', {
+        defaultMessage: 'Canvas failed to load',
       }),
     getLoadingMessage: () =>
       i18n.translate('xpack.canvas.app.loadingMessage', {
@@ -33,6 +33,12 @@ export const ComponentStrings = {
     getTitleText: () =>
       i18n.translate('xpack.canvas.embedObject.titleText', {
         defaultMessage: 'Embed Object',
+      }),
+  },
+  ArgAddPopover: {
+    getAddAriaLabel: () =>
+      i18n.translate('xpack.canvas.argAddPopover.addAriaLabel', {
+        defaultMessage: 'Add argument',
       }),
   },
   Asset: {
@@ -206,6 +212,38 @@ export const ComponentStrings = {
     getFlyoutCloseButtonAriaLabel: () =>
       i18n.translate('xpack.canvas.keyboardShortcutsDoc.flyout.closeButtonAriaLabel', {
         defaultMessage: 'Closes keyboard shortcuts reference',
+      }),
+  },
+  Toolbar: {
+    getEditorButtonLabel: () =>
+      i18n.translate('xpack.canvas.toolbar.editorButtonLabel', {
+        defaultMessage: 'Expression editor',
+      }),
+    getNextPageAriaLabel: () =>
+      i18n.translate('xpack.canvas.toolbar.nextPageAriaLabel', {
+        defaultMessage: 'Next Page',
+      }),
+    getPageButtonLabel: (pageNum: number, totalPages: number) =>
+      i18n.translate('xpack.canvas.toolbar.pageButtonLabel', {
+        defaultMessage: 'Page {pageNum}{rest}',
+        values: {
+          pageNum,
+          rest: totalPages > 1 ? ` of ${totalPages}` : '',
+        },
+      }),
+    getPreviousPageAriaLabel: () =>
+      i18n.translate('xpack.canvas.toolbar.previousPageAriaLabel', {
+        defaultMessage: 'Previous Page',
+      }),
+    getWorkpadManagerCloseButtonLabel: () =>
+      i18n.translate('xpack.canvas.toolbar.workpadManagerCloseButtonLabel', {
+        defaultMessage: 'Close',
+      }),
+  },
+  ToolbarTray: {
+    getCloseTrayAriaLabel: () =>
+      i18n.translate('xpack.canvas.toolbarTray.closeTrayAriaLabel', {
+        defaultMessage: 'Close tray',
       }),
   },
   WorkpadCreate: {
