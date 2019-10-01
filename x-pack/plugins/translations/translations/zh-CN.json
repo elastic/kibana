@@ -2813,7 +2813,6 @@
     "visTypeTable.tableVisEditorConfig.schemas.splitTitle": "拆分表",
     "visTypeTable.tableVisTitle": "数据表",
     "visTypeTable.vis.noResultsFoundTitle": "找不到结果",
-    "visTypeTable.params.defaultPercetangeCol": "不显示",
     "visTypeTable.params.PercentageColLabel": "百分比列",
     "visTypeTable.params.percentageTableColumnName": "{title} 百分比",
     "visTypeTable.params.showMetricsLabel.optionsTitle": "选项",

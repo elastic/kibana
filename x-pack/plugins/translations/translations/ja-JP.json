@@ -2812,7 +2812,6 @@
     "visTypeTable.tableVisEditorConfig.schemas.splitTitle": "テーブルを分割",
     "visTypeTable.tableVisTitle": "データテーブル",
     "visTypeTable.vis.noResultsFoundTitle": "結果が見つかりませんでした",
-    "visTypeTable.params.defaultPercetangeCol": "非表示",
     "visTypeTable.params.PercentageColLabel": "パーセンテージ列",
     "visTypeTable.params.percentageTableColumnName": "{title} パーセント",
     "visTypeTable.params.showMetricsLabel.optionsTitle": "オプション",

@@ -31,7 +31,7 @@ import {
   SelectOption,
 } from '../../../kbn_vislib_vis_types/public/components/common';
 import { TableVisParams } from '../types';
-import { totalAggregations, isNumeric } from './utils';
+import { totalAggregations, isAggConfigNumeric } from './utils';
 
 function TableOptions({
   aggs,
@@ -40,20 +40,16 @@ function TableOptions({
   setValidity,
   setValue,
 }: VisOptionsProps<TableVisParams>) {
-  const noCol = useMemo(
-    () => ({
-      value: '',
-      text: i18n.translate('visTypeTable.params.defaultPercetangeCol', {
-        defaultMessage: 'Don’t show',
-      }),
-    }),
-    []
-  );
   const percentageColumns = useMemo(
     () => [
-      noCol,
+      {
+        value: '',
+        text: i18n.translate('visTypeTable.params.defaultPercentageCol', {
+          defaultMessage: 'Don’t show',
+        }),
+      },
       ...tabifyGetColumns(aggs.getResponseAggs(), true)
-        .filter(col => isNumeric(get(col, 'aggConfig.type.name'), stateParams.dimensions))
+        .filter(col => isAggConfigNumeric(get(col, 'aggConfig.type.name'), stateParams.dimensions))
         .map(({ name }) => ({ value: name, text: name })),
     ],
     [aggs, aggsLabels, stateParams.percentageCol, stateParams.dimensions]
@@ -73,7 +69,7 @@ function TableOptions({
     ) {
       setValue('percentageCol', percentageColumns[0].value);
     }
-  }, [aggs, aggsLabels, percentageColumns, stateParams.percentageCol]);
+  }, [percentageColumns, stateParams.percentageCol]);
 
   return (
     <EuiPanel paddingSize="s">
@@ -97,7 +93,6 @@ function TableOptions({
         setValue={setValue}
       />
 
-      <EuiSpacer size="xs" />
       <SwitchOption
         label={i18n.translate('visTypeTable.params.showMetricsLabel', {
           defaultMessage: 'Show metrics for every bucket/level',
@@ -131,7 +126,6 @@ function TableOptions({
         setValue={setValue}
       />
 
-      <EuiSpacer size="xs" />
       <SelectOption
         label={i18n.translate('visTypeTable.params.totalFunctionLabel', {
           defaultMessage: 'Total function',

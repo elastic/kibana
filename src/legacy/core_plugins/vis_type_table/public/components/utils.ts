@@ -21,15 +21,7 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { AggTypes, Dimensions } from '../types';
 
-/**
- * Determines if a aggConfig is numeric
- * @param {String} type - the type of the aggConfig
- * @param {Object} obj - dimensions of the current visualization or editor
- * @param {Object} obj.buckets
- * @param {Object} obj.metrics
- * @returns {Boolean}
- */
-function isNumeric(
+function isAggConfigNumeric(
   type: AggTypes,
   { buckets, metrics }: Dimensions = { buckets: [], metrics: [] }
 ) {
@@ -49,8 +41,8 @@ const totalAggregations = [
   },
   {
     value: AggTypes.AVG,
-    text: i18n.translate('visTypeTable.totalAggregations.avgText', {
-      defaultMessage: 'Avg',
+    text: i18n.translate('visTypeTable.totalAggregations.averageText', {
+      defaultMessage: 'Average',
     }),
   },
   {
@@ -73,4 +65,4 @@ const totalAggregations = [
   },
 ];
 
-export { isNumeric, totalAggregations };
+export { isAggConfigNumeric, totalAggregations };

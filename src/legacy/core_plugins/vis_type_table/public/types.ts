@@ -40,6 +40,7 @@ export interface Dimensions {
 }
 
 export interface TableVisParams {
+  type: 'table';
   perPage: number | '';
   showPartialRows: boolean;
   showMetricsAtAllLevels: boolean;

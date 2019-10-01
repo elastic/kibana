@@ -26,6 +26,7 @@ import { visFactory } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 // @ts-ignore
 import { AngularVisController } from 'ui/vis/vis_types/angular_vis_type';
+import { AggGroupNames } from 'ui/vis/editors/default';
 import { tableVisResponseHandler } from './table_vis_request_handler';
 // @ts-ignore
 import tableVisTemplate from './table_vis.html';
@@ -62,7 +63,7 @@ export const createTableVisTypeDefinition = () => {
       optionsTemplate: TableOptions,
       schemas: new Schemas([
         {
-          group: 'metrics',
+          group: AggGroupNames.Metrics,
           name: 'metric',
           title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.metricTitle', {
             defaultMessage: 'Metric',
@@ -77,7 +78,7 @@ export const createTableVisTypeDefinition = () => {
           defaults: [{ type: 'count', schema: 'metric' }],
         },
         {
-          group: 'buckets',
+          group: AggGroupNames.Buckets,
           name: 'bucket',
           title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.bucketTitle', {
             defaultMessage: 'Split rows',
@@ -85,7 +86,7 @@ export const createTableVisTypeDefinition = () => {
           aggFilter: ['!filter'],
         },
         {
-          group: 'buckets',
+          group: AggGroupNames.Buckets,
           name: 'split',
           title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.splitTitle', {
             defaultMessage: 'Split table',
