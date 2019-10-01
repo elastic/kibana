@@ -116,7 +116,12 @@ export function SearchBar(props: SearchBarProps) {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill type="submit" disabled={isLoading || !currentIndexPattern}>
+            <EuiButton
+              data-test-subj="graph-explore-button"
+              fill
+              type="submit"
+              disabled={isLoading || !currentIndexPattern}
+            >
               {i18n.translate('xpack.graph.bar.exploreLabel', { defaultMessage: 'Explore' })}
             </EuiButton>
           </EuiFlexItem>
