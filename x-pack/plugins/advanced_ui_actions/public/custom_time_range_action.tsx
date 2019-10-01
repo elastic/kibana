@@ -7,19 +7,13 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { IEmbeddable, Embeddable, EmbeddableInput } from 'src/plugins/embeddable/public';
-import {
-  IAction,
-  IncompatibleActionError,
-} from '../../../../../../../src/plugins/ui_actions/public';
-import { TimeRange } from '../../../../../../../src/plugins/data/public';
-import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../../../src/legacy/core_plugins/kibana/public/discover/embeddable/search_embeddable';
-import { VisualizeEmbeddable } from '../../../../../../../src/legacy/core_plugins/kibana/public/visualize/embeddable/visualize_embeddable';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../../../src/legacy/core_plugins/kibana/public/visualize/embeddable/constants';
-
+import { IAction, IncompatibleActionError } from '../../../../src/plugins/ui_actions/public';
+import { TimeRange } from '../../../../src/plugins/data/public';
 import { CustomizeTimeRangeModal } from './customize_time_range_modal';
 import { OpenModal, CommonlyUsedRange } from './types';
 
 const CUSTOM_TIME_RANGE = 'CUSTOM_TIME_RANGE';
+const SEARCH_EMBEDDABLE_TYPE = 'search';
 
 export interface TimeRangeInput extends EmbeddableInput {
   timeRange: TimeRange;
@@ -30,6 +24,9 @@ function hasTimeRange(
 ): embeddable is Embeddable<TimeRangeInput> {
   return (embeddable as Embeddable<TimeRangeInput>).getInput().timeRange !== undefined;
 }
+
+const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
+type VisualizeEmbeddable = any;
 
 function isVisualizeEmbeddable(
   embeddable: IEmbeddable | VisualizeEmbeddable
