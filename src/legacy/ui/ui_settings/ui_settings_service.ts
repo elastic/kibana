@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { Legacy } from 'kibana';
 import { defaultsDeep } from 'lodash';
 import Boom from 'boom';
 
@@ -30,7 +30,7 @@ export interface UiSettingsServiceOptions {
   overrides: Record<string, SavedObjectAttribute>;
   savedObjectsClient: SavedObjectsClientContract;
   getDefaults?: () => Record<string, UiSettingsParams>;
-  logWithMetadata?: (...params: any[]) => void;
+  logWithMetadata?: Legacy.Server['logWithMetadata'];
 }
 
 interface ReadOptions {

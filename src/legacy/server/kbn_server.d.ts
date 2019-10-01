@@ -79,6 +79,7 @@ declare module 'hapi' {
       factoryFn: (request: Request) => Record<string, any>
     ) => void;
     uiSettingsServiceFactory: (options: any) => any;
+    logWithMetadata: (tags: string[], message: string, meta: Record<string, any>) => void;
   }
 
   interface Request {

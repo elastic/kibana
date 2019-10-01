@@ -19,6 +19,7 @@
 
 import { defaults } from 'lodash';
 import { SavedObjectsClientContract, SavedObjectAttribute } from 'src/core/server';
+import { Legacy } from 'kibana';
 
 import { getUpgradeableConfig } from './get_upgradeable_config';
 
@@ -26,7 +27,7 @@ interface Options {
   savedObjectsClient: SavedObjectsClientContract;
   version: string;
   buildNum: number;
-  logWithMetadata: (...params: any[]) => void;
+  logWithMetadata: Legacy.Server['logWithMetadata'];
   onWriteError?: <T extends SavedObjectAttribute = any>(
     error: Error,
     attributes: Record<string, any>

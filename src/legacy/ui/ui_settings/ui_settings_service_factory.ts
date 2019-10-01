@@ -45,6 +45,6 @@ export function uiSettingsServiceFactory(
     savedObjectsClient,
     getDefaults,
     overrides,
-    logWithMetadata: (...args) => (server as any).logWithMetadata(...args),
+    logWithMetadata: server.logWithMetadata,
   });
 }
