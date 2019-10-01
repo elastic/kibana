@@ -19,7 +19,7 @@ interface LogEntryTimestampColumnProps {
 
 export const LogEntryTimestampColumn = memo<LogEntryTimestampColumnProps>(
   ({ isHighlighted, isHovered, time }) => {
-    const formattedTime = useFormattedTime(time);
+    const formattedTime = useFormattedTime(time, { format: 'time' });
 
     return (
       <TimestampColumnContent isHovered={isHovered} isHighlighted={isHighlighted}>

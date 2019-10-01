@@ -326,7 +326,7 @@ const WithColumnWidths: React.FunctionComponent<{
 }> = ({ children, columnConfigurations, scale }) => {
   const { CharacterDimensionsProbe, dimensions } = useMeasuredCharacterDimensions(scale);
   const referenceTime = useMemo(() => Date.now(), []);
-  const formattedCurrentDate = useFormattedTime(referenceTime);
+  const formattedCurrentDate = useFormattedTime(referenceTime, { format: 'time' });
   const columnWidths = useMemo(
     () => getColumnWidths(columnConfigurations, dimensions.width, formattedCurrentDate.length),
     [columnConfigurations, dimensions.width, formattedCurrentDate]
