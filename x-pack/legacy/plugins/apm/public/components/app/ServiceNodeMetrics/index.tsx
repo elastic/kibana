@@ -8,19 +8,59 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
-  EuiHorizontalRule
+  EuiHorizontalRule,
+  EuiFlexGrid,
+  EuiPanel,
+  EuiSpacer,
+  EuiStat
 } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useAgentName } from '../../../hooks/useAgentName';
-import { ServiceMetrics } from '../ServiceMetrics';
+import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
+import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
+import { MetricsChart } from '../../shared/charts/MetricsChart';
+import { useFetcher, FETCH_STATUS } from '../../../hooks/useFetcher';
+import { callApmApi } from '../../../services/rest/callApmApi';
+import { truncate, px, unit } from '../../../style/variables';
+
+const INITIAL_DATA = {
+  host: '',
+  containerId: ''
+};
+
+const Truncate = styled.div`
+  ${truncate(px(unit * 12))}
+`;
 
 export function ServiceNodeMetrics() {
   const { urlParams } = useUrlParams();
   const { serviceName, serviceNodeName } = urlParams;
 
   const { agentName } = useAgentName();
+  const { data } = useServiceMetricCharts(urlParams, agentName);
+  const { start, end } = urlParams;
+
+  const {
+    data: { host, containerId } = INITIAL_DATA,
+    status
+  } = useFetcher(() => {
+    if (serviceName && serviceNodeName) {
+      return callApmApi({
+        pathname:
+          '/api/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
+        params: {
+          path: { serviceName, serviceNodeName }
+        }
+      });
+    }
+  }, [serviceName, serviceNodeName]);
+
+  const isLoading =
+    status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING;
 
   return (
     <div>
@@ -34,7 +74,46 @@ export function ServiceNodeMetrics() {
         </EuiFlexGroup>
       </ApmHeader>
       <EuiHorizontalRule margin="m" />
-      {agentName && serviceNodeName && <ServiceMetrics agentName={agentName} />}
+      <EuiFlexGroup gutterSize="xl">
+        <EuiFlexItem grow={false}>
+          <EuiStat
+            titleSize="s"
+            isLoading={isLoading}
+            description={i18n.translate('xpack.apm.serviceNodeMetrics.host', {
+              defaultMessage: 'Host'
+            })}
+            title={<Truncate>{host}</Truncate>}
+          ></EuiStat>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiStat
+            titleSize="s"
+            isLoading={isLoading}
+            description={i18n.translate(
+              'xpack.apm.serviceNodeMetrics.containerId',
+              {
+                defaultMessage: 'Container ID'
+              }
+            )}
+            title={<Truncate>{containerId}</Truncate>}
+          ></EuiStat>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiHorizontalRule margin="m" />
+      {agentName && serviceNodeName && (
+        <ChartsSyncContextProvider>
+          <EuiFlexGrid columns={2} gutterSize="s">
+            {data.charts.map(chart => (
+              <EuiFlexItem key={chart.key}>
+                <EuiPanel>
+                  <MetricsChart start={start} end={end} chart={chart} />
+                </EuiPanel>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGrid>
+          <EuiSpacer size="xxl" />
+        </ChartsSyncContextProvider>
+      )}
     </div>
   );
 }
