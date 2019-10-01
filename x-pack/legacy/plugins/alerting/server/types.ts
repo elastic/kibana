@@ -15,14 +15,15 @@ export type GetServicesFunction = (request: any) => Services;
 export type GetBasePathFunction = (spaceId?: string) => string;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
-export type Log = (
-  tags: string | string[],
-  data?: string | object | (() => any),
-  timestamp?: number
-) => void;
+export interface Logger {
+  info(message: string): void;
+  debug(message: string): void;
+  warn(message: string): void;
+  error(message: string): void;
+}
 
 export interface Services {
-  log: Log;
+  logger: Logger;
   callCluster(path: string, opts: any): Promise<any>;
   savedObjectsClient: SavedObjectsClientContract;
 }

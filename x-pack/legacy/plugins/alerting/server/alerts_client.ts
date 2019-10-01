@@ -8,7 +8,7 @@ import Boom from 'boom';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientContract, SavedObjectReference } from 'src/core/server';
-import { Alert, RawAlert, AlertTypeRegistry, AlertAction, Log, AlertType } from './types';
+import { Alert, RawAlert, AlertTypeRegistry, AlertAction, Logger, AlertType } from './types';
 import { TaskManager } from '../../task_manager';
 import { validateAlertTypeParams } from './lib';
 import { CreateAPIKeyResult as SecurityPluginCreateAPIKeyResult } from '../../../../plugins/security/server';
@@ -23,7 +23,7 @@ interface SuccessCreateAPIKeyResult {
 export type CreateAPIKeyResult = FailedCreateAPIKeyResult | SuccessCreateAPIKeyResult;
 
 interface ConstructorOptions {
-  log: Log;
+  logger: Logger;
   taskManager: TaskManager;
   savedObjectsClient: SavedObjectsClientContract;
   alertTypeRegistry: AlertTypeRegistry;
@@ -78,7 +78,7 @@ interface UpdateOptions {
 }
 
 export class AlertsClient {
-  private readonly log: Log;
+  private readonly logger: Logger;
   private readonly getUserName: () => Promise<string | null>;
   private readonly spaceId?: string;
   private readonly taskManager: TaskManager;
@@ -90,12 +90,12 @@ export class AlertsClient {
     alertTypeRegistry,
     savedObjectsClient,
     taskManager,
-    log,
+    logger,
     spaceId,
     getUserName,
     createAPIKey,
   }: ConstructorOptions) {
-    this.log = log;
+    this.logger = logger;
     this.getUserName = getUserName;
     this.spaceId = spaceId;
     this.taskManager = taskManager;
@@ -143,8 +143,7 @@ export class AlertsClient {
           await this.savedObjectsClient.delete('alert', createdAlert.id);
         } catch (err) {
           // Skip the cleanup error and throw the task manager error to avoid confusion
-          this.log(
-            ['alerting', 'error'],
+          this.logger.error(
             `Failed to cleanup alert "${createdAlert.id}" after scheduling task failed. Error: ${err.message}`
           );
         }

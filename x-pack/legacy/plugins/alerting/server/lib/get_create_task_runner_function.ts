@@ -97,7 +97,7 @@ export function getCreateTaskRunnerFunction({
 
         const executionHandler = createExecutionHandler({
           alertId,
-          log: services.log,
+          logger: services.logger,
           executeAction,
           apiKey,
           actions: actionsWithIds,

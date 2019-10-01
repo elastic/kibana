@@ -19,9 +19,14 @@ const alertTypeRegistryParams = {
   isSecurityEnabled: true,
   getServices() {
     return {
-      log: jest.fn(),
       callCluster: jest.fn(),
       savedObjectsClient: SavedObjectsClientMock.create(),
+      logger: {
+        info: jest.fn(),
+        debug: jest.fn(),
+        warn: jest.fn(),
+        error: jest.fn(),
+      },
     };
   },
   taskManager,
