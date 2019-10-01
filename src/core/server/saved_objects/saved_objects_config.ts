@@ -17,10 +17,16 @@
  * under the License.
  */
 
-import { Config } from './config';
-import { transformDeprecations } from './transform_deprecations';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-export default function (kbnServer) {
-  const settings = transformDeprecations(kbnServer.settings);
-  kbnServer.config = Config.withDefaultSchema(settings);
-}
+export type SavedObjectsConfigType = TypeOf<typeof config.schema>;
+
+export const config = {
+  path: 'migrations',
+  schema: schema.object({
+    batchSize: schema.number({ defaultValue: 100 }),
+    scrollDuration: schema.string({ defaultValue: '15m' }),
+    pollInterval: schema.number({ defaultValue: 1500 }),
+    skip: schema.boolean({ defaultValue: false }),
+  }),
+};

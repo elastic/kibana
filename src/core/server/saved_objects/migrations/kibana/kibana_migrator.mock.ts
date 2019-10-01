@@ -16,11 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { getTypes, getProperty, getRootProperties, getRootPropertiesObjects } from './lib';
-export {
-  FieldMapping,
-  MappingMeta,
-  MappingProperties,
-  IndexMapping,
-  SavedObjectsMapping,
-} from './types';
+
+import { KibanaMigrator, mergeProperties } from './kibana_migrator';
+import { buildActiveMappings } from '../core';
+import { SavedObjectsMapping } from '../../mappings';
+
+const createMigrator = (
+  {
+    savedObjectMappings,
+  }: {
+    savedObjectMappings: SavedObjectsMapping[];
+  } = { savedObjectMappings: [] }
+) => {
+  const mockMigrator: jest.Mocked<PublicMethodsOf<KibanaMigrator>> = {
+    runMigrations: jest.fn(),
+    getActiveMappings: jest.fn(),
+    migrateDocument: jest.fn(),
+  };
+
+  mockMigrator.getActiveMappings.mockReturnValue(
+    buildActiveMappings({ properties: mergeProperties(savedObjectMappings) })
+  );
+  mockMigrator.migrateDocument.mockImplementation(doc => doc);
+  return mockMigrator;
+};
+
+export const mockKibanaMigrator = {
+  create: createMigrator,
+};

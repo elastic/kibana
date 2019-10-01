@@ -16,15 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { UI_EXPORT_DEFAULTS } from './ui_export_defaults';
-import * as uiExportTypeReducers from './ui_export_types';
-import { reduceExportSpecs } from '../../plugin_discovery';
-
-export function collectUiExports(pluginSpecs) {
-  return reduceExportSpecs(
-    pluginSpecs,
-    uiExportTypeReducers,
-    UI_EXPORT_DEFAULTS
-  );
-}
+export { findLegacyPluginSpecs } from './find_legacy_plugin_specs';
