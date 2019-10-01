@@ -348,6 +348,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
 
     const productStatus = {
       totalUniqueInstanceCount: 0,
+      totalUniqueInternallyCollectedCount: 0,
       totalUniqueFullyMigratedCount: 0,
       totalUniquePartiallyMigratedCount: 0,
       detected: null,
@@ -388,6 +389,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
         }
       }
       productStatus.totalUniqueInstanceCount = Object.keys(map).length;
+      productStatus.totalUniqueInternallyCollectedCount = Object.keys(internalCollectorsUuidsMap).length;
       productStatus.totalUniquePartiallyMigratedCount = Object.keys(partiallyMigratedUuidsMap).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {
@@ -467,6 +469,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
         ...Object.keys(fullyMigratedUuidsMap),
         ...Object.keys(partiallyMigratedUuidsMap)
       ]).length;
+      productStatus.totalUniqueInternallyCollectedCount = Object.keys(internalCollectorsUuidsMap).length;
       productStatus.totalUniquePartiallyMigratedCount = Object.keys(partiallyMigratedUuidsMap).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {

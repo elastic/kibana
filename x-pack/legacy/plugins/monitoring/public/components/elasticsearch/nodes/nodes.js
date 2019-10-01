@@ -279,7 +279,8 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             componentToRender: null
           };
 
-          const hasInstances = setupMode.data.totalUniqueInstanceCount > 0;
+          const hasInstances = setupMode.data.totalUniqueInstanceCount > 0
+            && setupMode.data.totalUniqueInternallyCollectedCount > 0;
           if (!hasInstances) {
             customRenderResponse.shouldRender = true;
             customRenderResponse.componentToRender = (
@@ -288,7 +289,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
                   title={i18n.translate('xpack.monitoring.elasticsearch.nodes.metricbeatMigration.detectedNodeTitle', {
                     defaultMessage: 'Elasticsearch node detected',
                   })}
-                  color="warning"
+                  color={setupMode.data.totalUniqueInstanceCount > 0 ? 'danger' : 'warning'}
                   iconType="flag"
                 >
                   <p>
