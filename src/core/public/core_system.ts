@@ -80,7 +80,7 @@ export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
 export class CoreSystem {
   private readonly fatalErrors: FatalErrorsService;
   private readonly injectedMetadata: InjectedMetadataService;
-  private readonly legacyPlatform: LegacyPlatformService;
+  private readonly legacy: LegacyPlatformService;
   private readonly notifications: NotificationsService;
   private readonly http: HttpService;
   private readonly savedObjects: SavedObjectsService;
@@ -134,7 +134,7 @@ export class CoreSystem {
     this.context = new ContextService(this.coreContext);
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
 
-    this.legacyPlatform = new LegacyPlatformService({
+    this.legacy = new LegacyPlatformService({
       requireLegacyFiles,
       useLegacyTestHarness,
     });
@@ -154,7 +154,11 @@ export class CoreSystem {
       const notifications = this.notifications.setup({ uiSettings });
 
       const pluginDependencies = this.plugins.getOpaqueIds();
-      const context = this.context.setup({ pluginDependencies });
+      const context = this.context.setup({
+        // We inject a fake "legacy plugin" with no dependencies so that legacy plugins can register context providers
+        // that will only be available to other legacy plugins and will not leak into New Platform plugins.
+        pluginDependencies: new Map([...pluginDependencies, [this.legacy.legacyId, []]]),
+      });
       const application = this.application.setup({ context });
 
       const core: InternalCoreSetup = {
@@ -170,7 +174,7 @@ export class CoreSystem {
       // Services that do not expose contracts at setup
       const plugins = await this.plugins.setup(core);
 
-      await this.legacyPlatform.setup({
+      await this.legacy.setup({
         core,
         plugins: mapToObject(plugins.contracts),
       });
@@ -260,7 +264,7 @@ export class CoreSystem {
         targetDomElement: coreUiTargetDomElement,
       });
 
-      await this.legacyPlatform.start({
+      await this.legacy.start({
         core,
         plugins: mapToObject(plugins.contracts),
         targetDomElement: rendering.legacyTargetDomElement,
@@ -277,7 +281,7 @@ export class CoreSystem {
   }
 
   public stop() {
-    this.legacyPlatform.stop();
+    this.legacy.stop();
     this.plugins.stop();
     this.notifications.stop();
     this.http.stop();
