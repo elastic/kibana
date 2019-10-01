@@ -6,62 +6,14 @@
   margin-bottom: $euiSizeS;
 }
 
-.gphColorPicker__color,
-.gphIconPicker__icon {
+.gphColorPicker__color {
   margin: $euiSizeXS;
   cursor: pointer;
 
-  &.selectedNode,
   &:hover,
   &:focus {
     transform: scale(1.4);
   }
-}
-
-.gphIconPicker__icon {
-  opacity: .7;
-
-  &.selectedNode,
-  &:hover,
-  &:focus {
-    opacity: 1;
-  }
-}
-
-.gphIndexSelect{
-  max-width: $euiSizeL * 10;
-  margin-right: $euiSizeXS;
-
-  &-unselected {
-    @include euiFocusRing;
-  }
-}
-
-.gphAddButton {
-  background: $euiColorPrimary;
-  color: $euiColorEmptyShade;
-  border-radius: 50%;
-  font-size: $euiFontSizeXS;
-  margin: 2px $euiSizeS 0 $euiSizeXS;
-  @include size(26px); // same as svg
-
-  &:hover:not(:disabled) {
-    background: shadeOrTint($euiColorPrimary, 10%, 10%);
-    cursor: pointer;
-  }
-
-  &:disabled {
-    background: $euiColorMediumShade;
-    cursor: not-allowed;
-  }
-
-  &-focus {
-    @include euiFocusRing;
-  }
-}
-
-.gphFieldList {
-  min-width: $euiSizeXL * 10;
 }
 
 /**

@@ -48,13 +48,9 @@
 }
 
 .gphNode__text {
-  fill: $euiColorDarkestShade;
-
-  &--lowOpacity {
-    fill-opacity: 0.5;
-  }
+  fill: $euiColorInk;
 
   &--inverse {
-    fill: $euiColorLightestShade;
+    fill: $euiColorGhost;
   }
 }

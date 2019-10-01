@@ -129,7 +129,7 @@ export function GraphVisualization({
                 />
                 {node.icon && (
                   <text
-                    className={classNames('fa gphNode__text gphNode__text--lowOpacity', {
+                    className={classNames('fa gphNode__text', {
                       'gphNode__text--inverse': isColorDark(...hexToRgb(node.color)),
                     })}
                     transform="translate(0,5)"

@@ -60,7 +60,7 @@ exports[`graph_visualization should render to svg elements 1`] = `
         }
       />
       <text
-        className="fa gphNode__text gphNode__text--lowOpacity gphNode__text--inverse"
+        className="fa gphNode__text gphNode__text--inverse"
         textAnchor="middle"
         transform="translate(0,5)"
         x={5}
@@ -114,7 +114,7 @@ exports[`graph_visualization should render to svg elements 1`] = `
         }
       />
       <text
-        className="fa gphNode__text gphNode__text--lowOpacity gphNode__text--inverse"
+        className="fa gphNode__text gphNode__text--inverse"
         textAnchor="middle"
         transform="translate(0,5)"
         x={7}
@@ -150,7 +150,7 @@ exports[`graph_visualization should render to svg elements 1`] = `
         }
       />
       <text
-        className="fa gphNode__text gphNode__text--lowOpacity gphNode__text--inverse"
+        className="fa gphNode__text gphNode__text--inverse"
         textAnchor="middle"
         transform="translate(0,5)"
         x={12}
