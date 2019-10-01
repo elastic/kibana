@@ -17,7 +17,7 @@
  * under the License.
  */
 import { escape, isFunction } from 'lodash';
-import { FieldFormatConvert, IFieldFormat, HtmlConventTypeConvert } from '../types';
+import { FieldFormatConvert, IFieldFormat, HtmlContextTypeConvert } from '../types';
 
 import { asPrettyString, getHighlightHtml } from '../utils';
 
@@ -26,8 +26,8 @@ export const HTML_CONTEXT_TYPE = 'html';
 const getConvertFn = (
   format: IFieldFormat,
   fieldFormatConvert: Partial<FieldFormatConvert>
-): HtmlConventTypeConvert => {
-  const fallbackHtml: HtmlConventTypeConvert = (value, field, hit) => {
+): HtmlContextTypeConvert => {
+  const fallbackHtml: HtmlContextTypeConvert = (value, field, hit) => {
     const formatted = escape(format.convert(value, 'text'));
 
     return !field || !hit || !hit.highlight || !hit.highlight[field.name]
@@ -35,16 +35,16 @@ const getConvertFn = (
       : getHighlightHtml(formatted, hit.highlight[field.name]);
   };
 
-  return (fieldFormatConvert[HTML_CONTEXT_TYPE] || fallbackHtml) as HtmlConventTypeConvert;
+  return (fieldFormatConvert[HTML_CONTEXT_TYPE] || fallbackHtml) as HtmlContextTypeConvert;
 };
 
 export const setup = (
   format: IFieldFormat,
   fieldFormatConvert: Partial<FieldFormatConvert>
-): HtmlConventTypeConvert => {
+): HtmlContextTypeConvert => {
   const convert = getConvertFn(format, fieldFormatConvert);
 
-  const recurse: HtmlConventTypeConvert = (value, field, hit, meta) => {
+  const recurse: HtmlContextTypeConvert = (value, field, hit, meta) => {
     if (value == null) {
       return asPrettyString(value);
     }
@@ -63,7 +63,7 @@ export const setup = (
     return subValues.join(',' + (useMultiLine ? '\n' : ' '));
   };
 
-  const wrap: HtmlConventTypeConvert = (value, field, hit, meta) => {
+  const wrap: HtmlContextTypeConvert = (value, field, hit, meta) => {
     return `<span ng-non-bindable>${recurse(value, field, hit, meta)}</span>`;
   };
 

@@ -24,7 +24,7 @@ export type ContentType = 'html' | 'text';
 export { IFieldFormat } from './field_format';
 
 /** @internal **/
-export type HtmlConventTypeConvert = (
+export type HtmlContextTypeConvert = (
   value: any,
   field?: any,
   hit?: Record<string, any>,
@@ -35,10 +35,10 @@ export type HtmlConventTypeConvert = (
 export type TextContextTypeConvert = (value: any) => string;
 
 /** @internal **/
-export type FieldFormatConvertFunction = HtmlConventTypeConvert | TextContextTypeConvert;
+export type FieldFormatConvertFunction = HtmlContextTypeConvert | TextContextTypeConvert;
 
 /** @internal **/
 export interface FieldFormatConvert {
   text: TextContextTypeConvert;
-  html: HtmlConventTypeConvert;
+  html: HtmlContextTypeConvert;
 }

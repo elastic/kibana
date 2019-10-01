@@ -18,12 +18,12 @@
  */
 
 import {
+  FieldFormat,
   asPrettyString,
-  FieldFormat as AbstractFieldFormat,
   KBN_FIELD_TYPES,
 } from '../../../../../../plugins/data/common';
 
-export function createBoolFormat(FieldFormat: typeof AbstractFieldFormat) {
+export function createBoolFormat() {
   return class BoolFormat extends FieldFormat {
     static id = 'boolean';
     static title = 'Boolean';
