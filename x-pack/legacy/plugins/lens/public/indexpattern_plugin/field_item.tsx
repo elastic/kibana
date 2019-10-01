@@ -5,7 +5,6 @@
  */
 
 import React, { useState } from 'react';
-import chrome from 'ui/chrome';
 import DateMath from '@elastic/datemath';
 import {
   EuiFlexGroup,
@@ -45,8 +44,6 @@ import { FieldIcon, getColorForDataType } from './field_icon';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { BucketedAggregation, FieldStatsResponse } from '../../common';
 
-const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
-const chartTheme = IS_DARK_THEME ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme;
 export interface FieldItemProps {
   core: DatasourceDataPanelProps['core'];
   field: IndexPatternField;
@@ -201,6 +198,9 @@ export function FieldItem(props: FieldItemProps) {
 
 function FieldItemPopoverContents(props: State & FieldItemProps) {
   const { histogram, topValues, indexPattern, field, dateRange, core, sampledValues } = props;
+
+  const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
+  const chartTheme = IS_DARK_THEME ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme;
 
   if (props.isLoading) {
     return <EuiLoadingSpinner />;
