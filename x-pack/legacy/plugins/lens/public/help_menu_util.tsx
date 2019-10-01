@@ -12,6 +12,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Chrome } from 'ui/chrome';
 
+const docsPage = undefined;
+
 export function addHelpMenuToAppChrome(chrome: Chrome) {
   chrome.helpExtension.set(domElement => {
     render(<HelpMenu />, domElement);
@@ -25,15 +27,23 @@ function HelpMenu() {
   return (
     <>
       <EuiHorizontalRule margin="none" />
-      <EuiSpacer />
-      <EuiButton
-        fill
-        iconType="popout"
-        href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/lens.html`}
-        target="_blank"
-      >
-        <FormattedMessage id="xpack.lens.helpMenu.docLabel" defaultMessage="Lens documentation" />
-      </EuiButton>
+      {docsPage && (
+        <>
+          <EuiSpacer />
+          <EuiButton
+            fill
+            iconType="popout"
+            href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/${docsPage}.html`}
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.lens.helpMenu.docLabel"
+              defaultMessage="Lens documentation"
+            />
+          </EuiButton>
+        </>
+      )}
+
       <EuiSpacer />
       <EuiText size="s">
         <EuiIcon type="logoGithub" color="primary" /> &nbsp;
