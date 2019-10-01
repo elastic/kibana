@@ -5,7 +5,6 @@
  */
 
 import Joi from 'joi';
-import { sortByOrder } from 'lodash';
 import { getNodeInfo } from '../../../../../lib/logstash/get_node_info';
 import { getPipelines, processPipelinesAPIResponse } from '../../../../../lib/logstash/get_pipelines';
 import { handleError } from '../../../../../lib/errors';
@@ -68,7 +67,7 @@ export function logstashNodePipelinesRoute(server) {
       }
 
       const { pageOfPipelines, totalPipelineCount }
-        = await getPaginatedPipelines(req, lsIndexPattern, metricSet, pagination, sort, queryText);
+        = await getPaginatedPipelines(req, lsIndexPattern, { clusterUuid, logstashUuid }, metricSet, pagination, sort, queryText);
 
       // Just the IDs for the rest
       const pipelineIds = pageOfPipelines.map(pipeline => pipeline.id);
@@ -79,15 +78,9 @@ export function logstashNodePipelinesRoute(server) {
 
       try {
         const pipelineData = await getPipelines(req, lsIndexPattern, pipelineIds, metricSet, metricOptions);
-        // We need to re-sort because the data from above comes back in random order
-        const pipelinesResponse = sortByOrder(
-          pipelineData,
-          pipeline => pipeline[sort.field],
-          sort.direction
-        );
         const response = await processPipelinesAPIResponse(
           {
-            pipelines: pipelinesResponse,
+            pipelines: pipelineData,
             nodeSummary: await getNodeInfo(req, lsIndexPattern, { clusterUuid, logstashUuid })
           },
           throughputMetric,
@@ -97,7 +90,6 @@ export function logstashNodePipelinesRoute(server) {
           ...response,
           totalPipelineCount
         };
-        return response;
       } catch (err) {
         throw handleError(err, req);
       }

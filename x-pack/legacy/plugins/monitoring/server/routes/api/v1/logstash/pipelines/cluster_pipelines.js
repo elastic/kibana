@@ -67,7 +67,7 @@ export function logstashClusterPipelinesRoute(server) {
       }
 
       const { pageOfPipelines, totalPipelineCount } =
-        await getPaginatedPipelines(req, lsIndexPattern, metricSet, pagination, sort, queryText);
+        await getPaginatedPipelines(req, lsIndexPattern, {}, metricSet, pagination, sort, queryText);
 
       // Just the IDs for the rest
       const pipelineIds = pageOfPipelines.map(pipeline => pipeline.id);

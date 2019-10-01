@@ -8,9 +8,14 @@ import { get } from 'lodash';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 
-export async function getLogstashPipelineIds(req, logstashIndexPattern) {
+export async function getLogstashPipelineIds(req, logstashIndexPattern, { clusterUuid, logstashUuid }, size) {
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
+
+  const filters = [];
+  if (logstashUuid) {
+    filters.push({ term: { 'logstash_stats.logstash.uuid': logstashUuid } });
+  }
 
   const params = {
     index: logstashIndexPattern,
@@ -24,7 +29,8 @@ export async function getLogstashPipelineIds(req, logstashIndexPattern) {
         start,
         end,
         metric: LogstashMetric.getMetricFields(),
-        clusterUuid: req.params.clusterUuid,
+        clusterUuid,
+        filters,
       }),
       aggs: {
         nested_context: {
@@ -34,6 +40,7 @@ export async function getLogstashPipelineIds(req, logstashIndexPattern) {
           aggs: {
             composite_data: {
               composite: {
+                size,
                 sources: [
                   {
                     id: {

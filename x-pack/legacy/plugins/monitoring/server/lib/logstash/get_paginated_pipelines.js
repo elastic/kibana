@@ -22,13 +22,16 @@ import { getMetrics } from '../details/get_metrics';
  *
  * @param {*} req - Server request object
  * @param {*} lsIndexPattern - The index pattern to search against (`.monitoring-logstash-*`)
+ * @param {*} uuids - The optional `clusterUuid` and `logstashUuid` to filter the results from
  * @param {*} metricSet - The array of metrics that are sortable in the UI
  * @param {*} pagination - ({ index, size })
  * @param {*} sort - ({ field, direction })
  * @param {*} queryText - Text that will be used to filter out pipelines
  */
-export async function getPaginatedPipelines(req, lsIndexPattern, metricSet, pagination, sort, queryText) {
-  const pipelines = await getLogstashPipelineIds(req, lsIndexPattern);
+export async function getPaginatedPipelines(req, lsIndexPattern, { clusterUuid, logstashUuid }, metricSet, pagination, sort, queryText) {
+  const config = req.server.config();
+  const size = config.get('xpack.monitoring.max_bucket_size');
+  const pipelines = await getLogstashPipelineIds(req, lsIndexPattern, { clusterUuid, logstashUuid }, size);
 
   // `metricSet` defines a list of metrics that are sortable in the UI
   // but we don't need to fetch all the data for these metrics to perform
