@@ -735,7 +735,7 @@ describe('TaskStore', () => {
         },
       });
       expect(script).toMatchObject({
-        source: `ctx._source.owner=params.ownerId; ctx._source.status=params.status; ctx._source.retryAt=params.retryAt;`,
+        source: `ctx._source.task.owner=params.ownerId; ctx._source.task.status=params.status; ctx._source.task.retryAt=params.retryAt;`,
         lang: 'painless',
         params: {
           ownerId: kibanaId,
@@ -813,11 +813,14 @@ describe('TaskStore', () => {
 
       expect(query.bool.must).toContainEqual({
         bool: {
-          filter: {
-            term: {
-              owner: kibanaId,
+          must: [
+            {
+              term: {
+                'task.owner': kibanaId,
+              },
             },
-          },
+            { term: { 'task.status': 'claiming' } },
+          ],
         },
       });
 
