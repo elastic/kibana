@@ -12,7 +12,11 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { ManagedTable } from '../../shared/ManagedTable';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { callApmApi } from '../../../services/rest/callApmApi';
-import { asDynamicBytes, asInteger } from '../../../utils/formatters';
+import {
+  asDynamicBytes,
+  asInteger,
+  asPercent
+} from '../../../utils/formatters';
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 
 const ServiceNodeOverview = () => {
@@ -81,7 +85,7 @@ const ServiceNodeOverview = () => {
       }),
       field: 'cpu',
       sortable: true,
-      render: asDynamicBytes
+      render: (value: number | null) => asPercent(value || 0, 1)
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.heapMemoryColumnLabel', {
