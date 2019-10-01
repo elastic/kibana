@@ -102,7 +102,7 @@ coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req) 
       // (3.1.2) Or a lazy approach which perpetuates the problem to consumers:
       dataClient: async () => {
         const dataClient = await coreSetup.elasticsearch.dataClient$.pipe(take(1)).toPromise();
-        dataClient.asScoped(req),
+        return dataClient.asScoped(req);
       },
     },
   };
