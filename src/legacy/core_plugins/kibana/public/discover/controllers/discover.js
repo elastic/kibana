@@ -54,7 +54,6 @@ import { StateProvider } from 'ui/state_management/state';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { getFilterGenerator } from 'ui/filter_manager';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { getDocLink } from 'ui/documentation_links';
 import '../components/fetch_error';
@@ -121,37 +120,30 @@ uiRoutes
     resolve: {
       ip: function (Promise, indexPatterns, config, Private) {
         const State = Private(StateProvider);
-        const savedObjectsClient = Private(SavedObjectsClientProvider);
+        return indexPatterns.getCache().then((savedObjects)=> {
+          /**
+           *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
+           *  the load order of AppState conflicts with the load order of many other things
+           *  so in order to get the name of the index we should use, and to switch to the
+           *  default if necessary, we parse the appState with a temporary State object and
+           *  then destroy it immediatly after we're done
+           *
+           *  @type {State}
+           */
+          const state = new State('_a', {});
 
-        return savedObjectsClient.find({
-          type: 'index-pattern',
-          fields: ['title'],
-          perPage: 10000
-        })
-          .then(({ savedObjects }) => {
-            /**
-             *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
-             *  the load order of AppState conflicts with the load order of many other things
-             *  so in order to get the name of the index we should use, and to switch to the
-             *  default if necessary, we parse the appState with a temporary State object and
-             *  then destroy it immediatly after we're done
-             *
-             *  @type {State}
-             */
-            const state = new State('_a', {});
+          const specified = !!state.index;
+          const exists = _.findIndex(savedObjects, o => o.id === state.index) > -1;
+          const id = exists ? state.index : config.get('defaultIndex');
+          state.destroy();
 
-            const specified = !!state.index;
-            const exists = _.findIndex(savedObjects, o => o.id === state.index) > -1;
-            const id = exists ? state.index : config.get('defaultIndex');
-            state.destroy();
-
-            return Promise.props({
-              list: savedObjects,
-              loaded: indexPatterns.get(id),
-              stateVal: state.index,
-              stateValFound: specified && exists
-            });
+          return Promise.props({
+            list: savedObjects,
+            loaded: indexPatterns.get(id),
+            stateVal: state.index,
+            stateValFound: specified && exists
           });
+        });
       },
       savedSearch: function (redirectWhenMissing, savedSearches, $route) {
         const savedSearchId = $route.current.params.id;
