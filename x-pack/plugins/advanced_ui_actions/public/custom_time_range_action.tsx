@@ -9,11 +9,11 @@ import React from 'react';
 import { IEmbeddable, Embeddable, EmbeddableInput } from 'src/plugins/embeddable/public';
 import { IAction, IncompatibleActionError } from '../../../../src/plugins/ui_actions/public';
 import { TimeRange } from '../../../../src/plugins/data/public';
-import { SEARCH_EMBEDDABLE_TYPE } from '../../../../src/legacy/core_plugins/kibana/public/discover/embeddable/search_embeddable';
 import { CustomizeTimeRangeModal } from './customize_time_range_modal';
 import { OpenModal, CommonlyUsedRange } from './types';
 
 const CUSTOM_TIME_RANGE = 'CUSTOM_TIME_RANGE';
+const SEARCH_EMBEDDABLE_TYPE = 'search';
 
 export interface TimeRangeInput extends EmbeddableInput {
   timeRange: TimeRange;
