@@ -9,7 +9,7 @@ import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import { Title } from '../title';
-import { PageControls } from '../page_controls';
+import { PageControlsComponent } from '../page_controls';
 
 storiesOf('shareables/Footer/components', module)
   .add('Title', () => (
@@ -18,7 +18,7 @@ storiesOf('shareables/Footer/components', module)
     </div>
   ))
   .add('PageControls', () => (
-    <PageControls
+    <PageControlsComponent
       page={0}
       totalPages={1}
       onSetPageNumber={action('onSetPageNumber')}

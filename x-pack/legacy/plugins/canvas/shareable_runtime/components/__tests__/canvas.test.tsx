@@ -8,11 +8,11 @@ import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { JestContext } from '../../test/context_jest';
 import { getScrubber as scrubber, getPageControlsCenter as center } from '../../test/selectors';
-import { CanvasContainer } from '../canvas.container';
+import { Canvas } from '../canvas';
 
 describe('<Canvas />', () => {
   test('null workpad renders nothing', () => {
-    expect(mount(<CanvasContainer />).isEmptyRender());
+    expect(mount(<Canvas />).isEmptyRender());
   });
 
   let wrapper: ReactWrapper;
@@ -20,7 +20,7 @@ describe('<Canvas />', () => {
   beforeEach(() => {
     wrapper = mount(
       <JestContext source="austin">
-        <CanvasContainer />
+        <Canvas />
       </JestContext>
     );
   });

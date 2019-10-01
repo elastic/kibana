@@ -7,16 +7,16 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ExampleContext } from '../../../test/context_example';
 
-import { FooterContainer } from '../footer.container';
+import { Footer } from '../footer';
 import { TitleContainer } from '../title.container';
-import { PageControlsContainer } from '../page_controls.container';
-import { PagePreviewContainer } from '../page_preview.container';
-import { ScrubberContainer } from '../scrubber.container';
+import { PageControls } from '../page_controls';
+import { PagePreview } from '../page_preview';
+import { Scrubber } from '../scrubber';
 
 storiesOf('shareables/Footer', module)
   .add('Footer', () => (
     <ExampleContext height={172}>
-      <FooterContainer />
+      <Footer />
     </ExampleContext>
   ))
   .add('Title', () => (
@@ -26,16 +26,16 @@ storiesOf('shareables/Footer', module)
   ))
   .add('Scrubber', () => (
     <ExampleContext height={172} isScrubberVisible={true}>
-      <ScrubberContainer />
+      <Scrubber />
     </ExampleContext>
   ))
   .add('PageControls', () => (
     <ExampleContext style={{ background: '#333', padding: 10 }}>
-      <PageControlsContainer />
+      <PageControls />
     </ExampleContext>
   ))
   .add('PagePreview', () => (
     <ExampleContext>
-      <PagePreviewContainer height={172} index={0} />
+      <PagePreview height={172} index={0} />
     </ExampleContext>
   ));

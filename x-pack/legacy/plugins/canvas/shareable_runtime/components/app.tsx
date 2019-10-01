@@ -8,7 +8,7 @@ import React from 'react';
 import { CanvasRenderedWorkpad, CanvasShareableState, Stage } from '../types';
 import { RendererSpec } from '../../types';
 import { initialCanvasShareableState, CanvasShareableStateProvider } from '../context';
-import { CanvasContainer } from './canvas.container';
+import { Canvas } from './canvas';
 import { renderFunctions } from '../supported_renderers';
 
 interface Props {
@@ -45,7 +45,7 @@ export const App = (props: Props) => {
 
   return (
     <CanvasShareableStateProvider initialState={initialState}>
-      <CanvasContainer />
+      <Canvas />
     </CanvasShareableStateProvider>
   );
 };

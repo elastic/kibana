@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { Page } from '../page';
+import React, { FC } from 'react';
+import { PageComponent } from '../page';
 import { CanvasRenderedPage } from '../../types';
+import { useCanvasShareableState } from '../../context';
+import { setPageAction } from '../../context/actions';
 
 import css from './page_preview.module.scss';
 
-export type onClickProp = (index: number) => void;
+type onClickFn = (index: number) => void;
 
 export interface Props {
   /**
@@ -26,7 +28,7 @@ export interface Props {
   /**
    * The handler to invoke if the preview is clicked.
    */
-  onClick: onClickProp;
+  onClick: onClickFn;
 
   /**
    * An object describing the page.
@@ -47,14 +49,14 @@ export interface Props {
 /**
  * The small preview of the page shown within the `Scrubber`.
  */
-export const PagePreview = ({
+export const PagePreviewComponent: FC<Props> = ({
   height,
   index,
   onClick,
   page,
   workpadHeight,
   workpadWidth,
-}: Props) => {
+}) => {
   const scale = height / workpadHeight;
   const style = {
     height: workpadHeight * scale,
@@ -74,8 +76,27 @@ export const PagePreview = ({
       style={style}
     >
       <div className={css.preview} style={transform}>
-        <Page {...{ page }} height={workpadHeight} width={workpadWidth} />
+        <PageComponent {...{ page }} height={workpadHeight} width={workpadWidth} />
       </div>
     </div>
+  );
+};
+
+/**
+ * A store-connected container for the `PagePreview` component.
+ */
+export const PagePreview: FC<Pick<Props, 'index' | 'height'>> = ({ index, height }) => {
+  const [{ workpad }, dispatch] = useCanvasShareableState();
+
+  if (!workpad) {
+    return null;
+  }
+
+  const page = workpad.pages[index];
+  const onClick = (pageIndex: number) => dispatch(setPageAction(pageIndex));
+  const { height: workpadHeight, width: workpadWidth } = workpad;
+
+  return (
+    <PagePreviewComponent {...{ onClick, height, workpadHeight, workpadWidth, page, index }} />
   );
 };

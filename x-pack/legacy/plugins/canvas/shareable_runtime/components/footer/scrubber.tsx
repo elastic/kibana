@@ -6,7 +6,8 @@
 
 import React from 'react';
 import classnames from 'classnames';
-import { PagePreviewContainer } from './page_preview.container';
+import { PagePreview } from './page_preview';
+import { useCanvasShareableState } from '../../context';
 
 import css from './scrubber.module.scss';
 import { CanvasRenderedPage } from '../../types';
@@ -30,11 +31,11 @@ const THUMBNAIL_HEIGHT = 100;
  * The panel of previews of the pages in the workpad, allowing one to select and
  * navigate to a specific page.
  */
-export const Scrubber = ({ isScrubberVisible, pages }: Props) => {
+export const ScrubberComponent = ({ isScrubberVisible, pages }: Props) => {
   const className = isScrubberVisible ? classnames(css.root, css.visible) : css.root;
 
   const slides = pages.map((page, index) => (
-    <PagePreviewContainer key={page.id} height={THUMBNAIL_HEIGHT} {...{ index }} />
+    <PagePreview key={page.id} height={THUMBNAIL_HEIGHT} {...{ index }} />
   ));
 
   return (
@@ -42,4 +43,20 @@ export const Scrubber = ({ isScrubberVisible, pages }: Props) => {
       <div className={css.slideContainer}>{slides}</div>
     </div>
   );
+};
+
+/**
+ * A store-connected container for the `Scrubber` component.
+ */
+export const Scrubber = () => {
+  const [{ workpad, footer }] = useCanvasShareableState();
+
+  if (!workpad) {
+    return null;
+  }
+
+  const { pages } = workpad;
+  const { isScrubberVisible } = footer;
+
+  return <ScrubberComponent {...{ pages, isScrubberVisible }} />;
 };

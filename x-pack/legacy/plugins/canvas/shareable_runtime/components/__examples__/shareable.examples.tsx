@@ -8,25 +8,25 @@ import React from 'react';
 import { ExampleContext } from '../../test/context_example';
 
 import { sharedWorkpads } from '../../test';
-import { CanvasContainer } from '../canvas.container';
-import { PageContainer } from '../page.container';
-import { RenderedElementContainer } from '../rendered_element.container';
+import { Canvas } from '../canvas';
+import { Page } from '../page';
+import { RenderedElement } from '../rendered_element';
 
 const { hello } = sharedWorkpads;
 
 storiesOf('shareables', module)
   .add('Canvas', () => (
     <ExampleContext height={448}>
-      <CanvasContainer />
+      <Canvas />
     </ExampleContext>
   ))
   .add('Page', () => (
     <ExampleContext height={720}>
-      <PageContainer index={0} />
+      <Page index={0} />
     </ExampleContext>
   ))
   .add('RenderedElement', () => (
     <ExampleContext height={720}>
-      <RenderedElementContainer element={hello.pages[0].elements[0]} index={0} />
+      <RenderedElement element={hello.pages[0].elements[0]} index={0} />
     </ExampleContext>
   ));

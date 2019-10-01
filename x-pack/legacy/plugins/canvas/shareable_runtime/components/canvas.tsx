@@ -5,8 +5,9 @@
  */
 
 import React, { useState } from 'react';
-import { PageContainer } from './page.container';
-import { FooterContainer, FOOTER_HEIGHT } from './footer';
+import { useCanvasShareableState, setPageAction, setScrubberVisibleAction } from '../context';
+import { Page } from './page';
+import { Footer, FOOTER_HEIGHT } from './footer';
 import { getTimeInterval } from '../../public/lib/time_interval';
 
 import css from './canvas.module.scss';
@@ -14,19 +15,20 @@ import { CanvasRenderedWorkpad, Stage, Settings, Refs } from '../types';
 
 let timeout: number = 0;
 
-export type onSetPageProp = (page: number) => void;
-export type onSetScrubberVisibleProp = (visible: boolean) => void;
+export type onSetPageFn = (page: number) => void;
+export type onSetScrubberVisibleFn = (visible: boolean) => void;
+type Workpad = Pick<CanvasRenderedWorkpad, 'height' | 'width' | 'pages'>;
 
 interface Props {
   /**
    * The handler to invoke when a page is selected.
    */
-  onSetPage: onSetPageProp;
+  onSetPage: onSetPageFn;
 
   /**
    * The handler to invoke when the Scrubber is shown or hidden.
    */
-  onSetScrubberVisible: onSetScrubberVisibleProp;
+  onSetScrubberVisible: onSetScrubberVisibleFn;
 
   /**
    * The `react` `ref` objects pertaining to the stage.
@@ -46,13 +48,13 @@ interface Props {
   /**
    * The workpad being rendered within the Shareable area.
    */
-  workpad: Pick<CanvasRenderedWorkpad, 'height' | 'width' | 'pages'>;
+  workpad: Workpad;
 }
 
 /**
  * The "canvas" for a workpad, which composes the toolbar and other components.
  */
-export const Canvas = ({
+export const CanvasComponent = ({
   onSetPage,
   onSetScrubberVisible,
   refs,
@@ -110,10 +112,42 @@ export const Canvas = ({
     >
       <div className={css.container} style={{ height: stageHeight, width: stageWidth }}>
         <div className={css.page} style={pageStyle}>
-          <PageContainer index={page} />
+          <Page index={page} />
         </div>
       </div>
-      <FooterContainer isHidden={toolbarHidden} />
+      <Footer isHidden={toolbarHidden} />
     </div>
+  );
+};
+
+/**
+ * A store-connected container for the `Canvas` component.
+ */
+export const Canvas = () => {
+  const [{ workpad, stage, settings, refs }, dispatch] = useCanvasShareableState();
+
+  if (!workpad) {
+    return null;
+  }
+
+  const onSetPage: onSetPageFn = (page: number) => {
+    dispatch(setPageAction(page));
+  };
+
+  const onSetScrubberVisible: onSetScrubberVisibleFn = (visible: boolean) => {
+    dispatch(setScrubberVisibleAction(visible));
+  };
+
+  return (
+    <CanvasComponent
+      {...{
+        onSetPage,
+        onSetScrubberVisible,
+        refs,
+        settings,
+        stage,
+        workpad,
+      }}
+    />
   );
 };

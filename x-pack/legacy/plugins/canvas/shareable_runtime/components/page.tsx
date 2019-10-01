@@ -5,12 +5,13 @@
  */
 
 import React from 'react';
-import { RenderedElementContainer } from './rendered_element.container';
+import { RenderedElement } from './rendered_element';
 import { CanvasRenderedPage, CanvasRenderedElement } from '../types';
+import { useCanvasShareableState } from '../context';
 
 import css from './page.module.scss';
 
-interface Props {
+interface ComponentProps {
   /**
    * The height of the page, in pixels.
    */
@@ -28,11 +29,11 @@ interface Props {
 /**
  * A Page in the Shareable Workpad is conceptually identical to a Page in a Workpad.
  */
-export const Page = ({ page, height, width }: Props) => {
+export const PageComponent = ({ page, height, width }: ComponentProps) => {
   const { elements, style, id } = page;
 
   const output = elements.map((element: CanvasRenderedElement, i) => (
-    <RenderedElementContainer key={element.id} element={element} index={i + 1} />
+    <RenderedElement key={element.id} element={element} index={i + 1} />
   ));
 
   return (
@@ -40,4 +41,27 @@ export const Page = ({ page, height, width }: Props) => {
       {output}
     </div>
   );
+};
+
+interface ContainerProps {
+  /**
+   * The zero-based index of the page relative others within the workpad.
+   */
+  index: number;
+}
+
+/**
+ * A store-connected container for the `Page` component.
+ */
+export const Page = ({ index }: ContainerProps) => {
+  const [{ workpad }] = useCanvasShareableState();
+
+  if (!workpad) {
+    return null;
+  }
+
+  const { height, width, pages } = workpad;
+  const page = pages[index];
+
+  return <PageComponent {...{ page, height, width }} />;
 };
