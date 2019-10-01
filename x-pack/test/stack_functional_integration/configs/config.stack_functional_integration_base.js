@@ -21,18 +21,24 @@
 import getAllConfigs from './get_all_configs';
 import serverConfig from './server_config';
 import { resolve } from 'path';
+import getProvisionedConfigs from './get_provisioned_configs';
+
+const prepend = testFile => require.resolve(`../test/functional/apps/${testFile}`);
 
 export default async ({ readConfigFile }) => {
+  const resolved = resolve(__dirname, '../../../../../integration-test/qa/envvars.sh');
+  const provisionedConfigs = await getProvisionedConfigs(resolved);
   const defaultConfigs = await getAllConfigs(readConfigFile, '../../functional/config');
   return {
     ...defaultConfigs,
     junit: {
-      reportName: 'Stack Functional Integration Tests'
+      reportName: `Stack Functional Integration Tests - ${provisionedConfigs.VM}`
     },
     servers: serverConfig.servers,
     apps: serverConfig.apps,
     stackFunctionalIntegrationTests: {
-      pathToProvisionedEnvFile: resolve(__dirname, '../../../../../integration-test/qa/envvars.sh')
+      envObj: provisionedConfigs
     },
+    testFiles: provisionedConfigs.apps.split(',').map(prepend),
   };
 }

@@ -17,22 +17,19 @@
  * under the License.
  */
 
-import dotEnv, { DotenvParseOutput } from 'dotenv';
+import { DotenvParseOutput } from 'dotenv';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export async function ProvisionedEnvProvider({ getService }: FtrProviderContext) {
-  const log = getService('log');
+  // const log = getService('log');
   const config = getService('config');
 
   class ProvisionedEnv {
-    public readonly pathToEnvFile: string =
-      config.get('stackFunctionalIntegrationTests.pathToProvisionedEnvFile');
     public readonly envObj: DotenvParseOutput | undefined;
 
 
     constructor() {
-      log.debug(`Get environment file from integration-test repo at path: \n${this.pathToEnvFile}`)
-      this.envObj = dotEnv.config({ path: this.pathToEnvFile}).parsed;
+      this.envObj = config.get('stackFunctionalIntegrationTests.envObj');
     }
   }
 

@@ -257,7 +257,7 @@ export const schema = Joi.object()
     // settings for the stack functional integration tests
     stackFunctionalIntegrationTests: Joi.object()
       .keys({
-        pathToProvisionedEnvFile: Joi.string().default('this is a hardcoded path')
+        envObj: Joi.object().unknown(true)
       })
       .default(),
   })
