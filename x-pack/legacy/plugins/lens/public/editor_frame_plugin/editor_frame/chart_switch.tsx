@@ -178,7 +178,7 @@ export function ChartSwitch(props: Props) {
       ownFocus
       initialFocus=".lnsChartSwitch__popoverPanel"
       panelClassName="lnsChartSwitch__popoverPanel"
-      anchorClassName="eui-fullWidth"
+      anchorClassName="eui-textTruncate"
       panelPaddingSize="s"
       button={
         <EuiButtonEmpty
@@ -188,6 +188,7 @@ export function ChartSwitch(props: Props) {
           flush="left"
           iconSide="right"
           iconType="arrowDown"
+          color="text"
         >
           <VisualizationSummary {...props} />
         </EuiButtonEmpty>

@@ -10,7 +10,6 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiContextMenuPanelProps,
@@ -325,31 +324,26 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       >
         <EuiFlexItem grow={null}>
           <div className="lnsInnerIndexPatternDataPanel__header">
-            <EuiTitle size="xxs" className="eui-textTruncate">
-              <h4 title={currentIndexPattern.title}>{currentIndexPattern.title} </h4>
-            </EuiTitle>
-            <div className="lnsInnerIndexPatternDataPanel__changeLink">
-              <ChangeIndexPattern
-                data-test-subj="indexPattern-switcher"
-                trigger={{
-                  label: i18n.translate('xpack.lens.indexPatterns.changePatternLabel', {
-                    defaultMessage: '(change)',
-                  }),
-                  'data-test-subj': 'indexPattern-switch-link',
-                }}
-                currentIndexPatternId={currentIndexPatternId}
-                indexPatterns={indexPatterns}
-                onChangeIndexPattern={(newId: string) => {
-                  onChangeIndexPattern(newId);
+            <ChangeIndexPattern
+              data-test-subj="indexPattern-switcher"
+              trigger={{
+                label: currentIndexPattern.title,
+                title: currentIndexPattern.title,
+                'data-test-subj': 'indexPattern-switch-link',
+                className: 'lnsInnerIndexPatternDataPanel__triggerButton',
+              }}
+              currentIndexPatternId={currentIndexPatternId}
+              indexPatterns={indexPatterns}
+              onChangeIndexPattern={(newId: string) => {
+                onChangeIndexPattern(newId);
 
-                  setLocalState(s => ({
-                    ...s,
-                    nameFilter: '',
-                    typeFilter: [],
-                  }));
-                }}
-              />
-            </div>
+                setLocalState(s => ({
+                  ...s,
+                  nameFilter: '',
+                  typeFilter: [],
+                }));
+              }}
+            />
           </div>
         </EuiFlexItem>
         <EuiFlexItem>
