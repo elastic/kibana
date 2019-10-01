@@ -11,7 +11,6 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
-  const log = getService('log');
 
   return new (class MlJobTable {
     public async parseJobTable() {
@@ -214,40 +213,16 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     }
 
     public async clickActionsMenu(jobId: string) {
-      const jobRow = await testSubjects.find(this.rowSelector(jobId));
-      const actionsCell = await jobRow.findByCssSelector(`[id=${jobId}-actions]`);
-      const actionsMenuButton = await actionsCell.findByTagName('button');
-
-      log.debug(`Clicking actions menu button for job id ${jobId}`);
-      await actionsMenuButton.click();
+      await testSubjects.click(this.rowSelector(jobId, 'euiCollapsedItemActionsButton'));
       if (!(await find.existsByDisplayedByCssSelector('[class~=euiContextMenuPanel]'))) {
         throw new Error(`expected euiContextMenuPanel to exist`);
       }
     }
 
-    public async clickActionsMenuEntry(jobId: string, entryText: string) {
-      await this.clickActionsMenu(jobId);
-      const actionsMenuPanel = await find.byCssSelector('[class~=euiContextMenuPanel]');
-      const actionButtons = await actionsMenuPanel.findAllByTagName('button');
-
-      const filteredButtons = [];
-      for (const button of actionButtons) {
-        if ((await button.getVisibleText()) === entryText) {
-          filteredButtons.push(button);
-        }
-      }
-
-      if (!(filteredButtons.length === 1)) {
-        throw new Error(
-          `expected action button ${entryText} to exist exactly once, but found ${filteredButtons.length} matching buttons`
-        );
-      }
-      log.debug(`Clicking action button ${entryText} for job id ${jobId}`);
-      await filteredButtons[0].click();
-    }
-
     public async clickCloneJobAction(jobId: string) {
-      await this.clickActionsMenuEntry(jobId, 'Clone job');
+      await this.clickActionsMenu(jobId);
+      await testSubjects.click('mlActionButtonCloneJob');
+      await testSubjects.existOrFail('~mlPageJobWizard');
     }
   })();
 }
