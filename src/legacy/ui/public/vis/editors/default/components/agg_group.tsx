@@ -37,7 +37,7 @@ import {
   isInvalidAggsTouched,
   isAggRemovable,
   calcAggIsTooLow,
-  isAggDisabled,
+  getEnabledMetricAggsCount,
 } from './agg_group_helper';
 import { aggGroupReducer, initAggsState, AGGS_ACTION_KEYS } from './agg_group_state';
 import { Schema } from '../schemas';
@@ -82,8 +82,8 @@ function DefaultEditorAggGroup({
 
   const isGroupValid = Object.values(aggsState).every(item => item.valid);
   const isAllAggsTouched = isInvalidAggsTouched(aggsState);
-  const isAggregationDisabled = useMemo(
-    () => (groupName === AggGroupNames.Metrics ? isAggDisabled(group) : false),
+  const isMetricAggregationDisabled = useMemo(
+    () => (groupName === AggGroupNames.Metrics ? getEnabledMetricAggsCount(group) === 1 : false),
     [groupName, group]
   );
 
@@ -164,7 +164,7 @@ function DefaultEditorAggGroup({
                     isDraggable={stats.count > 1}
                     isLastBucket={groupName === AggGroupNames.Buckets && index === group.length - 1}
                     isRemovable={isAggRemovable(agg, group)}
-                    isDisabled={isAggregationDisabled}
+                    isDisabled={agg.schema.name === 'metric' ? isMetricAggregationDisabled : false}
                     lastParentPipelineAggTitle={lastParentPipelineAggTitle}
                     metricAggs={metricAggs}
                     state={state}
