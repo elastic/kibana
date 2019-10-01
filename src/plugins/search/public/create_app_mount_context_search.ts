@@ -27,17 +27,17 @@ import {
   TSearchStrategyProviderEnhanced,
 } from './i_search_strategy';
 import { TStrategyTypes } from './strategy_types';
-import { ES_SEARCH_STRATEGY } from '../common/es_search';
+import { DEFAULT_SEARCH_STRATEGY } from '../common';
 
 export const createAppMountSearchContext = (
   searchStrategies: TSearchStrategiesMap
 ): ISearchAppMountContext => {
-  const getSearchStrategy = <K extends TStrategyTypes = typeof ES_SEARCH_STRATEGY>(
+  const getSearchStrategy = <K extends TStrategyTypes = typeof DEFAULT_SEARCH_STRATEGY>(
     strategyName?: K
   ): Promise<ISearchStrategy<K>> => {
-    const strategyProvider = searchStrategies[strategyName ? strategyName : ES_SEARCH_STRATEGY] as
-      | TSearchStrategyProviderEnhanced<K>
-      | undefined;
+    const strategyProvider = searchStrategies[
+      strategyName ? strategyName : DEFAULT_SEARCH_STRATEGY
+    ] as TSearchStrategyProviderEnhanced<K> | undefined;
     if (!strategyProvider) {
       throw new Error(`Strategy with name ${name} does not exist`);
     }
@@ -49,8 +49,5 @@ export const createAppMountSearchContext = (
     return from(strategyPromise).pipe(mergeMap(s => s.search(request, options)));
   };
 
-  return {
-    search,
-    getSearchStrategy,
-  };
+  return { search };
 };

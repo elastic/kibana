@@ -19,14 +19,8 @@
 
 import { Observable } from 'rxjs';
 import { ES_SEARCH_STRATEGY, IEsSearchResponse } from '../../common';
-
-import {
-  TSearchStrategyProvider,
-  ISearchStrategy,
-  SYNC_SEARCH_STRATEGY,
-  ISearchGeneric,
-  ISearchContext,
-} from '..';
+import { SYNC_SEARCH_STRATEGY } from '../sync_search_strategy';
+import { TSearchStrategyProvider, ISearchStrategy, ISearchGeneric, ISearchContext } from '..';
 
 export const esClientSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
   context: ISearchContext,
@@ -38,6 +32,6 @@ export const esClientSearchStrategyProvider: TSearchStrategyProvider<typeof ES_S
         { ...request, serverStrategy: ES_SEARCH_STRATEGY },
         options,
         SYNC_SEARCH_STRATEGY
-      ) as Observable<IEsSearchResponse<unknown, unknown>>,
+      ) as Observable<IEsSearchResponse>,
   };
 };

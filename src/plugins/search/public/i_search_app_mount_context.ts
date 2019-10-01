@@ -18,10 +18,7 @@
  */
 
 import { ISearchGeneric } from './i_search';
-import { TGetSearchStrategy } from './i_search_strategy';
 
 export interface ISearchAppMountContext {
   search: ISearchGeneric;
-
-  getSearchStrategy: TGetSearchStrategy;
 }

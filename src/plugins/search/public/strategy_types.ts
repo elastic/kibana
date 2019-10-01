@@ -18,7 +18,7 @@
  */
 
 import { ES_SEARCH_STRATEGY } from '../common/es_search';
-import { SYNC_SEARCH_STRATEGY } from './constants';
+import { SYNC_SEARCH_STRATEGY } from './sync_search_strategy';
 
 /**
  * Contains all known strategy type identifiers that will be used to map to

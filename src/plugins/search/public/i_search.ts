@@ -18,15 +18,10 @@
  */
 
 import { Observable } from 'rxjs';
-import { IKibanaSearchRequest } from './types';
-import { IKibanaSearchResponse, DEFAULT_SEARCH_STRATEGY } from '../common';
-import { SYNC_SEARCH_STRATEGY } from './constants';
 import { TStrategyTypes } from './strategy_types';
+import { DEFAULT_SEARCH_STRATEGY, IKibanaSearchRequest, IKibanaSearchResponse } from '../common';
+import { SYNC_SEARCH_STRATEGY, ISyncSearchRequest } from './sync_search_strategy';
 import { ES_SEARCH_STRATEGY, IEsSearchRequest, IEsSearchResponse } from '../common/es_search';
-
-export interface ISyncSearchRequest extends IKibanaSearchRequest {
-  serverStrategy: string;
-}
 
 export interface ISearchOptions {
   signal?: AbortSignal;
@@ -40,7 +35,7 @@ export interface IRequestTypesMap {
 
 export interface IResponseTypesMap {
   [SYNC_SEARCH_STRATEGY]: IKibanaSearchResponse;
-  [ES_SEARCH_STRATEGY]: IEsSearchResponse<unknown, unknown>;
+  [ES_SEARCH_STRATEGY]: IEsSearchResponse;
   [key: string]: IKibanaSearchResponse;
 }
 

@@ -19,7 +19,7 @@
 
 import { APICaller } from 'kibana/server';
 import { IRouteHandlerSearchContext } from './i_route_handler_search_context';
-import { ES_SEARCH_STRATEGY } from '../common/es_search';
+import { DEFAULT_SEARCH_STRATEGY } from '../common';
 import { TSearchStrategiesMap } from './i_search_strategy';
 
 export function createApi({
@@ -31,12 +31,12 @@ export function createApi({
 }) {
   const api: IRouteHandlerSearchContext = {
     search: async (request, strategyName) => {
-      const name = strategyName ? strategyName : ES_SEARCH_STRATEGY;
+      const name = strategyName ? strategyName : DEFAULT_SEARCH_STRATEGY;
       const strategyProvider = searchStrategies[name];
       if (!strategyProvider) {
         throw new Error(`No strategy found for ${strategyName}`);
       }
-      // Give providers access to other search stratgies by injecting this function
+      // Give providers access to other search strategies by injecting this function
       const strategy = await strategyProvider(caller, api.search);
       if (!strategy) {
         throw new Error(`No strategy named ${name}`);

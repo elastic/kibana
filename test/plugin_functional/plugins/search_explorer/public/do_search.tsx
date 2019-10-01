@@ -24,7 +24,7 @@ import { Observable } from 'rxjs';
 import {
   IKibanaSearchResponse,
   IKibanaSearchRequest,
-} from '../../../../../src/plugins/search/public';
+} from '../../../../../src/plugins/search/common';
 
 interface Props {
   request: IKibanaSearchRequest;
@@ -63,7 +63,7 @@ export class DoSearch extends React.Component<Props, State> {
 
     this.abortController = new AbortController();
 
-    const subscription = this.props.search(this.abortController.signal).subscribe(
+    this.props.search(this.abortController.signal).subscribe(
       response => {
         this.setState({ response, error: undefined });
       },
@@ -72,7 +72,6 @@ export class DoSearch extends React.Component<Props, State> {
       },
       () => {
         this.setState({ searching: false, error: undefined });
-        subscription.unsubscribe();
       }
     );
   };
@@ -113,19 +112,14 @@ export class DoSearch extends React.Component<Props, State> {
 )`
                 : `data.search
 (
-  ${requestStr}
+${requestStr}
 )`}
-              );`}
             </EuiCodeBlock>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>Response:</EuiText>
             <EuiProgress
-              value={
-                this.state.response && this.state.response.getPercentComplete
-                  ? this.state.response.getPercentComplete()
-                  : 0
-              }
+              value={(this.state.response && this.state.response.percentComplete) || 0}
               max={100}
             />
             <EuiCodeBlock language="json" fontSize="m" paddingSize="m" color="dark">

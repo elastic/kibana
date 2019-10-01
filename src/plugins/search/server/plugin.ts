@@ -61,14 +61,11 @@ export class SearchServerPlugin implements Plugin<ISearchSetup, void> {
     this.contextContainer = core.context.createContextContainer();
 
     core.http.registerRouteHandlerContext<'search'>('search', context => {
-      const searchAPI = createApi({
+      return createApi({
         caller: context.core!.elasticsearch.dataClient.callAsCurrentUser,
         searchStrategies: this.searchStrategies,
       });
-      return searchAPI;
     });
-
-    this.contextContainer!.registerContext(this.initializerContext.opaqueId, 'core', () => core);
 
     const registerSearchStrategyProvider: TRegisterSearchStrategyProvider = (
       plugin,
@@ -91,6 +88,8 @@ export class SearchServerPlugin implements Plugin<ISearchSetup, void> {
         },
       },
     };
+
+    api.registerSearchStrategyContext(this.initializerContext.opaqueId, 'core', () => core);
 
     // ES search capabilities are written in a way that it could easily be a separate plugin,
     // however these two plugins are tightly coupled due to the default search strategy using

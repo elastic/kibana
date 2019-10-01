@@ -18,11 +18,16 @@
  */
 
 import { from } from 'rxjs';
-import { IKibanaSearchResponse } from '../common';
+import { IKibanaSearchRequest, IKibanaSearchResponse } from '../common';
 import { ISearchContext } from './i_search_context';
-import { ISearch, ISearchOptions, ISyncSearchRequest } from './i_search';
-import { SYNC_SEARCH_STRATEGY } from './constants';
+import { ISearch, ISearchOptions } from './i_search';
 import { TSearchStrategyProvider, ISearchStrategy } from './i_search_strategy';
+
+export const SYNC_SEARCH_STRATEGY = 'SYNC_SEARCH_STRATEGY';
+
+export interface ISyncSearchRequest extends IKibanaSearchRequest {
+  serverStrategy: string;
+}
 
 export const syncSearchStrategyProvider: TSearchStrategyProvider<typeof SYNC_SEARCH_STRATEGY> = (
   context: ISearchContext
