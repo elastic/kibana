@@ -77,6 +77,7 @@ function assertNonEmptyString(value: string, name: string) {
   }
 }
 
+/** @internal */
 export class SavedObjectsSerializer {
   private readonly schema: SavedObjectsSchema;
 

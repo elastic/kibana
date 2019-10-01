@@ -7,7 +7,11 @@ import * as Rx from 'rxjs';
 import { SpacesService } from './spaces_service';
 import { coreMock, elasticsearchServiceMock } from 'src/core/server/mocks';
 import { SpacesAuditLogger } from '../../lib/audit_logger';
-import { KibanaRequest, SavedObjectsService, SavedObjectsErrorHelpers } from 'src/core/server';
+import {
+  KibanaRequest,
+  SavedObjectsLegacyService,
+  SavedObjectsErrorHelpers,
+} from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { createOptionalPlugin } from '../../../../../server/lib/optional_plugin';
 import { LegacyAPI } from '../plugin';
@@ -53,7 +57,7 @@ const createService = async (serverBasePath: string = '') => {
           throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
         }),
       }),
-    } as unknown) as SavedObjectsService,
+    } as unknown) as SavedObjectsLegacyService,
   } as LegacyAPI;
 
   const spacesService = new SpacesService(mockLogger, () => legacyAPI);

@@ -27,7 +27,7 @@ import { BasicVislibParams, Axis } from '../../../types';
 import { SelectOption, SwitchOption, TruncateLabelsOption } from '../../common';
 import { getRotateOptions } from '../../../utils/collections';
 
-interface LabelOptionsProps extends VisOptionsProps<BasicVislibParams> {
+export interface LabelOptionsProps extends VisOptionsProps<BasicVislibParams> {
   axis: Axis;
   axesName: 'categoryAxes' | 'valueAxes';
   index: number;
