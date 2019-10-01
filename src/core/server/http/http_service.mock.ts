@@ -30,6 +30,7 @@ type ServiceSetupMockType = jest.Mocked<HttpServiceSetup> & {
 };
 
 const createBasePathMock = (): jest.Mocked<HttpServiceSetup['basePath']> => ({
+  serverBasePath: '/mock-server-basepath',
   get: jest.fn(),
   set: jest.fn(),
   prepend: jest.fn(),
