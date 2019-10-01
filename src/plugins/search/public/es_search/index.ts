@@ -18,8 +18,8 @@
  */
 
 import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
-import { EsSearchPlugin } from './plugin';
+import { EsSearchService } from './plugin';
 
 export const plugin: PluginInitializer<void, void> = (
   initializerContext: PluginInitializerContext
-) => new EsSearchPlugin(initializerContext);
+) => new EsSearchService(initializerContext);

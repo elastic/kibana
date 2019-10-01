@@ -49,7 +49,7 @@ interface Props {
 
 interface State {
   query: string;
-  results?: IEsSearchResponse<unknown, unknown>;
+  results?: IEsSearchResponse;
   index: string;
   searching: boolean;
   request: IEsSearchRequest;
@@ -63,10 +63,10 @@ export class EsSearchTest extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      query: 'boo',
+      query: '*',
       index: '*',
       searching: false,
-      request: this.getRequest({ index: '*', query: 'boo' }),
+      request: this.getRequest({ index: '*', query: '*' }),
       changes: false,
     };
   }
@@ -78,7 +78,7 @@ export class EsSearchTest extends React.Component<Props, State> {
         index,
         body: {
           query: {
-            multi_match: {
+            query_string: {
               query,
             },
           },
@@ -102,7 +102,7 @@ export class EsSearchTest extends React.Component<Props, State> {
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <EuiFormRow label="Multi-match query">
+            <EuiFormRow label="Query string query">
               <EuiFieldText
                 value={this.state.query}
                 onChange={e => this.setState({ query: e.target.value, changes: true })}

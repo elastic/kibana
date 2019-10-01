@@ -28,11 +28,7 @@ export { ISearchAppMountContext } from './i_search_app_mount_context';
 
 export { ISearchSetup } from './i_search_setup';
 
-export { SYNC_SEARCH_STRATEGY } from './constants';
-
 export { ISearchContext } from './i_search_context';
-
-export { IKibanaSearchRequest, IKibanaSearchResponse } from './types';
 
 export {
   ISearch,

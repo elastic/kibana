@@ -28,7 +28,7 @@ export interface IRequestTypesMap {
 }
 
 export interface IResponseTypesMap {
-  [ES_SEARCH_STRATEGY]: IEsSearchResponse<unknown, unknown>;
+  [ES_SEARCH_STRATEGY]: IEsSearchResponse;
   [key: string]: IKibanaSearchResponse;
 }
 

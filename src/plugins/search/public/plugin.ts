@@ -28,9 +28,8 @@ import {
 import { ISearchAppMountContext } from './i_search_app_mount_context';
 import { ISearchSetup } from './i_search_setup';
 import { createAppMountSearchContext } from './create_app_mount_context_search';
-import { syncSearchStrategyProvider } from './sync_search_strategy';
+import { SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider } from './sync_search_strategy';
 import { ISearchContext } from './i_search_context';
-import { SYNC_SEARCH_STRATEGY } from './constants';
 import { ISearchGeneric } from './i_search';
 import {
   TSearchStrategyProvider,
@@ -39,7 +38,7 @@ import {
   TSearchStrategiesMap,
 } from './i_search_strategy';
 import { TStrategyTypes } from './strategy_types';
-import { EsSearchPlugin } from './es_search/plugin';
+import { EsSearchService } from './es_search/plugin';
 
 /**
  * Extends the AppMountContext so other plugins have access
@@ -79,20 +78,11 @@ export class SearchPublicPlugin implements Plugin<ISearchSetup, void> {
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): ISearchSetup {
-    this.contextContainer = core.context.createContextContainer();
-
-    this.contextContainer!.registerContext(this.initializerContext.opaqueId, 'core', () => core);
-
     core.application.registerMountContext<'search'>('search', () => {
-      const { search, getSearchStrategy } = createAppMountSearchContext(this.searchStrategies);
-
-      const appMountApi = {
-        getSearchStrategy,
-        search,
-      };
-
-      return appMountApi;
+      return createAppMountSearchContext(this.searchStrategies);
     });
+
+    this.contextContainer = core.context.createContextContainer();
 
     const registerSearchStrategyProvider: TRegisterSearchStrategyProvider = <
       T extends TStrategyTypes
@@ -109,6 +99,7 @@ export class SearchPublicPlugin implements Plugin<ISearchSetup, void> {
       registerSearchStrategyProvider,
     };
 
+    api.registerSearchStrategyContext(this.initializerContext.opaqueId, 'core', () => core);
     api.registerSearchStrategyProvider(
       this.initializerContext.opaqueId,
       SYNC_SEARCH_STRATEGY,
@@ -118,7 +109,7 @@ export class SearchPublicPlugin implements Plugin<ISearchSetup, void> {
     // ES search capabilities are written in a way that it could easily be a separate plugin,
     // however these two plugins are tightly coupled due to the default search strategy using
     // es search types.
-    new EsSearchPlugin(this.initializerContext).setup(core, { search: api });
+    new EsSearchService(this.initializerContext).setup(core, { search: api });
 
     return api;
   }

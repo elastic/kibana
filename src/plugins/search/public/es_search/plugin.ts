@@ -26,7 +26,7 @@ export interface IEsSearchSetupDependencies {
   search: ISearchSetup;
 }
 
-export class EsSearchPlugin implements Plugin {
+export class EsSearchService implements Plugin {
   constructor(private initializerContext: PluginInitializerContext) {}
   public setup(core: CoreSetup, deps: IEsSearchSetupDependencies) {
     deps.search.registerSearchStrategyProvider(

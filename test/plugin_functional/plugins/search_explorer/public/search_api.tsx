@@ -17,7 +17,6 @@
  * under the License.
  */
 import React from 'react';
-import { Page } from './page';
 import { GuideSection } from './guide_section';
 
 // @ts-ignore
@@ -39,52 +38,50 @@ import serverSearch from '!!raw-loader!./../../../../../src/plugins/search/serve
 import serverPlugin from '!!raw-loader!./../../../../../src/plugins/search/server/plugin';
 
 export const SearchApiPage = () => (
-  <Page title="Search API">
-    <GuideSection
-      codeSections={[
-        {
-          title: 'Public',
-          code: [
-            {
-              description: 'plugin.ts',
-              snippet: publicPlugin,
-            },
-            {
-              description: `i_search_setup.ts`,
-              snippet: publicSetupContract,
-            },
-            {
-              description: 'i_search',
-              snippet: publicSearch,
-            },
-            {
-              description: 'i_search_strategy',
-              snippet: publicSearchStrategy,
-            },
-          ],
-        },
-        {
-          title: 'Server',
-          code: [
-            {
-              description: 'plugin.ts',
-              snippet: serverPlugin,
-            },
-            {
-              description: `i_search_setup.ts`,
-              snippet: serverSetupContract,
-            },
-            {
-              description: 'i_search',
-              snippet: serverSearch,
-            },
-            {
-              description: 'i_search_strategy',
-              snippet: serverSearchStrategy,
-            },
-          ],
-        },
-      ]}
-    ></GuideSection>
-  </Page>
+  <GuideSection
+    codeSections={[
+      {
+        title: 'Public',
+        code: [
+          {
+            description: 'plugin.ts',
+            snippet: publicPlugin,
+          },
+          {
+            description: `i_search_setup.ts`,
+            snippet: publicSetupContract,
+          },
+          {
+            description: 'i_search',
+            snippet: publicSearch,
+          },
+          {
+            description: 'i_search_strategy',
+            snippet: publicSearchStrategy,
+          },
+        ],
+      },
+      {
+        title: 'Server',
+        code: [
+          {
+            description: 'plugin.ts',
+            snippet: serverPlugin,
+          },
+          {
+            description: `i_search_setup.ts`,
+            snippet: serverSetupContract,
+          },
+          {
+            description: 'i_search',
+            snippet: serverSearch,
+          },
+          {
+            description: 'i_search_strategy',
+            snippet: serverSearchStrategy,
+          },
+        ],
+      },
+    ]}
+  ></GuideSection>
 );

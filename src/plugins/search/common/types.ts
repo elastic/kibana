@@ -24,10 +24,10 @@ export interface IKibanaSearchResponse {
   id?: string;
 
   /**
-   * If hasProgressInformation, this should be implemented and return progress
-   * information.
+   * If relevant to the search strategy, return a percentage
+   * that represents how progress is indicated.
    */
-  getPercentComplete?: () => number;
+  percentComplete?: number;
 
   /**
    * If relevant to the search strategy, return a total number
@@ -36,7 +36,7 @@ export interface IKibanaSearchResponse {
   total?: number;
 
   /**
-   * If relevant to the search strategy, return a total number
+   * If relevant to the search strategy, return a loaded number
    * that represents how progress is indicated.
    */
   loaded?: number;
