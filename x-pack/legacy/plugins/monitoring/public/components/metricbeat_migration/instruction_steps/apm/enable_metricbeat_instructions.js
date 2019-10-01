@@ -36,7 +36,7 @@ export function getApmInstructionsForEnablingMetricbeat(product, _meta, {
           >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.apmInstructions.installMetricbeatLinkText"
-              defaultMessage="Follow the instructions here"
+              defaultMessage="Follow the instructions here."
             />
           </EuiLink>
         </p>
@@ -127,7 +127,7 @@ export function getApmInstructionsForEnablingMetricbeat(product, _meta, {
           >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.apmInstructions.startMetricbeatLinkText"
-              defaultMessage="Follow the instructions here"
+              defaultMessage="Follow the instructions here."
             />
           </EuiLink>
         </p>

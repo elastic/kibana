@@ -60,7 +60,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
       <Fragment>
         <EuiCallOut
           title={i18n.translate('xpack.monitoring.setupMode.noMonitoringDataFound', {
-            defaultMessage: 'No {product} {identifier} detected.',
+            defaultMessage: 'No {product} {identifier} detected',
             values: {
               product: formatProductName(productName),
               identifier: getIdentifier(productName, true)
@@ -135,7 +135,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
             <p>
               {i18n.translate('xpack.monitoring.setupMode.migrateToMetricbeatDescription', {
                 defaultMessage: `These {product} {identifier} are monitored through self monitoring.
-                Migrate to monitor with Metricbeat.`,
+                Click 'Monitor with Metricbeat' to migrate.`,
                 values: {
                   product: formatProductName(productName),
                   identifier: getIdentifier(productName, true)

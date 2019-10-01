@@ -40,7 +40,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
         <EuiToolTip
           position="top"
           content={i18n.translate('xpack.monitoring.setupMode.tooltip.mightExist', {
-            defaultMessage: `We detected usage of this product. Start monitoring.`,
+            defaultMessage: `We detected usage of this product. Click to startM monitoring.`,
           })}
         >
           <EuiBadge color="warning" iconType="flag" onClick={badgeClickAction} onClickAriaLabel={detectedText}>
@@ -77,7 +77,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
       <EuiToolTip
         position="top"
         content={i18n.translate('xpack.monitoring.setupMode.tooltip.oneInternal', {
-          defaultMessage: `At least one {identifier} isn’t monitored using Metricbeat. View status`,
+          defaultMessage: `At least one {identifier} isn’t monitored using Metricbeat. Click to view status.`,
           values: {
             identifier: getIdentifier(productName)
           }
@@ -97,7 +97,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
       <EuiToolTip
         position="top"
         content={i18n.translate('xpack.monitoring.setupMode.tooltip.disableInternal', {
-          defaultMessage: `Metricbeat is monitoring all {identifierPlural}. View {identifierPlural} and disable self monitoring.`,
+          defaultMessage: `Metricbeat is monitoring all {identifierPlural}. Click to view {identifierPlural} and disable self monitoring.`,
           values: {
             identifierPlural: getIdentifier(productName, true)
           }

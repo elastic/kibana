@@ -50,7 +50,7 @@ export class EuiMonitoringTable extends React.PureComponent {
           <EuiSpacer size="m"/>
           <EuiButton iconType="flag" onClick={() => setupMode.openFlyout({}, true)}>
             {i18n.translate('xpack.monitoring.euiTable.setupNewButtonLabel', {
-              defaultMessage: 'Set up monitoring for another {identifier}',
+              defaultMessage: 'Set up monitoring for new {identifier}',
               values: {
                 identifier: getIdentifier(productName)
               }

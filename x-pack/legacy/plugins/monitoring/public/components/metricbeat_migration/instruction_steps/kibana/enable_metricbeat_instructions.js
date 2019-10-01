@@ -36,7 +36,7 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
           >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.kibanaInstructions.installMetricbeatLinkText"
-              defaultMessage="Follow the instructions here"
+              defaultMessage="Follow the instructions here."
             />
           </EuiLink>
         </p>
@@ -127,7 +127,7 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
           >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.kibanaInstructions.startMetricbeatLinkText"
-              defaultMessage="Follow the instructions here"
+              defaultMessage="Follow the instructions here."
             />
           </EuiLink>
         </p>

@@ -36,7 +36,7 @@ export function getLogstashInstructionsForEnablingMetricbeat(product, _meta, {
           >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.logstashInstructions.installMetricbeatLinkText"
-              defaultMessage="Follow the instructions here"
+              defaultMessage="Follow the instructions here."
             />
           </EuiLink>
         </p>
@@ -127,7 +127,7 @@ export function getLogstashInstructionsForEnablingMetricbeat(product, _meta, {
           >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.logstashInstructions.startMetricbeatLinkText"
-              defaultMessage="Follow the instructions here"
+              defaultMessage="Follow the instructions here."
             />
           </EuiLink>
         </p>
