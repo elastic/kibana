@@ -13,7 +13,7 @@ import { TaskManager } from '../../task_manager';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { XPackMainPlugin } from '../../xpack_main/xpack_main';
 import { AlertsClientFactory } from './lib';
-import { SavedObjectsLegacyService } from '../../../../../src/core/server';
+import { KibanaRequest, SavedObjectsLegacyService } from '../../../../../src/core/server';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import { ElasticsearchPlugin } from '../../../../../src/legacy/core_plugins/elasticsearch';
 import { PluginSetupContract as SecurityPluginSetupContract } from '../../../../plugins/security/server';
@@ -180,7 +180,7 @@ export class Plugin {
     return {
       listTypes: this.alertTypeRegistry!.list.bind(this.alertTypeRegistry!),
       getAlertsClientWithRequest: (request: Hapi.Request) =>
-        this.alertsClientFactory!.create(request),
+        this.alertsClientFactory!.create(KibanaRequest.from(request), request),
     };
   }
 }

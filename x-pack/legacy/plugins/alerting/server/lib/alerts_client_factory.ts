@@ -36,19 +36,19 @@ export class AlertsClientFactory {
     this.securityPluginSetup = options.securityPluginSetup;
   }
 
-  public create(request: Hapi.Request): AlertsClient {
+  public create(request: KibanaRequest, legacyRequest: Hapi.Request): AlertsClient {
     const { securityPluginSetup } = this;
     return new AlertsClient({
       logger: this.logger,
       taskManager: this.taskManager,
       alertTypeRegistry: this.alertTypeRegistry,
-      savedObjectsClient: request.getSavedObjectsClient(),
-      spaceId: this.getSpaceId(request),
+      savedObjectsClient: legacyRequest.getSavedObjectsClient(),
+      spaceId: this.getSpaceId(legacyRequest),
       async getUserName() {
         if (!securityPluginSetup) {
           return null;
         }
-        const user = await securityPluginSetup.authc.getCurrentUser(KibanaRequest.from(request));
+        const user = await securityPluginSetup.authc.getCurrentUser(request);
         return user ? user.username : null;
       },
       async createAPIKey() {
@@ -57,7 +57,7 @@ export class AlertsClientFactory {
         }
         return {
           created: true,
-          result: (await securityPluginSetup.authc.createAPIKey(KibanaRequest.from(request), {
+          result: (await securityPluginSetup.authc.createAPIKey(request, {
             name: `source: alerting, generated uuid: "${uuid.v4()}"`,
             role_descriptors: {},
           }))!,
