@@ -10,4 +10,3 @@ echo " -> Ensuring all functional tests are in a ciGroup"
 
 echo " -> building and extracting OSS Kibana distributable for use in functional tests"
 node scripts/build --debug --oss
-

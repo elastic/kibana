@@ -20,18 +20,39 @@ import { ensureRawRequest, KibanaRequest, LegacyRequest } from './router';
 
 import { modifyUrl } from '../../utils';
 
+/**
+ * Access or manipulate the Kibana base path
+ *
+ * @public
+ */
 export class BasePath {
   private readonly basePathCache = new WeakMap<LegacyRequest, string>();
 
-  constructor(private readonly serverBasePath?: string) {}
+  /**
+   * returns the server's basePath
+   *
+   * See {@link BasePath.get} for getting the basePath value for a specific request
+   */
+  public readonly serverBasePath: string;
 
+  /** @internal */
+  constructor(serverBasePath: string = '') {
+    this.serverBasePath = serverBasePath;
+  }
+
+  /**
+   * returns `basePath` value, specific for an incoming request.
+   */
   public get = (request: KibanaRequest | LegacyRequest) => {
     const requestScopePath = this.basePathCache.get(ensureRawRequest(request)) || '';
-    const serverBasePath = this.serverBasePath || '';
-    return `${serverBasePath}${requestScopePath}`;
+    return `${this.serverBasePath}${requestScopePath}`;
   };
 
-  // should work only for KibanaRequest as soon as spaces migrate to NP
+  /**
+   * sets `basePath` value, specific for an incoming request.
+   *
+   * @privateRemarks should work only for KibanaRequest as soon as spaces migrate to NP
+   */
   public set = (request: KibanaRequest | LegacyRequest, requestSpecificBasePath: string) => {
     const rawRequest = ensureRawRequest(request);
 
@@ -43,8 +64,11 @@ export class BasePath {
     this.basePathCache.set(rawRequest, requestSpecificBasePath);
   };
 
+  /**
+   * returns a new `basePath` value, prefixed with passed `url`.
+   */
   public prepend = (path: string): string => {
-    if (!this.serverBasePath) return path;
+    if (this.serverBasePath === '') return path;
     return modifyUrl(path, parts => {
       if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
         parts.pathname = `${this.serverBasePath}${parts.pathname}`;
@@ -52,8 +76,11 @@ export class BasePath {
     });
   };
 
+  /**
+   * returns a new `basePath` value, cleaned up from passed `url`.
+   */
   public remove = (path: string): string => {
-    if (!this.serverBasePath) {
+    if (this.serverBasePath === '') {
       return path;
     }
 
@@ -68,3 +95,11 @@ export class BasePath {
     return path;
   };
 }
+
+/**
+ * Access or manipulate the Kibana base path
+ *
+ * {@link BasePath}
+ * @public
+ */
+export type IBasePath = Pick<BasePath, keyof BasePath>;
