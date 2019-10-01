@@ -148,7 +148,7 @@ export const metrics = {
   apm_acm_requests: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.acm.request.count',
     title: i18n.translate('xpack.monitoring.metrics.apm.acm.requestsTitle', {
-      defaultMessage: 'Requests Count Agent Configuration Management',
+      defaultMessage: 'Request Count Agent Configuration Management',
     }),
     label: i18n.translate('xpack.monitoring.metrics.apm.acm.request.requestedLabel', {
       defaultMessage: 'Requested'
@@ -270,7 +270,7 @@ export const metrics = {
   apm_server_responses_errors_toolarge: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.toolarge',
     title: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrorsTitle', {
-      defaultMessage: 'Too large'
+      defaultMessage: 'Response Errors Intake API'
     }),
     label: i18n.translate('xpack.monitoring.metrics.apm.sever.responseErrors.tooLargeLabelTitle', {
       defaultMessage: 'Too large'
@@ -406,7 +406,7 @@ export const metrics = {
   apm_acm_responses_errors_forbidden: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.acm.response.errors.forbidden',
     title: i18n.translate('xpack.monitoring.metrics.apm.acm.responseErrors.acmForbiddenTitle', {
-      defaultMessage: 'Forbidden HTTP requests'
+      defaultMessage: 'Response Errors Agent Configuration Management'
     }),
     label: i18n.translate('xpack.monitoring.metrics.apm.acm.responseErrors.acmForbiddenLabel', {
       defaultMessage: 'Forbidden'
