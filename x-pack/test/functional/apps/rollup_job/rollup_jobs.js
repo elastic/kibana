@@ -99,7 +99,10 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.common.navigateToApp('discover');
       const hits = await PageObjects.discover.getHitCount();
-      expect(Number.parseInt(hits)).to.be.greaterThan(6);
+
+      //Number of hits should be 10.
+      //3 for rolled up data, 3 for legacy data that was rolled up, and 4 for the live data.
+      expect(Number.parseInt(hits)).to.eql(10);
     });
 
     after(async () => {
