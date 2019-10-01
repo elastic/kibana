@@ -10,7 +10,7 @@ import { npStart } from 'ui/new_platform';
 
 import { setup as data } from '../../../../../../../../src/legacy/core_plugins/data/public/legacy';
 
-import { useAppDependencies } from '../../index';
+import { useAppDependencies } from '../../app_dependencies';
 
 import {
   createSearchItems,

@@ -9,6 +9,8 @@ import React from 'react';
 
 import { CreateTransformButton } from './create_transform_button';
 
+jest.mock('ui/new_platform');
+
 describe('Transform: Transform List <CreateTransformButton />', () => {
   test('Minimal initialization', () => {
     const wrapper = shallow(<CreateTransformButton />);

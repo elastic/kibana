@@ -40,18 +40,18 @@ export const APP_CLUSTER_PRIVILEGES = [
 
 // Equivalent of capabilities.canGetTransform
 export const APP_GET_TRANSFORM_CLUSTER_PRIVILEGES = [
-  'cluster:monitor/data_frame/get',
-  'cluster:monitor/data_frame/stats/get',
+  'cluster.cluster:monitor/data_frame/get',
+  'cluster.cluster:monitor/data_frame/stats/get',
 ];
 
 // Equivalent of capabilities.canGetTransform
 export const APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES = [
-  'cluster:monitor/data_frame/get',
-  'cluster:monitor/data_frame/stats/get',
-  'cluster:admin/data_frame/preview',
-  'cluster:admin/data_frame/put',
-  'cluster:admin/data_frame/start',
-  'cluster:admin/data_frame/start_task',
+  'cluster.cluster:monitor/data_frame/get',
+  'cluster.cluster:monitor/data_frame/stats/get',
+  'cluster.cluster:admin/data_frame/preview',
+  'cluster.cluster:admin/data_frame/put',
+  'cluster.cluster:admin/data_frame/start',
+  'cluster.cluster:admin/data_frame/start_task',
 ];
 
 export const APP_INDEX_PRIVILEGES = ['monitor'];

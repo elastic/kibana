@@ -8,7 +8,8 @@ import { unmountComponentAtNode } from 'react-dom';
 import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/types';
 
 import { PLUGIN } from '../common/constants';
-import { CLIENT_BASE_PATH, renderReact } from './app';
+import { CLIENT_BASE_PATH } from './app';
+import { renderReact } from './app/app';
 import { AppCore, AppPlugins } from './app/types';
 import template from './index.html';
 import { Core, Plugins } from './shim';

@@ -12,6 +12,8 @@ import { StopAction } from './action_stop';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
+jest.mock('ui/new_platform');
+
 describe('Transform: Transform List Actions <StopAction />', () => {
   test('Minimal initialization', () => {
     const item: TransformListRow = transformListRow;

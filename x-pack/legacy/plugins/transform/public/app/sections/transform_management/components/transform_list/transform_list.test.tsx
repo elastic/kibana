@@ -10,6 +10,8 @@ import React from 'react';
 import './transform_list.test.mocks';
 import { TransformList } from './transform_list';
 
+jest.mock('ui/new_platform');
+
 describe('Transform: Transform List <TransformList />', () => {
   test('Minimal initialization', () => {
     const wrapper = shallow(

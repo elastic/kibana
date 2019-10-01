@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -21,12 +21,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
+import { PrivilegesWrapper } from '../../lib/authorization';
 import { KibanaProvider } from '../../lib/kibana';
 
 import { Wizard } from './components/wizard';
 
 type Props = RouteComponentProps<{ savedObjectId: string }>;
-export const Page = ({ match }: Props) => (
+const NewTransform = ({ match }: Props) => (
   <KibanaProvider savedObjectId={match.params.savedObjectId}>
     <EuiPage>
       <EuiPageBody>
@@ -62,3 +64,11 @@ export const Page = ({ match }: Props) => (
     </EuiPage>
   </KibanaProvider>
 );
+
+export const Page: FC<Props> = props => {
+  return (
+    <PrivilegesWrapper privileges={APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES}>
+      <NewTransform {...props} />
+    </PrivilegesWrapper>
+  );
+};

@@ -6,6 +6,8 @@
 
 import { getActions } from './actions';
 
+jest.mock('ui/new_platform');
+
 describe('Transform: Transform List Actions', () => {
   test('getActions()', () => {
     const actions = getActions({ forceDisable: false });

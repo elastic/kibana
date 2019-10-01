@@ -507,58 +507,56 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     <EuiFlexGroup>
       <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
         <EuiForm>
-          {kibanaContext.currentSavedSearch !== undefined &&
-            kibanaContext.currentSavedSearch.id === undefined &&
-            typeof searchString === 'string' && (
-              <Fragment>
-                <EuiFormRow
-                  label={i18n.translate('xpack.transform.stepDefineForm.indexPatternLabel', {
-                    defaultMessage: 'Index pattern',
-                  })}
-                  helpText={
-                    disabledQuery
-                      ? i18n.translate('xpack.transform.stepDefineForm.indexPatternHelpText', {
-                          defaultMessage:
-                            'An optional query for this index pattern is not supported. The number of supported index fields is {maxIndexFields} whereas this index has {numIndexFields} fields.',
-                          values: {
-                            maxIndexFields,
-                            numIndexFields,
-                          },
-                        })
-                      : ''
-                  }
-                >
-                  <span>{indexPattern.title}</span>
-                </EuiFormRow>
-                {!disabledQuery && (
-                  <Fragment>
-                    {!isAdvancedSourceEditorEnabled && (
-                      <EuiFormRow
-                        label={i18n.translate('xpack.transform.stepDefineForm.queryLabel', {
-                          defaultMessage: 'Query',
-                        })}
-                        helpText={i18n.translate('xpack.transform.stepDefineForm.queryHelpText', {
-                          defaultMessage: 'Use a query to filter the source data (optional).',
-                        })}
-                      >
-                        <KqlFilterBar
-                          indexPattern={indexPattern}
-                          onSubmit={searchHandler}
-                          initialValue={searchString === defaultSearch ? emptySearch : searchString}
-                          placeholder={i18n.translate(
-                            'xpack.transform.stepDefineForm.queryPlaceholder',
-                            {
-                              defaultMessage: 'e.g. {example}',
-                              values: { example: 'method : "GET" or status : "404"' },
-                            }
-                          )}
-                        />
-                      </EuiFormRow>
-                    )}
-                  </Fragment>
-                )}
-              </Fragment>
-            )}
+          {kibanaContext.currentSavedSearch === undefined && typeof searchString === 'string' && (
+            <Fragment>
+              <EuiFormRow
+                label={i18n.translate('xpack.transform.stepDefineForm.indexPatternLabel', {
+                  defaultMessage: 'Index pattern',
+                })}
+                helpText={
+                  disabledQuery
+                    ? i18n.translate('xpack.transform.stepDefineForm.indexPatternHelpText', {
+                        defaultMessage:
+                          'An optional query for this index pattern is not supported. The number of supported index fields is {maxIndexFields} whereas this index has {numIndexFields} fields.',
+                        values: {
+                          maxIndexFields,
+                          numIndexFields,
+                        },
+                      })
+                    : ''
+                }
+              >
+                <span>{indexPattern.title}</span>
+              </EuiFormRow>
+              {!disabledQuery && (
+                <Fragment>
+                  {!isAdvancedSourceEditorEnabled && (
+                    <EuiFormRow
+                      label={i18n.translate('xpack.transform.stepDefineForm.queryLabel', {
+                        defaultMessage: 'Query',
+                      })}
+                      helpText={i18n.translate('xpack.transform.stepDefineForm.queryHelpText', {
+                        defaultMessage: 'Use a query to filter the source data (optional).',
+                      })}
+                    >
+                      <KqlFilterBar
+                        indexPattern={indexPattern}
+                        onSubmit={searchHandler}
+                        initialValue={searchString === defaultSearch ? emptySearch : searchString}
+                        placeholder={i18n.translate(
+                          'xpack.transform.stepDefineForm.queryPlaceholder',
+                          {
+                            defaultMessage: 'e.g. {example}',
+                            values: { example: 'method : "GET" or status : "404"' },
+                          }
+                        )}
+                      />
+                    </EuiFormRow>
+                  )}
+                </Fragment>
+              )}
+            </Fragment>
+          )}
 
           {isAdvancedSourceEditorEnabled && (
             <Fragment>
@@ -605,57 +603,56 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
               </EuiFormRow>
             </Fragment>
           )}
-          {kibanaContext.currentSavedSearch !== undefined &&
-            kibanaContext.currentSavedSearch.id === undefined && (
-              <EuiFormRow>
-                <EuiFlexGroup gutterSize="none">
-                  <EuiFlexItem>
-                    <EuiSwitch
-                      label={i18n.translate(
-                        'xpack.transform.stepDefineForm.advancedEditorSourceConfigSwitchLabel',
-                        {
-                          defaultMessage: 'Advanced query editor',
-                        }
-                      )}
-                      checked={isAdvancedSourceEditorEnabled}
-                      onChange={() => {
-                        if (isAdvancedSourceEditorEnabled && sourceConfigUpdated) {
-                          setAdvancedSourceEditorSwitchModalVisible(true);
-                          return;
-                        }
-
-                        toggleAdvancedSourceEditor();
-                      }}
-                    />
-                    {isAdvancedSourceEditorSwitchModalVisible && (
-                      <SwitchModal
-                        onCancel={() => setAdvancedSourceEditorSwitchModalVisible(false)}
-                        onConfirm={() => {
-                          setAdvancedSourceEditorSwitchModalVisible(false);
-                          toggleAdvancedSourceEditor(true);
-                        }}
-                        type={'source'}
-                      />
+          {kibanaContext.currentSavedSearch === undefined && (
+            <EuiFormRow>
+              <EuiFlexGroup gutterSize="none">
+                <EuiFlexItem>
+                  <EuiSwitch
+                    label={i18n.translate(
+                      'xpack.transform.stepDefineForm.advancedEditorSourceConfigSwitchLabel',
+                      {
+                        defaultMessage: 'Advanced query editor',
+                      }
                     )}
-                  </EuiFlexItem>
-                  {isAdvancedSourceEditorEnabled && (
-                    <EuiButton
-                      size="s"
-                      fill
-                      onClick={applyAdvancedSourceEditorChanges}
-                      disabled={!isAdvancedSourceEditorApplyButtonEnabled}
-                    >
-                      {i18n.translate(
-                        'xpack.transform.stepDefineForm.advancedSourceEditorApplyButtonText',
-                        {
-                          defaultMessage: 'Apply changes',
-                        }
-                      )}
-                    </EuiButton>
+                    checked={isAdvancedSourceEditorEnabled}
+                    onChange={() => {
+                      if (isAdvancedSourceEditorEnabled && sourceConfigUpdated) {
+                        setAdvancedSourceEditorSwitchModalVisible(true);
+                        return;
+                      }
+
+                      toggleAdvancedSourceEditor();
+                    }}
+                  />
+                  {isAdvancedSourceEditorSwitchModalVisible && (
+                    <SwitchModal
+                      onCancel={() => setAdvancedSourceEditorSwitchModalVisible(false)}
+                      onConfirm={() => {
+                        setAdvancedSourceEditorSwitchModalVisible(false);
+                        toggleAdvancedSourceEditor(true);
+                      }}
+                      type={'source'}
+                    />
                   )}
-                </EuiFlexGroup>
-              </EuiFormRow>
-            )}
+                </EuiFlexItem>
+                {isAdvancedSourceEditorEnabled && (
+                  <EuiButton
+                    size="s"
+                    fill
+                    onClick={applyAdvancedSourceEditorChanges}
+                    disabled={!isAdvancedSourceEditorApplyButtonEnabled}
+                  >
+                    {i18n.translate(
+                      'xpack.transform.stepDefineForm.advancedSourceEditorApplyButtonText',
+                      {
+                        defaultMessage: 'Apply changes',
+                      }
+                    )}
+                  </EuiButton>
+                )}
+              </EuiFlexGroup>
+            </EuiFormRow>
+          )}
           {kibanaContext.currentSavedSearch !== undefined &&
             kibanaContext.currentSavedSearch.id !== undefined && (
               <EuiFormRow

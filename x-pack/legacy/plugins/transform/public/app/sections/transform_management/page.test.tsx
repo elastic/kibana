@@ -10,6 +10,8 @@ import React from 'react';
 import './page.test.mocks';
 import { Page } from './page';
 
+jest.mock('ui/new_platform');
+
 describe('Transform: Job List <Page />', () => {
   test('Minimal initialization', () => {
     const wrapper = shallow(<Page />);

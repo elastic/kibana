@@ -23,6 +23,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { APP_GET_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
+import { PrivilegesWrapper } from '../../lib/authorization';
 import { useRefreshTransformList, TransformListRow } from '../../common';
 import { CreateTransformButton } from './components/create_transform_button';
 import { TransformList } from './components/transform_list';
@@ -31,7 +33,7 @@ import { TransformStatsBar } from '../transform_management/components/transform_
 import { getTransformsFactory } from './services/transform_service';
 import { useRefreshInterval } from './components/transform_list/use_refresh_interval';
 
-export const Page: FC = () => {
+export const TransformManagement: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [transformsLoading, setTransformsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -110,5 +112,13 @@ export const Page: FC = () => {
         </EuiPageBody>
       </EuiPage>
     </Fragment>
+  );
+};
+
+export const Page: FC = () => {
+  return (
+    <PrivilegesWrapper privileges={APP_GET_TRANSFORM_CLUSTER_PRIVILEGES}>
+      <TransformManagement />
+    </PrivilegesWrapper>
   );
 };

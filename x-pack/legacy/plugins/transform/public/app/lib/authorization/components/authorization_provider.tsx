@@ -33,13 +33,13 @@ const initialValue: Authorization = {
   isLoading: true,
   apiError: null,
   privileges: {
-    hasAllPrivileges: true,
+    hasAllPrivileges: false,
     missingPrivileges: {},
   },
   capabilities: initialCapabalities,
 };
 
-export const AuthorizationContext = createContext<Authorization>(initialValue);
+export const AuthorizationContext = createContext<Authorization>({ ...initialValue });
 
 interface Props {
   privilegesEndpoint: string;
@@ -54,39 +54,35 @@ export const AuthorizationProvider = ({ privilegesEndpoint, children }: Props) =
 
   const value = {
     isLoading,
-    privileges: isLoading ? { hasAllPrivileges: true, missingPrivileges: {} } : privilegesData,
-    capabilities: initialCapabalities,
+    privileges: isLoading ? { ...initialValue.privileges } : privilegesData,
+    capabilities: { ...initialCapabalities },
     apiError: error ? error : null,
   };
 
   const hasPrivilege = hasPrivilegeFactory(value.privileges);
 
-  if (
+  value.capabilities.canGetTransform =
     hasPrivilege(['cluster', 'cluster:monitor/data_frame/get']) &&
-    hasPrivilege(['cluster', 'cluster:monitor/data_frame/stats/get'])
-  ) {
-    value.capabilities.canGetTransform = true;
-  }
+    hasPrivilege(['cluster', 'cluster:monitor/data_frame/stats/get']);
 
-  if (hasPrivilege(['cluster', 'cluster:admin/data_frame/put'])) {
-    value.capabilities.canCreateTransform = true;
-  }
+  value.capabilities.canCreateTransform = hasPrivilege(['cluster', 'cluster:admin/data_frame/put']);
 
-  if (hasPrivilege(['cluster', 'cluster:admin/data_frame/delete'])) {
-    value.capabilities.canDeleteTransform = true;
-  }
+  value.capabilities.canDeleteTransform = hasPrivilege([
+    'cluster',
+    'cluster:admin/data_frame/delete',
+  ]);
 
-  if (hasPrivilege(['cluster', 'cluster:admin/data_frame/preview'])) {
-    value.capabilities.canPreviewTransform = true;
-  }
+  value.capabilities.canPreviewTransform = hasPrivilege([
+    'cluster',
+    'cluster:admin/data_frame/preview',
+  ]);
 
-  if (
+  value.capabilities.canStartStopTransform =
     hasPrivilege(['cluster', 'cluster:admin/data_frame/start']) &&
     hasPrivilege(['cluster', 'cluster:admin/data_frame/start_task']) &&
-    hasPrivilege(['cluster', 'cluster:admin/data_frame/stop'])
-  ) {
-    value.capabilities.canStartStopTransform = true;
-  }
+    hasPrivilege(['cluster', 'cluster:admin/data_frame/stop']);
 
-  return <AuthorizationContext.Provider value={value}>{children}</AuthorizationContext.Provider>;
+  return (
+    <AuthorizationContext.Provider value={{ ...value }}>{children}</AuthorizationContext.Provider>
+  );
 };

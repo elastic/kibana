@@ -6,6 +6,8 @@
 
 import { getColumns } from './columns';
 
+jest.mock('ui/new_platform');
+
 describe('Transform: Job List Columns', () => {
   test('getColumns()', () => {
     const columns = getColumns([], () => {}, []);

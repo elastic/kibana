@@ -12,6 +12,8 @@ import { DeleteAction } from './action_delete';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
+jest.mock('ui/new_platform');
+
 describe('Transform: Transform List Actions <DeleteAction />', () => {
   test('Minimal initialization', () => {
     const item: TransformListRow = transformListRow;

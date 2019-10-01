@@ -4,25 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, FC } from 'react';
+import { render } from 'react-dom';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { EuiPageContent } from '@elastic/eui';
 
-import { APP_GET_TRANSFORM_CLUSTER_PRIVILEGES } from '../../common/constants';
-import { SectionLoading, SectionError } from './components';
+import { SectionError } from './components';
 import { BASE_PATH, DEFAULT_SECTION } from './constants';
-import { useAppDependencies } from './index';
-import { AuthorizationContext, WithPrivileges, NotAuthorizedSection } from './lib/authorization';
+import { getAppProviders, useAppDependencies } from './app_dependencies';
+import { AuthorizationContext } from './lib/authorization';
+import { AppCore, AppPlugins } from './types';
 
 import { Page as NewTransform } from './sections/data_frame_new_pivot/page';
 import { Page as TransformManagement } from './sections/transform_management/page';
 
-export const App: React.FunctionComponent = () => {
+export const App: FC = () => {
   const {
     core: {
       i18n: { FormattedMessage },
     },
   } = useAppDependencies();
+
   const { apiError } = useContext(AuthorizationContext);
 
   if (apiError) {
@@ -40,53 +41,23 @@ export const App: React.FunctionComponent = () => {
   }
 
   return (
-    <WithPrivileges
-      privileges={APP_GET_TRANSFORM_CLUSTER_PRIVILEGES.map(name => `cluster.${name}`)}
-    >
-      {({ isLoading, hasPrivileges, privilegesMissing }) =>
-        isLoading ? (
-          <SectionLoading>
-            <FormattedMessage
-              id="xpack.transform.app.checkingPrivilegesDescription"
-              defaultMessage="Checking privileges…"
-            />
-          </SectionLoading>
-        ) : hasPrivileges ? (
-          <div data-test-subj="transformApp">
-            <Switch>
-              <Route path={`${BASE_PATH}/new_transform/:savedObjectId`} component={NewTransform} />
-              <Route
-                exact
-                path={`${BASE_PATH}/transform_management`}
-                component={TransformManagement}
-              />
-              <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />
-            </Switch>
-          </div>
-        ) : (
-          <EuiPageContent>
-            <NotAuthorizedSection
-              title={
-                <FormattedMessage
-                  id="xpack.transform.app.deniedPrivilegeTitle"
-                  defaultMessage="You're missing cluster privileges"
-                />
-              }
-              message={
-                <FormattedMessage
-                  id="xpack.transform.app.deniedPrivilegeDescription"
-                  defaultMessage="To use Transforms, you must have {privilegesCount,
-                    plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
-                  values={{
-                    missingPrivileges: privilegesMissing.cluster!.join(', '),
-                    privilegesCount: privilegesMissing.cluster!.length,
-                  }}
-                />
-              }
-            />
-          </EuiPageContent>
-        )
-      }
-    </WithPrivileges>
+    <div data-test-subj="transformApp">
+      <Switch>
+        <Route path={`${BASE_PATH}/new_transform/:savedObjectId`} component={NewTransform} />
+        <Route exact path={`${BASE_PATH}/transform_management`} component={TransformManagement} />
+        <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />
+      </Switch>
+    </div>
+  );
+};
+
+export const renderReact = async (elem: Element, core: AppCore, plugins: AppPlugins) => {
+  const Providers = getAppProviders({ core, plugins });
+
+  render(
+    <Providers>
+      <App />
+    </Providers>,
+    elem
   );
 };
