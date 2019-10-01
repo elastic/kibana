@@ -24,17 +24,22 @@ import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 import { ViewMode } from '../types';
 
 /**
+ * On DOM elements with this data attribute Reporting will listen for `renderComplete` event.
+ */
+const ATTR_DATA_SHARED_ITEM = 'data-shared-item';
+/**
+ * If this attribute is present, it means `renderComplete` was fired at least once.
+ * Reporting uses this to check if they have to subscribe to `renderComplete` events.
+ */
+const ATTR_DATA_RENDER_COMPLETE = 'data-render-complete';
+/**
  * If this attribute is present it specifies that `renderComplete` event has not been fired yet.
  */
-const LOADING_ATTRIBUTE = 'data-loading';
-/**
- * @todo Add description of this attribute.
- */
-const DATA_SHARED_ITEM = 'data-shared-item';
+const ATTR_DATA_LOADING = 'data-loading';
 /**
  * Tracks number of times `renderComplete` event was fired.
  */
-const RENDERING_COUNT_ATTRIBUTE = 'data-rendering-count';
+const ATTR_DATA_RENDERING_COUNT = 'data-rendering-count';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
@@ -156,10 +161,11 @@ export abstract class Embeddable<
    */
   private onRenderComplete = () => {
     this.firstRenderCompleteCallback();
-    this.domNode!.removeAttribute(LOADING_ATTRIBUTE);
+    this.domNode!.setAttribute(ATTR_DATA_RENDER_COMPLETE, '');
+    this.domNode!.removeAttribute(ATTR_DATA_LOADING);
 
-    const renderingCount = Number(this.domNode!.getAttribute(RENDERING_COUNT_ATTRIBUTE) || 0);
-    this.domNode!.setAttribute(RENDERING_COUNT_ATTRIBUTE, String(renderingCount + 1));
+    const renderingCount = Number(this.domNode!.getAttribute(ATTR_DATA_RENDERING_COUNT) || 0);
+    this.domNode!.setAttribute(ATTR_DATA_RENDERING_COUNT, String(renderingCount + 1));
   };
 
   public render(domNode: HTMLElement | Element): void {
@@ -167,9 +173,9 @@ export abstract class Embeddable<
     if (!domNode) return;
 
     this.domNode = domNode;
-    domNode.setAttribute(LOADING_ATTRIBUTE, '');
-    domNode.setAttribute(DATA_SHARED_ITEM, '');
-    domNode.setAttribute(RENDERING_COUNT_ATTRIBUTE, '0');
+    domNode.setAttribute(ATTR_DATA_LOADING, '');
+    domNode.setAttribute(ATTR_DATA_SHARED_ITEM, '');
+    domNode.setAttribute(ATTR_DATA_RENDERING_COUNT, '0');
     domNode.addEventListener('renderComplete', this.onRenderComplete);
 
     return;
