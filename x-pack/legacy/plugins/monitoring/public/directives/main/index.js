@@ -156,6 +156,10 @@ export class MonitoringMainController {
     if (data.totalUniqueInstanceCount === 0) {
       return true;
     }
+    if (data.totalUniqueInternallyCollectedCount === 0
+      && data.totalUniqueFullyMigratedCount === 0 && data.totalUniquePartiallyMigratedCount === 0) {
+      return true;
+    }
     return false;
   }
 }

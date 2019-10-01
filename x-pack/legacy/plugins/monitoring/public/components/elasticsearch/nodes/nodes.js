@@ -259,7 +259,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
 
     nodes.push(...Object.entries(setupMode.data.byUuid)
       .reduce((nodes, [nodeUuid, instance]) => {
-        if (!nodesByUuid[nodeUuid]) {
+        if (!nodesByUuid[nodeUuid] && instance.node) {
           nodes.push(instance.node);
         }
         return nodes;
