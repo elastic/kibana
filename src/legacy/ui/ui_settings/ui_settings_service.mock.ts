@@ -24,14 +24,12 @@ const createServiceMock = () => {
     getDefaults: jest.fn(),
     get: jest.fn(),
     getAll: jest.fn(),
-    getRaw: jest.fn(),
     getUserProvided: jest.fn(),
     setMany: jest.fn(),
     set: jest.fn(),
     remove: jest.fn(),
     removeMany: jest.fn(),
     isOverridden: jest.fn(),
-    assertUpdateAllowed: jest.fn(),
   };
   mocked.get.mockResolvedValue(false);
   return mocked;

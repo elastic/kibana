@@ -66,14 +66,12 @@ export interface IUiSettingsService {
   getDefaults: () => Promise<Record<string, UiSettingsParams>>;
   get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
   getAll: <T extends SavedObjectAttribute = any>() => Promise<Record<string, T>>;
-  getRaw: () => Promise<UiSettingsRaw>;
   getUserProvided: () => Promise<UserProvided>;
   setMany: <T extends SavedObjectAttribute = any>(changes: Record<string, T>) => Promise<void>;
   set: <T extends SavedObjectAttribute = any>(key: string, value: T) => Promise<void>;
   remove: (key: string) => Promise<void>;
   removeMany: (keys: string[]) => Promise<void>;
   isOverridden: (key: string) => boolean;
-  assertUpdateAllowed: (key: string) => void;
 }
 /**
  *  Service that provides access to the UiSettings stored in elasticsearch.
