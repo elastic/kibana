@@ -54,9 +54,11 @@ export function EuiMonitoringSSPTable({
   };
 
   const onQueryChange = async ({ queryText }) => {
+    const newPage = { ...page, index: 0 };
+    setPage(newPage);
     setQueryText(queryText);
     setIsLoading(true);
-    await fetchMoreData({ page, sort, queryText });
+    await fetchMoreData({ page: newPage, sort, queryText });
     setIsLoading(false);
   };
 

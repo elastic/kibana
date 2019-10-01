@@ -64,6 +64,6 @@ export async function getPaginatedPipelines(req, lsIndexPattern, { clusterUuid, 
 
   return {
     pageOfPipelines,
-    totalPipelineCount: pipelines.length
+    totalPipelineCount: filteredPipelines.length
   };
 }
