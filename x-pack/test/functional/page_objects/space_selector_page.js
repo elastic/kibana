@@ -33,7 +33,7 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }) {
 
     async expectRoute(spaceId, route) {
       return await retry.try(async () => {
-        log.debug(`expactRoute(${spaceId}, ${route})`);
+        log.debug(`expectRoute(${spaceId}, ${route})`);
         await find.byCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide) ', 20000);
         const url = await browser.getCurrentUrl();
         if (spaceId === 'default') {
