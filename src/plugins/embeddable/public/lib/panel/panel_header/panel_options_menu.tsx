@@ -74,12 +74,12 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
   }
 
   public render() {
-    const { isViewMode } = this.props;
+    const { isViewMode, title } = this.props;
     const enhancedAriaLabel = i18n.translate(
       'embeddableApi.panel.optionsMenu.panelOptionsButtonEnhancedAriaLabel',
       {
         defaultMessage: 'Panel options for {title}',
-        values: { title: this.props.title },
+        values: { title },
       }
     );
     const ariaLabelWithoutTitle = i18n.translate(
@@ -94,7 +94,7 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
         iconType={isViewMode ? 'boxesHorizontal' : 'gear'}
         color="text"
         className="embPanel__optionsMenuButton"
-        aria-label={this.props.title ? enhancedAriaLabel : ariaLabelWithoutTitle}
+        aria-label={title ? enhancedAriaLabel : ariaLabelWithoutTitle}
         data-test-subj="embeddablePanelToggleMenuIcon"
         onClick={this.toggleContextMenu}
       />

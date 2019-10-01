@@ -19,6 +19,7 @@
 
 import { Component } from 'react';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiFieldText, EuiOutsideClickDetector, PopoverAnchorPosition } from '@elastic/eui';
 
@@ -464,34 +465,30 @@ export class QueryBarInputUI extends Component<Props, State> {
       'savedObjectsClient',
     ]);
 
+    const isSuggestionsVisible = this.state.isSuggestionsVisible && {
+      'aria-controls': 'kbnTypeahead__items',
+      'aria-owns': 'kbnTypeahead__items',
+    };
+    const ariaCombobox = Object.assign({ role: 'combobox' }, isSuggestionsVisible);
+
     return (
       <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
         <div
+          {...ariaCombobox}
           style={{ position: 'relative' }}
-          {...{ role: 'combobox' }} // using awkward syntax to avoid triggering false jsx-a11y/role-has-required-aria-props linting failure
-          aria-label={this.props.intl.formatMessage(
-            {
-              id: 'data.query.queryBar.comboboxAriaLabel',
-              defaultMessage: 'Search and filter the {pageType} page',
-            },
-            {
-              pageType: this.props.appName,
-            }
-          )}
+          aria-label={i18n.translate('data.query.queryBar.comboboxAriaLabel', {
+            defaultMessage: 'Search and filter the {pageType} page',
+            values: { pageType: this.props.appName },
+          })}
           aria-haspopup="true"
           aria-expanded={this.state.isSuggestionsVisible}
-          {...(this.state.isSuggestionsVisible && {
-            'aria-controls': 'kbnTypeahead__items',
-            'aria-owns': 'kbnTypeahead__items',
-          })}
         >
           <div role="search">
             <div className="kuiLocalSearchAssistedInput">
               <EuiFieldText
                 placeholder={
                   this.props.placeholder ||
-                  this.props.intl.formatMessage({
-                    id: 'data.query.queryBar.searchInputPlaceholder',
+                  i18n.translate('data.query.queryBar.searchInputPlaceholder', {
                     defaultMessage: 'Search',
                   })
                 }
@@ -509,23 +506,19 @@ export class QueryBarInputUI extends Component<Props, State> {
                 }}
                 autoComplete="off"
                 spellCheck={false}
-                aria-label={this.props.intl.formatMessage(
-                  {
-                    id: 'data.query.queryBar.searchInputAriaLabel',
-                    defaultMessage: 'Start typing to search and filter the {pageType} page',
-                  },
-                  {
-                    pageType: this.props.appName,
-                  }
-                )}
+                aria-label={i18n.translate('data.query.queryBar.searchInputAriaLabel', {
+                  defaultMessage: 'Start typing to search and filter the {pageType} page',
+                  values: { pageType: this.props.appName },
+                })}
                 type="text"
                 data-test-subj="queryInput"
                 aria-autocomplete="list"
-                {...(this.state.isSuggestionsVisible && { 'aria-controls': 'kbnTypeahead__items' })}
-                {...(this.state.isSuggestionsVisible &&
-                  typeof this.state.index === 'number' && {
-                    'aria-activedescendant': `suggestion-${this.state.index}`,
-                  })}
+                aria-controls={this.state.isSuggestionsVisible ? 'kbnTypeahead__items' : undefined}
+                aria-activedescendant={
+                  this.state.isSuggestionsVisible && typeof this.state.index === 'number'
+                    ? `suggestion-${this.state.index}`
+                    : undefined
+                }
                 role="textbox"
                 prepend={this.props.prepend}
                 append={

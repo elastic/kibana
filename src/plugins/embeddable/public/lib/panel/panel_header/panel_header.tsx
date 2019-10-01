@@ -17,7 +17,13 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { EuiContextMenuPanelDescriptor, EuiBadge, EuiIcon, EuiToolTip } from '@elastic/eui';
+import {
+  EuiContextMenuPanelDescriptor,
+  EuiBadge,
+  EuiIcon,
+  EuiToolTip,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import { IAction } from 'src/plugins/ui_actions/public';
@@ -32,7 +38,7 @@ export interface PanelHeaderProps {
   closeContextMenu: boolean;
   badges: IAction[];
   embeddable: IEmbeddable;
-  headerId: string;
+  headerId?: string;
 }
 
 function renderBadges(badges: IAction[], embeddable: IEmbeddable) {
@@ -49,13 +55,29 @@ function renderBadges(badges: IAction[], embeddable: IEmbeddable) {
   ));
 }
 
+function renderTooltip(description: string) {
+  return (
+    description !== '' && (
+      <EuiToolTip content={description} delay="regular" position="right">
+        <EuiIcon type="iInCircle" />
+      </EuiToolTip>
+    )
+  );
+}
+
 const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
 type VisualizeEmbeddable = any;
 
-function isVisualizeEmbeddable(
-  embeddable: IEmbeddable | VisualizeEmbeddable
-): embeddable is VisualizeEmbeddable {
-  return embeddable.type === VISUALIZE_EMBEDDABLE_TYPE;
+function getViewDescription(embeddable: IEmbeddable | VisualizeEmbeddable) {
+  if (embeddable.type === VISUALIZE_EMBEDDABLE_TYPE) {
+    const description = embeddable.getVisualizationDescription();
+
+    if (description) {
+      return description;
+    }
+  }
+
+  return '';
 }
 
 export function PanelHeader({
@@ -68,9 +90,9 @@ export function PanelHeader({
   embeddable,
   headerId,
 }: PanelHeaderProps) {
-  const showTitle = !isViewMode || (title && !hidePanelTitles);
+  const viewDescription = getViewDescription(embeddable);
+  const showTitle = !isViewMode || (title && !hidePanelTitles) || viewDescription !== '';
   const showPanelBar = badges.length > 0 || showTitle;
-
   const classes = classNames('embPanel__header', {
     'embPanel__header--floater': !showPanelBar,
   });
@@ -82,33 +104,11 @@ export function PanelHeader({
           getActionContextMenuPanel={getActionContextMenuPanel}
           isViewMode={isViewMode}
           closeContextMenu={closeContextMenu}
+          title={title}
         />
       </div>
     );
   }
-
-  let viewDescr = '';
-  if (isVisualizeEmbeddable(embeddable)) {
-    const vd = (embeddable as any).getVisualizationDescription();
-    if (vd) {
-      viewDescr = vd;
-    }
-  } else {
-    viewDescr = '';
-  }
-
-  const headingAriaLabel = i18n.translate('embeddableApi.panel.dashboardPanelAriaLabel', {
-    defaultMessage: 'Dashboard panel',
-  });
-  const enhancedHeadingAriaLabel = i18n.translate(
-    'embeddableApi.panel.enhancedDashboardPanelAriaLabel',
-    {
-      defaultMessage: 'Dashboard panel: {title}',
-      values: {
-        title,
-      },
-    }
-  );
 
   return (
     <figcaption
@@ -119,21 +119,32 @@ export function PanelHeader({
         id={headerId}
         data-test-subj="dashboardPanelTitle"
         className="embPanel__title embPanel__dragger"
-        aria-label={title ? enhancedHeadingAriaLabel : headingAriaLabel}
       >
-        {showTitle || viewDescr !== '' ? (
+        {showTitle ? (
           <span className="embPanel__titleInner">
-            <span className="embPanel__titleText">{title}</span>
-
-            {viewDescr !== '' && (
-              <EuiToolTip content={viewDescr} delay="regular" position="right">
-                <EuiIcon type="iInCircle" />
-              </EuiToolTip>
-            )}
+            <span className="embPanel__titleText" aria-hidden="true">
+              {title}
+            </span>
+            <EuiScreenReaderOnly>
+              <span>
+                {i18n.translate('embeddableApi.panel.enhancedDashboardPanelAriaLabel', {
+                  defaultMessage: 'Dashboard panel: {title}',
+                  values: { title },
+                })}
+              </span>
+            </EuiScreenReaderOnly>
+            {renderTooltip(viewDescription)}
           </span>
         ) : (
-          undefined
+          <EuiScreenReaderOnly>
+            <span>
+              {i18n.translate('embeddableApi.panel.dashboardPanelAriaLabel', {
+                defaultMessage: 'Dashboard panel',
+              })}
+            </span>
+          </EuiScreenReaderOnly>
         )}
+        {renderBadges(badges, embeddable)}
       </h2>
 
       <PanelOptionsMenu
