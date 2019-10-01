@@ -57,7 +57,7 @@ export default function({ getService }: FtrProviderContext) {
         variables: {
           dateRangeStart: '2019-09-11T03:31:04.380Z',
           dateRangeEnd: '2019-09-11T03:40:34.410Z',
-           filters:
+          filters:
             '{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}}]}}',
         },
       };

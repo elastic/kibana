@@ -39,9 +39,11 @@ export default function({ getService }: FtrProviderContext) {
 
     it('will fetch monitor state data for the given filters and range', async () => {
       const data: any = await getMonitorStates({
+        statusFilter: 'up',
         filters:
           '{"bool":{"must":[{"match":{"monitor.id":{"query":"0002-up","operator":"and"}}}]}}',
       });
+      // await new Promise(r => setTimeout(r, 90000));
       expectFixtureEql(data, 'monitor_states_id_filtered');
     });
 
