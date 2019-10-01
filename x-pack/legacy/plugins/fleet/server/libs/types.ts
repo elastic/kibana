@@ -8,10 +8,12 @@ import { AgentLib } from './agent';
 import { TokenLib } from './token';
 import { PolicyLib } from './policy';
 import { ArtifactLib } from './artifact';
+import { InstallLib } from './install';
 
 export interface FleetServerLib {
   agents: AgentLib;
   tokens: TokenLib;
   policies: PolicyLib;
   artifacts: ArtifactLib;
+  install: InstallLib;
 }

@@ -12,6 +12,9 @@ export type KibanaLegacyServer = Legacy.Server;
 
 export interface FrameworkAdapter {
   getSetting(settingPath: string): string;
+  getServerInfo(): {
+    protocol: string;
+  };
 }
 
 export interface FrameworkRequest<KibanaServerRequestGenaric extends Partial<Request> = any> {

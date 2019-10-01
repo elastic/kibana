@@ -12,4 +12,13 @@ export class FrameworkLib {
   public getSetting(setting: 'encryptionKey'): string {
     return this.adapter.getSetting(`xpack.fleet.${setting}`);
   }
+
+  public getServerConfig() {
+    return {
+      host: this.adapter.getSetting('server.host'),
+      protocol: this.adapter.getServerInfo().protocol,
+      port: this.adapter.getSetting('server.port'),
+      basePath: this.adapter.getSetting('server.basePath'),
+    };
+  }
 }

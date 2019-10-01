@@ -18,4 +18,10 @@ export class MemorizeFrameworkAdapter implements FrameworkAdapter {
       return this.adapter.getSetting(settingPath);
     }) as string;
   }
+
+  getServerInfo() {
+    return {
+      protocol: 'http://',
+    };
+  }
 }
