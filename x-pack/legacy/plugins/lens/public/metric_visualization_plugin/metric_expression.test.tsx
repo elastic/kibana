@@ -52,18 +52,9 @@ describe('metric_expression', () => {
 
       expect(shallow(<MetricChart data={data} args={args} formatFactory={x => x as FieldFormat} />))
         .toMatchInlineSnapshot(`
-        <div
-          style={
-            Object {
-              "alignItems": "center",
-              "display": "flex",
-              "flexDirection": "column",
-              "justifyContent": "center",
-              "maxHeight": "100%",
-              "maxWidth": "100%",
-              "textAlign": "center",
-            }
-          }
+        <VisualizationContainer
+          className="lnsMetricExpression__container"
+          reportTitle="My fanci metric chart"
         >
           <AutoScale>
             <div
@@ -88,7 +79,7 @@ describe('metric_expression', () => {
               My fanci metric chart
             </div>
           </AutoScale>
-        </div>
+        </VisualizationContainer>
       `);
     });
 
@@ -104,18 +95,9 @@ describe('metric_expression', () => {
           />
         )
       ).toMatchInlineSnapshot(`
-        <div
-          style={
-            Object {
-              "alignItems": "center",
-              "display": "flex",
-              "flexDirection": "column",
-              "justifyContent": "center",
-              "maxHeight": "100%",
-              "maxWidth": "100%",
-              "textAlign": "center",
-            }
-          }
+        <VisualizationContainer
+          className="lnsMetricExpression__container"
+          reportTitle="My fanci metric chart"
         >
           <AutoScale>
             <div
@@ -130,7 +112,7 @@ describe('metric_expression', () => {
               10110
             </div>
           </AutoScale>
-        </div>
+        </VisualizationContainer>
       `);
     });
   });

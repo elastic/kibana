@@ -120,7 +120,14 @@ function getBucketMappings(table: TableSuggestion, currentState?: State) {
   const currentXColumnIndex = prioritizedBuckets.findIndex(
     ({ columnId }) => columnId === currentLayer.xAccessor
   );
-  if (currentXColumnIndex) {
+  const currentXDataType =
+    currentXColumnIndex > -1 && prioritizedBuckets[currentXColumnIndex].operation.dataType;
+
+  if (
+    currentXDataType &&
+    // make sure time gets mapped to x dimension even when changing current bucket/dimension mapping
+    (currentXDataType === 'date' || prioritizedBuckets[0].operation.dataType !== 'date')
+  ) {
     const [x] = prioritizedBuckets.splice(currentXColumnIndex, 1);
     prioritizedBuckets.unshift(x);
   }
@@ -128,7 +135,7 @@ function getBucketMappings(table: TableSuggestion, currentState?: State) {
   const currentSplitColumnIndex = prioritizedBuckets.findIndex(
     ({ columnId }) => columnId === currentLayer.splitAccessor
   );
-  if (currentSplitColumnIndex) {
+  if (currentSplitColumnIndex > -1) {
     const [splitBy] = prioritizedBuckets.splice(currentSplitColumnIndex, 1);
     prioritizedBuckets.push(splitBy);
   }
@@ -180,7 +187,7 @@ function getSuggestionsForLayer(
 
   // if current state is using the same data, suggest same chart with different presentational configuration
 
-  if (xValue.operation.scale === 'ordinal') {
+  if (seriesType !== 'line' && xValue.operation.scale === 'ordinal') {
     // flip between horizontal/vertical for ordinal scales
     sameStateSuggestions.push(
       buildSuggestion({
@@ -191,36 +198,38 @@ function getSuggestionsForLayer(
     );
   } else {
     // change chart type for interval or ratio scales on x axis
-    const newSeriesType = flipSeriesType(seriesType);
+    const newSeriesType = altSeriesType(seriesType);
     sameStateSuggestions.push(
       buildSuggestion({
         ...options,
         seriesType: newSeriesType,
-        title: newSeriesType.startsWith('area')
-          ? i18n.translate('xpack.lens.xySuggestions.areaChartTitle', {
-              defaultMessage: 'Area chart',
-            })
-          : i18n.translate('xpack.lens.xySuggestions.barChartTitle', {
+        title: newSeriesType.startsWith('bar')
+          ? i18n.translate('xpack.lens.xySuggestions.barChartTitle', {
               defaultMessage: 'Bar chart',
+            })
+          : i18n.translate('xpack.lens.xySuggestions.lineChartTitle', {
+              defaultMessage: 'Line chart',
             }),
       })
     );
   }
 
-  // flip between stacked/unstacked
-  sameStateSuggestions.push(
-    buildSuggestion({
-      ...options,
-      seriesType: toggleStackSeriesType(seriesType),
-      title: seriesType.endsWith('stacked')
-        ? i18n.translate('xpack.lens.xySuggestions.unstackedChartTitle', {
-            defaultMessage: 'Unstacked',
-          })
-        : i18n.translate('xpack.lens.xySuggestions.stackedChartTitle', {
-            defaultMessage: 'Stacked',
-          }),
-    })
-  );
+  if (seriesType !== 'line' && splitBy) {
+    // flip between stacked/unstacked
+    sameStateSuggestions.push(
+      buildSuggestion({
+        ...options,
+        seriesType: toggleStackSeriesType(seriesType),
+        title: seriesType.endsWith('stacked')
+          ? i18n.translate('xpack.lens.xySuggestions.unstackedChartTitle', {
+              defaultMessage: 'Unstacked',
+            })
+          : i18n.translate('xpack.lens.xySuggestions.stackedChartTitle', {
+              defaultMessage: 'Stacked',
+            }),
+      })
+    );
+  }
 
   return sameStateSuggestions;
 }
@@ -240,18 +249,21 @@ function toggleStackSeriesType(oldSeriesType: SeriesType) {
   }
 }
 
-function flipSeriesType(oldSeriesType: SeriesType) {
+// Until the area chart rendering bug is fixed, avoid suggesting area charts
+// https://github.com/elastic/elastic-charts/issues/388
+function altSeriesType(oldSeriesType: SeriesType) {
   switch (oldSeriesType) {
     case 'area':
-      return 'bar';
+      return 'line';
     case 'area_stacked':
       return 'bar_stacked';
     case 'bar':
-      return 'area';
+      return 'line';
     case 'bar_stacked':
-      return 'area_stacked';
+      return 'line';
+    case 'line':
     default:
-      return 'bar';
+      return 'bar_stacked';
   }
 }
 
@@ -261,17 +273,25 @@ function getSeriesType(
   xValue: TableSuggestionColumn,
   changeType: TableChangeType
 ): SeriesType {
-  const defaultType = xValue.operation.dataType === 'date' ? 'area_stacked' : 'bar_stacked';
+  const defaultType = 'bar_stacked';
+
+  const oldLayer = getExistingLayer(currentState, layerId);
+  const oldLayerSeriesType = oldLayer ? oldLayer.seriesType : false;
+
+  const closestSeriesType =
+    oldLayerSeriesType || (currentState && currentState.preferredSeriesType) || defaultType;
+
+  // Attempt to keep the seriesType consistent on initial add of a layer
+  // Ordinal scales should always use a bar because there is no interpolation between buckets
+  if (xValue.operation.scale && xValue.operation.scale === 'ordinal') {
+    return closestSeriesType.startsWith('bar') ? closestSeriesType : defaultType;
+  }
+
   if (changeType === 'initial') {
     return defaultType;
-  } else {
-    const oldLayer = getExistingLayer(currentState, layerId);
-    return (
-      (oldLayer && oldLayer.seriesType) ||
-      (currentState && currentState.preferredSeriesType) ||
-      defaultType
-    );
   }
+
+  return closestSeriesType !== defaultType ? closestSeriesType : defaultType;
 }
 
 function getSuggestionTitle(

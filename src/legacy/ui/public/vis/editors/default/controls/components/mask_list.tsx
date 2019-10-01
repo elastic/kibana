@@ -78,6 +78,7 @@ function MaskList({ showValidation, onBlur, ...rest }: MaskListProps) {
             values: { mask: mask.value || '*' },
           })}
           compressed
+          fullWidth
           isInvalid={showValidation ? mask.isInvalid : false}
           placeholder="*"
           onChange={ev => {
