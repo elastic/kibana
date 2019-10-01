@@ -55,7 +55,7 @@ export default function({ getService }: FtrProviderContext) {
       const supertest = getService('supertest');
       const fetchPackageList = async () => {
         const response = await supertest
-          .get('/api/integrations_manager/list?registry-url=http://localhost:6666')
+          .get('/api/integrations_manager/list')
           .set('kbn-xsrf', 'xxx')
           .expect(200);
         return response.body;
