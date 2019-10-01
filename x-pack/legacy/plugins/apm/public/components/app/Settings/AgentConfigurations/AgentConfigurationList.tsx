@@ -33,8 +33,8 @@ export function AgentConfigurationList({
 }: {
   status: FETCH_STATUS;
   data: AgentConfigurationListAPIResponse;
-  setIsFlyoutOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setSelectedConfig: React.Dispatch<React.SetStateAction<Config | null>>;
+  setIsFlyoutOpen: (val: boolean) => void;
+  setSelectedConfig: (val: Config | null) => void;
 }) {
   const columns: Array<ITableColumn<Config>> = [
     {

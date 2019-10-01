@@ -22,6 +22,7 @@ export async function getAgentNameByService({
   const { client, config } = setup;
 
   const params = {
+    terminateAfter: 1,
     index: [
       config.get<string>('apm_oss.metricsIndices'),
       config.get<string>('apm_oss.errorIndices'),
@@ -41,15 +42,12 @@ export async function getAgentNameByService({
       },
       aggs: {
         agent_names: {
-          terms: {
-            field: SERVICE_AGENT_NAME,
-            size: 1
-          }
+          terms: { field: SERVICE_AGENT_NAME, size: 1 }
         }
       }
     }
   };
 
-  const resp = await client.search(params);
-  return idx(resp.aggregations, _ => _.agent_names.buckets[0].key);
+  const { aggregations } = await client.search(params);
+  return idx(aggregations, _ => _.agent_names.buckets[0].key);
 }

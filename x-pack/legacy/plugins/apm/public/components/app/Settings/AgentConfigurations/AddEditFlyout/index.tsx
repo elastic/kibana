@@ -65,10 +65,12 @@ export function AddEditFlyout({
   );
 
   // config settings
+  const initialSampleRate = idx(
+    selectedConfig,
+    _ => _.settings.transaction_sample_rate
+  );
   const [sampleRate, setSampleRate] = useState<string>(
-    (
-      idx(selectedConfig, _ => _.settings.transaction_sample_rate) || ''
-    ).toString()
+    initialSampleRate != null ? String(initialSampleRate) : ''
   );
   const [captureBody, setCaptureBody] = useState<string>(
     idx(selectedConfig, _ => _.settings.capture_body) || ''
@@ -119,11 +121,11 @@ export function AddEditFlyout({
       <EuiFlyout size="s" onClose={onClose} ownFocus={true}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle>
-            {selectedConfig ? (
-              <h2>{t('editConfigTitle', 'Edit configuration')}</h2>
-            ) : (
-              <h2>{t('createConfigTitle', 'Create configuration')}</h2>
-            )}
+            <h2>
+              {selectedConfig
+                ? t('editConfigTitle', 'Edit configuration')
+                : t('createConfigTitle', 'Create configuration')}
+            </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
@@ -226,7 +228,6 @@ async function saveConfig({
 
   try {
     const configuration = {
-      agent_name: 'TODO',
       service: {
         name: serviceName,
         environment:

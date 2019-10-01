@@ -16,7 +16,7 @@ export async function getServiceAgentName(serviceName: string, setup: Setup) {
   const { start, end, client, config } = setup;
 
   const params = {
-    terminate_after: 1,
+    terminateAfter: 1,
     index: [
       config.get<string>('apm_oss.errorIndices'),
       config.get<string>('apm_oss.transactionIndices'),
