@@ -31,9 +31,7 @@ export function init(server: Server) {
     savedObjects: server.savedObjects,
     http: {
       route: server.route.bind(server),
-      basePath: {
-        serverBasePath: (server.config().get('server.basePath') || '') as string,
-      },
+      basePath: ((server as unknown) as KbnServer).newPlatform.setup.core.http.basePath,
     },
   };
   const pluginsSetup = {
