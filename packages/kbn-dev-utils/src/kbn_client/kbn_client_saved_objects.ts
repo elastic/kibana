@@ -17,16 +17,9 @@
  * under the License.
  */
 
-import Url from 'url';
+import { ToolingLog } from '../tooling_log';
 
-import Axios, { AxiosRequestConfig } from 'axios';
-import { ToolingLog } from '@kbn/dev-utils';
-
-const joinPath = (...components: Array<string | undefined>) =>
-  `/${components
-    .filter((s): s is string => !!s)
-    .map(c => encodeURIComponent(c))
-    .join('/')}`;
+import { KbnClientRequester, uriencode } from './kbn_client_requester';
 
 type MigrationVersion = Record<string, string>;
 
@@ -64,15 +57,8 @@ interface UpdateOptions<Attributes> extends IndexOptions<Attributes> {
   id: string;
 }
 
-export class KibanaServerSavedObjects {
-  private readonly x = Axios.create({
-    baseURL: Url.resolve(this.url, '/api/saved_objects/'),
-    headers: {
-      'kbn-xsrf': 'KibanaServerSavedObjects',
-    },
-  });
-
-  constructor(private readonly url: string, private readonly log: ToolingLog) {}
+export class KbnClientSavedObjects {
+  constructor(private readonly log: ToolingLog, private readonly requester: KbnClientRequester) {}
 
   /**
    * Get an object
@@ -80,8 +66,9 @@ export class KibanaServerSavedObjects {
   public async get<Attributes extends Record<string, any>>(options: GetOptions) {
     this.log.debug('Gettings saved object: %j', options);
 
-    return await this.request<SavedObjectResponse<Attributes>>('get saved object', {
-      url: joinPath(options.type, options.id),
+    return await this.requester.request<SavedObjectResponse<Attributes>>({
+      description: 'get saved object',
+      path: uriencode`/api/saved_objects/${options.type}/${options.id}`,
       method: 'GET',
     });
   }
@@ -92,13 +79,16 @@ export class KibanaServerSavedObjects {
   public async create<Attributes extends Record<string, any>>(options: IndexOptions<Attributes>) {
     this.log.debug('Creating saved object: %j', options);
 
-    return await this.request<SavedObjectResponse<Attributes>>('update saved object', {
-      url: joinPath(options.type, options.id),
-      params: {
+    return await this.requester.request<SavedObjectResponse<Attributes>>({
+      description: 'update saved object',
+      path: options.id
+        ? uriencode`/api/saved_objects/${options.type}/${options.id}`
+        : uriencode`/api/saved_objects/${options.type}`,
+      query: {
         overwrite: options.overwrite,
       },
       method: 'POST',
-      data: {
+      body: {
         attributes: options.attributes,
         migrationVersion: options.migrationVersion,
         references: options.references,
@@ -112,13 +102,14 @@ export class KibanaServerSavedObjects {
   public async update<Attributes extends Record<string, any>>(options: UpdateOptions<Attributes>) {
     this.log.debug('Updating saved object: %j', options);
 
-    return await this.request<SavedObjectResponse<Attributes>>('update saved object', {
-      url: joinPath(options.type, options.id),
-      params: {
+    return await this.requester.request<SavedObjectResponse<Attributes>>({
+      description: 'update saved object',
+      path: uriencode`/api/saved_objects/${options.type}/${options.id}`,
+      query: {
         overwrite: options.overwrite,
       },
       method: 'PUT',
-      data: {
+      body: {
         attributes: options.attributes,
         migrationVersion: options.migrationVersion,
         references: options.references,
@@ -132,22 +123,10 @@ export class KibanaServerSavedObjects {
   public async delete(options: GetOptions) {
     this.log.debug('Deleting saved object %s/%s', options);
 
-    return await this.request('delete saved object', {
-      url: joinPath(options.type, options.id),
+    return await this.requester.request({
+      description: 'delete saved object',
+      path: uriencode`/api/saved_objects/${options.type}/${options.id}`,
       method: 'DELETE',
     });
-  }
-
-  private async request<T>(desc: string, options: AxiosRequestConfig) {
-    try {
-      const resp = await this.x.request<T>(options);
-      return resp.data;
-    } catch (error) {
-      if (error.response) {
-        throw new Error(`Failed to ${desc}:\n${JSON.stringify(error.response.data, null, 2)}`);
-      }
-
-      throw error;
-    }
   }
 }
