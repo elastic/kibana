@@ -19,14 +19,15 @@
 
 import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
 import { RangeValues } from 'ui/vis/editors/default/controls/ranges';
+import { SchemaConfig } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 import { ColorModes } from '../../kbn_vislib_vis_types/public/utils/collections';
 import { Labels, Style } from '../../kbn_vislib_vis_types/public/types';
 
 export const visType = 'metric';
 
 export interface DimensionsVisParam {
-  metrics: any;
-  bucket?: any;
+  metrics: SchemaConfig[];
+  bucket?: SchemaConfig[];
 }
 
 export interface MetricVisParam {
