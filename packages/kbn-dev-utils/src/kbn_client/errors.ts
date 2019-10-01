@@ -17,26 +17,26 @@
  * under the License.
  */
 
-import { resolve as resolveUrl } from 'url';
+import { AxiosError, AxiosResponse } from 'axios';
 
-import Wreck from '@hapi/wreck';
+export interface AxiosRequestError extends AxiosError {
+  response: undefined;
+}
 
-const get = async url => {
-  const { payload } = await Wreck.get(url, { json: 'force' });
-  return payload;
+export interface AxiosResponseError<T> extends AxiosError {
+  response: AxiosResponse<T>;
+}
+
+export const isAxiosRequestError = (error: any): error is AxiosRequestError => {
+  return error && error.code === undefined && error.response === undefined;
 };
 
-export class KibanaServerStatus {
-  constructor(kibanaServerUrl) {
-    this.kibanaServerUrl = kibanaServerUrl;
-  }
+export const isAxiosResponseError = (error: any): error is AxiosResponseError<any> => {
+  return error && error.code !== undefined && error.response !== undefined;
+};
 
-  async get() {
-    return await get(resolveUrl(this.kibanaServerUrl, './api/status'));
-  }
-
-  async getOverallState() {
-    const status = await this.get();
-    return status.status.overall.state;
-  }
-}
+export const isConcliftOnGetError = (error: any) => {
+  return (
+    isAxiosResponseError(error) && error.config.method === 'GET' && error.response.status === 409
+  );
+};
