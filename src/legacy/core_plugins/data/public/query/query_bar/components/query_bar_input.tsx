@@ -20,7 +20,15 @@
 import { Component } from 'react';
 import React from 'react';
 
-import { EuiFieldText, EuiOutsideClickDetector, PopoverAnchorPosition } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiOutsideClickDetector,
+  PopoverAnchorPosition,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiLink,
+} from '@elastic/eui';
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { debounce, compact, isEqual, omit } from 'lodash';
@@ -31,7 +39,10 @@ import {
   UiSettingsClientContract,
   SavedObjectsClientContract,
   HttpServiceBase,
+  Toast,
 } from 'src/core/public';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { documentationLinks } from 'ui/documentation_links';
 import {
   AutocompleteSuggestion,
   AutocompleteSuggestionType,
@@ -43,6 +54,11 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 import { getQueryLog } from '../lib/get_query_log';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
+import {
+  KibanaReactContextValue,
+  withKibana,
+  KibanaServices,
+} from '../../../../../../../plugins/kibana_react/public';
 
 // todo: related to https://github.com/elastic/kibana/pull/45762/files
 // Will be refactored after merge of related PR
@@ -50,6 +66,7 @@ const getAutocompleteProvider = (language: string) =>
   npStart.plugins.data.autocomplete.getProvider(language);
 
 interface Props {
+  kibana: KibanaReactContextValue<KibanaServices>;
   uiSettings: UiSettingsClientContract;
   indexPatterns: Array<IndexPattern | string>;
   savedObjectsClient: SavedObjectsClientContract;
@@ -310,22 +327,13 @@ export class QueryBarInputUI extends Component<Props, State> {
     }
   };
 
-  private selectSuggestion = ({
-    type,
-    text,
-    start,
-    end,
-    cursorIndex,
-  }: {
-    type: AutocompleteSuggestionType;
-    text: string;
-    start: number;
-    end: number;
-    cursorIndex?: number;
-  }) => {
+  private selectSuggestion = (suggestion: AutocompleteSuggestion) => {
     if (!this.inputRef) {
       return;
     }
+    const { type, text, start, end, cursorIndex } = suggestion;
+
+    this.handleNestedFieldSyntaxNotification(suggestion);
 
     const query = this.getQueryString();
     const { selectionStart, selectionEnd } = this.inputRef;
@@ -346,6 +354,69 @@ export class QueryBarInputUI extends Component<Props, State> {
     if (type === recentSearchType) {
       this.setState({ isSuggestionsVisible: false, index: null });
       this.onSubmit({ query: newQueryString, language: this.props.query.language });
+    }
+  };
+
+  private handleNestedFieldSyntaxNotification = (suggestion: AutocompleteSuggestion) => {
+    /*
+    Todo:
+      * Add docs stub
+      * Add docs link
+     */
+    if (
+      'field' in suggestion &&
+      suggestion.field.subType &&
+      suggestion.field.subType.nested &&
+      !this.props.store.get('kibana.KQLNestedQuerySyntaxInfoOptOut')
+    ) {
+      const { notifications } = this.props.kibana.services;
+
+      const onKQLNestedQuerySyntaxInfoOptOut = (toast: Toast) => {
+        if (!this.props.store) return;
+        this.props.store.set('kibana.KQLNestedQuerySyntaxInfoOptOut', true);
+        notifications!.toasts.remove(toast);
+      };
+
+      if (notifications) {
+        const toast = notifications.toasts.add({
+          title: this.props.intl.formatMessage({
+            id: 'data.query.queryBar.KQLNestedQuerySyntaxInfoTitle',
+            defaultMessage: 'KQL nested query syntax',
+          }),
+          text: (
+            <div>
+              <p>
+                <FormattedMessage
+                  id="data.query.queryBar.KQLNestedQuerySyntaxInfoText"
+                  defaultMessage="It looks like you're querying on a nested field for the first time. Nested queries need
+                   to be constructed in different ways depending on what results you're looking for. KQL has a special
+                   syntax that gives you full control over your nested queries. Read all about it in the {link}."
+                  values={{
+                    link: (
+                      <EuiLink href={documentationLinks.query.kueryQuerySyntax} target="_blank">
+                        <FormattedMessage
+                          id="data.query.queryBar.KQLNestedQuerySyntaxInfoDocLinkText"
+                          defaultMessage="docs"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButton size="s" onClick={() => onKQLNestedQuerySyntaxInfoOptOut(toast)}>
+                    <FormattedMessage
+                      id="data.query.queryBar.KQLNestedQuerySyntaxInfoOptOutText"
+                      defaultMessage="Don't show again"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+          ),
+        });
+      }
     }
   };
 
@@ -555,4 +626,4 @@ export class QueryBarInputUI extends Component<Props, State> {
   }
 }
 
-export const QueryBarInput = injectI18n(QueryBarInputUI);
+export const QueryBarInput = withKibana(injectI18n(QueryBarInputUI));
