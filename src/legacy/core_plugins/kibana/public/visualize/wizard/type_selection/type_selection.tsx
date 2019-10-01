@@ -43,11 +43,11 @@ import { VisHelpText } from './vis_help_text';
 import { VisTypeIcon } from './vis_type_icon';
 import { TypesStart } from '../../../../../visualizations/public/np_ready/types';
 
-interface VisTypeListEntry extends VisType {
+export interface VisTypeListEntry extends VisType {
   highlighted: boolean;
 }
 
-interface VisTypeAliasListEntry extends VisTypeAlias {
+export interface VisTypeAliasListEntry extends VisTypeAlias {
   highlighted: boolean;
 }
 
@@ -152,7 +152,9 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                     </h2>
                   </EuiTitle>
                   <EuiSpacer size="m" />
-                  <NewVisHelp />
+                  <NewVisHelp
+                    promotedTypes={(visTypes as VisTypeAliasListEntry[]).filter(t => t.promotion)}
+                  />
                 </React.Fragment>
               )}
             </EuiFlexItem>
@@ -196,7 +198,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       });
     }
 
-    return sortByOrder(entries, ['highlighted', 'isPromoted', 'title'], ['desc', 'asc', 'asc']);
+    return sortByOrder(entries, ['highlighted', 'promotion', 'title'], ['desc', 'asc', 'asc']);
   }
 
   private renderVisType = (visType: VisTypeListEntry | VisTypeAliasListEntry) => {
