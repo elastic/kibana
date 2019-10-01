@@ -1,6 +1,6 @@
 #!/bin/groovy
 
-library 'kibana-pipeline-library@add-library-loader'
+library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
 // Looks like 'oss:ciGroup:1' or 'oss:firefoxSmoke'
