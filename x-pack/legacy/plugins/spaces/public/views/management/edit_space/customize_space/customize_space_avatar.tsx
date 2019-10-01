@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
-import { getSpaceColor, getSpaceInitials } from '../../../../lib';
+import { getSpaceColor, getSpaceInitials } from '../../../../lib/space_attributes';
 import { encode, imageTypes } from '../../../../../common/lib/dataurl';
 
 import { MAX_SPACE_INITIALS } from '../../../../../common/constants';

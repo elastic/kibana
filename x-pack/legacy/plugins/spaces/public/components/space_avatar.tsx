@@ -8,7 +8,7 @@ import { EuiAvatar, isValidHex } from '@elastic/eui';
 import React, { SFC } from 'react';
 import { MAX_SPACE_INITIALS } from '../../common';
 import { Space } from '../../common/model/space';
-import { getSpaceColor, getSpaceInitials, getSpaceImageUrl } from '../lib';
+import { getSpaceColor, getSpaceInitials, getSpaceImageUrl } from '../lib/space_attributes';
 
 interface Props {
   space: Partial<Space>;
