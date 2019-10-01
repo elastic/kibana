@@ -26,6 +26,7 @@ export function MachineLearningJobWizardMultiMetricProvider({ getService }: FtrP
 
     async selectSplitField(identifier: string) {
       await comboBox.set('multiMetricSplitFieldSelect > comboBoxInput', identifier);
+      await this.assertSplitFieldSelection(identifier);
     },
 
     async assertDetectorSplitExists(splitField: string) {

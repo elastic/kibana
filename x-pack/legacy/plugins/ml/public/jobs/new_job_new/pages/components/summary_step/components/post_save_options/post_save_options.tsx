@@ -79,7 +79,7 @@ export const PostSaveOptions: FC<Props> = ({ jobRunner }) => {
             datafeedState === DATAFEED_STATE.STARTING || datafeedState === DATAFEED_STATE.STARTED
           }
           onClick={startJobInRealTime}
-          data-test-subj="mlButtonUseFullData3"
+          data-test-subj="mlJobWizardButtonRunInRealTime"
         >
           <FormattedMessage
             id="xpack.ml.newJob.wizard.summaryStep.postSaveOptions.startJobInRealTime"
@@ -95,7 +95,7 @@ export const PostSaveOptions: FC<Props> = ({ jobRunner }) => {
             watchCreated === true
           }
           onClick={() => setWatchFlyoutVisible(true)}
-          data-test-subj="mlButtonUseFullData"
+          data-test-subj="mlJobWizardButtonCreateWatch"
         >
           <FormattedMessage
             id="xpack.ml.newJob.wizard.summaryStep.postSaveOptions.createWatch"

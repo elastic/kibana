@@ -8,9 +8,10 @@ import { EuiLoadingSpinner, EuiSpacer, EuiTabbedContent, EuiText } from '@elasti
 import { parse as parseQuery } from 'querystring';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { QueryString } from 'ui/utils/query_string';
 import { i18n } from '@kbn/i18n';
+
 import { MainRouteParams } from '../../common/types';
+import { replaceParamInUrl } from '../../utils/query_string';
 import { FileTree } from '../file_tree/file_tree';
 import { Shortcut } from '../shortcuts';
 import { SymbolTree } from '../symbol_tree/symbol_tree';
@@ -109,8 +110,7 @@ class CodeSideTabs extends React.PureComponent<Props> {
   public switchTab = (tab: Tabs) => {
     const { history } = this.props;
     const { pathname, search } = history.location;
-    // @ts-ignore
-    history.push(QueryString.replaceParamInUrl(`${pathname}${search}`, 'sideTab', tab));
+    history.push(replaceParamInUrl(`${pathname}${search}`, 'sideTab', tab));
   };
 
   public render() {
