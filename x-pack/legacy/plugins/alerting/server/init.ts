@@ -13,11 +13,9 @@ import { TaskManager } from '../../task_manager';
 import { AlertingPlugin, Services } from './types';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { AlertsClient, CreateAPIKeyResult } from './alerts_client';
-import { SpacesPlugin } from '../../spaces';
 import { KibanaRequest } from '../../../../../src/core/server';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import { PluginSetupContract as SecurityPluginSetupContract } from '../../../../plugins/security/server';
-import { createOptionalPlugin } from '../../../server/lib/optional_plugin';
 import {
   createAlertRoute,
   deleteAlertRoute,
@@ -47,24 +45,41 @@ interface Server extends Legacy.Server {
 }
 
 export function init(server: Server) {
-  const config = server.config();
-  const kbnServer = (server as unknown) as KbnServer;
-  const taskManager = server.plugins.task_manager;
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-  const spaces = createOptionalPlugin<SpacesPlugin>(
-    config,
-    'xpack.spaces',
-    server.plugins,
-    'spaces'
-  );
-  const security = createOptionalPlugin<SecurityPluginSetupContract>(
-    config,
-    'xpack.security',
-    kbnServer.newPlatform.setup.plugins,
-    'security'
-  );
+  // core shim
+  const coreSetup = {
+    // TODO: Not sure why server.newPlatform doesn't work
+    ...((server as unknown) as KbnServer).newPlatform.setup.core,
+    elasticsearch: server.plugins.elasticsearch,
+    http: {
+      route: server.route.bind(server),
+    },
+  };
+  // plugins shim
+  const pluginsSetup = {
+    // TODO: Not sure why server.newPlatform doesn't work
+    ...((server as unknown) as KbnServer).newPlatform.setup.plugins,
+    task_manager: server.plugins.task_manager,
+    // TODO: Security is already inside newPlatform, TypeScript not happy
+    // TODO: Currently a function because it's an optional dependency that
+    // initializes after this function is called
+    // security() {
+    //   return server.config().get('xpack.security.enabled') !== false
+    //     ? (((server as unknown) as KbnServer).newPlatform.setup.plugins
+    //         .security as SecurityPluginSetupContract)
+    //     : undefined;
+    // },
+    // TODO: Currently a function because it's an optional dependency that
+    // initializes after this function is called
+    spaces: () => server.plugins.spaces,
+    actions: server.plugins.actions,
+    xpack_main: server.plugins.xpack_main,
+    encrypted_saved_objects: server.plugins.encrypted_saved_objects,
+  };
 
-  server.plugins.xpack_main.registerFeature({
+  const taskManager = pluginsSetup.task_manager;
+  const { callWithRequest } = coreSetup.elasticsearch.getCluster('admin');
+
+  pluginsSetup.xpack_main.registerFeature({
     id: 'alerting',
     name: 'Alerting',
     app: ['alerting', 'kibana'],
@@ -89,7 +104,7 @@ export function init(server: Server) {
   });
 
   // Encrypted attributes
-  server.plugins.encrypted_saved_objects.registerType({
+  pluginsSetup.encrypted_saved_objects.registerType({
     type: 'alert',
     attributesToEncrypt: new Set(['apiKey']),
     attributesToExcludeFromAAD: new Set([
@@ -108,38 +123,40 @@ export function init(server: Server) {
     };
   }
   function getBasePath(spaceId?: string): string {
-    return spaces.isEnabled && spaceId
-      ? spaces.getBasePath(spaceId)
+    return pluginsSetup.spaces() && spaceId
+      ? pluginsSetup.spaces().getBasePath(spaceId)
       : ((server.config().get('server.basePath') || '') as string);
   }
   function spaceIdToNamespace(spaceId?: string): string | undefined {
-    return spaces.isEnabled && spaceId ? spaces.spaceIdToNamespace(spaceId) : undefined;
+    return pluginsSetup.spaces() && spaceId
+      ? pluginsSetup.spaces().spaceIdToNamespace(spaceId)
+      : undefined;
   }
 
   const alertTypeRegistry = new AlertTypeRegistry({
     getServices,
-    isSecurityEnabled: security.isEnabled,
+    isSecurityEnabled: !!pluginsSetup.security(),
     taskManager,
-    executeAction: server.plugins.actions.execute,
-    encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects,
+    executeAction: pluginsSetup.actions.execute,
+    encryptedSavedObjectsPlugin: pluginsSetup.encrypted_saved_objects,
     getBasePath,
     spaceIdToNamespace,
   });
 
   // Register routes
-  server.route(createAlertRoute);
-  server.route(deleteAlertRoute);
-  server.route(findAlertRoute);
-  server.route(getAlertRoute);
-  server.route(listAlertTypesRoute);
-  server.route(updateAlertRoute);
-  server.route(enableAlertRoute);
-  server.route(disableAlertRoute);
-  server.route(updateApiKeyRoute);
-  server.route(muteAllAlertRoute);
-  server.route(unmuteAllAlertRoute);
-  server.route(muteAlertInstanceRoute);
-  server.route(unmuteAlertInstanceRoute);
+  coreSetup.http.route(createAlertRoute);
+  coreSetup.http.route(deleteAlertRoute);
+  coreSetup.http.route(findAlertRoute);
+  coreSetup.http.route(getAlertRoute);
+  coreSetup.http.route(listAlertTypesRoute);
+  coreSetup.http.route(updateAlertRoute);
+  coreSetup.http.route(enableAlertRoute);
+  coreSetup.http.route(disableAlertRoute);
+  coreSetup.http.route(updateApiKeyRoute);
+  coreSetup.http.route(muteAllAlertRoute);
+  coreSetup.http.route(unmuteAllAlertRoute);
+  coreSetup.http.route(muteAlertInstanceRoute);
+  coreSetup.http.route(unmuteAlertInstanceRoute);
 
   // Expose functions
   server.decorate('request', 'getAlertsClient', function() {
@@ -151,21 +168,23 @@ export function init(server: Server) {
       savedObjectsClient,
       alertTypeRegistry,
       taskManager,
-      spaceId: spaces.isEnabled ? spaces.getSpaceId(request) : undefined,
+      spaceId: pluginsSetup.spaces() ? pluginsSetup.spaces().getSpaceId(request) : undefined,
       async getUserName(): Promise<string | null> {
-        if (!security.isEnabled) {
+        const securityPluginSetup = pluginsSetup.security();
+        if (!securityPluginSetup) {
           return null;
         }
-        const user = await security.authc.getCurrentUser(KibanaRequest.from(request));
+        const user = await securityPluginSetup.authc.getCurrentUser(KibanaRequest.from(request));
         return user ? user.username : null;
       },
       async createAPIKey(): Promise<CreateAPIKeyResult> {
-        if (!security.isEnabled) {
+        const securityPluginSetup = pluginsSetup.security();
+        if (!securityPluginSetup) {
           return { created: false };
         }
         return {
           created: true,
-          result: (await security.authc.createAPIKey(KibanaRequest.from(request), {
+          result: (await securityPluginSetup.authc.createAPIKey(KibanaRequest.from(request), {
             name: `source: alerting, generated uuid: "${uuid.v4()}"`,
             role_descriptors: {},
           }))!,
