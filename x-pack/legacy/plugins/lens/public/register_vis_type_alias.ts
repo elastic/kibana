@@ -15,7 +15,7 @@ visualizations.types.registerAlias({
     description: i18n.translate('xpack.lens.visTypeAlias.promotion.description', {
       defaultMessage: 'Try Lens, our new, intuitive way to create visualizations.',
     }),
-    calloutText: i18n.translate('xpack.lens.visTypeAlias.promotion.calloutText', {
+    buttonText: i18n.translate('xpack.lens.visTypeAlias.promotion.buttonText', {
       defaultMessage: 'Go to Lens',
     }),
   },

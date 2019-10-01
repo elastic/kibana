@@ -48,7 +48,7 @@ export function NewVisHelp(props: Props) {
             iconType="popout"
             iconSide="right"
           >
-            {t.promotion!.calloutText}
+            {t.promotion!.buttonText}
           </EuiButton>
         </>
       ))}

@@ -39,7 +39,7 @@ interface VisualizationsAppExtension {
 
 export interface VisTypeAliasPromotion {
   description: string;
-  calloutText: string;
+  buttonText: string;
 }
 
 export interface VisTypeAlias {

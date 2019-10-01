@@ -39,7 +39,7 @@ describe('NewVisHelp', () => {
               icon: 'wahtever',
               name: 'whatever',
               promotion: {
-                calloutText: 'Do it now!',
+                buttonText: 'Do it now!',
                 description: 'Look at this fancy new thing!!!',
               },
               title: 'Test title',
