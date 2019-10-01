@@ -83,7 +83,7 @@ function DefaultEditorAggGroup({
   const isGroupValid = Object.values(aggsState).every(item => item.valid);
   const isAllAggsTouched = isInvalidAggsTouched(aggsState);
   const isMetricAggregationDisabled = useMemo(
-    () => (groupName === AggGroupNames.Metrics ? getEnabledMetricAggsCount(group) === 1 : false),
+    () => groupName === AggGroupNames.Metrics && getEnabledMetricAggsCount(group) === 1,
     [groupName, group]
   );
 
@@ -164,7 +164,7 @@ function DefaultEditorAggGroup({
                     isDraggable={stats.count > 1}
                     isLastBucket={groupName === AggGroupNames.Buckets && index === group.length - 1}
                     isRemovable={isAggRemovable(agg, group)}
-                    isDisabled={agg.schema.name === 'metric' ? isMetricAggregationDisabled : false}
+                    isDisabled={agg.schema.name === 'metric' && isMetricAggregationDisabled}
                     lastParentPipelineAggTitle={lastParentPipelineAggTitle}
                     metricAggs={metricAggs}
                     state={state}
