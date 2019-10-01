@@ -8,7 +8,7 @@ import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiImage, EuiText } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
-import chrome from 'ui/chrome';
+import { CoreStart, CoreSetup } from 'src/core/public';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import { Action } from './state_management';
 import { Datasource, Visualization, FramePublicAPI } from '../../types';
@@ -16,11 +16,6 @@ import { DragDrop, DragContext } from '../../drag_drop';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { buildExpression } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
-
-const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
-const emptyStateGraphicURL = IS_DARK_THEME
-  ? '/plugins/lens/assets/lens_app_graphic_dark_2x.png'
-  : '/plugins/lens/assets/lens_app_graphic_light_2x.png';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -38,6 +33,7 @@ export interface WorkspacePanelProps {
   framePublicAPI: FramePublicAPI;
   dispatch: (action: Action) => void;
   ExpressionRenderer: ExpressionRenderer;
+  core: CoreStart | CoreSetup;
 }
 
 export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
@@ -52,8 +48,14 @@ export function InnerWorkspacePanel({
   datasourceStates,
   framePublicAPI,
   dispatch,
+  core,
   ExpressionRenderer: ExpressionRendererComponent,
 }: WorkspacePanelProps) {
+  const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
+  const emptyStateGraphicURL = IS_DARK_THEME
+    ? '/plugins/lens/assets/lens_app_graphic_dark_2x.png'
+    : '/plugins/lens/assets/lens_app_graphic_light_2x.png';
+
   const dragDropContext = useContext(DragContext);
 
   const suggestionForDraggedField = useMemo(() => {
@@ -100,7 +102,11 @@ export function InnerWorkspacePanel({
             defaultMessage="Build a visualization"
           />
         </h3>
-        <EuiImage style={{ width: 360 }} url={chrome.addBasePath(emptyStateGraphicURL)} alt="" />
+        <EuiImage
+          style={{ width: 360 }}
+          url={core.http.basePath.prepend(emptyStateGraphicURL)}
+          alt=""
+        />
         <p>
           <FormattedMessage
             id="xpack.lens.editorFrame.emptyWorkspace"

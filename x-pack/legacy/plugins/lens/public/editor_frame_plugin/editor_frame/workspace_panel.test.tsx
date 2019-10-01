@@ -19,6 +19,7 @@ import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../drag_drop';
 import { Ast } from '@kbn/interpreter/common';
+import { coreMock } from 'src/core/public/mocks';
 
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
@@ -58,6 +59,7 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
+        core={coreMock.createSetup()}
       />
     );
 
@@ -79,6 +81,7 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
+        core={coreMock.createSetup()}
       />
     );
 
@@ -100,6 +103,7 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
+        core={coreMock.createSetup()}
       />
     );
 
@@ -135,6 +139,7 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
+        core={coreMock.createSetup()}
       />
     );
 
@@ -229,6 +234,7 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
+        core={coreMock.createSetup()}
       />
     );
 
@@ -306,6 +312,7 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
+        core={coreMock.createSetup()}
       />
     );
 
@@ -354,6 +361,7 @@ describe('workspace_panel', () => {
           visualizationState={{}}
           dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
+          core={coreMock.createSetup()}
         />
       );
 
@@ -393,6 +401,7 @@ describe('workspace_panel', () => {
           visualizationState={{}}
           dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
+          core={coreMock.createSetup()}
         />
       );
 
@@ -437,6 +446,7 @@ describe('workspace_panel', () => {
           visualizationState={{}}
           dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
+          core={coreMock.createSetup()}
         />
       );
 
@@ -484,6 +494,7 @@ describe('workspace_panel', () => {
           visualizationState={{}}
           dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
+          core={coreMock.createSetup()}
         />
       );
 
@@ -541,6 +552,7 @@ describe('workspace_panel', () => {
             visualizationState={{}}
             dispatch={mockDispatch}
             ExpressionRenderer={expressionRendererMock}
+            core={coreMock.createSetup()}
           />
         </ChildDragDropProvider>
       );
