@@ -5,15 +5,15 @@
  */
 
 import Hapi from 'hapi';
-import uuid from 'uuid';
 import { Logger, Services } from './types';
 import { SpacesPlugin } from '../../spaces';
 import { ActionsPlugin } from '../../actions';
-import { AlertsClient, CreateAPIKeyResult } from './alerts_client';
+import { AlertsClient } from './alerts_client';
 import { TaskManager } from '../../task_manager';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { XPackMainPlugin } from '../../xpack_main/xpack_main';
-import { KibanaRequest, SavedObjectsService } from '../../../../../src/core/server';
+import { AlertsClientFactory } from './lib';
+import { SavedObjectsLegacyService } from '../../../../../src/core/server';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import { ElasticsearchPlugin } from '../../../../../src/legacy/core_plugins/elasticsearch';
 import { PluginSetupContract as SecurityPluginSetupContract } from '../../../../plugins/security/server';
@@ -41,7 +41,7 @@ interface PluginInitializerContext {
 
 interface CoreSetup {
   elasticsearch: ElasticsearchPlugin;
-  savedObjects: SavedObjectsService;
+  savedObjects: SavedObjectsLegacyService;
   http: {
     route: (route: Hapi.ServerRoute) => void;
     basePath: {
@@ -67,6 +67,7 @@ export interface PluginSetupContract {
 
 export class Plugin {
   private readonly logger: Logger;
+  private alertsClientFactory?: AlertsClientFactory;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -155,46 +156,22 @@ export class Plugin {
     core.http.route(muteAlertInstanceRoute);
     core.http.route(unmuteAlertInstanceRoute);
 
+    this.alertsClientFactory = new AlertsClientFactory({
+      alertTypeRegistry,
+      logger: this.logger,
+      taskManager: plugins.task_manager,
+      securityPluginSetup: plugins.security,
+      getSpaceId(request: Hapi.Request) {
+        const spacesPlugin = plugins.spaces();
+        return spacesPlugin ? spacesPlugin.getSpaceId(request) : undefined;
+      },
+    });
+
     return {
       registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
       listTypes: alertTypeRegistry.list.bind(alertTypeRegistry),
-      getAlertsClientWithRequest(request: Hapi.Request) {
-        const savedObjectsClient = request.getSavedObjectsClient();
-        const spacesPlugin = plugins.spaces();
-
-        const alertsClient = new AlertsClient({
-          logger,
-          savedObjectsClient,
-          alertTypeRegistry,
-          taskManager: plugins.task_manager,
-          spaceId: spacesPlugin ? spacesPlugin.getSpaceId(request) : undefined,
-          async getUserName(): Promise<string | null> {
-            const securityPluginSetup = plugins.security;
-            if (!securityPluginSetup) {
-              return null;
-            }
-            const user = await securityPluginSetup.authc.getCurrentUser(
-              KibanaRequest.from(request)
-            );
-            return user ? user.username : null;
-          },
-          async createAPIKey(): Promise<CreateAPIKeyResult> {
-            const securityPluginSetup = plugins.security;
-            if (!securityPluginSetup) {
-              return { created: false };
-            }
-            return {
-              created: true,
-              result: (await securityPluginSetup.authc.createAPIKey(KibanaRequest.from(request), {
-                name: `source: alerting, generated uuid: "${uuid.v4()}"`,
-                role_descriptors: {},
-              }))!,
-            };
-          },
-        });
-
-        return alertsClient;
-      },
+      getAlertsClientWithRequest: (request: Hapi.Request) =>
+        this.alertsClientFactory!.create(request),
     };
   }
 }

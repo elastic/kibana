@@ -8,3 +8,4 @@ export { AlertInstance } from './alert_instance';
 export { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
 export { validateAlertTypeParams } from './validate_alert_type_params';
 export { parseDuration, getDurationSchema } from './parse_duration';
+export { AlertsClientFactory } from './alerts_client_factory';
