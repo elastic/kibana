@@ -37,16 +37,16 @@ This API is influenced heavily by the [application service mounting RFC](https:/
 
 export class MyPlugin {
   setup(core, { management }) {
-    // Registering a new link to a new section
+    // Registering a new app to a new section
     const mySection = management.sections.register({
       id: 'my-section',
       title: 'My Main Section', // display name
       order: 10,
       euiIconType: 'iconName',
     });
-    mySection.registerLink({
-      id: 'my-link',
-      title: 'My Link', // display name
+    mySection.registerApp({
+      id: 'my-management-app',
+      title: 'My Management App', // display name
       order: 20,
       async mount(context, params) {
         const { renderApp } = await import('./my-section');
@@ -54,16 +54,17 @@ export class MyPlugin {
       }
     });
 
-    // Registering a new link to an existing section
+    // Registering a new app to an existing section
     const kibanaSection = management.sections.get('kibana');
-    kibanaSection.registerLink({ id: 'my-kibana-section-link', ... });
+    kibanaSection.registerApp({ id: 'my-kibana-management-app', ... });
   }
 
   start(core, { management }) {
     // access all registered sections, filtered based on capabilities
-    management.sections.getAvailable();
-    // automatically navigate to any section link by id
-    management.sections.navigateToSectionLink('my-kibana-section-link');
+    const sections = management.sections.getAvailable();
+    sections.forEach(section => console.log(`${section.id} - ${section.title}`));
+    // automatically navigate to any app by id
+    management.sections.navigateToApp('my-kibana-management-app');
   }
 }
  
@@ -71,7 +72,7 @@ export class MyPlugin {
 
 export function renderApp(context, { sectionBasePath, element }) {
   ReactDOM.render(
-    // `sectionBasePath` would be `/app/management/my-section/my-link`
+    // `sectionBasePath` would be `/app/management/my-section/my-management-app`
     <MyApp basename={sectionBasePath} />,
     element
   );
@@ -109,12 +110,13 @@ import { mountWithReact } from 'src/plugins/kibana_react/public';
 export class MyPlugin {
   setup(core, { management }) {
     const kibanaSection = management.sections.get('kibana');
-    kibanaSection.registerLink({
-      id: 'my-other-kibana-section-link',
+    kibanaSection.registerApp({
+      id: 'my-other-kibana-management-app',
       ...,
       async mount(context, params) {
         const { MySection } = await import('./components/my-section');
-        return mountWithReact(MySection, context, params);
+        const unmountCallback = mountWithReact(MySection, context, params);
+        return () => unmountCallback();
       }
     });
   }
@@ -135,16 +137,16 @@ interface ManagementStart {
 interface SectionsServiceSetup {
   get: (sectionId: string) => Section;
   getAvailable: () => Section[]; // filtered based on capabilities
-  register: Register;
+  register: RegisterSection;
 }
 
 interface SectionsServiceStart {
-  getAvailable: () => Array<Omit<Section, 'registerLink'>>; // filtered based on capabilities
+  getAvailable: () => Array<Omit<Section, 'registerApp'>>; // filtered based on capabilities
   // uses `core.application.navigateToApp` under the hood, automatically prepending the `path` for the link
-  navigateToSectionLink: (linkId: string, options?: { path?: string; state?: any }) => void;
+  navigateToApp: (appId: string, options?: { path?: string; state?: any }) => void;
 }
 
-type Register = (
+type RegisterSection = (
   id: string,
   title: string,
   order?: number,
@@ -152,12 +154,12 @@ type Register = (
   icon?: string, // URL to image file; fallback if no `euiIconType`
 ) => Section;
  
-type RegisterLink = (
+type RegisterManagementApp = (
   id: string;
   title: string;
   order?: number;
   mount: ManagementSectionMount;
-) => Link;
+) => ManagementApp;
  
 type Unmount = () => Promise<void> | void;
  
@@ -171,7 +173,7 @@ type ManagementSectionMount = (
   params: ManagementSectionMountParams,
 ) => Unmount | Promise<Unmount>;
 
-interface Link {
+interface ManagementApp {
   id: string;
   title: string;
   basePath: string;
@@ -182,8 +184,8 @@ interface Link {
 interface Section {
   id: string;
   title: string;
-  links: Link[];
-  registerLink: RegisterLink;
+  apps: ManagementApp[];
+  registerApp: RegisterManagementApp;
   order?: number;
   euiIconType?: string;
   icon?: string;
