@@ -279,9 +279,12 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             componentToRender: null
           };
 
-          const hasInstances = setupMode.data.totalUniqueInstanceCount > 0
-            && setupMode.data.totalUniqueInternallyCollectedCount > 0;
-          if (!hasInstances) {
+          const isNetNewUser = setupMode.data.totalUniqueInstanceCount === 0;
+          const hasNoInstances = setupMode.data.totalUniqueInternallyCollectedCount === 0
+            && setupMode.data.totalUniqueFullyMigratedCount === 0
+            && setupMode.data.totalUniquePartiallyMigratedCount === 0;
+
+          if (isNetNewUser || hasNoInstances) {
             customRenderResponse.shouldRender = true;
             customRenderResponse.componentToRender = (
               <Fragment>
