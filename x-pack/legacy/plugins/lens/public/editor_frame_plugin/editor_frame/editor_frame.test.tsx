@@ -1515,7 +1515,6 @@ describe('editor_frame', () => {
         },
       });
       expect(onChange).toHaveBeenLastCalledWith({
-        // indexPatternTitles: ['resolved'],
         filterableIndexPatterns: [{ id: '1', title: 'resolved' }],
         doc: {
           expression: '',

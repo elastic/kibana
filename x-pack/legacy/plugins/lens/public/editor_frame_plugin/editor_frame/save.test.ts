@@ -37,12 +37,7 @@ describe('save editor frame state', () => {
       },
       query: { query: '', language: 'lucene' },
       dateRange: { fromDate: 'now-7d', toDate: 'now' },
-      filters: [
-        buildExistsFilter({ name: '@timestamp' }, { id: 'indexpattern' }),
-        //   meta: { index: 'indexpattern', negate: false, disabled: false, alias: null },
-        //   exists: { field: '@timestamp' },
-        // },
-      ],
+      filters: [buildExistsFilter({ name: '@timestamp' }, { id: 'indexpattern' })],
     },
   };
 

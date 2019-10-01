@@ -18,9 +18,12 @@
  */
 
 import React from 'react';
+import { mount } from 'enzyme';
 import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { I18nProvider } from '@kbn/i18n/react';
 
 import { coreMock } from '../../../../../core/public/mocks';
 const startMock = coreMock.createStart();
@@ -75,16 +78,23 @@ describe('TopNavMenu', () => {
   });
 
   it('Should render search bar', () => {
-    const component = shallowWithIntl(
-      <TopNavMenu
-        name={'test'}
-        showSearchBar={true}
-        savedObjects={startMock.savedObjects}
-        notifications={startMock.notifications}
-        uiSettings={startMock.uiSettings}
-        http={startMock.http}
-        timeHistory={timefilterSetupMock.history}
-      />
+    const services = {
+      uiSettings: startMock.uiSettings,
+      savedObjects: startMock.savedObjects,
+      notifications: startMock.notifications,
+      http: startMock.http,
+    };
+
+    const component = mount(
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <TopNavMenu
+            name={'test'}
+            showSearchBar={true}
+            timeHistory={timefilterSetupMock.history}
+          />
+        </KibanaContextProvider>
+      </I18nProvider>
     );
 
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);

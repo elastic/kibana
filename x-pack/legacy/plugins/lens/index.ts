@@ -65,17 +65,17 @@ export const lens: LegacyPluginInitializer = kibana => {
             api: [PLUGIN_ID],
             catalogue: [PLUGIN_ID],
             savedObject: {
-              all: [],
-              read: [],
+              all: ['search'],
+              read: ['index-pattern'],
             },
-            ui: ['save', 'show'],
+            ui: ['save', 'show', 'saveQuery'],
           },
           read: {
             api: [PLUGIN_ID],
             catalogue: [PLUGIN_ID],
             savedObject: {
               all: [],
-              read: [],
+              read: ['index-pattern'],
             },
             ui: ['show'],
           },

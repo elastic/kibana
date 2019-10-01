@@ -9,10 +9,11 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Storage } from 'ui/storage';
-import { CoreStart } from 'src/core/public';
+import { CoreStart, NotificationsStart } from 'src/core/public';
 import {
   DataSetup,
   IndexPattern as IndexPatternInstance,
+  IndexPatterns as IndexPatternsService,
   SavedQuery,
   Query,
 } from 'src/legacy/core_plugins/data/public';
@@ -26,7 +27,7 @@ import { NativeRenderer } from '../native_renderer';
 interface State {
   isLoading: boolean;
   isDirty: boolean;
-  indexPatterns: IndexPatternInstance[];
+  indexPatternsForTopNav: IndexPatternInstance[];
   persistedDoc?: Document;
 
   // Properties needed to interface with TopNav
@@ -63,7 +64,7 @@ export function App({
   const [state, setState] = useState<State>({
     isLoading: !!docId,
     isDirty: false,
-    indexPatterns: [],
+    indexPatternsForTopNav: [],
 
     query: { query: '', language },
     dateRange: {
@@ -78,7 +79,7 @@ export function App({
   useEffect(() => {
     const subscription = data.filter.filterManager.getUpdates$().subscribe({
       next: () => {
-        setState({ ...state, filters: data.filter.filterManager.getFilters() });
+        setState(s => ({ ...s, filters: data.filter.filterManager.getFilters() }));
       },
     });
     return () => {
@@ -105,40 +106,34 @@ export function App({
 
   useEffect(() => {
     if (docId && (!state.persistedDoc || state.persistedDoc.id !== docId)) {
-      setState({ ...state, isLoading: true });
+      setState(s => ({ ...s, isLoading: true }));
       docStorage
         .load(docId)
         .then(doc => {
-          Promise.all(
-            doc.state.datasourceMetaData.filterableIndexPatterns.map(({ id }) =>
-              data.indexPatterns.indexPatterns.get(id)
-            )
+          getAllIndexPatterns(
+            doc.state.datasourceMetaData.filterableIndexPatterns,
+            data.indexPatterns.indexPatterns,
+            core.notifications
           )
             .then(indexPatterns => {
-              setState({
-                ...state,
+              setState(s => ({
+                ...s,
                 isLoading: false,
                 persistedDoc: doc,
                 query: doc.state.query,
                 filters: doc.state.filters,
-                dateRange: doc.state.dateRange || state.dateRange,
-                indexPatterns,
-              });
+                dateRange: doc.state.dateRange || s.dateRange,
+                indexPatternsForTopNav: indexPatterns,
+              }));
             })
             .catch(() => {
-              setState({ ...state, isLoading: false });
-
-              core.notifications.toasts.addDanger(
-                i18n.translate('xpack.lens.editorFrame.indexPatternLoadingError', {
-                  defaultMessage: 'Error loading index patterns',
-                })
-              );
+              setState(s => ({ ...s, isLoading: false }));
 
               redirectTo();
             });
         })
         .catch(() => {
-          setState({ ...state, isLoading: false });
+          setState(s => ({ ...s, isLoading: false }));
 
           core.notifications.toasts.addDanger(
             i18n.translate('xpack.lens.editorFrame.docLoadingError', {
@@ -154,7 +149,7 @@ export function App({
   // Can save if the frame has told us what it has, and there is either:
   // a) No saved doc
   // b) A saved doc that differs from the frame state
-  const isSaveable = state.isDirty;
+  const isSaveable = state.isDirty && (core.application.capabilities.lens.save as boolean);
 
   const onError = useCallback(
     (e: { message: string }) =>
@@ -190,11 +185,11 @@ export function App({
                         .then(({ id }) => {
                           // Prevents unnecessary network request and disables save button
                           const newDoc = { ...lastKnownDocRef.current!, id };
-                          setState({
-                            ...state,
+                          setState(s => ({
+                            ...s,
                             isDirty: false,
                             persistedDoc: newDoc,
-                          });
+                          }));
                           if (docId !== id) {
                             redirectTo(id);
                           }
@@ -217,45 +212,50 @@ export function App({
               screenTitle={'lens'}
               onQuerySubmit={payload => {
                 const { dateRange, query } = payload;
-                setState({
-                  ...state,
+                setState(s => ({
+                  ...s,
                   dateRange: {
                     fromDate: dateRange.from,
                     toDate: dateRange.to,
                   },
-                  query: query || state.query,
-                });
+                  query: query || s.query,
+                }));
               }}
               filters={state.filters}
               onFiltersUpdated={filters => {
                 data.filter.filterManager.setFilters(filters);
               }}
               appName={'lens'}
-              indexPatterns={state.indexPatterns}
+              indexPatterns={state.indexPatternsForTopNav}
               store={store}
               showSearchBar={true}
               showDatePicker={true}
               showQueryInput={true}
               showFilterBar={true}
-              showSaveQuery={true /* TODO: Use permissions */}
+              showSaveQuery={core.application.capabilities.lens.saveQuery as boolean}
               savedQuery={state.savedQuery}
               onSaved={savedQuery => {
-                setState({ ...state, savedQuery });
+                setState(s => ({ ...s, savedQuery }));
               }}
               onSavedQueryUpdated={savedQuery => {
                 data.filter.filterManager.setFilters(
                   savedQuery.attributes.filters || state.filters
                 );
-                setState({
-                  ...state,
-                  savedQuery,
-                  query: savedQuery.attributes.query,
-                });
+                setState(s => ({
+                  ...s,
+                  savedQuery: { ...savedQuery }, // Shallow query for reference issues
+                  dateRange: savedQuery.attributes.timefilter
+                    ? {
+                        fromDate: savedQuery.attributes.timefilter.from,
+                        toDate: savedQuery.attributes.timefilter.to,
+                      }
+                    : s.dateRange,
+                }));
               }}
               onClearSavedQuery={() => {
                 data.filter.filterManager.removeAll();
-                setState({
-                  ...state,
+                setState(s => ({
+                  ...s,
                   savedQuery: undefined,
                   filters: [],
                   query: {
@@ -264,12 +264,11 @@ export function App({
                       store.get('kibana.userQueryLanguage') ||
                       core.uiSettings.get('search:queryLanguage'),
                   },
-                });
+                }));
               }}
               query={state.query}
               dateRangeFrom={state.dateRange.fromDate}
               dateRangeTo={state.dateRange.toDate}
-              savedObjectsClient={core.savedObjects.client}
               timeHistory={data.timefilter.history}
             />
           </div>
@@ -292,24 +291,24 @@ export function App({
                     setState(s => ({ ...s, isDirty: true }));
                   }
 
-                  Promise.all(
-                    filterableIndexPatterns.map(({ id }) =>
-                      data.indexPatterns.indexPatterns.get(id)
-                    )
-                  )
-                    .then(indexPatterns => {
-                      setState({
-                        ...state,
-                        indexPatterns,
-                      });
-                    })
-                    .catch(() => {
-                      core.notifications.toasts.addDanger(
-                        i18n.translate('xpack.lens.editorFrame.indexPatternLoadingError', {
-                          defaultMessage: 'Error loading index patterns',
-                        })
-                      );
+                  // Update the cached index patterns if the user made a change to any of them
+                  if (
+                    state.indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
+                    filterableIndexPatterns.filter(
+                      ({ id }) =>
+                        !state.indexPatternsForTopNav.find(indexPattern => indexPattern.id === id)
+                    ).length !== state.indexPatternsForTopNav.length
+                  ) {
+                    getAllIndexPatterns(
+                      filterableIndexPatterns,
+                      data.indexPatterns.indexPatterns,
+                      core.notifications
+                    ).then(indexPatterns => {
+                      if (indexPatterns) {
+                        setState(s => ({ ...s, indexPatternsForTopNav: indexPatterns }));
+                      }
                     });
+                  }
                 },
               }}
             />
@@ -318,4 +317,22 @@ export function App({
       </KibanaContextProvider>
     </I18nProvider>
   );
+}
+
+export async function getAllIndexPatterns(
+  ids: Array<{ id: string }>,
+  indexPatternsService: IndexPatternsService,
+  notifications: NotificationsStart
+): Promise<IndexPatternInstance[]> {
+  try {
+    return await Promise.all(ids.map(({ id }) => indexPatternsService.get(id)));
+  } catch (e) {
+    notifications.toasts.addDanger(
+      i18n.translate('xpack.lens.editorFrame.indexPatternLoadingError', {
+        defaultMessage: 'Error loading index patterns',
+      })
+    );
+
+    throw new Error(e);
+  }
 }

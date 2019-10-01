@@ -21,10 +21,9 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
-import { UiSettingsClientContract, CoreStart } from 'src/core/public';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
-import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
+import { useKibana } from '../../../../../plugins/kibana_react/public';
 import {
   SearchBar,
   SearchBarProps,
@@ -37,11 +36,7 @@ type Props = Partial<SearchBarProps> & {
   showSearchBar?: boolean;
 
   // Search Bar dependencies
-  uiSettings?: UiSettingsClientContract;
-  savedObjects?: CoreStart['savedObjects'];
-  notifications?: CoreStart['notifications'];
   timeHistory?: TimeHistoryContract;
-  http?: CoreStart['http'];
 };
 
 /*
@@ -54,6 +49,8 @@ type Props = Partial<SearchBarProps> & {
  **/
 
 export function TopNavMenu(props: Props) {
+  const kibana = useKibana();
+
   function renderItems() {
     if (!props.config) return;
     return props.config.map((menuItem: TopNavMenuData, i: number) => {
@@ -66,53 +63,47 @@ export function TopNavMenu(props: Props) {
   }
 
   function renderSearchBar() {
-    // Validate presense of all required fields
+    const { uiSettings, http, notifications, savedObjects } = kibana.services;
+
+    // If any fields are missing, render nothing
     if (
       !props.showSearchBar ||
-      !props.savedObjects ||
-      !props.http ||
-      !props.notifications ||
+      !savedObjects ||
+      !http ||
+      !notifications ||
+      !uiSettings ||
       !props.timeHistory
     )
       return;
     return (
-      <KibanaContextProvider
-        services={{
-          uiSettings: props.uiSettings,
-          http: props.http,
-          notifications: props.notifications,
-          savedObjects: props.savedObjects,
-        }}
-      >
-        <SearchBar
-          notifications={props.notifications}
-          savedObjects={props.savedObjects}
-          timeHistory={props.timeHistory}
-          query={props.query}
-          filters={props.filters}
-          showQueryBar={props.showQueryBar}
-          showQueryInput={props.showQueryInput}
-          showFilterBar={props.showFilterBar}
-          showDatePicker={props.showDatePicker}
-          appName={props.appName!}
-          screenTitle={props.screenTitle!}
-          onQuerySubmit={props.onQuerySubmit}
-          onFiltersUpdated={props.onFiltersUpdated}
-          dateRangeFrom={props.dateRangeFrom}
-          dateRangeTo={props.dateRangeTo}
-          isRefreshPaused={props.isRefreshPaused}
-          showAutoRefreshOnly={props.showAutoRefreshOnly}
-          onRefreshChange={props.onRefreshChange}
-          refreshInterval={props.refreshInterval}
-          indexPatterns={props.indexPatterns}
-          store={props.store}
-          savedQuery={props.savedQuery}
-          showSaveQuery={props.showSaveQuery}
-          onClearSavedQuery={props.onClearSavedQuery}
-          onSaved={props.onSaved}
-          onSavedQueryUpdated={props.onSavedQueryUpdated}
-        />
-      </KibanaContextProvider>
+      <SearchBar
+        notifications={notifications}
+        savedObjects={savedObjects}
+        timeHistory={props.timeHistory}
+        query={props.query}
+        filters={props.filters}
+        showQueryBar={props.showQueryBar}
+        showQueryInput={props.showQueryInput}
+        showFilterBar={props.showFilterBar}
+        showDatePicker={props.showDatePicker}
+        appName={props.appName!}
+        screenTitle={props.screenTitle!}
+        onQuerySubmit={props.onQuerySubmit}
+        onFiltersUpdated={props.onFiltersUpdated}
+        dateRangeFrom={props.dateRangeFrom}
+        dateRangeTo={props.dateRangeTo}
+        isRefreshPaused={props.isRefreshPaused}
+        showAutoRefreshOnly={props.showAutoRefreshOnly}
+        onRefreshChange={props.onRefreshChange}
+        refreshInterval={props.refreshInterval}
+        indexPatterns={props.indexPatterns}
+        store={props.store}
+        savedQuery={props.savedQuery}
+        showSaveQuery={props.showSaveQuery}
+        onClearSavedQuery={props.onClearSavedQuery}
+        onSaved={props.onSaved}
+        onSavedQueryUpdated={props.onSavedQueryUpdated}
+      />
     );
   }
 

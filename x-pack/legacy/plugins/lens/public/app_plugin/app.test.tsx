@@ -17,7 +17,7 @@ import {
   TopNavMenu,
   TopNavMenuData,
 } from '../../../../../../src/legacy/core_plugins/kibana_react/public';
-import { SavedObjectsClientContract } from 'src/core/public';
+import { SavedObjectsStart, ApplicationStart } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
 import { DataSetup } from 'src/legacy/core_plugins/data/public';
 
@@ -75,11 +75,21 @@ describe('Lens App', () => {
     docId?: string;
     docStorage: SavedObjectStore;
     redirectTo: (id?: string) => void;
-    savedObjectsClient: SavedObjectsClientContract;
+    savedObjects: SavedObjectsStart;
+    application: ApplicationStart;
   }> {
     return ({
       editorFrame: createMockFrame(),
-      core,
+      core: {
+        ...core,
+        application: {
+          ...core.application,
+          capabilities: {
+            ...core.application.capabilities,
+            lens: { save: true, saveQuery: true, show: true },
+          },
+        },
+      },
       data: {
         indexPatterns: {
           indexPatterns: {
@@ -102,7 +112,9 @@ describe('Lens App', () => {
       },
       TopNavMenu: jest.fn(() => <div />),
       redirectTo: jest.fn(id => {}),
-      savedObjectsClient: jest.fn(),
+      savedObjects: {
+        client: jest.fn(),
+      },
     } as unknown) as jest.Mocked<{
       editorFrame: EditorFrameInstance;
       core: typeof core;
@@ -111,7 +123,8 @@ describe('Lens App', () => {
       docId?: string;
       docStorage: SavedObjectStore;
       redirectTo: (id?: string) => void;
-      savedObjectsClient: SavedObjectsClientContract;
+      savedObjects: SavedObjectsStart;
+      application: ApplicationStart;
     }>;
   }
 
@@ -288,6 +301,29 @@ describe('Lens App', () => {
         )!;
       }
 
+      it('shows a disabled save button when the user does not have permissions', async () => {
+        const args = makeDefaultArgs();
+        args.core.application = {
+          ...args.core.application,
+          capabilities: {
+            ...args.core.application.capabilities,
+            lens: { save: false, saveQuery: false, show: true },
+          },
+        };
+        args.editorFrame = frame;
+
+        const instance = mount(<App {...args} />);
+
+        expect(getButton(instance).disableButton).toEqual(true);
+
+        const onChange = frame.mount.mock.calls[0][1].onChange;
+        onChange({ filterableIndexPatterns: [], doc: ('will save this' as unknown) as Document });
+
+        instance.update();
+
+        expect(getButton(instance).disableButton).toEqual(true);
+      });
+
       it('shows a save button that is enabled when the frame has provided its state', async () => {
         const args = makeDefaultArgs();
         args.editorFrame = frame;
@@ -462,9 +498,6 @@ describe('Lens App', () => {
 
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
-          // dateRangeFrom: 'now-14d',
-          // dateRangeTo: 'now-7d',
-          // query: { query: 'new', language: 'lucene' },
           filters: [buildExistsFilter({ name: 'myfield' }, { id: 'index1' })],
         }),
         {}
@@ -472,8 +505,6 @@ describe('Lens App', () => {
       expect(frame.mount).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({
-          // dateRange: { fromDate: 'now-14d', toDate: 'now-7d' },
-          // query: { query: 'new', language: 'lucene' },
           filters: [buildExistsFilter({ name: 'myfield' }, { id: 'index1' })],
         })
       );
@@ -481,6 +512,24 @@ describe('Lens App', () => {
   });
 
   describe('saved query handling', () => {
+    it('does not allow saving when the user is missing the saveQuery permission', () => {
+      const args = makeDefaultArgs();
+      args.core.application = {
+        ...args.core.application,
+        capabilities: {
+          ...args.core.application.capabilities,
+          lens: { save: false, saveQuery: false, show: true },
+        },
+      };
+
+      mount(<App {...args} />);
+
+      expect(TopNavMenu).toHaveBeenCalledWith(
+        expect.objectContaining({ showSaveQuery: false }),
+        {}
+      );
+    });
+
     it('persists the saved query ID when the query is saved', () => {
       const args = makeDefaultArgs();
       args.editorFrame = frame;
