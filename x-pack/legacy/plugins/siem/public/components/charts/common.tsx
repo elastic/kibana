@@ -31,6 +31,8 @@ const chartDefaultRendering: Rendering = 'canvas';
 const FlexGroup = styled(EuiFlexGroup)<{ height?: string | null; width?: string | null }>`
   height: ${({ height }) => (height ? height : '100%')};
   width: ${({ width }) => (width ? width : '100%')};
+  position: relative;
+  margin: 0;
 `;
 
 FlexGroup.displayName = 'FlexGroup';
@@ -136,7 +138,7 @@ export const getTheme = () => {
       bottom: 0,
     },
     scales: {
-      barsPadding: 0.5,
+      barsPadding: 0.05,
     },
   };
   const isDarkMode: boolean = chrome.getUiSettingsClient().get(DEFAULT_DARK_MODE);

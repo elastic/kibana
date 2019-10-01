@@ -212,7 +212,7 @@ describe.each([
       );
     });
 
-    it('render BarChartBaseComponent', () => {
+    it(`render BarChartBaseComponent ${JSON.stringify(mockBarChartData)}`, () => {
       expect(shallowWrapper.find(BarChartBaseComponent)).toHaveLength(1);
       expect(shallowWrapper.find(ChartHolder)).toHaveLength(0);
     });
@@ -291,7 +291,7 @@ describe.each(table)('renders prompt', data => {
     );
   });
 
-  it('render Chart Holder', () => {
+  it(`render Chart Holder with data ${JSON.stringify(data)}`, () => {
     expect(shallowWrapper.find(BarChartBaseComponent)).toHaveLength(0);
     expect(shallowWrapper.find(ChartHolder)).toHaveLength(1);
   });

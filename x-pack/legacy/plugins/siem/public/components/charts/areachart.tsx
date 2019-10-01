@@ -114,11 +114,9 @@ export const AreaChartWithCustomPrompt = React.memo<{
 }>(({ data, height, width, configs }) => {
   return data != null &&
     data.length &&
-    data.every(
+    data.some(
       ({ value }) =>
-        value != null &&
-        value.length > 0 &&
-        value.every(chart => chart.x != null && chart.y != null)
+        value != null && !!value.length && value.every(chart => chart.x != null && chart.y != null)
     ) ? (
     <AreaChartBaseComponent height={height} width={width} data={data} configs={configs} />
   ) : (

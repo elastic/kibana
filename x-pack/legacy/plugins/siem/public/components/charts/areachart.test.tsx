@@ -211,6 +211,24 @@ describe('AreaChartWithCustomPrompt', () => {
         },
       ],
     ],
+    [
+      [
+        {
+          key: 'uniqueSourceIpsHistogram',
+          value: [],
+          color: '#DB1374',
+        },
+        {
+          key: 'uniqueDestinationIpsHistogram',
+          value: [
+            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
+            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
+            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
+          ],
+          color: '#490092',
+        },
+      ],
+    ],
   ] as Array<[ChartSeriesData[]]>)('renders areachart', data => {
     beforeAll(() => {
       shallowWrapper = shallow(
@@ -218,7 +236,7 @@ describe('AreaChartWithCustomPrompt', () => {
       );
     });
 
-    it('render AreaChartBaseComponent', () => {
+    it(`render AreaChartBaseComponent with data ${JSON.stringify(data)}`, () => {
       expect(shallowWrapper.find(AreaChartBaseComponent)).toHaveLength(1);
       expect(shallowWrapper.find(ChartHolder)).toHaveLength(0);
     });
@@ -310,7 +328,7 @@ describe('AreaChartWithCustomPrompt', () => {
       );
     });
 
-    it('render Chart Holder', () => {
+    it(`render Chart Holder with data ${JSON.stringify(data)}`, () => {
       expect(shallowWrapper.find(AreaChartBaseComponent)).toHaveLength(0);
       expect(shallowWrapper.find(ChartHolder)).toHaveLength(1);
     });

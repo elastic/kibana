@@ -88,7 +88,7 @@ describe('getTheme', () => {
       chartMargins: { bottom: 0, left: 0, right: 0, top: 4 },
       chartPaddings: { bottom: 0, left: 0, right: 0, top: 0 },
       scales: {
-        barsPadding: 0.5,
+        barsPadding: 0.05,
       },
     };
     getTheme();
