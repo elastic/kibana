@@ -17,8 +17,8 @@ export default function({ getService }: FtrProviderContext) {
         operationName: 'MonitorStates',
         query: monitorStatesQueryString,
         variables: {
-          dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2025-01-28T19:00:16.078Z',
+          dateRangeStart: '2019-09-11T03:31:04.380Z',
+          dateRangeEnd: '2019-09-11T03:40:34.410Z',
           ...variables,
         },
       };
@@ -40,7 +40,7 @@ export default function({ getService }: FtrProviderContext) {
     it('will fetch monitor state data for the given filters and range', async () => {
       const data: any = await getMonitorStates({
         filters:
-          '{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}},{"match":{"monitor.id":{"query":"0030-up","operator":"and"}}}]}}',
+          '{"bool":{"must":[{"match":{"monitor.id":{"query":"0002-up","operator":"and"}}}]}}',
       });
       expectFixtureEql(data, 'monitor_states_id_filtered');
     });

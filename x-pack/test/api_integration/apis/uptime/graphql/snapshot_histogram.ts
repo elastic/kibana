@@ -17,8 +17,8 @@ export default function({ getService }: FtrProviderContext) {
         operationName: 'SnapshotHistogram',
         query: snapshotHistogramQueryString,
         variables: {
-          dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2025-01-28T19:00:16.078Z',
+          dateRangeStart: '2019-09-11T03:31:04.380Z',
+          dateRangeEnd: '2019-09-11T03:40:34.410Z',
         },
       };
 
@@ -36,9 +36,8 @@ export default function({ getService }: FtrProviderContext) {
         operationName: 'SnapshotHistogram',
         query: snapshotHistogramQueryString,
         variables: {
-          dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2025-01-28T19:00:16.078Z',
-          monitorId: 'auto-http-0XDD2D4E60FD4A61C3',
+          dateRangeStart: '2019-09-11T03:31:04.380Z',
+          dateRangeEnd: '2019-09-11T03:40:34.410Z',
         },
       };
 
@@ -56,9 +55,9 @@ export default function({ getService }: FtrProviderContext) {
         operationName: 'SnapshotHistogram',
         query: snapshotHistogramQueryString,
         variables: {
-          dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2025-01-28T19:00:16.078Z',
-          filters:
+          dateRangeStart: '2019-09-11T03:31:04.380Z',
+          dateRangeEnd: '2019-09-11T03:40:34.410Z',
+           filters:
             '{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}}]}}',
         },
       };
