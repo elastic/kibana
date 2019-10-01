@@ -61,6 +61,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     dateRangeEnd: string,
     location?: string | null
   ): Promise<MonitorChart> {
+    console.log("GET CHARTS", monitorId, dateRangeStart, dateRangeEnd, location);
+
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -101,6 +103,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
 
     const result = await this.database.search(request, params);
+
     const dateHistogramBuckets = dropLatestBucket(
       get(result, 'aggregations.timeseries.buckets', [])
     );

@@ -16,8 +16,8 @@ export default function ({ getService }) {
         operationName: 'MonitorCharts',
         query: monitorChartsQueryString,
         variables: {
-          dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2025-01-28T19:00:16.078Z',
+          dateRangeStart: '2019-09-11T03:31:04.380Z',
+          dateRangeEnd: '2019-09-11T03:40:34.410Z',
           monitorId: '0002-up',
         },
       };
@@ -36,8 +36,8 @@ export default function ({ getService }) {
         operationName: 'MonitorCharts',
         query: monitorChartsQueryString,
         variables: {
-          dateRangeStart: '2002-01-28T17:40:08.078Z',
-          dateRangeEnd: '2002-01-28T19:00:16.078Z',
+          dateRangeStart: '1999-09-11T03:31:04.380Z',
+          dateRangeEnd: '1999-09-11T03:40:34.410Z',
           monitorId: '0002-up',
         },
       };
@@ -47,6 +47,7 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorChartsQuery });
+
 
       expectFixtureEql(data, 'monitor_charts_empty_sets');
     });
