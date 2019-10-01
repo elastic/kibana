@@ -9,6 +9,7 @@ import { Logger } from './types';
 import { fillPool } from './lib/fill_pool';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
 import { sanitizeTaskDefinitions } from './lib/sanitize_task_definitions';
+import { intervalFromNow } from './lib/intervals';
 import {
   TaskDefinition,
   TaskDictionary,
@@ -95,7 +96,23 @@ export class TaskManager {
       logger: this.logger,
       pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
       work(): Promise<void> {
-        return fillPool(pool.run, store.fetchAvailableTasks, createRunner);
+        return fillPool(
+          pool.run,
+          async () => {
+            const { docs, claimedTasks } = await store.claimAvailableTasks({
+              size: pool.availableWorkers,
+              retryAt: intervalFromNow('5s')!,
+            });
+
+            if (docs.length !== claimedTasks) {
+              opts.logger.warn(
+                `[Task Ownership error]: (${claimedTasks}) tasks were claimed by Kibana, but (${docs.length}) claimed tasks were fetched`
+              );
+            }
+            return docs;
+          },
+          createRunner
+        );
       },
     });
 

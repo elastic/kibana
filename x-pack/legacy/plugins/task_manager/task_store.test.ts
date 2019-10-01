@@ -580,9 +580,7 @@ describe('TaskStore', () => {
       const result = await store.claimAvailableTasks(claimingOpts);
 
       sinon.assert.calledTwice(callCluster);
-      sinon.assert.calledWithMatch(callCluster, 'updateByQuery', {
-        body: { size: claimingOpts.size },
-      });
+      sinon.assert.calledWithMatch(callCluster, 'updateByQuery', { max_docs: claimingOpts.size });
       sinon.assert.calledWithMatch(callCluster, 'search', { body: { size: claimingOpts.size } });
 
       return {
@@ -606,9 +604,7 @@ describe('TaskStore', () => {
       sinon.assert.calledOnce(callCluster);
       sinon.assert.calledWithMatch(callCluster, 'updateByQuery', {
         ignoreUnavailable: true,
-        body: {
-          size: 10,
-        },
+        max_docs: 10,
       });
       expect(docs.length).toBe(0);
     });

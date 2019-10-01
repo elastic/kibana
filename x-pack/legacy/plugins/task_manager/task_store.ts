@@ -47,8 +47,12 @@ export interface FetchOpts extends SearchOpts {
   sort?: object[];
 }
 
-export interface UpdateByQueryOpts extends SearchOpts {
+export interface UpdateByQuerySearchOpts extends SearchOpts {
   script?: object;
+}
+
+export interface UpdateByQueryOpts extends SearchOpts {
+  max_docs?: number;
 }
 
 export interface OwnershipClaimingOpts {
@@ -246,88 +250,92 @@ export class TaskStore {
     size,
     retryAt,
   }: OwnershipClaimingOpts): Promise<number> {
-    const { total } = await this.updateByQuery({
-      query: {
-        bool: {
-          must: [
-            // Either a task with idle status and runAt <= now or
-            // status running with a retryAt <= now.
-            {
-              bool: {
-                should: [
-                  {
-                    bool: {
-                      must: [
-                        { term: { 'task.status': 'idle' } },
-                        { range: { 'task.runAt': { lte: 'now' } } },
-                      ],
+    const { total } = await this.updateByQuery(
+      {
+        query: {
+          bool: {
+            must: [
+              // Either a task with idle status and runAt <= now or
+              // status running with a retryAt <= now.
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        must: [
+                          { term: { 'task.status': 'idle' } },
+                          { range: { 'task.runAt': { lte: 'now' } } },
+                        ],
+                      },
                     },
-                  },
-                  {
-                    bool: {
-                      must: [
-                        {
-                          bool: {
-                            should: [
-                              { term: { 'task.status': 'running' } },
-                              { term: { 'task.status': 'claiming' } },
-                            ],
-                          },
-                        },
-                        { range: { 'task.retryAt': { lte: 'now' } } },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-            // Either task has an interval or the attempts < the maximum configured
-            {
-              bool: {
-                should: [
-                  { exists: { field: 'task.interval' } },
-                  ...Object.entries(this.definitions).map(([type, definition]) => ({
-                    bool: {
-                      must: [
-                        { term: { 'task.taskType': type } },
-                        {
-                          range: {
-                            'task.attempts': {
-                              lt: definition.maxAttempts || this.maxAttempts,
+                    {
+                      bool: {
+                        must: [
+                          {
+                            bool: {
+                              should: [
+                                { term: { 'task.status': 'running' } },
+                                { term: { 'task.status': 'claiming' } },
+                              ],
                             },
                           },
-                        },
-                      ],
+                          { range: { 'task.retryAt': { lte: 'now' } } },
+                        ],
+                      },
                     },
-                  })),
-                ],
+                  ],
+                },
               },
-            },
-          ],
+              // Either task has an interval or the attempts < the maximum configured
+              {
+                bool: {
+                  should: [
+                    { exists: { field: 'task.interval' } },
+                    ...Object.entries(this.definitions).map(([type, definition]) => ({
+                      bool: {
+                        must: [
+                          { term: { 'task.taskType': type } },
+                          {
+                            range: {
+                              'task.attempts': {
+                                lt: definition.maxAttempts || this.maxAttempts,
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    })),
+                  ],
+                },
+              },
+            ],
+          },
         },
-      },
-      size,
-      sort: {
-        _script: {
-          type: 'number',
-          order: 'asc',
-          script: {
-            lang: 'expression',
-            source: `doc['task.retryAt'].value || doc['task.runAt'].value`,
+        sort: {
+          _script: {
+            type: 'number',
+            order: 'asc',
+            script: {
+              lang: 'expression',
+              source: `doc['task.retryAt'].value || doc['task.runAt'].value`,
+            },
+          },
+        },
+        seq_no_primary_term: true,
+        script: {
+          source: `ctx._source.task.owner=params.ownerId; ctx._source.task.status=params.status; ctx._source.task.retryAt=params.retryAt;`,
+          lang: 'painless',
+          params: {
+            ownerId: this.kibanaId,
+            retryAt,
+            status: 'claiming',
           },
         },
       },
-      seq_no_primary_term: true,
-      script: {
-        source: `ctx._source.owner=params.ownerId; ctx._source.status=params.status; ctx._source.retryAt=params.retryAt;`,
-        lang: 'painless',
-        params: {
-          ownerId: this.kibanaId,
-          retryAt,
-          status: 'claiming',
-        },
-      },
-    });
+      {
+        max_docs: size,
+      }
+    );
     return total;
   }
 
@@ -340,11 +348,14 @@ export class TaskStore {
     const { docs } = await this.search({
       query: {
         bool: {
-          filter: {
-            term: {
-              owner: this.kibanaId,
+          must: [
+            {
+              term: {
+                'task.owner': this.kibanaId,
+              },
             },
-          },
+            { term: { 'task.status': 'claiming' } },
+          ],
         },
       },
       size,
@@ -414,11 +425,17 @@ export class TaskStore {
     };
   }
 
-  private async updateByQuery(opts: UpdateByQueryOpts = {}): Promise<UpdateByQueryResult> {
+  private async updateByQuery(
+    opts: UpdateByQuerySearchOpts = {},
+    { max_docs }: UpdateByQueryOpts = {}
+  ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
     const result = await this.callCluster('updateByQuery', {
       index: this.index,
       ignoreUnavailable: true,
+      refresh: true,
+      max_docs,
+      conflicts: 'proceed',
       body: {
         ...opts,
         query,

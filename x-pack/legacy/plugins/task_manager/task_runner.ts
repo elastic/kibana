@@ -30,7 +30,7 @@ const defaultBackoffPerFailure = 5 * 60 * 1000;
 export interface TaskRunner {
   isExpired: boolean;
   cancel: CancelFunction;
-  claimOwnership: () => Promise<boolean>;
+  markTaskAsRunning: () => Promise<boolean>;
   run: () => Promise<RunResult>;
   toString?: () => string;
 }
@@ -152,7 +152,7 @@ export class TaskManagerRunner implements TaskRunner {
    *
    * @returns {Promise<boolean>}
    */
-  public async claimOwnership(): Promise<boolean> {
+  public async markTaskAsRunning(): Promise<boolean> {
     const VERSION_CONFLICT_STATUS = 409;
     const attempts = this.instance.attempts + 1;
     const now = new Date();

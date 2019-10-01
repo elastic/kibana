@@ -75,7 +75,7 @@ export class TaskPool {
   private async attemptToRun(tasks: TaskRunner[]) {
     for (const task of tasks) {
       if (this.availableWorkers > 0) {
-        if (await task.claimOwnership()) {
+        if (await task.markTaskAsRunning()) {
           this.running.add(task);
           task
             .run()

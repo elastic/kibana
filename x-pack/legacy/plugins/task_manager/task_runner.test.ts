@@ -243,7 +243,7 @@ describe('TaskManagerRunner', () => {
       },
     });
 
-    await runner.claimOwnership();
+    await runner.markTaskAsRunning();
 
     sinon.assert.calledOnce(store.update);
     const instance = store.update.args[0][0];
@@ -409,7 +409,7 @@ describe('TaskManagerRunner', () => {
       },
     });
 
-    await runner.claimOwnership();
+    await runner.markTaskAsRunning();
 
     sinon.assert.calledOnce(store.update);
     sinon.assert.calledWith(getRetryStub, initialAttempts + 1);
@@ -442,7 +442,7 @@ describe('TaskManagerRunner', () => {
       },
     });
 
-    await runner.claimOwnership();
+    await runner.markTaskAsRunning();
 
     sinon.assert.calledOnce(store.update);
     sinon.assert.calledWith(getRetryStub, initialAttempts + 1);
@@ -477,7 +477,7 @@ describe('TaskManagerRunner', () => {
       },
     });
 
-    await runner.claimOwnership();
+    await runner.markTaskAsRunning();
 
     sinon.assert.calledOnce(store.update);
     sinon.assert.calledWith(getRetryStub, initialAttempts + 1);
@@ -510,7 +510,7 @@ describe('TaskManagerRunner', () => {
       },
     });
 
-    await runner.claimOwnership();
+    await runner.markTaskAsRunning();
 
     sinon.assert.calledOnce(store.update);
     sinon.assert.notCalled(getRetryStub);
