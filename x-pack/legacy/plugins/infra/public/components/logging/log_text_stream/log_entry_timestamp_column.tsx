@@ -45,11 +45,8 @@ const TimestampColumnContent = LogEntryColumnContent.extend.attrs<{
   isHovered: boolean;
   isHighlighted: boolean;
 }>({})`
-  background-color: ${props => props.theme.eui.euiColorLightestShade};
-  border-right: solid 2px ${props => props.theme.eui.euiColorLightShade};
   color: ${props => props.theme.eui.euiColorDarkShade};
   overflow: hidden;
-  text-align: right;
   text-overflow: clip;
   white-space: pre;
 
