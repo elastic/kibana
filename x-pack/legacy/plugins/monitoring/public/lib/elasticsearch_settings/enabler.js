@@ -35,7 +35,7 @@ export class Enabler {
 
   async enableCollectionEnabled() {
     try {
-      this.updateModel({ isCollectionEnabledUpdating: true, isCollectionEnabledUpdated: false });
+      this.updateModel({ isCollectionEnabledUpdating: true });
       await this.$http.put('../api/monitoring/v1/elasticsearch_settings/set/collection_enabled');
       this.updateModel({
         isCollectionEnabledUpdated: true,
