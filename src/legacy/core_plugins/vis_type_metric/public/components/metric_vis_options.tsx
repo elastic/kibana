@@ -18,7 +18,14 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiButtonGroupProps,
+  EuiFormRow,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -26,7 +33,6 @@ import { VisOptionsProps } from 'ui/vis/editors/default';
 import {
   ColorRanges,
   ColorSchemaOptions,
-  SelectOption,
   SwitchOption,
   RangeOption,
   SetColorSchemaOptionsValue,
@@ -78,6 +84,15 @@ function MetricVisOptions({
     [setMetricValue, stateParams.metric.style]
   );
 
+  const setColorMode: EuiButtonGroupProps['onChange'] = useCallback(
+    id => setMetricValue('metricColorMode', id as ColorModes),
+    [setMetricValue]
+  );
+
+  const metricColorModeLabel = i18n.translate('visTypeMetric.params.color.useForLabel', {
+    defaultMessage: 'Use color for',
+  });
+
   return (
     <>
       <EuiPanel paddingSize="s">
@@ -88,14 +103,6 @@ function MetricVisOptions({
         </EuiTitle>
         <EuiSpacer size="s" />
 
-        <ColorRanges
-          data-test-subj="metricColorRange"
-          colorsRange={stateParams.metric.colorsRange}
-          setValue={setMetricValue}
-          setTouched={setTouched}
-          setValidity={setValidity}
-        />
-
         <SwitchOption
           label={i18n.translate('visTypeMetric.params.percentageModeLabel', {
             defaultMessage: 'Percentage mode',
@@ -104,6 +111,15 @@ function MetricVisOptions({
           value={stateParams.metric.percentageMode}
           setValue={setMetricValue}
         />
+
+        <ColorRanges
+          data-test-subj="metricColorRange"
+          colorsRange={stateParams.metric.colorsRange}
+          setValue={setMetricValue}
+          setTouched={setTouched}
+          setValidity={setValidity}
+        />
+
         <EuiSpacer size="m" />
 
         <EuiTitle size="xs">
@@ -116,16 +132,17 @@ function MetricVisOptions({
         </EuiTitle>
         <EuiSpacer size="s" />
 
-        <SelectOption
-          disabled={stateParams.metric.colorsRange.length === 1}
-          label={i18n.translate('visTypeMetric.params.color.useForLabel', {
-            defaultMessage: 'Use color for',
-          })}
-          options={vis.type.editorConfig.collections.metricColorMode}
-          paramName="metricColorMode"
-          value={stateParams.metric.metricColorMode}
-          setValue={setMetricValue}
-        />
+        <EuiFormRow fullWidth display="rowCompressed" label={metricColorModeLabel}>
+          <EuiButtonGroup
+            buttonSize="compressed"
+            idSelected={stateParams.metric.metricColorMode}
+            isDisabled={stateParams.metric.colorsRange.length === 1}
+            isFullWidth={true}
+            legend={metricColorModeLabel}
+            options={vis.type.editorConfig.collections.metricColorMode}
+            onChange={setColorMode}
+          />
+        </EuiFormRow>
 
         <ColorSchemaOptions
           colorSchema={stateParams.metric.colorSchema}
@@ -150,24 +167,26 @@ function MetricVisOptions({
         </EuiTitle>
         <EuiSpacer size="s" />
 
-        <SwitchOption
-          label={i18n.translate('visTypeMetric.params.showLabelsLabel', {
-            defaultMessage: 'Show labels',
-          })}
-          paramName="show"
-          value={stateParams.metric.labels.show}
-          setValue={setMetricLabels}
-        />
-
         <RangeOption
           label={i18n.translate('visTypeMetric.params.style.fontSizeLabel', {
-            defaultMessage: 'Font size in points',
+            defaultMessage: 'Metric font size in points',
           })}
           min={12}
           max={120}
           paramName="fontSize"
           value={stateParams.metric.style.fontSize}
           setValue={setMetricStyle}
+          showInput={true}
+          showLabels={true}
+        />
+
+        <SwitchOption
+          label={i18n.translate('visTypeMetric.params.showTitleLabel', {
+            defaultMessage: 'Show metric title',
+          })}
+          paramName="show"
+          value={stateParams.metric.labels.show}
+          setValue={setMetricLabels}
         />
       </EuiPanel>
     </>

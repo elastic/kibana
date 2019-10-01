@@ -70,20 +70,20 @@ export const createMetricVisTypeDefinition = () => {
       collections: {
         metricColorMode: [
           {
-            value: ColorModes.NONE,
-            text: i18n.translate('visTypeMetric.colorModes.noneOptionLabel', {
+            id: ColorModes.NONE,
+            label: i18n.translate('visTypeMetric.colorModes.noneOptionLabel', {
               defaultMessage: 'None',
             }),
           },
           {
-            value: ColorModes.LABELS,
-            text: i18n.translate('visTypeMetric.colorModes.labelsOptionLabel', {
+            id: ColorModes.LABELS,
+            label: i18n.translate('visTypeMetric.colorModes.labelsOptionLabel', {
               defaultMessage: 'Labels',
             }),
           },
           {
-            value: ColorModes.BACKGROUND,
-            text: i18n.translate('visTypeMetric.colorModes.backgroundOptionLabel', {
+            id: ColorModes.BACKGROUND,
+            label: i18n.translate('visTypeMetric.colorModes.backgroundOptionLabel', {
               defaultMessage: 'Background',
             }),
           },
