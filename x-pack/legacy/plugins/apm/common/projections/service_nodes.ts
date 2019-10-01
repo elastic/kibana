@@ -8,7 +8,7 @@ import { Setup } from '../../server/lib/helpers/setup_request';
 import { SERVICE_NAME, SERVICE_NODE_NAME } from '../elasticsearch_fieldnames';
 import { rangeFilter } from '../../server/lib/helpers/range_filter';
 
-export function getJvmsProjection({
+export function getServiceNodesProjection({
   setup,
   serviceName
 }: {
@@ -30,7 +30,7 @@ export function getJvmsProjection({
         }
       },
       aggs: {
-        jvms: {
+        nodes: {
           terms: {
             field: SERVICE_NODE_NAME
           }

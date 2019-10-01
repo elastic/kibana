@@ -16,6 +16,7 @@ import { RouteName } from './route_names';
 import { Settings } from '../../Settings';
 import { toQuery } from '../../../shared/Links/url_helpers';
 import { ServiceNodeMetrics } from '../../ServiceNodeMetrics';
+import { resolveUrlParams } from '../../../../context/UrlParamsContext/resolveUrlParams';
 
 const metricsBreadcrumb = i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
   defaultMessage: 'Metrics'
@@ -81,7 +82,6 @@ export const routes: BreadcrumbRoute[] = [
       )(props),
     name: RouteName.SERVICE
   },
-
   // errors
   {
     exact: true,
@@ -117,23 +117,26 @@ export const routes: BreadcrumbRoute[] = [
     breadcrumb: metricsBreadcrumb,
     name: RouteName.METRICS
   },
+  // service nodes, only enabled for java agents for now
+  {
+    exact: true,
+    path: '/services/:serviceName/nodes',
+    component: () => <ServiceDetails tab="nodes" />,
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.nodesTitle', {
+      defaultMessage: 'JVMs'
+    }),
+    name: RouteName.SERVICE_NODES
+  },
   // node metrics
   {
     exact: true,
-    path: '/services/:serviceName/metrics/node/:serviceNodeName',
+    path: '/services/:serviceName/nodes/:serviceNodeName/metrics',
     component: () => <ServiceNodeMetrics />,
-    breadcrumb: metricsBreadcrumb,
-    name: RouteName.NODE_METRICS
-  },
-  // jvms
-  {
-    exact: true,
-    path: '/services/:serviceName/jvm',
-    component: () => <ServiceDetails tab="jvms" />,
-    breadcrumb: i18n.translate('xpack.apm.breadcrumb.jvmsTitle', {
-      defaultMessage: 'JVMs'
-    }),
-    name: RouteName.JVMS
+    breadcrumb: ({ location }) => {
+      const { serviceNodeName } = resolveUrlParams(location, {});
+      return serviceNodeName || '';
+    },
+    name: RouteName.SERVICE_NODE_METRICS
   },
   {
     exact: true,

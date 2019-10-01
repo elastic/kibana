@@ -5,7 +5,7 @@
  */
 
 import { Setup } from '../helpers/setup_request';
-import { getJvmsProjection } from '../../../common/projections/jvms';
+import { getServiceNodesProjection } from '../../../common/projections/service_nodes';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import {
   METRIC_PROCESS_CPU_PERCENT,
@@ -14,11 +14,11 @@ import {
   METRIC_JAVA_NON_HEAP_MEMORY_USED
 } from '../../../common/elasticsearch_fieldnames';
 
-const getJvms = async ({
+const getServiceNodes = async ({
   setup,
   serviceName,
-  sortField,
-  sortDirection
+  sortField = '_key',
+  sortDirection = 'asc'
 }: {
   setup: Setup;
   serviceName: string;
@@ -27,14 +27,14 @@ const getJvms = async ({
 }) => {
   const { client } = setup;
   const projection = mergeProjection(
-    getJvmsProjection({ setup, serviceName }),
+    getServiceNodesProjection({ setup, serviceName }),
     {
       body: {
         aggs: {
-          jvms: {
+          nodes: {
             terms: {
               order: {
-                [sortField || '_key']: sortDirection || 'asc'
+                [sortField]: sortDirection
               }
             },
             aggs: {
@@ -71,7 +71,7 @@ const getJvms = async ({
     return [];
   }
 
-  return response.aggregations.jvms.buckets.map(bucket => {
+  return response.aggregations.nodes.buckets.map(bucket => {
     return {
       name: bucket.key,
       cpu: bucket.cpu.value,
@@ -82,4 +82,4 @@ const getJvms = async ({
   });
 };
 
-export { getJvms };
+export { getServiceNodes };

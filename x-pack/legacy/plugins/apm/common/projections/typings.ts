@@ -25,5 +25,5 @@ export enum PROJECTION {
   TRANSACTIONS = 'transactions',
   METRICS = 'metrics',
   ERROR_GROUPS = 'errorGroups',
-  JVMS = 'jvms'
+  SERVICE_NODES = 'serviceNodes'
 }

@@ -9,22 +9,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getJvms } from './';
+import { getServiceNodes } from './';
 import {
   SearchParamsMock,
   inspectSearchParams
 } from '../../../public/utils/testHelpers';
 
-describe('metrics queries', () => {
+describe('service node queries', () => {
   let mock: SearchParamsMock;
 
   afterEach(() => {
     mock.teardown();
   });
 
-  it('fetches jvms', async () => {
+  it('fetches services nodes', async () => {
     mock = await inspectSearchParams(setup =>
-      getJvms({ setup, serviceName: 'foo' })
+      getServiceNodes({ setup, serviceName: 'foo' })
     );
 
     expect(mock.params).toMatchSnapshot();
@@ -32,7 +32,7 @@ describe('metrics queries', () => {
 
   it('fetches jvms with sortField and sortDirection defined', async () => {
     mock = await inspectSearchParams(setup =>
-      getJvms({
+      getServiceNodes({
         setup,
         serviceName: 'foo',
         sortField: 'foo',

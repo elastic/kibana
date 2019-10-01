@@ -13,9 +13,9 @@ export enum RouteName {
   ERRORS = 'errors',
   ERROR = 'error',
   METRICS = 'metrics',
-  NODE_METRICS = 'node_metrics',
+  SERVICE_NODE_METRICS = 'node_metrics',
   TRANSACTION_TYPE = 'transaction_type',
   TRANSACTION_NAME = 'transaction_name',
   SETTINGS = 'settings',
-  JVMS = 'jvms'
+  SERVICE_NODES = 'nodes'
 }

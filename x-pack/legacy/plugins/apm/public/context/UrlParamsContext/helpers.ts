@@ -64,9 +64,14 @@ export function getPathParams(pathname: string = '') {
 
   switch (pageName) {
     case 'services':
-      const servicePageName = paths[2];
+      let servicePageName = paths[2];
       const serviceName = paths[1];
-      const serviceNodeName = paths[4];
+      const serviceNodeName = paths[3];
+
+      if (servicePageName === 'nodes' && paths.length > 3) {
+        servicePageName = 'metrics';
+      }
+
       switch (servicePageName) {
         case 'transactions':
           return {
@@ -85,7 +90,7 @@ export function getPathParams(pathname: string = '') {
             serviceName,
             serviceNodeName
           };
-        case 'jvm':
+        case 'nodes':
           return {
             serviceName
           };

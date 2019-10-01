@@ -12,7 +12,7 @@ interface Props extends APMLinkExtendProps {
   serviceName: string;
 }
 
-const ServiceJvmOverviewLink = ({ serviceName, ...rest }: Props) => {
+const ServiceNodeOverviewLink = ({ serviceName, ...rest }: Props) => {
   const { urlParams } = useUrlParams();
 
   const persistedFilters = pickKeys(
@@ -24,11 +24,11 @@ const ServiceJvmOverviewLink = ({ serviceName, ...rest }: Props) => {
 
   return (
     <APMLink
-      path={`/services/${serviceName}/jvm`}
+      path={`/services/${serviceName}/nodes`}
       query={persistedFilters}
       {...rest}
     />
   );
 };
 
-export { ServiceJvmOverviewLink };
+export { ServiceNodeOverviewLink };

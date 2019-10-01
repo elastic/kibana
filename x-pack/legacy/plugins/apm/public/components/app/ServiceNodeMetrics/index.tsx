@@ -32,7 +32,8 @@ const INITIAL_DATA = {
   containerId: ''
 };
 
-const Truncate = styled.div`
+const Truncate = styled.span`
+  display: block;
   ${truncate(px(unit * 12))}
 `;
 

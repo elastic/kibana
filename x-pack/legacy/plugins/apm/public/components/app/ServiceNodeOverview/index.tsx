@@ -15,7 +15,7 @@ import { callApmApi } from '../../../services/rest/callApmApi';
 import { asDynamicBytes, asInteger } from '../../../utils/formatters';
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 
-const ServiceJvmOverview = () => {
+const ServiceNodeOverview = () => {
   const { uiFilters, urlParams } = useUrlParams();
   const { serviceName, start, end, sortField, sortDirection } = urlParams;
 
@@ -27,7 +27,7 @@ const ServiceJvmOverview = () => {
       params: {
         serviceName
       },
-      projection: PROJECTION.JVMS
+      projection: PROJECTION.SERVICE_NODES
     }),
     [serviceName]
   );
@@ -37,7 +37,7 @@ const ServiceJvmOverview = () => {
       return;
     }
     return callApmApi({
-      pathname: '/api/apm/services/{serviceName}/jvms',
+      pathname: '/api/apm/services/{serviceName}/serviceNodes',
       params: {
         path: {
           serviceName
@@ -81,9 +81,7 @@ const ServiceJvmOverview = () => {
       }),
       field: 'cpu',
       sortable: true,
-      render: (cpu: number) => {
-        return asDynamicBytes(cpu);
-      }
+      render: asDynamicBytes
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.heapMemoryColumnLabel', {
@@ -136,4 +134,4 @@ const ServiceJvmOverview = () => {
   );
 };
 
-export { ServiceJvmOverview };
+export { ServiceNodeOverview };

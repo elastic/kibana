@@ -6,11 +6,11 @@
 import * as t from 'io-ts';
 import { createRoute } from './create_route';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getJvms } from '../lib/jvms';
+import { getServiceNodes } from '../lib/service_nodes';
 import { rangeRt, uiFiltersRt } from './default_api_types';
 
-export const jvmsRoute = createRoute(core => ({
-  path: '/api/apm/services/{serviceName}/jvms',
+export const serviceNodesRoute = createRoute(core => ({
+  path: '/api/apm/services/{serviceName}/serviceNodes',
   params: {
     path: t.type({
       serviceName: t.string
@@ -29,6 +29,6 @@ export const jvmsRoute = createRoute(core => ({
     const { serviceName } = path;
     const { sortField, sortDirection } = query;
 
-    return getJvms({ setup, serviceName, sortField, sortDirection });
+    return getServiceNodes({ setup, serviceName, sortField, sortDirection });
   }
 }));

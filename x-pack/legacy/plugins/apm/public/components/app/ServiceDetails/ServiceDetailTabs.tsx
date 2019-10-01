@@ -16,12 +16,12 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { TransactionOverviewLink } from '../../shared/Links/apm/TransactionOverviewLink';
 import { ErrorOverviewLink } from '../../shared/Links/apm/ErrorOverviewLink';
 import { MetricOverviewLink } from '../../shared/Links/apm/MetricOverviewLink';
-import { ServiceJvmOverviewLink } from '../../shared/Links/apm/ServiceJvmOverviewLink';
-import { ServiceJvmOverview } from '../ServiceJvmOverview';
+import { ServiceNodeOverviewLink } from '../../shared/Links/apm/ServiceNodeOverviewLink';
+import { ServiceNodeOverview } from '../ServiceNodeOverview';
 import { useAgentName } from '../../../hooks/useAgentName';
 
 interface Props {
-  tab: 'transactions' | 'errors' | 'metrics' | 'jvms';
+  tab: 'transactions' | 'errors' | 'metrics' | 'nodes';
 }
 
 export function ServiceDetailTabs({ tab }: Props) {
@@ -63,18 +63,18 @@ export function ServiceDetailTabs({ tab }: Props) {
   const tabs = [transactionsTab, errorsTab];
 
   if (isJavaAgentName(agentName)) {
-    const jvmListTab = {
+    const nodesListTab = {
       link: (
-        <ServiceJvmOverviewLink serviceName={serviceName}>
-          {i18n.translate('xpack.apm.serviceDetails.jvmTabLabel', {
+        <ServiceNodeOverviewLink serviceName={serviceName}>
+          {i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
             defaultMessage: 'JVMs'
           })}
-        </ServiceJvmOverviewLink>
+        </ServiceNodeOverviewLink>
       ),
-      render: () => <ServiceJvmOverview />,
-      name: 'jvms'
+      render: () => <ServiceNodeOverview />,
+      name: 'nodes'
     };
-    tabs.push(jvmListTab);
+    tabs.push(nodesListTab);
   } else if (agentName && !isRumAgentName(agentName)) {
     const metricsTab = {
       link: (
