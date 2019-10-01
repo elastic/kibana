@@ -25,6 +25,14 @@ export class AddLayerPanel extends Component {
     layerImportAddReady: false,
   }
 
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
   componentDidUpdate() {
     if (!this.state.layerImportAddReady && this.props.isIndexingSuccess) {
       this.setState({ layerImportAddReady: true });
@@ -48,6 +56,9 @@ export class AddLayerPanel extends Component {
   }
 
   _viewLayer = async (source, options = {}) => {
+    if (!this._isMounted) {
+      return;
+    }
     if (!source) {
       this.setState({ layer: null });
       this.props.removeTransientLayer();
@@ -60,6 +71,9 @@ export class AddLayerPanel extends Component {
       style: style
     };
     const newLayer = source.createDefaultLayer(layerInitProps, this.props.mapColors);
+    if (!this._isMounted) {
+      return;
+    }
     this.setState(
       { layer: newLayer },
       () => this.props.viewLayer(this.state.layer)
@@ -67,6 +81,11 @@ export class AddLayerPanel extends Component {
   };
 
   _clearLayerData = ({ keepSourceType = false }) => {
+
+    if (!this._isMounted) {
+      return;
+    }
+
     this.setState({
       layer: null,
       ...(
