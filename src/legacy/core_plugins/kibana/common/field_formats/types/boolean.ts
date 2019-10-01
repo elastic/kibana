@@ -17,11 +17,19 @@
  * under the License.
  */
 
-import { asPrettyString } from '../../../../../../plugins/data/common/field_formats';
+import {
+  FieldFormat,
+  asPrettyString,
+  KBN_FIELD_TYPES,
+} from '../../../../../../plugins/data/common';
 
-export function createBoolFormat(FieldFormat) {
+export function createBoolFormat() {
   return class BoolFormat extends FieldFormat {
-    _convert(value) {
+    static id = 'boolean';
+    static title = 'Boolean';
+    static fieldType = [KBN_FIELD_TYPES.BOOLEAN, KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING];
+
+    _convert(value: any): string {
       if (typeof value === 'string') {
         value = value.trim().toLowerCase();
       }
@@ -41,9 +49,5 @@ export function createBoolFormat(FieldFormat) {
           return asPrettyString(value);
       }
     }
-
-    static id = 'boolean';
-    static title = 'Boolean';
-    static fieldType = ['boolean', 'number', 'string'];
   };
 }
