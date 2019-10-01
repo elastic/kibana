@@ -25,7 +25,7 @@ import { ToolingLog } from '@kbn/dev-utils';
 
 const ISSUES_URL = '/repos/elastic/kibana/issues/';
 
-interface GithubIssue {
+export interface GithubIssue {
   html_url: string;
   number: number;
   title: string;

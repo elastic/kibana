@@ -17,21 +17,24 @@
  * under the License.
  */
 
-import { REPO_ROOT, run, createFailError } from '@kbn/dev-utils';
+import { REPO_ROOT, run, createFailError, createFlagError } from '@kbn/dev-utils';
 import globby from 'globby';
-import dedent from 'dedent';
 
 import { getFailures } from './get_failures';
 import { GithubApi } from './github_api';
-import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
-
-const GITHUB_FLAKY_TEST_LABEL = 'failed-test';
-const BUILD_URL = process.env.BUILD_URL;
+import { updatedFailureIssue, createFailureIssue } from './report_failure';
+import { getIssueMetadata } from './issue_metadata';
 
 export function runFailedTestsReporterCli() {
   run(
     async ({ log, flags }) => {
-      if (!flags['dry-run']) {
+      const buildUrl = flags['build-url'];
+      if (typeof buildUrl !== 'string') {
+        throw createFlagError('Missing --build-url or process.env.BUILD_URL');
+      }
+
+      const dryRun = !!flags['dry-run'];
+      if (!dryRun) {
         // JOB_NAME is formatted as `elastic+kibana+7.x` in some places and `elastic+kibana+7.x/JOB=kibana-intake,node=immutable` in others
         const jobNameSplit = (process.env.JOB_NAME || '').split(/\+|\//);
         const branch = jobNameSplit.length >= 3 ? jobNameSplit[2] : process.env.GIT_BRANCH;
@@ -57,12 +60,15 @@ export function runFailedTestsReporterCli() {
         }
       }
 
-      const githubApi = new GithubApi(log, flags['dry-run'] ? undefined : process.env.GITHUB_TOKEN);
+      const githubApi = new GithubApi(log, dryRun ? undefined : process.env.GITHUB_TOKEN);
       const issues = await githubApi.getKibanaIssues();
-      const files = await globby(['target/junit/**/*.xml'], { cwd: REPO_ROOT, absolute: true });
+      const reportPaths = await globby(['target/junit/**/*.xml'], {
+        cwd: REPO_ROOT,
+        absolute: true,
+      });
 
-      for (const file of files) {
-        for (const failure of await getFailures(log, file)) {
+      for (const reportPath of reportPaths) {
+        for (const failure of await getFailures(log, reportPath)) {
           const existingIssue = issues.find(
             i =>
               getIssueMetadata(i.body, 'test.class') === failure.classname &&
@@ -70,38 +76,9 @@ export function runFailedTestsReporterCli() {
           );
 
           if (existingIssue) {
-            // Increment failCount
-            const newCount = getIssueMetadata(existingIssue.body, 'test.failCount', 0) + 1;
-            const newBody = updateIssueMetadata(existingIssue.body, {
-              'test.failCount': newCount,
-            });
-
-            await githubApi.editIssueBody(existingIssue.number, newBody);
-            await githubApi.addIssueComment(
-              existingIssue.number,
-              `New failure: [Jenkins Build](${BUILD_URL})`
-            );
-
-            log.info(`Updated issue ${existingIssue.html_url}, failCount: ${newCount}`);
+            await updatedFailureIssue(buildUrl, existingIssue, log, githubApi);
           } else {
-            const title = `Failing test: ${failure.classname} - ${failure.name}`;
-            const body = updateIssueMetadata(
-              dedent`
-                A test failed on a tracked branch
-                \`\`\`
-                ${failure.failure}
-                \`\`\`
-                First failure: [Jenkins Build](${BUILD_URL})
-              `,
-              {
-                'test.class': failure.classname,
-                'test.name': failure.name,
-                'test.failCount': 1,
-              }
-            );
-
-            const newIssueUrl = await githubApi.createIssue(title, body, [GITHUB_FLAKY_TEST_LABEL]);
-            log.info(`Created issue ${newIssueUrl}`);
+            await createFailureIssue(buildUrl, failure, log, githubApi);
           }
         }
       }
@@ -110,8 +87,13 @@ export function runFailedTestsReporterCli() {
       description: `a cli that opens issues or updates existing issues based on junit reports`,
       flags: {
         boolean: ['dry-run'],
+        string: ['build-url'],
+        default: {
+          'build-url': process.env.BUILD_URL,
+        },
         help: `
           --dry-run          Execute the CLI without contacting Github
+          --build-url        URL of the failed build, defaults to process.env.BUILD_URL
         `,
       },
     }

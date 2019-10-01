@@ -49,6 +49,14 @@
 const PREFIX = 'failed-test';
 const REGEX = /\n\n<!-- kibanaCiData = (.*) -->/;
 
+function safeJsonParse(json: string, onError: any) {
+  try {
+    return JSON.parse(json);
+  } catch {
+    return onError;
+  }
+}
+
 /**
  * Parse metadata from issue body
  */
@@ -56,7 +64,7 @@ export function getIssueMetadata(body: string, key: string, defaultValue: any = 
   const match = body.match(REGEX);
 
   if (match) {
-    const data = JSON.parse(match[1])[PREFIX];
+    const data = safeJsonParse(match[1], {})[PREFIX];
     return data && data[key] !== undefined ? data[key] : defaultValue;
   } else {
     return defaultValue;
@@ -69,7 +77,7 @@ export function getIssueMetadata(body: string, key: string, defaultValue: any = 
 export function updateIssueMetadata(body: string, values: Record<string, any>) {
   if (REGEX.test(body)) {
     return body.replace(REGEX, (match, json) => {
-      const data = JSON.parse(json);
+      const data = safeJsonParse(json, {});
       data[PREFIX] = Object.assign(data[PREFIX] || {}, values);
       return match.replace(json, JSON.stringify(data));
     });
