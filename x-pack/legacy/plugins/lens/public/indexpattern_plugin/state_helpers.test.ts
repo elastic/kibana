@@ -367,7 +367,7 @@ describe('state_helpers', () => {
       expect(
         getColumnOrder({
           col1: {
-            label: 'Top Values of category',
+            label: 'Top values of category',
             dataType: 'string',
             isBucketed: true,
 
@@ -411,7 +411,7 @@ describe('state_helpers', () => {
       expect(
         getColumnOrder({
           col1: {
-            label: 'Top Values of category',
+            label: 'Top values of category',
             dataType: 'string',
             isBucketed: true,
 
