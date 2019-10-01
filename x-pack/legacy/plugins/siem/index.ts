@@ -24,10 +24,7 @@ import {
   DEFAULT_FROM,
   DEFAULT_TO,
 } from './common/constants';
-import {
-  alwaysFiringAlertType,
-  rateLimitedActionType,
-} from './server/lib/detection_engine/alerts/always_firing';
+import { signalsAlertType } from './server/lib/detection_engine/alerts/signals_alert_type';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function siem(kibana: any) {
@@ -35,6 +32,11 @@ export function siem(kibana: any) {
     id: APP_ID,
     configPrefix: 'xpack.siem',
     publicDir: resolve(__dirname, 'public'),
+    // require: ['kibana', 'elasticsearch'],
+    // Uncomment these lines to turn on alerting and action for detection engine and comment the other
+    // require statement out. These are hidden behind feature flags at the moment so if you turn
+    // these on without the feature flags turned on then Kibana will crash since we are a legacy plugin
+    // and legacy plugins cannot have optional requirements.
     require: ['kibana', 'elasticsearch', 'alerting', 'actions'],
     uiExports: {
       app: {
@@ -119,17 +121,9 @@ export function siem(kibana: any) {
       },
       mappings: savedObjectMappings,
     },
-    isEnabled(config: Legacy.KibanaConfig) {
-      return config.get('xpack.alerting.enabled') && config.get('xpack.actions.enabled');
-    },
     init(server: Server) {
       if (server.plugins.alerting != null) {
-        console.log('...I have found alerting and should be ok to run...');
-        server.plugins.alerting.registerType(alwaysFiringAlertType);
-      }
-      if (server.plugins.actions != null) {
-        console.log('...I have found actions and should be ok to run...');
-        server.plugins.actions.registerType(rateLimitedActionType);
+        server.plugins.alerting.registerType(signalsAlertType);
       }
       server.injectUiAppVars('siem', async () => server.getInjectedUiAppVars('kibana'));
       initServerWithKibana(server);
