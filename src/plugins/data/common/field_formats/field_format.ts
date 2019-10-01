@@ -20,10 +20,17 @@
 import { isFunction, transform, size, cloneDeep, get, defaults } from 'lodash';
 import { createCustomFieldFormat } from './converters/custom';
 import { ContentType, FieldFormatConvert, FieldFormatConvertFunction } from './types';
-
-import { htmlContentTypeSetup, textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types';
+import {
+  htmlContentTypeSetup,
+  textContentTypeSetup,
+  TEXT_CONTEXT_TYPE,
+  HTML_CONTEXT_TYPE,
+} from './content_types';
 
 export const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
+
+export const isFieldFormatConvertFn = (convert: any): convert is FieldFormatConvertFunction =>
+  isFunction(convert);
 
 export abstract class FieldFormat {
   /**
@@ -49,13 +56,13 @@ export abstract class FieldFormat {
    * @property {FieldFormatConvert}
    * @private
    */
-  _convert: FieldFormatConvert = FieldFormat.setupContentType(this, get(this, '_convert', {}));
+  private convertObject: FieldFormatConvert | undefined;
 
   /**
    * @property {Function} - ref to child class
    * @private
    */
-  type: any = this.constructor;
+  public type: any = this.constructor;
 
   constructor(public _params: any = {}) {}
 
@@ -88,11 +95,11 @@ export abstract class FieldFormat {
   getConverterFor(
     contentType: ContentType = DEFAULT_CONTEXT_TYPE
   ): FieldFormatConvertFunction | null {
-    if (this._convert) {
-      return this._convert[contentType];
+    if (!this.convertObject) {
+      this.convertObject = FieldFormat.setupContentType(this, get(this, '_convert'));
     }
 
-    return null;
+    return this.convertObject[contentType] || null;
   }
 
   /**
@@ -160,27 +167,27 @@ export abstract class FieldFormat {
   }
 
   static from(convertFn: FieldFormatConvertFunction) {
-    return createCustomFieldFormat(FieldFormat.toConvertObject(convertFn));
+    return createCustomFieldFormat(convertFn);
   }
 
   private static setupContentType(
     fieldFormat: IFieldFormat,
-    convert: FieldFormatConvert | FieldFormatConvertFunction
+    convert: Partial<FieldFormatConvert> | FieldFormatConvertFunction = {}
   ): FieldFormatConvert {
-    const convertObject = FieldFormat.toConvertObject(convert);
+    const convertObject = isFieldFormatConvertFn(convert)
+      ? FieldFormat.toConvertObject(convert)
+      : convert;
 
     return {
-      ...textContentTypeSetup(fieldFormat, convertObject),
-      ...htmlContentTypeSetup(fieldFormat, convertObject),
+      [TEXT_CONTEXT_TYPE]: textContentTypeSetup(fieldFormat, convertObject),
+      [HTML_CONTEXT_TYPE]: htmlContentTypeSetup(fieldFormat, convertObject),
     };
   }
 
-  private static toConvertObject(
-    convert: FieldFormatConvert | FieldFormatConvertFunction
-  ): FieldFormatConvert {
-    if (isFunction(convert)) {
+  private static toConvertObject(convert: FieldFormatConvertFunction): Partial<FieldFormatConvert> {
+    if (isFieldFormatConvertFn(convert)) {
       return {
-        [DEFAULT_CONTEXT_TYPE]: convert,
+        [TEXT_CONTEXT_TYPE]: convert,
       };
     }
     return convert;

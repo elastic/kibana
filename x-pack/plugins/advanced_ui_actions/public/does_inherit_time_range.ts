@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Embeddable, IContainer, ContainerInput } from 'src/plugins/embeddable/public';
+import { Embeddable, IContainer, ContainerInput } from '../../../../src/plugins/embeddable/public';
 import { TimeRangeInput } from './custom_time_range_action';
 
 export function doesInheritTimeRange(embeddable: Embeddable<TimeRangeInput>) {

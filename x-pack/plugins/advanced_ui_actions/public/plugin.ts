@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { IUiActionsStart, IUiActionsSetup } from 'src/plugins/ui_actions/public';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+} from '../../../../src/core/public';
+import { IUiActionsStart, IUiActionsSetup } from '../../../../src/plugins/ui_actions/public';
 import {
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
   Setup as EmbeddableSetup,
   Start as EmbeddableStart,
-} from '../../../../../../../src/plugins/embeddable/public';
+} from '../../../../src/plugins/embeddable/public';
 import { CustomTimeRangeAction } from './custom_time_range_action';
 
 import { CustomTimeRangeBadge } from './custom_time_range_badge';

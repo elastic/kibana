@@ -24,13 +24,13 @@ import { asPrettyString } from '../utils';
 
 export const TEXT_CONTEXT_TYPE = 'text';
 
-const getConvertFn = (fieldFormatConvert: FieldFormatConvert): TextContextTypeConvert =>
+const getConvertFn = (fieldFormatConvert: Partial<FieldFormatConvert>): TextContextTypeConvert =>
   (fieldFormatConvert[TEXT_CONTEXT_TYPE] || asPrettyString) as TextContextTypeConvert;
 
 export const setup = (
   format: IFieldFormat,
-  fieldFormatConvert: FieldFormatConvert
-): FieldFormatConvert => {
+  fieldFormatConvert: Partial<FieldFormatConvert>
+): TextContextTypeConvert => {
   const convert = getConvertFn(fieldFormatConvert);
 
   const recurse: TextContextTypeConvert = value => {
@@ -42,5 +42,5 @@ export const setup = (
     return JSON.stringify(value.map(recurse));
   };
 
-  return { [TEXT_CONTEXT_TYPE]: recurse };
+  return recurse;
 };
