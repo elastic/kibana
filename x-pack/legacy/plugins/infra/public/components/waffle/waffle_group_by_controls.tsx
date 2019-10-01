@@ -20,10 +20,10 @@ import { FieldType } from 'ui/index_patterns';
 import { InfraNodeType, InfraSnapshotGroupbyInput } from '../../graphql/types';
 import { InfraGroupByOptions } from '../../lib/lib';
 import { CustomFieldPanel } from './custom_field_panel';
-import { fieldToName } from './lib/field_to_display_name';
 import euiStyled from '../../../../../common/eui_styled_components';
 
 interface Props {
+  options: Array<{ text: string; field: string; toolTipContent?: string }>;
   nodeType: InfraNodeType;
   groupBy: InfraSnapshotGroupbyInput[];
   onChange: (groupBy: InfraSnapshotGroupbyInput[]) => void;
@@ -31,40 +31,6 @@ interface Props {
   fields: FieldType[];
   customOptions: InfraGroupByOptions[];
 }
-
-let OPTIONS: { [P in InfraNodeType]: InfraGroupByOptions[] };
-const getOptions = (
-  nodeType: InfraNodeType
-): Array<{ text: string; field: string; toolTipContent?: string }> => {
-  if (!OPTIONS) {
-    const mapFieldToOption = (field: string) => ({
-      text: fieldToName(field),
-      field,
-    });
-    OPTIONS = {
-      [InfraNodeType.pod]: ['kubernetes.namespace', 'kubernetes.node.name', 'service.type'].map(
-        mapFieldToOption
-      ),
-      [InfraNodeType.container]: [
-        'host.name',
-        'cloud.availability_zone',
-        'cloud.machine.type',
-        'cloud.project.id',
-        'cloud.provider',
-        'service.type',
-      ].map(mapFieldToOption),
-      [InfraNodeType.host]: [
-        'cloud.availability_zone',
-        'cloud.machine.type',
-        'cloud.project.id',
-        'cloud.provider',
-        'service.type',
-      ].map(mapFieldToOption),
-    };
-  }
-
-  return OPTIONS[nodeType];
-};
 
 const initialState = {
   isPopoverOpen: false,
@@ -82,7 +48,7 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
       ...option,
       toolTipContent: option.text,
     }));
-    const options = getOptions(nodeType).concat(customOptions);
+    const options = this.props.options.concat(customOptions);
 
     if (!options.length) {
       throw Error(
