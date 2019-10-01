@@ -16,11 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { getTypes, getProperty, getRootProperties, getRootPropertiesObjects } from './lib';
-export {
-  FieldMapping,
-  MappingMeta,
-  MappingProperties,
-  IndexMapping,
-  SavedObjectsMapping,
-} from './types';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectsLegacyUiExports } from 'src/core/server/types';
+// @ts-ignore
+import { UI_EXPORT_DEFAULTS } from './ui_export_defaults';
+// @ts-ignore
+import * as uiExportTypeReducers from './ui_export_types';
+// @ts-ignore
+import { reduceExportSpecs } from '../../plugin_discovery';
+
+export function collectUiExports(pluginSpecs: unknown[]): SavedObjectsLegacyUiExports {
+  return reduceExportSpecs(pluginSpecs, uiExportTypeReducers, UI_EXPORT_DEFAULTS);
+}

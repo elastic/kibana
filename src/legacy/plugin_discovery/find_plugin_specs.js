@@ -39,7 +39,7 @@ import {
   isInvalidPackError,
 } from './errors';
 
-function defaultConfig(settings) {
+export function defaultConfig(settings) {
   return Config.withDefaultSchema(
     transformDeprecations(settings)
   );

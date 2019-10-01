@@ -16,11 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { getTypes, getProperty, getRootProperties, getRootPropertiesObjects } from './lib';
-export {
-  FieldMapping,
-  MappingMeta,
-  MappingProperties,
-  IndexMapping,
-  SavedObjectsMapping,
-} from './types';
+
+import { CoreContext } from './core_context';
+import { getEnvOptions } from './config/__mocks__/env';
+import { Env, IConfigService } from './config';
+import { loggingServiceMock } from './logging/logging_service.mock';
+import { configServiceMock } from './config/config_service.mock';
+import { ILoggingService } from './logging';
+
+function create({
+  env = Env.createDefault(getEnvOptions()),
+  logger = loggingServiceMock.create(),
+  configService = configServiceMock.create(),
+}: {
+  env?: Env;
+  logger?: jest.Mocked<ILoggingService>;
+  configService?: jest.Mocked<IConfigService>;
+} = {}): CoreContext {
+  return { coreId: Symbol(), env, logger, configService };
+}
+
+export const mockCoreContext = {
+  create,
+};
