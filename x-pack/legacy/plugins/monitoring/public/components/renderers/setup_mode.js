@@ -9,7 +9,8 @@ import {
   initSetupModeState,
   updateSetupModeData,
   disableElasticsearchInternalCollection,
-  toggleSetupMode
+  toggleSetupMode,
+  setSetupModeMenuItem
 } from '../../lib/setup_mode';
 import { Flyout } from '../metricbeat_migration/flyout';
 import {
@@ -61,6 +62,7 @@ export class SetupModeRenderer extends React.Component {
 
       this.setState(newState);
     });
+    setSetupModeMenuItem();
   }
 
   reset() {

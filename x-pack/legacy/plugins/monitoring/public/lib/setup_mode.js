@@ -122,7 +122,6 @@ export const toggleSetupMode = inSetupMode => {
   setupModeState.enabled = inSetupMode;
   globalState.inSetupMode = inSetupMode;
   globalState.save();
-  setSetupModeMenuItem(); // eslint-disable-line  no-use-before-define
   notifySetupModeDataChange();
 
   if (inSetupMode) {
@@ -131,7 +130,7 @@ export const toggleSetupMode = inSetupMode => {
   }
 };
 
-const setSetupModeMenuItem = () => {
+export const setSetupModeMenuItem = () => {
   checkAngularState();
 
   if (isOnPage('no-data')) {
@@ -159,7 +158,6 @@ const setSetupModeMenuItem = () => {
 export const initSetupModeState = async ($scope, $injector, callback) => {
   angularState.scope = $scope;
   angularState.injector = $injector;
-  setSetupModeMenuItem();
   callback && setupModeState.callbacks.push(callback);
 
   const globalState = $injector.get('globalState');
