@@ -13,15 +13,9 @@
       "auto-http-0XE3B163481423197D"
     ],
     "locations": [],
-    "names": null,
-    "ports": [
-      9200,
-      12349
-    ],
-    "schemes": [
-      "http",
-      "tcp"
-    ],
+    "names": [],
+    "ports": [9200, 12349],
+    "schemes": ["http", "tcp"],
     "urls": [
       "tcp://localhost:9200",
       "http://www.reddit.com/",
