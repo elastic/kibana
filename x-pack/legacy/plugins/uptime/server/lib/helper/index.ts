@@ -9,3 +9,4 @@ export { formatEsBucketsForHistogram } from './format_es_buckets_for_histogram';
 export { getFilterClause } from './get_filter_clause';
 export { getHistogramInterval } from './get_histogram_interval';
 export { parseFilterQuery } from './parse_filter_query';
+export { assertCloseTo } from './assert_close_to';
