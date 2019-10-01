@@ -20,6 +20,23 @@ export function refreshIntervalWatcher($timeout) {
     if (refresher) {
       $timeout.cancel(refresher);
     }
+    checkForStartRefresh();
+  };
+
+  function init(listenerCallback) {
+    listener = listenerCallback;
+    timefilter.on('refreshIntervalUpdate', onRefreshIntervalChange);
+
+    // Apply any refresh values set on initialization e.g. in the URL.
+    checkForStartRefresh();
+  }
+
+  function cancel() {
+    $timeout.cancel(refresher);
+    timefilter.off('refreshIntervalUpdate', onRefreshIntervalChange);
+  }
+
+  function checkForStartRefresh() {
     const interval = timefilter.getRefreshInterval();
     if (interval.value > 0 && !interval.pause) {
       function startRefresh() {
@@ -30,16 +47,6 @@ export function refreshIntervalWatcher($timeout) {
       }
       startRefresh();
     }
-  };
-
-  function init(listenerCallback) {
-    listener = listenerCallback;
-    timefilter.on('refreshIntervalUpdate', onRefreshIntervalChange);
-  }
-
-  function cancel() {
-    $timeout.cancel(refresher);
-    timefilter.off('refreshIntervalUpdate', onRefreshIntervalChange);
   }
 
   return {
