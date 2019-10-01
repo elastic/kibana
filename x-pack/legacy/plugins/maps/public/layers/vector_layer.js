@@ -131,9 +131,21 @@ export class VectorLayer extends AbstractLayer {
     return true;
   }
 
+  getInjectedData() {
+    const featureCollection = super.getInjectedData();
+    if (featureCollection) {
+      // Set default visible property on data
+      featureCollection.features.forEach(
+        feature => _.set(feature, `properties.${FEATURE_VISIBLE_PROPERTY_NAME}`, true)
+      );
+      return featureCollection;
+    } else {
+      return null;
+    }
+  }
+
   getCustomIconAndTooltipContent() {
-    const sourceDataRequest = this.getSourceDataRequest();
-    const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
+    const featureCollection = this._getSourceFeatureCollection();
 
     const noResultsIcon = (
       <EuiIcon
@@ -145,9 +157,10 @@ export class VectorLayer extends AbstractLayer {
     if (!featureCollection || featureCollection.features.length === 0) {
       return {
         icon: noResultsIcon,
-        tooltipContent: i18n.translate('xpack.maps.vectorLayer.noResultsFoundTooltip', {
-          defaultMessage: `No results found.`
-        })
+        tooltipContent: i18n.translate(
+          'xpack.maps.vectorLayer.noResultsFoundTooltip', {
+            defaultMessage: `No results found.`
+          })
       };
     }
 
@@ -162,7 +175,7 @@ export class VectorLayer extends AbstractLayer {
       };
     }
 
-
+    const sourceDataRequest = this.getSourceDataRequest();
     const { tooltipContent, areResultsTrimmed } = this._source.getSourceTooltipContent(sourceDataRequest);
     return {
       icon: this._style.getIcon(),
@@ -464,7 +477,17 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
-  async _syncSource({ startLoading, stopLoading, onLoadError, registerCancelCallback, dataFilters }) {
+  async _syncSource({
+    startLoading, stopLoading, onLoadError, registerCancelCallback, dataFilters
+  }) {
+
+    if (this._source.isInjectedData()) {
+      const featureCollection = this.getInjectedData();
+      return {
+        refreshed: false,
+        featureCollection
+      };
+    }
 
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
 
@@ -481,8 +504,8 @@ export class VectorLayer extends AbstractLayer {
     try {
       startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
       const layerName = await this.getDisplayName();
-      const { data: featureCollection, meta } = this._source.isPushedData()
-        ? { data: this.getPushedData(), meta: {} }
+      const { data: featureCollection, meta } = this._source.isInjectedData()
+        ? { data: this.getInjectedData(), meta: {} }
         : await this._source.getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback.bind(null, requestToken));
       this._assignIdsToFeatures(featureCollection);
       stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, featureCollection, meta);
@@ -543,8 +566,12 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _getSourceFeatureCollection() {
-    const sourceDataRequest = this.getSourceDataRequest();
-    return sourceDataRequest ? sourceDataRequest.getData() : null;
+    if (this._source.isInjectedData()) {
+      return this.getInjectedData();
+    } else {
+      const sourceDataRequest = this.getSourceDataRequest();
+      return sourceDataRequest ? sourceDataRequest.getData() : null;
+    }
   }
 
   _syncFeatureCollectionWithMb(mbMap) {

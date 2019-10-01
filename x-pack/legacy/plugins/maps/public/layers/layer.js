@@ -10,7 +10,10 @@ import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
 import { InjectedData } from './util/injected_data';
-import { MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER, SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
+import {
+  MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
+  SOURCE_DATA_ID_ORIGIN
+} from '../../common/constants';
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../reducers/util';
 import { i18n } from '@kbn/i18n';
