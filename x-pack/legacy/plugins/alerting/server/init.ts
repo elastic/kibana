@@ -50,24 +50,23 @@ export function init(server: Server) {
     // TODO: Not sure why server.newPlatform doesn't work
     ...((server as unknown) as KbnServer).newPlatform.setup.core,
     elasticsearch: server.plugins.elasticsearch,
+    savedObjects: server.savedObjects,
     http: {
       route: server.route.bind(server),
+      basePath: {
+        serverBasePath: server.config().get('server.basePath') || '',
+      },
     },
   };
   // plugins shim
   const pluginsSetup = {
     // TODO: Not sure why server.newPlatform doesn't work
     ...((server as unknown) as KbnServer).newPlatform.setup.plugins,
+    // TODO: Why?
+    security: ((server as unknown) as KbnServer).newPlatform.setup.plugins.security as
+      | SecurityPluginSetupContract
+      | undefined,
     task_manager: server.plugins.task_manager,
-    // TODO: Security is already inside newPlatform, TypeScript not happy
-    // TODO: Currently a function because it's an optional dependency that
-    // initializes after this function is called
-    // security() {
-    //   return server.config().get('xpack.security.enabled') !== false
-    //     ? (((server as unknown) as KbnServer).newPlatform.setup.plugins
-    //         .security as SecurityPluginSetupContract)
-    //     : undefined;
-    // },
     // TODO: Currently a function because it's an optional dependency that
     // initializes after this function is called
     spaces: () => server.plugins.spaces,
@@ -119,13 +118,13 @@ export function init(server: Server) {
     return {
       log: (...args) => server.log(...args),
       callCluster: (...args) => callWithRequest(request, ...args),
-      savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(request),
+      savedObjectsClient: coreSetup.savedObjects.getScopedSavedObjectsClient(request),
     };
   }
   function getBasePath(spaceId?: string): string {
     return pluginsSetup.spaces() && spaceId
       ? pluginsSetup.spaces().getBasePath(spaceId)
-      : ((server.config().get('server.basePath') || '') as string);
+      : coreSetup.http.basePath.serverBasePath;
   }
   function spaceIdToNamespace(spaceId?: string): string | undefined {
     return pluginsSetup.spaces() && spaceId
@@ -135,7 +134,7 @@ export function init(server: Server) {
 
   const alertTypeRegistry = new AlertTypeRegistry({
     getServices,
-    isSecurityEnabled: !!pluginsSetup.security(),
+    isSecurityEnabled: !!pluginsSetup.security,
     taskManager,
     executeAction: pluginsSetup.actions.execute,
     encryptedSavedObjectsPlugin: pluginsSetup.encrypted_saved_objects,
@@ -170,7 +169,7 @@ export function init(server: Server) {
       taskManager,
       spaceId: pluginsSetup.spaces() ? pluginsSetup.spaces().getSpaceId(request) : undefined,
       async getUserName(): Promise<string | null> {
-        const securityPluginSetup = pluginsSetup.security();
+        const securityPluginSetup = pluginsSetup.security;
         if (!securityPluginSetup) {
           return null;
         }
@@ -178,7 +177,7 @@ export function init(server: Server) {
         return user ? user.username : null;
       },
       async createAPIKey(): Promise<CreateAPIKeyResult> {
-        const securityPluginSetup = pluginsSetup.security();
+        const securityPluginSetup = pluginsSetup.security;
         if (!securityPluginSetup) {
           return { created: false };
         }
