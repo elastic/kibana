@@ -149,7 +149,7 @@ export function asTime(
   value: FormatterValue,
   { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
 ) {
-  if (value == null) {
+  if (value == null || value === undefined) {
     return defaultValue;
   }
   const formatter = getTimeFormatter(value);
