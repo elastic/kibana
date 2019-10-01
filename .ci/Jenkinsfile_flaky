@@ -16,22 +16,33 @@ def workerFailures = []
 currentBuild.displayName += trunc(" ${params.GITHUB_OWNER}:${params.branch_specifier}", 24)
 currentBuild.description = "${params.CI_GROUP}<br />Executions: ${params.NUMBER_EXECUTIONS}"
 
+// Note: If you increase agent count, it will execute NUMBER_EXECUTIONS per agent. It will not divide them up amongst the agents
+// e.g. NUMBER_EXECUTIONS = 25, agentCount = 4 results in 100 total executions
+def agentCount = 1
+
 stage("Kibana Pipeline") {
   timeout(time: 180, unit: 'MINUTES') {
     timestamps {
       ansiColor('xterm') {
-        catchError {
-          kibanaPipeline.withWorkers('flaky-test-runner', {
-            if (!IS_XPACK) {
-              kibanaPipeline.buildOss()
-              if (CI_GROUP == '1') {
-                runbld "./test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh"
-              }
-            } else {
-              kibanaPipeline.buildXpack()
+        def agents = [:]
+        for(def agentNumber = 1; agentNumber <= agentCount; agentNumber++) {
+          agents["agent-${agentNumber}"] = {
+            catchError {
+              kibanaPipeline.withWorkers('flaky-test-runner', {
+                if (!IS_XPACK) {
+                  kibanaPipeline.buildOss()
+                  if (CI_GROUP == '1') {
+                    runbld "./test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh"
+                  }
+                } else {
+                  kibanaPipeline.buildXpack()
+                }
+              }, getWorkerMap(agentNumber, params.NUMBER_EXECUTIONS.toInteger(), worker, workerFailures))()
             }
-          }, getWorkerMap(params.NUMBER_EXECUTIONS.toInteger(), worker, workerFailures))()
+          }
         }
+
+        parallel(agents)
 
         currentBuild.description += ", Failures: ${workerFailures.size()}"
 
@@ -66,22 +77,22 @@ def getWorkerFromParams(isXpack, job, ciGroup) {
   }
 }
 
-def getWorkerMap(numberOfExecutions, worker, workerFailures, maxWorkers = 14) {
+def getWorkerMap(agentNumber, numberOfExecutions, worker, workerFailures, maxWorkers = 14) {
   def workerMap = [:]
   def numberOfWorkers = Math.min(numberOfExecutions, maxWorkers)
 
   for(def i = 1; i <= numberOfWorkers; i++) {
     def workerExecutions = numberOfExecutions/numberOfWorkers + (i <= numberOfExecutions%numberOfWorkers ? 1 : 0)
 
-    workerMap["worker-${i}"] = { workerNumber ->
+    workerMap["agent-${agentNumber}-worker-${i}"] = { workerNumber ->
       for(def j = 0; j < workerExecutions; j++) {
-        print "Execute worker-${workerNumber}: ${j}"
-        withEnv(["JOB=worker-${workerNumber}-${j}"]) {
+        print "Execute agent-${agentNumber} worker-${workerNumber}: ${j}"
+        withEnv(["JOB=agent-${agentNumber}-worker-${workerNumber}-${j}"]) {
           catchError {
             try {
               worker(workerNumber)
             } catch (ex) {
-              workerFailures << "worker-${workerNumber}-${j}"
+              workerFailures << "agent-${agentNumber} worker-${workerNumber}-${j}"
               throw ex
             }
           }
