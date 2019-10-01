@@ -85,11 +85,20 @@ export class HeadlessChromiumDriver {
 
     this.page.on('response', interceptedResponse => {
       const interceptedUrl = interceptedResponse.url();
+      const remoteIp = interceptedResponse.remoteAddress().ip;
+      const status = interceptedResponse.status();
       const isMalicious = interceptedUrl.startsWith('file://');
       let allowed = true;
 
-      if (this.networkPolicy.enabled) {
-        allowed = allowResponse(interceptedUrl, this.networkPolicy.allow, this.networkPolicy.deny);
+      // Redirects can come through this hook as well, so only
+      // filter payloads that actually respond
+      if (this.networkPolicy.enabled && status === 200) {
+        allowed = allowResponse(
+          interceptedUrl,
+          remoteIp,
+          this.networkPolicy.allow,
+          this.networkPolicy.deny
+        );
       }
 
       if (isMalicious || !allowed) {
