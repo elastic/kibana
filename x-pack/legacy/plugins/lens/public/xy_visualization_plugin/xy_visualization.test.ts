@@ -99,7 +99,7 @@ describe('xy_visualization', () => {
               ],
               "layerId": "",
               "position": "top",
-              "seriesType": "bar",
+              "seriesType": "bar_stacked",
               "showGridlines": false,
               "splitAccessor": "test-id2",
               "xAccessor": "test-id3",
@@ -109,7 +109,7 @@ describe('xy_visualization', () => {
             "isVisible": true,
             "position": "right",
           },
-          "preferredSeriesType": "bar",
+          "preferredSeriesType": "bar_stacked",
           "title": "Empty XY Chart",
         }
       `);

@@ -130,7 +130,7 @@ export function XYChartReportable(props: XYChartRenderProps) {
   }, []);
 
   return (
-    <VisualizationContainer isReady={isReady}>
+    <VisualizationContainer className="lnsXyExpression__container" isReady={isReady}>
       <MemoizedChart {...props} />
     </VisualizationContainer>
   );
@@ -176,7 +176,7 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
   const shouldRotate = isHorizontalChart(layers);
 
   return (
-    <Chart className="lnsXyExpression__chart">
+    <Chart>
       <Settings
         showLegend={legend.isVisible}
         legendPosition={legend.position}

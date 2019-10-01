@@ -19,7 +19,7 @@ import { generateId } from '../id_generator';
 import { isHorizontalChart } from './state_helpers';
 
 const defaultIcon = 'visBarVertical';
-const defaultSeriesType = 'bar';
+const defaultSeriesType = 'bar_stacked';
 
 function getDescription(state?: State) {
   if (!state) {
