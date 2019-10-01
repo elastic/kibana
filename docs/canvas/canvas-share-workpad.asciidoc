@@ -52,17 +52,17 @@ For more information, refer to <<automating-report-generation, Automating report
 image::images/canvas-create-URL.gif[Create POST URL]
 
 [float]
-[[create-workpad-snapshot]]
-=== Embed on a website
+[[add-workpad-website]]
+=== Add the workpad to a website
 
-Create a snapshot of you workpad, then embed it on a website. To ensure that your connected data remains secure, the data in the JSON file is not connected to {kib}.
+To ensure that your connected data remains secure, the data in the JSON file is unable to connect to {kib}. When your workpad contains elements that manipulate the data, the element is unable to appear on the workpad.
 
 . If you are using a Gold or Platinum license, enable reporting in your `config/kibana.yml` file.
 
-. From your workpad, click the *Share workpad* icon in the upper left corner, then select *Embed on a website*.
+. From your workpad, click the *Share workpad* icon in the upper left corner, then select *Share on a website*.
 
-. From the *Embed on a website* flyout, follow the instructions.
+. On the *Share on a website* flyout, follow the instructions.
 
-NOTE: Snapshots encode the current state of the workpad in the JSON file. When you make changes to the workpad, the changes do not automatically appear in the JSON file.
+NOTE: Embedded workpads encode the current state of the workpad in the JSON file. When you make changes to the workpad, the changes do not automatically appear in the JSON file.
 
 //TODO insert image
