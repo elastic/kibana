@@ -7,6 +7,11 @@
          "type": "index-pattern", 
          "name": "kibanaSavedObjectMeta.searchSourceJSON.index", 
          "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b"
+      }, 
+      {
+         "type": "index-pattern", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index", 
+         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b"
       }
    ], 
    "search": {
@@ -19,7 +24,7 @@
       "title": "SMTP Table", 
       "version": 3, 
       "kibanaSavedObjectMeta": {
-         "searchSourceJSON": "{\n  \"highlight\": {\n    \"pre_tags\": [\n      \"@kibana-highlighted-field@\"\n    ],\n    \"post_tags\": [\n      \"@/kibana-highlighted-field@\"\n    ],\n    \"fields\": {\n      \"*\": {}\n    },\n    \"fragment_size\": 2147483647\n  },\n  \"filter\": [\n    {\n      \"meta\": {\n        \"negate\": false,\n        \"key\": \"Application\",\n        \"value\": \"smtp\",\n        \"disabled\": false,\n        \"indexRefName\": \"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"\n      },\n      \"query\": {\n        \"match\": {\n          \"Application\": {\n            \"query\": \"smtp\",\n            \"type\": \"phrase\"\n          }\n        }\n      },\n      \"$state\": {\n        \"store\": \"appState\"\n      }\n    }\n  ],\n  \"query\": {\n    \"query\": {\n      \"query_string\": {\n        \"query\": \"*\",\n        \"analyze_wildcard\": true,\n        \"time_zone\": \"America/Denver\"\n      }\n    },\n    \"language\": \"lucene\"\n  },\n  \"highlightAll\": true,\n  \"version\": true,\n  \"indexRefName\": \"kibanaSavedObjectMeta.searchSourceJSON.index\"\n}"
+         "searchSourceJSON": "{\"highlight\":{\"pre_tags\":[\"@kibana-highlighted-field@\"],\"post_tags\":[\"@/kibana-highlighted-field@\"],\"fields\":{\"*\":{}},\"fragment_size\":2147483647},\"query\":{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true,\"time_zone\":\"America/Denver\"}},\"language\":\"lucene\"},\"highlightAll\":true,\"version\":true,\"filter\":[{\"meta\":{\"alias\":\"SMTP Traffic\",\"negate\":false,\"type\":\"phrase\",\"key\":\"Application.keyword\",\"value\":\"smtp\",\"params\":{\"query\":\"smtp\"},\"disabled\":false,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"Application.keyword\":{\"query\":\"smtp\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
       }, 
       "columns": [
          "Attach", 
@@ -31,5 +36,5 @@
       ]
    }, 
    "type": "search", 
-   "updated_at": "2019-09-26T23:05:31.630Z"
+   "updated_at": "2019-10-01T20:37:18.883Z"
 }
