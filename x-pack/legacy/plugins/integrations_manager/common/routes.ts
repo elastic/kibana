@@ -4,13 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PLUGIN } from './constants';
-import { AssetType } from './types';
+import { AssetType, CategoryId } from './types';
 
 export const API_ROOT = `/api/${PLUGIN.ID}`;
 export const API_LIST_PATTERN = `${API_ROOT}/list`;
 export const API_INFO_PATTERN = `${API_ROOT}/package/{pkgkey}`;
 export const API_INSTALL_PATTERN = `${API_ROOT}/install/{pkgkey}/{asset?}`;
 export const API_DELETE_PATTERN = `${API_ROOT}/delete/{pkgkey}/{asset?}`;
+export const API_CATEGORIES_PATTERN = `${API_ROOT}/categories`;
+
+export interface ListParams {
+  category?: CategoryId;
+}
+
+export function getCategoriesPath() {
+  return API_CATEGORIES_PATTERN;
+}
 
 export function getListPath() {
   return API_LIST_PATTERN;

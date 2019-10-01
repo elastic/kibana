@@ -10,15 +10,27 @@ import { InstallationAttributes } from '../../common/types';
 import * as Registry from '../registry';
 import { createInstallableFrom } from './index';
 
+export { SearchParams } from '../registry';
+
 function nameAsTitle(name: string) {
   return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();
 }
 
-export async function getIntegrations(options: { savedObjectsClient: SavedObjectsClientContract }) {
+export async function getCategories() {
+  return Registry.fetchCategories();
+}
+
+export async function getIntegrations(
+  options: {
+    savedObjectsClient: SavedObjectsClientContract;
+  } & Registry.SearchParams
+) {
   const { savedObjectsClient } = options;
-  const registryItems = await Registry.fetchList().then(items =>
-    items.map(item => Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }))
-  );
+  const registryItems = await Registry.fetchList({ category: options.category }).then(items => {
+    return items.map(item =>
+      Object.assign({}, item, { title: item.title || nameAsTitle(item.name) })
+    );
+  });
   const searchObjects = registryItems.map(({ name, version }) => ({
     type: SAVED_OBJECT_TYPE,
     id: `${name}-${version}`,

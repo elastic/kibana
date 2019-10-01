@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
+import React from 'react';
+import { EuiLink } from '@elastic/eui';
+import chrome from 'ui/chrome';
 import { detectorToString } from 'plugins/ml/util/string_utils';
 import { formatValues, filterObjects } from './format_values';
 import { i18n } from '@kbn/i18n';
@@ -58,7 +60,10 @@ export function extractJobDetails(job) {
     items: []
   };
   if (job.calendars) {
-    calendars.items = job.calendars.map(c => ['', c]);
+    calendars.items = job.calendars.map(c => [
+      '',
+      <EuiLink href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list/edit_calendar/${c}?_g=()`}>{c}</EuiLink>,
+    ]);
     // remove the calendars list from the general section
     // so not to show it twice.
     const i = general.items.findIndex(item => item[0] === 'calendars');

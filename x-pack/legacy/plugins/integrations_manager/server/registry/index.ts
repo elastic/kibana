@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { URL } from 'url';
 import {
   AssetsGroupedByServiceByType,
   AssetParts,
+  CategoryId,
+  CategorySummaryList,
   RegistryList,
   RegistryPackage,
 } from '../../common/types';
@@ -14,17 +17,32 @@ import { cacheGet, cacheSet } from './cache';
 import { ArchiveEntry, untarBuffer } from './extract';
 import { fetchUrl, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
+import { integrationsManagerConfigStore } from '../config';
 
 export { ArchiveEntry } from './extract';
 
-const REGISTRY = process.env.REGISTRY || 'http://integrations-registry.app.elstc.co';
+export interface SearchParams {
+  category?: CategoryId;
+}
 
-export async function fetchList(): Promise<RegistryList> {
-  return fetchUrl(`${REGISTRY}/search`).then(JSON.parse);
+export async function fetchList(params?: SearchParams): Promise<RegistryList> {
+  const { registryUrl } = integrationsManagerConfigStore.getConfig();
+  const url = new URL(`${registryUrl}/search`);
+  if (params && params.category) {
+    url.searchParams.set('category', params.category);
+  }
+
+  return fetchUrl(url.toString()).then(JSON.parse);
 }
 
 export async function fetchInfo(key: string): Promise<RegistryPackage> {
-  return fetchUrl(`${REGISTRY}/package/${key}`).then(JSON.parse);
+  const { registryUrl } = integrationsManagerConfigStore.getConfig();
+  return fetchUrl(`${registryUrl}/package/${key}`).then(JSON.parse);
+}
+
+export async function fetchCategories(): Promise<CategorySummaryList> {
+  const { registryUrl } = integrationsManagerConfigStore.getConfig();
+  return fetchUrl(`${registryUrl}/categories`).then(JSON.parse);
 }
 
 export async function getArchiveInfo(
@@ -81,7 +99,8 @@ async function getOrFetchArchiveBuffer(key: string): Promise<Buffer> {
 }
 
 async function fetchArchiveBuffer(key: string): Promise<Buffer> {
-  return getResponseStream(`${REGISTRY}/package/${key}`).then(streamToBuffer);
+  const { registryUrl } = integrationsManagerConfigStore.getConfig();
+  return getResponseStream(`${registryUrl}/package/${key}`).then(streamToBuffer);
 }
 
 export function getAsset(key: string) {

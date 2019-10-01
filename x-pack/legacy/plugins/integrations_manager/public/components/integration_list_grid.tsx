@@ -3,45 +3,77 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React, { Fragment, ReactNode } from 'react';
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { IntegrationList, IntegrationListItem } from '../../common/types';
-import { IntegrationCard } from './integration_card';
+import { IntegrationCard, BadgeProps } from './integration_card';
 
-interface ListProps {
+type ListProps = {
+  controls?: ReactNode;
   title: string;
   list: IntegrationList;
-}
+} & BadgeProps;
 
-export function IntegrationListGrid({ title, list }: ListProps) {
-  if (!list.length) return null;
+export function IntegrationListGrid({ controls, title, list, showInstalledBadge }: ListProps) {
+  const controlsContent = <ControlsColumn title={title} controls={controls} />;
+  const gridContent = <GridColumn list={list} showInstalledBadge={showInstalledBadge} />;
 
   return (
     <Fragment>
-      <EuiSpacer />
+      <EuiSpacer size="l" />
       <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
-          <EuiText>
-            <h2>{title}</h2>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={3}>
-          <EuiFlexGrid gutterSize="l" columns={3}>
-            {list.map(item => (
-              <GridItem key={`${item.name}-${item.version}`} {...item} />
-            ))}
-          </EuiFlexGrid>
-        </EuiFlexItem>
+        <EuiFlexItem grow={1}>{controlsContent}</EuiFlexItem>
+        <EuiFlexItem grow={3}>{gridContent}</EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
+      <EuiSpacer size="xxl" />
     </Fragment>
   );
 }
 
-function GridItem(item: IntegrationListItem) {
+type GridItemProps = IntegrationListItem & BadgeProps;
+
+function GridItem(item: GridItemProps) {
   return (
     <EuiFlexItem>
-      <IntegrationCard {...item} />
+      <IntegrationCard {...item} showInstalledBadge={item.showInstalledBadge} />
     </EuiFlexItem>
+  );
+}
+
+interface ControlsColumnProps {
+  controls: ReactNode;
+  title: string;
+}
+
+function ControlsColumn({ controls, title }: ControlsColumnProps) {
+  return (
+    <Fragment>
+      <EuiText>
+        <h2>{title}</h2>
+      </EuiText>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={2}>{controls}</EuiFlexItem>
+        <EuiFlexItem grow={1} />
+      </EuiFlexGroup>
+    </Fragment>
+  );
+}
+
+type GridColumnProps = {
+  list: IntegrationList;
+} & BadgeProps;
+
+function GridColumn({ list, showInstalledBadge }: GridColumnProps) {
+  return (
+    <EuiFlexGrid gutterSize="l" columns={3}>
+      {list.map(item => (
+        <GridItem
+          key={`${item.name}-${item.version}`}
+          {...item}
+          showInstalledBadge={showInstalledBadge}
+        />
+      ))}
+    </EuiFlexGrid>
   );
 }
