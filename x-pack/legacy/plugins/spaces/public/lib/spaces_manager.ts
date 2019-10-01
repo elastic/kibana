@@ -9,8 +9,8 @@ import { SavedObjectsManagementRecord } from 'ui/management/saved_objects_manage
 import { Space } from '../../common/model/space';
 import { GetSpacePurpose } from '../../common/model/types';
 import { CopySavedObjectsToSpaceResponse } from './copy_saved_objects_to_space/types';
-import { addSpaceIdToPath } from '../../server/lib/spaces_url_parser';
 import { ENTER_SPACE_PATH } from '../../common/constants';
+import { addSpaceIdToPath } from '../../common';
 
 export class SpacesManager extends EventEmitter {
   constructor(private readonly serverBasePath: string) {

@@ -7,7 +7,7 @@
 import { Space } from '../../common/model/space';
 import { wrapError } from './errors';
 import { SpacesClient } from './spaces_client';
-import { getSpaceIdFromPath } from './spaces_url_parser';
+import { getSpaceIdFromPath } from '../../common';
 
 export async function getActiveSpace(
   spacesClient: SpacesClient,

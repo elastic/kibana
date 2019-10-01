@@ -6,12 +6,12 @@
 import { Logger, CoreSetup } from 'src/core/server';
 import { Space } from '../../../common/model/space';
 import { wrapError } from '../errors';
-import { addSpaceIdToPath } from '../spaces_url_parser';
 import { XPackMainPlugin } from '../../../../xpack_main/xpack_main';
 import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
 import { LegacyAPI } from '../../new_platform/plugin';
 import { getSpaceSelectorUrl } from '../get_space_selector_url';
 import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
+import { addSpaceIdToPath } from '../../../common';
 
 export interface OnPostAuthInterceptorDeps {
   getLegacyAPI(): LegacyAPI;
