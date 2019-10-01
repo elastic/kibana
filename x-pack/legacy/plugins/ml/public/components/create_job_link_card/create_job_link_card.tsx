@@ -55,7 +55,6 @@ export const CreateJobLinkCard: FC<Props> = ({
         }}
         data-test-subj={dateTestSubj}
         color="subdued"
-        type="link"
         {...linkHrefAndOnClickProps}
       >
         <EuiFlexGroup gutterSize="l" responsive={true}>

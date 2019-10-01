@@ -87,6 +87,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
             'Use the full range of options to create a job for more advanced use cases',
         })}
         onClick={openAdvancedJobWizard}
+        href={`${basePath}/app/ml#/jobs/new_job/advanced?index=${indexPattern}`}
       />
     </EuiPanel>
   );
