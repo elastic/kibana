@@ -63,7 +63,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="xpack.snapshotRestore.policyForm.stepRetention.expirationDescriptionTitle"
+              id="xpack.snapshotRestore.policyForm.stepRetention.expirationTitle"
               defaultMessage="Expiration"
             />
           </h3>
@@ -129,7 +129,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="xpack.snapshotRestore.policyForm.stepRetention.countDescriptionTitle"
+              id="xpack.snapshotRestore.policyForm.stepRetention.countTitle"
               defaultMessage="Snapshots to retain"
             />
           </h3>

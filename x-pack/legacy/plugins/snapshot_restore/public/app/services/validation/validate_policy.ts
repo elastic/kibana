@@ -34,7 +34,7 @@ export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
 
   if (isStringEmpty(name)) {
     validation.errors.name.push(
-      i18n.translate('xpack.snapshotRestore.policyValidation.nameRequiredError', {
+      i18n.translate('xpack.snapshotRestore.policyValidation.nameRequiredErroMessage', {
         defaultMessage: 'Policy name is required.',
       })
     );
@@ -42,7 +42,7 @@ export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
 
   if (isStringEmpty(snapshotName)) {
     validation.errors.snapshotName.push(
-      i18n.translate('xpack.snapshotRestore.policyValidation.snapshotNameRequiredError', {
+      i18n.translate('xpack.snapshotRestore.policyValidation.snapshotNameRequiredErrorMessage', {
         defaultMessage: 'Snapshot name is required.',
       })
     );
@@ -50,7 +50,7 @@ export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
 
   if (isStringEmpty(schedule)) {
     validation.errors.schedule.push(
-      i18n.translate('xpack.snapshotRestore.policyValidation.scheduleRequiredError', {
+      i18n.translate('xpack.snapshotRestore.policyValidation.scheduleRequiredErrorMessage', {
         defaultMessage: 'Schedule is required.',
       })
     );
@@ -58,7 +58,7 @@ export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
 
   if (isStringEmpty(repository)) {
     validation.errors.repository.push(
-      i18n.translate('xpack.snapshotRestore.policyValidation.repositoryRequiredError', {
+      i18n.translate('xpack.snapshotRestore.policyValidation.repositoryRequiredErrorMessage', {
         defaultMessage: 'Repository is required.',
       })
     );
@@ -66,7 +66,7 @@ export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
 
   if (config && typeof config.indices === 'string' && config.indices.trim().length === 0) {
     validation.errors.indices.push(
-      i18n.translate('xpack.snapshotRestore.policyValidation.indexPatternRequiredError', {
+      i18n.translate('xpack.snapshotRestore.policyValidation.indexPatternRequiredErrorMessage', {
         defaultMessage: 'At least one index pattern is required.',
       })
     );
@@ -74,7 +74,7 @@ export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
 
   if (config && Array.isArray(config.indices) && config.indices.length === 0) {
     validation.errors.indices.push(
-      i18n.translate('xpack.snapshotRestore.policyValidation.indicesRequiredError', {
+      i18n.translate('xpack.snapshotRestore.policyValidation.indicesRequiredErrorMessage', {
         defaultMessage: 'You must select at least one index.',
       })
     );
@@ -87,7 +87,7 @@ export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
     retention.minCount > retention.maxCount
   ) {
     validation.errors.minCount.push(
-      i18n.translate('xpack.snapshotRestore.policyValidation.invalidMinCountError', {
+      i18n.translate('xpack.snapshotRestore.policyValidation.invalidMinCountErrorMessage', {
         defaultMessage: 'Min count cannot be greater than max count.',
       })
     );

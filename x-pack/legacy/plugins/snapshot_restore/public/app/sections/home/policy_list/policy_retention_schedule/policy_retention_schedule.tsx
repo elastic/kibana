@@ -90,13 +90,13 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
                 <p>
                   {retentionSchedule ? (
                     <FormattedMessage
-                      id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleText"
+                      id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleDescription"
                       defaultMessage="Snapshot retention will run on the cron schedule: {cronSchedule}."
                       values={{ cronSchedule: <strong>{retentionSchedule}</strong> }}
                     />
                   ) : (
                     <FormattedMessage
-                      id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleNotConfiguredText"
+                      id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleNotConfiguredDescription"
                       defaultMessage="A snapshot retention schedule is not configured."
                     />
                   )}
@@ -112,7 +112,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
                         position="top"
                         content={
                           <FormattedMessage
-                            id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleEditLinkTooltipText"
+                            id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleEditLinkTooltip"
                             defaultMessage="Edit retention schedule"
                           />
                         }
@@ -141,7 +141,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
                         position="top"
                         content={
                           <FormattedMessage
-                            id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleAddLinkTooltipText"
+                            id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleAddLinkTooltip"
                             defaultMessage="Add retention schedule"
                           />
                         }
@@ -197,7 +197,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
                   onClick={() => updateRetentionPrompt(undefined, onRetentionScheduleUpdated)}
                 >
                   <FormattedMessage
-                    id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleAddButtonText"
+                    id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleAddButtonLabel"
                     defaultMessage="Add retention schedule"
                   />
                 </EuiButton>

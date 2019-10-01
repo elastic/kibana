@@ -360,7 +360,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
           data-test-subj="partialIndicesToggle"
           label={
             <FormattedMessage
-              id="xpack.snapshotRestore.policyForm.stepSettings.partialLabel"
+              id="xpack.snapshotRestore.policyForm.stepSettings.partialIndicesToggleSwitch"
               defaultMessage="Allow partial indices"
             />
           }

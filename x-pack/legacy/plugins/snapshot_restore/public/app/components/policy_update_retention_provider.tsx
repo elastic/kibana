@@ -110,7 +110,7 @@ export const PolicyUpdateRetentionProvider: React.FunctionComponent<Props> = ({ 
 
       toastNotifications.addSuccess(
         i18n.translate(
-          'xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionSuccessText',
+          'xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionSuccessMessage',
           {
             defaultMessage: 'Updated retention schedule',
           }
@@ -178,7 +178,7 @@ export const PolicyUpdateRetentionProvider: React.FunctionComponent<Props> = ({ 
                   }
                   isInvalid={isInvalid}
                   error={i18n.translate(
-                    'xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionScheduleFieldError',
+                    'xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionScheduleFieldErrorMessage',
                     {
                       defaultMessage: 'Retention schedule is required.',
                     }
@@ -191,7 +191,7 @@ export const PolicyUpdateRetentionProvider: React.FunctionComponent<Props> = ({ 
                         docLink: (
                           <EuiLink href={documentationLinksService.getCronUrl()} target="_blank">
                             <FormattedMessage
-                              id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionHelpTextDocLink"
+                              id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionHelpTextDocLinkText"
                               defaultMessage="Learn more"
                             />
                           </EuiLink>
