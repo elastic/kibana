@@ -199,7 +199,6 @@ describe('xy_suggestions', () => {
         changeType: 'reduced',
       },
       state: {
-        isHorizontal: false,
         legend: { isVisible: true, position: 'bottom' },
         preferredSeriesType: 'bar',
         layers: [
@@ -234,7 +233,6 @@ describe('xy_suggestions', () => {
 
   test('suggests an area chart for unchanged table and existing bar chart on non-ordinal x axis', () => {
     const currentState: XYState = {
-      isHorizontal: false,
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       layers: [
@@ -270,7 +268,6 @@ describe('xy_suggestions', () => {
   test('suggests a flipped chart for unchanged table and existing bar chart on ordinal x axis', () => {
     (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
-      isHorizontal: false,
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       layers: [
@@ -294,10 +291,8 @@ describe('xy_suggestions', () => {
     });
 
     expect(rest).toHaveLength(1);
-    expect(suggestion.state).toEqual({
-      ...currentState,
-      isHorizontal: true,
-    });
+    expect(suggestion.state.preferredSeriesType).toEqual('bar_horizontal');
+    expect(suggestion.state.layers.every(l => l.seriesType === 'bar_horizontal')).toBeTruthy();
     expect(suggestion.title).toEqual('Flip');
   });
 
@@ -305,7 +300,6 @@ describe('xy_suggestions', () => {
     (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
-      isHorizontal: false,
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       layers: [
@@ -344,7 +338,6 @@ describe('xy_suggestions', () => {
   test('keeps column to dimension mappings on extended tables', () => {
     (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
-      isHorizontal: false,
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       layers: [
@@ -383,7 +376,6 @@ describe('xy_suggestions', () => {
   test('overwrites column to dimension mappings if a date dimension is added', () => {
     (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
-      isHorizontal: false,
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       layers: [

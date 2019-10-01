@@ -27,6 +27,7 @@ import { VisualizationProps, OperationMetadata } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { MultiColumnEditor } from '../multi_column_editor';
 import { generateId } from '../id_generator';
+import { isHorizontalChart, isHorizontalSeries } from './state_helpers';
 
 const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
 const isBucketed = (op: OperationMetadata) => op.isBucketed;
@@ -55,10 +56,12 @@ function newLayerState(seriesType: SeriesType, layerId: string): LayerConfig {
 
 function LayerSettings({
   layer,
+  horizontalOnly,
   setSeriesType,
   removeLayer,
 }: {
   layer: LayerConfig;
+  horizontalOnly: boolean;
   setSeriesType: (seriesType: SeriesType) => void;
   removeLayer: () => void;
 }) {
@@ -96,10 +99,12 @@ function LayerSettings({
           name="chartType"
           className="eui-displayInlineBlock"
           data-test-subj="lnsXY_seriesType"
-          options={visualizationTypes.map(t => ({
-            ...t,
-            iconType: t.icon || 'empty',
-          }))}
+          options={visualizationTypes
+            .filter(t => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
+            .map(t => ({
+              ...t,
+              iconType: t.icon || 'empty',
+            }))}
           idSelected={layer.seriesType}
           onChange={seriesType => setSeriesType(seriesType as SeriesType)}
           isIconOnly
@@ -124,44 +129,10 @@ function LayerSettings({
 
 export function XYConfigPanel(props: VisualizationProps<State>) {
   const { state, setState, frame } = props;
-  const [isChartOptionsOpen, setIsChartOptionsOpen] = useState(false);
+  const horizontalOnly = isHorizontalChart(state.layers);
 
   return (
     <EuiForm className="lnsConfigPanel">
-      <EuiPopover
-        id="lnsXY_chartConfig"
-        isOpen={isChartOptionsOpen}
-        closePopover={() => setIsChartOptionsOpen(false)}
-        button={
-          <EuiButtonIcon
-            iconType="gear"
-            size="s"
-            data-test-subj="lnsXY_chart_settings"
-            onClick={() => setIsChartOptionsOpen(!isChartOptionsOpen)}
-            aria-label={i18n.translate('xpack.lens.xyChart.chartSettings', {
-              defaultMessage: 'Chart Settings',
-            })}
-            title={i18n.translate('xpack.lens.xyChart.chartSettings', {
-              defaultMessage: 'Chart Settings',
-            })}
-          />
-        }
-      >
-        <EuiSwitch
-          label={i18n.translate('xpack.lens.xyChart.isHorizontalSwitch', {
-            defaultMessage: 'Rotate chart 90º',
-          })}
-          checked={state.isHorizontal}
-          onChange={() => {
-            setState({
-              ...state,
-              isHorizontal: !state.isHorizontal,
-            });
-          }}
-          data-test-subj="lnsXY_chart_horizontal"
-        />
-      </EuiPopover>
-
       {state.layers.map((layer, index) => (
         <EuiPanel
           className="lnsConfigPanel__panel"
@@ -173,6 +144,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
             <EuiFlexItem grow={false}>
               <LayerSettings
                 layer={layer}
+                horizontalOnly={horizontalOnly}
                 setSeriesType={seriesType =>
                   setState(updateLayer(state, { ...layer, seriesType }, index))
                 }

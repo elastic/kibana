@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import {
   SuggestionRequest,
   VisualizationSuggestion,
@@ -17,6 +16,7 @@ import {
 } from '../types';
 import { State, SeriesType, XYState } from './types';
 import { generateId } from '../id_generator';
+import { getIconForSeries } from './state_helpers';
 
 const columnSortOrder = {
   date: 0,
@@ -25,21 +25,6 @@ const columnSortOrder = {
   boolean: 3,
   number: 4,
 };
-
-function getIconForSeries(type: SeriesType): EuiIconType {
-  switch (type) {
-    case 'area':
-    case 'area_stacked':
-      return 'visArea';
-    case 'bar':
-    case 'bar_stacked':
-      return 'visBarVertical';
-    case 'line':
-      return 'visLine';
-    default:
-      throw new Error('unknown series type');
-  }
-}
 
 /**
  * Generate suggestions for the xy chart.
@@ -163,10 +148,8 @@ function getSuggestionsForLayer(
 ): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
   const seriesType: SeriesType = getSeriesType(currentState, layerId, xValue, changeType);
-  const isHorizontal = currentState ? currentState.isHorizontal : false;
 
   const options = {
-    isHorizontal,
     currentState,
     seriesType,
     layerId,
@@ -186,14 +169,18 @@ function getSuggestionsForLayer(
   const sameStateSuggestions: Array<VisualizationSuggestion<State>> = [];
 
   // if current state is using the same data, suggest same chart with different presentational configuration
-
   if (xValue.operation.scale === 'ordinal') {
     // flip between horizontal/vertical for ordinal scales
     sameStateSuggestions.push(
       buildSuggestion({
         ...options,
         title: i18n.translate('xpack.lens.xySuggestions.flipTitle', { defaultMessage: 'Flip' }),
-        isHorizontal: !options.isHorizontal,
+        seriesType:
+          seriesType === 'bar_horizontal'
+            ? 'bar'
+            : seriesType === 'bar_horizontal_stacked'
+            ? 'bar_stacked'
+            : 'bar_horizontal',
       })
     );
   } else {
@@ -325,7 +312,6 @@ function getSuggestionTitle(
 }
 
 function buildSuggestion({
-  isHorizontal,
   currentState,
   seriesType,
   layerId,
@@ -336,7 +322,6 @@ function buildSuggestion({
   xValue,
 }: {
   currentState: XYState | undefined;
-  isHorizontal: boolean;
   seriesType: SeriesType;
   title: string;
   yValues: TableSuggestionColumn[];
@@ -355,7 +340,6 @@ function buildSuggestion({
   };
 
   const state: State = {
-    isHorizontal,
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     preferredSeriesType: seriesType,
     layers: [

@@ -28,7 +28,6 @@ describe('XYConfigPanel', () => {
     return {
       legend: { isVisible: true, position: Position.Right },
       preferredSeriesType: 'bar',
-      isHorizontal: false,
       layers: [
         {
           seriesType: 'bar',
@@ -64,41 +63,10 @@ describe('XYConfigPanel', () => {
     };
   });
 
-  test.skip('toggles axis position when going from horizontal bar to any other type', () => {});
   test.skip('allows toggling of legend visibility', () => {});
   test.skip('allows changing legend position', () => {});
   test.skip('allows toggling the y axis gridlines', () => {});
   test.skip('allows toggling the x axis gridlines', () => {});
-
-  test('puts the horizontal toggle in a popover', () => {
-    const state = testState();
-    const setState = jest.fn();
-    const component = mount(
-      <XYConfigPanel
-        dragDropContext={dragDropContext}
-        frame={frame}
-        setState={setState}
-        state={state}
-      />
-    );
-
-    component
-      .find(`[data-test-subj="lnsXY_chart_settings"]`)
-      .first()
-      .simulate('click');
-
-    act(() => {
-      component
-        .find('[data-test-subj="lnsXY_chart_horizontal"]')
-        .first()
-        .prop('onChange')!({} as FormEvent);
-    });
-
-    expect(setState).toHaveBeenCalledWith({
-      ...state,
-      isHorizontal: true,
-    });
-  });
 
   test('enables stacked chart types even when there is no split series', () => {
     const state = testState();
@@ -126,6 +94,28 @@ describe('XYConfigPanel', () => {
       'area_stacked',
     ]);
 
+    expect(options!.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
+  });
+
+  test('shows only horizontal bar options when in horizontal mode', () => {
+    const state = testState();
+    const component = mount(
+      <XYConfigPanel
+        dragDropContext={dragDropContext}
+        frame={frame}
+        setState={jest.fn()}
+        state={{ ...state, layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' }] }}
+      />
+    );
+
+    openComponentPopover(component, 'first');
+
+    const options = component
+      .find('[data-test-subj="lnsXY_seriesType"]')
+      .first()
+      .prop('options') as EuiButtonGroupProps['options'];
+
+    expect(options!.map(({ id }) => id)).toEqual(['bar_horizontal', 'bar_horizontal_stacked']);
     expect(options!.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
   });
 
