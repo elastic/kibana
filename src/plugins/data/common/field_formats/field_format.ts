@@ -56,10 +56,10 @@ export abstract class FieldFormat {
   /**
    * @property {FieldFormatConvert}
    * @private
-   * https://github.com/Microsoft/TypeScript/issues/17293
-   * just putting underscore to know that it is private
+   * have to remove the private because of
+   * https://github.com/Microsoft/TypeScript/issues/17293\
    */
-  _convertObject: FieldFormatConvert | undefined;
+  convertObject: FieldFormatConvert | undefined;
 
   /**
    * @property {Function} - ref to child class
@@ -98,11 +98,11 @@ export abstract class FieldFormat {
   getConverterFor(
     contentType: ContentType = DEFAULT_CONTEXT_TYPE
   ): FieldFormatConvertFunction | null {
-    if (!this._convertObject) {
-      this._convertObject = FieldFormat.setupContentType(this, get(this, '_convert'));
+    if (!this.convertObject) {
+      this.convertObject = FieldFormat.setupContentType(this, get(this, '_convert'));
     }
 
-    return this._convertObject[contentType] || null;
+    return this.convertObject[contentType] || null;
   }
 
   /**
