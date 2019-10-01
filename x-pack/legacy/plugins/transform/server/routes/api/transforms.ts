@@ -22,7 +22,11 @@ enum TRANSFORM_ACTIONS {
   DELETE = 'delete',
 }
 
-interface StartStopOptions {
+interface StartOptions {
+  transformId: TransformId;
+}
+
+interface StopOptions {
   transformId: TransformId;
   force: boolean;
   waitForCompletion?: boolean;
@@ -129,7 +133,7 @@ async function deleteTransforms(
             transformId,
             force: true,
             waitForCompletion: true,
-          } as StartStopOptions);
+          } as StopOptions);
         } catch (e) {
           if (isRequestTimeout(e)) {
             return fillResultsWithTimeouts({
@@ -188,13 +192,7 @@ async function startTransforms(
   for (const transformInfo of transformsInfo) {
     const transformId = transformInfo.id;
     try {
-      await callWithRequest('transform.startTransform', {
-        transformId,
-        force:
-          transformInfo.state !== undefined
-            ? transformInfo.state === TRANSFORM_STATE.FAILED
-            : false,
-      } as StartStopOptions);
+      await callWithRequest('transform.startTransform', { transformId } as StartOptions);
       results[transformId] = { success: true };
     } catch (e) {
       if (isRequestTimeout(e)) {
@@ -239,7 +237,7 @@ async function stopTransforms(
             ? transformInfo.state === TRANSFORM_STATE.FAILED
             : false,
         waitForCompletion: true,
-      } as StartStopOptions);
+      } as StopOptions);
       results[transformId] = { success: true };
     } catch (e) {
       if (isRequestTimeout(e)) {

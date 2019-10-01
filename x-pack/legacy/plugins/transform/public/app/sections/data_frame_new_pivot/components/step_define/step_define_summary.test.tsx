@@ -7,8 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { KibanaContext } from '../../../../../../../ml/public/contexts/kibana';
-import { kibanaContextValueMock } from '../../../../../../../ml/public/contexts/kibana/__mocks__/kibana_context_value';
+import { KibanaContext } from '../../../../lib/kibana';
 
 import {
   PivotAggsConfig,
@@ -18,6 +17,8 @@ import {
 } from '../../../../common';
 import { StepDefineExposedState } from './step_define_form';
 import { StepDefineSummary } from './step_define_summary';
+
+jest.mock('ui/new_platform');
 
 // workaround to make React.memo() work with enzyme
 jest.mock('react', () => {
@@ -54,7 +55,7 @@ describe('Transform: <DefinePivotSummary />', () => {
     // with the Provider being the outer most component.
     const wrapper = shallow(
       <div>
-        <KibanaContext.Provider value={kibanaContextValueMock}>
+        <KibanaContext.Provider value={{ initialized: false }}>
           <StepDefineSummary {...props} />
         </KibanaContext.Provider>
       </div>

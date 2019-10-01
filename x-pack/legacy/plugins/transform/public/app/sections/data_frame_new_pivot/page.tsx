@@ -21,7 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { KibanaProvider } from '../../lib/kibana/kibana_context';
+import { KibanaProvider } from '../../lib/kibana';
 
 import { Wizard } from './components/wizard';
 
@@ -46,7 +46,7 @@ export const Page = ({ match }: Props) => (
                   tooltipContent={i18n.translate(
                     'xpack.transform.transformsWizard.betaBadgeTooltipContent',
                     {
-                      defaultMessage: `Transform are a beta feature. We'd love to hear your feedback.`,
+                      defaultMessage: `Transforms are a beta feature. We'd love to hear your feedback.`,
                     }
                   )}
                 />

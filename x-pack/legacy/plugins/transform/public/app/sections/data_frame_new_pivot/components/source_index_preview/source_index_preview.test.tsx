@@ -7,12 +7,12 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { KibanaContext } from '../../../../../../../ml/public/contexts/kibana';
-import { kibanaContextValueMock } from '../../../../../../../ml/public/contexts/kibana/__mocks__/kibana_context_value';
-
+import { KibanaContext } from '../../../../lib/kibana';
 import { getPivotQuery } from '../../../../common';
 
 import { SourceIndexPreview } from './source_index_preview';
+
+jest.mock('ui/new_platform');
 
 // workaround to make React.memo() work with enzyme
 jest.mock('react', () => {
@@ -30,7 +30,7 @@ describe('Transform: <SourceIndexPreview />', () => {
     // with the Provider being the outer most component.
     const wrapper = shallow(
       <div>
-        <KibanaContext.Provider value={kibanaContextValueMock}>
+        <KibanaContext.Provider value={{ initialized: false }}>
           <SourceIndexPreview {...props} />
         </KibanaContext.Provider>
       </div>
