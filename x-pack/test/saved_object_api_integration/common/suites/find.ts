@@ -78,11 +78,11 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
     });
   };
 
-  const expectFilterInternalServerError = (resp: { [key: string]: any }) => {
+  const expectFilterWrongTypeError = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
-      error: 'Internal Server Error',
-      message: 'An internal server error occurred',
-      statusCode: 500,
+      error: 'Bad Request',
+      message: 'This type dashboard is not allowed: Bad Request',
+      statusCode: 400,
     });
   };
 
@@ -269,7 +269,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
     createExpectEmpty,
     createExpectRbacForbidden,
     createExpectVisualizationResults,
-    expectFilterInternalServerError,
+    expectFilterWrongTypeError,
     expectNotSpaceAwareResults,
     expectTypeRequired,
     findTest,

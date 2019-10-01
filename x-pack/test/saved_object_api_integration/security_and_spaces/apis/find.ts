@@ -18,7 +18,7 @@ export default function({ getService }: FtrProviderContext) {
       createExpectEmpty,
       createExpectRbacForbidden,
       createExpectVisualizationResults,
-      expectFilterInternalServerError,
+      expectFilterWrongTypeError,
       expectNotSpaceAwareResults,
       expectTypeRequired,
       findTest,
@@ -183,9 +183,9 @@ export default function({ getService }: FtrProviderContext) {
             response: expectTypeRequired,
           },
           filterWithUnAllowedType: {
-            description: 'Internal Server Error',
-            statusCode: 500,
-            response: expectFilterInternalServerError,
+            description: 'Bad Request',
+            statusCode: 400,
+            response: expectFilterWrongTypeError,
           },
         },
       });
@@ -317,9 +317,9 @@ export default function({ getService }: FtrProviderContext) {
             response: expectTypeRequired,
           },
           filterWithUnAllowedType: {
-            description: 'Internal Server Error',
-            statusCode: 500,
-            response: expectFilterInternalServerError,
+            description: 'Bad Request',
+            statusCode: 400,
+            response: expectFilterWrongTypeError,
           },
         },
       });
@@ -384,9 +384,9 @@ export default function({ getService }: FtrProviderContext) {
             response: expectTypeRequired,
           },
           filterWithUnAllowedType: {
-            description: 'Internal Server Error',
-            statusCode: 500,
-            response: expectFilterInternalServerError,
+            description: 'Bad Request',
+            statusCode: 400,
+            response: expectFilterWrongTypeError,
           },
         },
       });
@@ -451,9 +451,9 @@ export default function({ getService }: FtrProviderContext) {
             response: expectTypeRequired,
           },
           filterWithUnAllowedType: {
-            description: 'Internal Server Error',
-            statusCode: 500,
-            response: expectFilterInternalServerError,
+            description: 'Bad Request',
+            statusCode: 400,
+            response: expectFilterWrongTypeError,
           },
         },
       });
@@ -518,9 +518,9 @@ export default function({ getService }: FtrProviderContext) {
             response: expectTypeRequired,
           },
           filterWithUnAllowedType: {
-            description: 'Internal Server Error',
-            statusCode: 500,
-            response: expectFilterInternalServerError,
+            description: 'Bad Request',
+            statusCode: 400,
+            response: expectFilterWrongTypeError,
           },
         },
       });
@@ -585,9 +585,9 @@ export default function({ getService }: FtrProviderContext) {
             response: expectTypeRequired,
           },
           filterWithUnAllowedType: {
-            description: 'Internal Server Error',
-            statusCode: 500,
-            response: expectFilterInternalServerError,
+            description: 'Bad Request',
+            statusCode: 400,
+            response: expectFilterWrongTypeError,
           },
         },
       });
@@ -652,9 +652,9 @@ export default function({ getService }: FtrProviderContext) {
             response: expectTypeRequired,
           },
           filterWithUnAllowedType: {
-            description: 'Internal Server Error',
-            statusCode: 500,
-            response: expectFilterInternalServerError,
+            description: 'Bad Request',
+            statusCode: 400,
+            response: expectFilterWrongTypeError,
           },
         },
       });

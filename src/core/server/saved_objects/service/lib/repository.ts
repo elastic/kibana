@@ -417,7 +417,9 @@ export class SavedObjectsRepository {
     filter,
   }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
     if (!type) {
-      throw new TypeError(`options.type must be a string or an array of strings`);
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'options.type must be a string or an array of strings'
+      );
     }
 
     const types = Array.isArray(type) ? type : [type];
@@ -432,15 +434,17 @@ export class SavedObjectsRepository {
     }
 
     if (searchFields && !Array.isArray(searchFields)) {
-      throw new TypeError('options.searchFields must be an array');
+      throw SavedObjectsErrorHelpers.createBadRequestError('options.searchFields must be an array');
     }
 
     if (fields && !Array.isArray(fields)) {
-      throw new TypeError('options.fields must be an array');
+      throw SavedObjectsErrorHelpers.createBadRequestError('options.fields must be an array');
     }
 
     if (filter && filter !== '' && this._cacheIndexPatterns.getIndexPatterns() == null) {
-      throw new TypeError('options.filter is missing index pattern to work correctly');
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'options.filter is missing index pattern to work correctly'
+      );
     }
 
     const kueryNode =

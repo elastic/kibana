@@ -152,15 +152,16 @@ export default function ({ getService }) {
             })
         ));
 
-        it('should return 500 with Internal Server Error', async () => (
+        it('wrong type should return 400 with Bad Request', async () => (
           await supertest
             .get('/api/saved_objects/_find?type=visualization&filter=dashboard.attributes.title:foo')
-            .expect(500)
+            .expect(400)
             .then(resp => {
+              console.log('body', JSON.stringify(resp.body));
               expect(resp.body).to.eql({
-                error: 'Internal Server Error',
-                message: 'An internal server error occurred',
-                statusCode: 500,
+                error: 'Bad Request',
+                message: 'This type dashboard is not allowed: Bad Request',
+                statusCode: 400,
               });
             })
         ));
@@ -272,15 +273,16 @@ export default function ({ getService }) {
             })
         ));
 
-        it('should return 500 with Internal Server Error', async () => (
+        it('wrong type should return 400 with Bad Request', async () => (
           await supertest
             .get('/api/saved_objects/_find?type=visualization&filter=dashboard.attributes.title:foo')
-            .expect(500)
+            .expect(400)
             .then(resp => {
+              console.log('body', JSON.stringify(resp.body));
               expect(resp.body).to.eql({
-                error: 'Internal Server Error',
-                message: 'An internal server error occurred',
-                statusCode: 500,
+                error: 'Bad Request',
+                message: 'This type dashboard is not allowed: Bad Request',
+                statusCode: 400,
               });
             })
         ));

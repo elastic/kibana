@@ -21,6 +21,7 @@ import { fromKueryExpression, KueryNode, nodeTypes } from '@kbn/es-query';
 import { get, set } from 'lodash';
 
 import { SavedObjectsIndexPattern, SavedObjectsIndexPatternField } from './cache_index_patterns';
+import { SavedObjectsErrorHelpers } from './errors';
 
 export const validateConvertFilterToKueryNode = (
   types: string[],
@@ -39,13 +40,13 @@ export const validateConvertFilterToKueryNode = (
     );
 
     if (validationFilterKuery.length === 0) {
-      throw new TypeError(
+      throw SavedObjectsErrorHelpers.createBadRequestError(
         'If we have a filter options defined, we should always have validationFilterKuery defined too'
       );
     }
 
     if (validationFilterKuery.some(obj => obj.error != null)) {
-      throw new TypeError(
+      throw SavedObjectsErrorHelpers.createBadRequestError(
         validationFilterKuery
           .filter(obj => obj.error != null)
           .map(obj => obj.error)
