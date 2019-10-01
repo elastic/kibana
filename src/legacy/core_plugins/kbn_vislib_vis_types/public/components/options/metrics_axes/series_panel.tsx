@@ -27,7 +27,7 @@ import { BasicVislibParams } from '../../../types';
 import { ChartOptions } from './chart_options';
 import { SetParamByIndex, ChangeValueAxis } from './';
 
-interface SeriesPanelProps extends VisOptionsProps<BasicVislibParams> {
+export interface SeriesPanelProps extends VisOptionsProps<BasicVislibParams> {
   changeValueAxis: ChangeValueAxis;
   setParamByIndex: SetParamByIndex;
 }

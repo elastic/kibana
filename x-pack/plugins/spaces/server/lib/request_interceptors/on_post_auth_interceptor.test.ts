@@ -12,7 +12,7 @@ import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 import {
   HttpServiceSetup,
   CoreSetup,
-  SavedObjectsService,
+  SavedObjectsLegacyService,
   SavedObjectsErrorHelpers,
 } from '../../../../../../src/core/server';
 import {
@@ -167,7 +167,7 @@ describe('onPostAuthInterceptor', () => {
         serverDefaultRoute: defaultRoute,
         serverBasePath: '',
       },
-      savedObjects: (savedObjectsService as unknown) as SavedObjectsService,
+      savedObjects: (savedObjectsService as unknown) as SavedObjectsLegacyService,
     } as LegacyAPI;
 
     const service = new SpacesService(loggingMock, () => legacyAPI);

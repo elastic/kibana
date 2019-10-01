@@ -6,7 +6,7 @@
 
 import { Observable, combineLatest, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { SavedObjectsService, CoreSetup } from 'src/core/server';
+import { SavedObjectsLegacyService, CoreSetup } from 'src/core/server';
 import { Logger, PluginInitializerContext } from 'src/core/server';
 import { CapabilitiesModifier } from 'src/legacy/server/capabilities';
 import { SecurityPlugin } from '../../../legacy/plugins/security';
@@ -36,7 +36,7 @@ import { initExternalSpacesApi } from './routes/api/external';
  * to function properly.
  */
 export interface LegacyAPI {
-  savedObjects: SavedObjectsService;
+  savedObjects: SavedObjectsLegacyService;
   usage: {
     collectorSet: {
       register: (collector: any) => void;

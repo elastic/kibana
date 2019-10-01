@@ -2,7 +2,7 @@
   "prefix": "xpack",
   "paths": {
     "xpack.actions": "legacy/plugins/actions",
-    "xpack.advancedUiActions": "legacy/plugins/advanced_ui_actions",
+    "xpack.advancedUiActions": "plugins/advanced_ui_actions",
     "xpack.alerting": "legacy/plugins/alerting",
     "xpack.apm": "legacy/plugins/apm",
     "xpack.beatsManagement": "legacy/plugins/beats_management",

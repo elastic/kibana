@@ -5,13 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-import { SavedObjectsService, ClusterClient } from 'src/core/server';
+import { ClusterClient, SavedObjectsLegacyService } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 
 interface Deps {
   esClient: ClusterClient;
-  savedObjects: SavedObjectsService;
+  savedObjects: SavedObjectsLegacyService;
 }
 
 export async function createDefaultSpace({ esClient, savedObjects }: Deps) {

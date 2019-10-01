@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import Boom from 'boom';
 import { createDefaultSpace } from './create_default_space';
-import { SavedObjectsService, ClusterClient } from 'src/core/server';
+import { SavedObjectsLegacyService, ClusterClient } from 'src/core/server';
 
 interface MockServerSettings {
   defaultExists?: boolean;
@@ -70,10 +71,10 @@ const createMockDeps = (settings: MockServerSettings = {}) => {
 
   return {
     config: mockServer.config(),
-    savedObjects: (mockServer.savedObjects as unknown) as SavedObjectsService,
+    savedObjects: (mockServer.savedObjects as unknown) as SavedObjectsLegacyService,
     esClient: ({
       callAsInternalUser: jest.fn(),
-    } as unknown) as ClusterClient,
+    } as unknown) as jest.Mocked<ClusterClient>,
   };
 };
 
