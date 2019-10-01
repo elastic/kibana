@@ -18,6 +18,8 @@ import { getSpaceSelectorUrl } from './server/lib/get_space_selector_url';
 import { migrateToKibana660 } from './server/lib/migrations';
 import { SecurityPlugin } from '../security';
 import { initSpaceSelectorView } from './server/routes/views';
+// @ts-ignore
+import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 
 export interface SpacesPlugin {
   getSpaceId: SpacesServiceSetup['getSpaceId'];
@@ -153,6 +155,10 @@ export const spaces = (kibana: Record<string, any>) =>
       });
 
       initSpaceSelectorView(server);
+
+      watchStatusAndLicenseToInitialize(server.plugins.xpack_main, this, async () => {
+        await spacesPlugin.__legacyCompat.createDefaultSpace();
+      });
 
       server.expose('getSpaceId', (request: any) => spacesPlugin.spacesService.getSpaceId(request));
       server.expose('getActiveSpace', spacesPlugin.spacesService.getActiveSpace);

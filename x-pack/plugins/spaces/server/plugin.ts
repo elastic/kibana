@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable, combineLatest, Subscription } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { SavedObjectsLegacyService, CoreSetup } from 'src/core/server';
 import { Logger, PluginInitializerContext } from 'src/core/server';
 import { CapabilitiesModifier } from 'src/legacy/server/capabilities';
@@ -68,6 +68,12 @@ export interface PluginsSetup {
 
 export interface SpacesPluginSetup {
   spacesService: SpacesServiceSetup;
+  __legacyCompat: {
+    // TODO: We currently need the legacy plugin to inform this plugin when it is safe to create the default space.
+    // The NP does not have the equivilent ES connection/health/comapt checks that the legacy world does.
+    // See: https://github.com/elastic/kibana/issues/43456
+    createDefaultSpace: () => Promise<void>;
+  };
   registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
 }
 
@@ -77,8 +83,6 @@ export class Plugin {
   private readonly config$: Observable<ConfigType>;
 
   private readonly log: Logger;
-
-  private statusAndLicense$?: Subscription;
 
   private legacyAPI?: LegacyAPI;
   private readonly getLegacyAPI = () => {
@@ -144,34 +148,23 @@ export class Plugin {
 
     return {
       spacesService,
+      __legacyCompat: {
+        createDefaultSpace: async () => {
+          const esClient = await core.elasticsearch.adminClient$.pipe(take(1)).toPromise();
+          return createDefaultSpace({
+            esClient,
+            savedObjects: this.getLegacyAPI().savedObjects,
+          });
+        },
+      },
       registerLegacyAPI: (legacyAPI: LegacyAPI) => {
         this.legacyAPI = legacyAPI;
-        this.statusAndLicense$ = combineLatest(
-          core.elasticsearch.adminClient$,
-          plugins.licensing.license$
-        )
-          .pipe(
-            tap(([esClient, licenseCheck]) => {
-              if (licenseCheck.isAvailable) {
-                createDefaultSpace({
-                  esClient,
-                  savedObjects: this.getLegacyAPI().savedObjects,
-                });
-              }
-            })
-          )
-          .subscribe();
         this.setupLegacyComponents(core, spacesService, plugins.features, plugins.licensing);
       },
     };
   }
 
-  public stop() {
-    if (this.statusAndLicense$) {
-      this.statusAndLicense$.unsubscribe();
-      this.statusAndLicense$ = undefined;
-    }
-  }
+  public stop() {}
 
   private setupLegacyComponents(
     core: CoreSetup,
