@@ -36,7 +36,7 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
               })}
             >
               <FormattedMessage
-                id="xpack.maps.metricsEditor.deleteMetricButtonLabe"
+                id="xpack.maps.metricsEditor.deleteMetricButtonLabel"
                 defaultMessage="Delete metric"
               />
             </EuiButtonEmpty>
