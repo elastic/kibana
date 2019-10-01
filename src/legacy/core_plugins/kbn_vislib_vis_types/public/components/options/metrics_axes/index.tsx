@@ -125,13 +125,17 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
         lastLabels[axis.id] = newCustomLabel;
 
         if (
-          aggTypeIsChanged ||
-          aggFieldIsChanged ||
-          axis.title.text === '' ||
-          lastCustomLabels[axis.id] === axis.title.text
+          Object.keys(lastCustomLabels).length !== 0 &&
+          (aggTypeIsChanged ||
+            aggFieldIsChanged ||
+            axis.title.text === '' ||
+            lastCustomLabels[axis.id] === axis.title.text)
         ) {
           // Override axis title with new custom label
-          axes[axisNumber] = { ...axes[axisNumber], title: { ...axis, text: newCustomLabel } };
+          axes[axisNumber] = {
+            ...axis,
+            title: { ...axis.title, text: newCustomLabel },
+          };
           isAxesChanged = true;
         }
       }
