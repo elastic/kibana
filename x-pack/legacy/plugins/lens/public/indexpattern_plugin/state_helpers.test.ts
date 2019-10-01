@@ -392,7 +392,7 @@ describe('state_helpers', () => {
             sourceField: 'bytes',
           },
           col3: {
-            label: 'Date Histogram of timestamp',
+            label: 'Date histogram of timestamp',
             dataType: 'date',
             isBucketed: true,
 
@@ -438,7 +438,7 @@ describe('state_helpers', () => {
             suggestedPriority: 0,
           },
           col3: {
-            label: 'Date Histogram of timestamp',
+            label: 'Date histogram of timestamp',
             dataType: 'date',
             isBucketed: true,
 

@@ -96,7 +96,7 @@ describe('IndexPatternDimensionPanel', () => {
           columnOrder: ['col1'],
           columns: {
             col1: {
-              label: 'Date Histogram of timestamp',
+              label: 'Date histogram of timestamp',
               dataType: 'date',
               isBucketed: true,
 
@@ -280,7 +280,7 @@ describe('IndexPatternDimensionPanel', () => {
       'Incompatible'
     );
 
-    expect(options.find(({ name }) => name === 'Date Histogram')!['data-test-subj']).toContain(
+    expect(options.find(({ name }) => name === 'Date histogram')!['data-test-subj']).toContain(
       'Incompatible'
     );
   });
@@ -973,7 +973,7 @@ describe('IndexPatternDimensionPanel', () => {
             columnOrder: ['col1'],
             columns: {
               col1: {
-                label: 'Date Histogram of timestamp',
+                label: 'Date histogram of timestamp',
                 dataType: 'date',
                 isBucketed: true,
 
