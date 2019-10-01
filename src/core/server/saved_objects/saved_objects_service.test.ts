@@ -21,11 +21,12 @@ jest.mock('./migrations/kibana/kibana_migrator');
 
 import { SavedObjectsService, SavedObjectsSetupDeps } from './saved_objects_service';
 import { mockCoreContext } from '../core_context.mock';
-import { KibanaMigrator } from './migrations/kibana/kibana_migrator';
+import { KibanaMigrator, mockKibanaMigratorInstance } from './migrations/kibana/kibana_migrator';
 import { of } from 'rxjs';
 import elasticsearch from 'elasticsearch';
 import { Env } from '../config';
 import { configServiceMock } from '../mocks';
+import { ScopedSavedObjectsClientProvider } from '.';
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -49,7 +50,7 @@ describe('SavedObjectsService', () => {
       const soService = new SavedObjectsService(coreContext);
       const coreSetup = ({
         elasticsearch: { adminClient$: of(clusterClient) },
-        legacy: { uiExports: {}, pluginExtendedConfig: {} },
+        legacy: { uiExports: { savedObjectMappings: [] }, pluginExtendedConfig: {} },
       } as unknown) as SavedObjectsSetupDeps;
 
       await soService.setup(coreSetup);
@@ -57,6 +58,18 @@ describe('SavedObjectsService', () => {
       return expect((KibanaMigrator as jest.Mock).mock.calls[0][0].callCluster()).resolves.toMatch(
         'success'
       );
+    });
+
+    it('resolves with clientProvider', async () => {
+      const coreContext = mockCoreContext.create();
+      const soService = new SavedObjectsService(coreContext);
+      const coreSetup = ({
+        elasticsearch: { adminClient$: of({ callAsInternalUser: jest.fn() }) },
+        legacy: { uiExports: {}, pluginExtendedConfig: {} },
+      } as unknown) as SavedObjectsSetupDeps;
+
+      const savedObjectsSetup = await soService.setup(coreSetup);
+      expect(savedObjectsSetup.clientProvider).toBeInstanceOf(ScopedSavedObjectsClientProvider);
     });
   });
 
@@ -72,9 +85,8 @@ describe('SavedObjectsService', () => {
       } as unknown) as SavedObjectsSetupDeps;
 
       await soService.setup(coreSetup);
-      const migrator = (KibanaMigrator as jest.Mock<KibanaMigrator>).mock.instances[0];
       await soService.start({});
-      expect(migrator.runMigrations).toHaveBeenCalledWith(true);
+      expect(mockKibanaMigratorInstance.runMigrations).toHaveBeenCalledWith(true);
     });
 
     it('skips KibanaMigrator migrations when migrations.skip=true', async () => {
@@ -87,9 +99,8 @@ describe('SavedObjectsService', () => {
       } as unknown) as SavedObjectsSetupDeps;
 
       await soService.setup(coreSetup);
-      const migrator = (KibanaMigrator as jest.Mock<KibanaMigrator>).mock.instances[0];
       await soService.start({});
-      expect(migrator.runMigrations).toHaveBeenCalledWith(true);
+      expect(mockKibanaMigratorInstance.runMigrations).toHaveBeenCalledWith(true);
     });
 
     it('resolves with KibanaMigrator after waiting for migrations to complete', async () => {
@@ -102,12 +113,12 @@ describe('SavedObjectsService', () => {
       } as unknown) as SavedObjectsSetupDeps;
 
       await soService.setup(coreSetup);
-      const migrator = (KibanaMigrator as jest.Mock<KibanaMigrator>).mock.instances[0];
-      expect(migrator.runMigrations).toHaveBeenCalledTimes(0);
+      expect(mockKibanaMigratorInstance.runMigrations).toHaveBeenCalledTimes(0);
+
       const startContract = await soService.start({});
-      expect(startContract.migrator).toBeInstanceOf(KibanaMigrator);
-      expect(migrator.runMigrations).toHaveBeenCalledWith(false);
-      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
+      expect(startContract.migrator).toBe(mockKibanaMigratorInstance);
+      expect(mockKibanaMigratorInstance.runMigrations).toHaveBeenCalledWith(false);
+      expect(mockKibanaMigratorInstance.runMigrations).toHaveBeenCalledTimes(1);
     });
   });
 });

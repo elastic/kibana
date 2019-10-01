@@ -25,7 +25,6 @@ import { SavedObjectsSerializer } from '../../../core/server/saved_objects/seria
 import {
   SavedObjectsClient,
   SavedObjectsRepository,
-  ScopedSavedObjectsClientProvider,
   getSortedObjectsForExport,
   importSavedObjects,
   resolveImportErrors,
@@ -127,17 +126,7 @@ export function savedObjectsMixin(kbnServer, server) {
     });
   };
 
-  const provider = new ScopedSavedObjectsClientProvider({
-    index: server.config().get('kibana.index'),
-    mappings,
-    defaultClientFactory({ request }) {
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-      const callCluster = (...args) => callWithRequest(request, ...args);
-      const repository = createRepository(callCluster);
-
-      return new SavedObjectsClient(repository);
-    },
-  });
+  const provider = kbnServer.newPlatform.start.core.savedObjects.clientProvider;
 
   const service = {
     types: visibleTypes,

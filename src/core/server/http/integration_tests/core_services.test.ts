@@ -266,9 +266,6 @@ describe('http service', () => {
 
       await kbnTestServer.request.get(root, '/new-platform/').expect(200);
 
-      // called twice by elasticsearch service in http route handler context provider
-      expect(clusterClientMock).toBeCalledTimes(2);
-
       // admin client contains authHeaders for BWC with legacy platform.
       const [adminClient, dataClient] = clusterClientMock.mock.calls;
       const [, , adminClientHeaders] = adminClient;
@@ -291,9 +288,6 @@ describe('http service', () => {
         .get(root, '/new-platform/')
         .set('Authorization', authorizationHeader)
         .expect(200);
-
-      // called twice by elasticsearch service in http route handler context provider
-      expect(clusterClientMock).toBeCalledTimes(2);
 
       const [adminClient, dataClient] = clusterClientMock.mock.calls;
       const [, , adminClientHeaders] = adminClient;

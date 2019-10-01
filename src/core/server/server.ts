@@ -21,7 +21,7 @@ import { take } from 'rxjs/operators';
 import { Type } from '@kbn/config-schema';
 
 import { ConfigService, Env, Config, ConfigPath } from './config';
-import { ElasticsearchService } from './elasticsearch';
+import { ElasticsearchService, ElasticsearchServiceSetup } from './elasticsearch';
 import { HttpService, HttpServiceSetup } from './http';
 import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
@@ -36,7 +36,7 @@ import { config as kibanaConfig } from './kibana_config';
 import { config as savedObjectsConfig } from './saved_objects';
 import { mapToObject } from '../utils/';
 import { ContextService } from './context';
-import { InternalCoreSetup } from './index';
+import { SavedObjectsServiceSetup } from './saved_objects/saved_objects_service';
 
 const coreId = Symbol('core');
 
@@ -90,7 +90,6 @@ export class Server {
       http: httpSetup,
     };
 
-    this.registerCoreContext(coreSetup);
     const pluginsSetup = await this.plugins.setup(coreSetup);
 
     const legacySetup = await this.legacy.setup({
@@ -98,10 +97,12 @@ export class Server {
       plugins: mapToObject(pluginsSetup.contracts),
     });
 
-    await this.savedObjects.setup({
+    const savedObjectsSetup = await this.savedObjects.setup({
       elasticsearch: elasticsearchServiceSetup,
       legacy: legacySetup,
     });
+
+    this.registerCoreContext({ ...coreSetup, savedObjects: savedObjectsSetup });
 
     return coreSetup;
   }
@@ -143,11 +144,18 @@ export class Server {
     );
   }
 
-  private registerCoreContext(coreSetup: InternalCoreSetup) {
+  private registerCoreContext(coreSetup: {
+    http: HttpServiceSetup;
+    elasticsearch: ElasticsearchServiceSetup;
+    savedObjects: SavedObjectsServiceSetup;
+  }) {
     coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req) => {
       const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(take(1)).toPromise();
       const dataClient = await coreSetup.elasticsearch.dataClient$.pipe(take(1)).toPromise();
       return {
+        savedObjects: {
+          client: coreSetup.savedObjects.clientProvider.getClient(req),
+        },
         elasticsearch: {
           adminClient: adminClient.asScoped(req),
           dataClient: dataClient.asScoped(req),

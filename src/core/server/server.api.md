@@ -75,7 +75,7 @@ export function bootstrap({ configs, cliArgs, applyConfigOverrides, features, }:
 // @public
 export interface CallAPIOptions {
     signal?: AbortSignal;
-    wrap401Errors: boolean;
+    wrap401Errors?: boolean;
 }
 
 // @public

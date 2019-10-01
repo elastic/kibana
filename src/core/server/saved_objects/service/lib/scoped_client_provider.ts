@@ -55,7 +55,7 @@ export interface SavedObjectsClientProviderOptions {
 }
 
 /**
- * Provider for the Scoped Saved Object Client.
+ * Provider for the Scoped Saved Objects Client.
  */
 export class ScopedSavedObjectsClientProvider<Request = unknown> {
   private readonly _wrapperFactories = new PriorityCollection<{
