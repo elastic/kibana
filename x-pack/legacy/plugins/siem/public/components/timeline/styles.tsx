@@ -62,7 +62,7 @@ export const EventsThead = styled.div.attrs({
   role: 'rowgroup',
 })`
   ${({ theme }) => css`
-    background-color: ${theme.eui.euiColorEmptyShade}
+    background-color: ${theme.eui.euiColorEmptyShade};
     border-bottom: ${theme.eui.euiBorderWidthThick} solid ${theme.eui.euiColorLightShade};
     position: sticky;
     top: 0;
