@@ -5,7 +5,7 @@
  */
 
 import isEqual from 'lodash/fp/isEqual';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 
 interface Measurement {
@@ -30,6 +30,18 @@ interface AutoSizerProps {
   onResize?: (size: Measurements) => void;
 }
 
+/**
+ * Returning a new object reference guarantees that a before-and-after
+ * equivalence check will always be false, resulting in a re-render, even
+ * when multiple calls to forceUpdate are batched.
+ */
+const useForceUpdate = () => {
+  const [, dispatch] = useState<{}>(Object.create(null));
+  const memoizedDispatch = useCallback((): void => {
+    dispatch(Object.create(null));
+  }, [dispatch]);
+  return memoizedDispatch;
+};
 export const AutoSizer = React.memo<AutoSizerProps>(
   ({ bounds = false, children, content = true, detectAnyWindowResize, onResize }) => {
     const element = useRef<HTMLElement | null>(null);
@@ -47,7 +59,7 @@ export const AutoSizer = React.memo<AutoSizerProps>(
       height: 0,
       width: 0,
     });
-    const [shouldUpdate, setShouldUpdate] = useState(false);
+    const forceUpdate = useForceUpdate();
 
     const storeRef = (htmlElement: HTMLElement | null) => {
       if (element.current && resizeObserver.current) {
@@ -116,7 +128,7 @@ export const AutoSizer = React.memo<AutoSizerProps>(
         boundsMeasurement.current = boundsMeasurementNow;
         contentMeasurement.current = contentMeasurementNow;
         windowMeasurement.current = windowMeasurementNow;
-        setShouldUpdate(!shouldUpdate);
+        forceUpdate();
         if (onResize) {
           onResize({
             bounds: boundsMeasurementNow,
