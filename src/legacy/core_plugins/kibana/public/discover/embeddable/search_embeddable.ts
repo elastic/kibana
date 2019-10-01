@@ -167,6 +167,8 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
    * @param {Element} domNode
    */
   public render(domNode: HTMLElement) {
+    super.render(domNode);
+
     if (!this.searchScope) {
       throw new Error('Search scope not defined');
     }
@@ -179,6 +181,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
 
   public destroy() {
     super.destroy();
+
     this.savedSearch.destroy();
     if (this.searchInstance) {
       this.searchInstance.remove();

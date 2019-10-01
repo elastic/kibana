@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { EventEmitter } from 'events';
 import { debounce, forEach, get, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
@@ -77,10 +76,7 @@ export interface RequestHandlerParams {
   abortSignal?: AbortSignal;
 }
 
-const RENDER_COMPLETE_EVENT = 'render_complete';
-const DATA_SHARED_ITEM = 'data-shared-item';
 const LOADING_ATTRIBUTE = 'data-loading';
-const RENDERING_COUNT_ATTRIBUTE = 'data-rendering-count';
 
 /**
  * A handler to the embedded visualization. It offers several methods to interact
@@ -101,8 +97,6 @@ export class EmbeddedVisualizeHandler {
   private loaded: boolean = false;
   private destroyed: boolean = false;
 
-  private listeners = new EventEmitter();
-  private firstRenderComplete: Promise<void>;
   private renderCompleteHelper: RenderCompleteHelper;
   private shouldForceNextFetch: boolean = false;
   private debouncedFetchAndRender = debounce(() => {
@@ -156,14 +150,7 @@ export class EmbeddedVisualizeHandler {
       inspectorAdapters: this.inspectorAdapters,
     };
 
-    // Listen to the first RENDER_COMPLETE_EVENT to resolve this promise
-    this.firstRenderComplete = new Promise(resolve => {
-      this.listeners.once(RENDER_COMPLETE_EVENT, resolve);
-    });
-
     element.setAttribute(LOADING_ATTRIBUTE, '');
-    element.setAttribute(DATA_SHARED_ITEM, '');
-    element.setAttribute(RENDERING_COUNT_ATTRIBUTE, '0');
 
     element.addEventListener('renderComplete', this.onRenderCompleteListener);
 
@@ -356,32 +343,14 @@ export class EmbeddedVisualizeHandler {
   };
 
   /**
-   * Returns a promise, that will resolve (without a value) once the first rendering of
-   * the visualization has finished.
-   *
-   * @returns Promise, that resolves as soon as the visualization is done rendering
-   *    for the first time.
-   */
-  public whenFirstRenderComplete(): Promise<void> {
-    return this.firstRenderComplete;
-  }
-
-  /**
    * Force the fetch of new data and renders the chart again.
    */
   public reload = () => {
     this.fetchAndRender(true);
   };
 
-  private incrementRenderingCount = () => {
-    const renderingCount = Number(this.element.getAttribute(RENDERING_COUNT_ATTRIBUTE) || 0);
-    this.element.setAttribute(RENDERING_COUNT_ATTRIBUTE, `${renderingCount + 1}`);
-  };
-
   private onRenderCompleteListener = () => {
-    this.listeners.emit(RENDER_COMPLETE_EVENT);
     this.element.removeAttribute(LOADING_ATTRIBUTE);
-    this.incrementRenderingCount();
   };
 
   private onUiStateChange = () => {

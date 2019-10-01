@@ -25,7 +25,6 @@ import { VisualizeInput } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 
 export class DisabledLabEmbeddable extends Embeddable<VisualizeInput, EmbeddableOutput> {
-  private domNode?: HTMLElement;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
   constructor(private readonly title: string, initialInput: VisualizeInput) {
@@ -34,6 +33,8 @@ export class DisabledLabEmbeddable extends Embeddable<VisualizeInput, Embeddable
 
   public reload() {}
   public render(domNode: HTMLElement) {
+    super.render(domNode);
+
     if (this.title) {
       this.domNode = domNode;
       ReactDOM.render(<DisabledLabVisualization title={this.title} />, domNode);
@@ -41,6 +42,8 @@ export class DisabledLabEmbeddable extends Embeddable<VisualizeInput, Embeddable
   }
 
   public destroy() {
+    super.destroy();
+
     if (this.domNode) {
       ReactDOM.unmountComponentAtNode(this.domNode);
     }

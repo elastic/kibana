@@ -40,7 +40,5 @@ export class FilterableEmbeddable extends Embeddable<FilterableEmbeddableInput, 
     return inspectorAdapters;
   }
 
-  public render() {}
-
   public reload() {}
 }

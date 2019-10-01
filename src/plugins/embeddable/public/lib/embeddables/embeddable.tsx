@@ -23,6 +23,19 @@ import { IContainer } from '../containers';
 import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 import { ViewMode } from '../types';
 
+/**
+ * If this attribute is present it specifies that `renderComplete` event has not been fired yet.
+ */
+const LOADING_ATTRIBUTE = 'data-loading';
+/**
+ * @todo Add description of this attribute.
+ */
+const DATA_SHARED_ITEM = 'data-shared-item';
+/**
+ * Tracks number of times `renderComplete` event was fired.
+ */
+const RENDERING_COUNT_ATTRIBUTE = 'data-rendering-count';
+
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
 }
@@ -48,6 +61,13 @@ export abstract class Embeddable<
 
   // TODO: Rename to destroyed.
   private destoyed: boolean = false;
+
+  private firstRenderCompleteCallback!: () => void;
+  public whenFirstRenderComplete = new Promise(resolve => {
+    this.firstRenderCompleteCallback = resolve;
+  });
+
+  protected domNode: HTMLElement | Element | null = null;
 
   constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
     this.id = input.id;
@@ -129,10 +149,29 @@ export abstract class Embeddable<
     }
   }
 
+  /**
+   * Visualizations fire `renderComplete` DOM event when they are ready
+   * to be consumed by reporting plugin. Here we intercept this event
+   * and set some DOM attributes for testing.
+   */
+  private onRenderComplete = () => {
+    this.firstRenderCompleteCallback();
+    this.domNode!.removeAttribute(LOADING_ATTRIBUTE);
+
+    const renderingCount = Number(this.domNode!.getAttribute(RENDERING_COUNT_ATTRIBUTE) || 0);
+    this.domNode!.setAttribute(RENDERING_COUNT_ATTRIBUTE, String(renderingCount + 1));
+  };
+
   public render(domNode: HTMLElement | Element): void {
-    if (this.destoyed) {
-      throw new Error('Embeddable has been destroyed');
-    }
+    if (this.destoyed) throw new Error('Embeddable has been destroyed');
+    if (!domNode) return;
+
+    this.domNode = domNode;
+    domNode.setAttribute(LOADING_ATTRIBUTE, '');
+    domNode.setAttribute(DATA_SHARED_ITEM, '');
+    domNode.setAttribute(RENDERING_COUNT_ATTRIBUTE, '0');
+    domNode.addEventListener('renderComplete', this.onRenderComplete);
+
     return;
   }
 
@@ -151,6 +190,9 @@ export abstract class Embeddable<
    */
   public destroy(): void {
     this.destoyed = true;
+    if (this.domNode) {
+      this.domNode.removeEventListener('renderComplete', this.onRenderComplete);
+    }
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();
     }

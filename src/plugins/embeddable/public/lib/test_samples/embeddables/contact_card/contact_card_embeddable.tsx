@@ -51,7 +51,6 @@ export class ContactCardEmbeddable extends Embeddable<
   ContactCardEmbeddableOutput
 > {
   private subscription: Subscription;
-  private node?: Element;
   public readonly type: string = CONTACT_CARD_EMBEDDABLE;
 
   constructor(
@@ -79,7 +78,8 @@ export class ContactCardEmbeddable extends Embeddable<
   }
 
   public render(node: HTMLElement) {
-    this.node = node;
+    super.render(node);
+
     ReactDom.render(
       <ContactCardEmbeddableComponent embeddable={this} execTrigger={this.options.execAction} />,
       node
@@ -88,9 +88,10 @@ export class ContactCardEmbeddable extends Embeddable<
 
   public destroy() {
     super.destroy();
+
     this.subscription.unsubscribe();
-    if (this.node) {
-      ReactDom.unmountComponentAtNode(this.node);
+    if (this.domNode) {
+      ReactDom.unmountComponentAtNode(this.domNode);
     }
   }
 

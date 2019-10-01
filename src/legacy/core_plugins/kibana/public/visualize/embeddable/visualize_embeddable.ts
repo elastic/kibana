@@ -196,6 +196,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
    * @param {ContainerState} containerState
    */
   public render(domNode: HTMLElement) {
+    super.render(domNode);
+
     this.timeRange = _.cloneDeep(this.input.timeRange);
     this.query = this.input.query;
     this.filters = this.input.filters;
@@ -230,6 +232,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   public destroy() {
     super.destroy();
+
     if (this.subscription) {
       this.subscription.unsubscribe();
     }

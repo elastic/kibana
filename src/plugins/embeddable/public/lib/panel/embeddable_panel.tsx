@@ -65,6 +65,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   private parentSubscription?: Subscription;
   private subscription?: Subscription;
   private mounted: boolean = false;
+
   constructor(props: Props) {
     super(props);
     const { embeddable } = this.props;
@@ -98,6 +99,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     }
   }
 
+  // TODO: `componentWillMount` is deprecated.
   public componentWillMount() {
     this.mounted = true;
     const { embeddable } = this.props;
