@@ -26,18 +26,17 @@ interface Server extends Legacy.Server {
 }
 
 export function init(server: Server) {
+  const newPlatform = ((server as unknown) as KbnServer).newPlatform;
   const coreSetup = {
     elasticsearch: server.plugins.elasticsearch,
     savedObjects: server.savedObjects,
     http: {
       route: server.route.bind(server),
-      basePath: ((server as unknown) as KbnServer).newPlatform.setup.core.http.basePath,
+      basePath: newPlatform.setup.core.http.basePath,
     },
   };
   const pluginsSetup = {
-    security: ((server as unknown) as KbnServer).newPlatform.setup.plugins.security as
-      | SecurityPluginSetupContract
-      | undefined,
+    security: newPlatform.setup.plugins.security as SecurityPluginSetupContract | undefined,
     task_manager: server.plugins.task_manager,
     // TODO: Currently a function because it's an optional dependency that
     // initializes after this function is called
