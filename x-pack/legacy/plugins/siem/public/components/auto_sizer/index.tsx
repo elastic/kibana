@@ -5,7 +5,7 @@
  */
 
 import isEqual from 'lodash/fp/isEqual';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 
 interface Measurement {
@@ -47,11 +47,17 @@ export const AutoSizer = React.memo<AutoSizerProps>(
       height: 0,
       width: 0,
     });
+    const [shouldUpdate, setShouldUpdate] = useState(false);
 
     const storeRef = (htmlElement: HTMLElement | null) => {
+      if (element.current && resizeObserver.current) {
+        resizeObserver.current.unobserve(element.current);
+      }
+
       if (htmlElement && resizeObserver.current) {
         resizeObserver.current.observe(htmlElement);
       }
+
       element.current = htmlElement;
     };
 
@@ -106,9 +112,11 @@ export const AutoSizer = React.memo<AutoSizerProps>(
         if (!resizeObserver) {
           return;
         }
+
         boundsMeasurement.current = boundsMeasurementNow;
         contentMeasurement.current = contentMeasurementNow;
         windowMeasurement.current = windowMeasurementNow;
+        setShouldUpdate(!shouldUpdate);
         if (onResize) {
           onResize({
             bounds: boundsMeasurementNow,
@@ -123,7 +131,6 @@ export const AutoSizer = React.memo<AutoSizerProps>(
       if (detectAnyWindowResize) {
         window.addEventListener('resize', () => measure(null));
       }
-
       resizeObserver.current = new ResizeObserver(entries => {
         entries.forEach(entry => {
           if (entry.target === element.current) {
@@ -142,6 +149,7 @@ export const AutoSizer = React.memo<AutoSizerProps>(
         }
       };
     }, []);
+
     return children({
       bounds: boundsMeasurement.current,
       content: contentMeasurement.current,
