@@ -330,7 +330,8 @@ export class Flyout extends Component {
               {title}
             </h2>
           </EuiTitle>
-          {this.getDocumentationTitle()}
+          {/* Remove until we have a why article: https://github.com/elastic/kibana/pull/45799#issuecomment-536778656 */}
+          {/* {this.getDocumentationTitle()} */}
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           {this.renderActiveStep()}
