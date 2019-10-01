@@ -171,7 +171,7 @@ export function FieldItem(props: FieldItemProps) {
               }}
               aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonAriaLabel', {
                 defaultMessage:
-                  'Click or Enter for information about {fieldName}. Or, drag field into visualization.',
+                  'Click or press Enter for information about {fieldName}. Or, drag field into visualization.',
                 values: { fieldName: field.name },
               })}
             >
