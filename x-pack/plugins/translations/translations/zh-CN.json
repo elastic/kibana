@@ -2427,7 +2427,6 @@
     "kbn.visualize.badge.readOnly.text": "只读",
     "kbn.visualize.badge.readOnly.tooltip": "无法保存可视化",
     "kbn.visualize.createVisualization.noIndexPatternOrSavedSearchIdErrorMessage": "必须提供 indexPattern 或 savedSearchId",
-    "kbn.visualize.defaultVisualizationTitle": "新建可视化",
     "kbn.visualize.disabledLabVisualizationMessage": "请在高级设置中打开实验室模式，以查看实验室可视化。",
     "kbn.visualize.disabledLabVisualizationTitle": "{title} 为实验室可视化。",
     "kbn.visualize.editor.createBreadcrumb": "创建",
