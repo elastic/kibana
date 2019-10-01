@@ -78,7 +78,7 @@ export function enabledLanguageServers(serverOptions: ServerOptions) {
   function isEnabled(lang: LanguageServerDefinition, defaultEnabled: boolean) {
     const name = lang.name;
     // @ts-ignore
-    const enabled = serverOptions.lsp[name].enabled;
+    const enabled = serverOptions.lsp[name] && serverOptions.lsp[name].enabled;
     return enabled === undefined ? defaultEnabled : enabled;
   }
   const results = LanguageServers.filter(lang => isEnabled(lang, true));
