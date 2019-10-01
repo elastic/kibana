@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable, Subscription } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subscription, merge, of, timer } from 'rxjs';
+import { filter, first, map, pairwise, switchMap, tap } from 'rxjs/operators';
 import moment from 'moment';
 import { createHash } from 'crypto';
 import { TypeOf } from '@kbn/config-schema';
@@ -16,7 +16,6 @@ import {
   Plugin as CorePlugin,
   PluginInitializerContext,
 } from 'src/core/server';
-import { Poller } from '../../../../src/core/utils/poller';
 import { LicensingPluginSetup, ILicensingPlugin } from '../common/types';
 import { License } from '../common/license';
 import { hasLicenseInfoChanged } from '../common/has_license_info_changed';
@@ -37,11 +36,9 @@ type LicensingConfigType = TypeOf<typeof schema>;
 export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugin {
   private readonly logger: Logger;
   private readonly config$: Observable<LicensingConfig>;
-  private poller!: Poller<License>;
   private configSubscription: Subscription;
   private currentConfig!: LicensingConfig;
-  private core!: CoreSetup;
-  private refresher?: Promise<void>;
+  private elasticsearch!: CoreSetup['elasticsearch'];
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
@@ -64,35 +61,14 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
       `Calling [${config.clusterSource}] Elasticsearch _xpack API. Polling frequency: ${config.pollingFrequency}`
     );
 
-    const cluster = await this.core.elasticsearch.dataClient$.pipe(first()).toPromise();
-
     try {
+      const cluster = await this.elasticsearch.dataClient$.pipe(first()).toPromise();
       const response = await cluster.callAsInternalUser('transport.request', {
         method: 'GET',
         path: '/_xpack',
       });
       const rawLicense = response && response.license;
       const features = (response && response.features) || {};
-      const currentLicense = this.poller.subject$.getValue();
-      const licenseInfoChanged = hasLicenseInfoChanged(currentLicense, rawLicense);
-
-      if (!licenseInfoChanged) {
-        return undefined;
-      }
-
-      const licenseInfo = [
-        'type' in rawLicense && `type: ${rawLicense.type}`,
-        'status' in rawLicense && `status: ${rawLicense.status}`,
-        'expiry_date_in_millis' in rawLicense &&
-          `expiry date: ${moment(rawLicense.expiry_date_in_millis, 'x').format()}`,
-      ]
-        .filter(Boolean)
-        .join(' | ');
-
-      this.logger.info(
-        `Imported ${currentLicense ? 'changed ' : ''}license information` +
-          ` from Elasticsearch for the [${config.clusterSource}] cluster: ${licenseInfo}`
-      );
 
       return new License({
         plugin: this,
@@ -102,8 +78,7 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
       });
     } catch (err) {
       this.logger.warn(
-        `License information could not be obtained from Elasticsearch` +
-          ` for the [${config.clusterSource}] cluster. ${err}`
+        `License information could not be obtained from Elasticsearch for the [${config.clusterSource}] cluster. ${err}`
       );
 
       return new License({
@@ -115,23 +90,6 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
     }
   }
 
-  public async refresh() {
-    if (this.refresher) {
-      return this.refresher;
-    }
-
-    this.refresher = new Promise(async resolve => {
-      const license = await this.next(this.currentConfig);
-
-      if (license) {
-        this.poller.subject$.next(license);
-      }
-
-      this.refresher = undefined;
-      resolve();
-    });
-  }
-
   public sign(serialized: string) {
     return createHash('md5')
       .update(serialized)
@@ -140,23 +98,37 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
 
   public async setup(core: CoreSetup) {
     const { clusterSource, pollingFrequency } = this.currentConfig;
-    const initialLicense = new License({
-      plugin: this,
-      features: {},
-      clusterSource,
-    });
 
-    this.core = core;
-    this.poller = new Poller<License>(pollingFrequency, initialLicense, () =>
-      this.next(this.currentConfig)
+    this.elasticsearch = core.elasticsearch;
+
+    const manual$ = new BehaviorSubject<boolean>(true);
+    const license$ = merge(
+      of(new License({ plugin: this, features: {}, clusterSource })),
+      timer(0, pollingFrequency),
+      manual$
+    ).pipe(
+      switchMap(() => this.next(this.currentConfig)),
+      pairwise(),
+      filter(([previous, next]) => hasLicenseInfoChanged(previous, next)),
+      tap(([, next]) => {
+        this.logger.info(
+          `Imported license information from Elasticsearch for the [${clusterSource}] cluster: ` +
+            `type: ${next.type} | status: ${next.status} | expiry date: ${moment(
+              next.expiryDateInMillis,
+              'x'
+            ).format()}`
+        );
+      }),
+      map(([, next]) => next)
     );
 
-    const license$ = this.poller.subject$.asObservable();
-
-    this.core.http.registerRouteHandlerContext('licensing', createRouteHandlerContext(license$));
+    core.http.registerRouteHandlerContext('licensing', createRouteHandlerContext(license$));
 
     return {
       license$,
+      refresh() {
+        manual$.next(true);
+      },
     };
   }
 
@@ -164,9 +136,5 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
 
   public stop() {
     this.configSubscription.unsubscribe();
-
-    if (this.poller) {
-      this.poller.unsubscribe();
-    }
   }
 }

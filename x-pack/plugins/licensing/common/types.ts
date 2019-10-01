@@ -156,13 +156,13 @@ export interface ILicense {
 
 /** @public */
 export interface ILicensingPlugin {
-  refresh(): void;
   sign(serialized: string): string;
 }
 
 /** @public */
 export interface LicensingPluginSetup {
   license$: Observable<ILicense>;
+  refresh(): void;
 }
 /** @public */
 export type LicenseType = keyof typeof LICENSE_TYPE;

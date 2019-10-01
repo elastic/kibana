@@ -5,19 +5,18 @@
  */
 
 import { License } from './license';
-import { RawLicense } from './types';
 
 export function hasLicenseInfoChanged(
   currentLicense: License | undefined,
-  newLicense: RawLicense | undefined
+  newLicense: License | undefined
 ) {
   if (currentLicense && newLicense) {
     return (
       newLicense.type !== currentLicense.type ||
       newLicense.status !== currentLicense.status ||
-      newLicense.expiry_date_in_millis !== currentLicense.expiryDateInMillis
+      newLicense.expiryDateInMillis !== currentLicense.expiryDateInMillis
     );
   }
 
-  return (currentLicense && !newLicense) || (newLicense && !currentLicense);
+  return (!!currentLicense && !newLicense) || (!!newLicense && !currentLicense);
 }
