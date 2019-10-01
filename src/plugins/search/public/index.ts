@@ -41,3 +41,5 @@ export {
 export { TSearchStrategyProvider, ISearchStrategy } from './i_search_strategy';
 
 export { IEsSearchResponse, IEsSearchRequest, ES_SEARCH_STRATEGY } from '../common/es_search';
+
+export { SYNC_SEARCH_STRATEGY } from './sync_search_strategy';

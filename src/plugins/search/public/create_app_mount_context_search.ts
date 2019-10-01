@@ -39,14 +39,18 @@ export const createAppMountSearchContext = (
       strategyName ? strategyName : DEFAULT_SEARCH_STRATEGY
     ] as TSearchStrategyProviderEnhanced<K> | undefined;
     if (!strategyProvider) {
-      throw new Error(`Strategy with name ${name} does not exist`);
+      throw new Error(`Strategy with name ${strategyName} does not exist`);
     }
     return strategyProvider(search);
   };
 
   const search: ISearchGeneric = (request, options, strategyName) => {
     const strategyPromise = getSearchStrategy(strategyName);
-    return from(strategyPromise).pipe(mergeMap(s => s.search(request, options)));
+    return from(strategyPromise).pipe(
+      mergeMap(strategy => {
+        return strategy.search(request, options);
+      })
+    );
   };
 
   return { search };

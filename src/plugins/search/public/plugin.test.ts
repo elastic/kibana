@@ -21,25 +21,40 @@ import { coreMock } from '../../../core/public/mocks';
 
 import { SearchPublicPlugin } from './plugin';
 import { CoreSetup } from '../../../core/public';
+import { SYNC_SEARCH_STRATEGY } from './sync_search_strategy';
+import { ISearchAppMountContext } from './i_search_app_mount_context';
 
 describe('Search service', () => {
   let plugin: SearchPublicPlugin;
   let mockCoreSetup: MockedKeys<CoreSetup>;
+  const opaqueId = Symbol();
   beforeEach(() => {
-    plugin = new SearchPublicPlugin(coreMock.createPluginInitializerContext());
+    plugin = new SearchPublicPlugin({ opaqueId });
     mockCoreSetup = coreMock.createSetup();
   });
 
   describe('setup()', () => {
     it('exposes proper contract', async () => {
-      await expect(plugin.setup(mockCoreSetup)).resolves.toMatchInlineSnapshot(`
-
-            `);
+      const setup = plugin.setup(mockCoreSetup);
+      expect(setup).toHaveProperty('registerSearchStrategyContext');
+      expect(setup).toHaveProperty('registerSearchStrategyProvider');
     });
 
-    it('Registers two search strategies', async () => {
-      await plugin.setup(mockCoreSetup);
-      // todo
+    it('app mount', async () => {
+      plugin.setup(mockCoreSetup);
+
+      const mountContext = mockCoreSetup.application.registerMountContext.mock.calls[0][1]({
+        core: mockCoreSetup,
+      }) as ISearchAppMountContext;
+      // console.log(
+      //   'mockCoreSetup.application.registerMountContext.mock.calls[0][1]',
+      //   mockCoreSetup.application.registerMountContext.mock.calls[0][1]()
+      // );
+      // console.log('mountContext', mountContext);
+
+      await mountContext.search({}, {}, SYNC_SEARCH_STRATEGY);
+
+      expect(mockCoreSetup.http.fetch.mock.calls[0]).toMatchInlineSnapshot(`undefined`);
     });
   });
 });
