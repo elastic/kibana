@@ -106,8 +106,11 @@ export class VectorTileLayer extends TileLayer {
   }
 
   _makeNamespacedImageId(imageId) {
-    const prefix = this._source.getSpriteNamespacePrefix() + '/';
-    return prefix + imageId;
+    const prefix = this._source.getSpriteNamespacePrefix();
+    if (prefix) {
+      return `${prefix}/${imageId}`;
+    }
+    return imageId;
   }
 
   syncLayerWithMB(mbMap) {
@@ -139,17 +142,16 @@ export class VectorTileLayer extends TileLayer {
 
       //sync spritesheet
       const spriteMeta = this._getSpriteMeta();
-      if (!spriteMeta) {
-        return;
-      }
-      const newJson = {};
-      for (const imageId in spriteMeta.json) {
-        if (spriteMeta.json.hasOwnProperty(imageId)) {
-          const namespacedImageId = this._makeNamespacedImageId(imageId);
-          newJson[namespacedImageId] = spriteMeta.json[imageId];
+      if (spriteMeta) {
+        const newJson = {};
+        for (const imageId in spriteMeta.json) {
+          if (spriteMeta.json.hasOwnProperty(imageId)) {
+            const namespacedImageId = this._makeNamespacedImageId(imageId);
+            newJson[namespacedImageId] = spriteMeta.json[imageId];
+          }
         }
+        addSpritesheetToMap(newJson, spriteMeta.png, mbMap);
       }
-      addSpritesheetToMap(newJson, spriteMeta.png, mbMap);
 
       //sync layers
       vectorStyle.layers.forEach(layer => {

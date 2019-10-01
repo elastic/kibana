@@ -10,85 +10,107 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
-import { AbstractTMSSource } from './tms_source';
-import { TileLayer } from '../tile_layer';
+import _ from 'lodash';
+import crypto from 'crypto';
+import { AbstractSource } from './source';
+import { VectorTileLayer } from '../vector_tile_layer';
+
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel, getUrlLabel } from '../../../common/i18n_getters';
-import _ from 'lodash';
 
-export class XYZTMSSource extends AbstractTMSSource {
+// Unlike raster tiles and EMS vector tiles, custom vector tiles can have multiple sources
+// so we do not implement the getUrlTemplate function required by AbstractTMSSource.
+export class VectorTileSource extends AbstractSource {
 
-  static type = 'EMS_XYZ';
-  static title = i18n.translate('xpack.maps.source.ems_xyzTitle', {
-    defaultMessage: 'Raster Tile Map Service'
+  static type = 'VECTOR_TILE';
+  static title = i18n.translate('xpack.maps.source.vectorTileTitle', {
+    defaultMessage: 'Vector Tile Source'
   });
-  static description = i18n.translate('xpack.maps.source.ems_xyzDescription', {
-    defaultMessage: 'Raster tile map service configured in interface'
+  static description = i18n.translate('xpack.maps.source.vectorTileDescription', {
+    defaultMessage: 'Vector tile service configured in interface'
   });
   static icon = 'grid';
 
-  static createDescriptor({ urlTemplate, attributionText, attributionUrl }) {
+  static createDescriptor(sourceConfig) {
     return {
-      type: XYZTMSSource.type,
-      urlTemplate,
-      attributionText,
-      attributionUrl
+      type: VectorTileSource.type,
+      styleUrl: sourceConfig.styleUrl
     };
   }
 
-  static renderEditor({  onPreviewSource, inspectorAdapters }) {
+  static renderEditor({ onPreviewSource, inspectorAdapters }) {
     const onSourceConfigChange = (sourceConfig) => {
-      const sourceDescriptor = XYZTMSSource.createDescriptor(sourceConfig);
-      const source = new XYZTMSSource(sourceDescriptor, inspectorAdapters);
+      const descriptor = VectorTileSource.createDescriptor(sourceConfig);
+      const source = new VectorTileSource(descriptor, inspectorAdapters);
       onPreviewSource(source);
     };
-    return (<XYZTMSEditor onSourceConfigChange={onSourceConfigChange} />);
+
+    return <VectorTileSourceEditor onSourceConfigChange={onSourceConfigChange}/>;
   }
 
   async getImmutableProperties() {
     return [
-      { label: getDataSourceLabel(), value: XYZTMSSource.title },
-      { label: getUrlLabel(), value: this._descriptor.urlTemplate },
+      {
+        label: getDataSourceLabel(),
+        value: VectorTileSource.title
+      },
+      {
+        label: getUrlLabel(),
+        value: this._descriptor.styleUrl
+      }
     ];
   }
 
+  async _getVectorStyleJson() {
+    const resp = await fetch(this._descriptor.styleUrl);
+    if(!resp.ok) {
+      throw new Error(`Unable to access ${this._descriptor.styleUrl}`);
+    }
+    const style = await resp.json();
+    return style;
+  }
+
   _createDefaultLayerDescriptor(options) {
-    return TileLayer.createDescriptor({
+    return VectorTileLayer.createDescriptor({
       sourceDescriptor: this._descriptor,
       ...options
     });
   }
 
   createDefaultLayer(options) {
-    return new TileLayer({
+    return new VectorTileLayer({
       layerDescriptor: this._createDefaultLayerDescriptor(options),
       source: this
     });
   }
 
   async getDisplayName() {
-    return this._descriptor.urlTemplate;
+    const styleJson = await this._getVectorStyleJson();
+    return _.get(styleJson, 'name', this._descriptor.styleUrl);
   }
 
-  getAttributions() {
-    const { attributionText, attributionUrl } = this._descriptor;
-    const attributionComplete = !!attributionText && !!attributionUrl;
-
-    return attributionComplete
-      ? [{
-        url: attributionUrl,
-        label: attributionText
-      }]
-      : [];
+  async getAttributions() {
+    // TODO Can mapbox-gl automatically retrieve this from style sources?
+    return [];
   }
 
-  getUrlTemplate() {
-    return this._descriptor.urlTemplate;
+  getSpriteNamespacePrefix() {
+    return null;
+  }
+
+  async getVectorStyleSheetAndSpriteMeta() {
+    const vectorStyleSheet = await this._getVectorStyleJson();
+    return {
+      vectorStyleSheet
+    };
+  }
+
+  _getTileLayerId() {
+    return crypto.createHash('md5').update(this._descriptor.styleUrl).digest('hex');
   }
 }
 
-
-class XYZTMSEditor extends React.Component {
+class VectorTileSourceEditor extends React.Component {
 
   state = {
     tmsInput: '',
@@ -103,17 +125,17 @@ class XYZTMSEditor extends React.Component {
     }
   }, 2000);
 
-  _handleTMSInputChange(e) {
+  _handleStyleInputChange(e) {
     const url = e.target.value;
 
-    const canPreview = (url.indexOf('{x}') >= 0 && url.indexOf('{y}') >= 0 && url.indexOf('{z}') >= 0);
+    const canPreview = true;
     this.setState({
       tmsInput: url,
       tmsCanPreview: canPreview
-    }, () => this._sourceConfigChange({ urlTemplate: url }));
+    }, () => this._sourceConfigChange({ styleUrl: url }));
   }
 
-  _handleTMSAttributionChange(attributionUpdate) {
+  _handleAttributionChange(attributionUpdate) {
     this.setState(attributionUpdate, () => {
       const {
         attributionText,
@@ -143,8 +165,8 @@ class XYZTMSEditor extends React.Component {
           label="Url"
         >
           <EuiFieldText
-            placeholder={'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'}
-            onChange={e => this._handleTMSInputChange(e)}
+            placeholder={'https://tiles.maps.elastic.co/styles/osm-bright.json'}
+            onChange={e => this._handleStyleInputChange(e)}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -160,7 +182,7 @@ class XYZTMSEditor extends React.Component {
           <EuiFieldText
             placeholder={'© OpenStreetMap contributors'}
             onChange={({ target }) =>
-              this._handleTMSAttributionChange({ attributionText: target.value })
+              this._handleAttributionChange({ attributionText: target.value })
             }
           />
         </EuiFormRow>
@@ -177,7 +199,7 @@ class XYZTMSEditor extends React.Component {
           <EuiFieldText
             placeholder={'https://www.openstreetmap.org/copyright'}
             onChange={({ target }) =>
-              this._handleTMSAttributionChange({ attributionUrl: target.value })
+              this._handleAttributionChange({ attributionUrl: target.value })
             }
           />
         </EuiFormRow>

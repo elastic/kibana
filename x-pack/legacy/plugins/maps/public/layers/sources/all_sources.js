@@ -8,6 +8,7 @@ import { EMSFileSource } from './ems_file_source';
 import { GeojsonFileSource } from './client_file_source';
 import { KibanaRegionmapSource } from './kibana_regionmap_source';
 import { XYZTMSSource } from './xyz_tms_source';
+import { VectorTileSource } from './vector_tile_source';
 import { EMSTMSSource } from './ems_tms_source';
 import { WMSSource } from './wms_source';
 import { KibanaTilemapSource } from './kibana_tilemap_source';
@@ -22,6 +23,7 @@ export const ALL_SOURCES = [
   ESPewPewSource,
   EMSFileSource,
   EMSTMSSource,
+  VectorTileSource,
   KibanaRegionmapSource,
   KibanaTilemapSource,
   XYZTMSSource,
