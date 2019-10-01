@@ -97,6 +97,8 @@ export class MapEmbeddable extends Embeddable {
    * @param {ContainerState} containerState
    */
   render(domNode) {
+    super.render(domNode);
+
     this._store.dispatch(setReadOnly(true));
     this._store.dispatch(disableScrollZoom());
 
@@ -148,6 +150,7 @@ export class MapEmbeddable extends Embeddable {
 
   destroy() {
     super.destroy();
+
     if (this._unsubscribeFromStore) {
       this._unsubscribeFromStore();
     }

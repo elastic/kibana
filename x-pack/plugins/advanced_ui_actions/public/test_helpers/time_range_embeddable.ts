@@ -25,7 +25,5 @@ export class TimeRangeEmbeddable extends Embeddable<EmbeddableTimeRangeInput, Em
     super(initialInput, {}, parent);
   }
 
-  public render() {}
-
   public reload() {}
 }
