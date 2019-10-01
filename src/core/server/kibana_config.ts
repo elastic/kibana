@@ -16,11 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { getTypes, getProperty, getRootProperties, getRootPropertiesObjects } from './lib';
-export {
-  FieldMapping,
-  MappingMeta,
-  MappingProperties,
-  IndexMapping,
-  SavedObjectsMapping,
-} from './types';
+
+import { schema, TypeOf } from '@kbn/config-schema';
+
+export type KibanaConfigType = TypeOf<typeof config.schema>;
+
+export const config = {
+  path: 'kibana',
+  schema: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+    defaultAppId: schema.string({ defaultValue: 'home' }),
+    index: schema.string({ defaultValue: '.kibana' }),
+    disableWelcomeScreen: schema.boolean({ defaultValue: false }),
+    autocompleteTerminateAfter: schema.duration({ defaultValue: 100000 }),
+    autocompleteTimeout: schema.duration({ defaultValue: 1000 }),
+  }),
+};

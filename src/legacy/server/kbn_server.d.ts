@@ -26,7 +26,7 @@ import {
   ElasticsearchServiceSetup,
   LoggerFactory,
   SavedObjectsClientContract,
-  SavedObjectsService,
+  SavedObjectsLegacyService,
 } from '../../core/server';
 
 import { LegacyServiceSetupDeps, LegacyServiceStartDeps } from '../../core/server/';
@@ -62,7 +62,7 @@ declare module 'hapi' {
   interface Server {
     config: () => KibanaConfig;
     indexPatternsServiceFactory: IndexPatternsServiceFactory;
-    savedObjects: SavedObjectsService;
+    savedObjects: SavedObjectsLegacyService;
     usage: { collectorSet: any };
     injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
     getHiddenUiAppById(appId: string): UiApp;
@@ -127,4 +127,4 @@ export { Server, Request, ResponseToolkit } from 'hapi';
 
 // Re-export commonly accessed api types.
 export { IndexPatternsService } from './index_patterns';
-export { SavedObjectsService, SavedObjectsClient } from 'src/core/server';
+export { SavedObjectsLegacyService, SavedObjectsClient } from 'src/core/server';
