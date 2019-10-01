@@ -29,22 +29,20 @@ import {
   DashboardContainerOptions,
 } from '../lib/embeddable/dashboard_container';
 import { getSampleDashboardInput } from '../lib/test_helpers';
+import { KibanaContextProvider } from '../../../kibana_react/public';
+/* eslint-disable @kbn/eslint/no-restricted-paths */
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
-} from '../../../../../embeddable_api/public/np_ready/public/lib/test_samples';
-import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddable,
   ContactCardEmbeddableOutput,
-} from '../../../../../embeddable_api/public/np_ready/public/lib/test_samples';
-import { embeddablePluginMock } from '../../../../../embeddable_api/public/np_ready/public/mocks';
-import { createEditModeAction } from '../../../../../embeddable_api/public/np_ready/public/lib/test_samples';
-// eslint-disable-next-line
-import { inspectorPluginMock } from '../../../../../../../plugins/inspector/public/mocks';
-import { KibanaContextProvider } from '../../../../../../../plugins/kibana_react/public';
-// eslint-disable-next-line
-import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
+  createEditModeAction,
+} from '../../../embeddable/public/lib/test_samples';
+import { inspectorPluginMock } from '../../../inspector/public/mocks';
+import { embeddablePluginMock } from '../../../embeddable/public/mocks';
+import { uiActionsPluginMock } from '../../../ui_actions/public/mocks';
+/* eslint-enable @kbn/eslint/no-restricted-paths */
 
 test('DashboardContainer in edit mode shows edit mode actions', async () => {
   const inspector = inspectorPluginMock.createStartContract();

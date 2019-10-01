@@ -1,6 +1,6 @@
 @import 'src/legacy/ui/public/styles/styling_constants';
-@import 'src/legacy/core_plugins/embeddable_api/public/variables';
+@import './variables';
 
-@import './np_ready/public/lib/embeddable/grid/index';
-@import './np_ready/public/lib/embeddable/panel/index';
-@import './np_ready/public/lib/embeddable/viewport/index';
+@import '../../../../plugins/dashboard_embeddable_container/public/lib/embeddable/grid/index';
+@import '../../../../plugins/dashboard_embeddable_container/public/lib/embeddable/panel/index';
+@import '../../../../plugins/dashboard_embeddable_container/public/lib/embeddable/viewport/index';

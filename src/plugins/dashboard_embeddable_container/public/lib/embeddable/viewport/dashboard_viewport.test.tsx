@@ -28,11 +28,13 @@ import { EmbeddableFactory } from '../../embeddable_api';
 import { DashboardViewport, DashboardViewportProps } from './dashboard_viewport';
 import { DashboardContainer, DashboardContainerOptions } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
+/* eslint-disable @kbn/eslint/no-restricted-paths */
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
-} from '../../../../../../../embeddable_api/public/np_ready/public/lib/test_samples';
-import { KibanaContextProvider } from '../../../../../../../../../plugins/kibana_react/public';
+} from '../../../../../embeddable/public/lib/test_samples';
+/* eslint-enable @kbn/eslint/no-restricted-paths */
+import { KibanaContextProvider } from '../../../../../kibana_react/public';
 
 let dashboardContainer: DashboardContainer | undefined;
 

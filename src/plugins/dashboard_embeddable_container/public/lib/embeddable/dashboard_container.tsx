@@ -22,7 +22,7 @@ import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { Filter } from '@kbn/es-query';
 import { RefreshInterval, TimeRange } from 'src/plugins/data/public';
-import { IUiActionsStart } from '../../../../../../../../plugins/ui_actions/public';
+import { IUiActionsStart } from '../../../../../plugins/ui_actions/public';
 import {
   Container,
   ContainerInput,
@@ -30,20 +30,20 @@ import {
   ViewMode,
   EmbeddableFactory,
   IEmbeddable,
-} from '../../../../../../embeddable_api/public/np_ready/public';
+} from '../embeddable_api';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_container_factory';
 import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';
-import { Query } from '../../../../../../data/public';
-import { CoreStart } from '../../../../../../../../core/public';
-import { Start as InspectorStartContract } from '../../../../../../../../plugins/inspector/public';
-import { Start as EmbeddableStartContract } from '../../../../../../embeddable_api/public/np_ready/public';
+import { Query } from '../../../../data/public';
+import { CoreStart } from '../../../../../core/public';
+import { Start as InspectorStartContract } from '../../../../inspector/public';
+import { Start as EmbeddableStartContract } from '../embeddable_api';
 import {
   KibanaReactContext,
   KibanaReactContextValue,
   KibanaContextProvider,
-} from '../../../../../../../../plugins/kibana_react/public';
+} from '../../../../kibana_react/public';
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;

@@ -21,13 +21,15 @@ import { isErrorEmbeddable, EmbeddableFactory } from '../embeddable_api';
 import { ExpandPanelAction } from './expand_panel_action';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
+/* eslint-disable @kbn/eslint/no-restricted-paths */
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from '../../../../../../embeddable_api/public/np_ready/public/lib/test_samples';
+} from '../../../../embeddable/public/lib/test_samples';
+/* eslint-enable @kbn/eslint/no-restricted-paths */
 import { DashboardOptions } from '../embeddable/dashboard_container_factory';
 
 const embeddableFactories = new Map<string, EmbeddableFactory>();

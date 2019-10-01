@@ -27,6 +27,7 @@ export const npSetup = {
     embeddable: {
       registerEmbeddableFactory: sinon.fake(),
     },
+    dashboardEmbeddableContainer: undefined,
     expressions: {
       registerFunction: sinon.fake(),
       registerRenderer: sinon.fake(),
@@ -60,6 +61,7 @@ export const npStart = {
       getEmbeddableFactories: sinon.fake(),
       registerEmbeddableFactory: sinon.fake(),
     },
+    dashboardEmbeddableContainer: undefined,
     expressions: {
       registerFunction: sinon.fake(),
       registerRenderer: sinon.fake(),

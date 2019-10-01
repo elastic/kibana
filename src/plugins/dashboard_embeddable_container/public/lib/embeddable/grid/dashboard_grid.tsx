@@ -32,7 +32,7 @@ import { ViewMode, EmbeddableChildPanel } from '../../embeddable_api';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardPanelState, GridData } from '../types';
-import { withKibana } from '../../../../../../../../../plugins/kibana_react/public';
+import { withKibana } from '../../../../../kibana_react/public';
 
 let lastValidGridSize = 0;
 

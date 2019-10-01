@@ -17,4 +17,14 @@
  * under the License.
  */
 
-export * from '../../../../../embeddable_api/public/np_ready/public';
+import { PluginInitializerContext } from 'kibana/public';
+import { DashboardEmbeddableContainerPublicPlugin } from './plugin';
+
+export * from './lib';
+export * from './plugin';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DashboardEmbeddableContainerPublicPlugin(initializerContext);
+}
+
+export { DashboardEmbeddableContainerPublicPlugin as Plugin };

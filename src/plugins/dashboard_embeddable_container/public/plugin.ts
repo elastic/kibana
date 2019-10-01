@@ -18,13 +18,19 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { IUiActionsSetup, IUiActionsStart } from '../../../../../../plugins/ui_actions/public';
+import { IUiActionsSetup, IUiActionsStart } from '../../../plugins/ui_actions/public';
 import { CONTEXT_MENU_TRIGGER, Plugin as EmbeddablePlugin } from './lib/embeddable_api';
 import { ExpandPanelAction, DashboardContainerFactory } from './lib';
-import { Start as InspectorStartContract } from '../../../../../../plugins/inspector/public';
+import {
+  Setup as InspectorSetupContract,
+  Start as InspectorStartContract,
+} from '../../../plugins/inspector/public';
+import { SavedObjectFinder } from '../../kibana_react/public';
+import { ExitFullScreenButton } from '../../kibana_react/public';
 
 interface SetupDependencies {
   embeddable: ReturnType<EmbeddablePlugin['setup']>;
+  inspector: InspectorSetupContract;
   uiActions: IUiActionsSetup;
 }
 
@@ -32,10 +38,6 @@ interface StartDependencies {
   embeddable: ReturnType<EmbeddablePlugin['start']>;
   inspector: InspectorStartContract;
   uiActions: IUiActionsStart;
-  __LEGACY: {
-    SavedObjectFinder: React.ComponentType<any>;
-    ExitFullScreenButton: React.ComponentType<any>;
-  };
 }
 
 export type Setup = void;
@@ -53,20 +55,22 @@ export class DashboardEmbeddableContainerPublicPlugin
 
   public start(core: CoreStart, plugins: StartDependencies): Start {
     const { application, notifications, overlays } = core;
-    const { embeddable, inspector, __LEGACY, uiActions } = plugins;
+    const { embeddable, inspector, uiActions } = plugins;
 
+    /*
     const factory = new DashboardContainerFactory({
       application,
       notifications,
       overlays,
       embeddable,
       inspector,
-      SavedObjectFinder: __LEGACY.SavedObjectFinder,
-      ExitFullScreenButton: __LEGACY.ExitFullScreenButton,
+      SavedObjectFinder,
+      ExitFullScreenButton,
       uiActions,
     });
 
     embeddable.registerEmbeddableFactory(factory.type, factory);
+    */
   }
 
   public stop() {}

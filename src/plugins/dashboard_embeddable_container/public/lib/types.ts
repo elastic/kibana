@@ -18,10 +18,7 @@
  */
 
 import { IconType } from '@elastic/eui';
-import {
-  SavedObject as SavedObjectType,
-  SavedObjectAttributes,
-} from '../../../../../../../core/server';
+import { SavedObject as SavedObjectType, SavedObjectAttributes } from '../../../../core/server';
 
 export interface DashboardCapabilities {
   showWriteControls: boolean;

@@ -17,4 +17,4 @@
  * under the License.
  */
 
-import './np_ready/public/legacy';
+export * from '../../../embeddable/public';

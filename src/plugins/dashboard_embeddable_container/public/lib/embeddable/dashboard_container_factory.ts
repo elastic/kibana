@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObjectAttributes } from '../../../../../../../../core/server';
+import { SavedObjectAttributes } from '../../../../../core/server';
 import { SavedObjectMetaData } from '../types';
 import { ContainerOutput, EmbeddableFactory, ErrorEmbeddable, Container } from '../embeddable_api';
 import {

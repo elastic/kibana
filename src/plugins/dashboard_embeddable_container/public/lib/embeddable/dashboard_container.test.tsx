@@ -23,13 +23,15 @@ import { nextTick } from 'test_utils/enzyme_helpers';
 import { isErrorEmbeddable, ViewMode, EmbeddableFactory } from '../embeddable_api';
 import { DashboardContainer, DashboardContainerOptions } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
+/* eslint-disable @kbn/eslint/no-restricted-paths */
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddable,
   ContactCardEmbeddableOutput,
-} from '../../../../../../embeddable_api/public/np_ready/public/lib/test_samples';
+} from '../../../../embeddable/public/lib/test_samples';
+/* eslint-enable @kbn/eslint/no-restricted-paths */
 
 const options: DashboardContainerOptions = {
   application: {} as any,
