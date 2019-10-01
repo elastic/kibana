@@ -71,7 +71,7 @@ export function InnerWorkspacePanel({
       field: dragDropContext.dragging,
     });
 
-    return suggestions[0];
+    return suggestions.find(s => s.visualizationId === activeVisualizationId) || suggestions[0];
   }, [dragDropContext.dragging]);
 
   function onDrop() {
@@ -157,7 +157,7 @@ export function InnerWorkspacePanel({
     } else {
       return (
         <ExpressionRendererComponent
-          className="lnsExpressionOutput"
+          className="lnsExpressionRenderer"
           expression={expression!}
           onRenderFailure={(e: unknown) => {
             setExpressionError(e);

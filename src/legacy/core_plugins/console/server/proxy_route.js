@@ -19,30 +19,28 @@
 
 import Joi from 'joi';
 import Boom from 'boom';
-import Wreck from '@hapi/wreck';
 import { trimLeft, trimRight } from 'lodash';
+import { sendRequest } from './request';
+import * as url from 'url';
 
-function resolveUri(base, path) {
-  let pathToUse = `${trimRight(base, '/')}/${trimLeft(path, '/')}`;
-  const questionMarkIndex = pathToUse.indexOf('?');
-  // no query string in pathToUse, append '?pretty'
-  if (questionMarkIndex === -1) {
-    pathToUse = `${pathToUse}?pretty`;
-  } else {
-    // pathToUse has query string, append '&pretty'
-    pathToUse = `${pathToUse}&pretty`;
-  } // appending pretty here to have Elasticsearch do the JSON formatting, as doing
+function toURL(base, path) {
+  const urlResult = new url.URL(`${trimRight(base, '/')}/${trimLeft(path, '/')}`);
+  // Appending pretty here to have Elasticsearch do the JSON formatting, as doing
   // in JS can lead to data loss (7.0 will get munged into 7, thus losing indication of
   // measurement precision)
-  return pathToUse;
-}
-
-function extendCommaList(obj, property, value) {
-  obj[property] = (obj[property] ? obj[property] + ',' : '') + value;
+  if (!urlResult.searchParams.get('pretty')) {
+    urlResult.searchParams.append('pretty', 'true');
+  }
+  return urlResult;
 }
 
 function getProxyHeaders(req) {
-  const headers = {};
+  const headers = Object.create(null);
+
+  // Scope this proto-unsafe functionality to where it is being used.
+  function extendCommaList(obj, property, value) {
+    obj[property] = (obj[property] ? obj[property] + ',' : '') + value;
+  }
 
   if (req.info.remotePort && req.info.remoteAddress) {
     // see https://git.io/vytQ7
@@ -72,7 +70,6 @@ export const createProxyRoute = ({
       output: 'stream',
       parse: false,
     },
-
     validate: {
       query: Joi.object()
         .keys({
@@ -103,43 +100,46 @@ export const createProxyRoute = ({
     handler: async (req, h) => {
       const { payload, query } = req;
       const { path, method } = query;
-      const uri = resolveUri(baseUrl, path);
+      const uri = toURL(baseUrl, path);
 
-      const { timeout, rejectUnauthorized, agent, headers } = getConfigForReq(req, uri);
-      const makeRequest = async payloadToSend => {
-        const wreckOptions = {
-          payload: payloadToSend,
-          timeout,
-          rejectUnauthorized,
-          agent,
-          headers: {
-            ...headers,
-            ...getProxyHeaders(req),
-          },
-        };
+      // Because this can technically be provided by a settings-defined proxy config, we need to
+      // preserve these property names to maintain BWC.
+      const { timeout, agent, headers, rejectUnauthorized } = getConfigForReq(req, uri.toString());
 
-        const esResponse = await Wreck.request(method, uri, wreckOptions);
-
-        if (method.toUpperCase() !== 'HEAD') {
-          return h
-            .response(esResponse)
-            .code(esResponse.statusCode)
-            .header('warning', esResponse.headers.warning);
-        }
-
-        return h
-          .response(`${esResponse.statusCode} - ${esResponse.statusMessage}`)
-          .code(esResponse.statusCode)
-          .type('text/plain')
-          .header('warning', esResponse.headers.warning);
+      const requestHeaders = {
+        ...headers,
+        ...getProxyHeaders(req),
       };
-      // Wreck assumes that DELETE requests will not have a body, and thus it does not
-      // parse the payload to pass it along, so we have to do this manually here.
-      if (method.toUpperCase() === 'DELETE') {
-        const data = await Wreck.read(payload);
-        return await makeRequest(data);
+
+      const esIncomingMessage = await sendRequest({
+        method,
+        headers: requestHeaders,
+        uri,
+        timeout,
+        payload,
+        rejectUnauthorized,
+        agent,
+      });
+
+      const {
+        statusCode,
+        statusMessage,
+        headers: responseHeaders,
+      } = esIncomingMessage;
+
+      const { warning } = responseHeaders;
+
+      if (method.toUpperCase() !== 'HEAD') {
+        return h
+          .response(esIncomingMessage)
+          .code(statusCode)
+          .header('warning', warning);
       } else {
-        return await makeRequest(payload);
+        return h
+          .response(`${statusCode} - ${statusMessage}`)
+          .code(statusCode)
+          .type('text/plain')
+          .header('warning', warning);
       }
     },
   },

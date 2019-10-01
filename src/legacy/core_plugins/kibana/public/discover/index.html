@@ -163,11 +163,12 @@
               </header>
 
               <discover-histogram
-                style="display: flex; height: 200px"
+                class="dscHistogram"
                 ng-show="vis && rows.length !== 0"
                 chart-data="histogramData"
                 timefilter-update-handler="timefilterUpdateHandler"
                 watch-depth="reference"
+                data-test-subj="discoverChart"
               ></discover-histogram>
             </section>
 

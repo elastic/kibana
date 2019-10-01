@@ -62,7 +62,6 @@ export class AppPlugin {
           core={core}
           editorFrame={this.instance!}
           store={new Storage(localStorage)}
-          savedObjectsClient={chrome.getSavedObjectsClient()}
           docId={routeProps.match.params.id}
           docStorage={store}
           redirectTo={id => {
