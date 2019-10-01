@@ -1,0 +1,35 @@
+{
+   "migrationVersion": {
+      "search": "7.0.0"
+   }, 
+   "references": [
+      {
+         "type": "index-pattern", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.index", 
+         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b"
+      }
+   ], 
+   "search": {
+      "sort": [
+         "TimeUpdated", 
+         "desc"
+      ], 
+      "hits": 0, 
+      "description": "", 
+      "title": "Traffic Direction Table", 
+      "version": 2, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"highlight\":{\"pre_tags\":[\"@kibana-highlighted-field@\"],\"post_tags\":[\"@/kibana-highlighted-field@\"],\"fields\":{\"*\":{}},\"fragment_size\":2147483647},\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true,\"time_zone\":\"America/Denver\"}},\"language\":\"lucene\"},\"highlightAll\":true,\"version\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+      }, 
+      "columns": [
+         "TrafficDirection_NM", 
+         "Application", 
+         "DestIP", 
+         "SrcIP", 
+         "TotalBytes", 
+         "Session"
+      ]
+   }, 
+   "type": "search", 
+   "updated_at": "2019-09-26T21:13:46.923Z"
+}

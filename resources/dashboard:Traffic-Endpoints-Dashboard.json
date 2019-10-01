@@ -1,0 +1,46 @@
+{
+   "migrationVersion": {
+      "dashboard": "7.0.0"
+   }, 
+   "references": [
+      {
+         "type": "search", 
+         "name": "panel_0", 
+         "id": "Support-Table"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_1", 
+         "id": "Top-SrcIP-By-Metadata-Impact-(pie)"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_2", 
+         "id": "Top-DestIP-By-Metadata-Impact-(pie)"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_3", 
+         "id": "Top-DestIP-By-Session-(pie)"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_4", 
+         "id": "Top-SrcIP-By-Session-(pie)"
+      }
+   ], 
+   "type": "dashboard", 
+   "dashboard": {
+      "hits": 0, 
+      "timeRestore": false, 
+      "description": "", 
+      "title": "Traffic Endpoints Dashboard", 
+      "panelsJSON": "[{\"embeddableConfig\":{\"columns\":[\"Application\",\"SrcIP\",\"DestIP\",\"Duration\"],\"sort\":[\"TimeUpdated\",\"asc\"]},\"panelIndex\":\"1\",\"gridData\":{\"x\":0,\"y\":12,\"w\":48,\"h\":12,\"i\":\"1\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_0\"},{\"panelIndex\":\"2\",\"gridData\":{\"x\":0,\"y\":0,\"w\":12,\"h\":12,\"i\":\"2\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_1\"},{\"panelIndex\":\"3\",\"gridData\":{\"x\":12,\"y\":0,\"w\":12,\"h\":12,\"i\":\"3\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_2\"},{\"panelIndex\":\"4\",\"gridData\":{\"x\":36,\"y\":0,\"w\":12,\"h\":12,\"i\":\"4\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_3\"},{\"panelIndex\":\"5\",\"gridData\":{\"x\":24,\"y\":0,\"w\":12,\"h\":12,\"i\":\"5\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_4\"}]", 
+      "optionsJSON": "{\"useMargins\":true,\"hidePanelTitles\":false}", 
+      "version": 4, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true,\"time_zone\":\"America/Denver\"}},\"language\":\"lucene\"}}"
+      }
+   }, 
+   "updated_at": "2019-09-27T19:39:58.249Z"
+}

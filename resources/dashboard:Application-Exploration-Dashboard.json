@@ -1,0 +1,41 @@
+{
+   "migrationVersion": {
+      "dashboard": "7.0.0"
+   }, 
+   "references": [
+      {
+         "type": "visualization", 
+         "name": "panel_0", 
+         "id": "Top-Applications-By-Bandwidth-(histogram)"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_1", 
+         "id": "Application-Tags-Summary"
+      }, 
+      {
+         "type": "search", 
+         "name": "panel_2", 
+         "id": "Application-Exploration-Table"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_3", 
+         "id": "Application-Families-By-Bandwidth"
+      }
+   ], 
+   "type": "dashboard", 
+   "dashboard": {
+      "hits": 0, 
+      "timeRestore": false, 
+      "description": "", 
+      "title": "Application Exploration Dashboard", 
+      "panelsJSON": "[{\"panelIndex\":\"1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":32,\"h\":24,\"i\":\"1\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_0\"},{\"panelIndex\":\"2\",\"gridData\":{\"x\":32,\"y\":12,\"w\":16,\"h\":12,\"i\":\"2\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{\"columns\":[\"SrcIP\",\"DestIP\",\"Application\",\"ApplicationFamily\",\"ApplicationTags\",\"Duration\",\"TotalBytes\",\"TotalPackets\",\"Session\"],\"sort\":[\"TimeUpdated\",\"desc\"]},\"panelIndex\":\"3\",\"gridData\":{\"x\":0,\"y\":24,\"w\":48,\"h\":20,\"i\":\"3\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_2\"},{\"panelIndex\":\"4\",\"gridData\":{\"x\":32,\"y\":0,\"w\":16,\"h\":12,\"i\":\"4\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_3\"}]", 
+      "optionsJSON": "{\"useMargins\":true,\"hidePanelTitles\":false}", 
+      "version": 1, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true,\"time_zone\":\"America/Denver\"}},\"language\":\"lucene\"}}"
+      }
+   }, 
+   "updated_at": "2019-09-26T17:16:45.808Z"
+}

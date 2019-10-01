@@ -1,0 +1,56 @@
+{
+   "migrationVersion": {
+      "dashboard": "7.0.0"
+   }, 
+   "references": [
+      {
+         "type": "visualization", 
+         "name": "panel_0", 
+         "id": "Ingress-Egress-Traffic-Dashboard-Description"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_1", 
+         "id": "Egress-Traffic-By-Application"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_2", 
+         "id": "Egress-Traffic-By-Source-IP"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_3", 
+         "id": "Ingress-Traffic-By-Application"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_4", 
+         "id": "Ingress-Traffic-By-Source-IP"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_5", 
+         "id": "Traffic-Direction-By-Bandwidth"
+      }, 
+      {
+         "type": "search", 
+         "name": "panel_6", 
+         "id": "Traffic-Direction-Table"
+      }
+   ], 
+   "type": "dashboard", 
+   "dashboard": {
+      "hits": 0, 
+      "timeRestore": false, 
+      "description": "", 
+      "title": "Ingress Egress Traffic Dashboard", 
+      "panelsJSON": "[{\"panelIndex\":\"1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":12,\"i\":\"1\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_0\"},{\"panelIndex\":\"2\",\"gridData\":{\"x\":0,\"y\":12,\"w\":24,\"h\":12,\"i\":\"2\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_1\"},{\"panelIndex\":\"3\",\"gridData\":{\"x\":0,\"y\":24,\"w\":24,\"h\":12,\"i\":\"3\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_2\"},{\"panelIndex\":\"4\",\"gridData\":{\"x\":24,\"y\":12,\"w\":24,\"h\":12,\"i\":\"4\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_3\"},{\"panelIndex\":\"5\",\"gridData\":{\"x\":24,\"y\":24,\"w\":24,\"h\":12,\"i\":\"5\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_4\"},{\"panelIndex\":\"6\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":12,\"i\":\"6\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{\"columns\":[\"TrafficDirection_NM\",\"Application\",\"DestIP\",\"SrcIP\",\"TotalBytes\",\"Session\"],\"sort\":[\"TimeUpdated\",\"desc\"]},\"panelIndex\":\"7\",\"gridData\":{\"x\":0,\"y\":36,\"w\":48,\"h\":24,\"i\":\"7\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_6\"}]", 
+      "optionsJSON": "{\"useMargins\":true,\"hidePanelTitles\":false}", 
+      "version": 2, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true,\"time_zone\":\"America/Denver\"}},\"language\":\"lucene\"}}"
+      }
+   }, 
+   "updated_at": "2019-09-26T21:16:43.457Z"
+}

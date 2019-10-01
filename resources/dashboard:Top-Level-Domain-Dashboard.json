@@ -1,0 +1,51 @@
+{
+   "migrationVersion": {
+      "dashboard": "7.0.0"
+   }, 
+   "references": [
+      {
+         "type": "search", 
+         "name": "panel_0", 
+         "id": "Top-Level-Domain-Table"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_1", 
+         "id": "High-Bandwidth-Top-Level-Domains"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_2", 
+         "id": "Low-Bandwidth-Top-Level-Domains"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_3", 
+         "id": "Top-10-Top-Level-Domains-By-Bandwidth"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_4", 
+         "id": "Top-10-Second-Level-Domains-By-Bandwidth"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_5", 
+         "id": "Top-Level-Domain-Dashboard-Description"
+      }
+   ], 
+   "type": "dashboard", 
+   "dashboard": {
+      "hits": 0, 
+      "timeRestore": false, 
+      "description": "", 
+      "title": "Top Level Domain Dashboard", 
+      "panelsJSON": "[{\"embeddableConfig\":{\"columns\":[\"SrcIP\",\"DestIP\",\"Application\",\"Duration\",\"Session\",\"Domain_TLD_NM\",\"Domain_SLD_NM\",\"Domain_FQDN_NM\"],\"sort\":[\"TimeUpdated\",\"desc\"]},\"panelIndex\":\"1\",\"gridData\":{\"x\":0,\"y\":36,\"w\":48,\"h\":20,\"i\":\"1\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_0\"},{\"panelIndex\":\"2\",\"gridData\":{\"x\":16,\"y\":0,\"w\":16,\"h\":16,\"i\":\"2\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_1\"},{\"panelIndex\":\"3\",\"gridData\":{\"x\":32,\"y\":0,\"w\":16,\"h\":16,\"i\":\"3\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_2\"},{\"panelIndex\":\"4\",\"gridData\":{\"x\":0,\"y\":16,\"w\":24,\"h\":20,\"i\":\"4\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_3\"},{\"panelIndex\":\"5\",\"gridData\":{\"x\":24,\"y\":16,\"w\":24,\"h\":20,\"i\":\"5\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_4\"},{\"panelIndex\":\"6\",\"gridData\":{\"x\":0,\"y\":0,\"w\":16,\"h\":16,\"i\":\"6\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_5\"}]", 
+      "optionsJSON": "{\"useMargins\":true,\"hidePanelTitles\":false}", 
+      "version": 1, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true,\"time_zone\":\"America/Denver\"}},\"language\":\"lucene\"}}"
+      }
+   }, 
+   "updated_at": "2019-09-27T17:48:58.631Z"
+}
