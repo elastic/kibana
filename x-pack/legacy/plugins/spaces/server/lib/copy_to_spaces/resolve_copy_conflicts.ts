@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, SavedObjectsService, SavedObject } from 'src/core/server';
+import {
+  SavedObjectsClientContract,
+  SavedObjectsLegacyService,
+  SavedObject,
+} from 'src/core/server';
 import { Readable } from 'stream';
 import { spaceIdToNamespace } from '../utils/namespace';
 import { CopyOptions, ResolveConflictsOptions, CopyResponse } from './types';
@@ -15,7 +19,7 @@ import { createReadableStreamFromArray } from './lib/readable_stream_from_array'
 
 export function resolveCopySavedObjectsToSpacesConflictsFactory(
   savedObjectsClient: SavedObjectsClientContract,
-  savedObjectsService: SavedObjectsService
+  savedObjectsService: SavedObjectsLegacyService
 ) {
   const { importExport, types, schema } = savedObjectsService;
   const eligibleTypes = getEligibleTypes({ types, schema });
