@@ -12,7 +12,6 @@ import {
   EuiKeyPadMenu,
   EuiKeyPadMenuItemButton,
   EuiButtonEmpty,
-  EuiTitle,
 } from '@elastic/eui';
 import { flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -182,20 +181,19 @@ export function ChartSwitch(props: Props) {
       panelPaddingSize="s"
       button={
         <EuiButtonEmpty
-          size="xs"
+          className="lnsChartSwitch__triggerButton"
           onClick={() => setFlyoutOpen(!flyoutOpen)}
           data-test-subj="lnsChartSwitchPopover"
+          flush="left"
+          iconSide="right"
+          iconType="arrowDown"
         >
-          (
-          {i18n.translate('xpack.lens.configPanel.changeVisualization', {
-            defaultMessage: 'change',
-          })}
-          )
+          <VisualizationSummary {...props} />
         </EuiButtonEmpty>
       }
       isOpen={flyoutOpen}
       closePopover={() => setFlyoutOpen(false)}
-      anchorPosition="leftUp"
+      anchorPosition="downLeft"
     >
       <EuiPopoverTitle>
         {i18n.translate('xpack.lens.configPanel.chooseVisualization', {
@@ -233,15 +231,7 @@ export function ChartSwitch(props: Props) {
     </EuiPopover>
   );
 
-  return (
-    <div className="lnsChartSwitch__header">
-      <EuiTitle size="xs">
-        <h3>
-          <VisualizationSummary {...props} /> {popover}
-        </h3>
-      </EuiTitle>
-    </div>
-  );
+  return <div className="lnsChartSwitch__header">{popover}</div>;
 }
 
 function getTopSuggestion(

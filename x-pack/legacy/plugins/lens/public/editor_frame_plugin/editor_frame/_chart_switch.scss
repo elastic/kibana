@@ -7,6 +7,11 @@
   }
 }
 
+.lnsChartSwitch__triggerButton {
+  @include euiTitle('xs');
+  line-height: $euiSizeXXL;
+}
+
 .lnsChartSwitch__summaryIcon {
   margin-right: $euiSizeS;
   transform: translateY(-2px);
