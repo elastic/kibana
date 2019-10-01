@@ -42,7 +42,7 @@ function ListItem({
           <EuiIcon type={state === 'active' ? 'sortRight' : 'check'} />
         </span>
       )}
-      {children}
+      <EuiText>{children}</EuiText>
     </li>
   );
 }
