@@ -128,7 +128,6 @@ export const spaces = (kibana: Record<string, any>) =>
 
       spacesPlugin.registerLegacyAPI({
         legacyConfig: {
-          serverBasePath: config.get('server.basePath'),
           serverDefaultRoute: config.get('server.defaultRoute'),
           kibanaIndex: config.get('kibana.index'),
         },
