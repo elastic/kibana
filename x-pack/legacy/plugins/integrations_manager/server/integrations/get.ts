@@ -14,12 +14,9 @@ function nameAsTitle(name: string) {
   return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();
 }
 
-export async function getIntegrations(options: {
-  savedObjectsClient: SavedObjectsClientContract;
-  registryUrl: string | undefined;
-}) {
-  const { savedObjectsClient, registryUrl } = options;
-  const registryItems = await Registry.fetchList(registryUrl).then(items =>
+export async function getIntegrations(options: { savedObjectsClient: SavedObjectsClientContract }) {
+  const { savedObjectsClient } = options;
+  const registryItems = await Registry.fetchList().then(items =>
     items.map(item => Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }))
   );
   const searchObjects = registryItems.map(({ name, version }) => ({
