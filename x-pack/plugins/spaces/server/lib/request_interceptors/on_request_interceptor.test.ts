@@ -110,9 +110,7 @@ describe('onRequestInterceptor', () => {
     initSpacesOnRequestInterceptor({
       getLegacyAPI: () =>
         ({
-          legacyConfig: {
-            serverBasePath: opts.basePath,
-          },
+          legacyConfig: {},
         } as LegacyAPI),
       http: (http as unknown) as CoreSetup['http'],
     });

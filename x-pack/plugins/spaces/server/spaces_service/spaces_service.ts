@@ -64,7 +64,7 @@ export class SpacesService {
         ? (request as Record<string, any>).getBasePath()
         : http.basePath.get(request);
 
-      const spaceId = getSpaceIdFromPath(basePath, this.getServerBasePath());
+      const spaceId = getSpaceIdFromPath(basePath, http.basePath.serverBasePath);
 
       return spaceId;
     };
@@ -112,7 +112,7 @@ export class SpacesService {
         if (!spaceId) {
           throw new TypeError(`spaceId is required to retrieve base path`);
         }
-        return addSpaceIdToPath(this.getServerBasePath(), spaceId);
+        return addSpaceIdToPath(http.basePath.serverBasePath, spaceId);
       },
       isInDefaultSpace: (request: RequestFacade) => {
         const spaceId = getSpaceId(request);
@@ -135,9 +135,5 @@ export class SpacesService {
       this.configSubscription$.unsubscribe();
       this.configSubscription$ = undefined;
     }
-  }
-
-  private getServerBasePath() {
-    return this.getLegacyAPI().legacyConfig.serverBasePath;
   }
 }

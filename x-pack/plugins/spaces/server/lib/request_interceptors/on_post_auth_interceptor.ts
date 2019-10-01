@@ -28,7 +28,8 @@ export function initSpacesOnPostAuthRequestInterceptor({
   http,
 }: OnPostAuthInterceptorDeps) {
   http.registerOnPostAuth(async (request, response, toolkit) => {
-    const { serverBasePath, serverDefaultRoute } = getLegacyAPI().legacyConfig;
+    const { serverDefaultRoute } = getLegacyAPI().legacyConfig;
+    const serverBasePath = http.basePath.serverBasePath;
 
     const path = request.url.pathname!;
 

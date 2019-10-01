@@ -53,7 +53,6 @@ export interface LegacyAPI {
   };
   legacyConfig: {
     kibanaIndex: string;
-    serverBasePath: string;
     serverDefaultRoute: string;
   };
   xpackMain: XPackMainPlugin;
@@ -132,6 +131,7 @@ export class Plugin {
       internalRouter,
       getLegacyAPI: this.getLegacyAPI,
       spacesService,
+      serverBasePath: core.http.basePath.serverBasePath,
     });
 
     initSpacesRequestInterceptors({
@@ -195,7 +195,7 @@ export class Plugin {
         const activeSpace = await getActiveSpace(
           spacesClient,
           core.http.basePath.get(request),
-          legacyAPI.legacyConfig.serverBasePath
+          core.http.basePath.serverBasePath
         );
         const features = featuresSetup.getFeatures();
         return toggleUICapabilities(features, uiCapabilities, activeSpace);

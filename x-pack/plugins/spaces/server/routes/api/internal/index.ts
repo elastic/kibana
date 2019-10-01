@@ -12,6 +12,7 @@ import { SpacesServiceSetup } from '../../../spaces_service/spaces_service';
 export interface InternalRouteDeps {
   spacesService: SpacesServiceSetup;
   getLegacyAPI(): LegacyAPI;
+  serverBasePath: string;
   internalRouter: IRouter;
 }
 

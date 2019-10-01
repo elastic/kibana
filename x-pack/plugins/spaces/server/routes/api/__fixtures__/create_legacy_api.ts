@@ -105,7 +105,6 @@ export const createLegacyAPI = ({
   const legacyAPI: jest.Mocked<LegacyAPI> = {
     legacyConfig: {
       kibanaIndex: '',
-      serverBasePath: '',
       serverDefaultRoute: '/app/kibana',
     },
     auditLogger: {} as any,

@@ -23,7 +23,7 @@ describe('Spaces API', () => {
 
   const legacyAPI = createLegacyAPI({ spaces });
 
-  beforeAll(async () => {
+  const setup = async (serverBasePath: string = '') => {
     root = kbnTestServer.createRoot();
     const { http } = await root.setup();
     const router = http.createRouter('/');
@@ -59,15 +59,17 @@ describe('Spaces API', () => {
     initInternalSpacesApi({
       internalRouter: router,
       getLegacyAPI: () => legacyAPI,
+      serverBasePath,
       spacesService,
     });
 
     await root.start();
-  });
+  };
 
   afterAll(async () => await root.shutdown());
 
   it('POST space/{id}/select should respond with the new space location', async () => {
+    await setup();
     const response = await kbnTestServer.request.post(root, '/api/spaces/v1/space/a-space/select');
 
     const { status, body } = response;
@@ -78,6 +80,7 @@ describe('Spaces API', () => {
   test.todo(`returns result of routePreCheckLicense`);
 
   it('POST space/{id}/select should respond with 404 when the space is not found', async () => {
+    await setup();
     const response = await kbnTestServer.request.post(
       root,
       '/api/spaces/v1/space/not-a-space/select'
@@ -89,7 +92,7 @@ describe('Spaces API', () => {
   });
 
   it('POST space/{id}/select should respond with the new space location when a server.basePath is in use', async () => {
-    legacyAPI.legacyConfig.serverBasePath = '/my/base/path';
+    await setup('/my/base/path');
 
     const response = await kbnTestServer.request.post(root, '/api/spaces/v1/space/a-space/select');
 

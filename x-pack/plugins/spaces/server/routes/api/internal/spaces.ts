@@ -13,9 +13,7 @@ import { getSpaceById } from '../../lib';
 import { InternalRouteDeps } from '.';
 
 export function initInternalSpacesApi(deps: InternalRouteDeps) {
-  const { internalRouter, spacesService, getLegacyAPI } = deps;
-
-  internalRouter.post(
+  deps.internalRouter.post(
     {
       path: '/api/spaces/v1/space/{id}/select',
       validate: {
@@ -25,13 +23,14 @@ export function initInternalSpacesApi(deps: InternalRouteDeps) {
       },
     },
     async (context, request, response) => {
+      const { spacesService, getLegacyAPI, serverBasePath } = deps;
+
       const { savedObjects, legacyConfig } = getLegacyAPI();
 
       const { SavedObjectsClient } = savedObjects;
       const spacesClient: SpacesClient = await spacesService.scopedClient(request);
       const id = request.params.id;
 
-      const basePath = legacyConfig.serverBasePath;
       const defaultRoute = legacyConfig.serverDefaultRoute;
       try {
         const existingSpace: Space | null = await getSpaceById(
@@ -45,7 +44,7 @@ export function initInternalSpacesApi(deps: InternalRouteDeps) {
 
         return response.ok({
           body: {
-            location: addSpaceIdToPath(basePath, existingSpace.id, defaultRoute),
+            location: addSpaceIdToPath(serverBasePath, existingSpace.id, defaultRoute),
           },
         });
       } catch (error) {

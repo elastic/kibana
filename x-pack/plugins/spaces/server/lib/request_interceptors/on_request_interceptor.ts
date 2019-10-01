@@ -25,7 +25,7 @@ export function initSpacesOnRequestInterceptor({ getLegacyAPI, http }: OnRequest
     response: LifecycleResponseFactory,
     toolkit: OnPreAuthToolkit
   ) {
-    const { serverBasePath } = getLegacyAPI().legacyConfig;
+    const serverBasePath = http.basePath.serverBasePath;
     const path = request.url.pathname;
 
     // If navigating within the context of a space, then we store the Space's URL Context on the request,

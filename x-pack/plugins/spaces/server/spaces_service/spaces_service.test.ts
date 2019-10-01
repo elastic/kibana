@@ -11,6 +11,7 @@ import {
   KibanaRequest,
   SavedObjectsLegacyService,
   SavedObjectsErrorHelpers,
+  HttpServiceSetup,
 } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { getSpaceIdFromPath } from '../lib/spaces_url_parser';
@@ -29,9 +30,7 @@ const mockLogger = {
 
 const createService = async (serverBasePath: string = '') => {
   const legacyAPI = {
-    legacyConfig: {
-      serverBasePath,
-    },
+    legacyConfig: {},
     savedObjects: ({
       getSavedObjectsRepository: jest.fn().mockReturnValue({
         get: jest.fn().mockImplementation((type, id) => {
@@ -63,6 +62,9 @@ const createService = async (serverBasePath: string = '') => {
   const spacesService = new SpacesService(mockLogger, () => legacyAPI);
 
   const httpSetup = coreMock.createSetup().http;
+  httpSetup.basePath = {
+    serverBasePath,
+  } as HttpServiceSetup['basePath'];
   httpSetup.basePath.get = jest.fn().mockImplementation((request: KibanaRequest) => {
     const spaceId = getSpaceIdFromPath(request.url.path);
 

@@ -26,9 +26,7 @@ const log = {
 };
 
 const legacyAPI: LegacyAPI = {
-  legacyConfig: {
-    serverBasePath: '/foo',
-  },
+  legacyConfig: {},
   savedObjects: {} as SavedObjectsLegacyService,
 } as LegacyAPI;
 

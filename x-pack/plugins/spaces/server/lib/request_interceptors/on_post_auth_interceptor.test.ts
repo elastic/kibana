@@ -165,7 +165,6 @@ describe('onPostAuthInterceptor', () => {
     const legacyAPI = {
       legacyConfig: {
         serverDefaultRoute: defaultRoute,
-        serverBasePath: '',
       },
       savedObjects: (savedObjectsService as unknown) as SavedObjectsLegacyService,
     } as LegacyAPI;
