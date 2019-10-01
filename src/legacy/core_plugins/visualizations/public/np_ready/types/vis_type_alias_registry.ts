@@ -37,12 +37,17 @@ interface VisualizationsAppExtension {
   }) => VisualizationListItem;
 }
 
+export interface VisTypeAliasPromotion {
+  description: string;
+  calloutText: string;
+}
+
 export interface VisTypeAlias {
   aliasUrl: string;
   name: string;
   title: string;
   icon: string;
-  isPromoted?: boolean;
+  promotion?: VisTypeAliasPromotion;
   description: string;
 
   appExtensions?: {
