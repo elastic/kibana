@@ -26,7 +26,7 @@ import { SeriesParam } from '../../../types';
 import { NumberInputOption, SelectOption, SwitchOption } from '../../common';
 import { SetChart } from './chart_options';
 
-interface LineOptionsParams {
+export interface LineOptionsParams {
   chart: SeriesParam;
   vis: Vis;
   setChart: SetChart;
