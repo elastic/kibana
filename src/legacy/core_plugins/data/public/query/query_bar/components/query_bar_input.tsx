@@ -358,11 +358,6 @@ export class QueryBarInputUI extends Component<Props, State> {
   };
 
   private handleNestedFieldSyntaxNotification = (suggestion: AutocompleteSuggestion) => {
-    /*
-    Todo:
-      * Add docs stub
-      * Add docs link
-     */
     if (
       'field' in suggestion &&
       suggestion.field.subType &&
