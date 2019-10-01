@@ -1581,7 +1581,6 @@
     "kbn.discover.notifications.savedSearchTitle": "検索「{savedSearchTitle}」が保存されました。",
     "kbn.discover.painlessError.painlessScriptedFieldErrorMessage": "Painless スクリプトのフィールド「{script}」のエラー.",
     "kbn.discover.rootBreadcrumb": "ディスカバリ",
-    "kbn.discover.savedSearch.newSavedSearchTitle": "新しく保存された検索",
     "kbn.discover.savedSearch.savedObjectName": "保存された検索",
     "kbn.discover.scaledToDescription": "{bucketIntervalDescription} にスケーリング済み",
     "kbn.discover.searchingTitle": "検索中",
