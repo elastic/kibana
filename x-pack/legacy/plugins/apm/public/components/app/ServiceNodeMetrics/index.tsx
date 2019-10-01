@@ -12,7 +12,8 @@ import {
   EuiFlexGrid,
   EuiPanel,
   EuiSpacer,
-  EuiStat
+  EuiStat,
+  EuiToolTip
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -83,7 +84,11 @@ export function ServiceNodeMetrics() {
             description={i18n.translate('xpack.apm.serviceNodeMetrics.host', {
               defaultMessage: 'Host'
             })}
-            title={<Truncate>{host}</Truncate>}
+            title={
+              <EuiToolTip content={host}>
+                <Truncate>{host}</Truncate>
+              </EuiToolTip>
+            }
           ></EuiStat>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -96,7 +101,11 @@ export function ServiceNodeMetrics() {
                 defaultMessage: 'Container ID'
               }
             )}
-            title={<Truncate>{containerId}</Truncate>}
+            title={
+              <EuiToolTip content={containerId}>
+                <Truncate>{containerId}</Truncate>
+              </EuiToolTip>
+            }
           ></EuiStat>
         </EuiFlexItem>
       </EuiFlexGroup>
