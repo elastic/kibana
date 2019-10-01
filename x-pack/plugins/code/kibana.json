@@ -4,5 +4,6 @@
   "kibanaVersion": "kibana",
   "configPath": ["x-pack", "code"],
   "server": true,
-  "ui": false
+  "ui": false,
+  "requiredPlugins": ["features"]
 }

@@ -4,10 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { first } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
-import { LoggerFactory, PluginInitializerContext, RecursiveReadonly } from 'src/core/server';
+import {
+  CoreSetup,
+  LoggerFactory,
+  PluginInitializerContext,
+  RecursiveReadonly,
+} from 'src/core/server';
 import { deepFreeze } from '../../../../src/core/utils';
+import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
 import { CodeConfigSchema } from './config';
 
 /**
@@ -26,11 +33,44 @@ export interface PluginSetupContract {
 export class CodePlugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public async setup(): Promise<RecursiveReadonly<PluginSetupContract>> {
+  public async setup(
+    coreSetup: CoreSetup,
+    { features }: { features: FeaturesSetupContract }
+  ): Promise<RecursiveReadonly<PluginSetupContract>> {
     const config = await this.initializerContext.config
       .create<TypeOf<typeof CodeConfigSchema>>()
       .pipe(first())
       .toPromise();
+
+    features.registerFeature({
+      id: 'code',
+      name: i18n.translate('xpack.code.featureRegistry.codeFeatureName', {
+        defaultMessage: 'Code',
+      }),
+      icon: 'codeApp',
+      navLinkId: 'code',
+      app: ['code', 'kibana'],
+      catalogue: [], // TODO add catalogue here
+      privileges: {
+        all: {
+          excludeFromBasePrivileges: true,
+          api: ['code_user', 'code_admin'],
+          savedObject: {
+            all: [],
+            read: ['config'],
+          },
+          ui: ['show', 'user', 'admin'],
+        },
+        read: {
+          api: ['code_user'],
+          savedObject: {
+            all: [],
+            read: ['config'],
+          },
+          ui: ['show', 'user'],
+        },
+      },
+    });
 
     return deepFreeze({
       legacy: {

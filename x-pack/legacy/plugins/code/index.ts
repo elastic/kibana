@@ -22,7 +22,7 @@ export type ServerRouteFacade = ServerRoute;
 
 export const code = (kibana: any) =>
   new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: ['kibana', 'elasticsearch'],
     id: 'code',
     configPrefix: 'xpack.code',
     publicDir: resolve(__dirname, 'public'),

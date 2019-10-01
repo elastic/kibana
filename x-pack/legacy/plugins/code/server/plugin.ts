@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import crypto from 'crypto';
 import * as _ from 'lodash';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 
-import { XPackMainPlugin } from '../../xpack_main/xpack_main';
 import { GitOperations } from './git_operations';
 import { RepositoryIndexInitializerFactory, tryMigrateIndices } from './indexer';
 import { Esqueue } from './lib/esqueue';
@@ -78,42 +76,10 @@ export class CodePlugin {
 
   public setup(core: CoreSetup) {
     const { server } = core.http as any;
-
     // @ts-ignore
     this.serverOptions = new ServerOptions(this.initContext.legacy.config, server.config());
     // @ts-ignore
     this.log = new Logger(this.initContext.legacy.logger, this.serverOptions.verbose);
-
-    const xpackMainPlugin: XPackMainPlugin = server.plugins.xpack_main;
-    xpackMainPlugin.registerFeature({
-      id: 'code',
-      name: i18n.translate('xpack.code.featureRegistry.codeFeatureName', {
-        defaultMessage: 'Code',
-      }),
-      icon: 'codeApp',
-      navLinkId: 'code',
-      app: ['code', 'kibana'],
-      catalogue: [], // TODO add catalogue here
-      privileges: {
-        all: {
-          excludeFromBasePrivileges: true,
-          api: ['code_user', 'code_admin'],
-          savedObject: {
-            all: [],
-            read: ['config'],
-          },
-          ui: ['show', 'user', 'admin'],
-        },
-        read: {
-          api: ['code_user'],
-          savedObject: {
-            all: [],
-            read: ['config'],
-          },
-          ui: ['show', 'user'],
-        },
-      },
-    });
   }
 
   // TODO: CodeStart will not have the register route api.
