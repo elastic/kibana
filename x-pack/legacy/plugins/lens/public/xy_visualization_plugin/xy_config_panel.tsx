@@ -17,7 +17,6 @@ import {
   EuiPanel,
   EuiButtonIcon,
   EuiPopover,
-  EuiSwitch,
   EuiSpacer,
   EuiButtonEmpty,
   EuiPopoverFooter,

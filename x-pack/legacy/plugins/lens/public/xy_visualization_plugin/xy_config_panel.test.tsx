@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FormEvent } from 'react';
+import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { EuiButtonGroupProps } from '@elastic/eui';
@@ -15,7 +15,6 @@ import { Position } from '@elastic/charts';
 import { NativeRendererProps } from '../native_renderer';
 import { generateId } from '../id_generator';
 import { createMockFramePublicAPI, createMockDatasource } from '../editor_frame_plugin/mocks';
-import { act } from 'react-test-renderer';
 
 jest.mock('../id_generator');
 
