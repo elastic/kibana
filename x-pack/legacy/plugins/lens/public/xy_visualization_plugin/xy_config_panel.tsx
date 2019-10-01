@@ -97,7 +97,8 @@ function LayerSettings({
           className="eui-displayInlineBlock"
           data-test-subj="lnsXY_seriesType"
           options={visualizationTypes.map(t => ({
-            ...t,
+            id: t.id,
+            label: t.label,
             iconType: t.icon || 'empty',
           }))}
           idSelected={layer.seriesType}
