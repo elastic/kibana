@@ -5,7 +5,6 @@
  */
 
 import _ from 'lodash';
-import d3 from 'd3';
 import { i18n } from '@kbn/i18n';
 import 'ace';
 import React from 'react';
@@ -45,6 +44,7 @@ import { GraphApp } from './components/app';
 import { VennDiagram } from './components/venn_diagram';
 import { Listing } from './components/listing';
 import { Settings } from './components/settings';
+import { GraphVisualization } from './components/graph_visualization';
 
 import gws from './angular/graph_client_workspace.js';
 import { SavedWorkspacesProvider } from './angular/services/saved_workspaces';
@@ -110,6 +110,11 @@ app.directive('graphApp', function (reactDirective) {
     ['confirmWipeWorkspace', { watchDepth: 'reference' }],
   ]);
 });
+
+app.directive('graphVisualization', function (reactDirective) {
+  return reactDirective(GraphVisualization);
+});
+
 
 if (uiRoutes.enable) {
   uiRoutes.enable();
@@ -418,6 +423,10 @@ app.controller('graphuiPlugin', function (
     window.open(newUrl, '_blank');
   };
 
+  $scope.aceLoaded = (editor) => {
+    editor.$blockScrolling = Infinity;
+  };
+
   $scope.setDetail = function (data) {
     $scope.detail = data;
   };
@@ -457,31 +466,6 @@ app.controller('graphuiPlugin', function (
     }
     $scope.detail = { mergeCandidates };
   };
-
-  // Zoom functions for the SVG-based graph
-  const redraw = function () {
-    d3.select('#svgRootGroup')
-      .attr('transform',
-        'translate(' + d3.event.translate + ')' + 'scale(' + d3.event.scale + ')')
-      .attr('style', 'stroke-width: ' + 1 / d3.event.scale);
-    //To make scale-dependent features possible....
-    if ($scope.zoomLevel !== d3.event.scale) {
-      $scope.zoomLevel = d3.event.scale;
-      $scope.$apply();
-    }
-  };
-
-  const blockScroll = function () {
-    d3.event.preventDefault();
-  };
-  d3.select('#graphSvg')
-    .on('mousewheel', blockScroll)
-    .on('DOMMouseScroll', blockScroll)
-    .call(d3.behavior.zoom()
-      .on('zoom', redraw));
-
-
-
 
   // ===== Menubar configuration =========
   $scope.topNavMenu = [];
