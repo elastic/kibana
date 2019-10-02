@@ -1259,6 +1259,11 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       const inputMax = await control.findByCssSelector('[name$="maxValue"]');
       await inputMax.type(max);
     }
+
+    async scrollSubjectIntoView(subject) {
+      const element = await testSubjects.find(subject);
+      await element.scrollIntoViewIfNecessary();
+    }
   }
 
   return new VisualizePage();
