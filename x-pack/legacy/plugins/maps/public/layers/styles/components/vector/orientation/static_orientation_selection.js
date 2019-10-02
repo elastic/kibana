@@ -23,6 +23,7 @@ export function StaticOrientationSelection({ onChange, styleOptions }) {
       showInput
       showLabels
       compressed
+      append="°"
     />
   );
 }
