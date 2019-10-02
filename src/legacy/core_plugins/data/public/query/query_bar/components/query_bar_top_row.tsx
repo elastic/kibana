@@ -21,7 +21,6 @@ import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
 
 import classNames from 'classnames';
 import React, { useState, useEffect } from 'react';
-import { documentationLinks } from 'ui/documentation_links';
 import { PersistedLog } from 'ui/persisted_log';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSuperDatePicker } from '@elastic/eui';
@@ -65,7 +64,9 @@ function QueryBarTopRowUI(props: Props) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
 
   const kibana = useKibana<IDataPluginServices>();
-  const { uiSettings, notifications, store, appName } = kibana.services;
+  const { uiSettings, notifications, store, appName, docLinks } = kibana.services;
+
+  const kueryQuerySyntaxLink: string = docLinks!.links.query.kueryQuerySyntax;
 
   const queryLanguage = props.query && props.query.language;
   let persistedLog: PersistedLog | undefined;
@@ -262,7 +263,7 @@ function QueryBarTopRowUI(props: Props) {
                have Kibana Query Language (KQL) selected. Please review the KQL docs {link}."
                 values={{
                   link: (
-                    <EuiLink href={documentationLinks.query.kueryQuerySyntax} target="_blank">
+                    <EuiLink href={kueryQuerySyntaxLink} target="_blank">
                       <FormattedMessage
                         id="data.query.queryBar.syntaxOptionsDescription.docsLinkText"
                         defaultMessage="here"
