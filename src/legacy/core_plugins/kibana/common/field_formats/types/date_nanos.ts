@@ -18,15 +18,16 @@
  */
 
 import moment from 'moment';
-import _ from 'lodash';
+import { memoize } from 'lodash';
+import { FieldFormat } from '../../../../../../plugins/data/common/';
 
 /**
  * Analyse the given moment.js format pattern for the fractional sec part (S,SS,SSS...)
  * returning length, match, pattern and an escaped pattern, that excludes the fractional
  * part when formatting with moment.js -> e.g. [SSS]
  */
-export function analysePatternForFract(pattern) {
-  const fracSecMatch = pattern.match('S+'); //extract fractional seconds sub-pattern
+export function analysePatternForFract(pattern: string) {
+  const fracSecMatch = pattern.match('S+') as any; // extract fractional seconds sub-pattern
   const fracSecMatchStr = fracSecMatch ? fracSecMatch[0] : '';
 
   return {
@@ -42,28 +43,37 @@ export function analysePatternForFract(pattern) {
  * Since momentjs would loose the exact value for fractional seconds with a higher resolution than
  * milliseconds, the fractional pattern is replaced by the fractional value of the raw timestamp
  */
-export function formatWithNanos(dateMomentObj, valRaw, fracPatternObj) {
+export function formatWithNanos(dateMomentObj: any, valRaw: any, fracPatternObj: any) {
   if (fracPatternObj.length <= 3) {
-    //S,SS,SSS is formatted correctly by moment.js
+    // S,SS,SSS is formatted correctly by moment.js
     return dateMomentObj.format(fracPatternObj.pattern);
   } else {
-    //Beyond SSS the precise value of the raw datetime string is used
+    // Beyond SSS the precise value of the raw datetime string is used
     const valFormatted = dateMomentObj.format(fracPatternObj.patternEscaped);
-    //Extract fractional value of ES formatted timestamp, zero pad if necessary:
-    //2020-05-18T20:45:05.957Z -> 957000000
-    //2020-05-18T20:45:05.957000123Z -> 957000123
-    //we do not need to take care of the year 10000 bug since max year of date_nanos is 2262
+    // Extract fractional value of ES formatted timestamp, zero pad if necessary:
+    // 2020-05-18T20:45:05.957Z -> 957000000
+    // 2020-05-18T20:45:05.957000123Z -> 957000123
+    // we do not need to take care of the year 10000 bug since max year of date_nanos is 2262
     const valNanos = valRaw
-      .substr(20, valRaw.length - 21) //remove timezone(Z)
-      .padEnd(9, '0') //pad shorter fractionals
+      .substr(20, valRaw.length - 21) // remove timezone(Z)
+      .padEnd(9, '0') // pad shorter fractionals
       .substr(0, fracPatternObj.patternNanos.length);
     return valFormatted.replace(fracPatternObj.patternNanos, valNanos);
   }
 }
 
-export function createDateNanosFormat(FieldFormat) {
+export function createDateNanosFormat() {
   return class DateNanosFormat extends FieldFormat {
-    constructor(params, getConfig) {
+    static id = 'date_nanos';
+    static title = 'Date Nanos';
+    static fieldType = 'date';
+
+    private getConfig: Function;
+    private timeZone: any;
+    private memoizedConverter: any;
+    private memoizedPattern: any;
+
+    constructor(params: any, getConfig: Function) {
       super(params);
 
       this.getConfig = getConfig;
@@ -77,7 +87,7 @@ export function createDateNanosFormat(FieldFormat) {
       };
     }
 
-    _convert(val) {
+    _convert(val: any) {
       // don't give away our ref to converter so
       // we can hot-swap when config changes
       const pattern = this.param('pattern');
@@ -85,36 +95,32 @@ export function createDateNanosFormat(FieldFormat) {
       const fractPattern = analysePatternForFract(pattern);
       const fallbackPattern = this.param('patternFallback');
 
-      const timezoneChanged = this._timeZone !== timezone;
-      const datePatternChanged = this._memoizedPattern !== pattern;
+      const timezoneChanged = this.timeZone !== timezone;
+      const datePatternChanged = this.memoizedPattern !== pattern;
       if (timezoneChanged || datePatternChanged) {
-        this._timeZone = timezone;
-        this._memoizedPattern = pattern;
+        this.timeZone = timezone;
+        this.memoizedPattern = pattern;
 
-        this._memoizedConverter = _.memoize(function converter(val) {
-          if (val === null || val === undefined) {
+        this.memoizedConverter = memoize(function converter(value: any) {
+          if (value === null || value === undefined) {
             return '-';
           }
 
-          const date = moment(val);
+          const date = moment(value);
 
-          if (typeof val !== 'string' && date.isValid()) {
-            //fallback for max/min aggregation, where unixtime in ms is returned as a number
-            //aggregations in Elasticsearch generally just return ms
+          if (typeof value !== 'string' && date.isValid()) {
+            // fallback for max/min aggregation, where unixtime in ms is returned as a number
+            // aggregations in Elasticsearch generally just return ms
             return date.format(fallbackPattern);
           } else if (date.isValid()) {
-            return formatWithNanos(date, val, fractPattern);
+            return formatWithNanos(date, value, fractPattern);
           } else {
-            return val;
+            return value;
           }
         });
       }
 
-      return this._memoizedConverter(val);
+      return this.memoizedConverter(val);
     }
-
-    static id = 'date_nanos';
-    static title = 'Date Nanos';
-    static fieldType = 'date';
   };
 }
