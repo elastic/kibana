@@ -11,10 +11,6 @@ monitoring-shard-allocation {
 
 // SASSTODO: This needs a full rewrite / redesign
 .monCluster {
-  cluster-view {
-    display: block;
-  }
-
   .monUnassigned {
     vertical-align: middle;
     width: 150px;
@@ -25,10 +21,15 @@ monitoring-shard-allocation {
   }
 
   .monChild {
-    padding: 0 $euiSizeS;
+    padding: 0 $euiSize * 4 0 0;
 
     .shardLegendItem {
       align-items: center;
+
+      .shardLegendBoxes {
+        align-items: flex-end;
+        margin: 0;
+      }
     }
 
     .monHealth {
@@ -41,7 +42,7 @@ monitoring-shard-allocation {
 
     .monTitle {
       padding: $euiSizeXS $euiSizeS;
-      text-align: center;
+      text-align: left;
       font-size: $euiSizeM;
       color: $euiColorGhost;
       display: flex;

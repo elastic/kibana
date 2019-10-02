@@ -70,10 +70,10 @@ export class Assigned extends React.Component {
         data-status={shardStats && shardStats.status}
       >
         <EuiFlexGroup className="shardLegendItem" gutterSize="m">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem className="shardLegendBoxes" grow={2}>
             <EuiFlexGroup gutterSize="none">{shards}</EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false} className="monTitle eui-textNoWrap">
+          <EuiFlexItem grow={3} className="monTitle">
             {name}
             {master}
           </EuiFlexItem>
