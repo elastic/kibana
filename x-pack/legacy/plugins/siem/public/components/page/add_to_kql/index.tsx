@@ -16,7 +16,6 @@ import { NetworkFilter } from '../../../containers/network';
 import { assertUnreachable } from '../../../lib/helpers';
 import { hostsModel, KueryFilterQuery, networkModel } from '../../../store';
 import { WithHoverActions } from '../../with_hover_actions';
-
 import * as i18n from './translations';
 
 interface Props {

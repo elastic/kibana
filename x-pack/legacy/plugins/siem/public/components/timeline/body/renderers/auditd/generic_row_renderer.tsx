@@ -8,11 +8,10 @@ import { IconType } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import * as i18n from './translations';
 import { RowRenderer, RowRendererContainer } from '../row_renderer';
-import { Row } from '../helpers';
 import { AuditdGenericDetails } from './generic_details';
 import { AuditdGenericFileDetails } from './generic_file_details';
+import * as i18n from './translations';
 
 export const createGenericAuditRowRenderer = ({
   actionName,
@@ -32,7 +31,7 @@ export const createGenericAuditRowRenderer = ({
     );
   },
   renderRow: ({ browserFields, data, children, timelineId }) => (
-    <Row className="euiTableRow">
+    <>
       {children}
       <RowRendererContainer>
         <AuditdGenericDetails
@@ -43,7 +42,7 @@ export const createGenericAuditRowRenderer = ({
           timelineId={timelineId}
         />
       </RowRendererContainer>
-    </Row>
+    </>
   ),
 });
 
@@ -67,7 +66,7 @@ export const createGenericFileRowRenderer = ({
     );
   },
   renderRow: ({ browserFields, data, children, timelineId }) => (
-    <Row className="euiTableRow">
+    <>
       {children}
       <RowRendererContainer>
         <AuditdGenericFileDetails
@@ -79,7 +78,7 @@ export const createGenericFileRowRenderer = ({
           timelineId={timelineId}
         />
       </RowRendererContainer>
-    </Row>
+    </>
   ),
 });
 
