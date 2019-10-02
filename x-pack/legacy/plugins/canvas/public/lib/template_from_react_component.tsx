@@ -7,6 +7,7 @@
 import React, { ComponentType, FunctionComponent } from 'react';
 import { unmountComponentAtNode, render } from 'react-dom';
 import PropTypes from 'prop-types';
+import { I18nProvider } from '@kbn/i18n/react';
 import { ErrorBoundary } from '../components/enhance/error_boundary';
 import { ArgumentHandlers } from '../../types/arguments';
 
@@ -23,7 +24,11 @@ export const templateFromReactComponent = (Component: ComponentType<any>) => {
           return null;
         }
 
-        return <Component {...props} />;
+        return (
+          <I18nProvider>
+            <Component {...props} />
+          </I18nProvider>
+        );
       }}
     </ErrorBoundary>
   );
