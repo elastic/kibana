@@ -20,7 +20,7 @@ import React from 'react';
 import routes from 'ui/routes';
 
 import { registerSettingsComponent, PAGE_FOOTER_COMPONENT } from 'ui/management';
-import { TelemetryOptInProvider } from '../../services/telemetry_opt_in';
+import { TelemetryOptInProvider } from '../../services';
 import { TelemetryForm } from '../../components';
 
 routes.defaults(/\/management/, {

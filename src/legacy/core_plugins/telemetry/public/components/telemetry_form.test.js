@@ -21,7 +21,7 @@ import '../services/telemetry_opt_in.test.mocks';
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { TelemetryForm } from './telemetry_form';
-import { TelemetryOptInProvider } from '../services/telemetry_opt_in';
+import { TelemetryOptInProvider } from '../services';
 
 const buildTelemetryOptInProvider = () => {
   const mockHttp = {

@@ -17,11 +17,4 @@
  * under the License.
  */
 
-// @ts-ignore
-export { getLocalStats } from './local';
-export { getStats } from './get_stats';
-
-export { encryptTelemetry } from './encryption';
-export { createTelemetryUsageCollector } from './usage';
-export { createUiMetricUsageCollector } from './ui_metric';
-export { createLocalizationUsageCollector } from './localization';
+export { TelemetryOptInProvider } from './telemetry_opt_in';

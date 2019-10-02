@@ -23,7 +23,7 @@ import sinon from 'sinon';
 
 import { CONFIG_TELEMETRY } from '../../../common/constants';
 import { shouldShowBanner } from './should_show_banner';
-import { TelemetryOptInProvider } from '../../services/telemetry_opt_in';
+import { TelemetryOptInProvider } from '../../services';
 
 const getMockInjector = () => {
   const get = sinon.stub();

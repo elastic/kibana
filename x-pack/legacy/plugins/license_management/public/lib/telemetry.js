@@ -6,7 +6,7 @@
 
 import { fetchTelemetry } from '../../../../../../src/legacy/core_plugins/telemetry/public/hacks/fetch_telemetry';
 export { PRIVACY_STATEMENT_URL } from '../../../../../../src/legacy/core_plugins/telemetry/common/constants';
-export { TelemetryOptInProvider } from '../../../../../../src/legacy/core_plugins/telemetry/public/services/telemetry_opt_in';
+export { TelemetryOptInProvider } from '../../../../../../src/legacy/core_plugins/telemetry/public/services';
 export { OptInExampleFlyout } from '../../../../../../src/legacy/core_plugins/telemetry/public/components';
 
 let telemetryEnabled;

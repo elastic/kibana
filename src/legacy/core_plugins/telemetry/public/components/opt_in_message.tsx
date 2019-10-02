@@ -18,7 +18,7 @@
  */
 
 import * as React from 'react';
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { getConfigTelemetryDesc, PRIVACY_STATEMENT_URL } from '../../common/constants';
@@ -49,34 +49,30 @@ export class OptInMessage extends React.PureComponent<Props, State> {
     const { showDetails, showExample } = this.state;
 
     const getDetails = () => (
-      <EuiText size="s">
-        <p tab-index="0">
-          <FormattedMessage
-            id="telemetry.welcomeBanner.telemetryConfigDetailsDescription"
-            defaultMessage="No information about the data you process or store will be sent. This feature
-              will periodically send basic feature usage statistics. See an {exampleLink} or read our {telemetryPrivacyStatementLink}.
-              You can disable this feature at any time."
-            values={{
-              exampleLink: (
-                <EuiLink onClick={this.toggleShowExample}>
-                  <FormattedMessage
-                    id="telemetry.welcomeBanner.telemetryConfigDetailsDescription.exampleLinkText"
-                    defaultMessage="example"
-                  />
-                </EuiLink>
-              ),
-              telemetryPrivacyStatementLink: (
-                <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
-                  <FormattedMessage
-                    id="telemetry.welcomeBanner.telemetryConfigDetailsDescription.telemetryPrivacyStatementLinkText"
-                    defaultMessage="telemetry privacy statement"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </p>
-      </EuiText>
+      <FormattedMessage
+        id="telemetry.welcomeBanner.telemetryConfigDetailsDescription"
+        defaultMessage="No information about the data you process or store will be sent. This feature
+          will periodically send basic feature usage statistics. See an {exampleLink} or read our {telemetryPrivacyStatementLink}.
+          You can disable this feature at any time."
+        values={{
+          exampleLink: (
+            <EuiLink onClick={this.toggleShowExample}>
+              <FormattedMessage
+                id="telemetry.welcomeBanner.telemetryConfigDetailsDescription.exampleLinkText"
+                defaultMessage="example"
+              />
+            </EuiLink>
+          ),
+          telemetryPrivacyStatementLink: (
+            <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
+              <FormattedMessage
+                id="telemetry.welcomeBanner.telemetryConfigDetailsDescription.telemetryPrivacyStatementLinkText"
+                defaultMessage="telemetry privacy statement"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
     );
 
     const getFlyoutDetails = () => (
@@ -97,13 +93,13 @@ export class OptInMessage extends React.PureComponent<Props, State> {
 
     return (
       <React.Fragment>
-        <EuiText>
-          <p tab-index="0">
-            {getConfigTelemetryDesc()} {!showDetails && getReadMore()}
-          </p>
-        </EuiText>
-        {showDetails && getDetails()}
-        {showDetails && showExample && getFlyoutDetails()}
+        {getConfigTelemetryDesc()} {!showDetails && getReadMore()}
+        {showDetails && (
+          <span style={{ display: 'block', paddingTop: '10px' }}>
+            {getDetails()}
+            {showExample && getFlyoutDetails()}
+          </span>
+        )}
       </React.Fragment>
     );
   }

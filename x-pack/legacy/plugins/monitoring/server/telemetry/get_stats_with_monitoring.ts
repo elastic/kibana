@@ -29,13 +29,11 @@ export async function getStatsWithMonitoring(
   let response = [];
   const useInternalUser = !unencrypted;
 
-  if (config.get('xpack.monitoring.enabled')) {
-    try {
-      // attempt to collect stats from multiple clusters in monitoring data
-      response = await _getAllStats(req, start, end, { useInternalUser });
-    } catch (err) {
-      // no-op
-    }
+  try {
+    // attempt to collect stats from multiple clusters in monitoring data
+    response = await _getAllStats(req, start, end, { useInternalUser });
+  } catch (err) {
+    // no-op
   }
 
   if (!Array.isArray(response) || response.length === 0) {

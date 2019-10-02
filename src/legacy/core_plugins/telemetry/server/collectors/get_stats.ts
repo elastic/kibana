@@ -29,7 +29,7 @@ import { getLocalStats } from '.';
  * @param {Boolean} unencrypted Is the request payload going to be unencrypted.
  * @return {Promise} An array of telemetry objects.
  */
-export async function getStatsOSS(
+export async function getStats(
   req: any,
   config: any,
   start: string,
