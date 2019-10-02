@@ -45,7 +45,7 @@ uiRoutes.when('/logstash/nodes', {
               scope={$scope}
               injector={$injector}
               productName={LOGSTASH_SYSTEM_ID}
-              render={({ setupMode, flyoutComponent }) => (
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
                 <Fragment>
                   {flyoutComponent}
                   <Listing
@@ -57,6 +57,7 @@ uiRoutes.when('/logstash/nodes', {
                     onTableChange={this.onTableChange}
                     angular={{ kbnUrl, scope: $scope }}
                   />
+                  {bottomBarComponent}
                 </Fragment>
               )}
             />

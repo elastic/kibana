@@ -154,8 +154,8 @@ export const INDEX_PATTERN_FILEBEAT = 'filebeat-*';
 export const METRICBEAT_INDEX_NAME_UNIQUE_TOKEN = '-mb-';
 
 // We use this for metricbeat migration to identify specific products that we do not have constants for
-export const ELASTICSEARCH_CUSTOM_ID = 'elasticsearch';
-export const APM_CUSTOM_ID = 'apm';
+export const ELASTICSEARCH_SYSTEM_ID = 'elasticsearch';
+
 /**
  * The id of the infra source owned by the monitoring plugin.
  */
@@ -178,7 +178,6 @@ export const CODE_PATH_LOGSTASH = 'logstash';
 export const CODE_PATH_APM = 'apm';
 export const CODE_PATH_LICENSE = 'license';
 export const CODE_PATH_LOGS = 'logs';
-
 
 /**
  * The header sent by telemetry service when hitting Elasticsearch to identify query source

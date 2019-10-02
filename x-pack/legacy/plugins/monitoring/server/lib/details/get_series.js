@@ -14,6 +14,7 @@ import {
   NORMALIZED_DERIVATIVE_UNIT,
   CALCULATE_DURATION_UNTIL
 } from '../../../common/constants';
+import { formatUTCTimestampForTimezone } from '../format_timezone';
 
 /**
  * Derivative metrics for the first two agg buckets are unusable. For the first bucket, there
@@ -70,18 +71,27 @@ function createMetricAggs(metric) {
   return metric.aggs;
 }
 
-function fetchSeries(req, indexPattern, metric, min, max, bucketSize, filters) {
+function fetchSeries(req, indexPattern, metric, metricOptions, min, max, bucketSize, filters) {
   // if we're using a derivative metric, offset the min (also @see comment on offsetMinForDerivativeMetric function)
   const adjustedMin = metric.derivative ? offsetMinForDerivativeMetric(min, bucketSize) : min;
 
-  const dateHistogramSubAggs = metric.dateHistogramSubAggs || {
-    metric: {
-      [metric.metricAgg]: {
-        field: metric.field
-      }
-    },
-    ...createMetricAggs(metric)
-  };
+  let dateHistogramSubAggs = null;
+  if (metric.getDateHistogramSubAggs) {
+    dateHistogramSubAggs = metric.getDateHistogramSubAggs(metricOptions);
+  }
+  else if (metric.dateHistogramSubAggs) {
+    dateHistogramSubAggs = metric.dateHistogramSubAggs;
+  }
+  else {
+    dateHistogramSubAggs = {
+      metric: {
+        [metric.metricAgg]: {
+          field: metric.field
+        }
+      },
+      ...createMetricAggs(metric)
+    };
+  }
 
   const params = {
     index: indexPattern,
@@ -177,13 +187,41 @@ const formatBucketSize = bucketSizeInSeconds => {
   return formatTimestampToDuration(timestamp, CALCULATE_DURATION_UNTIL, now);
 };
 
-function handleSeries(metric, min, max, bucketSizeInSeconds, response) {
+function isObject(value) {
+  return typeof value === 'object' && !!value && !Array.isArray(value);
+}
+
+function countBuckets(data, count = 0) {
+  if (data.buckets) {
+    count += data.buckets.length;
+    for (const bucket of data.buckets) {
+      for (const key of Object.keys(bucket)) {
+        if (isObject(bucket[key])) {
+          count = countBuckets(bucket[key], count);
+        }
+      }
+    }
+  } else {
+    for (const key of Object.keys(data)) {
+      if (isObject(data[key])) {
+        count = countBuckets(data[key], count);
+      }
+    }
+  }
+  return count;
+}
+
+function handleSeries(metric, min, max, bucketSizeInSeconds, timezone, response) {
   const { derivative, calculation: customCalculation } = metric;
   const buckets = get(response, 'aggregations.check.buckets', []);
   const firstUsableBucketIndex = findFirstUsableBucketIndex(buckets, min);
   const lastUsableBucketIndex = findLastUsableBucketIndex(buckets, max, firstUsableBucketIndex, bucketSizeInSeconds * 1000);
   let data = [];
 
+  if (metric.debug) {
+    console.log(`metric.debug field=${metric.field} bucketsCreated: ${countBuckets(get(response, 'aggregations.check'))}`);
+    console.log(`metric.debug`, { bucketsLength: buckets.length, firstUsableBucketIndex, lastUsableBucketIndex });
+  }
 
   if (firstUsableBucketIndex <= lastUsableBucketIndex) {
     // map buckets to values for charts
@@ -193,14 +231,17 @@ function handleSeries(metric, min, max, bucketSizeInSeconds, response) {
     data = buckets
       .slice(firstUsableBucketIndex, lastUsableBucketIndex + 1) // take only the buckets we know are usable
       .map(bucket => ([
-        bucket.key,
+        formatUTCTimestampForTimezone(bucket.key, timezone),
         calculation(bucket, key, metric, bucketSizeInSeconds)
       ])); // map buckets to X/Y coords for Flot charting
   }
 
   return {
     bucket_size: formatBucketSize(bucketSizeInSeconds),
-    timeRange: { min, max },
+    timeRange: {
+      min: formatUTCTimestampForTimezone(min, timezone),
+      max: formatUTCTimestampForTimezone(max, timezone),
+    },
     metric: metric.serialize(),
     data
   };
@@ -217,14 +258,14 @@ function handleSeries(metric, min, max, bucketSizeInSeconds, response) {
  * @param {Array} filters Any filters that should be applied to the query.
  * @return {Promise} The object response containing the {@code timeRange}, {@code metric}, and {@code data}.
  */
-export async function getSeries(req, indexPattern, metricName, filters, { min, max, bucketSize }) {
+export async function getSeries(req, indexPattern, metricName, metricOptions, filters, { min, max, bucketSize, timezone }) {
   checkParam(indexPattern, 'indexPattern in details/getSeries');
 
   const metric = metrics[metricName];
   if (!metric) {
     throw new Error(`Not a valid metric: ${metricName}`);
   }
-  const response = await fetchSeries(req, indexPattern, metric, min, max, bucketSize, filters);
+  const response = await fetchSeries(req, indexPattern, metric, metricOptions, min, max, bucketSize, filters);
 
-  return handleSeries(metric, min, max, bucketSize, response);
+  return handleSeries(metric, min, max, bucketSize, timezone, response);
 }
