@@ -72,6 +72,27 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
         : find.waitForDeletedByCssSelector(testSubjSelector(selector), timeout));
     }
 
+    async stringExistsInCodeBlockOrFail(codeBlockSelector: string, stringToFind: string) {
+      await retry.try(async () => {
+        const responseCodeBlock = await this.find(codeBlockSelector);
+        const spans = await find.allDescendantDisplayedByTagName('span', responseCodeBlock);
+        const foundInSpans = await Promise.all(
+          spans.map(async span => {
+            const text = await span.getVisibleText();
+            if (text === stringToFind) {
+              log.debug(`"${text}" matched "${stringToFind}"!`);
+              return true;
+            } else {
+              log.debug(`"${text}" did not match "${stringToFind}"`);
+            }
+          })
+        );
+        if (!foundInSpans.find(foundInSpan => foundInSpan)) {
+          throw new Error('String not found. Trying again.');
+        }
+      });
+    }
+
     public async append(selector: string, text: string): Promise<void> {
       return await retry.try(async () => {
         log.debug(`TestSubjects.append(${selector}, ${text})`);

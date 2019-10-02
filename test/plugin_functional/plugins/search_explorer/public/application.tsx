@@ -85,12 +85,12 @@ const SearchApp = ({ basename, context }: { basename: string; context: AppMountC
     },
     {
       title: 'ES search strategy',
-      id: 'defaultSearch',
+      id: 'esSearch',
       component: <EsSearchTest search={context.search!.search} />,
     },
     {
       title: 'Demo search strategy',
-      id: 'fakeSearch',
+      id: 'demoSearch',
       component: <DemoStrategy search={context.search!.search} />,
     },
   ];

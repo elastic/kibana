@@ -92,7 +92,9 @@ export class DoSearch extends React.Component<Props, State> {
       <React.Fragment>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={this.search}>Search</EuiButton>
+            <EuiButton data-test-subj="doSearch" onClick={this.search}>
+              Search
+            </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton disabled={!this.state.searching} onClick={this.cancel}>
@@ -122,7 +124,13 @@ ${requestStr}
               value={(this.state.response && this.state.response.percentComplete) || 0}
               max={100}
             />
-            <EuiCodeBlock language="json" fontSize="m" paddingSize="m" color="dark">
+            <EuiCodeBlock
+              language="json"
+              fontSize="m"
+              paddingSize="m"
+              color="dark"
+              data-test-subj="response"
+            >
               {responseStr}
             </EuiCodeBlock>
           </EuiFlexItem>
