@@ -25,7 +25,7 @@ import { IndexPattern, TimeHistoryContract } from '../index';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
 import { parseQueryString } from './lib/parse_querystring';
 import { calculateBounds, getTime } from './get_time';
-import { TimefilterConfig, InputTimeRange } from './types';
+import { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
 
 export class Timefilter {
   // Fired when isTimeRangeSelectorEnabled \ isAutoRefreshSelectorEnabled are toggled
@@ -148,19 +148,19 @@ export class Timefilter {
     return getTime(indexPattern, timeRange ? timeRange : this._time, this.getForceNow());
   };
 
-  public getBounds = () => {
+  public getBounds(): TimeRangeBounds {
     return this.calculateBounds(this._time);
-  };
+  }
 
-  public calculateBounds = (timeRange: TimeRange) => {
+  public calculateBounds(timeRange: TimeRange): TimeRangeBounds {
     return calculateBounds(timeRange, { forceNow: this.getForceNow() });
-  };
+  }
 
-  public getActiveBounds = () => {
+  public getActiveBounds(): TimeRangeBounds | undefined {
     if (this.isTimeRangeSelectorEnabled) {
       return this.getBounds();
     }
-  };
+  }
 
   /**
    * Show the time bounds selector part of the time filter
