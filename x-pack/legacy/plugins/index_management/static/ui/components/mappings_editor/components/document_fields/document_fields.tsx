@@ -12,13 +12,16 @@ import { PropertiesList } from './properties';
 
 export const DocumentFields = () => {
   const {
-    properties: { data },
+    properties: { byId, topLevelFields },
   } = useState();
+
+  const getProperty = (propId: string) => byId[propId];
+  const properties = topLevelFields.map(getProperty);
 
   return (
     <>
       <DocumentFieldsHeaders />
-      <PropertiesList properties={data} />
+      <PropertiesList properties={properties} />
     </>
   );
 };

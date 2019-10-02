@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { OnFormUpdateArg } from './shared_imports';
-import { Properties, Property } from './types';
-import { getPropertyMeta } from './lib';
+import { Property } from './types';
+import { getPropertyMeta, NormalizedProperties } from './lib';
 
 export interface MappingsConfiguration {
   dynamic: boolean | string;
@@ -29,7 +29,8 @@ export interface State {
     fieldPathToAddProperty?: string;
   };
   properties: {
-    data: Properties;
+    byId: NormalizedProperties['byId'];
+    topLevelFields: NormalizedProperties['topLevelFields'];
     isValid: boolean | undefined;
   };
 }
@@ -67,11 +68,6 @@ const getChildProperty = (
   return getChildProperty(childProperty, pathsArray.slice(1));
 };
 
-const getPropertyAtPath = (path: string, properties: Properties) => {
-  const pathArray = path.split('.');
-  return getChildProperty(properties[pathArray[0]] as Property, pathArray.slice(1));
-};
-
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case 'configuration.update':
@@ -106,37 +102,42 @@ export const reducer = (state: State, action: Action): State => {
     case 'documentField.changeStatus':
       return { ...state, documentFields: { ...state.documentFields, status: action.value } };
     case 'property.add': {
-      const { name, ...rest } = action.value;
       const { fieldPathToAddProperty } = state.documentFields;
+      const { name } = action.value;
+      const propId =
+        fieldPathToAddProperty === undefined ? name : `${fieldPathToAddProperty}.${name}`;
 
-      const updatedPropertiesData = { ...state.properties.data };
+      const byId: NormalizedProperties['byId'] = {
+        ...state.properties.byId,
+        [propId]: action.value,
+      };
+      let topLevelFields = state.properties.topLevelFields;
 
       if (fieldPathToAddProperty === undefined) {
-        // Adding at the root level
-        updatedPropertiesData[name] = rest;
+        // update topLevel fields array
+        topLevelFields = [...topLevelFields, name];
       } else {
-        const { property, childPropertiesName } = getPropertyAtPath(
-          fieldPathToAddProperty,
-          updatedPropertiesData
-        );
+        const parentProperty = state.properties.byId[fieldPathToAddProperty!];
+        const childProperties = parentProperty.__childProperties__ || [];
 
-        property[childPropertiesName] = {
-          ...property[childPropertiesName],
-          [name]: rest,
+        // Update parent property with new children
+        byId[fieldPathToAddProperty] = {
+          ...parentProperty,
+          __childProperties__: [propId, ...childProperties],
         };
       }
 
       return {
         ...state,
-        properties: { ...state.properties, data: updatedPropertiesData },
+        properties: { ...state.properties, byId, topLevelFields },
         documentFields: { ...state.documentFields, status: 'idle' },
       };
     }
     case 'property.edit': {
-      const properties = state.properties.data; // Todo update this to merge new prop
+      // const properties = state.properties.data; // Todo update this to merge new prop
       return {
         ...state,
-        properties: { ...state.properties, data: properties },
+        // properties: { ...state.properties, data: properties },
         documentFields: { ...state.documentFields, status: 'idle' },
       };
     }

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 
 import { useState, useDispatch } from '../../../mappings_state';
@@ -12,22 +12,12 @@ import { CreateProperty } from './create_property';
 import { Property } from '../../../types';
 
 interface Props {
-  properties?: { [key: string]: Omit<Property, 'name'> };
+  properties?: Property[];
   path?: string;
   treeDepth?: number;
 }
 
-export const PropertiesList = React.memo(({ properties = {}, treeDepth = 0, path = '' }: Props) => {
-  const propertiesToArray = useMemo(() => {
-    const array = Object.entries(properties).map(
-      ([name, value]) => ({ name, ...value } as Property)
-    );
-    if (treeDepth === 0) {
-      return array;
-    }
-    return array.reverse(); // reverse so the new properties added appear on top of the list
-  }, [properties]);
-
+export const PropertiesList = React.memo(({ properties = [], treeDepth = 0, path = '' }: Props) => {
   const dispatch = useDispatch();
   const {
     documentFields: { status, fieldPathToAddProperty },
@@ -66,7 +56,7 @@ export const PropertiesList = React.memo(({ properties = {}, treeDepth = 0, path
     <>
       <div>
         <ul>
-          {propertiesToArray.map(property => (
+          {properties.map(property => (
             <li key={path ? `${path}.${property.name}` : property.name}>
               <PropertiesListItem property={property} treeDepth={treeDepth} parentPath={path} />
             </li>

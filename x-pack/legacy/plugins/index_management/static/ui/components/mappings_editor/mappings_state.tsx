@@ -8,6 +8,7 @@ import React, { useReducer, useEffect, createContext, useContext } from 'react';
 
 import { reducer, MappingsConfiguration, MappingsProperties, State, Dispatch } from './reducer';
 import { Property } from './types';
+import { normalize } from './lib';
 
 type Mappings = MappingsConfiguration & {
   properties: MappingsProperties;
@@ -37,6 +38,7 @@ export interface Props {
 }
 
 export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: Props) => {
+  const { byId, topLevelFields } = normalize(defaultValue.properties);
   const initialState: State = {
     isValid: undefined,
     configuration: {
@@ -47,7 +49,8 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
       validate: () => Promise.resolve(false),
     },
     properties: {
-      data: defaultValue.properties,
+      byId,
+      topLevelFields,
       isValid: true,
     },
     documentFields: {
@@ -61,7 +64,7 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
     onUpdate({
       getData: () => ({
         ...state.configuration.data.format(),
-        properties: state.properties.data,
+        properties: state.properties.byId,
       }),
       validate: () => {
         return state.configuration.validate();

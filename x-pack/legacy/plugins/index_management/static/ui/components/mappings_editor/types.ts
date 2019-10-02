@@ -91,5 +91,6 @@ export interface Property {
   type: DataType;
   properties?: { [key: string]: Property };
   fields?: { [key: string]: Property };
+  __childProperties__?: string[];
   [key: string]: any;
 }

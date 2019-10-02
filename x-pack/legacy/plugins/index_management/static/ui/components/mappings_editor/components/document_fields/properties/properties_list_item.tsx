@@ -22,9 +22,15 @@ export const PropertiesListItem = ({ property, parentPath, treeDepth = 0 }: Prop
   const dispatch = useDispatch();
   const {
     documentFields: { status, fieldPathToAddProperty },
+    properties: { byId },
   } = useState();
   const propertyPath = parentPath ? `${parentPath}.${property.name}` : property.name;
-  const { canHaveChildProperties, childProperties, hasChildProperties } = getPropertyMeta(property);
+  const { canHaveChildProperties } = getPropertyMeta(property);
+  const getProperty = (propId: string) => byId[propId];
+  const hasChildProperties = property.__childProperties__ !== undefined;
+  const childProperties = hasChildProperties
+    ? property.__childProperties__!.map(getProperty)
+    : null;
 
   const addField = () => {
     dispatch({
@@ -40,8 +46,6 @@ export const PropertiesListItem = ({ property, parentPath, treeDepth = 0 }: Prop
   const removeField = () => {
     // console.log('Removing', propertyPath);
   };
-
-  // console.log('............................Rendering', propertyPath);
 
   const renderCreateProperty = () => {
     if (status !== 'creatingProperty') {
@@ -81,7 +85,7 @@ export const PropertiesListItem = ({ property, parentPath, treeDepth = 0 }: Prop
       {hasChildProperties && (
         <div style={{ paddingLeft: '20px' }}>
           <PropertiesList
-            properties={childProperties}
+            properties={childProperties!}
             treeDepth={treeDepth + 1}
             path={propertyPath}
           />
