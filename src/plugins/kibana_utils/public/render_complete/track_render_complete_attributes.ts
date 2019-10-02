@@ -45,7 +45,6 @@ const ATTR_DATA_SHARED_ITEM = 'data-shared-item';
  * functions, otherwise reporting will hang forever when taking screenshot.
  */
 export const setInitialRenderCompleteAttrs = (el: HTMLElement) => {
-  el.setAttribute('data-test-subj', 'sharedItem');
   el.setAttribute(ATTR_DATA_SHARED_ITEM, '');
   el.setAttribute(ATTR_DATA_RENDERING_COUNT, '0');
   el.setAttribute(ATTR_DATA_RENDER_COMPLETE, 'false');
