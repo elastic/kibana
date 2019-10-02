@@ -40,6 +40,10 @@ body.canvas-isFullscreen { // sass-lint:disable-line no-qualifying-elements
     }
   }
 
+  .canvasLayout__rows {
+    max-width: none;
+  }
+
   .canvasLayout__rows,
   .canvasLayout__cols {
     align-items: center;
