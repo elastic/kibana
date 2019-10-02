@@ -21,11 +21,8 @@ export function LegacyIcon(props: LegacyIconProps) {
   const icon = (
     <i
       className={classNames('fa', props.className, 'gphLegacyIcon', {
-        selectedNode: props.selected,
-        gphNode__text: !props.onClick,
-        'gphNode__text--lowOpacity': !props.onClick,
-        gphIconPicker__icon: !!props.onClick,
-        gphNoUserSelect: !!props.onClick,
+        'gphLegacyIcon--selected': props.selected,
+        'gphLegacyIcon--pickable': !!props.onClick,
         'gphLegacyIcon--list': props.asListIcon,
       })}
       aria-label={props.icon.label}

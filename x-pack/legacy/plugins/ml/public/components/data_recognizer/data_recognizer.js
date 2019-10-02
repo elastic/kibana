@@ -57,9 +57,9 @@ export class DataRecognizer extends Component {
 
   render() {
     return (
-      <div className={this.className}>
+      <>
         {this.state.results}
-      </div>
+      </>
     );
   }
 }
