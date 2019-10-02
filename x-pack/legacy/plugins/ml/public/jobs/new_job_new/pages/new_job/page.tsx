@@ -41,7 +41,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const kibanaContext = useKibanaContext();
 
   const jobDefaults = newJobDefaults();
-
   const jobCreator = jobCreatorFactory(jobType)(
     kibanaContext.currentIndexPattern,
     kibanaContext.currentSavedSearch,

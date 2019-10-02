@@ -6,6 +6,7 @@
 
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { IndexPattern } from 'ui/index_patterns';
+
 import { JobCreator } from './job_creator';
 import { Field, Aggregation, SplitField, AggFieldPair } from '../../../../../common/types/fields';
 import { Job, Datafeed, Detector } from './configs';
@@ -14,13 +15,14 @@ import { JOB_TYPE, CREATED_BY_LABEL, DEFAULT_MODEL_MEMORY_LIMIT } from './util/c
 import { ml } from '../../../../services/ml_api_service';
 import { getRichDetectors } from './util/general';
 
-interface RichDetector {
-  agg: Aggregation;
-  field: Field;
+export interface RichDetector {
+  agg: Aggregation | null;
+  field: SplitField;
   byField: SplitField;
   overField: SplitField;
   partitionField: SplitField;
   excludeFrequent: string | null;
+  [key: string]: Aggregation | SplitField | string | null;
 }
 
 export class AdvancedJobCreator extends JobCreator {
@@ -118,34 +120,39 @@ export class AdvancedJobCreator extends JobCreator {
     this._richDetectors.splice(index, 1);
   }
 
-  // public get aggFieldPairs(): AggFieldPair[] {
-  //   return this.detectors.map((d, i) => ({
-  //     field: this._fields[i],
-  //     agg: this._aggs[i],
-  //   }));
-  // }
+  public get richDetectors(): RichDetector[] {
+    return this._richDetectors;
+  }
 
-  // public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
-  //   this._overrideConfigs(job, datafeed);
-  //   this.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
-  //   const detectors = getRichDetectors(job, datafeed);
-  //   if (datafeed.aggregations !== undefined) {
-  //     // if we've converting from a single metric job,
-  //     // delete the aggregations.
-  //     delete datafeed.aggregations;
-  //     delete job.analysis_config.summary_count_field_name;
-  //   }
-  //   this.removeAllDetectors();
-  //   detectors.forEach((d, i) => {
-  //     const dtr = detectors[i];
-  //     if (dtr.agg !== null && dtr.field !== null) {
-  //       this.addDetector(dtr.agg, dtr.field);
-  //     }
-  //   });
-  //   if (detectors.length) {
-  //     if (detectors[0].partitionField !== null) {
-  //       this.setSplitField(detectors[0].partitionField);
-  //     }
-  //   }
-  // }
+  public get aggFieldPairs(): AggFieldPair[] {
+    return [];
+    // return this.detectors.map((d, i) => ({
+    //   field: this._fields[i],
+    //   agg: this._aggs[i],
+    // }));
+  }
+
+  public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
+    // this._overrideConfigs(job, datafeed);
+    // this.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
+    // const detectors = getRichDetectors(job, datafeed);
+    // if (datafeed.aggregations !== undefined) {
+    //   // if we've converting from a single metric job,
+    //   // delete the aggregations.
+    //   delete datafeed.aggregations;
+    //   delete job.analysis_config.summary_count_field_name;
+    // }
+    // this.removeAllDetectors();
+    // detectors.forEach((d, i) => {
+    //   const dtr = detectors[i];
+    //   if (dtr.agg !== null && dtr.field !== null) {
+    //     this.addDetector(dtr.agg, dtr.field);
+    //   }
+    // });
+    // if (detectors.length) {
+    //   if (detectors[0].partitionField !== null) {
+    //     this.setSplitField(detectors[0].partitionField);
+    //   }
+    // }
+  }
 }

@@ -41,6 +41,10 @@ const routes: Route[] = [
     id: JOB_TYPE.POPULATION,
     k7Breadcrumbs: getCreatePopulationJobBreadcrumbs,
   },
+  {
+    id: JOB_TYPE.ADVANCED,
+    k7Breadcrumbs: getAdvancedJobConfigurationBreadcrumbs,
+  },
 ];
 
 routes.forEach((route: Route) => {

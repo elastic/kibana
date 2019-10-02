@@ -13,6 +13,7 @@ import { JOB_TYPE } from '../../../common/job_creator/util/constants';
 import { SingleMetricView } from './components/single_metric_view';
 import { MultiMetricView } from './components/multi_metric_view';
 import { PopulationView } from './components/population_view';
+import { AdvancedView } from './components/advanced_view';
 
 export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobCreator, jobCreatorUpdated, jobValidator, jobValidatorUpdated } = useContext(
@@ -48,8 +49,17 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
           {jobType === JOB_TYPE.POPULATION && (
             <PopulationView isActive={isCurrentStep} setCanProceed={setNextActive} />
           )}
+          {jobType === JOB_TYPE.ADVANCED && (
+            <AdvancedView isActive={isCurrentStep} setCanProceed={setNextActive} />
+          )}
           <WizardNav
-            previous={() => setCurrentStep(WIZARD_STEPS.TIME_RANGE)}
+            previous={() =>
+              setCurrentStep(
+                jobCreator.type === JOB_TYPE.ADVANCED
+                  ? WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED
+                  : WIZARD_STEPS.TIME_RANGE
+              )
+            }
             next={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
             nextActive={nextActive}
           />
