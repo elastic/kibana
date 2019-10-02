@@ -6,6 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiTitle } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
+import { DonutChart } from './donut_chart';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
@@ -40,50 +41,7 @@ export const SnapshotComponent = ({ data }: UptimeGraphQLQueryProps<SnapshotQuer
             <EuiSpacer size="xs" />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup justifyContent="spaceEvenly" gutterSize="s">
-              <EuiFlexItem>
-                <EuiStat
-                  description={i18n.translate('xpack.uptime.snapshot.stats.upDescription', {
-                    defaultMessage: 'Up',
-                  })}
-                  textAlign="center"
-                  title={data.snapshot.counts.up}
-                  titleColor="secondary"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiStat
-                  description={i18n.translate('xpack.uptime.snapshot.stats.downDescription', {
-                    defaultMessage: 'Down',
-                  })}
-                  textAlign="center"
-                  title={data.snapshot.counts.down}
-                  titleColor="danger"
-                />
-              </EuiFlexItem>
-              {data.snapshot.counts.mixed > 0 ? (
-                <EuiFlexItem>
-                  <EuiStat
-                    description={i18n.translate('xpack.uptime.snapshot.stats.mixedDescription', {
-                      defaultMessage: 'Mixed',
-                    })}
-                    textAlign="center"
-                    title={data.snapshot.counts.mixed}
-                    titleColor="subdued"
-                  />
-                </EuiFlexItem>
-              ) : null}
-              <EuiFlexItem>
-                <EuiStat
-                  description={i18n.translate('xpack.uptime.snapshot.stats.totalDescription', {
-                    defaultMessage: 'Total',
-                  })}
-                  textAlign="center"
-                  title={data.snapshot.counts.total}
-                  titleColor="subdued"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <DonutChart up={data.snapshot.counts.up} down={data.snapshot.counts.down} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
