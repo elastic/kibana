@@ -8,28 +8,28 @@ import { i18n } from '@kbn/i18n';
 
 export const ML_BREADCRUMB = Object.freeze({
   text: i18n.translate('xpack.ml.machineLearningBreadcrumbLabel', {
-    defaultMessage: 'Machine Learning'
+    defaultMessage: 'Machine Learning',
   }),
-  href: '#/'
+  href: '#/',
 });
 
 export const SETTINGS = Object.freeze({
   text: i18n.translate('xpack.ml.settingsBreadcrumbLabel', {
-    defaultMessage: 'Settings'
+    defaultMessage: 'Settings',
   }),
-  href: '#/settings?'
+  href: '#/settings?',
 });
 
 export const ANOMALY_DETECTION_BREADCRUMB = Object.freeze({
   text: i18n.translate('xpack.ml.anomalyDetectionBreadcrumbLabel', {
-    defaultMessage: 'Anomaly Detection'
+    defaultMessage: 'Anomaly Detection',
   }),
-  href: '#/jobs?'
+  href: '#/jobs?',
 });
 
 export const DATA_VISUALIZER_BREADCRUMB = Object.freeze({
   text: i18n.translate('xpack.ml.datavisualizerBreadcrumbLabel', {
-    defaultMessage: 'Data Visualizer'
+    defaultMessage: 'Data Visualizer',
   }),
-  href: '#/datavisualizer?'
+  href: '#/datavisualizer?',
 });
