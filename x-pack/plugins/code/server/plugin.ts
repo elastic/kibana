@@ -21,6 +21,7 @@ import { CodeConfigSchema } from './config';
  * Describes public Code plugin contract returned at the `setup` stage.
  */
 export interface PluginSetupContract {
+  /** @deprecated */
   legacy: {
     config: TypeOf<typeof CodeConfigSchema>;
     logger: LoggerFactory;
