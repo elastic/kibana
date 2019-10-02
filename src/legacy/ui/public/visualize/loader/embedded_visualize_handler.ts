@@ -346,7 +346,6 @@ export class EmbeddedVisualizeHandler {
   };
 
   private onRenderCompleteListener = () => {
-    this.element.setAttribute('data-render-complete', '');
     this.element.removeAttribute(LOADING_ATTRIBUTE);
   };
 

@@ -18,12 +18,6 @@
  */
 
 /**
- * If this attribute is present it specifies that `renderComplete` event has
- * not been fired yet.
- */
-const ATTR_DATA_LOADING = 'data-loading';
-
-/**
  * Tracks number of times `renderComplete` event was fired.
  */
 const ATTR_DATA_RENDERING_COUNT = 'data-rendering-count';
@@ -51,8 +45,8 @@ const ATTR_DATA_SHARED_ITEM = 'data-shared-item';
  * functions, otherwise reporting will hang forever when taking screenshot.
  */
 export const setInitialRenderCompleteAttrs = (el: HTMLElement) => {
+  el.setAttribute('data-test-subj', 'sharedItem');
   el.setAttribute(ATTR_DATA_SHARED_ITEM, '');
-  el.setAttribute(ATTR_DATA_LOADING, '');
   el.setAttribute(ATTR_DATA_RENDERING_COUNT, '0');
   el.setAttribute(ATTR_DATA_RENDER_COMPLETE, 'false');
 };
@@ -62,7 +56,6 @@ export const setInitialRenderCompleteAttrs = (el: HTMLElement) => {
  * to take screenshot. You can also call it every time it re-renders.
  */
 export const updateRenderCompleteAttrs = (el: HTMLElement) => {
-  el.removeAttribute(ATTR_DATA_LOADING);
   el.setAttribute(ATTR_DATA_RENDER_COMPLETE, 'true');
   el.setAttribute(
     ATTR_DATA_RENDERING_COUNT,
