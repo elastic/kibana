@@ -21,7 +21,7 @@ import { createPercentFormat } from './percent';
 
 const PercentFormat = createPercentFormat();
 
-describe('PercentFormat', function() {
+describe('PercentFormat', () => {
   const config: Record<any, any> = {};
 
   config['format:percent:defaultPattern'] = '0,0.[000]%';

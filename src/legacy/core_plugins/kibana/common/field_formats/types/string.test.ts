@@ -21,29 +21,29 @@ import { createStringFormat } from './string';
 
 const StringFormat = createStringFormat();
 
-describe('String Format', function() {
-  test('convert a string to lower case', function() {
+describe('String Format', () => {
+  test('convert a string to lower case', () => {
     const string = new StringFormat({
       transform: 'lower',
     });
     expect(string.convert('Kibana')).toBe('kibana');
   });
 
-  test('convert a string to upper case', function() {
+  test('convert a string to upper case', () => {
     const string = new StringFormat({
       transform: 'upper',
     });
     expect(string.convert('Kibana')).toBe('KIBANA');
   });
 
-  test('decode a base64 string', function() {
+  test('decode a base64 string', () => {
     const string = new StringFormat({
       transform: 'base64',
     });
     expect(string.convert('Zm9vYmFy')).toBe('foobar');
   });
 
-  test('convert a string to title case', function() {
+  test('convert a string to title case', () => {
     const string = new StringFormat({
       transform: 'title',
     });
@@ -54,14 +54,14 @@ describe('String Format', function() {
     expect(string.convert('Stay CALM!')).toBe('Stay Calm!');
   });
 
-  test('convert a string to short case', function() {
+  test('convert a string to short case', () => {
     const string = new StringFormat({
       transform: 'short',
     });
     expect(string.convert('dot.notated.string')).toBe('d.n.string');
   });
 
-  test('convert a string to unknown transform case', function() {
+  test('convert a string to unknown transform case', () => {
     const string = new StringFormat({
       transform: 'unknown_transform',
     });
@@ -69,7 +69,7 @@ describe('String Format', function() {
     expect(string.convert(value)).toBe(value);
   });
 
-  test('decode a URL Param string', function() {
+  test('decode a URL Param string', () => {
     const string = new StringFormat({
       transform: 'urlparam',
     });

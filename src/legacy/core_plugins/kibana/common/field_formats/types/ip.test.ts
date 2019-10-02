@@ -21,18 +21,18 @@ import { createIpFormat } from './ip';
 
 const IpFormat = createIpFormat();
 
-describe('IP Address Format', function() {
+describe('IP Address Format', () => {
   let ip: Record<any, any>;
 
-  beforeEach(function() {
+  beforeEach(() => {
     ip = new IpFormat();
   });
 
-  test('converts a value from a decimal to a string', function() {
+  test('converts a value from a decimal to a string', () => {
     expect(ip.convert(1186489492)).toBe('70.184.100.148');
   });
 
-  test('converts null and undefined to -', function() {
+  test('converts null and undefined to -', () => {
     expect(ip.convert(null)).toBe('-');
     expect(ip.convert(undefined)).toBe('-');
   });

@@ -21,9 +21,9 @@ import { createColorFormat } from './color';
 
 const ColorFormat = createColorFormat();
 
-describe('Color Format', function() {
+describe('Color Format', () => {
   describe('field is a number', () => {
-    test('should add colors if the value is in range', function() {
+    test('should add colors if the value is in range', () => {
       const colorer = new ColorFormat({
         fieldType: 'number',
         colors: [
@@ -44,7 +44,7 @@ describe('Color Format', function() {
       expect(colorer.convert(151, 'html')).toBe('<span ng-non-bindable>151</span>');
     });
 
-    test('should not convert invalid ranges', function() {
+    test('should not convert invalid ranges', () => {
       const colorer = new ColorFormat({
         fieldType: 'number',
         colors: [
@@ -60,7 +60,7 @@ describe('Color Format', function() {
   });
 
   describe('field is a string', () => {
-    test('should add colors if the regex matches', function() {
+    test('should add colors if the regex matches', () => {
       const colorer = new ColorFormat({
         fieldType: 'string',
         colors: [
@@ -95,7 +95,7 @@ describe('Color Format', function() {
       expect(converter('a', 'html')).toBe('<span ng-non-bindable>a</span>');
     });
 
-    test('returns original value (escaped) when regex is invalid', function() {
+    test('returns original value (escaped) when regex is invalid', () => {
       const colorer = new ColorFormat({
         fieldType: 'string',
         colors: [

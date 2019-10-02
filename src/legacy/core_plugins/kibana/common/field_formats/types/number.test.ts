@@ -21,7 +21,7 @@ import { createNumberFormat } from './number';
 
 const NumberFormat = createNumberFormat();
 
-describe('NumberFormat', function() {
+describe('NumberFormat', () => {
   const config: Record<any, any> = {};
 
   config['format:number:defaultPattern'] = '0,0.[000]';

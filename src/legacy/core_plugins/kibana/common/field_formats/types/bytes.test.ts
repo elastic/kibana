@@ -21,7 +21,7 @@ import { createBytesFormat } from './bytes';
 
 const BytesFormat = createBytesFormat();
 
-describe('BytesFormat', function() {
+describe('BytesFormat', () => {
   const config: Record<any, any> = {};
 
   config['format:bytes:defaultPattern'] = '0,0.[000]b';

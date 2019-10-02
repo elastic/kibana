@@ -22,11 +22,11 @@ import { createDateNanosFormat, analysePatternForFract, formatWithNanos } from '
 
 const DateFormat = createDateNanosFormat();
 
-describe('Date Nanos Format', function() {
+describe('Date Nanos Format', () => {
   let convert: Function;
   let mockConfig: Record<any, any>;
 
-  beforeEach(function() {
+  beforeEach(() => {
     mockConfig = {};
     mockConfig.dateNanosFormat = 'MMMM Do YYYY, HH:mm:ss.SSSSSSSSS';
     mockConfig['dateFormat:tz'] = 'Browser';
@@ -37,7 +37,7 @@ describe('Date Nanos Format', function() {
     convert = date.convert.bind(date);
   });
 
-  test('should inject fractional seconds into formatted timestamp', function() {
+  test('should inject fractional seconds into formatted timestamp', () => {
     [
       {
         input: '2019-05-20T14:04:56.357001234Z',
@@ -77,12 +77,12 @@ describe('Date Nanos Format', function() {
     });
   });
 
-  test('decoding an undefined or null date should return an empty string', function() {
+  test('decoding an undefined or null date should return an empty string', () => {
     expect(convert(null)).toBe('-');
     expect(convert(undefined)).toBe('-');
   });
 
-  test('should clear the memoization cache after changing the date', function() {
+  test('should clear the memoization cache after changing the date', () => {
     function setDefaultTimezone() {
       moment.tz.setDefault(mockConfig['dateFormat:tz']);
     }
@@ -100,7 +100,7 @@ describe('Date Nanos Format', function() {
     expect(chicagoTime).not.toBe(phoenixTime);
   });
 
-  test('should return the value itself when it cannot successfully be formatted', function() {
+  test('should return the value itself when it cannot successfully be formatted', () => {
     const dateMath = 'now+1M/d';
     expect(convert(dateMath)).toBe(dateMath);
   });
