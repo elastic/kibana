@@ -160,7 +160,7 @@ export function App({
       <KibanaContextProvider
         services={{
           appName: 'lens',
-          autocomplete: data.autocomplete,
+          data,
           store,
           ...core,
         }}

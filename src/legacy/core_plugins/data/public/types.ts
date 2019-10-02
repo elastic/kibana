@@ -18,7 +18,7 @@
  */
 
 import { UiSettingsClientContract, CoreStart } from 'src/core/public';
-import { AutocompletePublicPluginStart } from 'src/plugins/data/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 
 export interface IDataPluginServices extends Partial<CoreStart> {
   appName: string;
@@ -27,5 +27,5 @@ export interface IDataPluginServices extends Partial<CoreStart> {
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
   store: Storage;
-  autocomplete: AutocompletePublicPluginStart;
+  data: DataPublicPluginStart;
 }

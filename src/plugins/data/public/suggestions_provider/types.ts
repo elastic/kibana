@@ -17,17 +17,7 @@
  * under the License.
  */
 
-export * from './autocomplete_provider/types';
+// Should be import { Field } from './index_patterns';
+export type Field = any;
 
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { IGetSuggestions } from './suggestions_provider/types';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
-}
-
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-}
-
-export { IGetSuggestions } from './suggestions_provider/types';
+export type IGetSuggestions = (index: string, field: Field, query: string, boolFilter?: any) => any;

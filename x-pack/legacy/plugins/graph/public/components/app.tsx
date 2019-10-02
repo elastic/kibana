@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { Storage } from 'ui/storage';
 import { CoreStart } from 'kibana/public';
-import { AutocompletePublicPluginStart } from 'src/plugins/data/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { FieldManagerProps, FieldManager } from './field_manager';
 import { SearchBarProps, SearchBar } from './search_bar';
 
@@ -16,7 +16,8 @@ import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_reac
 
 export interface GraphAppProps extends FieldManagerProps, SearchBarProps {
   coreStart: CoreStart;
-  autocompleteStart: AutocompletePublicPluginStart;
+  // This is not named dataStart because of Angular treating data- prefix differently
+  pluginDataStart: DataPublicPluginStart;
   store: Storage;
 }
 
@@ -26,7 +27,7 @@ export function GraphApp(props: GraphAppProps) {
       services={{
         appName: 'graph',
         store: props.store,
-        autocomplete: props.autocompleteStart,
+        data: props.pluginDataStart,
         ...props.coreStart,
       }}
     >
