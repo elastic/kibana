@@ -279,6 +279,16 @@ test('uses API key when provided', async () => {
       // base64 encoded "123:abc"
       authorization: 'ApiKey MTIzOmFiYw==',
     },
+    path: '/',
+    route: { settings: {} },
+    url: {
+      href: '/',
+    },
+    raw: {
+      req: {
+        url: '/',
+      },
+    },
   });
 });
 
@@ -301,5 +311,15 @@ test(`doesn't use API key when not provided`, async () => {
   expect(getCreateTaskRunnerFunctionParams.getServices).toHaveBeenCalledWith({
     getBasePath: expect.anything(),
     headers: {},
+    path: '/',
+    route: { settings: {} },
+    url: {
+      href: '/',
+    },
+    raw: {
+      req: {
+        url: '/',
+      },
+    },
   });
 });
