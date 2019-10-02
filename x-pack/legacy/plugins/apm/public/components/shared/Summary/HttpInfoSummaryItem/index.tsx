@@ -6,24 +6,26 @@
 
 import React from 'react';
 import { EuiToolTip, EuiBadge } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { palettes } from '@elastic/eui';
 import { units, px, truncate, unit } from '../../../../style/variables';
 import { statusCodes } from './statusCodes';
 
-const statusColors = {
-  success: palettes.euiPaletteForStatus.colors[0],
-  warning: palettes.euiPaletteForStatus.colors[4],
-  error: palettes.euiPaletteForStatus.colors[9]
-};
+const {
+  euiColorDarkShade,
+  euiColorSecondary,
+  euiColorWarning,
+  euiColorDanger
+} = theme;
 
 function getStatusColor(status: number) {
   const colors: { [key: string]: string } = {
-    2: statusColors.success,
-    3: statusColors.warning,
-    4: statusColors.error,
-    5: statusColors.error
+    1: euiColorDarkShade,
+    2: euiColorSecondary,
+    3: euiColorDarkShade,
+    4: euiColorWarning,
+    5: euiColorDanger
   };
 
   return colors[status.toString().substr(0, 1)] || 'default';
