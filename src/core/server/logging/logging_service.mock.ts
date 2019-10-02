@@ -19,10 +19,9 @@
 
 // Test helpers to simplify mocking logs and collecting all their outputs
 import { Logger } from './logger';
-import { LoggingService } from './logging_service';
+import { ILoggingService } from './logging_service';
 import { LoggerFactory } from './logger_factory';
 
-type LoggingServiceContract = PublicMethodsOf<LoggingService>;
 type MockedLogger = jest.Mocked<Logger>;
 
 const createLoggingServiceMock = () => {
@@ -36,7 +35,7 @@ const createLoggingServiceMock = () => {
     warn: jest.fn(),
   };
 
-  const mocked: jest.Mocked<LoggingServiceContract> = {
+  const mocked: jest.Mocked<ILoggingService> = {
     get: jest.fn(),
     asLoggerFactory: jest.fn(),
     upgrade: jest.fn(),
@@ -65,7 +64,7 @@ const collectLoggingServiceMock = (loggerFactory: LoggerFactory) => {
 };
 
 const clearLoggingServiceMock = (loggerFactory: LoggerFactory) => {
-  const mockedLoggerFactory = (loggerFactory as unknown) as jest.Mocked<LoggingServiceContract>;
+  const mockedLoggerFactory = (loggerFactory as unknown) as jest.Mocked<ILoggingService>;
   mockedLoggerFactory.get.mockClear();
   mockedLoggerFactory.asLoggerFactory.mockClear();
   mockedLoggerFactory.upgrade.mockClear();

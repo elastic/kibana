@@ -18,6 +18,7 @@
  */
 
 import { delay } from 'bluebird';
+
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
 import { SavedObjectsErrorHelpers } from './errors';
@@ -263,7 +264,7 @@ describe('SavedObjectsRepository', () => {
     onBeforeWrite = jest.fn();
     migrator = {
       migrateDocument: jest.fn(doc => doc),
-      awaitMigration: async () => ({ status: 'skipped' }),
+      runMigrations: async () => ({ status: 'skipped' }),
     };
 
     const serializer = new SavedObjectsSerializer(schema);
@@ -272,6 +273,10 @@ describe('SavedObjectsRepository', () => {
 
     savedObjectsRepository = new SavedObjectsRepository({
       index: '.kibana-test',
+      cacheIndexPatterns: {
+        setIndexPatterns: jest.fn(),
+        getIndexPatterns: () => undefined,
+      },
       mappings,
       callCluster: callAdminCluster,
       migrator,
@@ -285,7 +290,7 @@ describe('SavedObjectsRepository', () => {
     getSearchDslNS.getSearchDsl.mockReset();
   });
 
-  afterEach(() => {});
+  afterEach(() => { });
 
   describe('#create', () => {
     beforeEach(() => {
@@ -297,7 +302,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('waits until migrations are complete before proceeding', async () => {
-      migrator.awaitMigration = jest.fn(async () =>
+      migrator.runMigrations = jest.fn(async () =>
         expect(callAdminCluster).not.toHaveBeenCalled()
       );
 
@@ -313,7 +318,7 @@ describe('SavedObjectsRepository', () => {
           }
         )
       ).resolves.toBeDefined();
-      expect(migrator.awaitMigration).toHaveBeenCalledTimes(1);
+      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
     });
 
     it('formats Elasticsearch response', async () => {
@@ -552,7 +557,7 @@ describe('SavedObjectsRepository', () => {
 
   describe('#bulkCreate', () => {
     it('waits until migrations are complete before proceeding', async () => {
-      migrator.awaitMigration = jest.fn(async () =>
+      migrator.runMigrations = jest.fn(async () =>
         expect(callAdminCluster).not.toHaveBeenCalled()
       );
       callAdminCluster.mockReturnValue({
@@ -576,7 +581,7 @@ describe('SavedObjectsRepository', () => {
         ])
       ).resolves.toBeDefined();
 
-      expect(migrator.awaitMigration).toHaveBeenCalledTimes(1);
+      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
     });
 
     it('formats Elasticsearch request', async () => {
@@ -993,12 +998,12 @@ describe('SavedObjectsRepository', () => {
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
-    it('should return objects in the same order regardless of type', () => {});
+    it('should return objects in the same order regardless of type', () => { });
   });
 
   describe('#delete', () => {
     it('waits until migrations are complete before proceeding', async () => {
-      migrator.awaitMigration = jest.fn(async () =>
+      migrator.runMigrations = jest.fn(async () =>
         expect(callAdminCluster).not.toHaveBeenCalled()
       );
       callAdminCluster.mockReturnValue({ result: 'deleted' });
@@ -1008,7 +1013,7 @@ describe('SavedObjectsRepository', () => {
         })
       ).resolves.toBeDefined();
 
-      expect(migrator.awaitMigration).toHaveBeenCalledTimes(1);
+      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
     });
 
     it('throws notFound when ES is unable to find the document', async () => {
@@ -1114,14 +1119,14 @@ describe('SavedObjectsRepository', () => {
 
   describe('#find', () => {
     it('waits until migrations are complete before proceeding', async () => {
-      migrator.awaitMigration = jest.fn(async () =>
+      migrator.runMigrations = jest.fn(async () =>
         expect(callAdminCluster).not.toHaveBeenCalled()
       );
 
       callAdminCluster.mockReturnValue(noNamespaceSearchResults);
       await expect(savedObjectsRepository.find({ type: 'foo' })).resolves.toBeDefined();
 
-      expect(migrator.awaitMigration).toHaveBeenCalledTimes(1);
+      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
     });
 
     it('requires type to be defined', async () => {
@@ -1154,6 +1159,13 @@ describe('SavedObjectsRepository', () => {
       }
     });
 
+    it('requires index pattern to be defined if filter is defined', async () => {
+      callAdminCluster.mockReturnValue(noNamespaceSearchResults);
+      expect(savedObjectsRepository.find({ type: 'foo', filter: 'foo.type: hello' }))
+        .rejects
+        .toThrowErrorMatchingInlineSnapshot('"options.filter is missing index pattern to work correctly: Bad Request"');
+    });
+
     it('passes mappings, schema, search, defaultSearchOperator, searchFields, type, sortField, sortOrder and hasReference to getSearchDsl',
       async () => {
         callAdminCluster.mockReturnValue(namespacedSearchResults);
@@ -1169,6 +1181,8 @@ describe('SavedObjectsRepository', () => {
             type: 'foo',
             id: '1',
           },
+          indexPattern: undefined,
+          kueryNode: null,
         };
 
         await savedObjectsRepository.find(relevantOpts);
@@ -1315,7 +1329,7 @@ describe('SavedObjectsRepository', () => {
     };
 
     it('waits until migrations are complete before proceeding', async () => {
-      migrator.awaitMigration = jest.fn(async () =>
+      migrator.runMigrations = jest.fn(async () =>
         expect(callAdminCluster).not.toHaveBeenCalled()
       );
 
@@ -1324,7 +1338,7 @@ describe('SavedObjectsRepository', () => {
         savedObjectsRepository.get('index-pattern', 'logstash-*')
       ).resolves.toBeDefined();
 
-      expect(migrator.awaitMigration).toHaveBeenCalledTimes(1);
+      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
     });
 
     it('formats Elasticsearch response when there is no namespace', async () => {
@@ -1408,7 +1422,7 @@ describe('SavedObjectsRepository', () => {
 
   describe('#bulkGet', () => {
     it('waits until migrations are complete before proceeding', async () => {
-      migrator.awaitMigration = jest.fn(async () =>
+      migrator.runMigrations = jest.fn(async () =>
         expect(callAdminCluster).not.toHaveBeenCalled()
       );
 
@@ -1421,7 +1435,7 @@ describe('SavedObjectsRepository', () => {
         ])
       ).resolves.toBeDefined();
 
-      expect(migrator.awaitMigration).toHaveBeenCalledTimes(1);
+      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
     });
 
     it('prepends type to id when getting objects when there is no namespace', async () => {
@@ -1662,7 +1676,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('waits until migrations are complete before proceeding', async () => {
-      migrator.awaitMigration = jest.fn(async () =>
+      migrator.runMigrations = jest.fn(async () =>
         expect(callAdminCluster).not.toHaveBeenCalled()
       );
 
@@ -1672,7 +1686,7 @@ describe('SavedObjectsRepository', () => {
         })
       ).resolves.toBeDefined();
 
-      expect(migrator.awaitMigration).toHaveReturnedTimes(1);
+      expect(migrator.runMigrations).toHaveReturnedTimes(1);
     });
 
     it('mockReturnValue current ES document _seq_no and _primary_term encoded as version', async () => {

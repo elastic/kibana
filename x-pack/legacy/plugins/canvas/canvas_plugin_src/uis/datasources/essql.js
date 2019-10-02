@@ -9,6 +9,9 @@ import PropTypes from 'prop-types';
 import { EuiFormRow, EuiTextArea } from '@elastic/eui';
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { DataSourceStrings } from '../../strings';
+
+const { Essql: strings } = DataSourceStrings;
 
 class EssqlDatasource extends PureComponent {
   componentDidMount() {
@@ -56,7 +59,7 @@ class EssqlDatasource extends PureComponent {
     const { isInvalid } = this.props;
 
     return (
-      <EuiFormRow isInvalid={isInvalid} label="Elasticsearch SQL query">
+      <EuiFormRow isInvalid={isInvalid} label={strings.getLabel()}>
         <EuiTextArea
           placeholder={this.defaultQuery}
           isInvalid={isInvalid}
@@ -79,8 +82,8 @@ EssqlDatasource.propTypes = {
 
 export const essql = () => ({
   name: 'essql',
-  displayName: 'Elasticsearch SQL',
-  help: 'Use Elasticsearch SQL to get a data table',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   // Replace this with a SQL logo when we have one in EUI
   image: 'logoElasticsearch',
   template: templateFromReactComponent(EssqlDatasource),

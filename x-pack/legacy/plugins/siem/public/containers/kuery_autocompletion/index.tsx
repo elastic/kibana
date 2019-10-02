@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { npStart } from 'ui/new_platform';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
@@ -26,78 +26,65 @@ interface KueryAutocompletionCurrentRequest {
   cursorPosition: number;
 }
 
-interface KueryAutocompletionLifecycleState {
-  // lacking cancellation support in the autocompletion api,
-  // this is used to keep older, slower requests from clobbering newer ones
-  currentRequest: KueryAutocompletionCurrentRequest | null;
-  suggestions: AutocompleteSuggestion[];
-}
-
 const getAutocompleteProvider = (language: string) =>
   npStart.plugins.data.autocomplete.getProvider(language);
 
-export class KueryAutocompletion extends React.PureComponent<
-  KueryAutocompletionLifecycleProps,
-  KueryAutocompletionLifecycleState
-> {
-  public readonly state: KueryAutocompletionLifecycleState = {
-    currentRequest: null,
-    suggestions: [],
-  };
+export const KueryAutocompletion = React.memo<KueryAutocompletionLifecycleProps>(
+  ({ children, indexPattern }) => {
+    const [currentRequest, setCurrentRequest] = useState<KueryAutocompletionCurrentRequest | null>(
+      null
+    );
 
-  public render() {
-    const { currentRequest, suggestions } = this.state;
-    return this.props.children({
+    const [suggestions, setSuggestions] = useState<AutocompleteSuggestion[]>([]);
+
+    const loadSuggestions = async (
+      expression: string,
+      cursorPosition: number,
+      maxSuggestions?: number
+    ) => {
+      const autocompletionProvider = getAutocompleteProvider('kuery');
+      const config = {
+        get: () => true,
+      };
+      if (!autocompletionProvider) {
+        return;
+      }
+
+      const getSuggestions = autocompletionProvider({
+        config,
+        indexPatterns: [indexPattern],
+        boolFilter: [],
+      });
+      const futureRequest = {
+        expression,
+        cursorPosition,
+      };
+      setCurrentRequest({
+        expression,
+        cursorPosition,
+      });
+      setSuggestions([]);
+      const newSuggestions = await getSuggestions({
+        query: expression,
+        selectionStart: cursorPosition,
+        selectionEnd: cursorPosition,
+      });
+      if (
+        futureRequest &&
+        futureRequest.expression !== (currentRequest && currentRequest.expression) &&
+        futureRequest.cursorPosition !== (currentRequest && currentRequest.cursorPosition)
+      ) {
+        setCurrentRequest(null);
+        setSuggestions(maxSuggestions ? newSuggestions.slice(0, maxSuggestions) : newSuggestions);
+      }
+    };
+
+    return children({
       isLoadingSuggestions: currentRequest !== null,
-      loadSuggestions: this.loadSuggestions,
+      loadSuggestions,
       suggestions,
     });
   }
+);
 
-  private loadSuggestions = async (
-    expression: string,
-    cursorPosition: number,
-    maxSuggestions?: number
-  ) => {
-    const { indexPattern } = this.props;
-    const autocompletionProvider = getAutocompleteProvider('kuery');
-    const config = {
-      get: () => true,
-    };
-    if (!autocompletionProvider) {
-      return;
-    }
-
-    const getSuggestions = autocompletionProvider({
-      config,
-      indexPatterns: [indexPattern],
-      boolFilter: [],
-    });
-
-    this.setState({
-      currentRequest: {
-        expression,
-        cursorPosition,
-      },
-      suggestions: [],
-    });
-
-    const suggestions = await getSuggestions({
-      query: expression,
-      selectionStart: cursorPosition,
-      selectionEnd: cursorPosition,
-    });
-
-    this.setState(state =>
-      state.currentRequest &&
-      state.currentRequest.expression !== expression &&
-      state.currentRequest.cursorPosition !== cursorPosition
-        ? state // ignore this result, since a newer request is in flight
-        : {
-            ...state,
-            currentRequest: null,
-            suggestions: maxSuggestions ? suggestions.slice(0, maxSuggestions) : suggestions,
-          }
-    );
-  };
-}
+KueryAutocompletion.displayName = 'KueryAutocompletion';
