@@ -463,7 +463,7 @@ export interface CallAPIOptions {
 // @public
 export class ClusterClient implements IClusterClient {
     constructor(config: ElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
-    asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): ScopedClusterClient;
+    asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): IScopedClusterClient;
     callAsInternalUser: APICaller;
     close(): void;
     }
@@ -698,11 +698,7 @@ export interface HttpServiceStart {
 export type IBasePath = Pick<BasePath, keyof BasePath>;
 
 // @public
-export interface IClusterClient {
-    asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): IScopedClusterClient;
-    callAsInternalUser: APICaller;
-    close(): void;
-}
+export type IClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'close' | 'asScoped'>;
 
 // @public
 export interface IContextContainer<THandler extends HandlerFunction<any>> {
@@ -767,10 +763,7 @@ export interface IRouter {
 export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolean;
 
 // @public
-export interface IScopedClusterClient {
-    callAsCurrentUser: APICaller;
-    callAsInternalUser: APICaller;
-}
+export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
 
 // @public
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {

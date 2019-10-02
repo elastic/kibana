@@ -89,23 +89,18 @@ export interface FakeRequest {
 }
 
 /**
- * {@inheritdoc ClusterClient}
- * @public
- */
-export interface IClusterClient {
-  /** {@inheritdoc ClusterClient.callAsInternalUser} */
-  callAsInternalUser: APICaller;
-  /** {@inheritdoc ClusterClient.close} */
-  close(): void;
-  /** {@inheritdoc ClusterClient.asScoped} */
-  asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): IScopedClusterClient;
-}
-
-/**
  * Represents an Elasticsearch cluster API client and allows to call API on behalf
  * of the internal Kibana user and the actual user that is derived from the request
  * headers (via `asScoped(...)`).
  *
+ * See {@link ClusterClient}.
+ *
+ * @public
+ */
+export type IClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'close' | 'asScoped'>;
+
+/**
+ * {@inheritDoc IClusterClient}
  * @public
  */
 export class ClusterClient implements IClusterClient {
@@ -176,7 +171,7 @@ export class ClusterClient implements IClusterClient {
    * @param request - Request the `ScopedClusterClient` instance will be scoped to.
    * Supports request optionality, Legacy.Request & FakeRequest for BWC with LegacyPlatform
    */
-  public asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest) {
+  public asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): IScopedClusterClient {
     // It'd have been quite expensive to create and configure client for every incoming
     // request since it involves parsing of the config, reading of the SSL certificate and
     // key files etc. Moreover scoped client needs two Elasticsearch JS clients at the same
@@ -194,7 +189,7 @@ export class ClusterClient implements IClusterClient {
 
     return new ScopedClusterClient(
       this.callAsInternalUser,
-      this.callAsCurrentUser as APICaller,
+      this.callAsCurrentUser,
       filterHeaders(this.getHeaders(request), this.config.requestHeadersWhitelist)
     );
   }
@@ -206,14 +201,18 @@ export class ClusterClient implements IClusterClient {
    * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
    * @param options - Options that affect the way we call the API and process the result.
    */
-  private callAsCurrentUser = async (
+  private callAsCurrentUser: APICaller = async (
     endpoint: string,
     clientParams: Record<string, any> = {},
     options?: CallAPIOptions
   ) => {
     this.assertIsNotClosed();
 
-    return await callAPI(this.scopedClient!, endpoint, clientParams, options);
+    return await (callAPI.bind(null, this.scopedClient!) as APICaller)(
+      endpoint,
+      clientParams,
+      options
+    );
   };
 
   private assertIsNotClosed() {

@@ -25,26 +25,22 @@ import { APICaller, CallAPIOptions } from './api_types';
 export { Headers };
 
 /**
- * {@inheritDoc ScopedClusterClient}
- * @public
- */
-export interface IScopedClusterClient {
-  /**
-   * {@inheritdoc ScopedClusterClient.callAsInternalUser}
-   */
-  callAsInternalUser: APICaller;
-  /**
-   * {@inheritdoc ScopedClusterClient.callAsCurrentUser}
-   */
-  callAsCurrentUser: APICaller;
-}
-
-/**
  * Serves the same purpose as "normal" `ClusterClient` but exposes additional
  * `callAsCurrentUser` method that doesn't use credentials of the Kibana internal
  * user (as `callAsInternalUser` does) to request Elasticsearch API, but rather
- * passes HTTP headers extracted from the current user request to the API
+ * passes HTTP headers extracted from the current user request to the API.
  *
+ * See {@link ScopedClusterClient}.
+ *
+ * @public
+ */
+export type IScopedClusterClient = Pick<
+  ScopedClusterClient,
+  'callAsCurrentUser' | 'callAsInternalUser'
+>;
+
+/**
+ * {@inheritDoc IScopedClusterClient}
  * @public
  */
 export class ScopedClusterClient implements IScopedClusterClient {

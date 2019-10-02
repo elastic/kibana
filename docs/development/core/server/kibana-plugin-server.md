@@ -17,11 +17,11 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  Class | Description |
 |  --- | --- |
 |  [BasePath](./kibana-plugin-server.basepath.md) | Access or manipulate the Kibana base path |
-|  [ClusterClient](./kibana-plugin-server.clusterclient.md) | Represents an Elasticsearch cluster API client and allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>). |
+|  [ClusterClient](./kibana-plugin-server.clusterclient.md) | Represents an Elasticsearch cluster API client and allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>).<!-- -->See [ClusterClient](./kibana-plugin-server.clusterclient.md)<!-- -->. |
 |  [ElasticsearchErrorHelpers](./kibana-plugin-server.elasticsearcherrorhelpers.md) | Helpers for working with errors returned from the Elasticsearch service.Since the internal data of errors are subject to change, consumers of the Elasticsearch service should always use these helpers to classify errors instead of checking error internals such as <code>body.error.header[WWW-Authenticate]</code> |
 |  [KibanaRequest](./kibana-plugin-server.kibanarequest.md) | Kibana specific abstraction for an incoming request. |
 |  [SavedObjectsErrorHelpers](./kibana-plugin-server.savedobjectserrorhelpers.md) |  |
-|  [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API |
+|  [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API.<!-- -->See [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md)<!-- -->. |
 
 ## Enumerations
 
@@ -54,12 +54,10 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpResponseOptions](./kibana-plugin-server.httpresponseoptions.md) | HTTP response parameters |
 |  [HttpServerSetup](./kibana-plugin-server.httpserversetup.md) | Kibana HTTP Service provides own abstraction for work with HTTP stack. Plugins don't have direct access to <code>hapi</code> server and its primitives anymore. Moreover, plugins shouldn't rely on the fact that HTTP Service uses one or another library under the hood. This gives the platform flexibility to upgrade or changing our internal HTTP stack without breaking plugins. If the HTTP Service lacks functionality you need, we are happy to discuss and support your needs. |
 |  [HttpServiceStart](./kibana-plugin-server.httpservicestart.md) |  |
-|  [IClusterClient](./kibana-plugin-server.iclusterclient.md) | Represents an Elasticsearch cluster API client and allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>). |
 |  [IContextContainer](./kibana-plugin-server.icontextcontainer.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [IKibanaSocket](./kibana-plugin-server.ikibanasocket.md) | A tiny abstraction for TCP socket. |
 |  [IndexSettingsDeprecationInfo](./kibana-plugin-server.indexsettingsdeprecationinfo.md) |  |
 |  [IRouter](./kibana-plugin-server.irouter.md) | Registers route handlers for specified resource path and method. |
-|  [IScopedClusterClient](./kibana-plugin-server.iscopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API |
 |  [KibanaRequestRoute](./kibana-plugin-server.kibanarequestroute.md) | Request specific route information exposed to a handler. |
 |  [LegacyRequest](./kibana-plugin-server.legacyrequest.md) |  |
 |  [LegacyServiceSetupDeps](./kibana-plugin-server.legacyservicesetupdeps.md) |  |
@@ -131,8 +129,10 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpResponsePayload](./kibana-plugin-server.httpresponsepayload.md) | Data send to the client as a response payload. |
 |  [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |  |
 |  [IBasePath](./kibana-plugin-server.ibasepath.md) | Access or manipulate the Kibana base path[BasePath](./kibana-plugin-server.basepath.md) |
+|  [IClusterClient](./kibana-plugin-server.iclusterclient.md) | Represents an Elasticsearch cluster API client and allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>).<!-- -->See [ClusterClient](./kibana-plugin-server.clusterclient.md)<!-- -->. |
 |  [IContextProvider](./kibana-plugin-server.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [IsAuthenticated](./kibana-plugin-server.isauthenticated.md) | Return authentication status for a request. |
+|  [IScopedClusterClient](./kibana-plugin-server.iscopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API.<!-- -->See [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md)<!-- -->. |
 |  [KibanaResponseFactory](./kibana-plugin-server.kibanaresponsefactory.md) | Creates an object containing request response payload, HTTP headers, error details, and other data transmitted to the client. |
 |  [KnownHeaders](./kibana-plugin-server.knownheaders.md) | Set of well-known HTTP headers. |
 |  [LifecycleResponseFactory](./kibana-plugin-server.lifecycleresponsefactory.md) | Creates an object containing redirection or error response with error details, HTTP headers, and other data transmitted to the client. |
