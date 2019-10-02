@@ -25,6 +25,8 @@ import {
 } from './common/constants';
 import { signalsAlertType } from './server/lib/detection_engine/alerts/signals_alert_type';
 
+console.log('savedObjectMappings', JSON.stringify(savedObjectMappings, null, 2));
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function siem(kibana: any) {
   return new kibana.Plugin({
@@ -119,6 +121,11 @@ export function siem(kibana: any) {
         },
       },
       mappings: savedObjectMappings,
+      savedObjectSchemas: {
+        'signals-mapping': {
+          indexPattern: 'other-index',
+        },
+      },
     },
     init(server: Server) {
       if (server.plugins.alerting != null) {

@@ -145,6 +145,7 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
 
     this.legacyRawConfig = pluginExtendedConfig;
 
+    console.log('uiExports', JSON.stringify(uiExports, null, 2));
     // check for unknown uiExport types
     if (uiExports.unknown && uiExports.unknown.length > 0) {
       throw new Error(
