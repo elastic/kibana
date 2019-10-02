@@ -113,7 +113,6 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
 
   const savedQueryPopoverButton = (
     <EuiButtonEmpty
-      className="euiFormControlLayout__prepend"
       iconType="arrowDown"
       iconSide="right"
       onClick={() => {

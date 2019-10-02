@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
+import { AutocompleteSuggestion } from '../../../../../../../../src/plugins/data/public';
 
 export interface ElasticsearchAdapter {
   convertKueryToEsQuery: (kuery: string) => Promise<string>;

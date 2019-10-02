@@ -16,10 +16,10 @@ interface Props {
 export const TabAliases: React.FunctionComponent<Props> = ({ templateDetails }) => {
   const { aliases } = templateDetails;
 
-  if (aliases) {
+  if (aliases && Object.keys(aliases).length) {
     return (
       <div data-test-subj="aliasesTab">
-        <EuiCodeBlock lang="json">{aliases}</EuiCodeBlock>
+        <EuiCodeBlock lang="json">{JSON.stringify(aliases, null, 2)}</EuiCodeBlock>
       </div>
     );
   }

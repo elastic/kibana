@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit } from 'lodash';
-import expect from '@kbn/expect';
-// eslint-disable-next-line max-len
+import { expectFixtureEql } from './expect_fixture_eql';
 import { monitorStatusBarQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
-import monitorStatus from './fixtures/monitor_status';
-import monitorStatusById from './fixtures/monitor_status_by_id';
 
 export default function ({ getService }) {
   describe('monitorStatusBar query', () => {
@@ -32,9 +28,7 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorStatusBarQuery });
-      expect({ monitorStatus: responseData.map(status => omit(status, 'millisFromNow')) }).to.eql(
-        monitorStatus
-      );
+      expectFixtureEql({ monitorStatus: responseData }, 'monitor_status');
     });
 
     it('returns the status for only the given monitor', async () => {
@@ -49,15 +43,13 @@ export default function ({ getService }) {
       };
       const {
         body: {
-          data: { monitorStatus: responseData },
+          data: { monitorStatus },
         },
       } = await supertest
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorStatusBarQuery });
-      expect({ monitorStatus: responseData.map(status => omit(status, 'millisFromNow')) }).to.eql(
-        monitorStatusById
-      );
+      expectFixtureEql({ monitorStatus }, 'monitor_status_by_id');
     });
   });
 }

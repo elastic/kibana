@@ -29,7 +29,7 @@ import { getRequestsViewDescription, getDataViewDescription } from './views';
 export interface Setup {
   registerView: InspectorViewRegistry['register'];
 
-  __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
+  __LEGACY: {
     views: InspectorViewRegistry;
   };
 }
@@ -74,7 +74,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
     return {
       registerView: this.views!.register.bind(this.views),
 
-      __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
+      __LEGACY: {
         views: this.views,
       },
     };

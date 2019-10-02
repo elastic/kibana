@@ -20,6 +20,7 @@ export function DynamicOrientationSelection({ ordinalFields, styleOptions, onCha
       fields={ordinalFields}
       selectedFieldName={_.get(styleOptions, 'field.name')}
       onChange={onFieldChange}
+      compressed
     />
   );
 }
@@ -27,5 +28,5 @@ export function DynamicOrientationSelection({ ordinalFields, styleOptions, onCha
 DynamicOrientationSelection.propTypes = {
   ordinalFields: PropTypes.arrayOf(fieldShape).isRequired,
   styleOptions: dynamicOrientationShape.isRequired,
-  onChange: PropTypes.func.isRequired
+  onChange: PropTypes.func.isRequired,
 };

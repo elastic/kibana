@@ -11,14 +11,15 @@ import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../../c
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../store/inputs/actions';
 import { scoreIntervalToDateTime } from '../../../components/ml/score/score_interval_to_datetime';
 import { Anomaly } from '../../../components/ml/types';
-import { getHostDetailsEventsKqlQueryExpression } from '../helpers';
+import { getHostDetailsEventsKqlQueryExpression } from './helpers';
 
-import { HostDetailsBodyComponentProps } from './type';
+import { HostDetailsBodyComponentProps } from './types';
 import { getFilterQuery, type, makeMapStateToProps } from './utils';
 
 const HostDetailsBodyComponent = React.memo<HostDetailsBodyComponentProps>(
   ({
     children,
+    deleteQuery,
     filterQueryExpression,
     from,
     isInitializing,
@@ -33,6 +34,7 @@ const HostDetailsBodyComponent = React.memo<HostDetailsBodyComponentProps>(
           indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
             <>
               {children({
+                deleteQuery,
                 endDate: to,
                 filterQuery: getFilterQuery(detailName, filterQueryExpression, indexPattern),
                 kqlQueryExpression: getHostDetailsEventsKqlQueryExpression({
@@ -52,6 +54,9 @@ const HostDetailsBodyComponent = React.memo<HostDetailsBodyComponentProps>(
                     from: fromTo.from,
                     to: fromTo.to,
                   });
+                },
+                updateDateRange: (min: number, max: number) => {
+                  setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
                 },
               })}
             </>

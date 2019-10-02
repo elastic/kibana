@@ -19,8 +19,8 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { LegacyDependenciesPlugin } from './shim';
-import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
-import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
+import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 
 import { createMetricVisFn } from './metric_vis_fn';
 // @ts-ignore
@@ -28,7 +28,7 @@ import { createMetricVisTypeDefinition } from './metric_vis_type';
 
 /** @internal */
 export interface MetricVisPluginSetupDependencies {
-  data: ReturnType<DataPublicPlugin['setup']>;
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   __LEGACY: LegacyDependenciesPlugin;
 }
@@ -43,11 +43,11 @@ export class MetricVisPlugin implements Plugin<void, void> {
 
   public setup(
     core: CoreSetup,
-    { data, visualizations, __LEGACY }: MetricVisPluginSetupDependencies
+    { expressions, visualizations, __LEGACY }: MetricVisPluginSetupDependencies
   ) {
     __LEGACY.setup();
 
-    data.expressions.registerFunction(createMetricVisFn);
+    expressions.registerFunction(createMetricVisFn);
     visualizations.types.registerVisualization(createMetricVisTypeDefinition);
   }
 

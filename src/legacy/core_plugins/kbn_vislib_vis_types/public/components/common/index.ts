@@ -18,9 +18,12 @@
  */
 
 export { BasicOptions } from './basic_options';
+export { ColorRanges } from './color_ranges';
+export { ColorSchemaOptions } from './color_schema';
 export { NumberInputOption } from './number_input';
 export { RangeOption } from './range';
 export { SelectOption } from './select';
 export { SwitchOption } from './switch';
 export { TextInputOption } from './text_input';
 export { TruncateLabelsOption } from './truncate_labels';
+export { ValidationWrapper, ValidationVisOptionsProps } from './validation_wrapper';

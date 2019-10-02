@@ -5,9 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { getTestAlertData } from './utils';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -37,6 +36,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             },
             interval: '12s',
             actions: [],
+            throttle: '2m',
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
@@ -61,8 +61,59 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 ...updatedData,
                 id: createdAlert.id,
+                alertTypeId: 'test.noop',
+                createdBy: 'elastic',
+                enabled: true,
                 updatedBy: user.username,
                 apiKeyOwner: user.username,
+                muteAll: false,
+                mutedInstanceIds: [],
+                scheduledTaskId: createdAlert.scheduledTaskId,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it(`shouldn't update alert from another space`, async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestAlertData())
+            .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'alert');
+
+          const response = await supertestWithoutAuth
+            .put(`${getUrlPrefix('other')}/api/alert/${createdAlert.id}`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              alertTypeParams: {
+                foo: true,
+              },
+              interval: '12s',
+              throttle: '1m',
+              actions: [],
+            });
+
+          expect(response.statusCode).to.eql(404);
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+            case 'space_1_all at space1':
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: `Saved object [alert/${createdAlert.id}] not found`,
               });
               break;
             default:
@@ -83,6 +134,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
+              throttle: '1m',
               alertTypeId: '1',
               alertTypeParams: {
                 foo: true,
@@ -145,10 +197,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'child "interval" fails because ["interval" is required]. child "alertTypeParams" fails because ["alertTypeParams" is required]. child "actions" fails because ["actions" is required]',
+                  'child "throttle" fails because ["throttle" is required]. child "interval" fails because ["interval" is required]. child "alertTypeParams" fails because ["alertTypeParams" is required]. child "actions" fails because ["actions" is required]',
                 validation: {
                   source: 'payload',
-                  keys: ['interval', 'alertTypeParams', 'actions'],
+                  keys: ['throttle', 'interval', 'alertTypeParams', 'actions'],
                 },
               });
               break;
@@ -178,6 +230,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .auth(user.username, user.password)
             .send({
               interval: '10s',
+              throttle: '1m',
               alertTypeParams: {},
               actions: [],
             });
@@ -208,7 +261,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('sshould handle update alert request appropriately when interval is wrong syntax', async () => {
+        it('should handle update alert request appropriately when interval is wrong syntax', async () => {
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alert/1`)
             .set('kbn-xsrf', 'foo')

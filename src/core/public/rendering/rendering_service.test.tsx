@@ -23,6 +23,7 @@ import { chromeServiceMock } from '../chrome/chrome_service.mock';
 import { RenderingService } from './rendering_service';
 import { InternalApplicationStart } from '../application';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { overlayServiceMock } from '../overlays/overlay_service.mock';
 
 describe('RenderingService#start', () => {
   const getService = ({ legacyMode = false }: { legacyMode?: boolean } = {}) => {
@@ -32,10 +33,19 @@ describe('RenderingService#start', () => {
     } as InternalApplicationStart;
     const chrome = chromeServiceMock.createStartContract();
     chrome.getHeaderComponent.mockReturnValue(<div>Hello chrome!</div>);
+    const overlays = overlayServiceMock.createStartContract();
+    overlays.banners.getComponent.mockReturnValue(<div>I'm a banner!</div>);
+
     const injectedMetadata = injectedMetadataServiceMock.createStartContract();
     injectedMetadata.getLegacyMode.mockReturnValue(legacyMode);
     const targetDomElement = document.createElement('div');
-    const start = rendering.start({ application, chrome, injectedMetadata, targetDomElement });
+    const start = rendering.start({
+      application,
+      chrome,
+      injectedMetadata,
+      overlays,
+      targetDomElement,
+    });
     return { start, targetDomElement };
   };
 
@@ -56,6 +66,19 @@ describe('RenderingService#start', () => {
     const { targetDomElement } = getService();
     expect(targetDomElement.querySelector('div.app-wrapper')).toBeDefined();
     expect(targetDomElement.querySelector('div.app-wrapper-pannel')).toBeDefined();
+  });
+
+  it('renders the banner UI', () => {
+    const { targetDomElement } = getService();
+    expect(targetDomElement.querySelector('#globalBannerList')).toMatchInlineSnapshot(`
+      <div
+        id="globalBannerList"
+      >
+        <div>
+          I'm a banner!
+        </div>
+      </div>
+    `);
   });
 
   describe('legacyMode', () => {

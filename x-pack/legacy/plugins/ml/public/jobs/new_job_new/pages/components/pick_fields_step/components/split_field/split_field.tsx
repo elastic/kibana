@@ -48,6 +48,13 @@ export const SplitFieldSelector: FC = () => {
         changeHandler={setSplitField}
         selectedField={splitField}
         isClearable={canClearSelection}
+        testSubject={
+          isMultiMetricJobCreator(jc)
+            ? 'mlMultiMetricSplitFieldSelect'
+            : isPopulationJobCreator(jc)
+            ? 'mlPopulationSplitFieldSelect'
+            : undefined
+        }
       />
     </Description>
   );

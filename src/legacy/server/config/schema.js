@@ -78,7 +78,7 @@ export default () => Joi.object({
   server: Joi.object({
     uuid: Joi.string().guid().default(),
     name: Joi.string().default(os.hostname()),
-    defaultRoute: Joi.string().default('/app/kibana').regex(/^\//, `start with a slash`),
+    defaultRoute: Joi.string().regex(/^\//, `start with a slash`),
     customResponseHeaders: Joi.object().unknown(true).default({}),
     xsrf: Joi.object({
       disableProtection: Joi.boolean().default(false),
@@ -152,12 +152,6 @@ export default () => Joi.object({
 
   path: Joi.object({
     data: Joi.string().default(getData())
-  }).default(),
-
-  migrations: Joi.object({
-    batchSize: Joi.number().default(100),
-    scrollDuration: Joi.string().default('15m'),
-    pollInterval: Joi.number().default(1500),
   }).default(),
 
   stats: Joi.object({
@@ -235,7 +229,7 @@ export default () => Joi.object({
       })).default([])
     }).default(),
     manifestServiceUrl: Joi.string().default('https://catalogue.maps.elastic.co/v7.2/manifest'),
-    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.2'),
+    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.4'),
     emsFontLibraryUrl: Joi.string().default('https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf'),
     emsTileLayerId: Joi.object({
       bright: Joi.string().default('road_map'),

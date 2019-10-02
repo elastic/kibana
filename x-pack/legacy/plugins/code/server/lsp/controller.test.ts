@@ -59,6 +59,8 @@ class LauncherStub implements ILanguageServerLauncher {
   ): Promise<ILanguageServerHandler> {
     return Promise.resolve(launcherSpy(builtinWorkspace, maxWorkspace, installationPath));
   }
+
+  launchFailed: boolean = false;
 }
 
 TYPESCRIPT.launcher = LauncherStub;

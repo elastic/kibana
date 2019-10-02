@@ -18,8 +18,7 @@ import {
 } from '../certificate_fingerprint';
 import { EVENT_DURATION_FIELD_NAME } from '../duration';
 import { ID_FIELD_NAME } from '../event_details/event_id';
-import { DESTINATION_IP_FIELD_NAME } from '../ip';
-import { SOURCE_IP_FIELD_NAME } from '../ip';
+import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
 import { JA3_HASH_FIELD_NAME } from '../ja3_fingerprint';
 import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port';
 import {

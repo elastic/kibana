@@ -9,13 +9,9 @@ jest.mock('./lib/send_email', () => ({
 }));
 
 import { ActionType, ActionTypeExecutorOptions } from '../types';
-import { ActionsConfigurationUtilities } from '../actions_config';
-import { ActionTypeRegistry } from '../action_type_registry';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
-import { taskManagerMock } from '../../../task_manager/task_manager.mock';
-import { validateParams, validateConfig, validateSecrets } from '../lib';
+import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
-import { registerBuiltInActionTypes } from './index';
+import { createActionTypeRegistry } from './index.test';
 import { sendEmail } from './lib/send_email';
 import { ActionParamsType, ActionTypeConfigType, ActionTypeSecretsType } from './email';
 
@@ -23,12 +19,6 @@ const sendEmailMock = sendEmail as jest.Mock;
 
 const ACTION_TYPE_ID = '.email';
 const NO_OP_FN = () => {};
-const MOCK_KIBANA_CONFIG_UTILS: ActionsConfigurationUtilities = {
-  isWhitelistedHostname: _ => true,
-  isWhitelistedUri: _ => true,
-  ensureWhitelistedHostname: _ => {},
-  ensureWhitelistedUri: _ => {},
-};
 
 const services = {
   log: NO_OP_FN,
@@ -36,38 +26,15 @@ const services = {
   savedObjectsClient: SavedObjectsClientMock.create(),
 };
 
-function getServices() {
-  return services;
-}
-
-let actionTypeRegistry: ActionTypeRegistry;
 let actionType: ActionType;
 
-const mockEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
-
 beforeAll(() => {
-  actionTypeRegistry = new ActionTypeRegistry({
-    getServices,
-    isSecurityEnabled: true,
-    taskManager: taskManagerMock.create(),
-    encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
-    spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-    getBasePath: jest.fn().mockReturnValue(undefined),
-  });
-
-  registerBuiltInActionTypes(actionTypeRegistry, MOCK_KIBANA_CONFIG_UTILS);
-
+  const actionTypeRegistry = createActionTypeRegistry();
   actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
 });
 
 beforeEach(() => {
   jest.resetAllMocks();
-});
-
-describe('action is registered', () => {
-  test('gets registered with builtin actions', () => {
-    expect(actionTypeRegistry.has(ACTION_TYPE_ID)).toEqual(true);
-  });
 });
 
 describe('actionTypeRegistry.get() works', () => {

@@ -31,13 +31,10 @@ exports[`Header should render normally 1`] = `
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
             data-test-subj="exportAllObjects"
-            iconSide="left"
             iconType="exportAction"
             onClick={[Function]}
             size="s"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Export {filteredCount, plural, one{# object} other {# objects}}"
@@ -54,13 +51,10 @@ exports[`Header should render normally 1`] = `
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
             data-test-subj="importObjects"
-            iconSide="left"
             iconType="importAction"
             onClick={[Function]}
             size="s"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Import"
@@ -73,12 +67,9 @@ exports[`Header should render normally 1`] = `
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
-            iconSide="left"
             iconType="refresh"
             onClick={[Function]}
             size="s"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Refresh"

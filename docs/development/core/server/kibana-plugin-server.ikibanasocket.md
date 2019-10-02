@@ -23,7 +23,7 @@ export interface IKibanaSocket
 
 |  Method | Description |
 |  --- | --- |
+|  [getPeerCertificate(detailed)](./kibana-plugin-server.ikibanasocket.getpeercertificate.md) |  |
 |  [getPeerCertificate(detailed)](./kibana-plugin-server.ikibanasocket.getpeercertificate_1.md) |  |
-|  [getPeerCertificate(detailed)](./kibana-plugin-server.ikibanasocket.getpeercertificate_2.md) |  |
-|  [getPeerCertificate(detailed)](./kibana-plugin-server.ikibanasocket.getpeercertificate_3.md) | Returns an object representing the peer's certificate. The returned object has some properties corresponding to the field of the certificate. If detailed argument is true the full chain with issuer property will be returned, if false only the top certificate without issuer property. If the peer does not provide a certificate, it returns null. |
+|  [getPeerCertificate(detailed)](./kibana-plugin-server.ikibanasocket.getpeercertificate_2.md) | Returns an object representing the peer's certificate. The returned object has some properties corresponding to the field of the certificate. If detailed argument is true the full chain with issuer property will be returned, if false only the top certificate without issuer property. If the peer does not provide a certificate, it returns null. |
 

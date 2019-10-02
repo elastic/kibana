@@ -93,7 +93,6 @@ export function ServiceDetailTabs({ tab }: Props) {
       <EuiTabs>
         {tabs.map(serviceTab => (
           <EuiTabLink
-            onClick={() => null}
             isSelected={serviceTab.name === tab}
             key={serviceTab.name}
           >

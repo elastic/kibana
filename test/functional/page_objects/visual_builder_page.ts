@@ -23,7 +23,7 @@ import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const log = getService('log');
-  const browser = getService('browser');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const PageObjects = getPageObjects(['common', 'header', 'visualize', 'timePicker']);
@@ -49,14 +49,12 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.common.navigateToUrl('visualize', 'create?type=metrics');
       log.debug('Set absolute time range from "' + fromTime + '" to "' + toTime + '"');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      if (browser.isFirefox) {
-        // https://github.com/elastic/kibana/issues/24058
-        await PageObjects.common.sleep(2000);
-      }
+      // 2 sec sleep until https://github.com/elastic/kibana/issues/46353 is fixed
+      await PageObjects.common.sleep(2000);
     }
 
     public async checkTabIsLoaded(testSubj: string, name: string) {
-      const isPresent = await testSubjects.exists(testSubj, { timeout: 5000 });
+      const isPresent = await testSubjects.exists(testSubj, { timeout: 10000 });
       if (!isPresent) {
         throw new Error(`TSVB ${name} tab is not loaded`);
       }
@@ -111,18 +109,26 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async enterMarkdown(markdown: string) {
       const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       await this.clearMarkdown();
-      await input.type(markdown);
+      await input.type(markdown, { charByChar: true });
       await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     public async clearMarkdown() {
-      const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
-      // click for switching context(fix for "should render first table variable" test)
-      // see _tsvb_markdown.js
       // Since we use ACE editor and that isn't really storing its value inside
       // a textarea we must really select all text and remove it, and cannot use
       // clearValue().
-      await input.clearValueWithKeyboard();
+      await retry.waitForWithTimeout('text area is cleared', 20000, async () => {
+        const editor = await testSubjects.find('codeEditorContainer');
+        const $ = await editor.parseDomContent();
+        const value = $('.ace_line').text();
+        if (value.length > 0) {
+          log.debug('Clearing text area input');
+          const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
+          await input.clearValueWithKeyboard();
+        }
+
+        return value.length === 0;
+      });
     }
 
     public async getMarkdownText(): Promise<string> {
@@ -194,8 +200,11 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      * @memberof VisualBuilderPage
      */
     public async markdownSwitchSubTab(subTab: 'data' | 'options' | 'markdown') {
-      const element = await testSubjects.find(`${subTab}-subtab`);
-      await element.click();
+      const tab = await testSubjects.find(`${subTab}-subtab`);
+      const isSelected = await tab.getAttribute('aria-selected');
+      if (isSelected !== 'true') {
+        await tab.click();
+      }
     }
 
     /**
@@ -336,13 +345,14 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async createNewAgg(nth = 0) {
+      const prevAggs = await testSubjects.findAll('aggSelector');
       const elements = await testSubjects.findAll('addMetricAddBtn');
       await elements[nth].click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const aggs = await testSubjects.findAll('aggSelector');
-      if (aggs.length < 2) {
-        throw new Error('there should be atleast 2 aggSelectors');
-      }
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+      await retry.waitFor('new agg is added', async () => {
+        const currentAggs = await testSubjects.findAll('aggSelector');
+        return currentAggs.length > prevAggs.length;
+      });
     }
 
     public async selectAggType(value: string, nth = 0) {
@@ -405,7 +415,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async selectIndexPatternTimeField(timeField: string) {
-      await comboBox.set('metricsIndexPatternFieldsSelect', timeField);
+      await retry.try(async () => {
+        await comboBox.clearInputField('metricsIndexPatternFieldsSelect');
+        await comboBox.set('metricsIndexPatternFieldsSelect', timeField);
+      });
     }
 
     /**
@@ -481,10 +494,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async cloneSeries(nth: number = 0): Promise<void> {
-      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
       const cloneBtnArray = await testSubjects.findAll('AddCloneBtn');
       await cloneBtnArray[nth].click();
-      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     /**

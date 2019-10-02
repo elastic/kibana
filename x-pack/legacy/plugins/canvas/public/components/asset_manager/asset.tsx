@@ -16,9 +16,14 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
+
+import { ComponentStrings } from '../../../i18n';
+
 import { Clipboard } from '../clipboard';
 import { Download } from '../download';
 import { AssetType } from '../../../types';
+
+const { Asset: strings } = ComponentStrings;
 
 interface Props {
   /** The asset to be rendered */
@@ -36,10 +41,10 @@ export const Asset: FunctionComponent<Props> = props => {
 
   const createImage = (
     <EuiFlexItem className="asset-create-image" grow={false}>
-      <EuiToolTip content="Create image element">
+      <EuiToolTip content={strings.getCreateImageTooltip()}>
         <EuiButtonIcon
           iconType="vector"
-          aria-label="Create image element"
+          aria-label={strings.getCreateImageTooltip()}
           onClick={() => onCreate(asset)}
         />
       </EuiToolTip>
@@ -48,9 +53,9 @@ export const Asset: FunctionComponent<Props> = props => {
 
   const downloadAsset = (
     <EuiFlexItem className="asset-download" grow={false}>
-      <EuiToolTip content="Download">
+      <EuiToolTip content={strings.getDownloadAssetTooltip()}>
         <Download fileName={asset.id} content={asset.value}>
-          <EuiButtonIcon iconType="sortDown" aria-label="Download" />
+          <EuiButtonIcon iconType="sortDown" aria-label={strings.getDownloadAssetTooltip()} />
         </Download>
       </EuiToolTip>
     </EuiFlexItem>
@@ -58,9 +63,9 @@ export const Asset: FunctionComponent<Props> = props => {
 
   const copyAsset = (
     <EuiFlexItem grow={false}>
-      <EuiToolTip content="Copy id to clipboard">
+      <EuiToolTip content={strings.getCopyAssetTooltip()}>
         <Clipboard content={asset.id} onCopy={(result: boolean) => result && onCopy(asset)}>
-          <EuiButtonIcon iconType="copyClipboard" aria-label="Copy id to clipboard" />
+          <EuiButtonIcon iconType="copyClipboard" aria-label={strings.getCopyAssetTooltip()} />
         </Clipboard>
       </EuiToolTip>
     </EuiFlexItem>
@@ -68,11 +73,11 @@ export const Asset: FunctionComponent<Props> = props => {
 
   const deleteAsset = (
     <EuiFlexItem grow={false}>
-      <EuiToolTip content="Delete">
+      <EuiToolTip content={strings.getDeleteAssetTooltip()}>
         <EuiButtonIcon
           color="danger"
           iconType="trash"
-          aria-label="Delete"
+          aria-label={strings.getDeleteAssetTooltip()}
           onClick={() => onDelete(asset)}
         />
       </EuiToolTip>
@@ -86,7 +91,7 @@ export const Asset: FunctionComponent<Props> = props => {
         size="original"
         url={props.asset.value}
         fullScreenIconColor="dark"
-        alt="Asset thumbnail"
+        alt={strings.getThumbnailAltText()}
         style={{ backgroundImage: `url(${props.asset.value})` }}
       />
     </div>

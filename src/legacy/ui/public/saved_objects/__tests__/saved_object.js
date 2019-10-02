@@ -25,7 +25,7 @@ import BluebirdPromise from 'bluebird';
 import { SavedObjectProvider } from '../saved_object';
 import StubIndexPatternProv from 'test_utils/stub_index_pattern';
 import { SavedObjectsClientProvider } from '../saved_objects_client_provider';
-import { InvalidJSONProperty } from '../../errors';
+import { InvalidJSONProperty } from '../../../../../plugins/kibana_utils/public';
 
 const getConfig = cfg => cfg;
 

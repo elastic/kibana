@@ -3,8 +3,6 @@
 exports[`Data Frame: <AggListForm /> Minimal initialization 1`] = `
 <Fragment>
   <EuiPanel
-    grow={true}
-    hasShadow={false}
     paddingSize="s"
   >
     <AggLabelForm

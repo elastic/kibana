@@ -11,11 +11,9 @@ exports[`Data Frame: Transform List Actions <DeleteAction /> Minimal initializat
       aria-label="Delete"
       color="text"
       disabled={true}
-      iconSide="left"
       iconType="trash"
       onClick={[Function]}
       size="xs"
-      type="button"
     >
       Delete
     </EuiButtonEmpty>

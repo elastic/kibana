@@ -5,9 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { getTestAlertData } from './utils';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -45,6 +44,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         interval: '10s',
         scheduledTaskId: response.body.scheduledTaskId,
         updatedBy: null,
+        throttle: '1m',
+        muteAll: false,
+        mutedInstanceIds: [],
       });
       expect(typeof response.body.scheduledTaskId).to.be('string');
       const { _source: taskRecord } = await getScheduledTask(response.body.scheduledTaskId);

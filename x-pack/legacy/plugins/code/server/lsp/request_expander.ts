@@ -20,13 +20,6 @@ import { ServerOptions } from '../server_options';
 import { Cancelable } from '../utils/cancelable';
 import { ILanguageServerHandler, LanguageServerProxy } from './proxy';
 
-interface Job {
-  request: LspRequest;
-  resolve: (response: ResponseMessage) => void;
-  reject: (error: any) => void;
-  startTime: number;
-}
-
 export enum WorkspaceStatus {
   Uninitialized = 'Uninitialized',
   Initializing = 'Initializing',
@@ -49,11 +42,9 @@ export const WorkspaceUnloadedError = new ResponseError(RequestCancelled, 'Works
 export class RequestExpander implements ILanguageServerHandler {
   public lastAccess: number = 0;
   private proxy: LanguageServerProxy;
-  private jobQueue: Job[] = [];
   // a map for workspacePath -> Workspace
   private workspaces: Map<string, Workspace> = new Map();
   private readonly workspaceRoot: string;
-  private running = false;
   private exited = false;
 
   constructor(
@@ -65,7 +56,6 @@ export class RequestExpander implements ILanguageServerHandler {
     readonly log: Logger
   ) {
     this.proxy = proxy;
-    this.handle = this.handle.bind(this);
     proxy.onDisconnected(() => {
       this.workspaces.clear();
     });
@@ -79,23 +69,21 @@ export class RequestExpander implements ILanguageServerHandler {
         reject(new Error('proxy is exited.'));
         return;
       }
-      this.jobQueue.push({
-        request,
-        resolve,
-        reject,
-        startTime: Date.now(),
-      });
-      this.log.debug(`queued  a ${request.method} job for workspace ${request.workspacePath}`);
-      if (!this.running) {
-        this.running = true;
-        this.handleNext();
-      }
+      this.log.debug(`handling a ${request.method} job for workspace ${request.workspacePath}`);
+      this.expand(request).then(
+        value => {
+          resolve(value);
+        },
+        err => {
+          this.log.error(err);
+          reject(err);
+        }
+      );
     });
   }
 
   public async exit() {
     this.exited = true;
-    this.running = false;
     this.log.debug(`exiting proxy`);
     return this.proxy.exit();
   }
@@ -129,16 +117,6 @@ export class RequestExpander implements ILanguageServerHandler {
       }
     }
     this.removeWorkspace(workspacePath);
-    const newJobQueue: Job[] = [];
-    this.jobQueue.forEach(job => {
-      if (job.request.workspacePath === workspacePath) {
-        job.reject(WorkspaceUnloadedError);
-        this.log.debug(`canceled a ${job.request.method} job because of unload workspace`);
-      } else {
-        newJobQueue.push(job);
-      }
-    });
-    this.jobQueue = newJobQueue;
   }
 
   public async initialize(workspacePath: string): Promise<void | InitializeResult> {
@@ -187,38 +165,7 @@ export class RequestExpander implements ILanguageServerHandler {
     );
   }
 
-  private handle() {
-    const job = this.jobQueue.shift();
-    if (job && !this.exited) {
-      this.log.debug('dequeue a job');
-      const { request, resolve, reject } = job;
-      this.expand(request, job.startTime).then(
-        value => {
-          try {
-            resolve(value);
-          } finally {
-            this.handleNext();
-          }
-        },
-        err => {
-          try {
-            this.log.error(err);
-            reject(err);
-          } finally {
-            this.handleNext();
-          }
-        }
-      );
-    } else {
-      this.running = false;
-    }
-  }
-
-  private handleNext() {
-    setTimeout(this.handle, 0);
-  }
-
-  private async expand(request: LspRequest, startTime: number): Promise<ResponseMessage> {
+  private async expand(request: LspRequest): Promise<ResponseMessage> {
     if (request.workspacePath) {
       const ws = this.getWorkspace(request.workspacePath);
       if (ws.status === WorkspaceStatus.Uninitialized) {

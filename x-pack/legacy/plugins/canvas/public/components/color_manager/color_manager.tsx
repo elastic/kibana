@@ -10,6 +10,10 @@ import React, { FunctionComponent } from 'react';
 import tinycolor from 'tinycolor2';
 import { ColorDot } from '../color_dot/color_dot';
 
+import { ComponentStrings } from '../../../i18n';
+
+const { ColorManager: strings } = ComponentStrings;
+
 export interface Props {
   /** The function to call when the Add Color button is clicked. The button will be disabled if there is no handler. */
   onAddColor?: (value: string) => void;
@@ -45,13 +49,13 @@ export const ColorManager: FunctionComponent<Props> = ({
     buttons = (
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
-          aria-label="Add Color"
+          aria-label={strings.getAddAriaLabel()}
           iconType="plusInCircle"
           isDisabled={!validColor || !onAddColor}
           onClick={() => onAddColor && onAddColor(value)}
         />
         <EuiButtonIcon
-          aria-label="Remove Color"
+          aria-label={strings.getRemoveAriaLabel()}
           iconType="minusInCircle"
           isDisabled={!validColor || !onRemoveColor}
           onClick={() => onRemoveColor && onRemoveColor(value)}
@@ -70,7 +74,7 @@ export const ColorManager: FunctionComponent<Props> = ({
         <EuiFieldText
           value={value}
           isInvalid={!validColor && value.length > 0}
-          placeholder="Color code"
+          placeholder={strings.getCodePlaceholder()}
           onChange={e => onChange(e.target.value)}
         />
       </EuiFlexItem>

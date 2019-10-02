@@ -10,7 +10,7 @@ import sinon from 'sinon';
 import nodeCrypto from '@elastic/node-crypto';
 
 import { CancellationToken } from '../../../../common/cancellation_token';
-import { FieldFormat } from  '../../../../../../../../src/legacy/ui/field_formats/field_format';
+import { FieldFormat } from '../../../../../../../../src/plugins/data/common/field_formats';
 import { FieldFormatsService } from  '../../../../../../../../src/legacy/ui/field_formats/mixin/field_formats_service';
 import { createStringFormat } from  '../../../../../../../../src/legacy/core_plugins/kibana/common/field_formats/types/string';
 
@@ -474,7 +474,8 @@ describe('CSV Execute Job', function () {
     });
   });
 
-  describe('cancellation', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/43069
+  describe.skip('cancellation', function () {
     const scrollId = getRandomScrollId();
 
     beforeEach(function () {

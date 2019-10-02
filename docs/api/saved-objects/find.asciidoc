@@ -4,9 +4,7 @@
 <titleabbrev>Find objects</titleabbrev>
 ++++
 
-Retrieve a paginated set of {kib} saved objects by various conditions.
-
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Retrieve a paginated set of {kib} saved objects by various conditions.
 
 [[saved-objects-api-find-request]]
 ==== Request

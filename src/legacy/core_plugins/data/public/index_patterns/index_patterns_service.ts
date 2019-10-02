@@ -17,10 +17,13 @@
  * under the License.
  */
 
-import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
+import {
+  UiSettingsClientContract,
+  SavedObjectsClientContract,
+  HttpServiceBase,
+} from 'src/core/public';
 import { Field, FieldList, FieldType } from './fields';
-// @ts-ignore
-import { createFlattenHitWrapper } from './index_patterns/flatten_hit';
+import { createFlattenHitWrapper } from './index_patterns';
 import { createIndexPatternSelect } from './components';
 import {
   formatHitProvider,
@@ -32,6 +35,7 @@ import {
 export interface IndexPatternDependencies {
   uiSettings: UiSettingsClientContract;
   savedObjectsClient: SavedObjectsClientContract;
+  http: HttpServiceBase;
 }
 
 /**
@@ -40,12 +44,12 @@ export interface IndexPatternDependencies {
  * @internal
  */
 export class IndexPatternsService {
-  public setup({ uiSettings, savedObjectsClient }: IndexPatternDependencies) {
+  public setup({ uiSettings, savedObjectsClient, http }: IndexPatternDependencies) {
     return {
       FieldList,
       flattenHitWrapper: createFlattenHitWrapper(),
       formatHitProvider,
-      indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient),
+      indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient, http),
       IndexPatternSelect: createIndexPatternSelect(savedObjectsClient),
       __LEGACY: {
         // For BWC we must temporarily export the class implementation of Field,
@@ -68,7 +72,6 @@ export class IndexPatternsService {
 
 /** @public */
 export { IndexPatternSelect } from './components';
-export { IndexPatternsProvider } from './index_patterns';
 export {
   CONTAINS_SPACES,
   getFromSavedObject,

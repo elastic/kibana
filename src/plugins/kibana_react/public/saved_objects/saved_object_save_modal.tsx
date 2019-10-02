@@ -31,17 +31,20 @@ import {
   EuiOverlayMask,
   EuiSpacer,
   EuiSwitch,
+  EuiTextArea,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../legacy/core_plugins/kibana/public/visualize/embeddable/constants';
 
 export interface OnSaveProps {
   newTitle: string;
   newCopyOnSave: boolean;
   isTitleDuplicateConfirmed: boolean;
   onTitleDuplicate: () => void;
+  newDescription: string;
 }
 
 interface Props {
@@ -61,6 +64,7 @@ interface State {
   isTitleDuplicateConfirmed: boolean;
   hasTitleDuplicate: boolean;
   isLoading: boolean;
+  visualizationDescription: string;
 }
 
 export class SavedObjectSaveModal extends React.Component<Props, State> {
@@ -70,6 +74,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
     isTitleDuplicateConfirmed: false,
     hasTitleDuplicate: false,
     isLoading: false,
+    visualizationDescription: this.props.description ? this.props.description : '',
   };
 
   public render() {
@@ -97,7 +102,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
               {this.renderDuplicateTitleCallout()}
 
               <EuiForm>
-                {this.props.description && (
+                {this.props.objectType !== VISUALIZE_EMBEDDABLE_TYPE && this.props.description && (
                   <EuiFormRow>
                     <EuiText color="subdued">{this.props.description}</EuiText>
                   </EuiFormRow>
@@ -125,6 +130,8 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
                   />
                 </EuiFormRow>
 
+                {this.renderViewDescription()}
+
                 {this.props.options}
               </EuiForm>
             </EuiModalBody>
@@ -144,6 +151,36 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
       </EuiOverlayMask>
     );
   }
+
+  private renderViewDescription = () => {
+    if (this.props.objectType !== VISUALIZE_EMBEDDABLE_TYPE) {
+      return;
+    }
+
+    return (
+      <EuiFormRow
+        fullWidth
+        label={
+          <FormattedMessage
+            id="kibana-react.savedObjects.saveModal.descriptionLabel"
+            defaultMessage="Description"
+          />
+        }
+      >
+        <EuiTextArea
+          data-test-subj="viewDescription"
+          value={this.state.visualizationDescription}
+          onChange={this.onDescriptionChange}
+        />
+      </EuiFormRow>
+    );
+  };
+
+  private onDescriptionChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    this.setState({
+      visualizationDescription: event.target.value,
+    });
+  };
 
   private onTitleDuplicate = () => {
     this.setState({
@@ -168,6 +205,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
       newCopyOnSave: this.state.copyOnSave,
       isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
       onTitleDuplicate: this.onTitleDuplicate,
+      newDescription: this.state.visualizationDescription,
     });
   };
 

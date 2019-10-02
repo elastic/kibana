@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BaseVisType, AngularVisTypeProvider, ReactVisType, VislibVisTypeProvider } from './vis_types';
+import { BaseVisType, ReactVisType } from './vis_types';
 
 export const visFactory = {
   createBaseVisualization: (config) => {
@@ -28,17 +28,8 @@ export const visFactory = {
   },
 };
 
-export const VisFactoryProvider = (Private) => {
-  const AngularVisType = Private(AngularVisTypeProvider);
-  const VislibVisType = Private(VislibVisTypeProvider);
-
+export const VisFactoryProvider = () => {
   return {
     ...visFactory,
-    createAngularVisualization: (config) => {
-      return new AngularVisType(config);
-    },
-    createVislibVisualization: (config) => {
-      return new VislibVisType(config);
-    }
   };
 };

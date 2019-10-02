@@ -69,9 +69,12 @@ export const MovingAverageAgg = props => {
       value: MODEL_TYPES.WEIGHTED_LINEAR,
     },
     {
-      label: i18n.translate('visTypeTimeseries.movingAverage.modelOptions.exponentiallyWeightedLabel', {
-        defaultMessage: 'Exponentially Weighted',
-      }),
+      label: i18n.translate(
+        'visTypeTimeseries.movingAverage.modelOptions.exponentiallyWeightedLabel',
+        {
+          defaultMessage: 'Exponentially Weighted',
+        }
+      ),
       value: MODEL_TYPES.WEIGHTED_EXPONENTIAL,
     },
     {
@@ -129,6 +132,7 @@ export const MovingAverageAgg = props => {
               defaultMessage: 'Aggregation',
             })}
           </EuiFormLabel>
+          <EuiSpacer size="xs" />
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -166,9 +170,12 @@ export const MovingAverageAgg = props => {
           >
             <EuiComboBox
               isClearable={false}
-              placeholder={i18n.translate('visTypeTimeseries.movingAverage.model.selectPlaceholder', {
-                defaultMessage: 'Select',
-              })}
+              placeholder={i18n.translate(
+                'visTypeTimeseries.movingAverage.model.selectPlaceholder',
+                {
+                  defaultMessage: 'Select',
+                }
+              )}
               options={modelOptions}
               selectedOptions={selectedModelOption ? [selectedModelOption] : []}
               onChange={handleSelectChange('model_type')}

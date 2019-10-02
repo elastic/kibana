@@ -123,6 +123,7 @@ export function TopAggregateParamEditor({
         value={value ? value.value : emptyValue.value}
         onChange={handleChange}
         fullWidth={true}
+        compressed
         isInvalid={showValidation ? !isValid : false}
         disabled={disabled}
         onBlur={setTouched}

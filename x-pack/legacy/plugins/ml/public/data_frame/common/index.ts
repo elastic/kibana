@@ -37,7 +37,7 @@ export {
   DATA_FRAME_MODE,
   DATA_FRAME_TRANSFORM_STATE,
 } from './transform_stats';
-export { moveToDataFrameTransformList, moveToDataFrameWizard, moveToDiscover } from './navigation';
+export { moveToDataFrameWizard, getDiscoverUrl } from './navigation';
 export {
   getEsAggFromAggConfig,
   isPivotAggsConfigWithUiSupport,

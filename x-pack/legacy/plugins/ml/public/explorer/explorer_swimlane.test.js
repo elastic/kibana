@@ -30,17 +30,17 @@ jest.mock('./explorer_dashboard_service', () => ({
 }));
 
 function getExplorerSwimlaneMocks() {
-  const MlTimeBucketsMethods = {
+  const TimeBucketsMethods = {
     setInterval: jest.fn(),
     getScaledDateFormat: jest.fn()
   };
-  const MlTimeBuckets = jest.fn(() => MlTimeBucketsMethods);
-  MlTimeBuckets.mockMethods = MlTimeBucketsMethods;
+  const TimeBuckets = jest.fn(() => TimeBucketsMethods);
+  TimeBuckets.mockMethods = TimeBucketsMethods;
 
   const swimlaneData = { laneLabels: [] };
 
   return {
-    MlTimeBuckets,
+    TimeBuckets,
     swimlaneData
   };
 }
@@ -65,7 +65,7 @@ describe('ExplorerSwimlane', () => {
 
     const wrapper = mountWithIntl(<ExplorerSwimlane.WrappedComponent
       chartWidth={mockChartWidth}
-      MlTimeBuckets={mocks.MlTimeBuckets}
+      TimeBuckets={mocks.TimeBuckets}
       swimlaneCellClick={jest.fn()}
       swimlaneData={mocks.swimlaneData}
       swimlaneType="overall"
@@ -80,8 +80,8 @@ describe('ExplorerSwimlane', () => {
     // test calls to mock functions
     expect(dragSelect$.subscribe.mock.calls.length).toBeGreaterThanOrEqual(1);
     expect(wrapper.instance().dragSelectSubscriber.unsubscribe.mock.calls).toHaveLength(0);
-    expect(mocks.MlTimeBuckets.mockMethods.setInterval.mock.calls.length).toBeGreaterThanOrEqual(1);
-    expect(mocks.MlTimeBuckets.mockMethods.getScaledDateFormat.mock.calls.length).toBeGreaterThanOrEqual(1);
+    expect(mocks.TimeBuckets.mockMethods.setInterval.mock.calls.length).toBeGreaterThanOrEqual(1);
+    expect(mocks.TimeBuckets.mockMethods.getScaledDateFormat.mock.calls.length).toBeGreaterThanOrEqual(1);
     expect(swimlaneRenderDoneListener.mock.calls.length).toBeGreaterThanOrEqual(1);
   });
 
@@ -91,7 +91,7 @@ describe('ExplorerSwimlane', () => {
 
     const wrapper = mountWithIntl(<ExplorerSwimlane.WrappedComponent
       chartWidth={mockChartWidth}
-      MlTimeBuckets={mocks.MlTimeBuckets}
+      TimeBuckets={mocks.TimeBuckets}
       swimlaneCellClick={jest.fn()}
       swimlaneData={mockOverallSwimlaneData}
       swimlaneType="overall"
@@ -103,8 +103,8 @@ describe('ExplorerSwimlane', () => {
     // test calls to mock functions
     expect(dragSelect$.subscribe.mock.calls.length).toBeGreaterThanOrEqual(1);
     expect(wrapper.instance().dragSelectSubscriber.unsubscribe.mock.calls).toHaveLength(0);
-    expect(mocks.MlTimeBuckets.mockMethods.setInterval.mock.calls.length).toBeGreaterThanOrEqual(1);
-    expect(mocks.MlTimeBuckets.mockMethods.getScaledDateFormat.mock.calls.length).toBeGreaterThanOrEqual(1);
+    expect(mocks.TimeBuckets.mockMethods.setInterval.mock.calls.length).toBeGreaterThanOrEqual(1);
+    expect(mocks.TimeBuckets.mockMethods.getScaledDateFormat.mock.calls.length).toBeGreaterThanOrEqual(1);
     expect(swimlaneRenderDoneListener.mock.calls.length).toBeGreaterThanOrEqual(1);
   });
 });

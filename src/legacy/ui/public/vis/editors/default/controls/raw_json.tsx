@@ -73,6 +73,7 @@ function RawJsonParamEditor({
         rows={2}
         fullWidth={true}
         onBlur={setTouched}
+        compressed
       />
     </EuiFormRow>
   );

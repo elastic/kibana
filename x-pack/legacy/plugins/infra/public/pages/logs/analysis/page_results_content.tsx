@@ -101,6 +101,17 @@ export const AnalysisResultsContent = ({
     [setSelectedTimeRange, handleQueryTimeRangeChange]
   );
 
+  const handleChartTimeRangeChange = useCallback(
+    ({ startTime, endTime }: TimeRange) => {
+      handleSelectedTimeRangeChange({
+        end: new Date(endTime).toISOString(),
+        isInvalid: false,
+        start: new Date(startTime).toISOString(),
+      });
+    },
+    [handleSelectedTimeRangeChange]
+  );
+
   const handleAutoRefreshChange = useCallback(
     ({ isPaused, refreshInterval: interval }: { isPaused: boolean; refreshInterval: number }) => {
       setAutoRefresh({
@@ -183,6 +194,7 @@ export const AnalysisResultsContent = ({
                   <LogRateResults
                     isLoading={isLoading}
                     results={logEntryRate}
+                    setTimeRange={handleChartTimeRangeChange}
                     timeRange={queryTimeRange}
                   />
                 </EuiPageContentBody>

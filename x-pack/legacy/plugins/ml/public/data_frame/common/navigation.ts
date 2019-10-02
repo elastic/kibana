@@ -10,11 +10,12 @@ export function moveToDataFrameWizard() {
   window.location.href = '#/data_frames/new_transform';
 }
 
-export function moveToDataFrameTransformList() {
-  window.location.href = '#/data_frames';
-}
-
-export function moveToDiscover(indexPatternId: string, baseUrl: string) {
+/**
+ * Gets a url for navigating to Discover page.
+ * @param indexPatternId Index pattern id.
+ * @param baseUrl Base url.
+ */
+export function getDiscoverUrl(indexPatternId: string, baseUrl: string): string {
   const _g = rison.encode({});
 
   // Add the index pattern ID to the appState part of the URL.
@@ -24,5 +25,5 @@ export function moveToDiscover(indexPatternId: string, baseUrl: string) {
 
   const hash = `#/discover?_g=${_g}&_a=${_a}`;
 
-  window.location.href = `${baseUrl}${hash}`;
+  return `${baseUrl}${hash}`;
 }

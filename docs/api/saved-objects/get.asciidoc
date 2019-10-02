@@ -4,9 +4,7 @@
 <titleabbrev>Get object</titleabbrev>
 ++++
 
-Retrieve a single {kib} saved object by ID.
-
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Retrieve a single {kib} saved object by ID.
 
 [[saved-objects-api-get-request]]
 ==== Request

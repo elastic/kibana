@@ -14,7 +14,7 @@ export function getDataFrameAnalyticsBreadcrumbs() {
     ML_BREADCRUMB,
     {
       text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameLabel', {
-        defaultMessage: 'Analytics',
+        defaultMessage: 'Data Frame Analytics',
       }),
       href: '',
     },

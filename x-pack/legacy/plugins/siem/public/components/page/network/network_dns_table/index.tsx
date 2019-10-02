@@ -24,6 +24,7 @@ interface OwnProps {
   data: NetworkDnsEdges[];
   fakeTotalCount: number;
   id: string;
+  isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   showMorePagesIndicator: boolean;
@@ -32,6 +33,7 @@ interface OwnProps {
 }
 
 interface NetworkDnsTableReduxProps {
+  activePage: number;
   limit: number;
   dnsSortField: NetworkDnsSortField;
   isPtrIncluded: boolean;
@@ -72,10 +74,12 @@ const rowItems: ItemsPerRow[] = [
 class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps> {
   public render() {
     const {
+      activePage,
       data,
       dnsSortField,
       fakeTotalCount,
       id,
+      isInspect,
       isPtrIncluded,
       limit,
       loading,
@@ -88,7 +92,9 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
     } = this.props;
     return (
       <PaginatedTable
+        activePage={activePage}
         columns={getNetworkDnsColumns(type)}
+        dataTestSubj={`table-${tableType}`}
         headerCount={totalCount}
         headerSupplement={
           <IsPtrIncluded isPtrIncluded={isPtrIncluded} onChange={this.onChangePtrIncluded} />
@@ -98,6 +104,7 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
         headerUnit={i18n.UNIT(totalCount)}
         id={id}
         itemsPerRow={rowItems}
+        isInspect={isInspect}
         limit={limit}
         loading={loading}
         loadPage={newActivePage => loadPage(newActivePage)}
@@ -116,7 +123,6 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
           })
         }
         updateLimitPagination={newLimit => updateDnsLimit({ limit: newLimit, networkType: type })}
-        updateProps={{ isPtrIncluded, totalCount, dnsSortField }}
       />
     );
   }

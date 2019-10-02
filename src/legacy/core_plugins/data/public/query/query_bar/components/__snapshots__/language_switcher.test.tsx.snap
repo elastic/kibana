@@ -2,14 +2,13 @@
 
 exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
 <EuiPopover
+  anchorClassName="euiFormControlLayout__append"
   anchorPosition="downRight"
   button={
     <EuiButtonEmpty
-      color="primary"
-      iconSide="left"
+      className="euiFormControlLayout__append"
       onClick={[Function]}
       size="xs"
-      type="button"
     >
       <FormattedMessage
         defaultMessage="Lucene"
@@ -18,7 +17,6 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
       />
     </EuiButtonEmpty>
   }
-  className="eui-displayBlock"
   closePopover={[Function]}
   display="inlineBlock"
   hasArrow={true}
@@ -72,6 +70,7 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
     <EuiForm>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={
@@ -105,14 +104,13 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
 
 exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
 <EuiPopover
+  anchorClassName="euiFormControlLayout__append"
   anchorPosition="downRight"
   button={
     <EuiButtonEmpty
-      color="primary"
-      iconSide="left"
+      className="euiFormControlLayout__append"
       onClick={[Function]}
       size="xs"
-      type="button"
     >
       <FormattedMessage
         defaultMessage="KQL"
@@ -121,7 +119,6 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
       />
     </EuiButtonEmpty>
   }
-  className="eui-displayBlock"
   closePopover={[Function]}
   display="inlineBlock"
   hasArrow={true}
@@ -175,6 +172,7 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
     <EuiForm>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={

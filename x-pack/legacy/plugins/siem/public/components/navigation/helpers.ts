@@ -30,13 +30,12 @@ export const getSearch = (tab: SearchNavTab, urlState: TabNavigationProps): stri
         } else if (urlKey === CONSTANTS.timerange) {
           urlStateToReplace = urlState[CONSTANTS.timerange];
         }
-        myLocation = replaceQueryStringInLocation(
+        return replaceQueryStringInLocation(
           myLocation,
           replaceStateKeyInQueryString(urlKey, urlStateToReplace)(
             getQueryStringFromLocation(myLocation)
           )
         );
-        return myLocation;
       },
       {
         pathname: urlState.pathName,

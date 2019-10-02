@@ -32,8 +32,6 @@ export function QueryActionsProvider(Private, Promise) {
   const fetchAnchor = Private(fetchAnchorProvider);
   const { fetchSurroundingDocs } = Private(fetchContextProvider);
   const {
-    increasePredecessorCount,
-    increaseSuccessorCount,
     setPredecessorCount,
     setQueryParameters,
     setSuccessorCount,
@@ -173,16 +171,6 @@ export function QueryActionsProvider(Private, Promise) {
     return fetchSurroundingRows('successors', state);
   };
 
-  const fetchMorePredecessorRows = (state) => () => {
-    increasePredecessorCount(state)();
-    return fetchSurroundingRows('predecessors', state);
-  };
-
-  const fetchMoreSuccessorRows = (state) => () => {
-    increaseSuccessorCount(state)();
-    return fetchSurroundingRows('successors', state);
-  };
-
   const setAllRows = (state) => (predecessorRows, anchorRow, successorRows) => (
     state.rows.all = [
       ...(predecessorRows || []),
@@ -199,8 +187,6 @@ export function QueryActionsProvider(Private, Promise) {
     fetchContextRowsWithNewQueryParameters,
     fetchGivenPredecessorRows,
     fetchGivenSuccessorRows,
-    fetchMorePredecessorRows,
-    fetchMoreSuccessorRows,
     setAllRows,
   };
 }

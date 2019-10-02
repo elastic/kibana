@@ -112,7 +112,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
               "title": "Max Anomaly Score",
             },
             Object {
-              "description": <EuiFlexGroup
+              "description": <ForwardRef
                 direction="column"
                 gutterSize="none"
                 responsive={false}
@@ -134,7 +134,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                     View in Machine Learning
                   </EuiLink>
                 </EuiFlexItem>
-              </EuiFlexGroup>,
+              </ForwardRef>,
               "title": <React.Fragment>
                 <EuiSpacer
                   size="m"
@@ -143,7 +143,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
               </React.Fragment>,
             },
             Object {
-              "description": <EuiFlexGroup
+              "description": <ForwardRef
                 direction="column"
                 gutterSize="none"
                 responsive={false}
@@ -168,11 +168,11 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                     Narrow to this date range
                   </EuiLink>
                 </EuiFlexItem>
-              </EuiFlexGroup>,
+              </ForwardRef>,
               "title": "Detected",
             },
             Object {
-              "description": <EuiFlexGroup
+              "description": <ForwardRef
                 direction="column"
                 gutterSize="none"
                 responsive={false}
@@ -182,11 +182,11 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 >
                   process.name: "du"
                 </EuiFlexItem>
-              </EuiFlexGroup>,
+              </ForwardRef>,
               "title": "Anomalous Entity",
             },
             Object {
-              "description": <EuiFlexGroup
+              "description": <ForwardRef
                 direction="column"
                 gutterSize="none"
                 responsive={false}
@@ -206,7 +206,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 >
                   user.name: "root"
                 </EuiFlexItem>
-              </EuiFlexGroup>,
+              </ForwardRef>,
               "title": "Influenced By",
             },
           ]

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { KbnClient } from '@kbn/dev-utils';
+
 import {
   saveAction,
   loadAction,
@@ -31,7 +33,7 @@ export class EsArchiver {
     this.client = client;
     this.dataDir = dataDir;
     this.log = log;
-    this.kibanaUrl = kibanaUrl;
+    this.kbnClient = new KbnClient(log, [kibanaUrl]);
   }
 
   /**
@@ -73,7 +75,7 @@ export class EsArchiver {
       client: this.client,
       dataDir: this.dataDir,
       log: this.log,
-      kibanaUrl: this.kibanaUrl,
+      kbnClient: this.kbnClient,
     });
   }
 
@@ -89,7 +91,7 @@ export class EsArchiver {
       client: this.client,
       dataDir: this.dataDir,
       log: this.log,
-      kibanaUrl: this.kibanaUrl,
+      kbnClient: this.kbnClient,
     });
   }
 
@@ -144,7 +146,7 @@ export class EsArchiver {
     await emptyKibanaIndexAction({
       client: this.client,
       log: this.log,
-      kibanaUrl: this.kibanaUrl,
+      kbnClient: this.kbnClient,
     });
   }
 }

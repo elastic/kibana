@@ -18,7 +18,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiFormLabel } from '@elastic/eui';
+import { EuiFormLabel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamType } from '../../../../agg_types/param_types/agg';
 import { AggConfig } from '../../..';
@@ -64,7 +64,9 @@ function SubMetricParamEditor({
 
   return (
     <>
+      <EuiSpacer size="m" />
       <EuiFormLabel>{aggTitle}</EuiFormLabel>
+      <EuiSpacer size="s" />
       <DefaultEditorAggParams
         agg={agg.params[type]}
         groupName={aggGroup}

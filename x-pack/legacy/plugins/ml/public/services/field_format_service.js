@@ -24,7 +24,7 @@ class FieldFormatService {
   // specified IDs. List of Kibana index patterns is passed, with a title
   // attribute set in each pattern which will be compared to the index pattern
   // configured in the datafeed of each job.
-  // Builds a map of Kibana FieldFormats (ui/field_formats/field_format)
+  // Builds a map of Kibana FieldFormats (plugins/data/common/field_formats)
   // against detector index by job ID.
   populateFormats(jobIds, indexPatterns) {
     return new Promise((resolve, reject) => {

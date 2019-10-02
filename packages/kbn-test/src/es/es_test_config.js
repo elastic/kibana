@@ -38,6 +38,10 @@ export const esTestConfig = new (class EsTestConfig {
     return process.env.TEST_ES_FROM || 'snapshot';
   }
 
+  getTransportPort() {
+    return process.env.TEST_ES_TRANSPORT_PORT || '9300-9400';
+  }
+
   getUrlParts() {
     // Allow setting one complete TEST_ES_URL for Es like https://elastic:changeme@myCloudInstance:9200
     if (process.env.TEST_ES_URL) {

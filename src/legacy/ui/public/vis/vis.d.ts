@@ -18,7 +18,7 @@
  */
 
 import { VisType } from './vis_types/vis_type';
-import { AggConfigs } from './agg_configs';
+import { AggConfigs } from '../agg_types/agg_configs';
 
 export interface Vis {
   type: VisType;

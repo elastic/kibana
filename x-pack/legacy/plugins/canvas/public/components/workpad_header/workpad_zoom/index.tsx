@@ -32,7 +32,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   setZoomScale: (scale: number) => dispatch(setZoomScale(scale)),
 });
 
-export const WorkpadZoom = compose<ComponentProps, void>(
+export const WorkpadZoom = compose<ComponentProps, {}>(
   connect(
     mapStateToProps,
     mapDispatchToProps

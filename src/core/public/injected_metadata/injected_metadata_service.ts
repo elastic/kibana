@@ -54,7 +54,6 @@ export interface InjectedMetadataParams {
     legacyMode: boolean;
     legacyMetadata: {
       app: unknown;
-      translations: unknown;
       bundleId: string;
       nav: LegacyNavLink[];
       version: string;
@@ -165,7 +164,6 @@ export interface InjectedMetadataSetup {
   getLegacyMode: () => boolean;
   getLegacyMetadata: () => {
     app: unknown;
-    translations: unknown;
     bundleId: string;
     nav: LegacyNavLink[];
     version: string;

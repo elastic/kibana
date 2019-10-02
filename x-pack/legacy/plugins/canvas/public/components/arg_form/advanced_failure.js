@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { compose, withProps, withPropsOnChange } from 'recompose';
-import { EuiForm, EuiTextArea, EuiButton, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { EuiTextArea, EuiButton, EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { fromExpression, toExpression } from '@kbn/interpreter/common';
 import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
 
@@ -39,16 +39,18 @@ export const AdvancedFailureComponent = props => {
   };
 
   return (
-    <EuiForm>
-      <EuiFormRow id={argId} isInvalid={!valid} error="Invalid Expression">
+    <div>
+      <EuiFormRow display="rowCompressed" id={argId} isInvalid={!valid} error="Invalid Expression">
         <EuiTextArea
           id={argId}
           isInvalid={!valid}
           value={argExpression}
+          compressed
           onChange={updateArgExpression}
           rows={3}
         />
       </EuiFormRow>
+      <EuiSpacer size="s" />
       <div>
         <EuiButton disabled={!valid} onClick={e => valueChange(e)} size="s" type="submit">
           Apply
@@ -59,7 +61,8 @@ export const AdvancedFailureComponent = props => {
           </EuiButtonEmpty>
         )}
       </div>
-    </EuiForm>
+      <EuiSpacer size="s" />
+    </div>
   );
 };
 

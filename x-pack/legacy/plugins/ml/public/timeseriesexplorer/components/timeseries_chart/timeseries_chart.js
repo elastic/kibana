@@ -39,7 +39,7 @@ import {
   showMultiBucketAnomalyTooltip,
 } from '../../../util/chart_utils';
 import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
-import { TimeBuckets } from 'ui/time_buckets';
+import { TimeBuckets } from '../../../util/time_buckets';
 import { mlTableService } from '../../../services/table_service';
 import { ContextChartMask } from '../context_chart_mask';
 import { findChartPointForAnomalyTime } from '../../timeseriesexplorer_utils';
@@ -103,7 +103,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     focusAnnotationData: PropTypes.array,
     focusChartData: PropTypes.array,
     focusForecastData: PropTypes.array,
-    loading: PropTypes.bool.isRequired,
+    skipRefresh: PropTypes.bool.isRequired,
     modelPlotEnabled: PropTypes.bool.isRequired,
     renderFocusChartOnly: PropTypes.bool.isRequired,
     selectedJob: PropTypes.object,
@@ -113,7 +113,9 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     swimlaneData: PropTypes.array,
     timefilter: PropTypes.object.isRequired,
     zoomFrom: PropTypes.object,
-    zoomTo: PropTypes.object
+    zoomTo: PropTypes.object,
+    zoomFromFocusLoaded: PropTypes.object,
+    zoomToFocusLoaded: PropTypes.object
   };
 
   rowMouseenterSubscriber = null;
@@ -203,7 +205,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
   }
 
   componentDidUpdate() {
-    if (this.props.loading) {
+    if (this.props.skipRefresh) {
       return;
     }
 
@@ -383,12 +385,17 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
     if ((focusLoadFrom !== contextXMin) || (focusLoadTo !== contextXMax)) {
       this.setContextBrushExtent(new Date(focusLoadFrom), new Date(focusLoadTo), true);
+      const newSelectedBounds = { min: moment(new Date(focusLoadFrom)), max: moment(focusLoadFrom) };
+      this.selectedBounds = newSelectedBounds;
     } else {
       // Don't set the brush if the selection is the full context chart domain.
       this.setBrushVisibility(false);
-      const selectedBounds = this.contextXScale.domain();
-      this.selectedBounds = { min: moment(new Date(selectedBounds[0])), max: moment(selectedBounds[1]) };
-      contextChartSelected({ from: selectedBounds[0], to: selectedBounds[1] });
+      const contextXScaleDomain = this.contextXScale.domain();
+      const newSelectedBounds =  { min: moment(new Date(contextXScaleDomain[0])), max: moment(contextXScaleDomain[1]) };
+      if (!_.isEqual(newSelectedBounds, this.selectedBounds)) {
+        this.selectedBounds = newSelectedBounds;
+        contextChartSelected({ from: contextXScaleDomain[0], to: contextXScaleDomain[1] });
+      }
     }
   }
 
@@ -512,7 +519,9 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       showAnnotations,
       showForecast,
       showModelBounds,
-      intl
+      intl,
+      zoomFromFocusLoaded,
+      zoomToFocusLoaded,
     } = this.props;
 
     if (focusChartData === undefined) {
@@ -543,10 +552,11 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     // Elasticsearch aggregation returns points at start of bucket,
     // so set the x-axis min to the start of the first aggregation interval,
     // and the x-axis max to the end of the last aggregation interval.
-    const bounds = this.selectedBounds;
-    if (typeof bounds === 'undefined') {
+    if (zoomFromFocusLoaded === undefined || zoomToFocusLoaded === undefined) {
       return;
     }
+    const bounds = { min: moment(zoomFromFocusLoaded.getTime()), max: moment(zoomToFocusLoaded.getTime()) };
+
     const aggMs = focusAggregationInterval.asMilliseconds();
     const earliest = moment(Math.floor((bounds.min.valueOf()) / aggMs) * aggMs);
     const latest = moment(Math.ceil((bounds.max.valueOf()) / aggMs) * aggMs);
@@ -1046,7 +1056,9 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
         rightHandle.attr('x', contextXScale(brushExtent[1]) + 0);
 
         topBorder.attr('x', contextXScale(brushExtent[0]) + 1);
-        topBorder.attr('width', contextXScale(brushExtent[1]) - contextXScale(brushExtent[0]) - 2);
+        // Use Math.max(0, ...) to make sure we don't end up
+        // with a negative width which would cause an SVG error.
+        topBorder.attr('width', Math.max(0, contextXScale(brushExtent[1]) - contextXScale(brushExtent[0]) - 2));
       }
 
       this.setBrushVisibility(show);
@@ -1061,8 +1073,11 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
     const that = this;
     function brushed() {
+      if (that.props.skipRefresh) {
+        return;
+      }
+
       const isEmpty = brush.empty();
-      showBrush(!isEmpty);
 
       const selectedBounds = isEmpty ? contextXScale.domain() : brush.extent();
       const selectionMin = selectedBounds[0].getTime();
@@ -1076,6 +1091,8 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       ) {
         return;
       }
+
+      showBrush(!isEmpty);
 
       // Set the color of the swimlane cells according to whether they are inside the selection.
       contextGroup.selectAll('.swimlane-cell')

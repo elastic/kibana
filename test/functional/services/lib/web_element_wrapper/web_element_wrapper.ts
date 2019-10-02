@@ -19,7 +19,6 @@
 
 import { delay } from 'bluebird';
 import { WebElement, WebDriver, By, IKey, until } from 'selenium-webdriver';
-// @ts-ignore not supported yet
 import { PNG } from 'pngjs';
 // @ts-ignore not supported yet
 import cheerio from 'cheerio';
@@ -743,7 +742,7 @@ export class WebElementWrapper {
    *
    * @returns {Promise<void>}
    */
-  public async takeScreenshot(): Promise<void> {
+  public async takeScreenshot(): Promise<Buffer> {
     const screenshot = await this.driver.takeScreenshot();
     const buffer = Buffer.from(screenshot.toString(), 'base64');
     const { width, height, x, y } = await this.getPosition();
@@ -757,11 +756,12 @@ export class WebElementWrapper {
       src.height = src.height / 2;
       let h = false;
       let v = false;
-      src.data = src.data.filter((d: any, i: number) => {
+      const filteredData = src.data.filter((d: any, i: number) => {
         h = i % 4 ? h : !h;
         v = i % (src.width * 2 * 4) ? v : !v;
         return h && v;
       });
+      src.data = Buffer.from(filteredData);
     }
     const dst = new PNG({ width, height });
     PNG.bitblt(src, dst, x, y, width, height, 0, 0);

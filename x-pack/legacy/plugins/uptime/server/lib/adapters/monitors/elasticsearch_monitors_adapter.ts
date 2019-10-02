@@ -7,20 +7,17 @@
 import { get, set, reduce } from 'lodash';
 import { INDEX_NAMES, QUERY } from '../../../../common/constants';
 import {
-  ErrorListItem,
   FilterBar,
-  LatestMonitor,
   MonitorChart,
   MonitorPageTitle,
-  MonitorSeriesPoint,
   Ping,
   LocationDurationLine,
 } from '../../../../common/graphql/types';
 import {
   dropLatestBucket,
-  getFilteredQuery,
-  getFilteredQueryAndStatusFilter,
+  getFilterClause,
   getHistogramInterval,
+  parseFilterQuery,
 } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
@@ -72,6 +69,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             filter: [
               { range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } } },
               { term: { 'monitor.id': monitorId } },
+              { term: { 'monitor.status': 'up' } },
               // if location is truthy, add it as a filter. otherwise add nothing
               ...(!!location ? [{ term: { 'observer.geo.name': location } }] : []),
             ],
@@ -83,6 +81,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             date_histogram: {
               field: '@timestamp',
               fixed_interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
+              min_doc_count: 0,
             },
             aggs: {
               location: {
@@ -102,7 +101,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
 
     const result = await this.database.search(request, params);
-    const dateBuckets = dropLatestBucket(get(result, 'aggregations.timeseries.buckets', []));
+    const dateHistogramBuckets = dropLatestBucket(
+      get(result, 'aggregations.timeseries.buckets', [])
+    );
 
     /**
      * The code below is responsible for formatting the aggregation data we fetched above in a way
@@ -122,26 +123,67 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       statusMaxCount: 0,
     };
 
-    const linesByLocation: { [key: string]: LocationDurationLine } = {};
-    dateBuckets.forEach(dateBucket => {
-      const x = get(dateBucket, 'key');
-      const docCount = get(dateBucket, 'doc_count', 0);
+    /**
+     * The following section of code enables us to provide buckets per location
+     * that have a `null` value if there is no data at the given timestamp.
+     *
+     * We maintain two `Set`s. One is per bucket, the other is persisted for the
+     * entire collection. At the end of a bucket's evaluation, if there was no object
+     * parsed for a given location line that was already started, we insert an element
+     * to the given line with a null value. Without this, our charts on the client will
+     * display a continuous line for each of the points they are provided.
+     */
 
-      dateBucket.location.buckets.forEach(
+    // a set of all the locations found for this result
+    const resultLocations = new Set<string>();
+    const linesByLocation: { [key: string]: LocationDurationLine } = {};
+    dateHistogramBuckets.forEach(dateHistogramBucket => {
+      const x = get(dateHistogramBucket, 'key');
+      const docCount = get(dateHistogramBucket, 'doc_count', 0);
+      // a set of all the locations for the current bucket
+      const bucketLocations = new Set<string>();
+
+      dateHistogramBucket.location.buckets.forEach(
         (locationBucket: { key: string; duration: { avg: number } }) => {
           const locationName = locationBucket.key;
-          let ldl: LocationDurationLine = get(linesByLocation, locationName);
-          if (!ldl) {
-            ldl = { name: locationName, line: [] };
-            linesByLocation[locationName] = ldl;
-            monitorChartsData.locationDurationLines.push(ldl);
+          // store the location name in each set
+          bucketLocations.add(locationName);
+          resultLocations.add(locationName);
+
+          // create a new line for this location if it doesn't exist
+          let currentLine: LocationDurationLine = get(linesByLocation, locationName);
+          if (!currentLine) {
+            currentLine = { name: locationName, line: [] };
+            linesByLocation[locationName] = currentLine;
+            monitorChartsData.locationDurationLines.push(currentLine);
           }
-          ldl.line.push({ x, y: get(locationBucket, 'duration.avg', null) });
+          // add the entry for the current location's duration average
+          currentLine.line.push({ x, y: get(locationBucket, 'duration.avg', null) });
         }
       );
 
+      // if there are more lines in the result than are represented in the current bucket,
+      // we must add null entries
+      if (dateHistogramBucket.location.buckets.length < resultLocations.size) {
+        resultLocations.forEach(resultLocation => {
+          // the current bucket has a value for this location, do nothing
+          if (location && location !== resultLocation) return;
+          // the current bucket had no value for this location, insert a null value
+          if (!bucketLocations.has(resultLocation)) {
+            const locationLine = monitorChartsData.locationDurationLines.find(
+              ({ name }) => name === resultLocation
+            );
+            // in practice, there should always be a line present, but `find` can return `undefined`
+            if (locationLine) {
+              // this will create a gap in the line like we desire
+              locationLine.line.push({ x, y: null });
+            }
+          }
+        });
+      }
+
       monitorChartsData.status.push(
-        formatStatusBuckets(x, get(dateBucket, 'status.buckets', []), docCount)
+        formatStatusBuckets(x, get(dateHistogramBucket, 'status.buckets', []), docCount)
       );
     });
 
@@ -159,19 +201,21 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string | null
+    filters?: string | null,
+    statusFilter?: string | null
   ): Promise<any> {
-    const { statusFilter, query } = getFilteredQueryAndStatusFilter(
-      dateRangeStart,
-      dateRangeEnd,
-      filters
-    );
+    const query = parseFilterQuery(filters);
+    const additionalFilters = [{ exists: { field: 'summary.up' } }];
+    if (query) {
+      additionalFilters.push(query);
+    }
+    const filter = getFilterClause(dateRangeStart, dateRangeEnd, additionalFilters);
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         query: {
           bool: {
-            filter: [{ exists: { field: 'summary.up' } }, query],
+            filter,
           },
         },
         size: 0,
@@ -296,135 +340,6 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
   }
 
   /**
-   * Fetch the latest status for a monitors list
-   * @param request Kibana request
-   * @param dateRangeStart timestamp bounds
-   * @param dateRangeEnd timestamp bounds
-   * @param filters filters defined by client
-   */
-  public async getMonitors(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    filters?: string | null
-  ): Promise<LatestMonitor[]> {
-    const { statusFilter, query } = getFilteredQueryAndStatusFilter(
-      dateRangeStart,
-      dateRangeEnd,
-      filters
-    );
-    const params = {
-      index: INDEX_NAMES.HEARTBEAT,
-      body: {
-        query,
-        size: 0,
-        aggs: {
-          hosts: {
-            composite: {
-              sources: [
-                {
-                  id: {
-                    terms: {
-                      field: 'monitor.id',
-                    },
-                  },
-                },
-                {
-                  url: {
-                    terms: {
-                      field: 'url.full',
-                    },
-                  },
-                },
-                {
-                  location: {
-                    terms: {
-                      field: 'observer.geo.name',
-                      missing_bucket: true,
-                    },
-                  },
-                },
-              ],
-              size: 40,
-            },
-            aggs: {
-              latest: {
-                top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': { order: 'desc' },
-                    },
-                  ],
-                  size: 1,
-                },
-              },
-              histogram: {
-                date_histogram: {
-                  field: '@timestamp',
-                  fixed_interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
-                  missing: 0,
-                },
-                aggs: {
-                  status: {
-                    terms: {
-                      field: 'monitor.status',
-                      size: 2,
-                      shard_size: 2,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-    const queryResult = await this.database.search(request, params);
-    const aggBuckets: any[] = get(queryResult, 'aggregations.hosts.buckets', []);
-    const latestMonitors: LatestMonitor[] = aggBuckets
-      .filter(
-        bucket =>
-          (statusFilter &&
-            get(bucket, 'latest.hits.hits[0]._source.monitor.status', undefined) ===
-              statusFilter) ||
-          !statusFilter
-      )
-      .map(
-        (bucket): LatestMonitor => {
-          const key: string = get(bucket, 'key.id');
-          const url: string | null = get(bucket, 'key.url', null);
-          const upSeries: MonitorSeriesPoint[] = [];
-          const downSeries: MonitorSeriesPoint[] = [];
-          const histogramBuckets: any[] = get(bucket, 'histogram.buckets', []);
-          const ping: Ping = get(bucket, 'latest.hits.hits[0]._source');
-          const timestamp: string = get(bucket, 'latest.hits.hits[0]._source.@timestamp');
-          histogramBuckets.forEach(histogramBucket => {
-            const status = get(histogramBucket, 'status.buckets', []);
-            // @ts-ignore TODO update typings and remove this comment
-            const up = status.find(f => f.key === 'up');
-            // @ts-ignore TODO update typings and remove this comment
-            const down = status.find(f => f.key === 'down');
-            // @ts-ignore TODO update typings and remove this comment
-            upSeries.push({ x: histogramBucket.key, y: up ? up.doc_count : null });
-            // @ts-ignore TODO update typings and remove this comment
-            downSeries.push({ x: histogramBucket.key, y: down ? down.doc_count : null });
-          });
-          return {
-            id: { key, url },
-            ping: {
-              ...ping,
-              timestamp,
-            },
-            upSeries,
-            downSeries,
-          };
-        }
-      );
-
-    return latestMonitors;
-  }
-
-  /**
    * Fetch options for the filter bar.
    * @param request Kibana request object
    * @param dateRangeStart timestamp bounds
@@ -467,114 +382,6 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       acc[field] = aggregations[bucketName].buckets.map((b: { key: string | number }) => b.key);
       return acc;
     }, {});
-  }
-
-  /**
-   * Fetch summaries of recent errors for monitors.
-   * @example getErrorsList({}, 'now-15m', 'now', '{bool: { must: [{'term': {'monitor.status': {value: 'down'}}}]}})
-   * @param request Request to send ES
-   * @param dateRangeStart timestamp bounds
-   * @param dateRangeEnd timestamp bounds
-   * @param filters any filters specified on the client
-   */
-  public async getErrorsList(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    filters?: string | null
-  ): Promise<ErrorListItem[]> {
-    const statusDown = {
-      term: {
-        'monitor.status': {
-          value: 'down',
-        },
-      },
-    };
-    const query = getFilteredQuery(dateRangeStart, dateRangeEnd, filters);
-    if (get(query, 'bool.filter', undefined)) {
-      query.bool.filter.push(statusDown);
-    } else {
-      set(query, 'bool.filter', [statusDown]);
-    }
-
-    const params = {
-      index: INDEX_NAMES.HEARTBEAT,
-      body: {
-        query,
-        size: 0,
-        aggs: {
-          errors: {
-            composite: {
-              sources: [
-                {
-                  id: {
-                    terms: {
-                      field: 'monitor.id',
-                    },
-                  },
-                },
-                {
-                  error_type: {
-                    terms: {
-                      field: 'error.type',
-                    },
-                  },
-                },
-                {
-                  location: {
-                    terms: {
-                      field: 'observer.geo.name',
-                      missing_bucket: true,
-                    },
-                  },
-                },
-              ],
-              size: 50,
-            },
-            aggs: {
-              latest: {
-                top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                  size: 1,
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-    const result = await this.database.search(request, params);
-    const buckets = get(result, 'aggregations.errors.buckets', []);
-
-    const errorsList: ErrorListItem[] = [];
-    buckets.forEach((bucket: any) => {
-      const count = get<number>(bucket, 'doc_count', 0);
-      const monitorId = get<string | null>(bucket, 'key.id', null);
-      const errorType = get<string | null>(bucket, 'key.error_type', null);
-      const location = get<string | null>(bucket, 'key.location', null);
-      const source = get<string | null>(bucket, 'latest.hits.hits[0]._source', null);
-      const errorMessage = get(source, 'error.message', null);
-      const statusCode = get(source, 'http.response.status_code', null);
-      const timestamp = get(source, '@timestamp', null);
-      const name = get(source, 'monitor.name', null);
-      errorsList.push({
-        count,
-        latestMessage: errorMessage,
-        location,
-        monitorId,
-        name: name === '' ? null : name,
-        statusCode,
-        timestamp,
-        type: errorType || '',
-      });
-    });
-    return errorsList.sort(({ count: A }, { count: B }) => B - A);
   }
 
   /**

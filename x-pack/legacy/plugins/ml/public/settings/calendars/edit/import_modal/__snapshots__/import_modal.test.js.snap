@@ -54,10 +54,7 @@ exports[`ImportModal Renders import modal 1`] = `
     </EuiModalBody>
     <EuiModalFooter>
       <EuiButtonEmpty
-        color="primary"
-        iconSide="left"
         onClick={[MockFunction]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Cancel"
@@ -66,13 +63,9 @@ exports[`ImportModal Renders import modal 1`] = `
         />
       </EuiButtonEmpty>
       <EuiButton
-        color="primary"
         disabled={true}
         fill={true}
-        iconSide="left"
         onClick={[Function]}
-        size="m"
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Import"

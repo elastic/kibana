@@ -32,26 +32,41 @@ export const useSiemJobs = (refetchData: boolean): Return => {
   const [, dispatchToaster] = useStateToaster();
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
-  const fetchFunc = async () => {
-    if (userPermissions) {
-      try {
-        const data = await groupsData({
-          'kbn-version': kbnVersion,
-        });
+  useEffect(() => {
+    let isSubscribed = true;
+    const abortCtrl = new AbortController();
+    setLoading(true);
 
-        const siemJobIds = getSiemJobIdsFromGroupsData(data);
+    async function fetchSiemJobIdsFromGroupsData() {
+      if (userPermissions) {
+        try {
+          const data = await groupsData(
+            {
+              'kbn-version': kbnVersion,
+            },
+            abortCtrl.signal
+          );
 
-        setSiemJobs(siemJobIds);
-      } catch (error) {
-        errorToToaster({ title: i18n.SIEM_JOB_FETCH_FAILURE, error, dispatchToaster });
+          const siemJobIds = getSiemJobIdsFromGroupsData(data);
+          if (isSubscribed) {
+            setSiemJobs(siemJobIds);
+          }
+        } catch (error) {
+          if (isSubscribed) {
+            errorToToaster({ title: i18n.SIEM_JOB_FETCH_FAILURE, error, dispatchToaster });
+          }
+        }
+      }
+      if (isSubscribed) {
+        setLoading(false);
       }
     }
-    setLoading(false);
-  };
 
-  useEffect(() => {
-    setLoading(true);
-    fetchFunc();
+    fetchSiemJobIdsFromGroupsData();
+    return () => {
+      isSubscribed = false;
+      abortCtrl.abort();
+    };
   }, [refetchData, userPermissions]);
 
   return [loading, siemJobs];

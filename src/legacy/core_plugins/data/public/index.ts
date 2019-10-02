@@ -18,7 +18,7 @@
  */
 
 // /// Define plugin function
-import { DataPlugin as Plugin, DataSetup, DataStart } from './plugin';
+import { DataPlugin as Plugin, DataSetup } from './plugin';
 
 export function plugin() {
   return new Plugin();
@@ -28,9 +28,7 @@ export function plugin() {
 
 /** @public types */
 export type DataSetup = DataSetup;
-export type DataStart = DataStart;
 
-export { ExpressionRenderer, ExpressionRendererProps } from './expressions';
 export { FilterBar, ApplyFiltersPopover } from './filter';
 export {
   Field,
@@ -39,7 +37,7 @@ export {
   IndexPatterns,
   StaticIndexPattern,
 } from './index_patterns';
-export { Query, QueryBar, QueryBarInput } from './query';
+export { Query, QueryBarInput } from './query';
 export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
 
 /** @public static code */
@@ -56,7 +54,6 @@ export {
   getRoutes,
   isFilterable,
   IndexPatternSelect,
-  IndexPatternsProvider, // LEGACY
   validateIndexPattern,
   ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS,
@@ -68,3 +65,5 @@ export {
   mockFields,
   mockIndexPattern,
 } from './index_patterns';
+
+export { TimeHistoryContract, TimefilterContract, getTime, InputTimeRange } from './timefilter';

@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { visFactory } from 'ui/vis/vis_factory';
 
 import { SelfChangingEditor } from './self_changing_editor';
 import { SelfChangingComponent } from './self_changing_components';
 
-function SelfChangingVisType(Private) {
-  const VisFactory = Private(VisFactoryProvider);
+import { setup as visualizations } from '../../../../../../src/legacy/core_plugins/visualizations/public/legacy';
 
-  return VisFactory.createReactVisualization({
+function SelfChangingVisType() {
+
+  return visFactory.createReactVisualization({
     name: 'self_changing_vis',
     title: 'Self Changing Vis',
     icon: 'visControls',
@@ -50,4 +50,4 @@ function SelfChangingVisType(Private) {
   });
 }
 
-VisTypesRegistryProvider.register(SelfChangingVisType);
+visualizations.types.registerVisualization(SelfChangingVisType);

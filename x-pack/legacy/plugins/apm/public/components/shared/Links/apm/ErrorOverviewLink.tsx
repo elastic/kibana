@@ -19,7 +19,6 @@ const ErrorOverviewLink = ({ serviceName, query, ...rest }: Props) => {
 
   const persistedFilters = pickKeys(
     urlParams,
-    'transactionResult',
     'host',
     'containerId',
     'podName'

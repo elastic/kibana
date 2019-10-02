@@ -19,7 +19,7 @@ import {
   CancellableTask,
   ConcreteTaskInstance,
   RunResult,
-  SanitizedTaskDefinition,
+  TaskDefinition,
   TaskDictionary,
   validateRunResult,
   TaskStatus,
@@ -28,7 +28,6 @@ import {
 const defaultBackoffPerFailure = 5 * 60 * 1000;
 
 export interface TaskRunner {
-  numWorkers: number;
   isExpired: boolean;
   cancel: CancelFunction;
   claimOwnership: () => Promise<boolean>;
@@ -44,7 +43,7 @@ interface Updatable {
 
 interface Opts {
   logger: Logger;
-  definitions: TaskDictionary<SanitizedTaskDefinition>;
+  definitions: TaskDictionary<TaskDefinition>;
   instance: ConcreteTaskInstance;
   store: Updatable;
   beforeRun: BeforeRunFunction;
@@ -61,7 +60,7 @@ interface Opts {
 export class TaskManagerRunner implements TaskRunner {
   private task?: CancellableTask;
   private instance: ConcreteTaskInstance;
-  private definitions: TaskDictionary<SanitizedTaskDefinition>;
+  private definitions: TaskDictionary<TaskDefinition>;
   private logger: Logger;
   private store: Updatable;
   private beforeRun: BeforeRunFunction;
@@ -82,14 +81,6 @@ export class TaskManagerRunner implements TaskRunner {
     this.logger = opts.logger;
     this.store = opts.store;
     this.beforeRun = opts.beforeRun;
-  }
-
-  /**
-   * Gets how many workers are occupied by this task instance.
-   * Per Joi validation logic, this will return a number >= 1
-   */
-  public get numWorkers() {
-    return this.definition.numWorkers;
   }
 
   /**

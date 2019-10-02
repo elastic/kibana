@@ -2,11 +2,7 @@
 
 exports[`Snapshot component renders without errors 1`] = `
 <Fragment>
-  <EuiPanel
-    grow={true}
-    hasShadow={false}
-    paddingSize="m"
-  >
+  <EuiPanel>
     <EuiTitle
       size="xs"
     >

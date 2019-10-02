@@ -30,7 +30,7 @@ import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
 
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
-import { InvalidJSONProperty, SavedObjectNotFound } from 'ui/errors';
+import { InvalidJSONProperty, SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { recentlyAccessed } from 'ui/persisted_log';

@@ -27,12 +27,15 @@ export function DynamicSizeSelection({ ordinalFields, styleOptions, onChange }) 
         onChange={onSizeRangeChange}
         minSize={styleOptions.minSize}
         maxSize={styleOptions.maxSize}
+        showLabels
+        compressed
       />
       <EuiSpacer size="s" />
       <FieldSelect
         fields={ordinalFields}
         selectedFieldName={_.get(styleOptions, 'field.name')}
         onChange={onFieldChange}
+        compressed
       />
     </Fragment>
   );
@@ -41,5 +44,5 @@ export function DynamicSizeSelection({ ordinalFields, styleOptions, onChange }) 
 DynamicSizeSelection.propTypes = {
   ordinalFields: PropTypes.arrayOf(fieldShape).isRequired,
   styleOptions: dynamicSizeShape.isRequired,
-  onChange: PropTypes.func.isRequired
+  onChange: PropTypes.func.isRequired,
 };

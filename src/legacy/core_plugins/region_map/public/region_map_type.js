@@ -25,7 +25,7 @@ import { createRegionMapVisualization } from './region_map_visualization';
 import { Status } from 'ui/vis/update_status';
 import { RegionMapOptions } from './components/region_map_options';
 
-import { visFactory } from '../../visualizations/public/np_ready/public';
+import { visFactory } from '../../visualizations/public';
 
 // TODO: reference to TILE_MAP plugin should be removed
 import { ORIGIN } from '../../tile_map/common/origin';
@@ -33,9 +33,6 @@ import { ORIGIN } from '../../tile_map/common/origin';
 export function createRegionMapTypeDefinition(dependencies) {
   const { uiSettings, regionmapsConfig, serviceSettings } = dependencies;
   const visualization = createRegionMapVisualization(dependencies);
-  const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, ORIGIN.KIBANA_YML));
-  const selectedLayer = vectorLayers[0];
-  const selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
 
   return visFactory.createBaseVisualization({
     name: 'region_map',
@@ -52,8 +49,6 @@ provided base maps, or add your own. Darker colors represent higher values.',
         addTooltip: true,
         colorSchema: 'Yellow to Red',
         emsHotLink: '',
-        selectedLayer,
-        selectedJoinField,
         isDisplayWarning: true,
         wms: uiSettings.get('visualization:tileMap:WMSdefaults'),
         mapZoom: 2,
@@ -69,12 +64,10 @@ provided base maps, or add your own. Darker colors represent higher values.',
         <RegionMapOptions
           {...props}
           serviceSettings={serviceSettings}
-          includeElasticMapsService={regionmapsConfig.includeElasticMapsService}
-        />
-      ),
+        />),
       collections: {
         colorSchemas,
-        vectorLayers,
+        vectorLayers: [],
         tmsLayers: [],
       },
       schemas: new Schemas([
@@ -112,6 +105,55 @@ provided base maps, or add your own. Darker colors represent higher values.',
           aggFilter: ['terms'],
         },
       ]),
+    },
+    setup: async (savedVis) => {
+      const vis = savedVis.vis;
+
+      const tmsLayers = await serviceSettings.getTMSServices();
+      vis.type.editorConfig.collections.tmsLayers = tmsLayers;
+      if (!vis.params.wms.selectedTmsLayer && tmsLayers.length) {
+        vis.params.wms.selectedTmsLayer = tmsLayers[0];
+      }
+
+      const vectorLayers = regionmapsConfig.layers.map(
+        mapToLayerWithId.bind(null, ORIGIN.KIBANA_YML)
+      );
+      let selectedLayer = vectorLayers[0];
+      let selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
+      if (regionmapsConfig.includeElasticMapsService) {
+        const layers = await serviceSettings.getFileLayers();
+        const newLayers = layers
+          .map(mapToLayerWithId.bind(null, ORIGIN.EMS))
+          .filter(
+            (layer) =>
+              !vectorLayers.some(vectorLayer => vectorLayer.layerId === layer.layerId)
+          );
+
+        // backfill v1 manifest for now
+        newLayers.forEach((layer) => {
+          if (layer.format === 'geojson') {
+            layer.format = {
+              type: 'geojson',
+            };
+          }
+        });
+
+        vis.type.editorConfig.collections.vectorLayers = [...vectorLayers, ...newLayers];
+
+        [selectedLayer] = vis.type.editorConfig.collections.vectorLayers;
+        selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
+
+        if (selectedLayer && !vis.params.selectedLayer && selectedLayer.isEMS) {
+          vis.params.emsHotLink = await serviceSettings.getEMSHotLink(selectedLayer);
+        }
+      }
+
+      if (!vis.params.selectedLayer) {
+        vis.params.selectedLayer = selectedLayer;
+        vis.params.selectedJoinField = selectedJoinField;
+      }
+
+      return savedVis;
     },
   });
 }

@@ -24,7 +24,14 @@ import { MetricSelect } from './metric_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
-import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiFormRow } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
+  EuiFormRow,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const PositiveOnlyAgg = props => {
@@ -54,6 +61,7 @@ export const PositiveOnlyAgg = props => {
               defaultMessage="Aggregation"
             />
           </EuiFormLabel>
+          <EuiSpacer size="xs" />
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -65,7 +73,12 @@ export const PositiveOnlyAgg = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('metric')}
-            label={<FormattedMessage id="visTypeTimeseries.positiveOnly.metricLabel" defaultMessage="Metric" />}
+            label={
+              <FormattedMessage
+                id="visTypeTimeseries.positiveOnly.metricLabel"
+                defaultMessage="Metric"
+              />
+            }
           >
             <MetricSelect
               onChange={handleSelectChange('field')}

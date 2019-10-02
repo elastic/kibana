@@ -65,9 +65,11 @@ jest.mock('ui/registry/field_formats', () => {
       getDefaultType: () => {
         return Format;
       },
-      byFieldType: {
-        'number': [Format],
-      },
+      getByFieldType: (fieldType) => {
+        if(fieldType === 'number') {
+          return [Format];
+        }
+      }
     },
   };
 });

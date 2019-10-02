@@ -73,6 +73,7 @@ exports[`Users Table Component Rendering it renders the default Users table 1`] 
   fakeTotalCount={3}
   flowTarget="source"
   id="user"
+  isInspect={false}
   loadPage={[MockFunction]}
   loading={false}
   showMorePagesIndicator={true}
