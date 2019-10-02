@@ -154,7 +154,7 @@ describe('getOperationTypesForField', () => {
           columnOrder: ['col1'],
           columns: {
             col1: {
-              label: 'Date Histogram of timestamp',
+              label: 'Date histogram of timestamp',
               dataType: 'date',
               isBucketed: true,
 
