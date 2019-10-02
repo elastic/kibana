@@ -38,7 +38,7 @@ uiRoutes.when('/data_frames/new_transform', {
 });
 
 uiRoutes.when('/data_frames/new_transform/step/index_or_search', {
-  template: '<ml-index-or-search></ml-index-or-search>',
+  template: '<ml-index-or-search />',
   k7Breadcrumbs: getDataFrameIndexOrSearchBreadcrumbs,
   resolve: {
     CheckLicense: checkBasicLicense,

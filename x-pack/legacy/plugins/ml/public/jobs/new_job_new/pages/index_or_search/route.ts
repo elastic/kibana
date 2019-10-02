@@ -26,7 +26,7 @@ uiRoutes.when('/jobs/new_job', {
 });
 
 uiRoutes.when('/jobs/new_job/step/index_or_search', {
-  template: '<ml-index-or-search></ml-index-or-search>',
+  template: '<ml-index-or-search />',
   k7Breadcrumbs: getCreateJobBreadcrumbs,
   resolve: {
     CheckLicense: checkLicenseExpired,
@@ -39,7 +39,7 @@ uiRoutes.when('/jobs/new_job/step/index_or_search', {
 });
 
 uiRoutes.when('/datavisualizer_index_select', {
-  template: '<ml-index-or-search></ml-index-or-search>',
+  template: '<ml-index-or-search />',
   k7Breadcrumbs: getDataVisualizerIndexOrSearchBreadcrumbs,
   resolve: {
     CheckLicense: checkBasicLicense,

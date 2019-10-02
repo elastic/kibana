@@ -11,13 +11,10 @@ import ReactDOM from 'react-dom';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 import { timefilter } from 'ui/timefilter';
-import { IndexPatterns } from 'ui/index_patterns';
 
 import { I18nContext } from 'ui/i18n';
 import { InjectorService } from '../../../../../common/types/angular';
-import { Page, PageProps } from './page';
-
-import { KibanaContext, KibanaConfigTypeFix } from '../../../../contexts/kibana';
+import { Page } from './page';
 
 module.directive('mlIndexOrSearch', ($injector: InjectorService) => {
   return {
@@ -28,25 +25,11 @@ module.directive('mlIndexOrSearch', ($injector: InjectorService) => {
       timefilter.disableTimeRangeSelector();
       timefilter.disableAutoRefreshSelector();
 
-      const indexPatterns = $injector.get<IndexPatterns>('indexPatterns');
-      const kbnBaseUrl = $injector.get<string>('kbnBaseUrl');
-      const kibanaConfig = $injector.get<KibanaConfigTypeFix>('config');
       const $route = $injector.get<any>('$route');
-
       const { nextStepPath } = $route.current.locals;
 
-      const kibanaContext = {
-        indexPatterns,
-        kbnBaseUrl,
-        kibanaConfig,
-      };
-
       ReactDOM.render(
-        <I18nContext>
-          <KibanaContext.Provider value={kibanaContext}>
-            {React.createElement(Page, { nextStepPath } as PageProps)}
-          </KibanaContext.Provider>
-        </I18nContext>,
+        <I18nContext>{React.createElement(Page, { nextStepPath })}</I18nContext>,
         element[0]
       );
 

@@ -24,6 +24,12 @@ export interface PageProps {
 export const Page: FC<PageProps> = ({ nextStepPath }) => {
   const RESULTS_PER_PAGE = 20;
 
+  const onObjectSelection = (id: string, type: string) => {
+    window.location.href = `${nextStepPath}?${
+      type === 'index-pattern' ? 'index' : 'savedSearchId'
+    }=${encodeURIComponent(id)}`;
+  };
+
   return (
     <EuiPage data-test-subj="mlPageSourceSelection">
       <EuiPageBody restrictWidth={1200}>
@@ -32,12 +38,8 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
             <EuiTitle size="m">
               <h1>
                 <FormattedMessage
-                  id="xpack.ml.newJob.wizard.createFromNewSearchTitle"
-                  defaultMessage="From a New Search, Select Index"
-                />{' '}
-                <FormattedMessage
-                  id="xpack.ml.newJob.wizard.createFromSavedSearchTitle"
-                  defaultMessage="Or, From a Saved Search"
+                  id="xpack.ml.newJob.wizard.selectIndexPatternOrSavedSearch"
+                  defaultMessage="Select index pattern or saved search"
                 />
               </h1>
             </EuiTitle>
@@ -46,24 +48,17 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
         <EuiPageContent>
           <SavedObjectFinder
             key="searchSavedObjectFinder"
-            onChoose={(id, type) => {
-              window.location.href = `${nextStepPath}?${
-                type === 'index-pattern' ? 'index' : 'savedSearchId'
-              }=${encodeURIComponent(id)}`;
-            }}
+            onChoose={onObjectSelection}
             showFilter
-            noItemsMessage={i18n.translate(
-              'kbn.visualize.newVisWizard.searchSelection.notFoundLabel',
-              {
-                defaultMessage: 'No matching indices or saved searches found.',
-              }
-            )}
+            noItemsMessage={i18n.translate('xpack.ml.newJob.wizard.searchSelection.notFoundLabel', {
+              defaultMessage: 'No matching indices or saved searches found.',
+            })}
             savedObjectMetaData={[
               {
                 type: 'search',
                 getIconForSavedObject: () => 'search',
                 name: i18n.translate(
-                  'kbn.visualize.newVisWizard.searchSelection.savedObjectType.search',
+                  'xpack.ml.newJob.wizard.searchSelection.savedObjectType.search',
                   {
                     defaultMessage: 'Saved search',
                   }
@@ -73,7 +68,7 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
                 type: 'index-pattern',
                 getIconForSavedObject: () => 'indexPatternApp',
                 name: i18n.translate(
-                  'kbn.visualize.newVisWizard.searchSelection.savedObjectType.indexPattern',
+                  'xpack.ml.newJob.wizard.searchSelection.savedObjectType.indexPattern',
                   {
                     defaultMessage: 'Index pattern',
                   }
