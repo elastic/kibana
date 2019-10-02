@@ -98,7 +98,7 @@ function MetricVisOptions({
       <EuiPanel paddingSize="s">
         <EuiTitle size="xs">
           <h3>
-            <FormattedMessage id="visTypeMetric.params.rangesTitle" defaultMessage="Ranges" />
+            <FormattedMessage id="visTypeMetric.params.settingsTitle" defaultMessage="Settings" />
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
@@ -112,6 +112,26 @@ function MetricVisOptions({
           setValue={setMetricValue}
         />
 
+        <SwitchOption
+          label={i18n.translate('visTypeMetric.params.showTitleLabel', {
+            defaultMessage: 'Show title',
+          })}
+          paramName="show"
+          value={stateParams.metric.labels.show}
+          setValue={setMetricLabels}
+        />
+      </EuiPanel>
+
+      <EuiSpacer size="s" />
+
+      <EuiPanel paddingSize="s">
+        <EuiTitle size="xs">
+          <h3>
+            <FormattedMessage id="visTypeMetric.params.rangesTitle" defaultMessage="Ranges" />
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+
         <ColorRanges
           data-test-subj="metricColorRange"
           colorsRange={stateParams.metric.colorsRange}
@@ -119,18 +139,6 @@ function MetricVisOptions({
           setTouched={setTouched}
           setValidity={setValidity}
         />
-
-        <EuiSpacer size="m" />
-
-        <EuiTitle size="xs">
-          <h3>
-            <FormattedMessage
-              id="visTypeMetric.params.color.colorOptionsTitle"
-              defaultMessage="Color options"
-            />
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
 
         <EuiFormRow fullWidth display="rowCompressed" label={metricColorModeLabel}>
           <EuiButtonGroup
@@ -153,6 +161,7 @@ function MetricVisOptions({
           }
           invertColors={stateParams.metric.invertColors}
           setValue={setMetricValue as SetColorSchemaOptionsValue}
+          showHelpText={false}
           uiState={uiState}
         />
       </EuiPanel>
@@ -178,15 +187,7 @@ function MetricVisOptions({
           setValue={setMetricStyle}
           showInput={true}
           showLabels={true}
-        />
-
-        <SwitchOption
-          label={i18n.translate('visTypeMetric.params.showTitleLabel', {
-            defaultMessage: 'Show metric title',
-          })}
-          paramName="show"
-          value={stateParams.metric.labels.show}
-          setValue={setMetricLabels}
+          showValue={false}
         />
       </EuiPanel>
     </>
