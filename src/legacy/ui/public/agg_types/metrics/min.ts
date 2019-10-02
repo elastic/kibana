@@ -16,25 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { MetricAggType } from './metric_agg_type';
-import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
-import { makeNestedLabel } from './lib/make_nested_label';
 import { i18n } from '@kbn/i18n';
+import { MetricAggType } from './metric_agg_type';
+import { METRIC_TYPES } from './metric_agg_types';
 
-const cumulativeSumLabel = i18n.translate('common.ui.aggTypes.metrics.cumulativeSumLabel', {
-  defaultMessage: 'cumulative sum'
+const minTitle = i18n.translate('common.ui.aggTypes.metrics.minTitle', {
+  defaultMessage: 'Min',
 });
 
-export const cumulativeSumMetricAgg = new MetricAggType({
-  name: 'cumulative_sum',
-  title: i18n.translate('common.ui.aggTypes.metrics.cumulativeSumTitle', {
-    defaultMessage: 'Cumulative Sum'
-  }),
-  subtype: parentPipelineAggHelper.subtype,
-  makeLabel: agg => makeNestedLabel(agg, cumulativeSumLabel),
+export const minMetricAgg = new MetricAggType({
+  name: METRIC_TYPES.MIN,
+  title: minTitle,
+  makeLabel(aggConfig) {
+    return i18n.translate('common.ui.aggTypes.metrics.minLabel', {
+      defaultMessage: 'Min {field}',
+      values: { field: aggConfig.getFieldDisplayName() },
+    });
+  },
   params: [
-    ...parentPipelineAggHelper.params()
+    {
+      name: 'field',
+      type: 'field',
+      filterFieldTypes: 'number,date',
+    },
   ],
-  getFormat: parentPipelineAggHelper.getFormat
 });

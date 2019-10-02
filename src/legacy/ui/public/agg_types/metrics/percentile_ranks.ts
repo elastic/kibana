@@ -17,68 +17,68 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { PercentileRanksEditor } from '../../vis/editors/default/controls/percentile_ranks';
 import { MetricAggType } from './metric_agg_type';
-import { getResponseAggConfigClass } from './get_response_agg_config_class';
-import { fieldFormats } from '../../registry/field_formats';
-import { getPercentileValue } from './percentiles_get_value';
-import { i18n } from '@kbn/i18n';
+import { getResponseAggConfigClass, IResponseAggConfig } from './get_response_agg_config_class';
 
+import { getPercentileValue } from './percentiles_get_value';
+import { METRIC_TYPES } from './metric_agg_types';
+// @ts-ignore
+import { fieldFormats } from '../../registry/field_formats';
 
 // required by the values editor
 
 const valueProps = {
-  makeLabel: function () {
+  makeLabel(this: IResponseAggConfig) {
     const field = this.getField();
     const format = (field && field.format) || fieldFormats.getDefaultInstance('number');
     const label = this.params.customLabel || this.getFieldDisplayName();
 
     return i18n.translate('common.ui.aggTypes.metrics.percentileRanks.valuePropsLabel', {
       defaultMessage: 'Percentile rank {format} of "{label}"',
-      values: { format: format.convert(this.key, 'text'), label }
+      values: { format: format.convert(this.key, 'text'), label },
     });
-  }
+  },
 };
 
-export const percentileRanksMetricAgg = new MetricAggType({
-  name: 'percentile_ranks',
+export const percentileRanksMetricAgg = new MetricAggType<IResponseAggConfig>({
+  name: METRIC_TYPES.PERCENTILE_RANKS,
   title: i18n.translate('common.ui.aggTypes.metrics.percentileRanksTitle', {
-    defaultMessage: 'Percentile Ranks'
+    defaultMessage: 'Percentile Ranks',
   }),
-  makeLabel: function (agg) {
+  makeLabel(agg) {
     return i18n.translate('common.ui.aggTypes.metrics.percentileRanksLabel', {
       defaultMessage: 'Percentile ranks of {field}',
-      values: { field: agg.getFieldDisplayName() }
+      values: { field: agg.getFieldDisplayName() },
     });
   },
   params: [
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: 'number'
+      filterFieldTypes: 'number',
     },
     {
       name: 'values',
       editorComponent: PercentileRanksEditor,
-      default: []
+      default: [],
     },
     {
       write(agg, output) {
         output.params.keyed = false;
-      }
-    }
+      },
+    },
   ],
-  getResponseAggs: function (agg) {
+  getResponseAggs(agg) {
     const ValueAggConfig = getResponseAggConfigClass(agg, valueProps);
 
-    return agg.params.values.map(function (value) {
-      return new ValueAggConfig(value);
-    });
+    return agg.params.values.map((value: any) => new ValueAggConfig(value));
   },
-  getFormat: function () {
+  getFormat() {
     return fieldFormats.getInstance('percent') || fieldFormats.getDefaultInstance('number');
   },
-  getValue: function (agg, bucket) {
+  getValue(agg, bucket) {
     return getPercentileValue(agg, bucket) / 100;
-  }
+  },
 });

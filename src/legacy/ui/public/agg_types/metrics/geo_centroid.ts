@@ -17,10 +17,30 @@
  * under the License.
  */
 
-import { find } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { MetricAggType } from './metric_agg_type';
+import { METRIC_TYPES } from './metric_agg_types';
 
-export function getPercentileValue(agg, bucket) {
-  const values = bucket[agg.parentId] && bucket[agg.parentId].values;
-  const percentile = find(values, value => agg.key === value.key);
-  return percentile ? percentile.value : NaN;
-}
+const geoCentroidTitle = i18n.translate('common.ui.aggTypes.metrics.geoCentroidTitle', {
+  defaultMessage: 'Geo Centroid',
+});
+
+const geoCentroidLabel = i18n.translate('common.ui.aggTypes.metrics.geoCentroidLabel', {
+  defaultMessage: 'Geo Centroid',
+});
+
+export const geoCentroidMetricAgg = new MetricAggType({
+  name: METRIC_TYPES.GEO_CENTROID,
+  title: geoCentroidTitle,
+  makeLabel: () => geoCentroidLabel,
+  params: [
+    {
+      name: 'field',
+      type: 'field',
+      filterFieldTypes: 'geo_point',
+    },
+  ],
+  getValue(agg, bucket) {
+    return bucket[agg.id] && bucket[agg.id].location;
+  },
+});

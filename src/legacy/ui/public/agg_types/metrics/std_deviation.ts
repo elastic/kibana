@@ -17,75 +17,88 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { MetricAggType } from './metric_agg_type';
-import { getResponseAggConfigClass } from './get_response_agg_config_class';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { MetricAggType } from './metric_agg_type';
+import { METRIC_TYPES } from './metric_agg_types';
+import { getResponseAggConfigClass, IResponseAggConfig } from './get_response_agg_config_class';
+
+interface ValProp {
+  valProp: string[];
+  title: string;
+}
+
+interface IStdDevResponseAggConfig extends IResponseAggConfig {
+  keyedDetails: (customLabel: string, fieldDisplayName?: string) => { [key: string]: ValProp };
+  valProp: () => ValProp;
+}
 
 const responseAggConfigProps = {
-  valProp: function () {
+  valProp(this: IStdDevResponseAggConfig) {
     const details = this.keyedDetails(this.params.customLabel)[this.key];
+
     return details.valProp;
   },
-  makeLabel: function () {
+  makeLabel(this: IStdDevResponseAggConfig) {
     const fieldDisplayName = this.getFieldDisplayName();
     const details = this.keyedDetails(this.params.customLabel, fieldDisplayName);
-    return _.get(details, [this.key, 'title']);
+
+    return get(details, [this.key, 'title']);
   },
-  keyedDetails: function (customLabel, fieldDisplayName) {
-    const label = customLabel ? customLabel : i18n.translate('common.ui.aggTypes.metrics.standardDeviation.keyDetailsLabel', {
-      defaultMessage: 'Standard Deviation of {fieldDisplayName}',
-      values: { fieldDisplayName }
-    });
+  keyedDetails(this: IStdDevResponseAggConfig, customLabel: string, fieldDisplayName: string) {
+    const label =
+      customLabel ||
+      i18n.translate('common.ui.aggTypes.metrics.standardDeviation.keyDetailsLabel', {
+        defaultMessage: 'Standard Deviation of {fieldDisplayName}',
+        values: { fieldDisplayName },
+      });
+
     return {
       std_lower: {
         valProp: ['std_deviation_bounds', 'lower'],
         title: i18n.translate('common.ui.aggTypes.metrics.standardDeviation.lowerKeyDetailsTitle', {
           defaultMessage: 'Lower {label}',
-          values: { label }
-        })
+          values: { label },
+        }),
       },
       std_upper: {
         valProp: ['std_deviation_bounds', 'upper'],
         title: i18n.translate('common.ui.aggTypes.metrics.standardDeviation.upperKeyDetailsTitle', {
           defaultMessage: 'Upper {label}',
-          values: { label }
-        })
-      }
+          values: { label },
+        }),
+      },
     };
-  }
+  },
 };
 
-export const stdDeviationMetricAgg = new MetricAggType({
-  name: 'std_dev',
+export const stdDeviationMetricAgg = new MetricAggType<IStdDevResponseAggConfig>({
+  name: METRIC_TYPES.STD_DEV,
   dslName: 'extended_stats',
   title: i18n.translate('common.ui.aggTypes.metrics.standardDeviationTitle', {
-    defaultMessage: 'Standard Deviation'
+    defaultMessage: 'Standard Deviation',
   }),
-  makeLabel: function (agg) {
+  makeLabel(agg) {
     return i18n.translate('common.ui.aggTypes.metrics.standardDeviationLabel', {
       defaultMessage: 'Standard Deviation of {field}',
-      values: { field: agg.getFieldDisplayName() }
+      values: { field: agg.getFieldDisplayName() },
     });
   },
   params: [
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: 'number'
-    }
+      filterFieldTypes: 'number',
+    },
   ],
 
-  getResponseAggs: function (agg) {
+  getResponseAggs(agg) {
     const ValueAggConfig = getResponseAggConfigClass(agg, responseAggConfigProps);
 
-    return [
-      new ValueAggConfig('std_lower'),
-      new ValueAggConfig('std_upper')
-    ];
+    return [new ValueAggConfig('std_lower'), new ValueAggConfig('std_upper')];
   },
 
-  getValue: function (agg, bucket) {
-    return _.get(bucket[agg.parentId], agg.valProp());
-  }
+  getValue(agg, bucket) {
+    return get(bucket[agg.parentId], agg.valProp());
+  },
 });

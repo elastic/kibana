@@ -17,28 +17,22 @@
  * under the License.
  */
 
-import { MetricAggType } from './metric_agg_type';
-import { fieldFormats } from '../../registry/field_formats';
-import { i18n } from '@kbn/i18n';
+import { AggConfigs } from '../../agg_configs';
+import { AggConfig } from '../../../vis';
 
-export const cardinalityMetricAgg = new MetricAggType({
-  name: 'cardinality',
-  title: i18n.translate('common.ui.aggTypes.metrics.uniqueCountTitle', {
-    defaultMessage: 'Unique Count'
-  }),
-  makeLabel: function (aggConfig) {
-    return i18n.translate('common.ui.aggTypes.metrics.uniqueCountLabel', {
-      defaultMessage: 'Unique count of {field}',
-      values: { field: aggConfig.getFieldDisplayName() }
-    });
-  },
-  getFormat: function () {
-    return fieldFormats.getDefaultInstance('number');
-  },
-  params: [
-    {
-      name: 'field',
-      type: 'field'
-    }
-  ]
-});
+export const parentPipelineAggWriter = (
+  agg: AggConfig,
+  output: Record<string, any>,
+  aggConfigs?: AggConfigs
+): void => {
+  const selectedMetric =
+    agg.params.customMetric || (aggConfigs && aggConfigs.getResponseAggById(agg.params.metricAgg));
+
+  if (agg.params.customMetric && agg.params.customMetric.type.name !== 'count') {
+    output.parentAggs = (output.parentAggs || []).concat(selectedMetric);
+  }
+
+  output.params = {
+    buckets_path: selectedMetric.type.name === 'count' ? '_count' : selectedMetric.id,
+  };
+};

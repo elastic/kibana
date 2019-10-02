@@ -17,24 +17,26 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import { MetricAggType } from './metric_agg_type';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
-import { i18n } from '@kbn/i18n';
+import { METRIC_TYPES } from './metric_agg_types';
 
-const overallSumLabel = i18n.translate('common.ui.aggTypes.metrics.overallSumLabel', {
-  defaultMessage: 'overall sum'
+const overallMaxLabel = i18n.translate('common.ui.aggTypes.metrics.overallMaxLabel', {
+  defaultMessage: 'overall max',
 });
 
-export const bucketSumMetricAgg = new MetricAggType({
-  name: 'sum_bucket',
-  title: i18n.translate('common.ui.aggTypes.metrics.sumBucketTitle', {
-    defaultMessage: 'Sum Bucket'
-  }),
-  makeLabel: agg => makeNestedLabel(agg, overallSumLabel),
+const maxBucketTitle = i18n.translate('common.ui.aggTypes.metrics.maxBucketTitle', {
+  defaultMessage: 'Max Bucket',
+});
+
+export const bucketMaxMetricAgg = new MetricAggType({
+  name: METRIC_TYPES.MAX_BUCKET,
+  title: maxBucketTitle,
+  makeLabel: agg => makeNestedLabel(agg, overallMaxLabel),
   subtype: siblingPipelineAggHelper.subtype,
-  params: [
-    ...siblingPipelineAggHelper.params()
-  ],
-  getFormat: siblingPipelineAggHelper.getFormat
+  params: [...siblingPipelineAggHelper.params()],
+  getFormat: siblingPipelineAggHelper.getFormat,
 });

@@ -17,14 +17,17 @@
  * under the License.
  */
 
-const siblingPipelineAggWriter = function (agg, output) {
+import { AggConfig } from '../../agg_config';
+import { METRIC_TYPES } from '../metric_agg_types';
+
+export const siblingPipelineAggWriter = (agg: AggConfig, output: Record<string, any>) => {
   if (!agg.params.customMetric) return;
 
   const metricAgg = agg.params.customMetric;
   const bucketAgg = agg.params.customBucket;
 
   // if a bucket is selected, we must add this agg as a sibling to it, and add a metric to that bucket (or select one of its)
-  if (metricAgg.type.name !== 'count') {
+  if (metricAgg.type.name !== METRIC_TYPES.COUNT) {
     bucketAgg.subAggs = (output.subAggs || []).concat(metricAgg);
     output.params.buckets_path = `${bucketAgg.id}>${metricAgg.id}`;
   } else {
@@ -32,7 +35,4 @@ const siblingPipelineAggWriter = function (agg, output) {
   }
 
   output.parentAggs = (output.parentAggs || []).concat(bucketAgg);
-
 };
-
-export { siblingPipelineAggWriter };

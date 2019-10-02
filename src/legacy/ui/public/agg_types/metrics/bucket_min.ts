@@ -16,25 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { MetricAggType } from './metric_agg_type';
-import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
-import { makeNestedLabel } from './lib/make_nested_label';
 import { i18n } from '@kbn/i18n';
+import { MetricAggType } from './metric_agg_type';
+import { makeNestedLabel } from './lib/make_nested_label';
+import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
+import { METRIC_TYPES } from './metric_agg_types';
 
-const derivativeLabel = i18n.translate('common.ui.aggTypes.metrics.derivativeLabel', {
-  defaultMessage: 'derivative'
+const overallMinLabel = i18n.translate('common.ui.aggTypes.metrics.overallMinLabel', {
+  defaultMessage: 'overall min',
 });
 
-export const derivativeMetricAgg = new MetricAggType({
-  name: 'derivative',
-  title: i18n.translate('common.ui.aggTypes.metrics.derivativeTitle', {
-    defaultMessage: 'Derivative'
-  }),
-  subtype: parentPipelineAggHelper.subtype,
-  makeLabel: agg => makeNestedLabel(agg, derivativeLabel),
-  params: [
-    ...parentPipelineAggHelper.params()
-  ],
-  getFormat: parentPipelineAggHelper.getFormat
+const minBucketTitle = i18n.translate('common.ui.aggTypes.metrics.minBucketTitle', {
+  defaultMessage: 'Min Bucket',
+});
+
+export const bucketMinMetricAgg = new MetricAggType({
+  name: METRIC_TYPES.MIN_BUCKET,
+  title: minBucketTitle,
+  makeLabel: agg => makeNestedLabel(agg, overallMinLabel),
+  subtype: siblingPipelineAggHelper.subtype,
+  params: [...siblingPipelineAggHelper.params()],
+  getFormat: siblingPipelineAggHelper.getFormat,
 });

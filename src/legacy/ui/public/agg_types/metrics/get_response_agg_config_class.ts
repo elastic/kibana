@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { assign } from 'lodash';
+import { AggConfig } from 'ui/agg_types';
 
 /**
  * Get the ResponseAggConfig class for an aggConfig,
@@ -27,16 +28,20 @@ import _ from 'lodash';
  * @param  {object} props - properties that the VAC should have
  * @return {Constructor} - a constructor for VAC objects that will inherit the aggConfig
  */
-export function getResponseAggConfigClass(agg, props) {
+export const getResponseAggConfigClass = (agg: any, props: any) => {
   if (agg.$$_ResponseAggConfigClass) {
     return agg.$$_ResponseAggConfigClass;
   } else {
     return (agg.$$_ResponseAggConfigClass = create(agg, props));
   }
+};
+
+export interface IResponseAggConfig extends AggConfig {
+  key: string | number;
+  parentId: AggConfig['id'];
 }
 
-function create(parentAgg, props) {
-
+export const create = (parentAgg: AggConfig, props: any): typeof AggConfig => {
   /**
    * AggConfig "wrapper" for multi-value metric aggs which
    * need to modify AggConfig behavior for each value produced.
@@ -44,23 +49,29 @@ function create(parentAgg, props) {
    * @param {string|number} key - the key or index that identifies
    *                            this part of the multi-value
    */
-  function ResponseAggConfig(key) {
-    this.key = key;
-    this.parentId = this.id;
+  class ResponseAggConfig {
+    id: AggConfig['id'];
+    key: string | number;
+    parentId: AggConfig['id'];
 
-    const subId = String(key);
-    if (subId.indexOf('.') > -1) {
-      this.id = this.parentId + '[\'' + subId.replace(/'/g, '\\\'') + '\']';
-    } else {
-      this.id = this.parentId + '.' + subId;
+    constructor(key: string) {
+      this.key = key;
+      this.parentId = parentAgg.id;
+
+      const subId = String(key);
+
+      if (subId.indexOf('.') > -1) {
+        this.id = this.parentId + "['" + subId.replace(/'/g, "\\'") + "']";
+      } else {
+        this.id = this.parentId + '.' + subId;
+      }
     }
   }
 
-  ResponseAggConfig.prototype = Object.create(parentAgg, {
-    constructor: ResponseAggConfig
-  });
+  ResponseAggConfig.prototype = Object.create(parentAgg);
+  ResponseAggConfig.prototype.constructor = ResponseAggConfig;
 
-  _.assign(ResponseAggConfig.prototype, props);
+  assign(ResponseAggConfig.prototype, props);
 
-  return ResponseAggConfig;
-}
+  return (ResponseAggConfig as unknown) as typeof AggConfig;
+};

@@ -17,36 +17,25 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
-import { i18n } from '@kbn/i18n';
+import { METRIC_TYPES } from './metric_agg_types';
 
-const overallAverageLabel = i18n.translate('common.ui.aggTypes.metrics.overallAverageLabel', {
-  defaultMessage: 'overall average'
+const overallSumLabel = i18n.translate('common.ui.aggTypes.metrics.overallSumLabel', {
+  defaultMessage: 'overall sum',
 });
 
-export const bucketAvgMetricAgg = new MetricAggType({
-  name: 'avg_bucket',
-  title: i18n.translate('common.ui.aggTypes.metrics.averageBucketTitle', {
-    defaultMessage: 'Average Bucket'
-  }),
-  makeLabel: agg => makeNestedLabel(agg, overallAverageLabel),
-  subtype: siblingPipelineAggHelper.subtype,
-  params: [
-    ...siblingPipelineAggHelper.params()
-  ],
-  getFormat: siblingPipelineAggHelper.getFormat,
-  getValue: function (agg, bucket) {
-    const customMetric = agg.params.customMetric;
-    const scaleMetrics = customMetric.type && customMetric.type.isScalable();
+const sumBucketTitle = i18n.translate('common.ui.aggTypes.metrics.sumBucketTitle', {
+  defaultMessage: 'Sum Bucket',
+});
 
-    let value = bucket[agg.id] && bucket[agg.id].value;
-    if (scaleMetrics && agg.params.customBucket.type.name === 'date_histogram') {
-      const aggInfo = agg.params.customBucket.write();
-      value *= get(aggInfo, 'bucketInterval.scale', 1);
-    }
-    return value;
-  }
+export const bucketSumMetricAgg = new MetricAggType({
+  name: METRIC_TYPES.SUM_BUCKET,
+  title: sumBucketTitle,
+  makeLabel: agg => makeNestedLabel(agg, overallSumLabel),
+  subtype: siblingPipelineAggHelper.subtype,
+  params: [...siblingPipelineAggHelper.params()],
+  getFormat: siblingPipelineAggHelper.getFormat,
 });

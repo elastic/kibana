@@ -17,25 +17,13 @@
  * under the License.
  */
 
-import { MetricAggType } from './metric_agg_type';
-import { i18n } from '@kbn/i18n';
+import { find } from 'lodash';
+import { IResponseAggConfig } from './get_response_agg_config_class';
 
-export const avgMetricAgg = new MetricAggType({
-  name: 'avg',
-  title: i18n.translate('common.ui.aggTypes.metrics.averageTitle', {
-    defaultMessage: 'Average'
-  }),
-  makeLabel: function (aggConfig) {
-    return i18n.translate('common.ui.aggTypes.metrics.averageLabel', {
-      defaultMessage: 'Average {field}',
-      values: { field: aggConfig.getFieldDisplayName() }
-    });
-  },
-  params: [
-    {
-      name: 'field',
-      type: 'field',
-      filterFieldTypes: 'number'
-    }
-  ]
-});
+export const getPercentileValue = (agg: IResponseAggConfig, bucket: any) => {
+  const { values } = bucket[agg.parentId] && bucket[agg.parentId];
+
+  const percentile: any = find(values, ({ key }) => key === agg.key);
+
+  return percentile ? percentile.value : NaN;
+};

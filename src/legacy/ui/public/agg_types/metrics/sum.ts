@@ -17,27 +17,31 @@
  * under the License.
  */
 
-import { MetricAggType } from './metric_agg_type';
 import { i18n } from '@kbn/i18n';
+import { MetricAggType } from './metric_agg_type';
+import { METRIC_TYPES } from './metric_agg_types';
 
-export const geoCentroidMetricAgg = new MetricAggType({
-  name: 'geo_centroid',
-  title: i18n.translate('common.ui.aggTypes.metrics.geoCentroidTitle', {
-    defaultMessage: 'Geo Centroid'
-  }),
-  makeLabel: function () {
-    return i18n.translate('common.ui.aggTypes.metrics.geoCentroidLabel', {
-      defaultMessage: 'Geo Centroid'
+const sumTitle = i18n.translate('common.ui.aggTypes.metrics.sumTitle', {
+  defaultMessage: 'Sum',
+});
+
+export const sumMetricAgg = new MetricAggType({
+  name: METRIC_TYPES.SUM,
+  title: sumTitle,
+  makeLabel(aggConfig) {
+    return i18n.translate('common.ui.aggTypes.metrics.sumLabel', {
+      defaultMessage: 'Sum of {field}',
+      values: { field: aggConfig.getFieldDisplayName() },
     });
+  },
+  isScalable() {
+    return true;
   },
   params: [
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: 'geo_point'
-    }
+      filterFieldTypes: 'number',
+    },
   ],
-  getValue: function (agg, bucket) {
-    return bucket[agg.id] && bucket[agg.id].location;
-  }
 });

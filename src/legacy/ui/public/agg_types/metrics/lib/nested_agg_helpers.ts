@@ -17,6 +17,9 @@
  * under the License.
  */
 
+import { AggConfig } from '../../agg_config';
+import { AggParam } from '../../agg_params';
+
 /**
  * Forwards modifyAggConfigOnSearchRequestStart calls to a nested AggConfig.
  * This must be used for each parameter, that accepts a nested aggregation, otherwise
@@ -33,22 +36,22 @@
  *      calls to. That should match the name of the parameter the function is called on.
  * @returns {function} A function, that forwards the calls.
  */
-function forwardModifyAggConfigOnSearchRequestStart(paramName) {
-  return (aggConfig, ...args) => {
+export const forwardModifyAggConfigOnSearchRequestStart = (paramName: string) => {
+  return (aggConfig: AggConfig, searchSource?: any, request?: any) => {
     if (!aggConfig || !aggConfig.params) {
       return;
     }
+
     const nestedAggConfig = aggConfig.params[paramName];
+
     if (nestedAggConfig && nestedAggConfig.type && nestedAggConfig.type.params) {
-      nestedAggConfig.type.params.forEach(param => {
+      nestedAggConfig.type.params.forEach((param: AggParam) => {
         // Check if this parameter of the nested aggConfig has a modifyAggConfigOnSearchRequestStart
         // function, that needs to be called.
         if (param.modifyAggConfigOnSearchRequestStart) {
-          param.modifyAggConfigOnSearchRequestStart(nestedAggConfig, ...args);
+          param.modifyAggConfigOnSearchRequestStart(nestedAggConfig, searchSource, request);
         }
       });
     }
   };
-}
-
-export { forwardModifyAggConfigOnSearchRequestStart };
+};

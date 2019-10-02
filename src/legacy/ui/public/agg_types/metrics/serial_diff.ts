@@ -17,24 +17,25 @@
  * under the License.
  */
 
-import { MetricAggType } from './metric_agg_type';
-import { makeNestedLabel } from './lib/make_nested_label';
-import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
 import { i18n } from '@kbn/i18n';
+import { MetricAggType } from './metric_agg_type';
+import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
+import { makeNestedLabel } from './lib/make_nested_label';
+import { METRIC_TYPES } from './metric_agg_types';
 
-const overallMaxLabel = i18n.translate('common.ui.aggTypes.metrics.overallMaxLabel', {
-  defaultMessage: 'overall max'
+const serialDiffTitle = i18n.translate('common.ui.aggTypes.metrics.serialDiffTitle', {
+  defaultMessage: 'Serial Diff',
 });
 
-export const bucketMaxMetricAgg = new MetricAggType({
-  name: 'max_bucket',
-  title: i18n.translate('common.ui.aggTypes.metrics.maxBucketTitle', {
-    defaultMessage: 'Max Bucket'
-  }),
-  makeLabel: agg => makeNestedLabel(agg, overallMaxLabel),
-  subtype: siblingPipelineAggHelper.subtype,
-  params: [
-    ...siblingPipelineAggHelper.params()
-  ],
-  getFormat: siblingPipelineAggHelper.getFormat
+const serialDiffLabel = i18n.translate('common.ui.aggTypes.metrics.serialDiffLabel', {
+  defaultMessage: 'serial diff',
+});
+
+export const serialDiffMetricAgg = new MetricAggType({
+  name: METRIC_TYPES.SERIAL_DIFF,
+  title: serialDiffTitle,
+  subtype: parentPipelineAggHelper.subtype,
+  makeLabel: agg => makeNestedLabel(agg, serialDiffLabel),
+  params: [...parentPipelineAggHelper.params()],
+  getFormat: parentPipelineAggHelper.getFormat,
 });

@@ -17,25 +17,32 @@
  * under the License.
  */
 
-import { MetricAggType } from './metric_agg_type';
 import { i18n } from '@kbn/i18n';
+import { MetricAggType } from './metric_agg_type';
+// @ts-ignore
+import { fieldFormats } from '../../registry/field_formats';
+import { METRIC_TYPES } from './metric_agg_types';
 
-export const maxMetricAgg = new MetricAggType({
-  name: 'max',
-  title: i18n.translate('common.ui.aggTypes.metrics.maxTitle', {
-    defaultMessage: 'Max'
-  }),
-  makeLabel: function (aggConfig) {
-    return i18n.translate('common.ui.aggTypes.metrics.maxLabel', {
-      defaultMessage: 'Max {field}',
-      values: { field: aggConfig.getFieldDisplayName() }
+const uniqueCountTitle = i18n.translate('common.ui.aggTypes.metrics.uniqueCountTitle', {
+  defaultMessage: 'Unique Count',
+});
+
+export const cardinalityMetricAgg = new MetricAggType({
+  name: METRIC_TYPES.CARDINALITY,
+  title: uniqueCountTitle,
+  makeLabel(aggConfig) {
+    return i18n.translate('common.ui.aggTypes.metrics.uniqueCountLabel', {
+      defaultMessage: 'Unique count of {field}',
+      values: { field: aggConfig.getFieldDisplayName() },
     });
+  },
+  getFormat() {
+    return fieldFormats.getDefaultInstance('number');
   },
   params: [
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: 'number,date'
-    }
-  ]
+    },
+  ],
 });

@@ -16,39 +16,43 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { MetricAggType } from './metric_agg_type';
-import { percentilesMetricAgg } from './percentiles';
 import { i18n } from '@kbn/i18n';
+import { MetricAggType } from './metric_agg_type';
+import { METRIC_TYPES } from './metric_agg_types';
+
+// @ts-ignore
+import { percentilesMetricAgg } from './percentiles';
+
+const medianTitle = i18n.translate('common.ui.aggTypes.metrics.medianTitle', {
+  defaultMessage: 'Median',
+});
 
 export const medianMetricAgg = new MetricAggType({
-  name: 'median',
+  name: METRIC_TYPES.MEDIAN,
   dslName: 'percentiles',
-  title: i18n.translate('common.ui.aggTypes.metrics.medianTitle', {
-    defaultMessage: 'Median'
-  }),
-  makeLabel: function (aggConfig) {
+  title: medianTitle,
+  makeLabel(aggConfig) {
     return i18n.translate('common.ui.aggTypes.metrics.medianLabel', {
       defaultMessage: 'Median {field}',
-      values: { field: aggConfig.getFieldDisplayName() }
+      values: { field: aggConfig.getFieldDisplayName() },
     });
   },
   params: [
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: ['number', 'date']
+      filterFieldTypes: ['number', 'date'],
     },
     {
       name: 'percents',
-      default: [50]
+      default: [50],
     },
     {
       write(agg, output) {
         output.params.keyed = false;
-      }
-    }
+      },
+    },
   ],
   getResponseAggs: percentilesMetricAgg.getResponseAggs,
-  getValue: percentilesMetricAgg.getValue
+  getValue: percentilesMetricAgg.getValue,
 });
