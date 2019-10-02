@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { TaskManager } from '../../task_manager';
 import { getCreateTaskRunnerFunction } from './lib';
 import { ActionsPlugin } from '../../actions';
+import { Logger } from '../../../../../src/core/server';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import {
   AlertType,
@@ -18,6 +19,7 @@ import {
 } from './types';
 
 interface ConstructorOptions {
+  logger: Logger;
   isSecurityEnabled: boolean;
   getServices: GetServicesFunction;
   taskManager: TaskManager;
@@ -28,6 +30,7 @@ interface ConstructorOptions {
 }
 
 export class AlertTypeRegistry {
+  private readonly logger: Logger;
   private readonly getServices: GetServicesFunction;
   private readonly taskManager: TaskManager;
   private readonly executeAction: ActionsPlugin['execute'];
@@ -38,6 +41,7 @@ export class AlertTypeRegistry {
   private readonly isSecurityEnabled: boolean;
 
   constructor({
+    logger,
     encryptedSavedObjectsPlugin,
     executeAction,
     taskManager,
@@ -46,6 +50,7 @@ export class AlertTypeRegistry {
     getBasePath,
     isSecurityEnabled,
   }: ConstructorOptions) {
+    this.logger = logger;
     this.taskManager = taskManager;
     this.executeAction = executeAction;
     this.encryptedSavedObjectsPlugin = encryptedSavedObjectsPlugin;
@@ -77,6 +82,7 @@ export class AlertTypeRegistry {
         type: `alerting:${alertType.id}`,
         createTaskRunner: getCreateTaskRunnerFunction({
           alertType,
+          logger: this.logger,
           isSecurityEnabled: this.isSecurityEnabled,
           getServices: this.getServices,
           executeAction: this.executeAction,

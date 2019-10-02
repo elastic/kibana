@@ -5,6 +5,7 @@
  */
 
 import { ActionsPlugin } from '../../../actions';
+import { Logger } from '../../../../../../src/core/server';
 import { ConcreteTaskInstance } from '../../../task_manager';
 import { createExecutionHandler } from './create_execution_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
@@ -22,6 +23,7 @@ import {
 } from '../types';
 
 export interface CreateTaskRunnerFunctionOptions {
+  logger: Logger;
   isSecurityEnabled: boolean;
   getServices: GetServicesFunction;
   alertType: AlertType;
@@ -36,6 +38,7 @@ interface TaskRunnerOptions {
 }
 
 export function getCreateTaskRunnerFunction({
+  logger,
   getServices,
   alertType,
   executeAction,
@@ -107,7 +110,7 @@ export function getCreateTaskRunnerFunction({
 
         const executionHandler = createExecutionHandler({
           alertId,
-          logger: services.logger,
+          logger,
           executeAction,
           apiKey,
           actions: actionsWithIds,

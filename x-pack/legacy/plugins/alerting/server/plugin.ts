@@ -85,7 +85,6 @@ export class Plugin {
     core: AlertingCoreSetup,
     plugins: AlertingPluginsSetup
   ): Promise<PluginSetupContract> {
-    const { logger } = this;
     const adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
 
     plugins.xpack_main.registerFeature({
@@ -126,7 +125,6 @@ export class Plugin {
 
     function getServices(request: any): Services {
       return {
-        logger,
         callCluster: (...args) =>
           adminClient.asScoped(KibanaRequest.from(request)).callAsCurrentUser(...args),
         savedObjectsClient: core.savedObjects.getScopedSavedObjectsClient(request),
@@ -145,6 +143,7 @@ export class Plugin {
 
     this.alertTypeRegistry = new AlertTypeRegistry({
       getServices,
+      logger: this.logger,
       isSecurityEnabled: !!plugins.security,
       taskManager: plugins.task_manager,
       executeAction: plugins.actions.execute,

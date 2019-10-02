@@ -6,11 +6,7 @@
 
 import { AlertInstance } from './lib';
 import { AlertTypeRegistry } from './alert_type_registry';
-import {
-  SavedObjectAttributes,
-  SavedObjectsClientContract,
-  Logger,
-} from '../../../../../src/core/server';
+import { SavedObjectAttributes, SavedObjectsClientContract } from '../../../../../src/core/server';
 
 export type State = Record<string, any>;
 export type Context = Record<string, any>;
@@ -20,7 +16,6 @@ export type GetBasePathFunction = (spaceId?: string) => string;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
 export interface Services {
-  logger: Logger;
   callCluster(path: string, opts: any): Promise<any>;
   savedObjectsClient: SavedObjectsClientContract;
 }

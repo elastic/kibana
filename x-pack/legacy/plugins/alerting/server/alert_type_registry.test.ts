@@ -21,11 +21,11 @@ const alertTypeRegistryParams = {
     return {
       callCluster: jest.fn(),
       savedObjectsClient: SavedObjectsClientMock.create(),
-      logger: loggingServiceMock.create().get(),
     };
   },
   taskManager,
   executeAction: jest.fn(),
+  logger: loggingServiceMock.create().get(),
   getBasePath: jest.fn().mockReturnValue(undefined),
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
   encryptedSavedObjectsPlugin: encryptedSavedObjectsMock.create(),
@@ -79,6 +79,7 @@ describe('register()', () => {
     expect(getCreateTaskRunnerFunction).toHaveBeenCalledWith({
       alertType,
       isSecurityEnabled: true,
+      logger: alertTypeRegistryParams.logger,
       getServices: alertTypeRegistryParams.getServices,
       encryptedSavedObjectsPlugin: alertTypeRegistryParams.encryptedSavedObjectsPlugin,
       getBasePath: alertTypeRegistryParams.getBasePath,
