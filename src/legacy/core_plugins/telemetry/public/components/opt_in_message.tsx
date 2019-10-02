@@ -18,7 +18,7 @@
  */
 
 import * as React from 'react';
-import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { getConfigTelemetryDesc, PRIVACY_STATEMENT_URL } from '../../common/constants';

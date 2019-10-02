@@ -40,7 +40,7 @@ export const init = (monitoringPlugin, server) => {
   collectorSet.register(getKibanaUsageCollector(server));
   collectorSet.register(getSettingsCollector(server, kbnServer));
 
-  telemetryCollectionManager.setStatsGetter(getStatsWithMonitoring, 1);
+  telemetryCollectionManager.setStatsGetter(getStatsWithMonitoring, 'monitoring', 1);
 
   /*
    * Instantiate and start the internal background task that calls collector

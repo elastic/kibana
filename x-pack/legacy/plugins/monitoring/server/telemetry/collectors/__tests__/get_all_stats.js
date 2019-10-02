@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { addStackStats, getAllStats, getAllStatsForServer, handleAllStats } from '../get_all_stats';
+import { addStackStats, getAllStats, handleAllStats } from '../get_all_stats';
 
 describe('get_all_stats', () => {
   const size = 123;
@@ -106,7 +106,7 @@ describe('get_all_stats', () => {
     }
   ];
 
-  describe('getAllStats / getAllStatsForServer return the same results', () => {
+  describe('getAllStats', () => {
     it('returns clusters', async () => {
       const clusterUuidsResponse = {
         aggregations: { cluster_uuids: { buckets: [ { key: 'a' } ] } }
@@ -201,7 +201,6 @@ describe('get_all_stats', () => {
         .onCall(3).returns(Promise.resolve(logstashStatsResponse));
 
       expect(await getAllStats(req, start, end)).to.eql(allClusters);
-      expect(await getAllStatsForServer(server, start, end)).to.eql(allClusters);
     });
 
     it('returns empty clusters', async () => {
@@ -213,7 +212,6 @@ describe('get_all_stats', () => {
       callWithInternalUser.withArgs('search').returns(Promise.resolve(clusterUuidsResponse));
 
       expect(await getAllStats(req, start, end)).to.eql([]);
-      expect(await getAllStatsForServer(server, start, end)).to.eql([]);
     });
   });
 

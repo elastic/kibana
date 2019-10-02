@@ -20,73 +20,54 @@
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 
-import { TIMEOUT } from '../constants';
 import {
-  getXPackUsage,
-} from '../get_xpack_usage';
+  getXPackLicense,
+} from '../get_license_info';
 
-
-
-function mockGetXPackUsage(callCluster, usage, req) {
+function mockGetXPackLicense(callCluster, license, req) {
   callCluster.withArgs(req, 'transport.request', {
     method: 'GET',
-    path: '/_xpack/usage',
+    path: '/_license',
     query: {
-      master_timeout: TIMEOUT
+      local: 'true'
     }
   })
-    .returns(usage);
+    .returns(license.then(response => ({ license: response })));
 
   callCluster.withArgs('transport.request', {
     method: 'GET',
-    path: '/_xpack/usage',
+    path: '/_license',
     query: {
-      master_timeout: TIMEOUT
+      local: 'true'
     }
   })
-    .returns(usage);
+    // conveniently wraps the passed in license object as { license: response }, like it really is
+    .returns(license.then(response => ({ license: response })));
 }
 
-/**
- * Mock getXPack responses.
- *
- * @param {Function} callCluster Sinon function mock.
- * @param {Promise} license Promised license response.
- * @param {Promise} usage Promised usage response.
- * @param {Object} usage reqeust object.
- */
 
+describe('getXPackLicense', () => {
 
-describe('getXPackUsage', () => {
-
-  it('uses callCluster to get /_xpack/usage API', () => {
-    const response = Promise.resolve({});
-    const callCluster = sinon.stub();
-
-    mockGetXPackUsage(callCluster, response);
-
-    expect(getXPackUsage(callCluster)).to.be(response);
-  });
 
   it('returns the formatted response object', async () => {
     const license = { fancy: 'license' };
-    const xpack = { also: 'fancy' };
+
 
     const callCluster = sinon.stub();
 
-    mockGetXPackUsage(callCluster, Promise.resolve(license), Promise.resolve(xpack));
+    mockGetXPackLicense(callCluster, Promise.resolve(license));
 
-    const data = await getXPackUsage(callCluster);
+    const data = await getXPackLicense(callCluster);
 
-    expect(data).to.eql({ license, xpack });
+    expect(data).to.eql(license);
   });
 
-  it('returns empty object upon usage failure', async () => {
+  it('returns empty object upon license failure', async () => {
     const callCluster = sinon.stub();
 
-    mockGetXPackUsage(callCluster, Promise.resolve({ fancy: 'license' }), Promise.reject(new Error()));
+    mockGetXPackLicense(callCluster, Promise.reject(new Error()), Promise.resolve({ also: 'fancy' }));
 
-    const data = await getXPackUsage(callCluster);
+    const data = await getXPackLicense(callCluster);
 
     expect(data).to.eql({ });
   });

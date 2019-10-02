@@ -65,6 +65,7 @@ export function getUsageStats(rawStats) {
     // e.g: we want `xpack.reporting` to just be `reporting`
     const top = omit(pluginsNested, 'xpack');
     const plugins = { ...top, ...pluginsNested.xpack };
+    console.log('plugins::', plugins);
 
     return {
       ...accum,

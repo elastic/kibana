@@ -90,8 +90,10 @@ const telemetry = (kibana: any) => {
     },
     init(server: Server) {
       const initializerContext = {} as PluginInitializerContext;
+
       const coreSetup = ({
         http: { server },
+        log: server.log,
       } as any) as CoreSetup;
 
       telemetryPlugin(initializerContext).setup(coreSetup);

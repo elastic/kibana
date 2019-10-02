@@ -20,7 +20,8 @@
 import { get, omit } from 'lodash';
 import { getClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
-import { getXPack } from './get_xpack';
+import { getXPackUsage } from './get_xpack_usage';
+import { getXPackLicense } from './get_license_info';
 import { getKibana, handleKibanaStats } from './get_kibana';
 
 /**
@@ -55,17 +56,18 @@ export function handleLocalStats(server, clusterInfo, clusterStats, license, xpa
  * @param {function} callCluster The callWithInternalUser handler (exposed for testing)
  * @return {Promise} The object containing the current Elasticsearch cluster's telemetry.
  */
-export function getLocalStatsWithCaller(server, callCluster) {
-  return Promise.all([
+export async function getLocalStatsWithCaller(server, callCluster) {
+  const [clusterInfo, clusterStats, license, xpack, kibana] = await Promise.all([
     getClusterInfo(callCluster),  // cluster info
     getClusterStats(callCluster), // cluster stats (not to be confused with cluster _state_)
-    getXPack(callCluster),        // { license, xpack }
-    getKibana(server, callCluster)
-  ]).then(([clusterInfo, clusterStats, { license, xpack }, kibana]) => {
-    return handleLocalStats(server, clusterInfo, clusterStats, license, xpack, kibana);
-  }
-  );
+    getXPackLicense(callCluster),
+    getXPackUsage(callCluster),
+    getKibana(server, callCluster),
+  ]);
+
+  return handleLocalStats(server, clusterInfo, clusterStats, license, xpack, kibana);
 }
+
 
 /**
  * Get statistics for the connected Elasticsearch cluster.
@@ -74,10 +76,12 @@ export function getLocalStatsWithCaller(server, callCluster) {
  * @param {Boolean} useRequestUser callWithRequest, otherwise callWithInternalUser
  * @return {Promise} The cluster object containing telemetry.
  */
-export function getLocalStats(req, { useInternalUser = false } = {}) {
+export async function getLocalStats(req, { useInternalUser = false } = {}) {
   const { server } = req;
   const { callWithRequest, callWithInternalUser } = server.plugins.elasticsearch.getCluster('data');
   const callCluster = useInternalUser ? callWithInternalUser : (...args) => callWithRequest(req, ...args);
 
-  return getLocalStatsWithCaller(server, callCluster);
+  return [
+    await getLocalStatsWithCaller(server, callCluster)
+  ];
 }

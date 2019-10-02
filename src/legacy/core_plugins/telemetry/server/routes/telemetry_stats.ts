@@ -48,8 +48,11 @@ export function registerTelemetryDataRoutes(core: CoreSetup) {
       const isDev = config.get('env.dev');
 
       try {
-        const getStats = telemetryCollectionManager.getStatsGetter();
+        const { getStats, title } = telemetryCollectionManager.getStatsGetter();
+        server.log(['debug', 'telemetry'], `Using Stats Getter: ${title}`);
+
         const usageData = await getStats(req, config, start, end, unencrypted);
+
         if (unencrypted) return usageData;
         return encryptTelemetry(usageData, isDev);
       } catch (err) {

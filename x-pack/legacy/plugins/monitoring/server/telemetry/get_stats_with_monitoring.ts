@@ -38,7 +38,7 @@ export async function getStatsWithMonitoring(
 
   if (!Array.isArray(response) || response.length === 0) {
     // return it as an array for a consistent API response
-    response = [await _getLocalStats(req, { useInternalUser })];
+    response = await _getLocalStats(req, { useInternalUser });
   }
 
   return response;

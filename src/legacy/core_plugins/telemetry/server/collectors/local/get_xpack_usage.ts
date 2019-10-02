@@ -17,14 +17,24 @@
  * under the License.
  */
 
-import { CoreSetup } from 'src/core/server';
-import { registerRoutes } from './routes';
-import { telemetryCollectionManager } from './collection_manager';
-import { getStats } from './collectors';
+import { TIMEOUT } from './constants';
 
-export class TelemetryPlugin {
-  public setup(core: CoreSetup) {
-    telemetryCollectionManager.setStatsGetter(getStats, 'local');
-    registerRoutes(core);
-  }
+/**
+ * Get the cluster stats from the connected cluster.
+ *
+ * This is the equivalent of GET /_xpack/usage?master_timeout=${TIMEOUT}
+ *
+ * Like any X-Pack related API, X-Pack must installed for this to work.
+ *
+ * @param {function} callCluster The callWithInternalUser handler (exposed for testing)
+ * @return {Promise} The response from Elasticsearch equivalent to GET /_cluster/stats.
+ */
+export async function getXPackUsage(callCluster: any) {
+  return await callCluster('transport.request', {
+    method: 'GET',
+    path: '/_xpack/usage',
+    query: {
+      master_timeout: TIMEOUT,
+    },
+  });
 }

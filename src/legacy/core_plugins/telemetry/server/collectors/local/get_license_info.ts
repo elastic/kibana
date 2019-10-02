@@ -17,14 +17,25 @@
  * under the License.
  */
 
-import { CoreSetup } from 'src/core/server';
-import { registerRoutes } from './routes';
-import { telemetryCollectionManager } from './collection_manager';
-import { getStats } from './collectors';
+/**
+ * Get the cluster stats from the connected cluster.
+ *
+ * This is the equivalent of GET /_license?local=true .
+ *
+ * Like any X-Pack related API, X-Pack must installed for this to work.
+ *
+ * @param {function} callCluster The callWithInternalUser handler (exposed for testing)
+ * @return {Promise} The response from Elasticsearch.
+ */
+export async function getXPackLicense(callCluster: any) {
+  const { license } = await callCluster('transport.request', {
+    method: 'GET',
+    path: '/_license',
+    query: {
+      // Fetching the local license is cheaper than getting it from the master and good enough
+      local: 'true',
+    },
+  });
 
-export class TelemetryPlugin {
-  public setup(core: CoreSetup) {
-    telemetryCollectionManager.setStatsGetter(getStats, 'local');
-    registerRoutes(core);
-  }
+  return license;
 }

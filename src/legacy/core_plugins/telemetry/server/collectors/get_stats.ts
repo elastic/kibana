@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { getLocalStats } from '.';
+// @ts-ignore
+import { getLocalStats } from './local';
 
 /**
  * Get the telemetry data.
@@ -37,8 +38,7 @@ export async function getStats(
   unencrypted: boolean,
   _getLocalStats = getLocalStats
 ) {
-  const useInternalUser = !unencrypted;
-
-  // return it as an array for a consistent API response
-  return [await _getLocalStats(req, { useInternalUser })];
+  return await _getLocalStats(req, {
+    useInternalUser: !unencrypted,
+  });
 }

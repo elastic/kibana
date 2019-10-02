@@ -37,20 +37,6 @@ export function getAllStats(req, start, end, { useInternalUser = false } = {}) {
 /**
  * Get statistics for all products joined by Elasticsearch cluster.
  *
- * @param {Object} server The server instance used to call ES as the internal user
- * @param {Date} start The starting range to request data
- * @param {Date} end The ending range to request data
- * @return {Promise} The array of clusters joined with the Kibana and Logstash instances.
- */
-export function getAllStatsForServer(server, start, end) {
-  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('monitoring');
-
-  return getAllStatsWithCaller(server, callWithInternalUser, start, end);
-}
-
-/**
- * Get statistics for all products joined by Elasticsearch cluster.
- *
  * @param {Object} server The Kibana server instance used to call ES as the internal user
  * @param {function} callCluster The callWithRequest or callWithInternalUser handler
  * @param {Date} start The starting range to request data

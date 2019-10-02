@@ -19,20 +19,30 @@
 
 class TelemetryCollectionManager {
   private getterMethod?: any;
+  private collectionTitle?: string;
   private getterMethodPriority = 0;
 
-  public setStatsGetter = (statsGetter: any, priority = 0) => {
+  public setStatsGetter = (statsGetter: any, title: string, priority = 0) => {
     if (priority >= this.getterMethodPriority) {
       this.getterMethod = statsGetter;
+      this.collectionTitle = title;
       this.getterMethodPriority = priority;
     }
+  };
+
+  getCollectionTitle = () => {
+    return this.collectionTitle;
   };
 
   public getStatsGetter = () => {
     if (!this.getterMethod) {
       throw Error('Stats getter method not set.');
     }
-    return this.getterMethod;
+    return {
+      getStats: this.getterMethod,
+      priority: this.getterMethodPriority,
+      title: this.collectionTitle,
+    };
   };
 }
 
