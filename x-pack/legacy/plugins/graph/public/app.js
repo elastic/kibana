@@ -33,6 +33,7 @@ import { npStart } from 'ui/new_platform';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { capabilities } from 'ui/capabilities';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+import { Storage } from 'ui/storage';
 
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
@@ -114,11 +115,10 @@ app.directive('graphApp', function (reactDirective) {
     ['isLoading', { watchDepth: 'reference' }],
     ['onIndexPatternSelected', { watchDepth: 'reference' }],
     ['onQuerySubmit', { watchDepth: 'reference' }],
-    ['savedObjects', { watchDepth: 'reference' }],
-    ['uiSettings', { watchDepth: 'reference' }],
-    ['http', { watchDepth: 'reference' }],
     ['initialQuery', { watchDepth: 'reference' }],
-    ['overlays', { watchDepth: 'reference' }]
+    ['autocompleteStart', { watchDepth: 'reference' }],
+    ['coreStart', { watchDepth: 'reference' }],
+    ['store', { watchDepth: 'reference' }]
   ]);
 });
 
@@ -297,8 +297,10 @@ app.controller('graphuiPlugin', function (
     }
   };
 
-  $scope.pluginDependencies = npStart.core;
 
+  $scope.store = new Storage(window.localStorage);
+  $scope.coreStart = npStart.core;
+  $scope.autocompleteStart = npStart.plugins.data.autocomplete;
   $scope.loading = false;
 
   const updateScope = () => {

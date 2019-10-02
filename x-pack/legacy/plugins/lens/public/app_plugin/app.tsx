@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Storage } from 'ui/storage';
 import { CoreStart } from 'src/core/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { Query } from '../../../../../../src/legacy/core_plugins/data/public';
 import { QueryBarTopRow } from '../../../../../../src/legacy/core_plugins/data/public/query/query_bar';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
@@ -51,6 +52,7 @@ function isLocalStateDirty(
 
 export function App({
   editorFrame,
+  data,
   core,
   store,
   docId,
@@ -58,6 +60,7 @@ export function App({
   redirectTo,
 }: {
   editorFrame: EditorFrameInstance;
+  data: DataPublicPluginStart;
   core: CoreStart;
   store: Storage;
   docId?: string;
@@ -156,10 +159,10 @@ export function App({
     <I18nProvider>
       <KibanaContextProvider
         services={{
-          uiSettings: core.uiSettings,
-          savedObjects: core.savedObjects,
-          notifications: core.notifications,
-          http: core.http,
+          appName: 'lens',
+          autocomplete: data.autocomplete,
+          store,
+          ...core,
         }}
       >
         <div className="lnsApp">
@@ -224,9 +227,7 @@ export function App({
                 setState({ ...state, localQueryBarState });
               }}
               isDirty={isLocalStateDirty(state.localQueryBarState, state.query, state.dateRange)}
-              appName={'lens'}
               indexPatterns={state.indexPatternTitles}
-              store={store}
               showDatePicker={true}
               showQueryInput={true}
               query={state.localQueryBarState.query}

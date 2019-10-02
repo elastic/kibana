@@ -11,14 +11,13 @@
     current-index-pattern="selectedIndex"
     on-index-pattern-selected="uiSelectIndex"
     on-query-submit="submit"
-    saved-objects="pluginDependencies.savedObjects"
-    ui-settings="pluginDependencies.uiSettings"
-    http="pluginDependencies.http"
-    overlays="pluginDependencies.overlays"
     is-loading="loading"
     initial-query="initialQuery"
     state="reduxState"
     dispatch="reduxDispatch"
+    autocomplete-start="autocompleteStart"
+    core-start="coreStart"
+    store="store"
   ></graph-app>
 
   <div class="gphGraph__container" id="GraphSvgContainer">
