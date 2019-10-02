@@ -81,7 +81,7 @@ export default () => Joi.object({
   server: Joi.object({
     uuid: Joi.string().guid().default(),
     name: Joi.string().default(os.hostname()),
-    defaultRoute: Joi.string().default('/app/kibana').regex(/^\//, `start with a slash`),
+    defaultRoute: Joi.string().regex(/^\//, `start with a slash`),
     customResponseHeaders: Joi.object().unknown(true).default({}),
     xsrf: Joi.object({
       disableProtection: Joi.boolean().default(false),

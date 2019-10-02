@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { DEFAULT_SPACE_ID } from '../../common/constants';
+import { DEFAULT_SPACE_ID } from '../constants';
 import { addSpaceIdToPath, getSpaceIdFromPath } from './spaces_url_parser';
 
 describe('getSpaceIdFromPath', () => {
