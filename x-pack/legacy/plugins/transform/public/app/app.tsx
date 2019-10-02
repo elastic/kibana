@@ -14,7 +14,7 @@ import { getAppProviders, useAppDependencies } from './app_dependencies';
 import { AuthorizationContext } from './lib/authorization';
 import { AppCore, AppPlugins } from './types';
 
-import { Page as NewTransform } from './sections/data_frame_new_pivot/page';
+import { Page as NewTransform } from './sections/new_transform/page';
 import { Page as TransformManagement } from './sections/transform_management/page';
 
 export const App: FC = () => {

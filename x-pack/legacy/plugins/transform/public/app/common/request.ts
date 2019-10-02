@@ -11,8 +11,8 @@ import { IndexPattern } from 'ui/index_patterns';
 import { dictionaryToArray } from '../../../common/types/common';
 import { SavedSearchQuery } from '../../../../ml/public/contexts/kibana';
 
-import { StepDefineExposedState } from '../sections/data_frame_new_pivot/components/step_define/step_define_form';
-import { StepDetailsExposedState } from '../sections/data_frame_new_pivot/components/step_details/step_details_form';
+import { StepDefineExposedState } from '../sections/new_transform/components/step_define/step_define_form';
+import { StepDetailsExposedState } from '../sections/new_transform/components/step_details/step_details_form';
 
 import {
   getEsAggFromAggConfig,

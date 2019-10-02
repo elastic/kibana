@@ -6,8 +6,8 @@
 
 import { PivotGroupByConfig } from '../common';
 
-import { StepDefineExposedState } from '../sections/data_frame_new_pivot/components/step_define/step_define_form';
-import { StepDetailsExposedState } from '../sections/data_frame_new_pivot/components/step_details/step_details_form';
+import { StepDefineExposedState } from '../sections/new_transform/components/step_define/step_define_form';
+import { StepDetailsExposedState } from '../sections/new_transform/components/step_details/step_details_form';
 
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
 import { PivotAggsConfig, PIVOT_SUPPORTED_AGGS } from './pivot_aggs';
