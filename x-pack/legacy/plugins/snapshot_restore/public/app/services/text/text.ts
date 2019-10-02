@@ -113,7 +113,7 @@ class TextService {
     });
   }
 
-  public getTimeUnitLabel(timeUnit = TIME_UNITS.SECOND, timeValue = '0') {
+  public getTimeUnitLabel(timeUnit: 'd' | 'h' | 'm' | 's', timeValue: string) {
     switch (timeUnit) {
       case TIME_UNITS.SECOND:
         return this.i18n.translate('xpack.snapshotRestore.policyForm.timeUnits.secondLabel', {

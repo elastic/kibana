@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { useAppDependencies } from '../../../../index';
-import { PolicyUpdateRetentionProvider } from '../../../../components';
+import { UpdateRetentionModalProvider, UpdateRetentionSetting } from '../../../../components';
 
 interface Props {
   retentionSettings: {
@@ -81,6 +81,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
 
   if (retentionSettings && retentionSettings.retentionSchedule) {
     const { retentionSchedule } = retentionSettings;
+
     return (
       <Fragment>
         <EuiPanel>
@@ -88,81 +89,43 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
             <EuiFlexItem grow={false}>
               <EuiText>
                 <p>
-                  {retentionSchedule ? (
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleDescription"
-                      defaultMessage="Snapshot retention will run on the cron schedule: {cronSchedule}."
-                      values={{ cronSchedule: <strong>{retentionSchedule}</strong> }}
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleNotConfiguredDescription"
-                      defaultMessage="A snapshot retention schedule is not configured."
-                    />
-                  )}
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleDescription"
+                    defaultMessage="Snapshot retention will run on the cron schedule: {cronSchedule}."
+                    values={{ cronSchedule: <strong>{retentionSchedule}</strong> }}
+                  />
                 </p>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {retentionSchedule ? (
-                <PolicyUpdateRetentionProvider>
-                  {updateRetentionPrompt => {
-                    return (
-                      <EuiToolTip
-                        position="top"
-                        content={
-                          <FormattedMessage
-                            id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleEditLinkTooltip"
-                            defaultMessage="Edit retention schedule"
-                          />
-                        }
-                      >
-                        <EuiButtonIcon
-                          iconType="pencil"
-                          onClick={() =>
-                            updateRetentionPrompt(retentionSchedule, onRetentionScheduleUpdated)
-                          }
-                          aria-label={i18n.translate(
-                            'xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleEditLinkAriaLabel',
-                            {
-                              defaultMessage: 'Edit retention schedule',
-                            }
-                          )}
+              <UpdateRetentionModalProvider>
+                {(updateRetentionPrompt: UpdateRetentionSetting) => {
+                  return (
+                    <EuiToolTip
+                      position="top"
+                      content={
+                        <FormattedMessage
+                          id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleEditLinkTooltip"
+                          defaultMessage="Edit retention schedule"
                         />
-                      </EuiToolTip>
-                    );
-                  }}
-                </PolicyUpdateRetentionProvider>
-              ) : (
-                <PolicyUpdateRetentionProvider>
-                  {updateRetentionPrompt => {
-                    return (
-                      <EuiToolTip
-                        position="top"
-                        content={
-                          <FormattedMessage
-                            id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleAddLinkTooltip"
-                            defaultMessage="Add retention schedule"
-                          />
+                      }
+                    >
+                      <EuiButtonIcon
+                        iconType="pencil"
+                        onClick={() =>
+                          updateRetentionPrompt(retentionSchedule, onRetentionScheduleUpdated)
                         }
-                      >
-                        <EuiButtonIcon
-                          iconType="plusInCircle"
-                          onClick={() =>
-                            updateRetentionPrompt(undefined, onRetentionScheduleUpdated)
+                        aria-label={i18n.translate(
+                          'xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleEditLinkAriaLabel',
+                          {
+                            defaultMessage: 'Edit retention schedule',
                           }
-                          aria-label={i18n.translate(
-                            'xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleAddLinkAriaLabel',
-                            {
-                              defaultMessage: 'Add retention schedule',
-                            }
-                          )}
-                        />
-                      </EuiToolTip>
-                    );
-                  }}
-                </PolicyUpdateRetentionProvider>
-              )}
+                        )}
+                      />
+                    </EuiToolTip>
+                  );
+                }}
+              </UpdateRetentionModalProvider>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
@@ -188,8 +151,8 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
               defaultMessage="You have one or more policies with retention, but you do not have a retention schedule configured."
             />
           </p>
-          <PolicyUpdateRetentionProvider>
-            {updateRetentionPrompt => {
+          <UpdateRetentionModalProvider>
+            {(updateRetentionPrompt: UpdateRetentionSetting) => {
               return (
                 <EuiButton
                   iconType="plusInCircle"
@@ -203,7 +166,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
                 </EuiButton>
               );
             }}
-          </PolicyUpdateRetentionProvider>
+          </UpdateRetentionModalProvider>
         </EuiCallOut>
         <EuiSpacer />
       </Fragment>

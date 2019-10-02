@@ -8,10 +8,9 @@ import { TIME_UNITS } from '../constants';
 
 export const deserializeTime = (time: string) => {
   const timeUnits = Object.values(TIME_UNITS);
-  const timeChars = time.split('');
 
   const timeUnit = timeUnits.find(unit => {
-    const unitIndex = timeChars.indexOf(unit);
+    const unitIndex = time.indexOf(unit);
     return unitIndex !== -1 && unitIndex === time.length - 1;
   });
 

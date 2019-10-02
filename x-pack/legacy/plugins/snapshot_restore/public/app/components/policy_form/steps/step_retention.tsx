@@ -24,12 +24,10 @@ import { StepProps } from './';
 import { textService } from '../../../services/text';
 
 const getExpirationTimeOptions = (unitSize = '0') =>
-  Object.entries(TIME_UNITS).map(([_key, value]) => {
-    return {
-      text: textService.getTimeUnitLabel(value, unitSize),
-      value,
-    };
-  });
+  Object.entries(TIME_UNITS).map(([_key, value]) => ({
+    text: textService.getTimeUnitLabel(value, unitSize),
+    value,
+  }));
 
 export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
   policy,
@@ -233,9 +231,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {/** Expiration field */}
       {renderExpireAfterField()}
-      {/** Retention count fields */}
       {renderCountFields()}
     </Fragment>
   );

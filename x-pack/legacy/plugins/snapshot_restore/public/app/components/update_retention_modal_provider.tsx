@@ -38,7 +38,7 @@ export type UpdateRetentionSetting = (
 
 type OnSuccessCallback = () => void;
 
-export const PolicyUpdateRetentionProvider: React.FunctionComponent<Props> = ({ children }) => {
+export const UpdateRetentionModalProvider: React.FunctionComponent<Props> = ({ children }) => {
   const {
     core: {
       i18n,
