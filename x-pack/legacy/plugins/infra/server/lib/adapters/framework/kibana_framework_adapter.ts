@@ -9,24 +9,26 @@ import { GraphQLSchema } from 'graphql';
 import { Legacy } from 'kibana';
 import { get } from 'lodash';
 import { runHttpQuery } from 'apollo-server-core';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf, ObjectType } from '@kbn/config-schema';
 import { first } from 'rxjs/operators';
 import {
   InfraBackendFrameworkAdapter,
   InfraFrameworkRequest,
-  InfraFrameworkRouteOptions,
-  InfraResponse,
   InfraTSVBResponse,
   InfraWrappableRequest,
   internalInfraFrameworkRequest,
+  InfraServerPluginDeps,
+  InfraDatabaseSearchResponse,
 } from './adapter_types';
 import { TSVBMetricModel } from '../../../../common/inventory_models/types';
 import {
   InternalCoreSetup,
   IRouter,
   KibanaRequest,
+  RequestHandler,
   RequestHandlerContext,
   KibanaResponseFactory,
+  RouteConfig,
 } from '../../../../../../../../src/core/server';
 import { InfraConfig } from '../../../new_platform_config.schema';
 
@@ -34,15 +36,37 @@ interface CallWithRequestParams extends GenericParams {
   max_concurrent_shard_requests?: number;
 }
 
-export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFrameworkAdapter {
-  private router: IRouter;
-  private core: InternalCoreSetup;
-  private legacyServer: Legacy.Server; // NP_TODO: REMOVE ... temporary while shimming only
+const anyObject = schema.object({}, { allowUnknowns: true });
 
-  constructor(core: InternalCoreSetup, config: InfraConfig, legacyServer: Legacy.Server) {
+const VALIDATE_PLACEHOLDER = {
+  body: anyObject,
+  params: anyObject,
+  query: anyObject,
+};
+
+type AnyObject = typeof anyObject;
+
+interface BasicRoute<
+  P extends ObjectType = AnyObject,
+  Q extends ObjectType = AnyObject,
+  B extends ObjectType = AnyObject
+> {
+  method: 'get' | 'put' | 'post' | 'delete';
+  path: string;
+  handler: RequestHandler<P, Q, B>;
+  options?: any;
+}
+
+export class InfraKibanaBackendFrameworkAdapter
+  implements InfraBackendFrameworkAdapter<BasicRoute> {
+  public router: IRouter;
+  private core: InternalCoreSetup;
+  private plugins: InfraServerPluginDeps;
+
+  constructor(core: InternalCoreSetup, config: InfraConfig, plugins: InfraServerPluginDeps) {
     this.router = core.http.createRouter('/api/infra');
     this.core = core;
-    this.legacyServer = legacyServer; // NP_TODO: REMOVE ... temporary while shimming only
+    this.plugins = plugins;
   }
 
   public registerGraphQLEndpoint(routePath: string, gqlSchema: GraphQLSchema): void {
@@ -146,28 +170,33 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     // });
   }
 
-  public registerRoute<
-    RouteRequest extends InfraWrappableRequest,
-    RouteResponse extends InfraResponse
-  >(route: InfraFrameworkRouteOptions<RouteRequest, RouteResponse>) {
-    const wrappedHandler = (request: any, h: Legacy.ResponseToolkit) =>
-      route.handler(wrapRequest(request), h);
+  // public registerRoute<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+  //   route: RouteConfig<P, Q, B>,
+  //   handler: RequestHandler<P, Q, B>
+  // ) {
+  //   // NP_TODO: Our current routes all use POST, but we need to expand this,
+  //   // but the types make it hell so I'm skipping for now
+  //   this.router.post(
+  //     {
+  //       validate: VALIDATE_PLACEHOLDER,
+  //       path: route.path,
+  //     },
+  //     route.handler
+  //   );
+  //   // this.legacyServer.route({
+  //   //   handler: wrappedHandler,
+  //   //   options: route.options,
+  //   //   method: route.method,
+  //   //   path: route.path,
+  //   // });
+  // }
 
-    this.legacyServer.route({
-      handler: wrappedHandler,
-      options: route.options,
-      method: route.method,
-      path: route.path,
-    });
-  }
-
-  public async callWithRequest(
-    wrapped: InfraFrameworkRequest<Legacy.Request>,
+  public async callWithRequest<Hit = {}, Aggregation = undefined>(
+    request: KibanaRequest | Legacy.Request,
     endpoint: string,
     params: CallWithRequestParams,
     ...rest: Array<any>
   ) {
-    const request = wrapped[internalInfraFrameworkRequest];
     const client = (await this.core.elasticsearch.dataClient$.pipe(first()).toPromise()).asScoped(
       request
     );
@@ -210,16 +239,16 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
       },
       ...rest
     );
-    return fields;
+    return fields as Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
   }
 
   public getIndexPatternsService(
     request: InfraFrameworkRequest<Legacy.Request>
   ): Legacy.IndexPatternsService {
-    return this.legacyServer.indexPatternsServiceFactory({
+    return this.plugins.indexPatterns.indexPatternsServiceFactory({
       callCluster: async (method: string, args: [GenericParams], ...rest: any[]) => {
         const fieldCaps = await this.callWithRequest(
-          request,
+          request[internalInfraFrameworkRequest],
           method,
           { ...args, allowNoIndices: true } as GenericParams,
           ...rest
@@ -230,17 +259,13 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
   }
 
   public getSpaceId(request: InfraFrameworkRequest): string {
-    const spacesPlugin = this.server.plugins.spaces;
+    const spacesPlugin = this.plugins.spaces;
 
     if (spacesPlugin && typeof spacesPlugin.getSpaceId === 'function') {
       return spacesPlugin.getSpaceId(request[internalInfraFrameworkRequest]);
     } else {
       return 'default';
     }
-  }
-
-  public getSavedObjectsService() {
-    return this.server.savedObjects;
   }
 
   public async makeTSVBRequest(

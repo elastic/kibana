@@ -21,6 +21,7 @@ import { InfraLogAnalysis } from './lib/log_analysis';
 import { InfraSnapshot } from './lib/snapshot';
 import { InfraSourceStatus } from './lib/source_status';
 import { InfraSources } from './lib/sources';
+import { InfraServerPluginDeps } from './lib/adapters/framework';
 
 export interface KbnServer extends Server {
   usage: any;
@@ -61,8 +62,8 @@ export class InfraServerPlugin {
     return this.libs;
   }
 
-  setup(core: InternalCoreSetup) {
-    const framework = new InfraKibanaBackendFrameworkAdapter(core, this.config, this.legacyServer);
+  setup(core: InternalCoreSetup, plugins: InfraServerPluginDeps) {
+    const framework = new InfraKibanaBackendFrameworkAdapter(core, this.config, plugins);
     const sources = new InfraSources({
       config: this.config,
       savedObjects: this.legacyServer.savedObjects,

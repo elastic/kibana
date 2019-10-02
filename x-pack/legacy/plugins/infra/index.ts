@@ -12,7 +12,7 @@ import KbnServer from 'src/legacy/server/kbn_server';
 import { BehaviorSubject } from 'rxjs';
 import { getConfigSchema } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
-import { plugin } from './server/new_platform_index';
+import { plugin, InfraServerPluginDeps } from './server/new_platform_index';
 import { UsageCollector } from './server/usage/usage_collector';
 
 const APP_ID = 'infra';
@@ -89,8 +89,15 @@ export function infra(kibana: any) {
         getUiSettingsService: legacyServer.getUiSettingsService, // NP_TODO: Replace this with route handler context instead when ready, see: https://github.com/elastic/kibana/issues/44994
       } as unknown) as PluginInitializerContext;
 
+      const pluginDeps: InfraServerPluginDeps = {
+        indexPatterns: {
+          indexPatternsServiceFactory: legacyServer.indexPatternsServiceFactory,
+        },
+        spaces: legacyServer.plugins.spaces,
+      };
+
       const infraPluginInstance = plugin(initContext, legacyServer);
-      infraPluginInstance.setup(core);
+      infraPluginInstance.setup(core, pluginDeps);
 
       // NP_TODO: EVERYTHING BELOW HERE IS LEGACY, MIGHT NEED TO MOVE SOME OF IT TO NP, NOT SURE HOW
 
