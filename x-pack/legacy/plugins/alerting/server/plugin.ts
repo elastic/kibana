@@ -5,6 +5,7 @@
  */
 
 import Hapi from 'hapi';
+import { first } from 'rxjs/operators';
 import { Services } from './types';
 import { SpacesPlugin } from '../../spaces';
 import { ActionsPlugin } from '../../actions';
@@ -14,9 +15,9 @@ import { AlertTypeRegistry } from './alert_type_registry';
 import { XPackMainPlugin } from '../../xpack_main/xpack_main';
 import { AlertsClientFactory } from './lib';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
-import { ElasticsearchPlugin } from '../../../../../src/legacy/core_plugins/elasticsearch';
 import { PluginSetupContract as SecurityPluginSetupContract } from '../../../../plugins/security/server';
 import {
+  ElasticsearchServiceSetup,
   KibanaRequest,
   Logger,
   LoggerFactory,
@@ -43,7 +44,7 @@ interface AlertingPluginInitializerContext {
 }
 
 interface AlertingCoreSetup {
-  elasticsearch: ElasticsearchPlugin;
+  elasticsearch: ElasticsearchServiceSetup;
   savedObjects: SavedObjectsLegacyService;
   http: {
     route: (route: Hapi.ServerRoute) => void;
@@ -80,9 +81,12 @@ export class Plugin {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
   }
 
-  public setup(core: AlertingCoreSetup, plugins: AlertingPluginsSetup): PluginSetupContract {
+  public async setup(
+    core: AlertingCoreSetup,
+    plugins: AlertingPluginsSetup
+  ): Promise<PluginSetupContract> {
     const { logger } = this;
-    const { callWithRequest } = core.elasticsearch.getCluster('admin');
+    const adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
 
     plugins.xpack_main.registerFeature({
       id: 'alerting',
@@ -123,7 +127,8 @@ export class Plugin {
     function getServices(request: any): Services {
       return {
         logger,
-        callCluster: (...args) => callWithRequest(request, ...args),
+        callCluster: (...args) =>
+          adminClient.asScoped(KibanaRequest.from(request)).callAsCurrentUser(...args),
         savedObjectsClient: core.savedObjects.getScopedSavedObjectsClient(request),
       };
     }

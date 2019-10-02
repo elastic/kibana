@@ -25,10 +25,10 @@ interface Server extends Legacy.Server {
   plugins: Plugins;
 }
 
-export function init(server: Server) {
+export async function init(server: Server) {
   const newPlatform = ((server as unknown) as KbnServer).newPlatform;
   const coreSetup = {
-    elasticsearch: server.plugins.elasticsearch,
+    elasticsearch: newPlatform.setup.core.elasticsearch,
     savedObjects: server.savedObjects,
     http: {
       route: server.route.bind(server),
@@ -50,7 +50,7 @@ export function init(server: Server) {
     logger: newPlatform.coreContext.logger,
   });
 
-  const setupContract = plugin.setup(coreSetup, pluginsSetup);
+  const setupContract = await plugin.setup(coreSetup, pluginsSetup);
   const startContract = plugin.start();
 
   server.decorate('request', 'getAlertsClient', function() {

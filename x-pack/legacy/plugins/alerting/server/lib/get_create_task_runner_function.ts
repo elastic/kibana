@@ -69,6 +69,16 @@ export function getCreateTaskRunnerFunction({
         const fakeRequest = {
           headers: requestHeaders,
           getBasePath: () => getBasePath(spaceId),
+          path: '/',
+          route: { settings: {} },
+          url: {
+            href: '/',
+          },
+          raw: {
+            req: {
+              url: '/',
+            },
+          },
         };
 
         const services = getServices(fakeRequest);
