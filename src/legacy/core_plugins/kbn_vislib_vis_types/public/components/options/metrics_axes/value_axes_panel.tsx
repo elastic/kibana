@@ -36,7 +36,7 @@ import { ValueAxisOptions } from './value_axis_options';
 import { SetParamByIndex } from './';
 import { ValidationVisOptionsProps } from '../../common';
 
-interface ValueAxesPanelProps extends ValidationVisOptionsProps<BasicVislibParams> {
+export interface ValueAxesPanelProps extends ValidationVisOptionsProps<BasicVislibParams> {
   isCategoryAxisHorizontal: boolean;
   addValueAxis: () => ValueAxis;
   removeValueAxis: (axis: ValueAxis) => void;
@@ -74,6 +74,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
           iconType="cross"
           onClick={() => removeValueAxis(axis)}
           aria-label={removeButtonTooltip}
+          data-test-subj="removeValueAxisBtn"
         />
       </EuiToolTip>
     ),

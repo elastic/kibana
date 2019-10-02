@@ -125,7 +125,7 @@ export class SavedObjectsRepository {
     this._onBeforeWrite = onBeforeWrite;
 
     this._unwrappedCallCluster = async (...args: Parameters<CallCluster>) => {
-      await migrator.awaitMigration();
+      await migrator.runMigrations();
       return callCluster(...args);
     };
     this._schema = schema;

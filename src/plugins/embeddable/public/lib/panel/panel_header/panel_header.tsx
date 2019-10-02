@@ -38,6 +38,7 @@ function renderBadges(badges: IAction[], embeddable: IEmbeddable) {
   return badges.map(badge => (
     <EuiBadge
       key={badge.id}
+      className="embPanel__headerBadge"
       iconType={badge.getIconType({ embeddable })}
       onClick={() => badge.execute({ embeddable })}
       onClickAriaLabel={badge.getDisplayName({ embeddable })}
@@ -47,8 +48,13 @@ function renderBadges(badges: IAction[], embeddable: IEmbeddable) {
   ));
 }
 
-function isVisualizeEmbeddable(embeddable: IEmbeddable | any): embeddable is any {
-  return embeddable.type === 'VISUALIZE_EMBEDDABLE_TYPE';
+const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
+type VisualizeEmbeddable = any;
+
+function isVisualizeEmbeddable(
+  embeddable: IEmbeddable | VisualizeEmbeddable
+): embeddable is VisualizeEmbeddable {
+  return embeddable.type === VISUALIZE_EMBEDDABLE_TYPE;
 }
 
 export function PanelHeader({
@@ -60,12 +66,12 @@ export function PanelHeader({
   badges,
   embeddable,
 }: PanelHeaderProps) {
-  const classes = classNames('embPanel__header', {
-    'embPanel__header--floater': !title || hidePanelTitles,
-  });
-
   const showTitle = !isViewMode || (title && !hidePanelTitles);
   const showPanelBar = badges.length > 0 || showTitle;
+
+  const classes = classNames('embPanel__header', {
+    'embPanel__header--floater': !showPanelBar,
+  });
 
   if (!showPanelBar) {
     return (
@@ -107,15 +113,20 @@ export function PanelHeader({
           }
         )}
       >
-        {showTitle ? `${title} ` : ''}
-        {renderBadges(badges, embeddable)}
-        {viewDescr !== '' ? (
-          <EuiToolTip content={viewDescr} delay="regular" position="right">
-            <EuiIcon type="iInCircle" />
-          </EuiToolTip>
+        {showTitle || viewDescr !== '' ? (
+          <span className="embPanel__titleInner">
+            <span className="embPanel__titleText">{title}</span>
+
+            {viewDescr !== '' && (
+              <EuiToolTip content={viewDescr} delay="regular" position="right">
+                <EuiIcon type="iInCircle" />
+              </EuiToolTip>
+            )}
+          </span>
         ) : (
-          ''
+          undefined
         )}
+        {renderBadges(badges, embeddable)}
       </div>
 
       <PanelOptionsMenu

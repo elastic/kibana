@@ -18,11 +18,10 @@
  */
 
 import './_saved_vis';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
-import { setup as visualizationsSetup } from '../../../../visualizations/public/legacy';
+import { start as visualizations } from '../../../../visualizations/public/legacy';
 import { createVisualizeEditUrl } from '../visualize_constants';
 import { findListItems } from './find_list_items';
 
@@ -36,7 +35,7 @@ savedObjectManagementRegistry.register({
 });
 
 app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) {
-  const visTypes = Private(VisTypesRegistryProvider);
+  const visTypes = visualizations.types;
   const savedObjectClient = Private(SavedObjectsClientProvider);
   const saveVisualizationLoader = new SavedObjectLoader(
     SavedVis,
@@ -58,12 +57,12 @@ app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) 
       } // eslint-disable-line no-empty
     }
 
-    if (!typeName || !visTypes.byName[typeName]) {
+    if (!typeName || !visTypes.get(typeName)) {
       source.error = 'Unknown visualization type';
       return source;
     }
 
-    source.type = visTypes.byName[typeName];
+    source.type = visTypes.get(typeName);
     source.savedObjectType = 'visualization';
     source.icon = source.type.icon;
     source.image = source.type.image;
@@ -86,7 +85,7 @@ app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) 
       size,
       mapSavedObjectApiHits: this.mapSavedObjectApiHits.bind(this),
       savedObjectsClient: this.savedObjectsClient,
-      visTypes: visualizationsSetup.types.visTypeAliasRegistry.get(),
+      visTypes: visualizations.types.getAliases(),
     });
   };
 
