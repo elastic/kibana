@@ -28,9 +28,7 @@ export const useAppDependencies = () => {
 };
 
 export const getAppProviders = (deps: AppDependencies) => {
-  const {
-    i18n: { Context: I18nContext },
-  } = deps.core;
+  const I18nContext = deps.core.i18n.Context;
 
   // Create App dependencies context and get its provider
   const AppDependenciesProvider = setAppDependencies(deps);

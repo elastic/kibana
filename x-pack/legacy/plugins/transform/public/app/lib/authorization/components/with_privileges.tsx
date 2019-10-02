@@ -73,11 +73,7 @@ const MissingClusterPrivileges: FC<MissingClusterPrivilegesProps> = ({
   missingPrivileges,
   privilegesCount,
 }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
+  const { FormattedMessage } = useAppDependencies().core.i18n;
 
   return (
     <EuiPageContent>
@@ -108,11 +104,7 @@ export const PrivilegesWrapper: FC<{ privileges: string | string[] }> = ({
   children,
   privileges,
 }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
+  const { FormattedMessage } = useAppDependencies().core.i18n;
 
   return (
     <WithPrivileges privileges={privileges}>

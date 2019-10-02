@@ -17,15 +17,14 @@ export const PLUGIN = {
 
 export const API_BASE_PATH = '/api/transform/';
 
-// df_admin permission requirements
+// Current df_admin permission requirements:
 // 1. `read` on source index
-// 2. `all` on source index to create and start transform (something more than read tbd)
+// 2. `all` on source index to create and start transform
 // 3. `all` on dest index (could be less tbd)
 // 3. `monitor` cluster privilege
 // 4. builtin `data_frame_transforms_admin`
 // 5. builtin `kibana_user`
 // 6. builtin `data_frame_transforms_user` (although this is probably included in the admin)
-// ^^ [2] seems weird. [3] seems excessive but possibly inherited from kibana.
 
 export const APP_CLUSTER_PRIVILEGES = [
   'cluster:monitor/data_frame/get',

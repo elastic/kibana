@@ -18,11 +18,7 @@ import { Page as CreateTransform } from './sections/create_transform/page';
 import { Page as TransformManagement } from './sections/transform_management/page';
 
 export const App: FC = () => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
+  const { FormattedMessage } = useAppDependencies().core.i18n;
 
   const { apiError } = useContext(AuthorizationContext);
 
@@ -51,7 +47,7 @@ export const App: FC = () => {
   );
 };
 
-export const renderReact = async (elem: Element, core: AppCore, plugins: AppPlugins) => {
+export const renderReact = (elem: Element, core: AppCore, plugins: AppPlugins) => {
   const Providers = getAppProviders({ core, plugins });
 
   render(

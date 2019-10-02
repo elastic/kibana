@@ -8,9 +8,9 @@ import { textService } from '../text';
 import { linkToHome } from './links';
 
 export enum BREADCRUMB_SECTION {
-  CREATE_TRANSFORM = 'createTransform',
-  HOME = 'home',
   MANAGEMENT = 'management',
+  HOME = 'home',
+  CREATE_TRANSFORM = 'createTransform',
 }
 
 interface BreadcrumbItem {
