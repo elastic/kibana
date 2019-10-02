@@ -17,6 +17,7 @@ import {
   LogRateModelPlotBucket,
   CompositeTimestampPartitionKey,
 } from './queries';
+import { KibanaRequest } from '../../../../../../../src/core/server';
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 
@@ -27,14 +28,14 @@ export class InfraLogAnalysis {
     }
   ) {}
 
-  public getJobIds(request: InfraFrameworkRequest, sourceId: string) {
+  public getJobIds(request: KibanaRequest, sourceId: string) {
     return {
       logEntryRate: getJobId(this.libs.framework.getSpaceId(request), sourceId, 'log-entry-rate'),
     };
   }
 
   public async getLogEntryRateBuckets(
-    request: InfraFrameworkRequest,
+    request: KibanaRequest,
     sourceId: string,
     startTime: number,
     endTime: number,

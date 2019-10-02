@@ -8,9 +8,10 @@ import { PluginInitializerContext } from 'src/core/server';
 import { InfraServerPlugin } from './new_platform_plugin';
 import { config, InfraConfig } from './new_platform_config.schema';
 import { Legacy } from '../../../../../kibana';
+import { InfraServerPluginDeps } from './lib/adapters/framework';
 
 // NP_TODO: kibana NP needs "config" to be exported from here, I think?
-export { config, InfraConfig };
+export { config, InfraConfig, InfraServerPluginDeps };
 
 export function plugin(context: PluginInitializerContext, legacyServer: Legacy.Server) {
   return new InfraServerPlugin(context, legacyServer);

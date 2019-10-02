@@ -10,57 +10,70 @@ import { Lifecycle, ResponseToolkit, RouteOptions } from 'hapi';
 import { Legacy } from 'kibana';
 import { JsonObject } from '../../../../common/typed_json';
 import { TSVBMetricModel } from '../../../../common/inventory_models/types';
+import { InfraMetricModel } from '../metrics/adapter_types';
+import { KibanaRequest } from '../../../../../../../../src/core/server';
 
 export const internalInfraFrameworkRequest = Symbol('internalInfraFrameworkRequest');
 
+export interface InfraServerPluginDeps {
+  spaces: any;
+  indexPatterns: {
+    indexPatternsServiceFactory: any;
+  };
+}
+
 /* eslint-disable  @typescript-eslint/unified-signatures */
-export interface InfraBackendFrameworkAdapter {
+export interface InfraBackendFrameworkAdapter<R> {
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
   registerRoute<RouteRequest extends InfraWrappableRequest, RouteResponse extends InfraResponse>(
-    route: InfraFrameworkRouteOptions<RouteRequest, RouteResponse>
+    route: R
   ): void;
   callWithRequest<Hit = {}, Aggregation = undefined>(
-    req: InfraFrameworkRequest,
+    req: KibanaRequest,
     method: 'search',
     options?: object
   ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
-  callWithRequest<Hit = {}, Aggregation = undefined>(
-    req: InfraFrameworkRequest,
-    method: 'msearch',
-    options?: object
-  ): Promise<InfraDatabaseMultiResponse<Hit, Aggregation>>;
-  callWithRequest(
-    req: InfraFrameworkRequest,
-    method: 'fieldCaps',
-    options?: object
-  ): Promise<InfraDatabaseFieldCapsResponse>;
-  callWithRequest(
-    req: InfraFrameworkRequest,
-    method: 'indices.existsAlias',
-    options?: object
-  ): Promise<boolean>;
-  callWithRequest(
-    req: InfraFrameworkRequest,
-    method: 'indices.getAlias' | 'indices.get',
-    options?: object
-  ): Promise<InfraDatabaseGetIndicesResponse>;
-  callWithRequest(
-    req: InfraFrameworkRequest,
-    method: 'ml.getBuckets',
-    options?: object
-  ): Promise<InfraDatabaseGetIndicesResponse>;
-  callWithRequest(
-    req: InfraFrameworkRequest,
-    method: string,
-    options?: object
-  ): Promise<InfraDatabaseSearchResponse>;
+  // callWithRequest<Hit = {}, Aggregation = undefined>(
+  //   req: InfraFrameworkRequest,
+  //   method: 'msearch',
+  //   options?: object
+  // ): Promise<InfraDatabaseMultiResponse<Hit, Aggregation>>;
+  // callWithRequest(
+  //   req: InfraFrameworkRequest,
+  //   method: 'fieldCaps',
+  //   options?: object
+  // ): Promise<InfraDatabaseFieldCapsResponse>;
+  // callWithRequest(
+  //   req: InfraFrameworkRequest,
+  //   method: 'indices.existsAlias',
+  //   options?: object
+  // ): Promise<boolean>;
+  // callWithRequest(
+  //   req: InfraFrameworkRequest,
+  //   method: 'indices.getAlias' | 'indices.get',
+  //   options?: object
+  // ): Promise<InfraDatabaseGetIndicesResponse>;
+  // callWithRequest(
+  //   req: InfraFrameworkRequest,
+  //   method: 'ml.getBuckets',
+  //   options?: object
+  // ): Promise<InfraDatabaseGetIndicesResponse>;
+  // callWithRequest(
+  //   req: InfraFrameworkRequest,
+  //   method: string,
+  //   options?: object
+  // ): Promise<InfraDatabaseSearchResponse>;
+
+  // NP_TODO: using Promise<unknown> here until new platform callAsCurrentUser can return types
+  // callWithRequest(req: KibanaRequest, method: string, options?: object): Promise<unknown>;
+
   getIndexPatternsService(req: InfraFrameworkRequest<any>): Legacy.IndexPatternsService;
   getSpaceId(request: InfraFrameworkRequest<any>): string;
   makeTSVBRequest(
     req: InfraFrameworkRequest,
     model: TSVBMetricModel,
     timerange: { min: number; max: number },
-    filters: JsonObject[]
+    filters: Array<JsonObject>
   ): Promise<InfraTSVBResponse>;
 }
 /* eslint-enable  @typescript-eslint/unified-signatures */
@@ -92,7 +105,7 @@ export interface InfraFrameworkRouteOptions<
   RouteResponse extends InfraResponse
 > {
   path: string;
-  method: string | string[];
+  method: string | Array<string>;
   vhost?: string;
   handler: InfraFrameworkRouteHandler<RouteRequest, RouteResponse>;
   options?: Pick<RouteOptions, Exclude<keyof RouteOptions, 'handler'>>;
@@ -122,12 +135,12 @@ export interface InfraDatabaseSearchResponse<Hit = {}, Aggregations = undefined>
       value: number;
       relation: string;
     };
-    hits: Hit[];
+    hits: Array<Hit>;
   };
 }
 
 export interface InfraDatabaseMultiResponse<Hit, Aggregation> extends InfraDatabaseResponse {
-  responses: Array<InfraDatabaseSearchResponse<Hit, Aggregation>>;
+  responses: InfraDatabaseSearchResponse<Hit, Aggregation>[];
 }
 
 export interface InfraDatabaseFieldCapsResponse extends InfraDatabaseResponse {
@@ -145,7 +158,7 @@ export interface InfraDatabaseGetIndicesResponse {
 export type SearchHit = SearchResponse<object>['hits']['hits'][0];
 
 export interface SortedSearchHit extends SearchHit {
-  sort: any[];
+  sort: Array<any>;
   _source: {
     [field: string]: any;
   };
@@ -159,7 +172,7 @@ export type InfraDateRangeAggregationBucket<NestedAggregation extends object = {
 } & NestedAggregation;
 
 export interface InfraDateRangeAggregationResponse<NestedAggregation extends object = {}> {
-  buckets: Array<InfraDateRangeAggregationBucket<NestedAggregation>>;
+  buckets: InfraDateRangeAggregationBucket<NestedAggregation>[];
 }
 
 export interface InfraTopHitsAggregationResponse {
@@ -173,7 +186,7 @@ export interface InfraMetadataAggregationBucket {
 }
 
 export interface InfraMetadataAggregationResponse {
-  buckets: InfraMetadataAggregationBucket[];
+  buckets: Array<InfraMetadataAggregationBucket>;
 }
 
 export interface InfraFieldsResponse {
@@ -196,13 +209,13 @@ export interface InfraTSVBResponse {
 
 export interface InfraTSVBPanel {
   id: string;
-  series: InfraTSVBSeries[];
+  series: Array<InfraTSVBSeries>;
 }
 
 export interface InfraTSVBSeries {
   id: string;
   label: string;
-  data: InfraTSVBDataPoint[];
+  data: Array<InfraTSVBDataPoint>;
 }
 
 export type InfraTSVBDataPoint = [number, number];

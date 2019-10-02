@@ -27,57 +27,57 @@ import { throwErrors } from '../../../common/runtime_types';
 export const initMetadataRoute = (libs: InfraBackendLibs) => {
   const { framework } = libs;
 
-  framework.registerRoute<InfraMetadataWrappedRequest, Promise<InfraMetadata>>({
-    method: 'POST',
-    path: '/api/infra/metadata',
-    handler: async req => {
-      try {
-        const { nodeId, nodeType, sourceId } = pipe(
-          InfraMetadataRequestRT.decode(req.payload),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
+  // framework.registerRoute<InfraMetadataWrappedRequest, Promise<InfraMetadata>>({
+  //   method: 'post',
+  //   path: '/api/infra/metadata',
+  //   handler: async req => {
+  //     try {
+  //       const { nodeId, nodeType, sourceId } = pipe(
+  //         InfraMetadataRequestRT.decode(req.payload),
+  //         fold(throwErrors(Boom.badRequest), identity)
+  //       );
 
-        const { configuration } = await libs.sources.getSourceConfiguration(req, sourceId);
-        const metricsMetadata = await getMetricMetadata(
-          framework,
-          req,
-          configuration,
-          nodeId,
-          nodeType
-        );
-        const metricFeatures = pickFeatureName(metricsMetadata.buckets).map(
-          nameToFeature('metrics')
-        );
+  //       const { configuration } = await libs.sources.getSourceConfiguration(req, sourceId);
+  //       const metricsMetadata = await getMetricMetadata(
+  //         framework,
+  //         req,
+  //         configuration,
+  //         nodeId,
+  //         nodeType
+  //       );
+  //       const metricFeatures = pickFeatureName(metricsMetadata.buckets).map(
+  //         nameToFeature('metrics')
+  //       );
 
-        const info = await getNodeInfo(framework, req, configuration, nodeId, nodeType);
-        const cloudInstanceId = get<string>(info, 'cloud.instance.id');
+  //       const info = await getNodeInfo(framework, req, configuration, nodeId, nodeType);
+  //       const cloudInstanceId = get<string>(info, 'cloud.instance.id');
 
-        const cloudMetricsMetadata = cloudInstanceId
-          ? await getCloudMetricsMetadata(framework, req, configuration, cloudInstanceId)
-          : { buckets: [] };
-        const cloudMetricsFeatures = pickFeatureName(cloudMetricsMetadata.buckets).map(
-          nameToFeature('metrics')
-        );
+  //       const cloudMetricsMetadata = cloudInstanceId
+  //         ? await getCloudMetricsMetadata(framework, req, configuration, cloudInstanceId)
+  //         : { buckets: [] };
+  //       const cloudMetricsFeatures = pickFeatureName(cloudMetricsMetadata.buckets).map(
+  //         nameToFeature('metrics')
+  //       );
 
-        const hasAPM = await hasAPMData(framework, req, configuration, nodeId, nodeType);
-        const apmMetricFeatures = hasAPM ? [{ name: 'apm.transaction', source: 'apm' }] : [];
+  //       const hasAPM = await hasAPMData(framework, req, configuration, nodeId, nodeType);
+  //       const apmMetricFeatures = hasAPM ? [{ name: 'apm.transaction', source: 'apm' }] : [];
 
-        const id = metricsMetadata.id;
-        const name = metricsMetadata.name || id;
-        return pipe(
-          InfraMetadataRT.decode({
-            id,
-            name,
-            features: [...metricFeatures, ...cloudMetricsFeatures, ...apmMetricFeatures],
-            info,
-          }),
-          fold(throwErrors(Boom.badImplementation), identity)
-        );
-      } catch (error) {
-        throw boomify(error);
-      }
-    },
-  });
+  //       const id = metricsMetadata.id;
+  //       const name = metricsMetadata.name || id;
+  //       return pipe(
+  //         InfraMetadataRT.decode({
+  //           id,
+  //           name,
+  //           features: [...metricFeatures, ...cloudMetricsFeatures, ...apmMetricFeatures],
+  //           info,
+  //         }),
+  //         fold(throwErrors(Boom.badImplementation), identity)
+  //       );
+  //     } catch (error) {
+  //       throw boomify(error);
+  //     }
+  //   },
+  // });
 };
 
 const nameToFeature = (source: string) => (name: string): InfraMetadataFeature => ({
