@@ -16,7 +16,7 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import { getOr, get } from 'lodash/fp';
+import { getOr, get, isNumber } from 'lodash/fp';
 import {
   ChartSeriesData,
   WrappedByAutoSizer,
@@ -30,6 +30,13 @@ import {
   getChartWidth,
 } from './common';
 import { AutoSizer } from '../auto_sizer';
+
+const checkIfAllTheDataInTheSeriesAreValid = (series: unknown): series is ChartSeriesData =>
+  !!get('value.length', series) &&
+  get('value', series).every(({ x, y }: { x: unknown; y: unknown }) => isNumber(y) && y > 0);
+
+const checkIfAnyValidSeriesExist = (data: unknown): data is ChartSeriesData[] =>
+  Array.isArray(data) && data.some(checkIfAllTheDataInTheSeriesAreValid);
 
 // Bar chart rotation: https://ela.st/chart-rotations
 export const BarChartBaseComponent = React.memo<{
@@ -54,7 +61,7 @@ export const BarChartBaseComponent = React.memo<{
         const barSeriesKey = series.key;
         const barSeriesSpecId = getSpecId(barSeriesKey);
         const seriesType = SeriesType.BAR;
-        return (
+        return checkIfAllTheDataInTheSeriesAreValid ? (
           <BarSeries
             id={barSeriesSpecId}
             key={barSeriesKey}
@@ -69,7 +76,7 @@ export const BarChartBaseComponent = React.memo<{
             stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
             customSeriesColors={getSeriesStyle(barSeriesKey, series.color, seriesType)}
           />
-        );
+        ) : null;
       })}
 
       <Axis
@@ -87,37 +94,17 @@ export const BarChartBaseComponent = React.memo<{
 
 BarChartBaseComponent.displayName = 'BarChartBaseComponent';
 
-export const BarChartWithCustomPrompt = React.memo<{
-  data: ChartSeriesData[] | null | undefined;
-  height: string | null | undefined;
-  width: string | null | undefined;
-  configs?: ChartSeriesConfigs | undefined;
-}>(({ data, height, width, configs }) => {
-  return data &&
-    data.length &&
-    data.some(
-      ({ value }) =>
-        value != null && value.length > 0 && value.some(chart => chart.y != null && chart.y > 0)
-    ) ? (
-    <BarChartBaseComponent height={height} width={width} data={data} configs={configs} />
-  ) : (
-    <ChartHolder height={height} width={width} />
-  );
-});
-
-BarChartWithCustomPrompt.displayName = 'BarChartWithCustomPrompt';
-
 export const BarChart = React.memo<{
   barChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
 }>(({ barChart, configs }) => {
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
-  return get(`0.value.length`, barChart) ? (
+  return checkIfAnyValidSeriesExist(barChart) ? (
     <AutoSizer detectAnyWindowResize={false} content>
       {({ measureRef, content: { height, width } }) => (
         <WrappedByAutoSizer innerRef={measureRef} height={getChartHeight(customHeight, height)}>
-          <BarChartWithCustomPrompt
+          <BarChartBaseComponent
             height={getChartHeight(customHeight, height)}
             width={getChartWidth(customWidth, width)}
             data={barChart}
