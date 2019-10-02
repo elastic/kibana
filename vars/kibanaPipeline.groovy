@@ -1,6 +1,6 @@
-def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
+def withWorkers(name, preWorkerClosure = {}, workerClosures = [:], nodeLabel = 'tests-xl') {
   return {
-    jobRunner('tests-xl') {
+    jobRunner(nodeLabel) {
       try {
         doSetup()
         preWorkerClosure()
