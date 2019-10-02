@@ -18,7 +18,7 @@ import {
   EuiButtonEmpty,
   EuiCallOut
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -56,6 +56,7 @@ export function AddSettingsFlyout({
       ? selectedConfig.settings.transaction_sample_rate.toString()
       : ''
   );
+
   const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher(
     () =>
       callApmApi({
@@ -88,6 +89,18 @@ export function AddSettingsFlyout({
     env =>
       env.name === environment && (Boolean(selectedConfig) || env.available)
   );
+
+  useEffect(() => {
+    if (selectedConfig) {
+      setEnvironment(selectedConfig.service.environment);
+      setServiceName(selectedConfig.service.name);
+      setSampleRate(selectedConfig.settings.transaction_sample_rate.toString());
+    } else {
+      setEnvironment(ENVIRONMENT_NOT_DEFINED);
+      setServiceName(undefined);
+      setSampleRate('');
+    }
+  }, [selectedConfig]);
 
   if (!isOpen) {
     return null;
