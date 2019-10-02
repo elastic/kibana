@@ -32,7 +32,6 @@ import React from 'react';
 import angular from 'angular';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { docTitle } from 'ui/doc_title';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
@@ -56,6 +55,8 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { npStart } from 'ui/new_platform';
 import { setup as data } from '../../../../../core_plugins/data/public/legacy';
+import { start as visualizations } from '../../../../visualizations/public/legacy';
+
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 
 const { savedQueryService } = data.search.services;
@@ -65,8 +66,8 @@ uiRoutes
     template: editorTemplate,
     k7Breadcrumbs: getCreateBreadcrumbs,
     resolve: {
-      savedVis: function (savedVisualizations, redirectWhenMissing, $route, Private) {
-        const visTypes = Private(VisTypesRegistryProvider);
+      savedVis: function (savedVisualizations, redirectWhenMissing, $route) {
+        const visTypes = visualizations.types.all();
         const visType = _.find(visTypes, { name: $route.current.params.type });
         const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
         const hasIndex = $route.current.params.indexPattern || $route.current.params.savedSearchId;

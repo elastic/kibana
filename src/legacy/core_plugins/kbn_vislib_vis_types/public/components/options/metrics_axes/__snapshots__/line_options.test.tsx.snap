@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LineOptions component should init with the default set of props 1`] = `
+<Fragment>
+  <EuiSpacer
+    size="m"
+  />
+  <SwitchOption
+    label="Show line"
+    paramName="drawLinesBetweenPoints"
+    setValue={[MockFunction]}
+    value={true}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    gutterSize="s"
+  >
+    <EuiFlexItem>
+      <SelectOption
+        disabled={false}
+        label="Line mode"
+        options={
+          Array [
+            Object {
+              "text": "Straight",
+              "value": "linear",
+            },
+            Object {
+              "text": "Smoothed",
+              "value": "cardinal",
+            },
+            Object {
+              "text": "Stepped",
+              "value": "step-after",
+            },
+          ]
+        }
+        paramName="interpolate"
+        setValue={[MockFunction]}
+        value="linear"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <NumberInputOption
+        disabled={false}
+        label="Line width"
+        min={0}
+        paramName="lineWidth"
+        setValue={[Function]}
+        step={0.5}
+        value={2}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+  <SwitchOption
+    label="Show dots"
+    paramName="showCircles"
+    setValue={[MockFunction]}
+    value={true}
+  />
+</Fragment>
+`;

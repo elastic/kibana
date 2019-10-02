@@ -14,6 +14,8 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiLoadingSpinner,
+  EuiText,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../common/types';
@@ -94,8 +96,40 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       name: i18n.translate('xpack.snapshotRestore.policyList.table.snapshotNameColumnTitle', {
         defaultMessage: 'Snapshot name',
       }),
-      truncateText: true,
       sortable: true,
+      render: (
+        snapshotName: SlmPolicy['snapshotName'],
+        { lastFailure, lastSuccess }: SlmPolicy
+      ) => {
+        // Alert user if last snapshot failed
+        if (lastSuccess && lastFailure && lastFailure.time > lastSuccess.time) {
+          return (
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              className="snapshotRestorePolicyTableSnapshotFailureContainer"
+            >
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  position="top"
+                  content={i18n.translate(
+                    'xpack.snapshotRestore.policyList.table.lastSnapshotFailedTooltip',
+                    {
+                      defaultMessage: 'Last snapshot failed',
+                    }
+                  )}
+                >
+                  <EuiIcon type="alert" color="danger" />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={1}>
+                <EuiText size="s">{snapshotName}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        }
+        return snapshotName;
+      },
     },
     {
       field: 'repository',
