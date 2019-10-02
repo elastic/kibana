@@ -15,10 +15,12 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiEmptyPrompt,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FrontendLibs } from '../../lib/types';
+import { AgentHealth } from '../../components/agent_health';
 
 interface RouterProps {
   libs: FrontendLibs;
@@ -49,15 +51,15 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
       truncateText: true,
       sortable: true,
     },
-    {
-      field: 'id',
-      name: i18n.translate('xpack.fleet.agentList.metaColumnTitle', {
-        defaultMessage: 'Meta',
-      }),
-      truncateText: true,
-      sortable: true,
-      render: () => <span>some-region</span>,
-    },
+    // {
+    //   field: 'id',
+    //   name: i18n.translate('xpack.fleet.agentList.metaColumnTitle', {
+    //     defaultMessage: 'Meta',
+    //   }),
+    //   truncateText: true,
+    //   sortable: true,
+    //   render: () => <span>some-region</span>,
+    // },
     {
       field: 'policy_id',
       name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
@@ -66,23 +68,43 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
       truncateText: true,
       sortable: true,
     },
+    // {
+    //   field: 'event_rate',
+    //   name: i18n.translate('xpack.fleet.agentList.eventsColumnTitle', {
+    //     defaultMessage: 'Events (24h)',
+    //   }),
+    //   truncateText: true,
+    //   sortable: true,
+    //   render: () => <span>34</span>,
+    // },
     {
-      field: 'event_rate',
-      name: i18n.translate('xpack.fleet.agentList.eventsColumnTitle', {
-        defaultMessage: 'Events (24h)',
-      }),
-      truncateText: true,
-      sortable: true,
-      render: () => <span>34</span>,
-    },
-    {
-      field: 'status',
+      field: 'active',
       name: i18n.translate('xpack.fleet.agentList.statusColumnTitle', {
         defaultMessage: 'Status',
       }),
       truncateText: true,
       sortable: true,
-      render: () => <span>some status</span>,
+      render: (active: boolean, agent: any) => <AgentHealth agent={agent} />,
+    },
+    {
+      name: i18n.translate('xpack.fleet.agentList.actionsColumnTitle', {
+        defaultMessage: 'Actions',
+      }),
+      actions: [
+        {
+          render: () => {
+            return (
+              <EuiLink color="primary" onClick={() => {}}>
+                <FormattedMessage
+                  id="xpack.fleet.agentList.viewActionLinkText"
+                  defaultMessage="view"
+                />
+              </EuiLink>
+            );
+          },
+        },
+      ],
+      width: '100px',
     },
   ];
 
@@ -103,6 +125,19 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
       incremental: true,
       schema: true,
     },
+    filters: [
+      {
+        type: 'field_value_selection',
+        field: 'policy_id',
+        name: i18n.translate('xpack.fleet.agentList.policyFilterLabel', {
+          defaultMessage: 'Policy',
+        }),
+        multiSelect: true,
+        options: [...new Set(agents.map(agent => agent.policy_id))].map(policy => ({
+          value: policy,
+        })),
+      },
+    ],
     toolsRight: (
       <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
         <EuiFlexItem>
@@ -148,10 +183,7 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
       <EuiPageContent>
         <EuiTitle size="l">
           <h1>
-            <FormattedMessage
-              id="xpack.fleet.agentList.pageTitle"
-              defaultMessage="Elastic Fleet - Agents"
-            />
+            <FormattedMessage id="xpack.fleet.agentList.pageTitle" defaultMessage="Elastic Fleet" />
           </h1>
         </EuiTitle>
         <EuiSpacer size="s" />
@@ -173,7 +205,9 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
                 })
               : agents.length === 0
               ? emptyPrompt
-              : null
+              : i18n.translate('xpack.fleet.agentList.noFilteredAgentsPrompt', {
+                  defaultMessage: 'No agents found',
+                })
           }
           items={agents}
           itemId="id"
