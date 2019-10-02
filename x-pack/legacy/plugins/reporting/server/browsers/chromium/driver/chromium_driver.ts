@@ -72,8 +72,8 @@ export class HeadlessChromiumDriver {
       const isData = interceptedUrl.startsWith('data:');
 
       // We should never ever let file protocol requests go through
-      if (allowed && this.allowRequest(interceptedUrl, null)) {
-        logger.error(`Got file-protocol URL: "${interceptedUrl}", closing browser.`);
+      if (!allowed || !this.allowRequest(interceptedUrl, null)) {
+        logger.error(`Got bad URL: "${interceptedUrl}", closing browser.`);
         interceptedRequest.abort('blockedbyclient');
         this.page.browser().close();
         throw new Error(`Received disallowed outgoing URL: "${interceptedUrl}", exiting`);
@@ -98,15 +98,9 @@ export class HeadlessChromiumDriver {
     this.page.on('response', interceptedResponse => {
       const interceptedUrl = interceptedResponse.url();
       const remoteIp = interceptedResponse.remoteAddress().ip;
-      let allowed = !interceptedUrl.startsWith('file://');
+      const allowed = !interceptedUrl.startsWith('file://');
 
-      // Redirects can come through this hook as well, so only
-      // filter payloads that actually respond
-      if (interceptedResponse.status() === 200) {
-        allowed = this.allowRequest(interceptedUrl, remoteIp);
-      }
-
-      if (!allowed) {
+      if (!allowed || !this.allowRequest(interceptedUrl, remoteIp)) {
         logger.error(`Got disallowed URL "${interceptedUrl}", closing browser.`);
         this.page.browser().close();
         throw new Error(`Received disallowed URL in response: ${interceptedUrl}`);
