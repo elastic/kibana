@@ -141,6 +141,39 @@ function addBar(foos, foo) {
 }
 ```
 
+### Avoid `any` whenever possible
+
+Since TypeScript 3.0 and the introduction of the
+[`unknown` type](https://mariusschulz.com/blog/the-unknown-type-in-typescript) there are rarely any
+reasons to use `any` as a type. Nearly all places of former `any` usage can be replace by either a
+generic or `unknown` (in cases the type is really not known).
+
+You should always prefer using those mechanisms over using `any`, since they are stricter typed and
+less likely to introduce bugs in the future due to insufficient types.
+
+If you’re not having `any` in your plugin or are starting a new plugin, you should enable the
+[`@typescript-eslint/no-explicit-any`](https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-explicit-any.md)
+linting rule for your plugin via the [`.eslintrc.js`](https://github.com/elastic/kibana/blob/master/.eslintrc.js) config.
+
+### Avoid non-null assertions
+
+You should try avoiding non-null assertions (`!.`) wherever possible. By using them you tell
+TypeScript, that something is not null even though by it’s type it could be. Usage of non-null
+assertions is most often a side-effect of you actually checked that the variable is not null `null`
+but TypeScript doesn’t correctly carry on that information till the usage of the variable.
+
+In most cases it’s possible to replace the non-null assertion by structuring your code/checks slightly different
+or using [user defined type guards](https://www.typescriptlang.org/docs/handbook/advanced-types.html#user-defined-type-guards)
+to properly tell TypeScript what type a variable has.
+
+Using non-null assertion increases the risk for future bugs. In case the condition under which we assumed that the
+variable can’t be null has changed (potentially even due to changes in compeltely different files), the non-null
+assertion would now wrongly disable proper type checking for us.
+
+If you’re not using non-null assertions in your plugin or are starting a new plugin, consider enabling the
+[`@typescript-eslint/no-non-null-assertion`](https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-non-null-assertion.md)
+linting rule for you plugin in the [`.eslintrc.js`](https://github.com/elastic/kibana/blob/master/.eslintrc.js) config.
+
 ### Return/throw early from functions
 
 To avoid deep nesting of if-statements, always return a function's value as early
