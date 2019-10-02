@@ -17,30 +17,38 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { asPrettyString } from '../../../../../../plugins/data/common/field_formats';
+import { findLast, cloneDeep, template, escape } from 'lodash';
+import {
+  asPrettyString,
+  FieldFormat,
+  HTML_CONTEXT_TYPE,
+} from '../../../../../../plugins/data/common/field_formats';
 import { DEFAULT_COLOR } from './color_default';
 
-const convertTemplate = _.template('<span style="<%- style %>"><%- val %></span>');
+const convertTemplate = template('<span style="<%- style %>"><%- val %></span>');
 
-export function createColorFormat(FieldFormat) {
+export function createColorFormat() {
   class ColorFormat extends FieldFormat {
+    static id = 'color';
+    static title = 'Color';
+    static fieldType = ['number', 'string'];
+
     getParamDefaults() {
       return {
         fieldType: null, // populated by editor, see controller below
-        colors: [_.cloneDeep(DEFAULT_COLOR)]
+        colors: [cloneDeep(DEFAULT_COLOR)],
       };
     }
 
-    findColorRuleForVal(val) {
+    findColorRuleForVal(val: any) {
       switch (this.param('fieldType')) {
         case 'string':
-          return _.findLast(this.param('colors'), (colorParam) => {
+          return findLast(this.param('colors'), (colorParam: typeof DEFAULT_COLOR) => {
             return new RegExp(colorParam.regex).test(val);
           });
 
         case 'number':
-          return _.findLast(this.param('colors'), ({ range }) => {
+          return findLast(this.param('colors'), ({ range }) => {
             if (!range) return;
             const [start, end] = range.split(':');
             return val >= Number(start) && val <= Number(end);
@@ -51,25 +59,18 @@ export function createColorFormat(FieldFormat) {
       }
     }
 
-    static id = 'color';
-    static title = 'Color';
-    static fieldType = [
-      'number',
-      'string'
-    ];
+    _convert = {
+      [HTML_CONTEXT_TYPE](this: ColorFormat, val: any) {
+        const color = this.findColorRuleForVal(val) as typeof DEFAULT_COLOR;
+        if (!color) return escape(asPrettyString(val));
+
+        let style = '';
+        if (color.text) style += `color: ${color.text};`;
+        if (color.background) style += `background-color: ${color.background};`;
+        return convertTemplate({ val, style });
+      },
+    };
   }
-
-  ColorFormat.prototype._convert = {
-    html(val) {
-      const color = this.findColorRuleForVal(val);
-      if (!color) return _.escape(asPrettyString(val));
-
-      let style = '';
-      if (color.text) style += `color: ${color.text};`;
-      if (color.background) style += `background-color: ${color.background};`;
-      return convertTemplate({ val, style });
-    }
-  };
 
   return ColorFormat;
 }
