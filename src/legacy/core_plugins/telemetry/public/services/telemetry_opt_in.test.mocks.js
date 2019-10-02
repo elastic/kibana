@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { injectedMetadataServiceMock } from '../../../../../../src/core/public/mocks';
+import { injectedMetadataServiceMock } from '../../../../../core/public/mocks';
 const injectedMetadataMock = injectedMetadataServiceMock.createStartContract();
 
 export function mockInjectedMetadata({ telemetryOptedIn }) {

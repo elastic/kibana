@@ -36,7 +36,6 @@ export async function getStatsWithMonitoring(
   }
 
   if (!Array.isArray(response) || response.length === 0) {
-    // return it as an array for a consistent API response
     response = await getStatsWithXpack(req, config, start, end, unencrypted);
   }
 
