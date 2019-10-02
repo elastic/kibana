@@ -263,7 +263,7 @@ describe('SavedObjectsRepository', () => {
     onBeforeWrite = jest.fn();
     migrator = {
       migrateDocument: jest.fn(doc => doc),
-      awaitMigration: async () => ({ status: 'skipped' }),
+      runMigrations: async () => ({ status: 'skipped' }),
     };
 
     const serializer = new SavedObjectsSerializer(schema);
@@ -297,7 +297,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('waits until migrations are complete before proceeding', async () => {
-      migrator.awaitMigration = jest.fn(async () =>
+      migrator.runMigrations = jest.fn(async () =>
         expect(callAdminCluster).not.toHaveBeenCalled()
       );
 
@@ -313,7 +313,7 @@ describe('SavedObjectsRepository', () => {
           }
         )
       ).resolves.toBeDefined();
-      expect(migrator.awaitMigration).toHaveBeenCalledTimes(1);
+      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
     });
 
     it('formats Elasticsearch response', async () => {
@@ -552,7 +552,7 @@ describe('SavedObjectsRepository', () => {
 
   describe('#bulkCreate', () => {
     it('waits until migrations are complete before proceeding', async () => {
-      migrator.awaitMigration = jest.fn(async () =>
+      migrator.runMigrations = jest.fn(async () =>
         expect(callAdminCluster).not.toHaveBeenCalled()
       );
       callAdminCluster.mockReturnValue({
@@ -576,7 +576,7 @@ describe('SavedObjectsRepository', () => {
         ])
       ).resolves.toBeDefined();
 
-      expect(migrator.awaitMigration).toHaveBeenCalledTimes(1);
+      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
     });
 
     it('formats Elasticsearch request', async () => {
@@ -998,7 +998,7 @@ describe('SavedObjectsRepository', () => {
 
   describe('#delete', () => {
     it('waits until migrations are complete before proceeding', async () => {
-      migrator.awaitMigration = jest.fn(async () =>
+      migrator.runMigrations = jest.fn(async () =>
         expect(callAdminCluster).not.toHaveBeenCalled()
       );
       callAdminCluster.mockReturnValue({ result: 'deleted' });
@@ -1008,7 +1008,7 @@ describe('SavedObjectsRepository', () => {
         })
       ).resolves.toBeDefined();
 
-      expect(migrator.awaitMigration).toHaveBeenCalledTimes(1);
+      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
     });
 
     it('throws notFound when ES is unable to find the document', async () => {
@@ -1114,14 +1114,14 @@ describe('SavedObjectsRepository', () => {
 
   describe('#find', () => {
     it('waits until migrations are complete before proceeding', async () => {
-      migrator.awaitMigration = jest.fn(async () =>
+      migrator.runMigrations = jest.fn(async () =>
         expect(callAdminCluster).not.toHaveBeenCalled()
       );
 
       callAdminCluster.mockReturnValue(noNamespaceSearchResults);
       await expect(savedObjectsRepository.find({ type: 'foo' })).resolves.toBeDefined();
 
-      expect(migrator.awaitMigration).toHaveBeenCalledTimes(1);
+      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
     });
 
     it('requires type to be defined', async () => {
@@ -1315,7 +1315,7 @@ describe('SavedObjectsRepository', () => {
     };
 
     it('waits until migrations are complete before proceeding', async () => {
-      migrator.awaitMigration = jest.fn(async () =>
+      migrator.runMigrations = jest.fn(async () =>
         expect(callAdminCluster).not.toHaveBeenCalled()
       );
 
@@ -1324,7 +1324,7 @@ describe('SavedObjectsRepository', () => {
         savedObjectsRepository.get('index-pattern', 'logstash-*')
       ).resolves.toBeDefined();
 
-      expect(migrator.awaitMigration).toHaveBeenCalledTimes(1);
+      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
     });
 
     it('formats Elasticsearch response when there is no namespace', async () => {
@@ -1408,7 +1408,7 @@ describe('SavedObjectsRepository', () => {
 
   describe('#bulkGet', () => {
     it('waits until migrations are complete before proceeding', async () => {
-      migrator.awaitMigration = jest.fn(async () =>
+      migrator.runMigrations = jest.fn(async () =>
         expect(callAdminCluster).not.toHaveBeenCalled()
       );
 
@@ -1421,7 +1421,7 @@ describe('SavedObjectsRepository', () => {
         ])
       ).resolves.toBeDefined();
 
-      expect(migrator.awaitMigration).toHaveBeenCalledTimes(1);
+      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
     });
 
     it('prepends type to id when getting objects when there is no namespace', async () => {
@@ -1662,7 +1662,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('waits until migrations are complete before proceeding', async () => {
-      migrator.awaitMigration = jest.fn(async () =>
+      migrator.runMigrations = jest.fn(async () =>
         expect(callAdminCluster).not.toHaveBeenCalled()
       );
 
@@ -1672,7 +1672,7 @@ describe('SavedObjectsRepository', () => {
         })
       ).resolves.toBeDefined();
 
-      expect(migrator.awaitMigration).toHaveReturnedTimes(1);
+      expect(migrator.runMigrations).toHaveReturnedTimes(1);
     });
 
     it('mockReturnValue current ES document _seq_no and _primary_term encoded as version', async () => {

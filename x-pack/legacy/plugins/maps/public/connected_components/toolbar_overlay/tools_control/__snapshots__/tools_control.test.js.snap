@@ -63,7 +63,7 @@ exports[`Should render cancel button when drawing 1`] = `
                 onSubmit={[Function]}
               />,
               "id": 1,
-              "title": "Draw shape to filter data",
+              "title": "Draw shape",
             },
             Object {
               "content": <GeometryFilterForm
@@ -84,7 +84,7 @@ exports[`Should render cancel button when drawing 1`] = `
                 onSubmit={[Function]}
               />,
               "id": 2,
-              "title": "Draw bounds to filter data",
+              "title": "Draw bounds",
             },
           ]
         }
@@ -166,7 +166,7 @@ exports[`renders 1`] = `
             onSubmit={[Function]}
           />,
           "id": 1,
-          "title": "Draw shape to filter data",
+          "title": "Draw shape",
         },
         Object {
           "content": <GeometryFilterForm
@@ -187,7 +187,7 @@ exports[`renders 1`] = `
             onSubmit={[Function]}
           />,
           "id": 2,
-          "title": "Draw bounds to filter data",
+          "title": "Draw bounds",
         },
       ]
     }
