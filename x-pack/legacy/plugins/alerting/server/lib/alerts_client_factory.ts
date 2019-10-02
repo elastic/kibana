@@ -6,9 +6,9 @@
 
 import Hapi from 'hapi';
 import uuid from 'uuid';
-import { TaskManager } from '../../../task_manager';
+import { AlertTypeRegistry } from '../types';
 import { AlertsClient } from '../alerts_client';
-import { AlertTypeRegistry } from '../alert_type_registry';
+import { TaskManager } from '../../../task_manager';
 import { KibanaRequest, Logger } from '../../../../../../src/core/server';
 import { PluginSetupContract as SecurityPluginSetupContract } from '../../../../../plugins/security/server';
 
