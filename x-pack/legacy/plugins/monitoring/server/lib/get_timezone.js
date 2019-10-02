@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export async function getTimezone(server, savedObjectsClient) {
-  const uiConfig = server.uiSettingsServiceFactory({
-    savedObjectsClient,
-  });
-  const timezone = await uiConfig.get('dateFormat:tz');
-  return timezone;
+export async function getTimezone(req) {
+  return await req.getUiSettingsService().get('dateFormat:tz');
 }

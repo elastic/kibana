@@ -22,7 +22,7 @@ export async function getMetrics(req, indexPattern, metricSet = [], filters = []
   const max = moment.utc(req.payload.timeRange.max).valueOf();
   const minIntervalSeconds = config.get('xpack.monitoring.min_interval_seconds');
   const bucketSize = calculateTimeseriesInterval(min, max, minIntervalSeconds);
-  const timezone = await getTimezone(req.server, req.getSavedObjectsClient());
+  const timezone = await getTimezone(req);
 
   return Promise.map(metricSet, metric => {
     // metric names match the literal metric name, but they can be supplied in groups or individually

@@ -18,7 +18,7 @@ async function handleResponse(response, req, filebeatIndexPattern, opts) {
     logs: []
   };
 
-  const timezone = await getTimezone(req.server, req.getSavedObjectsClient());
+  const timezone = await getTimezone(req);
   const hits = get(response, 'hits.hits', []);
   if (hits.length) {
     result.enabled = true;
