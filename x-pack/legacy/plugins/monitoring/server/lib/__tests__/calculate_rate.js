@@ -53,6 +53,19 @@ describe('Calculate Rate', () => {
     expect(isEstimate).to.be(false);
   });
 
+  it('calculates a rate using data time bounds, not just time picker time bounds', () => {
+    const { rate, isEstimate } = calculateRate({
+      hitTimestamp: '2017-08-08T18:33:04.501Z',
+      earliestHitTimestamp: '2017-08-08T18:03:04.501Z',
+      latestTotal: 24924,
+      earliestTotal: 18945,
+      timeWindowMin: '2017-08-08T17:33:04.501Z',
+      timeWindowMax: '2017-08-08T18:33:04.501Z'
+    });
+    expect(rate).to.be(3.321);
+    expect(isEstimate).to.be(false);
+  });
+
   it('calculates zero as the rate if latest - earliest is 0', () => {
     const { rate, isEstimate } = calculateRate({
       hitTimestamp: '2017-08-08T18:33:04.501Z',
