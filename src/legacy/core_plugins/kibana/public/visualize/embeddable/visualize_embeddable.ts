@@ -39,6 +39,8 @@ import {
 } from '../../../../../../plugins/embeddable/public';
 import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+// eslint-disable-next-line
+import { setInitialRenderCompleteAttrs, updateRenderCompleteAttrs } from '../../../../../../plugins/kibana_utils/public/render_complete/track_render_complete_attributes';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -78,6 +80,11 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private visCustomizations: VisualizeInput['vis'];
   private subscription: Subscription;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
+
+  private firstRenderCompleteCallback!: () => void;
+  public whenFirstRenderComplete = new Promise(resolve => {
+    this.firstRenderCompleteCallback = resolve;
+  });
 
   constructor(
     {
@@ -191,12 +198,25 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   }
 
   /**
+   * Visualizations fire `renderComplete` DOM event when they are ready
+   * to be consumed by reporting plugin. Here we intercept this event
+   * and set some DOM attributes for testing and reporting.
+   */
+  private onRenderComplete = () => {
+    this.firstRenderCompleteCallback();
+    updateRenderCompleteAttrs(this.domNode! as HTMLElement);
+  };
+
+  /**
    *
    * @param {Element} domNode
    * @param {ContainerState} containerState
    */
   public render(domNode: HTMLElement) {
     super.render(domNode);
+
+    setInitialRenderCompleteAttrs(domNode as HTMLElement);
+    domNode.addEventListener('renderComplete', this.onRenderComplete);
 
     this.timeRange = _.cloneDeep(this.input.timeRange);
     this.query = this.input.query;
@@ -205,7 +225,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.transferCustomizationsToUiState();
 
     const dataAttrs: { [key: string]: string } = {
-      'shared-item': '',
       title: this.output.title || '',
     };
     if (this.savedVisualization.description) {
@@ -232,6 +251,10 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   public destroy() {
     super.destroy();
+
+    if (this.domNode) {
+      this.domNode.removeEventListener('renderComplete', this.onRenderComplete);
+    }
 
     if (this.subscription) {
       this.subscription.unsubscribe();

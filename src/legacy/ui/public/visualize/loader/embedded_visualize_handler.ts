@@ -33,7 +33,6 @@ import { Inspector } from '../../inspector';
 import { Adapters } from '../../inspector/types';
 import { PersistedState } from '../../persisted_state';
 import { IPrivate } from '../../private';
-import { RenderCompleteHelper } from '../../../../../plugins/kibana_utils/public';
 import { AppState } from '../../state_management/app_state';
 import { timefilter } from '../../timefilter';
 import { Vis } from '../../vis';
@@ -97,7 +96,6 @@ export class EmbeddedVisualizeHandler {
   private loaded: boolean = false;
   private destroyed: boolean = false;
 
-  private renderCompleteHelper: RenderCompleteHelper;
   private shouldForceNextFetch: boolean = false;
   private debouncedFetchAndRender = debounce(() => {
     if (this.destroyed) {
@@ -187,7 +185,6 @@ export class EmbeddedVisualizeHandler {
 
     this.dataLoader = new PipelineDataLoader(vis);
     const visFilters: any = Private(VisFiltersProvider);
-    this.renderCompleteHelper = new RenderCompleteHelper(element);
     this.inspectorAdapters = this.getActiveInspectorAdapters();
     this.vis.openInspector = this.openInspector;
     this.vis.hasInspector = this.hasInspector;
@@ -290,7 +287,6 @@ export class EmbeddedVisualizeHandler {
     this.element.removeEventListener('renderComplete', this.onRenderCompleteListener);
     this.uiState.off('change', this.onUiStateChange);
     visualizationLoader.destroy(this.element);
-    this.renderCompleteHelper.destroy();
     if (this.handlers.destroyFn) {
       this.handlers.destroyFn();
     }

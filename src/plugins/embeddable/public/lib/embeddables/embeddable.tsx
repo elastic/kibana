@@ -23,15 +23,6 @@ import { IContainer } from '../containers';
 import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 import { ViewMode } from '../types';
 
-/**
- * If this attribute is present it specifies that `renderComplete` event has not been fired yet.
- */
-const ATTR_DATA_LOADING = 'data-loading';
-/**
- * Tracks number of times `renderComplete` event was fired.
- */
-const ATTR_DATA_RENDERING_COUNT = 'data-rendering-count';
-
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
 }
@@ -57,11 +48,6 @@ export abstract class Embeddable<
 
   // TODO: Rename to destroyed.
   private destoyed: boolean = false;
-
-  private firstRenderCompleteCallback!: () => void;
-  public whenFirstRenderComplete = new Promise(resolve => {
-    this.firstRenderCompleteCallback = resolve;
-  });
 
   protected domNode: HTMLElement | Element | null = null;
 
@@ -146,28 +132,16 @@ export abstract class Embeddable<
   }
 
   /**
-   * Visualizations fire `renderComplete` DOM event when they are ready
-   * to be consumed by reporting plugin. Here we intercept this event
-   * and set some DOM attributes for testing.
+   * Render embeddable onto the page.
+   *
+   * @todo Make this method accept only `HTMLElement`.
+   * @param domNode HTML element.
    */
-  private onRenderComplete = () => {
-    this.firstRenderCompleteCallback();
-    this.domNode!.removeAttribute(ATTR_DATA_LOADING);
-
-    const renderingCount = Number(this.domNode!.getAttribute(ATTR_DATA_RENDERING_COUNT) || 0);
-    this.domNode!.setAttribute(ATTR_DATA_RENDERING_COUNT, String(renderingCount + 1));
-  };
-
   public render(domNode: HTMLElement | Element): void {
     if (this.destoyed) throw new Error('Embeddable has been destroyed');
     if (!domNode) return;
 
     this.domNode = domNode;
-    domNode.setAttribute(ATTR_DATA_LOADING, '');
-    domNode.setAttribute(ATTR_DATA_RENDERING_COUNT, '0');
-    domNode.addEventListener('renderComplete', this.onRenderComplete);
-
-    return;
   }
 
   /**
@@ -185,9 +159,7 @@ export abstract class Embeddable<
    */
   public destroy(): void {
     this.destoyed = true;
-    if (this.domNode) {
-      this.domNode.removeEventListener('renderComplete', this.onRenderComplete);
-    }
+
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();
     }
