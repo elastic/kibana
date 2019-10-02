@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
 import { createUrlFormat } from './url';
 
-const UrlFormat = createUrlFormat(FieldFormat);
+const UrlFormat = createUrlFormat();
 
 describe('UrlFormat', () => {
   test('outputs a simple <a> tag by default', () => {

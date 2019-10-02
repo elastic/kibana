@@ -33,8 +33,8 @@ const TRANSFORM_OPTIONS = [
 ];
 const DEFAULT_TRANSFORM_OPTION = false;
 
-export function createStringFormat(BaseFieldFormat: typeof FieldFormat) {
-  class StringFormat extends BaseFieldFormat {
+export function createStringFormat() {
+  class StringFormat extends FieldFormat {
     static id = 'string';
     static title = 'String';
     static fieldType = [

@@ -18,9 +18,8 @@
  */
 
 import { createBytesFormat } from './bytes';
-import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
 
-const BytesFormat = createBytesFormat(FieldFormat);
+const BytesFormat = createBytesFormat();
 
 describe('BytesFormat', function() {
   const config: Record<any, any> = {};

@@ -18,9 +18,8 @@
  */
 
 import { createTruncateFormat } from './truncate';
-import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
 
-const TruncateFormat = createTruncateFormat(FieldFormat);
+const TruncateFormat = createTruncateFormat();
 
 describe('String TruncateFormat', function() {
   test('truncate large string', function() {

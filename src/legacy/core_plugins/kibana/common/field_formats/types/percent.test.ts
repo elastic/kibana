@@ -18,9 +18,8 @@
  */
 
 import { createPercentFormat } from './percent';
-import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
 
-const PercentFormat = createPercentFormat(FieldFormat);
+const PercentFormat = createPercentFormat();
 
 describe('PercentFormat', function() {
   const config: Record<any, any> = {};
