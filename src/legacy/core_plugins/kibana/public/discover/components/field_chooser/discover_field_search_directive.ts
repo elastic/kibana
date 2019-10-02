@@ -16,13 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// @ts-ignore
+import { uiModules } from 'ui/modules';
+import { wrapInI18nContext } from 'ui/i18n';
+import { DiscoverFieldSearch } from './discover_field_search';
 
-import { chromeServiceMock } from '../../../../../core/public/mocks';
+const app = uiModules.get('apps/discover');
 
-jest.doMock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      chrome: chromeServiceMock.createStartContract(),
-    },
-  },
-}));
+app.directive('discoverFieldSearch', function(reactDirective: any) {
+  return reactDirective(wrapInI18nContext(DiscoverFieldSearch), [
+    ['onChange', { watchDepth: 'reference' }],
+    ['onShowFilter', { watchDepth: 'reference' }],
+    ['showFilter', { watchDepth: 'value' }],
+    ['value', { watchDepth: 'value' }],
+  ]);
+});

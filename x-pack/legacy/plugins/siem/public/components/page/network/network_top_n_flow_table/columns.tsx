@@ -111,7 +111,7 @@ export const getNetworkTopNFlowColumns = (
         return getEmptyTagValue();
       }
     },
-    width: '15%',
+    width: '20%',
   },
   {
     name: i18n.DOMAIN,
@@ -150,12 +150,17 @@ export const getNetworkTopNFlowColumns = (
                 attrName: `${flowTarget}.as.organization.name`,
                 idPrefix: `${id}-name`,
               })}
-            {as.number &&
-              getRowItemDraggable({
-                rowItem: `${as.number}`,
-                attrName: `${flowTarget}.as.number`,
-                idPrefix: `${id}-number`,
-              })}
+
+            {as.number && (
+              <>
+                {' '}
+                {getRowItemDraggable({
+                  rowItem: `${as.number}`,
+                  attrName: `${flowTarget}.as.number`,
+                  idPrefix: `${id}-number`,
+                })}
+              </>
+            )}
           </>
         );
       } else {

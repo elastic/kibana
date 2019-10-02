@@ -4,27 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
 import React, { useEffect, useRef, useState } from 'react';
 import uuid from 'uuid';
-
 import VisibilitySensor from 'react-visibility-sensor';
-import styled from 'styled-components';
+
 import { BrowserFields } from '../../../../containers/source';
 import { TimelineDetailsComponentQuery } from '../../../../containers/timeline/details';
 import { TimelineItem, DetailItem } from '../../../../graphql/types';
+import { requestIdleCallbackViaScheduler } from '../../../../lib/helpers/scheduler';
 import { Note } from '../../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
+import { SkeletonRow } from '../../../skeleton_row';
 import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
 import { ExpandableEvent } from '../../expandable_event';
-import { ColumnHeader } from '../column_headers/column_header';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
-import { ColumnRenderer } from '../renderers/column_renderer';
-import { RowRenderer } from '../renderers/row_renderer';
-import { getRowRenderer } from '../renderers/get_row_renderer';
-import { requestIdleCallbackViaScheduler } from '../../../../lib/helpers/scheduler';
-import { StatefulEventChild } from './stateful_event_child';
+import { EventsTrGroup, EventsTrSupplement, OFFSET_SCROLLBAR } from '../../styles';
+import { useTimelineWidthContext } from '../../timeline_context';
+import { ColumnHeader } from '../column_headers/column_header';
 import { eventIsPinned } from '../helpers';
+import { ColumnRenderer } from '../renderers/column_renderer';
+import { getRowRenderer } from '../renderers/get_row_renderer';
+import { RowRenderer } from '../renderers/row_renderer';
+import { StatefulEventChild } from './stateful_event_child';
 
 interface Props {
   actionsColumnWidth: number;
@@ -56,15 +57,7 @@ const emptyDetails: DetailItem[] = [];
  * This is the default row height whenever it is a plain row renderer and not a custom row height.
  * We use this value when we do not know the height of a particular row.
  */
-const DEFAULT_ROW_HEIGHT = '27px';
-
-/**
- * This is the default margin size from the EmptyRow below and is the top and bottom
- * margin added together.
- * If you change margin: 5px 0 5px 0; within EmptyRow styled component, then please
- * update this value
- */
-const EMPTY_ROW_MARGIN_TOP_BOTTOM = 10;
+const DEFAULT_ROW_HEIGHT = '32px';
 
 /**
  * This is the top offset in pixels of the top part of the timeline. The UI area where you do your
@@ -85,20 +78,26 @@ const TOP_OFFSET = 50;
  */
 const BOTTOM_OFFSET = -500;
 
-/**
- * This is missing the height props intentionally for performance reasons that
- * you can see here:
- * https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
- *
- * We inline the height style for performance reasons directly on the component.
- */
-export const EmptyRow = styled.div`
-  background-color: ${props => props.theme.eui.euiColorLightestShade};
-  width: 100%;
-  border: ${props => `1px solid ${props.theme.eui.euiColorLightShade}`};
-  border-radius: 5px;
-  margin: 5px 0 5px 0;
-`;
+interface AttributesProps {
+  children: React.ReactNode;
+}
+
+const Attributes = React.memo<AttributesProps>(({ children }) => {
+  const width = useTimelineWidthContext();
+
+  // Passing the styles directly to the component because the width is
+  // being calculated and is recommended by Styled Components for performance
+  // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
+  return (
+    <EventsTrSupplement
+      className="siemEventsTable__trSupplement--attributes"
+      data-test-subj="event-details"
+      style={{ width: `${width - OFFSET_SCROLLBAR}px` }}
+    >
+      {children}
+    </EventsTrSupplement>
+  );
+});
 
 export const StatefulEvent = React.memo<Props>(
   ({
@@ -173,14 +172,14 @@ export const StatefulEvent = React.memo<Props>(
       };
     }, []);
 
+    // Number of current columns plus one for actions.
+    const columnCount = columnHeaders.length + 1;
+
     // If we are not ready to render yet, just return null
     // see useEffect() for when it schedules the first
     // time this stateful component should be rendered.
     if (!initialRender) {
-      // height is being inlined directly in here because of performance with StyledComponents
-      // involving quick and constant changes to the DOM.
-      // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-      return <EmptyRow style={{ height: DEFAULT_ROW_HEIGHT }}></EmptyRow>;
+      return <SkeletonRow cellCount={columnCount} />;
     }
 
     return (
@@ -199,12 +198,12 @@ export const StatefulEvent = React.memo<Props>(
                 executeQuery={!!expanded[event._id]}
               >
                 {({ detailsData, loading }) => (
-                  <div
+                  <EventsTrGroup
                     className={STATEFUL_EVENT_CSS_CLASS_NAME}
                     data-test-subj="event"
-                    ref={newDivElement => {
-                      if (newDivElement != null) {
-                        divElement.current = newDivElement;
+                    innerRef={c => {
+                      if (c != null) {
+                        divElement.current = c;
                       }
                     }}
                   >
@@ -238,7 +237,8 @@ export const StatefulEvent = React.memo<Props>(
                       ),
                       timelineId,
                     })}
-                    <EuiFlexItem data-test-subj="event-details" grow={true}>
+
+                    <Attributes>
                       <ExpandableEvent
                         browserFields={browserFields}
                         columnHeaders={columnHeaders}
@@ -249,8 +249,8 @@ export const StatefulEvent = React.memo<Props>(
                         timelineId={timelineId}
                         toggleColumn={toggleColumn}
                       />
-                    </EuiFlexItem>
-                  </div>
+                    </Attributes>
+                  </EventsTrGroup>
                 )}
               </TimelineDetailsComponentQuery>
             );
@@ -258,13 +258,13 @@ export const StatefulEvent = React.memo<Props>(
             // Height place holder for visibility detection as well as re-rendering sections.
             const height =
               divElement.current != null
-                ? `${divElement.current.clientHeight - EMPTY_ROW_MARGIN_TOP_BOTTOM}px`
+                ? `${divElement.current.clientHeight}px`
                 : DEFAULT_ROW_HEIGHT;
 
             // height is being inlined directly in here because of performance with StyledComponents
             // involving quick and constant changes to the DOM.
             // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-            return <EmptyRow style={{ height }}></EmptyRow>;
+            return <SkeletonRow cellCount={columnCount} style={{ height }} />;
           }
         }}
       </VisibilitySensor>

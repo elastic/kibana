@@ -250,6 +250,7 @@ export function EditorFrame(props: EditorFrameProps) {
               visualizationMap={props.visualizationMap}
               dispatch={dispatch}
               ExpressionRenderer={props.ExpressionRenderer}
+              core={props.core}
             />
           </WorkspacePanelWrapper>
         )

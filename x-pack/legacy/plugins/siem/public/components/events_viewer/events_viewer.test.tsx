@@ -50,7 +50,7 @@ describe('EventsViewer', () => {
 
     expect(
       wrapper
-        .find(`[data-test-subj="subtitle"]`)
+        .find(`[data-test-subj="header-panel-subtitle"]`)
         .first()
         .text()
     ).toEqual('Showing: 12 events');
