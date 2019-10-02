@@ -74,7 +74,7 @@ const isObject = (value: any): boolean =>
 
 export interface NormalizedProperties {
   byId: { [id: string]: Property };
-  topLevelFields: string[];
+  rootLevelFields: string[];
 }
 
 export const normalize = (propertiesToNormalize: Properties): NormalizedProperties => {
@@ -112,6 +112,6 @@ export const normalize = (propertiesToNormalize: Properties): NormalizedProperti
 
   return {
     byId,
-    topLevelFields: Object.keys(propertiesToNormalize),
+    rootLevelFields: Object.keys(propertiesToNormalize),
   };
 };

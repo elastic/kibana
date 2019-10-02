@@ -38,7 +38,7 @@ export interface Props {
 }
 
 export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: Props) => {
-  const { byId, topLevelFields } = normalize(defaultValue.properties);
+  const { byId, rootLevelFields } = normalize(defaultValue.properties);
   const initialState: State = {
     isValid: undefined,
     configuration: {
@@ -50,7 +50,7 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
     },
     properties: {
       byId,
-      topLevelFields,
+      rootLevelFields,
       isValid: true,
     },
     documentFields: {

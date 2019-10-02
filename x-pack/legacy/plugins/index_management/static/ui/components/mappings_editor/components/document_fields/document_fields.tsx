@@ -12,11 +12,11 @@ import { PropertiesList } from './properties';
 
 export const DocumentFields = () => {
   const {
-    properties: { byId, topLevelFields },
+    properties: { byId, rootLevelFields },
   } = useState();
 
   const getProperty = (propId: string) => byId[propId];
-  const properties = topLevelFields.map(getProperty);
+  const properties = rootLevelFields.map(getProperty);
 
   return (
     <>

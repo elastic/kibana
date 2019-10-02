@@ -30,7 +30,7 @@ export interface State {
   };
   properties: {
     byId: NormalizedProperties['byId'];
-    topLevelFields: NormalizedProperties['topLevelFields'];
+    rootLevelFields: NormalizedProperties['rootLevelFields'];
     isValid: boolean | undefined;
   };
 }
@@ -104,24 +104,24 @@ export const reducer = (state: State, action: Action): State => {
     case 'property.add': {
       const { fieldPathToAddProperty } = state.documentFields;
       const { name } = action.value;
-      const propId =
-        fieldPathToAddProperty === undefined ? name : `${fieldPathToAddProperty}.${name}`;
+      const addToRootLevel = fieldPathToAddProperty === undefined;
+      const propId = addToRootLevel ? name : `${fieldPathToAddProperty}.${name}`;
+
+      const rootLevelFields = addToRootLevel
+        ? [...state.properties.rootLevelFields, name]
+        : state.properties.rootLevelFields;
 
       const byId: NormalizedProperties['byId'] = {
         ...state.properties.byId,
         [propId]: action.value,
       };
-      let topLevelFields = state.properties.topLevelFields;
 
-      if (fieldPathToAddProperty === undefined) {
-        // update topLevel fields array
-        topLevelFields = [...topLevelFields, name];
-      } else {
+      if (!addToRootLevel) {
         const parentProperty = state.properties.byId[fieldPathToAddProperty!];
         const childProperties = parentProperty.__childProperties__ || [];
 
         // Update parent property with new children
-        byId[fieldPathToAddProperty] = {
+        byId[fieldPathToAddProperty!] = {
           ...parentProperty,
           __childProperties__: [propId, ...childProperties],
         };
@@ -129,7 +129,7 @@ export const reducer = (state: State, action: Action): State => {
 
       return {
         ...state,
-        properties: { ...state.properties, byId, topLevelFields },
+        properties: { ...state.properties, byId, rootLevelFields },
         documentFields: { ...state.documentFields, status: 'idle' },
       };
     }
