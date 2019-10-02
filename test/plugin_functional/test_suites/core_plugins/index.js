@@ -22,5 +22,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./applications'));
     loadTestFile(require.resolve('./ui_plugins'));
     loadTestFile(require.resolve('./server_plugins.js'));
+    loadTestFile(require.resolve('./legacy_plugins.js'));
   });
 }

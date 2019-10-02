@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const EVENT_COUNT_FREQUENCY_BY_ACTION = i18n.translate(
   'xpack.siem.eventsOverTime.eventCountFrequencyByActionTitle',
   {
-    defaultMessage: 'Event count frequency by action',
+    defaultMessage: 'Event count by action',
   }
 );
 

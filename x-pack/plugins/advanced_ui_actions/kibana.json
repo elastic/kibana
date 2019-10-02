@@ -1,0 +1,10 @@
+{
+  "id": "advancedUiActions",
+  "version": "kibana",
+  "requiredPlugins": [
+    "embeddable",
+    "uiActions"
+  ],
+  "server": false,
+  "ui": true
+}
