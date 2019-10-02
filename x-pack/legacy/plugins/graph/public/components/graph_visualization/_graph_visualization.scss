@@ -19,6 +19,10 @@
   }
 }
 
+.gphNode {
+  cursor: pointer;
+}
+
 .gphNode__label {
   @include gphSvgText;
   cursor: pointer;

@@ -8,10 +8,12 @@
   &--pickable {
     margin: $euiSizeXS;
     cursor: pointer;
-    opacity: .7;
+    opacity: 0.7;
   }
 
-  &--pickable:hover, &--pickable:focus, &--selected {
+  &--pickable:hover,
+  &--pickable:focus,
+  &--selected {
     transform: scale(1.4);
     opacity: 1;
   }
