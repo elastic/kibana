@@ -256,10 +256,6 @@ deprecation warning at startup. This setting cannot end in a slash (`/`).
 `server.customResponseHeaders:`:: *Default: `{}`* Header names and values to
   send on all responses to the client from the Kibana server.
 
-[[server-default]]`server.defaultRoute:`:: *Default: "/app/kibana"* This setting
-specifies the default route when opening Kibana. You can use this setting to
-modify the landing page when opening Kibana. Supported on {ece}.
-
 `server.host:`:: *Default: "localhost"* This setting specifies the host of the
 back end server.
 
