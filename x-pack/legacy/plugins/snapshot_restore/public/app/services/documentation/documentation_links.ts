@@ -72,7 +72,7 @@ class DocumentationLinksService {
   }
 
   public getCronUrl() {
-    return `${this.esStackOverviewDocBasePath}trigger-schedule.html#schedule-cron`;
+    return `${this.esDocBasePath}trigger-schedule.html#schedule-cron`;
   }
 }
 
