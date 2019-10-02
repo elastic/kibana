@@ -28,7 +28,7 @@ export interface PluginSetupContract {
 }
 
 /**
- * Represents Timelion Plugin instance that will be managed by the Kibana plugin system.
+ * Represents Code Plugin instance that will be managed by the Kibana plugin system.
  */
 export class CodePlugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
@@ -73,6 +73,7 @@ export class CodePlugin {
     });
 
     return deepFreeze({
+      /** @deprecated */
       legacy: {
         config,
         logger: this.initializerContext.logger,

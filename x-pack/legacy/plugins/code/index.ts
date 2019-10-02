@@ -50,7 +50,7 @@ export const code = (kibana: any) =>
           enabled: Joi.boolean().default(true),
         }).default(),
         enabled: Joi.boolean().default(true),
-      });
+      }).default();
     },
     async init(server: ServerFacade) {
       // @ts-ignore

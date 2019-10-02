@@ -9,7 +9,6 @@ import { Logger } from '../log';
 
 export class ConsoleLogger extends Logger {
   constructor() {
-    // @ts-ignore
     super({
       get: (...contextParts: string[]) => {
         return console as any;

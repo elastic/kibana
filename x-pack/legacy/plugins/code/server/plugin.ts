@@ -6,7 +6,7 @@
 
 import crypto from 'crypto';
 import * as _ from 'lodash';
-import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup } from 'src/core/server';
 
 import { GitOperations } from './git_operations';
 import { RepositoryIndexInitializerFactory, tryMigrateIndices } from './indexer';
@@ -69,16 +69,14 @@ export class CodePlugin {
   private codeServices: CodeServices | null = null;
   private nodeService: NodeRepositoriesService | null = null;
 
-  constructor(private readonly initContext: PluginInitializerContext<PluginSetupContract>) {
+  constructor(private readonly initContext: PluginSetupContract) {
     this.log = {} as Logger;
     this.serverOptions = {} as ServerOptions;
   }
 
   public setup(core: CoreSetup) {
     const { server } = core.http as any;
-    // @ts-ignore
     this.serverOptions = new ServerOptions(this.initContext.legacy.config, server.config());
-    // @ts-ignore
     this.log = new Logger(this.initContext.legacy.logger, this.serverOptions.verbose);
   }
 
@@ -135,7 +133,6 @@ export class CodePlugin {
 
     const { gitOps, lspService } = initLocalService(
       server,
-      // @ts-ignore
       this.initContext.legacy.logger,
       this.serverOptions,
       codeServices,
@@ -184,7 +181,6 @@ export class CodePlugin {
 
     const { gitOps, lspService } = initLocalService(
       server,
-      // @ts-ignore
       this.initContext.legacy.logger,
       this.serverOptions,
       codeServices,
