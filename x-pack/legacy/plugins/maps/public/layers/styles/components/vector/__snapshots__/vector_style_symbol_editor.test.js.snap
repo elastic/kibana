@@ -1,34 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Should render icon select when symbolized as Icon 1`] = `
-<EuiFormRow
-  describedByIds={Array []}
-  display="rowCompressed"
-  fullWidth={false}
-  hasEmptyLabelSpace={false}
-  label="Symbol type"
-  labelType="label"
->
-  <EuiSelect
-    compressed={true}
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="columnCompressed"
     fullWidth={false}
-    hasNoInitialSelection={false}
-    isLoading={false}
-    onChange={[Function]}
-    options={
-      Array [
-        Object {
-          "text": "circle marker",
-          "value": "circle",
-        },
-        Object {
-          "text": "icon",
-          "value": "icon",
-        },
-      ]
-    }
-    value="icon"
-  />
+    hasEmptyLabelSpace={false}
+    label="Symbol type"
+    labelType="label"
+  >
+    <EuiButtonGroup
+      buttonSize="compressed"
+      idSelected="icon"
+      isFullWidth={true}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "id": "circle",
+            "label": "circle marker",
+          },
+          Object {
+            "id": "icon",
+            "label": "icon",
+          },
+        ]
+      }
+    />
+  </EuiFormRow>
   <EuiSpacer
     size="s"
   />
@@ -60,37 +60,37 @@ exports[`Should render icon select when symbolized as Icon 1`] = `
     }
     singleSelection={true}
   />
-</EuiFormRow>
+</Fragment>
 `;
 
 exports[`Should render symbol select when symbolized as Circle 1`] = `
-<EuiFormRow
-  describedByIds={Array []}
-  display="rowCompressed"
-  fullWidth={false}
-  hasEmptyLabelSpace={false}
-  label="Symbol type"
-  labelType="label"
->
-  <EuiSelect
-    compressed={true}
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="columnCompressed"
     fullWidth={false}
-    hasNoInitialSelection={false}
-    isLoading={false}
-    onChange={[Function]}
-    options={
-      Array [
-        Object {
-          "text": "circle marker",
-          "value": "circle",
-        },
-        Object {
-          "text": "icon",
-          "value": "icon",
-        },
-      ]
-    }
-    value="circle"
-  />
-</EuiFormRow>
+    hasEmptyLabelSpace={false}
+    label="Symbol type"
+    labelType="label"
+  >
+    <EuiButtonGroup
+      buttonSize="compressed"
+      idSelected="circle"
+      isFullWidth={true}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "id": "circle",
+            "label": "circle marker",
+          },
+          Object {
+            "id": "icon",
+            "label": "icon",
+          },
+        ]
+      }
+    />
+  </EuiFormRow>
+</Fragment>
 `;

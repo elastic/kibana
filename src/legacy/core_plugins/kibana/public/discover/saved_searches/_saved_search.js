@@ -18,7 +18,6 @@
  */
 
 import 'ui/notify';
-import { i18n } from '@kbn/i18n';
 import { uiModules } from 'ui/modules';
 import { createLegacyClass } from 'ui/utils/legacy_class';
 import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
@@ -38,9 +37,7 @@ module.factory('SavedSearch', function (Private) {
 
       id: id,
       defaults: {
-        title: i18n.translate('kbn.discover.savedSearch.newSavedSearchTitle', {
-          defaultMessage: 'New Saved Search',
-        }),
+        title: '',
         description: '',
         columns: [],
         hits: 0,

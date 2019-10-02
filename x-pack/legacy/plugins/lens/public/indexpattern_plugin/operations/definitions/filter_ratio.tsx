@@ -18,7 +18,7 @@ import { OperationDefinition } from '.';
 import { BaseIndexPatternColumn } from './column_types';
 
 const filterRatioLabel = i18n.translate('xpack.lens.indexPattern.filterRatio', {
-  defaultMessage: 'Filter Ratio',
+  defaultMessage: 'Filter ratio',
 });
 
 export interface FilterRatioIndexPatternColumn extends BaseIndexPatternColumn {
@@ -35,7 +35,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
   type: 'filter_ratio',
   priority: 1,
   displayName: i18n.translate('xpack.lens.indexPattern.filterRatio', {
-    defaultMessage: 'Filter Ratio',
+    defaultMessage: 'Filter ratio',
   }),
   getPossibleOperationForDocument: () => {
     return {
@@ -80,16 +80,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
     // TODO parse the KQL tree and check whether this would work out
     return false;
   },
-  paramEditor: ({
-    state,
-    setState,
-    currentColumn,
-    uiSettings,
-    storage,
-    layerId,
-    savedObjectsClient,
-    http,
-  }) => {
+  paramEditor: ({ state, setState, currentColumn, layerId }) => {
     const [hasDenominator, setDenominator] = useState(
       !isEqual(currentColumn.params.denominator, initialQuery)
     );
@@ -102,14 +93,8 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
           })}
         >
           <QueryBarInput
-            appName={'lens'}
             indexPatterns={[state.indexPatterns[state.layers[layerId].indexPatternId].title]}
             query={currentColumn.params.numerator}
-            screenTitle={''}
-            store={storage}
-            uiSettings={uiSettings}
-            savedObjectsClient={savedObjectsClient}
-            http={http}
             onChange={(newQuery: Query) => {
               setState(
                 updateColumnParam({
@@ -168,14 +153,8 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
         >
           {hasDenominator ? (
             <QueryBarInput
-              appName={'lens'}
               indexPatterns={[state.indexPatterns[state.layers[layerId].indexPatternId].title]}
               query={currentColumn.params.denominator}
-              screenTitle={''}
-              store={storage}
-              uiSettings={uiSettings}
-              savedObjectsClient={savedObjectsClient}
-              http={http}
               onChange={(newQuery: Query) => {
                 setState(
                   updateColumnParam({

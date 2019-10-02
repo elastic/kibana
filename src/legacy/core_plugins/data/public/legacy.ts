@@ -45,4 +45,7 @@ export const setup = dataPlugin.setup(npSetup.core, {
   __LEGACY: legacyPlugin.setup(),
 });
 
-export const start = dataPlugin.start(npStart.core);
+export const start = dataPlugin.start(npStart.core, {
+  data: npStart.plugins.data,
+  __LEGACY: legacyPlugin.start(),
+});
