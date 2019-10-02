@@ -230,11 +230,11 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async assertInfluencerInputExists() {
-      await testSubjects.existOrFail('influencerSelect > comboBoxInput');
+      await testSubjects.existOrFail('mlInfluencerSelect > comboBoxInput');
     },
 
     async getSelectedInfluencers(): Promise<string[]> {
-      return await comboBox.getComboBoxSelectedOptions('influencerSelect > comboBoxInput');
+      return await comboBox.getComboBoxSelectedOptions('mlInfluencerSelect > comboBoxInput');
     },
 
     async assertInfluencerSelection(influencers: string[]) {
@@ -242,7 +242,7 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async addInfluencer(influencer: string) {
-      await comboBox.setCustom('influencerSelect > comboBoxInput', influencer);
+      await comboBox.setCustom('mlInfluencerSelect > comboBoxInput', influencer);
       expect(await this.getSelectedInfluencers()).to.contain(influencer);
     },
 
@@ -256,31 +256,13 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
       detectorPosition: number,
       chartType: string
     ) {
-      await testSubjects.existOrFail(`detector ${detectorPosition}`);
-      await testSubjects.existOrFail(`detector ${detectorPosition} > detectorTitle`);
+      await testSubjects.existOrFail(`mlDetector ${detectorPosition}`);
+      await testSubjects.existOrFail(`mlDetector ${detectorPosition} > mlDetectorTitle`);
       expect(
-        await testSubjects.getVisibleText(`detector ${detectorPosition} > detectorTitle`)
+        await testSubjects.getVisibleText(`mlDetector ${detectorPosition} > mlDetectorTitle`)
       ).to.eql(aggAndFieldIdentifier);
 
-      await this.assertAnomalyChartExists(chartType, `detector ${detectorPosition}`);
-    },
-
-    async assertDetectorSplitExists(splitField: string) {
-      await testSubjects.existOrFail(`dataSplit > dataSplitTitle ${splitField}`);
-      await testSubjects.existOrFail(`dataSplit > splitCard front`);
-      await testSubjects.existOrFail(`dataSplit > splitCard back`);
-    },
-
-    async assertDetectorSplitFrontCardTitle(frontCardTitle: string) {
-      expect(
-        await testSubjects.getVisibleText(`dataSplit > splitCard front > splitCardTitle`)
-      ).to.eql(frontCardTitle);
-    },
-
-    async assertDetectorSplitNumberOfBackCards(numberOfBackCards: number) {
-      expect(await testSubjects.findAll(`dataSplit > splitCard back`)).to.have.length(
-        numberOfBackCards
-      );
+      await this.assertAnomalyChartExists(chartType, `mlDetector ${detectorPosition}`);
     },
 
     async assertCreateJobButtonExists() {
@@ -288,11 +270,11 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async assertDateRangeSelectionExists() {
-      await testSubjects.existOrFail('jobWizardDateRange');
+      await testSubjects.existOrFail('mlJobWizardDateRange');
     },
 
     async getSelectedDateRange() {
-      const dateRange = await testSubjects.find('jobWizardDateRange');
+      const dateRange = await testSubjects.find('mlJobWizardDateRange');
       const [startPicker, endPicker] = await dateRange.findAllByClassName('euiFieldText');
       return {
         startDate: await startPicker.getAttribute('value'),
