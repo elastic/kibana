@@ -18,7 +18,7 @@
  */
 
 import { asPrettyString } from '../../../../../../plugins/data/common/field_formats';
-import { FieldFormat, DEFAULT_CONTEXT_TYPE } from '../../../../../../plugins/data/common/';
+import { FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../../../plugins/data/common/';
 // @ts-ignore
 import { shortenDottedString } from '../../utils/shorten_dotted_string';
 
@@ -35,26 +35,6 @@ const DEFAULT_TRANSFORM_OPTION = false;
 
 export function createStringFormat(BaseFieldFormat: typeof FieldFormat) {
   class StringFormat extends BaseFieldFormat {
-    getParamDefaults() {
-      return {
-        transform: DEFAULT_TRANSFORM_OPTION,
-      };
-    }
-
-    protected base64Decode(val: any) {
-      try {
-        return Buffer.from(val, 'base64').toString('utf8');
-      } catch (e) {
-        return asPrettyString(val);
-      }
-    }
-
-    protected toTitleCase(val: string) {
-      return val.replace(/\w\S*/g, txt => {
-        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-      });
-    }
-
     static id = 'string';
     static title = 'String';
     static fieldType = [
@@ -71,28 +51,48 @@ export function createStringFormat(BaseFieldFormat: typeof FieldFormat) {
       'conflict',
     ];
     static transformOptions = TRANSFORM_OPTIONS;
-  }
 
-  StringFormat.prototype._convert = {
-    [DEFAULT_CONTEXT_TYPE](this: StringFormat, val: any) {
-      switch (this.param('transform')) {
-        case 'lower':
-          return String(val).toLowerCase();
-        case 'upper':
-          return String(val).toUpperCase();
-        case 'title':
-          return this.toTitleCase(val);
-        case 'short':
-          return shortenDottedString(val);
-        case 'base64':
-          return this.base64Decode(val);
-        case 'urlparam':
-          return decodeURIComponent(val);
-        default:
-          return asPrettyString(val);
+    getParamDefaults() {
+      return {
+        transform: DEFAULT_TRANSFORM_OPTION,
+      };
+    }
+
+    private base64Decode(val: any) {
+      try {
+        return Buffer.from(val, 'base64').toString('utf8');
+      } catch (e) {
+        return asPrettyString(val);
       }
-    },
-  };
+    }
+
+    private toTitleCase(val: string) {
+      return val.replace(/\w\S*/g, txt => {
+        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+      });
+    }
+
+    _convert = {
+      [TEXT_CONTEXT_TYPE](this: StringFormat, val: any) {
+        switch (this.param('transform')) {
+          case 'lower':
+            return String(val).toLowerCase();
+          case 'upper':
+            return String(val).toUpperCase();
+          case 'title':
+            return this.toTitleCase(val);
+          case 'short':
+            return shortenDottedString(val);
+          case 'base64':
+            return this.base64Decode(val);
+          case 'urlparam':
+            return decodeURIComponent(val);
+          default:
+            return asPrettyString(val);
+        }
+      },
+    };
+  }
 
   return StringFormat;
 }

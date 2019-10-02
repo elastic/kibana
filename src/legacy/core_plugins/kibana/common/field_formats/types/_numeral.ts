@@ -22,7 +22,7 @@ import numeral from '@elastic/numeral';
 // @ts-ignore
 import numeralLanguages from '@elastic/numeral/languages';
 import { assign, has } from 'lodash';
-import { DEFAULT_CONTEXT_TYPE, FieldFormat } from '../../../../../../plugins/data/common/';
+import { FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../../../plugins/data/common/';
 
 const numeralInst = numeral();
 
@@ -52,34 +52,34 @@ export function createNumeralFormat(BaseFieldFormat: typeof FieldFormat, opts: R
         pattern: this.getConfig(`format:${opts.id}:defaultPattern`),
       };
     }
+
+    _convert = {
+      [TEXT_CONTEXT_TYPE](this: NumeralFormat, val: any) {
+        if (val === -Infinity) return '-∞';
+        if (val === +Infinity) return '+∞';
+        if (typeof val !== 'number') {
+          val = parseFloat(val);
+        }
+
+        if (isNaN(val)) return '';
+
+        const previousLocale = numeral.language();
+        const defaultLocale =
+          (this.getConfig && this.getConfig('format:number:defaultLocale')) || 'en';
+        numeral.language(defaultLocale);
+
+        const formatted = numeralInst.set(val).format(this.param('pattern'));
+
+        numeral.language(previousLocale);
+
+        return opts.afterConvert ? opts.afterConvert.call(this, formatted) : formatted;
+      },
+    };
   }
 
   if (opts.prototype) {
     assign(NumeralFormat.prototype, opts.prototype);
   }
-
-  NumeralFormat.prototype._convert = {
-    [DEFAULT_CONTEXT_TYPE](val: any) {
-      if (val === -Infinity) return '-∞';
-      if (val === +Infinity) return '+∞';
-      if (typeof val !== 'number') {
-        val = parseFloat(val);
-      }
-
-      if (isNaN(val)) return '';
-
-      const previousLocale = numeral.language();
-      const defaultLocale =
-        (this.getConfig && this.getConfig('format:number:defaultLocale')) || 'en';
-      numeral.language(defaultLocale);
-
-      const formatted = numeralInst.set(val).format(this.param('pattern'));
-
-      numeral.language(previousLocale);
-
-      return opts.afterConvert ? opts.afterConvert.call(this, formatted) : formatted;
-    },
-  };
 
   return NumeralFormat;
 }

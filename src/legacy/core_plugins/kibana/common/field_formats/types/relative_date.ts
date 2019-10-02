@@ -18,7 +18,7 @@
  */
 
 import moment from 'moment';
-import { FieldFormat, DEFAULT_CONTEXT_TYPE } from '../../../../../../plugins/data/common/';
+import { FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../../../plugins/data/common/';
 
 export function createRelativeDateFormat(BaseFieldFormat: typeof FieldFormat) {
   class RelativeDateFormat extends BaseFieldFormat {
@@ -29,22 +29,22 @@ export function createRelativeDateFormat(BaseFieldFormat: typeof FieldFormat) {
     constructor(params: any) {
       super(params);
     }
+
+    _convert = {
+      [TEXT_CONTEXT_TYPE](val: any) {
+        if (val === null || val === undefined) {
+          return '-';
+        }
+
+        const date = moment(val);
+        if (date.isValid()) {
+          return date.fromNow();
+        } else {
+          return val;
+        }
+      },
+    };
   }
-
-  RelativeDateFormat.prototype._convert = {
-    [DEFAULT_CONTEXT_TYPE](val: any) {
-      if (val === null || val === undefined) {
-        return '-';
-      }
-
-      const date = moment(val);
-      if (date.isValid()) {
-        return date.fromNow();
-      } else {
-        return val;
-      }
-    },
-  };
 
   return RelativeDateFormat;
 }
