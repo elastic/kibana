@@ -13,9 +13,7 @@ import {
   loadCurrentIndexPattern,
   loadCurrentSavedSearch,
   loadIndexPatterns,
-  // @ts-ignore
 } from '../../../util/index_utils';
-import indexOrSearchTemplate from '../../../jobs/new_job/wizard/steps/index_or_search/index_or_search.html';
 
 import {
   getDataFrameCreateBreadcrumbs,
@@ -40,7 +38,7 @@ uiRoutes.when('/data_frames/new_transform', {
 });
 
 uiRoutes.when('/data_frames/new_transform/step/index_or_search', {
-  template: indexOrSearchTemplate,
+  template: '<ml-index-or-search></ml-index-or-search>',
   k7Breadcrumbs: getDataFrameIndexOrSearchBreadcrumbs,
   resolve: {
     CheckLicense: checkBasicLicense,
