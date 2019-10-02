@@ -74,7 +74,7 @@ export function DiscoverFieldSearch({ showFilter, onChange, onShowFilter, value 
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={filterBtnAriaLabel}>
+        <EuiToolTip content={filterBtnAriaLabel} position="right">
           <EuiButtonIcon
             aria-expanded={showFilter}
             aria-label={filterBtnAriaLabel}
