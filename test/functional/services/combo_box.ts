@@ -66,7 +66,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
     public async setElement(
       comboBoxElement: WebElementWrapper,
       value: string,
-      options = { clickWithMouse: true }
+      options = { clickWithMouse: false }
     ): Promise<void> {
       log.debug(`comboBox.setElement, value: ${value}`);
       const isOptionSelected = await this.isOptionSelected(comboBoxElement, value);
@@ -142,10 +142,10 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       const input = await comboBoxElement.findByTagName('input');
       await input.clearValue();
       await this.waitForOptionsListLoading(comboBoxElement);
-      await PageObjects.common.sleep(1000);
       await input.type(filterValue);
       await this.waitForOptionsListLoading(comboBoxElement);
       const actualText = input.getVisibleText();
+      // LeeDr: it seems that sometimes using IEDriver the first characters don't get typed.
       if (!actualText === filterValue) {
         log.debug(`--------- ERROR expected setFilterValue=${filterValue}, actual=${actualText}`);
       }

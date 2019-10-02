@@ -27,7 +27,6 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
   const flyout = getService('flyout');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const globalNav = getService('globalNav');
 
   class Inspector {
     private async getIsEnabled(): Promise<boolean> {
@@ -64,9 +63,6 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
       if (!isOpen) {
         await retry.try(async () => {
           await testSubjects.click('openInspectorButton');
-          // have to move the mouse to get the help flyout to appear on IE11
-          // see https://github.com/elastic/kibana/issues/45333
-          // await globalNav.moveMouseToLogo();
           await testSubjects.exists('inspectorPanel');
         });
       }
