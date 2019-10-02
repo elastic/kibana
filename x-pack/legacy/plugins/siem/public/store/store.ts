@@ -16,9 +16,10 @@ import { inputsSelectors } from './inputs';
 import { State, initialState, reducer } from './reducer';
 import { createRootEpic } from './epic';
 
+type ComposeType = typeof compose;
 declare global {
   interface Window {
-    __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: typeof compose;
+    __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: ComposeType;
   }
 }
 let store: Store<State, Action> | null = null;

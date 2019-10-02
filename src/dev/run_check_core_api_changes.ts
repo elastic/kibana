@@ -139,14 +139,51 @@ const runApiExtractor = (
   return Extractor.invoke(config, options);
 };
 
-async function run(folder: string): Promise<boolean> {
+interface Options {
+  accept: boolean;
+  docs: boolean;
+  help: boolean;
+}
+
+async function run(
+  folder: string,
+  { log, opts }: { log: ToolingLog; opts: Options }
+): Promise<boolean> {
+  log.info(`Core ${folder} API: checking for changes in API signature...`);
+
+  const { apiReportChanged, succeeded } = runApiExtractor(log, folder, opts.accept);
+
+  // If we're not accepting changes and there's a failure, exit.
+  if (!opts.accept && !succeeded) {
+    return false;
+  }
+
+  // Attempt to generate docs even if api-extractor didn't succeed
+  if ((opts.accept && apiReportChanged) || opts.docs) {
+    try {
+      await renameExtractedApiPackageName(folder);
+      await runApiDocumenter(folder);
+    } catch (e) {
+      log.error(e);
+      return false;
+    }
+    log.info(`Core ${folder} API: updated documentation ✔`);
+  }
+
+  // If the api signature changed or any errors or warnings occured, exit with an error
+  // NOTE: Because of https://github.com/Microsoft/web-build-tools/issues/1258
+  //  api-extractor will not return `succeeded: false` when the API changes.
+  return !apiReportChanged && succeeded;
+}
+
+(async () => {
   const log = new ToolingLog({
     level: 'info',
     writeTo: process.stdout,
   });
 
   const extraFlags: string[] = [];
-  const opts = getopts(process.argv.slice(2), {
+  const opts = (getopts(process.argv.slice(2), {
     boolean: ['accept', 'docs', 'help'],
     default: {
       project: undefined,
@@ -155,7 +192,7 @@ async function run(folder: string): Promise<boolean> {
       extraFlags.push(name);
       return false;
     },
-  });
+  }) as any) as Options;
 
   if (extraFlags.length > 0) {
     for (const flag of extraFlags) {
@@ -193,45 +230,18 @@ async function run(folder: string): Promise<boolean> {
     return !(extraFlags.length > 0);
   }
 
-  log.info(`Core ${folder} API: checking for changes in API signature...`);
-
   try {
+    log.info(`Core: Building types...`);
     await runBuildTypes();
   } catch (e) {
     log.error(e);
     return false;
   }
 
-  const { apiReportChanged, succeeded } = runApiExtractor(log, folder, opts.accept);
+  const folders = ['public', 'server'];
+  const results = await Promise.all(folders.map(folder => run(folder, { log, opts })));
 
-  // If we're not accepting changes and there's a failure, exit.
-  if (!opts.accept && !succeeded) {
-    return false;
-  }
-
-  // Attempt to generate docs even if api-extractor didn't succeed
-  if ((opts.accept && apiReportChanged) || opts.docs) {
-    try {
-      await renameExtractedApiPackageName(folder);
-      await runApiDocumenter(folder);
-    } catch (e) {
-      log.error(e);
-      return false;
-    }
-    log.info(`Core ${folder} API: updated documentation ✔`);
-  }
-
-  // If the api signature changed or any errors or warnings occured, exit with an error
-  // NOTE: Because of https://github.com/Microsoft/web-build-tools/issues/1258
-  //  api-extractor will not return `succeeded: false` when the API changes.
-  return !apiReportChanged && succeeded;
-}
-
-(async () => {
-  const publicSucceeded = await run('public');
-  const serverSucceeded = await run('server');
-
-  if (!publicSucceeded || !serverSucceeded) {
+  if (results.find(r => r === false) !== undefined) {
     process.exitCode = 1;
   }
 })();
