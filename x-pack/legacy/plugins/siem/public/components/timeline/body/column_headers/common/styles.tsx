@@ -10,11 +10,9 @@ import styled from 'styled-components';
 export const FullHeightFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 `;
-
 FullHeightFlexGroup.displayName = 'FullHeightFlexGroup';
 
 export const FullHeightFlexItem = styled(EuiFlexItem)`
   height: 100%;
 `;
-
 FullHeightFlexItem.displayName = 'FullHeightFlexItem';

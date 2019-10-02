@@ -428,7 +428,7 @@ describe('onPostAuthInterceptor', () => {
     );
   }, 30000);
 
-  it('allows the request to continue when accessing the root of a non-default space', async () => {
+  it('redirects to the "enter space" endpoint when accessing the root of a non-default space', async () => {
     const spaces = [
       {
         id: 'default',
@@ -449,9 +449,8 @@ describe('onPostAuthInterceptor', () => {
 
     const { response, spacesService } = await request('/s/a-space', spaces);
 
-    // OSS handles this redirection for us
     expect(response.status).toEqual(302);
-    expect(response.header.location).toEqual(`/s/a-space${defaultRoute}`);
+    expect(response.header.location).toEqual(`/s/a-space/spaces/enter`);
 
     expect(spacesService.scopedClient).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -463,7 +462,7 @@ describe('onPostAuthInterceptor', () => {
   }, 30000);
 
   describe('with a single available space', () => {
-    it('it redirects to the defaultRoute within the context of the single Space when navigating to Kibana root', async () => {
+    it('it redirects to the "enter space" endpoint within the context of the single Space when navigating to Kibana root', async () => {
       const spaces = [
         {
           id: 'a-space',
@@ -477,7 +476,7 @@ describe('onPostAuthInterceptor', () => {
       const { response, spacesService } = await request('/', spaces);
 
       expect(response.status).toEqual(302);
-      expect(response.header.location).toEqual(`/s/a-space${defaultRoute}`);
+      expect(response.header.location).toEqual(`/s/a-space/spaces/enter`);
 
       expect(spacesService.scopedClient).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -488,7 +487,7 @@ describe('onPostAuthInterceptor', () => {
       );
     });
 
-    it('it redirects to the defaultRoute within the context of the Default Space when navigating to Kibana root', async () => {
+    it('it redirects to the "enter space" endpoint within the context of the Default Space when navigating to Kibana root', async () => {
       // This is very similar to the test above, but this handles the condition where the only available space is the Default Space,
       // which does not have a URL Context. In this scenario, the end result is the same as the other test, but the final URL the user
       // is redirected to does not contain a space identifier (e.g., /s/foo)
@@ -506,7 +505,7 @@ describe('onPostAuthInterceptor', () => {
       const { response, spacesService } = await request('/', spaces);
 
       expect(response.status).toEqual(302);
-      expect(response.header.location).toEqual(defaultRoute);
+      expect(response.header.location).toEqual('/spaces/enter');
       expect(spacesService.scopedClient).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: expect.objectContaining({
