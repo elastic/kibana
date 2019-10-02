@@ -1536,7 +1536,6 @@
     "kbn.discover.fieldChooser.fieldCalculator.fieldIsNotPresentInDocumentsErrorMessage": "此字段在您的 Elasticsearch 映射中，但不在文档表中显示的 {hitsLength} 个文档中。您可能仍能够基于其进行可视化或搜索。",
     "kbn.discover.fieldChooser.filter.aggregatableLabel": "可聚合",
     "kbn.discover.fieldChooser.filter.availableFieldsTitle": "可用字段",
-    "kbn.discover.fieldChooser.filter.fieldNameLabel": "字段名称",
     "kbn.discover.fieldChooser.filter.hideMissingFieldsLabel": "隐藏缺失字段",
     "kbn.discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel": "索引和字段",
     "kbn.discover.fieldChooser.filter.popularTitle": "常用",
