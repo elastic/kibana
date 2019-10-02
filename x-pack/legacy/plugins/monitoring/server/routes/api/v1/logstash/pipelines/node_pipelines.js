@@ -63,7 +63,7 @@ export function logstashNodePipelinesRoute(server) {
         latestNodesCount: nodesCountMetric
       };
       if (sort) {
-        sort.field = sortMetricSetMap[sort.field];
+        sort.field = sortMetricSetMap[sort.field] || sort.field;
       }
 
       const { pageOfPipelines, totalPipelineCount }
