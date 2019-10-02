@@ -103,7 +103,7 @@ export class JsonIndexFilePicker extends Component {
       });
       return;
     }
-    return fileNameOnly;
+    return fileNameOnly.toLowerCase();
   }
 
   async _parseFile(file) {
