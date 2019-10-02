@@ -241,12 +241,6 @@ export const ComponentStrings = {
         defaultMessage: 'Delete',
       }),
   },
-  ShapePreview: {
-    getShapeErrorMessage: () =>
-      i18n.translate('xpack.canvas.shapePreview.shapeErrorMessage', {
-        defaultMessage: 'An unexpected error occurred: the SVG was not parseable',
-      }),
-  },
   Toolbar: {
     getEditorButtonLabel: () =>
       i18n.translate('xpack.canvas.toolbar.editorButtonLabel', {
