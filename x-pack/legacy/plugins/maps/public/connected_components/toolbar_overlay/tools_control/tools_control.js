@@ -26,10 +26,17 @@ const DRAW_BOUNDS_LABEL = i18n.translate('xpack.maps.toolbarOverlay.drawBoundsLa
   defaultMessage: 'Draw bounds to filter data',
 });
 
-export class ToolsControl extends Component {
+const DRAW_SHAPE_LABEL_SHORT = i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabelShort', {
+  defaultMessage: 'Draw shape',
+});
 
+const DRAW_BOUNDS_LABEL_SHORT = i18n.translate('xpack.maps.toolbarOverlay.drawBoundsLabelShort', {
+  defaultMessage: 'Draw bounds',
+});
+
+export class ToolsControl extends Component {
   state = {
-    isPopoverOpen: false
+    isPopoverOpen: false,
   };
 
   _togglePopover = () => {
@@ -42,18 +49,18 @@ export class ToolsControl extends Component {
     this.setState({ isPopoverOpen: false });
   };
 
-  _initiateShapeDraw = (options) => {
+  _initiateShapeDraw = options => {
     this.props.initiateDraw({
       drawType: DRAW_TYPE.POLYGON,
-      ...options
+      ...options,
     });
     this._closePopover();
-  }
+  };
 
-  _initiateBoundsDraw = (options) => {
+  _initiateBoundsDraw = options => {
     this.props.initiateDraw({
       drawType: DRAW_TYPE.BOUNDS,
-      ...options
+      ...options,
     });
     this._closePopover();
   };
@@ -68,48 +75,50 @@ export class ToolsControl extends Component {
         items: [
           {
             name: DRAW_SHAPE_LABEL,
-            panel: 1
+            panel: 1,
           },
           {
             name: DRAW_BOUNDS_LABEL,
-            panel: 2
-          }
-        ]
+            panel: 2,
+          },
+        ],
       },
       {
         id: 1,
-        title: DRAW_SHAPE_LABEL,
+        title: DRAW_SHAPE_LABEL_SHORT,
         content: (
           <GeometryFilterForm
             className="mapDrawControl__geometryFilterForm"
-            buttonLabel={i18n.translate('xpack.maps.toolbarOverlay.drawShape.onSubmitButtonLabel', {
-              defaultMessage: 'Draw shape',
-            })}
+            buttonLabel={DRAW_SHAPE_LABEL_SHORT}
             geoFields={this.props.geoFields}
-            intitialGeometryLabel={i18n.translate('xpack.maps.toolbarOverlay.drawShape.initialGeometryLabel', {
-              defaultMessage: 'shape',
-            })}
+            intitialGeometryLabel={i18n.translate(
+              'xpack.maps.toolbarOverlay.drawShape.initialGeometryLabel',
+              {
+                defaultMessage: 'shape',
+              }
+            )}
             onSubmit={this._initiateShapeDraw}
           />
-        )
+        ),
       },
       {
         id: 2,
-        title: DRAW_BOUNDS_LABEL,
+        title: DRAW_BOUNDS_LABEL_SHORT,
         content: (
           <GeometryFilterForm
             className="mapDrawControl__geometryFilterForm"
-            buttonLabel={i18n.translate('xpack.maps.toolbarOverlay.drawBounds.onSubmitButtonLabel', {
-              defaultMessage: 'Draw bounds',
-            })}
+            buttonLabel={DRAW_BOUNDS_LABEL_SHORT}
             geoFields={this.props.geoFields}
-            intitialGeometryLabel={i18n.translate('xpack.maps.toolbarOverlay.drawBounds.initialGeometryLabel', {
-              defaultMessage: 'bounds',
-            })}
+            intitialGeometryLabel={i18n.translate(
+              'xpack.maps.toolbarOverlay.drawBounds.initialGeometryLabel',
+              {
+                defaultMessage: 'bounds',
+              }
+            )}
             onSubmit={this._initiateBoundsDraw}
           />
-        )
-      }
+        ),
+      },
     ];
   }
 
@@ -141,10 +150,7 @@ export class ToolsControl extends Component {
         withTitle
         anchorPosition="leftUp"
       >
-        <EuiContextMenu
-          initialPanelId={0}
-          panels={this._getDrawPanels()}
-        />
+        <EuiContextMenu initialPanelId={0} panels={this._getDrawPanels()} />
       </EuiPopover>
     );
 
@@ -154,15 +160,9 @@ export class ToolsControl extends Component {
 
     return (
       <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>{toolsPopoverButton}</EuiFlexItem>
         <EuiFlexItem>
-          {toolsPopoverButton}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButton
-            size="s"
-            fill
-            onClick={this.props.cancelDraw}
-          >
+          <EuiButton size="s" fill onClick={this.props.cancelDraw}>
             <FormattedMessage
               id="xpack.maps.tooltip.toolsControl.cancelDrawButtonLabel"
               defaultMessage="Cancel"

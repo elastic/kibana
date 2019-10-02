@@ -330,28 +330,21 @@ export function PopoverEditor(props: PopoverEditorProps) {
                   <EuiCallOut
                     data-test-subj="indexPattern-invalid-operation"
                     title={i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
-                      defaultMessage: 'Operation not applicable to field',
+                      defaultMessage: 'To use this function, select a different field.',
                     })}
-                    color="danger"
-                    iconType="cross"
+                    color="warning"
                     size="s"
-                  >
-                    <p>
-                      <FormattedMessage
-                        id="xpack.lens.indexPattern.invalidOperationDescription"
-                        defaultMessage="Please choose another field"
-                      />
-                    </p>
-                  </EuiCallOut>
+                    iconType="sortUp"
+                  />
                 )}
                 {incompatibleSelectedOperationType && !selectedColumn && (
                   <EuiCallOut
                     size="s"
                     data-test-subj="indexPattern-fieldless-operation"
                     title={i18n.translate('xpack.lens.indexPattern.fieldlessOperationLabel', {
-                      defaultMessage: 'Choose a field the operation is applied to',
+                      defaultMessage: 'To use this function, select a field.',
                     })}
-                    iconType="alert"
+                    iconType="sortUp"
                   ></EuiCallOut>
                 )}
                 {!incompatibleSelectedOperationType && ParamEditor && (
