@@ -121,7 +121,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
     async getGraphObjects() {
       await this.stopLayout();
       const graphElements = await find.allByCssSelector(
-        '#svgRootGroup line, #svgRootGroup circle, text.gphNode__label'
+        '#graphSvg line, #graphSvg circle, #graphSvg text.gphNode__label'
       );
       const nodes: Node[] = [];
       const nodePositionMap: Record<string, number> = {};
