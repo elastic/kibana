@@ -33,10 +33,10 @@ export const findPotentialMatches = async (
     monitorIds.push(monitorId);
 
     // Doc count can be zero if status filter optimization does not match
-    if (b.summaries.doc_count > 0) {
+    if (b.doc_count > 0) {
       // Here we grab the most recent 2 check groups per location and add them to the list.
       // Why 2? Because the most recent one may be a partial result from mode: all, and hence not match a summary doc.
-      b.summaries.locations.buckets.forEach((lb: any) => {
+      b.locations.buckets.forEach((lb: any) => {
         lb.top.hits.hits.forEach((h: any) => {
           checkGroups.add(h._source.monitor.check_group);
         });
@@ -65,20 +65,17 @@ const query = async (queryContext: QueryContext, searchAfter: any, size: number)
 const queryBody = (queryContext: QueryContext, searchAfter: any, size: number) => {
   const compositeOrder = cursorDirectionToOrder(queryContext.pagination.cursorDirection);
 
-  const queryClause = queryContext.filterClause || { match_all: {} };
-
-  // This clause is an optimization for the case where we only want to show 'up' monitors.
-  // We know we can exclude any down matches because an 'up' monitor may not have any 'down' matches.
-  // However, we can't optimize anything in any other case, because a sibling check in the same check_group
-  // or in another location may have a different status.
-  const statusFilterClause =
-    queryContext.statusFilter && queryContext.statusFilter === 'up'
-      ? { match: { 'summary.down': 0 } }
-      : { exists: { field: 'summary.down' } };
+  const filters = [];
+  if (queryContext.filterClause) {
+    filters.push(queryContext.filterClause);
+  }
+  if (queryContext.statusFilter) {
+    filters.push({ match: { 'monitor.status': queryContext.statusFilter } });
+  }
 
   const body = {
     size: 0,
-    query: queryClause,
+    query: { bool: { filter: filters } },
     aggs: {
       monitors: {
         composite: {
@@ -90,28 +87,18 @@ const queryBody = (queryContext: QueryContext, searchAfter: any, size: number) =
           ],
         },
         aggs: {
-          summaries: {
-            filter: { bool: { filter: [statusFilterClause] } },
+          // Here we grab the most recent 2 check groups per location.
+          // Why 2? Because the most recent one may not be for a summary, it may be incomplete.
+          locations: {
+            terms: { field: 'observer.geo.name', missing: '__missing__' },
             aggs: {
-              // Here we grab the most recent 2 check groups per location.
-              // Why 2? Because the most recent one may not be for a summary, it may be incomplete.
-              locations: {
-                terms: { field: 'observer.geo.name', missing: '__missing__' },
-                aggs: {
-                  top: {
-                    top_hits: {
-                      sort: [{ '@timestamp': 'desc' }],
-                      _source: {
-                        includes: [
-                          'monitor.check_group',
-                          '@timestamp',
-                          'summary.up',
-                          'summary.down',
-                        ],
-                      },
-                      size: 2,
-                    },
+              top: {
+                top_hits: {
+                  sort: [{ '@timestamp': 'desc' }],
+                  _source: {
+                    includes: ['monitor.check_group', '@timestamp'],
                   },
+                  size: 2,
                 },
               },
             },
