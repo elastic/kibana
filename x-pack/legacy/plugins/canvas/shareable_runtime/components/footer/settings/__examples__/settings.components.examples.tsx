@@ -8,12 +8,12 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
-import { AutoplaySettings } from '../autoplay_settings';
-import { ToolbarSettings } from '../toolbar_settings';
+import { AutoplaySettingsComponent } from '../autoplay_settings';
+import { ToolbarSettingsComponent } from '../toolbar_settings';
 
 storiesOf('shareables/Settings/components', module)
   .add('AutoplaySettings, autoplay disabled', () => (
-    <AutoplaySettings
+    <AutoplaySettingsComponent
       onSetAutoplay={action('onSetAutoplay')}
       isEnabled={false}
       interval="5s"
@@ -21,7 +21,7 @@ storiesOf('shareables/Settings/components', module)
     />
   ))
   .add('AutoplaySettings, autoplay enabled', () => (
-    <AutoplaySettings
+    <AutoplaySettingsComponent
       onSetAutoplay={action('onSetAutoplay')}
       isEnabled={true}
       interval="5s"
@@ -29,8 +29,8 @@ storiesOf('shareables/Settings/components', module)
     />
   ))
   .add('ToolbarSettings, autohide enabled', () => (
-    <ToolbarSettings onSetAutohide={action('onSetInterval')} isAutohide={true} />
+    <ToolbarSettingsComponent onSetAutohide={action('onSetInterval')} isAutohide={true} />
   ))
   .add('ToolbarSettings, autohide disabled', () => (
-    <ToolbarSettings onSetAutohide={action('onSetInterval')} isAutohide={false} />
+    <ToolbarSettingsComponent onSetAutohide={action('onSetInterval')} isAutohide={false} />
   ));

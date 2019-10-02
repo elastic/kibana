@@ -6,17 +6,17 @@
 
 import { ReactWrapper } from 'enzyme';
 
-export const getCanvas = (wrapper: ReactWrapper) => wrapper.find('CanvasContainer > Canvas');
+export const getCanvas = (wrapper: ReactWrapper) => wrapper.find('Canvas > CanvasComponent');
 
-export const getFooter = (wrapper: ReactWrapper) => wrapper.find('FooterContainer > Footer');
+export const getFooter = (wrapper: ReactWrapper) => wrapper.find('Footer > FooterComponent');
 
-export const getScrubber = (wrapper: ReactWrapper) => wrapper.find('ScrubberContainer > Scrubber');
+export const getScrubber = (wrapper: ReactWrapper) => wrapper.find('Scrubber > ScrubberComponent');
 
 export const getScrubberSlideContainer = (wrapper: ReactWrapper) =>
   getScrubber(wrapper).find('.slideContainer');
 
 export const getToolbarPanel = (wrapper: ReactWrapper) =>
-  wrapper.find('ToolbarSettingsContainer > ToolbarSettings');
+  wrapper.find('ToolbarSettings > ToolbarSettingsComponent');
 
 export const getToolbarCheckbox = (wrapper: ReactWrapper) =>
   getToolbarPanel(wrapper)
@@ -24,7 +24,7 @@ export const getToolbarCheckbox = (wrapper: ReactWrapper) =>
     .find('input[type="checkbox"]');
 
 export const getAutoplayPanel = (wrapper: ReactWrapper) =>
-  wrapper.find('AutoplaySettingsContainer > AutoplaySettings');
+  wrapper.find('AutoplaySettings > AutoplaySettingsComponent');
 
 export const getAutoplayCheckbox = (wrapper: ReactWrapper) =>
   getAutoplayPanel(wrapper)
@@ -40,7 +40,7 @@ export const getAutoplaySubmit = (wrapper: ReactWrapper) =>
   getAutoplayPanel(wrapper).find('EuiButton');
 
 export const getSettingsPanel = (wrapper: ReactWrapper) =>
-  wrapper.find('SettingsContainer > Settings');
+  wrapper.find('Settings > SettingsComponent');
 
 export const getSettingsTrigger = (wrapper: ReactWrapper) =>
   getSettingsPanel(wrapper).find('EuiButtonIcon');

@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { useCanvasShareableState } from '../../context';
 
 interface Props {
   /**
@@ -13,10 +14,11 @@ interface Props {
    */
   title: string;
 }
+
 /**
  * The title of the workpad displayed in the left-hand of the footer.
  */
-export const Title = ({ title }: Props) => (
+export const TitleComponent: FC<Props> = ({ title }) => (
   <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
     <EuiFlexItem grow={false}>
       <EuiIcon type="logoKibana" size="m" />
@@ -28,3 +30,18 @@ export const Title = ({ title }: Props) => (
     </EuiFlexItem>
   </EuiFlexGroup>
 );
+
+/**
+ * A store-connected container for the `Title` component.
+ */
+export const Title: FC<{}> = () => {
+  const [{ workpad }] = useCanvasShareableState();
+
+  if (!workpad) {
+    return null;
+  }
+
+  const { name: title } = workpad;
+
+  return <TitleComponent {...{ title }} />;
+};

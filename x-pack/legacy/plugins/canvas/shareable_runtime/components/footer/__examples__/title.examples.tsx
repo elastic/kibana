@@ -3,20 +3,28 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { storiesOf } from '@storybook/react';
+
 import React from 'react';
+import { storiesOf } from '@storybook/react';
+
 import { ExampleContext } from '../../../test/context_example';
+import { Title, TitleComponent } from '../title';
 
-import { Footer } from '../footer';
+const style = { background: '#333', padding: 10 };
 
-storiesOf('shareables/Footer', module)
+storiesOf('shareables/Title', module)
   .add('contextual: hello', () => (
-    <ExampleContext height={172} source="hello">
-      <Footer />
+    <ExampleContext source="austin">
+      <Title />
     </ExampleContext>
   ))
   .add('contextual: austin', () => (
-    <ExampleContext height={172} source="austin">
-      <Footer />
+    <ExampleContext source="austin" {...{ style }}>
+      <Title />
+    </ExampleContext>
+  ))
+  .add('component', () => (
+    <ExampleContext {...{ style }}>
+      <TitleComponent title="This is a test title." />
     </ExampleContext>
   ));

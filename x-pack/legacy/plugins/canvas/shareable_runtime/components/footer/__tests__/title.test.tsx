@@ -7,16 +7,16 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { JestContext } from '../../../test/context_jest';
-import { TitleContainer } from '../title.container';
+import { Title } from '../title';
 
 describe('<Title />', () => {
   test('null workpad renders nothing', () => {
-    expect(mount(<TitleContainer />).isEmptyRender());
+    expect(mount(<Title />).isEmptyRender());
   });
 
   const wrapper = mount(
     <JestContext>
-      <TitleContainer />
+      <Title />
     </JestContext>
   );
 

@@ -14,7 +14,7 @@ import {
   getPortal as portal,
   getContextMenuItems as menuItems,
 } from '../../../../test/selectors';
-import { SettingsContainer } from '../settings.container';
+import { Settings } from '../settings';
 
 jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
 jest.mock('@elastic/eui/lib/components/portal/portal', () => {
@@ -33,7 +33,7 @@ describe('<Settings />', () => {
     wrapper = mount(
       <JestContext stageRef={ref}>
         <div ref={ref}>
-          <SettingsContainer />
+          <Settings />
         </div>
       </JestContext>
     );

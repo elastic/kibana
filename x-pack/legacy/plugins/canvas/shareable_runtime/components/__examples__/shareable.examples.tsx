@@ -16,7 +16,7 @@ const { hello } = sharedWorkpads;
 
 storiesOf('shareables', module)
   .add('Canvas', () => (
-    <ExampleContext height={448}>
+    <ExampleContext height={448} source="austin">
       <Canvas />
     </ExampleContext>
   ))

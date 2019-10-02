@@ -7,10 +7,10 @@
 import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useCanvasShareableState } from '../../context';
-import { ScrubberContainer } from './scrubber.container';
-import { TitleContainer } from './title.container';
+import { Scrubber } from './scrubber';
+import { Title } from './title';
 import { PageControls } from './page_controls';
-import { SettingsContainer } from './settings';
+import { Settings } from './settings';
 
 import css from './footer.module.scss';
 
@@ -36,16 +36,16 @@ export const FooterComponent: FC<Props> = ({ isAutohide = false, isHidden = fals
 
   return (
     <div className={root} style={{ height: FOOTER_HEIGHT }}>
-      <ScrubberContainer />
+      <Scrubber />
       <div className={bar} style={{ bottom: isAutohide && isHidden ? -FOOTER_HEIGHT : 0 }}>
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem className={title}>
-            <TitleContainer />
+            <Title />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
               <PageControls />
-              <SettingsContainer />
+              <Settings />
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
