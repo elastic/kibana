@@ -40,6 +40,11 @@ export default function({ getService, getPageObjects, loadTestFile }: FtrProvide
       await appsMenu.clickLink('Search Explorer');
     });
 
+    after(async function() {
+      await esArchiver.unload('../functional/fixtures/es_archiver/dashboard/current/data');
+      await esArchiver.unload('../functional/fixtures/es_archiver/dashboard/current/kibana');
+    });
+
     loadTestFile(require.resolve('./demo_data'));
     loadTestFile(require.resolve('./es_search'));
   });
