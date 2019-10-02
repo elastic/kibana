@@ -29,6 +29,7 @@ import { IInterpreterRenderFunction } from '../../../../../../src/legacy/core_pl
 import { LensMultiTable } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
+import { isHorizontalChart } from './state_helpers';
 
 const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
 const chartTheme = IS_DARK_THEME ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme;
@@ -79,10 +80,6 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs
       types: ['lens_xy_layer'],
       help: 'Layers of visual series',
       multi: true,
-    },
-    isHorizontal: {
-      types: ['boolean'],
-      help: 'Render horizontally',
     },
   },
   context: {
@@ -145,7 +142,7 @@ export function XYChartReportable(props: XYChartRenderProps) {
 }
 
 export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderProps) {
-  const { legend, layers, isHorizontal } = args;
+  const { legend, layers } = args;
 
   if (Object.values(data.tables).every(table => table.rows.length === 0)) {
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
@@ -182,6 +179,7 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
 
   const chartHasMoreThanOneSeries =
     layers.length > 1 || data.tables[Object.keys(data.tables)[0]].columns.length > 2;
+  const shouldRotate = isHorizontalChart(layers);
 
   return (
     <Chart>
@@ -189,13 +187,13 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
         showLegend={legend.isVisible ? chartHasMoreThanOneSeries : legend.isVisible}
         legendPosition={legend.position}
         showLegendDisplayValue={false}
-        rotation={isHorizontal ? 90 : 0}
         theme={chartTheme}
+        rotation={shouldRotate ? 90 : 0}
       />
 
       <Axis
         id={getAxisId('x')}
-        position={isHorizontal ? Position.Left : Position.Bottom}
+        position={shouldRotate ? Position.Left : Position.Bottom}
         title={args.xTitle}
         showGridLines={false}
         hide={layers[0].hide}
@@ -204,7 +202,7 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
 
       <Axis
         id={getAxisId('y')}
-        position={isHorizontal ? Position.Bottom : Position.Left}
+        position={shouldRotate ? Position.Bottom : Position.Left}
         title={args.yTitle}
         showGridLines={false}
         hide={layers[0].hide}
@@ -266,7 +264,10 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
 
           return seriesType === 'line' ? (
             <LineSeries {...seriesProps} />
-          ) : seriesType === 'bar' || seriesType === 'bar_stacked' ? (
+          ) : seriesType === 'bar' ||
+            seriesType === 'bar_stacked' ||
+            seriesType === 'bar_horizontal' ||
+            seriesType === 'bar_horizontal_stacked' ? (
             <BarSeries {...seriesProps} />
           ) : (
             <AreaSeries {...seriesProps} />

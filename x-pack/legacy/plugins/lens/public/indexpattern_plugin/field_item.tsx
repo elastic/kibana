@@ -18,6 +18,7 @@ import {
   EuiButtonGroup,
   EuiPopoverFooter,
   EuiPopoverTitle,
+  EuiIconTip,
 } from '@elastic/eui';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import {
@@ -145,6 +146,7 @@ export function FieldItem(props: FieldItemProps) {
   return (
     <EuiPopover
       id="lnsFieldListPanel__field"
+      className="lnsFieldItem__popoverAnchor"
       display="block"
       container={document.querySelector<HTMLElement>('.application') || undefined}
       button={
@@ -158,7 +160,7 @@ export function FieldItem(props: FieldItemProps) {
         >
           <EuiKeyboardAccessible>
             <div
-              className="lnsFieldItem__info"
+              className={`lnsFieldItem__info ${infoIsOpen ? 'lnsFieldItem__info-isOpen' : ''}`}
               data-test-subj={`lnsFieldListPanelField-${field.name}`}
               onClick={() => {
                 togglePopover();
@@ -168,12 +170,9 @@ export function FieldItem(props: FieldItemProps) {
                   togglePopover();
                 }
               }}
-              title={i18n.translate('xpack.lens.indexPattern.fieldStatsButton', {
-                defaultMessage: 'Click or Enter for more information about {fieldName}',
-                values: { fieldName: field.name },
-              })}
-              aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButton', {
-                defaultMessage: 'Click or Enter for more information about {fieldName}',
+              aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonAriaLabel', {
+                defaultMessage:
+                  'Click or press Enter for information about {fieldName}. Or, drag field into visualization.',
                 values: { fieldName: field.name },
               })}
             >
@@ -182,6 +181,18 @@ export function FieldItem(props: FieldItemProps) {
               <span className="lnsFieldItem__name" title={field.name}>
                 {wrappableHighlightableFieldName}
               </span>
+
+              <EuiIconTip
+                anchorClassName="lnsFieldItem__infoIcon"
+                content={i18n.translate('xpack.lens.indexPattern.fieldStatsButton', {
+                  defaultMessage:
+                    'Click for information about {fieldName}. Or, drag field into visualization.',
+                  values: { fieldName: field.name },
+                })}
+                type="iInCircle"
+                color="subdued"
+                size="s"
+              />
             </div>
           </EuiKeyboardAccessible>
         </DragDrop>
@@ -264,7 +275,8 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
   if (histogram && histogram.buckets.length && topValues && topValues.buckets.length) {
     title = (
       <EuiButtonGroup
-        buttonSize="s"
+        className="lnsFieldItem__popoverButtonGroup"
+        buttonSize="compressed"
         isFullWidth
         legend={i18n.translate('xpack.lens.indexPattern.fieldStatsDisplayToggle', {
           defaultMessage: 'Toggle either the',
@@ -272,7 +284,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
         options={[
           {
             label: i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
-              defaultMessage: 'Top Values',
+              defaultMessage: 'Top values',
             }),
             id: 'topValues',
           },
@@ -301,7 +313,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     title = (
       <>
         {i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
-          defaultMessage: 'Top Values',
+          defaultMessage: 'Top values',
         })}
       </>
     );
