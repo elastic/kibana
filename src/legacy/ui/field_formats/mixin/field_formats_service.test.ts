@@ -17,11 +17,8 @@
  * under the License.
  */
 
-import { FieldFormat } from '../../../../plugins/data/common/field_formats';
-import { FieldFormatsService } from './field_formats_service';
-
-// @ts-ignore
 import { createNumberFormat } from '../../../core_plugins/kibana/common/field_formats/types/number';
+import { FieldFormatsService } from './field_formats_service';
 
 const getConfig = (key: string) => {
   switch (key) {
@@ -39,7 +36,7 @@ describe('FieldFormatsService', function() {
   let fieldFormatsService: FieldFormatsService;
 
   beforeEach(function() {
-    const fieldFormatClasses = [createNumberFormat(FieldFormat)];
+    const fieldFormatClasses = [createNumberFormat()] as any;
 
     fieldFormatsService = new FieldFormatsService(fieldFormatClasses, getConfig);
   });

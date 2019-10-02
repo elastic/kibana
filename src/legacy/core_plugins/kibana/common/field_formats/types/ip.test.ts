@@ -17,18 +17,23 @@
  * under the License.
  */
 
-export function createIpFormat(FieldFormat) {
-  return class IpFormat extends FieldFormat {
-    _convert(val) {
-      if (val === undefined || val === null) return '-';
-      if (!isFinite(val)) return val;
+import { createIpFormat } from './ip';
 
-      // shazzam!
-      return [val >>> 24, val >>> 16 & 0xFF, val >>> 8 & 0xFF, val & 0xFF].join('.');
-    }
+const IpFormat = createIpFormat();
 
-    static id = 'ip';
-    static title = 'IP Address';
-    static fieldType = 'ip';
-  };
-}
+describe('IP Address Format', function() {
+  let ip: Record<any, any>;
+
+  beforeEach(function() {
+    ip = new IpFormat();
+  });
+
+  test('converts a value from a decimal to a string', function() {
+    expect(ip.convert(1186489492)).toBe('70.184.100.148');
+  });
+
+  test('converts null and undefined to -', function() {
+    expect(ip.convert(null)).toBe('-');
+    expect(ip.convert(undefined)).toBe('-');
+  });
+});
