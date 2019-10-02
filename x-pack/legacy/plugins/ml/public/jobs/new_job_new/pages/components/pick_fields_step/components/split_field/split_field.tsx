@@ -50,9 +50,9 @@ export const SplitFieldSelector: FC = () => {
         isClearable={canClearSelection}
         testSubject={
           isMultiMetricJobCreator(jc)
-            ? 'multiMetricSplitFieldSelect'
+            ? 'mlMultiMetricSplitFieldSelect'
             : isPopulationJobCreator(jc)
-            ? 'populationSplitFieldSelect'
+            ? 'mlPopulationSplitFieldSelect'
             : undefined
         }
       />
