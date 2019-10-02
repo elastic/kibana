@@ -40,7 +40,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
         <EuiToolTip
           position="top"
           content={i18n.translate('xpack.monitoring.setupMode.tooltip.mightExist', {
-            defaultMessage: `We detected usage of this product. Click to startM monitoring.`,
+            defaultMessage: `We detected usage of this product. Click to start monitoring.`,
           })}
         >
           <EuiBadge color="warning" iconType="flag" onClick={badgeClickAction} onClickAriaLabel={detectedText}>
@@ -58,7 +58,10 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
         <EuiToolTip
           position="top"
           content={i18n.translate('xpack.monitoring.setupMode.tooltip.noUsageDetected', {
-            defaultMessage: `We did not detect any usage.`,
+            defaultMessage: `We did not detect any usage. Click to view {identifier}.`,
+            values: {
+              identifier: getIdentifier(productName, true)
+            }
           })}
         >
           <EuiBadge color="hollow" iconType="flag" onClick={badgeClickAction} onClickAriaLabel={noMonitoringText}>
