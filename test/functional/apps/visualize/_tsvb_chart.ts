@@ -25,9 +25,10 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const inspector = getService('inspector');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker']);
 
-  describe('visual builder', function describeIndexTests() {
+  describe('visual_builder_example', function describeIndexTests() {
     this.tags('smoke');
     beforeEach(async () => {
       await PageObjects.visualize.navigateToNewVisualization();
@@ -48,7 +49,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show correct data', async () => {
         const value = await PageObjects.visualBuilder.getMetricValue();
+        //await retry.try(async function tryingForTime() {
         expect(value).to.eql('156');
+
       });
 
       it('should show correct data with Math Aggregation', async () => {
@@ -62,7 +65,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/46677
-    describe.skip('gauge', () => {
+    describe('gauge', () => {
       beforeEach(async () => {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickGauge();
