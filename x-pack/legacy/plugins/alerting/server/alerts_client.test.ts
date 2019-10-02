@@ -6,7 +6,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { AlertsClient } from './alerts_client';
-import { Logger } from '../../../../../src/core/server';
 import { SavedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
