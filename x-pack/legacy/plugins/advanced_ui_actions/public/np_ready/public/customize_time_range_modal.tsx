@@ -130,23 +130,26 @@ export class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, 
           </EuiFormRow>
         </EuiModalBody>
         <EuiModalFooter>
-          <EuiFlexGroup gutterSize="s" responsive={false}>
-            <EuiFlexItem>
-              <EuiButtonEmpty
-                onClick={this.inheritFromParent}
-                color="danger"
-                data-test-subj="removePerPanelTimeRangeButton"
-                disabled={this.state.inheritTimeRange}
-              >
-                {i18n.translate(
-                  'xpack.advancedUiActions.customizePanelTimeRange.modal.removeButtonTitle',
-                  {
-                    defaultMessage: 'Remove',
-                  }
-                )}
-              </EuiButtonEmpty>
+          <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="spaceBetween">
+            <EuiFlexItem grow={true}>
+              <div>
+                <EuiButtonEmpty
+                  onClick={this.inheritFromParent}
+                  color="danger"
+                  data-test-subj="removePerPanelTimeRangeButton"
+                  disabled={this.state.inheritTimeRange}
+                  flush="left"
+                >
+                  {i18n.translate(
+                    'xpack.advancedUiActions.customizePanelTimeRange.modal.removeButtonTitle',
+                    {
+                      defaultMessage: 'Remove',
+                    }
+                  )}
+                </EuiButtonEmpty>
+              </div>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={this.cancel} data-test-subj="cancelPerPanelTimeRangeButton">
                 {i18n.translate(
                   'xpack.advancedUiActions.customizePanelTimeRange.modal.cancelButtonTitle',
@@ -156,7 +159,7 @@ export class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, 
                 )}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiButton data-test-subj="addPerPanelTimeRangeButton" onClick={this.addToPanel} fill>
                 {this.state.inheritTimeRange
                   ? i18n.translate(

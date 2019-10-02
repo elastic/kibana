@@ -7,14 +7,10 @@
 import { mapValues, uniq, indexBy } from 'lodash';
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import {
-  EuiComboBox,
   EuiLoadingSpinner,
-  // @ts-ignore
-  EuiHighlight,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
-  EuiButtonEmpty,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiContextMenuPanelProps,
@@ -36,6 +32,7 @@ import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import { FieldItem } from './field_item';
 import { FieldIcon } from './field_icon';
 import { updateLayerIndexPattern } from './state_helpers';
+import { ChangeIndexPattern } from './change_indexpattern';
 
 // TODO the typings for EuiContextMenuPanel are incorrect - watchedItemProps is missing. This can be removed when the types are adjusted
 const FixedEuiContextMenuPanel = (EuiContextMenuPanel as unknown) as React.FunctionComponent<
@@ -71,21 +68,20 @@ export function IndexPatternDataPanel({
   dateRange,
 }: DatasourceDataPanelProps<IndexPatternPrivateState>) {
   const { indexPatterns, currentIndexPatternId } = state;
-  const [showIndexPatternSwitcher, setShowIndexPatternSwitcher] = useState(false);
 
   const onChangeIndexPattern = useCallback(
     (newIndexPattern: string) => {
-      setState({
-        ...state,
-        layers: isSingleEmptyLayer(state.layers)
-          ? mapValues(state.layers, layer =>
+      setState(prevState => ({
+        ...prevState,
+        layers: isSingleEmptyLayer(prevState.layers)
+          ? mapValues(prevState.layers, layer =>
               updateLayerIndexPattern(layer, indexPatterns[newIndexPattern])
             )
-          : state.layers,
+          : prevState.layers,
         currentIndexPatternId: newIndexPattern,
-      });
+      }));
     },
-    [state, setState]
+    [setState]
   );
 
   const updateFieldsWithCounts = useCallback(
@@ -109,12 +105,10 @@ export function IndexPatternDataPanel({
 
   const onToggleEmptyFields = useCallback(() => {
     setState(prevState => ({ ...prevState, showEmptyFields: !prevState.showEmptyFields }));
-  }, [state, setState]);
+  }, [setState]);
 
   return (
     <MemoizedDataPanel
-      showIndexPatternSwitcher={showIndexPatternSwitcher}
-      setShowIndexPatternSwitcher={setShowIndexPatternSwitcher}
       currentIndexPatternId={currentIndexPatternId}
       indexPatterns={indexPatterns}
       query={query}
@@ -123,8 +117,7 @@ export function IndexPatternDataPanel({
       showEmptyFields={state.showEmptyFields}
       onToggleEmptyFields={onToggleEmptyFields}
       core={core}
-      // only pass in the state change callback if it's actually needed to avoid re-renders
-      onChangeIndexPattern={showIndexPatternSwitcher ? onChangeIndexPattern : undefined}
+      onChangeIndexPattern={onChangeIndexPattern}
       updateFieldsWithCounts={
         !indexPatterns[currentIndexPatternId].hasExistence ? updateFieldsWithCounts : undefined
       }
@@ -153,8 +146,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   query,
   dateRange,
   dragDropContext,
-  showIndexPatternSwitcher,
-  setShowIndexPatternSwitcher,
   onChangeIndexPattern,
   updateFieldsWithCounts,
   showEmptyFields,
@@ -167,11 +158,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   query: Query;
   core: DatasourceDataPanelProps['core'];
   dragDropContext: DragContextState;
-  showIndexPatternSwitcher: boolean;
-  setShowIndexPatternSwitcher: (show: boolean) => void;
   showEmptyFields: boolean;
   onToggleEmptyFields: () => void;
-  onChangeIndexPattern?: (newId: string) => void;
+  onChangeIndexPattern: (newId: string) => void;
   updateFieldsWithCounts?: (indexPatternId: string, fields: IndexPattern['fields']) => void;
 }) {
   if (Object.keys(indexPatterns).length === 0) {
@@ -335,70 +324,31 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       >
         <EuiFlexItem grow={null}>
           <div className="lnsInnerIndexPatternDataPanel__header">
-            {!showIndexPatternSwitcher ? (
-              <>
-                <EuiTitle size="xxs">
-                  <h4
-                    className="lnsInnerIndexPatternDataPanel__header"
-                    title={currentIndexPattern.title}
-                  >
-                    {currentIndexPattern.title}{' '}
-                  </h4>
-                </EuiTitle>
-                <EuiButtonEmpty
-                  data-test-subj="indexPattern-switch-link"
-                  className="lnsInnerIndexPatternDataPanel__changeLink"
-                  onClick={() => setShowIndexPatternSwitcher(true)}
-                  size="xs"
-                >
-                  (
-                  <FormattedMessage
-                    id="xpack.lens.indexPatterns.changePatternLabel"
-                    defaultMessage="change"
-                  />
-                  )
-                </EuiButtonEmpty>
-              </>
-            ) : (
-              <EuiComboBox
+            <EuiTitle size="xxs" className="eui-textTruncate">
+              <h4 title={currentIndexPattern.title}>{currentIndexPattern.title} </h4>
+            </EuiTitle>
+            <div className="lnsInnerIndexPatternDataPanel__changeLink">
+              <ChangeIndexPattern
                 data-test-subj="indexPattern-switcher"
-                options={Object.values(indexPatterns).map(({ title, id }) => ({
-                  label: title,
-                  value: id,
-                }))}
-                inputRef={el => {
-                  if (el) {
-                    el.focus();
-                  }
+                trigger={{
+                  label: i18n.translate('xpack.lens.indexPatterns.changePatternLabel', {
+                    defaultMessage: '(change)',
+                  }),
+                  'data-test-subj': 'indexPattern-switch-link',
                 }}
-                selectedOptions={
-                  currentIndexPatternId
-                    ? [
-                        {
-                          label: currentIndexPattern.title,
-                          value: currentIndexPattern.id,
-                        },
-                      ]
-                    : undefined
-                }
-                singleSelection={{ asPlainText: true }}
-                isClearable={false}
-                onBlur={() => {
-                  setShowIndexPatternSwitcher(false);
-                }}
-                onChange={choices => {
-                  onChangeIndexPattern!(choices[0].value as string);
+                currentIndexPatternId={currentIndexPatternId}
+                indexPatterns={indexPatterns}
+                onChangeIndexPattern={(newId: string) => {
+                  onChangeIndexPattern(newId);
 
                   setLocalState(s => ({
                     ...s,
                     nameFilter: '',
                     typeFilter: [],
                   }));
-
-                  setShowIndexPatternSwitcher(false);
                 }}
               />
-            )}
+            </div>
           </div>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -469,7 +419,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     />
                     <EuiPopoverFooter>
                       <EuiSwitch
-                        compressed
                         checked={!showEmptyFields}
                         onChange={() => {
                           onToggleEmptyFields();

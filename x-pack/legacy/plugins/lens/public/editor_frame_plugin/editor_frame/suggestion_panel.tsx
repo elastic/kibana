@@ -68,7 +68,7 @@ const PreviewRenderer = ({
   }, [expression]);
 
   return expressionError ? (
-    <div className="lnsSidebar__suggestionIcon">
+    <div className="lnsSuggestionPanel__suggestionIcon">
       <EuiIconTip
         size="xl"
         color="danger"
@@ -83,8 +83,8 @@ const PreviewRenderer = ({
     </div>
   ) : (
     <ExpressionRendererComponent
-      className={classNames('lnsSuggestionChartWrapper', {
-        'lnsSuggestionChartWrapper--withLabel': withLabel,
+      className={classNames('lnsSuggestionPanel__chartWrapper', {
+        'lnsSuggestionPanel__chartWrapper--withLabel': withLabel,
       })}
       expression={expression}
       onRenderFailure={(e: unknown) => {

@@ -169,7 +169,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           data-test-subj={`lnsXY_layer_${layer.layerId}`}
           paddingSize="s"
         >
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
             <EuiFlexItem grow={false}>
               <LayerSettings
                 layer={layer}
@@ -183,7 +183,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
               />
             </EuiFlexItem>
 
-            <EuiFlexItem>
+            <EuiFlexItem className="eui-textTruncate">
               <NativeRenderer
                 data-test-subj="lnsXY_layerHeader"
                 render={props.frame.datasourceLayers[layer.layerId].renderLayerPanel}
@@ -192,7 +192,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          <EuiSpacer size="s" />
+          <EuiSpacer size="xs" />
 
           <EuiFormRow
             className="lnsConfigPanel__axis"

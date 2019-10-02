@@ -29,11 +29,13 @@
 
 import { EventEmitter } from 'events';
 import _ from 'lodash';
-import { VisTypesRegistryProvider } from '../../registry/vis_types';
 import { PersistedState } from '../../persisted_state';
 
-export function VisProvider(Private, indexPatterns, getAppState) {
-  const visTypes = Private(VisTypesRegistryProvider);
+import { start as visualizations } from '../../../../core_plugins/visualizations/public/legacy';
+
+
+export function VisProvider(indexPatterns, getAppState) {
+  const visTypes = visualizations.types;
 
   class Vis extends EventEmitter {
     constructor(visState = { type: 'histogram' }) {
@@ -65,7 +67,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
       this.title = state.title || '';
       const type = state.type || this.type;
       if (_.isString(type)) {
-        this.type = visTypes.byName[type];
+        this.type = visTypes.get(type);
         if (!this.type) {
           throw new Error(`Invalid type "${type}"`);
         }

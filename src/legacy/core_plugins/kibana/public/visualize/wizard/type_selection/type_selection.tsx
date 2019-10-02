@@ -41,6 +41,7 @@ import { VisTypeAlias } from '../../../../../visualizations/public';
 import { NewVisHelp } from './new_vis_help';
 import { VisHelpText } from './vis_help_text';
 import { VisTypeIcon } from './vis_type_icon';
+import { TypesStart } from '../../../../../visualizations/public/np_ready/types';
 
 interface VisTypeListEntry extends VisType {
   highlighted: boolean;
@@ -52,8 +53,7 @@ interface VisTypeAliasListEntry extends VisTypeAlias {
 
 interface TypeSelectionProps {
   onVisTypeSelected: (visType: VisType) => void;
-  visTypesRegistry: VisType[];
-  visTypeAliases?: VisTypeAlias[];
+  visTypesRegistry: TypesStart;
   showExperimental: boolean;
 }
 
@@ -79,11 +79,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
 
   public render() {
     const { query, highlightedType } = this.state;
-    const visTypes = this.getFilteredVisTypes(
-      this.props.visTypesRegistry,
-      this.props.visTypeAliases,
-      query
-    );
+    const visTypes = this.getFilteredVisTypes(this.props.visTypesRegistry, query);
     return (
       <React.Fragment>
         <EuiModalHeader>
@@ -167,11 +163,10 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
   }
 
   private filteredVisTypes(
-    visTypes: VisType[],
-    visTypeAliases: any[] = [],
+    visTypes: TypesStart,
     query: string
   ): Array<VisTypeListEntry | VisTypeAliasListEntry> {
-    const types = visTypes.filter(type => {
+    const types = visTypes.all().filter(type => {
       // Filter out all lab visualizations if lab mode is not enabled
       if (!this.props.showExperimental && type.stage === 'experimental') {
         return false;
@@ -185,7 +180,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       return true;
     });
 
-    const allTypes = [...types, ...visTypeAliases];
+    const allTypes = [...types, ...visTypes.getAliases()];
 
     let entries: Array<VisTypeListEntry | VisTypeAliasListEntry>;
     if (!query) {

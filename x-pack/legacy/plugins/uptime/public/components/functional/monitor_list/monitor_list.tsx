@@ -105,6 +105,11 @@ export const MonitorListComponent = (props: Props) => {
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiBasicTable
+          aria-label={i18n.translate('xpack.uptime.monitorList.table.description', {
+            defaultMessage:
+              'Monitor Status table with columns for Status, Name, URL, IP, Downtime History and Integrations. The table is currently displaying {length} items.',
+            values: { length: items.length },
+          })}
           error={errors ? formatUptimeGraphQLErrorList(errors) : errors}
           loading={loading}
           isExpandable={true}

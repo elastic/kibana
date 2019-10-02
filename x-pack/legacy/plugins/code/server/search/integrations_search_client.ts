@@ -7,7 +7,7 @@
 import {
   Document,
   IntegrationsSearchResult,
-  ResolveSnippetsIntegrationRequest,
+  ResolveSnippetsRequest,
   SearchResultItem,
   SourceHit,
 } from '../../model';
@@ -21,13 +21,12 @@ export class IntegrationsSearchClient extends DocumentSearchClient {
     super(client, log);
   }
 
-  public async resolveSnippets(
-    req: ResolveSnippetsIntegrationRequest
-  ): Promise<IntegrationsSearchResult> {
-    const { repoUri, filePath, lineNumStart, lineNumEnd } = req;
-    const index = DocumentSearchIndexWithScope([repoUri]);
+  public async resolveSnippets(req: ResolveSnippetsRequest): Promise<IntegrationsSearchResult> {
+    const { repoUris, filePath, lineNumStart, lineNumEnd } = req;
+    const index = DocumentSearchIndexWithScope(repoUris);
 
-    const rawRes = await this.client.search({
+    let fallback = false;
+    let rawRes = await this.client.search({
       index,
       body: {
         query: {
@@ -39,15 +38,46 @@ export class IntegrationsSearchClient extends DocumentSearchClient {
         },
       },
     });
+    if (rawRes.hits.hits.length === 0) {
+      // Fall back with match query with gauss score normalization on path length.
+      rawRes = await this.client.search({
+        index,
+        body: {
+          query: {
+            script_score: {
+              query: {
+                term: {
+                  'path.hierarchy': {
+                    value: filePath,
+                  },
+                },
+              },
+              script: {
+                source:
+                  "decayNumericGauss(params.origin, params.scale, params.offset, params.decay, doc['path.keyword'].value.length())",
+                params: {
+                  origin: filePath.length,
+                  scale: 20,
+                  offset: 0,
+                  decay: 0.8,
+                },
+              },
+            },
+          },
+        },
+      });
+      fallback = true;
+    }
 
+    const total = rawRes.hits.total.value;
     const hits: any[] = rawRes.hits.hits;
     const results: SearchResultItem[] = hits.map(hit => {
       const doc: Document = hit._source;
-      const { path, language } = doc;
+      const { repoUri: uri, path, language } = doc;
 
       const sourceContent = this.getSnippetContent(doc, lineNumStart, lineNumEnd);
       const item: SearchResultItem = {
-        uri: repoUri,
+        uri,
         filePath: path,
         language: language!,
         hits: 1,
@@ -55,9 +85,10 @@ export class IntegrationsSearchClient extends DocumentSearchClient {
       };
       return item;
     });
-    const total = rawRes.hits.total.value;
+
     return {
       results,
+      fallback,
       took: rawRes.took,
       total,
     };
