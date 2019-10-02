@@ -412,4 +412,15 @@ export class ESSearchSource extends AbstractESSource {
       topHitsSize: this._descriptor.topHitsSize,
     };
   }
+
+  async getPreIndexedShape(properties) {
+    const indexPattern = await this._getIndexPattern();
+    const geoField = await this._getGeoField();
+
+    return {
+      index: indexPattern.title,
+      id: properties._id,
+      path: geoField.name,
+    };
+  }
 }

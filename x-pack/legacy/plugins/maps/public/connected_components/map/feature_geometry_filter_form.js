@@ -16,8 +16,48 @@ import { GeometryFilterForm } from '../../components/geometry_filter_form';
 
 export class FeatureGeometryFilterForm extends Component {
 
-  _createFilter = ({ geometryLabel, indexPatternId, geoFieldName, geoFieldType, relation }) => {
+  state = {
+    isLoading: false,
+  }
+
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  _loadPreIndexedShape = async () => {
+    this.setState({
+      isLoading: true,
+    });
+
+    let preIndexedShape;
+    try {
+      preIndexedShape = await this.props.loadPreIndexedShape();
+    } catch (err) {
+      // ignore error, just fall back to using geometry if preIndexedShape can not be fetched
+    }
+
+    if (this._isMounted) {
+      this.setState({ isLoading: false });
+    }
+
+    return preIndexedShape;
+  }
+
+  _createFilter = async ({ geometryLabel, indexPatternId, geoFieldName, geoFieldType, relation }) => {
+    const preIndexedShape = await this._loadPreIndexedShape();
+    if (!this._isMounted) {
+      // do not create filter if component is unmounted
+      return;
+    }
+
+    console.log(preIndexedShape);
+
     const filter = createSpatialFilterWithGeometry({
+      preIndexedShape,
       geometry: this.props.geometry,
       geometryLabel,
       indexPatternId,
@@ -65,6 +105,7 @@ export class FeatureGeometryFilterForm extends Component {
         onSubmit={this._createFilter}
         isFilterGeometryClosed={this.props.geometry.type !== GEO_JSON_TYPE.LINE_STRING
           && this.props.geometry.type !== GEO_JSON_TYPE.MULTI_LINE_STRING}
+        isLoading={this.state.isLoading}
       />
     );
   }
