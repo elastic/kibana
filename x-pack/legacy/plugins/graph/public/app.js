@@ -66,7 +66,6 @@ export function initAngularModule(moduleName, deps) {
     config, //uiSettings?
     savedObjectRegistry, //Private(SavedObjectRegistryProvider)
     capabilities,
-    formatAngularHttpError,
     coreStart, //npStart.core
     confirmModal,
     http, //$http
@@ -224,7 +223,8 @@ export function initAngularModule(moduleName, deps) {
     function handleHttpError(error) {
       return checkLicense(Promise, kbnBaseUrl)
         .then(() => {
-          toastNotifications.addDanger(formatAngularHttpError(error));
+          // TODO format this
+          toastNotifications.addDanger(error);
         });
     }
 

@@ -8,6 +8,8 @@ import angular from 'angular';
 // @ts-ignore
 import { initAngularModule } from './app';
 import { AppMountContext } from 'kibana/public';
+import { MinimalSaveModalProps } from 'ui/saved_objects/show_saved_object_save_modal';
+import { DataSetup } from 'src/legacy/core_plugins/data/public';
 
 const mainTemplate = (basePath: string) => `
   <!-- This base tag is key to making this work -->
@@ -22,29 +24,38 @@ const moduleName = 'app/graph';
   //   xpackInfo,
   //   addAppRedirectMessageToUrl,
   //   fatalError,
-  //   chrome,
-  //   savedGraphWorkspaces,
-  //   toastNotifications,
-  //   savedObjectsClient, //Private(SavedObjectsClientProvider)
-  //   indexPatterns, //data.indexPatterns.indexPatterns
-  //   savedWorkspacesClient, //Private(SavedWorkspacesProvider)
-  //   kbnBaseUrl,
-  //   kbnUrl,
-  //   config, //uiSettings?
-  //   savedObjectRegistry, //Private(SavedObjectRegistryProvider)
+  // X chrome,
+  // I savedGraphWorkspaces,
+  // X toastNotifications,
+  // I savedObjectsClient, //Private(SavedObjectsClientProvider)
+  // X indexPatterns, //data.indexPatterns.indexPatterns
+  // I savedWorkspacesClient, //Private(SavedWorkspacesProvider)
+  // I kbnBaseUrl,
+  // I kbnUrl,
+  // X config, //uiSettings?
+  // I savedObjectRegistry, //Private(SavedObjectRegistryProvider)
   // X capabilities,
-  //   formatAngularHttpError,
   // X coreStart, //npStart.core
-  //   confirmModal,
-  //   http, //$http
-  //   showSaveModal,
+  // I confirmModal,
+  // X http, //$http
+  // X showSaveModal,
   // } = deps;
 
-export const renderApp = ({ core }: AppMountContext, { element , appBasePath }: { element: HTMLElement, appBasePath: string }) => {
+export interface GraphDeps {
+  showSaveModal: (saveModal: React.ReactElement<MinimalSaveModalProps>) => void;
+ element: HTMLElement; appBasePath: string; data: DataSetup
+}
+
+export const renderApp = ({ core }: AppMountContext, { element , appBasePath, showSaveModal, data }: GraphDeps) => {
   const deps = {
     capabilities: core.application.capabilities.graph,
     coreStart: core,
-
+    http: core.http,
+    chrome: core.chrome,
+    config: core.uiSettings,
+    showSaveModal: showSaveModal,
+    toastNotifications: core.notifications.toasts,
+    indexPatterns: data.indexPatterns.indexPatterns
   }
   initAngularModule(moduleName, deps);
   // eslint-disable-next-line
