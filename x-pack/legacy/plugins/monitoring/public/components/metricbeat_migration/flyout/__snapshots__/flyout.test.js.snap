@@ -875,7 +875,7 @@ exports[`Flyout elasticsearch part two should show instructions to disable inter
               It can take up to 30 seconds to detect data.
             </p>
             <p>
-              Last self monitoring was -0 seconds ago.
+              Last self monitoring was 0 seconds ago.
             </p>
           </EuiCallOut>,
           "status": "incomplete",
