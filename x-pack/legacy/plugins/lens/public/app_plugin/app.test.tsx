@@ -440,6 +440,22 @@ describe('Lens App', () => {
         }),
         {}
       );
+
+      // Do it again to verify that the dirty checking is done right
+      onChange({
+        filterableIndexPatterns: [{ id: '2', title: 'second index' }],
+        doc: ({ id: undefined } as unknown) as Document,
+      });
+
+      await waitForPromises();
+      instance.update();
+
+      expect(TopNavMenu).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          indexPatterns: [{ id: '2' }],
+        }),
+        {}
+      );
     });
 
     it('updates the editor frame when the user changes query or time in the search bar', () => {
