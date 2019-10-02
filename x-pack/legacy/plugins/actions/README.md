@@ -81,7 +81,7 @@ This is the primary function for an action type. Whenever the action needs to ex
 
 ### Example
 
-The built-in email action type provides a good example of creating an action type with non-trivial configuration and params: 
+The built-in email action type provides a good example of creating an action type with non-trivial configuration and params:
 [x-pack/legacy/plugins/actions/server/builtin_action_types/email.ts](server/builtin_action_types/email.ts)
 
 
@@ -197,7 +197,7 @@ Kibana ships with a set of built-in action types:
 - slack: post a message to a slack channel
 - index: index document(s) into elasticsearch
 
-## server log, action id: `.log`
+## server log, action id: `.server-log`
 
 The params properties are modelled after the arguments to the [Hapi.server.log()](https://hapijs.com/api#-serverlogtags-data-timestamp) function.
 

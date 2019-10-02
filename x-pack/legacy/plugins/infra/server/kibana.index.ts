@@ -10,6 +10,7 @@ import JoiNamespace from 'joi';
 import { initInfraServer } from './infra_server';
 import { compose } from './lib/compose/kibana';
 import { UsageCollector } from './usage/usage_collector';
+import { registerAlertTypes } from './lib/alerting';
 
 export interface KbnServer extends Server {
   usage: any;
@@ -18,6 +19,7 @@ export interface KbnServer extends Server {
 export const initServerWithKibana = (kbnServer: KbnServer) => {
   const libs = compose(kbnServer);
   initInfraServer(libs);
+  registerAlertTypes(kbnServer);
 
   kbnServer.expose(
     'defineInternalSourceConfiguration',

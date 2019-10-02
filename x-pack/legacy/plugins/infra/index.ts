@@ -21,7 +21,7 @@ export function infra(kibana: any) {
     id: APP_ID,
     configPrefix: 'xpack.infra',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch', 'metrics'],
+    require: ['kibana', 'elasticsearch', 'metrics', 'alerting'],
     uiExports: {
       app: {
         description: i18n.translate('xpack.infra.infrastructureDescription', {
