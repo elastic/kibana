@@ -7,7 +7,7 @@
 // @ts-ignore
 import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 
-import { SavedObjectsClient, UiSettingsClientContract } from 'src/core/public';
+import { SavedObjectsClientContract, UiSettingsClientContract } from 'src/core/public';
 
 import {
   IndexPattern as IndexPatternType,
@@ -25,10 +25,7 @@ let currentSavedSearch = null;
 export let refreshIndexPatterns: () => Promise<unknown>;
 
 export function loadIndexPatterns(
-  savedObjectsClient: Pick<
-    SavedObjectsClient,
-    'create' | 'bulkCreate' | 'delete' | 'find' | 'get' | 'bulkGet' | 'update'
-  >,
+  savedObjectsClient: SavedObjectsClientContract,
   indexPatterns: IndexPatternsType
 ) {
   fullIndexPatterns = indexPatterns;
@@ -73,7 +70,7 @@ export function loadCurrentSavedSearch(savedSearches: any, savedSearchId: SavedS
   return currentSavedSearch;
 }
 
-// Provider for creating the items used for searching and job creation.
+// Helper for creating the items used for searching and job creation.
 export function createSearchItems(
   indexPattern: IndexPatternType | undefined,
   savedSearch: any,
