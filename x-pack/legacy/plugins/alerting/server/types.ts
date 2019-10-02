@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectAttributes, SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectAttributes, SavedObjectsClientContract, Logger } from 'src/core/server';
 import { AlertInstance } from './lib';
 import { AlertTypeRegistry } from './alert_type_registry';
 
@@ -14,13 +14,6 @@ export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'param
 export type GetServicesFunction = (request: any) => Services;
 export type GetBasePathFunction = (spaceId?: string) => string;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
-
-export interface Logger {
-  info(message: string): void;
-  debug(message: string): void;
-  warn(message: string): void;
-  error(message: string): void;
-}
 
 export interface Services {
   logger: Logger;

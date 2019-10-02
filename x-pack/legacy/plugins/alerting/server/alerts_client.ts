@@ -7,8 +7,8 @@
 import Boom from 'boom';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsClientContract, SavedObjectReference } from 'src/core/server';
-import { Alert, RawAlert, AlertTypeRegistry, AlertAction, Logger, AlertType } from './types';
+import { Logger, SavedObjectsClientContract, SavedObjectReference } from 'src/core/server';
+import { Alert, RawAlert, AlertTypeRegistry, AlertAction, AlertType } from './types';
 import { TaskManager } from '../../task_manager';
 import { validateAlertTypeParams } from './lib';
 import { CreateAPIKeyResult as SecurityPluginCreateAPIKeyResult } from '../../../../plugins/security/server';

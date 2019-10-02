@@ -47,14 +47,7 @@ export function init(server: Server) {
   };
 
   const plugin = new Plugin({
-    logger: {
-      get: () => ({
-        info: (message: string) => server.log(['info', 'task_manager'], message),
-        debug: (message: string) => server.log(['debug', 'task_manager'], message),
-        warn: (message: string) => server.log(['warn', 'task_manager'], message),
-        error: (message: string) => server.log(['error', 'task_manager'], message),
-      }),
-    },
+    logger: newPlatform.coreContext.logger,
   });
 
   const setupContract = plugin.setup(coreSetup, pluginsSetup);

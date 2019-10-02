@@ -27,6 +27,9 @@ const createExecutionHandlerParams = {
     debug: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
+    trace: jest.fn(),
+    fatal: jest.fn(),
+    log: jest.fn(),
   },
   actions: [
     {

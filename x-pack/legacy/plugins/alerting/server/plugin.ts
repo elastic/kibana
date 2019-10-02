@@ -5,7 +5,7 @@
  */
 
 import Hapi from 'hapi';
-import { Logger, Services } from './types';
+import { Services } from './types';
 import { SpacesPlugin } from '../../spaces';
 import { ActionsPlugin } from '../../actions';
 import { AlertsClient } from './alerts_client';
@@ -13,10 +13,15 @@ import { TaskManager } from '../../task_manager';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { XPackMainPlugin } from '../../xpack_main/xpack_main';
 import { AlertsClientFactory } from './lib';
-import { KibanaRequest, SavedObjectsLegacyService } from '../../../../../src/core/server';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import { ElasticsearchPlugin } from '../../../../../src/legacy/core_plugins/elasticsearch';
 import { PluginSetupContract as SecurityPluginSetupContract } from '../../../../plugins/security/server';
+import {
+  KibanaRequest,
+  Logger,
+  LoggerFactory,
+  SavedObjectsLegacyService,
+} from '../../../../../src/core/server';
 import {
   createAlertRoute,
   deleteAlertRoute,
@@ -33,13 +38,11 @@ import {
   unmuteAlertInstanceRoute,
 } from './routes';
 
-interface PluginInitializerContext {
-  logger: {
-    get: () => Logger;
-  };
+interface AlertingPluginInitializerContext {
+  logger: LoggerFactory;
 }
 
-interface CoreSetup {
+interface AlertingCoreSetup {
   elasticsearch: ElasticsearchPlugin;
   savedObjects: SavedObjectsLegacyService;
   http: {
@@ -50,7 +53,7 @@ interface CoreSetup {
   };
 }
 
-interface PluginsSetup {
+interface AlertingPluginsSetup {
   security?: SecurityPluginSetupContract;
   task_manager: TaskManager;
   spaces: () => SpacesPlugin | undefined;
@@ -73,11 +76,11 @@ export class Plugin {
   private alertTypeRegistry?: AlertTypeRegistry;
   private alertsClientFactory?: AlertsClientFactory;
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
+  constructor(initializerContext: AlertingPluginInitializerContext) {
+    this.logger = initializerContext.logger.get('plugins', 'alerting');
   }
 
-  public setup(core: CoreSetup, plugins: PluginsSetup): PluginSetupContract {
+  public setup(core: AlertingCoreSetup, plugins: AlertingPluginsSetup): PluginSetupContract {
     const { logger } = this;
     const { callWithRequest } = core.elasticsearch.getCluster('admin');
 

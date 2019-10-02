@@ -60,7 +60,7 @@ export const signalsAlertType: AlertType = {
     });
 
     try {
-      services.log(['info', 'SIEM'], 'Starting SIEM signal job');
+      services.logger.info('[SIEM] Starting SIEM signal job');
 
       // TODO: Comment this in eventually and use this for manual insertion of the
       // signals instead of the ReIndex() api
@@ -69,11 +69,11 @@ export const signalsAlertType: AlertType = {
       const result = await services.callCluster('reindex', reIndex);
 
       // TODO: Error handling here and writing of any errors that come back from ES by
-      services.log(['info', 'SIEM'], `Result of reindex: ${JSON.stringify(result, null, 2)}`);
+      services.logger.info(`[SIEM] Result of reindex: ${JSON.stringify(result, null, 2)}`);
     } catch (err) {
       // TODO: Error handling and writing of errors into a signal that has error
       // handling/conditions
-      services.log(['error', 'SIEM'], `You encountered an error of: ${err.message}`);
+      services.logger.info(`[SIEM] You encountered an error of: ${err.message}`);
     }
 
     // Schedule the default action which is nothing if it's a plain signal.
