@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export function MachineLearningJobTableProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const find = getService('find');
 
   return new (class MlJobTable {
     public async parseJobTable() {
@@ -17,11 +18,13 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       const $ = await table.parseDomContent();
       const rows = [];
 
-      for (const tr of $.findTestSubjects('~row').toArray()) {
+      for (const tr of $.findTestSubjects('~mlJobListRow').toArray()) {
         const $tr = $(tr);
 
-        const $description = $tr.findTestSubject('description').find('.euiTableCellContent');
-        const $jobGroups = $description.findTestSubjects('jobGroup');
+        const $description = $tr
+          .findTestSubject('mlJobListColumnDescription')
+          .find('.euiTableCellContent');
+        const $jobGroups = $description.findTestSubjects('mlJobGroup');
         const jobGroups = [];
         for (const el of $jobGroups.toArray()) {
           // collect this group in our array
@@ -37,7 +40,7 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
 
         rows.push({
           id: $tr
-            .findTestSubject('id')
+            .findTestSubject('mlJobListColumnId')
             .find('.euiTableCellContent')
             .text()
             .trim(),
@@ -47,27 +50,27 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
             .trim(),
           jobGroups,
           recordCount: $tr
-            .findTestSubject('recordCount')
+            .findTestSubject('mlJobListColumnRecordCount')
             .find('.euiTableCellContent')
             .text()
             .trim(),
           memoryStatus: $tr
-            .findTestSubject('memoryStatus')
+            .findTestSubject('mlJobListColumnMemoryStatus')
             .find('.euiTableCellContent')
             .text()
             .trim(),
           jobState: $tr
-            .findTestSubject('jobState')
+            .findTestSubject('mlJobListColumnJobState')
             .find('.euiTableCellContent')
             .text()
             .trim(),
           datafeedState: $tr
-            .findTestSubject('datafeedState')
+            .findTestSubject('mlJobListColumnDatafeedState')
             .find('.euiTableCellContent')
             .text()
             .trim(),
           latestTimestamp: $tr
-            .findTestSubject('latestTimestamp')
+            .findTestSubject('mlJobListColumnLatestTimestamp')
             .find('.euiTableCellContent')
             .text()
             .trim(),
@@ -80,13 +83,13 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     public async parseJobCounts(jobId: string) {
       return await this.withDetailsOpen(jobId, async () => {
         // click counts tab
-        await testSubjects.click(this.detailsSelector(jobId, 'tab-counts'));
+        await testSubjects.click(this.detailsSelector(jobId, 'mlJobListTab-counts'));
 
         const countsTable = await testSubjects.find(
-          this.detailsSelector(jobId, 'details-counts > counts')
+          this.detailsSelector(jobId, 'mlJobDetails-counts > mlJobRowDetailsSection-counts')
         );
         const modelSizeStatsTable = await testSubjects.find(
-          this.detailsSelector(jobId, 'details-counts > modelSizeStats')
+          this.detailsSelector(jobId, 'mlJobDetails-counts > mlJobRowDetailsSection-modelSizeStats')
         );
 
         // parse a table by reading each row
@@ -140,7 +143,7 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     public async ensureDetailsOpen(jobId: string) {
       await retry.try(async () => {
         if (!(await testSubjects.exists(this.detailsSelector(jobId)))) {
-          await testSubjects.click(this.rowSelector(jobId, 'detailsToggle'));
+          await testSubjects.click(this.rowSelector(jobId, 'mlJobListRowDetailsToggle'));
         }
 
         await testSubjects.existOrFail(this.detailsSelector(jobId));
@@ -150,7 +153,7 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     public async ensureDetailsClosed(jobId: string) {
       await retry.try(async () => {
         if (await testSubjects.exists(this.detailsSelector(jobId))) {
-          await testSubjects.click(this.rowSelector(jobId, 'detailsToggle'));
+          await testSubjects.click(this.rowSelector(jobId, 'mlJobListRowDetailsToggle'));
           await testSubjects.missingOrFail(this.detailsSelector(jobId));
         }
       });
@@ -209,6 +212,19 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       delete modelSizeStats.model_bytes;
 
       expect(modelSizeStats).to.eql(expectedModelSizeStats);
+    }
+
+    public async clickActionsMenu(jobId: string) {
+      await testSubjects.click(this.rowSelector(jobId, 'euiCollapsedItemActionsButton'));
+      if (!(await find.existsByDisplayedByCssSelector('[class~=euiContextMenuPanel]'))) {
+        throw new Error(`expected euiContextMenuPanel to exist`);
+      }
+    }
+
+    public async clickCloneJobAction(jobId: string) {
+      await this.clickActionsMenu(jobId);
+      await testSubjects.click('mlActionButtonCloneJob');
+      await testSubjects.existOrFail('~mlPageJobWizard');
     }
   })();
 }
