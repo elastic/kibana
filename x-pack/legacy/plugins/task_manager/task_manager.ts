@@ -95,25 +95,7 @@ export class TaskManager {
     const poller = new TaskPoller({
       logger: this.logger,
       pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
-      work(): Promise<void> {
-        return fillPool(
-          pool.run,
-          async () => {
-            const { docs, claimedTasks } = await store.claimAvailableTasks({
-              size: pool.availableWorkers,
-              retryAt: intervalFromNow('5s')!,
-            });
-
-            if (docs.length !== claimedTasks) {
-              opts.logger.warn(
-                `[Task Ownership error]: (${claimedTasks}) tasks were claimed by Kibana, but (${docs.length}) claimed tasks were fetched`
-              );
-            }
-            return docs;
-          },
-          createRunner
-        );
-      },
+      work: (): Promise<void> => fillPool(pool.run, this.claimAvailableTasks, createRunner),
     });
 
     this.pool = pool;
@@ -143,6 +125,20 @@ export class TaskManager {
       }
     };
     startPoller();
+  }
+
+  private async claimAvailableTasks() {
+    const { docs, claimedTasks } = await this.store.claimAvailableTasks({
+      size: this.pool.availableWorkers,
+      retryAt: intervalFromNow('1s')!,
+    });
+
+    if (docs.length !== claimedTasks) {
+      this.logger.warn(
+        `[Task Ownership error]: (${claimedTasks}) tasks were claimed by Kibana, but (${docs.length}) claimed tasks were fetched`
+      );
+    }
+    return docs;
   }
 
   private async waitUntilStarted() {
