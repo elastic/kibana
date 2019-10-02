@@ -8,6 +8,7 @@ import { get, set } from 'lodash';
 import { DatabaseAdapter } from '../../database';
 import { ElasticsearchMonitorsAdapter } from '../elasticsearch_monitors_adapter';
 import { CountParams, CountResponse } from 'elasticsearch';
+import filterResult from './filter_result.json';
 
 // FIXME: there are many untested functions in this adapter. They should be tested.
 describe('ElasticsearchMonitorsAdapter', () => {
@@ -78,6 +79,20 @@ describe('ElasticsearchMonitorsAdapter', () => {
     const result = await adapter.getMonitors({}, 'now-15m', 'now');
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchSnapshot();
+  });
+
+  it('will return filter data for each expected field', async () => {
+    const searchMock = jest.fn();
+    searchMock.mockReturnValue({ aggregations: filterResult });
+    const database = {
+      search: searchMock,
+      count: jest.fn(),
+      head: jest.fn(),
+    };
+    const adapter = new ElasticsearchMonitorsAdapter(database);
+    const filters = await adapter.getFilterBar({}, 'now-3w', 'now-2h');
+    expect(searchMock).toHaveBeenCalled();
+    expect(filters).toMatchSnapshot();
   });
 
   it('getMonitorChartsData will run expected parameters when no location is specified', async () => {

@@ -13,6 +13,7 @@ import chrome from 'ui/chrome';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { JOB_STATE, DATAFEED_STATE } from 'plugins/ml/../common/constants/states';
+import { parseInterval } from '../../../../common/util/parse_interval';
 import { i18n } from '@kbn/i18n';
 
 export function loadFullJob(jobId) {
@@ -154,11 +155,27 @@ export function cloneJob(jobId) {
         // use tempJobCloningObjects to temporarily store the job
         mlJobService.tempJobCloningObjects.job = job;
 
-        if (job.data_counts.earliest_record_timestamp !== undefined && job.data_counts.latest_record_timestamp !== undefined) {
+        if (
+          job.data_counts.earliest_record_timestamp !== undefined &&
+          job.data_counts.latest_record_timestamp !== undefined &&
+          job.data_counts.latest_bucket_timestamp !== undefined) {
           // if the job has run before, use the earliest and latest record timestamp
           // as the cloned job's time range
-          mlJobService.tempJobCloningObjects.start = job.data_counts.earliest_record_timestamp;
-          mlJobService.tempJobCloningObjects.end = job.data_counts.latest_record_timestamp;
+          let start = job.data_counts.earliest_record_timestamp;
+          let end = job.data_counts.latest_record_timestamp;
+
+          if (job.datafeed_config.aggregations !== undefined) {
+            // if the datafeed uses aggregations the earliest and latest record timestamps may not be the same
+            // as the start and end of the data in the index.
+            const bucketSpanMs = parseInterval(job.analysis_config.bucket_span).asMilliseconds();
+            // round down to the start of the nearest bucket
+            start = Math.floor(job.data_counts.earliest_record_timestamp / bucketSpanMs) * bucketSpanMs;
+            // use latest_bucket_timestamp and add two bucket spans minus one ms
+            end = job.data_counts.latest_bucket_timestamp + (bucketSpanMs * 2) - 1;
+          }
+
+          mlJobService.tempJobCloningObjects.start = start;
+          mlJobService.tempJobCloningObjects.end = end;
         }
       } else {
         // otherwise use the currentJob

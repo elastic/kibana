@@ -152,3 +152,53 @@ Object {
   "upSeries": Array [],
 }
 `;
+
+exports[`ElasticsearchMonitorsAdapter will return filter data for each expected field 1`] = `
+Object {
+  "ids": Array [
+    "auto-http-0X728B660675AD66C2",
+    "auto-http-0XE4A3C7D7E53C51AD",
+    "auto-http-0X2E097095C06B7B4E",
+    "auto-tcp-0X7BAA5C23EED7A602",
+    "icmp-test",
+    "siem-test",
+    "auto-http-0X3F1F767F45156CB3",
+    "test-site",
+    "elatic-site",
+    "https://www.propvednik.com",
+  ],
+  "locations": Array [
+    "us-east-2",
+  ],
+  "names": Array [
+    "apm-server-dev",
+    "dev-service",
+    "kibana-dev",
+    "SecurityContents",
+    "icmp test",
+  ],
+  "ports": Array [
+    12349,
+    8200,
+    5601,
+    9200,
+    443,
+  ],
+  "schemes": Array [
+    "http",
+    "icmp",
+    "tcp",
+  ],
+  "urls": Array [
+    "http://localhost:12349",
+    "http://localhost:8200",
+    "http://localhost:5601",
+    "https://www.elastic.co/products/siem",
+    "icmp://8.8.8.8",
+    "tcp://localhost:9200",
+    "http://localhost:9200",
+    "https://www.elastic.co",
+    "https://propovednik.com",
+  ],
+}
+`;
