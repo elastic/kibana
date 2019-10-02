@@ -131,14 +131,14 @@ describe('Filter Utils', () => {
           mockIndexPatterns
         );
       }).toThrowErrorMatchingInlineSnapshot(
-        `"This key 'updatedAt' need to be wrapped by a saved object type like foo,bar"`
+        `"This key 'updatedAt' need to be wrapped by a saved object type like foo,bar: Bad Request"`
       );
     });
 
     test('Lets make sure that we are throwing an exception if we are using hiddentype with types', () => {
       expect(() => {
         validateConvertFilterToKueryNode([], 'hiddentype.title: "title"', mockIndexPatterns);
-      }).toThrowErrorMatchingInlineSnapshot(`"This type hiddentype is not allowed"`);
+      }).toThrowErrorMatchingInlineSnapshot(`"This type hiddentype is not allowed: Bad Request"`);
     });
   });
 

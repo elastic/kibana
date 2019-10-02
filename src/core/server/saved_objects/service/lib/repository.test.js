@@ -1163,7 +1163,7 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.mockReturnValue(noNamespaceSearchResults);
       expect(savedObjectsRepository.find({ type: 'foo', filter: 'foo.type: hello' }))
         .rejects
-        .toThrowErrorMatchingInlineSnapshot('"options.filter is missing index pattern to work correctly"');
+        .toThrowErrorMatchingInlineSnapshot('"options.filter is missing index pattern to work correctly: Bad Request"');
     });
 
     it('passes mappings, schema, search, defaultSearchOperator, searchFields, type, sortField, sortOrder and hasReference to getSearchDsl',
