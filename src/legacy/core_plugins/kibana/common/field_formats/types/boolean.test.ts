@@ -22,7 +22,7 @@ import { createBoolFormat } from './boolean';
 
 const BoolFormat = createBoolFormat();
 
-describe('Boolean Format', function() {
+describe('Boolean Format', () => {
   let boolean: Record<any, any>;
 
   beforeEach(() => {

@@ -21,26 +21,26 @@ import { createTruncateFormat } from './truncate';
 
 const TruncateFormat = createTruncateFormat();
 
-describe('String TruncateFormat', function() {
-  test('truncate large string', function() {
+describe('String TruncateFormat', () => {
+  test('truncate large string', () => {
     const truncate = new TruncateFormat({ fieldLength: 4 });
 
     expect(truncate.convert('This is some text')).toBe('This...');
   });
 
-  test('does not truncate large string when field length is not a string', function() {
+  test('does not truncate large string when field length is not a string', () => {
     const truncate = new TruncateFormat({ fieldLength: 'not number' });
 
     expect(truncate.convert('This is some text')).toBe('This is some text');
   });
 
-  test('does not truncate large string when field length is null', function() {
+  test('does not truncate large string when field length is null', () => {
     const truncate = new TruncateFormat({ fieldLength: null });
 
     expect(truncate.convert('This is some text')).toBe('This is some text');
   });
 
-  test('does not truncate large string when field length larger than the text', function() {
+  test('does not truncate large string when field length larger than the text', () => {
     const truncate = new TruncateFormat({ fieldLength: 100000 });
 
     expect(truncate.convert('This is some text')).toBe('This is some text');

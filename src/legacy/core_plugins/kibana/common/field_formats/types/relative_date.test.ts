@@ -22,24 +22,24 @@ import { createRelativeDateFormat } from './relative_date';
 
 const RelativeDateFormat = createRelativeDateFormat();
 
-describe('Relative Date Format', function() {
+describe('Relative Date Format', () => {
   let convert: any;
 
-  beforeEach(function() {
+  beforeEach(() => {
     const relativeDate = new RelativeDateFormat({});
     convert = relativeDate.convert.bind(relativeDate) as Function;
   });
 
-  test('decoding an undefined or null date should return a "-"', function() {
+  test('decoding an undefined or null date should return a "-"', () => {
     expect(convert(null)).toBe('-');
     expect(convert(undefined)).toBe('-');
   });
 
-  test('decoding invalid date should echo invalid value', function() {
+  test('decoding invalid date should echo invalid value', () => {
     expect(convert('not a valid date')).toBe('not a valid date');
   });
 
-  test('should parse date values', function() {
+  test('should parse date values', () => {
     const val = '2017-08-13T20:24:09.904Z';
     expect(convert(val)).toBe(moment(val).fromNow());
   });

@@ -209,7 +209,7 @@ describe('UrlFormat', () => {
       );
     });
 
-    test('should support multiple types of urls w/o basePath', function() {
+    test('should support multiple types of urls w/o basePath', () => {
       const url = new UrlFormat({});
       const parsedUrl = {
         origin: 'http://kibana.host.com',
