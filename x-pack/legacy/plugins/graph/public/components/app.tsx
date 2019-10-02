@@ -7,23 +7,27 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { Storage } from 'ui/storage';
-import { npStart } from 'ui/new_platform';
+import { CoreStart } from 'kibana/public';
+import { AutocompletePublicPluginStart } from 'src/plugins/data/public';
 import { FieldManagerProps, FieldManager } from './field_manager';
 import { SearchBarProps, SearchBar } from './search_bar';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-const localStorage = new Storage(window.localStorage);
 
-export interface GraphAppProps extends FieldManagerProps, SearchBarProps {}
+export interface GraphAppProps extends FieldManagerProps, SearchBarProps {
+  coreStart: CoreStart;
+  autocompleteStart: AutocompletePublicPluginStart;
+  store: Storage;
+}
 
 export function GraphApp(props: GraphAppProps) {
   return (
     <KibanaContextProvider
       services={{
         appName: 'graph',
-        store: localStorage,
-        autocomplete: npStart.plugins.data.autocomplete,
-        ...npStart.core,
+        store: props.store,
+        autocomplete: props.autocompleteStart,
+        ...props.coreStart,
       }}
     >
       <div className="gphGraph__bar">
