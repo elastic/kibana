@@ -55,6 +55,7 @@ import {
 } from './http';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
+import { SavedObjectsServiceStart } from './saved_objects';
 
 export { bootstrap } from './bootstrap';
 export { ConfigPath, ConfigService } from './config';
@@ -83,6 +84,8 @@ export {
   AuthResultParams,
   AuthStatus,
   AuthToolkit,
+  BasePath,
+  IBasePath,
   CustomHttpResponseOptions,
   GetAuthHeaders,
   GetAuthState,
@@ -154,7 +157,7 @@ export {
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsSchema,
   SavedObjectsSerializer,
-  SavedObjectsService,
+  SavedObjectsLegacyService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from './saved_objects';
@@ -234,9 +237,11 @@ export interface InternalCoreSetup {
 }
 
 /**
- * @public
+ * @internal
  */
-export interface InternalCoreStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export interface InternalCoreStart {
+  savedObjects: SavedObjectsServiceStart;
+}
 
 export {
   ContextSetup,

@@ -174,10 +174,11 @@ export class UiSettingsService {
     } = options;
 
     const {
+      isConflictError,
       isNotFoundError,
       isForbiddenError,
       isEsUnavailableError,
-      isNotAuthorizedError
+      isNotAuthorizedError,
     } = this._savedObjectsClient.errors;
 
     const isIgnorableError = error => (
@@ -196,7 +197,14 @@ export class UiSettingsService {
           version: this._id,
           buildNum: this._buildNum,
           logWithMetadata: this._logWithMetadata,
-          onWriteError(error, attributes) {
+          async onWriteError(error, attributes) {
+            if (isConflictError(error)) {
+              // trigger `!failedUpgradeAttributes` check below, since another
+              // request caused the uiSettings object to be created so we can
+              // just re-read
+              return false;
+            }
+
             if (isNotAuthorizedError(error) || isForbiddenError(error)) {
               return attributes;
             }
