@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiSpacer,
-  EuiAccordion
-} from '@elastic/eui';
+import { EuiSpacer, EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { IStackframe } from '../../../../typings/es_schemas/raw/fields/Stackframe';
@@ -32,8 +29,11 @@ export class Variables extends React.Component<Props> {
 
     return (
       <React.Fragment>
-        <EuiSpacer/>
-        <EuiAccordion id="local-variables" buttonContent={ this.localVariablesToogleButtonLabel() }>       
+        <EuiSpacer />
+        <EuiAccordion
+          id="local-variables"
+          buttonContent={this.localVariablesToogleButtonLabel()}
+        >
           <React.Fragment>
             <DottedKeyValueTable data={this.props.vars} maxDepth={5} />
           </React.Fragment>
