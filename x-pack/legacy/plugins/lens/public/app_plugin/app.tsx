@@ -192,11 +192,10 @@ export function App({
                             redirectTo(id);
                           }
                         })
-                        .catch(reason => {
+                        .catch(() => {
                           core.notifications.toasts.addDanger(
                             i18n.translate('xpack.lens.editorFrame.docSavingError', {
-                              defaultMessage: 'Error saving document {reason}',
-                              values: { reason },
+                              defaultMessage: 'Error saving document',
                             })
                           );
                         });
@@ -284,10 +283,10 @@ export function App({
                   // Update the cached index patterns if the user made a change to any of them
                   if (
                     state.indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
-                    filterableIndexPatterns.filter(
+                    filterableIndexPatterns.find(
                       ({ id }) =>
                         !state.indexPatternsForTopNav.find(indexPattern => indexPattern.id === id)
-                    ).length !== state.indexPatternsForTopNav.length
+                    )
                   ) {
                     getAllIndexPatterns(
                       filterableIndexPatterns,

@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
+import { EuiPanel, EuiToolTip } from '@elastic/eui';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { EditorFrame } from './editor_frame';
 import { Visualization, DatasourcePublicAPI, DatasourceSuggestion } from '../../types';
@@ -19,7 +20,7 @@ import {
 } from '../mocks';
 import { ExpressionRenderer } from 'src/legacy/core_plugins/expressions/public';
 import { DragDrop } from '../../drag_drop';
-import { EuiPanel, EuiToolTip } from '@elastic/eui';
+import { FrameLayout } from './frame_layout';
 
 // calling this function will wait for all pending Promises from mock
 // datasources to be processed by its callers.
@@ -1592,6 +1593,45 @@ describe('editor_frame', () => {
           visualizationType: 'testVis',
         },
       });
+    });
+
+    it('should call onChange when the datasource makes an internal state change', async () => {
+      const onChange = jest.fn();
+
+      mockDatasource.initialize.mockResolvedValue({});
+      mockDatasource.getLayers.mockReturnValue(['first']);
+      mockDatasource.getMetaData.mockReturnValue({
+        filterableIndexPatterns: [{ id: '1', title: 'resolved' }],
+      });
+      mockVisualization.initialize.mockReturnValue({ initialState: true });
+
+      act(() => {
+        instance = mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{ testVis: mockVisualization }}
+            datasourceMap={{ testDatasource: mockDatasource }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+            onChange={onChange}
+          />
+        );
+      });
+
+      await waitForPromises();
+      expect(onChange).toHaveBeenCalledTimes(2);
+
+      (instance.find(FrameLayout).prop('dataPanel') as ReactElement)!.props.dispatch({
+        type: 'UPDATE_DATASOURCE_STATE',
+        updater: () => ({
+          newState: true,
+        }),
+        datasourceId: 'testDatasource',
+      });
+      await waitForPromises();
+
+      expect(onChange).toHaveBeenCalledTimes(3);
     });
   });
 });

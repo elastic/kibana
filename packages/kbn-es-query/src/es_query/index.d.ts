@@ -29,3 +29,11 @@ export function buildEsQuery(
     dateFormatTZ?: string | null;
   }
 ): unknown;
+export function getEsQueryConfig(config: {
+  get: (name: string) => unknown;
+}): {
+  allowLeadingWildcards: boolean;
+  queryStringOptions: unknown;
+  ignoreFilterIfFieldNotInIndex: boolean;
+  dateFormatTZ?: string | null;
+};
