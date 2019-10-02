@@ -139,7 +139,6 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       comboBoxElement: WebElementWrapper,
       filterValue: string
     ): Promise<void> {
-      console.log('----------------- setFilterValue start -----------------')
       const input = await comboBoxElement.findByTagName('input');
       await input.clearValue();
       await this.waitForOptionsListLoading(comboBoxElement);
@@ -147,8 +146,8 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       await input.type(filterValue);
       await this.waitForOptionsListLoading(comboBoxElement);
       const actualText = input.getVisibleText();
-      if (! actualText === filterValue) {
-        console.log(`--------- ERROR expected setFilterValue=${filterValue}, actual=${actualText}`);
+      if (!actualText === filterValue) {
+        log.debug(`--------- ERROR expected setFilterValue=${filterValue}, actual=${actualText}`);
       }
     }
 

@@ -23,16 +23,12 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const flyout = getService('flyout');
-  const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['header', 'common']);
 
   return new class DashboardAddPanel {
     async clickOpenAddPanel() {
       log.debug('DashboardAddPanel.clickOpenAddPanel');
       await testSubjects.click('dashboardAddPanelButton');
-      // have to move the mouse to get the help flyout to appear on IE11
-      // see https://github.com/elastic/kibana/issues/45333
-      // await globalNav.moveMouseToLogo();
     }
 
     async clickAddNewEmbeddableLink(type) {

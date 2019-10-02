@@ -63,9 +63,6 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       log.debug('navigateToApp visualize');
       await PageObjects.common.navigateToApp('visualize');
       await this.clickNewVisualization();
-      // have to move the mouse to get the help flyout to appear on IE11
-      // see https://github.com/elastic/kibana/issues/45333
-      // await globalNav.moveMouseToLogo();
       await this.waitForVisualizationSelectPage();
     }
 
@@ -845,7 +842,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       // the values we're going to use to calculate the data values we're testing.
       // So git rid of the one 'M' and split the rest on the 'L's.
       // const tempArray = data.replace('M', '').replace(/\s*/g,'').split('L');
-      const tempArray = data.replace('M ', '').replace('M', '').replace(/ L /g,'L').replace(/ /g,',').split('L');
+      const tempArray = data.replace('M ', '').replace('M', '').replace(/ L /g, 'L').replace(/ /g, ',').split('L');
       log.debug(tempArray.toString());
       const chartSections = tempArray.length / 2;
       // log.debug('chartSections = ' + chartSections + ' height = ' + yAxisHeight + ' yAxisLabel = ' + yAxisLabel);

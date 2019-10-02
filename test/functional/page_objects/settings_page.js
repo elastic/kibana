@@ -28,7 +28,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
   const flyout = getService('flyout');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
-  const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['header', 'common']);
 
   class SettingsPage {
@@ -53,9 +52,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('index_patterns');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
-      // have to move the mouse to get the help flyout to appear on IE11
-      // see https://github.com/elastic/kibana/issues/45333
-      // await globalNav.moveMouseToLogo();
       // check for the index pattern info flyout that covers the
       // create index pattern button on smaller screens
       if (await testSubjects.exists('CreateIndexPatternPrompt')) {
