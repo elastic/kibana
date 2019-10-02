@@ -201,7 +201,7 @@ export const BEATS_SYSTEM_ID = 'beats';
  * The name of the Apm System ID used to publish and look up Apm stats through the Monitoring system.
  * @type {string}
  */
-export const APM_SYSTEM_ID = 'beats';
+export const APM_SYSTEM_ID = 'apm';
 
 /**
  * The name of the Kibana System ID used to look up Logstash stats through the Monitoring system.
