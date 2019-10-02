@@ -27,7 +27,7 @@ import {
   HTML_CONTEXT_TYPE,
 } from './content_types';
 
-export const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
+const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
 
 export const isFieldFormatConvertFn = (convert: any): convert is FieldFormatConvertFunction =>
   isFunction(convert);

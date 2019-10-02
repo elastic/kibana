@@ -37,6 +37,20 @@ const DEFAULT_URL_TYPE = 'a';
 
 export function createUrlFormat(BaseFieldFormat: typeof FieldFormat) {
   class UrlFormat extends BaseFieldFormat {
+    static id = 'url';
+    static title = 'Url';
+    static fieldType = [
+      'number',
+      'boolean',
+      'date',
+      'ip',
+      'string',
+      'murmur3',
+      'unknown',
+      'conflict',
+    ];
+    static urlTypes = URL_TYPES;
+
     constructor(params: any) {
       super(params);
       this.compileTemplate = memoize(this.compileTemplate);
@@ -50,7 +64,7 @@ export function createUrlFormat(BaseFieldFormat: typeof FieldFormat) {
       };
     }
 
-    protected formatLabel(value: any, url: any) {
+    private formatLabel(value: any, url?: any) {
       const template = this.param('labelTemplate');
       if (url == null) url = this.formatUrl(value);
       if (!template) return url;
@@ -61,7 +75,7 @@ export function createUrlFormat(BaseFieldFormat: typeof FieldFormat) {
       });
     }
 
-    protected formatUrl(value: any) {
+    private formatUrl(value: any) {
       const template = this.param('urlTemplate');
       if (!template) return value;
 
@@ -71,7 +85,7 @@ export function createUrlFormat(BaseFieldFormat: typeof FieldFormat) {
       });
     }
 
-    protected compileTemplate(template: string) {
+    private compileTemplate(template: string) {
       const parts = template.split(templateMatchRE).map(function(part: string, i: number) {
         // trim all the odd bits, the variable names
         return i % 2 ? part.trim() : part;
@@ -96,90 +110,82 @@ export function createUrlFormat(BaseFieldFormat: typeof FieldFormat) {
       };
     }
 
-    static id = 'url';
-    static title = 'Url';
-    static fieldType = [
-      'number',
-      'boolean',
-      'date',
-      'ip',
-      'string',
-      'murmur3',
-      'unknown',
-      'conflict',
-    ];
-    static urlTypes = URL_TYPES;
+    _convert = {
+      [TEXT_CONTEXT_TYPE](this: UrlFormat, value: any): string {
+        return this.formatLabel(value);
+      },
+
+      [HTML_CONTEXT_TYPE](
+        this: UrlFormat,
+        rawValue: any,
+        field: { name: string | number },
+        hit: { highlight: { [x: string]: any } },
+        parsedUrl: { origin: any; pathname: any; basePath: any }
+      ) {
+        const url = escape(this.formatUrl(rawValue));
+        const label = escape(this.formatLabel(rawValue, url));
+
+        switch (this.param('type')) {
+          case 'audio':
+            return `<audio controls preload="none" src="${url}">`;
+
+          case 'img':
+            // If the URL hasn't been formatted to become a meaningful label then the best we can do
+            // is tell screen readers where the image comes from.
+            const imageLabel =
+              label === url ? `A dynamically-specified image located at ${url}` : label;
+
+            return `<img src="${url}" alt="${imageLabel}">`;
+          default:
+            const inWhitelist = whitelistUrlSchemes.some(scheme => url.indexOf(scheme) === 0);
+            if (!inWhitelist && !parsedUrl) {
+              return url;
+            }
+
+            let prefix = '';
+            /**
+             * This code attempts to convert a relative url into a kibana absolute url
+             *
+             * SUPPORTED:
+             *  - /app/kibana/
+             *  - ../app/kibana
+             *  - #/discover
+             *
+             * UNSUPPORTED
+             *  - app/kibana
+             */
+            if (!inWhitelist) {
+              // Handles urls like: `#/discover`
+              if (url[0] === '#') {
+                prefix = `${parsedUrl.origin}${parsedUrl.pathname}`;
+              }
+              // Handle urls like: `/app/kibana` or `/xyz/app/kibana`
+              else if (url.indexOf(parsedUrl.basePath || '/') === 0) {
+                prefix = `${parsedUrl.origin}`;
+              }
+              // Handle urls like: `../app/kibana`
+              else {
+                const prefixEnd = url[0] === '/' ? '' : '/';
+
+                prefix = `${parsedUrl.origin}${parsedUrl.basePath || ''}/app${prefixEnd}`;
+              }
+            }
+
+            let linkLabel;
+
+            if (hit && hit.highlight && hit.highlight[field.name]) {
+              linkLabel = getHighlightHtml(label, hit.highlight[field.name]);
+            } else {
+              linkLabel = label;
+            }
+
+            const linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
+
+            return `<a href="${prefix}${url}" target="${linkTarget}" rel="noopener noreferrer">${linkLabel}</a>`;
+        }
+      },
+    };
   }
-
-  UrlFormat.prototype._convert = {
-    [TEXT_CONTEXT_TYPE](value: any) {
-      return this.formatLabel(value);
-    },
-
-    [HTML_CONTEXT_TYPE](this: UrlFormat, rawValue, field, hit, parsedUrl) {
-      const url = escape(this.formatUrl(rawValue));
-      const label = escape(this.formatLabel(rawValue, url));
-
-      switch (this.param('type')) {
-        case 'audio':
-          return `<audio controls preload="none" src="${url}">`;
-
-        case 'img':
-          // If the URL hasn't been formatted to become a meaningful label then the best we can do
-          // is tell screen readers where the image comes from.
-          const imageLabel =
-            label === url ? `A dynamically-specified image located at ${url}` : label;
-
-          return `<img src="${url}" alt="${imageLabel}">`;
-        default:
-          const inWhitelist = whitelistUrlSchemes.some(scheme => url.indexOf(scheme) === 0);
-          if (!inWhitelist && !parsedUrl) {
-            return url;
-          }
-
-          let prefix = '';
-          /**
-           * This code attempts to convert a relative url into a kibana absolute url
-           *
-           * SUPPORTED:
-           *  - /app/kibana/
-           *  - ../app/kibana
-           *  - #/discover
-           *
-           * UNSUPPORTED
-           *  - app/kibana
-           */
-          if (!inWhitelist) {
-            // Handles urls like: `#/discover`
-            if (url[0] === '#') {
-              prefix = `${parsedUrl.origin}${parsedUrl.pathname}`;
-            }
-            // Handle urls like: `/app/kibana` or `/xyz/app/kibana`
-            else if (url.indexOf(parsedUrl.basePath || '/') === 0) {
-              prefix = `${parsedUrl.origin}`;
-            }
-            // Handle urls like: `../app/kibana`
-            else {
-              const prefixEnd = url[0] === '/' ? '' : '/';
-
-              prefix = `${parsedUrl.origin}${parsedUrl.basePath || ''}/app${prefixEnd}`;
-            }
-          }
-
-          let linkLabel;
-
-          if (hit && hit.highlight && hit.highlight[field.name]) {
-            linkLabel = getHighlightHtml(label, hit.highlight[field.name]);
-          } else {
-            linkLabel = label;
-          }
-
-          const linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
-
-          return `<a href="${prefix}${url}" target="${linkTarget}" rel="noopener noreferrer">${linkLabel}</a>`;
-      }
-    },
-  };
 
   return UrlFormat;
 }

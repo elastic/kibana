@@ -18,7 +18,7 @@
  */
 
 import { trunc } from 'lodash';
-import { FieldFormat, DEFAULT_CONTEXT_TYPE } from '../../../../../../plugins/data/common/';
+import { FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../../../plugins/data/common/';
 
 const omission = '...';
 
@@ -27,21 +27,21 @@ export function createTruncateFormat(BaseFieldFormat: typeof FieldFormat) {
     static id = 'truncate';
     static title = 'Truncated String';
     static fieldType = ['string'];
+
+    _convert = {
+      [TEXT_CONTEXT_TYPE](this: TruncateFormat, val: any) {
+        const length = this.param('fieldLength') as any;
+        if (length > 0) {
+          return trunc(val, {
+            length: length + omission.length,
+            omission,
+          });
+        }
+
+        return val;
+      },
+    };
   }
-
-  TruncateFormat.prototype._convert = {
-    [DEFAULT_CONTEXT_TYPE](val: any) {
-      const length = this.param('fieldLength') as any;
-      if (length > 0) {
-        return trunc(val, {
-          length: length + omission.length,
-          omission,
-        });
-      }
-
-      return val;
-    },
-  };
 
   return TruncateFormat;
 }

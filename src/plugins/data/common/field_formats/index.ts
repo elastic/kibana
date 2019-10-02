@@ -18,5 +18,5 @@
  */
 
 export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
-export { FieldFormat, DEFAULT_CONTEXT_TYPE } from './field_format';
+export { FieldFormat } from './field_format';
 export { getHighlightRequest, asPrettyString, getHighlightHtml } from './utils';
