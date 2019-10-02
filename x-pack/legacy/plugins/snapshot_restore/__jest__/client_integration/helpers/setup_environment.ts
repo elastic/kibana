@@ -26,7 +26,7 @@ export const setupEnvironment = () => {
   breadcrumbService.init(chrome, {});
   textService.init(i18n);
   uiMetricService.init(createUiStatsReporter);
-  documentationLinksService.init('', '', '');
+  documentationLinksService.init('', '');
   docTitleService.init(docTitle.change);
 
   const { server, httpRequestsMockHelpers } = initHttpRequests();

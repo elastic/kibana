@@ -10,16 +10,10 @@ import { REPOSITORY_DOC_PATHS } from '../../constants';
 class DocumentationLinksService {
   private esDocBasePath: string = '';
   private esPluginDocBasePath: string = '';
-  private esStackOverviewDocBasePath: string = '';
 
-  public init(
-    esDocBasePath: string,
-    esPluginDocBasePath: string,
-    esStackOverviewDocBasePath: string
-  ): void {
+  public init(esDocBasePath: string, esPluginDocBasePath: string): void {
     this.esDocBasePath = esDocBasePath;
     this.esPluginDocBasePath = esPluginDocBasePath;
-    this.esStackOverviewDocBasePath = esStackOverviewDocBasePath;
   }
 
   public getRepositoryPluginDocUrl() {
