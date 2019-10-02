@@ -1,4 +1,5 @@
-const { resolve } = require('path');
+import { resolve } from 'path';
+
 const kibanaURL = '/app/kibana';
 const url = require('url');
 
@@ -13,7 +14,7 @@ const TEST_ES_URL = url.parse(process.env.ESURL ? process.env.ESURL : 'http://el
 const TEST_ES_USERNAME = TEST_ES_URL.auth.split(':')[0] || 'elastic';
 const TEST_ES_PASSWORD = TEST_ES_URL.auth.split(':')[1] || 'changeit';
 
-module.exports = {
+export default ({
   servers: {
     kibana: {
       protocol: process.env.KIBANAPROTO || TEST_KIBANA_URL.protocol.replace(':',''),
@@ -79,4 +80,4 @@ module.exports = {
   esIndexDump: {
     dataDir: resolve(__dirname, 'fixtures/dump_data')
   }
-};
+});

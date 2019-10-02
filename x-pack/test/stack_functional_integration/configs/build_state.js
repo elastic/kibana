@@ -8,5 +8,5 @@ const envObj = path => dotEnv.config({ path });
 // default fn :: path -> {}
 export default path => {
   const obj = envObj(path);
-  return { ...obj, tests: testsList(obj) };
+  return { tests: testsList(obj), ...obj, };
 }
