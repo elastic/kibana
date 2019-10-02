@@ -18,7 +18,7 @@ import { toExpression, toPreviewExpression } from './to_expression';
 import { generateId } from '../id_generator';
 
 const defaultIcon = 'visBarVertical';
-const defaultSeriesType = 'bar';
+const defaultSeriesType = 'bar_stacked';
 
 function getDescription(state?: State) {
   if (!state) {

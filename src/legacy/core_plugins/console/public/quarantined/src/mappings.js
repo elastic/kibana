@@ -267,7 +267,7 @@ function retrieveSettings(settingsKey, settingsToRetrieve) {
 
   // Fetch autocomplete info if setting is set to true, and if user has made changes.
   if (currentSettings[settingsKey] && settingsToRetrieve[settingsKey]) {
-    return es.send('GET', settingKeyToPathMap[settingsKey], null, null, true);
+    return es.send('GET', settingKeyToPathMap[settingsKey], null);
   } else {
     const settingsPromise = new $.Deferred();
     // If a user has saved settings, but a field remains checked and unchanged, no need to make changes

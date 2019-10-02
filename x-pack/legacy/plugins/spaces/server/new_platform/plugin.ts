@@ -5,7 +5,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { SavedObjectsService, CoreSetup } from 'src/core/server';
+import { SavedObjectsLegacyService, CoreSetup } from 'src/core/server';
 import { Logger, PluginInitializerContext } from 'src/core/server';
 import { CapabilitiesModifier } from 'src/legacy/server/capabilities';
 import { Legacy } from 'kibana';
@@ -36,7 +36,7 @@ import { initSpacesRequestInterceptors } from '../lib/request_interceptors';
  * to function properly.
  */
 export interface LegacyAPI {
-  savedObjects: SavedObjectsService;
+  savedObjects: SavedObjectsLegacyService;
   usage: {
     collectorSet: {
       register: (collector: any) => void;
