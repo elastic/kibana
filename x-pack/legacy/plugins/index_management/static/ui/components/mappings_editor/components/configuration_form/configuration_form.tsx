@@ -7,7 +7,7 @@ import React, { useEffect } from 'react';
 
 import { useForm, getUseField, Form, OnFormUpdateArg } from '../../shared_imports';
 import { FormRow, Field } from '../../shared_imports';
-import { DYNAMIC_SETTING_OPTIONS } from '../../field_configuration';
+import { DYNAMIC_SETTING_OPTIONS } from '../../constants';
 import { Types, useDispatch } from '../../mappings_state';
 import { schema } from './form.schema';
 

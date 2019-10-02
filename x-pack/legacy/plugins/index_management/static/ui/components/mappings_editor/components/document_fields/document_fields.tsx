@@ -6,18 +6,19 @@
 
 import React from 'react';
 
+import { useState } from '../../mappings_state';
 import { DocumentFieldsHeaders } from './document_fields_header';
-import { Properties, Props as PropertiesProps } from './properties';
+import { PropertiesList } from './properties';
 
-interface Props {
-  defaultValue?: PropertiesProps['defaultValue'];
-}
+export const DocumentFields = () => {
+  const {
+    properties: { data },
+  } = useState();
 
-export const DocumentFields = ({ defaultValue }: Props) => {
   return (
     <>
       <DocumentFieldsHeaders />
-      <Properties defaultValue={defaultValue} />
+      <PropertiesList properties={data} />
     </>
   );
 };

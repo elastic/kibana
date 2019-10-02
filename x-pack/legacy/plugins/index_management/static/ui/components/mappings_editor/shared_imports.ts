@@ -18,6 +18,8 @@ export {
 export {
   FormRow,
   Field,
+  TextField,
+  SelectField,
 } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/components';
 
 export {

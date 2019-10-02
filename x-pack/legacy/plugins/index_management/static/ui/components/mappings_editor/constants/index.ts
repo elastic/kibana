@@ -5,3 +5,5 @@
  */
 
 export * from './field_options';
+
+export * from './data_types_definition';

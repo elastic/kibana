@@ -7,6 +7,7 @@
 import React, { useReducer, useEffect, createContext, useContext } from 'react';
 
 import { reducer, MappingsConfiguration, MappingsProperties, State, Dispatch } from './reducer';
+import { Property } from './types';
 
 type Mappings = MappingsConfiguration & {
   properties: MappingsProperties;
@@ -31,7 +32,7 @@ const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
 export interface Props {
   children: React.ReactNode;
-  defaultValue: { properties: { [key: string]: any } };
+  defaultValue: { properties: { [key: string]: Property } };
   onUpdate: OnUpdateHandler;
 }
 
