@@ -468,7 +468,12 @@ describe('loader', () => {
         setState,
         indexPatternId: 'b',
         layerId: 'l0',
-        savedObjectsClient: mockClient(),
+        savedObjectsClient: {
+          ...mockClient(),
+          bulkGet: jest.fn(async () => {
+            throw err;
+          }),
+        },
         onError,
       });
 
