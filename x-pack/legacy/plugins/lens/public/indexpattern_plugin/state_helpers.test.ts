@@ -367,7 +367,7 @@ describe('state_helpers', () => {
       expect(
         getColumnOrder({
           col1: {
-            label: 'Top Values of category',
+            label: 'Top values of category',
             dataType: 'string',
             isBucketed: true,
 
@@ -392,7 +392,7 @@ describe('state_helpers', () => {
             sourceField: 'bytes',
           },
           col3: {
-            label: 'Date Histogram of timestamp',
+            label: 'Date histogram of timestamp',
             dataType: 'date',
             isBucketed: true,
 
@@ -411,7 +411,7 @@ describe('state_helpers', () => {
       expect(
         getColumnOrder({
           col1: {
-            label: 'Top Values of category',
+            label: 'Top values of category',
             dataType: 'string',
             isBucketed: true,
 
@@ -438,7 +438,7 @@ describe('state_helpers', () => {
             suggestedPriority: 0,
           },
           col3: {
-            label: 'Date Histogram of timestamp',
+            label: 'Date histogram of timestamp',
             dataType: 'date',
             isBucketed: true,
 
