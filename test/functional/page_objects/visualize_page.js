@@ -65,7 +65,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await this.clickNewVisualization();
       // have to move the mouse to get the help flyout to appear on IE11
       // see https://github.com/elastic/kibana/issues/45333
-      await globalNav.moveMouseToLogo();
+      // await globalNav.moveMouseToLogo();
       await this.waitForVisualizationSelectPage();
     }
 
@@ -721,12 +721,19 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       log.debug('Click Save Visualization button');
       await testSubjects.click('confirmSaveSavedObjectButton');
 
+      // if we wait for this, the success toast message could be gone :-()
       // wait for save to complete before completion
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      // await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async saveVisualizationExpectSuccess(vizName, { saveAsNew = false } = {}) {
       await this.saveVisualization(vizName, { saveAsNew });
+      // let toasts = await testSubjects.find('globalToastList');
+      // console.log(`toasts = ${await toasts.getAttribute('innerHTML')}`);
+      // await PageObjects.common.sleep(1000);
+      // toasts = await testSubjects.find('globalToastList');
+      // console.log(`toasts = ${await toasts.getAttribute('innerHTML')}`);
+
       const successToast = await testSubjects.exists('saveVisualizationSuccess', {
         timeout: defaultFindTimeout
       });
@@ -837,7 +844,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       // by a bunch of 'L'ines from that point to the next.  Those points are
       // the values we're going to use to calculate the data values we're testing.
       // So git rid of the one 'M' and split the rest on the 'L's.
-      const tempArray = data.replace('M', '').split('L');
+      // const tempArray = data.replace('M', '').replace(/\s*/g,'').split('L');
+      const tempArray = data.replace('M ', '').replace('M', '').replace(/ L /g,'L').replace(/ /g,',').split('L');
+      log.debug(tempArray.toString());
       const chartSections = tempArray.length / 2;
       // log.debug('chartSections = ' + chartSections + ' height = ' + yAxisHeight + ' yAxisLabel = ' + yAxisLabel);
       const chartData = [];

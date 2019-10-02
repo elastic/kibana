@@ -66,7 +66,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
     public async setElement(
       comboBoxElement: WebElementWrapper,
       value: string,
-      options = { clickWithMouse: false }
+      options = { clickWithMouse: true }
     ): Promise<void> {
       log.debug(`comboBox.setElement, value: ${value}`);
       const isOptionSelected = await this.isOptionSelected(comboBoxElement, value);
@@ -75,7 +75,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
         return;
       }
 
-      comboBoxElement.scrollIntoViewIfNecessary();
+      await comboBoxElement.scrollIntoViewIfNecessary();
       await this.setFilterValue(comboBoxElement, value);
       await this.openOptionsList(comboBoxElement);
 
@@ -139,11 +139,17 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       comboBoxElement: WebElementWrapper,
       filterValue: string
     ): Promise<void> {
+      console.log('----------------- setFilterValue start -----------------')
       const input = await comboBoxElement.findByTagName('input');
       await input.clearValue();
       await this.waitForOptionsListLoading(comboBoxElement);
+      await PageObjects.common.sleep(1000);
       await input.type(filterValue);
       await this.waitForOptionsListLoading(comboBoxElement);
+      const actualText = input.getVisibleText();
+      if (! actualText === filterValue) {
+        console.log(`--------- ERROR expected setFilterValue=${filterValue}, actual=${actualText}`);
+      }
     }
 
     /**

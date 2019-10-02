@@ -234,6 +234,9 @@ export class WebElementWrapper {
    * @default { withJS: false }
    */
   async clearValue(options: ClearOptions = { withJS: false }) {
+    if (this.browserType === Browsers.InternetExplorer) {
+      return this.clearValueWithKeyboard();
+    }
     await this.retryCall(async function clearValue(wrapper) {
       if (wrapper.browserType === Browsers.Chrome || options.withJS) {
         // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
@@ -252,9 +255,12 @@ export class WebElementWrapper {
   async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }) {
     if (options.charByChar === true || this.browserType === Browsers.InternetExplorer) {
       const value = await this.getAttribute('value');
+      // For IE testing, the text field gets clicked in the middle so
+      // first go HOME and then DELETE all chars
+      await this.pressKeys(this.Keys.HOME);
       for (let i = 0; i <= value.length; i++) {
-        await this.pressKeys(this.Keys.BACK_SPACE);
-        await delay(100);
+        await this.pressKeys(this.Keys.DELETE);
+        // await delay(10);
       }
     } else {
       if (this.browserType === Browsers.Chrome) {

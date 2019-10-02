@@ -55,7 +55,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       // have to move the mouse to get the help flyout to appear on IE11
       // see https://github.com/elastic/kibana/issues/45333
-      await globalNav.moveMouseToLogo();
+      // await globalNav.moveMouseToLogo();
       // check for the index pattern info flyout that covers the
       // create index pattern button on smaller screens
       if (await testSubjects.exists('CreateIndexPatternPrompt')) {
@@ -359,7 +359,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       });
       await retry.try(async () => {
         log.debug('getAlertText');
+        await PageObjects.common.sleep(5000);
         alertText = await testSubjects.getVisibleText('confirmModalTitleText');
+        console.log(`---------------- alertText = ${alertText}`);
       });
       await retry.try(async () => {
         log.debug('acceptConfirmation');

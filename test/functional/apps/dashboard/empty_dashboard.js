@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should display add button', async () => {
-      const addButtonExists = await testSubjects.exists('emptyDashboardAddPanelButton');
+      const addButtonExists = await testSubject.exists('emptyDashboardAddPanelButton');
       expect(addButtonExists).to.be(true);
     });
 
@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }) {
       await testSubjects.click('emptyDashboardAddPanelButton');
       // have to move the mouse to get the help flyout to appear on IE11
       // see https://github.com/elastic/kibana/issues/45333
-      await globalNav.moveMouseToLogo();
+      // await globalNav.moveMouseToLogo();
       const isAddPanelOpen = await dashboardAddPanel.isAddPanelOpen();
       expect(isAddPanelOpen).to.be(true);
     });

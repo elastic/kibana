@@ -20,7 +20,7 @@
 export default function ({ getService, loadTestFile }) {
   const esArchiver = getService('esArchiver');
 
-  describe('management', function () {
+  describe('managementX', function () {
     before(async () => {
       await esArchiver.unload('logstash_functional');
       await esArchiver.load('empty_kibana');

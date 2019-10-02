@@ -32,7 +32,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await testSubjects.click('dashboardAddPanelButton');
       // have to move the mouse to get the help flyout to appear on IE11
       // see https://github.com/elastic/kibana/issues/45333
-      await globalNav.moveMouseToLogo();
+      // await globalNav.moveMouseToLogo();
     }
 
     async clickAddNewEmbeddableLink(type) {
