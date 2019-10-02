@@ -10,7 +10,8 @@ import {
   HOST_NAME,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
-  CONTAINER_ID
+  CONTAINER_ID,
+  PROCESSOR_EVENT
 } from '../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 
@@ -32,6 +33,7 @@ export async function getServiceNodeMetadata({
       query: {
         bool: {
           filter: [
+            { term: { [PROCESSOR_EVENT]: 'metric' } },
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [SERVICE_NODE_NAME]: serviceNodeName } }
           ]
