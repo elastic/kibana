@@ -95,7 +95,7 @@ export class TaskManager {
     const poller = new TaskPoller({
       logger: this.logger,
       pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
-      work: (): Promise<void> => fillPool(pool.run, this.claimAvailableTasks, createRunner),
+      work: (): Promise<void> => fillPool(pool.run, () => this.claimAvailableTasks(), createRunner),
     });
 
     this.pool = pool;
