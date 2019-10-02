@@ -13,6 +13,7 @@ import {
   updateHandler,
   getIndicesHandler,
   updateRetentionSettingsHandler,
+  executeRetentionHandler,
 } from './policy';
 
 describe('[Snapshot and Restore API Routes] Policy', () => {
@@ -357,6 +358,27 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
       const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
       await expect(
         updateRetentionSettingsHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('executeRetentionHandler()', () => {
+    const mockExecuteRequest = ({} as unknown) as Request;
+
+    it('should return successful ES response', async () => {
+      const mockEsResponse = { acknowledged: true };
+      const callWithRequest = jest.fn().mockResolvedValueOnce(mockEsResponse);
+      const expectedResponse = { ...mockEsResponse };
+
+      await expect(
+        executeRetentionHandler(mockExecuteRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
+    });
+
+    it('should throw if ES error', async () => {
+      const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
+      await expect(
+        executeRetentionHandler(mockExecuteRequest, callWithRequest, mockResponseToolkit)
       ).rejects.toThrow();
     });
   });
