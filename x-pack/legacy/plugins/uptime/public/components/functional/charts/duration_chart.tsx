@@ -4,30 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Axis,
-  Chart,
-  CurveType,
-  getAxisId,
-  getSpecId,
-  LineSeries,
-  Position,
-  ScaleType,
-  timeFormatter,
-  Settings,
-} from '@elastic/charts';
+import { Axis, Chart, getAxisId, Position, timeFormatter, Settings } from '@elastic/charts';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
-import React, { useContext } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  convertMicrosecondsToMilliseconds as microsToMillis,
-  getChartDateLabel,
-} from '../../../lib/helper';
+import { getChartDateLabel } from '../../../lib/helper';
 import { LocationDurationLine } from '../../../../common/graphql/types';
-import { UptimeSettingsContext } from '../../../contexts';
-import { getColorsMap } from './get_colors_map';
+import { DurationLineSeriesList } from './duration_line_series_list';
+import { DurationChartEmptyState } from './duration_chart_empty_state';
 import { ChartWrapper } from './chart_wrapper';
+import { useUrlParams } from '../../../hooks';
+import { getTickFormat } from './get_tick_format';
 
 interface DurationChartProps {
   /**
@@ -59,34 +47,14 @@ interface DurationChartProps {
 export const DurationChart = ({
   locationDurationLines,
   meanColor,
-  rangeColor,
   loading,
 }: DurationChartProps) => {
-  const { absoluteStartDate, absoluteEndDate } = useContext(UptimeSettingsContext);
-  // this id is used for the line chart representing the average duration length
-  const averageSpecId = getSpecId('average-');
-
-  const lineSeries = locationDurationLines.map(line => {
-    const locationSpecId = getSpecId('loc-avg' + line.name);
-    return (
-      <LineSeries
-        curve={CurveType.CURVE_MONOTONE_X}
-        customSeriesColors={getColorsMap(meanColor, averageSpecId)}
-        data={line.line.map(({ x, y }) => [x || 0, microsToMillis(y)])}
-        id={locationSpecId}
-        key={`locline-${line.name}`}
-        name={line.name}
-        xAccessor={0}
-        xScaleType={ScaleType.Time}
-        yAccessors={[1]}
-        yScaleToDataExtent={false}
-        yScaleType={ScaleType.Linear}
-      />
-    );
-  });
+  const hasLines = locationDurationLines.length > 0;
+  const [getUrlParams] = useUrlParams();
+  const { absoluteDateRangeStart: min, absoluteDateRangeEnd: max } = getUrlParams();
 
   return (
-    <React.Fragment>
+    <>
       <EuiPanel paddingSize="m">
         <EuiTitle size="xs">
           <h4>
@@ -99,16 +67,12 @@ export const DurationChart = ({
         </EuiTitle>
         <ChartWrapper height="400px" loading={loading}>
           <Chart>
-            <Settings
-              xDomain={{ min: absoluteStartDate, max: absoluteEndDate }}
-              showLegend={true}
-              legendPosition={Position.Bottom}
-            />
+            <Settings xDomain={{ min, max }} showLegend={true} legendPosition={Position.Bottom} />
             <Axis
               id={getAxisId('bottom')}
               position={Position.Bottom}
               showOverlappingTicks={true}
-              tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
+              tickFormat={timeFormatter(getChartDateLabel(min, max))}
               title={i18n.translate('xpack.uptime.monitorCharts.durationChart.bottomAxis.title', {
                 defaultMessage: 'Timestamp',
               })}
@@ -117,15 +81,19 @@ export const DurationChart = ({
               domain={{ min: 0 }}
               id={getAxisId('left')}
               position={Position.Left}
-              tickFormat={d => Number(d).toFixed(0)}
+              tickFormat={d => getTickFormat(d)}
               title={i18n.translate('xpack.uptime.monitorCharts.durationChart.leftAxis.title', {
                 defaultMessage: 'Duration ms',
               })}
             />
-            {lineSeries}
+            {hasLines ? (
+              <DurationLineSeriesList lines={locationDurationLines} meanColor={meanColor} />
+            ) : (
+              <DurationChartEmptyState />
+            )}
           </Chart>
         </ChartWrapper>
       </EuiPanel>
-    </React.Fragment>
+    </>
   );
 };

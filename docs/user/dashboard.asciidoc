@@ -13,6 +13,7 @@ With *Dashboard*, you can:
 
 * <<dashboard-create-new-dashboard, Create a dashboard>>
 * <<customizing-your-dashboard, Arrange dashboard elements>>
+* <<dashboard-customize-filter, Customize time ranges>>
 * <<sharing-dashboards, Share a dashboard>>
 * <<import-dashboards, Import and export dashboards>>
 * <<viewing-detailed-information, Inspect and edit dashboard elements>>
@@ -37,7 +38,7 @@ image::images/dashboard-read-only-badge.png[Example of Dashboard's read only acc
 [[dashboard-getting-started]]
 === Interact with dashboards
 
-When you open *Dashhboard*, you're presented an overview of your dashboards. 
+When you open *Dashboard*, you're presented an overview of your dashboards. 
 If you don't have any dashboards, you can add 
 <<add-sample-data, sample data sets>>,
 which include pre-built dashboards. 
@@ -94,6 +95,21 @@ to the new dimensions.
 * To delete a panel, open the panel menu and select *Delete from dashboard.* Deleting a panel from a
 dashboard does *not* delete the saved visualization or search.
 
+[float]
+[[dashboard-customize-filter]]
+=== Customize time ranges
+
+You can configure each visualization, saved search, and map on your dashboard
+for a specific time range. For example, you might want one visualization to show
+the monthly trend for CPU usage and another to show the current CPU usage.   
+
+From the panel menu, select *Customize time range* to expose a time filter 
+dedicated to that panel. Panels that are not restricted by a specific 
+time range are controlled by the
+global time filter.
+
+[role="screenshot"]
+image:images/time_range_per_panel.gif[Time range per dashboard panel]
 
 [float]
 [[sharing-dashboards]]

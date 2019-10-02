@@ -17,12 +17,28 @@
  * under the License.
  */
 
+import { IconType } from '@elastic/eui';
 import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 
-interface SetupDependencies {
-  Vis: any;
-  VisFactoryProvider: any;
-  VisTypesRegistryProvider: any;
+export interface VisType {
+  name: string;
+  title: string;
+  description?: string;
+  visualization: any;
+  isAccessible?: boolean;
+  requestHandler: string;
+  responseHandler: string;
+  icon?: IconType;
+  image?: string;
+  stage: 'experimental' | 'production';
+  requiresSearch: boolean;
+  hidden: boolean;
+
+  // Since we haven't typed everything here yet, we basically "any" the rest
+  // of that interface. This should be removed as soon as this type definition
+  // has been completed. But that way we at least have typing for a couple of
+  // properties on that type.
+  [key: string]: any;
 }
 
 /**
@@ -31,14 +47,29 @@ interface SetupDependencies {
  * @internal
  */
 export class TypesService {
-  public setup({ Vis, VisFactoryProvider, VisTypesRegistryProvider }: SetupDependencies) {
+  private types: Record<string, VisType> = {};
+  public setup() {
     return {
-      Vis,
-      VisFactoryProvider,
-      registerVisualization: (registerFn: () => any) => {
-        VisTypesRegistryProvider.register(registerFn);
+      registerVisualization: (registerFn: () => VisType) => {
+        const visDefinition = registerFn();
+        if (this.types[visDefinition.name]) {
+          throw new Error('type already exists!');
+        }
+        this.types[visDefinition.name] = visDefinition;
       },
-      visTypeAliasRegistry,
+      registerAlias: visTypeAliasRegistry.add,
+    };
+  }
+
+  public start() {
+    return {
+      get: (visualization: string) => {
+        return this.types[visualization];
+      },
+      all: () => {
+        return [...Object.values(this.types)];
+      },
+      getAliases: visTypeAliasRegistry.get,
     };
   }
 
@@ -49,6 +80,7 @@ export class TypesService {
 
 /** @internal */
 export type TypesSetup = ReturnType<TypesService['setup']>;
+export type TypesStart = ReturnType<TypesService['start']>;
 
 /** @public types */
 export type VisTypeAlias = VisTypeAlias;

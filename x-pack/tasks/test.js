@@ -12,6 +12,7 @@ import { createAutoJUnitReporter } from '../../src/dev';
 
 const MOCHA_OPTIONS = {
   ui: 'bdd',
+  require: require.resolve('../../src/setup_node_env'),
   reporter: createAutoJUnitReporter({
     reportName: 'X-Pack Mocha Tests',
   }),

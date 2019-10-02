@@ -7,16 +7,16 @@
 <b>Signature:</b>
 
 ```typescript
-getPeerCertificate(detailed: true): DetailedPeerCertificate | null;
+getPeerCertificate(detailed: false): PeerCertificate | null;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  detailed | <code>true</code> |  |
+|  detailed | <code>false</code> |  |
 
 <b>Returns:</b>
 
-`DetailedPeerCertificate | null`
+`PeerCertificate | null`
 

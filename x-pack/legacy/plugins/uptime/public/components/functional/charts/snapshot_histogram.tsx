@@ -11,14 +11,14 @@ import {
   getAxisId,
   getSpecId,
   Position,
-  ScaleType,
   timeFormatter,
   Settings,
 } from '@elastic/charts';
 import { EuiEmptyPrompt, EuiTitle, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import moment from 'moment';
 import { HistogramDataPoint } from '../../../../common/graphql/types';
 import { getColorsMap } from './get_colors_map';
 import { getChartDateLabel } from '../../../lib/helper';
@@ -45,7 +45,7 @@ export interface SnapshotHistogramProps {
   dangerColor: string;
 
   /**
-   * Height is needed, since by defauly charts takes height of 100%
+   * Height is needed, since by default charts takes height of 100%
    */
   height?: string;
 }
@@ -67,11 +67,11 @@ export const SnapshotHistogramComponent = ({
 }: Props) => {
   if (!data || !data.histogram)
     /**
-     * TODO: the Fragment, EuiTitle, and EuiPanel should be extractec to a dumb component
+     * TODO: the Fragment, EuiTitle, and EuiPanel should be extracted to a dumb component
      * that we can reuse in the subsequent return statement at the bottom of this function.
      */
     return (
-      <Fragment>
+      <>
         <EuiTitle size="xs">
           <h5>
             <FormattedMessage
@@ -102,7 +102,7 @@ export const SnapshotHistogramComponent = ({
             }
           />
         </EuiPanel>
-      </Fragment>
+      </>
     );
   const { histogram } = data;
   const downMonitorsName = i18n.translate('xpack.uptime.snapshotHistogram.downMonitorsId', {
@@ -115,7 +115,7 @@ export const SnapshotHistogramComponent = ({
   });
   const upSpecId = getSpecId(upMonitorsId);
   return (
-    <Fragment>
+    <>
       <EuiPanel paddingSize="m">
         <EuiTitle size="xs">
           <h5>
@@ -125,7 +125,18 @@ export const SnapshotHistogramComponent = ({
             />
           </h5>
         </EuiTitle>
-        <ChartWrapper height={height} loading={loading}>
+        <ChartWrapper
+          height={height}
+          loading={loading}
+          aria-label={i18n.translate('xpack.uptime.snapshotHistogram.description', {
+            defaultMessage:
+              'Bar Chart showing uptime status over time from {startTime} to {endTime}.',
+            values: {
+              startTime: moment(new Date(absoluteStartDate).valueOf()).fromNow(),
+              endTime: moment(new Date(absoluteEndDate).valueOf()).fromNow(),
+            },
+          })}
+        >
           <Chart>
             <Settings
               xDomain={{ min: absoluteStartDate, max: absoluteEndDate }}
@@ -147,8 +158,7 @@ export const SnapshotHistogramComponent = ({
                   defaultMessage: 'Snapshot Y Axis',
                 })
               )}
-              position={Position.Left}
-              showOverlappingTicks={true}
+              position="left"
               title={i18n.translate('xpack.uptime.snapshotHistogram.yAxis.title', {
                 defaultMessage: 'Pings',
                 description:
@@ -163,9 +173,9 @@ export const SnapshotHistogramComponent = ({
               stackAccessors={[0]}
               timeZone="local"
               xAccessor={0}
-              xScaleType={ScaleType.Time}
+              xScaleType="time"
               yAccessors={[1]}
-              yScaleType={ScaleType.Linear}
+              yScaleType="linear"
             />
             <BarSeries
               customSeriesColors={getColorsMap(dangerColor, downSpecId)}
@@ -177,14 +187,14 @@ export const SnapshotHistogramComponent = ({
               stackAccessors={[0]}
               timeZone="local"
               xAccessor={0}
-              xScaleType={ScaleType.Time}
+              xScaleType="time"
               yAccessors={[1]}
-              yScaleType={ScaleType.Linear}
+              yScaleType="linear"
             />
           </Chart>
         </ChartWrapper>
       </EuiPanel>
-    </Fragment>
+    </>
   );
 };
 

@@ -29,22 +29,18 @@
 
 import { EventEmitter } from 'events';
 import _ from 'lodash';
-import { VisTypesRegistryProvider } from '../registry/vis_types';
-import { AggConfigs } from './agg_configs';
+import '../render_complete/directive';
+import { AggConfigs } from '../agg_types/agg_configs';
 import { PersistedState } from '../persisted_state';
-import { FilterBarQueryFilterProvider } from '../filter_manager/query_filter';
 import { updateVisualizationConfig } from './vis_update';
 import { SearchSourceProvider } from '../courier/search_source';
-import { SavedObjectsClientProvider } from '../saved_objects';
+import { start as visualizations } from '../../../core_plugins/visualizations/public/legacy';
 
-import { timefilter } from '../timefilter';
 import '../directives/bind';
 
-export function VisProvider(Private, indexPatterns, getAppState) {
-  const visTypes = Private(VisTypesRegistryProvider);
-  const queryFilter = Private(FilterBarQueryFilterProvider);
+export function VisProvider(Private, getAppState) {
+  const visTypes = visualizations.types;
   const SearchSource = Private(SearchSourceProvider);
-  const savedObjectsClient = Private(SavedObjectsClientProvider);
 
   class Vis extends EventEmitter {
     constructor(indexPattern, visState) {
@@ -66,11 +62,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
       this.sessionState = {};
 
       this.API = {
-        savedObjectsClient: savedObjectsClient,
         SearchSource: SearchSource,
-        indexPatterns: indexPatterns,
-        timeFilter: timefilter,
-        queryFilter: queryFilter,
         events: {
           filter: data => this.eventsSubject.next({ name: 'filterBucket', data }),
           brush: data => this.eventsSubject.next({ name: 'brush', data }),
@@ -83,7 +75,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
       this.title = state.title || '';
       const type = state.type || this.type;
       if (_.isString(type)) {
-        this.type = visTypes.byName[type];
+        this.type = visTypes.get(type);
         if (!this.type) {
           throw new Error(`Invalid type "${type}"`);
         }

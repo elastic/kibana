@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 import {
   MachineLearningAnomalyExplorerProvider,
   MachineLearningAPIProvider,
+  MachineLearningDataFrameAnalyticsProvider,
   MachineLearningDataFramesProvider,
   MachineLearningDataVisualizerProvider,
   MachineLearningJobManagementProvider,
@@ -16,6 +17,8 @@ import {
   MachineLearningJobTableProvider,
   MachineLearningJobTypeSelectionProvider,
   MachineLearningJobWizardCommonProvider,
+  MachineLearningJobWizardMultiMetricProvider,
+  MachineLearningJobWizardPopulationProvider,
   MachineLearningNavigationProvider,
   MachineLearningSettingsProvider,
   MachineLearningSingleMetricViewerProvider,
@@ -24,6 +27,7 @@ import {
 export function MachineLearningProvider(context: FtrProviderContext) {
   const anomalyExplorer = MachineLearningAnomalyExplorerProvider(context);
   const api = MachineLearningAPIProvider(context);
+  const dataFrameAnalytics = MachineLearningDataFrameAnalyticsProvider(context);
   const dataFrames = MachineLearningDataFramesProvider(context);
   const dataVisualizer = MachineLearningDataVisualizerProvider(context);
   const jobManagement = MachineLearningJobManagementProvider(context);
@@ -31,6 +35,8 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const jobTable = MachineLearningJobTableProvider(context);
   const jobTypeSelection = MachineLearningJobTypeSelectionProvider(context);
   const jobWizardCommon = MachineLearningJobWizardCommonProvider(context);
+  const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(context);
+  const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(context);
   const navigation = MachineLearningNavigationProvider(context);
   const settings = MachineLearningSettingsProvider(context);
   const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context);
@@ -38,6 +44,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   return {
     anomalyExplorer,
     api,
+    dataFrameAnalytics,
     dataFrames,
     dataVisualizer,
     jobManagement,
@@ -45,6 +52,8 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     jobTable,
     jobTypeSelection,
     jobWizardCommon,
+    jobWizardMultiMetric,
+    jobWizardPopulation,
     navigation,
     settings,
     singleMetricViewer,

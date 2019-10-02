@@ -38,11 +38,6 @@ import { PluginInitializerContext } from 'src/core/public';
 import { npSetup, npStart } from 'ui/new_platform';
 // @ts-ignore
 import { VisFiltersProvider, createFilter } from 'ui/vis/vis_filters';
-// @ts-ignore
-import { VisProvider as Vis } from 'ui/vis/index.js';
-// @ts-ignore
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
 import { plugin } from '.';
 
@@ -52,10 +47,6 @@ export const setup = pluginInstance.setup(npSetup.core, {
   __LEGACY: {
     VisFiltersProvider,
     createFilter,
-
-    Vis,
-    VisFactoryProvider,
-    VisTypesRegistryProvider,
   },
 });
-export const start = pluginInstance.start(npStart.core, {});
+export const start = pluginInstance.start(npStart.core);

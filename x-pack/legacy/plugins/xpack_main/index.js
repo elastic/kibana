@@ -14,16 +14,6 @@ import { replaceInjectedVars } from './server/lib/replace_injected_vars';
 import { setupXPackMain } from './server/lib/setup_xpack_main';
 import { xpackInfoRoute, settingsRoute } from './server/routes/api/v1';
 
-import { has } from 'lodash';
-
-function movedToTelemetry(configPath) {
-  return (settings, log) => {
-    if (has(settings, configPath)) {
-      log(`Config key "xpack.xpack_main.${configPath}" is deprecated. Use "telemetry.${configPath}" instead.`);
-    }
-  };
-}
-
 export { callClusterFactory } from './server/lib/call_cluster_factory';
 export const xpackMain = (kibana) => {
   return new kibana.Plugin({
@@ -93,10 +83,10 @@ export const xpackMain = (kibana) => {
       xpackInfoRoute(server);
       settingsRoute(server, this.kbnServer);
     },
-    deprecations: () => [
-      movedToTelemetry('telemetry.config'),
-      movedToTelemetry('telemetry.url'),
-      movedToTelemetry('telemetry.enabled'),
+    deprecations: ({ rename }) => [
+      rename('xpack.xpack_main.telemetry.config', 'telemetry.config'),
+      rename('xpack.xpack_main.telemetry.url', 'telemetry.url'),
+      rename('xpack.xpack_main.telemetry.enabled', 'telemetry.enabled'),
     ],
   });
 };

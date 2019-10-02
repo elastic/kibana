@@ -99,9 +99,6 @@
 }
 
 .euiPanel.code-timeline__commit--root {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
   &:not(:first-child) {
     border-top: none;
   }
@@ -152,7 +149,6 @@
   margin: 0 $euiSize;
   border-radius: $euiSizeXS;
   cursor: pointer;
-  width: calc(100% - $euiSizeXL);
 
   &:hover {
     background: $euiFocusBackgroundColor;
@@ -271,14 +267,6 @@
 
 .codeNoMinWidth {
   min-width: unset !important;
-}
-
-.code-commit-id {
-  @include euiCodeFont;
-  height: calc(20rem / 14);
-  margin: auto 0 auto $euiSizeM;
-  text-align: center;
-  flex-shrink: 0;
 }
 
 .code-line-decoration {

@@ -3,41 +3,41 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Boom from 'boom';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { HttpServiceSetup, Logger } from 'src/core/server';
+import { Logger, CoreSetup } from 'src/core/server';
 import { Space } from '../../../common/model/space';
 import { wrapError } from '../errors';
-import { getSpaceSelectorUrl } from '../get_space_selector_url';
-import { addSpaceIdToPath, getSpaceIdFromPath } from '../spaces_url_parser';
+import { addSpaceIdToPath } from '../spaces_url_parser';
 import { XPackMainPlugin } from '../../../../xpack_main/xpack_main';
 import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
+import { LegacyAPI } from '../../new_platform/plugin';
+import { getSpaceSelectorUrl } from '../get_space_selector_url';
+import { DEFAULT_SPACE_ID } from '../../../common/constants';
 
 export interface OnPostAuthInterceptorDeps {
-  config: KibanaConfig;
-  onPostAuth: (handler: any) => void;
-  getHiddenUiAppById: (appId: string) => unknown;
-  http: HttpServiceSetup;
+  getLegacyAPI(): LegacyAPI;
+  http: CoreSetup['http'];
   xpackMain: XPackMainPlugin;
   spacesService: SpacesServiceSetup;
   log: Logger;
 }
 
 export function initSpacesOnPostAuthRequestInterceptor({
-  config,
   xpackMain,
+  getLegacyAPI,
   spacesService,
   log,
   http,
-  onPostAuth,
-  getHiddenUiAppById,
 }: OnPostAuthInterceptorDeps) {
-  const serverBasePath: string = config.get('server.basePath');
+  const { serverBasePath, serverDefaultRoute } = getLegacyAPI().legacyConfig;
 
-  onPostAuth(async function spacesOnPostAuthHandler(request: any, h: any) {
-    const path = request.path;
+  http.registerOnPostAuth(async (request, response, toolkit) => {
+    const path = request.url.pathname!;
 
-    const isRequestingKibanaRoot = path === '/';
+    const spaceId = spacesService.getSpaceId(request);
+
+    // The root of kibana is also the root of the defaut space,
+    // since the default space does not have a URL Identifier (i.e., `/s/foo`).
+    const isRequestingKibanaRoot = path === '/' && spaceId === DEFAULT_SPACE_ID;
     const isRequestingApplication = path.startsWith('/app');
 
     const spacesClient = await spacesService.scopedClient(request);
@@ -49,45 +49,65 @@ export function initSpacesOnPostAuthRequestInterceptor({
       try {
         const spaces = await spacesClient.getAll();
 
-        const basePath: string = config.get('server.basePath');
-        const defaultRoute: string = config.get('server.defaultRoute');
-
         if (spaces.length === 1) {
           // If only one space is available, then send user there directly.
           // No need for an interstitial screen where there is only one possible outcome.
           const space = spaces[0];
 
-          const destination = addSpaceIdToPath(basePath, space.id, defaultRoute);
-          return h.redirect(destination).takeover();
+          const destination = addSpaceIdToPath(serverBasePath, space.id, serverDefaultRoute);
+          return response.redirected({ headers: { location: destination } });
         }
 
         if (spaces.length > 0) {
           // render spaces selector instead of home page
-          const app = getHiddenUiAppById('space_selector');
-          return (await h.renderApp(app, { spaces })).takeover();
+          return response.redirected({
+            headers: { location: getSpaceSelectorUrl(serverBasePath) },
+          });
         }
       } catch (error) {
-        return wrapError(error);
+        const wrappedError = wrapError(error);
+        return response.customError({
+          body: wrappedError,
+          headers: wrappedError.output.headers,
+          statusCode: wrappedError.output.statusCode,
+        });
       }
     }
 
     // This condition should only happen after selecting a space, or when transitioning from one application to another
     // e.g.: Navigating from Dashboard to Timelion
     if (isRequestingApplication) {
-      let spaceId: string = '';
       let space: Space;
       try {
-        spaceId = getSpaceIdFromPath(http.basePath.get(request), serverBasePath);
-
         log.debug(`Verifying access to space "${spaceId}"`);
 
         space = await spacesClient.get(spaceId);
       } catch (error) {
-        log.error(
-          `Unable to navigate to space "${spaceId}", redirecting to Space Selector. ${error}`
-        );
-        // Space doesn't exist, or user not authorized for space, or some other issue retrieving the active space.
-        return h.redirect(getSpaceSelectorUrl(config)).takeover();
+        const wrappedError = wrapError(error);
+
+        const statusCode = wrappedError.output.statusCode;
+
+        // If user is not authorized, or the space cannot be found, allow them to select another space
+        // by redirecting to the space selector.
+        const shouldRedirectToSpaceSelector = statusCode === 403 || statusCode === 404;
+
+        if (shouldRedirectToSpaceSelector) {
+          log.debug(
+            `Unable to navigate to space "${spaceId}", redirecting to Space Selector. ${error}`
+          );
+          return response.redirected({
+            headers: {
+              location: getSpaceSelectorUrl(serverBasePath),
+            },
+          });
+        } else {
+          log.error(`Unable to navigate to space "${spaceId}". ${error}`);
+          return response.customError({
+            body: wrappedError,
+            headers: wrappedError.output.headers,
+            statusCode: wrappedError.output.statusCode,
+          });
+        }
       }
 
       // Verify application is available in this space
@@ -105,13 +125,14 @@ export function initSpacesOnPostAuthRequestInterceptor({
           );
 
           const isAvailableInSpace = enabledFeatures.some(feature => feature.app.includes(appId));
+
           if (!isAvailableInSpace) {
-            log.error(`App ${appId} is not enabled within space "${spaceId}".`);
-            return Boom.notFound();
+            log.debug(`App ${appId} is not enabled within space "${spaceId}".`);
+            return response.notFound();
           }
         }
       }
     }
-    return h.continue;
+    return toolkit.next();
   });
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { castEsToKbnFieldTypeName } from '../legacy/utils';
+import { castEsToKbnFieldTypeName } from '../plugins/data/common';
 // eslint-disable-next-line max-len
 import { shouldReadFieldFromDocValues } from '../legacy/server/index_patterns/service/lib/field_capabilities/should_read_field_from_doc_values';
 
@@ -39,7 +39,8 @@ function stubbedLogstashFields() {
     ['area',              'geo_shape',  true,  true ],
     ['hashed',            'murmur3',    false, true ],
     ['geo.coordinates',   'geo_point',  true,  true ],
-    ['extension',         'keyword',    true,  true ],
+    ['extension',         'text',       true,  true],
+    ['extension.keyword', 'keyword',    true,  true,   {},            'extension',  'multi' ],
     ['machine.os',        'text',       true,  true ],
     ['machine.os.raw',    'keyword',    true,  true,   {},            'machine.os', 'multi' ],
     ['geo.src',           'keyword',    true,  true ],

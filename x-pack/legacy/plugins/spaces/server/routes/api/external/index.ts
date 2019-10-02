@@ -5,7 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
-import { Logger, SavedObjectsService } from 'src/core/server';
+import { Logger, SavedObjectsLegacyService } from 'src/core/server';
 import { XPackMainPlugin } from '../../../../../xpack_main/xpack_main';
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { initDeleteSpacesApi } from './delete';
@@ -13,15 +13,14 @@ import { initGetSpacesApi } from './get';
 import { initPostSpacesApi } from './post';
 import { initPutSpacesApi } from './put';
 import { SpacesServiceSetup } from '../../../new_platform/spaces_service/spaces_service';
-import { SpacesHttpServiceSetup } from '../../../new_platform/plugin';
 import { initCopyToSpacesApi } from './copy_to_space';
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 interface RouteDeps {
   xpackMain: XPackMainPlugin;
-  http: SpacesHttpServiceSetup;
-  savedObjects: SavedObjectsService;
+  legacyRouter: Legacy.Server['route'];
+  savedObjects: SavedObjectsLegacyService;
   spacesService: SpacesServiceSetup;
   log: Logger;
 }

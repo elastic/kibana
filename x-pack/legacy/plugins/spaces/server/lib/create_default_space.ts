@@ -7,12 +7,12 @@
 import { i18n } from '@kbn/i18n';
 
 import { first } from 'rxjs/operators';
-import { ElasticsearchServiceSetup, SavedObjectsService } from 'src/core/server';
+import { SavedObjectsLegacyService, CoreSetup } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 
 interface Deps {
-  elasticsearch: ElasticsearchServiceSetup;
-  savedObjects: SavedObjectsService;
+  elasticsearch: CoreSetup['elasticsearch'];
+  savedObjects: SavedObjectsLegacyService;
 }
 
 export async function createDefaultSpace({ elasticsearch, savedObjects }: Deps) {

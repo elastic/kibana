@@ -6,10 +6,13 @@
 
 import React, { Fragment, ChangeEvent, PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { EuiSelect, EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiSelect, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import { ExpressionAST } from '../../../../types';
+import { ArgumentStrings } from '../../../strings';
+
+const { AxisConfig: strings } = ArgumentStrings;
 
 const { set } = immutable;
 
@@ -72,8 +75,8 @@ export class ExtendedTemplate extends PureComponent<Props> {
     }
 
     const positions = {
-      xaxis: ['bottom', 'top'],
-      yaxis: ['left', 'right'],
+      xaxis: [strings.getPositionBottom(), strings.getPositionTop()],
+      yaxis: [strings.getPositionLeft(), strings.getPositionRight()],
     };
     const argName = this.props.typeInstance.name;
     const position = this.getArgValue('position', positions[argName][0]);
@@ -82,9 +85,15 @@ export class ExtendedTemplate extends PureComponent<Props> {
 
     return (
       <Fragment>
-        <EuiFormRow label="Position" compressed>
-          <EuiSelect value={position} options={options} onChange={this.setArgValue('position')} />
+        <EuiFormRow label={strings.getPositionLabel()} display="rowCompressed">
+          <EuiSelect
+            compressed
+            value={position}
+            options={options}
+            onChange={this.setArgValue('position')}
+          />
         </EuiFormRow>
+        <EuiSpacer size="s" />
       </Fragment>
     );
   }
