@@ -22,7 +22,7 @@ import {
   getFieldBrowserSearchInputClassName,
   PANES_FLEX_GROUP_WIDTH,
 } from './helpers';
-import { FieldBrowserProps, OnFieldSelected, OnHideFieldBrowser } from './types';
+import { FieldBrowserProps, OnHideFieldBrowser } from './types';
 
 const FieldsBrowserContainer = styled.div<{ width: number }>`
   ${({ theme, width }) => css`

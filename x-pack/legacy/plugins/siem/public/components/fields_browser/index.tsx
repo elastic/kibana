@@ -15,7 +15,6 @@ import { BrowserFields } from '../../containers/source';
 import { timelineActions } from '../../store/actions';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { DEFAULT_CATEGORY_NAME } from '../timeline/body/column_headers/default_headers';
-import { OnUpdateColumns } from '../timeline/events';
 import { FieldsBrowser } from './field_browser';
 import { filterBrowserFieldsByFieldName, mergeBrowserFieldsWithDefaultCategory } from './helpers';
 import * as i18n from './translations';
