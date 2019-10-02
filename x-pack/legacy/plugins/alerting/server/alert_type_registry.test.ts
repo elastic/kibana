@@ -9,7 +9,7 @@ jest.mock('./lib/get_create_task_runner_function', () => ({
 }));
 
 import { AlertTypeRegistry } from './alert_type_registry';
-import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { SavedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/plugin.mock';
 
@@ -21,15 +21,7 @@ const alertTypeRegistryParams = {
     return {
       callCluster: jest.fn(),
       savedObjectsClient: SavedObjectsClientMock.create(),
-      logger: {
-        info: jest.fn(),
-        debug: jest.fn(),
-        warn: jest.fn(),
-        error: jest.fn(),
-        trace: jest.fn(),
-        fatal: jest.fn(),
-        log: jest.fn(),
-      },
+      logger: loggingServiceMock.create().get(),
     };
   },
   taskManager,

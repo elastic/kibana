@@ -6,7 +6,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { AlertsClient } from './alerts_client';
-import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { Logger } from '../../../../../src/core/server';
+import { SavedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 
@@ -21,15 +22,7 @@ const alertsClientParams = {
   spaceId: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
-  logger: {
-    info: jest.fn(),
-    debug: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    trace: jest.fn(),
-    fatal: jest.fn(),
-    log: jest.fn(),
-  },
+  logger: loggingServiceMock.create().get(),
 };
 
 beforeEach(() => {
@@ -425,12 +418,9 @@ describe('create()', () => {
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Task manager error"`
     );
-    expect(alertsClientParams.logger.error).toHaveBeenCalledTimes(1);
-    expect(alertsClientParams.logger.error.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "Failed to cleanup alert \\"1\\" after scheduling task failed. Error: Saved object delete error",
-      ]
-    `);
+    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+      'Failed to cleanup alert "1" after scheduling task failed. Error: Saved object delete error'
+    );
   });
 
   test('throws an error if alert type not registerd', async () => {

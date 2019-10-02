@@ -6,6 +6,7 @@
 
 import { AlertType } from '../types';
 import { createExecutionHandler } from './create_execution_handler';
+import { loggingServiceMock } from '../../../../../../src/core/server/mocks';
 
 const alertType: AlertType = {
   id: 'test',
@@ -22,15 +23,7 @@ const createExecutionHandlerParams = {
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
   getBasePath: jest.fn().mockReturnValue(undefined),
   alertType,
-  logger: {
-    info: jest.fn(),
-    debug: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    trace: jest.fn(),
-    fatal: jest.fn(),
-    log: jest.fn(),
-  },
+  logger: loggingServiceMock.create().get(),
   actions: [
     {
       id: '1',
