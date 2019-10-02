@@ -3,18 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
 import { EnforceSecurityPage } from './error/enforce_security';
 import { InvalidLicensePage } from './error/invalid_license';
 import { NoAccessPage } from './error/no_access';
-
-const IndexPage = () => {
-  return <span>Elastic Fleet</span>;
-};
+import { AgentListPage } from './agent';
 
 export const routeMap = [
   { path: '/error/enforce_security', component: EnforceSecurityPage },
   { path: '/error/invalid_license', component: InvalidLicensePage },
   { path: '/error/no_access', component: NoAccessPage },
-  { path: '/', component: IndexPage },
+  { path: '/agents', component: AgentListPage },
 ];
