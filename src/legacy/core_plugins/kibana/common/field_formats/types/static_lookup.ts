@@ -17,15 +17,21 @@
  * under the License.
  */
 
-function convertLookupEntriesToMap(lookupEntries) {
-  return lookupEntries.reduce((lookupMap, lookupEntry) => {
+import { FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../../../plugins/data/common/';
+
+function convertLookupEntriesToMap(lookupEntries: any) {
+  return lookupEntries.reduce((lookupMap: any, lookupEntry: any) => {
     lookupMap[lookupEntry.key] = lookupEntry.value;
     return lookupMap;
   }, {});
 }
 
-export function createStaticLookupFormat(FieldFormat) {
+export function createStaticLookupFormat() {
   return class StaticLookupFormat extends FieldFormat {
+    static id = 'static_lookup';
+    static title = 'Static Lookup';
+    static fieldType = ['string', 'number', 'ip', 'boolean'];
+
     getParamDefaults() {
       return {
         lookupEntries: [{}],
@@ -33,16 +39,14 @@ export function createStaticLookupFormat(FieldFormat) {
       };
     }
 
-    _convert(val) {
-      const lookupEntries = this.param('lookupEntries');
-      const unknownKeyValue = this.param('unknownKeyValue');
+    _convert = {
+      [TEXT_CONTEXT_TYPE](this: StaticLookupFormat, val: any) {
+        const lookupEntries = this.param('lookupEntries');
+        const unknownKeyValue = this.param('unknownKeyValue');
 
-      const lookupMap = convertLookupEntriesToMap(lookupEntries);
-      return lookupMap[val] || unknownKeyValue || val;
-    }
-
-    static id = 'static_lookup';
-    static title = 'Static Lookup';
-    static fieldType = ['string', 'number', 'ip', 'boolean'];
+        const lookupMap = convertLookupEntriesToMap(lookupEntries);
+        return lookupMap[val] || unknownKeyValue || val;
+      },
+    };
   };
 }
