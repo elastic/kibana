@@ -1581,7 +1581,6 @@
     "kbn.discover.notifications.savedSearchTitle": "搜索 “{savedSearchTitle}” 已保存",
     "kbn.discover.painlessError.painlessScriptedFieldErrorMessage": "Painless 脚本字段 “{script}” 有错误。",
     "kbn.discover.rootBreadcrumb": "Discover",
-    "kbn.discover.savedSearch.newSavedSearchTitle": "新保存的搜索",
     "kbn.discover.savedSearch.savedObjectName": "已保存搜索",
     "kbn.discover.scaledToDescription": "已缩放至 {bucketIntervalDescription}",
     "kbn.discover.searchingTitle": "正在搜索",
