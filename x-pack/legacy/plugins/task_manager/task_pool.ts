@@ -83,6 +83,8 @@ export class TaskPool {
               this.logger.warn(`Task ${task} failed in attempt to run: ${err.message}`);
             })
             .then(() => this.running.delete(task));
+        } else {
+          this.logger.warn(`Failed to mark Task ${task} as running`);
         }
       } else {
         return false;
