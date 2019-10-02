@@ -1535,7 +1535,6 @@
     "kbn.discover.fieldChooser.fieldCalculator.fieldIsNotPresentInDocumentsErrorMessage": "このフィールドは Elasticsearch マッピングに表示されますが、ドキュメントテーブルの {hitsLength} 件のドキュメントには含まれません。可視化や検索は可能な場合があります。",
     "kbn.discover.fieldChooser.filter.aggregatableLabel": "集約可能",
     "kbn.discover.fieldChooser.filter.availableFieldsTitle": "利用可能なフィールド",
-    "kbn.discover.fieldChooser.filter.fieldNameLabel": "フィールド名",
     "kbn.discover.fieldChooser.filter.hideMissingFieldsLabel": "未入力のフィールドを非表示",
     "kbn.discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel": "インデックスとフィールド",
     "kbn.discover.fieldChooser.filter.popularTitle": "人気",
