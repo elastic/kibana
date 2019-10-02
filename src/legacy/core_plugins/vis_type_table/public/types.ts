@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { SchemaConfig } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
+
 export enum AggTypes {
   SUM = 'sum',
   AVG = 'avg',
@@ -25,18 +27,9 @@ export enum AggTypes {
   COUNT = 'count',
 }
 
-interface Dimension {
-  accessor: number;
-  aggType: AggTypes;
-  format: {
-    id: number;
-  };
-  params: { [key: string]: unknown };
-}
-
 export interface Dimensions {
-  buckets: Dimension[];
-  metrics: Dimension[];
+  buckets: SchemaConfig[];
+  metrics: SchemaConfig[];
 }
 
 export interface TableVisParams {
