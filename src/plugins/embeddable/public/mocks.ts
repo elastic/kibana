@@ -47,7 +47,10 @@ const createInstance = () => {
   const setup = plugin.setup(coreMock.createSetup(), {
     uiActions: uiActionsPluginMock.createSetupContract(),
   });
-  const doStart = () => plugin.start(coreMock.createStart());
+  const doStart = () =>
+    plugin.start(coreMock.createStart(), {
+      uiActions: uiActionsPluginMock.createStartContract(),
+    });
   return {
     plugin,
     setup,

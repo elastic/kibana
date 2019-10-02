@@ -47,7 +47,7 @@ export const testPlugin = (
     coreStart,
     setup,
     doStart: (anotherCoreStart: CoreStart = coreStart) => {
-      const start = plugin.start(anotherCoreStart);
+      const start = plugin.start(anotherCoreStart, { uiActions: uiActions.doStart() });
       return start;
     },
     uiActions: uiActions.doStart(coreStart),

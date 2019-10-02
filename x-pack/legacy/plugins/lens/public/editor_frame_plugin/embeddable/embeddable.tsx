@@ -44,7 +44,6 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
 
   private expressionRenderer: ExpressionRenderer;
   private savedVis: Document;
-  private domNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
 
   private currentContext: {
@@ -109,7 +108,8 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
    * @param {ContainerState} containerState
    */
   render(domNode: HTMLElement | Element) {
-    this.domNode = domNode;
+    super.render(domNode);
+
     render(
       <ExpressionWrapper
         ExpressionRenderer={this.expressionRenderer}
@@ -122,6 +122,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
 
   destroy() {
     super.destroy();
+
     if (this.domNode) {
       unmountComponentAtNode(this.domNode);
     }
