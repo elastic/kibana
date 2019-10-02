@@ -13,21 +13,21 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React from 'react';
 
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
 import { ChartView } from './chart';
-import { isValidLogRateView, LogRateView, LogRateViewSwitcher } from './log_rate_view_switcher';
-import { TableView } from './table';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 
 export const LogRateResults = ({
   isLoading,
   results,
+  setTimeRange,
   timeRange,
 }: {
   isLoading: boolean;
   results: GetLogEntryRateSuccessResponsePayload['data'] | null;
+  setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
 }) => {
   const title = i18n.translate('xpack.infra.logs.analysis.logRateSectionTitle', {
@@ -38,8 +38,6 @@ export const LogRateResults = ({
     'xpack.infra.logs.analysis.logRateSectionLoadingAriaLabel',
     { defaultMessage: 'Loading log rate results' }
   );
-
-  const [viewMode, setViewMode] = useState<LogRateView>('chart');
 
   return (
     <>
@@ -72,22 +70,7 @@ export const LogRateResults = ({
           }
         />
       ) : (
-        <>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={true}>
-              <LogRateViewSwitcher
-                selectedView={viewMode}
-                onChange={id => (isValidLogRateView(id) ? setViewMode(id) : undefined)}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
-          {viewMode === 'chart' ? (
-            <ChartView data={results} timeRange={timeRange} />
-          ) : (
-            <TableView data={results} />
-          )}
-        </>
+        <ChartView data={results} setTimeRange={setTimeRange} timeRange={timeRange} />
       )}
     </>
   );

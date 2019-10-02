@@ -30,7 +30,7 @@ import { CheckerErrors } from './checker_errors';
 function NoDataMessage(props) {
   const { isLoading, reason, checkMessage } = props;
 
-  if (isLoading && checkMessage !== null) {
+  if (isLoading) {
     return <CheckingSettings checkMessage={checkMessage} />;
   }
 
@@ -65,8 +65,8 @@ export function NoData(props) {
             <NoDataMessage {...props} />
             <CheckerErrors errors={props.errors} />
             <EuiHorizontalRule size="half" />
-            <EuiButtonEmpty>
-              <EuiTextColor color="primary" onClick={() => setUseInternalCollection(false)}>
+            <EuiButtonEmpty isDisabled={props.isCollectionEnabledUpdated} onClick={() => setUseInternalCollection(false)}>
+              <EuiTextColor color="default">
                 <FormattedMessage
                   id="xpack.monitoring.noData.setupMetricbeatInstead"
                   defaultMessage="Or, set up with Metricbeat (recommended)"
@@ -122,18 +122,18 @@ export function NoData(props) {
                 isLoading={isLoading}
               >
                 <FormattedMessage
-                  id="xpack.monitoring.noData.explanations.collectionInterval.turnOnMonitoringButtonLabel"
+                  id="xpack.monitoring.noData.collectionInterval.turnOnMonitoringButtonLabel"
                   defaultMessage="Set up monitoring with Metricbeat"
                 />
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiHorizontalRule size="half" />
-          <EuiButtonEmpty>
-            <EuiTextColor color="subdued" onClick={() => setUseInternalCollection(true)}>
+          <EuiButtonEmpty onClick={() => setUseInternalCollection(true)} data-test-subj="useInternalCollection">
+            <EuiTextColor color="subdued">
               <FormattedMessage
                 id="xpack.monitoring.noData.setupInternalInstead"
-                defaultMessage="Or, set up with internal collection (deprecated)"
+                defaultMessage="Or, set up with self monitoring"
               />
             </EuiTextColor>
           </EuiButtonEmpty>

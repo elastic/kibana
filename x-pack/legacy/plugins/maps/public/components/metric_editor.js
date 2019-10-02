@@ -8,32 +8,25 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiFieldText,
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
-import {
-  MetricSelect,
-  METRIC_AGGREGATION_VALUES,
-} from './metric_select';
+import { MetricSelect, METRIC_AGGREGATION_VALUES } from './metric_select';
 import { SingleFieldSelect } from './single_field_select';
 
 export function MetricEditor({ fields, metricsFilter, metric, onChange, removeButton }) {
-
-  const onAggChange = (metricAggregationType) => {
+  const onAggChange = metricAggregationType => {
     onChange({
       ...metric,
       type: metricAggregationType,
     });
   };
-  const onFieldChange = (fieldName) => {
+  const onFieldChange = fieldName => {
     onChange({
       ...metric,
       field: fieldName,
     });
   };
-  const onLabelChange = (e) => {
+  const onLabelChange = e => {
     onChange({
       ...metric,
       label: e.target.value,
@@ -42,24 +35,26 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
 
   let fieldSelect;
   if (metric.type && metric.type !== 'count') {
-    const filterNumberFields = (field) => {
+    const filterNumberFields = field => {
       return field.type === 'number';
     };
     fieldSelect = (
       <EuiFormRow
         label={i18n.translate('xpack.maps.metricsEditor.selectFieldLabel', {
-          defaultMessage: 'Field'
+          defaultMessage: 'Field',
         })}
+        display="rowCompressed"
       >
         <SingleFieldSelect
           placeholder={i18n.translate('xpack.maps.metricsEditor.selectFieldPlaceholder', {
-            defaultMessage: 'Select field'
+            defaultMessage: 'Select field',
           })}
           value={metric.field}
           onChange={onFieldChange}
           filterField={filterNumberFields}
           fields={fields}
           isClearable={false}
+          compressed
         />
       </EuiFormRow>
     );
@@ -70,12 +65,14 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
     labelInput = (
       <EuiFormRow
         label={i18n.translate('xpack.maps.metricsEditor.customLabel', {
-          defaultMessage: 'Custom label'
+          defaultMessage: 'Custom label',
         })}
+        display="rowCompressed"
       >
         <EuiFieldText
           onChange={onLabelChange}
           value={metric.label ? metric.label : ''}
+          compressed
         />
       </EuiFormRow>
     );
@@ -83,24 +80,24 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
 
   return (
     <Fragment>
-
       <EuiFormRow
         label={i18n.translate('xpack.maps.metricsEditor.aggregationLabel', {
-          defaultMessage: 'Aggregation'
+          defaultMessage: 'Aggregation',
         })}
         labelAppend={removeButton}
+        display="rowCompressed"
       >
         <MetricSelect
           onChange={onAggChange}
           value={metric.type}
           metricsFilter={metricsFilter}
+          compressed
         />
       </EuiFormRow>
 
       {fieldSelect}
 
       {labelInput}
-
     </Fragment>
   );
 }
@@ -111,7 +108,7 @@ MetricEditor.propTypes = {
     field: PropTypes.string,
     label: PropTypes.string,
   }),
-  fields: PropTypes.object,  // indexPattern.fields IndexedArray object
+  fields: PropTypes.object, // indexPattern.fields IndexedArray object
   onChange: PropTypes.func.isRequired,
   metricsFilter: PropTypes.func,
 };

@@ -5,19 +5,20 @@
  */
 
 import { EuiComboBox } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+
 import React, { useCallback } from 'react';
 import { FieldType } from 'ui/index_patterns';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
+import { isDisplayable } from '../../utils/is_displayable';
 
 interface Props {
-  intl: InjectedIntl;
   options: MetricsExplorerOptions;
   onChange: (groupBy: string | null) => void;
   fields: FieldType[];
 }
 
-export const MetricsExplorerGroupBy = injectI18n(({ intl, options, onChange, fields }: Props) => {
+export const MetricsExplorerGroupBy = ({ options, onChange, fields }: Props) => {
   const handleChange = useCallback(
     selectedOptions => {
       const groupBy = (selectedOptions.length === 1 && selectedOptions[0].label) || null;
@@ -25,20 +26,32 @@ export const MetricsExplorerGroupBy = injectI18n(({ intl, options, onChange, fie
     },
     [onChange]
   );
+
+  const metricPrefixes = options.metrics
+    .map(
+      metric =>
+        (metric.field &&
+          metric.field
+            .split(/\./)
+            .slice(0, 2)
+            .join('.')) ||
+        null
+    )
+    .filter(metric => metric) as string[];
+
   return (
     <EuiComboBox
-      placeholder={intl.formatMessage({
-        id: 'xpack.infra.metricsExplorer.groupByLabel',
+      placeholder={i18n.translate('xpack.infra.metricsExplorer.groupByLabel', {
         defaultMessage: 'Everything',
       })}
       fullWidth
       singleSelection={true}
       selectedOptions={(options.groupBy && [{ label: options.groupBy }]) || []}
       options={fields
-        .filter(f => f.aggregatable && f.type === 'string')
+        .filter(f => isDisplayable(f, metricPrefixes) && f.aggregatable && f.type === 'string')
         .map(f => ({ label: f.name }))}
       onChange={handleChange}
       isClearable={true}
     />
   );
-});
+};

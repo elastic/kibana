@@ -95,13 +95,19 @@ export class JobRunner {
       this._percentageComplete = 0;
 
       const check = async () => {
-        const { isRunning, progress } = await this.getProgress();
+        const { isRunning, progress: prog, isJobClosed } = await this.getProgress();
+
+        // if the progress has reached 100% but the job is still running,
+        // dial the progress back to 99 to avoid any post creation buttons from
+        // appearing as they only rely on the progress.
+        const progress =
+          prog === 100 && (isRunning === true || isJobClosed === false) ? prog - 1 : prog;
 
         this._adjustRefreshInterval(progress);
         this._percentageComplete = progress;
         this._progress$.next(this._percentageComplete);
 
-        if (isRunning === true && this._stopRefreshPoll.stop === false) {
+        if ((isRunning === true || isJobClosed === false) && this._stopRefreshPoll.stop === false) {
           setTimeout(async () => {
             await check();
           }, this._refreshInterval);
@@ -163,7 +169,11 @@ export class JobRunner {
     return await this._startDatafeed(start, undefined, false);
   }
 
-  public async getProgress(): Promise<{ progress: Progress; isRunning: boolean }> {
+  public async getProgress(): Promise<{
+    progress: Progress;
+    isRunning: boolean;
+    isJobClosed: boolean;
+  }> {
     return await ml.jobs.getLookBackProgress(this._jobId, this._start, this._end);
   }
 

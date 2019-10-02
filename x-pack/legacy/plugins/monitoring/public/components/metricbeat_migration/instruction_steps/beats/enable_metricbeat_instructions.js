@@ -42,7 +42,7 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, {
           >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.beatsInstructions.installMetricbeatLinkText"
-              defaultMessage="Follow the instructions here"
+              defaultMessage="Follow the instructions here."
             />
           </EuiLink>
         </p>
@@ -142,7 +142,7 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, {
           isCopyable
         >
           {`output.elasticsearch:
-  hosts: ["${esMonitoringUrl}"] ## Monitoring cluster
+  hosts: [${esMonitoringUrl}] ## Monitoring cluster
 
   # Optional protocol and basic auth credentials.
   #protocol: "https"
@@ -169,7 +169,7 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, {
           >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.beatsInstructions.startMetricbeatLinkText"
-              defaultMessage="Follow the instructions here"
+              defaultMessage="Follow the instructions here."
             />
           </EuiLink>
         </p>

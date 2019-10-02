@@ -19,10 +19,10 @@ export default function exploreRepositoryFunctionalTests({
   const retry = getService('retry');
   const config = getService('config');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
-  const exists = async (selector: string) => testSubjects.exists(selector, { allowHidden: true });
+  const exists = async (selector: string) =>
+    await testSubjects.exists(selector, { allowHidden: true });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/45079
-  describe.skip('File Tree', function() {
+  describe('File Tree', function() {
     this.tags('smoke');
     const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
 
@@ -45,7 +45,7 @@ export default function exploreRepositoryFunctionalTests({
     });
 
     after(async () => {
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
       await repoUnload(
         'github.com/elastic/code-examples_flatten-directory',
         config.get('kbnTestServer.installDir') || REPO_ROOT

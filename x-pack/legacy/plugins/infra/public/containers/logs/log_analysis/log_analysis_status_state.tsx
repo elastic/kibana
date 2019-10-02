@@ -126,7 +126,7 @@ function statusReducer(state: StatusReducerState, action: StatusReducerAction): 
     }
     case 'failedFetchingJobStatuses': {
       return {
-        ...state,
+        setupStatus: 'unknown',
         jobStatus: {
           ...state.jobStatus,
           'log-entry-rate': 'unknown',

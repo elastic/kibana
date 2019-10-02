@@ -28,13 +28,12 @@ const Container = styled.div`
   padding-top: 8px;
   position: fixed;
   top: 40%;
-  right: -49px;
-  z-index: 9;
+  right: -51px;
+  z-index: ${({ theme }) => theme.eui.euiZLevel9};
   transform: rotate(-90deg);
   user-select: none;
 
   button {
-    border-bottom: none;
     border-radius: 4px 4px 0 0;
     box-shadow: none;
     height: 46px;
@@ -47,13 +46,14 @@ const Container = styled.div`
   }
 
   .euiButton--primary:enabled {
+    background: ${({ theme }) => theme.eui.euiColorEmptyShade};
     box-shadow: none;
   }
 
   .euiButton--primary:enabled:hover,
   .euiButton--primary:enabled:focus {
     animation: none;
-    background-color: inherit;
+    background: ${({ theme }) => theme.eui.euiColorEmptyShade};
     box-shadow: none;
   }
 

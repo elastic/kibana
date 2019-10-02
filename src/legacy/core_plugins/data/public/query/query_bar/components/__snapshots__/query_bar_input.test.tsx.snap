@@ -306,9 +306,7 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                 <div
                   className="euiFormControlLayout__childrenWrapper"
                 >
-                  <EuiValidatableControl
-                    className="undefined euiFormControlLayout__child--noStyle"
-                  >
+                  <EuiValidatableControl>
                     <input
                       aria-activedescendant=""
                       aria-autocomplete="list"
@@ -362,9 +360,11 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                   onSelectLanguage={[Function]}
                 >
                   <EuiPopover
+                    anchorClassName="euiFormControlLayout__append"
                     anchorPosition="downRight"
                     button={
                       <EuiButtonEmpty
+                        className="euiFormControlLayout__append"
                         onClick={[Function]}
                         size="xs"
                       >
@@ -375,7 +375,6 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                         />
                       </EuiButtonEmpty>
                     }
-                    className="eui-displayBlock"
                     closePopover={[Function]}
                     display="inlineBlock"
                     hasArrow={true}
@@ -390,7 +389,7 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                       onOutsideClick={[Function]}
                     >
                       <div
-                        className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle eui-displayBlock"
+                        className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle"
                         id="popover"
                         onKeyDown={[Function]}
                         onMouseDown={[Function]}
@@ -399,14 +398,15 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                         onTouchStart={[Function]}
                       >
                         <div
-                          className="euiPopover__anchor"
+                          className="euiPopover__anchor euiFormControlLayout__append"
                         >
                           <EuiButtonEmpty
+                            className="euiFormControlLayout__append"
                             onClick={[Function]}
                             size="xs"
                           >
                             <button
-                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__append"
                               onClick={[Function]}
                               type="button"
                             >
@@ -755,9 +755,7 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                 <div
                   className="euiFormControlLayout__childrenWrapper"
                 >
-                  <EuiValidatableControl
-                    className="undefined euiFormControlLayout__child--noStyle"
-                  >
+                  <EuiValidatableControl>
                     <input
                       aria-activedescendant=""
                       aria-autocomplete="list"
@@ -811,9 +809,11 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                   onSelectLanguage={[Function]}
                 >
                   <EuiPopover
+                    anchorClassName="euiFormControlLayout__append"
                     anchorPosition="downRight"
                     button={
                       <EuiButtonEmpty
+                        className="euiFormControlLayout__append"
                         onClick={[Function]}
                         size="xs"
                       >
@@ -824,7 +824,6 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                         />
                       </EuiButtonEmpty>
                     }
-                    className="eui-displayBlock"
                     closePopover={[Function]}
                     display="inlineBlock"
                     hasArrow={true}
@@ -839,7 +838,7 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                       onOutsideClick={[Function]}
                     >
                       <div
-                        className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle eui-displayBlock"
+                        className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle"
                         id="popover"
                         onKeyDown={[Function]}
                         onMouseDown={[Function]}
@@ -848,14 +847,15 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                         onTouchStart={[Function]}
                       >
                         <div
-                          className="euiPopover__anchor"
+                          className="euiPopover__anchor euiFormControlLayout__append"
                         >
                           <EuiButtonEmpty
+                            className="euiFormControlLayout__append"
                             onClick={[Function]}
                             size="xs"
                           >
                             <button
-                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__append"
                               onClick={[Function]}
                               type="button"
                             >
@@ -1204,9 +1204,7 @@ exports[`QueryBarInput Should render the given query 1`] = `
                 <div
                   className="euiFormControlLayout__childrenWrapper"
                 >
-                  <EuiValidatableControl
-                    className="undefined euiFormControlLayout__child--noStyle"
-                  >
+                  <EuiValidatableControl>
                     <input
                       aria-activedescendant=""
                       aria-autocomplete="list"
@@ -1260,9 +1258,11 @@ exports[`QueryBarInput Should render the given query 1`] = `
                   onSelectLanguage={[Function]}
                 >
                   <EuiPopover
+                    anchorClassName="euiFormControlLayout__append"
                     anchorPosition="downRight"
                     button={
                       <EuiButtonEmpty
+                        className="euiFormControlLayout__append"
                         onClick={[Function]}
                         size="xs"
                       >
@@ -1273,7 +1273,6 @@ exports[`QueryBarInput Should render the given query 1`] = `
                         />
                       </EuiButtonEmpty>
                     }
-                    className="eui-displayBlock"
                     closePopover={[Function]}
                     display="inlineBlock"
                     hasArrow={true}
@@ -1288,7 +1287,7 @@ exports[`QueryBarInput Should render the given query 1`] = `
                       onOutsideClick={[Function]}
                     >
                       <div
-                        className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle eui-displayBlock"
+                        className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle"
                         id="popover"
                         onKeyDown={[Function]}
                         onMouseDown={[Function]}
@@ -1297,14 +1296,15 @@ exports[`QueryBarInput Should render the given query 1`] = `
                         onTouchStart={[Function]}
                       >
                         <div
-                          className="euiPopover__anchor"
+                          className="euiPopover__anchor euiFormControlLayout__append"
                         >
                           <EuiButtonEmpty
+                            className="euiFormControlLayout__append"
                             onClick={[Function]}
                             size="xs"
                           >
                             <button
-                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__append"
                               onClick={[Function]}
                               type="button"
                             >

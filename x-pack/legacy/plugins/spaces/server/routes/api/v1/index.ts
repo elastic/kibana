@@ -4,22 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { SavedObjectsService } from 'src/core/server';
+import { Legacy } from 'kibana';
 import { XPackMainPlugin } from '../../../../../xpack_main/xpack_main';
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { initInternalSpacesApi } from './spaces';
 import { SpacesServiceSetup } from '../../../new_platform/spaces_service/spaces_service';
-import { SpacesHttpServiceSetup } from '../../../new_platform/plugin';
+import { LegacyAPI } from '../../../new_platform/plugin';
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 interface RouteDeps {
   xpackMain: XPackMainPlugin;
-  http: SpacesHttpServiceSetup;
-  savedObjects: SavedObjectsService;
   spacesService: SpacesServiceSetup;
-  config: KibanaConfig;
+  getLegacyAPI(): LegacyAPI;
+  legacyRouter: Legacy.Server['route'];
 }
 
 export interface InternalRouteDeps extends Omit<RouteDeps, 'xpackMain'> {

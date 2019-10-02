@@ -11,10 +11,10 @@ import { MetricsEditor } from '../../../components/metrics_editor';
 import { indexPatternService } from '../../../kibana_services';
 import { ResolutionEditor } from './resolution_editor';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 
 export class UpdateSourceEditor extends Component {
-
   state = {
     fields: null,
   };
@@ -38,9 +38,9 @@ export class UpdateSourceEditor extends Component {
           loadError: i18n.translate('xpack.maps.source.esGrid.noIndexPatternErrorMessage', {
             defaultMessage: `Unable to find Index pattern {id}`,
             values: {
-              id: this.props.indexPatternId
-            }
-          })
+              id: this.props.indexPatternId,
+            },
+          }),
         });
       }
       return;
@@ -53,43 +53,47 @@ export class UpdateSourceEditor extends Component {
     this.setState({ fields: indexPattern.fields });
   }
 
-  _onMetricsChange = (metrics) => {
+  _onMetricsChange = metrics => {
     this.props.onChange({ propName: 'metrics', value: metrics });
   };
 
-  _onResolutionChange =    (e) => {
+  _onResolutionChange = e => {
     this.props.onChange({ propName: 'resolution', value: e });
   };
 
   _renderMetricsEditor() {
-    const metricsFilter = (this.props.renderAs === RENDER_AS.HEATMAP) ?  ((metric) => {
-      //these are countable metrics, where blending heatmap color blobs make sense
-      return ['count', 'sum'].includes(metric.value);
-    }) : null;
+    const metricsFilter =
+      this.props.renderAs === RENDER_AS.HEATMAP
+        ? metric => {
+          //these are countable metrics, where blending heatmap color blobs make sense
+          return ['count', 'sum'].includes(metric.value);
+        }
+        : null;
     const allowMultipleMetrics = this.props.renderAs !== RENDER_AS.HEATMAP;
     return (
-      <EuiFormRow
-        label={i18n.translate('xpack.maps.source.esGrid.metricsLabel', {
-          defaultMessage: 'Metrics'
-        })}
-      >
-        <div>
-          <MetricsEditor
-            allowMultipleMetrics={allowMultipleMetrics}
-            metricsFilter={metricsFilter}
-            fields={this.state.fields}
-            metrics={this.props.metrics}
-            onChange={this._onMetricsChange}
-          />
-        </div>
-      </EuiFormRow>
+      <div>
+        <EuiTitle size="xxs">
+          <h6>
+            <FormattedMessage id="xpack.maps.source.esGrid.metricsLabel" defaultMessage="Metrics" />
+          </h6>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <MetricsEditor
+          allowMultipleMetrics={allowMultipleMetrics}
+          metricsFilter={metricsFilter}
+          fields={this.state.fields}
+          metrics={this.props.metrics}
+          onChange={this._onMetricsChange}
+        />
+      </div>
     );
   }
 
   render() {
     return (
       <Fragment>
-        <ResolutionEditor resolution={this.props.resolution} onChange={this._onResolutionChange}/>
+        <ResolutionEditor resolution={this.props.resolution} onChange={this._onResolutionChange} />
+        <EuiSpacer />
         {this._renderMetricsEditor()}
       </Fragment>
     );

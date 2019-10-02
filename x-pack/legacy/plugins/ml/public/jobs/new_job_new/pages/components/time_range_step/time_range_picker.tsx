@@ -56,7 +56,7 @@ export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
 
   return (
     <Fragment>
-      <div style={{ minWidth: WIDTH }}>
+      <div style={{ minWidth: WIDTH }} data-test-subj={`jobWizardDateRange`}>
         <EuiDatePickerRange
           fullWidth={true}
           startDateControl={

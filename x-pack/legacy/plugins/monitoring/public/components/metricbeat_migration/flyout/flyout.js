@@ -110,9 +110,10 @@ export class Flyout extends Component {
         );
       case INSTRUCTION_STEP_ENABLE_METRICBEAT:
       case INSTRUCTION_STEP_DISABLE_INTERNAL:
+        const esMonitoringUrls = esMonitoringUrl.split(',').map(url => `"${url}"`);
         const instructionSteps = getInstructionSteps(productName, product, activeStep, meta, {
           doneWithMigration: onClose,
-          esMonitoringUrl,
+          esMonitoringUrl: esMonitoringUrls,
           hasCheckedStatus: checkedStatusByStep[activeStep],
         });
 
@@ -234,7 +235,7 @@ export class Flyout extends Component {
       <EuiText size="s">
         <EuiLink href={documentationUrl} target="_blank">
           {i18n.translate('xpack.monitoring.metricbeatMigration.flyout.learnMore', {
-            defaultMessage: 'Learn about this migration.'
+            defaultMessage: 'Learn about why.'
           })}
         </EuiLink>
       </EuiText>
@@ -329,7 +330,8 @@ export class Flyout extends Component {
               {title}
             </h2>
           </EuiTitle>
-          {this.getDocumentationTitle()}
+          {/* Remove until we have a why article: https://github.com/elastic/kibana/pull/45799#issuecomment-536778656 */}
+          {/* {this.getDocumentationTitle()} */}
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           {this.renderActiveStep()}

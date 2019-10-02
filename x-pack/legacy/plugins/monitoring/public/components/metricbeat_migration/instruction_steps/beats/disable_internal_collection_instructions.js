@@ -19,7 +19,7 @@ export function getBeatsInstructionsForDisablingInternalCollection(product, meta
   const beatType = product.beatType;
   const disableInternalCollectionStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.beatsInstructions.disableInternalCollection.title', {
-      defaultMessage: 'Disable internal collection of {beatType}\'s monitoring metrics',
+      defaultMessage: 'Disable self monitoring of {beatType}\'s monitoring metrics',
       values: {
         beatType: beatType || UNDETECTED_BEAT_TYPE
       }

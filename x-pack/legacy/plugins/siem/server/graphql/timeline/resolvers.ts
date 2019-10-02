@@ -44,10 +44,10 @@ export const createTimelineResolvers = (
 } => ({
   Query: {
     async getOneTimeline(root, args, { req }) {
-      return await libs.timeline.getTimeline(req, args.id);
+      return libs.timeline.getTimeline(req, args.id);
     },
     async getAllTimeline(root, args, { req }) {
-      return await libs.timeline.getAllTimeline(
+      return libs.timeline.getAllTimeline(
         req,
         args.onlyUserFavorite || null,
         args.pageInfo || null,
@@ -63,10 +63,10 @@ export const createTimelineResolvers = (
       return true;
     },
     async persistFavorite(root, args, { req }) {
-      return await libs.timeline.persistFavorite(req, args.timelineId || null);
+      return libs.timeline.persistFavorite(req, args.timelineId || null);
     },
     async persistTimeline(root, args, { req }) {
-      return await libs.timeline.persistTimeline(
+      return libs.timeline.persistTimeline(
         req,
         args.id || null,
         args.version || null,

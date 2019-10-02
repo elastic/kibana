@@ -19,23 +19,12 @@
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  UiSettingsClientContract,
-} from '../../../../core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 
-import { LegacyDependenciesPluginSetup, LegacyDependenciesPlugin } from './shim';
+import { LegacyDependenciesPlugin } from './shim';
 
 import { createTableVisFn } from './table_vis_fn';
 import { createTableVisTypeDefinition } from './table_vis_type';
-
-/** @internal */
-export interface TableVisualizationDependencies extends LegacyDependenciesPluginSetup {
-  uiSettings: UiSettingsClientContract;
-}
 
 /** @internal */
 export interface TablePluginSetupDependencies {
@@ -56,16 +45,10 @@ export class TableVisPlugin implements Plugin<Promise<void>, void> {
     core: CoreSetup,
     { expressions, visualizations, __LEGACY }: TablePluginSetupDependencies
   ) {
-    const visualizationDependencies: Readonly<TableVisualizationDependencies> = {
-      uiSettings: core.uiSettings,
-      ...(await __LEGACY.setup()),
-    };
-
+    __LEGACY.setup();
     expressions.registerFunction(createTableVisFn);
 
-    visualizations.types.registerVisualization(() =>
-      createTableVisTypeDefinition(visualizationDependencies)
-    );
+    visualizations.types.registerVisualization(createTableVisTypeDefinition);
   }
 
   public start(core: CoreStart) {

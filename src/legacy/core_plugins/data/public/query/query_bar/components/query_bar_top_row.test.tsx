@@ -20,13 +20,22 @@
 import { mockPersistedLogFactory } from './query_bar_input.test.mocks';
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
 import './query_bar_top_row.test.mocks';
 import { QueryBarTopRow } from './query_bar_top_row';
 import { IndexPattern } from '../../../index';
 
 import { coreMock } from '../../../../../../../core/public/mocks';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { I18nProvider } from '@kbn/i18n/react';
 const startMock = coreMock.createStart();
+
+import { timefilterServiceMock } from '../../../timefilter/timefilter_service.mock';
+const timefilterSetupMock = timefilterServiceMock.createSetupContract();
+
+timefilterSetupMock.history.get.mockImplementation(() => {
+  return [];
+});
 
 startMock.uiSettings.get.mockImplementation((key: string) => {
   switch (key) {
@@ -91,26 +100,39 @@ const mockIndexPattern = {
 describe('QueryBarTopRowTopRow', () => {
   const QUERY_INPUT_SELECTOR = 'InjectIntl(QueryBarInputUI)';
   const TIMEPICKER_SELECTOR = 'EuiSuperDatePicker';
+  const services = {
+    uiSettings: startMock.uiSettings,
+    savedObjects: startMock.savedObjects,
+    notifications: startMock.notifications,
+    http: startMock.http,
+  };
+  const defaultOptions = {
+    appName: 'discover',
+    screenTitle: 'Another Screen',
+    onSubmit: noop,
+    onChange: noop,
+    store: createMockStorage(),
+    intl: null as any,
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('Should render the given query', () => {
-    const component = shallowWithIntl(
-      <QueryBarTopRow.WrappedComponent
-        uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
-        query={kqlQuery}
-        onSubmit={noop}
-        appName={'discover'}
-        screenTitle={'Another Screen'}
-        indexPatterns={[mockIndexPattern]}
-        store={createMockStorage()}
-        intl={null as any}
-        onChange={noop}
-        isDirty={false}
-        http={startMock.http}
-      />
+    const component = mount(
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <QueryBarTopRow.WrappedComponent
+            {...defaultOptions}
+            query={kqlQuery}
+            screenTitle={'Another Screen'}
+            isDirty={false}
+            indexPatterns={[mockIndexPattern]}
+            timeHistory={timefilterSetupMock.history}
+          />
+        </KibanaContextProvider>
+      </I18nProvider>
     );
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(1);
@@ -118,40 +140,36 @@ describe('QueryBarTopRowTopRow', () => {
   });
 
   it('Should create a unique PersistedLog based on the appName and query language', () => {
-    shallowWithIntl(
-      <QueryBarTopRow.WrappedComponent
-        uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
-        query={kqlQuery}
-        onSubmit={noop}
-        appName={'discover'}
-        screenTitle={'Another Screen'}
-        indexPatterns={[mockIndexPattern]}
-        store={createMockStorage()}
-        disableAutoFocus={true}
-        intl={null as any}
-        onChange={noop}
-        isDirty={false}
-        http={startMock.http}
-      />
+    mount(
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <QueryBarTopRow.WrappedComponent
+            {...defaultOptions}
+            query={kqlQuery}
+            screenTitle={'Another Screen'}
+            indexPatterns={[mockIndexPattern]}
+            timeHistory={timefilterSetupMock.history}
+            disableAutoFocus={true}
+            isDirty={false}
+          />
+        </KibanaContextProvider>
+      </I18nProvider>
     );
 
     expect(mockPersistedLogFactory.mock.calls[0][0]).toBe('typeahead:discover-kuery');
   });
 
   it('Should render only timepicker when no options provided', () => {
-    const component = shallowWithIntl(
-      <QueryBarTopRow.WrappedComponent
-        uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
-        onSubmit={noop}
-        onChange={noop}
-        isDirty={false}
-        http={startMock.http}
-        appName={'discover'}
-        store={createMockStorage()}
-        intl={null as any}
-      />
+    const component = mount(
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <QueryBarTopRow.WrappedComponent
+            {...defaultOptions}
+            isDirty={false}
+            timeHistory={timefilterSetupMock.history}
+          />
+        </KibanaContextProvider>
+      </I18nProvider>
     );
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
@@ -159,19 +177,17 @@ describe('QueryBarTopRowTopRow', () => {
   });
 
   it('Should not show timepicker when asked', () => {
-    const component = shallowWithIntl(
-      <QueryBarTopRow.WrappedComponent
-        uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
-        onSubmit={noop}
-        onChange={noop}
-        isDirty={false}
-        http={startMock.http}
-        appName={'discover'}
-        store={createMockStorage()}
-        intl={null as any}
-        showDatePicker={false}
-      />
+    const component = mount(
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <QueryBarTopRow.WrappedComponent
+            {...defaultOptions}
+            isDirty={false}
+            showDatePicker={false}
+            timeHistory={timefilterSetupMock.history}
+          />
+        </KibanaContextProvider>
+      </I18nProvider>
     );
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
@@ -179,22 +195,20 @@ describe('QueryBarTopRowTopRow', () => {
   });
 
   it('Should render timepicker with options', () => {
-    const component = shallowWithIntl(
-      <QueryBarTopRow.WrappedComponent
-        uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
-        onSubmit={noop}
-        onChange={noop}
-        isDirty={false}
-        http={startMock.http}
-        appName={'discover'}
-        screenTitle={'Another Screen'}
-        store={createMockStorage()}
-        intl={null as any}
-        showDatePicker={true}
-        dateRangeFrom={'now-7d'}
-        dateRangeTo={'now'}
-      />
+    const component = mount(
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <QueryBarTopRow.WrappedComponent
+            {...defaultOptions}
+            isDirty={false}
+            screenTitle={'Another Screen'}
+            showDatePicker={true}
+            dateRangeFrom={'now-7d'}
+            dateRangeTo={'now'}
+            timeHistory={timefilterSetupMock.history}
+          />
+        </KibanaContextProvider>
+      </I18nProvider>
     );
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
@@ -202,22 +216,20 @@ describe('QueryBarTopRowTopRow', () => {
   });
 
   it('Should render only query input bar', () => {
-    const component = shallowWithIntl(
-      <QueryBarTopRow.WrappedComponent
-        uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
-        query={kqlQuery}
-        onSubmit={noop}
-        onChange={noop}
-        isDirty={false}
-        http={startMock.http}
-        appName={'discover'}
-        screenTitle={'Another Screen'}
-        indexPatterns={[mockIndexPattern]}
-        store={createMockStorage()}
-        intl={null as any}
-        showDatePicker={false}
-      />
+    const component = mount(
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <QueryBarTopRow.WrappedComponent
+            query={kqlQuery}
+            {...defaultOptions}
+            isDirty={false}
+            screenTitle={'Another Screen'}
+            indexPatterns={[mockIndexPattern]}
+            showDatePicker={false}
+            timeHistory={timefilterSetupMock.history}
+          />
+        </KibanaContextProvider>
+      </I18nProvider>
     );
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(1);
@@ -225,23 +237,21 @@ describe('QueryBarTopRowTopRow', () => {
   });
 
   it('Should NOT render query input bar if disabled', () => {
-    const component = shallowWithIntl(
-      <QueryBarTopRow.WrappedComponent
-        uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
-        query={kqlQuery}
-        onSubmit={noop}
-        onChange={noop}
-        isDirty={false}
-        http={startMock.http}
-        appName={'discover'}
-        screenTitle={'Another Screen'}
-        indexPatterns={[mockIndexPattern]}
-        store={createMockStorage()}
-        intl={null as any}
-        showQueryInput={false}
-        showDatePicker={false}
-      />
+    const component = mount(
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <QueryBarTopRow.WrappedComponent
+            query={kqlQuery}
+            {...defaultOptions}
+            isDirty={false}
+            screenTitle={'Another Screen'}
+            indexPatterns={[mockIndexPattern]}
+            showQueryInput={false}
+            showDatePicker={false}
+            timeHistory={timefilterSetupMock.history}
+          />
+        </KibanaContextProvider>
+      </I18nProvider>
     );
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
@@ -249,20 +259,18 @@ describe('QueryBarTopRowTopRow', () => {
   });
 
   it('Should NOT render query input bar if missing options', () => {
-    const component = shallowWithIntl(
-      <QueryBarTopRow.WrappedComponent
-        uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
-        onSubmit={noop}
-        onChange={noop}
-        isDirty={false}
-        http={startMock.http}
-        appName={'discover'}
-        screenTitle={'Another Screen'}
-        store={createMockStorage()}
-        intl={null as any}
-        showDatePicker={false}
-      />
+    const component = mount(
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <QueryBarTopRow.WrappedComponent
+            {...defaultOptions}
+            isDirty={false}
+            screenTitle={'Another Screen'}
+            showDatePicker={false}
+            timeHistory={timefilterSetupMock.history}
+          />
+        </KibanaContextProvider>
+      </I18nProvider>
     );
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);

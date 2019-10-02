@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FontawesomeIcon } from '../services/style_choices';
+import { FontawesomeIcon } from '../helpers/style_choices';
 import { WorkspaceField, AdvancedSettings } from './app_state';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

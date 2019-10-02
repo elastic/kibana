@@ -30,5 +30,3 @@ checks-reporter-with-killswitch "Firefox smoke test" \
     --kibana-install-dir "$installDir" \
     --include-tag "smoke" \
     --config test/functional/config.firefox.js;
-
-source "$KIBANA_DIR/test/scripts/jenkins_xpack_firefox_smoke.sh"

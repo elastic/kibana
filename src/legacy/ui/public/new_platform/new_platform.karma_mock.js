@@ -24,6 +24,9 @@ export const npSetup = {
     chrome: {}
   },
   plugins: {
+    embeddable: {
+      registerEmbeddableFactory: sinon.fake(),
+    },
     expressions: {
       registerFunction: sinon.fake(),
       registerRenderer: sinon.fake(),
@@ -39,6 +42,11 @@ export const npSetup = {
         },
       },
     },
+    uiActions: {
+      attachAction: sinon.fake(),
+      registerAction: sinon.fake(),
+      registerTrigger: sinon.fake(),
+    },
   },
 };
 
@@ -47,6 +55,11 @@ export const npStart = {
     chrome: {}
   },
   plugins: {
+    embeddable: {
+      getEmbeddableFactory: sinon.fake(),
+      getEmbeddableFactories: sinon.fake(),
+      registerEmbeddableFactory: sinon.fake(),
+    },
     expressions: {
       registerFunction: sinon.fake(),
       registerRenderer: sinon.fake(),
@@ -59,6 +72,16 @@ export const npStart = {
         onClose: Promise.resolve(undefined),
         close: () => Promise.resolve(undefined),
       }),
+    },
+    uiActions: {
+      attachAction: sinon.fake(),
+      registerAction: sinon.fake(),
+      registerTrigger: sinon.fake(),
+      detachAction: sinon.fake(),
+      executeTriggerActions: sinon.fake(),
+      getTrigger: sinon.fake(),
+      getTriggerActions: sinon.fake(),
+      getTriggerCompatibleActions: sinon.fake(),
     },
   },
 };

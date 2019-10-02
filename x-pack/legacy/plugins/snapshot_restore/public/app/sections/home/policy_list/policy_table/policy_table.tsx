@@ -26,10 +26,11 @@ import {
 } from '../../../../components';
 import { uiMetricService } from '../../../../services/ui_metric';
 import { linkToAddPolicy, linkToEditPolicy } from '../../../../services/navigation';
+import { SendRequestResponse } from '../../../../../shared_imports';
 
 interface Props {
   policies: SlmPolicy[];
-  reload: () => Promise<void>;
+  reload: () => Promise<SendRequestResponse>;
   openPolicyDetailsUrl: (name: SlmPolicy['name']) => string;
   onPolicyDeleted: (policiesDeleted: Array<SlmPolicy['name']>) => void;
   onPolicyExecuted: () => void;

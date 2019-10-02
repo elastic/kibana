@@ -5,45 +5,24 @@
  */
 
 import Joi from 'joi';
-import {
-  SanitizedTaskDefinition,
-  TaskDefinition,
-  TaskDictionary,
-  validateTaskDefinition,
-} from '../task';
+import { TaskDefinition, TaskDictionary, validateTaskDefinition } from '../task';
 
 /**
  * Sanitizes the system's task definitions. Task definitions have optional properties, and
- * this ensures they all are given a reasonable default. This also overrides certain task
- * definition properties with kibana.yml overrides (such as the `override_num_workers` config
- * value).
+ * this ensures they all are given a reasonable default.
  *
- * @param maxWorkers - The maxiumum numer of workers allowed to run at once
  * @param taskDefinitions - The Kibana task definitions dictionary
- * @param overrideNumWorkers - The kibana.yml overrides numWorkers per task type.
  */
 export function sanitizeTaskDefinitions(
-  taskDefinitions: TaskDictionary<TaskDefinition> = {},
-  maxWorkers: number,
-  overrideNumWorkers: { [taskType: string]: number }
-): TaskDictionary<SanitizedTaskDefinition> {
+  taskDefinitions: TaskDictionary<TaskDefinition> = {}
+): TaskDictionary<TaskDefinition> {
   return Object.keys(taskDefinitions).reduce(
     (acc, type) => {
       const rawDefinition = taskDefinitions[type];
       rawDefinition.type = type;
-      const definition = Joi.attempt(rawDefinition, validateTaskDefinition) as TaskDefinition;
-      const numWorkers = Math.min(
-        maxWorkers,
-        overrideNumWorkers[definition.type] || definition.numWorkers || 1
-      );
-
-      acc[type] = {
-        ...definition,
-        numWorkers,
-      };
-
+      acc[type] = Joi.attempt(rawDefinition, validateTaskDefinition) as TaskDefinition;
       return acc;
     },
-    {} as TaskDictionary<SanitizedTaskDefinition>
+    {} as TaskDictionary<TaskDefinition>
   );
 }

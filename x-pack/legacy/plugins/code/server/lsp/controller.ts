@@ -197,6 +197,9 @@ export class LanguageServerController implements ILanguageServerHandler {
     // installed, but is it running?
     if (status === LanguageServerStatus.READY) {
       const ls = this.languageServers.find(d => d.definition === def);
+      if (ls && ls.launcher.launchFailed) {
+        return LanguageServerStatus.LAUNCH_FAILED;
+      }
       if (ls && ls.launcher.running) {
         return LanguageServerStatus.RUNNING;
       }

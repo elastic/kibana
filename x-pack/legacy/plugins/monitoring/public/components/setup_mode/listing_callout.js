@@ -13,6 +13,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { formatProductName, getIdentifier } from './formatting';
 
+const MIGRATE_TO_MB_LABEL = i18n.translate('xpack.monitoring.setupMode.migrateToMetricbeat', {
+  defaultMessage: 'Monitor with Metricbeat',
+});
+
 export function ListingCallOut({ setupModeData, productName, customRenderer = null }) {
   if (customRenderer) {
     const { shouldRender, componentToRender } = customRenderer();
@@ -41,9 +45,8 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
           >
             <p>
               {i18n.translate('xpack.monitoring.setupMode.detectedNodeDescription', {
-                defaultMessage: `Based on your indices, we think you might have a {product} {identifier}. Click 'Set up monitoring' below to start monitoring this {identifier}.`, // eslint-disable-line max-len
+                defaultMessage: `Click 'Set up monitoring' below to start monitoring this {identifier}.`,
                 values: {
-                  product: formatProductName(productName),
                   identifier: getIdentifier(productName)
                 }
               })}
@@ -57,7 +60,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
       <Fragment>
         <EuiCallOut
           title={i18n.translate('xpack.monitoring.setupMode.noMonitoringDataFound', {
-            defaultMessage: 'We did not detect any {product} {identifier}.',
+            defaultMessage: 'No {product} {identifier} detected',
             values: {
               product: formatProductName(productName),
               identifier: getIdentifier(productName, true)
@@ -67,11 +70,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
         >
           <p>
             {i18n.translate('xpack.monitoring.setupMode.netNewUserDescription', {
-              defaultMessage: `If you have {product} {identifier}, click 'Set up monitoring' below to monitor with Metricbeat.`,
-              values: {
-                product: formatProductName(productName),
-                identifier: getIdentifier(productName, true)
-              }
+              defaultMessage: `Click 'Set up monitoring' to start monitoring with Metricbeat.`,
             })}
           </p>
         </EuiCallOut>
@@ -103,14 +102,14 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
       <Fragment>
         <EuiCallOut
           title={i18n.translate('xpack.monitoring.setupMode.disableInternalCollectionTitle', {
-            defaultMessage: 'Disable internal collection',
+            defaultMessage: 'Disable self monitoring',
           })}
           color="warning"
           iconType="flag"
         >
           <p>
             {i18n.translate('xpack.monitoring.setupMode.disableInternalCollectionDescription', {
-              defaultMessage: `Metricbeat is now monitoring your {product} {identifier}. Disable internal collection to finish the migration.`, // eslint-disable-line max-len
+              defaultMessage: `Metricbeat is now monitoring your {product} {identifier}. Disable self monitoring to finish the migration.`,
               values: {
                 product: formatProductName(productName),
                 identifier: getIdentifier(productName, true)
@@ -123,20 +122,41 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
     );
   }
 
-  if (setupModeData.totalUniqueInstanceCount > 0 &&
-      setupModeData.totalUniqueFullyMigratedCount === 0 && setupModeData.totalUniquePartiallyMigratedCount === 0) {
+  if (setupModeData.totalUniqueInstanceCount > 0) {
+    if (setupModeData.totalUniqueFullyMigratedCount === 0 && setupModeData.totalUniquePartiallyMigratedCount === 0) {
+      return (
+        <Fragment>
+          <EuiCallOut
+            title={MIGRATE_TO_MB_LABEL}
+            color="danger"
+            iconType="flag"
+          >
+            <p>
+              {i18n.translate('xpack.monitoring.setupMode.migrateToMetricbeatDescription', {
+                defaultMessage: `These {product} {identifier} are self monitored.
+                Click 'Monitor with Metricbeat' to migrate.`,
+                values: {
+                  product: formatProductName(productName),
+                  identifier: getIdentifier(productName, true)
+                }
+              })}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m"/>
+        </Fragment>
+      );
+    }
+
     return (
       <Fragment>
         <EuiCallOut
-          title={i18n.translate('xpack.monitoring.setupMode.migrateToMetricbeat', {
-            defaultMessage: 'Migrate to Metricbeat',
-          })}
+          title={MIGRATE_TO_MB_LABEL}
           color="danger"
           iconType="flag"
         >
           <p>
-            {i18n.translate('xpack.monitoring.setupMode.disableInternalCollectionDescription', {
-              defaultMessage: `These {product} {identifier} are monitored through internal collection. Migrate to monitor with Metricbeat.`,
+            {i18n.translate('xpack.monitoring.setupMode.migrateSomeToMetricbeatDescription', {
+              defaultMessage: `Some {product} {identifier} are monitored through self monitoring. Migrate to monitor with Metricbeat.`,
               values: {
                 product: formatProductName(productName),
                 identifier: getIdentifier(productName, true)

@@ -7,6 +7,7 @@ exports[`render 1`] = `
 >
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     helpText={
@@ -110,6 +111,7 @@ exports[`render 1`] = `
   <EuiFormRow
     data-test-subj="createShortUrl"
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     labelType="label"
@@ -148,6 +150,9 @@ exports[`render 1`] = `
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
   <EuiCopy
     afterMessage="Copied"
     anchorClassName="kbnShareContextMenu__copyAnchor"
@@ -165,6 +170,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
 >
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label={
@@ -257,6 +263,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
   <EuiFormRow
     data-test-subj="createShortUrl"
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     labelType="label"
@@ -295,6 +302,9 @@ exports[`should enable saved object export option when objectId is provided 1`] 
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
   <EuiCopy
     afterMessage="Copied"
     anchorClassName="kbnShareContextMenu__copyAnchor"
@@ -312,6 +322,7 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
 >
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label={
@@ -401,6 +412,9 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
       }
     />
   </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
   <EuiCopy
     afterMessage="Copied"
     anchorClassName="kbnShareContextMenu__copyAnchor"

@@ -9,7 +9,9 @@ import { i18n } from '@kbn/i18n';
 export * from './angular';
 export * from './components';
 export * from './constants';
+export * from './errors';
 export * from './shortcuts';
+export * from './units';
 
 export const getAppDescription = () =>
   i18n.translate('xpack.canvas.appDescription', {

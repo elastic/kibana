@@ -36,7 +36,7 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
           >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.kibanaInstructions.installMetricbeatLinkText"
-              defaultMessage="Follow the instructions here"
+              defaultMessage="Follow the instructions here."
             />
           </EuiLink>
         </p>
@@ -100,7 +100,7 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
           isCopyable
         >
           {`output.elasticsearch:
-  hosts: ["${esMonitoringUrl}"] ## Monitoring cluster
+  hosts: [${esMonitoringUrl}] ## Monitoring cluster
 
   # Optional protocol and basic auth credentials.
   #protocol: "https"
@@ -127,7 +127,7 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
           >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.kibanaInstructions.startMetricbeatLinkText"
-              defaultMessage="Follow the instructions here"
+              defaultMessage="Follow the instructions here."
             />
           </EuiLink>
         </p>

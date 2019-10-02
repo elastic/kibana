@@ -67,6 +67,7 @@ export const WithMetricsExplorerOptionsUrlState = () => {
       mapToUrlState={mapToUrlState}
       onChange={handleChange}
       onInitialize={handleChange}
+      populateWithInitialState={true}
     />
   );
 };

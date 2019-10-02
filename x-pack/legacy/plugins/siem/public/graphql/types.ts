@@ -111,14 +111,14 @@ export interface Source {
   status: SourceStatus;
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
-  /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
-  Events: EventsData;
 
   Timeline: TimelineData;
 
   TimelineDetails: TimelineDetailsData;
 
   LastEventTime: LastEventTimeData;
+
+  EventsOverTime: EventsOverTimeData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
@@ -339,20 +339,36 @@ export interface Inspect {
   response: string[];
 }
 
-export interface EventsData {
-  edges: EcsEdges[];
+export interface TimelineData {
+  edges: TimelineEdges[];
 
   totalCount: number;
 
-  pageInfo: PageInfoPaginated;
+  pageInfo: PageInfo;
 
   inspect?: Inspect | null;
 }
 
-export interface EcsEdges {
-  node: Ecs;
+export interface TimelineEdges {
+  node: TimelineItem;
 
   cursor: CursorType;
+}
+
+export interface TimelineItem {
+  _id: string;
+
+  _index?: string | null;
+
+  data: TimelineNonEcsData[];
+
+  ecs: Ecs;
+}
+
+export interface TimelineNonEcsData {
+  field: string;
+
+  value?: ToStringArray | null;
 }
 
 export interface Ecs {
@@ -807,38 +823,6 @@ export interface SshEcsFields {
   signature?: ToStringArray | null;
 }
 
-export interface TimelineData {
-  edges: TimelineEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfo;
-
-  inspect?: Inspect | null;
-}
-
-export interface TimelineEdges {
-  node: TimelineItem;
-
-  cursor: CursorType;
-}
-
-export interface TimelineItem {
-  _id: string;
-
-  _index?: string | null;
-
-  data: TimelineNonEcsData[];
-
-  ecs: Ecs;
-}
-
-export interface TimelineNonEcsData {
-  field: string;
-
-  value?: ToStringArray | null;
-}
-
 export interface PageInfo {
   endCursor?: CursorType | null;
 
@@ -863,6 +847,22 @@ export interface LastEventTimeData {
   lastSeen?: Date | null;
 
   inspect?: Inspect | null;
+}
+
+export interface EventsOverTimeData {
+  inspect?: Inspect | null;
+
+  eventsOverTime: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface MatrixOverTimeHistogramData {
+  x: number;
+
+  y: number;
+
+  g: string;
 }
 
 export interface HostsData {
@@ -1511,6 +1511,12 @@ export interface ResponseFavoriteTimeline {
   favorite?: FavoriteTimelineResult[] | null;
 }
 
+export interface EcsEdges {
+  node: Ecs;
+
+  cursor: CursorType;
+}
+
 export interface EventsTimelineData {
   edges: EcsEdges[];
 
@@ -1587,12 +1593,6 @@ export interface PaginationInputPaginated {
   querySize: number;
 }
 
-export interface SortField {
-  sortFieldId: string;
-
-  direction: Direction;
-}
-
 export interface PaginationInput {
   /** The limit parameter allows you to configure the maximum amount of items to be returned */
   limit: number;
@@ -1600,6 +1600,12 @@ export interface PaginationInput {
   cursor?: string | null;
   /** The tiebreaker parameter allow to be more precise to fetch the next item */
   tiebreaker?: string | null;
+}
+
+export interface SortField {
+  sortFieldId: string;
+
+  direction: Direction;
 }
 
 export interface LastTimeDetails {
@@ -1818,17 +1824,6 @@ export interface AuthenticationsSourceArgs {
 
   defaultIndex: string[];
 }
-export interface EventsSourceArgs {
-  pagination: PaginationInputPaginated;
-
-  sortField: SortField;
-
-  timerange?: TimerangeInput | null;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
 export interface TimelineSourceArgs {
   pagination: PaginationInput;
 
@@ -1855,6 +1850,13 @@ export interface LastEventTimeSourceArgs {
   indexKey: LastEventIndexKey;
 
   details: LastTimeDetails;
+
+  defaultIndex: string[];
+}
+export interface EventsOverTimeSourceArgs {
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
 
   defaultIndex: string[];
 }
@@ -2428,6 +2430,58 @@ export namespace GetDomainsQuery {
     fakeTotalCount: number;
 
     showMorePagesIndicator: boolean;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
+export namespace GetEventsOverTimeQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    filterQuery?: string | null;
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    EventsOverTime: EventsOverTime;
+  };
+
+  export type EventsOverTime = {
+    __typename?: 'EventsOverTimeData';
+
+    eventsOverTime: _EventsOverTime[];
+
+    totalCount: number;
+
+    inspect?: Inspect | null;
+  };
+
+  export type _EventsOverTime = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+
+    g: string;
   };
 
   export type Inspect = {

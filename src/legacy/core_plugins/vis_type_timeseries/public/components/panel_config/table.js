@@ -249,7 +249,7 @@ export class TablePanelConfig extends Component {
                     defaultMessage="Ignore global filter?"
                   />
                 </EuiFormLabel>
-                <EuiSpacer size="s" />
+                <EuiSpacer size="m" />
                 <YesNo
                   id={htmlId('globalFilterOption')}
                   value={model.ignore_global_filter}

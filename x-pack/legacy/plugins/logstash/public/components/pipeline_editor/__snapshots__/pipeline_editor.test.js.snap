@@ -35,6 +35,7 @@ exports[`PipelineEditor component includes required error message for falsy pipe
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
         hasEmptyLabelSpace={false}
         label={
@@ -60,6 +61,7 @@ exports[`PipelineEditor component includes required error message for falsy pipe
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
         hasEmptyLabelSpace={false}
         label={
@@ -83,6 +85,7 @@ exports[`PipelineEditor component includes required error message for falsy pipe
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
         hasEmptyLabelSpace={false}
         label={
@@ -115,6 +118,7 @@ exports[`PipelineEditor component includes required error message for falsy pipe
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={
@@ -136,6 +140,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
+      <EuiSpacer />
       <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
@@ -349,6 +354,7 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
         hasEmptyLabelSpace={false}
         label={
@@ -374,6 +380,7 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
         hasEmptyLabelSpace={false}
         label={
@@ -397,6 +404,7 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
         hasEmptyLabelSpace={false}
         label={
@@ -429,6 +437,7 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={
@@ -450,6 +459,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
+      <EuiSpacer />
       <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
@@ -663,6 +673,7 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
         hasEmptyLabelSpace={false}
         label={
@@ -688,6 +699,7 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
         hasEmptyLabelSpace={false}
         label={
@@ -711,6 +723,7 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
         hasEmptyLabelSpace={false}
         label={
@@ -743,6 +756,7 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={
@@ -764,6 +778,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
+      <EuiSpacer />
       <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
@@ -973,6 +988,7 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
         hasEmptyLabelSpace={false}
         label={
@@ -996,6 +1012,7 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
         hasEmptyLabelSpace={false}
         label={
@@ -1028,6 +1045,7 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={
@@ -1049,6 +1067,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
+      <EuiSpacer />
       <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
@@ -1273,6 +1292,7 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
         hasEmptyLabelSpace={false}
         label={
@@ -1298,6 +1318,7 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
         hasEmptyLabelSpace={false}
         label={
@@ -1321,6 +1342,7 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
         hasEmptyLabelSpace={false}
         label={
@@ -1353,6 +1375,7 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={
@@ -1374,6 +1397,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
+      <EuiSpacer />
       <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
@@ -1583,6 +1607,7 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
         hasEmptyLabelSpace={false}
         label={
@@ -1606,6 +1631,7 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
         hasEmptyLabelSpace={false}
         label={
@@ -1638,6 +1664,7 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={
@@ -1659,6 +1686,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
+      <EuiSpacer />
       <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"

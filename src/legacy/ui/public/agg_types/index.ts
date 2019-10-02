@@ -128,6 +128,8 @@ aggTypes.buckets.forEach(aggType => (aggType.type = 'buckets'));
 
 export { AggParam } from './agg_params';
 export { AggType } from './agg_type';
+export { AggConfig } from './agg_config';
+export { AggConfigs } from './agg_configs';
 export { FieldParamType } from './param_types';
 export { BucketAggType } from './buckets/_bucket_agg_type';
 export { setBounds };

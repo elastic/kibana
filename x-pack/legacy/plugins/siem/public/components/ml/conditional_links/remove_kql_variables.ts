@@ -11,21 +11,19 @@ export const operators = ['and', 'or', 'not'];
 
 export const removeKqlVariablesUsingRegex = (expression: string) => {
   const myRegexp = /(\s+)*(and|or|not){0,1}(\s+)*([\w\.\-\[\]]+)\s*:\s*"(\$[\w\.\-\(\)\[\]]+\$)"(\s+)*(and|or|not){0,1}(\s+)*/g;
-  return expression.replace(myRegexp, replacement);
+  return expression.replace(myRegexp, replacer);
 };
 
-export const replacement = (match: string, ...parts: string[]): string => {
+export const replacer = (match: string, ...parts: Array<string | null | undefined>): string => {
+  // this function is only called after applying the match..
+  // see here for more details -> https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#Specifying_a_function_as_a_parameter
   if (parts == null) {
     return '';
   }
-  const operatorsMatched = parts.reduce<string[]>((accum, part) => {
-    if (part != null && operators.includes(part)) {
-      accum = [...accum, part];
-      return accum;
-    } else {
-      return accum;
-    }
-  }, []);
+  const operatorsMatched = parts.reduce<string[]>(
+    (accum, part) => (part != null && operators.includes(part) ? [...accum, part] : accum),
+    []
+  );
   if (operatorsMatched.length > 1) {
     return ` ${operatorsMatched[operatorsMatched.length - 1].trim()} `;
   } else {

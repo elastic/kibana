@@ -87,6 +87,7 @@ class TlsTableComponent extends React.PureComponent<TlsTableProps> {
       <PaginatedTable
         activePage={activePage}
         columns={getTlsColumns(tlsTableId)}
+        dataTestSubj={`table-${tableType}`}
         showMorePagesIndicator={showMorePagesIndicator}
         headerCount={totalCount}
         headerTitle={i18n.TRANSPORT_LAYER_SECURITY}

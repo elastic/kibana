@@ -9,16 +9,9 @@ import { VectorStyle } from '../vector_style';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  EuiFormRow,
-  EuiButtonToggle
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiFormRow, EuiButtonToggle } from '@elastic/eui';
 
 export class StaticDynamicStyleRow extends React.Component {
-
   // Store previous options locally so when type is toggled,
   // previous style options can be used.
   prevStaticStyleOptions = this.props.defaultStaticStyleOptions;
@@ -42,18 +35,18 @@ export class StaticDynamicStyleRow extends React.Component {
   _onStaticStyleChange = options => {
     const styleDescriptor = {
       type: VectorStyle.STYLE_TYPE.STATIC,
-      options
+      options,
     };
     this.props.handlePropertyChange(this.props.property, styleDescriptor);
-  }
+  };
 
   _onDynamicStyleChange = options => {
     const styleDescriptor = {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
-      options
+      options,
     };
     this.props.handlePropertyChange(this.props.property, styleDescriptor);
-  }
+  };
 
   _onTypeToggle = () => {
     if (this._isDynamic()) {
@@ -68,7 +61,7 @@ export class StaticDynamicStyleRow extends React.Component {
     this.prevStaticStyleOptions = this._getStyleOptions();
     // toggle to dynamic style
     this._onDynamicStyleChange(this.prevDynamicStyleOptions);
-  }
+  };
 
   _renderStyleSelector() {
     if (this._isDynamic()) {
@@ -94,30 +87,29 @@ export class StaticDynamicStyleRow extends React.Component {
 
   render() {
     const isDynamic = this._isDynamic();
-    const dynamicTooltipContent =
-      isDynamic ?
-        i18n.translate('xpack.maps.styles.staticDynamic.staticDescription', {
-          defaultMessage: 'Use static styling properties to symbolize features.'
-        })  :
-        i18n.translate('xpack.maps.styles.staticDynamic.dynamicDescription', {
-          defaultMessage: 'Use property values to symbolize features.'
-        });
+    const dynamicTooltipContent = isDynamic
+      ? i18n.translate('xpack.maps.styles.staticDynamic.staticDescription', {
+        defaultMessage: 'Use static styling properties to symbolize features.',
+      })
+      : i18n.translate('xpack.maps.styles.staticDynamic.dynamicDescription', {
+        defaultMessage: 'Use property values to symbolize features.',
+      });
 
     return (
       <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem className={isDynamic ? 'mapStaticDynamicSylingOption__dynamicSizeHack' : undefined}>
-          <EuiFormRow label={this.props.label && this.props.label}>
+        <EuiFlexItem
+          className={isDynamic ? 'mapStaticDynamicSylingOption__dynamicSizeHack' : undefined}
+        >
+          <EuiFormRow label={this.props.label && this.props.label} display="rowCompressed">
             {this._renderStyleSelector()}
           </EuiFormRow>
         </EuiFlexItem>
-        {this._canBeDynamic() &&
+        {this._canBeDynamic() && (
           <EuiFlexItem grow={false}>
-            <EuiFormRow hasEmptyLabelSpace>
-              <EuiToolTip
-                content={dynamicTooltipContent}
-                delay="long"
-              >
+            <EuiFormRow hasEmptyLabelSpace display="centerCompressed">
+              <EuiToolTip content={dynamicTooltipContent} delay="long">
                 <EuiButtonToggle
+                  size="s"
                   label={dynamicTooltipContent}
                   iconType="link"
                   onChange={this._onTypeToggle}
@@ -128,7 +120,7 @@ export class StaticDynamicStyleRow extends React.Component {
               </EuiToolTip>
             </EuiFormRow>
           </EuiFlexItem>
-        }
+        )}
       </EuiFlexGroup>
     );
   }

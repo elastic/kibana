@@ -6,26 +6,11 @@
 
 import uiRoutes from 'ui/routes';
 import template from './index.html';
-import { CODE_PATH_LICENSE } from '../../../common/constants';
 import { NoDataController } from './controller';
 
 uiRoutes
   .when('/no-data', {
     template,
-    resolve: {
-      clusters: $injector => {
-        const monitoringClusters = $injector.get('monitoringClusters');
-        const kbnUrl = $injector.get('kbnUrl');
-
-        return monitoringClusters(undefined, undefined, [CODE_PATH_LICENSE]).then(clusters => {
-          if (clusters && clusters.length) {
-            kbnUrl.changePath('/home');
-            return Promise.reject();
-          }
-          return Promise.resolve();
-        });
-      }
-    },
-    controller: NoDataController,
+    controller: NoDataController
   })
   .otherwise({ redirectTo: '/home' });

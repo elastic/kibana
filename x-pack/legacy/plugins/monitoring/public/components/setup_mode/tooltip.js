@@ -27,14 +27,14 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
   const allMonitoredByMetricbeat = totalUniqueInstanceCount > 0 &&
     (totalUniqueFullyMigratedCount === totalUniqueInstanceCount || totalUniquePartiallyMigratedCount === totalUniqueInstanceCount);
   const internalCollectionOn = totalUniquePartiallyMigratedCount > 0;
-  const mightExist = get(setupModeData, 'detected.mightExist');
+  const mightExist = get(setupModeData, 'detected.mightExist') || get(setupModeData, 'detected.doesExist');
 
   let tooltip = null;
 
   if (totalUniqueInstanceCount === 0) {
     if (mightExist) {
       const detectedText = i18n.translate('xpack.monitoring.setupMode.tooltip.detected', {
-        defaultMessage: 'No collection'
+        defaultMessage: 'No monitoring'
       });
       tooltip = (
         <EuiToolTip
@@ -57,8 +57,11 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
       tooltip = (
         <EuiToolTip
           position="top"
-          content={i18n.translate('xpack.monitoring.setupMode.tooltip.mightExist', {
-            defaultMessage: `We did not detect any usage.`,
+          content={i18n.translate('xpack.monitoring.setupMode.tooltip.noUsageDetected', {
+            defaultMessage: `We did not detect any usage. Click to view {identifier}.`,
+            values: {
+              identifier: getIdentifier(productName, true)
+            }
           })}
         >
           <EuiBadge color="hollow" iconType="flag" onClick={badgeClickAction} onClickAriaLabel={noMonitoringText}>
@@ -71,13 +74,13 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
 
   else if (!allMonitoredByMetricbeat) {
     const internalCollection = i18n.translate('xpack.monitoring.euiTable.isInternalCollectorLabel', {
-      defaultMessage: 'Internal collection'
+      defaultMessage: 'Self monitoring'
     });
     tooltip = (
       <EuiToolTip
         position="top"
         content={i18n.translate('xpack.monitoring.setupMode.tooltip.oneInternal', {
-          defaultMessage: `At least one {identifier} isn’t monitored using Metricbeat. Click to get status`,
+          defaultMessage: `At least one {identifier} isn’t monitored using Metricbeat. Click to view status.`,
           values: {
             identifier: getIdentifier(productName)
           }
@@ -91,14 +94,13 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
   }
   else if (internalCollectionOn) {
     const internalAndMB = i18n.translate('xpack.monitoring.euiTable.isPartiallyMigratedLabel', {
-      defaultMessage: 'Internal collection is on'
+      defaultMessage: 'Self monitoring is on'
     });
     tooltip = (
       <EuiToolTip
         position="top"
         content={i18n.translate('xpack.monitoring.setupMode.tooltip.disableInternal', {
-          defaultMessage: `Metricbeat is monitoring all {identifierPlural}.
-          Click to view {identifierPlural} and disable internal collection.`,
+          defaultMessage: `Metricbeat is monitoring all {identifierPlural}. Click to view {identifierPlural} and disable self monitoring.`,
           values: {
             identifierPlural: getIdentifier(productName, true)
           }
@@ -112,7 +114,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
   }
   else {
     const metricbeatCollection = i18n.translate('xpack.monitoring.euiTable.isFullyMigratedLabel', {
-      defaultMessage: 'Metricbeat collection'
+      defaultMessage: 'Metricbeat monitoring'
     });
     tooltip = (
       <EuiToolTip

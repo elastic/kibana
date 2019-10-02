@@ -32,7 +32,7 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Ftr
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await esArchiver.unload('code/repositories/typescript_node_starter');
       });
 

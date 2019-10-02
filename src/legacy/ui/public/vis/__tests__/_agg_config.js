@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { VisProvider } from '..';
 import { AggType } from '../../agg_types/agg_type';
-import { AggConfig } from '../agg_config';
+import { AggConfig } from '../../agg_types/agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { fieldFormats } from '../../registry/field_formats';
 

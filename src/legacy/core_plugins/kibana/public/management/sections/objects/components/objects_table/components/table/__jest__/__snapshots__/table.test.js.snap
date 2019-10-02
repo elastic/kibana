@@ -65,6 +65,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
         >
           <EuiFormRow
             describedByIds={Array []}
+            display="row"
             fullWidth={false}
             hasEmptyLabelSpace={false}
             label={
@@ -91,6 +92,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           </EuiFormRow>
           <EuiFormRow
             describedByIds={Array []}
+            display="row"
             fullWidth={false}
             hasEmptyLabelSpace={false}
             labelType="label"
@@ -268,6 +270,7 @@ exports[`Table should render normally 1`] = `
         >
           <EuiFormRow
             describedByIds={Array []}
+            display="row"
             fullWidth={false}
             hasEmptyLabelSpace={false}
             label={
@@ -294,6 +297,7 @@ exports[`Table should render normally 1`] = `
           </EuiFormRow>
           <EuiFormRow
             describedByIds={Array []}
+            display="row"
             fullWidth={false}
             hasEmptyLabelSpace={false}
             labelType="label"

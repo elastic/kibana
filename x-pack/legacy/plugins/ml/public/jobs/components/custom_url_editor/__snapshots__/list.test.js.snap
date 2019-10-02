@@ -10,6 +10,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         error={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -36,6 +37,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     <EuiFlexItem>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={
@@ -61,6 +63,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         error={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -90,6 +93,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={true}
         labelType="label"
@@ -120,6 +124,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={true}
         labelType="label"
@@ -154,6 +159,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         error={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -180,6 +186,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     <EuiFlexItem>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={
@@ -205,6 +212,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         error={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -234,6 +242,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={true}
         labelType="label"
@@ -264,6 +273,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={true}
         labelType="label"
@@ -298,6 +308,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         error={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -324,6 +335,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     <EuiFlexItem>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={
@@ -349,6 +361,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         error={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
@@ -378,6 +391,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={true}
         labelType="label"
@@ -408,6 +422,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={true}
         labelType="label"

@@ -86,7 +86,8 @@ interface BaseSavedObjectFinder {
   onChoose?: (
     id: SimpleSavedObject<SavedObjectAttributes>['id'],
     type: SimpleSavedObject<SavedObjectAttributes>['type'],
-    name: string
+    name: string,
+    savedObject: SimpleSavedObject<SavedObjectAttributes>
   ) => void;
   noItemsMessage?: React.ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<SavedObjectAttributes>>;
@@ -470,7 +471,7 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
                   onClick={
                     onChoose
                       ? () => {
-                          onChoose(item.id, item.type, fullName);
+                          onChoose(item.id, item.type, fullName, item.savedObject);
                         }
                       : undefined
                   }

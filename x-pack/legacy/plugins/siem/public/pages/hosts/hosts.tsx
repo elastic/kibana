@@ -30,11 +30,7 @@ import { SpyRoute } from '../../utils/route/spy_routes';
 import { FiltersGlobal } from '../../components/filters_global';
 
 import * as i18n from './translations';
-import {
-  navTabsHosts,
-  AnomaliesQueryTabBodyProps,
-  HostsComponentsQueryProps,
-} from './hosts_navigations';
+import { navTabsHosts } from './nav_tabs';
 import { hasMlUserPermissions } from '../../components/ml/permissions/has_ml_user_permissions';
 import { MlCapabilitiesContext } from '../../components/ml/permissions/ml_capabilities_provider';
 
@@ -51,9 +47,6 @@ interface HostsComponentDispatchProps {
     to: number;
   }>;
 }
-
-export type CommonChildren = (args: HostsComponentsQueryProps) => JSX.Element;
-export type AnonamaliesChildren = (args: AnomaliesQueryTabBodyProps) => JSX.Element;
 
 export type HostsQueryProps = GlobalTimeArgs;
 
@@ -101,14 +94,7 @@ const HostsComponent = React.memo<HostsComponentProps>(
                         setQuery={setQuery}
                         to={to}
                         narrowDateRange={(min: number, max: number) => {
-                          /**
-                           * Using setTimeout here because of this issue:
-                           * https://github.com/elastic/elastic-charts/issues/360
-                           * Need to remove the setTimeout here after this issue is fixed.
-                           * */
-                          setTimeout(() => {
-                            setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-                          }, 500);
+                          setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
                         }}
                       />
                     )}

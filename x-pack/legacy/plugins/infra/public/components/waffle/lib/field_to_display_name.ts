@@ -4,44 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InjectedIntl } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 interface Lookup {
   [id: string]: string;
 }
 
-export const fieldToName = (field: string, intl: InjectedIntl) => {
+export const fieldToName = (field: string) => {
   const LOOKUP: Lookup = {
-    'kubernetes.namespace': intl.formatMessage({
-      id: 'xpack.infra.groupByDisplayNames.kubernetesNamespace',
+    'kubernetes.namespace': i18n.translate('xpack.infra.groupByDisplayNames.kubernetesNamespace', {
       defaultMessage: 'Namespace',
     }),
-    'kubernetes.node.name': intl.formatMessage({
-      id: 'xpack.infra.groupByDisplayNames.kubernetesNodeName',
+    'kubernetes.node.name': i18n.translate('xpack.infra.groupByDisplayNames.kubernetesNodeName', {
       defaultMessage: 'Node',
     }),
-    'host.name': intl.formatMessage({
-      id: 'xpack.infra.groupByDisplayNames.hostName',
+    'host.name': i18n.translate('xpack.infra.groupByDisplayNames.hostName', {
       defaultMessage: 'Host',
     }),
-    'cloud.availability_zone': intl.formatMessage({
-      id: 'xpack.infra.groupByDisplayNames.availabilityZone',
+    'cloud.availability_zone': i18n.translate('xpack.infra.groupByDisplayNames.availabilityZone', {
       defaultMessage: 'Availability zone',
     }),
-    'cloud.machine.type': intl.formatMessage({
-      id: 'xpack.infra.groupByDisplayNames.machineType',
+    'cloud.machine.type': i18n.translate('xpack.infra.groupByDisplayNames.machineType', {
       defaultMessage: 'Machine type',
     }),
-    'cloud.project.id': intl.formatMessage({
-      id: 'xpack.infra.groupByDisplayNames.projectID',
+    'cloud.project.id': i18n.translate('xpack.infra.groupByDisplayNames.projectID', {
       defaultMessage: 'Project ID',
     }),
-    'cloud.provider': intl.formatMessage({
-      id: 'xpack.infra.groupByDisplayNames.provider',
+    'cloud.provider': i18n.translate('xpack.infra.groupByDisplayNames.provider', {
       defaultMessage: 'Cloud provider',
     }),
-    'service.type': intl.formatMessage({
-      id: 'xpack.infra.groupByDisplayNames.serviceType',
+    'service.type': i18n.translate('xpack.infra.groupByDisplayNames.serviceType', {
       defaultMessage: 'Service type',
     }),
   };

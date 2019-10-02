@@ -42,6 +42,7 @@ function TextInputOption<ParamName extends string>({
   return (
     <EuiFormRow helpText={helpText} label={label} fullWidth compressed>
       <EuiFieldText
+        compressed
         fullWidth
         data-test-subj={dataTestSubj}
         disabled={disabled}

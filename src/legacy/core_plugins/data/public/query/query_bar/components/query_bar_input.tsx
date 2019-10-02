@@ -23,19 +23,19 @@ import React from 'react';
 import { EuiFieldText, EuiOutsideClickDetector, PopoverAnchorPosition } from '@elastic/eui';
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import {
-  AutocompleteSuggestion,
-  AutocompleteSuggestionType,
-  getAutocompleteProvider,
-} from 'ui/autocomplete_providers';
 import { debounce, compact, isEqual, omit } from 'lodash';
 import { PersistedLog } from 'ui/persisted_log';
 import { Storage } from 'ui/storage';
+import { npStart } from 'ui/new_platform';
 import {
   UiSettingsClientContract,
   SavedObjectsClientContract,
   HttpServiceBase,
 } from 'src/core/public';
+import {
+  AutocompleteSuggestion,
+  AutocompleteSuggestionType,
+} from '../../../../../../../plugins/data/public';
 import { IndexPattern, StaticIndexPattern } from '../../../index_patterns';
 import { Query } from '../index';
 import { fromUser, matchPairs, toUser } from '../lib';
@@ -43,6 +43,11 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 import { getQueryLog } from '../lib/get_query_log';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
+
+// todo: related to https://github.com/elastic/kibana/pull/45762/files
+// Will be refactored after merge of related PR
+const getAutocompleteProvider = (language: string) =>
+  npStart.plugins.data.autocomplete.getProvider(language);
 
 interface Props {
   uiSettings: UiSettingsClientContract;
@@ -58,6 +63,7 @@ interface Props {
   prepend?: React.ReactNode;
   persistedLog?: PersistedLog;
   bubbleSubmitEvent?: boolean;
+  placeholder?: string;
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
   onChange?: (query: Query) => void;
   onSubmit?: (query: Query) => void;
@@ -471,10 +477,13 @@ export class QueryBarInputUI extends Component<Props, State> {
           <div role="search">
             <div className="kuiLocalSearchAssistedInput">
               <EuiFieldText
-                placeholder={this.props.intl.formatMessage({
-                  id: 'data.query.queryBar.searchInputPlaceholder',
-                  defaultMessage: 'Search',
-                })}
+                placeholder={
+                  this.props.placeholder ||
+                  this.props.intl.formatMessage({
+                    id: 'data.query.queryBar.searchInputPlaceholder',
+                    defaultMessage: 'Search',
+                  })
+                }
                 value={this.getQueryString()}
                 onKeyDown={this.onKeyDown}
                 onKeyUp={this.onKeyUp}

@@ -32,6 +32,7 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
     <EuiForm>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={
@@ -117,6 +118,7 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
     <EuiForm>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={
@@ -202,6 +204,7 @@ exports[`AddItemPopover renders the popover 1`] = `
     <EuiForm>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={

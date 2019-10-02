@@ -2,6 +2,10 @@
   position: relative;
   padding-right: $euiSizeXL + $euiSizeXS;
 
+  & + & {
+    margin-top: $euiSizeS;
+  }
+
   &:hover,
   &:focus {
     .mapColorStop__icons {
@@ -24,6 +28,10 @@
 }
 
 @keyframes mapColorStopBecomeVisible {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }

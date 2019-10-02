@@ -67,7 +67,7 @@ module.exports = function (grunt) {
       reporters: process.env.CI ? ['dots', 'junit'] : ['progress'],
 
       junitReporter: {
-        outputFile: resolve(ROOT, 'target/junit', process.env.JOB || '.', 'TEST-karma.xml'),
+        outputFile: resolve(ROOT, 'target/junit', process.env.JOB || '.', `TEST-${process.env.JOB ? process.env.JOB + '-' : ''}karma.xml`),
         useBrowserName: false,
         nameFormatter: (browser, result) => [...result.suite, result.description].join(' '),
         classNameFormatter: (browser, result) => {

@@ -17,7 +17,7 @@ import { getDisableStatusStep } from '../common_instructions';
 export function getApmInstructionsForDisablingInternalCollection(product, meta) {
   const disableInternalCollectionStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.apmInstructions.disableInternalCollection.title', {
-      defaultMessage: 'Disable internal collection of the APM server\'s monitoring metrics'
+      defaultMessage: 'Disable self monitoring of the APM server\'s monitoring metrics'
     }),
     children: (
       <Fragment>

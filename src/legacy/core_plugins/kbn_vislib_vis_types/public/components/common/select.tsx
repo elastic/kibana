@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
 interface SelectOptionProps<ParamName extends string, ValidParamValues extends string | number> {
@@ -45,6 +45,8 @@ function SelectOption<ParamName extends string, ValidParamValues extends string 
   value,
   setValue,
 }: SelectOptionProps<ParamName, ValidParamValues>) {
+  const availableOptions = useMemo(() => [emptyValue, ...options], [options]);
+
   return (
     <EuiFormRow
       compressed
@@ -55,8 +57,9 @@ function SelectOption<ParamName extends string, ValidParamValues extends string 
       labelAppend={labelAppend}
     >
       <EuiSelect
+        compressed
         disabled={disabled}
-        options={[emptyValue, ...options]}
+        options={availableOptions}
         value={value === undefined ? emptyValue.value : value}
         onChange={ev => setValue(paramName, ev.target.value as ValidParamValues)}
         fullWidth={true}

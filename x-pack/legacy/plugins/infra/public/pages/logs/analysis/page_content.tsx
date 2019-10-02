@@ -13,12 +13,15 @@ import { Source } from '../../../containers/source';
 import { AnalysisResultsContent } from './page_results_content';
 import { AnalysisSetupContent } from './page_setup_content';
 import { AnalysisUnavailableContent } from './page_unavailable_content';
+import { AnalysisSetupStatusUnknownContent } from './page_setup_status_unknown';
 
 export const AnalysisPageContent = () => {
   const { sourceId, source } = useContext(Source.Context);
   const { hasLogAnalysisCapabilites } = useContext(LogAnalysisCapabilities.Context);
 
-  const { setup, retry, setupStatus, viewResults } = useContext(LogAnalysisJobs.Context);
+  const { setup, retry, setupStatus, viewResults, fetchJobStatus } = useContext(
+    LogAnalysisJobs.Context
+  );
 
   if (!hasLogAnalysisCapabilites) {
     return <AnalysisUnavailableContent />;
@@ -30,6 +33,8 @@ export const AnalysisPageContent = () => {
         })}
       />
     );
+  } else if (setupStatus === 'unknown') {
+    return <AnalysisSetupStatusUnknownContent retry={fetchJobStatus} />;
   } else if (setupStatus === 'skipped' || setupStatus === 'hiddenAfterSuccess') {
     return (
       <AnalysisResultsContent

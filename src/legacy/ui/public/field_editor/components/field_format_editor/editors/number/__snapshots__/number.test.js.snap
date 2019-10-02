@@ -4,6 +4,7 @@ exports[`NumberFormatEditor should render normally 1`] = `
 <Fragment>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     error={null}
     fullWidth={false}
     hasEmptyLabelSpace={false}

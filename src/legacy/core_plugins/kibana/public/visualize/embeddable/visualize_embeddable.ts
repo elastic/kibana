@@ -29,16 +29,14 @@ import {
 } from 'ui/visualize/loader/types';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
-import { TimeRange } from 'src/plugins/data/public';
 import { Filter } from '@kbn/es-query';
+import { TimeRange } from '../../../../../../plugins/data/public';
 import {
   EmbeddableInput,
   EmbeddableOutput,
   Embeddable,
   Container,
-  APPLY_FILTER_TRIGGER,
-  Trigger,
-} from '../../../../embeddable_api/public/np_ready/public';
+} from '../../../../../../plugins/embeddable/public';
 import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 
@@ -128,10 +126,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       return undefined;
     }
     return this.handler.inspectorAdapters;
-  }
-
-  public supportsTrigger(trigger: Trigger) {
-    return trigger.id !== APPLY_FILTER_TRIGGER;
   }
 
   /**

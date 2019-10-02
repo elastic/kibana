@@ -17,7 +17,7 @@ import { getDisableStatusStep } from '../common_instructions';
 export function getLogstashInstructionsForDisablingInternalCollection(product, meta) {
   const disableInternalCollectionStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.logstashInstructions.disableInternalCollection.title', {
-      defaultMessage: 'Disable internal collection of Logstash monitoring metrics'
+      defaultMessage: 'Disable self monitoring of Logstash monitoring metrics'
     }),
     children: (
       <Fragment>

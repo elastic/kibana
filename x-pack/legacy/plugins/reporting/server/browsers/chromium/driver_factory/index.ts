@@ -54,7 +54,6 @@ export class HeadlessChromiumDriverFactory {
     const chromiumArgs = args({
       userDataDir,
       viewport,
-      verboseLogging: true,
       disableSandbox: this.browserConfig.disableSandbox,
       proxy: this.browserConfig.proxy,
     });
@@ -91,7 +90,6 @@ export class HeadlessChromiumDriverFactory {
       const chromiumArgs = args({
         userDataDir,
         viewport,
-        verboseLogging: this.logger.isVerbose,
         disableSandbox: this.browserConfig.disableSandbox,
         proxy: this.browserConfig.proxy,
       });

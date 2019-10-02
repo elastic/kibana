@@ -20,8 +20,11 @@
 import { CoreWindow, loadPluginBundle } from './plugin_loader';
 
 let createdScriptTags = [] as any[];
-let appendChildSpy: jest.Mock<Node, [Node]>;
-let createElementSpy: jest.Mock<HTMLElement, [string, (ElementCreationOptions | undefined)?]>;
+let appendChildSpy: jest.SpyInstance<Node, [Node]>;
+let createElementSpy: jest.SpyInstance<
+  HTMLElement,
+  [string, (ElementCreationOptions | undefined)?]
+>;
 
 const coreWindow = (window as unknown) as CoreWindow;
 

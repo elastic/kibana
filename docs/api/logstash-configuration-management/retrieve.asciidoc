@@ -5,9 +5,7 @@
 <titleabbrev>Retrieve pipeline</titleabbrev>
 ++++
 
-Retrieves a centrally-managed Logstash pipeline.
-
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Retrieves a centrally-managed Logstash pipeline.
 
 [[logstash-configuration-management-api-retrieve-request]]
 ==== Request

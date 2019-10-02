@@ -20,7 +20,6 @@
 import { resolve, dirname } from 'path';
 import { writeFile, readFileSync } from 'fs';
 import Bluebird, { fromNode as fcb, promisify } from 'bluebird';
-// @ts-ignore
 import mkdirp from 'mkdirp';
 import del from 'del';
 import { comparePngs } from './lib/compare_pngs';
@@ -28,7 +27,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
 type WriteFileAsync = (path: string | number | Buffer | URL, data: any) => Bluebird<void>;
-type MkDirAsync = (dirName: string) => Bluebird<void>;
+type MkDirAsync = (dirName: string) => Bluebird<mkdirp.Made>;
 
 const mkdirAsync = promisify(mkdirp) as MkDirAsync;
 const writeFileAsync = promisify(writeFile) as WriteFileAsync;
@@ -41,7 +40,10 @@ export async function ScreenshotsProvider({ getService }: FtrProviderContext) {
   const SESSION_DIRECTORY = resolve(config.get('screenshots.directory'), 'session');
   const FAILURE_DIRECTORY = resolve(config.get('screenshots.directory'), 'failure');
   const BASELINE_DIRECTORY = resolve(config.get('screenshots.directory'), 'baseline');
-  await del([SESSION_DIRECTORY, FAILURE_DIRECTORY]);
+
+  if (process.env.CI !== 'true') {
+    await del([SESSION_DIRECTORY, FAILURE_DIRECTORY]);
+  }
 
   class Screenshots {
     /**
@@ -68,15 +70,15 @@ export async function ScreenshotsProvider({ getService }: FtrProviderContext) {
       }
     }
 
-    async take(name: string, el: WebElementWrapper) {
+    async take(name: string, el?: WebElementWrapper) {
       return await this._take(resolve(SESSION_DIRECTORY, `${name}.png`), el);
     }
 
-    async takeForFailure(name: string, el: WebElementWrapper) {
+    async takeForFailure(name: string, el?: WebElementWrapper) {
       await this._take(resolve(FAILURE_DIRECTORY, `${name}.png`), el);
     }
 
-    async _take(path: string, el: WebElementWrapper) {
+    async _take(path: string, el?: WebElementWrapper) {
       try {
         log.info(`Taking screenshot "${path}"`);
         const screenshot = await (el ? el.takeScreenshot() : browser.takeScreenshot());

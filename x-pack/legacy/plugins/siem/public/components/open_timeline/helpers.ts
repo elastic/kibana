@@ -126,15 +126,10 @@ export const defaultTimelineToTimelineModel = (
     savedObjectId: duplicate ? null : timeline.savedObjectId,
     version: duplicate ? null : timeline.version,
     title: duplicate ? '' : timeline.title || '',
-  }).reduce(
-    (acc: TimelineModel, [key, value]) => {
-      if (value != null) {
-        acc = set(key, value, acc);
-      }
-      return acc;
-    },
-    { ...timelineDefaults, id: '' }
-  );
+  }).reduce((acc: TimelineModel, [key, value]) => (value != null ? set(key, value, acc) : acc), {
+    ...timelineDefaults,
+    id: '',
+  });
 };
 
 export const formatTimelineResultToModel = (

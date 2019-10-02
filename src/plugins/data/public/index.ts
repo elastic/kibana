@@ -20,8 +20,6 @@
 import { PluginInitializerContext } from '../../../core/public';
 import { DataPublicPlugin } from './plugin';
 
-export { RefreshInterval, TimeRange, Query } from './types';
-
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataPublicPlugin(initializerContext);
 }
@@ -29,3 +27,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { DataPublicPlugin as Plugin };
 
 export * from '../common';
+export * from './autocomplete_provider';
+
+export * from './types';

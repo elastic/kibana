@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renders dynamic options should display disabled dynamic options with tooltip for non-string fields 1`] = `
-<div>
+<Fragment>
   <InjectIntl(IndexPatternSelectFormRowUi)
     controlIndex={0}
     indexPatternId="mockIndexPattern"
@@ -17,6 +17,7 @@ exports[`renders dynamic options should display disabled dynamic options with to
   />
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     helpText={
@@ -45,6 +46,7 @@ exports[`renders dynamic options should display disabled dynamic options with to
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     helpText={
@@ -74,6 +76,7 @@ exports[`renders dynamic options should display disabled dynamic options with to
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     helpText={
@@ -104,11 +107,11 @@ exports[`renders dynamic options should display disabled dynamic options with to
       value={5}
     />
   </EuiFormRow>
-</div>
+</Fragment>
 `;
 
 exports[`renders dynamic options should display dynamic options for string fields 1`] = `
-<div>
+<Fragment>
   <InjectIntl(IndexPatternSelectFormRowUi)
     controlIndex={0}
     indexPatternId="mockIndexPattern"
@@ -124,6 +127,7 @@ exports[`renders dynamic options should display dynamic options for string field
   />
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     helpText={
@@ -152,6 +156,7 @@ exports[`renders dynamic options should display dynamic options for string field
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     helpText={
@@ -179,11 +184,11 @@ exports[`renders dynamic options should display dynamic options for string field
       onChange={[Function]}
     />
   </EuiFormRow>
-</div>
+</Fragment>
 `;
 
 exports[`renders dynamic options should display size field when dynamic options is disabled 1`] = `
-<div>
+<Fragment>
   <InjectIntl(IndexPatternSelectFormRowUi)
     controlIndex={0}
     indexPatternId="mockIndexPattern"
@@ -199,6 +204,7 @@ exports[`renders dynamic options should display size field when dynamic options 
   />
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     helpText={
@@ -227,6 +233,7 @@ exports[`renders dynamic options should display size field when dynamic options 
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     helpText={
@@ -256,6 +263,7 @@ exports[`renders dynamic options should display size field when dynamic options 
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     helpText={
@@ -286,11 +294,11 @@ exports[`renders dynamic options should display size field when dynamic options 
       value={5}
     />
   </EuiFormRow>
-</div>
+</Fragment>
 `;
 
 exports[`renders should display chaining input when parents are provided 1`] = `
-<div>
+<Fragment>
   <InjectIntl(IndexPatternSelectFormRowUi)
     controlIndex={0}
     indexPatternId="indexPattern1"
@@ -306,6 +314,7 @@ exports[`renders should display chaining input when parents are provided 1`] = `
   />
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     helpText={
@@ -352,6 +361,7 @@ exports[`renders should display chaining input when parents are provided 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     helpText={
@@ -380,6 +390,7 @@ exports[`renders should display chaining input when parents are provided 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     helpText={
@@ -409,6 +420,7 @@ exports[`renders should display chaining input when parents are provided 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     helpText={
@@ -439,11 +451,11 @@ exports[`renders should display chaining input when parents are provided 1`] = `
       value={10}
     />
   </EuiFormRow>
-</div>
+</Fragment>
 `;
 
 exports[`renders should not display any options until field is selected 1`] = `
-<div>
+<Fragment>
   <InjectIntl(IndexPatternSelectFormRowUi)
     controlIndex={0}
     indexPatternId="mockIndexPattern"
@@ -457,5 +469,5 @@ exports[`renders should not display any options until field is selected 1`] = `
     indexPatternId="mockIndexPattern"
     onChange={[Function]}
   />
-</div>
+</Fragment>
 `;

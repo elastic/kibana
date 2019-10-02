@@ -259,7 +259,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
 
     nodes.push(...Object.entries(setupMode.data.byUuid)
       .reduce((nodes, [nodeUuid, instance]) => {
-        if (!nodesByUuid[nodeUuid]) {
+        if (!nodesByUuid[nodeUuid] && instance.node) {
           nodes.push(instance.node);
         }
         return nodes;
@@ -267,7 +267,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
   }
 
   let setupModeCallout = null;
-  if (setupMode.data) {
+  if (setupMode.enabled && setupMode.data) {
     setupModeCallout = (
       <ListingCallOut
         setupModeData={setupMode.data}
@@ -279,7 +279,33 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             componentToRender: null
           };
 
-          if (setupMode.data.totalUniquePartiallyMigratedCount === setupMode.data.totalUniqueInstanceCount) {
+          const isNetNewUser = setupMode.data.totalUniqueInstanceCount === 0;
+          const hasNoInstances = setupMode.data.totalUniqueInternallyCollectedCount === 0
+            && setupMode.data.totalUniqueFullyMigratedCount === 0
+            && setupMode.data.totalUniquePartiallyMigratedCount === 0;
+
+          if (isNetNewUser || hasNoInstances) {
+            customRenderResponse.shouldRender = true;
+            customRenderResponse.componentToRender = (
+              <Fragment>
+                <EuiCallOut
+                  title={i18n.translate('xpack.monitoring.elasticsearch.nodes.metricbeatMigration.detectedNodeTitle', {
+                    defaultMessage: 'Elasticsearch node detected',
+                  })}
+                  color={setupMode.data.totalUniqueInstanceCount > 0 ? 'danger' : 'warning'}
+                  iconType="flag"
+                >
+                  <p>
+                    {i18n.translate('xpack.monitoring.elasticsearch.nodes.metricbeatMigration.detectedNodeDescription', {
+                      defaultMessage: `The following nodes are not monitored. Click 'Monitor with Metricbeat' below to start monitoring.`,
+                    })}
+                  </p>
+                </EuiCallOut>
+                <EuiSpacer size="m"/>
+              </Fragment>
+            );
+          }
+          else if (setupMode.data.totalUniquePartiallyMigratedCount === setupMode.data.totalUniqueInstanceCount) {
             const finishMigrationAction = _.get(setupMode.meta, 'liveClusterUuid') === clusterUuid
               ? setupMode.shortcutToFinishMigration
               : setupMode.openFlyout;
@@ -289,21 +315,20 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
               <Fragment>
                 <EuiCallOut
                   title={i18n.translate('xpack.monitoring.elasticsearch.nodes.metricbeatMigration.disableInternalCollectionTitle', {
-                    defaultMessage: 'Disable internal collection',
+                    defaultMessage: 'Metricbeat is now monitoring your Elasticsearch nodes',
                   })}
                   color="warning"
                   iconType="flag"
                 >
                   <p>
                     {i18n.translate('xpack.monitoring.elasticsearch.nodes.metricbeatMigration.disableInternalCollectionDescription', {
-                      defaultMessage: `Metricbeat is now monitoring your Elasticsearch servers.
-                      Disable internal collection to finish the migration.`
+                      defaultMessage: `Disable self monitoring to finish the migration.`
                     })}
                   </p>
                   <EuiButton onClick={finishMigrationAction} size="s" color="warning" fill>
                     {i18n.translate(
                       'xpack.monitoring.elasticsearch.nodes.metricbeatMigration.disableInternalCollectionMigrationButtonLabel', {
-                        defaultMessage: 'Disable internal collection'
+                        defaultMessage: 'Disable self monitoring'
                       }
                     )}
                   </EuiButton>

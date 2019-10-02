@@ -72,8 +72,9 @@ export const BorderForm: FunctionComponent<Props> = ({
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={2}>
-        <EuiFormRow label="Thickness" compressed>
+        <EuiFormRow label="Thickness" display="rowCompressed">
           <EuiFieldNumber
+            compressed
             value={Number(borderWidthVal)}
             onChange={e => namedChange('borderWidth')(Number(e.target.value))}
           />
@@ -81,8 +82,9 @@ export const BorderForm: FunctionComponent<Props> = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={3}>
-        <EuiFormRow label="Style" compressed>
+        <EuiFormRow label="Style" display="rowCompressed">
           <EuiSuperSelect
+            compressed
             valueOfSelected={borderStyleVal || 'none'}
             options={Object.values(BorderStyle).map(style => ({
               value: style,
@@ -94,8 +96,9 @@ export const BorderForm: FunctionComponent<Props> = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={2}>
-        <EuiFormRow label="Radius" compressed>
+        <EuiFormRow label="Radius" display="rowCompressed">
           <EuiFieldNumber
+            compressed
             value={Number(radiusVal)}
             onChange={e => namedChange('borderRadius')(e.target.value)}
           />
@@ -103,7 +106,7 @@ export const BorderForm: FunctionComponent<Props> = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={1}>
-        <EuiFormRow label="Color" style={{ fontSize: 0 }}>
+        <EuiFormRow display="rowCompressed" label="Color" style={{ fontSize: 0 }}>
           <ColorPickerPopover
             value={borderColor}
             onChange={borderColorChange}

@@ -8,7 +8,7 @@ import { GraphWorkspaceSavedObject } from '../../types';
 import { savedWorkspaceToAppState } from './deserialize';
 import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { createWorkspace } from '../../angular/graph_client_workspace';
-import { outlinkEncoders } from '../outlink_encoders';
+import { outlinkEncoders } from '../../helpers/outlink_encoders';
 
 describe('deserialize', () => {
   let savedWorkspace: GraphWorkspaceSavedObject;
@@ -116,7 +116,11 @@ describe('deserialize', () => {
     return savedWorkspaceToAppState(
       savedWorkspace,
       {
-        getNonScriptedFields: () => [{ name: 'field1' }, { name: 'field2' }, { name: 'field3' }],
+        getNonScriptedFields: () => [
+          { name: 'field1', type: 'string' },
+          { name: 'field2', type: 'string' },
+          { name: 'field3', type: 'string' },
+        ],
       } as IndexPattern,
       createWorkspace({})
     );
@@ -140,6 +144,7 @@ describe('deserialize', () => {
           "lastValidHopSize": undefined,
           "name": "field1",
           "selected": true,
+          "type": "string",
         },
         Object {
           "color": "black",
@@ -148,14 +153,15 @@ describe('deserialize', () => {
           "lastValidHopSize": undefined,
           "name": "field2",
           "selected": true,
+          "type": "string",
         },
         Object {
-          "color": "#8ee684",
+          "color": "#FCA5D3",
           "hopSize": 5,
           "icon": Object {
             "class": "fa-folder-open-o",
             "code": "",
-            "label": "folder open",
+            "label": "Folder open",
             "patterns": Array [
               /category/i,
               /folder/i,
@@ -165,6 +171,7 @@ describe('deserialize', () => {
           "lastValidHopSize": 5,
           "name": "field3",
           "selected": false,
+          "type": "string",
         },
       ]
     `);

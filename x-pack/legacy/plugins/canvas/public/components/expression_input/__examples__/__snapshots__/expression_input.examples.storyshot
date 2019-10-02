@@ -9,21 +9,25 @@ exports[`Storyshots components/ExpressionInput default 1`] = `
     id="generated-id-row"
   >
     <div
-      className="canvasExpressionInput__editor"
-      id="generated-id"
-      onBlur={[Function]}
-      onFocus={[Function]}
+      className="euiFormRow__fieldWrapper"
     >
       <div
-        className="react-monaco-editor-container"
-        style={
-          Object {
-            "height": "100%",
-            "width": "100%",
+        className="canvasExpressionInput__editor"
+        id="generated-id"
+        onBlur={[Function]}
+        onFocus={[Function]}
+      >
+        <div
+          className="react-monaco-editor-container"
+          style={
+            Object {
+              "height": "100%",
+              "width": "100%",
+            }
           }
-        }
-      />
-      <div />
+        />
+        <div />
+      </div>
     </div>
   </div>
 </div>

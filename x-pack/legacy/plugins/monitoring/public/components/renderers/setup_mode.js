@@ -9,7 +9,8 @@ import {
   initSetupModeState,
   updateSetupModeData,
   disableElasticsearchInternalCollection,
-  toggleSetupMode
+  toggleSetupMode,
+  setSetupModeMenuItem
 } from '../../lib/setup_mode';
 import { Flyout } from '../metricbeat_migration/flyout';
 import {
@@ -61,6 +62,7 @@ export class SetupModeRenderer extends React.Component {
 
       this.setState(newState);
     });
+    setSetupModeMenuItem();
   }
 
   reset() {
@@ -121,7 +123,7 @@ export class SetupModeRenderer extends React.Component {
 
     return (
       <Fragment>
-        <EuiSpacer size="l"/>
+        <EuiSpacer size="xxl"/>
         <EuiBottomBar>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
@@ -130,8 +132,7 @@ export class SetupModeRenderer extends React.Component {
                   <EuiTextColor color="ghost">
                     <FormattedMessage
                       id="xpack.monitoring.setupMode.description"
-                      defaultMessage="You are in setup mode. Click ({flagIcon}) flag icon next to all areas
-                      that have configuration options."
+                      defaultMessage="You are in setup mode. The ({flagIcon}) icon indicates configuration options."
                       values={{
                         flagIcon: (
                           <EuiIcon type="flag"/>

@@ -25,23 +25,37 @@ export const useIndexPatterns = (refreshToggle = false): Return => {
   const [, dispatchToaster] = useStateToaster();
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
-  const fetchFunc = async () => {
-    try {
-      const data = await getIndexPatterns({
-        'kbn-version': kbnVersion,
-      });
-
-      setIndexPatterns(data);
-      setIsLoading(false);
-    } catch (error) {
-      errorToToaster({ title: i18n.INDEX_PATTERN_FETCH_FAILURE, error, dispatchToaster });
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
+    let isSubscribed = true;
+    const abortCtrl = new AbortController();
     setIsLoading(true);
-    fetchFunc();
+
+    async function fetchIndexPatterns() {
+      try {
+        const data = await getIndexPatterns(
+          {
+            'kbn-version': kbnVersion,
+          },
+          abortCtrl.signal
+        );
+
+        if (isSubscribed) {
+          setIndexPatterns(data);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        if (isSubscribed) {
+          errorToToaster({ title: i18n.INDEX_PATTERN_FETCH_FAILURE, error, dispatchToaster });
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchIndexPatterns();
+    return () => {
+      isSubscribed = false;
+      abortCtrl.abort();
+    };
   }, [refreshToggle]);
 
   return [isLoading, indexPatterns];

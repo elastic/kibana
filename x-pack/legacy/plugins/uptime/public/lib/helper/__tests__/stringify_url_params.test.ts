@@ -13,8 +13,10 @@ describe('stringifyUrlParams', () => {
       autorefreshIsPaused: false,
       dateRangeStart: 'now-15m',
       dateRangeEnd: 'now',
+      filters: 'monitor.id: bar',
       search: 'monitor.id: foo',
       selectedPingStatus: 'down',
+      statusFilter: 'up',
     });
     expect(result).toMatchSnapshot();
   });

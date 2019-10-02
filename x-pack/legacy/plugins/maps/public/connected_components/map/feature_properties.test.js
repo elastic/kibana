@@ -34,7 +34,6 @@ const defaultProps = {
   layerId: `layer`,
   onCloseTooltip: () => {},
   showFilterButtons: false,
-  reevaluateTooltipPosition: () => {},
 };
 
 const mockTooltipProperties = [

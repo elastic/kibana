@@ -50,6 +50,7 @@ class VisualizeListingTableUi extends Component {
         editItem={capabilities.get().visualize.save ? this.props.editItem : null}
         tableColumns={this.getTableColumns()}
         listingLimit={this.props.listingLimit}
+        selectable={item => item.canDelete}
         initialFilter={''}
         noItemsFragment={this.getNoItemsMessage()}
         entityName={

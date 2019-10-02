@@ -33,13 +33,13 @@ export class Network {
     req: FrameworkRequest,
     options: NetworkTopNFlowRequestOptions
   ): Promise<NetworkTopNFlowData> {
-    return await this.adapter.getNetworkTopNFlow(req, options);
+    return this.adapter.getNetworkTopNFlow(req, options);
   }
 
   public async getNetworkDns(
     req: FrameworkRequest,
     options: NetworkDnsRequestOptions
   ): Promise<NetworkTopNFlowData> {
-    return await this.adapter.getNetworkDns(req, options);
+    return this.adapter.getNetworkDns(req, options);
   }
 }

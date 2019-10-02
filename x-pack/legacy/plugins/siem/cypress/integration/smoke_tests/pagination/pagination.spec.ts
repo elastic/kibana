@@ -5,14 +5,16 @@
  */
 
 import { logout } from '../../lib/logout';
-import { HOSTS_PAGE_TABS } from '../../lib/urls';
+import { HOSTS_PAGE_TAB_URLS } from '../../lib/urls';
 import {
+  AUTHENTICATIONS_TABLE,
   getDraggableField,
   getPageButtonSelector,
   NAVIGATION_AUTHENTICATIONS,
   NAVIGATION_UNCOMMON_PROCESSES,
   NUMBERED_PAGINATION,
   SUPER_DATE_PICKER_APPLY_BUTTON,
+  UNCOMMON_PROCCESSES_TABLE,
 } from '../../lib/pagination/selectors';
 import { DEFAULT_TIMEOUT, loginAndWaitForPage, waitForTableLoad } from '../../lib/util/helpers';
 
@@ -22,8 +24,8 @@ describe('Pagination', () => {
   });
 
   it('pagination updates results and page number', () => {
-    loginAndWaitForPage(HOSTS_PAGE_TABS.authentications);
-    waitForTableLoad();
+    loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
+    waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
     cy.get(getPageButtonSelector(0)).should('have.class', 'euiPaginationButton-isActive');
 
     cy.get(getDraggableField('user.name'))
@@ -32,7 +34,7 @@ describe('Pagination', () => {
       .then(text1 => {
         cy.get(getPageButtonSelector(2)).click({ force: true });
         // wait for table to be done loading
-        waitForTableLoad();
+        waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
         cy.get(getDraggableField('user.name'))
           .first()
           .invoke('text')
@@ -45,13 +47,13 @@ describe('Pagination', () => {
   });
 
   it('pagination keeps track of page results when tabs change', () => {
-    loginAndWaitForPage(HOSTS_PAGE_TABS.authentications);
-    waitForTableLoad();
+    loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
+    waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
     cy.get(getPageButtonSelector(0)).should('have.class', 'euiPaginationButton-isActive');
     let thirdPageResult: string;
     cy.get(getPageButtonSelector(2)).click({ force: true });
     // wait for table to be done loading
-    waitForTableLoad();
+    waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
 
     cy.get(getDraggableField('user.name'))
       .first()
@@ -59,14 +61,14 @@ describe('Pagination', () => {
       .then(text2 => {
         thirdPageResult = `${text2}`;
       });
-    cy.get(NAVIGATION_UNCOMMON_PROCESSES).click({ force: true });
-    waitForTableLoad();
-    // check uncommon processes table starts at 1
+    cy.get(NAVIGATION_AUTHENTICATIONS).click({ force: true });
+    waitForTableLoad(AUTHENTICATIONS_TABLE);
+    // check authentications table starts at 1
     cy.get(getPageButtonSelector(0)).should('have.class', 'euiPaginationButton-isActive');
 
-    cy.get(NAVIGATION_AUTHENTICATIONS).click({ force: true });
-    waitForTableLoad();
-    // check authentications table picks up at 3
+    cy.get(NAVIGATION_UNCOMMON_PROCESSES).click({ force: true });
+    waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
+    // check uncommon processes table picks up at 3
     cy.get(getPageButtonSelector(2)).should('have.class', 'euiPaginationButton-isActive');
     cy.get(getDraggableField('user.name'))
       .first()
@@ -81,7 +83,7 @@ describe('Pagination', () => {
    * when we figure out a way to really mock the data, we should come back to it
    */
   it('pagination resets results and page number to first page when refresh is clicked', () => {
-    loginAndWaitForPage(HOSTS_PAGE_TABS.authentications);
+    loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
     cy.get(NUMBERED_PAGINATION, { timeout: DEFAULT_TIMEOUT });
     cy.get(getPageButtonSelector(0)).should('have.class', 'euiPaginationButton-isActive');
     // let firstResult: string;
@@ -92,12 +94,12 @@ describe('Pagination', () => {
     //     firstResult = `${text1}`;
     //   });
     cy.get(getPageButtonSelector(2)).click({ force: true });
-    waitForTableLoad();
+    waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
     cy.get(getPageButtonSelector(0)).should('not.have.class', 'euiPaginationButton-isActive');
     cy.get(SUPER_DATE_PICKER_APPLY_BUTTON)
       .last()
       .click({ force: true });
-    waitForTableLoad();
+    waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
     cy.get(getPageButtonSelector(0)).should('have.class', 'euiPaginationButton-isActive');
     // cy.get(getDraggableField('user.name'))
     //   .first()

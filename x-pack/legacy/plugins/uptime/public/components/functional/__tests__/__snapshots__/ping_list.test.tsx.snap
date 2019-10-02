@@ -36,6 +36,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
                 <EuiFormRow
                   aria-label="Status"
                   describedByIds={Array []}
+                  display="row"
                   fullWidth={false}
                   hasEmptyLabelSpace={false}
                   label="Status"
@@ -83,6 +84,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
                 <EuiFormRow
                   aria-label="Location"
                   describedByIds={Array []}
+                  display="row"
                   fullWidth={false}
                   hasEmptyLabelSpace={false}
                   label="Location"

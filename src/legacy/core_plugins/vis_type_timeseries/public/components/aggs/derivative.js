@@ -32,6 +32,7 @@ import {
   EuiFormLabel,
   EuiFieldText,
   EuiFormRow,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -59,8 +60,12 @@ export const DerivativeAgg = props => {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
-            <FormattedMessage id="visTypeTimeseries.derivative.aggregationLabel" defaultMessage="Aggregation" />
+            <FormattedMessage
+              id="visTypeTimeseries.derivative.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
           </EuiFormLabel>
+          <EuiSpacer size="xs" />
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -73,7 +78,12 @@ export const DerivativeAgg = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('metric')}
-            label={<FormattedMessage id="visTypeTimeseries.derivative.metricLabel" defaultMessage="Metric" />}
+            label={
+              <FormattedMessage
+                id="visTypeTimeseries.derivative.metricLabel"
+                defaultMessage="Metric"
+              />
+            }
             fullWidth
           >
             <MetricSelect

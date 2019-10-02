@@ -5,11 +5,24 @@
  */
 
 import React from 'react';
+import DateMath from '@elastic/datemath';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { MonitorChartsComponent } from '../monitor_charts';
 import { MonitorChart } from '../../../../common/graphql/types';
 
 describe('MonitorCharts component', () => {
+  let dateMathSpy: any;
+  const MOCK_DATE_VALUE = 20;
+
+  beforeEach(() => {
+    dateMathSpy = jest.spyOn(DateMath, 'parse');
+    dateMathSpy.mockReturnValue(MOCK_DATE_VALUE);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   const chartResponse: { monitorChartsData: MonitorChart } = {
     monitorChartsData: {
       locationDurationLines: [

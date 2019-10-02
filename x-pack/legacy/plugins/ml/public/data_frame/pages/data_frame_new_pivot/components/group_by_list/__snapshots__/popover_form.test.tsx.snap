@@ -10,6 +10,7 @@ exports[`Data Frame: Group By <PopoverForm /> Minimal initialization 1`] = `
 >
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     error={false}
     fullWidth={false}
     hasEmptyLabelSpace={false}
@@ -29,6 +30,7 @@ exports[`Data Frame: Group By <PopoverForm /> Minimal initialization 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     error={false}
     fullWidth={false}
     hasEmptyLabelSpace={false}
@@ -79,6 +81,7 @@ exports[`Data Frame: Group By <PopoverForm /> Minimal initialization 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={true}
     labelType="label"

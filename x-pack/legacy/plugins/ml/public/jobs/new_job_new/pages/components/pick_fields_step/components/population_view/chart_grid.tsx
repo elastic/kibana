@@ -49,7 +49,7 @@ export const ChartGrid: FC<ChartGridProps> = ({
   return (
     <EuiFlexGrid columns={chartSettings.cols}>
       {aggFieldPairList.map((af, i) => (
-        <EuiFlexItem key={i}>
+        <EuiFlexItem key={i} data-test-subj={`detector ${i}`}>
           <Fragment>
             <EuiFlexGroup>
               <EuiFlexItem>

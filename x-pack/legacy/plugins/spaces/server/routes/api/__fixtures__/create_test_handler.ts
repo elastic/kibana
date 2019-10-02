@@ -7,10 +7,9 @@
 import * as Rx from 'rxjs';
 import { Server } from 'hapi';
 import { Legacy } from 'kibana';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { httpServiceMock, elasticsearchServiceMock } from 'src/core/server/mocks';
-import { SavedObjectsSchema, SavedObjectsService } from 'src/core/server';
+import { elasticsearchServiceMock, coreMock } from 'src/core/server/mocks';
+import { SavedObjectsSchema, SavedObjectsLegacyService } from 'src/core/server';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from 'src/legacy/utils/streams';
 import { createOptionalPlugin } from '../../../../../../server/lib/optional_plugin';
@@ -20,7 +19,7 @@ import { ExternalRouteDeps } from '../external';
 import { SpacesService } from '../../../new_platform/spaces_service';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { InternalRouteDeps } from '../v1';
-import { SpacesHttpServiceSetup } from '../../../new_platform/plugin';
+import { LegacyAPI } from '../../../new_platform/plugin';
 
 interface KibanaServer extends Legacy.Server {
   savedObjects: any;
@@ -45,13 +44,19 @@ export interface RequestRunnerResult {
   server: any;
   mockSavedObjectsRepository: any;
   mockSavedObjectsService: {
-    getScopedSavedObjectsClient: jest.Mock<SavedObjectsService['getScopedSavedObjectsClient']>;
+    getScopedSavedObjectsClient: jest.Mock<
+      SavedObjectsLegacyService['getScopedSavedObjectsClient']
+    >;
     importExport: {
       getSortedObjectsForExport: jest.Mock<
-        SavedObjectsService['importExport']['getSortedObjectsForExport']
+        SavedObjectsLegacyService['importExport']['getSortedObjectsForExport']
       >;
-      importSavedObjects: jest.Mock<SavedObjectsService['importExport']['importSavedObjects']>;
-      resolveImportErrors: jest.Mock<SavedObjectsService['importExport']['resolveImportErrors']>;
+      importSavedObjects: jest.Mock<
+        SavedObjectsLegacyService['importExport']['importSavedObjects']
+      >;
+      resolveImportErrors: jest.Mock<
+        SavedObjectsLegacyService['importExport']['resolveImportErrors']
+      >;
     };
   };
   headers: Record<string, unknown>;
@@ -215,13 +220,22 @@ export function createTestHandler(
       fatal: jest.fn(),
     };
 
-    const service = new SpacesService(log, server.config().get('server.basePath'));
-    const spacesService = await service.setup({
-      http: httpServiceMock.createSetupContract(),
-      elasticsearch: elasticsearchServiceMock.createSetupContract(),
+    const coreSetupMock = coreMock.createSetup();
+
+    const legacyAPI = {
+      legacyConfig: {
+        serverBasePath: mockConfig.get('server.basePath'),
+        serverDefaultRoute: mockConfig.get('server.defaultRoute'),
+      },
       savedObjects: server.savedObjects,
+    } as LegacyAPI;
+
+    const service = new SpacesService(log, () => legacyAPI);
+    const spacesService = await service.setup({
+      http: coreSetupMock.http,
+      elasticsearch: elasticsearchServiceMock.createSetupContract(),
       security: createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
-      spacesAuditLogger: {} as SpacesAuditLogger,
+      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
       config$: Rx.of({ maxSpaces: 1000 }),
     });
 
@@ -240,15 +254,12 @@ export function createTestHandler(
     });
 
     initApiFn({
-      http: ({
-        server,
-        route: server.route.bind(server),
-      } as unknown) as SpacesHttpServiceSetup,
+      getLegacyAPI: () => legacyAPI,
       routePreCheckLicenseFn: pre,
       savedObjects: server.savedObjects,
       spacesService,
       log,
-      config: mockConfig as KibanaConfig,
+      legacyRouter: server.route.bind(server),
     });
 
     teardowns.push(() => server.stop());

@@ -37,6 +37,7 @@ import {
   EuiLink,
   EuiFormRow,
   EuiCode,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -74,8 +75,12 @@ export class MathAgg extends Component {
         <EuiFlexGroup direction="column" gutterSize="l">
           <EuiFlexItem>
             <EuiFormLabel htmlFor={htmlId('aggregation')}>
-              <FormattedMessage id="visTypeTimeseries.math.aggregationLabel" defaultMessage="Aggregation" />
+              <FormattedMessage
+                id="visTypeTimeseries.math.aggregationLabel"
+                defaultMessage="Aggregation"
+              />
             </EuiFormLabel>
+            <EuiSpacer size="xs" />
             <AggSelect
               id={htmlId('aggregation')}
               siblings={this.props.siblings}
@@ -86,8 +91,12 @@ export class MathAgg extends Component {
 
           <EuiFlexItem>
             <EuiFormLabel htmlFor={htmlId('variables')}>
-              <FormattedMessage id="visTypeTimeseries.math.variablesLabel" defaultMessage="Variables" />
+              <FormattedMessage
+                id="visTypeTimeseries.math.variablesLabel"
+                defaultMessage="Variables"
+              />
             </EuiFormLabel>
+            <EuiSpacer size="xs" />
             <CalculationVars
               id={htmlId('variables')}
               metrics={siblings}
@@ -102,7 +111,10 @@ export class MathAgg extends Component {
             <EuiFormRow
               id="mathExpressionInput"
               label={
-                <FormattedMessage id="visTypeTimeseries.math.expressionLabel" defaultMessage="Expression" />
+                <FormattedMessage
+                  id="visTypeTimeseries.math.expressionLabel"
+                  defaultMessage="Expression"
+                />
               }
               fullWidth
               helpText={

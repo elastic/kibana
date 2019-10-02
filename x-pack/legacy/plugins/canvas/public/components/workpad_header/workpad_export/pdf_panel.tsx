@@ -8,6 +8,9 @@ import React from 'react';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { Clipboard } from '../../clipboard';
 
+import { ComponentStrings } from '../../../../i18n';
+const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
+
 interface Props {
   /** The URL that will invoke PDF Report generation. */
   pdfURL: string;
@@ -23,17 +26,15 @@ interface Props {
 export const PDFPanel = ({ pdfURL, onExport, onCopy }: Props) => (
   <div className="canvasWorkpadExport__panelContent">
     <EuiText size="s">
-      <p>PDFs can take a minute or two to generate based on the size of your workpad.</p>
+      <p>{strings.getPDFPanelGenerateDescription()}</p>
     </EuiText>
     <EuiSpacer size="s" />
     <EuiButton fill onClick={onExport} size="s" style={{ width: '100%' }}>
-      Generate PDF
+      {strings.getPDFPanelGenerateButtonLabel()}
     </EuiButton>
     <EuiSpacer size="s" />
     <EuiText size="s">
-      <p>
-        Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
-      </p>
+      <p>{strings.getPDFPanelCopyDescription()}</p>
     </EuiText>
     <EuiSpacer size="s" />
     <Clipboard content={pdfURL} onCopy={onCopy}>
@@ -41,9 +42,9 @@ export const PDFPanel = ({ pdfURL, onExport, onCopy }: Props) => (
         iconType="copy"
         size="s"
         style={{ width: '100%' }}
-        aria-label="Alternatively, you can generate a PDF from a script or with Watcher by using this URL. Press Enter to copy the URL to clipboard."
+        aria-label={strings.getPDFPanelCopyAriaLabel()}
       >
-        Copy POST URL
+        {strings.getPDFPanelCopyButtonLabel()}
       </EuiButton>
     </Clipboard>
   </div>

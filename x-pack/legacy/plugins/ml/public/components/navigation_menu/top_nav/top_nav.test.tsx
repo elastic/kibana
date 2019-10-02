@@ -7,10 +7,12 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
+import { EuiSuperDatePicker } from '@elastic/eui';
+
 import { uiTimefilterMock } from '../../../contexts/ui/__mocks__/mocks';
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
 
-import { MlSuperDatePickerWithUpdate, TopNav } from './top_nav';
+import { TopNav } from './top_nav';
 
 uiTimefilterMock.enableAutoRefreshSelector();
 uiTimefilterMock.enableTimeRangeSelector();
@@ -39,20 +41,14 @@ describe('Navigation Menu: <TopNav />', () => {
     refreshSubscription.unsubscribe();
   });
 
-  // The following tests are written against MlSuperDatePickerWithUpdate
-  // instead of TopNav. TopNav uses hooks and we cannot writing tests
+  // The following tests are written against EuiSuperDatePicker
+  // instead of TopNav. TopNav uses hooks and we cannot write tests
   // with async hook updates yet until React 16.9 is available.
-
-  // MlSuperDatePickerWithUpdate fixes an issue with EuiSuperDatePicker
-  // which didn't make it into Kibana 7.4. We should be able to just
-  // use EuiSuperDatePicker again once the following PR is in EUI:
-  // https://github.com/elastic/eui/pull/2298
-
   test('Listen for consecutive super date picker refreshs.', async () => {
     const onRefresh = jest.fn();
 
     const componentRefresh = mount(
-      <MlSuperDatePickerWithUpdate
+      <EuiSuperDatePicker
         onTimeChange={noop}
         isPaused={false}
         onRefresh={onRefresh}
@@ -76,7 +72,7 @@ describe('Navigation Menu: <TopNav />', () => {
     const onRefresh = jest.fn();
 
     const componentRefresh = mount(
-      <MlSuperDatePickerWithUpdate
+      <EuiSuperDatePicker
         onTimeChange={noop}
         isPaused={false}
         onRefresh={onRefresh}

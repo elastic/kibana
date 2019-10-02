@@ -1,13 +1,13 @@
 [role="xpack"]
 [[reporting-chromium-sandbox]]
-=== Chromium Sandbox
+=== Chromium sandbox
 
 When {reporting} uses the Chromium browser for generating PDF reports, it's recommended to use the sandbox for
 an additional layer of security. The Chromium sandbox uses operating system provided mechanisms to ensure that
 code execution cannot make persistent changes to the computer or access confidential information. The specific
 sandboxing techniques differ for each operating system.
 
-==== Linux Sandbox
+==== Linux sandbox
 The Linux sandbox depends on user namespaces, which were introduced with the 3.8 Linux kernel. However, many
 distributions don't have user namespaces enabled by default, or they require the CAP_SYS_ADMIN capability. {reporting}
 will automatically disable the sandbox when it is running on Debian and CentOS as additional steps are required to enable
@@ -19,6 +19,6 @@ recommended to enable usernamespaces and set `xpack.reporting.capture.browser.ch
 `kibana.yml` to enable the sandbox.
 
 ==== Docker
-When running Kibana in a Docker container, all container processes are run within a usernamespace with seccomp-bpf and
+When running {kib} in a Docker container, all container processes are run within a usernamespace with seccomp-bpf and
 AppArmor profiles that prevent the Chromium sandbox from being used. In these situations, disabling the sandbox is recommended,
 as the container implements similar security mechanisms.

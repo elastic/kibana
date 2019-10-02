@@ -34,10 +34,10 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ES_TYPES } from '../../../common/es_types';
+import { ES_FIELD_TYPES } from '../../../../../../plugins/data/common';
 import { Percentiles, newPercentile } from './percentile_ui';
 
-const RESTRICT_FIELDS = [ES_TYPES.NUMBER];
+const RESTRICT_FIELDS = [ES_FIELD_TYPES.NUMBER];
 
 export class PercentileAgg extends Component {
   // eslint-disable-line react/no-multi-comp
@@ -78,6 +78,7 @@ export class PercentileAgg extends Component {
                 defaultMessage="Aggregation"
               />
             </EuiFormLabel>
+            <EuiSpacer size="xs" />
             <AggSelect
               id={htmlId('aggregation')}
               panelType={this.props.panel.type}
@@ -89,7 +90,12 @@ export class PercentileAgg extends Component {
           <EuiFlexItem>
             <EuiFormRow
               id={htmlId('field')}
-              label={<FormattedMessage id="visTypeTimeseries.percentile.fieldLabel" defaultMessage="Field" />}
+              label={
+                <FormattedMessage
+                  id="visTypeTimeseries.percentile.fieldLabel"
+                  defaultMessage="Field"
+                />
+              }
             >
               <FieldSelect
                 fields={fields}

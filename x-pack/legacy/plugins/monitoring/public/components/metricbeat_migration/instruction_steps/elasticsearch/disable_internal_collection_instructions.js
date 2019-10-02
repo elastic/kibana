@@ -17,7 +17,7 @@ import { getDisableStatusStep } from '../common_instructions';
 export function getElasticsearchInstructionsForDisablingInternalCollection(product, meta) {
   const disableInternalCollectionStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.disableInternalCollectionTitle', {
-      defaultMessage: 'Disable internal collection of Elasticsearch monitoring metrics'
+      defaultMessage: 'Disable self monitoring of Elasticsearch monitoring metrics'
     }),
     children: (
       <Fragment>
@@ -25,7 +25,7 @@ export function getElasticsearchInstructionsForDisablingInternalCollection(produ
           <p>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.disableInternalCollectionDescription"
-              defaultMessage="Disable internal collection of Elasticsearch monitoring metrics.
+              defaultMessage="Disable self monitoring of Elasticsearch monitoring metrics.
             Set {monospace} to false on each server in the production cluster."
               values={{
                 monospace: (

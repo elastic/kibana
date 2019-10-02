@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent } from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import {
   EuiPage,
   EuiPageBody,
@@ -12,6 +12,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiLink,
+  EuiCallOut
 } from '@elastic/eui';
 import { capitalize, get } from 'lodash';
 import { ClusterStatus } from '../cluster_status';
@@ -209,6 +210,38 @@ export class KibanaInstances extends PureComponent {
           setupModeData={setupMode.data}
           useNodeIdentifier={false}
           productName={KIBANA_SYSTEM_ID}
+          customRenderer={() => {
+            const customRenderResponse = {
+              shouldRender: false,
+              componentToRender: null
+            };
+
+            const hasInstances = setupMode.data.totalUniqueInstanceCount > 0;
+            if (!hasInstances) {
+              customRenderResponse.shouldRender = true;
+              customRenderResponse.componentToRender = (
+                <Fragment>
+                  <EuiCallOut
+                    title={i18n.translate('xpack.monitoring.kibana.instances.metricbeatMigration.detectedNodeTitle', {
+                      defaultMessage: 'Kibana instance detected',
+                    })}
+                    color="warning"
+                    iconType="flag"
+                  >
+                    <p>
+                      {i18n.translate('xpack.monitoring.kibana.instances.metricbeatMigration.detectedNodeDescription', {
+                        defaultMessage: `The following instances are not monitored.
+                        Click 'Monitor with Metricbeat' below to start monitoring.`,
+                      })}
+                    </p>
+                  </EuiCallOut>
+                  <EuiSpacer size="m"/>
+                </Fragment>
+              );
+            }
+
+            return customRenderResponse;
+          }}
         />
       );
     }

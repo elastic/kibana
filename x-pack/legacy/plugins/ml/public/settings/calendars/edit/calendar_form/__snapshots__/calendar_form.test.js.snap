@@ -36,6 +36,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
   />
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     error={
       Array [
         "Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character",
@@ -65,6 +66,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label={
@@ -88,6 +90,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label={
@@ -112,6 +115,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label={
@@ -140,6 +144,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
   />
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={true}
     hasEmptyLabelSpace={false}
     label={

@@ -12,7 +12,7 @@ import { dictionaryToArray } from '../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
 
 import { Dictionary } from '../../../../../../common/types/common';
-import { ES_FIELD_TYPES } from '../../../../../../common/constants/field_types';
+import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import {
   getPreviewRequestBody,
   PreviewRequestBody,

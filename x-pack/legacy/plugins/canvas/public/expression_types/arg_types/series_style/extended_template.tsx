@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, ChangeEvent } from 'react';
+import React, { FunctionComponent, ChangeEvent, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import { ExpressionAST } from '../../../../types';
@@ -73,50 +73,60 @@ export const ExtendedTemplate: FunctionComponent<Props> = props => {
   return (
     <div>
       {name !== 'defaultStyle' && (
-        <EuiFormRow label="Series Identifier" compressed>
-          <EuiSelect
-            value={selectedSeries}
-            options={labelOptions}
-            onChange={ev => handleChange('label', ev)}
-          />
-        </EuiFormRow>
+        <Fragment>
+          <EuiFormRow label="Series Identifier" display="rowCompressed">
+            <EuiSelect
+              compressed
+              value={selectedSeries}
+              options={labelOptions}
+              onChange={ev => handleChange('label', ev)}
+            />
+          </EuiFormRow>
+          <EuiSpacer size="s" />
+        </Fragment>
       )}
       {hasPropFields && (
-        <EuiFlexGroup gutterSize="s">
-          {fields.includes('lines') && (
-            <EuiFlexItem>
-              <EuiFormRow label="Line" compressed>
-                <EuiSelect
-                  value={get(chainArgs, 'lines.0', 0)}
-                  options={values}
-                  onChange={ev => handleChange('lines', ev)}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          )}
-          {fields.includes('bars') && (
-            <EuiFlexItem>
-              <EuiFormRow label="Bar" compressed>
-                <EuiSelect
-                  value={get(chainArgs, 'bars.0', 0)}
-                  options={values}
-                  onChange={ev => handleChange('bars', ev)}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          )}
-          {fields.includes('points') && (
-            <EuiFlexItem>
-              <EuiFormRow label="Point" compressed>
-                <EuiSelect
-                  value={get(chainArgs, 'points.0', 0)}
-                  options={values}
-                  onChange={ev => handleChange('points', ev)}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        <Fragment>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="s">
+            {fields.includes('lines') && (
+              <EuiFlexItem>
+                <EuiFormRow label="Line" display="rowCompressed">
+                  <EuiSelect
+                    value={get(chainArgs, 'lines.0', 0)}
+                    options={values}
+                    compressed
+                    onChange={ev => handleChange('lines', ev)}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            )}
+            {fields.includes('bars') && (
+              <EuiFlexItem>
+                <EuiFormRow label="Bar" display="rowCompressed">
+                  <EuiSelect
+                    value={get(chainArgs, 'bars.0', 0)}
+                    options={values}
+                    compressed
+                    onChange={ev => handleChange('bars', ev)}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            )}
+            {fields.includes('points') && (
+              <EuiFlexItem>
+                <EuiFormRow label="Point" display="rowCompressed">
+                  <EuiSelect
+                    value={get(chainArgs, 'points.0', 0)}
+                    options={values}
+                    compressed
+                    onChange={ev => handleChange('points', ev)}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </Fragment>
       )}
     </div>
   );

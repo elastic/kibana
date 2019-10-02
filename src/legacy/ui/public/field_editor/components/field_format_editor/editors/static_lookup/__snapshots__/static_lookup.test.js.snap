@@ -71,6 +71,7 @@ exports[`StaticLookupFormatEditorComponent should render multiple lookup entries
   />
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label={
@@ -162,6 +163,7 @@ exports[`StaticLookupFormatEditorComponent should render normally 1`] = `
   />
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label={

@@ -5,7 +5,7 @@
  */
 
 import { execFile, spawn } from 'child_process';
-import { existsSync } from 'fs';
+import { existsSync, mkdirSync } from 'fs';
 import getPort from 'get-port';
 import * as glob from 'glob';
 import { platform as getOsPlatform } from 'os';
@@ -175,6 +175,11 @@ export class JavaLauncher extends AbstractLauncher {
         '--add-opens',
         'java.base/java.lang=ALL-UNNAMED'
       );
+    }
+
+    // Check if workspace exists before launching
+    if (!existsSync(this.options.jdtWorkspacePath)) {
+      mkdirSync(this.options.jdtWorkspacePath);
     }
 
     const p = spawn(javaPath, params, {

@@ -97,6 +97,7 @@ function MetricAggParamEditor({
         value={value || EMPTY_VALUE}
         onChange={ev => setValue(ev.target.value)}
         fullWidth={true}
+        compressed
         isInvalid={showValidation ? !isValid : false}
         onBlur={setTouched}
         data-test-subj={`visEditorSubAggMetric${agg.id}`}

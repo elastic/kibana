@@ -34,10 +34,10 @@ export const MultiMetricSettings: FC<Props> = ({ setIsValid }) => {
   return (
     <Fragment>
       <EuiFlexGroup gutterSize="xl">
-        <EuiFlexItem data-test-subj="mlJobWizardSplitFieldSelection">
+        <EuiFlexItem>
           <SplitFieldSelector />
         </EuiFlexItem>
-        <EuiFlexItem data-test-subj="mlJobWizardInfluencerSelection">
+        <EuiFlexItem>
           <Influencers />
         </EuiFlexItem>
       </EuiFlexGroup>

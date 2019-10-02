@@ -23,18 +23,23 @@ const SYMBOLIZE_AS_OPTIONS = [
   {
     value: SYMBOLIZE_AS_CIRCLE,
     text: i18n.translate('xpack.maps.vector.symbolAs.circleLabel', {
-      defaultMessage: 'circle marker'
-    })
+      defaultMessage: 'circle marker',
+    }),
   },
   {
     value: SYMBOLIZE_AS_ICON,
     text: i18n.translate('xpack.maps.vector.symbolAs.IconLabel', {
-      defaultMessage: 'icon'
-    })
+      defaultMessage: 'icon',
+    }),
   },
 ];
 
-export function VectorStyleSymbolEditor({ styleOptions, handlePropertyChange, symbolOptions, isDarkMode }) {
+export function VectorStyleSymbolEditor({
+  styleOptions,
+  handlePropertyChange,
+  symbolOptions,
+  isDarkMode,
+}) {
   const renderSymbolizeAsSelect = () => {
     const selectedOption = SYMBOLIZE_AS_OPTIONS.find(({ value }) => {
       return value === styleOptions.symbolizeAs;
@@ -44,8 +49,8 @@ export function VectorStyleSymbolEditor({ styleOptions, handlePropertyChange, sy
       const styleDescriptor = {
         options: {
           ...styleOptions,
-          symbolizeAs: e.target.value
-        }
+          symbolizeAs: e.target.value,
+        },
       };
       handlePropertyChange('symbol', styleDescriptor);
     };
@@ -55,6 +60,7 @@ export function VectorStyleSymbolEditor({ styleOptions, handlePropertyChange, sy
         options={SYMBOLIZE_AS_OPTIONS}
         value={selectedOption ? selectedOption.value : undefined}
         onChange={onSymbolizeAsChange}
+        compressed
       />
     );
   };
@@ -72,8 +78,8 @@ export function VectorStyleSymbolEditor({ styleOptions, handlePropertyChange, sy
       const styleDescriptor = {
         options: {
           ...styleOptions,
-          symbolId: selectedOptions[0].value
-        }
+          symbolId: selectedOptions[0].value,
+        },
       };
       handlePropertyChange('symbol', styleDescriptor);
     };
@@ -89,9 +95,7 @@ export function VectorStyleSymbolEditor({ styleOptions, handlePropertyChange, sy
               strokeWidth={'1px'}
             />
           </EuiFlexItem>
-          <EuiFlexItem>
-            {label}
-          </EuiFlexItem>
+          <EuiFlexItem>{label}</EuiFlexItem>
         </EuiFlexGroup>
       );
     };
@@ -104,6 +108,7 @@ export function VectorStyleSymbolEditor({ styleOptions, handlePropertyChange, sy
         singleSelection={true}
         isClearable={false}
         renderOption={renderOption}
+        compressed
       />
     );
   };
@@ -125,8 +130,9 @@ export function VectorStyleSymbolEditor({ styleOptions, handlePropertyChange, sy
   return (
     <EuiFormRow
       label={i18n.translate('xpack.maps.vector.symbolLabel', {
-        defaultMessage: 'Symbol type'
+        defaultMessage: 'Symbol type',
       })}
+      display="rowCompressed"
     >
       {renderFormRowContent()}
     </EuiFormRow>

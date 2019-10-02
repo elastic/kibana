@@ -123,7 +123,7 @@ export function ApmServerInstances({ apms, setupMode }) {
   } = apms;
 
   let setupModeCallout = null;
-  if (setupMode.data) {
+  if (setupMode.enabled && setupMode.data) {
     setupModeCallout = (
       <ListingCallOut
         setupModeData={setupMode.data}

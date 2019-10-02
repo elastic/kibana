@@ -21,13 +21,14 @@ import React, { useEffect, useReducer } from 'react';
 import {
   EuiTitle,
   EuiDragDropContext,
+  DragDropContextProps,
   EuiDroppable,
   EuiDraggable,
   EuiSpacer,
   EuiPanel,
 } from '@elastic/eui';
 
-import { AggConfig } from '../../../agg_config';
+import { AggConfig } from '../../../../agg_types/agg_config';
 import { aggGroupNamesMap, AggGroupNames } from '../agg_groups';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
@@ -101,11 +102,7 @@ function DefaultEditorAggGroup({
     setValidity(isGroupValid);
   }, [isGroupValid]);
 
-  interface DragDropResultProps {
-    source: { index: number };
-    destination?: { index: number } | null;
-  }
-  const onDragEnd = ({ source, destination }: DragDropResultProps) => {
+  const onDragEnd: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
       const orderedGroup = Array.from(group);
       const [removed] = orderedGroup.splice(source.index, 1);

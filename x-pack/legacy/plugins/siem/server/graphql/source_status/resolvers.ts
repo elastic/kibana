@@ -31,7 +31,7 @@ export const createSourceStatusResolvers = (libs: {
 } => ({
   SourceStatus: {
     async indicesExist(source, args, { req }) {
-      return await libs.sourceStatus.hasIndices(req, args.defaultIndex);
+      return libs.sourceStatus.hasIndices(req, args.defaultIndex);
     },
     async indexFields(source, args, { req }) {
       return libs.fields.getFields(req, args.defaultIndex);

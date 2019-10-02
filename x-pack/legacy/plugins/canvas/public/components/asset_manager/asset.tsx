@@ -41,10 +41,10 @@ export const Asset: FunctionComponent<Props> = props => {
 
   const createImage = (
     <EuiFlexItem className="asset-create-image" grow={false}>
-      <EuiToolTip content={strings.getCreateImageTooltipText()}>
+      <EuiToolTip content={strings.getCreateImageTooltip()}>
         <EuiButtonIcon
           iconType="vector"
-          aria-label={strings.getCreateImageTooltipText()}
+          aria-label={strings.getCreateImageTooltip()}
           onClick={() => onCreate(asset)}
         />
       </EuiToolTip>
@@ -53,9 +53,9 @@ export const Asset: FunctionComponent<Props> = props => {
 
   const downloadAsset = (
     <EuiFlexItem className="asset-download" grow={false}>
-      <EuiToolTip content={strings.getDownloadAssetTooltipText()}>
+      <EuiToolTip content={strings.getDownloadAssetTooltip()}>
         <Download fileName={asset.id} content={asset.value}>
-          <EuiButtonIcon iconType="sortDown" aria-label={strings.getDownloadAssetTooltipText()} />
+          <EuiButtonIcon iconType="sortDown" aria-label={strings.getDownloadAssetTooltip()} />
         </Download>
       </EuiToolTip>
     </EuiFlexItem>
@@ -63,9 +63,9 @@ export const Asset: FunctionComponent<Props> = props => {
 
   const copyAsset = (
     <EuiFlexItem grow={false}>
-      <EuiToolTip content={strings.getCopyAssetTooltipText()}>
+      <EuiToolTip content={strings.getCopyAssetTooltip()}>
         <Clipboard content={asset.id} onCopy={(result: boolean) => result && onCopy(asset)}>
-          <EuiButtonIcon iconType="copyClipboard" aria-label={strings.getCopyAssetTooltipText()} />
+          <EuiButtonIcon iconType="copyClipboard" aria-label={strings.getCopyAssetTooltip()} />
         </Clipboard>
       </EuiToolTip>
     </EuiFlexItem>
@@ -73,11 +73,11 @@ export const Asset: FunctionComponent<Props> = props => {
 
   const deleteAsset = (
     <EuiFlexItem grow={false}>
-      <EuiToolTip content={strings.getDeleteAssetTooltipText()}>
+      <EuiToolTip content={strings.getDeleteAssetTooltip()}>
         <EuiButtonIcon
           color="danger"
           iconType="trash"
-          aria-label={strings.getDeleteAssetTooltipText()}
+          aria-label={strings.getDeleteAssetTooltip()}
           onClick={() => onDelete(asset)}
         />
       </EuiToolTip>

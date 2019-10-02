@@ -46,7 +46,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
 
   const disableInternalCollectionStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.title', {
-      defaultMessage: 'Disable internal collection of Kibana monitoring metrics'
+      defaultMessage: 'Disable self monitoring of Kibana monitoring metrics'
     }),
     children: (
       <Fragment>

@@ -9,9 +9,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import querystring from 'querystring';
 import React from 'react';
 import { connect } from 'react-redux';
-import chrome from 'ui/chrome';
 import url from 'url';
+import { npStart } from 'ui/new_platform';
 
+import { APP_TITLE } from '../../../common/constants';
 import { DocumentSearchResult, SearchOptions, SearchScope } from '../../../model';
 import { changeSearchScope } from '../../actions';
 import { RootState } from '../../reducers';
@@ -22,6 +23,8 @@ import { CodeResult } from './code_result';
 import { EmptyPlaceholder } from './empty_placeholder';
 import { Pagination } from './pagination';
 import { SideBar } from './side_bar';
+import { trackCodeUiMetric, METRIC_TYPE } from '../../services/ui_metric';
+import { CodeUIUsageMetrics } from '../../../model/usage_telemetry_metrics';
 
 interface Props {
   searchOptions: SearchOptions;
@@ -49,11 +52,18 @@ class SearchPage extends React.PureComponent<Props, State> {
   public searchBar: any = null;
 
   public componentDidMount() {
-    chrome.breadcrumbs.push({ text: `Search` });
+    // track search page load count
+    trackCodeUiMetric(METRIC_TYPE.LOADED, CodeUIUsageMetrics.SEARCH_PAGE_LOAD_COUNT);
+    npStart.core.chrome.setBreadcrumbs([
+      { text: APP_TITLE, href: '#/' },
+      {
+        text: 'Search',
+      },
+    ]);
   }
 
   public componentWillUnmount() {
-    chrome.breadcrumbs.pop();
+    npStart.core.chrome.setBreadcrumbs([{ text: APP_TITLE, href: '#/' }]);
   }
 
   public onLanguageFilterToggled = (lang: string) => {
@@ -220,6 +230,13 @@ class SearchPage extends React.PureComponent<Props, State> {
 
     return (
       <div className="codeContainer__root">
+        <SearchBar
+          searchOptions={this.props.searchOptions}
+          query={this.props.query}
+          onSearchScopeChanged={this.props.onSearchScopeChanged}
+          enableSubmitWhenOptionsChanged={true}
+          ref={(element: any) => (this.searchBar = element)}
+        />
         <div className="codeContainer__rootInner">
           <SideBar
             query={this.props.query}
@@ -231,16 +248,7 @@ class SearchPage extends React.PureComponent<Props, State> {
             onLanguageFilterToggled={this.onLanguageFilterToggled}
             onRepositoryFilterToggled={this.onRepositoryFilterToggled}
           />
-          <div className="codeContainer__search--main">
-            <SearchBar
-              searchOptions={this.props.searchOptions}
-              query={this.props.query}
-              onSearchScopeChanged={this.props.onSearchScopeChanged}
-              enableSubmitWhenOptionsChanged={true}
-              ref={(element: any) => (this.searchBar = element)}
-            />
-            {mainComp}
-          </div>
+          <div className="codeContainer__search--main">{mainComp}</div>
         </div>
       </div>
     );

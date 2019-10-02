@@ -7,24 +7,29 @@
 import React, { FC } from 'react';
 import { Stat, StatsBarStat } from './stat';
 
-interface JobStatsBarStats {
-  activeNodes: StatsBarStat;
+interface Stats {
   total: StatsBarStat;
-  open: StatsBarStat;
   failed: StatsBarStat;
+}
+export interface JobStatsBarStats extends Stats {
+  activeNodes: StatsBarStat;
+  open: StatsBarStat;
   closed: StatsBarStat;
   activeDatafeeds: StatsBarStat;
 }
 
-export interface TransformStatsBarStats {
-  total: StatsBarStat;
+export interface TransformStatsBarStats extends Stats {
   batch: StatsBarStat;
   continuous: StatsBarStat;
-  failed: StatsBarStat;
   started: StatsBarStat;
 }
 
-type StatsBarStats = TransformStatsBarStats | JobStatsBarStats;
+export interface AnalyticStatsBarStats extends Stats {
+  started: StatsBarStat;
+  stopped: StatsBarStat;
+}
+
+type StatsBarStats = TransformStatsBarStats | JobStatsBarStats | AnalyticStatsBarStats;
 type StatsKey = keyof StatsBarStats;
 
 interface StatsBarProps {

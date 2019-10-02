@@ -3,6 +3,7 @@
 ### Setup local environment
 
 #### Kibana
+
 ```
 git clone git@github.com:elastic/kibana.git
 cd kibana/
@@ -15,35 +16,42 @@ yarn start
 To access an elasticsearch instance that has live data you have two options:
 
 ##### A. Connect to Elasticsearch on Cloud (internal devs only)
-Add the following to the kibana config file (config/kibana.dev.yml):
-https://p.elstc.co/paste/fqorvbJi#Yf6tQ8Bxk4nYMWpoPXr1iZ-QnJ1EbKBEM+H/kdPsmBg
+
+Find the credentials for the cluster [here](https://github.com/elastic/apm-dev/blob/master/docs/credentials/apm-ui-clusters.md#apmelstcco)
 
 ##### B. Start Elastic Stack and APM data generators
+
 ```
 git clone git@github.com:elastic/apm-integration-testing.git
 cd apm-integration-testing/
 ./scripts/compose.py start master --all --no-kibana
 ```
-*Docker Compose is required*
 
-### Test
+_Docker Compose is required_
+
+### Unit testing
 
 Note: Run the following commands from `kibana/x-pack`.
 
-#### Run tests
+#### Run unit tests
+
 ```
 node scripts/jest.js plugins/apm --watch
 ```
 
 #### Update snapshots
+
 ```
 node scripts/jest.js plugins/apm --updateSnapshot
 ```
----
+
+### Cypress E2E tests
+
+See the Cypress-specific [readme.md](cypress/README.md)
 
 ### Linting
 
-Note: Run the following commands from `kibana/`.
+_Note: Run the following commands from `kibana/`._
 
 #### Prettier
 
@@ -52,6 +60,7 @@ yarn prettier  "./x-pack/legacy/plugins/apm/**/*.{tsx,ts,js}" --write
 ```
 
 #### ESLint
+
 ```
 yarn eslint ./x-pack/legacy/plugins/apm --fix
 ```

@@ -18,5 +18,5 @@ export interface ChromeRecentlyAccessed
 |  --- | --- |
 |  [add(link, label, id)](./kibana-plugin-public.chromerecentlyaccessed.add.md) | Adds a new item to the recently accessed history. |
 |  [get()](./kibana-plugin-public.chromerecentlyaccessed.get.md) | Gets an Array of the current recently accessed history. |
-|  [get$()](./kibana-plugin-public.chromerecentlyaccessed.get$.md) | Gets an Observable of the array of recently accessed history. |
+|  [get$()](./kibana-plugin-public.chromerecentlyaccessed.get_.md) | Gets an Observable of the array of recently accessed history. |
 

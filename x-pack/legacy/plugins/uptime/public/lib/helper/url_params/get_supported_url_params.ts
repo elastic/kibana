@@ -7,12 +7,16 @@
 import { parseIsPaused } from './parse_is_paused';
 import { parseUrlInt } from './parse_url_int';
 import { CLIENT_DEFAULTS } from '../../../../common/constants';
+import { parseAbsoluteDate } from './parse_absolute_date';
 
 export interface UptimeUrlParams {
+  absoluteDateRangeStart: number;
+  absoluteDateRangeEnd: number;
   autorefreshInterval: number;
   autorefreshIsPaused: boolean;
   dateRangeStart: string;
   dateRangeEnd: string;
+  filters: string;
   // TODO: reintroduce for pagination and sorting
   // monitorListPageIndex: number;
   // monitorListPageSize: number;
@@ -20,13 +24,17 @@ export interface UptimeUrlParams {
   // monitorListSortField: string;
   search: string;
   selectedPingStatus: string;
+  statusFilter: string;
 }
 
 const {
+  ABSOLUTE_DATE_RANGE_START,
+  ABSOLUTE_DATE_RANGE_END,
   AUTOREFRESH_INTERVAL,
   AUTOREFRESH_IS_PAUSED,
   DATE_RANGE_START,
   DATE_RANGE_END,
+  FILTERS,
   // TODO: reintroduce for pagination and sorting
   // MONITOR_LIST_PAGE_INDEX,
   // MONITOR_LIST_PAGE_SIZE,
@@ -34,6 +42,7 @@ const {
   // MONITOR_LIST_SORT_FIELD,
   SEARCH,
   SELECTED_PING_LIST_STATUS,
+  STATUS_FILTER,
 } = CLIENT_DEFAULTS;
 
 /**
@@ -70,6 +79,7 @@ export const getSupportedUrlParams = (params: {
     autorefreshIsPaused,
     dateRangeStart,
     dateRangeEnd,
+    filters,
     // TODO: reintroduce for pagination and sorting
     // monitorListPageIndex,
     // monitorListPageSize,
@@ -77,13 +87,23 @@ export const getSupportedUrlParams = (params: {
     // monitorListSortField,
     search,
     selectedPingStatus,
+    statusFilter,
   } = filteredParams;
 
   return {
+    absoluteDateRangeStart: parseAbsoluteDate(
+      dateRangeStart || DATE_RANGE_START,
+      ABSOLUTE_DATE_RANGE_START
+    ),
+    absoluteDateRangeEnd: parseAbsoluteDate(
+      dateRangeEnd || DATE_RANGE_END,
+      ABSOLUTE_DATE_RANGE_END
+    ),
     autorefreshInterval: parseUrlInt(autorefreshInterval, AUTOREFRESH_INTERVAL),
     autorefreshIsPaused: parseIsPaused(autorefreshIsPaused, AUTOREFRESH_IS_PAUSED),
     dateRangeStart: dateRangeStart || DATE_RANGE_START,
     dateRangeEnd: dateRangeEnd || DATE_RANGE_END,
+    filters: filters || FILTERS,
     // TODO: reintroduce for pagination and sorting
     // monitorListPageIndex: parseUrlInt(monitorListPageIndex, MONITOR_LIST_PAGE_INDEX),
     // monitorListPageSize: parseUrlInt(monitorListPageSize, MONITOR_LIST_PAGE_SIZE),
@@ -92,5 +112,6 @@ export const getSupportedUrlParams = (params: {
     search: search || SEARCH,
     selectedPingStatus:
       selectedPingStatus === undefined ? SELECTED_PING_LIST_STATUS : selectedPingStatus,
+    statusFilter: statusFilter || STATUS_FILTER,
   };
 };

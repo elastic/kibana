@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
 import { collectionActions } from './lib/collection_actions';
-import { ES_TYPES } from '../../common/es_types';
+import { ES_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { AddDeleteButtons } from './add_delete_buttons';
 import { ColorPicker } from './color_picker';
 import { FieldSelect } from './aggs/field_select';
@@ -57,7 +57,7 @@ function newAnnotation() {
   };
 }
 
-const RESTRICT_FIELDS = [ES_TYPES.DATE];
+const RESTRICT_FIELDS = [ES_FIELD_TYPES.DATE];
 
 export class AnnotationsEditor extends Component {
   constructor(props) {
@@ -186,7 +186,7 @@ export class AnnotationsEditor extends Component {
                     defaultMessage="Ignore global filters?"
                   />
                 </EuiFormLabel>
-                <EuiSpacer size="s" />
+                <EuiSpacer size="m" />
                 <YesNo
                   value={model.ignore_global_filters}
                   name="ignore_global_filters"
@@ -200,7 +200,7 @@ export class AnnotationsEditor extends Component {
                     defaultMessage="Ignore panel filters?"
                   />
                 </EuiFormLabel>
-                <EuiSpacer size="s" />
+                <EuiSpacer size="xs" />
                 <YesNo
                   value={model.ignore_panel_filters}
                   name="ignore_panel_filters"

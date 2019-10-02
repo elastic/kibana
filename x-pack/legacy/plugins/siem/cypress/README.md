@@ -6,9 +6,9 @@ that rely on mocked API calls), that execute via [Cypress](https://www.cypress.i
 Cypress tests may be run against:
 
 - A local Kibana instance, interactively or via the command line. Credentials
-are specified via `kibna.dev.yml` or environment variables.
+are specified via `kibana.dev.yml` or environment variables.
 - A remote Elastic Cloud instance (override `baseUrl`), interactively or via
-the command line. Again, credentials are specified via `kibna.dev.yml` or
+the command line. Again, credentials are specified via `kibana.dev.yml` or
 environment variables.
 - As part of CI (override `baseUrl` and pass credentials via the
 `CYPRESS_ELASTICSEARCH_USERNAME` and `CYPRESS_ELASTICSEARCH_PASSWORD`
@@ -240,3 +240,7 @@ Videos are (optionally) output to:
 ```
 target/kibana-siem/cypress/videos
 ```
+
+## Linting 
+
+Optional linting rules for Cypress and linting setup can be found [here](https://github.com/cypress-io/eslint-plugin-cypress#usage)

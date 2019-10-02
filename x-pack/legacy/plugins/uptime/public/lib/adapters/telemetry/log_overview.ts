@@ -5,7 +5,7 @@
  */
 
 import axios from 'axios';
-import { getApiPath } from './get_api_path';
+import { getApiPath } from '../../helper';
 
 /**
  * Generates a function to log a page load of the overview page for Kibana telemtry.

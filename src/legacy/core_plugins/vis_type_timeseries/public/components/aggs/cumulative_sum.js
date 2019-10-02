@@ -25,7 +25,14 @@ import { MetricSelect } from './metric_select';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiFormRow } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
+  EuiFormRow,
+  EuiSpacer,
+} from '@elastic/eui';
 
 export function CumulativeSumAgg(props) {
   const { model, siblings } = props;
@@ -49,6 +56,7 @@ export function CumulativeSumAgg(props) {
               defaultMessage="Aggregation"
             />
           </EuiFormLabel>
+          <EuiSpacer size="xs" />
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -60,7 +68,12 @@ export function CumulativeSumAgg(props) {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('metric')}
-            label={<FormattedMessage id="visTypeTimeseries.cumulativeSum.metricLabel" defaultMessage="Metric" />}
+            label={
+              <FormattedMessage
+                id="visTypeTimeseries.cumulativeSum.metricLabel"
+                defaultMessage="Metric"
+              />
+            }
           >
             <MetricSelect
               onChange={handleSelectChange('field')}

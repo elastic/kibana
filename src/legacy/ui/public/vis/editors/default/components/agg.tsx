@@ -22,9 +22,9 @@ import {
   EuiAccordion,
   EuiToolTip,
   EuiButtonIcon,
+  EuiButtonIconProps,
   EuiSpacer,
   EuiIconTip,
-  Color,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -206,7 +206,7 @@ function DefaultEditorAgg({
             <EuiToolTip key={icon.id} position="bottom" content={icon.tooltip}>
               <EuiButtonIcon
                 iconType={icon.type}
-                color={icon.color as Color}
+                color={icon.color as EuiButtonIconProps['color']}
                 onClick={icon.onClick}
                 aria-label={icon.tooltip}
                 data-test-subj={icon.dataTestSubj}

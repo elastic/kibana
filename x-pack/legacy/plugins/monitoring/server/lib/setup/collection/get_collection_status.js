@@ -317,7 +317,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
   const liveClusterUuid = skipLiveData ? null : await getLiveElasticsearchClusterUuid(req);
-  const isLiveCluster = clusterUuid && liveClusterUuid === clusterUuid;
+  const isLiveCluster = !clusterUuid || liveClusterUuid === clusterUuid;
 
   const PRODUCTS = [
     { name: KIBANA_SYSTEM_ID },
@@ -348,6 +348,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
 
     const productStatus = {
       totalUniqueInstanceCount: 0,
+      totalUniqueInternallyCollectedCount: 0,
       totalUniqueFullyMigratedCount: 0,
       totalUniquePartiallyMigratedCount: 0,
       detected: null,
@@ -357,28 +358,6 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
     const fullyMigratedUuidsMap = {};
     const internalCollectorsUuidsMap = {};
     const partiallyMigratedUuidsMap = {};
-
-    if (product.name === ELASTICSEARCH_SYSTEM_ID && liveEsNodes.length) {
-      productStatus.byUuid = liveEsNodes.reduce((accum, esNode) => ({
-        ...accum,
-        [esNode.id]: {
-          node: esNode,
-          isNetNewUser: true
-        },
-      }), {});
-    }
-
-    if (product.name === KIBANA_SYSTEM_ID && liveKibanaInstance) {
-      const kibanaLiveUuid = get(liveKibanaInstance, 'kibana.uuid');
-      if (kibanaLiveUuid) {
-        productStatus.byUuid = {
-          [kibanaLiveUuid]: {
-            instance: liveKibanaInstance,
-            isNetNewUser: true
-          }
-        };
-      }
-    }
 
     // If there is no data, then they are a net new user
     if (!indexBuckets || indexBuckets.length === 0) {
@@ -410,6 +389,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
         }
       }
       productStatus.totalUniqueInstanceCount = Object.keys(map).length;
+      productStatus.totalUniqueInternallyCollectedCount = Object.keys(internalCollectorsUuidsMap).length;
       productStatus.totalUniquePartiallyMigratedCount = Object.keys(partiallyMigratedUuidsMap).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {
@@ -489,6 +469,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
         ...Object.keys(fullyMigratedUuidsMap),
         ...Object.keys(partiallyMigratedUuidsMap)
       ]).length;
+      productStatus.totalUniqueInternallyCollectedCount = Object.keys(internalCollectorsUuidsMap).length;
       productStatus.totalUniquePartiallyMigratedCount = Object.keys(partiallyMigratedUuidsMap).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {
@@ -526,6 +507,35 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
 
     if (productStatus.totalUniqueInstanceCount === 0) {
       productStatus.detected = detectedProducts[product.name];
+    }
+
+    if (product.name === ELASTICSEARCH_SYSTEM_ID && liveEsNodes.length) {
+      productStatus.byUuid = liveEsNodes.reduce((byUuid, esNode) => {
+        if (!byUuid[esNode.id]) {
+          productStatus.totalUniqueInstanceCount++;
+          return {
+            ...byUuid,
+            [esNode.id]: {
+              node: esNode,
+              isNetNewUser: true
+            },
+          };
+        }
+        return byUuid;
+      }, productStatus.byUuid);
+    }
+
+    if (product.name === KIBANA_SYSTEM_ID && liveKibanaInstance) {
+      const kibanaLiveUuid = get(liveKibanaInstance, 'kibana.uuid');
+      if (kibanaLiveUuid && !productStatus.byUuid[kibanaLiveUuid]) {
+        productStatus.totalUniqueInstanceCount++;
+        productStatus.byUuid = {
+          [kibanaLiveUuid]: {
+            instance: liveKibanaInstance,
+            isNetNewUser: true
+          }
+        };
+      }
     }
 
     return {

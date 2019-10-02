@@ -7,6 +7,7 @@
 import * as Rx from 'rxjs';
 import { resolve } from 'path';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
+import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { createOptionalPlugin } from '../../server/lib/optional_plugin';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
@@ -16,17 +17,13 @@ import { getActiveSpace } from './server/lib/get_active_space';
 import { getSpaceSelectorUrl } from './server/lib/get_space_selector_url';
 import { migrateToKibana660 } from './server/lib/migrations';
 import { plugin } from './server/new_platform';
-import {
-  SpacesInitializerContext,
-  SpacesCoreSetup,
-  SpacesHttpServiceSetup,
-} from './server/new_platform/plugin';
-import { initSpacesRequestInterceptors } from './server/lib/request_interceptors';
 import { SecurityPlugin } from '../security';
 import { SpacesServiceSetup } from './server/new_platform/spaces_service/spaces_service';
+import { initSpaceSelectorView } from './server/routes/views';
 
 export interface SpacesPlugin {
   getSpaceId: SpacesServiceSetup['getSpaceId'];
+  getActiveSpace: SpacesServiceSetup['getActiveSpace'];
   spaceIdToNamespace: SpacesServiceSetup['spaceIdToNamespace'];
   namespaceToSpaceId: SpacesServiceSetup['namespaceToSpaceId'];
   getBasePath: SpacesServiceSetup['getBasePath'];
@@ -122,8 +119,7 @@ export const spaces = (kibana: Record<string, any>) =>
 
     async init(server: Server) {
       const kbnServer = (server as unknown) as KbnServer;
-      const initializerContext = ({
-        legacyConfig: server.config(),
+      const initializerContext = {
         config: {
           create: () => {
             return Rx.of({
@@ -140,29 +136,9 @@ export const spaces = (kibana: Record<string, any>) =>
             );
           },
         },
-      } as unknown) as SpacesInitializerContext;
+      } as PluginInitializerContext;
 
-      const spacesHttpService: SpacesHttpServiceSetup = {
-        ...kbnServer.newPlatform.setup.core.http,
-        route: server.route.bind(server),
-      };
-
-      const core: SpacesCoreSetup = {
-        http: spacesHttpService,
-        elasticsearch: kbnServer.newPlatform.setup.core.elasticsearch,
-        savedObjects: server.savedObjects,
-        usage: server.usage,
-        tutorial: {
-          addScopedTutorialContextFactory: server.addScopedTutorialContextFactory,
-        },
-        capabilities: {
-          registerCapabilitiesModifier: server.registerCapabilitiesModifier,
-        },
-        auditLogger: {
-          create: (pluginId: string) =>
-            new AuditLogger(server, pluginId, server.config(), server.plugins.xpack_main.info),
-        },
-      };
+      const core = (kbnServer.newPlatform.setup.core as unknown) as CoreSetup;
 
       const plugins = {
         xpackMain: server.plugins.xpack_main,
@@ -177,21 +153,38 @@ export const spaces = (kibana: Record<string, any>) =>
         spaces: this,
       };
 
-      const { spacesService, log } = await plugin(initializerContext).setup(core, plugins);
+      const { spacesService, registerLegacyAPI } = await plugin(initializerContext).setup(
+        core,
+        plugins
+      );
 
-      initSpacesRequestInterceptors({
-        config: initializerContext.legacyConfig,
-        http: core.http,
-        getHiddenUiAppById: server.getHiddenUiAppById,
-        onPostAuth: handler => {
-          server.ext('onPostAuth', handler);
+      const config = server.config();
+
+      registerLegacyAPI({
+        router: server.route.bind(server),
+        legacyConfig: {
+          serverBasePath: config.get('server.basePath'),
+          serverDefaultRoute: config.get('server.defaultRoute'),
+          kibanaIndex: config.get('kibana.index'),
         },
-        log,
-        spacesService,
-        xpackMain: plugins.xpackMain,
+        savedObjects: server.savedObjects,
+        usage: server.usage,
+        tutorial: {
+          addScopedTutorialContextFactory: server.addScopedTutorialContextFactory,
+        },
+        capabilities: {
+          registerCapabilitiesModifier: server.registerCapabilitiesModifier,
+        },
+        auditLogger: {
+          create: (pluginId: string) =>
+            new AuditLogger(server, pluginId, server.config(), server.plugins.xpack_main.info),
+        },
       });
 
+      initSpaceSelectorView(server);
+
       server.expose('getSpaceId', (request: any) => spacesService.getSpaceId(request));
+      server.expose('getActiveSpace', spacesService.getActiveSpace);
       server.expose('spaceIdToNamespace', spacesService.spaceIdToNamespace);
       server.expose('namespaceToSpaceId', spacesService.namespaceToSpaceId);
       server.expose('getBasePath', spacesService.getBasePath);
