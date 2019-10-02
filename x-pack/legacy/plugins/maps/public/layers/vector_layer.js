@@ -133,15 +133,14 @@ export class VectorLayer extends AbstractLayer {
 
   getInjectedData() {
     const featureCollection = super.getInjectedData();
-    if (featureCollection) {
-      // Set default visible property on data
-      featureCollection.features.forEach(
-        feature => _.set(feature, `properties.${FEATURE_VISIBLE_PROPERTY_NAME}`, true)
-      );
-      return featureCollection;
-    } else {
+    if (!featureCollection) {
       return null;
     }
+    // Set default visible property on data
+    featureCollection.features.forEach(
+      feature => _.set(feature, `properties.${FEATURE_VISIBLE_PROPERTY_NAME}`, true)
+    );
+    return featureCollection;
   }
 
   getCustomIconAndTooltipContent() {
