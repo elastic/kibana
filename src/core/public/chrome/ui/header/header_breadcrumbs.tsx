@@ -64,7 +64,11 @@ export class HeaderBreadcrumbs extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiHeaderBreadcrumbs breadcrumbs={this.getBreadcrumbs()} data-test-subj="breadcrumbs" />
+      <EuiHeaderBreadcrumbs
+        breadcrumbs={this.getBreadcrumbs()}
+        max={10}
+        data-test-subj="breadcrumbs"
+      />
     );
   }
 

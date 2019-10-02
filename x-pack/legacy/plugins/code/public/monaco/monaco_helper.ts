@@ -5,7 +5,8 @@
  */
 
 import { editor } from 'monaco-editor';
-import { ResizeChecker } from 'ui/resize_checker';
+
+import { ResizeChecker } from '../components/shared/resize_checker';
 import { EditorActions } from '../components/editor/editor';
 
 import { toCanonicalUrl } from '../../common/uri_util';
