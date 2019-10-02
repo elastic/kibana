@@ -7,14 +7,16 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import './page.test.mocks';
-import { Page } from './page';
+import { TransformManagementSection } from './transform_management_section';
 
 jest.mock('ui/new_platform');
+jest.mock('ui/timefilter', () => {
+  return {};
+});
 
-describe('Transform: Job List <Page />', () => {
+describe('Transform: <TransformManagementSection />', () => {
   test('Minimal initialization', () => {
-    const wrapper = shallow(<Page />);
+    const wrapper = shallow(<TransformManagementSection />);
 
     expect(wrapper).toMatchSnapshot();
   });

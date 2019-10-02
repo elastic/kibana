@@ -14,8 +14,8 @@ import { getAppProviders, useAppDependencies } from './app_dependencies';
 import { AuthorizationContext } from './lib/authorization';
 import { AppCore, AppPlugins } from './types';
 
-import { Page as CreateTransform } from './sections/create_transform/page';
-import { Page as TransformManagement } from './sections/transform_management/page';
+import { CreateTransformSection } from './sections/create_transform';
+import { TransformManagementSection } from './sections/transform_management';
 
 export const App: FC = () => {
   const { FormattedMessage } = useAppDependencies().core.i18n;
@@ -39,8 +39,15 @@ export const App: FC = () => {
   return (
     <div data-test-subj="transformApp">
       <Switch>
-        <Route path={`${BASE_PATH}/create_transform/:savedObjectId`} component={CreateTransform} />
-        <Route exact path={`${BASE_PATH}/transform_management`} component={TransformManagement} />
+        <Route
+          path={`${BASE_PATH}/create_transform/:savedObjectId`}
+          component={CreateTransformSection}
+        />
+        <Route
+          exact
+          path={`${BASE_PATH}/transform_management`}
+          component={TransformManagementSection}
+        />
         <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />
       </Switch>
     </div>

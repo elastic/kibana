@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('ui/timefilter', () => {
-  return {};
-});
+export { CreateTransformSection } from './create_transform_section';

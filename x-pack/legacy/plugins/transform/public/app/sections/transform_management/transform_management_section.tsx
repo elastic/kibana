@@ -116,7 +116,7 @@ export const TransformManagement: FC = () => {
   );
 };
 
-export const Page: FC = () => {
+export const TransformManagementSection: FC = () => {
   // Set breadcrumb and page title
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(BREADCRUMB_SECTION.HOME);
