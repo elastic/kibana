@@ -20,6 +20,7 @@ import { connect } from 'react-redux';
 import { MonitorSummary, CheckMonitor } from '../../../../common/graphql/types';
 import { UptimeSettingsContext } from '../../../contexts';
 import { AppState } from '../../../state';
+import { fetchMonitorDetails, MonitorDetailsRequest } from '../../../state/actions/monitor';
 
 const ContainerDiv = styled.div`
   padding: 10px;
@@ -28,12 +29,16 @@ const ContainerDiv = styled.div`
 
 interface MonitorListDrawerProps {
   summary?: MonitorSummary;
+  loadMonitorDetails: typeof fetchMonitorDetails;
 }
 
 /**
  * The elements shown when the user expands the monitor list rows.
  */
-export const MonitorListDrawerComponent = ({ summary }: MonitorListDrawerProps) => {
+export const MonitorListDrawerComponent = ({
+  summary,
+  loadMonitorDetails,
+}: MonitorListDrawerProps) => {
   const {
     colors: { success, danger },
   } = useContext(UptimeSettingsContext);
@@ -49,6 +54,12 @@ export const MonitorListDrawerComponent = ({ summary }: MonitorListDrawerProps) 
     if (check.monitor.status === 'down') {
       downLocations.push(check.monitor);
     }
+  });
+
+  const checkGroup: string = get(summary, 'state.checks[0].agent.id');
+  loadMonitorDetails({
+    checkGroup,
+    monitorId: summary.monitor_id,
   });
   const displayMonitorStatus = (locations: CheckMonitor[], color: string, titleTxt: string) => {
     return (
@@ -87,7 +98,9 @@ const mapStateToProps = (state: AppState) => ({
   // monitorDetails: getMonitorDetails(state),
 });
 
-const mapDispatchToProps = (dispatch: any) => ({});
+const mapDispatchToProps = (dispatch: any) => ({
+  loadMonitorDetails: (data: MonitorDetailsRequest) => dispatch(fetchMonitorDetails(data)),
+});
 
 export const MonitorListDrawer = connect(
   mapStateToProps,

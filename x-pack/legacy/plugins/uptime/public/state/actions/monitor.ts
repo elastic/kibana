@@ -4,23 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const GET_MONITOR_DETAILS = 'GET_MONITOR_DETAILS';
+export const FETCH_MONITOR_DETAILS = 'FETCH_MONITOR_DETAILS';
+export const FETCH_MONITOR_DETAILS_SUCCESS = 'FETCH_MONITOR_DETAILS_SUCCESS';
+export const FETCH_MONITOR_DETAILS_FAIL = 'FETCH_MONITOR_DETAILS_FAIL';
 
-export interface MonitorState {
-  id: string;
-  open: boolean;
+export interface MonitorDetailsState {
+  error: Error;
 }
 
-interface SetIntegrationPopoverAction {
-  type: typeof GET_MONITOR_DETAILS;
-  payload: MonitorState;
+export interface MonitorDetailsRequest {
+  monitorId: string;
+  checkGroup: string;
 }
 
-export function toggleIntegrationsPopover(popoverState: MonitorState): SetIntegrationPopoverAction {
+interface GetMonitorDetailsAction {
+  type: typeof FETCH_MONITOR_DETAILS;
+  payload: MonitorDetailsRequest;
+}
+
+interface GetMonitorDetailsSuccessAction {
+  type: typeof FETCH_MONITOR_DETAILS_SUCCESS;
+  payload: MonitorDetailsState;
+}
+
+interface GetMonitorDetailsFailAction {
+  type: typeof FETCH_MONITOR_DETAILS_FAIL;
+  payload: any;
+}
+
+export function fetchMonitorDetails(
+  monitorDetailsState: MonitorDetailsRequest
+): GetMonitorDetailsAction {
   return {
-    type: GET_MONITOR_DETAILS,
-    payload: popoverState,
+    type: FETCH_MONITOR_DETAILS,
+    payload: monitorDetailsState,
   };
 }
 
-export type UiActionTypes = SetIntegrationPopoverAction;
+export type MonitorActionTypes =
+  | GetMonitorDetailsAction
+  | GetMonitorDetailsSuccessAction
+  | GetMonitorDetailsFailAction;

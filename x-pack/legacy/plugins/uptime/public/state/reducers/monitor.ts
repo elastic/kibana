@@ -4,26 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UiActionTypes, MonitorState, GET_MONITOR_DETAILS } from '../actions/monitor';
+import {
+  MonitorActionTypes,
+  MonitorDetailsState,
+  FETCH_MONITOR_DETAILS,
+  FETCH_MONITOR_DETAILS_SUCCESS,
+  FETCH_MONITOR_DETAILS_FAIL,
+} from '../actions/monitor';
 
-export interface UiState {
-  integrationsPopoverOpen: MonitorState | null;
+export interface MonitorState {
+  monitorDetails: MonitorDetailsState[] | [];
 }
 
-const initialState: UiState = {
-  integrationsPopoverOpen: null,
+const initialState: MonitorState = {
+  monitorDetails: [],
 };
 
-export function uiReducer(state = initialState, action: UiActionTypes): UiState {
+export function uiReducer(state = initialState, action: MonitorActionTypes): MonitorState {
   switch (action.type) {
-    case GET_MONITOR_DETAILS:
-      const popoverState = action.payload;
+    case FETCH_MONITOR_DETAILS:
       return {
         ...state,
-        integrationsPopoverOpen: {
-          id: popoverState.id,
-          open: popoverState.open,
-        },
+      };
+    case FETCH_MONITOR_DETAILS_SUCCESS:
+      const monitorDetails = action.payload;
+      return {
+        ...state,
+        monitorDetails: [...state.monitorDetails, monitorDetails],
+      };
+    case FETCH_MONITOR_DETAILS_FAIL:
+      return {
+        ...state,
       };
     default:
       return state;

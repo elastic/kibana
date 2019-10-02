@@ -16,12 +16,6 @@ import { getApiPath } from '../../helper';
 export const getIndexPattern = async (basePath?: string, setter?: (data: unknown) => void) => {
   try {
     const { data } = await axios.get(getApiPath('/api/uptime/index_pattern', basePath));
-    const { data2 } = await axios.get(
-      getApiPath(
-        `/api/uptime/monitor/details?monitorId=bad-ssl&checkGroup=8f9a37fb-573a-4fdc-9895-440a5b39c250`,
-        basePath
-      )
-    );
 
     if (setter) {
       setter(data);
