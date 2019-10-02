@@ -21,6 +21,10 @@ jest.mock('ui/documentation_links', () => ({
   DOC_LINK_VERSION: 'current'
 }));
 
+jest.mock('../../../../common', () => ({
+  formatTimestampToDuration: () => `0 seconds`,
+}));
+
 const PRODUCTS = [
   {
     name: ELASTICSEARCH_SYSTEM_ID
@@ -76,7 +80,8 @@ describe('Flyout', () => {
             <Flyout
               onClose={() => {}}
               product={{
-                isPartiallyMigrated: true
+                isPartiallyMigrated: true,
+                lastInternallyCollectedTimestamp: 0,
               }}
               meta={{
                 secondsAgo: 30

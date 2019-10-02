@@ -59,7 +59,7 @@ exports[`setupMode SetupModeBadge should use a text status if internal collectio
 
 exports[`setupMode SetupModeBadge unknown should render each product consistently 1`] = `
 <EuiBadge
-  color="hollow"
+  color="danger"
   iconType="flag"
 >
   N/A
