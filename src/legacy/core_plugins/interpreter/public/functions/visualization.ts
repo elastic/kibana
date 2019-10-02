@@ -101,7 +101,7 @@ export const visualization = () => ({
         });
 
         Object.keys(schemas).forEach(key => {
-          schemas[key].forEach(i => {
+          schemas[key].forEach((i: any) => {
             if (context.columns[i] && context.columns[i].aggConfig) {
               context.columns[i].aggConfig.schema = key;
             }

@@ -68,7 +68,7 @@ export const kibanaContext = () => ({
     }
 
     if (context.filters) {
-      filters = filters.concat(context.filters).filter(f => !f.meta.disabled);
+      filters = filters.concat(context.filters).filter((f: any) => !f.meta.disabled);
     }
 
     const timeRange = args.timeRange ? JSON.parse(args.timeRange) : context.timeRange;

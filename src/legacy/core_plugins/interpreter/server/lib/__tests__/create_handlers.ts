@@ -34,7 +34,7 @@ const mockServer = {
   },
   config: () => ({
     has: () => false,
-    get: val => val,
+    get: (val: any) => val,
   }),
   info: {
     uri: 'serveruri',
