@@ -6,13 +6,13 @@
 
 import { shallow, mount } from 'enzyme';
 import React, { ChangeEvent } from 'react';
-import { EuiComboBox } from '@elastic/eui';
 import { IndexPatternPrivateState, IndexPatternColumn } from './indexpattern';
 import { createMockedDragDropContext } from './mocks';
 import { InnerIndexPatternDataPanel, IndexPatternDataPanel, MemoizedDataPanel } from './datapanel';
 import { FieldItem } from './field_item';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
+import { ChangeIndexPattern } from './change_indexpattern';
 
 jest.mock('ui/new_platform');
 jest.mock('./loader');
@@ -115,6 +115,12 @@ const initialState: IndexPatternPrivateState = {
           aggregatable: true,
           searchable: true,
         },
+        {
+          name: 'client',
+          type: 'ip',
+          aggregatable: true,
+          searchable: true,
+        },
       ],
     },
     '2': {
@@ -207,8 +213,6 @@ describe('IndexPattern Data Panel', () => {
       dragDropContext: createMockedDragDropContext(),
       currentIndexPatternId: '1',
       indexPatterns: initialState.indexPatterns,
-      showIndexPatternSwitcher: false,
-      setShowIndexPatternSwitcher: jest.fn(),
       onChangeIndexPattern: jest.fn(),
       core,
       dateRange: {
@@ -223,24 +227,22 @@ describe('IndexPattern Data Panel', () => {
 
   it('should update index pattern of layer on switch if it is a single empty one', async () => {
     const setStateSpy = jest.fn();
+    const state = {
+      ...initialState,
+      layers: { first: { indexPatternId: '1', columnOrder: [], columns: {} } },
+    };
     const wrapper = shallow(
       <IndexPatternDataPanel
         {...defaultProps}
-        state={{
-          ...initialState,
-          layers: { first: { indexPatternId: '1', columnOrder: [], columns: {} } },
-        }}
+        state={state}
         setState={setStateSpy}
         dragDropContext={{ dragging: {}, setDragging: () => {} }}
       />
     );
 
-    act(() => {
-      wrapper.find(MemoizedDataPanel).prop('setShowIndexPatternSwitcher')!(true);
-    });
     wrapper.find(MemoizedDataPanel).prop('onChangeIndexPattern')!('2');
 
-    expect(setStateSpy).toHaveBeenCalledWith({
+    expect(setStateSpy.mock.calls[0][0](state)).toEqual({
       ...initialState,
       layers: { first: { indexPatternId: '2', columnOrder: [], columns: {} } },
       currentIndexPatternId: '2',
@@ -265,12 +267,12 @@ describe('IndexPattern Data Panel', () => {
       />
     );
 
-    act(() => {
-      wrapper.find(MemoizedDataPanel).prop('setShowIndexPatternSwitcher')!(true);
-    });
     wrapper.find(MemoizedDataPanel).prop('onChangeIndexPattern')!('2');
 
-    expect(setStateSpy).toHaveBeenCalledWith({ ...state, currentIndexPatternId: '2' });
+    expect(setStateSpy.mock.calls[0][0](state)).toEqual({
+      ...state,
+      currentIndexPatternId: '2',
+    });
   });
 
   it('should not update index pattern of layer on switch if there are columns configured', async () => {
@@ -294,12 +296,12 @@ describe('IndexPattern Data Panel', () => {
       />
     );
 
-    act(() => {
-      wrapper.find(MemoizedDataPanel).prop('setShowIndexPatternSwitcher')!(true);
-    });
     wrapper.find(MemoizedDataPanel).prop('onChangeIndexPattern')!('2');
 
-    expect(setStateSpy).toHaveBeenCalledWith({ ...state, currentIndexPatternId: '2' });
+    expect(setStateSpy.mock.calls[0][0](state)).toEqual({
+      ...state,
+      currentIndexPatternId: '2',
+    });
   });
 
   it('should render a warning if there are no index patterns', () => {
@@ -312,20 +314,7 @@ describe('IndexPattern Data Panel', () => {
   it('should call setState when the index pattern is switched', async () => {
     const wrapper = shallow(<InnerIndexPatternDataPanel {...defaultProps} />);
 
-    wrapper.find('[data-test-subj="indexPattern-switch-link"]').simulate('click');
-
-    expect(defaultProps.setShowIndexPatternSwitcher).toHaveBeenCalledWith(true);
-
-    wrapper.setProps({ showIndexPatternSwitcher: true });
-
-    const comboBox = wrapper.find(EuiComboBox);
-
-    comboBox.prop('onChange')!([
-      {
-        label: initialState.indexPatterns['2'].title,
-        value: '2',
-      },
-    ]);
+    wrapper.find(ChangeIndexPattern).prop('onChangeIndexPattern')('2');
 
     expect(defaultProps.onChangeIndexPattern).toHaveBeenCalledWith('2');
   });
@@ -375,6 +364,10 @@ describe('IndexPattern Data Panel', () => {
               name: 'source',
               type: 'string',
             },
+            {
+              name: 'client',
+              type: 'ip',
+            },
           ],
         }),
       });
@@ -423,6 +416,7 @@ describe('IndexPattern Data Panel', () => {
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
         'bytes',
+        'client',
         'memory',
         'source',
         'timestamp',
@@ -487,6 +481,7 @@ describe('IndexPattern Data Panel', () => {
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
         'bytes',
+        'client',
         'memory',
         'source',
         'timestamp',

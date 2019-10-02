@@ -30,7 +30,10 @@ export const EventRateChart: FC<Props> = ({
   loading = false,
 }) => {
   return (
-    <div style={{ width, height }} data-test-subj="mlEventRateChart">
+    <div
+      style={{ width, height }}
+      data-test-subj={`mlEventRateChart ${eventRateChartData.length ? 'withData' : 'empty'}`}
+    >
       <LoadingWrapper height={height} hasData={eventRateChartData.length > 0} loading={loading}>
         <Chart>
           {showAxis === true && <Axes />}

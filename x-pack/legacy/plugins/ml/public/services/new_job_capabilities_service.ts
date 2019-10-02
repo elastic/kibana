@@ -15,7 +15,7 @@ import {
   NewJobCaps,
   EVENT_RATE_FIELD_ID,
 } from '../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../common/constants/field_types';
+import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 import {
   ML_JOB_AGGREGATION,
   KIBANA_AGGREGATION,

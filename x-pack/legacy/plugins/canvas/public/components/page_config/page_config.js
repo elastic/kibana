@@ -27,6 +27,7 @@ export const PageConfig = ({
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFormRow
+        display="rowCompressed"
         label={strings.getBackgroundColorLabel()}
         helpText={strings.getBackgroundColorDescription()}
       >
@@ -37,15 +38,16 @@ export const PageConfig = ({
         page, we use the second page's transition) */}
       {pageIndex > 0 ? (
         <Fragment>
-          <EuiFormRow label={strings.getTransitionLabel()} compressed>
+          <EuiFormRow label={strings.getTransitionLabel()} display="rowCompressed">
             <EuiSelect
               value={transition ? transition.name : ''}
               options={transitions}
+              compressed
               onChange={e => setTransition(e.target.value)}
             />
           </EuiFormRow>
           {transition ? (
-            <EuiFormRow label={strings.getTransitionPreviewLabel()}>
+            <EuiFormRow label={strings.getTransitionPreviewLabel()} display="rowCompressed">
               <EuiCard
                 title=""
                 description=""

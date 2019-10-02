@@ -30,7 +30,7 @@ import { documentationLinksService } from '../../services/documentation';
 import { useLoadRepositoryTypes } from '../../services/http';
 import { textService } from '../../services/text';
 import { RepositoryValidation } from '../../services/validation';
-import { SectionError, SectionLoading, RepositoryTypeLogo } from '../';
+import { SectionError, SectionLoading, RepositoryTypeLogo, Error } from '../';
 
 interface Props {
   repository: Repository | EmptyRepository;
@@ -177,7 +177,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
               defaultMessage="Error loading repository types"
             />
           }
-          error={repositoryTypesError}
+          error={repositoryTypesError as Error}
         />
       );
     }

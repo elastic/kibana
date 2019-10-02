@@ -115,10 +115,9 @@ export const datatableVisualization: Visualization<
   switchVisualizationType: (_, state) => state,
 
   initialize(frame, state) {
-    const layerId = Object.keys(frame.datasourceLayers)[0] || frame.addNewLayer();
     return (
       state || {
-        layers: [newLayerState(layerId)],
+        layers: [newLayerState(frame.addNewLayer())],
       }
     );
   },

@@ -136,7 +136,6 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
                   )}
                 </KpiHostDetailsQuery>
 
-                <EuiHorizontalRule />
                 <SiemNavigation
                   navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
                   display="default"

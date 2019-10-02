@@ -21,6 +21,7 @@ import {
   EuiAccordion,
   EuiText,
   EuiButton,
+  EuiFormRowhasEmptyLabelSpace,
 } from '@elastic/eui';
 import { DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
 import { ComponentStrings } from '../../../i18n';
@@ -73,37 +74,38 @@ export class WorkpadConfig extends PureComponent {
 
         <EuiSpacer size="m" />
 
-        <EuiFormRow label="Name" compressed>
-          <EuiFieldText value={name} onChange={e => setName(e.target.value)} />
+        <EuiFormRow label="Name" display="rowCompressed">
+          <EuiFieldText compressed value={name} onChange={e => setName(e.target.value)} />
         </EuiFormRow>
 
         <EuiSpacer size="s" />
 
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem>
-            <EuiFormRow label={strings.getPageWidthLabel()} compressed>
+            <EuiFormRow label={strings.getPageWidthLabel()} display="rowCompressed">
               <EuiFieldNumber
+                compressed
                 onChange={e => setSize({ width: Number(e.target.value), height: size.height })}
                 value={size.width}
               />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormRow hasEmptyLabelSpace>
+            <EuiFormRowhasEmptyLabelSpace display="rowCompressed" hasEmptyLabelSpace>
               <EuiToolTip position="bottom" content={strings.getFlipDimensionTooltip()}>
                 <EuiButtonIcon
                   iconType="merge"
                   color="text"
                   onClick={rotate}
                   aria-label={strings.getFlipDimensionAriaLabel()}
-                  style={{ marginBottom: 12 }}
                 />
               </EuiToolTip>
-            </EuiFormRow>
+            </EuiFormRowhasEmptyLabelSpace>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow label={strings.getPageHeightLabel()} compressed>
+            <EuiFormRow label={strings.getPageHeightLabel()} display="rowCompressed">
               <EuiFieldNumber
+                compressed
                 onChange={e => setSize({ height: Number(e.target.value), width: size.width })}
                 value={size.height}
               />
@@ -148,6 +150,7 @@ export class WorkpadConfig extends PureComponent {
             <EuiTextArea
               aria-label={strings.getGlobalCSSTooltip()}
               value={css}
+              compressed
               onChange={e => this.setState({ css: e.target.value })}
               rows={10}
             />

@@ -16,7 +16,7 @@ yarn cypress run
 
 ### Connect to Elasticsearch on Cloud (internal devs only)
 
-Update kibana.yml with the [cloud credentials](https://p.elstc.co/paste/nRxc9Fuq#0GKJvmrJajnl-PjgBZSnpItKaixWgPb2xn6DCyGD6nw). The cloud instance contains the static data set
+Find the credentials for the cluster [here](https://github.com/elastic/apm-dev/blob/master/docs/credentials/apm-ui-clusters.md#e2e-cluster). The cloud instance contains the static data set
 
 ### Kibana
 

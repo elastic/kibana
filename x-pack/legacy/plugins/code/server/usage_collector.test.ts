@@ -120,6 +120,10 @@ describe('Code Usage Collector', () => {
             enabled: 0,
             key: 'Go',
           },
+          {
+            enabled: 1,
+            key: 'Ctags',
+          },
         ],
       });
     });
