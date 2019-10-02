@@ -73,12 +73,6 @@ export function checkLicense(xpackLicenseInfo) {
   }
 
   // License is valid and active
-  console.log('valid and active', {
-    isLicenseActive,
-    isLicenseModeValid,
-    licenseType,
-    isSecurityEnabled
-  });
   return {
     isAvailable: true,
     enableLinks: true,
