@@ -21,7 +21,7 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import { setup as data } from '../../../data/public/legacy';
-import { start as visualizations } from '../../../visualizations/public/legacy';
+import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
 
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { PersistedState } from 'ui/persisted_state';
