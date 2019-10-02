@@ -37,6 +37,7 @@ import { config as savedObjectsConfig } from './saved_objects';
 import { mapToObject } from '../utils/';
 import { ContextService } from './context';
 import { SavedObjectsServiceSetup } from './saved_objects/saved_objects_service';
+import { RequestHandlerContext } from '.';
 
 const coreId = Symbol('core');
 
@@ -149,19 +150,23 @@ export class Server {
     elasticsearch: ElasticsearchServiceSetup;
     savedObjects: SavedObjectsServiceSetup;
   }) {
-    coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req) => {
-      const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(take(1)).toPromise();
-      const dataClient = await coreSetup.elasticsearch.dataClient$.pipe(take(1)).toPromise();
-      return {
-        savedObjects: {
-          client: coreSetup.savedObjects.clientProvider.getClient(req),
-        },
-        elasticsearch: {
-          adminClient: adminClient.asScoped(req),
-          dataClient: dataClient.asScoped(req),
-        },
-      };
-    });
+    coreSetup.http.registerRouteHandlerContext(
+      coreId,
+      'core',
+      async (context, req): Promise<RequestHandlerContext['core']> => {
+        const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(take(1)).toPromise();
+        const dataClient = await coreSetup.elasticsearch.dataClient$.pipe(take(1)).toPromise();
+        return {
+          savedObjects: {
+            client: coreSetup.savedObjects.clientProvider.getClient(req),
+          },
+          elasticsearch: {
+            adminClient: adminClient.asScoped(req),
+            dataClient: dataClient.asScoped(req),
+          },
+        };
+      }
+    );
   }
 
   public async setupConfigSchemas() {

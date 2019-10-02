@@ -56,6 +56,7 @@ import {
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
 import { SavedObjectsServiceStart } from './saved_objects';
+import { SavedObjectsClientContract } from './saved_objects/types';
 
 export { bootstrap } from './bootstrap';
 export { ConfigPath, ConfigService } from './config';
@@ -179,6 +180,9 @@ export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
  */
 export interface RequestHandlerContext {
   core: {
+    savedObjects: {
+      client: SavedObjectsClientContract;
+    };
     elasticsearch: {
       dataClient: ScopedClusterClient;
       adminClient: ScopedClusterClient;

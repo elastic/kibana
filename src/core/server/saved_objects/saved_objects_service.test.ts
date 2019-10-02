@@ -21,6 +21,7 @@ jest.mock('./migrations/kibana/kibana_migrator');
 
 import { SavedObjectsService, SavedObjectsSetupDeps } from './saved_objects_service';
 import { mockCoreContext } from '../core_context.mock';
+// @ts-ignore Typescript doesn't know about the jest mock
 import { KibanaMigrator, mockKibanaMigratorInstance } from './migrations/kibana/kibana_migrator';
 import { of } from 'rxjs';
 import elasticsearch from 'elasticsearch';
