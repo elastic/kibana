@@ -48,8 +48,13 @@ function renderBadges(badges: IAction[], embeddable: IEmbeddable) {
   ));
 }
 
-function isVisualizeEmbeddable(embeddable: IEmbeddable | any): embeddable is any {
-  return embeddable.type === 'VISUALIZE_EMBEDDABLE_TYPE';
+const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
+type VisualizeEmbeddable = any;
+
+function isVisualizeEmbeddable(
+  embeddable: IEmbeddable | VisualizeEmbeddable
+): embeddable is VisualizeEmbeddable {
+  return embeddable.type === VISUALIZE_EMBEDDABLE_TYPE;
 }
 
 export function PanelHeader({

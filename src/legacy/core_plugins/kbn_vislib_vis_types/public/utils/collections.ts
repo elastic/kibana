@@ -331,4 +331,8 @@ export {
   getPositions,
   getRotateOptions,
   getScaleTypes,
+  getInterpolationModes,
+  getChartTypes,
+  getChartModes,
+  getAxisModes,
 };

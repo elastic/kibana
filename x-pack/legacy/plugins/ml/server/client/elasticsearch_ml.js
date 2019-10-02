@@ -287,14 +287,11 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.startDataFrameTransform = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/<%=transformId%>/_start?&force=<%=force%>',
+        fmt: '/_data_frame/transforms/<%=transformId%>/_start',
         req: {
           transformId: {
             type: 'string'
           },
-          force: {
-            type: 'boolean'
-          }
         }
       }
     ],
