@@ -97,7 +97,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
       const newUrlState = {
         ...mockProps.urlState,
         [CONSTANTS.kqlQuery]: {
-          ...getFilterQuery(CONSTANTS.networkPage),
+          ...getFilterQuery(),
           queryLocation: CONSTANTS.networkPage,
         },
       };

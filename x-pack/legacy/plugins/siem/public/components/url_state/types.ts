@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Filter } from '@kbn/es-query';
+import ApolloClient from 'apollo-client';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
+import { Query } from 'src/plugins/data/common';
 
-import ApolloClient from 'apollo-client';
-import { KueryFilterQuery } from '../../store';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { DispatchUpdateTimeline } from '../open_timeline/types';
@@ -19,14 +20,14 @@ import { CONSTANTS, UrlStateType } from './constants';
 export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
   CONSTANTS.kqlQuery,
   CONSTANTS.timerange,
-  CONSTANTS.timelineId,
+  CONSTANTS.timeline,
 ];
 
 export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
-  host: [CONSTANTS.kqlQuery, CONSTANTS.timerange, CONSTANTS.timelineId],
-  network: [CONSTANTS.kqlQuery, CONSTANTS.timerange, CONSTANTS.timelineId],
-  timeline: [CONSTANTS.timelineId, CONSTANTS.timerange],
-  overview: [CONSTANTS.timelineId, CONSTANTS.timerange],
+  host: [CONSTANTS.kqlQuery, CONSTANTS.timerange, CONSTANTS.timeline],
+  network: [CONSTANTS.kqlQuery, CONSTANTS.timerange, CONSTANTS.timeline],
+  timeline: [CONSTANTS.timeline, CONSTANTS.timerange],
+  overview: [CONSTANTS.timeline, CONSTANTS.timerange],
 };
 
 export type LocationTypes =
@@ -39,14 +40,25 @@ export type LocationTypes =
   | CONSTANTS.unknown;
 
 export interface KqlQuery {
-  filterQuery: KueryFilterQuery | null;
-  queryLocation: LocationTypes | null;
+  appQuery: Query;
+  filters: Filter[];
+}
+
+export interface SavedQuery {
+  savedQueryId: string;
+}
+
+export type UrlSateQuery = KqlQuery | SavedQuery;
+
+export interface Timeline {
+  id: string;
+  isOpen: boolean;
 }
 
 export interface UrlState {
-  [CONSTANTS.kqlQuery]: KqlQuery;
+  [CONSTANTS.kqlQuery]: UrlSateQuery;
   [CONSTANTS.timerange]: UrlInputsModel;
-  [CONSTANTS.timelineId]: string;
+  [CONSTANTS.timeline]: Timeline;
 }
 export type KeyUrlState = keyof UrlState;
 

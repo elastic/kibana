@@ -7,7 +7,6 @@
 import actionCreatorFactory from 'typescript-fsa';
 
 import { HostsSortField } from '../../graphql/types';
-import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 import { HostsTableType, HostsType } from './model';
 const actionCreator = actionCreatorFactory('x-pack/siem/local/hosts');
@@ -30,13 +29,3 @@ export const updateHostsSort = actionCreator<{
   sort: HostsSortField;
   hostsType: HostsType;
 }>('UPDATE_HOSTS_SORT');
-
-export const setHostsFilterQueryDraft = actionCreator<{
-  filterQueryDraft: KueryFilterQuery;
-  hostsType: HostsType;
-}>('SET_HOSTS_FILTER_QUERY_DRAFT');
-
-export const applyHostsFilterQuery = actionCreator<{
-  filterQuery: SerializedFilterQuery;
-  hostsType: HostsType;
-}>('APPLY_HOSTS_FILTER_QUERY');

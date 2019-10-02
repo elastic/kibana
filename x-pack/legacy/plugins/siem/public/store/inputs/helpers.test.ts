@@ -118,7 +118,7 @@ describe('Inputs', () => {
       };
       const newState: InputsModel = upsertQuery(newQuery);
 
-      expect(newState.global.query[0]).toEqual({
+      expect(newState.global.queries[0]).toEqual({
         id: 'myQuery',
         inspect: null,
         isInspected: false,
@@ -144,7 +144,7 @@ describe('Inputs', () => {
       newQuery.state = newState;
       newState = upsertQuery(newQuery);
 
-      expect(newState.global.query[0]).toEqual({
+      expect(newState.global.queries[0]).toEqual({
         id: 'myQuery',
         inspect: null,
         isInspected: false,
@@ -179,7 +179,7 @@ describe('Inputs', () => {
       };
       const newState: InputsModel = setIsInspected(newQuery);
 
-      expect(newState.global.query[0]).toEqual({
+      expect(newState.global.queries[0]).toEqual({
         id: 'myQuery',
         inspect: null,
         isInspected: true,
@@ -199,7 +199,7 @@ describe('Inputs', () => {
       };
       const newState: InputsModel = setIsInspected(newQuery);
 
-      expect(newState.global.query[0]).toEqual({
+      expect(newState.global.queries[0]).toEqual({
         id: 'myQuery',
         inspect: null,
         isInspected: false,

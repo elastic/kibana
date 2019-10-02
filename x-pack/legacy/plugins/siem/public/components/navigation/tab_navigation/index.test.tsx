@@ -51,22 +51,14 @@ describe('Tab Navigation', () => {
           linkTo: ['global'],
         },
       },
-      hosts: {
-        filterQuery: null,
-        queryLocation: null,
+      [CONSTANTS.kqlQuery]: {
+        appQuery: { query: 'host.name:"siem-es"', language: 'kuery' },
+        filters: [],
       },
-      hostDetails: {
-        filterQuery: null,
-        queryLocation: null,
+      [CONSTANTS.timeline]: {
+        id: '',
+        isOpen: false,
       },
-      network: {
-        filterQuery: {
-          expression: 'host.name:"siem-es"',
-          kind: 'kuery',
-        },
-        queryLocation: CONSTANTS.hostsPage,
-      },
-      [CONSTANTS.timelineId]: '',
     };
     test('it mounts with correct tab highlighted', () => {
       const wrapper = shallow(<TabNavigation {...mockProps} />);
@@ -89,7 +81,7 @@ describe('Tab Navigation', () => {
       const wrapper = shallow(<TabNavigation {...mockProps} />);
       const firstTab = wrapper.find('[data-test-subj="navigation-link-network"]');
       expect(firstTab.props().href).toBe(
-        "#/link-to/network?kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:hosts.page)&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))"
+        "#/link-to/network?kqlQuery=(filters:!(),query:(query:'host.name:%22siem-es%22',language:kuery))&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))"
       );
     });
   });
@@ -125,22 +117,14 @@ describe('Tab Navigation', () => {
           linkTo: ['global'],
         },
       },
-      network: {
-        filterQuery: null,
-        queryLocation: null,
+      [CONSTANTS.kqlQuery]: {
+        appQuery: { query: 'host.name:"siem-es"', language: 'kuery' },
+        filters: [],
       },
-      hosts: {
-        filterQuery: null,
-        queryLocation: null,
+      [CONSTANTS.timeline]: {
+        id: '',
+        isOpen: false,
       },
-      hostDetails: {
-        filterQuery: {
-          expression: 'host.name:"siem-es"',
-          kind: 'kuery',
-        },
-        queryLocation: CONSTANTS.hostsPage,
-      },
-      [CONSTANTS.timelineId]: '',
     };
     test('it mounts with correct tab highlighted', () => {
       const wrapper = shallow(<TabNavigation {...mockProps} />);
@@ -169,7 +153,7 @@ describe('Tab Navigation', () => {
         `[data-test-subj="navigation-link-${HostsTableType.authentications}"]`
       );
       expect(firstTab.props().href).toBe(
-        `#/${pageName}/${hostName}/${HostsTableType.authentications}?kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:hosts.page)&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`
+        `#/${pageName}/${hostName}/${HostsTableType.authentications}?kqlQuery=(filters:!(),query:(query:'host.name:%22siem-es%22',language:kuery))&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`
       );
     });
   });

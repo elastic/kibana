@@ -8,7 +8,7 @@ import { Location } from 'history';
 
 import { UrlInputsModel } from '../../store/inputs/model';
 import { CONSTANTS } from '../url_state/constants';
-import { KqlQuery, URL_STATE_KEYS, KeyUrlState } from '../url_state/types';
+import { UrlSateQuery, URL_STATE_KEYS, KeyUrlState, Timeline } from '../url_state/types';
 import {
   replaceQueryStringInLocation,
   replaceStateKeyInQueryString,
@@ -22,11 +22,10 @@ export const getSearch = (tab: SearchNavTab, urlState: TabNavigationProps): stri
   if (tab && tab.urlKey != null && URL_STATE_KEYS[tab.urlKey] != null) {
     return URL_STATE_KEYS[tab.urlKey].reduce<Location>(
       (myLocation: Location, urlKey: KeyUrlState) => {
-        let urlStateToReplace: UrlInputsModel | KqlQuery | string = urlState[CONSTANTS.timelineId];
-        if (urlKey === CONSTANTS.kqlQuery && tab.urlKey === 'host') {
-          urlStateToReplace = tab.isDetailPage ? urlState.hostDetails : urlState.hosts;
-        } else if (urlKey === CONSTANTS.kqlQuery && tab.urlKey === 'network') {
-          urlStateToReplace = urlState.network;
+        let urlStateToReplace: UrlInputsModel | UrlSateQuery | Timeline =
+          urlState[CONSTANTS.timeline];
+        if (urlKey === CONSTANTS.kqlQuery) {
+          urlStateToReplace = urlState.kqlQuery;
         } else if (urlKey === CONSTANTS.timerange) {
           urlStateToReplace = urlState[CONSTANTS.timerange];
         }

@@ -5,7 +5,7 @@
  */
 
 import { Location } from 'history';
-import { isEqual, difference } from 'lodash/fp';
+import { isEqual, difference, isEmpty } from 'lodash/fp';
 import { useEffect, useRef, useState } from 'react';
 
 import { UrlInputsModel } from '../../store/inputs/model';
@@ -18,7 +18,6 @@ import {
   replaceStateKeyInQueryString,
   getParamFromQueryString,
   decodeRisonUrlState,
-  isKqlForRoute,
   getUrlType,
   getTitle,
 } from './helpers';
@@ -29,7 +28,9 @@ import {
   KeyUrlState,
   KqlQuery,
   ALL_URL_STATE_KEYS,
+  UrlSateQuery,
   UrlStateToRedux,
+  Timeline,
 } from './types';
 
 function usePrevious(value: PreviousLocationUrlState) {
@@ -59,7 +60,7 @@ export const useUrlStateHooks = ({
   const prevProps = usePrevious({ pathName, urlState });
 
   const replaceStateInLocation = (
-    urlStateToReplace: UrlInputsModel | KqlQuery | string,
+    urlStateToReplace: UrlInputsModel | UrlSateQuery | Timeline | string,
     urlStateKey: string,
     latestLocation: Location = {
       hash: '',
@@ -94,20 +95,16 @@ export const useUrlStateHooks = ({
         urlKey
       );
       if (newUrlStateString) {
-        const kqlQueryStateData: KqlQuery = decodeRisonUrlState(newUrlStateString);
+        const queryState: KqlQuery | Timeline = decodeRisonUrlState(newUrlStateString);
         if (
           urlKey === CONSTANTS.kqlQuery &&
-          !isKqlForRoute(pageName, detailName, kqlQueryStateData.queryLocation) &&
-          urlState[urlKey].queryLocation === kqlQueryStateData.queryLocation
+          (urlState[urlKey] as KqlQuery).appQuery != null &&
+          (urlState[urlKey] as KqlQuery).appQuery.query === '' &&
+          isEmpty((urlState[urlKey] as KqlQuery).filters)
         ) {
-          myLocation = replaceStateInLocation(
-            {
-              filterQuery: null,
-              queryLocation: null,
-            },
-            urlKey,
-            myLocation
-          );
+          myLocation = replaceStateInLocation('', urlKey, myLocation);
+        } else if (urlKey === CONSTANTS.timeline && (queryState as Timeline).id === '') {
+          myLocation = replaceStateInLocation('', urlKey, myLocation);
         }
         if (isInitializing) {
           urlStateToUpdate = [...urlStateToUpdate, { urlKey, newUrlStateString }];
@@ -146,7 +143,18 @@ export const useUrlStateHooks = ({
     } else if (!isEqual(urlState, prevProps.urlState) && !isInitializing) {
       let newLocation: Location = location;
       URL_STATE_KEYS[type].forEach((urlKey: KeyUrlState) => {
-        newLocation = replaceStateInLocation(urlState[urlKey], urlKey, newLocation);
+        if (
+          urlKey === CONSTANTS.kqlQuery &&
+          (urlState[urlKey] as KqlQuery).appQuery != null &&
+          (urlState[urlKey] as KqlQuery).appQuery.query === '' &&
+          isEmpty((urlState[urlKey] as KqlQuery).filters)
+        ) {
+          newLocation = replaceStateInLocation('', urlKey, newLocation);
+        } else if (urlKey === CONSTANTS.timeline && (urlState[urlKey] as Timeline).id === '') {
+          newLocation = replaceStateInLocation('', urlKey, newLocation);
+        } else {
+          newLocation = replaceStateInLocation(urlState[urlKey], urlKey, newLocation);
+        }
       });
     } else if (pathName !== prevProps.pathName) {
       handleInitialize(location, type);

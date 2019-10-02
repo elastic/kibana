@@ -30,8 +30,6 @@ const getMockObject = (
   detailName: string | undefined
 ): RouteSpyState & TabNavigationProps => ({
   detailName,
-  hostDetails: { filterQuery: null, queryLocation: null },
-  hosts: { filterQuery: null, queryLocation: null },
   navTabs: {
     hosts: {
       disabled: false,
@@ -62,12 +60,18 @@ const getMockObject = (
       urlKey: 'timeline',
     },
   },
-  network: { filterQuery: null, queryLocation: null },
   pageName,
   pathName,
   search: '',
   tabName: HostsTableType.authentications,
-  timelineId: '',
+  kqlQuery: {
+    appQuery: { query: '', language: 'kuery' },
+    filters: [],
+  },
+  timeline: {
+    id: '',
+    isOpen: false,
+  },
   timerange: {
     global: {
       linkTo: ['timeline'],

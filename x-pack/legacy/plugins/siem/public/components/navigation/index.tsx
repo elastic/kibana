@@ -12,67 +12,54 @@ import { connect } from 'react-redux';
 import { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { CONSTANTS } from '../url_state/constants';
-import {
-  inputsSelectors,
-  hostsSelectors,
-  networkSelectors,
-  timelineSelectors,
-  State,
-  hostsModel,
-  networkModel,
-} from '../../store';
+import { inputsSelectors, timelineSelectors, State } from '../../store';
 
 import { setBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
 import { TabNavigationProps } from './tab_navigation/types';
 import { SiemNavigationComponentProps } from './types';
+import { UrlSateQuery } from '../url_state/types';
 
 export const SiemNavigationComponent = React.memo<TabNavigationProps & RouteSpyState>(
   ({
     detailName,
     display,
-    hostDetails,
-    hosts,
+    kqlQuery,
     navTabs,
-    network,
     pageName,
     pathName,
     search,
     showBorder,
     tabName,
-    timelineId,
+    timeline,
     timerange,
   }) => {
     useEffect(() => {
       if (pathName) {
         setBreadcrumbs({
           detailName,
-          hosts,
-          hostDetails,
+          kqlQuery,
           navTabs,
-          network,
           pageName,
           pathName,
           search,
           tabName,
           timerange,
-          timelineId,
+          timeline,
         });
       }
-    }, [pathName, search, hosts, hostDetails, network, navTabs, timerange, timelineId]);
+    }, [pathName, search, kqlQuery, navTabs, timerange, timeline]);
 
     return (
       <TabNavigation
         display={display}
-        hosts={hosts}
-        hostDetails={hostDetails}
+        kqlQuery={kqlQuery}
         navTabs={navTabs}
-        network={network}
         pageName={pageName}
         pathName={pathName}
         showBorder={showBorder}
         tabName={tabName}
-        timelineId={timelineId}
+        timeline={timeline}
         timerange={timerange}
       />
     );
@@ -81,12 +68,10 @@ export const SiemNavigationComponent = React.memo<TabNavigationProps & RouteSpyS
     return (
       prevProps.pathName === nextProps.pathName &&
       prevProps.search === nextProps.search &&
-      isEqual(prevProps.hosts, nextProps.hosts) &&
-      isEqual(prevProps.hostDetails, nextProps.hostDetails) &&
-      isEqual(prevProps.network, nextProps.network) &&
+      isEqual(prevProps.kqlQuery, nextProps.kqlQuery) &&
       isEqual(prevProps.navTabs, nextProps.navTabs) &&
       isEqual(prevProps.timerange, nextProps.timerange) &&
-      isEqual(prevProps.timelineId, nextProps.timelineId)
+      isEqual(prevProps.timeline, nextProps.timeline)
     );
   }
 );
@@ -95,33 +80,36 @@ SiemNavigationComponent.displayName = 'SiemNavigationComponent';
 
 const makeMapStateToProps = () => {
   const getInputsSelector = inputsSelectors.inputsSelector();
-  const getHostsFilterQueryAsKuery = hostsSelectors.hostsFilterQueryAsKuery();
-  const getNetworkFilterQueryAsKuery = networkSelectors.networkFilterQueryAsKuery();
+  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
+  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
+  const getGlobalSavedQuerySelector = inputsSelectors.globalSavedQuerySelector();
   const getTimelines = timelineSelectors.getTimelines();
   const mapStateToProps = (state: State) => {
     const inputState = getInputsSelector(state);
     const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
     const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
 
-    const openTimelineId = Object.entries(getTimelines(state)).reduce(
-      (useTimelineId, [timelineId, timelineObj]) =>
-        timelineObj.savedObjectId != null ? timelineObj.savedObjectId : useTimelineId,
-      ''
+    const timeline = Object.entries(getTimelines(state)).reduce(
+      (obj, [timelineId, timelineObj]) => ({
+        id: timelineObj.savedObjectId != null ? timelineObj.savedObjectId : '',
+        isOpen: timelineObj.show,
+      }),
+      { id: '', isOpen: false }
     );
 
+    let kqlQuery: UrlSateQuery = {
+      appQuery: getGlobalQuerySelector(state),
+      filters: getGlobalFiltersQuerySelector(state),
+    };
+    const savedQuery = getGlobalSavedQuerySelector(state);
+    if (savedQuery != null && savedQuery.id !== '') {
+      kqlQuery = {
+        savedQueryId: savedQuery.id,
+      };
+    }
+
     return {
-      hosts: {
-        filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.page),
-        queryLocation: CONSTANTS.hostsPage,
-      },
-      hostDetails: {
-        filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.details),
-        queryLocation: CONSTANTS.hostsDetails,
-      },
-      network: {
-        filterQuery: getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.page),
-        queryLocation: CONSTANTS.networkPage,
-      },
+      [CONSTANTS.kqlQuery]: kqlQuery,
       [CONSTANTS.timerange]: {
         global: {
           [CONSTANTS.timerange]: globalTimerange,
@@ -132,7 +120,7 @@ const makeMapStateToProps = () => {
           linkTo: timelineLinkTo,
         },
       },
-      [CONSTANTS.timelineId]: openTimelineId,
+      [CONSTANTS.timeline]: timeline,
     };
   };
 

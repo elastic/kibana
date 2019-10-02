@@ -68,7 +68,8 @@ const getMockProps = (ip: string) => ({
   from,
   isInitializing: false,
   setQuery: jest.fn(),
-  filterQuery: 'coolQueryhuh?',
+  query: { query: 'coolQueryhuh?', language: 'keury' },
+  filters: [],
   flowTarget: FlowTarget.source,
   history: getMockHistory(ip),
   location: {

@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiFieldSearch,
-  EuiFieldSearchProps,
-  EuiOutsideClickDetector,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiFieldText, EuiOutsideClickDetector, EuiPanel, EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
 import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
 
@@ -60,7 +55,12 @@ export class AutocompleteField extends React.PureComponent<
     return (
       <EuiOutsideClickDetector onOutsideClick={this.handleBlur}>
         <AutocompleteContainer>
-          <FixedEuiFieldSearch
+          <EuiFieldText
+            append={
+              <EuiButtonEmpty isDisabled={true} size="xs">
+                {'KQL'}
+              </EuiButtonEmpty>
+            }
             data-test-subj={dataTestSubj}
             fullWidth
             inputRef={this.handleChangeInputRef}
@@ -70,9 +70,9 @@ export class AutocompleteField extends React.PureComponent<
             onFocus={this.handleFocus}
             onKeyDown={this.handleKeyDown}
             onKeyUp={this.handleKeyUp}
-            onSearch={this.submit}
-            placeholder={placeholder}
+            placeholder={`Search ${placeholder}`}
             value={value}
+            autoComplete="off"
           />
           {areSuggestionsVisible && !isLoadingSuggestions && suggestions.length > 0 ? (
             <SuggestionsPanel>
@@ -306,15 +306,6 @@ const withUnfocused = (state: AutocompleteFieldState) => ({
   ...state,
   isFocused: false,
 });
-
-export const FixedEuiFieldSearch: React.SFC<
-  React.InputHTMLAttributes<HTMLInputElement> &
-    EuiFieldSearchProps & {
-      inputRef?: (element: HTMLInputElement | null) => void;
-      onSearch: (value: string) => void;
-    }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-> = EuiFieldSearch as any;
 
 const AutocompleteContainer = euiStyled.div`
   position: relative;

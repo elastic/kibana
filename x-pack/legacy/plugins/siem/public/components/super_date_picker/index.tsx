@@ -59,7 +59,7 @@ interface ReturnUpdateReduxTime {
   kqlHasBeenUpdated: boolean;
 }
 
-type DispatchUpdateReduxTime = ({
+export type DispatchUpdateReduxTime = ({
   end,
   id,
   isQuickSelection,
@@ -201,7 +201,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
   }
 );
 
-const formatDate = (
+export const formatDate = (
   date: string,
   options?: {
     roundUp?: boolean;
@@ -211,7 +211,7 @@ const formatDate = (
   return momentDate != null && momentDate.isValid() ? momentDate.valueOf() : 0;
 };
 
-const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({
+export const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({
   end,
   id,
   isQuickSelection,

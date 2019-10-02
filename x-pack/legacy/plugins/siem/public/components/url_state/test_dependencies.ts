@@ -6,27 +6,26 @@
 
 import { ActionCreator } from 'typescript-fsa';
 import { hostsModel, networkModel } from '../../store';
-import { UrlStateContainerPropTypes, LocationTypes, KqlQuery } from './types';
+import { UrlStateContainerPropTypes, LocationTypes, UrlSateQuery } from './types';
 import { CONSTANTS } from './constants';
 import { DispatchUpdateTimeline } from '../open_timeline/types';
 import { navTabs, SiemPageName } from '../../pages/home/home_navigations';
-import { hostsActions, inputsActions, networkActions } from '../../store/actions';
+import { inputsActions } from '../../store/actions';
 import { HostsTableType } from '../../store/hosts/model';
 import { dispatchSetInitialStateFromUrl } from './initialize_redux_by_url';
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
 
-export const getFilterQuery = (queryLocation: LocationTypes): KqlQuery => ({
-  filterQuery: {
-    expression: 'host.name:"siem-es"',
-    kind: 'kuery',
+export const getFilterQuery = (): UrlSateQuery => ({
+  appQuery: {
+    query: 'host.name:"siem-es"',
+    language: 'kuery',
   },
-  queryLocation,
+  filters: [],
 });
 
-export const mockApplyHostsFilterQuery: jest.Mock = (hostsActions.applyHostsFilterQuery as unknown) as jest.Mock;
-export const mockApplyNetworkFilterQuery: jest.Mock = (networkActions.applyNetworkFilterQuery as unknown) as jest.Mock;
+export const mockSetFilterQuery: jest.Mock = (inputsActions.setFilterQuery as unknown) as jest.Mock;
 export const mockAddGlobalLinkTo: jest.Mock = (inputsActions.addGlobalLinkTo as unknown) as jest.Mock;
 export const mockAddTimelineLinkTo: jest.Mock = (inputsActions.addTimelineLinkTo as unknown) as jest.Mock;
 export const mockRemoveGlobalLinkTo: jest.Mock = (inputsActions.removeGlobalLinkTo as unknown) as jest.Mock;
@@ -35,12 +34,6 @@ export const mockSetAbsoluteRangeDatePicker: jest.Mock = (inputsActions.setAbsol
 export const mockSetRelativeRangeDatePicker: jest.Mock = (inputsActions.setRelativeRangeDatePicker as unknown) as jest.Mock;
 
 jest.mock('../../store/actions', () => ({
-  hostsActions: {
-    applyHostsFilterQuery: jest.fn(),
-  },
-  networkActions: {
-    applyNetworkFilterQuery: jest.fn(),
-  },
   inputsActions: {
     addGlobalLinkTo: jest.fn(),
     addTimelineLinkTo: jest.fn(),
@@ -48,6 +41,7 @@ jest.mock('../../store/actions', () => ({
     removeTimelineLinkTo: jest.fn(),
     setAbsoluteRangeDatePicker: jest.fn(),
     setRelativeRangeDatePicker: jest.fn(),
+    setFilterQuery: jest.fn(),
   },
 }));
 
@@ -117,10 +111,13 @@ export const defaultProps: UrlStateContainerPropTypes = {
       },
     },
     [CONSTANTS.kqlQuery]: {
-      filterQuery: null,
-      queryLocation: null,
+      appQuery: { query: '', language: 'kuery' },
+      filters: [],
     },
-    [CONSTANTS.timelineId]: '',
+    [CONSTANTS.timeline]: {
+      id: '',
+      isOpen: false,
+    },
   },
   setInitialStateFromUrl: dispatchSetInitialStateFromUrl(mockDispatch),
   updateTimeline: (jest.fn() as unknown) as DispatchUpdateTimeline,
@@ -137,14 +134,17 @@ export const defaultProps: UrlStateContainerPropTypes = {
 export const getMockProps = (
   location = defaultLocation,
   kqlQueryKey = CONSTANTS.networkPage,
-  kqlQueryValue: KqlQuery | null,
+  kqlQueryValue: UrlSateQuery | null,
   pageName: string,
   detailName: string | undefined
 ): UrlStateContainerPropTypes => ({
   ...defaultProps,
   urlState: {
     ...defaultProps.urlState,
-    [CONSTANTS.kqlQuery]: kqlQueryValue || { filterQuery: null, queryLocation: null },
+    [CONSTANTS.kqlQuery]: kqlQueryValue || {
+      appQuery: { query: '', language: 'kuery' },
+      filters: [],
+    },
   },
   history: {
     ...mockHistory,
@@ -192,7 +192,7 @@ export const getMockPropsObj = ({
         state: '',
       },
       page,
-      getFilterQuery(page),
+      getFilterQuery(),
       pageName,
       detailName
     ),
@@ -218,7 +218,7 @@ export const getMockPropsObj = ({
         state: '',
       },
       page,
-      getFilterQuery(page),
+      getFilterQuery(),
       pageName,
       detailName
     ),
@@ -246,7 +246,7 @@ export const getMockPropsObj = ({
         state: '',
       },
       page,
-      getFilterQuery(page),
+      getFilterQuery(),
       pageName,
       detailName
     ),

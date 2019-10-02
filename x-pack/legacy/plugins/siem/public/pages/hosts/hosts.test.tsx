@@ -83,7 +83,8 @@ describe('Hosts - rendering', () => {
       id: InputsModelId;
       to: number;
     }>,
-    filterQuery: '',
+    query: { query: '', language: 'kuery' },
+    filters: [],
   };
 
   beforeAll(() => {

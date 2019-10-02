@@ -11,11 +11,10 @@ import { HookWrapper } from '../../mock';
 import {
   getMockPropsObj,
   mockHistory,
+  mockSetFilterQuery,
   mockSetAbsoluteRangeDatePicker,
   mockSetRelativeRangeDatePicker,
   testCases,
-  mockApplyHostsFilterQuery,
-  mockApplyNetworkFilterQuery,
 } from './test_dependencies';
 import { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
@@ -119,12 +118,8 @@ describe('UrlStateContainer', () => {
             mockProps = getMockPropsObj({ page, examplePath, namespaceLower, pageName, detailName })
               .relativeTimeSearch.undefinedQuery;
             mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
-            const functionName =
-              namespaceUpper === 'Network'
-                ? mockApplyNetworkFilterQuery
-                : mockApplyHostsFilterQuery;
             // @ts-ignore property mock does not exists
-            expect(functionName.mock.calls[0][0]).toEqual({
+            expect(mockSetFilterQuery.mock.calls[0][0]).toEqual({
               filterQuery: serializedFilterQuery,
               [`${namespaceLower}Type`]: type,
             });
@@ -144,12 +139,8 @@ describe('UrlStateContainer', () => {
               detailName,
             }).oppositeQueryLocationSearch.undefinedQuery;
             mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
-            const functionName =
-              namespaceUpper === 'Network'
-                ? mockApplyNetworkFilterQuery
-                : mockApplyHostsFilterQuery;
             // @ts-ignore property mock does not exists
-            expect(functionName.mock.calls.length).toEqual(0);
+            expect(mockSetFilterQuery.mock.calls.length).toEqual(0);
           }
         );
       });

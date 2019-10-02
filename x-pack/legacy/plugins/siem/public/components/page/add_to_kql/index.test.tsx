@@ -15,7 +15,7 @@ import {
   TestProviders,
   mockIndexPattern,
 } from '../../../mock';
-import { createStore, hostsModel, networkModel, State } from '../../../store';
+import { createStore, State } from '../../../store';
 
 import { AddToKql } from '.';
 
@@ -31,10 +31,29 @@ describe('AddToKql Component', () => {
     const wrapper = shallow(
       <TestProviders store={store}>
         <AddToKql
+          id="global"
           indexPattern={mockIndexPattern}
-          expression={`host.name: ${escapeQueryValue('siem-kibana')}`}
-          componentFilterType="hosts"
-          type={hostsModel.HostsType.page}
+          filter={{
+            meta: {
+              alias: null,
+              negate: false,
+              disabled: false,
+              type: 'phrase',
+              key: 'host.name',
+              value: escapeQueryValue('siem-kibana') as string,
+              params: {
+                query: escapeQueryValue('siem-kibana'),
+              },
+            },
+            query: {
+              match: {
+                'host.name': {
+                  query: escapeQueryValue('siem-kibana'),
+                  type: 'phrase',
+                },
+              },
+            },
+          }}
         >
           <>{'siem-kibana'}</>
         </AddToKql>
@@ -48,10 +67,29 @@ describe('AddToKql Component', () => {
     const wrapper = shallow(
       <TestProviders store={store}>
         <AddToKql
+          id="global"
           indexPattern={mockIndexPattern}
-          expression={`host.name: ${escapeQueryValue('siem-kibana')}`}
-          componentFilterType="hosts"
-          type={hostsModel.HostsType.page}
+          filter={{
+            meta: {
+              alias: null,
+              negate: false,
+              disabled: false,
+              type: 'phrase',
+              key: 'host.name',
+              value: escapeQueryValue('siem-kibana') as string,
+              params: {
+                query: escapeQueryValue('siem-kibana'),
+              },
+            },
+            query: {
+              match: {
+                'host.name': {
+                  query: escapeQueryValue('siem-kibana'),
+                  type: 'phrase',
+                },
+              },
+            },
+          }}
         >
           <>{'siem-kibana'}</>
         </AddToKql>
@@ -67,10 +105,29 @@ describe('AddToKql Component', () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <AddToKql
+          id="global"
           indexPattern={mockIndexPattern}
-          expression={`host.name: ${escapeQueryValue('siem-kibana')}`}
-          componentFilterType="hosts"
-          type={hostsModel.HostsType.page}
+          filter={{
+            meta: {
+              alias: null,
+              negate: false,
+              disabled: false,
+              type: 'phrase',
+              key: 'host.name',
+              value: escapeQueryValue('siem-kibana') as string,
+              params: {
+                query: escapeQueryValue('siem-kibana'),
+              },
+            },
+            query: {
+              match: {
+                'host.name': {
+                  query: escapeQueryValue('siem-kibana'),
+                  type: 'phrase',
+                },
+              },
+            },
+          }}
         >
           <>{'siem-kibana'}</>
         </AddToKql>
@@ -125,10 +182,29 @@ describe('AddToKql Component', () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <AddToKql
+          id="global"
           indexPattern={mockIndexPattern}
-          expression={`host.name: ${escapeQueryValue('siem-kibana')}`}
-          componentFilterType="network"
-          type={networkModel.NetworkType.page}
+          filter={{
+            meta: {
+              alias: null,
+              negate: false,
+              disabled: false,
+              type: 'phrase',
+              key: 'host.name',
+              value: escapeQueryValue('siem-kibana') as string,
+              params: {
+                query: escapeQueryValue('siem-kibana'),
+              },
+            },
+            query: {
+              match: {
+                'host.name': {
+                  query: escapeQueryValue('siem-kibana'),
+                  type: 'phrase',
+                },
+              },
+            },
+          }}
         >
           <>{'siem-kibana'}</>
         </AddToKql>

@@ -7,7 +7,7 @@
 import { get, isEmpty } from 'lodash/fp';
 import { Dispatch } from 'redux';
 
-import { hostsActions, inputsActions, networkActions } from '../../store/actions';
+import { inputsActions } from '../../store/actions';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
 import {
   UrlInputsModel,
@@ -15,14 +15,18 @@ import {
   AbsoluteTimeRange,
   RelativeTimeRange,
 } from '../../store/inputs/model';
+import { savedQueryService, siemFilterManager } from '../search_bar';
 
 import { CONSTANTS } from './constants';
-import { decodeRisonUrlState, isKqlForRoute, getCurrentLocation } from './helpers';
+import { decodeRisonUrlState } from './helpers';
 import { normalizeTimeRange } from './normalize_time_range';
-import { DispatchSetInitialStateFromUrl, KqlQuery, SetInitialStateFromUrl } from './types';
-import { convertKueryToElasticSearchQuery } from '../../lib/keury';
-import { HostsType } from '../../store/hosts/model';
-import { NetworkType } from '../../store/network/model';
+import {
+  DispatchSetInitialStateFromUrl,
+  SetInitialStateFromUrl,
+  UrlSateQuery,
+  KqlQuery,
+  SavedQuery,
+} from './types';
 import { queryTimelineById } from '../open_timeline/helpers';
 
 export const dispatchSetInitialStateFromUrl = (
@@ -111,41 +115,41 @@ export const dispatchSetInitialStateFromUrl = (
       }
     }
     if (urlKey === CONSTANTS.kqlQuery && indexPattern != null) {
-      const kqlQueryStateData: KqlQuery = decodeRisonUrlState(newUrlStateString);
-      if (isKqlForRoute(pageName, detailName, kqlQueryStateData.queryLocation)) {
-        const filterQuery = {
-          kuery: kqlQueryStateData.filterQuery,
-          serializedQuery: convertKueryToElasticSearchQuery(
-            kqlQueryStateData.filterQuery ? kqlQueryStateData.filterQuery.expression : '',
-            indexPattern
-          ),
-        };
-        const page = getCurrentLocation(pageName, detailName);
-        if ([CONSTANTS.hostsPage, CONSTANTS.hostsDetails].includes(page)) {
-          dispatch(
-            hostsActions.applyHostsFilterQuery({
-              filterQuery,
-              hostsType: page === CONSTANTS.hostsPage ? HostsType.page : HostsType.details,
-            })
-          );
-        } else if ([CONSTANTS.networkPage, CONSTANTS.networkDetails].includes(page)) {
-          dispatch(
-            networkActions.applyNetworkFilterQuery({
-              filterQuery,
-              networkType: page === CONSTANTS.networkPage ? NetworkType.page : NetworkType.details,
-            })
-          );
-        }
+      const kqlQueryStateData: UrlSateQuery = decodeRisonUrlState(newUrlStateString);
+      if ((kqlQueryStateData as SavedQuery).savedQueryId != null) {
+        savedQueryService
+          .getSavedQuery((kqlQueryStateData as SavedQuery).savedQueryId)
+          .then(savedQueryData => {
+            siemFilterManager.setFilters(savedQueryData.attributes.filters || []);
+            dispatch(
+              inputsActions.setFilterQuery({
+                id: 'global',
+                ...savedQueryData.attributes.query,
+              })
+            );
+            dispatch(inputsActions.setSavedQuery({ id: 'global', savedQuery: savedQueryData }));
+          });
+      } else if ((kqlQueryStateData as KqlQuery).appQuery != null) {
+        const kqlQuery = kqlQueryStateData as KqlQuery;
+        siemFilterManager.setFilters(kqlQuery.filters || []);
+        dispatch(
+          inputsActions.setFilterQuery({
+            id: 'global',
+            query: kqlQuery.appQuery.query,
+            language: kqlQuery.appQuery.language,
+          })
+        );
       }
     }
 
-    if (urlKey === CONSTANTS.timelineId) {
-      const timelineId = decodeRisonUrlState(newUrlStateString);
-      if (timelineId != null) {
+    if (urlKey === CONSTANTS.timeline) {
+      const timeline = decodeRisonUrlState(newUrlStateString);
+      if (timeline != null && timeline.id !== '') {
         queryTimelineById({
           apolloClient,
           duplicate: false,
-          timelineId,
+          timelineId: timeline.id,
+          openTimeline: timeline.isOpen,
           updateIsLoading: updateTimelineIsLoading,
           updateTimeline,
         });

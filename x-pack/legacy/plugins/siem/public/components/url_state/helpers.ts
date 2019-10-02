@@ -41,12 +41,7 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   urlState: UrlState | undefined
 ) => (queryString: string) => {
   const previousQueryValues = QueryString.decode(queryString);
-  if (
-    urlState == null ||
-    (typeof urlState === 'string' && urlState === '') ||
-    (urlState && urlState.filterQuery === null) ||
-    (urlState && urlState.filterQuery != null && urlState.filterQuery.expression === '')
-  ) {
+  if (urlState == null || (typeof urlState === 'string' && urlState === '')) {
     delete previousQueryValues[stateKey];
     return QueryString.encode({
       ...previousQueryValues,

@@ -56,10 +56,29 @@ export const getHostsColumns = (
                 </DragEffects>
               ) : (
                 <AddToKql
+                  id="global"
                   indexPattern={indexPattern}
-                  expression={`host.name: ${escapeQueryValue(hostName[0])}`}
-                  componentFilterType="hosts"
-                  type={type}
+                  filter={{
+                    meta: {
+                      alias: null,
+                      negate: false,
+                      disabled: false,
+                      type: 'phrase',
+                      key: 'host.name',
+                      value: hostName[0] as string,
+                      params: {
+                        query: hostName[0],
+                      },
+                    },
+                    query: {
+                      match: {
+                        'host.name': {
+                          query: hostName[0],
+                          type: 'phrase',
+                        },
+                      },
+                    },
+                  }}
                 >
                   <HostDetailsLink hostName={hostName[0]} />
                 </AddToKql>
@@ -106,10 +125,29 @@ export const getHostsColumns = (
       if (hostOsName != null) {
         return (
           <AddToKql
+            id="global"
             indexPattern={indexPattern}
-            expression={`host.os.name: ${escapeQueryValue(hostOsName)}`}
-            componentFilterType="hosts"
-            type={type}
+            filter={{
+              meta: {
+                alias: null,
+                negate: false,
+                disabled: false,
+                type: 'phrase',
+                key: 'host.os.name',
+                value: escapeQueryValue(hostOsName) as string,
+                params: {
+                  query: escapeQueryValue(hostOsName),
+                },
+              },
+              query: {
+                match: {
+                  'host.os.name': {
+                    query: escapeQueryValue(hostOsName),
+                    type: 'phrase',
+                  },
+                },
+              },
+            }}
           >
             <>{hostOsName}</>
           </AddToKql>
@@ -128,10 +166,29 @@ export const getHostsColumns = (
       if (hostOsVersion != null) {
         return (
           <AddToKql
+            id="global"
             indexPattern={indexPattern}
-            expression={`host.os.version: ${escapeQueryValue(hostOsVersion)}`}
-            componentFilterType="hosts"
-            type={type}
+            filter={{
+              meta: {
+                alias: null,
+                negate: false,
+                disabled: false,
+                type: 'phrase',
+                key: 'host.os.version',
+                value: escapeQueryValue(hostOsVersion) as string,
+                params: {
+                  query: escapeQueryValue(hostOsVersion),
+                },
+              },
+              query: {
+                match: {
+                  'host.os.version': {
+                    query: escapeQueryValue(hostOsVersion),
+                    type: 'phrase',
+                  },
+                },
+              },
+            }}
           >
             <>{hostOsVersion}</>
           </AddToKql>

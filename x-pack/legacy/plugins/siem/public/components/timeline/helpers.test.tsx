@@ -118,23 +118,33 @@ describe('Build KQL Query', () => {
 describe('Combined Queries', () => {
   test('No Data Provider & No kqlQuery & and isEventViewer is false', () => {
     expect(
-      combineQueries([], mockIndexPattern, mockBrowserFields, '', 'search', startDate, endDate)
+      combineQueries({
+        dataProviders: [],
+        indexPattern: mockIndexPattern,
+        browserFields: mockBrowserFields,
+        filters: [],
+        kqlQuery: { query: '', language: 'keury' },
+        kqlMode: 'search',
+        start: startDate,
+        end: endDate,
+      })
     ).toBeNull();
   });
 
   test('No Data Provider & No kqlQuery & isEventViewer is true', () => {
     const isEventViewer = true;
     expect(
-      combineQueries(
-        [],
-        mockIndexPattern,
-        mockBrowserFields,
-        '',
-        'search',
-        startDate,
-        endDate,
-        isEventViewer
-      )
+      combineQueries({
+        dataProviders: [],
+        indexPattern: mockIndexPattern,
+        browserFields: mockBrowserFields,
+        filters: [],
+        kqlQuery: { query: '', language: 'keury' },
+        kqlMode: 'search',
+        start: startDate,
+        end: endDate,
+        isEventViewer,
+      })
     ).toEqual({
       filterQuery:
         '{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}',
@@ -143,15 +153,16 @@ describe('Combined Queries', () => {
 
   test('Only Data Provider', () => {
     const dataProviders = mockDataProviders.slice(0, 1);
-    const { filterQuery } = combineQueries(
+    const { filterQuery } = combineQueries({
       dataProviders,
-      mockIndexPattern,
-      mockBrowserFields,
-      '',
-      'search',
-      startDate,
-      endDate
-    )!;
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [],
+      kqlQuery: { query: '', language: 'keury' },
+      kqlMode: 'search',
+      start: startDate,
+      end: endDate,
+    })!;
     expect(filterQuery).toEqual(
       '{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}'
     );
@@ -161,15 +172,16 @@ describe('Combined Queries', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     dataProviders[0].queryMatch.field = '@timestamp';
     dataProviders[0].queryMatch.value = '2018-03-23T23:36:23.232Z';
-    const { filterQuery } = combineQueries(
+    const { filterQuery } = combineQueries({
       dataProviders,
-      mockIndexPattern,
-      mockBrowserFields,
-      '',
-      'search',
-      startDate,
-      endDate
-    )!;
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [],
+      kqlQuery: { query: '', language: 'keury' },
+      kqlMode: 'search',
+      start: startDate,
+      end: endDate,
+    })!;
     expect(filterQuery).toEqual(
       '{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521848183232,"lte":1521848183232}}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}'
     );
@@ -179,15 +191,16 @@ describe('Combined Queries', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     dataProviders[0].queryMatch.field = '@timestamp';
     dataProviders[0].queryMatch.value = 1521848183232;
-    const { filterQuery } = combineQueries(
+    const { filterQuery } = combineQueries({
       dataProviders,
-      mockIndexPattern,
-      mockBrowserFields,
-      '',
-      'search',
-      startDate,
-      endDate
-    )!;
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [],
+      kqlQuery: { query: '', language: 'keury' },
+      kqlMode: 'search',
+      start: startDate,
+      end: endDate,
+    })!;
     expect(filterQuery).toEqual(
       '{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521848183232,"lte":1521848183232}}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}'
     );
@@ -197,15 +210,16 @@ describe('Combined Queries', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     dataProviders[0].queryMatch.field = 'event.end';
     dataProviders[0].queryMatch.value = '2018-03-23T23:36:23.232Z';
-    const { filterQuery } = combineQueries(
+    const { filterQuery } = combineQueries({
       dataProviders,
-      mockIndexPattern,
-      mockBrowserFields,
-      '',
-      'search',
-      startDate,
-      endDate
-    )!;
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [],
+      kqlQuery: { query: '', language: 'keury' },
+      kqlMode: 'search',
+      start: startDate,
+      end: endDate,
+    })!;
     expect(filterQuery).toEqual(
       '{"bool":{"filter":[{"bool":{"should":[{"match":{"event.end":1521848183232}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}'
     );
@@ -215,30 +229,32 @@ describe('Combined Queries', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     dataProviders[0].queryMatch.field = 'event.end';
     dataProviders[0].queryMatch.value = 1521848183232;
-    const { filterQuery } = combineQueries(
+    const { filterQuery } = combineQueries({
       dataProviders,
-      mockIndexPattern,
-      mockBrowserFields,
-      '',
-      'search',
-      startDate,
-      endDate
-    )!;
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [],
+      kqlQuery: { query: '', language: 'keury' },
+      kqlMode: 'search',
+      start: startDate,
+      end: endDate,
+    })!;
     expect(filterQuery).toEqual(
       '{"bool":{"filter":[{"bool":{"should":[{"match":{"event.end":1521848183232}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}'
     );
   });
 
   test('Only KQL search/filter query', () => {
-    const { filterQuery } = combineQueries(
-      [],
-      mockIndexPattern,
-      mockBrowserFields,
-      'host.name: "host-1"',
-      'search',
-      startDate,
-      endDate
-    )!;
+    const { filterQuery } = combineQueries({
+      dataProviders: [],
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [],
+      kqlQuery: { query: 'host.name: "host-1"', language: 'keury' },
+      kqlMode: 'search',
+      start: startDate,
+      end: endDate,
+    })!;
     expect(filterQuery).toEqual(
       '{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}'
     );
@@ -246,15 +262,16 @@ describe('Combined Queries', () => {
 
   test('Data Provider & KQL search query', () => {
     const dataProviders = mockDataProviders.slice(0, 1);
-    const { filterQuery } = combineQueries(
+    const { filterQuery } = combineQueries({
       dataProviders,
-      mockIndexPattern,
-      mockBrowserFields,
-      'host.name: "host-1"',
-      'search',
-      startDate,
-      endDate
-    )!;
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [],
+      kqlQuery: { query: 'host.name: "host-1"', language: 'keury' },
+      kqlMode: 'search',
+      start: startDate,
+      end: endDate,
+    })!;
     expect(filterQuery).toEqual(
       '{"bool":{"filter":[{"bool":{"should":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}'
     );
@@ -262,15 +279,16 @@ describe('Combined Queries', () => {
 
   test('Data Provider & KQL filter query', () => {
     const dataProviders = mockDataProviders.slice(0, 1);
-    const { filterQuery } = combineQueries(
+    const { filterQuery } = combineQueries({
       dataProviders,
-      mockIndexPattern,
-      mockBrowserFields,
-      'host.name: "host-1"',
-      'filter',
-      startDate,
-      endDate
-    )!;
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [],
+      kqlQuery: { query: 'host.name: "host-1"', language: 'keury' },
+      kqlMode: 'filter',
+      start: startDate,
+      end: endDate,
+    })!;
     expect(filterQuery).toEqual(
       '{"bool":{"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}]}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}'
     );
@@ -280,15 +298,16 @@ describe('Combined Queries', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
     dataProviders[0].and = mockDataProviders.slice(2, 4);
     dataProviders[1].and = mockDataProviders.slice(4, 5);
-    const { filterQuery } = combineQueries(
+    const { filterQuery } = combineQueries({
       dataProviders,
-      mockIndexPattern,
-      mockBrowserFields,
-      'host.name: "host-1"',
-      'search',
-      startDate,
-      endDate
-    )!;
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [],
+      kqlQuery: { query: 'host.name: "host-1"', language: 'keury' },
+      kqlMode: 'search',
+      start: startDate,
+      end: endDate,
+    })!;
     expect(filterQuery).toEqual(
       '{"bool":{"filter":[{"bool":{"should":[{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 3"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 4"}}],"minimum_should_match":1}}]}}]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 2"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 5"}}],"minimum_should_match":1}}]}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}'
     );
@@ -298,15 +317,16 @@ describe('Combined Queries', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
     dataProviders[0].and = mockDataProviders.slice(2, 4);
     dataProviders[1].and = mockDataProviders.slice(4, 5);
-    const { filterQuery } = combineQueries(
+    const { filterQuery } = combineQueries({
       dataProviders,
-      mockIndexPattern,
-      mockBrowserFields,
-      'host.name: "host-1"',
-      'filter',
-      startDate,
-      endDate
-    )!;
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [],
+      kqlQuery: { query: 'host.name: "host-1"', language: 'keury' },
+      kqlMode: 'filter',
+      start: startDate,
+      end: endDate,
+    })!;
     expect(filterQuery).toEqual(
       '{"bool":{"filter":[{"bool":{"filter":[{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 3"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 4"}}],"minimum_should_match":1}}]}}]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 2"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 5"}}],"minimum_should_match":1}}]}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}]}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}'
     );

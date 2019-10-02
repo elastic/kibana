@@ -13,7 +13,7 @@ export enum CONSTANTS {
   overviewPage = 'overview.page',
   timelinePage = 'timeline.page',
   timerange = 'timerange',
-  timelineId = 'timelineId',
+  timeline = 'timeline',
   unknown = 'unknown',
 }
 
