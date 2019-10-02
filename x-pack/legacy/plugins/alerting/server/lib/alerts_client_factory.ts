@@ -12,7 +12,7 @@ import { AlertTypeRegistry } from '../alert_type_registry';
 import { KibanaRequest, Logger } from '../../../../../../src/core/server';
 import { PluginSetupContract as SecurityPluginSetupContract } from '../../../../../plugins/security/server';
 
-interface ConstructorOpts {
+export interface ConstructorOpts {
   logger: Logger;
   taskManager: TaskManager;
   alertTypeRegistry: AlertTypeRegistry;
