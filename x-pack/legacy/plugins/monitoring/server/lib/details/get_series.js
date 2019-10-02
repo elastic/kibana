@@ -14,6 +14,7 @@ import {
   NORMALIZED_DERIVATIVE_UNIT,
   CALCULATE_DURATION_UNTIL
 } from '../../../common/constants';
+import { formatUTCTimestampForTimezone } from '../format_timezone';
 
 /**
  * Derivative metrics for the first two agg buckets are unusable. For the first bucket, there
@@ -177,7 +178,7 @@ const formatBucketSize = bucketSizeInSeconds => {
   return formatTimestampToDuration(timestamp, CALCULATE_DURATION_UNTIL, now);
 };
 
-function handleSeries(metric, min, max, bucketSizeInSeconds, response) {
+function handleSeries(metric, min, max, bucketSizeInSeconds, timezone, response) {
   const { derivative, calculation: customCalculation } = metric;
   const buckets = get(response, 'aggregations.check.buckets', []);
   const firstUsableBucketIndex = findFirstUsableBucketIndex(buckets, min);
@@ -193,14 +194,17 @@ function handleSeries(metric, min, max, bucketSizeInSeconds, response) {
     data = buckets
       .slice(firstUsableBucketIndex, lastUsableBucketIndex + 1) // take only the buckets we know are usable
       .map(bucket => ([
-        bucket.key,
+        formatUTCTimestampForTimezone(bucket.key, timezone),
         calculation(bucket, key, metric, bucketSizeInSeconds)
       ])); // map buckets to X/Y coords for Flot charting
   }
 
   return {
     bucket_size: formatBucketSize(bucketSizeInSeconds),
-    timeRange: { min, max },
+    timeRange: {
+      min: formatUTCTimestampForTimezone(min, timezone),
+      max: formatUTCTimestampForTimezone(max, timezone),
+    },
     metric: metric.serialize(),
     data
   };
@@ -217,7 +221,7 @@ function handleSeries(metric, min, max, bucketSizeInSeconds, response) {
  * @param {Array} filters Any filters that should be applied to the query.
  * @return {Promise} The object response containing the {@code timeRange}, {@code metric}, and {@code data}.
  */
-export async function getSeries(req, indexPattern, metricName, filters, { min, max, bucketSize }) {
+export async function getSeries(req, indexPattern, metricName, filters, { min, max, bucketSize, timezone }) {
   checkParam(indexPattern, 'indexPattern in details/getSeries');
 
   const metric = metrics[metricName];
@@ -226,5 +230,5 @@ export async function getSeries(req, indexPattern, metricName, filters, { min, m
   }
   const response = await fetchSeries(req, indexPattern, metric, min, max, bucketSize, filters);
 
-  return handleSeries(metric, min, max, bucketSize, response);
+  return handleSeries(metric, min, max, bucketSize, timezone, response);
 }

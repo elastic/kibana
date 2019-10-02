@@ -31,7 +31,7 @@ const FixedEuiRange = (EuiRange as unknown) as React.ComponentType<
 
 function ofName(name: string) {
   return i18n.translate('xpack.lens.indexPattern.dateHistogramOf', {
-    defaultMessage: 'Date Histogram of {name}',
+    defaultMessage: 'Date histogram of {name}',
     values: { name },
   });
 }
@@ -51,7 +51,7 @@ export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternC
 export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatternColumn> = {
   type: 'date_histogram',
   displayName: i18n.translate('xpack.lens.indexPattern.dateHistogram', {
-    defaultMessage: 'Date Histogram',
+    defaultMessage: 'Date histogram',
   }),
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
