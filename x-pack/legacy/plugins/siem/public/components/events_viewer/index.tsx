@@ -87,7 +87,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     updateItemsPerPage,
     upsertColumn,
   }) => {
-    const [showInspect, setShowInspect] = useState<boolean>(false);
+    const [showInspect, setShowInspect] = useState(false);
 
     useEffect(() => {
       if (createTimeline != null) {

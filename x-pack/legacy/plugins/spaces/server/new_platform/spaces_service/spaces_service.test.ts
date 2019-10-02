@@ -13,9 +13,9 @@ import {
   SavedObjectsErrorHelpers,
 } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
-import { getSpaceIdFromPath } from '../../lib/spaces_url_parser';
 import { createOptionalPlugin } from '../../../../../server/lib/optional_plugin';
 import { LegacyAPI } from '../plugin';
+import { getSpaceIdFromPath } from '../../../common';
 
 const mockLogger = {
   trace: jest.fn(),
