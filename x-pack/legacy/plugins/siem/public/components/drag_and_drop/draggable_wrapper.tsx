@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import * as React from 'react';
+import React, { useEffect } from 'react';
 import {
   Draggable,
   DraggableProvided,
@@ -21,7 +21,6 @@ import { dragAndDropActions } from '../../store/drag_and_drop';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../timeline/helpers';
 import { TruncatableText } from '../truncatable_text';
-
 import { getDraggableId, getDroppableId } from './helpers';
 
 // As right now, we do not know what we want there, we will keep it as a placeholder
@@ -30,41 +29,28 @@ export const DragEffects = styled.div``;
 DragEffects.displayName = 'DragEffects';
 
 const Wrapper = styled.div`
-  .euiPageBody & {
-    display: inline-block;
-  }
+  display: inline-block;
+  max-width: 100%;
 `;
 
 Wrapper.displayName = 'Wrapper';
 
 const ProviderContainer = styled.div<{ isDragging: boolean }>`
   ${({ theme, isDragging }) => css`
-    // ALL DRAGGABLES
-
     &,
     &::before,
     &::after {
       transition: background ${theme.eui.euiAnimSpeedFast} ease,
         color ${theme.eui.euiAnimSpeedFast} ease;
     }
-    z-index: 9999 !important;
-    .euiBadge,
-    .euiBadge__text {
-      cursor: grab;
-    }
-
-    // PAGE DRAGGABLES
 
     ${!isDragging &&
       `
-      .euiPageBody & {
-        z-index: ${theme.eui.euiZLevel0} !important;
-      }
-
-      {
+      & {
         border-radius: 2px;
         padding: 0 4px 0 8px;
         position: relative;
+        z-index: ${theme.eui.euiZLevel0} !important;
 
         &::before {
           background-image: linear-gradient(
@@ -87,6 +73,14 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
         }
       }
 
+      &:hover {
+        &,
+        & .euiBadge,
+        & .euiBadge__text {
+          cursor: move; //Fallback for IE11
+          cursor: grab;
+        }
+      }
 
       .${STATEFUL_EVENT_CSS_CLASS_NAME}:hover &,
       tr:hover & {
@@ -113,7 +107,8 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
         background-color: ${theme.eui.euiColorPrimary};
 
         &,
-        & a {
+        & a,
+        & a:hover {
           color: ${theme.eui.euiColorEmptyShade};
         }
 
@@ -132,9 +127,10 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
 
     ${isDragging &&
       `
-      .euiPageBody & {
-        z-index: z-index: 9999 !important;
-      `}
+      & {
+        z-index: 9999 !important;
+      }
+    `}
   `}
 `;
 
@@ -148,8 +144,8 @@ interface OwnProps {
     provided: DraggableProvided,
     state: DraggableStateSnapshot
   ) => React.ReactNode;
+  truncate?: boolean;
   usePortal?: boolean;
-  width?: string;
 }
 
 interface DispatchProps {
@@ -167,28 +163,15 @@ type Props = OwnProps & DispatchProps;
  * Wraps a draggable component to handle registration / unregistration of the
  * data provider associated with the item being dropped
  */
-class DraggableWrapperComponent extends React.Component<Props> {
-  public shouldComponentUpdate = ({ dataProvider, render, width }: Props) =>
-    isEqual(dataProvider, this.props.dataProvider) &&
-    render !== this.props.render &&
-    width === this.props.width
-      ? false
-      : true;
 
-  public componentDidMount() {
-    const { dataProvider, registerProvider } = this.props;
-
-    registerProvider!({ provider: dataProvider });
-  }
-
-  public componentWillUnmount() {
-    const { dataProvider, unRegisterProvider } = this.props;
-
-    unRegisterProvider!({ id: dataProvider.id });
-  }
-
-  public render() {
-    const { dataProvider, render, usePortal = false, width } = this.props;
+const DraggableWrapperComponent = React.memo<Props>(
+  ({ dataProvider, registerProvider, render, truncate, unRegisterProvider, usePortal = false }) => {
+    useEffect(() => {
+      registerProvider!({ provider: dataProvider });
+      return () => {
+        unRegisterProvider!({ id: dataProvider.id });
+      };
+    }, []);
 
     return (
       <Wrapper data-test-subj="draggableWrapperDiv">
@@ -200,38 +183,30 @@ class DraggableWrapperComponent extends React.Component<Props> {
                 index={0}
                 key={getDraggableId(dataProvider.id)}
               >
-                {(provided, snapshot) => {
-                  return (
-                    <ConditionalPortal usePortal={snapshot.isDragging && usePortal}>
-                      <ProviderContainer
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        innerRef={provided.innerRef}
-                        data-test-subj="providerContainer"
-                        isDragging={snapshot.isDragging}
-                        style={{
-                          ...provided.draggableProps.style,
-                        }}
-                      >
-                        {width != null && !snapshot.isDragging ? (
-                          <TruncatableText
-                            data-test-subj="draggable-truncatable-content"
-                            size="xs"
-                            width={width}
-                          >
-                            {render(dataProvider, provided, snapshot)}
-                          </TruncatableText>
-                        ) : (
-                          <span
-                            data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
-                          >
-                            {render(dataProvider, provided, snapshot)}
-                          </span>
-                        )}
-                      </ProviderContainer>
-                    </ConditionalPortal>
-                  );
-                }}
+                {(provided, snapshot) => (
+                  <ConditionalPortal usePortal={snapshot.isDragging && usePortal}>
+                    <ProviderContainer
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      innerRef={provided.innerRef}
+                      data-test-subj="providerContainer"
+                      isDragging={snapshot.isDragging}
+                      style={{
+                        ...provided.draggableProps.style,
+                      }}
+                    >
+                      {truncate && !snapshot.isDragging ? (
+                        <TruncatableText data-test-subj="draggable-truncatable-content">
+                          {render(dataProvider, provided, snapshot)}
+                        </TruncatableText>
+                      ) : (
+                        <span data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}>
+                          {render(dataProvider, provided, snapshot)}
+                        </span>
+                      )}
+                    </ProviderContainer>
+                  </ConditionalPortal>
+                )}
               </Draggable>
               {droppableProvided.placeholder}
             </div>
@@ -239,8 +214,17 @@ class DraggableWrapperComponent extends React.Component<Props> {
         </Droppable>
       </Wrapper>
     );
+  },
+  (prevProps, nextProps) => {
+    return (
+      isEqual(prevProps.dataProvider, nextProps.dataProvider) &&
+      prevProps.render !== nextProps.render &&
+      prevProps.truncate === nextProps.truncate
+    );
   }
-}
+);
+
+DraggableWrapperComponent.displayName = 'DraggableWrapperComponent';
 
 export const DraggableWrapper = connect(
   null,

@@ -5,9 +5,120 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BOOLEAN_FALSE, BOOLEAN_TRUE, CSS, URL, MARKDOWN, HTML, HEX, RGB } from '../../i18n';
+
+import {
+  BOOLEAN_FALSE,
+  BOOLEAN_TRUE,
+  CANVAS,
+  CSS,
+  ELASTICSEARCH,
+  HEX,
+  HTML,
+  KIBANA,
+  LUCENE,
+  MARKDOWN,
+  MOMENTJS,
+  NUMERALJS,
+  RGB,
+  SQL,
+  TIMELION,
+  URL,
+} from '../../i18n';
 
 export const ArgumentStrings = {
+  AxisConfig: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.axisConfigTitle', {
+        defaultMessage: 'Axis config',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.axisConfigLabel', {
+        defaultMessage: 'Visualization axis configuration',
+      }),
+    getPositionLabel: () =>
+      i18n.translate('xpack.canvas.uis.arguments.axisConfig.positionLabel', {
+        defaultMessage: 'Position',
+      }),
+    getPositionTop: () =>
+      i18n.translate('xpack.canvas.uis.arguments.axisConfig.position.options.topDropDown', {
+        defaultMessage: 'top',
+      }),
+    getPositionBottom: () =>
+      i18n.translate('xpack.canvas.uis.arguments.axisConfig.position.options.bottomDropDown', {
+        defaultMessage: 'bottom',
+      }),
+    getPositionRight: () =>
+      i18n.translate('xpack.canvas.uis.arguments.axisConfig.position.options.rightDropDown', {
+        defaultMessage: 'right',
+      }),
+    getPositionLeft: () =>
+      i18n.translate('xpack.canvas.uis.arguments.axisConfig.position.options.leftDropDown', {
+        defaultMessage: 'left',
+      }),
+  },
+  DataColumn: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.dataColumnTitle', {
+        defaultMessage: 'Column',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.dataColumnLabel', {
+        defaultMessage: 'Select the data column',
+      }),
+    getOptionAverage: () =>
+      i18n.translate('xpack.canvas.uis.arguments.dataColumn.options.averageDropDown', {
+        defaultMessage: 'Average',
+      }),
+    getOptionCount: () =>
+      i18n.translate('xpack.canvas.uis.arguments.dataColumn.options.countDropDown', {
+        defaultMessage: 'Count',
+      }),
+    getOptionFirst: () =>
+      i18n.translate('xpack.canvas.uis.arguments.dataColumn.options.firstDropDown', {
+        defaultMessage: 'First',
+      }),
+    getOptionLast: () =>
+      i18n.translate('xpack.canvas.uis.arguments.dataColumn.options.lastDropDown', {
+        defaultMessage: 'Last',
+      }),
+    getOptionMax: () =>
+      i18n.translate('xpack.canvas.uis.arguments.dataColumn.options.maxDropDown', {
+        defaultMessage: 'Max',
+      }),
+    getOptionMedian: () =>
+      i18n.translate('xpack.canvas.uis.arguments.dataColumn.options.medianDropDown', {
+        defaultMessage: 'Median',
+      }),
+    getOptionMin: () =>
+      i18n.translate('xpack.canvas.uis.arguments.dataColumn.options.minDropDown', {
+        defaultMessage: 'Min',
+      }),
+    getOptionSum: () =>
+      i18n.translate('xpack.canvas.uis.arguments.dataColumn.options.sumDropDown', {
+        defaultMessage: 'Sum',
+      }),
+    getOptionUnique: () =>
+      i18n.translate('xpack.canvas.uis.arguments.dataColumn.options.uniqueDropDown', {
+        defaultMessage: 'Unique',
+      }),
+    getOptionValue: () =>
+      i18n.translate('xpack.canvas.uis.arguments.dataColumn.options.valueDropDown', {
+        defaultMessage: 'Value',
+      }),
+  },
+  DateFormat: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.dateFormatTitle', {
+        defaultMessage: 'Date Format',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.dateFormatLabel', {
+        defaultMessage: 'Select or enter a {momentJS} format',
+        values: {
+          momentJS: MOMENTJS,
+        },
+      }),
+  },
   FilterGroup: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.arguments.filterGroupTitle', {
@@ -59,6 +170,49 @@ export const ArgumentStrings = {
         defaultMessage: 'Asset',
       }),
   },
+  Number: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.numberTitle', {
+        defaultMessage: 'Number',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.numberLabel', {
+        defaultMessage: 'Input a number',
+      }),
+  },
+  NumberFormat: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.numberFormatTitle', {
+        defaultMessage: 'Number Format',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.numberFormatLabel', {
+        defaultMessage: 'Select or enter a valid {numeralJS} format',
+        values: {
+          numeralJS: NUMERALJS,
+        },
+      }),
+    getFormatNumber: () =>
+      i18n.translate('xpack.canvas.uis.arguments.numberFormat.format.numberDropDown', {
+        defaultMessage: 'Number',
+      }),
+    getFormatPercent: () =>
+      i18n.translate('xpack.canvas.uis.arguments.numberFormat.format.percentDropDown', {
+        defaultMessage: 'Percent',
+      }),
+    getFormatCurrency: () =>
+      i18n.translate('xpack.canvas.uis.arguments.numberFormat.format.currencyDropDown', {
+        defaultMessage: 'Currency',
+      }),
+    getFormatDuration: () =>
+      i18n.translate('xpack.canvas.uis.arguments.numberFormat.format.durationDropDown', {
+        defaultMessage: 'Duration',
+      }),
+    getFormatBytes: () =>
+      i18n.translate('xpack.canvas.uis.arguments.numberFormat.format.bytesDropDown', {
+        defaultMessage: 'Bytes',
+      }),
+  },
   Palette: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.arguments.paletteTitle', {
@@ -67,6 +221,272 @@ export const ArgumentStrings = {
     getHelp: () =>
       i18n.translate('xpack.canvas.uis.arguments.paletteLabel', {
         defaultMessage: 'Choose a color palette',
+      }),
+  },
+  Percentage: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.percentageTitle', {
+        defaultMessage: 'Percentage',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.percentageLabel', {
+        defaultMessage: 'Slider for percentage ',
+      }),
+  },
+  Range: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.rangeTitle', {
+        defaultMessage: 'Range',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.rangeLabel', {
+        defaultMessage: 'Slider for values within a range',
+      }),
+  },
+  Select: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.selectTitle', {
+        defaultMessage: 'Select',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.selectLabel', {
+        defaultMessage: 'Select from multiple options in a drop down',
+      }),
+  },
+  Shape: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.shapeTitle', {
+        defaultMessage: 'Shape',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.shapeLabel', {
+        defaultMessage: 'Shape picker',
+      }),
+  },
+  String: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.stringTitle', {
+        defaultMessage: 'String',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.stringLabel', {
+        defaultMessage: 'Input short strings',
+      }),
+  },
+  Textarea: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.textareaTitle', {
+        defaultMessage: 'Textarea',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.textareaLabel', {
+        defaultMessage: 'Input long strings',
+      }),
+  },
+  Toggle: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.toggleTitle', {
+        defaultMessage: 'Toggle',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.toggleLabel', {
+        defaultMessage: 'A true/false toggle switch',
+      }),
+  },
+};
+
+export const DataSourceStrings = {
+  DemoData: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.demoDataTitle', {
+        defaultMessage: 'Demo data',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.demoDataLabel', {
+        defaultMessage: 'Mock data set with usernames, prices, projects, countries, and phases',
+      }),
+    getHeading: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.demoData.headingTitle', {
+        defaultMessage: 'You are using demo data',
+      }),
+  },
+  Essql: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.essqlTitle', {
+        defaultMessage: '{elasticsearch} {sql}',
+        values: {
+          elasticsearch: ELASTICSEARCH,
+          sql: SQL,
+        },
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.essqlLabel', {
+        defaultMessage: 'Use {elasticsearch} {sql} to get a data table',
+        values: {
+          elasticsearch: ELASTICSEARCH,
+          sql: SQL,
+        },
+      }),
+    getLabel: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.essql.queryTitle', {
+        defaultMessage: '{elasticsearch} {sql} query',
+        values: {
+          elasticsearch: ELASTICSEARCH,
+          sql: SQL,
+        },
+      }),
+  },
+  Timelion: {
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.timelionLabel', {
+        defaultMessage: 'Use {timelion} syntax to retrieve a timeseries',
+        values: {
+          timelion: TIMELION,
+        },
+      }),
+    getAbout: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.timelion.aboutDetail', {
+        defaultMessage:
+          '{canvas} integrates with {kibanaTimelion} application to allow you to use {timelion} queries to pull back timeseries data in a tabular format that can be used with {canvas} elements.',
+        values: {
+          timelion: TIMELION,
+          kibanaTimelion: `${KIBANA}'s ${TIMELION}`,
+          canvas: CANVAS,
+        },
+      }),
+    getQueryLabel: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.timelion.queryTitle', {
+        defaultMessage: 'Query',
+      }),
+    getQueryHelp: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.timelion.queryLabel', {
+        defaultMessage: '{lucene} Query String syntax',
+        values: {
+          lucene: LUCENE,
+        },
+      }),
+    getIntervalLabel: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.timelion.intervalTitle', {
+        defaultMessage: 'Interval',
+      }),
+    getIntervalHelp: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.timelion.intervalLabel', {
+        defaultMessage:
+          'Accepts {elasticsearch} date math: {weeksExample}, {daysExample}, {secondsExample}, or {auto}',
+        values: {
+          elasticsearch: ELASTICSEARCH,
+          secondsExample: '10s',
+          daysExample: '5d',
+          weeksExample: '1w',
+          auto: 'auto',
+        },
+      }),
+    getTipsHeading: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.timelion.tipsTitle', {
+        defaultMessage: 'Some tips',
+      }),
+  },
+};
+
+export const ModelStrings = {
+  PointSeries: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.pointSeriesTitle', {
+        defaultMessage: 'Dimensions & measures',
+      }),
+    getXAxisDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.pointSeries.args.xaxisTitle', {
+        defaultMessage: 'X-axis',
+      }),
+    getXAxisHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.pointSeries.args.xaxisLabel', {
+        defaultMessage: 'Data along the horizontal axis. Usually a number, string or date',
+      }),
+    getYaxisDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.pointSeries.args.yaxisTitle', {
+        defaultMessage: 'Y-axis',
+      }),
+    getYaxisHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.pointSeries.args.yaxisLabel', {
+        defaultMessage: 'Data along the vertical axis. Usually a number',
+      }),
+    getColorDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.pointSeries.args.colorTitle', {
+        defaultMessage: 'Color',
+      }),
+    getColorHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.pointSeries.args.colorLabel', {
+        defaultMessage: 'Determines the color of a mark or series',
+      }),
+    getSizeDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.pointSeries.args.sizeTitle', {
+        defaultMessage: 'Size',
+      }),
+    getSizeHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.pointSeries.args.sizeLabel', {
+        defaultMessage: 'Determine the size of a mark',
+      }),
+    getTextDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.pointSeries.args.textTitle', {
+        defaultMessage: 'Text',
+      }),
+    getTextHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.pointSeries.args.textLabel', {
+        defaultMessage: 'Set the text to use as, or around, the mark',
+      }),
+  },
+};
+
+export const TransformStrings = {
+  FormatDate: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.transforms.formatDateTitle', {
+        defaultMessage: 'Date format',
+      }),
+    getFormatDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.transforms.formatDate.args.formatTitle', {
+        defaultMessage: 'Format',
+      }),
+  },
+  FormatNumber: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.transforms.formatNumberTitle', {
+        defaultMessage: 'Number format',
+      }),
+    getFormatDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.transforms.formatNumber.args.formatTitle', {
+        defaultMessage: 'Format',
+      }),
+  },
+  RoundDate: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.transforms.roundDateTitle', {
+        defaultMessage: 'Round date',
+      }),
+    getFormatDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.transforms.roundDate.args.formatTitle', {
+        defaultMessage: 'Format',
+      }),
+    getFormatHelp: () =>
+      i18n.translate('xpack.canvas.uis.transforms.roundDate.args.formatLabel', {
+        defaultMessage: 'Select or enter a {momentJs} format to round the date',
+        values: {
+          momentJs: MOMENTJS,
+        },
+      }),
+  },
+  Sort: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.transforms.sortTitle', {
+        defaultMessage: 'Datatable sorting',
+      }),
+    getSortFieldDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.transforms.sort.args.sortFieldTitle', {
+        defaultMessage: 'Sort field',
+      }),
+    getReverseDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.transforms.sort.args.reverseToggleSwitch', {
+        defaultMessage: 'Descending',
       }),
   },
 };
