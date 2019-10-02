@@ -327,7 +327,7 @@ var apm = initApm({curlyOpen}
   // ${i18n.translate('kbn.server.tutorials.apm.jsClient.installDependency.commands.setRequiredServiceNameComment', {
     defaultMessage: 'Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)',
   })}
-  serviceName: '',
+  serviceName: 'your-app-name',
 
   // ${i18n.translate('kbn.server.tutorials.apm.jsClient.installDependency.commands.setCustomApmServerUrlComment', {
     defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
@@ -340,6 +340,11 @@ var apm = initApm({curlyOpen}
   })}
   serviceVersion: ''
 {curlyClose})`.split('\n'),
+    textPost: i18n.translate('kbn.server.tutorials.apm.jsClient.installDependency.textPost', {
+      defaultMessage: 'Framework integrations, like React or Angular, have custom dependencies. \
+See the [integration documentation]({docLink}) for more information.',
+      values: { docLink: '{config.docs.base_url}guide/en/apm/agent/rum-js/{config.docs.version}/framework-integrations.html' },
+    }),
   },
   {
     title: i18n.translate('kbn.server.tutorials.apm.jsClient.scriptTags.title', {
@@ -359,7 +364,7 @@ and host the file on your Server/CDN before deploying to production.',
 <script src="https://your-cdn-host.com/path/to/elastic-apm-rum.umd.min.js" crossorigin></script>
 <script>
   elasticApm.init({curlyOpen}
-    serviceName: '',
+    serviceName: 'your-app-name',
     serverUrl: 'http://localhost:8200',
   {curlyClose})
 </script>
