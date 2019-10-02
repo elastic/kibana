@@ -113,7 +113,7 @@ describe('Timeline', () => {
       expect(wrapper.find('[data-test-subj="timelineHeader"]').exists()).toEqual(true);
     });
 
-    test('it renders the timeline body', () => {
+    test('it renders the timeline table', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocks}>
@@ -148,7 +148,7 @@ describe('Timeline', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="horizontal-scroll"]').exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
     });
 
     test('it does NOT render the paging footer when you do NOT have any data providers', () => {
