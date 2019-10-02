@@ -57,6 +57,7 @@ interface Props {
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
   onChange?: (query: Query) => void;
   onSubmit?: (query: Query) => void;
+  dataTestSubj?: string;
 }
 
 interface State {
@@ -487,7 +488,6 @@ export class QueryBarInputUI extends Component<Props, State> {
                     : undefined
                 }
                 type="text"
-                data-test-subj="queryInput"
                 aria-autocomplete="list"
                 aria-controls="kbnTypeahead__items"
                 aria-activedescendant={
@@ -502,6 +502,7 @@ export class QueryBarInputUI extends Component<Props, State> {
                     onSelectLanguage={this.onSelectLanguage}
                   />
                 }
+                data-test-subj={this.props.dataTestSubj || 'queryInput'}
               />
             </div>
           </div>

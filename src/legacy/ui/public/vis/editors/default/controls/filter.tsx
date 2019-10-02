@@ -104,7 +104,7 @@ function FilterRow({
             indexPatterns={[agg.getIndexPattern()]}
             onChange={(query: Query) => onChangeValue(id, query, customLabel)}
             disableAutoFocus={!autoFocus}
-            data-test-subj={dataTestSubj}
+            dataTestSubj={dataTestSubj}
             bubbleSubmitEvent={true}
             languageSwitcherPopoverAnchorPosition="leftDown"
           />
