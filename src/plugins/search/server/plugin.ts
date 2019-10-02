@@ -35,7 +35,7 @@ import {
   TRegisterSearchStrategyProvider,
 } from './i_search_strategy';
 import { IRouteHandlerSearchContext } from './i_route_handler_search_context';
-import { EsSearchServerPlugin } from './es_search/plugin';
+import { EsSearchService } from './es_search/plugin';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
@@ -94,7 +94,7 @@ export class SearchServerPlugin implements Plugin<ISearchSetup, void> {
     // ES search capabilities are written in a way that it could easily be a separate plugin,
     // however these two plugins are tightly coupled due to the default search strategy using
     // es search types.
-    new EsSearchServerPlugin(this.initializerContext).setup(core, { search: api });
+    new EsSearchService(this.initializerContext).setup(core, { search: api });
 
     return api;
   }

@@ -17,26 +17,36 @@
  * under the License.
  */
 
-import { ISearchSetup } from '../i_search_setup';
-import { PluginInitializerContext, CoreSetup, Plugin } from '../../../../core/server';
+import { coreMock } from '../../../../core/public/mocks';
 import { esSearchStrategyProvider } from './es_search_strategy';
-import { ES_SEARCH_STRATEGY } from '../../common';
+import { CoreSetup } from 'kibana/public';
+import { ES_SEARCH_STRATEGY } from '../../common/es_search';
 
-interface IEsSearchDependencies {
-  search: ISearchSetup;
-}
+describe('ES search strategy', () => {
+  let mockCoreSetup: MockedKeys<CoreSetup>;
+  const mockSearch = jest.fn();
 
-export class EsSearchService implements Plugin<void, void, IEsSearchDependencies> {
-  constructor(private initializerContext: PluginInitializerContext) {}
+  beforeEach(() => {
+    mockCoreSetup = coreMock.createSetup();
+    mockSearch.mockClear();
+  });
 
-  public setup(core: CoreSetup, deps: IEsSearchDependencies) {
-    deps.search.registerSearchStrategyProvider(
-      this.initializerContext.opaqueId,
-      ES_SEARCH_STRATEGY,
-      esSearchStrategyProvider
+  it('returns a strategy with `search` that calls the sync search `search`', () => {
+    const request = { params: {} };
+    const options = {};
+
+    const esSearch = esSearchStrategyProvider(
+      {
+        core: mockCoreSetup,
+      },
+      mockSearch
     );
-  }
+    esSearch.search(request, options);
 
-  public start() {}
-  public stop() {}
-}
+    expect(mockSearch.mock.calls[0][0]).toEqual({
+      ...request,
+      serverStrategy: ES_SEARCH_STRATEGY,
+    });
+    expect(mockSearch.mock.calls[0][1]).toBe(options);
+  });
+});

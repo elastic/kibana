@@ -18,24 +18,39 @@
  */
 
 import { coreMock } from '../../../core/public/mocks';
-
-import { SearchPublicPlugin } from './plugin';
+import { SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider } from './sync_search_strategy';
 import { CoreSetup } from '../../../core/public';
 
-describe('Search service', () => {
-  let plugin: SearchPublicPlugin;
+describe('Sync search strategy', () => {
   let mockCoreSetup: MockedKeys<CoreSetup>;
-  const opaqueId = Symbol();
+  const mockSearch = jest.fn();
+
   beforeEach(() => {
-    plugin = new SearchPublicPlugin({ opaqueId });
     mockCoreSetup = coreMock.createSetup();
   });
 
-  describe('setup()', () => {
-    it('exposes proper contract', async () => {
-      const setup = plugin.setup(mockCoreSetup);
-      expect(setup).toHaveProperty('registerSearchStrategyContext');
-      expect(setup).toHaveProperty('registerSearchStrategyProvider');
+  it('returns a strategy with `search` that calls the backend API', () => {
+    mockCoreSetup.http.fetch.mockImplementationOnce(() => Promise.resolve());
+
+    const syncSearch = syncSearchStrategyProvider(
+      {
+        core: mockCoreSetup,
+      },
+      mockSearch
+    );
+    syncSearch.search(
+      {
+        serverStrategy: SYNC_SEARCH_STRATEGY,
+      },
+      {}
+    );
+    expect(mockCoreSetup.http.fetch.mock.calls[0][0]).toBe(`/api/search/${SYNC_SEARCH_STRATEGY}`);
+    expect(mockCoreSetup.http.fetch.mock.calls[0][1]).toEqual({
+      body: JSON.stringify({
+        serverStrategy: 'SYNC_SEARCH_STRATEGY',
+      }),
+      method: 'POST',
+      signal: undefined,
     });
   });
 });

@@ -19,7 +19,7 @@
 
 import { Plugin, CoreSetup, PluginInitializerContext } from '../../../../core/public';
 import { ES_SEARCH_STRATEGY } from '../../common/es_search';
-import { esClientSearchStrategyProvider } from './es_search_strategy';
+import { esSearchStrategyProvider } from './es_search_strategy';
 import { ISearchSetup } from '../i_search_setup';
 
 export interface IEsSearchSetupDependencies {
@@ -32,7 +32,7 @@ export class EsSearchService implements Plugin {
     deps.search.registerSearchStrategyProvider(
       this.initializerContext.opaqueId,
       ES_SEARCH_STRATEGY,
-      esClientSearchStrategyProvider
+      esSearchStrategyProvider
     );
   }
 

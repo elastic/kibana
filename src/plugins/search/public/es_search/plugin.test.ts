@@ -17,26 +17,27 @@
  * under the License.
  */
 
-import { ISearchSetup } from '../i_search_setup';
-import { PluginInitializerContext, CoreSetup, Plugin } from '../../../../core/server';
-import { esSearchStrategyProvider } from './es_search_strategy';
-import { ES_SEARCH_STRATEGY } from '../../common';
+import { coreMock } from '../../../../core/public/mocks';
+import { EsSearchService } from './plugin';
+import { CoreSetup } from '../../../../core/public';
+import { searchSetupMock } from '../mocks';
 
-interface IEsSearchDependencies {
-  search: ISearchSetup;
-}
+describe('ES search strategy service', () => {
+  let service: EsSearchService;
+  let mockCoreSetup: MockedKeys<CoreSetup>;
+  const opaqueId = Symbol();
 
-export class EsSearchService implements Plugin<void, void, IEsSearchDependencies> {
-  constructor(private initializerContext: PluginInitializerContext) {}
+  beforeEach(() => {
+    service = new EsSearchService({ opaqueId });
+    mockCoreSetup = coreMock.createSetup();
+  });
 
-  public setup(core: CoreSetup, deps: IEsSearchDependencies) {
-    deps.search.registerSearchStrategyProvider(
-      this.initializerContext.opaqueId,
-      ES_SEARCH_STRATEGY,
-      esSearchStrategyProvider
-    );
-  }
-
-  public start() {}
-  public stop() {}
-}
+  describe('setup()', () => {
+    it('registers the ES search strategy', async () => {
+      service.setup(mockCoreSetup, {
+        search: searchSetupMock,
+      });
+      expect(searchSetupMock.registerSearchStrategyProvider).toBeCalled();
+    });
+  });
+});
