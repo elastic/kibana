@@ -13,7 +13,7 @@ import { ChangeIndexPattern } from './change_indexpattern';
 
 export interface IndexPatternLayerPanelProps extends DatasourceLayerPanelProps {
   state: IndexPatternPrivateState;
-  onChangeIndexPattern: (newId: string) => Promise<void>;
+  onChangeIndexPattern: (newId: string) => void;
 }
 
 export function LayerPanel({ state, layerId, onChangeIndexPattern }: IndexPatternLayerPanelProps) {

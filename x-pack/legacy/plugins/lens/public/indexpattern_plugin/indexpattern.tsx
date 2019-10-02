@@ -103,6 +103,12 @@ export function getIndexPatternDatasource({
   savedObjectsClient: SavedObjectsClientContract;
 }) {
   const uiSettings = chrome.getUiSettingsClient();
+  const onIndexPatternLoadError = (err: Error) =>
+    core.notifications.toasts.addError(err, {
+      title: i18n.translate('xpack.lens.editorFrame.indexPatternLoadError', {
+        defaultMessage: 'Error loading index pattern',
+      }),
+    });
 
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
@@ -174,6 +180,7 @@ export function getIndexPatternDatasource({
                 state,
                 setState,
                 savedObjectsClient,
+                onError: onIndexPatternLoadError,
               });
             }}
             {...props}
@@ -226,12 +233,13 @@ export function getIndexPatternDatasource({
             <LayerPanel
               state={state}
               onChangeIndexPattern={indexPatternId => {
-                return changeLayerIndexPattern({
+                changeLayerIndexPattern({
                   savedObjectsClient,
                   indexPatternId,
                   setState,
                   state,
                   layerId: props.layerId,
+                  onError: onIndexPatternLoadError,
                 });
               }}
               {...props}
