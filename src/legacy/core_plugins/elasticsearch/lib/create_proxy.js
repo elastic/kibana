@@ -64,6 +64,8 @@ export function createProxy(server) {
         }, { signal });
       } catch (error) {
         throw handleESError(error);
+        // newError.output.payload = JSON.stringify(error.response);
+        // throw newError;
       }
     })
   });
