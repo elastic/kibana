@@ -55,7 +55,7 @@ function TableOptions({
     [aggs, aggsLabels, stateParams.percentageCol, stateParams.dimensions]
   );
 
-  const isPerPageValid = stateParams.perPage === '' ? true : stateParams.perPage > 0;
+  const isPerPageValid = stateParams.perPage === '' || stateParams.perPage > 0;
 
   useEffect(() => {
     setValidity(isPerPageValid);
