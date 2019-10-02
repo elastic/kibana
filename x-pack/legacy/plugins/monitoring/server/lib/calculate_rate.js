@@ -49,7 +49,16 @@ export function calculateRate(
 
   const earliestTimeInMillis = moment(timeWindowMin).valueOf();
   const latestTimeInMillis = moment(timeWindowMax).valueOf();
-  const millisDelta = latestTimeInMillis - earliestTimeInMillis;
+
+  // Effective latest and earliest timestamps depend not only on the time window bounds but also
+  // on whether we have data within those bounds. For example, if the time window bounds are "Last 1 hour"
+  // but we only have monitoring data for the last 25 minutes, we should use the latter for calculating
+  // the rate. If we only use the time window bounds, the rate will be calculated as lower than it
+  // should be.
+  const effectiveLatestTimeInMillis = Math.min(hitTimestampMoment, latestTimeInMillis);
+  const effectiveEarliestTimeInMillis = Math.max(earliestHitTimestampMoment, earliestTimeInMillis);
+
+  const millisDelta = effectiveLatestTimeInMillis - effectiveEarliestTimeInMillis;
 
   let rate = null;
   let isEstimate = false;
