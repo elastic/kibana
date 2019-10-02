@@ -5,54 +5,53 @@
  */
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  const jobId = `fq_multi_1_${Date.now()}`;
+  const jobId = `fq_single_1_${Date.now()}`;
   const jobIdClone = `${jobId}_clone`;
   const jobDescription =
-    'Create multi metric job based on the farequote dataset with 15m bucketspan and min/max/mean(responsetime) split by airline';
-  const jobGroups = ['automated', 'farequote', 'multi-metric'];
+    'Create single metric job based on the farequote dataset with 30m bucketspan and mean(responsetime)';
+  const jobGroups = ['automated', 'farequote', 'single-metric'];
   const jobGroupsClone = [...jobGroups, 'clone'];
-  const aggAndFieldIdentifiers = ['Min(responsetime)', 'Max(responsetime)', 'Mean(responsetime)'];
-  const splitField = 'airline';
-  const bucketSpan = '15m';
-  const memoryLimit = '20mb';
+  const aggAndFieldIdentifier = 'Mean(responsetime)';
+  const bucketSpan = '30m';
+  const memoryLimit = '15mb';
 
   function getExpectedRow(expectedJobId: string, expectedJobGroups: string[]) {
     return {
       id: expectedJobId,
       description: jobDescription,
       jobGroups: [...new Set(expectedJobGroups)].sort(),
-      recordCount: '86,274',
+      recordCount: '2,399',
       memoryStatus: 'ok',
       jobState: 'closed',
       datafeedState: 'stopped',
-      latestTimestamp: '2016-02-11 23:59:54',
+      latestTimestamp: '2016-02-11 23:56:59',
     };
   }
 
   function getExpectedCounts(expectedJobId: string) {
     return {
       job_id: expectedJobId,
-      processed_record_count: '86,274',
-      processed_field_count: '172,548',
-      input_bytes: '6.4 MB',
-      input_field_count: '172,548',
+      processed_record_count: '2,399',
+      processed_field_count: '4,798',
+      input_bytes: '180.6 KB',
+      input_field_count: '4,798',
       invalid_date_count: '0',
       missing_field_count: '0',
       out_of_order_timestamp_count: '0',
       empty_bucket_count: '0',
       sparse_bucket_count: '0',
-      bucket_count: '479',
-      earliest_record_timestamp: '2016-02-07 00:00:00',
-      latest_record_timestamp: '2016-02-11 23:59:54',
-      input_record_count: '86,274',
-      latest_bucket_timestamp: '2016-02-11 23:45:00',
+      bucket_count: '239',
+      earliest_record_timestamp: '2016-02-07 00:02:50',
+      latest_record_timestamp: '2016-02-11 23:56:59',
+      input_record_count: '2,399',
+      latest_bucket_timestamp: '2016-02-11 23:30:00',
     };
   }
 
@@ -61,17 +60,17 @@ export default function({ getService }: FtrProviderContext) {
       job_id: expectedJobId,
       result_type: 'model_size_stats',
       model_bytes_exceeded: '0',
-      model_bytes_memory_limit: '20971520',
-      total_by_field_count: '59',
+      model_bytes_memory_limit: '15728640',
+      total_by_field_count: '3',
       total_over_field_count: '0',
-      total_partition_field_count: '58',
+      total_partition_field_count: '2',
       bucket_allocation_failures_count: '0',
       memory_status: 'ok',
-      timestamp: '2016-02-11 23:30:00',
+      timestamp: '2016-02-11 23:00:00',
     };
   }
 
-  describe('multi metric', function() {
+  describe('single metric', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
@@ -97,8 +96,8 @@ export default function({ getService }: FtrProviderContext) {
         await ml.jobSourceSelection.selectSourceIndexPattern('farequote');
       });
 
-      it('loads the multi metric job wizard page', async () => {
-        await ml.jobTypeSelection.selectMultiMetricJob();
+      it('loads the single metric job wizard page', async () => {
+        await ml.jobTypeSelection.selectSingleMetricJob();
       });
 
       it('displays the time range step', async () => {
@@ -118,32 +117,10 @@ export default function({ getService }: FtrProviderContext) {
         await ml.jobWizardCommon.advanceToPickFieldsSection();
       });
 
-      it('selects detectors and displays detector previews', async () => {
-        for (const [index, aggAndFieldIdentifier] of aggAndFieldIdentifiers.entries()) {
-          await ml.jobWizardCommon.assertAggAndFieldInputExists();
-          await ml.jobWizardCommon.selectAggAndField(aggAndFieldIdentifier, false);
-          await ml.jobWizardCommon.assertDetectorPreviewExists(
-            aggAndFieldIdentifier,
-            index,
-            'LINE'
-          );
-        }
-      });
-
-      it('inputs the split field and displays split cards', async () => {
-        await ml.jobWizardMultiMetric.assertSplitFieldInputExists();
-        await ml.jobWizardMultiMetric.selectSplitField(splitField);
-
-        await ml.jobWizardMultiMetric.assertDetectorSplitExists(splitField);
-        await ml.jobWizardMultiMetric.assertDetectorSplitFrontCardTitle('AAL');
-        await ml.jobWizardMultiMetric.assertDetectorSplitNumberOfBackCards(9);
-
-        await ml.jobWizardCommon.assertInfluencerSelection([splitField]);
-      });
-
-      it('displays the influencer field', async () => {
-        await ml.jobWizardCommon.assertInfluencerInputExists();
-        await ml.jobWizardCommon.assertInfluencerSelection([splitField]);
+      it('selects field and aggregation', async () => {
+        await ml.jobWizardCommon.assertAggAndFieldInputExists();
+        await ml.jobWizardCommon.selectAggAndField(aggAndFieldIdentifier, true);
+        await ml.jobWizardCommon.assertAnomalyChartExists('LINE');
       });
 
       it('inputs the bucket span', async () => {
@@ -226,9 +203,9 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     describe('job cloning', function() {
-      it('clicks the clone action and loads the multi metric wizard', async () => {
+      it('clicks the clone action and loads the single metric wizard', async () => {
         await ml.jobTable.clickCloneJobAction(jobId);
-        await ml.jobTypeSelection.assertMultiMetricJobWizardOpen();
+        await ml.jobTypeSelection.assertSingleMetricJobWizardOpen();
       });
 
       it('displays the time range step', async () => {
@@ -248,28 +225,10 @@ export default function({ getService }: FtrProviderContext) {
         await ml.jobWizardCommon.advanceToPickFieldsSection();
       });
 
-      it('pre-fills detectors and shows preview with split cards', async () => {
-        for (const [index, aggAndFieldIdentifier] of aggAndFieldIdentifiers.entries()) {
-          await ml.jobWizardCommon.assertDetectorPreviewExists(
-            aggAndFieldIdentifier,
-            index,
-            'LINE'
-          );
-        }
-
-        await ml.jobWizardMultiMetric.assertDetectorSplitExists(splitField);
-        await ml.jobWizardMultiMetric.assertDetectorSplitFrontCardTitle('AAL');
-        await ml.jobWizardMultiMetric.assertDetectorSplitNumberOfBackCards(9);
-      });
-
-      it('pre-fills the split field', async () => {
-        await ml.jobWizardMultiMetric.assertSplitFieldInputExists();
-        await ml.jobWizardMultiMetric.assertSplitFieldSelection(splitField);
-      });
-
-      it('pre-fills influencers', async () => {
-        await ml.jobWizardCommon.assertInfluencerInputExists();
-        await ml.jobWizardCommon.assertInfluencerSelection([splitField]);
+      it('pre-fills field and aggregation', async () => {
+        await ml.jobWizardCommon.assertAggAndFieldInputExists();
+        await ml.jobWizardCommon.assertAggAndFieldSelection(aggAndFieldIdentifier);
+        await ml.jobWizardCommon.assertAnomalyChartExists('LINE');
       });
 
       it('pre-fills the bucket span', async () => {
@@ -312,7 +271,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('pre-fills the model plot switch', async () => {
         await ml.jobWizardCommon.assertModelPlotSwitchExists();
-        await ml.jobWizardCommon.assertModelPlotSwitchCheckedState(false);
+        await ml.jobWizardCommon.assertModelPlotSwitchCheckedState(true);
       });
 
       it('pre-fills the dedicated index switch', async () => {

@@ -5,53 +5,68 @@
  */
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  const jobId = `fq_single_1_${Date.now()}`;
+  const jobId = `ec_population_1_${Date.now()}`;
   const jobIdClone = `${jobId}_clone`;
   const jobDescription =
-    'Create single metric job based on the farequote dataset with 30m bucketspan and mean(responsetime)';
-  const jobGroups = ['automated', 'farequote', 'single-metric'];
+    'Create population job based on the ecommerce sample dataset with 2h bucketspan over customer_id' +
+    ' - detectors: (Mean(products.base_price) by customer_gender), (Mean(products.quantity) by category.leyword)';
+  const jobGroups = ['automated', 'ecommerce', 'population'];
   const jobGroupsClone = [...jobGroups, 'clone'];
-  const aggAndFieldIdentifier = 'Mean(responsetime)';
-  const bucketSpan = '30m';
-  const memoryLimit = '15mb';
+  const populationField = 'customer_id';
+  const detectors = [
+    {
+      identifier: 'Mean(products.base_price)',
+      splitField: 'customer_gender',
+      frontCardTitle: 'FEMALE',
+      numberOfBackCards: 1,
+    },
+    {
+      identifier: 'Mean(products.quantity)',
+      splitField: 'category.keyword',
+      frontCardTitle: "Men's Clothing",
+      numberOfBackCards: 5,
+    },
+  ];
+  const bucketSpan = '2h';
+  const memoryLimit = '8mb';
 
   function getExpectedRow(expectedJobId: string, expectedJobGroups: string[]) {
     return {
       id: expectedJobId,
       description: jobDescription,
       jobGroups: [...new Set(expectedJobGroups)].sort(),
-      recordCount: '2,399',
+      recordCount: '4,675',
       memoryStatus: 'ok',
       jobState: 'closed',
       datafeedState: 'stopped',
-      latestTimestamp: '2016-02-11 23:56:59',
+      latestTimestamp: '2019-07-12 23:45:36',
     };
   }
 
   function getExpectedCounts(expectedJobId: string) {
     return {
       job_id: expectedJobId,
-      processed_record_count: '2,399',
-      processed_field_count: '4,798',
-      input_bytes: '180.6 KB',
-      input_field_count: '4,798',
+      processed_record_count: '4,675',
+      processed_field_count: '23,375',
+      input_bytes: '867.7 KB',
+      input_field_count: '23,375',
       invalid_date_count: '0',
       missing_field_count: '0',
       out_of_order_timestamp_count: '0',
       empty_bucket_count: '0',
       sparse_bucket_count: '0',
-      bucket_count: '239',
-      earliest_record_timestamp: '2016-02-07 00:02:50',
-      latest_record_timestamp: '2016-02-11 23:56:59',
-      input_record_count: '2,399',
-      latest_bucket_timestamp: '2016-02-11 23:30:00',
+      bucket_count: '371',
+      earliest_record_timestamp: '2019-06-12 00:04:19',
+      latest_record_timestamp: '2019-07-12 23:45:36',
+      input_record_count: '4,675',
+      latest_bucket_timestamp: '2019-07-12 22:00:00',
     };
   }
 
@@ -60,20 +75,20 @@ export default function({ getService }: FtrProviderContext) {
       job_id: expectedJobId,
       result_type: 'model_size_stats',
       model_bytes_exceeded: '0',
-      model_bytes_memory_limit: '15728640',
-      total_by_field_count: '3',
-      total_over_field_count: '0',
-      total_partition_field_count: '2',
+      model_bytes_memory_limit: '8388608',
+      total_by_field_count: '25',
+      total_over_field_count: '92',
+      total_partition_field_count: '3',
       bucket_allocation_failures_count: '0',
       memory_status: 'ok',
-      timestamp: '2016-02-11 23:00:00',
+      timestamp: '2019-07-12 20:00:00',
     };
   }
 
-  describe('single metric', function() {
+  describe('population', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('ml/ecommerce');
     });
 
     after(async () => {
@@ -93,11 +108,11 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       it('loads the job type selection page', async () => {
-        await ml.jobSourceSelection.selectSourceIndexPattern('farequote');
+        await ml.jobSourceSelection.selectSourceIndexPattern('ecommerce');
       });
 
-      it('loads the single metric job wizard page', async () => {
-        await ml.jobTypeSelection.selectSingleMetricJob();
+      it('loads the population job wizard page', async () => {
+        await ml.jobTypeSelection.selectPopulationJob();
       });
 
       it('displays the time range step', async () => {
@@ -106,8 +121,8 @@ export default function({ getService }: FtrProviderContext) {
 
       it('displays the event rate chart', async () => {
         await ml.jobWizardCommon.clickUseFullDataButton(
-          'Feb 7, 2016 @ 00:00:00.000',
-          'Feb 11, 2016 @ 23:59:54.000'
+          'Jun 12, 2019 @ 00:04:19.000',
+          'Jul 12, 2019 @ 23:45:36.000'
         );
         await ml.jobWizardCommon.assertEventRateChartExists();
         await ml.jobWizardCommon.assertEventRateChartHasData();
@@ -117,10 +132,45 @@ export default function({ getService }: FtrProviderContext) {
         await ml.jobWizardCommon.advanceToPickFieldsSection();
       });
 
-      it('selects field and aggregation', async () => {
-        await ml.jobWizardCommon.assertAggAndFieldInputExists();
-        await ml.jobWizardCommon.selectAggAndField(aggAndFieldIdentifier, true);
-        await ml.jobWizardCommon.assertAnomalyChartExists('LINE');
+      it('selects the population field', async () => {
+        await ml.jobWizardPopulation.assertPopulationFieldInputExists();
+        await ml.jobWizardPopulation.selectPopulationField(populationField);
+      });
+
+      it('selects detectors and displays detector previews', async () => {
+        for (const [index, detector] of detectors.entries()) {
+          await ml.jobWizardCommon.assertAggAndFieldInputExists();
+          await ml.jobWizardCommon.selectAggAndField(detector.identifier, false);
+          await ml.jobWizardCommon.assertDetectorPreviewExists(
+            detector.identifier,
+            index,
+            'SCATTER'
+          );
+        }
+      });
+
+      it('inputs detector split fields and displays split cards', async () => {
+        for (const [index, detector] of detectors.entries()) {
+          await ml.jobWizardPopulation.assertDetectorSplitFieldInputExists(index);
+          await ml.jobWizardPopulation.selectDetectorSplitField(index, detector.splitField);
+
+          await ml.jobWizardPopulation.assertDetectorSplitExists(index);
+          await ml.jobWizardPopulation.assertDetectorSplitFrontCardTitle(
+            index,
+            detector.frontCardTitle
+          );
+          await ml.jobWizardPopulation.assertDetectorSplitNumberOfBackCards(
+            index,
+            detector.numberOfBackCards
+          );
+        }
+      });
+
+      it('displays the influencer field', async () => {
+        await ml.jobWizardCommon.assertInfluencerInputExists();
+        await ml.jobWizardCommon.assertInfluencerSelection(
+          [populationField].concat(detectors.map(detector => detector.splitField))
+        );
       });
 
       it('inputs the bucket span', async () => {
@@ -203,9 +253,9 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     describe('job cloning', function() {
-      it('clicks the clone action and loads the single metric wizard', async () => {
+      it('clicks the clone action and loads the population wizard', async () => {
         await ml.jobTable.clickCloneJobAction(jobId);
-        await ml.jobTypeSelection.assertSingleMetricJobWizardOpen();
+        await ml.jobTypeSelection.assertPopulationJobWizardOpen();
       });
 
       it('displays the time range step', async () => {
@@ -214,8 +264,8 @@ export default function({ getService }: FtrProviderContext) {
 
       it('displays the event rate chart', async () => {
         await ml.jobWizardCommon.clickUseFullDataButton(
-          'Feb 7, 2016 @ 00:00:00.000',
-          'Feb 11, 2016 @ 23:59:54.000'
+          'Jun 12, 2019 @ 00:04:19.000',
+          'Jul 12, 2019 @ 23:45:36.000'
         );
         await ml.jobWizardCommon.assertEventRateChartExists();
         await ml.jobWizardCommon.assertEventRateChartHasData();
@@ -225,10 +275,40 @@ export default function({ getService }: FtrProviderContext) {
         await ml.jobWizardCommon.advanceToPickFieldsSection();
       });
 
-      it('pre-fills field and aggregation', async () => {
-        await ml.jobWizardCommon.assertAggAndFieldInputExists();
-        await ml.jobWizardCommon.assertAggAndFieldSelection(aggAndFieldIdentifier);
-        await ml.jobWizardCommon.assertAnomalyChartExists('LINE');
+      it('pre-fills the population field', async () => {
+        await ml.jobWizardPopulation.assertPopulationFieldInputExists();
+        await ml.jobWizardPopulation.assertPopulationFieldSelection(populationField);
+      });
+
+      it('pre-fills detectors and shows preview with split cards', async () => {
+        for (const [index, detector] of detectors.entries()) {
+          await ml.jobWizardCommon.assertDetectorPreviewExists(
+            detector.identifier,
+            index,
+            'SCATTER'
+          );
+
+          await ml.jobWizardPopulation.assertDetectorSplitFieldSelection(
+            index,
+            detector.splitField
+          );
+          await ml.jobWizardPopulation.assertDetectorSplitExists(index);
+          await ml.jobWizardPopulation.assertDetectorSplitFrontCardTitle(
+            index,
+            detector.frontCardTitle
+          );
+          await ml.jobWizardPopulation.assertDetectorSplitNumberOfBackCards(
+            index,
+            detector.numberOfBackCards
+          );
+        }
+      });
+
+      it('pre-fills influencers', async () => {
+        await ml.jobWizardCommon.assertInfluencerInputExists();
+        await ml.jobWizardCommon.assertInfluencerSelection(
+          [populationField].concat(detectors.map(detector => detector.splitField))
+        );
       });
 
       it('pre-fills the bucket span', async () => {
@@ -271,7 +351,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('pre-fills the model plot switch', async () => {
         await ml.jobWizardCommon.assertModelPlotSwitchExists();
-        await ml.jobWizardCommon.assertModelPlotSwitchCheckedState(true);
+        await ml.jobWizardCommon.assertModelPlotSwitchCheckedState(false);
       });
 
       it('pre-fills the dedicated index switch', async () => {
