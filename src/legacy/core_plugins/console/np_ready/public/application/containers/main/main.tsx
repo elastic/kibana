@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { debounce } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
