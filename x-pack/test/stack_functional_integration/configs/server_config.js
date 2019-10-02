@@ -68,10 +68,10 @@ module.exports = {
     //   pathname: '/app/code',
     //   hash: '/admin',
     // },
-    // sampledata: {
-    //   pathname: '/app/kibana',
-    //   hash: '/home/tutorial_directory/sampleData'
-    // }
+    sampledata: {
+      pathname: '/app/kibana',
+      hash: '/home/tutorial_directory/sampleData'
+    }
   },
   screenshots: {
     directory: resolve(__dirname, 'screenshots')
