@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, SavedObjectsService, SavedObject } from 'src/core/server';
+import {
+  SavedObjectsClientContract,
+  SavedObjectsLegacyService,
+  SavedObject,
+} from 'src/core/server';
 import { Readable } from 'stream';
 import { SavedObjectsClientProviderOptions } from 'src/core/server';
 import { spaceIdToNamespace } from '../utils/namespace';
@@ -20,7 +24,7 @@ export const COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS: SavedObjectsClientProvide
 
 export function copySavedObjectsToSpacesFactory(
   savedObjectsClient: SavedObjectsClientContract,
-  savedObjectsService: SavedObjectsService
+  savedObjectsService: SavedObjectsLegacyService
 ) {
   const { importExport, types, schema } = savedObjectsService;
   const eligibleTypes = getEligibleTypes({ types, schema });

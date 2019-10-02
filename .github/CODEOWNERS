@@ -4,6 +4,7 @@
 
 # App
 /x-pack/legacy/plugins/lens/ @elastic/kibana-app
+/x-pack/legacy/plugins/graph/ @elastic/kibana-app
 
 # App Architecture
 /src/plugins/data/ @elastic/kibana-app-arch
@@ -12,6 +13,8 @@
 
 # APM
 /x-pack/legacy/plugins/apm/  @elastic/apm-ui
+/x-pack/test/functional/apps/apm/  @elastic/apm-ui
+/src/legacy/core_plugins/apm_oss/  @elastic/apm-ui
 
 # Beats
 /x-pack/legacy/plugins/beats_management/  @elastic/beats

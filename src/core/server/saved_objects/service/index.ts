@@ -26,9 +26,10 @@ import { SavedObjectsSchema } from '../schema';
 import { SavedObjectsResolveImportErrorsOptions } from '../import/types';
 
 /**
- * @public
+ * @internal
+ * @deprecated
  */
-export interface SavedObjectsService<Request = any> {
+export interface SavedObjectsLegacyService<Request = any> {
   // ATTENTION: these types are incomplete
   addScopedSavedObjectsClientWrapperFactory: ScopedSavedObjectsClientProvider<
     Request

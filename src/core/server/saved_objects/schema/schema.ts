@@ -26,10 +26,12 @@ interface SavedObjectsSchemaTypeDefinition {
   convertToAliasScript?: string;
 }
 
+/** @internal */
 export interface SavedObjectsSchemaDefinition {
   [key: string]: SavedObjectsSchemaTypeDefinition;
 }
 
+/** @internal */
 export class SavedObjectsSchema {
   private readonly definition?: SavedObjectsSchemaDefinition;
   constructor(schemaDefinition?: SavedObjectsSchemaDefinition) {
