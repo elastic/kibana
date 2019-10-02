@@ -33,6 +33,7 @@ import { SettingsSection } from './SettingsSection';
 import { ServiceSection } from './ServiceSection';
 import { DeleteSection } from './DeleteSection';
 import { transactionMaxSpansRt } from '../../../../../../common/runtime_types/transaction_max_spans_rt';
+import { useFetcher } from '../../../../../hooks/useFetcher';
 const t = (id: string, defaultMessage: string, values?: Record<string, any>) =>
   i18n.translate(`xpack.apm.settings.agentConf.${id}`, {
     defaultMessage,
@@ -62,6 +63,20 @@ export function AddEditFlyout({
     selectedConfig
       ? selectedConfig.service.environment || ENVIRONMENT_NOT_DEFINED
       : ''
+  );
+
+  const { data: agentName } = useFetcher(
+    () => {
+      if (serviceName) {
+        return callApmApi({
+          pathname:
+            '/api/apm/settings/agent-configuration/services/{serviceName}/agent_name',
+          params: { path: { serviceName } }
+        });
+      }
+    },
+    [serviceName],
+    { preservePreviousData: false }
   );
 
   // config settings
@@ -149,8 +164,11 @@ export function AddEditFlyout({
             >
               <ServiceSection
                 selectedConfig={selectedConfig}
+                // environment
                 environment={environment}
                 setEnvironment={setEnvironment}
+                //
+                // serviceName
                 serviceName={serviceName}
                 setServiceName={setServiceName}
               />
@@ -172,6 +190,7 @@ export function AddEditFlyout({
                   set: setTransactionMaxSpans,
                   isValid: isTransactionMaxSpansValid
                 }}
+                agentName={agentName}
               />
 
               {selectedConfig ? (

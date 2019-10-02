@@ -15,6 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { SelectWithPlaceholder } from '../../../../shared/SelectWithPlaceholder';
+import { isRumAgentName } from '../../../../../../common/agent_name';
 const t = (id: string, defaultMessage: string) =>
   i18n.translate(`xpack.apm.settings.agentConf.flyOut.settingsSection.${id}`, {
     defaultMessage
@@ -30,13 +31,17 @@ interface Props {
   sampleRate: ConfigOption;
   captureBody: ConfigOption;
   transactionMaxSpans: ConfigOption;
+  agentName: string | undefined;
 }
 
 export function SettingsSection({
   sampleRate,
   captureBody,
-  transactionMaxSpans
+  transactionMaxSpans,
+  agentName
 }: Props) {
+  const isRumService = isRumAgentName(agentName);
+
   return (
     <>
       <EuiTitle size="xs">
@@ -75,76 +80,80 @@ export function SettingsSection({
 
       <EuiSpacer size="m" />
 
-      <EuiFormRow
-        label={t('captureBodyInputLabel', 'Capture body')}
-        helpText={t(
-          'captureBodyInputHelpText',
-          'For transactions that are HTTP requests, the agent can optionally capture the request body (e.g. POST variables). Default is "Off".'
-        )}
-      >
-        <SelectWithPlaceholder
-          placeholder={t('captureBodyInputPlaceholderText', 'Select option')}
-          options={[
-            {
-              value: 'off',
-              text: t('captureBodyConfigOptionOff', 'Off')
-            },
-            {
-              value: 'errors',
-              text: t('captureBodyConfigOptionErrors', 'Errors')
-            },
-            {
-              value: 'transactions',
-              text: t('captureBodyConfigOptionTransactions', 'Transactions')
-            },
-            {
-              value: 'all',
-              text: t('captureBodyConfigOptionAll', 'All')
-            }
-          ]}
-          value={captureBody.value}
-          onChange={e => {
-            e.preventDefault();
-            captureBody.set(e.target.value);
-          }}
-        />
-      </EuiFormRow>
-
-      <EuiFormRow
-        label={t(
-          'transactionMaxSpansConfigInputLabel',
-          'Transaction max spans'
-        )}
-        helpText={t(
-          'transactionMaxSpansConfigInputHelpText',
-          'Limits the amount of spans that are recorded per transaction. Default is 500.'
-        )}
-        error={t(
-          'transactionMaxSpansConfigInputErrorText',
-          'Must be between 0 and 32000'
-        )}
-        isInvalid={
-          !isEmpty(transactionMaxSpans.value) && !transactionMaxSpans.isValid
-        }
-      >
-        <EuiFieldNumber
-          placeholder={t(
-            'transactionMaxSpansConfigInputPlaceholderText',
-            'Set transaction max spans'
+      {!isRumService && (
+        <EuiFormRow
+          label={t('captureBodyInputLabel', 'Capture body')}
+          helpText={t(
+            'captureBodyInputHelpText',
+            'For transactions that are HTTP requests, the agent can optionally capture the request body (e.g. POST variables). Default is "Off".'
           )}
-          value={
-            transactionMaxSpans.value === ''
-              ? ''
-              : Number(transactionMaxSpans.value)
+        >
+          <SelectWithPlaceholder
+            placeholder={t('captureBodyInputPlaceholderText', 'Select option')}
+            options={[
+              {
+                value: 'off',
+                text: t('captureBodyConfigOptionOff', 'Off')
+              },
+              {
+                value: 'errors',
+                text: t('captureBodyConfigOptionErrors', 'Errors')
+              },
+              {
+                value: 'transactions',
+                text: t('captureBodyConfigOptionTransactions', 'Transactions')
+              },
+              {
+                value: 'all',
+                text: t('captureBodyConfigOptionAll', 'All')
+              }
+            ]}
+            value={captureBody.value}
+            onChange={e => {
+              e.preventDefault();
+              captureBody.set(e.target.value);
+            }}
+          />
+        </EuiFormRow>
+      )}
+
+      {!isRumService && (
+        <EuiFormRow
+          label={t(
+            'transactionMaxSpansConfigInputLabel',
+            'Transaction max spans'
+          )}
+          helpText={t(
+            'transactionMaxSpansConfigInputHelpText',
+            'Limits the amount of spans that are recorded per transaction. Default is 500.'
+          )}
+          error={t(
+            'transactionMaxSpansConfigInputErrorText',
+            'Must be between 0 and 32000'
+          )}
+          isInvalid={
+            !isEmpty(transactionMaxSpans.value) && !transactionMaxSpans.isValid
           }
-          min={0}
-          max={32000}
-          onChange={e => {
-            e.preventDefault();
-            transactionMaxSpans.set(e.target.value);
-          }}
-        />
-      </EuiFormRow>
+        >
+          <EuiFieldNumber
+            placeholder={t(
+              'transactionMaxSpansConfigInputPlaceholderText',
+              'Set transaction max spans'
+            )}
+            value={
+              transactionMaxSpans.value === ''
+                ? ''
+                : Number(transactionMaxSpans.value)
+            }
+            min={0}
+            max={32000}
+            onChange={e => {
+              e.preventDefault();
+              transactionMaxSpans.set(e.target.value);
+            }}
+          />
+        </EuiFormRow>
+      )}
     </>
   );
 }

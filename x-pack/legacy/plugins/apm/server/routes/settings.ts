@@ -59,7 +59,6 @@ export const listAgentConfigurationServicesRoute = createRoute(() => ({
 }));
 
 const agentPayloadRt = t.type({
-  agent_name: t.string,
   service: t.intersection([
     t.type({ name: t.string }),
     t.partial({ environments: t.array(t.string) })
@@ -84,6 +83,20 @@ export const listAgentConfigurationEnvironmentsRoute = createRoute(() => ({
     const setup = await setupRequest(req);
     const { serviceName } = path;
     return await getEnvironments({ serviceName, setup });
+  }
+}));
+
+// get agentName for service
+export const agentConfigurationAgentNameRoute = createRoute(() => ({
+  path:
+    '/api/apm/settings/agent-configuration/services/{serviceName}/agent_name',
+  params: {
+    path: t.type({ serviceName: t.string })
+  },
+  handler: async (req, { path }) => {
+    const setup = await setupRequest(req);
+    const { serviceName } = path;
+    return await getAgentNameByService({ serviceName, setup });
   }
 }));
 

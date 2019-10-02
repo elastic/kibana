@@ -51,6 +51,7 @@ export function AgentConfigurationList({
       sortable: true,
       render: (_, config: Config) => (
         <EuiButtonEmpty
+          flush="left"
           size="s"
           color="primary"
           onClick={() => {
