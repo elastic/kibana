@@ -19,6 +19,19 @@ The following section is re-used in the Installation and Upgrade Guide
 ////
 // tag::notable-breaking-changes[]
 
-coming[7.4.0]
+[float]
+[[breaking_74_search_instead_of-msearch]]
+=== Use search instead of msearch when batching is disabled 
+
+*Details:*
+When the advanced setting `courier:batchSearches` is disabled, we 
+previously sent the search requests as `_msearch` requests.
+We now use `_search` when batching is disabled.
+
+*Impact:*
+When the advanced setting `courier:batchSearches` is disabled, 
+requests from *Discover*, *Visualize*, and *Dashboard* will now query {es} 
+using the `_search` endpoint rather than the `_msearch` endpoint.
+
 
 // end::notable-breaking-changes[]

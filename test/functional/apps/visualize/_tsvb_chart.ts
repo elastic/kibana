@@ -51,8 +51,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         expect(value).to.eql('156');
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/45315
-      it.skip('should show correct data with Math Aggregation', async () => {
+      it('should show correct data with Math Aggregation', async () => {
         await PageObjects.visualBuilder.createNewAgg();
         await PageObjects.visualBuilder.selectAggType('math', 1);
         await PageObjects.visualBuilder.fillInVariable();
@@ -94,8 +93,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/44132
-    describe.skip('switch index patterns', () => {
+    describe('switch index patterns', () => {
       beforeEach(async () => {
         log.debug('Load kibana_sample_data_flights data');
         await esArchiver.loadIfNeeded('kibana_sample_data_flights');

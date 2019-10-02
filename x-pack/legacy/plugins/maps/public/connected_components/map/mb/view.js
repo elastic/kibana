@@ -158,7 +158,6 @@ export class MBMapContainer extends React.Component {
         uniqueFeatures.push({
           id: featureId,
           layerId: layerId,
-          geometry: mbFeature.geometry,
         });
       }
     }
@@ -497,6 +496,7 @@ export class MBMapContainer extends React.Component {
           addFilters={this.props.addFilters}
           geoFields={this.props.geoFields}
           reevaluateTooltipPosition={this._reevaluateTooltipPosition}
+          loadFeatureGeometry={this._loadFeatureGeometry}
         />
       </I18nProvider>
     ), this._tooltipContainer);
@@ -505,6 +505,21 @@ export class MBMapContainer extends React.Component {
       .setDOMContent(this._tooltipContainer)
       .addTo(this._mbMap);
   }
+
+  // Must load original geometry instead of using geometry from mapbox feature.
+  // Mapbox feature geometry is from vector tile and is not the same as the original geometry.
+  _loadFeatureGeometry = ({ layerId, featureId }) => {
+    const tooltipLayer = this._findLayerById(layerId);
+    if (!tooltipLayer) {
+      return null;
+    }
+    const targetFeature = tooltipLayer.getFeatureById(featureId);
+    if (!targetFeature) {
+      return null;
+    }
+
+    return targetFeature.geometry;
+  };
 
   _loadFeatureProperties = async ({ layerId, featureId }) => {
     const tooltipLayer = this._findLayerById(layerId);
