@@ -1,0 +1,39 @@
+[[using-api]]
+== Using the APIs
+
+The following {kib} APIs are available:
+
+* <<features-api-get>>
+* <<spaces-api>>
+* <<role-management-api>>
+* <<saved-objects-api>>
+* <<dashboard-import-api>>
+* <<logstash-configuration-management-api>>
+* <<url-shortening-api>>
+* <<upgrade-assistant-api>>
+
+[float]
+[[api-authentication]]
+== Authentication
+
+{kib} supports token-based authentication with the same user name and password that you use to log into the {kib} Console. 
+
+[float]
+[[api-calls]]
+== API calls
+
+The API base path is `/api/`.
+
+You communicate with our API through HTTP and HTTPs protocols. We recommend that you use HTTPs on port 5601 because it is more secure.
+
+API calls are stateless. Each request that you make happens in isolation from other calls and must include all of the necessary information for {kib} to fulfill the request. API requests return JSON output, which is a format that is machine-readable and works well for automation.
+
+Calls to the API endpoints require different request methods, depending on what they do. Use the following request methods when you communication with {kib} APIs:
+
+* *GET* - Fetches the information.
+
+* *POST* - Adds new information.
+
+* *PUT* - Updates the existing information.
+
+* *DELETE* - Removes the information.
