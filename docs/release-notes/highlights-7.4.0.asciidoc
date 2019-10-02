@@ -4,8 +4,6 @@
 <titleabbrev>7.4.0</titleabbrev>
 ++++
 
-coming[7.4.0]
-
 Each release of {kib} brings new features and product improvements. 
 Here are the most notable feature and user experience changes in 7.4.
 
@@ -13,6 +11,9 @@ Here are the most notable feature and user experience changes in 7.4.
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
+
+For a complete list of highlights,
+see the https://www.elastic.co/blog/kibana-7-4-0-released[{kib} 7.4 release blog].
 
 [float]
 [[pki-7.4]]
@@ -34,7 +35,8 @@ authorization to identity card access. To start using PKI in production, check o
 A geospatial perspective is especially useful for security 
 events data sets. In 7.4, SIEM embeds maps directly in 
 the Network interface to show common request paths between origin and 
-destination sources. For more information, see the SIEM blog post.
+destination sources.
+For more information, see the https://www.elastic.co/blog/elastic-siem-7-4-0-released[SIEM 7.4 release blog].
 
 [role="screenshot"]
 image::release-notes/images/7.4-siem-maps.png[SIEM and Maps]
