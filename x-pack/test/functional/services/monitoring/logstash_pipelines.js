@@ -18,6 +18,7 @@ export function MonitoringLogstashPipelinesProvider({ getService, getPageObjects
   const SUBJ_SEARCH_BAR = `${SUBJ_TABLE_CONTAINER} > monitoringTableToolBar`;
 
   const SUBJ_TABLE_SORT_EVENTS_EMITTED_RATE_COL = `${SUBJ_TABLE_CONTAINER} > tableHeaderCell_latestThroughput_1`;
+  const SUBJ_TABLE_SORT_ID_COL = `${SUBJ_TABLE_CONTAINER} > tableHeaderCell_id_0`;
 
   const SUBJ_PIPELINES_IDS = `${SUBJ_TABLE_CONTAINER} > id`;
   const SUBJ_PIPELINES_EVENTS_EMITTED_RATES = `${SUBJ_TABLE_CONTAINER} > eventsEmittedRate`;
@@ -51,6 +52,12 @@ export function MonitoringLogstashPipelinesProvider({ getService, getPageObjects
           }
         ];
       }, []);
+    }
+
+    async clickIdCol() {
+      const headerCell = await testSubjects.find(SUBJ_TABLE_SORT_ID_COL);
+      const button = await headerCell.findByTagName('button');
+      return button.click();
     }
 
     async clickEventsEmittedRateCol() {
