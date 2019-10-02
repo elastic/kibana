@@ -15,7 +15,9 @@ describe('license', () => {
   let license: ILicense;
 
   afterEach(async () => {
-    await plugin.stop();
+    if (plugin) {
+      await plugin.stop();
+    }
     sessionStorage.clear();
   });
 

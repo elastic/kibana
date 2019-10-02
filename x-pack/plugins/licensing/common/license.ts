@@ -37,8 +37,8 @@ export class License implements ILicense {
   private _signature!: string;
   private objectified!: any;
   private readonly featuresMap: Map<string, LicenseFeature>;
-  private error?: Error;
   private clusterSource?: string;
+  public error?: Error;
 
   constructor({ plugin, license, features, error, clusterSource }: LicenseArgs) {
     this.plugin = plugin;

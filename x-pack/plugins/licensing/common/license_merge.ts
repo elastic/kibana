@@ -6,8 +6,8 @@
 
 import { merge } from 'lodash';
 
-export function licenseMerge(xpackInfo = {}) {
-  return merge(
+export function licenseMerge(xpackInfo: any = {}) {
+  const rawLicense = merge(
     {
       license: {
         uid: '00000000-0000-0000-0000-000000000000',
@@ -72,4 +72,10 @@ export function licenseMerge(xpackInfo = {}) {
     },
     xpackInfo
   );
+
+  if (xpackInfo.license === null) {
+    Reflect.deleteProperty(rawLicense, 'license');
+  }
+
+  return rawLicense;
 }

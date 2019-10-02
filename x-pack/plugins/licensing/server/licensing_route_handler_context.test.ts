@@ -5,18 +5,20 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { ILicense } from '../common/types';
 import { setup } from './__fixtures__/setup';
 import { createRouteHandlerContext } from './licensing_route_handler_context';
 
 describe('licensingRouteHandlerContext', () => {
   it('provides the initial license value', async () => {
-    const { license$, license } = await setup();
+    const { license$ } = await setup();
+    const initial = await license$.pipe(first()).toPromise();
     const context = createRouteHandlerContext(license$);
 
-    const { license: contextResult } = await context({}, {} as any, {} as any);
+    const { license } = await context({}, {} as any, {} as any);
 
-    expect(contextResult).toBe(license);
+    expect(license).toBe(initial);
   });
 
   it('provides the latest license value', async () => {

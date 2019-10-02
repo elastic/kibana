@@ -43,20 +43,20 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
     return json;
   }
 
-  private setSession(license: License) {
+  private setSession = (license: License) => {
     sessionStorage.setItem(LICENSING_SESSION, JSON.stringify(license.toObject()));
 
     if (license.signature) {
       sessionStorage.setItem(LICENSING_SESSION_SIGNATURE, license.signature);
     }
-  }
+  };
 
   private clearSession() {
     sessionStorage.removeItem(LICENSING_SESSION_SIGNATURE);
     sessionStorage.removeItem(LICENSING_SESSION);
   }
 
-  private async next() {
+  private next = async () => {
     try {
       const response = await this.http.get(API_ROUTE);
       const rawLicense = response && response.license;
@@ -68,9 +68,9 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
       this.clearSession();
       return new License({ plugin: this, features: {}, error: err });
     }
-  }
+  };
 
-  private intercept(manual$: BehaviorSubject<boolean>) {
+  private intercept(refresher$: BehaviorSubject<boolean>) {
     this.removeInterceptor = this.http.intercept({
       response: httpResponse => {
         const signature = httpResponse.response!.headers.get(SIGNATURE_HEADER) || '';
@@ -79,7 +79,7 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
           this.signature = signature;
 
           if (!httpResponse.request!.url.includes(API_ROUTE)) {
-            manual$.next(true);
+            refresher$.next(true);
           }
         }
       },
@@ -94,23 +94,25 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
     this.http = core.http;
 
     const { license, features = {} } = this.getSession();
-    const manual$ = new BehaviorSubject<boolean>(true);
-    const initialLicense = new License({ plugin: this, license, features });
+    const refresher$ = new BehaviorSubject<boolean>(true);
 
-    this.intercept(manual$);
+    this.intercept(refresher$);
 
-    const license$ = merge(of(initialLicense), timer(0, this.pollingFrequency), manual$).pipe(
-      switchMap(() => this.next()),
+    const initial$ = of(new License({ plugin: this, license, features }));
+    const licenseFetches$ = merge(timer(0, this.pollingFrequency), refresher$).pipe(
+      switchMap(this.next)
+    );
+    const updates$ = merge(initial$, licenseFetches$).pipe(
       pairwise(),
       filter(([previous, next]) => hasLicenseInfoChanged(previous, next)),
-      tap(([, next]) => this.setSession(next)),
       map(([, next]) => next)
     );
+    const license$ = merge(initial$, updates$).pipe(tap(this.setSession));
 
     return {
       license$,
       refresh() {
-        manual$.next(true);
+        refresher$.next(true);
       },
     };
   }

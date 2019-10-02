@@ -14,7 +14,9 @@ export function hasLicenseInfoChanged(
     return (
       newLicense.type !== currentLicense.type ||
       newLicense.status !== currentLicense.status ||
-      newLicense.expiryDateInMillis !== currentLicense.expiryDateInMillis
+      newLicense.expiryDateInMillis !== currentLicense.expiryDateInMillis ||
+      newLicense.isAvailable !== currentLicense.isAvailable ||
+      newLicense.error !== currentLicense.error
     );
   }
 

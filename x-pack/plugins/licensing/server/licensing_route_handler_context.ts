@@ -13,7 +13,6 @@ export function createRouteHandlerContext(
   license$: Observable<ILicense>
 ): IContextProvider<RequestHandler<any, any, any>, 'licensing'> {
   return async function licensingRouteHandlerContext() {
-    const license = await license$.pipe(take(1)).toPromise();
-    return { license };
+    return { license: await license$.pipe(take(1)).toPromise() };
   };
 }

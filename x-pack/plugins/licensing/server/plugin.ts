@@ -56,7 +56,9 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
     });
   }
 
-  private async next(config: LicensingConfig) {
+  private next = async () => {
+    const config = this.currentConfig;
+
     this.logger.debug(
       `Calling [${config.clusterSource}] Elasticsearch _xpack API. Polling frequency: ${config.pollingFrequency}`
     );
@@ -88,7 +90,17 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
         clusterSource: config.clusterSource,
       });
     }
-  }
+  };
+
+  private setSession = (license: License) => {
+    this.logger.info(
+      `Imported license information from Elasticsearch for the [${this.currentConfig.clusterSource}] cluster: ` +
+        `type: ${license.type} | status: ${license.status} | expiry date: ${moment(
+          license.expiryDateInMillis,
+          'x'
+        ).format()}`
+    );
+  };
 
   public sign(serialized: string) {
     return createHash('md5')
@@ -101,33 +113,24 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
 
     this.elasticsearch = core.elasticsearch;
 
-    const manual$ = new BehaviorSubject<boolean>(true);
-    const license$ = merge(
-      of(new License({ plugin: this, features: {}, clusterSource })),
-      timer(0, pollingFrequency),
-      manual$
-    ).pipe(
-      switchMap(() => this.next(this.currentConfig)),
+    const refresher$ = new BehaviorSubject<boolean>(true);
+    const initial$ = of(new License({ plugin: this, features: {}, clusterSource }));
+    const licenseFetches$ = merge(timer(0, pollingFrequency), refresher$).pipe(
+      switchMap(this.next)
+    );
+    const updates$ = merge(initial$, licenseFetches$).pipe(
       pairwise(),
       filter(([previous, next]) => hasLicenseInfoChanged(previous, next)),
-      tap(([, next]) => {
-        this.logger.info(
-          `Imported license information from Elasticsearch for the [${clusterSource}] cluster: ` +
-            `type: ${next.type} | status: ${next.status} | expiry date: ${moment(
-              next.expiryDateInMillis,
-              'x'
-            ).format()}`
-        );
-      }),
       map(([, next]) => next)
     );
+    const license$ = merge(initial$, updates$).pipe(tap(this.setSession));
 
     core.http.registerRouteHandlerContext('licensing', createRouteHandlerContext(license$));
 
     return {
       license$,
       refresh() {
-        manual$.next(true);
+        refresher$.next(true);
       },
     };
   }
