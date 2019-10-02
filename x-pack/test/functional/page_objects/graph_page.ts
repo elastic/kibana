@@ -180,8 +180,9 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
         await testSubjects.click('graphNewButton');
         await testSubjects.existOrFail('confirmModal', { timeout: 3000 });
       });
-      await PageObjects.common.sleep(1000);
       await PageObjects.common.clickConfirmOnModal();
+      // wait for route change to complete
+      await PageObjects.common.sleep(3000);
     }
 
     async saveGraph(name: string) {
