@@ -36,9 +36,9 @@ exports[`setupMode SetupModeBadge partially migrated should render each product 
   color="warning"
   iconType="flag"
   onClick={[Function]}
-  onClickAriaLabel="Disable internal collection"
+  onClickAriaLabel="Disable self monitoring"
 >
-  Disable internal collection
+  Disable self monitoring
 </EuiBadge>
 `;
 
@@ -52,7 +52,7 @@ exports[`setupMode SetupModeBadge should use a text status if internal collectio
     color="warning"
     size="xs"
   >
-    Monitor all nodes with Metricbeat
+    Some nodes use only self monitoring
   </EuiTextColor>
 </Fragment>
 `;

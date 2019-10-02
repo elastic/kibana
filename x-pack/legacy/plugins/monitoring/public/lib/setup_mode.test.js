@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { toggleSetupMode, initSetupModeState, getSetupModeState, updateSetupModeData } from './setup_mode';
+import {
+  toggleSetupMode,
+  initSetupModeState,
+  getSetupModeState,
+  updateSetupModeData,
+  setSetupModeMenuItem
+} from './setup_mode';
 
 jest.mock('./ajax_error_handler', () => ({
   ajaxErrorHandlersProvider: err => {
@@ -83,6 +89,7 @@ describe('setup_mode', () => {
 
     it('should set top nav config', async () => {
       initSetupModeState(angularStateMock.scope, angularStateMock.injector);
+      setSetupModeMenuItem();
       expect(angularStateMock.scope.topNavMenu.length).toBe(1);
       await toggleSetupMode(true);
       expect(angularStateMock.scope.topNavMenu.length).toBe(0);

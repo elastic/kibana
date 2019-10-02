@@ -32,11 +32,9 @@ exports[`SetupModeRenderer should render the flyout open 1`] = `
     }
   />
   <EuiSpacer
-    size="l"
+    size="xxl"
   />
-  <EuiBottomBar
-    paddingSize="m"
-  >
+  <EuiBottomBar>
     <EuiFlexGroup
       alignItems="center"
       justifyContent="spaceBetween"
@@ -54,7 +52,7 @@ exports[`SetupModeRenderer should render the flyout open 1`] = `
               color="ghost"
             >
               <FormattedMessage
-                defaultMessage="You are in setup mode. Click ({flagIcon}) flag icon next to all areas that have configuration options."
+                defaultMessage="You are in setup mode. The ({flagIcon}) icon indicates configuration options."
                 id="xpack.monitoring.setupMode.description"
                 values={
                   Object {
@@ -80,10 +78,8 @@ exports[`SetupModeRenderer should render the flyout open 1`] = `
             <EuiButton
               color="danger"
               fill={true}
-              iconSide="left"
               onClick={[Function]}
               size="s"
-              type="button"
             >
               Exit setup mode
             </EuiButton>
@@ -131,11 +127,9 @@ exports[`SetupModeRenderer should render with setup mode enabled 1`] = `
     }
   />
   <EuiSpacer
-    size="l"
+    size="xxl"
   />
-  <EuiBottomBar
-    paddingSize="m"
-  >
+  <EuiBottomBar>
     <EuiFlexGroup
       alignItems="center"
       justifyContent="spaceBetween"
@@ -153,7 +147,7 @@ exports[`SetupModeRenderer should render with setup mode enabled 1`] = `
               color="ghost"
             >
               <FormattedMessage
-                defaultMessage="You are in setup mode. Click ({flagIcon}) flag icon next to all areas that have configuration options."
+                defaultMessage="You are in setup mode. The ({flagIcon}) icon indicates configuration options."
                 id="xpack.monitoring.setupMode.description"
                 values={
                   Object {
@@ -179,10 +173,8 @@ exports[`SetupModeRenderer should render with setup mode enabled 1`] = `
             <EuiButton
               color="danger"
               fill={true}
-              iconSide="left"
               onClick={[Function]}
               size="s"
-              type="button"
             >
               Exit setup mode
             </EuiButton>

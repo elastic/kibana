@@ -27,6 +27,7 @@ exports[`Flyout apm part one should render normally 1`] = `
     <EuiForm>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
         hasEmptyLabelSpace={false}
         helpText="Typically a single URL. If multiple URLs, separate with a comma.
@@ -58,12 +59,9 @@ exports[`Flyout apm part one should render normally 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
-          color="primary"
           flush="left"
-          iconSide="left"
           iconType="cross"
           onClick={[Function]}
-          type="button"
         >
           Close
         </EuiButtonEmpty>
@@ -72,13 +70,11 @@ exports[`Flyout apm part one should render normally 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           fill={true}
           iconSide="right"
           iconType="sortRight"
           isDisabled={false}
           onClick={[Function]}
-          size="m"
           type="submit"
         >
           Next
@@ -133,19 +129,19 @@ exports[`Flyout apm part two should show instructions to disable internal collec
               </p>
             </EuiText>
           </React.Fragment>,
-          "title": "Disable internal collection of the APM server's monitoring metrics",
+          "title": "Disable self monitoring of the APM server's monitoring metrics",
         },
         Object {
           "children": <EuiCallOut
             color="warning"
             size="s"
-            title="Data is still coming from internal collection"
+            title="Data is still coming from self monitoring"
           >
             <p>
-              It can take up to 30 seconds to detect data, and we’ll continue checking.
+              It can take up to 30 seconds to detect data.
             </p>
             <p>
-              Last internal collection was 0 seconds ago.
+              Last self monitoring was 0 seconds ago.
             </p>
           </EuiCallOut>,
           "status": "incomplete",
@@ -172,7 +168,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
                 type="button"
               >
                 <FormattedMessage
-                  defaultMessage="Follow the instructions here"
+                  defaultMessage="Follow the instructions here."
                   id="xpack.monitoring.metricbeatMigration.apmInstructions.installMetricbeatLinkText"
                   values={Object {}}
                 />
@@ -217,11 +213,10 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
               <EuiCallOut
                 color="warning"
                 iconType="help"
-                size="m"
                 title={
                   <EuiText>
                     <FormattedMessage
-                      defaultMessage="If security is enabled, you might require {link}."
+                      defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
                         Object {
@@ -287,11 +282,10 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
               <EuiCallOut
                 color="warning"
                 iconType="help"
-                size="m"
                 title={
                   <EuiText>
                     <FormattedMessage
-                      defaultMessage="If security is enabled, you might require {link}."
+                      defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
                         Object {
@@ -330,7 +324,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
                 type="button"
               >
                 <FormattedMessage
-                  defaultMessage="Follow the instructions here"
+                  defaultMessage="Follow the instructions here."
                   id="xpack.monitoring.metricbeatMigration.apmInstructions.startMetricbeatLinkText"
                   values={Object {}}
                 />
@@ -381,6 +375,7 @@ exports[`Flyout beats part one should render normally 1`] = `
     <EuiForm>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
         hasEmptyLabelSpace={false}
         helpText="Typically a single URL. If multiple URLs, separate with a comma.
@@ -412,12 +407,9 @@ exports[`Flyout beats part one should render normally 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
-          color="primary"
           flush="left"
-          iconSide="left"
           iconType="cross"
           onClick={[Function]}
-          type="button"
         >
           Close
         </EuiButtonEmpty>
@@ -426,13 +418,11 @@ exports[`Flyout beats part one should render normally 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           fill={true}
           iconSide="right"
           iconType="sortRight"
           isDisabled={false}
           onClick={[Function]}
-          size="m"
           type="submit"
         >
           Next
@@ -492,19 +482,19 @@ exports[`Flyout beats part two should show instructions to disable internal coll
               </p>
             </EuiText>
           </React.Fragment>,
-          "title": "Disable internal collection of beat's monitoring metrics",
+          "title": "Disable self monitoring of beat's monitoring metrics",
         },
         Object {
           "children": <EuiCallOut
             color="warning"
             size="s"
-            title="Data is still coming from internal collection"
+            title="Data is still coming from self monitoring"
           >
             <p>
-              It can take up to 30 seconds to detect data, and we’ll continue checking.
+              It can take up to 30 seconds to detect data.
             </p>
             <p>
-              Last internal collection was 0 seconds ago.
+              Last self monitoring was 0 seconds ago.
             </p>
           </EuiCallOut>,
           "status": "incomplete",
@@ -531,7 +521,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                 type="button"
               >
                 <FormattedMessage
-                  defaultMessage="Follow the instructions here"
+                  defaultMessage="Follow the instructions here."
                   id="xpack.monitoring.metricbeatMigration.beatsInstructions.installMetricbeatLinkText"
                   values={Object {}}
                 />
@@ -576,7 +566,6 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
             <EuiCallOut
               color="warning"
               iconType="help"
-              size="m"
               title={
                 <EuiText>
                   <p>
@@ -616,11 +605,10 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
               <EuiCallOut
                 color="warning"
                 iconType="help"
-                size="m"
                 title={
                   <EuiText>
                     <FormattedMessage
-                      defaultMessage="If security is enabled, you might require {link}."
+                      defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
                         Object {
@@ -686,11 +674,10 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
               <EuiCallOut
                 color="warning"
                 iconType="help"
-                size="m"
                 title={
                   <EuiText>
                     <FormattedMessage
-                      defaultMessage="If security is enabled, you might require {link}."
+                      defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
                         Object {
@@ -729,7 +716,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                 type="button"
               >
                 <FormattedMessage
-                  defaultMessage="Follow the instructions here"
+                  defaultMessage="Follow the instructions here."
                   id="xpack.monitoring.metricbeatMigration.beatsInstructions.startMetricbeatLinkText"
                   values={Object {}}
                 />
@@ -775,23 +762,12 @@ exports[`Flyout elasticsearch part one should render normally 1`] = `
         Monitor \`Elasticsearch\` node with Metricbeat
       </h2>
     </EuiTitle>
-    <EuiText
-      size="s"
-    >
-      <EuiLink
-        color="primary"
-        href="https://www.elastic.co/guide/en/elasticsearch/reference/current/configuring-metricbeat.html"
-        target="_blank"
-        type="button"
-      >
-        Learn about this migration.
-      </EuiLink>
-    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiForm>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
         hasEmptyLabelSpace={false}
         helpText="Typically a single URL. If multiple URLs, separate with a comma.
@@ -823,12 +799,9 @@ exports[`Flyout elasticsearch part one should render normally 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
-          color="primary"
           flush="left"
-          iconSide="left"
           iconType="cross"
           onClick={[Function]}
-          type="button"
         >
           Close
         </EuiButtonEmpty>
@@ -837,13 +810,11 @@ exports[`Flyout elasticsearch part one should render normally 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           fill={true}
           iconSide="right"
           iconType="sortRight"
           isDisabled={false}
           onClick={[Function]}
-          size="m"
           type="submit"
         >
           Next
@@ -864,7 +835,7 @@ exports[`Flyout elasticsearch part two should show instructions to disable inter
             <EuiText>
               <p>
                 <FormattedMessage
-                  defaultMessage="Disable internal collection of Elasticsearch monitoring metrics. Set {monospace} to false on each server in the production cluster."
+                  defaultMessage="Disable self monitoring of Elasticsearch monitoring metrics. Set {monospace} to false on each server in the production cluster."
                   id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.disableInternalCollectionDescription"
                   values={
                     Object {
@@ -892,19 +863,19 @@ exports[`Flyout elasticsearch part two should show instructions to disable inter
           
             </EuiCodeBlock>
           </React.Fragment>,
-          "title": "Disable internal collection of Elasticsearch monitoring metrics",
+          "title": "Disable self monitoring of Elasticsearch monitoring metrics",
         },
         Object {
           "children": <EuiCallOut
             color="warning"
             size="s"
-            title="Data is still coming from internal collection"
+            title="Data is still coming from self monitoring"
           >
             <p>
-              It can take up to 30 seconds to detect data, and we’ll continue checking.
+              It can take up to 30 seconds to detect data.
             </p>
             <p>
-              Last internal collection was 0 seconds ago.
+              Last self monitoring was -0 seconds ago.
             </p>
           </EuiCallOut>,
           "status": "incomplete",
@@ -984,11 +955,10 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
               <EuiCallOut
                 color="warning"
                 iconType="help"
-                size="m"
                 title={
                   <EuiText>
                     <FormattedMessage
-                      defaultMessage="If security is enabled, you might require {link}."
+                      defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
                         Object {
@@ -1054,11 +1024,10 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
               <EuiCallOut
                 color="warning"
                 iconType="help"
-                size="m"
                 title={
                   <EuiText>
                     <FormattedMessage
-                      defaultMessage="If security is enabled, you might require {link}."
+                      defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
                         Object {
@@ -1143,23 +1112,12 @@ exports[`Flyout kibana part one should render normally 1`] = `
         Monitor \`Kibana\` instance with Metricbeat
       </h2>
     </EuiTitle>
-    <EuiText
-      size="s"
-    >
-      <EuiLink
-        color="primary"
-        href="https://www.elastic.co/guide/en/kibana/current/monitoring-metricbeat.html"
-        target="_blank"
-        type="button"
-      >
-        Learn about this migration.
-      </EuiLink>
-    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiForm>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
         hasEmptyLabelSpace={false}
         helpText="Typically a single URL. If multiple URLs, separate with a comma.
@@ -1191,12 +1149,9 @@ exports[`Flyout kibana part one should render normally 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
-          color="primary"
           flush="left"
-          iconSide="left"
           iconType="cross"
           onClick={[Function]}
-          type="button"
         >
           Close
         </EuiButtonEmpty>
@@ -1205,13 +1160,11 @@ exports[`Flyout kibana part one should render normally 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           fill={true}
           iconSide="right"
           iconType="sortRight"
           isDisabled={false}
           onClick={[Function]}
-          size="m"
           type="submit"
         >
           Next
@@ -1275,19 +1228,19 @@ exports[`Flyout kibana part two should show instructions to disable internal col
               </p>
             </EuiText>
           </React.Fragment>,
-          "title": "Disable internal collection of Kibana monitoring metrics",
+          "title": "Disable self monitoring of Kibana monitoring metrics",
         },
         Object {
           "children": <EuiCallOut
             color="warning"
             size="s"
-            title="Data is still coming from internal collection"
+            title="Data is still coming from self monitoring"
           >
             <p>
-              It can take up to 30 seconds to detect data, and we’ll continue checking.
+              It can take up to 30 seconds to detect data.
             </p>
             <p>
-              Last internal collection was 0 seconds ago.
+              Last self monitoring was 0 seconds ago.
             </p>
           </EuiCallOut>,
           "status": "incomplete",
@@ -1314,7 +1267,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
                 type="button"
               >
                 <FormattedMessage
-                  defaultMessage="Follow the instructions here"
+                  defaultMessage="Follow the instructions here."
                   id="xpack.monitoring.metricbeatMigration.kibanaInstructions.installMetricbeatLinkText"
                   values={Object {}}
                 />
@@ -1359,11 +1312,10 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
               <EuiCallOut
                 color="warning"
                 iconType="help"
-                size="m"
                 title={
                   <EuiText>
                     <FormattedMessage
-                      defaultMessage="If security is enabled, you might require {link}."
+                      defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
                         Object {
@@ -1429,11 +1381,10 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
               <EuiCallOut
                 color="warning"
                 iconType="help"
-                size="m"
                 title={
                   <EuiText>
                     <FormattedMessage
-                      defaultMessage="If security is enabled, you might require {link}."
+                      defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
                         Object {
@@ -1472,7 +1423,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
                 type="button"
               >
                 <FormattedMessage
-                  defaultMessage="Follow the instructions here"
+                  defaultMessage="Follow the instructions here."
                   id="xpack.monitoring.metricbeatMigration.kibanaInstructions.startMetricbeatLinkText"
                   values={Object {}}
                 />
@@ -1523,6 +1474,7 @@ exports[`Flyout logstash part one should render normally 1`] = `
     <EuiForm>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
         hasEmptyLabelSpace={false}
         helpText="Typically a single URL. If multiple URLs, separate with a comma.
@@ -1554,12 +1506,9 @@ exports[`Flyout logstash part one should render normally 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
-          color="primary"
           flush="left"
-          iconSide="left"
           iconType="cross"
           onClick={[Function]}
-          type="button"
         >
           Close
         </EuiButtonEmpty>
@@ -1568,13 +1517,11 @@ exports[`Flyout logstash part one should render normally 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           fill={true}
           iconSide="right"
           iconType="sortRight"
           isDisabled={false}
           onClick={[Function]}
-          size="m"
           type="submit"
         >
           Next
@@ -1629,19 +1576,19 @@ exports[`Flyout logstash part two should show instructions to disable internal c
               </p>
             </EuiText>
           </React.Fragment>,
-          "title": "Disable internal collection of Logstash monitoring metrics",
+          "title": "Disable self monitoring of Logstash monitoring metrics",
         },
         Object {
           "children": <EuiCallOut
             color="warning"
             size="s"
-            title="Data is still coming from internal collection"
+            title="Data is still coming from self monitoring"
           >
             <p>
-              It can take up to 30 seconds to detect data, and we’ll continue checking.
+              It can take up to 30 seconds to detect data.
             </p>
             <p>
-              Last internal collection was 0 seconds ago.
+              Last self monitoring was 0 seconds ago.
             </p>
           </EuiCallOut>,
           "status": "incomplete",
@@ -1668,7 +1615,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
                 type="button"
               >
                 <FormattedMessage
-                  defaultMessage="Follow the instructions here"
+                  defaultMessage="Follow the instructions here."
                   id="xpack.monitoring.metricbeatMigration.logstashInstructions.installMetricbeatLinkText"
                   values={Object {}}
                 />
@@ -1713,11 +1660,10 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
               <EuiCallOut
                 color="warning"
                 iconType="help"
-                size="m"
                 title={
                   <EuiText>
                     <FormattedMessage
-                      defaultMessage="If security is enabled, you might require {link}."
+                      defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
                         Object {
@@ -1783,11 +1729,10 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
               <EuiCallOut
                 color="warning"
                 iconType="help"
-                size="m"
                 title={
                   <EuiText>
                     <FormattedMessage
-                      defaultMessage="If security is enabled, you might require {link}."
+                      defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
                         Object {
@@ -1826,7 +1771,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
                 type="button"
               >
                 <FormattedMessage
-                  defaultMessage="Follow the instructions here"
+                  defaultMessage="Follow the instructions here."
                   id="xpack.monitoring.metricbeatMigration.logstashInstructions.startMetricbeatLinkText"
                   values={Object {}}
                 />
@@ -1916,19 +1861,19 @@ exports[`Flyout should render the beat type for beats for the disabling internal
               </p>
             </EuiText>
           </React.Fragment>,
-          "title": "Disable internal collection of filebeat's monitoring metrics",
+          "title": "Disable self monitoring of filebeat's monitoring metrics",
         },
         Object {
           "children": <EuiCallOut
             color="warning"
             size="s"
-            title="Data is still coming from internal collection"
+            title="Data is still coming from self monitoring"
           >
             <p>
-              It can take up to 30 seconds to detect data, and we’ll continue checking.
+              It can take up to 30 seconds to detect data.
             </p>
             <p>
-              Last internal collection was 0 seconds ago.
+              Last self monitoring was 0 seconds ago.
             </p>
           </EuiCallOut>,
           "status": "incomplete",
@@ -1955,7 +1900,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                 type="button"
               >
                 <FormattedMessage
-                  defaultMessage="Follow the instructions here"
+                  defaultMessage="Follow the instructions here."
                   id="xpack.monitoring.metricbeatMigration.beatsInstructions.installMetricbeatLinkText"
                   values={Object {}}
                 />
@@ -2000,7 +1945,6 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
             <EuiCallOut
               color="warning"
               iconType="help"
-              size="m"
               title={
                 <EuiText>
                   <p>
@@ -2040,11 +1984,10 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
               <EuiCallOut
                 color="warning"
                 iconType="help"
-                size="m"
                 title={
                   <EuiText>
                     <FormattedMessage
-                      defaultMessage="If security is enabled, you might require {link}."
+                      defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
                         Object {
@@ -2110,11 +2053,10 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
               <EuiCallOut
                 color="warning"
                 iconType="help"
-                size="m"
                 title={
                   <EuiText>
                     <FormattedMessage
-                      defaultMessage="If security is enabled, you might require {link}."
+                      defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
                         Object {
@@ -2153,7 +2095,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                 type="button"
               >
                 <FormattedMessage
-                  defaultMessage="Follow the instructions here"
+                  defaultMessage="Follow the instructions here."
                   id="xpack.monitoring.metricbeatMigration.beatsInstructions.startMetricbeatLinkText"
                   values={Object {}}
                 />
@@ -2236,7 +2178,6 @@ exports[`Flyout should show a restart warning for restarting the primary Kibana 
               <EuiCallOut
                 color="warning"
                 iconType="help"
-                size="m"
                 title="This step requires you to restart the Kibana server"
               >
                 <EuiText>
@@ -2251,19 +2192,19 @@ exports[`Flyout should show a restart warning for restarting the primary Kibana 
               </EuiCallOut>
             </React.Fragment>
           </React.Fragment>,
-          "title": "Disable internal collection of Kibana monitoring metrics",
+          "title": "Disable self monitoring of Kibana monitoring metrics",
         },
         Object {
           "children": <EuiCallOut
             color="warning"
             size="s"
-            title="Data is still coming from internal collection"
+            title="Data is still coming from self monitoring"
           >
             <p>
-              It can take up to 30 seconds to detect data, and we’ll continue checking.
+              It can take up to 30 seconds to detect data.
             </p>
             <p>
-              Last internal collection was 0 seconds ago.
+              Last self monitoring was 0 seconds ago.
             </p>
           </EuiCallOut>,
           "status": "incomplete",

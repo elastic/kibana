@@ -5,11 +5,11 @@ exports[`setupMode ListingCallOut all internally collected should render for apm
   <EuiCallOut
     color="danger"
     iconType="flag"
-    size="m"
-    title="Migrate to Metricbeat"
+    title="Monitor with Metricbeat"
   >
     <p>
-      These APM servers are monitored through internal collection. Migrate to monitor with Metricbeat.
+      These APM servers are self monitored.
+                Click 'Monitor with Metricbeat' to migrate.
     </p>
   </EuiCallOut>
   <EuiSpacer
@@ -23,11 +23,11 @@ exports[`setupMode ListingCallOut all internally collected should render for bea
   <EuiCallOut
     color="danger"
     iconType="flag"
-    size="m"
-    title="Migrate to Metricbeat"
+    title="Monitor with Metricbeat"
   >
     <p>
-      These Beats instances are monitored through internal collection. Migrate to monitor with Metricbeat.
+      These Beats instances are self monitored.
+                Click 'Monitor with Metricbeat' to migrate.
     </p>
   </EuiCallOut>
   <EuiSpacer
@@ -41,11 +41,11 @@ exports[`setupMode ListingCallOut all internally collected should render for ela
   <EuiCallOut
     color="danger"
     iconType="flag"
-    size="m"
-    title="Migrate to Metricbeat"
+    title="Monitor with Metricbeat"
   >
     <p>
-      These Elasticsearch nodes are monitored through internal collection. Migrate to monitor with Metricbeat.
+      These Elasticsearch nodes are self monitored.
+                Click 'Monitor with Metricbeat' to migrate.
     </p>
   </EuiCallOut>
   <EuiSpacer
@@ -59,11 +59,11 @@ exports[`setupMode ListingCallOut all internally collected should render for kib
   <EuiCallOut
     color="danger"
     iconType="flag"
-    size="m"
-    title="Migrate to Metricbeat"
+    title="Monitor with Metricbeat"
   >
     <p>
-      These Kibana instances are monitored through internal collection. Migrate to monitor with Metricbeat.
+      These Kibana instances are self monitored.
+                Click 'Monitor with Metricbeat' to migrate.
     </p>
   </EuiCallOut>
   <EuiSpacer
@@ -77,11 +77,11 @@ exports[`setupMode ListingCallOut all internally collected should render for log
   <EuiCallOut
     color="danger"
     iconType="flag"
-    size="m"
-    title="Migrate to Metricbeat"
+    title="Monitor with Metricbeat"
   >
     <p>
-      These Logstash nodes are monitored through internal collection. Migrate to monitor with Metricbeat.
+      These Logstash nodes are self monitored.
+                Click 'Monitor with Metricbeat' to migrate.
     </p>
   </EuiCallOut>
   <EuiSpacer
@@ -95,7 +95,6 @@ exports[`setupMode ListingCallOut all migrated should render for apm 1`] = `
   <EuiCallOut
     color="success"
     iconType="flag"
-    size="m"
     title="Metricbeat is monitoring all servers."
   />
   <EuiSpacer
@@ -109,7 +108,6 @@ exports[`setupMode ListingCallOut all migrated should render for beats 1`] = `
   <EuiCallOut
     color="success"
     iconType="flag"
-    size="m"
     title="Metricbeat is monitoring all instances."
   />
   <EuiSpacer
@@ -123,7 +121,6 @@ exports[`setupMode ListingCallOut all migrated should render for elasticsearch 1
   <EuiCallOut
     color="success"
     iconType="flag"
-    size="m"
     title="Metricbeat is monitoring all nodes."
   />
   <EuiSpacer
@@ -137,7 +134,6 @@ exports[`setupMode ListingCallOut all migrated should render for kibana 1`] = `
   <EuiCallOut
     color="success"
     iconType="flag"
-    size="m"
     title="Metricbeat is monitoring all instances."
   />
   <EuiSpacer
@@ -151,7 +147,6 @@ exports[`setupMode ListingCallOut all migrated should render for logstash 1`] = 
   <EuiCallOut
     color="success"
     iconType="flag"
-    size="m"
     title="Metricbeat is monitoring all nodes."
   />
   <EuiSpacer
@@ -165,11 +160,10 @@ exports[`setupMode ListingCallOut all partially migrated should render for apm 1
   <EuiCallOut
     color="warning"
     iconType="flag"
-    size="m"
-    title="Disable internal collection"
+    title="Disable self monitoring"
   >
     <p>
-      Metricbeat is now monitoring your APM servers. Disable internal collection to finish the migration.
+      Metricbeat is now monitoring your APM servers. Disable self monitoring to finish the migration.
     </p>
   </EuiCallOut>
   <EuiSpacer
@@ -183,11 +177,10 @@ exports[`setupMode ListingCallOut all partially migrated should render for beats
   <EuiCallOut
     color="warning"
     iconType="flag"
-    size="m"
-    title="Disable internal collection"
+    title="Disable self monitoring"
   >
     <p>
-      Metricbeat is now monitoring your Beats instances. Disable internal collection to finish the migration.
+      Metricbeat is now monitoring your Beats instances. Disable self monitoring to finish the migration.
     </p>
   </EuiCallOut>
   <EuiSpacer
@@ -201,11 +194,10 @@ exports[`setupMode ListingCallOut all partially migrated should render for elast
   <EuiCallOut
     color="warning"
     iconType="flag"
-    size="m"
-    title="Disable internal collection"
+    title="Disable self monitoring"
   >
     <p>
-      Metricbeat is now monitoring your Elasticsearch nodes. Disable internal collection to finish the migration.
+      Metricbeat is now monitoring your Elasticsearch nodes. Disable self monitoring to finish the migration.
     </p>
   </EuiCallOut>
   <EuiSpacer
@@ -219,11 +211,10 @@ exports[`setupMode ListingCallOut all partially migrated should render for kiban
   <EuiCallOut
     color="warning"
     iconType="flag"
-    size="m"
-    title="Disable internal collection"
+    title="Disable self monitoring"
   >
     <p>
-      Metricbeat is now monitoring your Kibana instances. Disable internal collection to finish the migration.
+      Metricbeat is now monitoring your Kibana instances. Disable self monitoring to finish the migration.
     </p>
   </EuiCallOut>
   <EuiSpacer
@@ -237,11 +228,10 @@ exports[`setupMode ListingCallOut all partially migrated should render for logst
   <EuiCallOut
     color="warning"
     iconType="flag"
-    size="m"
-    title="Disable internal collection"
+    title="Disable self monitoring"
   >
     <p>
-      Metricbeat is now monitoring your Logstash nodes. Disable internal collection to finish the migration.
+      Metricbeat is now monitoring your Logstash nodes. Disable self monitoring to finish the migration.
     </p>
   </EuiCallOut>
   <EuiSpacer
@@ -253,13 +243,11 @@ exports[`setupMode ListingCallOut all partially migrated should render for logst
 exports[`setupMode ListingCallOut no detectable instances should render for apm 1`] = `
 <Fragment>
   <EuiCallOut
-    color="primary"
     iconType="flag"
-    size="m"
-    title="We did not detect any APM servers."
+    title="No APM servers detected"
   >
     <p>
-      If you have APM servers, click 'Set up monitoring' below to monitor with Metricbeat.
+      Click 'Set up monitoring' to start monitoring with Metricbeat.
     </p>
   </EuiCallOut>
   <EuiSpacer
@@ -271,13 +259,11 @@ exports[`setupMode ListingCallOut no detectable instances should render for apm 
 exports[`setupMode ListingCallOut no detectable instances should render for beats 1`] = `
 <Fragment>
   <EuiCallOut
-    color="primary"
     iconType="flag"
-    size="m"
-    title="We did not detect any Beats instances."
+    title="No Beats instances detected"
   >
     <p>
-      If you have Beats instances, click 'Set up monitoring' below to monitor with Metricbeat.
+      Click 'Set up monitoring' to start monitoring with Metricbeat.
     </p>
   </EuiCallOut>
   <EuiSpacer
@@ -289,13 +275,11 @@ exports[`setupMode ListingCallOut no detectable instances should render for beat
 exports[`setupMode ListingCallOut no detectable instances should render for elasticsearch 1`] = `
 <Fragment>
   <EuiCallOut
-    color="primary"
     iconType="flag"
-    size="m"
-    title="We did not detect any Elasticsearch nodes."
+    title="No Elasticsearch nodes detected"
   >
     <p>
-      If you have Elasticsearch nodes, click 'Set up monitoring' below to monitor with Metricbeat.
+      Click 'Set up monitoring' to start monitoring with Metricbeat.
     </p>
   </EuiCallOut>
   <EuiSpacer
@@ -307,13 +291,11 @@ exports[`setupMode ListingCallOut no detectable instances should render for elas
 exports[`setupMode ListingCallOut no detectable instances should render for kibana 1`] = `
 <Fragment>
   <EuiCallOut
-    color="primary"
     iconType="flag"
-    size="m"
-    title="We did not detect any Kibana instances."
+    title="No Kibana instances detected"
   >
     <p>
-      If you have Kibana instances, click 'Set up monitoring' below to monitor with Metricbeat.
+      Click 'Set up monitoring' to start monitoring with Metricbeat.
     </p>
   </EuiCallOut>
   <EuiSpacer
@@ -325,13 +307,11 @@ exports[`setupMode ListingCallOut no detectable instances should render for kiba
 exports[`setupMode ListingCallOut no detectable instances should render for logstash 1`] = `
 <Fragment>
   <EuiCallOut
-    color="primary"
     iconType="flag"
-    size="m"
-    title="We did not detect any Logstash nodes."
+    title="No Logstash nodes detected"
   >
     <p>
-      If you have Logstash nodes, click 'Set up monitoring' below to monitor with Metricbeat.
+      Click 'Set up monitoring' to start monitoring with Metricbeat.
     </p>
   </EuiCallOut>
   <EuiSpacer
@@ -345,11 +325,10 @@ exports[`setupMode ListingCallOut only detectable instances should render for ap
   <EuiCallOut
     color="warning"
     iconType="flag"
-    size="m"
     title="APM server detected"
   >
     <p>
-      Based on your indices, we think you might have a APM server. Click 'Set up monitoring' below to start monitoring this server.
+      Click 'Set up monitoring' below to start monitoring this server.
     </p>
   </EuiCallOut>
   <EuiSpacer
@@ -363,11 +342,10 @@ exports[`setupMode ListingCallOut only detectable instances should render for be
   <EuiCallOut
     color="warning"
     iconType="flag"
-    size="m"
     title="Beats instance detected"
   >
     <p>
-      Based on your indices, we think you might have a Beats instance. Click 'Set up monitoring' below to start monitoring this instance.
+      Click 'Set up monitoring' below to start monitoring this instance.
     </p>
   </EuiCallOut>
   <EuiSpacer
@@ -381,11 +359,10 @@ exports[`setupMode ListingCallOut only detectable instances should render for el
   <EuiCallOut
     color="warning"
     iconType="flag"
-    size="m"
     title="Elasticsearch node detected"
   >
     <p>
-      Based on your indices, we think you might have a Elasticsearch node. Click 'Set up monitoring' below to start monitoring this node.
+      Click 'Set up monitoring' below to start monitoring this node.
     </p>
   </EuiCallOut>
   <EuiSpacer
@@ -399,11 +376,10 @@ exports[`setupMode ListingCallOut only detectable instances should render for ki
   <EuiCallOut
     color="warning"
     iconType="flag"
-    size="m"
     title="Kibana instance detected"
   >
     <p>
-      Based on your indices, we think you might have a Kibana instance. Click 'Set up monitoring' below to start monitoring this instance.
+      Click 'Set up monitoring' below to start monitoring this instance.
     </p>
   </EuiCallOut>
   <EuiSpacer
@@ -417,11 +393,10 @@ exports[`setupMode ListingCallOut only detectable instances should render for lo
   <EuiCallOut
     color="warning"
     iconType="flag"
-    size="m"
     title="Logstash node detected"
   >
     <p>
-      Based on your indices, we think you might have a Logstash node. Click 'Set up monitoring' below to start monitoring this node.
+      Click 'Set up monitoring' below to start monitoring this node.
     </p>
   </EuiCallOut>
   <EuiSpacer

@@ -18,6 +18,7 @@ describe('SetupModeRenderer', () => {
       }),
       initSetupModeState: () => {},
       updateSetupModeData: () => {},
+      setSetupModeMenuItem: () => {}
     }));
     const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
 
@@ -53,6 +54,7 @@ describe('SetupModeRenderer', () => {
       }),
       initSetupModeState: () => {},
       updateSetupModeData: () => {},
+      setSetupModeMenuItem: () => {}
     }));
     const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
 
@@ -92,6 +94,7 @@ describe('SetupModeRenderer', () => {
       }),
       initSetupModeState: () => {},
       updateSetupModeData: () => {},
+      setSetupModeMenuItem: () => {}
     }));
     const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
 
@@ -131,6 +134,7 @@ describe('SetupModeRenderer', () => {
       }),
       initSetupModeState: () => {},
       updateSetupModeData: () => {},
+      setSetupModeMenuItem: () => {}
     }));
     const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
 
@@ -185,6 +189,7 @@ describe('SetupModeRenderer', () => {
         }, 500);
       },
       updateSetupModeData: () => {},
+      setSetupModeMenuItem: () => {}
     }));
     const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
 
@@ -213,5 +218,60 @@ describe('SetupModeRenderer', () => {
     expect(component.state('renderState')).toBe(true);
     expect(component.state('newProduct')).toBe(newProduct);
     expect(component.find('Flyout').prop('product')).toBe(newProduct);
+  });
+
+  it('should set the top menu items', () => {
+    const newProduct = { id: 1 };
+
+    const setSetupModeMenuItem = jest.fn();
+    jest.doMock('../../lib/setup_mode', () => ({
+      getSetupModeState: () => ({
+        enabled: true,
+        data: {
+          elasticsearch: {
+            byUuid: {
+              2: newProduct
+            }
+          },
+          _meta: {}
+        }
+      }),
+      initSetupModeState: (_scope, _injectir, cb) => {
+        setTimeout(() => {
+          cb({
+            elasticsearch: {
+              byUuid: {
+                1: {}
+              }
+            }
+          });
+        }, 500);
+      },
+      updateSetupModeData: () => {},
+      setSetupModeMenuItem,
+    }));
+    const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
+
+    const ChildComponent = () => <h1>Hi</h1>;
+    const scope = {};
+    const injector = {};
+    const component = shallow(
+      <SetupModeRenderer
+        scope={scope}
+        injector={injector}
+        productName={ELASTICSEARCH_SYSTEM_ID}
+        render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+          <Fragment>
+            {flyoutComponent}
+            <ChildComponent setupMode={setupMode}/>
+            {bottomBarComponent}
+          </Fragment>
+        )}
+      />
+    );
+
+    component.setState({ isFlyoutOpen: true });
+    component.update();
+    expect(setSetupModeMenuItem).toHaveBeenCalled();
   });
 });
