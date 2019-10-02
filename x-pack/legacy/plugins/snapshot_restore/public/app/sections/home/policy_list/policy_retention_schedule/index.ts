@@ -3,8 +3,5 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { i18n } from '@kbn/i18n';
 
-export const statusTitle = i18n.translate('xpack.monitoring.metricbeatMigration.apmInstructions.statusTitle', {
-  defaultMessage: `Migration status`
-});
+export { PolicyRetentionSchedule } from './policy_retention_schedule';

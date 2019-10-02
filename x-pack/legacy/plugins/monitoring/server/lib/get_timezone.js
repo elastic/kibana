@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { i18n } from '@kbn/i18n';
 
-export const statusTitle = i18n.translate('xpack.monitoring.metricbeatMigration.logstashInstructions.statusTitle', {
-  defaultMessage: `Migration status`
-});
+export async function getTimezone(req) {
+  return await req.getUiSettingsService().get('dateFormat:tz');
+}

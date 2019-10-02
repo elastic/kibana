@@ -91,53 +91,56 @@ interface Props {
 }
 
 /** Renders a header */
-export class Header extends React.PureComponent<Props> {
-  public render() {
-    const { header } = this.props;
+export const Header = React.memo<Props>(
+  ({
+    header,
+    onColumnRemoved,
+    onColumnResized,
+    onColumnSorted,
+    onFilterChange = noop,
+    setIsResizing,
+    sort,
+  }) => {
+    const onClick = () => {
+      onColumnSorted!({
+        columnId: header.id,
+        sortDirection: getNewSortDirectionOnClick({
+          clickedHeader: header,
+          currentSort: sort,
+        }),
+      });
+    };
+
+    const onResize: OnResize = ({ delta, id }) => {
+      onColumnResized({ columnId: id, delta });
+    };
+
+    const renderActions = (isResizing: boolean) => {
+      setIsResizing(isResizing);
+      return (
+        <>
+          <HeaderComp header={header} isResizing={isResizing} onClick={onClick} sort={sort}>
+            <Actions header={header} onColumnRemoved={onColumnRemoved} sort={sort} />
+          </HeaderComp>
+
+          <Filter header={header} onFilterChange={onFilterChange} />
+        </>
+      );
+    };
 
     return (
       <Resizeable
         bottom={0}
         handle={<EventsHeadingHandle />}
         id={header.id}
-        onResize={this.onResize}
+        onResize={onResize}
         positionAbsolute
-        render={this.renderActions}
+        render={renderActions}
         right="-1px"
         top={0}
       />
     );
   }
+);
 
-  private renderActions = (isResizing: boolean) => {
-    const { header, onColumnRemoved, onFilterChange = noop, setIsResizing, sort } = this.props;
-
-    setIsResizing(isResizing);
-
-    return (
-      <>
-        <HeaderComp header={header} isResizing={isResizing} onClick={this.onClick} sort={sort}>
-          <Actions header={header} onColumnRemoved={onColumnRemoved} sort={sort} />
-        </HeaderComp>
-
-        <Filter header={header} onFilterChange={onFilterChange} />
-      </>
-    );
-  };
-
-  private onClick = () => {
-    const { header, onColumnSorted, sort } = this.props;
-
-    onColumnSorted!({
-      columnId: header.id,
-      sortDirection: getNewSortDirectionOnClick({
-        clickedHeader: header,
-        currentSort: sort,
-      }),
-    });
-  };
-
-  private onResize: OnResize = ({ delta, id }) => {
-    this.props.onColumnResized({ columnId: id, delta });
-  };
-}
+Header.displayName = 'Header';
