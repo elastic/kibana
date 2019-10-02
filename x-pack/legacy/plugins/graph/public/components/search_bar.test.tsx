@@ -29,6 +29,13 @@ function wrapSearchBarInContext(testProps: SearchBarProps) {
     } as CoreStart['uiSettings'],
     savedObjects: {} as CoreStart['savedObjects'],
     notifications: {} as CoreStart['notifications'],
+    docLinks: {
+      links: {
+        query: {
+          kueryQuerySyntax: '',
+        },
+      },
+    } as CoreStart['docLinks'],
     http: {} as CoreStart['http'],
     overlays: {} as CoreStart['overlays'],
   };

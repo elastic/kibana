@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import React from 'react';
 import { QueryLanguageSwitcher } from './language_switcher';
 
