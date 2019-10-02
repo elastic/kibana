@@ -17,19 +17,39 @@
  * under the License.
  */
 
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import React from 'react';
 import { QueryLanguageSwitcher } from './language_switcher';
 
+import { I18nProvider } from '@kbn/i18n/react';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { coreMock } from '../../../../../../../core/public/mocks';
+const startMock = coreMock.createStart();
+
 describe('LanguageSwitcher', () => {
+  function wrapInContext(testProps: any) {
+    const services = {
+      uiSettings: startMock.uiSettings,
+      docLinks: startMock.docLinks,
+    };
+
+    return (
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <QueryLanguageSwitcher {...testProps} />
+        </KibanaContextProvider>
+      </I18nProvider>
+    );
+  }
+
   it('should toggle off if language is lucene', () => {
     const component = shallow(
-      <QueryLanguageSwitcher
-        language="lucene"
-        onSelectLanguage={() => {
+      wrapInContext({
+        language: 'lucene',
+        onSelectLanguage: () => {
           return;
-        }}
-      />
+        },
+      })
     );
 
     expect(component).toMatchSnapshot();
@@ -37,12 +57,12 @@ describe('LanguageSwitcher', () => {
 
   it('should toggle on if language is kuery', () => {
     const component = shallow(
-      <QueryLanguageSwitcher
-        language="kuery"
-        onSelectLanguage={() => {
+      wrapInContext({
+        language: 'kuery',
+        onSelectLanguage: () => {
           return;
-        }}
-      />
+        },
+      })
     );
 
     expect(component).toMatchSnapshot();
@@ -51,9 +71,12 @@ describe('LanguageSwitcher', () => {
   it('call onSelectLanguage when the toggle is clicked', () => {
     const callback = jest.fn();
     const component = shallow(
-      <QueryLanguageSwitcher language="kuery" onSelectLanguage={callback} />
+      wrapInContext({
+        language: 'kuery',
+        onSelectLanguage: callback,
+      })
     );
-    component.find('[data-test-subj="languageToggle"]').simulate('change');
+    component.find(QueryLanguageSwitcher).simulate('change');
     expect(callback).toHaveBeenCalledTimes(1);
   });
 });
