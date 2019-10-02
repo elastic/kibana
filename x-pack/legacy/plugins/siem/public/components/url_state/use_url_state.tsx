@@ -33,7 +33,7 @@ import {
 } from './types';
 
 function usePrevious(value: PreviousLocationUrlState) {
-  const ref = useRef(value);
+  const ref = useRef<PreviousLocationUrlState>(value);
   useEffect(() => {
     ref.current = value;
   });
