@@ -11,8 +11,10 @@ import { Storage } from 'ui/storage';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
 import { QueryBarTopRow } from '../../../../../../src/legacy/core_plugins/data/public/query/query_bar';
-import { SavedObjectsClientContract } from 'src/core/public';
+import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { coreMock } from 'src/core/public/mocks';
+
+const dataStartMock = dataPluginMock.createStartContract();
 
 jest.mock('../../../../../../src/legacy/core_plugins/data/public/query/query_bar', () => ({
   QueryBarTopRow: jest.fn(() => null),
@@ -37,16 +39,17 @@ describe('Lens App', () => {
 
   function makeDefaultArgs(): jest.Mocked<{
     editorFrame: EditorFrameInstance;
+    data: typeof dataStartMock;
     core: typeof core;
     store: Storage;
     docId?: string;
     docStorage: SavedObjectStore;
     redirectTo: (id?: string) => void;
-    savedObjectsClient: SavedObjectsClientContract;
   }> {
     return ({
       editorFrame: createMockFrame(),
       core,
+      data: dataStartMock,
       store: {
         get: jest.fn(),
       },
@@ -59,12 +62,12 @@ describe('Lens App', () => {
       savedObjectsClient: jest.fn(),
     } as unknown) as jest.Mocked<{
       editorFrame: EditorFrameInstance;
+      data: typeof dataStartMock;
       core: typeof core;
       store: Storage;
       docId?: string;
       docStorage: SavedObjectStore;
       redirectTo: (id?: string) => void;
-      savedObjectsClient: SavedObjectsClientContract;
     }>;
   }
 

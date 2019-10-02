@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { noop } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
+import { noop } from 'lodash/fp';
 import * as React from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
-
+import { CategoriesPane } from './categories_pane';
+import { FieldsPane } from './fields_pane';
+import { Header } from './header';
 import {
   CATEGORY_PANE_WIDTH,
   FIELDS_PANE_WIDTH,
@@ -21,26 +23,25 @@ import {
   PANES_FLEX_GROUP_WIDTH,
 } from './helpers';
 import { FieldBrowserProps, OnFieldSelected, OnHideFieldBrowser } from './types';
-import { Header } from './header';
-import { CategoriesPane } from './categories_pane';
-import { FieldsPane } from './fields_pane';
-const FieldsBrowserContainer = styled.div<{ width: number }>`
-  background-color: ${props => props.theme.eui.euiColorLightestShade};
-  border: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};
-  border-radius: 4px;
-  padding: 8px 8px 16px 8px;
-  position: absolute;
-  top: 25px;
-  ${({ width }) => `width: ${width}px`};
-  z-index: 9990;
-`;
 
+const FieldsBrowserContainer = styled.div<{ width: number }>`
+  ${({ theme, width }) => css`
+    background-color: ${theme.eui.euiColorLightestShade};
+    border: ${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiColorMediumShade};
+    border-radius: ${theme.eui.euiBorderRadius};
+    left: 0;
+    padding: ${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.m};
+    position: absolute;
+    top: calc(100% + ${theme.eui.euiSize});
+    width: ${width}px;
+    z-index: 9990;
+  `}
+`;
 FieldsBrowserContainer.displayName = 'FieldsBrowserContainer';
 
 const PanesFlexGroup = styled(EuiFlexGroup)`
   width: ${PANES_FLEX_GROUP_WIDTH}px;
 `;
-
 PanesFlexGroup.displayName = 'PanesFlexGroup';
 
 type Props = Pick<
