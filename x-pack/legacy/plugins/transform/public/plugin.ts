@@ -8,10 +8,9 @@ import { unmountComponentAtNode } from 'react-dom';
 import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/types';
 
 import { PLUGIN } from '../common/constants';
-import { CLIENT_BASE_PATH } from './app';
+import { CLIENT_BASE_PATH } from './app/constants';
 import { renderReact } from './app/app';
 import { AppCore, AppPlugins } from './app/types';
-import template from './index.html';
 import { Core, Plugins } from './shim';
 
 import { breadcrumbService, docTitleService } from './app/services/navigation';
@@ -21,6 +20,8 @@ import { textService } from './app/services/text';
 import { uiMetricService } from './app/services/ui_metric';
 
 const REACT_ROOT_ID = 'transformReactRoot';
+
+const template = `<kbn-management-app section="elasticsearch/transform"><div id="transformReactRoot"/></kbn-management-app>`;
 
 export class Plugin {
   public start(core: Core, plugins: Plugins): void {

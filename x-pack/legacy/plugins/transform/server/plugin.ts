@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { API_BASE_PATH } from './common/constants';
-import { registerRoutes } from './server/routes/api/register_routes';
+import { API_BASE_PATH } from '../common/constants';
+import { registerRoutes } from './routes/api/register_routes';
 import { Core, Plugins } from './shim';
 
 export class Plugin {

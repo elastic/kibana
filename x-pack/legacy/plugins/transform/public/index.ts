@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Plugin as TransformPlugin } from './plugin';
-import { createShim } from './shim';
+import { createPublicShim } from './shim';
 
-const { core, plugins } = createShim();
+const { core, plugins } = createPublicShim();
 const transformPlugin = new TransformPlugin();
 transformPlugin.start(core, plugins);

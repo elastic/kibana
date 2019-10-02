@@ -7,9 +7,9 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
-import { createRouter, Router } from '../../server/lib/create_router';
-import { registerLicenseChecker } from '../../server/lib/register_license_checker';
-import { elasticsearchJsPlugin } from './server/client/elasticsearch_transform';
+import { createRouter, Router } from '../../../server/lib/create_router';
+import { registerLicenseChecker } from '../../../server/lib/register_license_checker';
+import { elasticsearchJsPlugin } from './client/elasticsearch_transform';
 
 export interface Core {
   http: {
@@ -33,7 +33,7 @@ export interface Plugins {
   elasticsearch: any;
 }
 
-export function createShim(
+export function createServerShim(
   server: Legacy.Server,
   pluginId: string
 ): { core: Core; plugins: Plugins } {

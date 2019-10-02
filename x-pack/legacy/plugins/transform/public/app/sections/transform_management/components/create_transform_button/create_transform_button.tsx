@@ -20,7 +20,7 @@ import {
   AuthorizationContext,
 } from '../../../../lib/authorization';
 
-import { BASE_PATH } from '../../../../constants';
+import { CLIENT_BASE_PATH } from '../../../../constants';
 
 export const CreateTransformButton: FC = () => {
   const [isSearchSelectionVisible, setIsSearchSelectionVisible] = useState(false);
@@ -28,7 +28,7 @@ export const CreateTransformButton: FC = () => {
   const { capabilities } = useContext(AuthorizationContext);
 
   if (savedObjectId !== null) {
-    return <Redirect to={`${BASE_PATH}/create_transform/${savedObjectId}`} />;
+    return <Redirect to={`${CLIENT_BASE_PATH}/create_transform/${savedObjectId}`} />;
   }
 
   const disabled =

@@ -77,7 +77,7 @@ export interface Plugins extends AppPlugins {
   };
 }
 
-export function createShim(): { core: Core; plugins: Plugins } {
+export function createPublicShim(): { core: Core; plugins: Plugins } {
   // This is an Angular service, which is why we use this provider pattern
   // to access it within our React app.
   let httpClient: ng.IHttpService;

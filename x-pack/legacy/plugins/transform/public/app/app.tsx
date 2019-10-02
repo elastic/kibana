@@ -9,7 +9,7 @@ import { render } from 'react-dom';
 import { Redirect, Route, Switch } from 'react-router-dom';
 
 import { SectionError } from './components';
-import { BASE_PATH, DEFAULT_SECTION } from './constants';
+import { CLIENT_BASE_PATH, SECTION_SLUG } from './constants';
 import { getAppProviders, useAppDependencies } from './app_dependencies';
 import { AuthorizationContext } from './lib/authorization';
 import { AppCore, AppPlugins } from './types';
@@ -40,15 +40,15 @@ export const App: FC = () => {
     <div data-test-subj="transformApp">
       <Switch>
         <Route
-          path={`${BASE_PATH}/create_transform/:savedObjectId`}
+          path={`${CLIENT_BASE_PATH}/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
           component={CreateTransformSection}
         />
         <Route
           exact
-          path={`${BASE_PATH}/transform_management`}
+          path={`${CLIENT_BASE_PATH}/${SECTION_SLUG.HOME}`}
           component={TransformManagementSection}
         />
-        <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />
+        <Redirect from={`${CLIENT_BASE_PATH}`} to={`${CLIENT_BASE_PATH}/${SECTION_SLUG.HOME}`} />
       </Switch>
     </div>
   );

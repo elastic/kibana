@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const BASE_PATH = '/management/elasticsearch/transform';
-export const DEFAULT_SECTION: Section = 'transform_management';
-export type Section = 'transform_management' | 'create_transform';
-
-// Set a minimum request duration to avoid strange UI flickers
-export const MINIMUM_TIMEOUT_MS = 300;
+export const CLIENT_BASE_PATH = '/management/elasticsearch/transform';
+export enum SECTION_SLUG {
+  HOME = 'transform_management',
+  CREATE_TRANSFORM = 'create_transform',
+}
 
 export enum TRANSFORM_DOC_PATHS {
   default = 'docs.html',
