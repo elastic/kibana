@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import ora from 'ora';
+import ora = require('ora');
 import { BackportOptions } from '../options/options';
 import { CommitSelected } from '../services/github/Commit';
 import { HandledError } from '../services/HandledError';

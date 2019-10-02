@@ -1,5 +1,5 @@
 import { logger } from '../services/logger';
-import ora from 'ora';
+import ora = require('ora');
 
 export async function withSpinner<T>(
   { text }: { text: string },

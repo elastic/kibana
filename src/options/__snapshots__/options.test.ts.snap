@@ -1,26 +1,24 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`validateRequiredOptions should throw when accessToken is empty 1`] = `
-"Invalid option \\"accessToken\\"
+"Please update your config file: /myHomeDir/.backport/config.json.
+It must contain a valid \\"username\\" and \\"acccessToken\\".
 
-You can add it with either:
- - Config file: \\"/myHomeDir/.backport/config.json\\". Read more: https://github.com/sqren/backport/blob/1bd66ad5705a8e80501290ac7456e04108cb34be/docs/configuration.md#global-config-backportconfigjson
- - CLI: \\"--accessToken myAccessToken\\""
+Read more: https://github.com/sqren/backport/blob/f0535241177c5b343b04fe12844bfb513237d847/docs/configuration.md#global-config-backportconfigjson"
 `;
 
 exports[`validateRequiredOptions should throw when accessToken is missing 1`] = `
-"Invalid option \\"accessToken\\"
+"Please update your config file: /myHomeDir/.backport/config.json.
+It must contain a valid \\"username\\" and \\"acccessToken\\".
 
-You can add it with either:
- - Config file: \\"/myHomeDir/.backport/config.json\\". Read more: https://github.com/sqren/backport/blob/1bd66ad5705a8e80501290ac7456e04108cb34be/docs/configuration.md#global-config-backportconfigjson
- - CLI: \\"--accessToken myAccessToken\\""
+Read more: https://github.com/sqren/backport/blob/f0535241177c5b343b04fe12844bfb513237d847/docs/configuration.md#global-config-backportconfigjson"
 `;
 
 exports[`validateRequiredOptions should throw when both branches and branchChoices are missing 1`] = `
 "Invalid option \\"branches\\"
 
 You can add it with either:
- - Config file: \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/1bd66ad5705a8e80501290ac7456e04108cb34be/docs/configuration.md#project-config-backportrcjson
+ - Config file: \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/f0535241177c5b343b04fe12844bfb513237d847/docs/configuration.md#project-config-backportrcjson
  - CLI: \\"--branches 6.1\\""
 `;
 
@@ -28,7 +26,7 @@ exports[`validateRequiredOptions should throw when upstream is empty 1`] = `
 "Invalid option \\"upstream\\"
 
 You can add it with either:
- - Config file: \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/1bd66ad5705a8e80501290ac7456e04108cb34be/docs/configuration.md#project-config-backportrcjson
+ - Config file: \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/f0535241177c5b343b04fe12844bfb513237d847/docs/configuration.md#project-config-backportrcjson
  - CLI: \\"--upstream elastic/kibana\\""
 `;
 
@@ -36,22 +34,20 @@ exports[`validateRequiredOptions should throw when upstream is missing 1`] = `
 "Invalid option \\"upstream\\"
 
 You can add it with either:
- - Config file: \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/1bd66ad5705a8e80501290ac7456e04108cb34be/docs/configuration.md#project-config-backportrcjson
+ - Config file: \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/f0535241177c5b343b04fe12844bfb513237d847/docs/configuration.md#project-config-backportrcjson
  - CLI: \\"--upstream elastic/kibana\\""
 `;
 
 exports[`validateRequiredOptions should throw when username is empty 1`] = `
-"Invalid option \\"username\\"
+"Please update your config file: /myHomeDir/.backport/config.json.
+It must contain a valid \\"username\\" and \\"acccessToken\\".
 
-You can add it with either:
- - Config file: \\"/myHomeDir/.backport/config.json\\". Read more: https://github.com/sqren/backport/blob/1bd66ad5705a8e80501290ac7456e04108cb34be/docs/configuration.md#global-config-backportconfigjson
- - CLI: \\"--username sqren\\""
+Read more: https://github.com/sqren/backport/blob/f0535241177c5b343b04fe12844bfb513237d847/docs/configuration.md#global-config-backportconfigjson"
 `;
 
 exports[`validateRequiredOptions should throw when username is missing 1`] = `
-"Invalid option \\"username\\"
+"Please update your config file: /myHomeDir/.backport/config.json.
+It must contain a valid \\"username\\" and \\"acccessToken\\".
 
-You can add it with either:
- - Config file: \\"/myHomeDir/.backport/config.json\\". Read more: https://github.com/sqren/backport/blob/1bd66ad5705a8e80501290ac7456e04108cb34be/docs/configuration.md#global-config-backportconfigjson
- - CLI: \\"--username sqren\\""
+Read more: https://github.com/sqren/backport/blob/f0535241177c5b343b04fe12844bfb513237d847/docs/configuration.md#global-config-backportconfigjson"
 `;

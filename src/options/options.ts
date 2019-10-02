@@ -13,10 +13,10 @@ export async function getOptions(argv: string[]) {
 }
 
 const GLOBAL_CONFIG_DOCS_LINK =
-  'https://github.com/sqren/backport/blob/1bd66ad5705a8e80501290ac7456e04108cb34be/docs/configuration.md#global-config-backportconfigjson';
+  'https://github.com/sqren/backport/blob/f0535241177c5b343b04fe12844bfb513237d847/docs/configuration.md#global-config-backportconfigjson';
 
 const PROJECT_CONFIG_DOCS_LINK =
-  'https://github.com/sqren/backport/blob/1bd66ad5705a8e80501290ac7456e04108cb34be/docs/configuration.md#project-config-backportrcjson';
+  'https://github.com/sqren/backport/blob/f0535241177c5b343b04fe12844bfb513237d847/docs/configuration.md#project-config-backportrcjson';
 
 function getErrorMessage({
   field,
@@ -25,26 +25,17 @@ function getErrorMessage({
   field: keyof OptionsFromCliArgs;
   exampleValue: string;
 }) {
-  // all properties can theoretically go into either config file but it is not recommended
-  // to add `username` or `accessToken` in the project config (.backportrc.json)
-  const isGlobalConfigProperty =
-    field === 'accessToken' || field === 'username';
-
-  const globalConfigPath = getGlobalConfigPath();
-  const configFileMessage = isGlobalConfigProperty
-    ? `Config file: "${globalConfigPath}". Read more: ${GLOBAL_CONFIG_DOCS_LINK}`
-    : `Config file: ".backportrc.json". Read more: ${PROJECT_CONFIG_DOCS_LINK}`;
-
-  return `Invalid option "${field}"\n\nYou can add it with either:\n - ${configFileMessage}\n - CLI: "--${field} ${exampleValue}"`;
+  return `Invalid option "${field}"\n\nYou can add it with either:\n - Config file: ".backportrc.json". Read more: ${PROJECT_CONFIG_DOCS_LINK}\n - CLI: "--${field} ${exampleValue}"`;
 }
 
 export function validateRequiredOptions({
   upstream = '',
   ...options
 }: OptionsFromCliArgs) {
-  if (!options.accessToken) {
+  if (!options.accessToken || !options.username) {
+    const globalConfigPath = getGlobalConfigPath();
     throw new HandledError(
-      getErrorMessage({ field: 'accessToken', exampleValue: 'myAccessToken' })
+      `Please update your config file: ${globalConfigPath}.\nIt must contain a valid "username" and "acccessToken".\n\nRead more: ${GLOBAL_CONFIG_DOCS_LINK}`
     );
   }
 
@@ -58,12 +49,6 @@ export function validateRequiredOptions({
   if (!repoOwner || !repoName) {
     throw new HandledError(
       getErrorMessage({ field: 'upstream', exampleValue: 'elastic/kibana' })
-    );
-  }
-
-  if (!options.username) {
-    throw new HandledError(
-      getErrorMessage({ field: 'username', exampleValue: 'sqren' })
     );
   }
 
