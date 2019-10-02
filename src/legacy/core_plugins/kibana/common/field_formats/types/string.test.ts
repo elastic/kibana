@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
 import { createStringFormat } from './string';
 
-const StringFormat = createStringFormat(FieldFormat);
+const StringFormat = createStringFormat();
 
 describe('String Format', function() {
   test('convert a string to lower case', function() {

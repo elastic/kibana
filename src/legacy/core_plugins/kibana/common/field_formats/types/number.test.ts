@@ -18,9 +18,8 @@
  */
 
 import { createNumberFormat } from './number';
-import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
 
-const NumberFormat = createNumberFormat(FieldFormat);
+const NumberFormat = createNumberFormat();
 
 describe('NumberFormat', function() {
   const config: Record<any, any> = {};

@@ -22,8 +22,8 @@ import { FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../../../plugins/data/c
 
 const omission = '...';
 
-export function createTruncateFormat(BaseFieldFormat: typeof FieldFormat) {
-  class TruncateFormat extends BaseFieldFormat {
+export function createTruncateFormat() {
+  class TruncateFormat extends FieldFormat {
     static id = 'truncate';
     static title = 'Truncated String';
     static fieldType = ['string'];

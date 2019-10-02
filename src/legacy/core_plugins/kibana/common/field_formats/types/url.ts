@@ -35,8 +35,8 @@ const URL_TYPES = [
 ];
 const DEFAULT_URL_TYPE = 'a';
 
-export function createUrlFormat(BaseFieldFormat: typeof FieldFormat) {
-  class UrlFormat extends BaseFieldFormat {
+export function createUrlFormat() {
+  class UrlFormat extends FieldFormat {
     static id = 'url';
     static title = 'Url';
     static fieldType = [

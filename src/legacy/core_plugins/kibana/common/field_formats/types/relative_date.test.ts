@@ -19,9 +19,8 @@
 
 import moment from 'moment-timezone';
 import { createRelativeDateFormat } from './relative_date';
-import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
 
-const RelativeDateFormat = createRelativeDateFormat(FieldFormat);
+const RelativeDateFormat = createRelativeDateFormat();
 
 describe('Relative Date Format', function() {
   let convert: any;

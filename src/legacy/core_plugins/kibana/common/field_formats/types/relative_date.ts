@@ -20,8 +20,8 @@
 import moment from 'moment';
 import { FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../../../plugins/data/common/';
 
-export function createRelativeDateFormat(BaseFieldFormat: typeof FieldFormat) {
-  class RelativeDateFormat extends BaseFieldFormat {
+export function createRelativeDateFormat() {
+  class RelativeDateFormat extends FieldFormat {
     static id = 'relative_date';
     static title = 'Relative Date';
     static fieldType = 'date';
