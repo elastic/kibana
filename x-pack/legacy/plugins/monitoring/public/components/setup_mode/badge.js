@@ -114,7 +114,7 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
       badgeProps.onClickAriaLabel = customText || unknown;
     }
     statusText = (
-      <EuiBadge color="hollow" iconType="flag" {...badgeProps}>
+      <EuiBadge color="danger" iconType="flag" {...badgeProps}>
         {customText || unknown}
       </EuiBadge>
     );

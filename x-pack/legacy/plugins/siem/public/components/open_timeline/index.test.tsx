@@ -520,7 +520,7 @@ describe('StatefulOpenTimeline', () => {
 
     expect(
       wrapper
-        .find('[data-test-subj="panel_headline_title"]')
+        .find('[data-test-subj="header-panel-title"]')
         .first()
         .text()
     ).toEqual(title);
