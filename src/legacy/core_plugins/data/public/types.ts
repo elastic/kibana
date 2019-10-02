@@ -17,16 +17,15 @@
  * under the License.
  */
 
-import {
-  fatalErrorsServiceMock,
-  notificationServiceMock,
-} from '../../../../../../../core/public/mocks';
+import { UiSettingsClientContract, CoreStart } from 'src/core/public';
+import { AutocompletePublicPluginStart } from 'src/plugins/data/public';
 
-jest.doMock('ui/new_platform', () => ({
-  npSetup: {
-    core: {
-      fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-      notifications: notificationServiceMock.createSetupContract(),
-    },
-  },
-}));
+export interface IDataPluginServices extends Partial<CoreStart> {
+  appName: string;
+  uiSettings: UiSettingsClientContract;
+  savedObjects: CoreStart['savedObjects'];
+  notifications: CoreStart['notifications'];
+  http: CoreStart['http'];
+  store: Storage;
+  autocomplete: AutocompletePublicPluginStart;
+}

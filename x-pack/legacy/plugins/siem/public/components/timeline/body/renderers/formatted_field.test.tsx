@@ -112,27 +112,30 @@ describe('Events', () => {
     expect(wrapper.text()).toEqual(getEmptyValue());
   });
 
-  test('it renders tooltip for message when it exists', () => {
+  test('it renders tooltip for truncatable message when it exists', () => {
     const wrapper = mount(
       <FormattedFieldValue
-        eventId={mockTimelineData[0].ecs._id}
         contextId="test"
+        eventId={mockTimelineData[0].ecs._id}
         fieldName="message"
         fieldType="text"
+        truncate
         value={'some message'}
       />
     );
+
     expect(wrapper.find('[data-test-subj="message-tool-tip"]').exists()).toEqual(true);
   });
 
-  test('it does NOT render a tooltip for message when it is null', () => {
+  test('it does NOT render a tooltip for truncatable message when it is null', () => {
     const wrapper = mount(
       <TestProviders>
         <FormattedFieldValue
-          eventId={mockTimelineData[0].ecs._id}
           contextId="test"
+          eventId={mockTimelineData[0].ecs._id}
           fieldName="message"
           fieldType="text"
+          truncate
           value={null}
         />
       </TestProviders>
@@ -140,14 +143,15 @@ describe('Events', () => {
     expect(wrapper.find('[data-test-subj="message-tool-tip"]').exists()).toEqual(false);
   });
 
-  test('it does NOT render a tooltip for message when it is undefined', () => {
+  test('it does NOT render a tooltip for truncatable message when it is undefined', () => {
     const wrapper = mount(
       <TestProviders>
         <FormattedFieldValue
-          eventId={mockTimelineData[0].ecs._id}
           contextId="test"
+          eventId={mockTimelineData[0].ecs._id}
           fieldName="message"
           fieldType="text"
+          truncate
           value={undefined}
         />
       </TestProviders>
@@ -155,14 +159,15 @@ describe('Events', () => {
     expect(wrapper.find('[data-test-subj="message-tool-tip"]').exists()).toEqual(false);
   });
 
-  test('it does NOT render a tooltip for message when it is an empty string', () => {
+  test('it does NOT render a tooltip for truncatable message when it is an empty string', () => {
     const wrapper = mount(
       <TestProviders>
         <FormattedFieldValue
-          eventId={mockTimelineData[0].ecs._id}
           contextId="test"
+          eventId={mockTimelineData[0].ecs._id}
           fieldName="message"
           fieldType="text"
+          truncate
           value={''}
         />
       </TestProviders>
@@ -183,13 +188,14 @@ describe('Events', () => {
     expect(wrapper.text()).toEqual('some message');
   });
 
-  test('it renders truncatable message text when fieldName is message', () => {
+  test('it renders truncatable message text when fieldName is message with truncate prop', () => {
     const wrapper = mount(
       <FormattedFieldValue
-        eventId={mockTimelineData[0].ecs._id}
         contextId="test"
+        eventId={mockTimelineData[0].ecs._id}
         fieldName="message"
         fieldType="text"
+        truncate
         value={'some message'}
       />
     );
