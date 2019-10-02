@@ -17,21 +17,23 @@
  * under the License.
  */
 
+// TODO: remove when index patterns are moved here.
 jest.mock('ui/new_platform');
 jest.mock('ui/index_patterns');
 
 import { mockFields, mockIndexPattern } from 'ui/index_patterns';
 import { getSuggestionsProvider } from './value_suggestions';
+import { UiSettingsClientContract } from 'kibana/public';
 
 describe('getSuggestions', () => {
   let getSuggestions: any;
-  let fetch: any;
+  let http: any;
 
   describe('with value suggestions disabled', () => {
     beforeEach(() => {
-      const config = { get: () => false };
-      fetch = jest.fn();
-      getSuggestions = getSuggestionsProvider(config, fetch);
+      const config = { get: (key: string) => false } as UiSettingsClientContract;
+      http = { fetch: jest.fn() };
+      getSuggestions = getSuggestionsProvider(config, http);
     });
 
     it('should return an empty array', async () => {
@@ -40,15 +42,15 @@ describe('getSuggestions', () => {
       const query = '';
       const suggestions = await getSuggestions(index, field, query);
       expect(suggestions).toEqual([]);
-      expect(fetch).not.toHaveBeenCalled();
+      expect(http.fetch).not.toHaveBeenCalled();
     });
   });
 
   describe('with value suggestions enabled', () => {
     beforeEach(() => {
-      const config = { get: () => true };
-      fetch = jest.fn();
-      getSuggestions = getSuggestionsProvider(config, fetch);
+      const config = { get: (key: string) => true } as UiSettingsClientContract;
+      http = { fetch: jest.fn() };
+      getSuggestions = getSuggestionsProvider(config, http);
     });
 
     it('should return true/false for boolean fields', async () => {
@@ -57,7 +59,7 @@ describe('getSuggestions', () => {
       const query = '';
       const suggestions = await getSuggestions(index, field, query);
       expect(suggestions).toEqual([true, false]);
-      expect(fetch).not.toHaveBeenCalled();
+      expect(http.fetch).not.toHaveBeenCalled();
     });
 
     it('should return an empty array if the field type is not a string or boolean', async () => {
@@ -66,7 +68,7 @@ describe('getSuggestions', () => {
       const query = '';
       const suggestions = await getSuggestions(index, field, query);
       expect(suggestions).toEqual([]);
-      expect(fetch).not.toHaveBeenCalled();
+      expect(http.fetch).not.toHaveBeenCalled();
     });
 
     it('should return an empty array if the field is not aggregatable', async () => {
@@ -75,7 +77,7 @@ describe('getSuggestions', () => {
       const query = '';
       const suggestions = await getSuggestions(index, field, query);
       expect(suggestions).toEqual([]);
-      expect(fetch).not.toHaveBeenCalled();
+      expect(http.fetch).not.toHaveBeenCalled();
     });
 
     it('should otherwise request suggestions', async () => {
@@ -85,7 +87,7 @@ describe('getSuggestions', () => {
       );
       const query = '';
       await getSuggestions(index, field, query);
-      expect(fetch).toHaveBeenCalled();
+      expect(http.fetch).toHaveBeenCalled();
     });
 
     it('should cache results if using the same index/field/query/filter', async () => {
@@ -96,7 +98,7 @@ describe('getSuggestions', () => {
       const query = '';
       await getSuggestions(index, field, query);
       await getSuggestions(index, field, query);
-      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(http.fetch).toHaveBeenCalledTimes(1);
     });
 
     it('should cache results for only one minute', async () => {
@@ -113,7 +115,7 @@ describe('getSuggestions', () => {
       await getSuggestions(index, field, query);
       Date.now = now;
 
-      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(http.fetch).toHaveBeenCalledTimes(2);
     });
 
     it('should not cache results if using a different index/field/query', async () => {
@@ -128,7 +130,7 @@ describe('getSuggestions', () => {
       await getSuggestions('logstash-*', fields[0], 'query');
       await getSuggestions('logstash-*', fields[1], '');
       await getSuggestions('logstash-*', fields[1], 'query');
-      expect(fetch).toHaveBeenCalledTimes(8);
+      expect(http.fetch).toHaveBeenCalledTimes(8);
     });
   });
 });

@@ -17,8 +17,4 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { kfetch } from 'ui/kfetch';
-import { getSuggestionsProvider } from './value_suggestions';
-
-export const getSuggestions = getSuggestionsProvider(chrome.getUiSettingsClient(), kfetch);
+export { getSuggestionsProvider } from './value_suggestions';

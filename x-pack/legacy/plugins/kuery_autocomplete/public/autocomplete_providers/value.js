@@ -6,7 +6,7 @@
 
 import { flatten } from 'lodash';
 import { escapeQuotes } from './escape_kuery';
-import { getSuggestions } from 'ui/value_suggestions';
+import { npStart } from 'ui/new_platform';
 
 const type = 'value';
 
@@ -31,7 +31,7 @@ export function getSuggestionsProvider({ indexPatterns, boolFilter }) {
     const query = `${prefix}${suffix}`;
 
     const suggestionsByField = fields.map(field => {
-      return getSuggestions(field.indexPatternTitle, field, query, boolFilter).then(data => {
+      return npStart.data.getSuggestions(field.indexPatternTitle, field, query, boolFilter).then(data => {
         const quotedValues = data.map(value => typeof value === 'string' ? `"${escapeQuotes(value)}"` : `${value}`);
         return wrapAsSuggestions(start, end, query, quotedValues);
       });

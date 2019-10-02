@@ -116,7 +116,7 @@ app.directive('graphApp', function (reactDirective) {
     ['onIndexPatternSelected', { watchDepth: 'reference' }],
     ['onQuerySubmit', { watchDepth: 'reference' }],
     ['initialQuery', { watchDepth: 'reference' }],
-    ['autocompleteStart', { watchDepth: 'reference' }],
+    ['pluginDataStart', { watchDepth: 'reference' }],
     ['coreStart', { watchDepth: 'reference' }],
     ['store', { watchDepth: 'reference' }]
   ]);
@@ -300,7 +300,7 @@ app.controller('graphuiPlugin', function (
 
   $scope.store = new Storage(window.localStorage);
   $scope.coreStart = npStart.core;
-  $scope.autocompleteStart = npStart.plugins.data.autocomplete;
+  $scope.pluginDataStart = npStart.plugins.data;
   $scope.loading = false;
 
   const updateScope = () => {

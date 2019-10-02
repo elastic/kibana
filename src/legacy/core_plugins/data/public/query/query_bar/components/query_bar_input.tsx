@@ -135,7 +135,7 @@ export class QueryBarInputUI extends Component<Props, State> {
 
     const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
 
-    const autocompleteProvider = this.services.autocomplete.getProvider(language);
+    const autocompleteProvider = this.services.data.autocomplete.getProvider(language);
     if (
       !autocompleteProvider ||
       !Array.isArray(this.state.indexPatterns) ||
