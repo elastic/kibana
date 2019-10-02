@@ -1,0 +1,81 @@
+[[lens]]
+== Lens
+
+*Lens* provides you with a simple way to create and build basic visualizations.
+
+With Lens, you can:
+
+* Easily make sense of your data with basic visualizations. 
+* Use aggregations to plot any data set, no matter how large.
+* Focus the data you want to display with searches.
+* Add your visualizations to Canvas, Dashboards, Discover, and notepads.
+
+//TODO For an overview of Lens, watch <<Lens video, Lens video>>.
+
+[float]
+[[choose-lens-visualization]]
+=== Types of Lens visualizations
+
+Lens comes with these types of visualizations:
+
+Bar:: Display numerical comparisons across multiple categories. In bar charts, 
+data is displayed using a number of bars that represent a particular category.
+
+//TODO add bar chart image
+
+Stacked Bar:: Display numerical comparisons across multiple categories, with the 
+added ability to compare the different parts of a particular category. In 
+stacked bar charts, each bar represents a particular category, and the segments 
+of the bar represent the sub categories of that bar.
+
+//TODO add stacked bar chart image
+
+Line:: Display data trends over time. In line charts, data is displayed as a 
+series of data points that are connected by line segments.
+
+//TODO add line chart image
+
+Area:: Display one or more quantities over time. In area charts, points are
+plotted and connected by lines to show the value of a quantity at several
+different times.
+
+//TODO add area chart image
+
+Stacked Area:: Display the evolution of numeric variables for several 
+categories stacked on top of each other.  
+
+//TODO add stacked area chart image
+
+Data Table:: Display your raw data or aggregation results in a tabular format.
+
+//TODO add data table image
+
+Metric:: The latest number in a data series.
+
+//TODO add metric image
+
+[float]
+[[create-lens-visualization]]
+=== Create Lens visualizations
+
+To create your Lens visualizations, use the Lens visualization builder.
+
+. Drag and drop the fields you want to display on the *Create a visualization* window.
+
+. To change the type of visualization, click on the *Suggestions* windows.
+
+[float]
+[[lens-tutorial]]
+=== Lens tutorial
+
+To create your first Lens visualization, use the following tutorial where you'll
+create...
+
+[float]
+[[lens-before-you-begin]]
+==== Before you begin
+
+For this tutorial, you'll need to add the...
+
+
+
