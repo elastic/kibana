@@ -80,6 +80,7 @@ import { fieldWildcardFilter } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../../plugins/data/common/field_formats';
 import { npSetup } from 'ui/new_platform';
 import chrome from '../../chrome';
+import { RequestFailure } from '../fetch/errors';
 
 const FIELDS = [
   'type',
@@ -286,10 +287,16 @@ export class SearchSource {
     const searchRequest = await this._flatten();
     await this.requestIsStarting(searchRequest, options);
 
-    return fetchSoon(searchRequest, {
+    const response = await fetchSoon(searchRequest, {
       ...(this._searchStrategyId && { searchStrategyId: this._searchStrategyId }),
       ...options,
     }, { es, config, esShardTimeout });
+
+    if (response.error) {
+      throw new RequestFailure(null, response);
+    }
+
+    return response;
   }
 
   /**

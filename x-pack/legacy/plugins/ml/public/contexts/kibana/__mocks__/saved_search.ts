@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { searchSourceMock } from '../../../../../../../../src/legacy/ui/public/courier/search_source/mocks';
+
 export const savedSearchMock = {
   id: 'the-saved-search-id',
   title: 'the-saved-search-title',
-  searchSource: {},
+  searchSource: searchSourceMock,
   columns: [],
   sort: [],
   destroy: () => {},
