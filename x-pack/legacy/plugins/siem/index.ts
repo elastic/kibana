@@ -113,7 +113,7 @@ export function siem(kibana: any) {
           type: 'number',
           description: i18n.translate('xpack.siem.uiSettings.defaultAnomalyScoreDescription', {
             defaultMessage:
-              '<p>Value above which machine learning job anomalies are displayed in the SIEM app.</p><p>Valid values: 0 to 100.</p>',
+              '<p>Value above which Machine Learning job anomalies are displayed in the SIEM app.</p><p>Valid values: 0 to 100.</p>',
           }),
           category: ['siem'],
           requiresPageReload: true,
