@@ -19,9 +19,13 @@ enum TRANSFORM_ACTIONS {
   DELETE = 'delete',
 }
 
-interface StartStopOptions {
+interface StartTransformOptions {
   transformId: DataFrameTransformId;
-  force: boolean;
+}
+
+interface StopTransformOptions {
+  transformId: DataFrameTransformId;
+  force?: boolean;
   waitForCompletion?: boolean;
 }
 
@@ -30,11 +34,11 @@ export function transformServiceProvider(callWithRequest: callWithRequestType) {
     return callWithRequest('ml.deleteDataFrameTransform', { transformId });
   }
 
-  async function stopTransform(options: StartStopOptions) {
+  async function stopTransform(options: StopTransformOptions) {
     return callWithRequest('ml.stopDataFrameTransform', options);
   }
 
-  async function startTransform(options: StartStopOptions) {
+  async function startTransform(options: StartTransformOptions) {
     return callWithRequest('ml.startDataFrameTransform', options);
   }
 
@@ -86,13 +90,7 @@ export function transformServiceProvider(callWithRequest: callWithRequestType) {
     for (const transformInfo of transformsInfo) {
       const transformId = transformInfo.id;
       try {
-        await startTransform({
-          transformId,
-          force:
-            transformInfo.state !== undefined
-              ? transformInfo.state === DATA_FRAME_TRANSFORM_STATE.FAILED
-              : false,
-        });
+        await startTransform({ transformId });
         results[transformId] = { success: true };
       } catch (e) {
         if (isRequestTimeout(e)) {

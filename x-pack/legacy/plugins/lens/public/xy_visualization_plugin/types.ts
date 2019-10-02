@@ -182,7 +182,14 @@ export const layerConfig: ExpressionFunction<
   },
 };
 
-export type SeriesType = 'bar' | 'line' | 'area' | 'bar_stacked' | 'area_stacked';
+export type SeriesType =
+  | 'bar'
+  | 'bar_horizontal'
+  | 'line'
+  | 'area'
+  | 'bar_stacked'
+  | 'bar_horizontal_stacked'
+  | 'area_stacked';
 
 export interface LayerConfig {
   hide?: boolean;
@@ -206,7 +213,6 @@ export interface XYArgs {
   yTitle: string;
   legend: LegendConfig;
   layers: LayerArgs[];
-  isHorizontal: boolean;
 }
 
 // Persisted parts of the state
@@ -214,7 +220,6 @@ export interface XYState {
   preferredSeriesType: SeriesType;
   legend: LegendConfig;
   layers: LayerConfig[];
-  isHorizontal: boolean;
 }
 
 export type State = XYState;
@@ -230,11 +235,25 @@ export const visualizationTypes: VisualizationType[] = [
     }),
   },
   {
+    id: 'bar_horizontal',
+    icon: 'visBarHorizontal',
+    label: i18n.translate('xpack.lens.xyVisualization.barHorizontalLabel', {
+      defaultMessage: 'Horizontal Bar',
+    }),
+  },
+  {
     id: 'bar_stacked',
     icon: 'visBarVerticalStacked',
     largeIcon: chartBarStackedSVG,
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarLabel', {
       defaultMessage: 'Stacked bar',
+    }),
+  },
+  {
+    id: 'bar_horizontal_stacked',
+    icon: 'visBarHorizontal',
+    label: i18n.translate('xpack.lens.xyVisualization.stackedBarHorizontalLabel', {
+      defaultMessage: 'Stacked Horizontal Bar',
     }),
   },
   {
