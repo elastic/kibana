@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getAllStats } from './collectors';
-import { getLocalStats } from '../../../../../../src/legacy/core_plugins/telemetry/server/collectors';
+// @ts-ignore
+import { getAllStats } from './get_all_stats';
+import { getStatsWithXpack } from '../../../xpack_main/server/telemetry_collection';
 
 /**
  * Get the telemetry data.
@@ -22,23 +23,21 @@ export async function getStatsWithMonitoring(
   config: any,
   start: string,
   end: string,
-  unencrypted: boolean,
-  statsGetters: any = {}
+  unencrypted: boolean
 ) {
-  const { _getAllStats = getAllStats, _getLocalStats = getLocalStats } = statsGetters;
   let response = [];
   const useInternalUser = !unencrypted;
 
   try {
     // attempt to collect stats from multiple clusters in monitoring data
-    response = await _getAllStats(req, start, end, { useInternalUser });
+    response = await getAllStats(req, start, end, { useInternalUser });
   } catch (err) {
     // no-op
   }
 
   if (!Array.isArray(response) || response.length === 0) {
     // return it as an array for a consistent API response
-    response = await _getLocalStats(req, { useInternalUser });
+    response = await getStatsWithXpack(req, config, start, end, unencrypted);
   }
 
   return response;

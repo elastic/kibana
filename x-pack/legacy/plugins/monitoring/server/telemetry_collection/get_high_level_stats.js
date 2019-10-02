@@ -15,7 +15,7 @@ import {
   APM_SYSTEM_ID,
   LOGSTASH_SYSTEM_ID,
   TELEMETRY_QUERY_SOURCE,
-} from '../../../common/constants';
+} from '../../common/constants';
 
 /**
  * Update a counter associated with the {@code key}.

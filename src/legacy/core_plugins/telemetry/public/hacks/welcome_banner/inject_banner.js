@@ -18,11 +18,11 @@
  */
 
 import chrome from 'ui/chrome';
-import { Path } from 'plugins/xpack_main/services/path';
+
 import { fetchTelemetry } from '../fetch_telemetry';
 import { renderBanner } from './render_banner';
 import { shouldShowBanner } from './should_show_banner';
-import { TelemetryOptInProvider } from '../../services';
+import { TelemetryOptInProvider, isUnauthenticated } from '../../services';
 import { npStart } from 'ui/new_platform';
 
 /**
@@ -39,7 +39,7 @@ async function asyncInjectBanner($injector) {
   const config = $injector.get('config');
 
   // and no banner for non-logged in users
-  if (Path.isUnauthenticated()) {
+  if (isUnauthenticated()) {
     return;
   }
 

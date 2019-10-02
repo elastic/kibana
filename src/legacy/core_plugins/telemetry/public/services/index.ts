@@ -18,3 +18,4 @@
  */
 
 export { TelemetryOptInProvider } from './telemetry_opt_in';
+export { isUnauthenticated } from './path';

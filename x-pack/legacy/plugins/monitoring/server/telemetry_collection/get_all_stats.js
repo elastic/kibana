@@ -10,7 +10,7 @@ import {
   LOGSTASH_SYSTEM_ID,
   KIBANA_SYSTEM_ID,
   BEATS_SYSTEM_ID,
-} from '../../../common/constants';
+} from '../../common/constants';
 import { getClusterUuids } from './get_cluster_uuids';
 import { getElasticsearchStats } from './get_es_stats';
 import { getKibanaStats } from './get_kibana_stats';

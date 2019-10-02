@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import { createQuery } from './create_query';
-import { INDEX_PATTERN_BEATS } from '../../../common/constants';
+import { INDEX_PATTERN_BEATS } from '../../common/constants';
 
 const HITS_SIZE = 10000; // maximum hits to receive from ES with each search
 

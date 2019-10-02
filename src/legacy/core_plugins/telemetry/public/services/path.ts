@@ -17,4 +17,9 @@
  * under the License.
  */
 
-export { getLocalStats } from './get_local_stats';
+import chrome from 'ui/chrome';
+
+export function isUnauthenticated() {
+  const path = chrome.removeBasePath(window.location.pathname);
+  return path === '/login' || path === '/logout' || path === '/logged_out' || path === '/status';
+}

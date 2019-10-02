@@ -17,24 +17,29 @@
  * under the License.
  */
 
-import { TIMEOUT } from './constants';
+// @ts-ignore
+import { getLocalStats } from './get_local_stats';
 
 /**
- * Get the cluster stats from the connected cluster.
+ * Get the telemetry data.
  *
- * This is the equivalent of GET /_xpack/usage?master_timeout=${TIMEOUT}
- *
- * Like any X-Pack related API, X-Pack must installed for this to work.
- *
- * @param {function} callCluster The callWithInternalUser handler (exposed for testing)
- * @return {Promise} The response from Elasticsearch equivalent to GET /_cluster/stats.
+ * @param {Object} req The incoming request.
+ * @param {Object} config Kibana config.
+ * @param {String} start The start time of the request (likely 20m ago).
+ * @param {String} end The end time of the request.
+ * @param {Boolean} unencrypted Is the request payload going to be unencrypted.
+ * @return {Promise} An array of telemetry objects.
  */
-export async function getXPackUsage(callCluster: any) {
-  return await callCluster('transport.request', {
-    method: 'GET',
-    path: '/_xpack/usage',
-    query: {
-      master_timeout: TIMEOUT,
-    },
-  });
+export async function getStats(
+  req: any,
+  config: any,
+  start: string,
+  end: string,
+  unencrypted: boolean
+) {
+  return [
+    await getLocalStats(req, {
+      useInternalUser: !unencrypted,
+    }),
+  ];
 }

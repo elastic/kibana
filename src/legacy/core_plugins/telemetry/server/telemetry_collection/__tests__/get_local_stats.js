@@ -22,7 +22,6 @@ import sinon from 'sinon';
 
 import { mockGetClusterInfo } from './get_cluster_info';
 import { mockGetClusterStats } from './get_cluster_stats';
-import { mockGetXPack } from './get_xpack';
 
 import { omit } from 'lodash';
 import {
@@ -45,7 +44,6 @@ const getMockServer = (getCluster = sinon.stub(), kibanaUsage = {}) => ({
 function mockGetLocalStats(callCluster, clusterInfo, clusterStats, license, usage, req) {
   mockGetClusterInfo(callCluster, clusterInfo, req);
   mockGetClusterStats(callCluster, clusterStats, req);
-  mockGetXPack(callCluster, license, usage, req);
 }
 
 describe('get_local_stats', () => {

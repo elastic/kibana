@@ -18,27 +18,7 @@
  */
 
 // @ts-ignore
-import { getLocalStats } from './local';
+export { getLocalStats } from './get_local_stats';
 
-/**
- * Get the telemetry data.
- *
- * @param {Object} req The incoming request.
- * @param {Object} config Kibana config.
- * @param {String} start The start time of the request (likely 20m ago).
- * @param {String} end The end time of the request.
- * @param {Boolean} unencrypted Is the request payload going to be unencrypted.
- * @return {Promise} An array of telemetry objects.
- */
-export async function getStats(
-  req: any,
-  config: any,
-  start: string,
-  end: string,
-  unencrypted: boolean,
-  _getLocalStats = getLocalStats
-) {
-  return await _getLocalStats(req, {
-    useInternalUser: !unencrypted,
-  });
-}
+// @ts-ignore
+export { getStats } from './get_stats';

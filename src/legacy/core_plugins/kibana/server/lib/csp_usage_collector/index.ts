@@ -17,25 +17,4 @@
  * under the License.
  */
 
-/**
- * Get the cluster stats from the connected cluster.
- *
- * This is the equivalent of GET /_license?local=true .
- *
- * Like any X-Pack related API, X-Pack must installed for this to work.
- *
- * @param {function} callCluster The callWithInternalUser handler (exposed for testing)
- * @return {Promise} The response from Elasticsearch.
- */
-export async function getXPackLicense(callCluster: any) {
-  const { license } = await callCluster('transport.request', {
-    method: 'GET',
-    path: '/_license',
-    query: {
-      // Fetching the local license is cheaper than getting it from the master and good enough
-      local: 'true',
-    },
-  });
-
-  return license;
-}
+export { registerCspCollector } from './csp_collector';

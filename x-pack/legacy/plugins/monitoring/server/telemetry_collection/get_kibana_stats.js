@@ -5,7 +5,7 @@
  */
 
 import { get, isEmpty, omit } from 'lodash';
-import { KIBANA_SYSTEM_ID } from '../../../common/constants';
+import { KIBANA_SYSTEM_ID } from '../../common/constants';
 import { fetchHighLevelStats, handleHighLevelStatsResponse } from './get_high_level_stats';
 
 export function rollUpTotals(rolledUp, addOn, field) {

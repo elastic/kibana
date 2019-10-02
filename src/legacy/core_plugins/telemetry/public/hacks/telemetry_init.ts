@@ -17,12 +17,10 @@
  * under the License.
  */
 
+import { npStart } from 'ui/new_platform';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-// @ts-ignore
-import { Path } from 'plugins/xpack_main/services/path';
-// @ts-ignore
-import { npStart } from 'ui/new_platform';
+import { isUnauthenticated } from '../services';
 // @ts-ignore
 import { Telemetry } from './telemetry';
 // @ts-ignore
@@ -35,7 +33,7 @@ function telemetryInit($injector: any) {
 
   if (telemetryEnabled) {
     // no telemetry for non-logged in users
-    if (Path.isUnauthenticated()) {
+    if (isUnauthenticated()) {
       return;
     }
 

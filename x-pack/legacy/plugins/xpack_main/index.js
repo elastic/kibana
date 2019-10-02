@@ -17,6 +17,9 @@ import { xpackInfoRoute, settingsRoute } from './server/routes/api/v1';
 import { has } from 'lodash';
 
 export { callClusterFactory } from './server/lib/call_cluster_factory';
+import { getStatsWithXpack } from './server/telemetry_collection';
+import { telemetryCollectionManager } from '../../../../src/legacy/core_plugins/telemetry/server';
+
 export const xpackMain = (kibana) => {
   return new kibana.Plugin({
     id: 'xpack_main',
@@ -75,6 +78,8 @@ export const xpackMain = (kibana) => {
       }
 
       mirrorPluginStatus(server.plugins.elasticsearch, this, 'yellow', 'red');
+
+      telemetryCollectionManager.setStatsGetter(getStatsWithXpack, 'local_xpack', 1);
 
       featuresPlugin.registerLegacyAPI({
         xpackInfo: setupXPackMain(server),

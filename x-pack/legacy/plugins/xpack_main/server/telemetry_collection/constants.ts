@@ -4,4 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerCspCollector } from './csp_collector';
+/**
+ * The timeout used by each request, whenever a timeout can be specified.
+ */
+export const TIMEOUT = '30s';
