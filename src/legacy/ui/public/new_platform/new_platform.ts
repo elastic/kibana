@@ -65,6 +65,7 @@ export function __reset__() {
   npSetup.plugins = {} as any;
   npStart.core = (null as unknown) as LegacyCoreStart;
   npStart.plugins = {} as any;
+  legacyAppRegistered = false;
 }
 
 export function __setup__(coreSetup: LegacyCoreSetup, plugins: PluginsSetup) {
@@ -72,22 +73,36 @@ export function __setup__(coreSetup: LegacyCoreSetup, plugins: PluginsSetup) {
   npSetup.plugins = plugins;
 
   // Setup compatibility layer for AppService in legacy platform
-  npSetup.core.application.register = (app: App) => {
-    require('ui/chrome').setRootController(app.id, ($scope: IScope, $element: JQLite) => {
-      const element = $element[0];
-
-      // Root controller cannot return a Promise so use an internal async function and call it
-      (async () => {
-        const unmount = await app.mount({ core: npStart.core }, { element, appBasePath: '' });
-        $scope.$on('$destroy', () => {
-          unmount();
-        });
-      })();
-    });
-  };
+  npSetup.core.application.register = legacyAppRegister;
 }
 
 export function __start__(coreStart: LegacyCoreStart, plugins: PluginsStart) {
   npStart.core = coreStart;
   npStart.plugins = plugins;
 }
+
+/** Flag used to ensure `legacyAppRegister` is only called once. */
+let legacyAppRegistered = false;
+
+/**
+ * Exported for testing only. Use `npSetup.core.application.register` in legacy apps.
+ * @internal
+ */
+export const legacyAppRegister = (app: App) => {
+  if (legacyAppRegistered) {
+    throw new Error(`core.application.register may only be called once for legacy plugins.`);
+  }
+  legacyAppRegistered = true;
+
+  require('ui/chrome').setRootController(app.id, ($scope: IScope, $element: JQLite) => {
+    const element = $element[0];
+
+    // Root controller cannot return a Promise so use an internal async function and call it immediately
+    (async () => {
+      const unmount = await app.mount({ core: npStart.core }, { element, appBasePath: '' });
+      $scope.$on('$destroy', () => {
+        unmount();
+      });
+    })();
+  });
+};

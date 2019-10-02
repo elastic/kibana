@@ -17,11 +17,18 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./applications'));
-    loadTestFile(require.resolve('./legacy_plugins'));
-    loadTestFile(require.resolve('./server_plugins'));
-    loadTestFile(require.resolve('./ui_plugins'));
-  });
-}
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+import { AppMountContext, AppMountParameters } from 'kibana/public';
+
+const App = () => <h1 data-test-subj="coreLegacyCompatH1">core_legacy_compat</h1>;
+
+export const renderApp = (
+  context: AppMountContext,
+  { appBasePath, element }: AppMountParameters
+) => {
+  ReactDOM.render(<App />, element);
+
+  return () => ReactDOM.unmountComponentAtNode(element);
+};
