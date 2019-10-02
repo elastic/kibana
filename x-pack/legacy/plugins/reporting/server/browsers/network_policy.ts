@@ -44,9 +44,9 @@ const allowUrl = (url: string, allowList: filterList, denyList: filterList) => {
   return isAllowed(allowBy, allowList, denyList);
 };
 
-export const allowResponse = (
+export const allowRequest = (
   url: string,
-  ip: string,
+  ip: string | null,
   allowList: filterList,
   denyList: filterList
 ) => {
@@ -72,7 +72,7 @@ export const allowResponse = (
   }
 
   if (ipAllowFilters.length || ipDenyFilters.length) {
-    isIPOk = allowIp(ip, allowList, denyList);
+    isIPOk = !ip || allowIp(ip, allowList, denyList);
   }
 
   if (hostAllowFilters.length || hostDenyFilters.length) {

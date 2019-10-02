@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { trunc } from 'lodash';
 import open from 'opn';
 import { parse as parseUrl } from 'url';
 import { Page, SerializableOrJSHandle, EvaluateFn } from 'puppeteer';
 import { ViewZoomWidthHeight } from '../../../../export_types/common/layouts/layout';
 import { LevelLogger } from '../../../../server/lib';
-import { allowResponse } from '../../network_policy';
+import { allowRequest } from '../../network_policy';
 import {
   ConditionalHeaders,
   ConditionalHeadersConditions,
@@ -39,6 +40,20 @@ export class HeadlessChromiumDriver {
     this.networkPolicy = networkPolicy;
   }
 
+  private allowRequest(url: string, ip: string | null) {
+    return (
+      !this.networkPolicy.enabled ||
+      allowRequest(url, ip, this.networkPolicy.allow, this.networkPolicy.deny)
+    );
+  }
+
+  private truncateUrl(url: string) {
+    return trunc(url, {
+      length: 100,
+      omission: '[truncated]',
+    });
+  }
+
   public async open(
     url: string,
     {
@@ -47,23 +62,25 @@ export class HeadlessChromiumDriver {
     }: { conditionalHeaders: ConditionalHeaders; waitForSelector: string },
     logger: LevelLogger
   ) {
-    logger.info(`opening url ${url}`);
     await this.page.setRequestInterception(true);
+    logger.info(`opening url ${url}`);
     let interceptedCount = 0;
 
-    this.page.on('request', (interceptedRequest: any) => {
-      let isData = false;
-      let interceptedUrl = interceptedRequest.url();
+    this.page.on('request', interceptedRequest => {
+      const interceptedUrl = interceptedRequest.url();
+      const allowed = !interceptedUrl.startsWith('file://');
+      const isData = interceptedUrl.startsWith('data:');
 
       // We should never ever let file protocol requests go through
-      if (interceptedUrl.startsWith('file://')) {
+      if (allowed && this.allowRequest(interceptedUrl, null)) {
         logger.error(`Got file-protocol URL: "${interceptedUrl}", closing browser.`);
+        interceptedRequest.abort('blockedbyclient');
         this.page.browser().close();
-        throw new Error(`Received bad URL outgoing URL: ${interceptedUrl}`);
+        throw new Error(`Received disallowed outgoing URL: "${interceptedUrl}", exiting`);
       }
 
-      if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedRequest.url())) {
-        logger.debug(`Using custom headers for ${interceptedRequest.url()}`);
+      if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedUrl)) {
+        logger.debug(`Using custom headers for ${interceptedUrl}`);
         interceptedRequest.continue({
           headers: {
             ...interceptedRequest.headers(),
@@ -71,13 +88,8 @@ export class HeadlessChromiumDriver {
           },
         });
       } else {
-        if (interceptedUrl.startsWith('data:')) {
-          // `data:image/xyz;base64` can be very long URLs
-          interceptedUrl = interceptedUrl.substring(0, 100) + '[truncated]';
-          isData = true;
-        }
-
-        logger.debug(`No custom headers for ${interceptedUrl}`);
+        const loggedUrl = isData ? this.truncateUrl(interceptedUrl) : interceptedUrl;
+        logger.debug(`No custom headers for ${loggedUrl}`);
         interceptedRequest.continue();
       }
       interceptedCount = interceptedCount + (isData ? 0 : 1);
@@ -86,25 +98,18 @@ export class HeadlessChromiumDriver {
     this.page.on('response', interceptedResponse => {
       const interceptedUrl = interceptedResponse.url();
       const remoteIp = interceptedResponse.remoteAddress().ip;
-      const status = interceptedResponse.status();
-      const isMalicious = interceptedUrl.startsWith('file://');
-      let allowed = true;
+      let allowed = !interceptedUrl.startsWith('file://');
 
       // Redirects can come through this hook as well, so only
       // filter payloads that actually respond
-      if (this.networkPolicy.enabled && status === 200) {
-        allowed = allowResponse(
-          interceptedUrl,
-          remoteIp,
-          this.networkPolicy.allow,
-          this.networkPolicy.deny
-        );
+      if (interceptedResponse.status() === 200) {
+        allowed = this.allowRequest(interceptedUrl, remoteIp);
       }
 
-      if (isMalicious || !allowed) {
-        logger.error(`Got bad URL "${interceptedUrl}", closing browser.`);
+      if (!allowed) {
+        logger.error(`Got disallowed URL "${interceptedUrl}", closing browser.`);
         this.page.browser().close();
-        throw new Error(`Received bad URL in response: ${interceptedUrl}`);
+        throw new Error(`Received disallowed URL in response: ${interceptedUrl}`);
       }
     });
 
