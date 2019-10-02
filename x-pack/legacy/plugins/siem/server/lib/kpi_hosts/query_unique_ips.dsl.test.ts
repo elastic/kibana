@@ -12,10 +12,12 @@ import {
 } from './mock';
 import { buildUniqueIpsQuery } from './query_unique_ips.dsl';
 
-describe.each([
+const table: Array<[typeof mockKpiHostDetailsOptions, typeof mockKpiHostDetailsUniqueIpsQuery]> = [
   [mockKpiHostsOptions, mockKpiHostsUniqueIpsQuery],
   [mockKpiHostDetailsOptions, mockKpiHostDetailsUniqueIpsQuery],
-])('buildUniqueIpsQuery', (option, expected) => {
+];
+
+describe.each(table)('buildUniqueIpsQuery', (option, expected) => {
   test(`returns correct query by option type`, () => {
     expect(buildUniqueIpsQuery(option)).toMatchObject(expected);
   });

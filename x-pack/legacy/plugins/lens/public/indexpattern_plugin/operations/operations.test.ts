@@ -154,7 +154,7 @@ describe('getOperationTypesForField', () => {
           columnOrder: ['col1'],
           columns: {
             col1: {
-              label: 'Date Histogram of timestamp',
+              label: 'Date histogram of timestamp',
               dataType: 'date',
               isBucketed: true,
 
@@ -272,6 +272,21 @@ describe('getOperationTypesForField', () => {
               Object {
                 "field": "bytes",
                 "operationType": "avg",
+                "type": "field",
+              },
+              Object {
+                "field": "timestamp",
+                "operationType": "cardinality",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
+                "operationType": "cardinality",
+                "type": "field",
+              },
+              Object {
+                "field": "source",
+                "operationType": "cardinality",
                 "type": "field",
               },
               Object {

@@ -19,3 +19,6 @@
 
 export * from './query';
 export * from './field_formats';
+export * from './kbn_field_types';
+
+export * from './types';

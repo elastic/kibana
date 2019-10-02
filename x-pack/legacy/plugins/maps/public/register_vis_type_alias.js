@@ -8,7 +8,7 @@ import { setup as visualizationsSetup } from '../../../../../src/legacy/core_plu
 import { i18n } from '@kbn/i18n';
 import { APP_ID, APP_ICON, MAP_BASE_URL } from '../common/constants';
 
-visualizationsSetup.types.visTypeAliasRegistry.add({
+visualizationsSetup.types.registerAlias({
   aliasUrl: MAP_BASE_URL,
   name: APP_ID,
   title: i18n.translate('xpack.maps.visTypeAlias.title', {

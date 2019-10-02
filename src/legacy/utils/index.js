@@ -30,12 +30,6 @@ export { IS_KIBANA_DISTRIBUTABLE } from './artifact_type';
 export { IS_KIBANA_RELEASE } from './artifact_type';
 
 export {
-  getKbnTypeNames,
-  getKbnFieldType,
-  castEsToKbnFieldTypeName,
-} from './kbn_field_types';
-
-export {
   concatStreamProviders,
   createConcatStream,
   createIntersperseStream,
