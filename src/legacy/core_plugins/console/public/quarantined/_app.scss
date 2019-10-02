@@ -1,6 +1,16 @@
 // TODO: Move all of the styles here (should be modularised by, e.g., CSS-in-JS or CSS modules).
 #consoleRoot {
-  height: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  -webkit-box-flex: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  flex-basis: auto;
+
   // Make sure the editor actions don't create scrollbars on this container
   // SASSTODO: Uncomment when tooltips are EUI-ified (inside portals)
   overflow: hidden;
