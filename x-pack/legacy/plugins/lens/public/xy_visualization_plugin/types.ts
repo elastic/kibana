@@ -15,6 +15,8 @@ import chartAreaSVG from '../assets/chart_area.svg';
 import chartAreaStackedSVG from '../assets/chart_area_stacked.svg';
 import chartBarSVG from '../assets/chart_bar.svg';
 import chartBarStackedSVG from '../assets/chart_bar_stacked.svg';
+import chartBarHorizontalSVG from '../assets/chart_bar_horizontal.svg';
+import chartBarHorizontalStackedSVG from '../assets/chart_bar_horizontal_stacked.svg';
 import chartLineSVG from '../assets/chart_line.svg';
 
 import { VisualizationType } from '..';
@@ -237,6 +239,7 @@ export const visualizationTypes: VisualizationType[] = [
   {
     id: 'bar_horizontal',
     icon: 'visBarHorizontal',
+    largeIcon: chartBarHorizontalSVG,
     label: i18n.translate('xpack.lens.xyVisualization.barHorizontalLabel', {
       defaultMessage: 'Horizontal Bar',
     }),
@@ -246,12 +249,13 @@ export const visualizationTypes: VisualizationType[] = [
     icon: 'visBarVerticalStacked',
     largeIcon: chartBarStackedSVG,
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarLabel', {
-      defaultMessage: 'Stacked bar',
+      defaultMessage: 'Stacked Bar',
     }),
   },
   {
     id: 'bar_horizontal_stacked',
-    icon: 'visBarHorizontal',
+    icon: 'visBarHorizontalStacked',
+    largeIcon: chartBarHorizontalStackedSVG,
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarHorizontalLabel', {
       defaultMessage: 'Stacked Horizontal Bar',
     }),
