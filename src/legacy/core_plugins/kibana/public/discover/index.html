@@ -29,19 +29,20 @@
   <main class="container-fluid">
     <div class="row">
       <div class="col-md-2 sidebar-container collapsible-sidebar" id="discover-sidebar">
-        <disc-field-chooser
-          class="dscFieldChooser"
-          columns="state.columns"
-          hits="rows"
-          field-counts="fieldCounts"
-          index-pattern="searchSource.getField('index')"
-          index-pattern-list="opts.indexPatternList"
-          state="state"
-          on-add-field="addColumn"
-          on-add-filter="filterQuery"
-          on-remove-field="removeColumn"
-        >
-        </disc-field-chooser>
+        <div class="dscFieldChooser">
+          <disc-field-chooser
+            columns="state.columns"
+            hits="rows"
+            field-counts="fieldCounts"
+            index-pattern="searchSource.getField('index')"
+            index-pattern-list="opts.indexPatternList"
+            state="state"
+            on-add-field="addColumn"
+            on-add-filter="filterQuery"
+            on-remove-field="removeColumn"
+          >
+          </disc-field-chooser>
+        </div>
       </div>
 
       <div class="dscWrapper col-md-10">

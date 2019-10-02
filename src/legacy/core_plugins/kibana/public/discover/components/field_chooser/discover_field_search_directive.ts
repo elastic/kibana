@@ -16,34 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// @ts-ignore
+import { uiModules } from 'ui/modules';
+import { wrapInI18nContext } from 'ui/i18n';
+import { DiscoverFieldSearch } from './discover_field_search';
 
-import { asPrettyString } from '../../../../../../plugins/data/common/field_formats';
+const app = uiModules.get('apps/discover');
 
-export function createBoolFormat(FieldFormat) {
-  return class BoolFormat extends FieldFormat {
-    _convert(value) {
-      if (typeof value === 'string') {
-        value = value.trim().toLowerCase();
-      }
-
-      switch (value) {
-        case false:
-        case 0:
-        case 'false':
-        case 'no':
-          return 'false';
-        case true:
-        case 1:
-        case 'true':
-        case 'yes':
-          return 'true';
-        default:
-          return asPrettyString(value);
-      }
-    }
-
-    static id = 'boolean';
-    static title = 'Boolean';
-    static fieldType = ['boolean', 'number', 'string'];
-  };
-}
+app.directive('discoverFieldSearch', function(reactDirective: any) {
+  return reactDirective(wrapInI18nContext(DiscoverFieldSearch), [
+    ['onChange', { watchDepth: 'reference' }],
+    ['onShowFilter', { watchDepth: 'reference' }],
+    ['showFilter', { watchDepth: 'value' }],
+    ['value', { watchDepth: 'value' }],
+  ]);
+});

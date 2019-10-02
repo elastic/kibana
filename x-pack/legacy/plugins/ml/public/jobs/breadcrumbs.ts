@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import { ML_BREADCRUMB, DATA_VISUALIZER_BREADCRUMB, ANOMALY_DETECTION_BREADCRUMB } from '../breadcrumbs';
 import { i18n } from '@kbn/i18n';
+import { Breadcrumb } from 'ui/chrome';
+import {
+  ANOMALY_DETECTION_BREADCRUMB,
+  DATA_VISUALIZER_BREADCRUMB,
+  ML_BREADCRUMB,
+} from '../breadcrumbs';
 
-
-export function getJobManagementBreadcrumbs() {
+export function getJobManagementBreadcrumbs(): Breadcrumb[] {
   // Whilst top level nav menu with tabs remains,
   // use root ML breadcrumb.
   return [
@@ -17,93 +20,93 @@ export function getJobManagementBreadcrumbs() {
     ANOMALY_DETECTION_BREADCRUMB,
     {
       text: i18n.translate('xpack.ml.anomalyDetection.jobManagementLabel', {
-        defaultMessage: 'Job Management'
+        defaultMessage: 'Job Management',
       }),
-      href: ''
-    }
+      href: '',
+    },
   ];
 }
 
-export function getCreateJobBreadcrumbs() {
+export function getCreateJobBreadcrumbs(): Breadcrumb[] {
   return [
     ML_BREADCRUMB,
     ANOMALY_DETECTION_BREADCRUMB,
     {
       text: i18n.translate('xpack.ml.jobsBreadcrumbs.createJobLabel', {
-        defaultMessage: 'Create job'
+        defaultMessage: 'Create job',
       }),
-      href: '#/jobs/new_job'
-    }
+      href: '#/jobs/new_job',
+    },
   ];
 }
 
-export function getCreateSingleMetricJobBreadcrumbs() {
+export function getCreateSingleMetricJobBreadcrumbs(): Breadcrumb[] {
   return [
     ...getCreateJobBreadcrumbs(),
     {
       text: i18n.translate('xpack.ml.jobsBreadcrumbs.singleMetricLabel', {
-        defaultMessage: 'Single metric'
+        defaultMessage: 'Single metric',
       }),
-      href: ''
-    }
+      href: '',
+    },
   ];
 }
 
-export function getCreateMultiMetricJobBreadcrumbs() {
+export function getCreateMultiMetricJobBreadcrumbs(): Breadcrumb[] {
   return [
     ...getCreateJobBreadcrumbs(),
     {
       text: i18n.translate('xpack.ml.jobsBreadcrumbs.multiMetricLabel', {
-        defaultMessage: 'Multi metric'
+        defaultMessage: 'Multi metric',
       }),
-      href: ''
-    }
+      href: '',
+    },
   ];
 }
 
-export function getCreatePopulationJobBreadcrumbs() {
+export function getCreatePopulationJobBreadcrumbs(): Breadcrumb[] {
   return [
     ...getCreateJobBreadcrumbs(),
     {
       text: i18n.translate('xpack.ml.jobsBreadcrumbs.populationLabel', {
-        defaultMessage: 'Population'
+        defaultMessage: 'Population',
       }),
-      href: ''
-    }
+      href: '',
+    },
   ];
 }
 
-export function getAdvancedJobConfigurationBreadcrumbs() {
+export function getAdvancedJobConfigurationBreadcrumbs(): Breadcrumb[] {
   return [
     ...getCreateJobBreadcrumbs(),
     {
       text: i18n.translate('xpack.ml.jobsBreadcrumbs.advancedConfigurationLabel', {
-        defaultMessage: 'Advanced configuration'
+        defaultMessage: 'Advanced configuration',
       }),
-      href: ''
-    }
+      href: '',
+    },
   ];
 }
 
-export function getCreateRecognizerJobBreadcrumbs($routeParams) {
+export function getCreateRecognizerJobBreadcrumbs($routeParams: any): Breadcrumb[] {
   return [
     ...getCreateJobBreadcrumbs(),
     {
       text: $routeParams.id,
-      href: ''
-    }
+      href: '',
+    },
   ];
 }
 
-export function getDataVisualizerIndexOrSearchBreadcrumbs() {
+export function getDataVisualizerIndexOrSearchBreadcrumbs(): Breadcrumb[] {
   return [
     ML_BREADCRUMB,
     DATA_VISUALIZER_BREADCRUMB,
     {
       text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectIndexOrSearchLabel', {
-        defaultMessage: 'Select index or search'
+        defaultMessage: 'Select index or search',
       }),
-      href: ''
-    }
+      href: '',
+    },
   ];
 }

@@ -9,14 +9,12 @@ import uiRoutes from 'ui/routes';
 // @ts-ignore
 import { checkFullLicense } from '../../../../license/check_license';
 import { checkGetJobsPrivilege } from '../../../../privilege/check_privilege';
-// @ts-ignore
 import { loadCurrentIndexPattern, loadCurrentSavedSearch } from '../../../../util/index_utils';
 
 import {
   getCreateSingleMetricJobBreadcrumbs,
   getCreateMultiMetricJobBreadcrumbs,
   getCreatePopulationJobBreadcrumbs,
-  // @ts-ignore
 } from '../../../breadcrumbs';
 
 import { Route } from '../../../../../common/types/kibana';
