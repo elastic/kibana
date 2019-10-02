@@ -17,34 +17,33 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
 import moment from 'moment-timezone';
-import { createDateFormat } from '../date';
-import { FieldFormat } from '../../../../../../../plugins/data/common/field_formats';
+import { createDateFormat } from './date';
 
-const DateFormat = createDateFormat(FieldFormat);
+const DateFormat = createDateFormat();
 
-describe('Date Format', function () {
-  let convert;
-  let mockConfig;
+describe('Date Format', function() {
+  let convert: Function;
+  let mockConfig: Record<any, any>;
 
-  beforeEach(function () {
+  beforeEach(function() {
     mockConfig = {};
     mockConfig.dateFormat = 'MMMM Do YYYY, HH:mm:ss.SSS';
     mockConfig['dateFormat:tz'] = 'Browser';
-    const getConfig = (key) => mockConfig[key];
+
+    const getConfig = (key: any) => mockConfig[key];
 
     const date = new DateFormat({}, getConfig);
 
     convert = date.convert.bind(date);
   });
 
-  it('decoding an undefined or null date should return an empty string', function () {
-    expect(convert(null)).to.be('-');
-    expect(convert(undefined)).to.be('-');
+  test('decoding an undefined or null date should return an empty string', function() {
+    expect(convert(null)).toBe('-');
+    expect(convert(undefined)).toBe('-');
   });
 
-  it('should clear the memoization cache after changing the date', function () {
+  test('should clear the memoization cache after changing the date', function() {
     function setDefaultTimezone() {
       moment.tz.setDefault(mockConfig['dateFormat:tz']);
     }
@@ -58,11 +57,11 @@ describe('Date Format', function () {
     setDefaultTimezone();
     const phoenixTime = convert(time);
 
-    expect(chicagoTime).not.to.equal(phoenixTime);
+    expect(chicagoTime).not.toBe(phoenixTime);
   });
 
-  it('should return the value itself when it cannot successfully be formatted', function () {
+  test('should return the value itself when it cannot successfully be formatted', function() {
     const dateMath = 'now+1M/d';
-    expect(convert(dateMath)).to.be(dateMath);
+    expect(convert(dateMath)).toBe(dateMath);
   });
 });

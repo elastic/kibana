@@ -17,12 +17,22 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { memoize } from 'lodash';
 import moment from 'moment';
+import { FieldFormat } from '../../../../../../plugins/data/common/';
 
-export function createDateFormat(FieldFormat) {
+export function createDateFormat() {
   return class DateFormat extends FieldFormat {
-    constructor(params, getConfig) {
+    static id = 'date';
+    static title = 'Date';
+    static fieldType = 'date';
+
+    private getConfig: Function;
+    private memoizedPattern: any;
+    private memoizedConverter: any;
+    private timeZone: any;
+
+    constructor(params: any, getConfig: Function) {
       super(params);
 
       this.getConfig = getConfig;
@@ -31,42 +41,38 @@ export function createDateFormat(FieldFormat) {
     getParamDefaults() {
       return {
         pattern: this.getConfig('dateFormat'),
-        timezone: this.getConfig('dateFormat:tz')
+        timezone: this.getConfig('dateFormat:tz'),
       };
     }
 
-    _convert(val) {
+    _convert(val: any) {
       // don't give away our ref to converter so
       // we can hot-swap when config changes
       const pattern = this.param('pattern');
       const timezone = this.param('timezone');
 
-      const timezoneChanged = this._timeZone !== timezone;
-      const datePatternChanged = this._memoizedPattern !== pattern;
+      const timezoneChanged = this.timeZone !== timezone;
+      const datePatternChanged = this.memoizedPattern !== pattern;
       if (timezoneChanged || datePatternChanged) {
-        this._timeZone = timezone;
-        this._memoizedPattern = pattern;
+        this.timeZone = timezone;
+        this.memoizedPattern = pattern;
 
-        this._memoizedConverter = _.memoize(function converter(val) {
-          if (val === null || val === undefined) {
+        this.memoizedConverter = memoize(function converter(value: any) {
+          if (value === null || value === undefined) {
             return '-';
           }
 
-          const date = moment(val);
+          const date = moment(value);
 
           if (date.isValid()) {
             return date.format(pattern);
           } else {
-            return val;
+            return value;
           }
         });
       }
 
-      return this._memoizedConverter(val);
+      return this.memoizedConverter(val);
     }
-
-    static id = 'date';
-    static title = 'Date';
-    static fieldType = 'date';
   };
 }
