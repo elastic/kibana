@@ -35,6 +35,10 @@ interface StatefulSearchBarDeps {
   autocomplete: AutocompletePublicPluginStart;
 }
 
+export type StatetfulSearchBarProps = SearchBarOwnProps & {
+  appName: string;
+};
+
 const defaultFiltersUpdated = (filterManager: FilterManager) => {
   return (filters: Filter[]) => {
     filterManager.setFilters(filters);
@@ -59,7 +63,7 @@ export function createSearchBar({
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
-  return (props: SearchBarOwnProps & { appName: string }) => {
+  return (props: StatetfulSearchBarProps) => {
     const timeRange = timefilter.timefilter.getTime();
     const refreshInterval = timefilter.timefilter.getRefreshInterval();
 

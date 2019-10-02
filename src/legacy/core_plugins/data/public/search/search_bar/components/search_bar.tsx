@@ -99,7 +99,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   private savedQueryService!: SavedQueryService;
-  private services!: IDataPluginServices;
+  private services = this.props.kibana.services;
   public filterBarRef: Element | null = null;
   public filterBarWrapperRef: Element | null = null;
 
@@ -330,7 +330,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   public componentDidMount() {
-    this.services = this.props.kibana.services;
     if (this.filterBarRef) {
       this.setFilterBarHeight();
       this.ro.observe(this.filterBarRef);

@@ -97,7 +97,7 @@ export class QueryBarInputUI extends Component<Props, State> {
   public inputRef: HTMLInputElement | null = null;
 
   private persistedLog: PersistedLog | undefined;
-  private services!: IDataPluginServices;
+  private services = this.props.kibana.services;
   private componentIsUnmounting = false;
 
   private getQueryString = () => {
@@ -389,12 +389,7 @@ export class QueryBarInputUI extends Component<Props, State> {
     this.setState({ index });
   };
 
-  public componentWillMount() {
-    this.services = this.props.kibana.services;
-  }
-
   public componentDidMount() {
-    this.services = this.props.kibana.services;
     const parsedQuery = fromUser(toUser(this.props.query.query));
     if (!isEqual(this.props.query.query, parsedQuery)) {
       this.onChange({ ...this.props.query, query: parsedQuery });

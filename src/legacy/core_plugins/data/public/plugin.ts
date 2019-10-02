@@ -18,7 +18,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { SearchService, SearchSetup, createSearchBar } from './search';
+import { SearchService, SearchSetup, createSearchBar, StatetfulSearchBarProps } from './search';
 import { QueryService, QuerySetup } from './query';
 import { FilterService, FilterSetup } from './filter';
 import { TimefilterService, TimefilterSetup } from './timefilter';
@@ -67,7 +67,9 @@ export interface DataStart {
   query: QuerySetup;
   search: SearchSetup;
   timefilter: TimefilterSetup;
-  ui: any;
+  ui: {
+    SearchBar: React.ComponentType<StatetfulSearchBarProps>;
+  };
 }
 
 /**
