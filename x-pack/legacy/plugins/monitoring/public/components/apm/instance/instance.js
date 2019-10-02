@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export function ApmServerInstance({ summary, metrics, ...props }) {
   const seriesToShow = [
     metrics.apm_server_requests,
-    metrics.apm_server_responses_valid,
+    metrics.apm_server_responses,
     metrics.apm_server_responses_errors,
     metrics.apm_transformations,
 
@@ -31,7 +31,7 @@ export function ApmServerInstance({ summary, metrics, ...props }) {
 
     metrics.apm_acm_requests,
 
-    metrics.apm_acm_responses_valid,
+    metrics.apm_acm_responses,
     metrics.apm_acm_responses_errors,
 
     metrics.apm_cpu,

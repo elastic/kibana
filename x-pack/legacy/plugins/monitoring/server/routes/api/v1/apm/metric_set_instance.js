@@ -31,7 +31,7 @@ export const metricSet = [
       'apm_server_responses_valid_ok',
       'apm_server_responses_valid_accepted'
     ],
-    name: 'apm_server_responses_valid'
+    name: 'apm_server_responses'
   },
   {
     keys: [
