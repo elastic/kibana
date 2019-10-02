@@ -158,6 +158,7 @@ export class InnerCustomPlot extends PureComponent {
       <Fragment>
         <div style={{ position: 'relative', height: plotValues.XY_HEIGHT }}>
           <StaticPlot
+            width={width}
             noHits={noHits}
             plotValues={plotValues}
             series={enabledSeries}

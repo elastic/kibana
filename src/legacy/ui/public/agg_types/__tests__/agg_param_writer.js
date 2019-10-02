@@ -52,7 +52,7 @@ export default function AggParamWriterHelper(Private) {
     constructor(opts) {
       this.aggType = opts.aggType;
       if (_.isString(this.aggType)) {
-        this.aggType = aggTypes.byName[this.aggType];
+        this.aggType = aggTypes.buckets.find(agg => agg.name === this.aggType) || aggTypes.metrics.find(agg => agg.name === this.aggType);
       }
 
       // not configurable right now, but totally required
@@ -74,12 +74,12 @@ export default function AggParamWriterHelper(Private) {
     write(paramValues, modifyAggConfig = null) {
       paramValues = _.clone(paramValues);
 
-      if (this.aggType.params.byName.field && !paramValues.field) {
+      if (this.aggType.paramByName('field') && !paramValues.field) {
         // pick a field rather than force a field to be specified everywhere
         if (this.aggType.type === AggGroupNames.Metrics) {
           paramValues.field = _.sample(this.indexPattern.fields.byType.number);
         } else {
-          const type = this.aggType.params.byName.field.filterFieldTypes || 'string';
+          const type = this.aggType.paramByName('field').filterFieldTypes || 'string';
           let field;
           do {
             field = _.sample(this.indexPattern.fields.byType[type]);
@@ -88,7 +88,7 @@ export default function AggParamWriterHelper(Private) {
         }
       }
 
-      const aggConfig = this.vis.aggs[0];
+      const aggConfig = this.vis.aggs.aggs[0];
       aggConfig.setParams(paramValues);
 
       if (modifyAggConfig) {

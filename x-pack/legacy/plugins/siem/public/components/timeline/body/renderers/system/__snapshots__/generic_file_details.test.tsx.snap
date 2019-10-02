@@ -90,6 +90,7 @@ exports[`SystemGenericFileDetails rendering it renders the default SystemGeneric
       }
     }
     text="[generic-text-123]"
+    timelineId="test"
   />
 </Component>
 `;

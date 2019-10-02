@@ -24,11 +24,12 @@ import { BucketAggType } from './_bucket_agg_type';
 import { TimeBuckets } from '../../time_buckets';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { intervalOptions } from './_interval_options';
-import { TimeIntervalParamEditor } from '../controls/time_interval';
+import { TimeIntervalParamEditor } from '../../vis/editors/default/controls/time_interval';
 import { timefilter } from '../../timefilter';
-import { DropPartialsParamEditor } from '../controls/drop_partials';
+import { DropPartialsParamEditor } from '../../vis/editors/default/controls/drop_partials';
 import { dateHistogramInterval } from '../../../../core_plugins/data/public';
 import { i18n } from '@kbn/i18n';
+import { writeParams } from '../agg_params';
 
 const config = chrome.getUiSettingsClient();
 const detectedTimezone = moment.tz.guess();
@@ -55,7 +56,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
     date: true
   },
   makeLabel: function (agg) {
-    const output = this.params.write(agg);
+    const output = writeParams(this.params, agg);
     const field = agg.getFieldDisplayName();
     return i18n.translate('common.ui.aggTypes.buckets.dateHistogramLabel', {
       defaultMessage: '{fieldName} per {intervalDescription}',
@@ -157,7 +158,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
 
         const scaleMetrics = interval.scaled && interval.scale < 1;
         if (scaleMetrics && aggs) {
-          const metrics = aggs.filter(agg => agg.type && agg.type.type === 'metrics');
+          const metrics = aggs.aggs.filter(agg => agg.type && agg.type.type === 'metrics');
           const all = _.every(metrics, function (agg) {
             return agg.type.isScalable();
           });

@@ -21,7 +21,8 @@ import { Poller } from './poller';
 
 const delay = (duration: number) => new Promise(r => setTimeout(r, duration));
 
-describe('Poller', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/44560
+describe.skip('Poller', () => {
   let handler: jest.Mock<any, any>;
   let poller: Poller<string>;
 

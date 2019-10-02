@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { geoHashBucketAgg } from '../../buckets/geo_hash';
-import * as AggConfigModule from '../../../vis/agg_config';
+import * as AggConfigModule from '../../agg_config';
 import * as BucketAggTypeModule from '../../buckets/_bucket_agg_type';
 
 describe('Geohash Agg', () => {

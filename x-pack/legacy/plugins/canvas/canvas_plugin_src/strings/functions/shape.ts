@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { shape } from '../../functions/common/shape';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { SVG } from '../constants';
+import { SVG } from '../../../i18n';
 
 export const help: FunctionHelp<FunctionFactory<typeof shape>> = {
   help: i18n.translate('xpack.canvas.functions.shapeHelpText', {

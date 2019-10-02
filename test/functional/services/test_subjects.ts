@@ -27,10 +27,13 @@ interface ExistsOptions {
   allowHidden?: boolean;
 }
 
+interface ClearOptions {
+  withKeyboard: boolean;
+}
+
 export function TestSubjectsProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
-  const browser = getService('browser');
   const find = getService('find');
   const config = getService('config');
 
@@ -96,7 +99,7 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
         log.debug(`TestSubjects.doubleClick(${selector})`);
         const element = await this.find(selector, timeout);
         await element.moveMouseTo();
-        await browser.doubleClick(element);
+        await element.doubleClick();
       });
     }
 
@@ -152,7 +155,11 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    public async setValue(selector: string, text: string): Promise<void> {
+    public async setValue(
+      selector: string,
+      text: string,
+      options: ClearOptions = { withKeyboard: false }
+    ): Promise<void> {
       return await retry.try(async () => {
         log.debug(`TestSubjects.setValue(${selector}, ${text})`);
         await this.click(selector);
@@ -160,9 +167,17 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
         // call clearValue() and type() on the element that is focused after
         // clicking on the testSubject
         const input = await find.activeElement();
-        await input.clearValue();
+        if (options.withKeyboard === true) {
+          await input.clearValueWithKeyboard();
+        } else {
+          await input.clearValue();
+        }
         await input.type(text);
       });
+    }
+
+    public async selectValue(selector: string, value: string): Promise<void> {
+      await find.selectValue(`[data-test-subj="${selector}"]`, value);
     }
 
     public async isEnabled(selector: string): Promise<boolean> {

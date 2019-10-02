@@ -22,6 +22,8 @@ import { history } from '../../utils/url';
 import { Modifier, Shortcut } from '../shortcuts';
 import { ReferencesPanel } from './references_panel';
 import { encodeRevisionString } from '../../../common/uri_util';
+import { trackCodeUiMetric, METRIC_TYPE } from '../../services/ui_metric';
+import { CodeUIUsageMetrics } from '../../../model/usage_telemetry_metrics';
 
 export interface EditorActions {
   closePanel(changeUrl: boolean): void;
@@ -64,6 +66,8 @@ export class EditorComponent extends React.Component<IProps> {
     if (!this.gutterClickHandler) {
       this.gutterClickHandler = this.editor!.onMouseDown(
         (e: editorInterfaces.IEditorMouseEvent) => {
+          // track line number click count
+          trackCodeUiMetric(METRIC_TYPE.COUNT, CodeUIUsageMetrics.LINE_NUMBER_CLICK_COUNT);
           const { resource, org, repo, revision, path, pathType } = this.props.match.params;
           const queryString = this.props.location.search;
           const repoUri = `${resource}/${org}/${repo}`;
@@ -133,16 +137,16 @@ export class EditorComponent extends React.Component<IProps> {
     if (this.monaco && qs !== prevProps.location.search) {
       this.monaco.updateUrlQuery(qs);
     }
-    if (this.monaco && this.monaco.editor) {
+    if (this.editor) {
       if (prevProps.showBlame !== this.props.showBlame && this.props.showBlame) {
-        this.monaco.editor.updateOptions({ lineDecorationsWidth: 316 });
+        this.editor.updateOptions({ lineDecorationsWidth: 316 });
         this.loadBlame(this.props.blames);
       } else if (!this.props.showBlame) {
         this.destroyBlameWidgets();
-        this.monaco.editor.updateOptions({ lineDecorationsWidth: 16 });
+        this.editor.updateOptions({ lineDecorationsWidth: 16 });
       }
       if (prevProps.blames !== this.props.blames && this.props.showBlame) {
-        this.monaco.editor.updateOptions({ lineDecorationsWidth: 316 });
+        this.editor.updateOptions({ lineDecorationsWidth: 316 });
         this.loadBlame(this.props.blames);
       }
     }
@@ -220,6 +224,10 @@ export class EditorComponent extends React.Component<IProps> {
         lang = 'text';
       }
       this.editor = await this.monaco.loadFile(repo, file, text, lang, revision);
+      if (this.props.showBlame) {
+        this.editor.updateOptions({ lineDecorationsWidth: 316 });
+        this.loadBlame(this.props.blames);
+      }
       this.registerGutterClickHandler();
     }
   }

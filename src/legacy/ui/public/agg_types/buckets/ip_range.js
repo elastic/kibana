@@ -20,8 +20,8 @@
 import _ from 'lodash';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterIpRange } from './create_filter/ip_range';
-import { IpRangeTypeParamEditor } from '../controls/ip_range_type';
-import { IpRangesParamEditor } from '../controls/ip_ranges';
+import { IpRangeTypeParamEditor } from '../../vis/editors/default/controls/ip_range_type';
+import { IpRangesParamEditor } from '../../vis/editors/default/controls/ip_ranges';
 import { i18n } from '@kbn/i18n';
 
 export const ipRangeBucketAgg = new BucketAggType({

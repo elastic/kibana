@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
+import React from 'react';
+import { EuiLink } from '@elastic/eui';
+import chrome from 'ui/chrome';
 import { detectorToString } from 'plugins/ml/util/string_utils';
 import { formatValues, filterObjects } from './format_values';
 import { i18n } from '@kbn/i18n';
@@ -16,6 +18,7 @@ export function extractJobDetails(job) {
   }
 
   const general = {
+    id: 'general',
     title: i18n.translate('xpack.ml.jobsList.jobDetails.generalTitle', {
       defaultMessage: 'General'
     }),
@@ -25,6 +28,7 @@ export function extractJobDetails(job) {
 
 
   const customUrl = {
+    id: 'customUrl',
     title: i18n.translate('xpack.ml.jobsList.jobDetails.customUrlsTitle', {
       defaultMessage: 'Custom URLs'
     }),
@@ -36,6 +40,7 @@ export function extractJobDetails(job) {
   }
 
   const node = {
+    id: 'node',
     title: i18n.translate('xpack.ml.jobsList.jobDetails.nodeTitle', {
       defaultMessage: 'Node'
     }),
@@ -47,6 +52,7 @@ export function extractJobDetails(job) {
   }
 
   const calendars = {
+    id: 'calendars',
     title: i18n.translate('xpack.ml.jobsList.jobDetails.calendarsTitle', {
       defaultMessage: 'Calendars'
     }),
@@ -54,7 +60,10 @@ export function extractJobDetails(job) {
     items: []
   };
   if (job.calendars) {
-    calendars.items = job.calendars.map(c => ['', c]);
+    calendars.items = job.calendars.map(c => [
+      '',
+      <EuiLink href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list/edit_calendar/${c}?_g=()`}>{c}</EuiLink>,
+    ]);
     // remove the calendars list from the general section
     // so not to show it twice.
     const i = general.items.findIndex(item => item[0] === 'calendars');
@@ -64,6 +73,7 @@ export function extractJobDetails(job) {
   }
 
   const detectors = {
+    id: 'detectors',
     title: i18n.translate('xpack.ml.jobsList.jobDetails.detectorsTitle', {
       defaultMessage: 'Detectors'
     }),
@@ -81,6 +91,7 @@ export function extractJobDetails(job) {
   }
 
   const influencers = {
+    id: 'influencers',
     title: i18n.translate('xpack.ml.jobsList.jobDetails.influencersTitle', {
       defaultMessage: 'Influencers'
     }),
@@ -89,6 +100,7 @@ export function extractJobDetails(job) {
   };
 
   const analysisConfig = {
+    id: 'analysisConfig',
     title: i18n.translate('xpack.ml.jobsList.jobDetails.analysisConfigTitle', {
       defaultMessage: 'Analysis config'
     }),
@@ -97,6 +109,7 @@ export function extractJobDetails(job) {
   };
 
   const analysisLimits = {
+    id: 'analysisLimits',
     title: i18n.translate('xpack.ml.jobsList.jobDetails.analysisLimitsTitle', {
       defaultMessage: 'Analysis limits'
     }),
@@ -105,6 +118,7 @@ export function extractJobDetails(job) {
   };
 
   const dataDescription = {
+    id: 'dataDescription',
     title: i18n.translate('xpack.ml.jobsList.jobDetails.dataDescriptionTitle', {
       defaultMessage: 'Data description'
     }),
@@ -113,6 +127,7 @@ export function extractJobDetails(job) {
   };
 
   const datafeed = {
+    id: 'datafeed',
     title: i18n.translate('xpack.ml.jobsList.jobDetails.datafeedTitle', {
       defaultMessage: 'Datafeed'
     }),
@@ -132,6 +147,7 @@ export function extractJobDetails(job) {
   }
 
   const counts = {
+    id: 'counts',
     title: i18n.translate('xpack.ml.jobsList.jobDetails.countsTitle', {
       defaultMessage: 'Counts'
     }),
@@ -140,6 +156,7 @@ export function extractJobDetails(job) {
   };
 
   const modelSizeStats = {
+    id: 'modelSizeStats',
     title: i18n.translate('xpack.ml.jobsList.jobDetails.modelSizeStatsTitle', {
       defaultMessage: 'Model size stats'
     }),
@@ -148,6 +165,7 @@ export function extractJobDetails(job) {
   };
 
   const datafeedTimingStats = {
+    id: 'datafeedTimingStats',
     title: i18n.translate('xpack.ml.jobsList.jobDetails.datafeedTimingStatsTitle', {
       defaultMessage: 'Timing stats'
     }),

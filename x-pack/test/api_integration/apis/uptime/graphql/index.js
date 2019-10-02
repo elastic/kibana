@@ -16,10 +16,8 @@ export default function ({ getService, loadTestFile }) {
     // verifying the pre-loaded documents are returned in a way that
     // matches the snapshots contained in './fixtures'
     loadTestFile(require.resolve('./doc_count'));
-    loadTestFile(require.resolve('./error_list'));
     loadTestFile(require.resolve('./filter_bar'));
     loadTestFile(require.resolve('./monitor_charts'));
-    loadTestFile(require.resolve('./monitor_list'));
     loadTestFile(require.resolve('./monitor_page_title'));
     loadTestFile(require.resolve('./monitor_states'));
     loadTestFile(require.resolve('./monitor_status_bar'));

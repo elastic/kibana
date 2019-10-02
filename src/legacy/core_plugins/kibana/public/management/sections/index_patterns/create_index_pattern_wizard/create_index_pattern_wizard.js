@@ -121,7 +121,7 @@ export class CreateIndexPatternWizard extends Component {
     const { services } = this.props;
     const { indexPattern } = this.state;
 
-    const emptyPattern = await services.indexPatterns.get();
+    const emptyPattern = await services.indexPatterns.make();
 
     Object.assign(emptyPattern, {
       id: indexPatternId,

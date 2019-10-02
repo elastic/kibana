@@ -8,10 +8,13 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { ml } from '../../../../../services/ml_api_service';
 
-import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../../common';
-
 import {
   DataFrameTransformListRow,
+  refreshTransformList$,
+  REFRESH_TRANSFORM_LIST_STATE,
+} from '../../../../common';
+
+import {
   DataFrameTransformEndpointRequest,
   DataFrameTransformEndpointResult,
 } from '../../components/transform_list/common';
@@ -33,7 +36,7 @@ export const startTransforms = async (dataFrames: DataFrameTransformListRow[]) =
       if (results[transformId].success === true) {
         toastNotifications.addSuccess(
           i18n.translate('xpack.ml.dataframe.transformList.startTransformSuccessMessage', {
-            defaultMessage: 'Data frame transform {transformId} started successfully.',
+            defaultMessage: 'Request to start data frame transform {transformId} acknowledged.',
             values: { transformId },
           })
         );

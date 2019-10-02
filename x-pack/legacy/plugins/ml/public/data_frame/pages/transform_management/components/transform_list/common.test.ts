@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import mockDataFrameTransformListRow from './__mocks__/data_frame_transform_list_row.json';
+import mockDataFrameTransformListRow from '../../../../common/__mocks__/data_frame_transform_list_row.json';
 
 import {
   DataFrameTransformListRow,
   isCompletedBatchTransform,
   DATA_FRAME_TRANSFORM_STATE,
-} from './common';
+} from '../../../../common';
 
 describe('Data Frame: isCompletedBatchTransform()', () => {
   test('isCompletedBatchTransform()', () => {

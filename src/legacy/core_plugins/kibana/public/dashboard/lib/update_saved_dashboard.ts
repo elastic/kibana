@@ -19,7 +19,8 @@
 
 import _ from 'lodash';
 import { AppState } from 'ui/state_management/app_state';
-import { Timefilter, RefreshInterval } from 'ui/timefilter';
+import { Timefilter } from 'ui/timefilter';
+import { RefreshInterval } from 'src/plugins/data/public';
 import { FilterUtils } from './filter_utils';
 import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
 

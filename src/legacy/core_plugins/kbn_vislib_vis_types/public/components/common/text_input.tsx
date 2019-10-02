@@ -26,10 +26,12 @@ interface TextInputOptionProps<ParamName extends string> {
   label?: React.ReactNode;
   paramName: ParamName;
   value?: string;
+  'data-test-subj'?: string;
   setValue: (paramName: ParamName, value: string) => void;
 }
 
 function TextInputOption<ParamName extends string>({
+  'data-test-subj': dataTestSubj,
   disabled,
   helpText,
   label,
@@ -40,7 +42,9 @@ function TextInputOption<ParamName extends string>({
   return (
     <EuiFormRow helpText={helpText} label={label} fullWidth compressed>
       <EuiFieldText
+        compressed
         fullWidth
+        data-test-subj={dataTestSubj}
         disabled={disabled}
         value={value}
         onChange={ev => setValue(paramName, ev.target.value)}

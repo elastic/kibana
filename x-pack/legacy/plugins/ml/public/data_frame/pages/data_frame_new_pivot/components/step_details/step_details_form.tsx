@@ -18,12 +18,12 @@ import { isValidIndexName } from '../../../../../../common/util/es_utils';
 import { ml } from '../../../../../services/ml_api_service';
 
 import {
-  delayFormatRegex,
   isTransformIdValid,
   DataFrameTransformId,
   DataFrameTransformPivotConfig,
 } from '../../../../common';
 import { EsIndexName, IndexPatternTitle } from './common';
+import { delayValidator } from '../../../../common/validators';
 
 export interface StepDetailsExposedState {
   continuousModeDateField: string;
@@ -84,7 +84,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     isContinuousModeAvailable ? dateFieldNames[0] : ''
   );
   const [continuousModeDelay, setContinuousModeDelay] = useState(defaults.continuousModeDelay);
-  const isContinuousModeDelayValid = continuousModeDelay.match(delayFormatRegex) !== null;
+  const isContinuousModeDelayValid = delayValidator(continuousModeDelay);
 
   // fetch existing transform IDs and indices once for form validation
   useEffect(() => {

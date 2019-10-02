@@ -6,6 +6,9 @@
 
 import { failure } from 'io-ts/lib/PathReporter';
 
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 import {
   InfraLogEntryColumn,
   InfraLogEntryFieldColumn,
@@ -182,11 +185,12 @@ export const createLogEntriesResolvers = (libs: {
       }));
     },
     async logItem(source, args, { req }) {
-      const sourceConfiguration = SourceConfigurationRuntimeType.decode(
-        source.configuration
-      ).getOrElseL(errors => {
-        throw new Error(failure(errors).join('\n'));
-      });
+      const sourceConfiguration = pipe(
+        SourceConfigurationRuntimeType.decode(source.configuration),
+        fold(errors => {
+          throw new Error(failure(errors).join('\n'));
+        }, identity)
+      );
 
       return await libs.logEntries.getLogItem(req, args.id, sourceConfiguration);
     },

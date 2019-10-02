@@ -4,24 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionCreator } from 'typescript-fsa';
-import { connect } from 'react-redux';
-import { EuiButton, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
+import { connect } from 'react-redux';
 import styled from 'styled-components';
+import { ActionCreator } from 'typescript-fsa';
 
 import { BrowserFields } from '../../containers/source';
+import { timelineActions } from '../../store/actions';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { DEFAULT_CATEGORY_NAME } from '../timeline/body/column_headers/default_headers';
 import { OnUpdateColumns } from '../timeline/events';
-
 import { FieldsBrowser } from './field_browser';
-import { FieldBrowserProps } from './types';
 import { filterBrowserFieldsByFieldName, mergeBrowserFieldsWithDefaultCategory } from './helpers';
-
 import * as i18n from './translations';
-import { timelineActions } from '../../store/actions';
+import { FieldBrowserProps } from './types';
 
 const fieldsButtonClassName = 'fields-button';
 
@@ -41,17 +39,8 @@ interface State {
   show: boolean;
 }
 
-const FieldsBrowserButtonContainer = styled.div<{ show: boolean }>`
-  ${({ show }) => (show ? 'position: absolute;' : '')}
-
-  .${fieldsButtonClassName} {
-    border-color: ${({ theme }) => theme.eui.euiColorLightShade};
-    color: ${({ theme }) => theme.eui.euiColorDarkestShade};
-    font-size: 14px;
-    margin: 1px 5px 2px 0;
-    ${({ show }) => (show ? 'position: absolute;' : '')}
-    ${({ show }) => (show ? 'top: -15px;' : '')}
-  }
+const FieldsBrowserButtonContainer = styled.div`
+  position: relative;
 `;
 
 FieldsBrowserButtonContainer.displayName = 'FieldsBrowserButtonContainer';
@@ -124,28 +113,26 @@ export class StatefulFieldsBrowserComponent extends React.PureComponent<
 
     return (
       <>
-        <FieldsBrowserButtonContainer data-test-subj="fields-browser-button-container" show={show}>
+        <FieldsBrowserButtonContainer data-test-subj="fields-browser-button-container">
           <EuiToolTip content={i18n.CUSTOMIZE_COLUMNS}>
             {isEventViewer ? (
               <EuiButtonIcon
                 aria-label={i18n.CUSTOMIZE_COLUMNS}
                 className={fieldsButtonClassName}
                 data-test-subj="show-field-browser-gear"
-                iconType="gear"
+                iconType="list"
                 onClick={this.toggleShow}
               />
             ) : (
-              <EuiButton
+              <EuiButtonEmpty
                 className={fieldsButtonClassName}
-                color="primary"
                 data-test-subj="show-field-browser"
-                iconSide="right"
-                iconType="arrowDown"
+                iconType="list"
                 onClick={this.toggleShow}
-                size="s"
+                size="xs"
               >
                 {i18n.FIELDS}
-              </EuiButton>
+              </EuiButtonEmpty>
             )}
           </EuiToolTip>
 
@@ -159,6 +146,7 @@ export class StatefulFieldsBrowserComponent extends React.PureComponent<
                   : browserFieldsWithDefaultCategory
               }
               height={height}
+              isEventViewer={isEventViewer}
               isSearching={isSearching}
               onCategorySelected={this.updateSelectedCategoryId}
               onFieldSelected={onFieldSelected}

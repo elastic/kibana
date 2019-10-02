@@ -43,13 +43,6 @@ function getServerMock(customization?: any) {
     log: () => {
       return;
     },
-    config: () => ({
-      get: (key: string) => {
-        if (key === 'xpack.spaces.enabled') {
-          return true;
-        }
-      },
-    }),
     usage: {
       collectorSet: {
         makeUsageCollector: (options: any) => {
@@ -79,24 +72,6 @@ const defaultCallClusterMock = jest.fn().mockResolvedValue({
   },
 });
 
-test('sets enabled to false when spaces is turned off', async () => {
-  const mockConfigGet = jest.fn(key => {
-    if (key === 'xpack.spaces.enabled') {
-      return false;
-    } else if (key.indexOf('xpack.spaces') >= 0) {
-      throw new Error('Unknown config key!');
-    }
-  });
-  const serverMock = getServerMock({ config: () => ({ get: mockConfigGet }) });
-  const { fetch: getSpacesUsage } = getSpacesUsageCollector({
-    config: serverMock.config(),
-    usage: serverMock.usage,
-    xpackMain: serverMock.plugins.xpack_main,
-  });
-  const usageStats: UsageStats = await getSpacesUsage(defaultCallClusterMock);
-  expect(usageStats.enabled).toBe(false);
-});
-
 describe('with a basic license', () => {
   let serverWithBasicLicenseMock: any;
   let usageStats: UsageStats;
@@ -106,7 +81,7 @@ describe('with a basic license', () => {
       .fn()
       .mockReturnValue('basic');
     const { fetch: getSpacesUsage } = getSpacesUsageCollector({
-      config: serverWithBasicLicenseMock.config(),
+      kibanaIndex: '.kibana',
       usage: serverWithBasicLicenseMock.usage,
       xpackMain: serverWithBasicLicenseMock.plugins.xpack_main,
     });
@@ -142,7 +117,7 @@ describe('with no license', () => {
     serverWithNoLicenseMock.plugins.xpack_main.info.isAvailable = jest.fn().mockReturnValue(false);
 
     const { fetch: getSpacesUsage } = getSpacesUsageCollector({
-      config: serverWithNoLicenseMock.config(),
+      kibanaIndex: '.kibana',
       usage: serverWithNoLicenseMock.usage,
       xpackMain: serverWithNoLicenseMock.plugins.xpack_main,
     });
@@ -175,7 +150,7 @@ describe('with platinum license', () => {
       .fn()
       .mockReturnValue('platinum');
     const { fetch: getSpacesUsage } = getSpacesUsageCollector({
-      config: serverWithPlatinumLicenseMock.config(),
+      kibanaIndex: '.kibana',
       usage: serverWithPlatinumLicenseMock.usage,
       xpackMain: serverWithPlatinumLicenseMock.plugins.xpack_main,
     });

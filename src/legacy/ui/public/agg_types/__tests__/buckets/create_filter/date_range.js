@@ -52,7 +52,7 @@ describe('AggConfig Filters', function () {
         ]
       });
 
-      const aggConfig = vis.aggs.byTypeName.date_range[0];
+      const aggConfig = vis.aggs.byName('date_range')[0];
       const filter = createFilterDateRange(aggConfig, 'February 1st, 2015 to February 7th, 2015');
       expect(filter).to.have.property('range');
       expect(filter).to.have.property('meta');

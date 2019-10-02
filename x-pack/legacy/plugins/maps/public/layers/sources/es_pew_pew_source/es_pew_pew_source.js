@@ -13,12 +13,13 @@ import { VectorLayer } from '../../vector_layer';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { VectorStyle } from '../../styles/vector_style';
+import { vectorStyles } from '../../styles/vector_style_defaults';
 import { i18n } from '@kbn/i18n';
 import { SOURCE_DATA_ID_ORIGIN, ES_PEW_PEW } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { AggConfigs } from 'ui/vis/agg_configs';
+import { AggConfigs } from 'ui/agg_types';
 
 const COUNT_PROP_LABEL = 'count';
 const COUNT_PROP_NAME = 'doc_count';
@@ -42,10 +43,10 @@ export class ESPewPewSource extends AbstractESSource {
 
   static type = ES_PEW_PEW;
   static title = i18n.translate('xpack.maps.source.pewPewTitle', {
-    defaultMessage: 'Source-destination connections'
+    defaultMessage: 'Point to point'
   });
   static description = i18n.translate('xpack.maps.source.pewPewDescription', {
-    defaultMessage: 'Aggregated data paths between the origin and destinations.'
+    defaultMessage: 'Aggregated data paths between the source and destination'
   });
 
   static createDescriptor({ indexPatternId, sourceGeoField, destGeoField }) {
@@ -141,7 +142,7 @@ export class ESPewPewSource extends AbstractESSource {
 
   createDefaultLayer(options) {
     const styleDescriptor = VectorStyle.createDescriptor({
-      lineColor: {
+      [vectorStyles.LINE_COLOR]: {
         type: VectorStyle.STYLE_TYPE.DYNAMIC,
         options: {
           field: {
@@ -152,7 +153,7 @@ export class ESPewPewSource extends AbstractESSource {
           color: 'Blues'
         }
       },
-      lineWidth: {
+      [vectorStyles.LINE_WIDTH]: {
         type: VectorStyle.STYLE_TYPE.DYNAMIC,
         options: {
           field: {
@@ -182,7 +183,7 @@ export class ESPewPewSource extends AbstractESSource {
     return Math.min(targetGeotileLevel, MAX_GEOTILE_LEVEL);
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters) {
+  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this._getIndexPattern();
     const metricAggConfigs = this.getMetricFields().map(metric => {
       const metricAggConfig = {
@@ -232,9 +233,13 @@ export class ESPewPewSource extends AbstractESSource {
       }
     });
 
-    const esResponse = await this._runEsQuery(layerName, searchSource, i18n.translate('xpack.maps.source.pewPew.inspectorDescription', {
-      defaultMessage: 'Source-destination connections request'
-    }));
+    const esResponse = await this._runEsQuery(
+      layerName,
+      searchSource,
+      registerCancelCallback,
+      i18n.translate('xpack.maps.source.pewPew.inspectorDescription', {
+        defaultMessage: 'Source-destination connections request'
+      }));
 
     const { featureCollection } = convertToLines(esResponse);
 

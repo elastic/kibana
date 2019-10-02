@@ -106,7 +106,7 @@ export const getDomainsColumns = (
               key={escapeDataProviderId(
                 `${tableId}-table-${flowTarget}-${flowDirection}-direction-${direction}`
               )}
-              expression={`network.direction: "${escapeQueryValue(direction)}"`}
+              expression={`network.direction: ${escapeQueryValue(direction)}`}
               type={type}
               componentFilterType={'network'}
             >

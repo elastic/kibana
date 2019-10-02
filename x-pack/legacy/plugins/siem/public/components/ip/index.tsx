@@ -7,7 +7,6 @@
 import * as React from 'react';
 import { pure } from 'recompose';
 
-import { DefaultDraggable } from '../draggables';
 import { FormattedFieldValue } from '../timeline/body/renderers/formatted_field';
 
 export const SOURCE_IP_FIELD_NAME = 'source.ip';
@@ -25,22 +24,14 @@ export const Ip = pure<{
   fieldName: string;
   value?: string | null;
 }>(({ contextId, eventId, fieldName, value }) => (
-  <DefaultDraggable
-    data-test-subj="ip"
-    field={fieldName}
-    id={`${contextId}-${eventId}-${fieldName}-${value}`}
-    tooltipContent={fieldName}
+  <FormattedFieldValue
+    contextId={contextId}
+    data-test-subj="formatted-ip"
+    eventId={eventId}
+    fieldName={fieldName}
+    fieldType={IP_FIELD_TYPE}
     value={value}
-  >
-    <FormattedFieldValue
-      contextId={contextId}
-      data-test-subj="formatted-ip"
-      eventId={eventId}
-      fieldName={fieldName}
-      fieldType={IP_FIELD_TYPE}
-      value={value}
-    />
-  </DefaultDraggable>
+  />
 ));
 
 Ip.displayName = 'Ip';

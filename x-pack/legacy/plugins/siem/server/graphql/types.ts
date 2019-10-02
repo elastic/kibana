@@ -140,14 +140,14 @@ export interface Source {
   status: SourceStatus;
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
-  /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
-  Events: EventsData;
 
   Timeline: TimelineData;
 
   TimelineDetails: TimelineDetailsData;
 
   LastEventTime: LastEventTimeData;
+
+  EventsOverTime: EventsOverTimeData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
@@ -368,20 +368,36 @@ export interface Inspect {
   response: string[];
 }
 
-export interface EventsData {
-  edges: EcsEdges[];
+export interface TimelineData {
+  edges: TimelineEdges[];
 
   totalCount: number;
 
-  pageInfo: PageInfoPaginated;
+  pageInfo: PageInfo;
 
   inspect?: Inspect | null;
 }
 
-export interface EcsEdges {
-  node: Ecs;
+export interface TimelineEdges {
+  node: TimelineItem;
 
   cursor: CursorType;
+}
+
+export interface TimelineItem {
+  _id: string;
+
+  _index?: string | null;
+
+  data: TimelineNonEcsData[];
+
+  ecs: Ecs;
+}
+
+export interface TimelineNonEcsData {
+  field: string;
+
+  value?: ToStringArray | null;
 }
 
 export interface Ecs {
@@ -836,38 +852,6 @@ export interface SshEcsFields {
   signature?: ToStringArray | null;
 }
 
-export interface TimelineData {
-  edges: TimelineEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfo;
-
-  inspect?: Inspect | null;
-}
-
-export interface TimelineEdges {
-  node: TimelineItem;
-
-  cursor: CursorType;
-}
-
-export interface TimelineItem {
-  _id: string;
-
-  _index?: string | null;
-
-  data: TimelineNonEcsData[];
-
-  ecs: Ecs;
-}
-
-export interface TimelineNonEcsData {
-  field: string;
-
-  value?: ToStringArray | null;
-}
-
 export interface PageInfo {
   endCursor?: CursorType | null;
 
@@ -892,6 +876,22 @@ export interface LastEventTimeData {
   lastSeen?: Date | null;
 
   inspect?: Inspect | null;
+}
+
+export interface EventsOverTimeData {
+  inspect?: Inspect | null;
+
+  eventsOverTime: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface MatrixOverTimeHistogramData {
+  x: number;
+
+  y: number;
+
+  g: string;
 }
 
 export interface HostsData {
@@ -1540,6 +1540,12 @@ export interface ResponseFavoriteTimeline {
   favorite?: FavoriteTimelineResult[] | null;
 }
 
+export interface EcsEdges {
+  node: Ecs;
+
+  cursor: CursorType;
+}
+
 export interface EventsTimelineData {
   edges: EcsEdges[];
 
@@ -1616,12 +1622,6 @@ export interface PaginationInputPaginated {
   querySize: number;
 }
 
-export interface SortField {
-  sortFieldId: string;
-
-  direction: Direction;
-}
-
 export interface PaginationInput {
   /** The limit parameter allows you to configure the maximum amount of items to be returned */
   limit: number;
@@ -1629,6 +1629,12 @@ export interface PaginationInput {
   cursor?: string | null;
   /** The tiebreaker parameter allow to be more precise to fetch the next item */
   tiebreaker?: string | null;
+}
+
+export interface SortField {
+  sortFieldId: string;
+
+  direction: Direction;
 }
 
 export interface LastTimeDetails {
@@ -1847,17 +1853,6 @@ export interface AuthenticationsSourceArgs {
 
   defaultIndex: string[];
 }
-export interface EventsSourceArgs {
-  pagination: PaginationInputPaginated;
-
-  sortField: SortField;
-
-  timerange?: TimerangeInput | null;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
 export interface TimelineSourceArgs {
   pagination: PaginationInput;
 
@@ -1884,6 +1879,13 @@ export interface LastEventTimeSourceArgs {
   indexKey: LastEventIndexKey;
 
   details: LastTimeDetails;
+
+  defaultIndex: string[];
+}
+export interface EventsOverTimeSourceArgs {
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
 
   defaultIndex: string[];
 }
@@ -2514,14 +2516,14 @@ export namespace SourceResolvers {
     status?: StatusResolver<SourceStatus, TypeParent, Context>;
     /** Gets Authentication success and failures based on a timerange */
     Authentications?: AuthenticationsResolver<AuthenticationsData, TypeParent, Context>;
-    /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
-    Events?: EventsResolver<EventsData, TypeParent, Context>;
 
     Timeline?: TimelineResolver<TimelineData, TypeParent, Context>;
 
     TimelineDetails?: TimelineDetailsResolver<TimelineDetailsData, TypeParent, Context>;
 
     LastEventTime?: LastEventTimeResolver<LastEventTimeData, TypeParent, Context>;
+
+    EventsOverTime?: EventsOverTimeResolver<EventsOverTimeData, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Hosts?: HostsResolver<HostsData, TypeParent, Context>;
 
@@ -2586,24 +2588,6 @@ export namespace SourceResolvers {
     defaultIndex: string[];
   }
 
-  export type EventsResolver<R = EventsData, Parent = Source, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context,
-    EventsArgs
-  >;
-  export interface EventsArgs {
-    pagination: PaginationInputPaginated;
-
-    sortField: SortField;
-
-    timerange?: TimerangeInput | null;
-
-    filterQuery?: string | null;
-
-    defaultIndex: string[];
-  }
-
   export type TimelineResolver<R = TimelineData, Parent = Source, Context = SiemContext> = Resolver<
     R,
     Parent,
@@ -2648,6 +2632,19 @@ export namespace SourceResolvers {
     indexKey: LastEventIndexKey;
 
     details: LastTimeDetails;
+
+    defaultIndex: string[];
+  }
+
+  export type EventsOverTimeResolver<
+    R = EventsOverTimeData,
+    Parent = Source,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, EventsOverTimeArgs>;
+  export interface EventsOverTimeArgs {
+    timerange: TimerangeInput;
+
+    filterQuery?: string | null;
 
     defaultIndex: string[];
   }
@@ -3544,56 +3541,108 @@ export namespace InspectResolvers {
   >;
 }
 
-export namespace EventsDataResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = EventsData> {
-    edges?: EdgesResolver<EcsEdges[], TypeParent, Context>;
+export namespace TimelineDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = TimelineData> {
+    edges?: EdgesResolver<TimelineEdges[], TypeParent, Context>;
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
-    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, Context>;
+    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
-  export type EdgesResolver<R = EcsEdges[], Parent = EventsData, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type TotalCountResolver<R = number, Parent = EventsData, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type EdgesResolver<
+    R = TimelineEdges[],
+    Parent = TimelineData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = TimelineData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type PageInfoResolver<
-    R = PageInfoPaginated,
-    Parent = EventsData,
+    R = PageInfo,
+    Parent = TimelineData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type InspectResolver<
     R = Inspect | null,
-    Parent = EventsData,
+    Parent = TimelineData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace EcsEdgesResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = EcsEdges> {
-    node?: NodeResolver<Ecs, TypeParent, Context>;
+export namespace TimelineEdgesResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = TimelineEdges> {
+    node?: NodeResolver<TimelineItem, TypeParent, Context>;
 
     cursor?: CursorResolver<CursorType, TypeParent, Context>;
   }
 
-  export type NodeResolver<R = Ecs, Parent = EcsEdges, Context = SiemContext> = Resolver<
+  export type NodeResolver<
+    R = TimelineItem,
+    Parent = TimelineEdges,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type CursorResolver<
+    R = CursorType,
+    Parent = TimelineEdges,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace TimelineItemResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = TimelineItem> {
+    _id?: IdResolver<string, TypeParent, Context>;
+
+    _index?: IndexResolver<string | null, TypeParent, Context>;
+
+    data?: DataResolver<TimelineNonEcsData[], TypeParent, Context>;
+
+    ecs?: EcsResolver<Ecs, TypeParent, Context>;
+  }
+
+  export type IdResolver<R = string, Parent = TimelineItem, Context = SiemContext> = Resolver<
     R,
     Parent,
     Context
   >;
-  export type CursorResolver<R = CursorType, Parent = EcsEdges, Context = SiemContext> = Resolver<
+  export type IndexResolver<
+    R = string | null,
+    Parent = TimelineItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DataResolver<
+    R = TimelineNonEcsData[],
+    Parent = TimelineItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type EcsResolver<R = Ecs, Parent = TimelineItem, Context = SiemContext> = Resolver<
     R,
     Parent,
     Context
   >;
+}
+
+export namespace TimelineNonEcsDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = TimelineNonEcsData> {
+    field?: FieldResolver<string, TypeParent, Context>;
+
+    value?: ValueResolver<ToStringArray | null, TypeParent, Context>;
+  }
+
+  export type FieldResolver<
+    R = string,
+    Parent = TimelineNonEcsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ValueResolver<
+    R = ToStringArray | null,
+    Parent = TimelineNonEcsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace EcsResolvers {
@@ -5112,110 +5161,6 @@ export namespace SshEcsFieldsResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace TimelineDataResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = TimelineData> {
-    edges?: EdgesResolver<TimelineEdges[], TypeParent, Context>;
-
-    totalCount?: TotalCountResolver<number, TypeParent, Context>;
-
-    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
-
-    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
-  }
-
-  export type EdgesResolver<
-    R = TimelineEdges[],
-    Parent = TimelineData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type TotalCountResolver<
-    R = number,
-    Parent = TimelineData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type PageInfoResolver<
-    R = PageInfo,
-    Parent = TimelineData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type InspectResolver<
-    R = Inspect | null,
-    Parent = TimelineData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace TimelineEdgesResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = TimelineEdges> {
-    node?: NodeResolver<TimelineItem, TypeParent, Context>;
-
-    cursor?: CursorResolver<CursorType, TypeParent, Context>;
-  }
-
-  export type NodeResolver<
-    R = TimelineItem,
-    Parent = TimelineEdges,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type CursorResolver<
-    R = CursorType,
-    Parent = TimelineEdges,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace TimelineItemResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = TimelineItem> {
-    _id?: IdResolver<string, TypeParent, Context>;
-
-    _index?: IndexResolver<string | null, TypeParent, Context>;
-
-    data?: DataResolver<TimelineNonEcsData[], TypeParent, Context>;
-
-    ecs?: EcsResolver<Ecs, TypeParent, Context>;
-  }
-
-  export type IdResolver<R = string, Parent = TimelineItem, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type IndexResolver<
-    R = string | null,
-    Parent = TimelineItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type DataResolver<
-    R = TimelineNonEcsData[],
-    Parent = TimelineItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type EcsResolver<R = Ecs, Parent = TimelineItem, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-}
-
-export namespace TimelineNonEcsDataResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = TimelineNonEcsData> {
-    field?: FieldResolver<string, TypeParent, Context>;
-
-    value?: ValueResolver<ToStringArray | null, TypeParent, Context>;
-  }
-
-  export type FieldResolver<
-    R = string,
-    Parent = TimelineNonEcsData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type ValueResolver<
-    R = ToStringArray | null,
-    Parent = TimelineNonEcsData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-}
-
 export namespace PageInfoResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = PageInfo> {
     endCursor?: EndCursorResolver<CursorType | null, TypeParent, Context>;
@@ -5295,6 +5240,58 @@ export namespace LastEventTimeDataResolvers {
   export type InspectResolver<
     R = Inspect | null,
     Parent = LastEventTimeData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace EventsOverTimeDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = EventsOverTimeData> {
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
+
+    eventsOverTime?: EventsOverTimeResolver<MatrixOverTimeHistogramData[], TypeParent, Context>;
+
+    totalCount?: TotalCountResolver<number, TypeParent, Context>;
+  }
+
+  export type InspectResolver<
+    R = Inspect | null,
+    Parent = EventsOverTimeData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type EventsOverTimeResolver<
+    R = MatrixOverTimeHistogramData[],
+    Parent = EventsOverTimeData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = EventsOverTimeData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace MatrixOverTimeHistogramDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = MatrixOverTimeHistogramData> {
+    x?: XResolver<number, TypeParent, Context>;
+
+    y?: YResolver<number, TypeParent, Context>;
+
+    g?: GResolver<string, TypeParent, Context>;
+  }
+
+  export type XResolver<
+    R = number,
+    Parent = MatrixOverTimeHistogramData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type YResolver<
+    R = number,
+    Parent = MatrixOverTimeHistogramData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type GResolver<
+    R = string,
+    Parent = MatrixOverTimeHistogramData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }
@@ -7539,6 +7536,25 @@ export namespace ResponseFavoriteTimelineResolvers {
     Parent = ResponseFavoriteTimeline,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
+}
+
+export namespace EcsEdgesResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = EcsEdges> {
+    node?: NodeResolver<Ecs, TypeParent, Context>;
+
+    cursor?: CursorResolver<CursorType, TypeParent, Context>;
+  }
+
+  export type NodeResolver<R = Ecs, Parent = EcsEdges, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type CursorResolver<R = CursorType, Parent = EcsEdges, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
 }
 
 export namespace EventsTimelineDataResolvers {

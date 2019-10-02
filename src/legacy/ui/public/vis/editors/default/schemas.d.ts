@@ -29,4 +29,8 @@ export interface Schema {
   name: string;
   params: AggParam[];
   title: string;
+  defaults: unknown;
+  hideCustomLabel?: boolean;
+  mustBeFirst?: boolean;
+  editorComponent?: any;
 }

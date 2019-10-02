@@ -71,7 +71,7 @@ const SourceArrow = pure<{
         <EuiFlexItem grow={false}>
           <DefaultDraggable
             field={SOURCE_BYTES_FIELD_NAME}
-            id={`${contextId}-${eventId}-${SOURCE_BYTES_FIELD_NAME}-${sourceBytes}`}
+            id={`source-arrow-default-draggable-${contextId}-${eventId}-${SOURCE_BYTES_FIELD_NAME}-${sourceBytes}`}
             value={sourceBytes}
           >
             <Data size="xs">
@@ -96,7 +96,7 @@ const SourceArrow = pure<{
         <EuiFlexItem grow={false}>
           <DefaultDraggable
             field={SOURCE_PACKETS_FIELD_NAME}
-            id={`${contextId}-${eventId}-${SOURCE_PACKETS_FIELD_NAME}-${sourcePackets}`}
+            id={`source-arrow-default-draggable-${contextId}-${eventId}-${SOURCE_PACKETS_FIELD_NAME}-${sourcePackets}`}
             value={sourcePackets}
           >
             <Data size="xs">
@@ -149,7 +149,7 @@ const DestinationArrow = pure<{
         <EuiFlexItem grow={false}>
           <DefaultDraggable
             field={DESTINATION_BYTES_FIELD_NAME}
-            id={`${contextId}-${eventId}-${DESTINATION_BYTES_FIELD_NAME}-${destinationBytes}`}
+            id={`destination-arrow-default-draggable-${contextId}-${eventId}-${DESTINATION_BYTES_FIELD_NAME}-${destinationBytes}`}
             value={destinationBytes}
           >
             <Data size="xs">
@@ -174,7 +174,7 @@ const DestinationArrow = pure<{
         <EuiFlexItem grow={false}>
           <DefaultDraggable
             field={DESTINATION_PACKETS_FIELD_NAME}
-            id={`${contextId}-${eventId}-${DESTINATION_PACKETS_FIELD_NAME}-${destinationPackets}`}
+            id={`destination-arrow-default-draggable-${contextId}-${eventId}-${DESTINATION_PACKETS_FIELD_NAME}-${destinationPackets}`}
             value={destinationPackets}
           >
             <Data size="xs">

@@ -6,7 +6,6 @@
 
 import rison from 'rison-node';
 import chrome from 'ui/chrome';
-import { QueryString } from 'ui/utils/query_string';
 // @ts-ignore Untyped local.
 import { fetch } from '../../../../common/lib/fetch';
 import { CanvasWorkpad } from '../../../../types';
@@ -20,10 +19,15 @@ interface PageCount {
 
 type Arguments = [CanvasWorkpad, PageCount];
 
+interface PdfUrlData {
+  createPdfUri: string;
+  createPdfPayload: { jobParams: string };
+}
+
 export function getPdfUrl(
   { id, name: title, width, height }: CanvasWorkpad,
   { pageCount }: PageCount
-) {
+): PdfUrlData {
   const reportingEntry = chrome.addBasePath('/api/reporting/generate');
   const canvasEntry = '/app/canvas#';
 
@@ -54,13 +58,15 @@ export function getPdfUrl(
     title,
   };
 
-  return `${reportingEntry}/printablePdf?${QueryString.param(
-    'jobParams',
-    rison.encode(jobParams)
-  )}`;
+  return {
+    createPdfUri: `${reportingEntry}/printablePdf`,
+    createPdfPayload: {
+      jobParams: rison.encode(jobParams),
+    },
+  };
 }
 
 export function createPdf(...args: Arguments) {
-  const createPdfUri = getPdfUrl(...args);
-  return fetch.post(createPdfUri);
+  const { createPdfUri, createPdfPayload } = getPdfUrl(...args);
+  return fetch.post(createPdfUri, createPdfPayload);
 }

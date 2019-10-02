@@ -84,7 +84,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       it('allows creating a new workspace', async () => {
         await PageObjects.common.navigateToApp('graph');
         await testSubjects.click('graphCreateWorkspacePromptButton');
-        const breadcrumb = await testSubjects.find('graphCurrentWorkspaceBreadcrumb');
+        const breadcrumb = await testSubjects.find('~graphCurrentWorkspaceBreadcrumb');
         expect(await breadcrumb.getVisibleText()).to.equal('Unsaved workspace');
       });
 

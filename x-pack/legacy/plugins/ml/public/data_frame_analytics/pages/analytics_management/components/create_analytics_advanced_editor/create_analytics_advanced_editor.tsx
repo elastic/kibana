@@ -125,6 +125,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
               onChange={onChange}
               setOptions={{
                 fontSize: '12px',
+                maxLines: 20,
               }}
               aria-label={i18n.translate(
                 'xpack.ml.dataframe.analytics.create.advancedEditor.codeEditorAriaLabel',
@@ -134,6 +135,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
               )}
             />
           </EuiFormRow>
+          <EuiSpacer />
           {advancedEditorMessages.map((advancedEditorMessage, i) => (
             <Fragment key={i}>
               <EuiCallOut
@@ -153,7 +155,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
                   <p>{advancedEditorMessage.error}</p>
                 ) : null}
               </EuiCallOut>
-              <EuiSpacer size="s" />
+              <EuiSpacer />
             </Fragment>
           ))}
           <EuiFormRow

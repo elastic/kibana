@@ -18,11 +18,10 @@
  */
 
 import _ from 'lodash';
-import { AggConfig } from '../../../vis/agg_config';
 import { Schemas } from '../../../vis/editors/default/schemas';
 
 import { siblingPipelineAggWriter } from './sibling_pipeline_agg_writer';
-import { SubMetricParamEditor } from '../../controls/sub_metric';
+import { SubMetricParamEditor } from '../../../vis/editors/default/controls/sub_metric';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 import { i18n } from '@kbn/i18n';
 
@@ -64,14 +63,8 @@ const siblingPipelineAggHelper = {
     return [
       {
         name: 'customBucket',
-        type: AggConfig,
+        type: 'agg',
         default: null,
-        serialize: function (customMetric) {
-          return customMetric.toJSON();
-        },
-        deserialize: function (state, agg) {
-          return this.makeAgg(agg, state);
-        },
         makeAgg: function (agg, state) {
           state = state || { type: 'date_histogram' };
           state.schema = bucketAggSchema;
@@ -85,14 +78,8 @@ const siblingPipelineAggHelper = {
       },
       {
         name: 'customMetric',
-        type: AggConfig,
+        type: 'agg',
         default: null,
-        serialize: function (customMetric) {
-          return customMetric.toJSON();
-        },
-        deserialize: function (state, agg) {
-          return this.makeAgg(agg, state);
-        },
         makeAgg: function (agg, state) {
           state = state || { type: 'count' };
           state.schema = metricAggSchema;

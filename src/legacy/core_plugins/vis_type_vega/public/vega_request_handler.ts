@@ -17,7 +17,8 @@
  * under the License.
  */
 import { Filter } from '@kbn/es-query';
-import { timefilter, TimeRange } from 'ui/timefilter';
+import { timefilter } from 'ui/timefilter';
+import { TimeRange } from 'src/plugins/data/public';
 import { Query } from 'src/legacy/core_plugins/data/public';
 
 // @ts-ignore

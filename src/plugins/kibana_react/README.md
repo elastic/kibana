@@ -8,11 +8,11 @@ Tools for building React applications in Kibana.
 You can create React context that holds Core or plugin services that your plugin depends on.
 
 ```ts
-import { createContext } from 'kibana-react';
+import { createKibanaReactContext } from 'kibana-react';
 
 class MyPlugin {
   start(core, plugins) {
-    const context = createContext({ ...core, ...plugins });
+    const context = createKibanaReactContext({ ...core, ...plugins });
   }
 }
 ```
@@ -20,11 +20,11 @@ class MyPlugin {
 You may also want to be explicit about services you depend on.
 
 ```ts
-import { createContext } from 'kibana-react';
+import { createKibanaReactContext } from 'kibana-react';
 
 class MyPlugin {
   start({ notifications, overlays }, { embeddable }) {
-    const context = createContext({ notifications, overlays, embeddable });
+    const context = createKibanaReactContext({ notifications, overlays, embeddable });
   }
 }
 ```
@@ -162,11 +162,11 @@ Wrapper around Core's `overlays` service, allows you to display React modals and
 directly without having to use `react-dom` library to mount to DOM nodes.
 
 ```tsx
-import { createContext } from 'kibana-react';
+import { createKibanaReactContext } from 'kibana-react';
 
 class MyPlugin {
   start(core) {
-    const { value: { overlays } } = createContext(core);
+    const { value: { overlays } } = createKibanaReactContext(core);
 
     overlays.openModal(
       <div>
@@ -202,11 +202,11 @@ Wrapper around Core's `notifications` service, allows you to render React elemen
 directly without having to use `react-dom` library to mount to DOM nodes.
 
 ```tsx
-import { createContext } from 'kibana-react';
+import { createKibanaReactContext } from 'kibana-react';
 
 class MyPlugin {
   start(core) {
-    const { value: { notifications } } = createContext(core);
+    const { value: { notifications } } = createKibanaReactContext(core);
 
     notifications.toasts.show({
       title: <div>Hello</div>,

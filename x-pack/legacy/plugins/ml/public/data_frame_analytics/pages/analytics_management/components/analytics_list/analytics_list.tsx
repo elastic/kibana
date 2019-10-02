@@ -13,7 +13,6 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiEmptyPrompt,
-  SortDirection,
 } from '@elastic/eui';
 
 import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
@@ -33,7 +32,13 @@ import { ActionDispatchers } from '../../hooks/use_create_analytics_form/actions
 import { getAnalyticsFactory } from '../../services/analytics_service';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
-import { ProgressBar, AnalyticsTable } from './analytics_table';
+import {
+  ProgressBar,
+  MlInMemoryTable,
+  OnTableChangeArg,
+  SortDirection,
+  SORT_DIRECTION,
+} from '../../../../../components/ml_in_memory_table';
 
 function getItemIdToExpandedRowMap(
   itemIds: DataFrameAnalyticsId[],
@@ -85,7 +90,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const [pageSize, setPageSize] = useState(10);
 
   const [sortField, setSortField] = useState<string>(DataFrameAnalyticsListColumn.id);
-  const [sortDirection, setSortDirection] = useState<string>(SortDirection.ASC);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
   const disabled =
     !checkPermission('canCreateDataFrameAnalytics') ||
@@ -291,11 +296,8 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   const onTableChange = ({
     page = { index: 0, size: 10 },
-    sort = { field: DataFrameAnalyticsListColumn.id, direction: SortDirection.ASC },
-  }: {
-    page: { index: number; size: number };
-    sort: { field: string; direction: string };
-  }) => {
+    sort = { field: DataFrameAnalyticsListColumn.id, direction: SORT_DIRECTION.ASC },
+  }: OnTableChangeArg) => {
     const { index, size } = page;
     setPageIndex(index);
     setPageSize(size);
@@ -308,7 +310,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   return (
     <Fragment>
       <ProgressBar isLoading={isLoading} />
-      <AnalyticsTable
+      <MlInMemoryTable
         allowNeutralSort={false}
         className="mlAnalyticsTable"
         columns={columns}

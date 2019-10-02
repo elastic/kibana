@@ -14,7 +14,7 @@ exports[`AddToKql Component Rendering 1`] = `
 >
   <AddToKql
     componentFilterType="hosts"
-    expression="host.name: siem-kibana"
+    expression="host.name: \\"siem-kibana\\""
     indexPattern={
       Object {
         "fields": Array [

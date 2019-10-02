@@ -12,7 +12,6 @@ import {
   Axis,
   BarSeries,
   Chart,
-  DataSeriesColorsValues,
   getAxisId,
   getSpecId,
   niceTimeFormatter,
@@ -59,22 +58,23 @@ export const DocumentCountChart: FC<Props> = ({
 
   const dateFormatter = niceTimeFormatter([timeRangeEarliest, timeRangeLatest]);
 
-  // TODO - switch to use inline areaSeriesStyle to set series fill once charts version is 8.0.0+
   const IS_DARK_THEME = useUiChromeContext()
     .getUiSettingsClient()
     .get('theme:darkMode');
   const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
   const EVENT_RATE_COLOR = themeName.euiColorVis2;
-  const barSeriesColorValues: DataSeriesColorsValues = {
-    colorValues: [],
-    specId: getSpecId(SPEC_ID),
-  };
-  const seriesColors = new Map([[barSeriesColorValues, EVENT_RATE_COLOR]]);
 
   return (
     <div style={{ width, height }}>
       <Chart>
-        <Settings xDomain={xDomain} />
+        <Settings
+          xDomain={xDomain}
+          theme={{
+            colors: {
+              vizColors: [EVENT_RATE_COLOR],
+            },
+          }}
+        />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -91,7 +91,6 @@ export const DocumentCountChart: FC<Props> = ({
           yAccessors={['value']}
           // Display empty chart when no data in range
           data={chartPoints.length > 0 ? chartPoints : [{ time: timeRangeEarliest, value: 0 }]}
-          customSeriesColors={seriesColors}
         />
       </Chart>
     </div>

@@ -92,6 +92,8 @@ export type TestSubjects =
   | 'watchActionAccordion'
   | 'watchActionAccordion.mockComboBox'
   | 'watchActionsPanel'
+  | 'watchThresholdButton'
+  | 'watchThresholdInput'
   | 'watchConditionTitle'
   | 'watchTimeFieldSelect'
   | 'watchVisualizationChart'

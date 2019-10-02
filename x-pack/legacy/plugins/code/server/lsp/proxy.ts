@@ -245,12 +245,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   }
 
   private onSocketClosed() {
-    const conn = this.clientConnection;
     this.clientConnection = null;
-    if (conn) {
-      conn.dispose();
-    }
-
     this.eventEmitter.emit('close');
   }
 

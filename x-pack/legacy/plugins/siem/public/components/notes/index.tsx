@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  // @ts-ignore
-  EuiInMemoryTable,
-  EuiModalBody,
-  EuiModalHeader,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiInMemoryTable, EuiModalBody, EuiModalHeader, EuiPanel, EuiSpacer } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
 

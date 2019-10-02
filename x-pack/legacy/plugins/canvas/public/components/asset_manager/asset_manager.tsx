@@ -13,9 +13,14 @@ import {
 } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import React, { Fragment, PureComponent } from 'react';
+
+import { ComponentStrings } from '../../../i18n';
+
 import { ConfirmModal } from '../confirm_modal';
 import { AssetType } from '../../../types';
 import { AssetModal } from './asset_modal';
+
+const { AssetManager: strings } = ComponentStrings;
 
 interface Props {
   /** A list of assets, if available */
@@ -80,9 +85,9 @@ export class AssetManager extends PureComponent<Props, State> {
     const confirmModal = (
       <ConfirmModal
         isOpen={this.state.deleteId !== null}
-        title="Remove Asset"
-        message="Are you sure you want to remove this asset?"
-        confirmButtonText="Remove"
+        title={strings.getConfirmModalTitle()}
+        message={strings.getConfirmModalMessageText()}
+        confirmButtonText={strings.getConfirmModalButtonLabel()}
         onConfirm={this.doDelete}
         onCancel={this.resetDelete}
       />
@@ -90,7 +95,7 @@ export class AssetManager extends PureComponent<Props, State> {
 
     return (
       <Fragment>
-        <EuiButtonEmpty onClick={this.showModal}>Manage assets</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={this.showModal}>{strings.getButtonLabel()}</EuiButtonEmpty>
         {isModalVisible ? assetModal : null}
         {confirmModal}
       </Fragment>

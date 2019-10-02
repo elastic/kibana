@@ -242,6 +242,7 @@ export class ContextContainer<
     );
 
     return [...this.contextProviders]
+      .sort(sortByCoreFirst(this.coreId))
       .filter(([contextName]) => contextsToBuild.has(contextName))
       .reduce(
         async (contextPromise, [contextName, { provider, source: providerSource }]) => {
@@ -292,3 +293,17 @@ export class ContextContainer<
     ]);
   }
 }
+
+/** Sorts context provider pairs by core pairs first. */
+const sortByCoreFirst = (
+  coreId: symbol
+): ((left: [any, { source: symbol }], right: [any, { source: symbol }]) => number) => (
+  [leftName, leftProvider],
+  [rightName, rightProvider]
+) => {
+  if (leftProvider.source === coreId) {
+    return rightProvider.source === coreId ? 0 : -1;
+  } else {
+    return rightProvider.source === coreId ? 1 : 0;
+  }
+};

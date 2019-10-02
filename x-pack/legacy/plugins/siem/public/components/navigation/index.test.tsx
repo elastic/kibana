@@ -6,51 +6,27 @@
 
 import { shallow } from 'enzyme';
 import * as React from 'react';
-import { RouteComponentProps } from 'react-router';
 
 import { CONSTANTS } from '../url_state/constants';
 import { SiemNavigationComponent } from './';
 import { setBreadcrumbs } from './breadcrumbs';
 import { navTabs } from '../../pages/home/home_navigations';
-import { TabNavigationProps } from './type';
+import { TabNavigationProps } from './tab_navigation/types';
+import { HostsTableType } from '../../store/hosts/model';
+import { RouteSpyState } from '../../utils/route/types';
 
 jest.mock('./breadcrumbs', () => ({
   setBreadcrumbs: jest.fn(),
 }));
 
-type Action = 'PUSH' | 'POP' | 'REPLACE';
-type Props = RouteComponentProps & TabNavigationProps;
-const pop: Action = 'POP';
 describe('SIEM Navigation', () => {
-  const location = {
-    pathname: '/hosts',
+  const mockProps: TabNavigationProps & RouteSpyState = {
+    pageName: 'hosts',
+    pathName: '/hosts',
+    detailName: undefined,
     search: '',
-    state: '',
-    hash: '',
-  };
-
-  const mockProps: Props = {
-    location,
-    match: {
-      isExact: true,
-      params: {},
-      path: '',
-      url: '',
-    },
+    tabName: HostsTableType.authentications,
     navTabs,
-    history: {
-      length: 2,
-      location,
-      action: pop,
-      push: jest.fn(),
-      replace: jest.fn(),
-      go: jest.fn(),
-      goBack: jest.fn(),
-      goForward: jest.fn(),
-      block: jest.fn(),
-      createHref: jest.fn(),
-      listen: jest.fn(),
-    },
     [CONSTANTS.timerange]: {
       global: {
         [CONSTANTS.timerange]: {
@@ -87,13 +63,141 @@ describe('SIEM Navigation', () => {
     },
     [CONSTANTS.timelineId]: '',
   };
-  const wrapper = shallow(<SiemNavigationComponent {...mockProps} navTabs={navTabs} />);
+  const wrapper = shallow(<SiemNavigationComponent {...mockProps} />);
   test('it calls setBreadcrumbs with correct path on mount', () => {
-    expect(setBreadcrumbs).toHaveBeenNthCalledWith(1, '/hosts', {});
+    expect(setBreadcrumbs).toHaveBeenNthCalledWith(1, {
+      detailName: undefined,
+      hostDetails: { filterQuery: null, queryLocation: null },
+      hosts: { filterQuery: null, queryLocation: null },
+      navTabs: {
+        hosts: {
+          disabled: false,
+          href: '#/link-to/hosts',
+          id: 'hosts',
+          name: 'Hosts',
+          urlKey: 'host',
+        },
+        network: {
+          disabled: false,
+          href: '#/link-to/network',
+          id: 'network',
+          name: 'Network',
+          urlKey: 'network',
+        },
+        overview: {
+          disabled: false,
+          href: '#/link-to/overview',
+          id: 'overview',
+          name: 'Overview',
+          urlKey: 'overview',
+        },
+        timelines: {
+          disabled: false,
+          href: '#/link-to/timelines',
+          id: 'timelines',
+          name: 'Timelines',
+          urlKey: 'timeline',
+        },
+      },
+      network: { filterQuery: null, queryLocation: null },
+      pageName: 'hosts',
+      pathName: '/hosts',
+      search: '',
+      tabName: 'authentications',
+      timelineId: '',
+      timerange: {
+        global: {
+          linkTo: ['timeline'],
+          timerange: {
+            from: 1558048243696,
+            fromStr: 'now-24h',
+            kind: 'relative',
+            to: 1558134643697,
+            toStr: 'now',
+          },
+        },
+        timeline: {
+          linkTo: ['global'],
+          timerange: {
+            from: 1558048243696,
+            fromStr: 'now-24h',
+            kind: 'relative',
+            to: 1558134643697,
+            toStr: 'now',
+          },
+        },
+      },
+    });
   });
   test('it calls setBreadcrumbs with correct path on update', () => {
-    wrapper.setProps({ location: { pathname: '/network' } });
+    wrapper.setProps({
+      pageName: 'network',
+      pathName: '/network',
+      tabName: undefined,
+    });
     wrapper.update();
-    expect(setBreadcrumbs).toHaveBeenNthCalledWith(2, '/network', {});
+    expect(setBreadcrumbs).toHaveBeenNthCalledWith(2, {
+      detailName: undefined,
+      hostDetails: { filterQuery: null, queryLocation: null },
+      hosts: { filterQuery: null, queryLocation: null },
+      navTabs: {
+        hosts: {
+          disabled: false,
+          href: '#/link-to/hosts',
+          id: 'hosts',
+          name: 'Hosts',
+          urlKey: 'host',
+        },
+        network: {
+          disabled: false,
+          href: '#/link-to/network',
+          id: 'network',
+          name: 'Network',
+          urlKey: 'network',
+        },
+        overview: {
+          disabled: false,
+          href: '#/link-to/overview',
+          id: 'overview',
+          name: 'Overview',
+          urlKey: 'overview',
+        },
+        timelines: {
+          disabled: false,
+          href: '#/link-to/timelines',
+          id: 'timelines',
+          name: 'Timelines',
+          urlKey: 'timeline',
+        },
+      },
+      network: { filterQuery: null, queryLocation: null },
+      pageName: 'network',
+      pathName: '/network',
+      search: '',
+      tabName: undefined,
+      timelineId: '',
+      timerange: {
+        global: {
+          linkTo: ['timeline'],
+          timerange: {
+            from: 1558048243696,
+            fromStr: 'now-24h',
+            kind: 'relative',
+            to: 1558134643697,
+            toStr: 'now',
+          },
+        },
+        timeline: {
+          linkTo: ['global'],
+          timerange: {
+            from: 1558048243696,
+            fromStr: 'now-24h',
+            kind: 'relative',
+            to: 1558134643697,
+            toStr: 'now',
+          },
+        },
+      },
+    });
   });
 });

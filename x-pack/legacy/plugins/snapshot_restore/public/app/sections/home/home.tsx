@@ -43,8 +43,11 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
   const {
     core: {
       i18n: { FormattedMessage },
+      chrome,
     },
   } = useAppDependencies();
+
+  const slmUiEnabled = chrome.getInjected('slmUiEnabled');
 
   const tabs: Array<{
     id: Section;
@@ -69,15 +72,6 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
       ),
     },
     {
-      id: 'policies',
-      name: (
-        <FormattedMessage
-          id="xpack.snapshotRestore.home.policiesTabTitle"
-          defaultMessage="Policies"
-        />
-      ),
-    },
-    {
       id: 'restore_status',
       name: (
         <FormattedMessage
@@ -87,6 +81,18 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
       ),
     },
   ];
+
+  if (slmUiEnabled) {
+    tabs.splice(2, 0, {
+      id: 'policies',
+      name: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.home.policiesTabTitle"
+          defaultMessage="Policies"
+        />
+      ),
+    });
+  }
 
   const onSectionChange = (newSection: Section) => {
     history.push(`${BASE_PATH}/${newSection}`);

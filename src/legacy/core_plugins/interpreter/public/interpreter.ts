@@ -20,19 +20,11 @@
 import 'uiExports/interpreter';
 // @ts-ignore
 import { register, registryFactory } from '@kbn/interpreter/common';
-// @ts-ignore
-import { npSetup } from 'ui/new_platform';
 import { initializeInterpreter } from './lib/interpreter';
 import { registries } from './registries';
-
-import { ajaxStream } from './lib/ajax_stream';
 import { functions } from './functions';
 import { visualization } from './renderers/visualization';
-import { typeSpecs } from '../../../../plugins/data/common/expressions/expression_types';
-
-const { http } = npSetup.core;
-const KIBANA_VERSION = npSetup.core.injectedMetadata.getKibanaVersion();
-const KIBANA_BASE_PATH = npSetup.core.injectedMetadata.getBasePath();
+import { typeSpecs } from '../../../../plugins/expressions/common';
 
 // Expose kbnInterpreter.register(specs) and kbnInterpreter.registries() globally so that plugins
 // can register without a transpile step.
@@ -47,29 +39,16 @@ register(registries, {
   renderers: [visualization],
 });
 
-let _resolve;
-let _interpreterPromise;
-
-const initialize = async () => {
-  initializeInterpreter({
-    http,
-    ajaxStream: ajaxStream(KIBANA_VERSION, KIBANA_BASE_PATH),
-    typesRegistry: registries.types,
-    functionsRegistry: registries.browserFunctions,
-  }).then(interpreter => {
-    _resolve({ interpreter });
-  });
-};
+let interpreterPromise: Promise<any> | undefined;
 
 export const getInterpreter = async () => {
-  if (!_interpreterPromise) {
-    _interpreterPromise = new Promise(resolve => (_resolve = resolve));
-    initialize();
+  if (!interpreterPromise) {
+    interpreterPromise = initializeInterpreter();
   }
-  return await _interpreterPromise;
+  return await interpreterPromise;
 };
 
-export const interpretAst = async (...params) => {
+export const interpretAst = async (...params: any) => {
   const { interpreter } = await getInterpreter();
   return await interpreter.interpretAst(...params);
 };

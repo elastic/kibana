@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectNotFound } from 'ui/errors';
+import { SavedObjectNotFound } from '../../../../../../../../plugins/kibana_utils/public';
 import { i18n } from '@kbn/i18n';
 
 async function getSavedObject(doc, services) {
@@ -52,7 +52,7 @@ function addJsonFieldToIndexPattern(target, sourceString, fieldName, indexName) 
 }
 async function importIndexPattern(doc, indexPatterns, overwriteAll, confirmModalPromise) {
   // TODO: consolidate this is the code in create_index_pattern_wizard.js
-  const emptyPattern = await indexPatterns.get();
+  const emptyPattern = await indexPatterns.make();
   const {
     title,
     timeFieldName,

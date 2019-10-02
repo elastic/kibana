@@ -62,7 +62,12 @@ export class LanguageServerController implements ILanguageServerHandler {
       builtinWorkspaceFolders: def.builtinWorkspaceFolders,
       languages: def.languages,
       maxWorkspace: options.maxWorkspace,
-      launcher: new def.launcher(this.targetHost, options, loggerFactory),
+      launcher: new def.launcher(
+        this.targetHost,
+        options,
+        loggerFactory,
+        this.installManager.installationPath(def)!
+      ),
     }));
     const add2map = (
       map: { [lang: string]: LanguageServerData[] },
@@ -104,8 +109,7 @@ export class LanguageServerController implements ILanguageServerHandler {
         if (!ls.languageServerHandlers && !ls.launcher.running) {
           ls.languageServerHandlers = ls.launcher.launch(
             ls.builtinWorkspaceFolders,
-            ls.maxWorkspace,
-            this.installManager.installationPath(ls.definition)
+            ls.maxWorkspace
           );
         }
         const handler = await (ls.languageServerHandlers as Promise<ILanguageServerHandler>);
@@ -155,11 +159,7 @@ export class LanguageServerController implements ILanguageServerHandler {
       // for those language server has builtin workspace support, we can launch them during kibana startup
       if (installed && ls.builtinWorkspaceFolders) {
         try {
-          ls.languageServerHandlers = ls.launcher.launch(
-            true,
-            ls.maxWorkspace,
-            this.installManager.installationPath(ls.definition)!
-          );
+          ls.languageServerHandlers = ls.launcher.launch(true, ls.maxWorkspace);
         } catch (e) {
           this.log.error(e);
         }
@@ -197,6 +197,9 @@ export class LanguageServerController implements ILanguageServerHandler {
     // installed, but is it running?
     if (status === LanguageServerStatus.READY) {
       const ls = this.languageServers.find(d => d.definition === def);
+      if (ls && ls.launcher.launchFailed) {
+        return LanguageServerStatus.LAUNCH_FAILED;
+      }
       if (ls && ls.launcher.running) {
         return LanguageServerStatus.RUNNING;
       }
@@ -235,8 +238,7 @@ export class LanguageServerController implements ILanguageServerHandler {
       if (handlerArray.length < maxWorkspace) {
         handler = languageServer.launcher.launch(
           languageServer.builtinWorkspaceFolders,
-          maxWorkspace,
-          this.installManager.installationPath(languageServer.definition)
+          maxWorkspace
         );
         handlers[realPath] = handler;
         return handler;

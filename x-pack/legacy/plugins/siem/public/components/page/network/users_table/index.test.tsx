@@ -37,6 +37,7 @@ describe('Users Table Component', () => {
             flowTarget={FlowTarget.source}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
             id="user"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockUsersData.pageInfo)}
@@ -60,6 +61,7 @@ describe('Users Table Component', () => {
               flowTarget={FlowTarget.source}
               fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
               id="user"
+              isInspect={false}
               loading={false}
               loadPage={loadPage}
               showMorePagesIndicator={getOr(
@@ -94,7 +96,7 @@ describe('Users Table Component', () => {
           .find('.euiTable thead tr th button')
           .first()
           .text()
-      ).toEqual('NameClick to sort in ascending order');
+      ).toEqual('UserClick to sort in ascending order');
     });
   });
 });

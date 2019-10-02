@@ -21,7 +21,8 @@ export class TypescriptServerLauncher extends AbstractLauncher {
   constructor(
     readonly targetHost: string,
     readonly options: ServerOptions,
-    readonly loggerFactory: LoggerFactory
+    readonly loggerFactory: LoggerFactory,
+    readonly installationPath: string
   ) {
     super('typescript', targetHost, options, loggerFactory);
   }
@@ -32,6 +33,8 @@ export class TypescriptServerLauncher extends AbstractLauncher {
     }
     return TS_LANG_DETACH_PORT;
   }
+
+  protected startupTimeout = 5000;
 
   createExpander(
     proxy: LanguageServerProxy,
@@ -52,12 +55,8 @@ export class TypescriptServerLauncher extends AbstractLauncher {
       this.log
     );
   }
-  async spawnProcess(
-    installationPath: string,
-    port: number,
-    log: Logger
-  ): Promise<ControlledProgram> {
-    const p = spawn(process.execPath, [installationPath, '-p', port.toString(), '-c', '1'], {
+  async spawnProcess(port: number, log: Logger): Promise<ControlledProgram> {
+    const p = spawn(process.execPath, [this.installationPath, '-p', port.toString(), '-c', '1'], {
       detached: false,
       stdio: 'pipe',
     });

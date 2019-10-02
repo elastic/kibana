@@ -9,7 +9,7 @@ import { revealImage } from '../../functions/common/revealImage';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
 import { Position } from '../../../types';
-import { BASE64, URL } from '../constants';
+import { BASE64, URL } from '../../../i18n';
 
 export const help: FunctionHelp<FunctionFactory<typeof revealImage>> = {
   help: i18n.translate('xpack.canvas.functions.revealImageHelpText', {

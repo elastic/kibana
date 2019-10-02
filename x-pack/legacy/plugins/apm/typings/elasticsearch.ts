@@ -28,7 +28,9 @@ declare module 'elasticsearch' {
     | 'extended_stats'
     | 'filter'
     | 'filters'
-    | 'cardinality';
+    | 'cardinality'
+    | 'sampler'
+    | 'value_count';
 
   type AggOptions = AggregationOptionMap & {
     [key: string]: any;
@@ -71,6 +73,12 @@ declare module 'elasticsearch' {
     >;
   };
 
+  type SamplerAggregation<SubAggregationMap> = SubAggregation<
+    SubAggregationMap
+  > & {
+    doc_count: number;
+  };
+
   interface AggregatedValue {
     value: number | null;
   }
@@ -82,7 +90,9 @@ declare module 'elasticsearch' {
         max: AggregatedValue;
         min: AggregatedValue;
         sum: AggregatedValue;
-        terms: BucketAggregation<AggregationOption[AggregationName]>;
+        value_count: AggregatedValue;
+        // Elasticsearch might return terms with numbers, but this is a more limited type
+        terms: BucketAggregation<AggregationOption[AggregationName], string>;
         date_histogram: BucketAggregation<
           AggregationOption[AggregationName],
           number
@@ -128,6 +138,7 @@ declare module 'elasticsearch' {
         cardinality: {
           value: number;
         };
+        sampler: SamplerAggregation<AggregationOption[AggregationName]>;
       }[AggregationType & keyof AggregationOption[AggregationName]];
     }
   >;

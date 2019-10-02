@@ -50,8 +50,8 @@ function filterEntries(entries, exclude) {
 export function validateMessageNamespace(id, filePath, allowedPaths, reporter) {
   const normalizedPath = normalizePath(filePath);
 
-  const [expectedNamespace] = Object.entries(allowedPaths).find(([, pluginPath]) =>
-    normalizedPath.startsWith(`${pluginPath}/`)
+  const [expectedNamespace] = Object.entries(allowedPaths).find(([, pluginPaths]) =>
+    pluginPaths.some(pluginPath => normalizedPath.startsWith(`${pluginPath}/`))
   );
 
   if (!id.startsWith(`${expectedNamespace}.`)) {

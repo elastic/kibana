@@ -32,7 +32,7 @@ export const CreateAnalyticsButton: FC<CreateAnalyticsFormProps> = props => {
       data-test-subj="mlDataFrameAnalyticsButtonCreate"
     >
       {i18n.translate('xpack.ml.dataframe.analyticsList.createDataFrameAnalyticsButton', {
-        defaultMessage: 'Create outlier detection job',
+        defaultMessage: 'Create analytics job',
       })}
     </EuiButton>
   );

@@ -133,10 +133,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.setTimepickerInDataRange();
       });
 
-      it('are added when pie chart legend item is clicked', async function () {
-        await dashboardAddPanel.addVisualization('Rendering Test: pie');
+      it('are added when a cell magnifying glass is clicked', async function () {
+        await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
         await PageObjects.dashboard.waitForRenderComplete();
-        await pieChart.filterByLegendItem('4,886');
+        await testSubjects.click('docTableCellFilter');
 
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);

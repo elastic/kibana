@@ -21,6 +21,8 @@ import {
   whoisRenderer,
   reputationRenderer,
   DefaultFieldRenderer,
+  DEFAULT_MORE_MAX_HEIGHT,
+  MoreContainer,
 } from './field_renderers';
 import { mockData } from '../page/network/ip_overview/mock';
 
@@ -234,6 +236,119 @@ describe('Field Renderers', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('item1,item2 ');
+    });
+
+    test('it should render all items when the item count exactly equals displayCount', () => {
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <DefaultFieldRenderer
+            displayCount={5}
+            rowItems={['item1', 'item2', 'item3', 'item4', 'item5']}
+            attrName={'item1'}
+            idPrefix={'prefix-1'}
+          />
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual('item1,item2,item3,item4,item5 ');
+    });
+
+    test('it should render all items up to displayCount and the expected "+ n More" popover anchor text for items greater than displayCount', () => {
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <DefaultFieldRenderer
+            displayCount={5}
+            rowItems={['item1', 'item2', 'item3', 'item4', 'item5', 'item6', 'item7']}
+            attrName={'item1'}
+            idPrefix={'prefix-1'}
+          />
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual('item1,item2,item3,item4,item5  ,+2 More');
+    });
+  });
+
+  describe('MoreContainer', () => {
+    const idPrefix = 'prefix-1';
+    const rowItems = ['item1', 'item2', 'item3', 'item4', 'item5', 'item6', 'item7'];
+
+    test('it should only render the items after overflowIndexStart', () => {
+      const wrapper = mountWithIntl(
+        <MoreContainer
+          idPrefix={idPrefix}
+          rowItems={rowItems}
+          moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+          overflowIndexStart={5}
+        />
+      );
+
+      expect(wrapper.text()).toEqual('item6item7');
+    });
+
+    test('it should render all the items when overflowIndexStart is zero', () => {
+      const wrapper = mountWithIntl(
+        <MoreContainer
+          idPrefix={idPrefix}
+          rowItems={rowItems}
+          moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+          overflowIndexStart={0}
+        />
+      );
+
+      expect(wrapper.text()).toEqual('item1item2item3item4item5item6item7');
+    });
+
+    test('it should have the overflow `auto` style to enable scrolling when necessary', () => {
+      const wrapper = mountWithIntl(
+        <MoreContainer
+          idPrefix={idPrefix}
+          rowItems={rowItems}
+          moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+          overflowIndexStart={5}
+        />
+      );
+
+      expect(
+        wrapper
+          .find('[data-test-subj="more-container"]')
+          .first()
+          .props().style!.overflow
+      ).toEqual('auto');
+    });
+
+    test('it should use the moreMaxHeight prop as the value for the max-height style', () => {
+      const wrapper = mountWithIntl(
+        <MoreContainer
+          idPrefix={idPrefix}
+          rowItems={rowItems}
+          moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+          overflowIndexStart={5}
+        />
+      );
+
+      expect(
+        wrapper
+          .find('[data-test-subj="more-container"]')
+          .first()
+          .props().style!.maxHeight
+      ).toEqual(DEFAULT_MORE_MAX_HEIGHT);
+    });
+
+    test('it should only invoke the optional render function, when provided, for the items after overflowIndexStart', () => {
+      const render = jest.fn();
+
+      mountWithIntl(
+        <MoreContainer
+          idPrefix={idPrefix}
+          render={render}
+          rowItems={rowItems}
+          moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+          overflowIndexStart={5}
+        />
+      );
+
+      expect(render).toHaveBeenCalledTimes(2);
     });
   });
 });

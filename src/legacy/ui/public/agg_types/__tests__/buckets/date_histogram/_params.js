@@ -26,7 +26,7 @@ import AggParamWriterProvider from '../../agg_param_writer';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import chrome from '../../../../chrome';
 import { aggTypes } from '../../..';
-import { AggConfig } from '../../../../vis/agg_config';
+import { AggConfig } from '../../../agg_config';
 import { timefilter } from 'ui/timefilter';
 
 const config = chrome.getUiSettingsClient();
@@ -118,19 +118,19 @@ describe('date_histogram params', function () {
           const timeBounds = getTimeBounds(1, 'y');
 
           const vis = paramWriter.vis;
-          vis.aggs.splice(0);
+          vis.aggs.aggs.splice(0);
 
           const histoConfig = new AggConfig(vis.aggs, {
-            type: aggTypes.byName.date_histogram,
+            type: aggTypes.buckets.find(agg => agg.name === 'date_histogram'),
             schema: 'segment',
             params: { interval: 's', field: timeField, timeRange: timeBounds }
           });
 
-          vis.aggs.push(histoConfig);
+          vis.aggs.aggs.push(histoConfig);
 
           typeNames.forEach(function (type) {
-            vis.aggs.push(new AggConfig(vis.aggs, {
-              type: aggTypes.byName[type],
+            vis.aggs.aggs.push(new AggConfig(vis.aggs, {
+              type: aggTypes.metrics.find(agg => agg.name === type),
               schema: 'metric'
             }));
           });

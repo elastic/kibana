@@ -156,7 +156,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
     return (
       <>
         <EuiFlexGrid columns={2} gutterSize="s">
-          <EuiFlexItem>
+          <EuiFlexItem data-cy={`transaction-duration-charts`}>
             <EuiPanel>
               <React.Fragment>
                 <EuiFlexGroup justifyContent="spaceBetween">

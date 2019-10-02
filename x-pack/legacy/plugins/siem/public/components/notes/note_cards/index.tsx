@@ -8,52 +8,39 @@ import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
 
-import { useContext } from 'react';
 import { Note } from '../../../lib/note';
 import { AddNote } from '../add_note';
 import { AssociateNote, GetNewNoteId, UpdateNote } from '../helpers';
 import { NoteCard } from '../note_card';
-import { TimelineWidthContext } from '../../timeline/timeline_context';
 
 const AddNoteContainer = styled.div``;
-
 AddNoteContainer.displayName = 'AddNoteContainer';
 
 const NoteContainer = styled.div`
   margin-top: 5px;
 `;
-
 NoteContainer.displayName = 'NoteContainer';
 
 interface NoteCardsCompProps {
   children: React.ReactNode;
 }
 
-const NoteCardsComp = React.memo<NoteCardsCompProps>(({ children }) => {
-  const width = useContext(TimelineWidthContext);
-
-  // Passing the styles directly to the component because the width is
-  // being calculated and is recommended by Styled Components for performance
-  // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-  return (
-    <EuiPanel
-      data-test-subj="note-cards"
-      hasShadow={false}
-      paddingSize="none"
-      style={{ width: `${width - 10}px`, border: 'none' }}
-    >
-      {children}
-    </EuiPanel>
-  );
-});
-
+const NoteCardsComp = React.memo<NoteCardsCompProps>(({ children }) => (
+  <EuiPanel
+    data-test-subj="note-cards"
+    hasShadow={false}
+    paddingSize="none"
+    style={{ border: 'none' }}
+  >
+    {children}
+  </EuiPanel>
+));
 NoteCardsComp.displayName = 'NoteCardsComp';
 
 const NotesContainer = styled(EuiFlexGroup)`
   padding: 0 5px;
   margin-bottom: 5px;
 `;
-
 NotesContainer.displayName = 'NotesContainer';
 
 interface Props {

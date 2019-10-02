@@ -67,7 +67,9 @@ const getIndexPatternTitle = async (
 
 // Takes in stateful runtime dependencies and pre-wires them to the component
 export function createIndexPatternSelect(savedObjectsClient: SavedObjectsClientContract) {
-  return (props: any) => <IndexPatternSelect savedObjectsClient={savedObjectsClient} {...props} />;
+  return (props: Omit<IndexPatternSelectProps, 'savedObjectsClient'>) => (
+    <IndexPatternSelect {...props} savedObjectsClient={savedObjectsClient} />
+  );
 }
 
 export class IndexPatternSelect extends Component<IndexPatternSelectProps> {

@@ -28,8 +28,8 @@ import { GaugeOptionsInternalProps } from '.';
 
 function StylePanel({ aggs, setGaugeValue, stateParams, vis }: GaugeOptionsInternalProps) {
   const diasableAlignment =
-    aggs.bySchemaGroup[AggGroupNames.Metrics].length === 1 &&
-    !aggs.bySchemaGroup[AggGroupNames.Buckets];
+    aggs.bySchemaGroup(AggGroupNames.Metrics).length === 1 &&
+    !aggs.bySchemaGroup(AggGroupNames.Buckets);
 
   return (
     <EuiPanel paddingSize="s">

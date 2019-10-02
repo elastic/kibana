@@ -32,6 +32,10 @@ export class Job extends events.EventEmitter {
     this.indexSettings = options.indexSettings || {};
     this.browser_type = options.browser_type;
 
+    if (typeof this.maxAttempts !== 'number' || this.maxAttempts < 1) {
+      throw new Error(`Invalid max_attempts: ${this.maxAttempts}`);
+    }
+
     this.debug = (msg, err) => {
       const logger = options.logger || function () {};
       const message = `${this.id} - ${msg}`;

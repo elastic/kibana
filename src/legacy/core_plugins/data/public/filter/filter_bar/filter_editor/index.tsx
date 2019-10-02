@@ -192,7 +192,12 @@ class FilterEditorUI extends Component<Props, State> {
   }
 
   private renderIndexPatternInput() {
-    if (this.props.indexPatterns.length <= 1) {
+    if (
+      this.props.indexPatterns.length <= 1 &&
+      this.props.indexPatterns.find(
+        indexPattern => indexPattern === this.state.selectedIndexPattern
+      )
+    ) {
       return '';
     }
     const { selectedIndexPattern } = this.state;
@@ -228,8 +233,10 @@ class FilterEditorUI extends Component<Props, State> {
     return (
       <div>
         <EuiFlexGroup responsive={false} gutterSize="s">
-          <EuiFlexItem style={{ maxWidth: '188px' }}>{this.renderFieldInput()}</EuiFlexItem>
-          <EuiFlexItem style={{ maxWidth: '188px' }}>{this.renderOperatorInput()}</EuiFlexItem>
+          <EuiFlexItem grow={2}>{this.renderFieldInput()}</EuiFlexItem>
+          <EuiFlexItem grow={false} style={{ flexBasis: 160 }}>
+            {this.renderOperatorInput()}
+          </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <div data-test-subj="filterParams">{this.renderParamsEditor()}</div>
@@ -252,7 +259,7 @@ class FilterEditorUI extends Component<Props, State> {
           isDisabled={!selectedIndexPattern}
           placeholder={this.props.intl.formatMessage({
             id: 'data.filter.filterEditor.fieldSelectPlaceholder',
-            defaultMessage: 'Select a field',
+            defaultMessage: 'Select a field first',
           })}
           options={fields}
           selectedOptions={selectedField ? [selectedField] : []}
@@ -278,10 +285,17 @@ class FilterEditorUI extends Component<Props, State> {
       >
         <OperatorComboBox
           isDisabled={!selectedField}
-          placeholder={this.props.intl.formatMessage({
-            id: 'data.filter.filterEditor.operatorSelectPlaceholder',
-            defaultMessage: 'Select an operator',
-          })}
+          placeholder={
+            selectedField
+              ? this.props.intl.formatMessage({
+                  id: 'data.filter.filterEditor.operatorSelectPlaceholderSelect',
+                  defaultMessage: 'Select',
+                })
+              : this.props.intl.formatMessage({
+                  id: 'data.filter.filterEditor.operatorSelectPlaceholderWaiting',
+                  defaultMessage: 'Waiting',
+                })
+          }
           options={operators}
           selectedOptions={selectedOperator ? [selectedOperator] : []}
           getLabel={({ message }) => message}

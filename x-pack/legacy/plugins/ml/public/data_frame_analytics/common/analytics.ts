@@ -9,11 +9,6 @@ import { BehaviorSubject } from 'rxjs';
 import { filter, distinctUntilChanged } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
-// @ts-ignore
-import { isJobIdValid } from '../../../common/util/job_utils';
-
-export const isAnalyticsIdValid = isJobIdValid;
-
 export type IndexName = string;
 export type IndexPattern = string;
 export type DataFrameAnalyticsId = string;
@@ -65,7 +60,7 @@ export interface DataFrameAnalyticsConfig {
     results_field: string;
   };
   source: {
-    index: IndexName;
+    index: IndexName | IndexName[];
   };
   analysis: AnalysisConfig;
   analyzed_fields: {

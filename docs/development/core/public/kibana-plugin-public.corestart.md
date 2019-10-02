@@ -16,7 +16,7 @@ export interface CoreStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [application](./kibana-plugin-public.corestart.application.md) | <code>Pick&lt;ApplicationStart, 'capabilities'&gt;</code> | [ApplicationStart](./kibana-plugin-public.applicationstart.md) |
+|  [application](./kibana-plugin-public.corestart.application.md) | <code>ApplicationStart</code> | [ApplicationStart](./kibana-plugin-public.applicationstart.md) |
 |  [chrome](./kibana-plugin-public.corestart.chrome.md) | <code>ChromeStart</code> | [ChromeStart](./kibana-plugin-public.chromestart.md) |
 |  [docLinks](./kibana-plugin-public.corestart.doclinks.md) | <code>DocLinksStart</code> | [DocLinksStart](./kibana-plugin-public.doclinksstart.md) |
 |  [http](./kibana-plugin-public.corestart.http.md) | <code>HttpStart</code> | [HttpStart](./kibana-plugin-public.httpstart.md) |

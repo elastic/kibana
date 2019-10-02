@@ -14,12 +14,10 @@ import { VectorStyleSymbolEditor } from './vector_style_symbol_editor';
 import { OrientationEditor } from './orientation/orientation_editor';
 import {
   getDefaultDynamicProperties,
-  getDefaultStaticProperties
+  getDefaultStaticProperties,
+  vectorStyles,
 } from '../../vector_style_defaults';
-import {
-  DEFAULT_FILL_COLORS,
-  DEFAULT_LINE_COLORS
-} from '../../color_utils';
+import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_utils';
 import { VECTOR_SHAPE_TYPES } from '../../../sources/vector_feature_types';
 import { SYMBOLIZE_AS_ICON } from '../../vector_constants';
 import { i18n } from '@kbn/i18n';
@@ -34,7 +32,7 @@ export class VectorStyleEditor extends Component {
     defaultStaticProperties: getDefaultStaticProperties(),
     supportedFeatures: undefined,
     selectedFeatureType: undefined,
-  }
+  };
 
   componentWillUnmount() {
     this._isMounted = false;
@@ -70,9 +68,11 @@ export class VectorStyleEditor extends Component {
       return;
     }
 
-    if (_.isEqual(supportedFeatures, this.state.supportedFeatures)
-      && isPointsOnly === this.state.isPointsOnly
-      && isLinesOnly === this.state.isLinesOnly) {
+    if (
+      _.isEqual(supportedFeatures, this.state.supportedFeatures) &&
+      isPointsOnly === this.state.isPointsOnly &&
+      isLinesOnly === this.state.isLinesOnly
+    ) {
       return;
     }
 
@@ -83,8 +83,10 @@ export class VectorStyleEditor extends Component {
       selectedFeature = VECTOR_SHAPE_TYPES.LINE;
     }
 
-    if (!_.isEqual(supportedFeatures, this.state.supportedFeatures) ||
-      selectedFeature !== this.state.selectedFeature) {
+    if (
+      !_.isEqual(supportedFeatures, this.state.supportedFeatures) ||
+      selectedFeature !== this.state.selectedFeature
+    ) {
       this.setState({
         supportedFeatures,
         selectedFeature,
@@ -97,7 +99,7 @@ export class VectorStyleEditor extends Component {
   _renderFillColor() {
     return (
       <VectorStyleColorEditor
-        styleProperty="fillColor"
+        styleProperty={vectorStyles.FILL_COLOR}
         swatches={DEFAULT_FILL_COLORS}
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.fillColor}
@@ -111,7 +113,7 @@ export class VectorStyleEditor extends Component {
   _renderLineColor() {
     return (
       <VectorStyleColorEditor
-        styleProperty="lineColor"
+        styleProperty={vectorStyles.LINE_COLOR}
         swatches={DEFAULT_LINE_COLORS}
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.lineColor}
@@ -125,7 +127,7 @@ export class VectorStyleEditor extends Component {
   _renderLineWidth() {
     return (
       <VectorStyleSizeEditor
-        styleProperty="lineWidth"
+        styleProperty={vectorStyles.LINE_WIDTH}
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.lineWidth}
         ordinalFields={this.state.ordinalFields}
@@ -138,7 +140,7 @@ export class VectorStyleEditor extends Component {
   _renderSymbolSize() {
     return (
       <VectorStyleSizeEditor
-        styleProperty="iconSize"
+        styleProperty={vectorStyles.ICON_SIZE}
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.iconSize}
         ordinalFields={this.state.ordinalFields}
@@ -150,11 +152,11 @@ export class VectorStyleEditor extends Component {
 
   _renderPointProperties() {
     let iconOrientation;
-    if (this.props.styleProperties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON)  {
+    if (this.props.styleProperties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON) {
       iconOrientation = (
         <Fragment>
           <OrientationEditor
-            styleProperty="iconOrientation"
+            styleProperty={vectorStyles.ICON_ORIENTATION}
             handlePropertyChange={this.props.handlePropertyChange}
             styleDescriptor={this.props.styleProperties.iconOrientation}
             ordinalFields={this.state.ordinalFields}
@@ -168,13 +170,13 @@ export class VectorStyleEditor extends Component {
 
     return (
       <Fragment>
-
         <VectorStyleSymbolEditor
           styleOptions={this.props.styleProperties.symbol.options}
           handlePropertyChange={this.props.handlePropertyChange}
           symbolOptions={SYMBOL_OPTIONS}
           isDarkMode={chrome.getUiSettingsClient().get('theme:darkMode', false)}
         />
+        <EuiSpacer size="m" />
 
         {this._renderFillColor()}
         <EuiSpacer size="m" />
@@ -188,7 +190,6 @@ export class VectorStyleEditor extends Component {
         {iconOrientation}
 
         {this._renderSymbolSize()}
-
       </Fragment>
     );
   }
@@ -220,13 +221,10 @@ export class VectorStyleEditor extends Component {
 
   _handleSelectedFeatureChange = selectedFeature => {
     this.setState({ selectedFeature });
-  }
+  };
 
   render() {
-    const {
-      supportedFeatures,
-      selectedFeature,
-    } = this.state;
+    const { supportedFeatures, selectedFeature } = this.state;
 
     if (!supportedFeatures) {
       return null;
@@ -247,21 +245,21 @@ export class VectorStyleEditor extends Component {
       {
         id: VECTOR_SHAPE_TYPES.POINT,
         label: i18n.translate('xpack.maps.vectorStyleEditor.pointLabel', {
-          defaultMessage: 'Points'
-        })
+          defaultMessage: 'Points',
+        }),
       },
       {
         id: VECTOR_SHAPE_TYPES.LINE,
         label: i18n.translate('xpack.maps.vectorStyleEditor.lineLabel', {
-          defaultMessage: 'Lines'
-        })
+          defaultMessage: 'Lines',
+        }),
       },
       {
         id: VECTOR_SHAPE_TYPES.POLYGON,
         label: i18n.translate('xpack.maps.vectorStyleEditor.polygonLabel', {
-          defaultMessage: 'Polygons'
-        })
-      }
+          defaultMessage: 'Polygons',
+        }),
+      },
     ];
 
     let styleProperties = this._renderPolygonProperties();
@@ -275,7 +273,7 @@ export class VectorStyleEditor extends Component {
       <Fragment>
         <EuiButtonGroup
           legend={i18n.translate('xpack.maps.vectorStyleEditor.featureTypeButtonGroupLegend', {
-            defaultMessage: 'vector feature button group'
+            defaultMessage: 'vector feature button group',
           })}
           options={featureButtons}
           idSelected={selectedFeature}

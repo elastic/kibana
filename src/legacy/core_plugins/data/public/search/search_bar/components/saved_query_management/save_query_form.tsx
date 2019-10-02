@@ -95,18 +95,27 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
   const titleConflictErrorText = i18n.translate(
     'data.search.searchBar.savedQueryForm.titleConflictText',
     {
-      defaultMessage: 'Title conflicts with an existing saved query',
+      defaultMessage: 'Name conflicts with an existing saved query',
+    }
+  );
+  const titleMissingErrorText = i18n.translate(
+    'data.search.searchBar.savedQueryForm.titleMissingText',
+    {
+      defaultMessage: 'Name is required',
     }
   );
   const whitespaceErrorText = i18n.translate(
     'data.search.searchBar.savedQueryForm.whitespaceErrorText',
     {
-      defaultMessage: 'Title cannot contain leading or trailing whitespace',
+      defaultMessage: 'Name cannot contain leading or trailing whitespace',
     }
   );
 
   const validate = () => {
     const errors = [];
+    if (!title.length) {
+      errors.push(titleMissingErrorText);
+    }
     if (title.length > title.trim().length) {
       errors.push(whitespaceErrorText);
     }
@@ -130,7 +139,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
   }
 
   const saveQueryForm = (
-    <EuiForm isInvalid={hasErrors} error={formErrors}>
+    <EuiForm isInvalid={hasErrors} error={formErrors} data-test-subj="saveQueryForm">
       <EuiFormRow>
         <EuiText color="subdued">{savedQueryDescriptionText}</EuiText>
       </EuiFormRow>
@@ -140,7 +149,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
         })}
         helpText={i18n.translate('data.search.searchBar.savedQueryNameHelpText', {
           defaultMessage:
-            'Name cannot contain leading or trailing whitespace. Name must be unique.',
+            'Name is required. Name cannot contain leading or trailing whitespace. Name must be unique.',
         })}
         isInvalid={hasErrors}
       >

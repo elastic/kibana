@@ -24,15 +24,20 @@ import { functionWrapper } from '../../interpreter/test_helpers';
 
 jest.mock('ui/new_platform');
 
-const mockResponseHandler = jest.fn().mockReturnValue(
-  Promise.resolve({
-    tables: [{ columns: [], rows: [] }],
-  })
-);
+jest.mock('ui/vis/response_handlers/legacy', () => {
+  const mockResponseHandler = jest.fn().mockReturnValue(
+    Promise.resolve({
+      tables: [{ columns: [], rows: [] }],
+    })
+  );
 
-jest.mock('ui/vis/response_handlers/legacy', () => ({
-  legacyResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
-}));
+  return {
+    mockResponseHandler,
+    legacyResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
+  };
+});
+
+const { mockResponseHandler } = jest.requireMock('ui/vis/response_handlers/legacy');
 
 describe('interpreter/functions#table', () => {
   const fn = functionWrapper(createTableVisFn);

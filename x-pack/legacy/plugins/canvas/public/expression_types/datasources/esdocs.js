@@ -35,7 +35,7 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
   };
 
   const getIndex = () => {
-    return getSimpleArg('index', args)[0] || defaultIndex;
+    return getSimpleArg('index', args)[0] || '';
   };
 
   const getQuery = () => {
@@ -58,7 +58,11 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
   const fields = getFields();
   const [sortField, sortOrder] = getSortBy();
 
-  const index = getIndex().toLowerCase();
+  const index = getIndex();
+
+  if (!index && defaultIndex) {
+    setArg('index', defaultIndex);
+  }
 
   const sortOptions = [{ value: 'asc', text: 'Ascending' }, { value: 'desc', text: 'Descending' }];
 

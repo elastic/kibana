@@ -43,39 +43,39 @@ export default function (kibana) {
 
     init(server, options) { // eslint-disable-line no-unused-vars
       <%_ if (generateApp) { -%>
-        const xpackMainPlugin = server.plugins.xpack_main;
-        if (xpackMainPlugin) {
-          const featureId = '<%= snakeCase(name) %>';
+      const xpackMainPlugin = server.plugins.xpack_main;
+      if (xpackMainPlugin) {
+        const featureId = '<%= snakeCase(name) %>';
 
-          xpackMainPlugin.registerFeature({
-            id: featureId,
-            name: i18n.translate('<%= camelCase(name) %>.featureRegistry.featureName', {
-              defaultMessage: '<%= name %>',
-            }),
-            navLinkId: featureId,
-            icon: 'questionInCircle',
-            app: [featureId, 'kibana'],
-            catalogue: [],
-            privileges: {
-              all: {
-                api: [],
-                savedObject: {
-                  all: [],
-                  read: [],
-                },
-                ui: ['show'],
+        xpackMainPlugin.registerFeature({
+          id: featureId,
+          name: i18n.translate('<%= camelCase(name) %>.featureRegistry.featureName', {
+            defaultMessage: '<%= name %>',
+          }),
+          navLinkId: featureId,
+          icon: 'questionInCircle',
+          app: [featureId, 'kibana'],
+          catalogue: [],
+          privileges: {
+            all: {
+              api: [],
+              savedObject: {
+                all: [],
+                read: [],
               },
-              read: {
-                api: [],
-                savedObject: {
-                  all: [],
-                  read: [],
-                },
-                ui: ['show'],
-              },
+              ui: ['show'],
             },
-          });
-        }
+            read: {
+              api: [],
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['show'],
+            },
+          },
+        });
+      }
       <%_ } -%>
 
       <%_ if (generateApi) { -%>

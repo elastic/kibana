@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import dataFrameTransformListRow from './__mocks__/data_frame_transform_list_row.json';
+import dataFrameTransformListRow from '../../../../common/__mocks__/data_frame_transform_list_row.json';
 
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 

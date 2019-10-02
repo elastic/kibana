@@ -1,0 +1,20 @@
+{
+  "lens": {
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "visualizationType": {
+        "type": "keyword"
+      },
+      "state": {
+        "enabled": false,
+        "type": "object"
+      },
+      "expression": {
+        "index": false,
+        "type": "keyword"
+      }
+    }
+  }
+}

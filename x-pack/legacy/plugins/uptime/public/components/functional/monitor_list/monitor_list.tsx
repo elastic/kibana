@@ -5,6 +5,7 @@
  */
 
 import { EuiBasicTable, EuiPanel, EuiTitle, EuiButtonIcon, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
@@ -33,6 +34,7 @@ interface MonitorListProps {
   absoluteStartDate: number;
   absoluteEndDate: number;
   dangerColor: string;
+  hasActiveFilters: boolean;
   successColor: string;
   linkParameters?: string;
   // TODO: reintegrate pagination in a future release
@@ -55,6 +57,7 @@ export const MonitorListComponent = (props: Props) => {
     successColor,
     data,
     errors,
+    hasActiveFilters,
     linkParameters,
     loading,
     // TODO: reintroduce for pagination and sorting
@@ -91,18 +94,27 @@ export const MonitorListComponent = (props: Props) => {
 
   return (
     <Fragment>
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.uptime.monitorList.monitoringStatusTitle"
-            defaultMessage="Monitor status"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiPanel paddingSize="s">
+      <EuiPanel>
+        <EuiTitle size="xs">
+          <h5>
+            <FormattedMessage
+              id="xpack.uptime.monitorList.monitoringStatusTitle"
+              defaultMessage="Monitor status"
+            />
+          </h5>
+        </EuiTitle>
+        <EuiSpacer size="s" />
         <EuiBasicTable
+          aria-label={i18n.translate('xpack.uptime.monitorList.table.description', {
+            defaultMessage:
+              'Monitor Status table with columns for Status, Name, URL, IP, Downtime History and Integrations. The table is currently displaying {length} items.',
+            values: { length: items.length },
+          })}
           error={errors ? formatUptimeGraphQLErrorList(errors) : errors}
-          loading={loading}
+          // Only set loading to true when there are no items present to prevent the bug outlined in
+          // in https://github.com/elastic/eui/issues/2393 . Once that is fixed we can simply set the value here to
+          // loading={loading}
+          loading={loading && (!items || items.length < 1)}
           isExpandable={true}
           hasActions={true}
           itemId="monitor_id"
@@ -124,11 +136,19 @@ export const MonitorListComponent = (props: Props) => {
           items={items}
           // TODO: not needed without sorting and pagination
           // onChange={onChange}
-          noItemsMessage={i18n.translate('xpack.uptime.monitorList.noItemMessage', {
-            defaultMessage: 'No uptime monitors found',
-            description:
-              'This message is shown if the monitors table is rendered but has no items.',
-          })}
+          noItemsMessage={
+            hasActiveFilters
+              ? i18n.translate('xpack.uptime.monitorList.noItemForSelectedFiltersMessage', {
+                  defaultMessage: 'No monitors found for selected filter criteria',
+                  description:
+                    'This message is show if there are no monitors in the table and some filter or search criteria exists',
+                })
+              : i18n.translate('xpack.uptime.monitorList.noItemMessage', {
+                  defaultMessage: 'No uptime monitors found',
+                  description:
+                    'This message is shown if the monitors table is rendered but has no items.',
+                })
+          }
           // TODO: reintegrate pagination in future release
           // pagination={pagination}
           // TODO: reintegrate sorting in future release
@@ -206,7 +226,7 @@ export const MonitorListComponent = (props: Props) => {
                 {
                   defaultMessage: 'Integrations',
                   description:
-                    'The heading column of some action buttons that will take users to other Obsevability apps',
+                    'The heading column of some action buttons that will take users to other Observability apps',
                 }
               ),
               render: (state: any, summary: MonitorSummary) => (

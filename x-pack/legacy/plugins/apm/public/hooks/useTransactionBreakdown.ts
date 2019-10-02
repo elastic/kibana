@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useRef } from 'react';
 import { useFetcher } from './useFetcher';
 import { useUrlParams } from './useUrlParams';
 import { callApmApi } from '../services/rest/callApmApi';
@@ -38,16 +37,9 @@ export function useTransactionBreakdown() {
     }
   }, [serviceName, start, end, transactionType, transactionName, uiFilters]);
 
-  const receivedDataDuringLifetime = useRef(false);
-
-  if (data && data.kpis.length) {
-    receivedDataDuringLifetime.current = true;
-  }
-
   return {
     data,
     status,
-    error,
-    receivedDataDuringLifetime: receivedDataDuringLifetime.current
+    error
   };
 }

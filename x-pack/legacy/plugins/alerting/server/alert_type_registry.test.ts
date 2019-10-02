@@ -44,6 +44,7 @@ describe('has()', () => {
     registry.register({
       id: 'foo',
       name: 'Foo',
+      actionGroups: [],
       executor: jest.fn(),
     });
     expect(registry.has('foo')).toEqual(true);
@@ -55,6 +56,7 @@ describe('register()', () => {
     const alertType = {
       id: 'test',
       name: 'Test',
+      actionGroups: [],
       executor: jest.fn(),
     };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -64,16 +66,16 @@ describe('register()', () => {
     registry.register(alertType);
     expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
     expect(taskManager.registerTaskDefinitions.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "alerting:test": Object {
-      "createTaskRunner": [MockFunction],
-      "title": "Test",
-      "type": "alerting:test",
-    },
-  },
-]
-`);
+      Array [
+        Object {
+          "alerting:test": Object {
+            "createTaskRunner": [MockFunction],
+            "title": "Test",
+            "type": "alerting:test",
+          },
+        },
+      ]
+    `);
     expect(getCreateTaskRunnerFunction).toHaveBeenCalledWith({
       alertType,
       isSecurityEnabled: true,
@@ -90,12 +92,14 @@ Array [
     registry.register({
       id: 'test',
       name: 'Test',
+      actionGroups: [],
       executor: jest.fn(),
     });
     expect(() =>
       registry.register({
         id: 'test',
         name: 'Test',
+        actionGroups: [],
         executor: jest.fn(),
       })
     ).toThrowErrorMatchingInlineSnapshot(`"Alert type \\"test\\" is already registered."`);
@@ -108,16 +112,18 @@ describe('get()', () => {
     registry.register({
       id: 'test',
       name: 'Test',
+      actionGroups: [],
       executor: jest.fn(),
     });
     const alertType = registry.get('test');
     expect(alertType).toMatchInlineSnapshot(`
-Object {
-  "executor": [MockFunction],
-  "id": "test",
-  "name": "Test",
-}
-`);
+      Object {
+        "actionGroups": Array [],
+        "executor": [MockFunction],
+        "id": "test",
+        "name": "Test",
+      }
+    `);
   });
 
   test(`should throw an error if type isn't registered`, () => {
@@ -140,16 +146,17 @@ describe('list()', () => {
     registry.register({
       id: 'test',
       name: 'Test',
+      actionGroups: [],
       executor: jest.fn(),
     });
     const result = registry.list();
     expect(result).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "id": "test",
-    "name": "Test",
-  },
-]
-`);
+      Array [
+        Object {
+          "id": "test",
+          "name": "Test",
+        },
+      ]
+    `);
   });
 });

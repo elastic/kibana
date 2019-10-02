@@ -18,18 +18,18 @@
  */
 
 // @ts-ignore
-import { ObjDefine } from 'ui/utils/obj_define';
-// @ts-ignore
 import { fieldFormats } from 'ui/registry/field_formats';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
-import { getKbnFieldType } from '../../../../../utils/kbn_field_types';
+import { ObjDefine } from './obj_define';
 // @ts-ignore
-import { FieldFormat } from '../../../../../ui/field_formats/field_format';
+import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
 // @ts-ignore
 import { shortenDottedString } from '../../../../../core_plugins/kibana/common/utils/shorten_dotted_string';
 import { IndexPattern } from '../index_patterns';
+
+import { getKbnFieldType } from '../../../../../../plugins/data/public';
 
 export type FieldSpec = Record<string, any>;
 export interface FieldType {
@@ -127,9 +127,9 @@ export class Field implements FieldType {
     const searchable = !!spec.searchable || scripted;
     const aggregatable = !!spec.aggregatable || scripted;
     const readFromDocValues = !!spec.readFromDocValues && !scripted;
-    const sortable = spec.name === '_score' || ((indexed || aggregatable) && type.sortable);
+    const sortable = spec.name === '_score' || ((indexed || aggregatable) && type && type.sortable);
     const filterable =
-      spec.name === '_id' || scripted || ((indexed || searchable) && type.filterable);
+      spec.name === '_id' || scripted || ((indexed || searchable) && type && type.filterable);
     const visualizable = aggregatable;
 
     this.name = '';

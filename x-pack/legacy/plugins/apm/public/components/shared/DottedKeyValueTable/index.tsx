@@ -34,10 +34,12 @@ export function pathify(
   item: StringMap<any>,
   { maxDepth, parentKey = '', depth = 0 }: PathifyOptions
 ): PathifyResult {
+  const isArrayWithSingleValue = Array.isArray(item) && item.length === 1;
   return Object.keys(item)
     .sort()
     .reduce((pathified, key) => {
-      const currentKey = compact([parentKey, key]).join('.');
+      const childKey = isArrayWithSingleValue ? '' : key;
+      const currentKey = compact([parentKey, childKey]).join('.');
       if ((!maxDepth || depth + 1 <= maxDepth) && isObject(item[key])) {
         return {
           ...pathified,

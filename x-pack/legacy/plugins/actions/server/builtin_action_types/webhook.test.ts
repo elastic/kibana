@@ -4,8 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { actionType } from './webhook';
+import { getActionType } from './webhook';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
+import { ActionsConfigurationUtilities } from '../actions_config';
+import { ActionType } from '../types';
+import { createActionTypeRegistry } from './index.test';
+
+const ACTION_TYPE_ID = '.webhook';
+const configUtilsMock: ActionsConfigurationUtilities = {
+  isWhitelistedHostname: _ => true,
+  isWhitelistedUri: _ => true,
+  ensureWhitelistedHostname: _ => {},
+  ensureWhitelistedUri: _ => {},
+};
+
+let actionType: ActionType;
+
+beforeAll(() => {
+  const actionTypeRegistry = createActionTypeRegistry();
+  actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
+});
 
 describe('actionType', () => {
   test('exposes the action as `webhook` on its Id and Name', () => {
@@ -118,6 +136,42 @@ describe('config validation', () => {
 - [headers.0]: expected value of type [object] but got [string]
 - [headers.1]: expected value to equal [null] but got [application/json]"
 `);
+  });
+
+  test('config validation passes when kibana config whitelists the url', () => {
+    const config: Record<string, any> = {
+      url: 'http://mylisteningserver.com:9200/endpoint',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    expect(validateConfig(actionType, config)).toEqual({
+      ...defaultValues,
+      ...config,
+    });
+  });
+
+  test('config validation returns an error if the specified URL isnt whitelisted', () => {
+    actionType = getActionType({
+      ...configUtilsMock,
+      ensureWhitelistedUri: _ => {
+        throw new Error(`target url is not whitelisted`);
+      },
+    });
+
+    const config: Record<string, any> = {
+      url: 'http://mylisteningserver.com:9200/endpoint',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    expect(() => {
+      validateConfig(actionType, config);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: error configuring webhook action: target url is not whitelisted"`
+    );
   });
 });
 

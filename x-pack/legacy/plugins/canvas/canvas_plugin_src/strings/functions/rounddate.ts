@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { rounddate } from '../../functions/common/rounddate';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { MOMENTJS } from '../constants';
+import { MOMENTJS } from '../../../i18n';
 
 export const help: FunctionHelp<FunctionFactory<typeof rounddate>> = {
   help: i18n.translate('xpack.canvas.functions.rounddateHelpText', {

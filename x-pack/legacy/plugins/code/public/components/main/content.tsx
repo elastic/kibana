@@ -38,9 +38,10 @@ import {
   SearchScope,
   WorkerReservedProgress,
   Repository,
+  RepoState,
 } from '../../../model';
 import { CommitInfo, ReferenceInfo } from '../../../model/commit';
-import { changeSearchScope, FetchFileResponse, RepoState, RepoStatus } from '../../actions';
+import { changeSearchScope, FetchFileResponse, RepoStatus } from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
 import {
@@ -53,7 +54,7 @@ import { encodeRevisionString } from '../../../common/uri_util';
 import { history } from '../../utils/url';
 import { Editor } from '../editor/editor';
 import { CloneStatus } from './clone_status';
-import { CommitHistory } from './commit_history';
+import { CommitHistory } from '../commits';
 import { Directory } from './directory';
 import { ErrorPanel } from './error_panel';
 import { NotFound } from './not_found';

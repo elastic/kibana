@@ -18,12 +18,12 @@
  */
 
 import { IndexPattern } from './index_pattern';
-import { GetFieldsOptions, IndexPatternsApiClient } from './index_patterns_api_client';
+import { GetFieldsOptions, IIndexPatternsApiClient } from './index_patterns_api_client';
 
 /** @internal */
 export const createFieldsFetcher = (
   indexPattern: IndexPattern,
-  apiClient: IndexPatternsApiClient,
+  apiClient: IIndexPatternsApiClient,
   metaFields: string
 ) => {
   const fieldFetcher = {

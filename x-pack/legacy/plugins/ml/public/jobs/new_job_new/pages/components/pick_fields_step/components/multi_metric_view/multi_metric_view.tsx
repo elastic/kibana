@@ -8,6 +8,7 @@ import React, { Fragment, FC, useEffect, useState } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import { MultiMetricDetectors } from './metric_selection';
+import { MultiMetricDetectorsSummary } from './metric_selection_summary';
 import { MultiMetricSettings } from './settings';
 
 interface Props {
@@ -27,11 +28,18 @@ export const MultiMetricView: FC<Props> = ({ isActive, setCanProceed }) => {
 
   return (
     <Fragment>
-      <MultiMetricDetectors isActive={isActive} setIsValid={setMetricValid} />
-      {metricsValid && isActive && (
+      {isActive === false && <MultiMetricDetectorsSummary />}
+
+      {isActive === true && (
         <Fragment>
-          <EuiHorizontalRule margin="l" />
-          <MultiMetricSettings isActive={isActive} setIsValid={setSettingsValid} />
+          <MultiMetricDetectors setIsValid={setMetricValid} />
+
+          {metricsValid && (
+            <Fragment>
+              <EuiHorizontalRule margin="l" />
+              <MultiMetricSettings setIsValid={setSettingsValid} />
+            </Fragment>
+          )}
         </Fragment>
       )}
     </Fragment>

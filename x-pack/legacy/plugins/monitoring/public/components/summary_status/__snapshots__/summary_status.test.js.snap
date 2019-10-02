@@ -18,13 +18,13 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
           class="euiText euiText--small euiStat__description"
         >
           <p
-            id="generated-id"
+            aria-hidden="true"
           >
             Status
           </p>
         </div>
         <p
-          aria-labelledby="generated-id"
+          aria-hidden="true"
           class="euiTitle euiTitle--xsmall euiStat__title"
         >
           Status: 
@@ -39,6 +39,11 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
           </span>
            Yellow
         </p>
+        <p
+          class="euiScreenReaderOnly"
+        >
+          Status [object Object]
+        </p>
       </div>
     </div>
     <div
@@ -52,14 +57,19 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
           class="euiText euiText--small euiStat__description"
         >
           <p
-            id="generated-id"
+            aria-hidden="true"
           />
         </div>
         <p
-          aria-labelledby="generated-id"
+          aria-hidden="true"
           class="euiTitle euiTitle--xsmall euiStat__title"
         >
           127.0.0.1:9300
+        </p>
+        <p
+          class="euiScreenReaderOnly"
+        >
+           127.0.0.1:9300
         </p>
       </div>
     </div>
@@ -74,16 +84,21 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
           class="euiText euiText--small euiStat__description"
         >
           <p
-            id="generated-id"
+            aria-hidden="true"
           >
             Documents
           </p>
         </div>
         <p
-          aria-labelledby="generated-id"
+          aria-hidden="true"
           class="euiTitle euiTitle--xsmall euiStat__title"
         >
           24.8k
+        </p>
+        <p
+          class="euiScreenReaderOnly"
+        >
+          Documents 24.8k
         </p>
       </div>
     </div>
@@ -110,16 +125,21 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
           class="euiText euiText--small euiStat__description"
         >
           <p
-            id="generated-id"
+            aria-hidden="true"
           >
             Free Disk Space
           </p>
         </div>
         <p
-          aria-labelledby="generated-id"
+          aria-hidden="true"
           class="euiTitle euiTitle--xsmall euiStat__title"
         >
           173.9 GB
+        </p>
+        <p
+          class="euiScreenReaderOnly"
+        >
+          Free Disk Space 173.9 GB
         </p>
       </div>
     </div>
@@ -134,16 +154,21 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
           class="euiText euiText--small euiStat__description"
         >
           <p
-            id="generated-id"
+            aria-hidden="true"
           >
             Documents
           </p>
         </div>
         <p
-          aria-labelledby="generated-id"
+          aria-hidden="true"
           class="euiTitle euiTitle--xsmall euiStat__title"
         >
           24.8k
+        </p>
+        <p
+          class="euiScreenReaderOnly"
+        >
+          Documents 24.8k
         </p>
       </div>
     </div>
@@ -169,13 +194,13 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
           class="euiText euiText--small euiStat__description"
         >
           <p
-            id="generated-id"
+            aria-hidden="true"
           >
             Status
           </p>
         </div>
         <p
-          aria-labelledby="generated-id"
+          aria-hidden="true"
           class="euiTitle euiTitle--xsmall euiStat__title"
         >
           Status: 
@@ -190,6 +215,11 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
           </span>
            Green
         </p>
+        <p
+          class="euiScreenReaderOnly"
+        >
+          Status [object Object]
+        </p>
       </div>
     </div>
     <div
@@ -203,16 +233,21 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
           class="euiText euiText--small euiStat__description"
         >
           <p
-            id="generated-id"
+            aria-hidden="true"
           >
             Free Disk Space
           </p>
         </div>
         <p
-          aria-labelledby="generated-id"
+          aria-hidden="true"
           class="euiTitle euiTitle--xsmall euiStat__title"
         >
           173.9 GB
+        </p>
+        <p
+          class="euiScreenReaderOnly"
+        >
+          Free Disk Space 173.9 GB
         </p>
       </div>
     </div>
@@ -227,16 +262,21 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
           class="euiText euiText--small euiStat__description"
         >
           <p
-            id="generated-id"
+            aria-hidden="true"
           >
             Documents
           </p>
         </div>
         <p
-          aria-labelledby="generated-id"
+          aria-hidden="true"
           class="euiTitle euiTitle--xsmall euiStat__title"
         >
           24.8k
+        </p>
+        <p
+          class="euiScreenReaderOnly"
+        >
+          Documents 24.8k
         </p>
       </div>
     </div>

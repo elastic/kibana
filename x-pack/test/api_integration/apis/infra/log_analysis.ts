@@ -6,6 +6,9 @@
 
 import expect from '@kbn/expect';
 
+import { pipe } from 'fp-ts/lib/pipeable';
+import { identity } from 'fp-ts/lib/function';
+import { fold } from 'fp-ts/lib/Either';
 import {
   LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH,
   getLogEntryRateRequestPayloadRT,
@@ -55,9 +58,10 @@ export default ({ getService }: FtrProviderContext) => {
             )
             .expect(200);
 
-          const logEntryRateBuckets = getLogEntryRateSuccessReponsePayloadRT
-            .decode(body)
-            .getOrElseL(throwErrors(createPlainError));
+          const logEntryRateBuckets = pipe(
+            getLogEntryRateSuccessReponsePayloadRT.decode(body),
+            fold(throwErrors(createPlainError), identity)
+          );
 
           expect(logEntryRateBuckets.data.bucketDuration).to.be(15 * 60 * 1000);
           expect(logEntryRateBuckets.data.histogramBuckets).to.not.be.empty();
@@ -84,9 +88,10 @@ export default ({ getService }: FtrProviderContext) => {
             )
             .expect(200);
 
-          const logEntryRateBuckets = getLogEntryRateSuccessReponsePayloadRT
-            .decode(body)
-            .getOrElseL(throwErrors(createPlainError));
+          const logEntryRateBuckets = pipe(
+            getLogEntryRateSuccessReponsePayloadRT.decode(body),
+            fold(throwErrors(createPlainError), identity)
+          );
 
           expect(logEntryRateBuckets.data.bucketDuration).to.be(15 * 60 * 1000);
           expect(logEntryRateBuckets.data.histogramBuckets).to.be.empty();

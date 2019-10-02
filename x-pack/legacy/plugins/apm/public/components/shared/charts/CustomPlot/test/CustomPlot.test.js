@@ -293,7 +293,7 @@ describe('when response has no data', () => {
         onHover={onHover}
         onMouseLeave={onMouseLeave}
         onSelectionEnd={onSelectionEnd}
-        width={100}
+        width={800}
         tickFormatX={x => x.getTime()} // Avoid timezone issues in snapshots
       />
     );

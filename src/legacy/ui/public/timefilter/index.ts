@@ -17,8 +17,22 @@
  * under the License.
  */
 
-export { TimeRange, RefreshInterval } from '../../../../plugins/data/public';
+import uiRoutes from 'ui/routes';
+import { TimefilterContract, TimeHistoryContract } from '../../../core_plugins/data/public';
+import { registerTimefilterWithGlobalState } from './setup_router';
+import { setup as data } from '../../../core_plugins/data/public/legacy';
 
-export { timefilter, Timefilter, registerTimefilterWithGlobalState } from './timefilter';
-export { timeHistory, TimeHistory } from './time_history';
-export { getTime } from './get_time';
+export {
+  getTime,
+  InputTimeRange,
+  TimeHistoryContract,
+  TimefilterContract,
+} from '../../../core_plugins/data/public';
+export type Timefilter = TimefilterContract;
+export type TimeHistory = TimeHistoryContract;
+export const timeHistory = data.timefilter.history;
+export const timefilter = data.timefilter.timefilter;
+
+uiRoutes.addSetupWork((globalState, $rootScope) => {
+  return registerTimefilterWithGlobalState(timefilter, globalState, $rootScope);
+});

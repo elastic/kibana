@@ -20,23 +20,21 @@
 import _, { each, reject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
-import { SavedObjectNotFound, DuplicateField } from 'ui/errors';
-// @ts-ignore
 import { fieldFormats } from 'ui/registry/field_formats';
 // @ts-ignore
 import { expandShorthand } from 'ui/utils/mapping_setup';
 import { toastNotifications } from 'ui/notify';
 import { findObjectByTitle } from 'ui/saved_objects';
 import { SavedObjectsClientContract } from 'src/core/public';
+import { SavedObjectNotFound, DuplicateField } from '../../../../../../plugins/kibana_utils/public';
 
 import { IndexPatternMissingIndices } from '../errors';
 import { Field, FieldList, FieldType } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { getRoutes } from '../utils';
 import { formatHitProvider } from './format_hit';
-// @ts-ignore
 import { flattenHitWrapper } from './flatten_hit';
-import { IndexPatternsApiClient } from './index_patterns_api_client';
+import { IIndexPatternsApiClient } from './index_patterns_api_client';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -108,7 +106,7 @@ export class IndexPattern implements StaticIndexPattern {
     id: string | undefined,
     getConfig: any,
     savedObjectsClient: SavedObjectsClientContract,
-    apiClient: IndexPatternsApiClient,
+    apiClient: IIndexPatternsApiClient,
     patternCache: any
   ) {
     this.id = id;
@@ -135,7 +133,7 @@ export class IndexPattern implements StaticIndexPattern {
   }
 
   private deserializeFieldFormatMap(mapping: any) {
-    const FieldFormat = fieldFormats.byId[mapping.id];
+    const FieldFormat = fieldFormats.getType(mapping.id);
     return FieldFormat && new FieldFormat(mapping.params, this.getConfig);
   }
 

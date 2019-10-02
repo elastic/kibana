@@ -144,7 +144,7 @@ export const getAnomaliesHostTableColumnsCurated = (
   const columns = getAnomaliesHostTableColumns(startDate, endDate, interval, narrowDateRange);
 
   // Columns to exclude from host details pages
-  if (pageType === 'details') {
+  if (pageType === HostsType.details) {
     return columns.filter(column => column.name !== i18n.HOST_NAME);
   } else {
     return columns;

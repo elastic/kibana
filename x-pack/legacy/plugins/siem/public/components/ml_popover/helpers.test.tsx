@@ -18,6 +18,7 @@ import {
   getJobsToDisplay,
   getJobsToInstall,
   searchFilter,
+  getStablePatternTitles,
 } from './helpers';
 
 jest.mock('../ml/permissions/has_ml_admin_permissions', () => ({
@@ -150,6 +151,20 @@ describe('helpers', () => {
         { id: '2d1fe420-eeee-11e9-ad95-4b5e687c2aee', title: 'filebeat-*' },
         { id: '5463ec70-c7ba-ffff-ad95-4b5e687c2aee', title: 'auditbeat-*' },
       ]);
+    });
+  });
+
+  describe('getStablePatternTitles', () => {
+    test('it returns a stable reference two times in a row with standard strings', () => {
+      const one = getStablePatternTitles(['a', 'b', 'c']);
+      const two = getStablePatternTitles(['a', 'b', 'c']);
+      expect(one).toBe(two);
+    });
+
+    test('it returns a stable reference two times in a row with strings interchanged', () => {
+      const one = getStablePatternTitles(['c', 'b', 'a']);
+      const two = getStablePatternTitles(['a', 'b', 'c']);
+      expect(one).toBe(two);
     });
   });
 });

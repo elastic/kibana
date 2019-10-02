@@ -4,20 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Location } from 'history';
-import { RouteComponentProps } from 'react-router';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { Dispatch } from 'redux';
-import { hostsModel, KueryFilterQuery, networkModel, SerializedFilterQuery } from '../../store';
+import ApolloClient from 'apollo-client';
+import { KueryFilterQuery } from '../../store';
 import { UrlInputsModel } from '../../store/inputs/model';
-import { InputsModelId } from '../../store/inputs/constants';
-
-import { CONSTANTS } from './constants';
+import { RouteSpyState } from '../../utils/route/types';
 import { DispatchUpdateTimeline } from '../open_timeline/types';
+import { NavTab } from '../navigation/types';
 
-export type UrlStateType = 'host' | 'network' | 'overview' | 'timeline';
+import { CONSTANTS, UrlStateType } from './constants';
 
 export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
   CONSTANTS.kqlQuery,
@@ -53,8 +50,8 @@ export interface UrlState {
 }
 export type KeyUrlState = keyof UrlState;
 
-export interface UrlStateProps<TCache = object> {
-  isInitializing: boolean;
+export interface UrlStateProps {
+  navTabs: Record<string, NavTab>;
   indexPattern?: StaticIndexPattern;
   mapToUrlState?: (value: string) => UrlState;
   onChange?: (urlState: UrlState, previousUrlState: UrlState) => void;
@@ -65,47 +62,48 @@ export interface UrlStateStateToPropsType {
   urlState: UrlState;
 }
 
-export interface UrlStateDispatchToPropsType {
-  addGlobalLinkTo: ActionCreator<{ linkToId: InputsModelId }>;
-  addTimelineLinkTo: ActionCreator<{ linkToId: InputsModelId }>;
-  dispatch: Dispatch;
-  removeGlobalLinkTo: ActionCreator<void>;
-  removeTimelineLinkTo: ActionCreator<void>;
-  setHostsKql: ActionCreator<{
-    filterQuery: SerializedFilterQuery;
-    hostsType: hostsModel.HostsType;
-  }>;
-  setNetworkKql: ActionCreator<{
-    filterQuery: SerializedFilterQuery;
-    networkType: networkModel.NetworkType;
-  }>;
-  setAbsoluteTimerange: ActionCreator<{
-    from: number;
-    fromStr: undefined;
-    id: InputsModelId;
-    to: number;
-    toStr: undefined;
-  }>;
-  setRelativeTimerange: ActionCreator<{
-    from: number;
-    fromStr: string;
-    id: InputsModelId;
-    to: number;
-    toStr: string;
-  }>;
-  updateTimeline: DispatchUpdateTimeline;
-  updateTimelineIsLoading: ActionCreator<{
-    id: string;
-    isLoading: boolean;
-  }>;
+export interface UpdateTimelineIsLoading {
+  id: string;
+  isLoading: boolean;
 }
 
-export type UrlStateContainerPropTypes = RouteComponentProps &
+export interface UrlStateDispatchToPropsType {
+  setInitialStateFromUrl: DispatchSetInitialStateFromUrl;
+  updateTimeline: DispatchUpdateTimeline;
+  updateTimelineIsLoading: ActionCreator<UpdateTimelineIsLoading>;
+}
+
+export type UrlStateContainerPropTypes = RouteSpyState &
   UrlStateStateToPropsType &
   UrlStateDispatchToPropsType &
   UrlStateProps;
 
 export interface PreviousLocationUrlState {
-  location: Location;
+  pathName: string | undefined;
   urlState: UrlState;
 }
+
+export interface UrlStateToRedux {
+  urlKey: KeyUrlState;
+  newUrlStateString: string;
+}
+
+export interface SetInitialStateFromUrl<TCache> {
+  apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
+  detailName: string | undefined;
+  indexPattern: StaticIndexPattern | undefined;
+  pageName: string;
+  updateTimeline: DispatchUpdateTimeline;
+  updateTimelineIsLoading: ActionCreator<UpdateTimelineIsLoading>;
+  urlStateToUpdate: UrlStateToRedux[];
+}
+
+export type DispatchSetInitialStateFromUrl = <TCache>({
+  apolloClient,
+  detailName,
+  indexPattern,
+  pageName,
+  updateTimeline,
+  updateTimelineIsLoading,
+  urlStateToUpdate,
+}: SetInitialStateFromUrl<TCache>) => () => void;

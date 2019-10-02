@@ -105,6 +105,7 @@ describe('Timeline', () => {
         timeline: {
           ...timelineByIdMock.foo,
         },
+        timelineById: timelineByIdMock,
       });
 
       expect(update).toEqual({

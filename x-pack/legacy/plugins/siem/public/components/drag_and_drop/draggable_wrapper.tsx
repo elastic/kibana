@@ -18,8 +18,8 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { dragAndDropActions } from '../../store/drag_and_drop';
 import { DataProvider } from '../timeline/data_providers/data_provider';
+import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../timeline/helpers';
 import { TruncatableText } from '../truncatable_text';
-
 import { getDraggableId, getDroppableId } from './helpers';
 
 // As right now, we do not know what we want there, we will keep it as a placeholder
@@ -28,17 +28,14 @@ export const DragEffects = styled.div``;
 DragEffects.displayName = 'DragEffects';
 
 const Wrapper = styled.div`
-  .euiPageBody & {
-    display: inline-block;
-  }
+  display: inline-block;
+  max-width: 100%;
 `;
 
 Wrapper.displayName = 'Wrapper';
 
 const ProviderContainer = styled.div<{ isDragging: boolean }>`
   ${({ theme, isDragging }) => css`
-    // ALL DRAGGABLES
-
     &,
     &::before,
     &::after {
@@ -46,16 +43,14 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
         color ${theme.eui.euiAnimSpeedFast} ease;
     }
 
-    // PAGE DRAGGABLES
-
     ${!isDragging &&
       `
-      .euiPageBody & {
+      & {
         border-radius: 2px;
         padding: 0 4px 0 8px;
         position: relative;
         z-index: ${theme.eui.euiZLevel0} !important;
-        
+
         &::before {
           background-image: linear-gradient(
               135deg,
@@ -77,7 +72,17 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
         }
       }
 
-      .euiPageBody tr:hover & {
+      &:hover {
+        &,
+        & .euiBadge,
+        & .euiBadge__text {
+          cursor: move; //Fallback for IE11
+          cursor: grab;
+        }
+      }
+
+      .${STATEFUL_EVENT_CSS_CLASS_NAME}:hover &,
+      tr:hover & {
         background-color: ${theme.eui.euiColorLightShade};
 
         &::before {
@@ -92,14 +97,17 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
         }
       }
 
-      .euiPageBody &:hover,
-      .euiPageBody &:focus,
-      .euiPageBody tr:hover &:hover,
-      .euiPageBody tr:hover &:focus {
+      &:hover,
+      &:focus,
+      .${STATEFUL_EVENT_CSS_CLASS_NAME}:hover &:hover,
+      .${STATEFUL_EVENT_CSS_CLASS_NAME}:focus &:focus,
+      tr:hover &:hover,
+      tr:hover &:focus {
         background-color: ${theme.eui.euiColorPrimary};
 
         &,
-        & a {
+        & a,
+        & a:hover {
           color: ${theme.eui.euiColorEmptyShade};
         }
 
@@ -118,15 +126,10 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
 
     ${isDragging &&
       `
-      .euiPageBody & {
+      & {
         z-index: ${theme.eui.euiZLevel9} !important;
-      `}
-
-    // TIMELINE DRAGGABLES
-
-    .timeline-flyout &:hover {
-      background-color: ${theme.eui.euiColorLightShade};
-    }
+      }
+    `}
   `}
 `;
 
@@ -140,7 +143,7 @@ interface OwnProps {
     provided: DraggableProvided,
     state: DraggableStateSnapshot
   ) => React.ReactNode;
-  width?: string;
+  truncate?: boolean;
 }
 
 interface DispatchProps {
@@ -159,10 +162,10 @@ type Props = OwnProps & DispatchProps;
  * data provider associated with the item being dropped
  */
 class DraggableWrapperComponent extends React.Component<Props> {
-  public shouldComponentUpdate = ({ dataProvider, render, width }: Props) =>
+  public shouldComponentUpdate = ({ dataProvider, render, truncate }: Props) =>
     isEqual(dataProvider, this.props.dataProvider) &&
     render !== this.props.render &&
-    width === this.props.width
+    truncate === this.props.truncate
       ? false
       : true;
 
@@ -179,7 +182,7 @@ class DraggableWrapperComponent extends React.Component<Props> {
   }
 
   public render() {
-    const { dataProvider, render, width } = this.props;
+    const { dataProvider, render, truncate } = this.props;
 
     return (
       <Wrapper data-test-subj="draggableWrapperDiv">
@@ -189,36 +192,30 @@ class DraggableWrapperComponent extends React.Component<Props> {
               <Draggable
                 draggableId={getDraggableId(dataProvider.id)}
                 index={0}
-                key={dataProvider.id}
+                key={getDraggableId(dataProvider.id)}
               >
-                {(provided, snapshot) => {
-                  return (
-                    <ProviderContainer
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      innerRef={provided.innerRef}
-                      data-test-subj="providerContainer"
-                      isDragging={snapshot.isDragging}
-                      style={{
-                        ...provided.draggableProps.style,
-                      }}
-                    >
-                      {width != null && !snapshot.isDragging ? (
-                        <TruncatableText
-                          data-test-subj="draggable-truncatable-content"
-                          size="s"
-                          width={width}
-                        >
-                          {render(dataProvider, provided, snapshot)}
-                        </TruncatableText>
-                      ) : (
-                        <span data-test-subj="draggable-content">
-                          {render(dataProvider, provided, snapshot)}
-                        </span>
-                      )}
-                    </ProviderContainer>
-                  );
-                }}
+                {(provided, snapshot) => (
+                  <ProviderContainer
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    innerRef={provided.innerRef}
+                    data-test-subj="providerContainer"
+                    isDragging={snapshot.isDragging}
+                    style={{
+                      ...provided.draggableProps.style,
+                    }}
+                  >
+                    {truncate && !snapshot.isDragging ? (
+                      <TruncatableText data-test-subj="draggable-truncatable-content">
+                        {render(dataProvider, provided, snapshot)}
+                      </TruncatableText>
+                    ) : (
+                      <span data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}>
+                        {render(dataProvider, provided, snapshot)}
+                      </span>
+                    )}
+                  </ProviderContainer>
+                )}
               </Draggable>
               {droppableProvided.placeholder}
             </div>

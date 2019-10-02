@@ -34,12 +34,14 @@ interface OwnProps {
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   id: string;
+  isInspect: boolean;
   showMorePagesIndicator: boolean;
   totalCount: number;
   type: hostsModel.HostsType;
 }
 
 interface AuthenticationTableReduxProps {
+  activePage: number;
   limit: number;
 }
 
@@ -85,9 +87,11 @@ const rowItems: ItemsPerRow[] = [
 
 const AuthenticationTableComponent = pure<AuthenticationTableProps>(
   ({
+    activePage,
     data,
     fakeTotalCount,
     id,
+    isInspect,
     limit,
     loading,
     loadPage,
@@ -98,11 +102,14 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
     updateTableLimit,
   }) => (
     <PaginatedTable
+      activePage={activePage}
       columns={getAuthenticationColumnsCurated(type)}
+      dataTestSubj={`table-${tableType}`}
       headerCount={totalCount}
       headerTitle={i18n.AUTHENTICATIONS}
       headerUnit={i18n.UNIT(totalCount)}
       id={id}
+      isInspect={isInspect}
       itemsPerRow={rowItems}
       limit={limit}
       loading={loading}
@@ -124,7 +131,6 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
           tableType,
         })
       }
-      updateProps={{ totalCount }}
     />
   )
 );
@@ -328,11 +334,13 @@ const getAuthenticationColumns = (): AuthTableColumns => [
   },
 ];
 
-export const getAuthenticationColumnsCurated = (pageType: hostsModel.HostsType) => {
+export const getAuthenticationColumnsCurated = (
+  pageType: hostsModel.HostsType
+): AuthTableColumns => {
   const columns = getAuthenticationColumns();
 
   // Columns to exclude from host details pages
-  if (pageType === 'details') {
+  if (pageType === hostsModel.HostsType.details) {
     return [i18n.LAST_FAILED_DESTINATION, i18n.LAST_SUCCESSFUL_DESTINATION].reduce((acc, name) => {
       acc.splice(acc.findIndex(column => column.name === name), 1);
       return acc;

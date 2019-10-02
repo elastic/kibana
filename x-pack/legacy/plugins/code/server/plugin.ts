@@ -54,6 +54,8 @@ import { initLocalService } from './init_local';
 import { initQueue } from './init_queue';
 import { initWorkers } from './init_workers';
 import { ClusterNodeAdapter } from './distributed/cluster/cluster_node_adapter';
+import { NodeRepositoriesService } from './distributed/cluster/node_repositories_service';
+import { initCodeUsageCollector } from './usage_collector';
 
 export class CodePlugin {
   private isCodeNode = false;
@@ -66,6 +68,7 @@ export class CodePlugin {
   private updateScheduler: UpdateScheduler | null = null;
   private lspService: LspService | null = null;
   private codeServices: CodeServices | null = null;
+  private nodeService: NodeRepositoriesService | null = null;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.log = {} as Logger;
@@ -153,9 +156,14 @@ export class CodePlugin {
       server,
       this.log
     );
-    const codeServices = new CodeServices(
-      new ClusterNodeAdapter(codeServerRouter, this.log, this.serverOptions, esClient)
+    const clusterNodeAdapter = new ClusterNodeAdapter(
+      codeServerRouter,
+      this.log,
+      this.serverOptions,
+      esClient
     );
+
+    const codeServices = new CodeServices(clusterNodeAdapter);
 
     this.queue = initQueue(server, this.log, esClient);
 
@@ -169,7 +177,7 @@ export class CodePlugin {
     );
     this.lspService = lspService;
     this.gitOps = gitOps;
-    const { indexScheduler, updateScheduler } = initWorkers(
+    const { indexScheduler, updateScheduler, cloneWorker } = initWorkers(
       server,
       this.log,
       esClient,
@@ -181,6 +189,14 @@ export class CodePlugin {
     );
     this.indexScheduler = indexScheduler;
     this.updateScheduler = updateScheduler;
+
+    this.nodeService = new NodeRepositoriesService(
+      this.log,
+      clusterNodeAdapter.clusterService,
+      clusterNodeAdapter.clusterMembershipService,
+      cloneWorker
+    );
+    await this.nodeService.start();
 
     // Execute index version checking and try to migrate index data if necessary.
     await tryMigrateIndices(esClient, this.log);
@@ -226,6 +242,10 @@ export class CodePlugin {
     await tryMigrateIndices(esClient, this.log);
 
     this.initRoutes(server, codeServices, repoIndexInitializerFactory, repoConfigController);
+
+    // TODO: extend the usage collection to cluster mode.
+    initCodeUsageCollector(server, esClient, lspService);
+
     return codeServices;
   }
 
@@ -239,6 +259,9 @@ export class CodePlugin {
     }
     if (this.codeServices) {
       await this.codeServices.stop();
+    }
+    if (this.nodeService) {
+      await this.nodeService.stop();
     }
   }
 

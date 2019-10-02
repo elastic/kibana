@@ -41,10 +41,10 @@ import vegaMapImage256 from './vega_map_image_256.png';
 import { VegaParser } from '../data_model/vega_parser';
 import { SearchCache } from '../data_model/search_cache';
 
-import { visualizations } from '../../../visualizations/public';
+import { setup as visualizationsSetup } from '../../../visualizations/public/legacy';
 import { createVegaTypeDefinition } from '../vega_type';
 
-const THRESHOLD = 0.10;
+const THRESHOLD = 0.1;
 const PIXEL_DIFF = 30;
 
 describe('VegaVisualizations', () => {
@@ -55,24 +55,30 @@ describe('VegaVisualizations', () => {
   let vis;
   let imageComparator;
   let vegaVisualizationDependencies;
+  let visRegComplete = false;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject((Private, $injector) => {
-    vegaVisualizationDependencies = {
-      es: $injector.get('es'),
-      serviceSettings: $injector.get('serviceSettings'),
-      uiSettings: $injector.get('config'),
-    };
+  beforeEach(
+    ngMock.inject((Private, $injector) => {
+      vegaVisualizationDependencies = {
+        es: $injector.get('es'),
+        serviceSettings: $injector.get('serviceSettings'),
+        uiSettings: $injector.get('config'),
+      };
 
-    visualizations.types.VisTypesRegistryProvider.register(() =>
-      createVegaTypeDefinition(vegaVisualizationDependencies)
-    );
+      if(!visRegComplete) {
+        visRegComplete = true;
+        visualizationsSetup.types.registerVisualization(() =>
+          createVegaTypeDefinition(vegaVisualizationDependencies)
+        );
+      }
 
-    Vis = Private(visModule.VisProvider);
+      Vis = Private(visModule.VisProvider);
 
-    VegaVisualization = createVegaVisualization(vegaVisualizationDependencies);
-    indexPattern = Private(LogstashIndexPatternStubProvider);
-  }));
+      VegaVisualization = createVegaVisualization(vegaVisualizationDependencies);
+      indexPattern = Private(LogstashIndexPatternStubProvider);
+    })
+  );
 
   describe('VegaVisualization - basics', () => {
     beforeEach(async function () {
@@ -87,7 +93,7 @@ describe('VegaVisualizations', () => {
       imageComparator.destroy();
     });
 
-    it('should show vegalite graph and update on resize', async function () {
+    it('should show vegalite graph and update on resize (may fail in dev env)', async function () {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
@@ -105,15 +111,12 @@ describe('VegaVisualizations', () => {
         await vegaVis.render(vegaParser, vis.params, { resize: true });
         const mismatchedPixels2 = await compareImage(vegaliteImage256);
         expect(mismatchedPixels2).to.be.lessThan(PIXEL_DIFF);
-
       } finally {
         vegaVis.destroy();
       }
-
     });
 
-    it('should show vega graph', async function () {
-
+    it('should show vega graph (may fail in dev env)', async function () {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
@@ -127,19 +130,15 @@ describe('VegaVisualizations', () => {
       } finally {
         vegaVis.destroy();
       }
-
     });
 
-    it('should show vegatooltip on mouseover over a vega graph', async () => {
-
+    it('should show vegatooltip on mouseover over a vega graph (may fail in dev env)', async () => {
       let vegaVis;
       try {
-
         vegaVis = new VegaVisualization(domNode, vis);
         const vegaParser = new VegaParser(vegaTooltipGraph, new SearchCache());
         await vegaParser.parseAsync();
         await vegaVis.render(vegaParser, vis.params, { data: true });
-
 
         const $el = $(domNode);
         const offset = $el.offset();
@@ -160,27 +159,24 @@ describe('VegaVisualizations', () => {
         expect(tooltip).to.be.ok();
         expect(tooltip.innerHTML).to.be(
           '<h2>This is a long title</h2>' +
-          '<table><tbody>' +
-          '<tr><td class="key">fieldA:</td><td class="value">value of fld1</td></tr>' +
-          '<tr><td class="key">fld2:</td><td class="value">42</td></tr>' +
-          '</tbody></table>');
+            '<table><tbody>' +
+            '<tr><td class="key">fieldA:</td><td class="value">value of fld1</td></tr>' +
+            '<tr><td class="key">fld2:</td><td class="value">42</td></tr>' +
+            '</tbody></table>'
+        );
 
         vegaVis.destroy();
 
         tooltip = document.getElementById('vega-kibana-tooltip');
         expect(tooltip).to.not.be.ok();
-
       } finally {
         vegaVis.destroy();
       }
-
     });
 
     it('should show vega blank rectangle on top of a map (vegamap)', async () => {
-
       let vegaVis;
       try {
-
         vegaVis = new VegaVisualization(domNode, vis);
         const vegaParser = new VegaParser(vegaMapGraph, new SearchCache());
         await vegaParser.parseAsync();
@@ -191,19 +187,17 @@ describe('VegaVisualizations', () => {
         await vegaVis.render(vegaParser, vis.params, { data: true });
         const mismatchedPixels = await compareImage(vegaMapImage256);
         expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
-
       } finally {
         vegaVis.destroy();
       }
-
     });
 
     it('should add a small subpixel value to the height of the canvas to avoid getting it set to 0', async () => {
       let vegaVis;
       try {
-
         vegaVis = new VegaVisualization(domNode, vis);
-        const vegaParser = new VegaParser(`{
+        const vegaParser = new VegaParser(
+          `{
             "$schema": "https://vega.github.io/schema/vega/v3.json",
             "marks": [
               {
@@ -222,7 +216,9 @@ describe('VegaVisualizations', () => {
                 }
               }
             ]
-          }`, new SearchCache());
+          }`,
+          new SearchCache()
+        );
         await vegaParser.parseAsync();
 
         domNode.style.width = '256px';
@@ -240,9 +236,7 @@ describe('VegaVisualizations', () => {
         vegaVis.destroy();
       }
     });
-
   });
-
 
   async function compareImage(expectedImageSource) {
     const elementList = domNode.querySelectorAll('canvas');
@@ -267,5 +261,4 @@ describe('VegaVisualizations', () => {
     domNode.innerHTML = '';
     document.body.removeChild(domNode);
   }
-
 });

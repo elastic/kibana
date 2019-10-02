@@ -9,13 +9,10 @@ jest.mock('./lib/post_pagerduty', () => ({
 }));
 
 import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
-import { ActionTypeRegistry } from '../action_type_registry';
-import { taskManagerMock } from '../../../task_manager/task_manager.mock';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { postPagerduty } from './lib/post_pagerduty';
-import { registerBuiltInActionTypes } from './index';
+import { createActionTypeRegistry } from './index.test';
 
 const postPagerdutyMock = postPagerduty as jest.Mock;
 
@@ -28,36 +25,15 @@ const services: Services = {
   savedObjectsClient: SavedObjectsClientMock.create(),
 };
 
-function getServices(): Services {
-  return services;
-}
-
 let actionType: ActionType;
-let actionTypeRegistry: ActionTypeRegistry;
-
-const mockEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
 
 beforeAll(() => {
-  actionTypeRegistry = new ActionTypeRegistry({
-    getServices,
-    isSecurityEnabled: true,
-    taskManager: taskManagerMock.create(),
-    encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
-    spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-    getBasePath: jest.fn().mockReturnValue(undefined),
-  });
-  registerBuiltInActionTypes(actionTypeRegistry);
+  const actionTypeRegistry = createActionTypeRegistry();
   actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
 });
 
 beforeEach(() => {
   services.log = NO_OP_FN;
-});
-
-describe('action registation', () => {
-  test('should be successful', () => {
-    expect(actionTypeRegistry.has(ACTION_TYPE_ID)).toEqual(true);
-  });
 });
 
 describe('get()', () => {

@@ -160,40 +160,6 @@ export const ilmFilterExtension = indices => {
           },
         ],
       },
-      {
-        type: 'field_value_selection',
-        field: 'ilm.phase',
-        name: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.lifecyclePhaseLabel', {
-          defaultMessage: 'Lifecycle phase',
-        }),
-        multiSelect: 'or',
-        options: [
-          {
-            value: 'hot',
-            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.hotLabel', {
-              defaultMessage: 'Hot',
-            }),
-          },
-          {
-            value: 'warm',
-            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.warmLabel', {
-              defaultMessage: 'Warm',
-            }),
-          },
-          {
-            value: 'cold',
-            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.coldLabel', {
-              defaultMessage: 'Cold',
-            }),
-          },
-          {
-            value: 'delete',
-            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.deleteLabel', {
-              defaultMessage: 'Delete',
-            }),
-          },
-        ],
-      },
     ];
   }
 };

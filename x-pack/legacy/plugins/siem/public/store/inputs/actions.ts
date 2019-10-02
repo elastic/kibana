@@ -44,6 +44,11 @@ export const setQuery = actionCreator<{
   inspect: InspectQuery | null;
 }>('SET_QUERY');
 
+export const deleteOneQuery = actionCreator<{
+  inputId: InputsModelId;
+  id: string;
+}>('DELETE_QUERY');
+
 export const setInspectionParameter = actionCreator<{
   id: string;
   inputId: InputsModelId;

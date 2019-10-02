@@ -23,10 +23,10 @@ import { toastNotifications } from 'ui/notify';
 import chrome from '../../chrome';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
-import { NumberIntervalParamEditor } from '../controls/number_interval';
-import { MinDocCountParamEditor } from '../controls/min_doc_count';
-import { HasExtendedBoundsParamEditor } from '../controls/has_extended_bounds';
-import { ExtendedBoundsParamEditor } from '../controls/extended_bounds';
+import { NumberIntervalParamEditor } from '../../vis/editors/default/controls/number_interval';
+import { MinDocCountParamEditor } from '../../vis/editors/default/controls/min_doc_count';
+import { HasExtendedBoundsParamEditor } from '../../vis/editors/default/controls/has_extended_bounds';
+import { ExtendedBoundsParamEditor } from '../../vis/editors/default/controls/extended_bounds';
 import { i18n } from '@kbn/i18n';
 
 const config = chrome.getUiSettingsClient();

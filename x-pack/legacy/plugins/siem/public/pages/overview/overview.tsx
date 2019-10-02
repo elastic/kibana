@@ -19,6 +19,7 @@ import { GlobalTime } from '../../containers/global_time';
 import { Summary } from './summary';
 import { EmptyPage } from '../../components/empty_page';
 import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
+import { SpyRoute } from '../../utils/route/spy_routes';
 
 import * as i18n from './translations';
 
@@ -65,6 +66,7 @@ export const OverviewComponent = pure(() => {
           )
         }
       </WithSource>
+      <SpyRoute />
     </>
   );
 });

@@ -37,7 +37,7 @@ The port for accessing Kibana, if different from the `server.port` value.
 The protocol for accessing Kibana, typically `http` or `https`.
 
 `xpack.reporting.kibanaServer.hostname`::
-The hostname for accessing Kibana, if different from the `server.name` value.
+The hostname for accessing {kib}, if different from the `server.host` value.
 
 NOTE: Configuring the `xpack.reporting.kibanaServer` settings to point to a
 proxy host requires that the Kibana server has network access to the proxy.
@@ -82,6 +82,10 @@ Defaults to `120000` (two minutes).
 
 Reporting works by capturing screenshots from Kibana. The following settings
 control the capturing process.
+
+`xpack.reporting.capture.maxAttempts`::
+If capturing a report fails for any reason, Kibana will re-attempt othe reporting
+job, as many times as this setting. Defaults to `3`.
 
 `xpack.reporting.capture.loadDelay`::
 When visualizations are not evented, this is the amount of time before

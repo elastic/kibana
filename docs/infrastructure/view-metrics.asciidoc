@@ -4,6 +4,7 @@
 == Viewing infrastructure metrics
 
 When you select *View Metrics* for a component in your infrastructure from the <<infra-ui, Infrastructure app in Kibana>>, you can view detailed metrics for that component, and for any related components.
+You can also view additional component metadata.
 
 [role="screenshot"]
 image::infrastructure/images/infra-view-metrics.png[Infrastructure View Metrics in Kibana]

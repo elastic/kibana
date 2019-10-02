@@ -133,48 +133,51 @@ interface GenericDetailsProps {
   data: Ecs;
   contextId: string;
   text: string;
+  timelineId: string;
 }
 
-export const SystemGenericDetails = pure<GenericDetailsProps>(({ data, contextId, text }) => {
-  const id = data._id;
-  const message: string | null = data.message != null ? data.message[0] : null;
-  const hostName: string | null | undefined = get('host.name[0]', data);
-  const userName: string | null | undefined = get('user.name[0]', data);
-  const outcome: string | null | undefined = get('event.outcome[0]', data);
-  const packageName: string | null | undefined = get('system.audit.package.name[0]', data);
-  const packageSummary: string | null | undefined = get('system.audit.package.summary[0]', data);
-  const packageVersion: string | null | undefined = get('system.audit.package.version[0]', data);
-  const processPid: number | null | undefined = get('process.pid[0]', data);
-  const processName: string | null | undefined = get('process.name[0]', data);
-  const processExecutable: string | null | undefined = get('process.executable[0]', data);
-  const sshSignature: string | null | undefined = get('system.auth.ssh.signature[0]', data);
-  const sshMethod: string | null | undefined = get('system.auth.ssh.method[0]', data);
-  const workingDirectory: string | null | undefined = get('process.working_directory[0]', data);
+export const SystemGenericDetails = pure<GenericDetailsProps>(
+  ({ data, contextId, text, timelineId }) => {
+    const id = data._id;
+    const message: string | null = data.message != null ? data.message[0] : null;
+    const hostName: string | null | undefined = get('host.name[0]', data);
+    const userName: string | null | undefined = get('user.name[0]', data);
+    const outcome: string | null | undefined = get('event.outcome[0]', data);
+    const packageName: string | null | undefined = get('system.audit.package.name[0]', data);
+    const packageSummary: string | null | undefined = get('system.audit.package.summary[0]', data);
+    const packageVersion: string | null | undefined = get('system.audit.package.version[0]', data);
+    const processPid: number | null | undefined = get('process.pid[0]', data);
+    const processName: string | null | undefined = get('process.name[0]', data);
+    const processExecutable: string | null | undefined = get('process.executable[0]', data);
+    const sshSignature: string | null | undefined = get('system.auth.ssh.signature[0]', data);
+    const sshMethod: string | null | undefined = get('system.auth.ssh.method[0]', data);
+    const workingDirectory: string | null | undefined = get('process.working_directory[0]', data);
 
-  return (
-    <Details>
-      <SystemGenericLine
-        contextId={contextId}
-        hostName={hostName}
-        id={id}
-        message={message}
-        outcome={outcome}
-        packageName={packageName}
-        packageSummary={packageSummary}
-        packageVersion={packageVersion}
-        processExecutable={processExecutable}
-        processPid={processPid}
-        processName={processName}
-        sshMethod={sshMethod}
-        sshSignature={sshSignature}
-        text={text}
-        userName={userName}
-        workingDirectory={workingDirectory}
-      />
-      <EuiSpacer size="s" />
-      <NetflowRenderer data={data} />
-    </Details>
-  );
-});
+    return (
+      <Details>
+        <SystemGenericLine
+          contextId={contextId}
+          hostName={hostName}
+          id={id}
+          message={message}
+          outcome={outcome}
+          packageName={packageName}
+          packageSummary={packageSummary}
+          packageVersion={packageVersion}
+          processExecutable={processExecutable}
+          processPid={processPid}
+          processName={processName}
+          sshMethod={sshMethod}
+          sshSignature={sshSignature}
+          text={text}
+          userName={userName}
+          workingDirectory={workingDirectory}
+        />
+        <EuiSpacer size="s" />
+        <NetflowRenderer data={data} timelineId={timelineId} />
+      </Details>
+    );
+  }
+);
 
 SystemGenericDetails.displayName = 'SystemGenericDetails';

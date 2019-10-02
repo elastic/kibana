@@ -18,13 +18,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  Action,
-  IEmbeddable,
-  ActionContext,
-  IncompatibleActionError,
-} from '../../../../../../embeddable_api/public/np_ready/public';
+import { IEmbeddable } from '../../../../../../embeddable_api/public/np_ready/public';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
+import {
+  IAction,
+  IncompatibleActionError,
+} from '../../../../../../../../../src/plugins/ui_actions/public';
 
 export const EXPAND_PANEL_ACTION = 'togglePanel';
 
@@ -40,13 +39,16 @@ function isExpanded(embeddable: IEmbeddable) {
   return embeddable.id === embeddable.parent.getInput().expandedPanelId;
 }
 
-export class ExpandPanelAction extends Action {
-  public readonly type = EXPAND_PANEL_ACTION;
+interface ActionContext {
+  embeddable: IEmbeddable;
+}
 
-  constructor() {
-    super(EXPAND_PANEL_ACTION);
-    this.order = 7;
-  }
+export class ExpandPanelAction implements IAction<ActionContext> {
+  public readonly type = EXPAND_PANEL_ACTION;
+  public readonly id = EXPAND_PANEL_ACTION;
+  public order = 7;
+
+  constructor() {}
 
   public getDisplayName({ embeddable }: ActionContext) {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
@@ -80,7 +82,7 @@ export class ExpandPanelAction extends Action {
     return Boolean(embeddable.parent && isDashboard(embeddable.parent));
   }
 
-  public execute({ embeddable }: ActionContext) {
+  public async execute({ embeddable }: ActionContext) {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }

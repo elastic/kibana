@@ -16,22 +16,25 @@ interface SetQuery {
   id: string;
   inspect: inputsModel.InspectQuery | null;
   loading: boolean;
-  refetch: inputsModel.Refetch;
+  refetch: inputsModel.Refetch | inputsModel.RefetchKql;
 }
+
 interface GlobalQuery extends SetQuery {
   inputId: InputsModelId;
 }
 
-interface GlobalTimeArgs {
+export interface GlobalTimeArgs {
   from: number;
   to: number;
   setQuery: ({ id, inspect, loading, refetch }: SetQuery) => void;
+  deleteQuery?: ({ id }: { id: string }) => void;
   isInitializing: boolean;
 }
 
 interface GlobalTimeDispatch {
   setGlobalQuery: ActionCreator<GlobalQuery>;
   deleteAllQuery: ActionCreator<{ id: InputsModelId }>;
+  deleteOneQuery: ActionCreator<{ inputId: InputsModelId; id: string }>;
 }
 
 interface GlobalTimeReduxState {
@@ -45,7 +48,7 @@ interface OwnProps {
 type GlobalTimeProps = OwnProps & GlobalTimeReduxState & GlobalTimeDispatch;
 
 export const GlobalTimeComponent = React.memo(
-  ({ children, deleteAllQuery, from, to, setGlobalQuery }: GlobalTimeProps) => {
+  ({ children, deleteAllQuery, deleteOneQuery, from, to, setGlobalQuery }: GlobalTimeProps) => {
     const [isInitializing, setIsInitializing] = useState(true);
 
     useEffect(() => {
@@ -55,7 +58,7 @@ export const GlobalTimeComponent = React.memo(
       return () => {
         deleteAllQuery({ id: 'global' });
       };
-    });
+    }, []);
 
     return (
       <>
@@ -65,6 +68,7 @@ export const GlobalTimeComponent = React.memo(
           to,
           setQuery: ({ id, inspect, loading, refetch }: SetQuery) =>
             setGlobalQuery({ inputId: 'global', id, inspect, loading, refetch }),
+          deleteQuery: ({ id }: { id: string }) => deleteOneQuery({ inputId: 'global', id }),
         })}
       </>
     );
@@ -83,6 +87,7 @@ export const GlobalTime = connect(
   mapStateToProps,
   {
     deleteAllQuery: inputsActions.deleteAllQuery,
+    deleteOneQuery: inputsActions.deleteOneQuery,
     setGlobalQuery: inputsActions.setQuery,
   }
 )(GlobalTimeComponent);

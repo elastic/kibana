@@ -5,18 +5,41 @@
  */
 
 import chrome from 'ui/chrome';
+import {
+  DEFAULT_SIEM_TIME_RANGE,
+  DEFAULT_SIEM_REFRESH_INTERVAL,
+  DEFAULT_INDEX_KEY,
+  DEFAULT_DATE_FORMAT_TZ,
+  DEFAULT_DARK_MODE,
+  DEFAULT_TIME_RANGE,
+  DEFAULT_REFRESH_RATE_INTERVAL,
+  DEFAULT_FROM,
+  DEFAULT_TO,
+  DEFAULT_INTERVAL_PAUSE,
+  DEFAULT_INTERVAL_VALUE,
+} from '../../common/constants';
 
 chrome.getUiSettingsClient().get.mockImplementation((key: string) => {
   switch (key) {
-    case 'timepicker:timeDefaults':
+    case DEFAULT_TIME_RANGE:
       return { from: 'now-15m', to: 'now', mode: 'quick' };
-    case 'timepicker:refreshIntervalDefaults':
+    case DEFAULT_REFRESH_RATE_INTERVAL:
       return { pause: false, value: 0 };
-    case 'siem:defaultIndex':
+    case DEFAULT_SIEM_TIME_RANGE:
+      return {
+        from: DEFAULT_FROM,
+        to: DEFAULT_TO,
+      };
+    case DEFAULT_SIEM_REFRESH_INTERVAL:
+      return {
+        pause: DEFAULT_INTERVAL_PAUSE,
+        value: DEFAULT_INTERVAL_VALUE,
+      };
+    case DEFAULT_INDEX_KEY:
       return ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
-    case 'dateFormat:tz':
+    case DEFAULT_DATE_FORMAT_TZ:
       return 'Asia/Taipei';
-    case 'theme:darkMode':
+    case DEFAULT_DARK_MODE:
       return false;
     default:
       throw new Error(`Unexpected config key: ${key}`);

@@ -17,14 +17,13 @@
  * under the License.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { last } from 'lodash';
-import { EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import React from 'react';
+import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { RangesParamEditor } from 'ui/agg_types/controls/ranges';
-import { SelectOption, SwitchOption } from '../../common';
+import { ColorRanges, ColorSchemaOptions, SwitchOption } from '../../common';
+import { SetColorSchemaOptionsValue } from '../../common/color_schema';
 import { GaugeOptionsInternalProps } from '.';
 
 function RangesPanel({
@@ -36,49 +35,6 @@ function RangesPanel({
   uiState,
   vis,
 }: GaugeOptionsInternalProps) {
-  const [isCustomColors, setIsCustomColors] = useState(false);
-
-  useEffect(() => {
-    uiState.on('colorChanged', () => {
-      setIsCustomColors(true);
-    });
-  }, [uiState]);
-
-  const addRangeValues = useCallback(() => {
-    const previousRange = last(stateParams.gauge.colorsRange);
-    const from = previousRange.to ? previousRange.to : 0;
-    const to = previousRange.to ? from + (previousRange.to - (previousRange.from || 0)) : 100;
-
-    return { from, to };
-  }, [stateParams.gauge.colorsRange]);
-
-  const validateRange = useCallback(
-    ({ from, to }, index) => {
-      const leftBound = index === 0 ? -Infinity : stateParams.gauge.colorsRange[index - 1].to || 0;
-      const isFromValid = from >= leftBound;
-      const isToValid = to >= from;
-
-      return [isFromValid, isToValid];
-    },
-    [stateParams.gauge.colorsRange]
-  );
-
-  const resetColorsButton = (
-    <EuiText size="xs">
-      <EuiLink
-        onClick={() => {
-          uiState.set('vis.colors', null);
-          setIsCustomColors(false);
-        }}
-      >
-        <FormattedMessage
-          id="kbnVislibVisTypes.controls.gaugeOptions.resetColorsButtonLabel"
-          defaultMessage="Reset colors"
-        />
-      </EuiLink>
-    </EuiText>
-  );
-
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
@@ -91,18 +47,12 @@ function RangesPanel({
       </EuiTitle>
       <EuiSpacer size="s" />
 
-      <RangesParamEditor
-        dataTestSubj="gaugeColorRange"
-        error={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.errorText', {
-          defaultMessage: 'Each range should be greater than previous.',
-        })}
-        hidePlaceholders={true}
-        value={stateParams.gauge.colorsRange}
-        setValue={value => setGaugeValue('colorsRange', value)}
+      <ColorRanges
+        data-test-subj="gaugeColorRange"
+        colorsRange={stateParams.gauge.colorsRange}
+        setValue={setGaugeValue}
         setTouched={setTouched}
         setValidity={setValidity}
-        addRangeValues={addRangeValues}
-        validateRange={validateRange}
       />
 
       <SwitchOption
@@ -127,34 +77,14 @@ function RangesPanel({
         value={stateParams.gauge.percentageMode}
         setValue={setGaugeValue}
       />
-      <EuiSpacer size="s" />
 
-      <SelectOption
+      <ColorSchemaOptions
         disabled={stateParams.gauge.colorsRange.length < 2}
-        helpText={i18n.translate(
-          'kbnVislibVisTypes.controls.gaugeOptions.howToChangeColorsDescription',
-          {
-            defaultMessage: 'Note: colors can be changed in the legend.',
-          }
-        )}
-        label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.colorSchemaLabel', {
-          defaultMessage: 'Color schema',
-        })}
-        labelAppend={isCustomColors && resetColorsButton}
-        options={vis.type.editorConfig.collections.colorSchemas}
-        paramName="colorSchema"
-        value={stateParams.gauge.colorSchema}
-        setValue={setGaugeValue}
-      />
-
-      <SwitchOption
-        disabled={stateParams.gauge.colorsRange.length < 2}
-        label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.reverseColorSchemaLabel', {
-          defaultMessage: 'Reverse schema',
-        })}
-        paramName="invertColors"
-        value={stateParams.gauge.invertColors}
-        setValue={setGaugeValue}
+        colorSchema={stateParams.gauge.colorSchema}
+        colorSchemas={vis.type.editorConfig.collections.colorSchemas}
+        invertColors={stateParams.gauge.invertColors}
+        uiState={uiState}
+        setValue={setGaugeValue as SetColorSchemaOptionsValue}
       />
 
       <SwitchOption

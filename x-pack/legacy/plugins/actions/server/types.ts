@@ -7,6 +7,7 @@
 import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
 import { ExecuteOptions } from './create_execute_function';
+import { ActionsKibanaConfig } from './actions_config';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: any) => Services;
@@ -59,6 +60,7 @@ interface ValidatorType {
   validate<T>(value: any): any;
 }
 
+export type ActionTypeCreator = (config?: ActionsKibanaConfig) => ActionType;
 export interface ActionType {
   id: string;
   name: string;

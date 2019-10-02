@@ -9,7 +9,7 @@ import React from 'react';
 import { getRenderedHref } from '../../../utils/testHelpers';
 import { InfraLink } from './InfraLink';
 import * as kibanaCore from '../../../../../observability/public/context/kibana_core';
-import { InternalCoreStart } from 'src/core/public';
+import { LegacyCoreStart } from 'src/core/public';
 
 const coreMock = ({
   http: {
@@ -17,7 +17,7 @@ const coreMock = ({
       prepend: (path: string) => `/basepath${path}`
     }
   }
-} as unknown) as InternalCoreStart;
+} as unknown) as LegacyCoreStart;
 
 jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
 

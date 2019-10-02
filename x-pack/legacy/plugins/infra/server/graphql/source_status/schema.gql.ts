@@ -17,6 +17,8 @@ export const sourceStatusSchema = gql`
     searchable: Boolean!
     "Whether the field's values can be aggregated"
     aggregatable: Boolean!
+    "Whether the field should be displayed based on event.module and a ECS allowed list"
+    displayable: Boolean!
   }
 
   extend type InfraSourceStatus {

@@ -88,6 +88,7 @@ describe('MonitorList component', () => {
         absoluteEndDate={125}
         dangerColor="danger"
         data={{ monitorStates: result }}
+        hasActiveFilters={false}
         loading={false}
         successColor="primary"
       />
@@ -103,6 +104,7 @@ describe('MonitorList component', () => {
         absoluteEndDate={125}
         dangerColor="danger"
         data={{}}
+        hasActiveFilters={false}
         loading={false}
         successColor="primary"
       />

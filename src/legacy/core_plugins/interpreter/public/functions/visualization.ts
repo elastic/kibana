@@ -20,26 +20,10 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
-import { VisRequestHandlersRegistryProvider as RequestHandlersProvider } from 'ui/registry/vis_request_handlers';
-import { VisResponseHandlersRegistryProvider as ResponseHandlerProvider } from 'ui/registry/vis_response_handlers';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { PersistedState } from 'ui/persisted_state';
-import { IndexPatternsProvider } from '../../../data/public';
-
-function getHandler(from: any, type: any) {
-  if (typeof type === 'function') {
-    return type;
-  }
-  if (type === 'courier' || type === 'none') {
-    return null;
-  }
-  const handlerDesc = from.find((handler: any) => handler.name === type);
-  if (!handlerDesc) {
-    throw new Error(`Could not find handler "${type}".`);
-  }
-  return handlerDesc.handler;
-}
+import { setup as data } from '../../../data/public/legacy';
+import { start as visualizations } from '../../../visualizations/public/legacy';
 
 export const visualization = () => ({
   name: 'visualization',
@@ -80,24 +64,19 @@ export const visualization = () => ({
   async fn(context: any, args: any, handlers: any) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private = $injector.get('Private') as any;
-    const requestHandlers = Private(RequestHandlersProvider);
-    const responseHandlers = Private(ResponseHandlerProvider);
-    const visTypes = Private(VisTypesRegistryProvider);
-    const indexPatterns = Private(IndexPatternsProvider);
+    const { indexPatterns } = data.indexPatterns;
     const queryFilter = Private(FilterBarQueryFilterProvider);
 
     const visConfigParams = JSON.parse(args.visConfig);
     const schemas = JSON.parse(args.schemas);
-    const visType = visTypes.byName[args.type || 'histogram'];
-    const requestHandler = getHandler(requestHandlers, visType.requestHandler);
-    const responseHandler = getHandler(responseHandlers, visType.responseHandler);
+    const visType = visualizations.types.get(args.type || 'histogram') as any;
     const indexPattern = args.index ? await indexPatterns.get(args.index) : null;
 
     const uiStateParams = JSON.parse(args.uiState);
     const uiState = new PersistedState(uiStateParams);
 
-    if (requestHandler) {
-      context = await requestHandler({
+    if (typeof visType.requestHandler === 'function') {
+      context = await visType.requestHandler({
         partialRows: args.partialRows,
         metricsAtAllLevels: args.metricsAtAllLevels,
         index: indexPattern,
@@ -112,7 +91,7 @@ export const visualization = () => ({
       });
     }
 
-    if (responseHandler) {
+    if (typeof visType.responseHandler === 'function') {
       if (context.columns) {
         // assign schemas to aggConfigs
         context.columns.forEach((column: any) => {
@@ -130,7 +109,7 @@ export const visualization = () => ({
         });
       }
 
-      context = await responseHandler(context, visConfigParams.dimensions);
+      context = await visType.responseHandler(context, visConfigParams.dimensions);
     }
 
     return {

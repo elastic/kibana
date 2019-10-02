@@ -18,6 +18,7 @@
  */
 
 import { TmsLayer } from 'ui/vis/map/service_settings';
+import { MapTypes } from './map_types';
 
 export interface WMSOptions {
   selectedTmsLayer?: TmsLayer;
@@ -35,7 +36,7 @@ export interface WMSOptions {
 
 export interface TileMapVisParams {
   colorSchema: string;
-  mapType: 'Scaled Circle Markers' | 'Shaded Circle Markers' | 'Shaded geohash grid' | 'Heatmap';
+  mapType: MapTypes;
   isDesaturated: boolean;
   addTooltip: boolean;
   heatClusterSize: number;

@@ -90,7 +90,7 @@ export class Plugin {
           if (elem) {
             renderReact(
               elem,
-              { i18n, notification } as AppCore,
+              { i18n, notification, chrome } as AppCore,
               { management: { sections: management.sections } } as AppPlugins
             );
           }

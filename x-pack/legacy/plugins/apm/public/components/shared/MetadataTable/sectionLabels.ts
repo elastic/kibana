@@ -66,9 +66,23 @@ export const USER = i18n.translate(
   }
 );
 
+export const USER_AGENT = i18n.translate(
+  'xpack.apm.metadataTable.section.userAgentLabel',
+  {
+    defaultMessage: 'User agent'
+  }
+);
+
 export const CUSTOM = i18n.translate(
   'xpack.apm.metadataTable.section.customLabel',
   {
     defaultMessage: 'Custom'
+  }
+);
+
+export const PAGE = i18n.translate(
+  'xpack.apm.metadataTable.section.pageLabel',
+  {
+    defaultMessage: 'Page'
   }
 );

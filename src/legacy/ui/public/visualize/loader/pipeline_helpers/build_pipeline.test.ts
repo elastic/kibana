@@ -27,10 +27,14 @@ import {
   Schemas,
 } from './build_pipeline';
 import { Vis, VisState } from 'ui/vis';
-import { AggConfig } from 'ui/vis/agg_config';
+import { AggConfig } from 'ui/agg_types/agg_config';
 import { SearchSource } from 'ui/courier';
 
-jest.mock('ui/agg_types/buckets/date_histogram', () => ({}));
+jest.mock('ui/new_platform');
+jest.mock('ui/agg_types/buckets/date_histogram', () => ({
+  setBounds: () => {},
+  dateHistogramBucketAgg: () => {},
+}));
 
 describe('visualize loader pipeline helpers: build pipeline', () => {
   describe('prepareJson', () => {
@@ -360,7 +364,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
     beforeEach(() => {
       aggs = [
         {
-          id: 0,
+          id: '0',
           enabled: true,
           type: {
             type: 'metrics',
@@ -370,7 +374,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
             name: 'metric',
           },
           params: {},
-        },
+        } as AggConfig,
       ];
 
       params = {
@@ -387,7 +391,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
           params: {
             seriesParams: [
               {
-                data: { id: 0 },
+                data: { id: '0' },
                 valueAxis: 'axis-y',
               },
             ],
@@ -438,17 +442,17 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
 
       it('with two numeric metrics, mixed normal and percent mode should have corresponding formatters', async () => {
         const aggConfig = aggs[0];
-        aggs = [{ ...aggConfig }, { ...aggConfig, id: 5 }];
+        aggs = [{ ...aggConfig } as AggConfig, { ...aggConfig, id: '5' } as AggConfig];
 
         visState = {
           params: {
             seriesParams: [
               {
-                data: { id: 0 },
+                data: { id: '0' },
                 valueAxis: 'axis-y-1',
               },
               {
-                data: { id: 5 },
+                data: { id: '5' },
                 valueAxis: 'axis-y-2',
               },
             ],

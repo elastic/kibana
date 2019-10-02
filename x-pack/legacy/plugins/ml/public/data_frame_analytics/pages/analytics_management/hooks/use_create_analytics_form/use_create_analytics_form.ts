@@ -105,7 +105,7 @@ export const useCreateAnalyticsForm = () => {
         message: i18n.translate(
           'xpack.ml.dataframe.stepCreateForm.createDataFrameAnalyticsSuccessMessage',
           {
-            defaultMessage: 'Analytics job {jobId} created.',
+            defaultMessage: 'Request to create data frame analytics {jobId} acknowledged.',
             values: { jobId },
           }
         ),
@@ -134,7 +134,7 @@ export const useCreateAnalyticsForm = () => {
     const indexPatternName = destinationIndex;
 
     try {
-      const newIndexPattern = await kibanaContext.indexPatterns.get();
+      const newIndexPattern = await kibanaContext.indexPatterns.make();
 
       Object.assign(newIndexPattern, {
         id: '',
@@ -235,17 +235,19 @@ export const useCreateAnalyticsForm = () => {
       // able to identify outliers if there are no numeric fields present.
       const ids = await kibanaContext.indexPatterns.getIds(true);
       const indexPatternsWithNumericFields: IndexPatternTitle[] = [];
-      ids.forEach(async id => {
-        const indexPattern = await kibanaContext.indexPatterns.get(id);
-        if (
-          indexPattern.fields
-            .filter(f => !OMIT_FIELDS.includes(f.name))
-            .map(f => f.type)
-            .includes('number')
-        ) {
-          indexPatternsWithNumericFields.push(indexPattern.title);
-        }
-      });
+      ids
+        .filter(f => !!f)
+        .forEach(async id => {
+          const indexPattern = await kibanaContext.indexPatterns.get(id!);
+          if (
+            indexPattern.fields
+              .filter(f => !OMIT_FIELDS.includes(f.name))
+              .map(f => f.type)
+              .includes('number')
+          ) {
+            indexPatternsWithNumericFields.push(indexPattern.title);
+          }
+        });
       setIndexPatternTitles({ indexPatternTitles, indexPatternsWithNumericFields });
     } catch (e) {
       addRequestMessage({
@@ -273,7 +275,7 @@ export const useCreateAnalyticsForm = () => {
         message: i18n.translate(
           'xpack.ml.dataframe.analytics.create.startDataFrameAnalyticsSuccessMessage',
           {
-            defaultMessage: 'Analytics job {jobId} started.',
+            defaultMessage: 'Request to start data frame analytics {jobId} acknowledged.',
             values: { jobId },
           }
         ),

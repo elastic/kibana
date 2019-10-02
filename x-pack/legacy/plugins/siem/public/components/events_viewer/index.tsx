@@ -11,7 +11,7 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { WithSource } from '../../containers/source';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
-import { timelineActions } from '../../store/actions';
+import { timelineActions, inputsActions } from '../../store/actions';
 import { KqlMode, TimelineModel } from '../../store/timeline/model';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { DataProvider } from '../timeline/data_providers/data_provider';
@@ -19,7 +19,7 @@ import { Sort } from '../timeline/body/sort';
 import { OnChangeItemsPerPage } from '../timeline/events';
 
 import { EventsViewer } from './events_viewer';
-import { defaultHeaders } from './default_headers';
+import { InputsModelId } from '../../store/inputs/constants';
 
 export interface OwnProps {
   end: number;
@@ -44,6 +44,12 @@ interface DispatchProps {
   createTimeline: ActionCreator<{
     id: string;
     columns: ColumnHeader[];
+    itemsPerPage?: number;
+    sort?: Sort;
+  }>;
+  deleteEventQuery: ActionCreator<{
+    id: string;
+    inputId: InputsModelId;
   }>;
   removeColumn: ActionCreator<{
     id: string;
@@ -67,6 +73,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     createTimeline,
     columns,
     dataProviders,
+    deleteEventQuery,
     end,
     id,
     isLive,
@@ -84,8 +91,11 @@ const StatefulEventsViewerComponent = React.memo<Props>(
 
     useEffect(() => {
       if (createTimeline != null) {
-        createTimeline({ id, columns: defaultHeaders });
+        createTimeline({ id, columns, sort, itemsPerPage });
       }
+      return () => {
+        deleteEventQuery({ id, inputId: 'global' });
+      };
     }, []);
 
     const onChangeItemsPerPage: OnChangeItemsPerPage = itemsChangedPerPage =>
@@ -157,11 +167,11 @@ StatefulEventsViewerComponent.displayName = 'StatefulEventsViewerComponent';
 
 const makeMapStateToProps = () => {
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const getEvents = timelineSelectors.getEventsByIdSelector();
   const mapStateToProps = (state: State, { id }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
-    const timeline: TimelineModel = getTimeline(state, id);
-    const { columns, dataProviders, itemsPerPage, itemsPerPageOptions, kqlMode, sort } = timeline;
+    const events: TimelineModel = getEvents(state, id);
+    const { columns, dataProviders, itemsPerPage, itemsPerPageOptions, kqlMode, sort } = events;
 
     return {
       columns,
@@ -181,6 +191,7 @@ export const StatefulEventsViewer = connect(
   makeMapStateToProps,
   {
     createTimeline: timelineActions.createTimeline,
+    deleteEventQuery: inputsActions.deleteOneQuery,
     updateItemsPerPage: timelineActions.updateItemsPerPage,
     updateSort: timelineActions.updateSort,
     removeColumn: timelineActions.removeColumn,

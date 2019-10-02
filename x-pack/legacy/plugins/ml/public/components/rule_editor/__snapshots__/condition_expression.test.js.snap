@@ -202,11 +202,9 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
     <EuiButtonIcon
       aria-label="Delete condition"
       color="danger"
-      iconSize="m"
       iconType="trash"
       onClick={[Function]}
       size="s"
-      type="button"
     />
   </EuiFlexItem>
 </EuiFlexGroup>
@@ -412,11 +410,9 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
     <EuiButtonIcon
       aria-label="Delete condition"
       color="danger"
-      iconSize="m"
       iconType="trash"
       onClick={[Function]}
       size="s"
-      type="button"
     />
   </EuiFlexItem>
 </EuiFlexGroup>

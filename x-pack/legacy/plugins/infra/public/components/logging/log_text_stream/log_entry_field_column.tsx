@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import stringify from 'json-stable-stringify';
 import { darken, transparentize } from 'polished';
 import React, { useMemo } from 'react';
 
@@ -51,7 +52,7 @@ export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnPro
     </ul>
   ) : (
     highlightFieldValue(
-      value,
+      typeof value === 'object' && value != null ? stringify(value) : value,
       isHighlightFieldColumn(firstHighlight) ? firstHighlight.highlights : [],
       isActiveHighlight ? ActiveHighlightMarker : HighlightMarker
     )

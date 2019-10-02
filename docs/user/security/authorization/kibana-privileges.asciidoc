@@ -1,0 +1,71 @@
+[role="xpack"]
+[[kibana-privileges]]
+=== Kibana privileges
+
+{kib} privileges grant users access to features within {kib}. Roles have privileges to determine whether users have write or read access.
+
+==== Base privileges
+Assigning a base privilege grants access to all available features in Kibana (Discover, Visualize, Dashboard, and so on).
+[[kibana-privileges-all]]
+`all`:: Grants full read-write access.
+`read`:: Grants read-only access.
+
+===== Assigning base privileges
+From the role management screen:
+
+[role="screenshot"]
+image::user/security/images/assign_base_privilege.png[Assign base privilege]
+
+From the <<role-management-api-put, role management API>>:
+[source,js]
+--------------------------------------------------
+PUT /api/security/role/my_kibana_role
+{
+  "elasticsearch": {
+    "cluster" : [ ],
+    "indices" : [ ]
+  },
+  "kibana": [
+    {
+      "base": ["all"],
+      "feature": {},
+      "spaces": ["marketing"]
+    }
+  ]
+}
+--------------------------------------------------
+
+
+[[kibana-feature-privileges]]
+==== Feature privileges
+Assigning a feature privilege grants access to a specific feature.
+
+`all`:: Grants full read-write access.
+`read`:: Grants read-only access.
+
+===== Assigning feature privileges
+From the role management screen:
+
+[role="screenshot"]
+image::user/security/images/assign_feature_privilege.png[Assign feature privilege]
+
+From the <<role-management-api-put, role management API>>:
+[source,js]
+--------------------------------------------------
+PUT /api/security/role/my_kibana_role
+{
+  "elasticsearch": {
+    "cluster" : [ ],
+    "indices" : [ ]
+  },
+  "kibana": [
+    {
+      "base": [],
+      "feature": {
+        "dashboard": ["all"]
+      },
+      "spaces": ["marketing"]
+    }
+  ]
+}
+--------------------------------------------------

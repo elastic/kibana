@@ -80,7 +80,7 @@ module.exports = function({ name }) {
     },
     move: {
       gitignore: '.gitignore',
-      eslintrc: '.eslintrc',
+      'eslintrc.js': '.eslintrc.js',
       'package_template.json': 'package.json',
     },
     data: answers =>

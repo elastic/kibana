@@ -4,23 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { IndexPattern } from 'ui/index_patterns';
 
-import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiText, EuiTitle, EuiFlexGroup } from '@elastic/eui';
 
 import { useUiChromeContext } from '../../../../contexts/ui/use_ui_chrome_context';
 import { CreateJobLinkCard } from '../../../../components/create_job_link_card';
+import { DataRecognizer } from '../../../../components/data_recognizer';
 
 interface Props {
   indexPattern: IndexPattern;
 }
 
 export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
+  const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
+
+  const recognizerResults = {
+    count: 0,
+    onChange() {
+      setRecognizerResultsCount(recognizerResults.count);
+    },
+  };
+
   const basePath = useUiChromeContext().getBasePath();
 
   function openAdvancedJobWizard() {
@@ -29,6 +39,9 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
     window.open(`${basePath}/app/ml#/jobs/new_job/advanced?index=${indexPattern}`, '_self');
   }
 
+  // Note we use display:none for the DataRecognizer section as it needs to be
+  // passed the recognizerResults object, and then run the recognizer check which
+  // controls whether the recognizer section is ultimately displayed.
   return (
     <EuiPanel data-test-subj="mlDataVisualizerActionsPanel">
       <EuiTitle>
@@ -40,6 +53,21 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
         </h2>
       </EuiTitle>
       <EuiSpacer size="s" />
+      <div style={recognizerResultsCount === 0 ? { display: 'none' } : {}}>
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.ml.datavisualizer.actionsPanel.selectKnownConfigurationDescription"
+              defaultMessage="Select known configurations for recognized data:"
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="l" responsive={true} wrap={true}>
+          <DataRecognizer indexPattern={indexPattern} results={recognizerResults}></DataRecognizer>
+        </EuiFlexGroup>
+        <EuiSpacer size="l" />
+      </div>
       <EuiText>
         <p>
           <FormattedMessage
@@ -50,7 +78,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
       </EuiText>
       <EuiSpacer size="m" />
       <CreateJobLinkCard
-        iconType="createAdvancedJob"
+        icon="createAdvancedJob"
         title={i18n.translate('xpack.ml.datavisualizer.actionsPanel.advancedTitle', {
           defaultMessage: 'Advanced',
         })}
@@ -59,6 +87,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
             'Use the full range of options to create a job for more advanced use cases',
         })}
         onClick={openAdvancedJobWizard}
+        href={`${basePath}/app/ml#/jobs/new_job/advanced?index=${indexPattern}`}
       />
     </EuiPanel>
   );

@@ -10,6 +10,7 @@ import styled from 'styled-components';
 
 import { HeaderPage } from '../../components/header_page';
 import { StatefulOpenTimeline } from '../../components/open_timeline';
+import { SpyRoute } from '../../utils/route/spy_routes';
 
 import * as i18n from './translations';
 
@@ -41,6 +42,7 @@ export class TimelinesPage extends React.PureComponent<OwnProps> {
             title={i18n.ALL_TIMELINES_PANEL_TITLE}
           />
         </TimelinesContainer>
+        <SpyRoute />
       </>
     );
   }

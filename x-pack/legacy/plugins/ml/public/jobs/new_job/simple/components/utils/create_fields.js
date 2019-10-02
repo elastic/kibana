@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
+import { i18n } from '@kbn/i18n';
 import { EVENT_RATE_COUNT_FIELD } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
-import { ML_JOB_FIELD_TYPES, KBN_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
+import { ML_JOB_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
 import { getSafeAggregationName } from 'plugins/ml/../common/util/job_utils';
 import { kbnTypeToMLJobType } from 'plugins/ml/util/field_types_utils';
-import { i18n } from '@kbn/i18n';
+import { KBN_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 
 export function createFields(scope, indexPattern) {
   const isPopulation = scope.formConfig.hasOwnProperty('overField');

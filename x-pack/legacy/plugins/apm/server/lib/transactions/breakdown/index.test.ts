@@ -134,4 +134,32 @@ describe('getTransactionBreakdown', () => {
 
     expect(timeseries.map(serie => serie.title)).toEqual(['app', 'http']);
   });
+
+  it('fills in gaps for a given timestamp', async () => {
+    const clientSpy = jest.fn().mockReturnValueOnce(dataResponse);
+
+    const response = await getTransactionBreakdown({
+      serviceName: 'myServiceName',
+      transactionType: 'request',
+      setup: {
+        start: 0,
+        end: 500000,
+        client: { search: clientSpy } as any,
+        config: {
+          get: () => 'myIndex' as any,
+          has: () => true
+        },
+        uiFiltersES: []
+      }
+    });
+
+    const { timeseries } = response;
+
+    const appTimeseries = timeseries.find(series => series.title === 'app');
+
+    // missing values should be 0 if other span types do have data for that timestamp
+    expect((appTimeseries as NonNullable<typeof appTimeseries>).data[1].y).toBe(
+      0
+    );
+  });
 });

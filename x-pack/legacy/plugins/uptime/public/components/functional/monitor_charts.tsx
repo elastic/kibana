@@ -7,14 +7,13 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useContext } from 'react';
-import DateMath from '@elastic/datemath';
-import { Moment } from 'moment';
 import { MonitorChart } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { monitorChartsQuery } from '../../queries';
 import { DurationChart } from './charts';
 import { UptimeSettingsContext } from '../../contexts';
 import { SnapshotHistogram } from './charts/snapshot_histogram';
+import { useUrlParams } from '../../hooks';
 
 interface MonitorChartsQueryResult {
   monitorChartsData?: MonitorChart;
@@ -32,35 +31,43 @@ interface MonitorChartsProps {
 
 type Props = MonitorChartsProps & UptimeGraphQLQueryProps<MonitorChartsQueryResult>;
 
-export const MonitorChartsComponent = (props: Props) => {
-  const { data, mean, range, monitorId, dateRangeStart, dateRangeEnd } = props;
+export const MonitorChartsComponent = ({
+  data,
+  mean,
+  range,
+  monitorId,
+  dateRangeStart,
+  dateRangeEnd,
+  loading,
+}: Props) => {
   if (data && data.monitorChartsData) {
     const {
       monitorChartsData: { locationDurationLines },
     } = data;
 
     const { colors } = useContext(UptimeSettingsContext);
-    const parseDateRange = (r: string): number => {
-      const parsed: Moment | undefined = DateMath.parse(r);
-      return parsed ? parsed.valueOf() : 0;
-    };
+    const [getUrlParams] = useUrlParams();
+    const { absoluteDateRangeStart, absoluteDateRangeEnd } = getUrlParams();
+
     return (
       <Fragment>
         <EuiFlexGroup>
-          <EuiFlexItem style={{ height: 400 }}>
+          <EuiFlexItem>
             <DurationChart
               locationDurationLines={locationDurationLines}
               meanColor={mean}
               rangeColor={range}
+              loading={loading}
             />
           </EuiFlexItem>
           <EuiFlexItem>
             <SnapshotHistogram
-              absoluteStartDate={parseDateRange(dateRangeStart)}
-              absoluteEndDate={parseDateRange(dateRangeEnd)}
+              absoluteStartDate={absoluteDateRangeStart}
+              absoluteEndDate={absoluteDateRangeEnd}
               successColor={colors.success}
               dangerColor={colors.danger}
               variables={{ dateRangeStart, dateRangeEnd, monitorId }}
+              height="400px"
             />
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -19,7 +19,7 @@ import {
 import {
   ConcreteTaskInstance,
   ElasticJs,
-  SanitizedTaskDefinition,
+  TaskDefinition,
   TaskDictionary,
   TaskInstance,
 } from './task';
@@ -28,7 +28,7 @@ export interface StoreOpts {
   callCluster: ElasticJs;
   index: string;
   maxAttempts: number;
-  definitions: TaskDictionary<SanitizedTaskDefinition>;
+  definitions: TaskDictionary<TaskDefinition>;
   savedObjectsRepository: SavedObjectsClientContract;
   serializer: SavedObjectsSerializer;
 }
@@ -52,7 +52,7 @@ export class TaskStore {
   public readonly maxAttempts: number;
   public readonly index: string;
   private callCluster: ElasticJs;
-  private definitions: TaskDictionary<SanitizedTaskDefinition>;
+  private definitions: TaskDictionary<TaskDefinition>;
   private savedObjectsRepository: SavedObjectsClientContract;
   private serializer: SavedObjectsSerializer;
 

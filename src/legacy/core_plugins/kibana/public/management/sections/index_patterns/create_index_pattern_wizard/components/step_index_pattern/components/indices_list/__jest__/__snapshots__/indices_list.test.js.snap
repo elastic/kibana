@@ -2,57 +2,23 @@
 
 exports[`IndicesList should change pages 1`] = `
 <div>
-  <EuiTable
-    responsive={true}
-  >
+  <EuiTable>
     <EuiTableBody>
       <EuiTableRow
         key="0"
       >
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        >
+        <EuiTableRowCell>
           kibana
         </EuiTableRowCell>
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        />
+        <EuiTableRowCell />
       </EuiTableRow>
       <EuiTableRow
         key="1"
       >
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        >
+        <EuiTableRowCell>
           es
         </EuiTableRowCell>
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        />
+        <EuiTableRowCell />
       </EuiTableRow>
     </EuiTableBody>
   </EuiTable>
@@ -75,7 +41,6 @@ exports[`IndicesList should change pages 1`] = `
             iconType="arrowDown"
             onClick={[Function]}
             size="s"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Rows per page: {perPage}"
@@ -103,33 +68,25 @@ exports[`IndicesList should change pages 1`] = `
             Array [
               <EuiContextMenuItem
                 icon="empty"
-                layoutAlign="center"
                 onClick={[Function]}
-                toolTipPosition="right"
               >
                 5
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
-                layoutAlign="center"
                 onClick={[Function]}
-                toolTipPosition="right"
               >
                 10
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
-                layoutAlign="center"
                 onClick={[Function]}
-                toolTipPosition="right"
               >
                 20
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
-                layoutAlign="center"
                 onClick={[Function]}
-                toolTipPosition="right"
               >
                 50
               </EuiContextMenuItem>,
@@ -144,33 +101,15 @@ exports[`IndicesList should change pages 1`] = `
 
 exports[`IndicesList should change per page 1`] = `
 <div>
-  <EuiTable
-    responsive={true}
-  >
+  <EuiTable>
     <EuiTableBody>
       <EuiTableRow
         key="0"
       >
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        >
+        <EuiTableRowCell>
           kibana
         </EuiTableRowCell>
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        />
+        <EuiTableRowCell />
       </EuiTableRow>
     </EuiTableBody>
   </EuiTable>
@@ -193,7 +132,6 @@ exports[`IndicesList should change per page 1`] = `
             iconType="arrowDown"
             onClick={[Function]}
             size="s"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Rows per page: {perPage}"
@@ -221,33 +159,25 @@ exports[`IndicesList should change per page 1`] = `
             Array [
               <EuiContextMenuItem
                 icon="empty"
-                layoutAlign="center"
                 onClick={[Function]}
-                toolTipPosition="right"
               >
                 5
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
-                layoutAlign="center"
                 onClick={[Function]}
-                toolTipPosition="right"
               >
                 10
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
-                layoutAlign="center"
                 onClick={[Function]}
-                toolTipPosition="right"
               >
                 20
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
-                layoutAlign="center"
                 onClick={[Function]}
-                toolTipPosition="right"
               >
                 50
               </EuiContextMenuItem>,
@@ -271,22 +201,12 @@ exports[`IndicesList should change per page 1`] = `
 
 exports[`IndicesList should highlight the query in the matches 1`] = `
 <div>
-  <EuiTable
-    responsive={true}
-  >
+  <EuiTable>
     <EuiTableBody>
       <EuiTableRow
         key="0"
       >
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        >
+        <EuiTableRowCell>
           <span>
             <strong>
               ki
@@ -294,39 +214,15 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
             bana
           </span>
         </EuiTableRowCell>
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        />
+        <EuiTableRowCell />
       </EuiTableRow>
       <EuiTableRow
         key="1"
       >
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        >
+        <EuiTableRowCell>
           es
         </EuiTableRowCell>
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        />
+        <EuiTableRowCell />
       </EuiTableRow>
     </EuiTableBody>
   </EuiTable>
@@ -349,7 +245,6 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
             iconType="arrowDown"
             onClick={[Function]}
             size="s"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Rows per page: {perPage}"
@@ -377,33 +272,25 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
             Array [
               <EuiContextMenuItem
                 icon="empty"
-                layoutAlign="center"
                 onClick={[Function]}
-                toolTipPosition="right"
               >
                 5
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
-                layoutAlign="center"
                 onClick={[Function]}
-                toolTipPosition="right"
               >
                 10
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
-                layoutAlign="center"
                 onClick={[Function]}
-                toolTipPosition="right"
               >
                 20
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
-                layoutAlign="center"
                 onClick={[Function]}
-                toolTipPosition="right"
               >
                 50
               </EuiContextMenuItem>,
@@ -418,57 +305,23 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
 
 exports[`IndicesList should render normally 1`] = `
 <div>
-  <EuiTable
-    responsive={true}
-  >
+  <EuiTable>
     <EuiTableBody>
       <EuiTableRow
         key="0"
       >
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        >
+        <EuiTableRowCell>
           kibana
         </EuiTableRowCell>
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        />
+        <EuiTableRowCell />
       </EuiTableRow>
       <EuiTableRow
         key="1"
       >
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        >
+        <EuiTableRowCell>
           es
         </EuiTableRowCell>
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        />
+        <EuiTableRowCell />
       </EuiTableRow>
     </EuiTableBody>
   </EuiTable>
@@ -491,7 +344,6 @@ exports[`IndicesList should render normally 1`] = `
             iconType="arrowDown"
             onClick={[Function]}
             size="s"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Rows per page: {perPage}"
@@ -519,33 +371,25 @@ exports[`IndicesList should render normally 1`] = `
             Array [
               <EuiContextMenuItem
                 icon="empty"
-                layoutAlign="center"
                 onClick={[Function]}
-                toolTipPosition="right"
               >
                 5
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
-                layoutAlign="center"
                 onClick={[Function]}
-                toolTipPosition="right"
               >
                 10
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
-                layoutAlign="center"
                 onClick={[Function]}
-                toolTipPosition="right"
               >
                 20
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
-                layoutAlign="center"
                 onClick={[Function]}
-                toolTipPosition="right"
               >
                 50
               </EuiContextMenuItem>,
@@ -560,249 +404,87 @@ exports[`IndicesList should render normally 1`] = `
 
 exports[`IndicesList updating props should render all new indices 1`] = `
 <div>
-  <EuiTable
-    responsive={true}
-  >
+  <EuiTable>
     <EuiTableBody>
       <EuiTableRow
         key="0"
       >
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        >
+        <EuiTableRowCell>
           kibana
         </EuiTableRowCell>
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        />
+        <EuiTableRowCell />
       </EuiTableRow>
       <EuiTableRow
         key="1"
       >
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        >
+        <EuiTableRowCell>
           es
         </EuiTableRowCell>
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        />
+        <EuiTableRowCell />
       </EuiTableRow>
       <EuiTableRow
         key="2"
       >
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        >
+        <EuiTableRowCell>
           kibana
         </EuiTableRowCell>
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        />
+        <EuiTableRowCell />
       </EuiTableRow>
       <EuiTableRow
         key="3"
       >
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        >
+        <EuiTableRowCell>
           es
         </EuiTableRowCell>
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        />
+        <EuiTableRowCell />
       </EuiTableRow>
       <EuiTableRow
         key="4"
       >
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        >
+        <EuiTableRowCell>
           kibana
         </EuiTableRowCell>
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        />
+        <EuiTableRowCell />
       </EuiTableRow>
       <EuiTableRow
         key="5"
       >
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        >
+        <EuiTableRowCell>
           es
         </EuiTableRowCell>
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        />
+        <EuiTableRowCell />
       </EuiTableRow>
       <EuiTableRow
         key="6"
       >
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        >
+        <EuiTableRowCell>
           kibana
         </EuiTableRowCell>
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        />
+        <EuiTableRowCell />
       </EuiTableRow>
       <EuiTableRow
         key="7"
       >
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        >
+        <EuiTableRowCell>
           es
         </EuiTableRowCell>
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        />
+        <EuiTableRowCell />
       </EuiTableRow>
       <EuiTableRow
         key="8"
       >
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        >
+        <EuiTableRowCell>
           kibana
         </EuiTableRowCell>
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        />
+        <EuiTableRowCell />
       </EuiTableRow>
       <EuiTableRow
         key="9"
       >
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        >
+        <EuiTableRowCell>
           es
         </EuiTableRowCell>
-        <EuiTableRowCell
-          align="left"
-          mobileOptions={
-            Object {
-              "show": true,
-            }
-          }
-          textOnly={true}
-        />
+        <EuiTableRowCell />
       </EuiTableRow>
     </EuiTableBody>
   </EuiTable>
@@ -825,7 +507,6 @@ exports[`IndicesList updating props should render all new indices 1`] = `
             iconType="arrowDown"
             onClick={[Function]}
             size="s"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Rows per page: {perPage}"
@@ -853,33 +534,25 @@ exports[`IndicesList updating props should render all new indices 1`] = `
             Array [
               <EuiContextMenuItem
                 icon="empty"
-                layoutAlign="center"
                 onClick={[Function]}
-                toolTipPosition="right"
               >
                 5
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
-                layoutAlign="center"
                 onClick={[Function]}
-                toolTipPosition="right"
               >
                 10
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
-                layoutAlign="center"
                 onClick={[Function]}
-                toolTipPosition="right"
               >
                 20
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
-                layoutAlign="center"
                 onClick={[Function]}
-                toolTipPosition="right"
               >
                 50
               </EuiContextMenuItem>,

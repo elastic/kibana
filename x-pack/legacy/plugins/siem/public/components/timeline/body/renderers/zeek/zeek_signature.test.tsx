@@ -35,7 +35,7 @@ describe('ZeekSignature', () => {
 
   describe('rendering', () => {
     test('it renders the default Zeek', () => {
-      const wrapper = shallow(<ZeekSignature data={zeek} />);
+      const wrapper = shallow(<ZeekSignature data={zeek} timelineId="test" />);
       expect(toJson(wrapper)).toMatchSnapshot();
     });
   });
