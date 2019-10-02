@@ -181,15 +181,17 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async setBucketSpan(bucketSpan: string) {
-      await testSubjects.setValue('mlJobWizardInputBucketSpan', bucketSpan);
+      await testSubjects.setValue('mlJobWizardInputBucketSpan', bucketSpan, { withKeyboard: true });
     },
 
     async setJobId(jobId: string) {
-      await testSubjects.setValue('mlJobWizardInputJobId', jobId);
+      await testSubjects.setValue('mlJobWizardInputJobId', jobId, { withKeyboard: true });
     },
 
     async setJobDescription(jobDescription: string) {
-      await testSubjects.setValue('mlJobWizardInputJobDescription', jobDescription);
+      await testSubjects.setValue('mlJobWizardInputJobDescription', jobDescription, {
+        withKeyboard: true,
+      });
     },
 
     async addJobGroup(jobGroup: string) {
@@ -216,7 +218,9 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async setModelMemoryLimit(modelMemoryLimit: string) {
-      await testSubjects.setValue('mlJobWizardInputModelMemoryLimit', modelMemoryLimit);
+      await testSubjects.setValue('mlJobWizardInputModelMemoryLimit', modelMemoryLimit, {
+        withKeyboard: true,
+      });
     },
 
     async createJobAndWaitForCompletion() {
