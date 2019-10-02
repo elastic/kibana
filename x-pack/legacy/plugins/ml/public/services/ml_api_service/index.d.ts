@@ -125,7 +125,7 @@ declare interface Ml {
       jobId: string,
       start: number,
       end: number
-    ): Promise<{ progress: number; isRunning: boolean }>;
+    ): Promise<{ progress: number; isRunning: boolean; isJobClosed: boolean }>;
   };
 
   estimateBucketSpan(
