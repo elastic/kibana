@@ -698,7 +698,7 @@ export class FieldEditorComponent extends PureComponent {
         isSaving: true
       });
 
-      const isValid = true; await isScriptValid({
+      const isValid = await isScriptValid({
         name: field.name,
         lang: field.lang,
         script: field.script,
