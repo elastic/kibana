@@ -28,6 +28,7 @@ export interface WorkspaceNode {
   scaledSize: number;
   parent: WorkspaceNode | null;
   color: string;
+  isSelected?: boolean;
 }
 
 export interface WorkspaceEdge {
@@ -37,6 +38,7 @@ export interface WorkspaceEdge {
   label: string;
   source: WorkspaceNode;
   target: WorkspaceNode;
+  isSelected?: boolean;
 }
 
 export interface ServerResultNode {
