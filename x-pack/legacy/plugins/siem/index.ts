@@ -23,6 +23,7 @@ import {
   DEFAULT_FROM,
   DEFAULT_TO,
 } from './common/constants';
+import { signalsAlertType } from './server/lib/detection_engine/alerts/signals_alert_type';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function siem(kibana: any) {
@@ -31,6 +32,11 @@ export function siem(kibana: any) {
     configPrefix: 'xpack.siem',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch'],
+    // Uncomment these lines to turn on alerting and action for detection engine and comment the other
+    // require statement out. These are hidden behind feature flags at the moment so if you turn
+    // these on without the feature flags turned on then Kibana will crash since we are a legacy plugin
+    // and legacy plugins cannot have optional requirements.
+    // require: ['kibana', 'elasticsearch', 'alerting', 'actions'],
     uiExports: {
       app: {
         description: i18n.translate('xpack.siem.securityDescription', {
@@ -115,6 +121,9 @@ export function siem(kibana: any) {
       mappings: savedObjectMappings,
     },
     init(server: Server) {
+      if (server.plugins.alerting != null) {
+        server.plugins.alerting.registerType(signalsAlertType);
+      }
       server.injectUiAppVars('siem', async () => server.getInjectedUiAppVars('kibana'));
       initServerWithKibana(server);
     },

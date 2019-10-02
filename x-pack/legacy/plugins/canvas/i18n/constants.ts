@@ -31,6 +31,7 @@ export const POST = 'POST';
 export const RGB = 'RGB';
 export const SQL = 'SQL';
 export const SVG = 'SVG';
+export const TIMELION = 'Timelion';
 export const TINYMATH = '`TinyMath`';
 export const TINYMATH_URL =
   'https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html';

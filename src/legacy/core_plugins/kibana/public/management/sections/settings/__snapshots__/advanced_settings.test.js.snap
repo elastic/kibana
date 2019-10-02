@@ -70,6 +70,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "array",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -88,6 +89,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "boolean",
+            "validation": undefined,
             "value": undefined,
           },
         ],
@@ -108,6 +110,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "string",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -126,6 +129,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "image",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -146,6 +150,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "json",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -164,6 +169,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "number",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -186,6 +192,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "select",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -204,6 +211,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "string",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -222,6 +230,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "json",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -240,6 +249,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "markdown",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -258,6 +268,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "number",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -280,6 +291,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "select",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -298,6 +310,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "string",
+            "validation": undefined,
             "value": undefined,
           },
         ],
@@ -342,6 +355,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "array",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -360,6 +374,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "boolean",
+            "validation": undefined,
             "value": undefined,
           },
         ],
@@ -380,6 +395,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "string",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -398,6 +414,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "image",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -418,6 +435,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "json",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -436,6 +454,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "number",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -458,6 +477,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "select",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -476,6 +496,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "string",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -494,6 +515,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "json",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -512,6 +534,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "markdown",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -530,6 +553,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "number",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -552,6 +576,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "select",
+            "validation": undefined,
             "value": undefined,
           },
           Object {
@@ -570,6 +595,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "readonly": false,
             "requiresPageReload": false,
             "type": "string",
+            "validation": undefined,
             "value": undefined,
           },
         ],
@@ -689,6 +715,7 @@ exports[`AdvancedSettings should render read-only when saving is disabled 1`] = 
             "readonly": false,
             "requiresPageReload": false,
             "type": "string",
+            "validation": undefined,
             "value": undefined,
           },
         ],
@@ -731,6 +758,7 @@ exports[`AdvancedSettings should render read-only when saving is disabled 1`] = 
             "readonly": false,
             "requiresPageReload": false,
             "type": "string",
+            "validation": undefined,
             "value": undefined,
           },
         ],
@@ -868,6 +896,7 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
             "readonly": false,
             "requiresPageReload": false,
             "type": "string",
+            "validation": undefined,
             "value": undefined,
           },
         ],
@@ -910,6 +939,7 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
             "readonly": false,
             "requiresPageReload": false,
             "type": "string",
+            "validation": undefined,
             "value": undefined,
           },
         ],

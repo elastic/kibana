@@ -11,6 +11,7 @@ import chrome from 'ui/chrome';
 import { Storage } from 'ui/storage';
 import { CoreSetup, CoreStart } from 'src/core/public';
 import { npSetup, npStart } from 'ui/new_platform';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { editorFrameSetup, editorFrameStart, editorFrameStop } from '../editor_frame_plugin';
 import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from '../indexpattern_plugin';
 import { SavedObjectIndexStore } from '../persistence';
@@ -23,6 +24,9 @@ import {
 import { App } from './app';
 import { EditorFrameInstance } from '../types';
 
+export interface LensPluginStartDependencies {
+  data: DataPublicPluginStart;
+}
 export class AppPlugin {
   private instance: EditorFrameInstance | null = null;
   private store: SavedObjectIndexStore | null = null;
@@ -45,7 +49,7 @@ export class AppPlugin {
     editorFrameSetupInterface.registerVisualization(metricVisualization);
   }
 
-  start(core: CoreStart) {
+  start(core: CoreStart, { data }: LensPluginStartDependencies) {
     if (this.store === null) {
       throw new Error('Start lifecycle called before setup lifecycle');
     }
@@ -60,6 +64,7 @@ export class AppPlugin {
       return (
         <App
           core={core}
+          data={data}
           editorFrame={this.instance!}
           store={new Storage(localStorage)}
           docId={routeProps.match.params.id}
@@ -109,5 +114,5 @@ export class AppPlugin {
 const app = new AppPlugin();
 
 export const appSetup = () => app.setup(npSetup.core);
-export const appStart = () => app.start(npStart.core);
+export const appStart = () => app.start(npStart.core, { data: npStart.plugins.data });
 export const appStop = () => app.stop();

@@ -250,7 +250,6 @@ exports[`Inspector Data View component should render empty state 1`] = `
           </p>
         </React.Fragment>
       }
-      iconColor="subdued"
       title={
         <h2>
           <FormattedMessage

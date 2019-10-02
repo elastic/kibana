@@ -12,11 +12,11 @@ import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { SecurityPlugin } from '../../../../security';
 import { SpacesClient } from '../../lib/spaces_client';
-import { getSpaceIdFromPath, addSpaceIdToPath } from '../../lib/spaces_url_parser';
 import { SpacesConfigType } from '../config';
 import { namespaceToSpaceId, spaceIdToNamespace } from '../../lib/utils/namespace';
 import { LegacyAPI } from '../plugin';
 import { Space } from '../../../common/model/space';
+import { getSpaceIdFromPath, addSpaceIdToPath } from '../../../common';
 
 type RequestFacade = KibanaRequest | Legacy.Request;
 
