@@ -13,7 +13,7 @@ class TextService {
       home: i18n.translate('xpack.transform.home.breadcrumbTitle', {
         defaultMessage: 'Transforms',
       }),
-      snapshots: i18n.translate('xpack.transform.createTransform.breadcrumbTitle', {
+      createTransform: i18n.translate('xpack.transform.createTransform.breadcrumbTitle', {
         defaultMessage: 'Create transform',
       }),
     };

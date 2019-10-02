@@ -14,7 +14,7 @@ import { getAppProviders, useAppDependencies } from './app_dependencies';
 import { AuthorizationContext } from './lib/authorization';
 import { AppCore, AppPlugins } from './types';
 
-import { Page as NewTransform } from './sections/new_transform/page';
+import { Page as CreateTransform } from './sections/create_transform/page';
 import { Page as TransformManagement } from './sections/transform_management/page';
 
 export const App: FC = () => {
@@ -43,7 +43,7 @@ export const App: FC = () => {
   return (
     <div data-test-subj="transformApp">
       <Switch>
-        <Route path={`${BASE_PATH}/new_transform/:savedObjectId`} component={NewTransform} />
+        <Route path={`${BASE_PATH}/create_transform/:savedObjectId`} component={CreateTransform} />
         <Route exact path={`${BASE_PATH}/transform_management`} component={TransformManagement} />
         <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />
       </Switch>

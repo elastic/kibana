@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { useEffect, FC } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -22,13 +22,14 @@ import {
 } from '@elastic/eui';
 
 import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
+import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 import { PrivilegesWrapper } from '../../lib/authorization';
 import { KibanaProvider } from '../../lib/kibana';
 
 import { Wizard } from './components/wizard';
 
 type Props = RouteComponentProps<{ savedObjectId: string }>;
-const NewTransform = ({ match }: Props) => (
+const CreateTransform = ({ match }: Props) => (
   <KibanaProvider savedObjectId={match.params.savedObjectId}>
     <EuiPage>
       <EuiPageBody>
@@ -37,8 +38,8 @@ const NewTransform = ({ match }: Props) => (
             <EuiTitle>
               <h1>
                 <FormattedMessage
-                  id="xpack.transform.transformsWizard.newTransformTitle"
-                  defaultMessage="New transform"
+                  id="xpack.transform.transformsWizard.createTransformTitle"
+                  defaultMessage="Create transform"
                 />
                 <span>&nbsp;</span>
                 <EuiBetaBadge
@@ -66,9 +67,15 @@ const NewTransform = ({ match }: Props) => (
 );
 
 export const Page: FC<Props> = props => {
+  // Set breadcrumb and page title
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs(BREADCRUMB_SECTION.CREATE_TRANSFORM);
+    docTitleService.setTitle('createTransform');
+  }, []);
+
   return (
     <PrivilegesWrapper privileges={APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES}>
-      <NewTransform {...props} />
+      <CreateTransform {...props} />
     </PrivilegesWrapper>
   );
 };

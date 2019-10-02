@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useState } from 'react';
+import React, { FC, Fragment, useEffect, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -26,6 +26,7 @@ import {
 import { APP_GET_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 import { PrivilegesWrapper } from '../../lib/authorization';
 import { useRefreshTransformList, TransformListRow } from '../../common';
+import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 import { CreateTransformButton } from './components/create_transform_button';
 import { TransformList } from './components/transform_list';
 import { RefreshTransformListButton } from './components/refresh_transform_list_button';
@@ -116,6 +117,12 @@ export const TransformManagement: FC = () => {
 };
 
 export const Page: FC = () => {
+  // Set breadcrumb and page title
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs(BREADCRUMB_SECTION.HOME);
+    docTitleService.setTitle('home');
+  }, []);
+
   return (
     <PrivilegesWrapper privileges={APP_GET_TRANSFORM_CLUSTER_PRIVILEGES}>
       <TransformManagement />

@@ -5,33 +5,29 @@
  */
 
 import { textService } from '../text';
-import {
-  linkToHome,
-  linkToSnapshots,
-  linkToRepositories,
-  linkToPolicies,
-  linkToRestoreStatus,
-} from './';
+import { linkToHome } from './links';
+
+export enum BREADCRUMB_SECTION {
+  CREATE_TRANSFORM = 'createTransform',
+  HOME = 'home',
+  MANAGEMENT = 'management',
+}
+
+interface BreadcrumbItem {
+  text: string;
+  href?: string;
+}
+
+type Breadcrumbs = {
+  [key in BREADCRUMB_SECTION]: BreadcrumbItem[];
+};
 
 class BreadcrumbService {
   private chrome: any;
-  private breadcrumbs: {
-    [key: string]: Array<{
-      text: string;
-      href?: string;
-    }>;
-  } = {
+  private breadcrumbs: Breadcrumbs = {
     management: [],
     home: [],
-    snapshots: [],
-    repositories: [],
-    policies: [],
-    restore_status: [],
-    repositoryAdd: [],
-    repositoryEdit: [],
-    restoreSnapshot: [],
-    policyAdd: [],
-    policyEdit: [],
+    createTransform: [],
   };
 
   public init(chrome: any, managementBreadcrumb: any): void {
@@ -46,78 +42,21 @@ class BreadcrumbService {
         href: linkToHome(),
       },
     ];
-    this.breadcrumbs.snapshots = [
+    this.breadcrumbs.createTransform = [
       ...this.breadcrumbs.home,
       {
-        text: textService.breadcrumbs.snapshots,
-        href: linkToSnapshots(),
-      },
-    ];
-    this.breadcrumbs.repositories = [
-      ...this.breadcrumbs.home,
-      {
-        text: textService.breadcrumbs.repositories,
-        href: linkToRepositories(),
-      },
-    ];
-    this.breadcrumbs.policies = [
-      ...this.breadcrumbs.home,
-      {
-        text: textService.breadcrumbs.policies,
-        href: linkToPolicies(),
-      },
-    ];
-    this.breadcrumbs.restore_status = [
-      ...this.breadcrumbs.home,
-      {
-        text: textService.breadcrumbs.restore_status,
-        href: linkToRestoreStatus(),
-      },
-    ];
-
-    // Inner pages
-    this.breadcrumbs.repositoryAdd = [
-      ...this.breadcrumbs.repositories,
-      {
-        text: textService.breadcrumbs.repositoryAdd,
-      },
-    ];
-    this.breadcrumbs.repositoryEdit = [
-      ...this.breadcrumbs.repositories,
-      {
-        text: textService.breadcrumbs.repositoryEdit,
-      },
-    ];
-    this.breadcrumbs.restoreSnapshot = [
-      ...this.breadcrumbs.snapshots,
-      {
-        text: textService.breadcrumbs.restoreSnapshot,
-      },
-    ];
-    this.breadcrumbs.policyAdd = [
-      ...this.breadcrumbs.policies,
-      {
-        text: textService.breadcrumbs.policyAdd,
-      },
-    ];
-    this.breadcrumbs.policyEdit = [
-      ...this.breadcrumbs.policies,
-      {
-        text: textService.breadcrumbs.policyEdit,
+        text: textService.breadcrumbs.createTransform,
       },
     ];
   }
 
-  public setBreadcrumbs(type: string): void {
+  public setBreadcrumbs(type: BREADCRUMB_SECTION): void {
     const newBreadcrumbs = this.breadcrumbs[type]
       ? [...this.breadcrumbs[type]]
       : [...this.breadcrumbs.home];
 
     // Pop off last breadcrumb
-    const lastBreadcrumb = newBreadcrumbs.pop() as {
-      text: string;
-      href?: string;
-    };
+    const lastBreadcrumb = newBreadcrumbs.pop() as BreadcrumbItem;
 
     // Put last breadcrumb back without href
     newBreadcrumbs.push({

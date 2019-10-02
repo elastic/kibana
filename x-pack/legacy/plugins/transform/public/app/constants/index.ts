@@ -6,7 +6,7 @@
 
 export const BASE_PATH = '/management/elasticsearch/transform';
 export const DEFAULT_SECTION: Section = 'transform_management';
-export type Section = 'transform_management' | 'new_transform';
+export type Section = 'transform_management' | 'create_transform';
 
 // Set a minimum request duration to avoid strange UI flickers
 export const MINIMUM_TIMEOUT_MS = 300;

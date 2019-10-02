@@ -6,10 +6,6 @@
 
 import rison from 'rison-node';
 
-export function moveToTransformWizard() {
-  window.location.href = '#/data_frames/new_transform';
-}
-
 /**
  * Gets a url for navigating to Discover page.
  * @param indexPatternId Index pattern id.

@@ -10,7 +10,6 @@ exports[`Transform: Transform List <TransformList /> Minimal initialization 1`] 
       Array [
         <EuiButtonEmpty
           isDisabled={true}
-          onClick={[Function]}
         >
           Create your first transform
         </EuiButtonEmpty>,

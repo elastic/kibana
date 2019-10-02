@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { breadcrumbService } from './breadcrumb';
+export { breadcrumbService, BREADCRUMB_SECTION } from './breadcrumb';
 export { docTitleService } from './doc_title';
 export * from './links';

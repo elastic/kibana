@@ -28,7 +28,7 @@ export const CreateTransformButton: FC = () => {
   const { capabilities } = useContext(AuthorizationContext);
 
   if (savedObjectId !== null) {
-    return <Redirect to={`${BASE_PATH}/new_transform/${savedObjectId}`} />;
+    return <Redirect to={`${BASE_PATH}/create_transform/${savedObjectId}`} />;
   }
 
   const disabled =
@@ -61,7 +61,7 @@ export const CreateTransformButton: FC = () => {
       </EuiButton>
       {isSearchSelectionVisible && (
         <EuiOverlayMask>
-          <EuiModal onClose={onCloseModal} className="transformNewTransformSearchDialog">
+          <EuiModal onClose={onCloseModal} className="transformCreateTransformSearchDialog">
             <SearchSelection onSearchSelected={setSavedObjectId} visType={fakeVisType} />
           </EuiModal>
         </EuiOverlayMask>
