@@ -8,8 +8,8 @@ export { DonutChart } from './donut_chart';
 export { EmptyState } from './empty_state';
 export { EmptyStatusBar } from './empty_status_bar';
 export { FilterGroup } from './filter_group';
-export { KueryBar } from './kuery_bar';
 export { IntegrationLink } from './integration_link';
+export { KueryBar } from './kuery_bar';
 export { MonitorCharts } from './monitor_charts';
 export { MonitorList } from './monitor_list';
 export { MonitorPageLink } from './monitor_page_link';
@@ -19,4 +19,4 @@ export { OverviewPageParsingErrorCallout } from './overview_page_parsing_error_c
 export { PingList } from './ping_list';
 export { Snapshot } from './snapshot';
 export { SnapshotHistogram } from './charts';
-export { SnapshotLoading } from './snapshot_loading';
+export { StatusPanel } from './status_panel';

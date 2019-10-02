@@ -4,33 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
-
-console.log(d3);
-const WIDTH = 128;
-const HEIGHT = 128;
+import { DonutChartLegend } from './donut_chart_legend';
 
 interface DonutChartProps {
   up: number;
   down: number;
+  width: number;
+  height: number;
 }
 
-export const DonutChart = ({ up, down }: DonutChartProps) => {
-  const chartElement = useRef<string | null>(null);
+export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
+  const chartElement = useRef<SVGSVGElement | null>(null);
   useEffect(() => {
     if (chartElement.current !== null) {
       const svg = d3
         .select(chartElement.current)
         .append('g')
-        .attr('transform', `translate(${WIDTH / 2}, ${HEIGHT / 2})`);
+        .attr('transform', `translate(${width / 2}, ${height / 2})`);
       const data = { up, down };
       const color = d3
+        // @ts-ignore this function exists
         .scaleOrdinal()
         .domain(data)
         .range(['#D5DAE4', '#AD392D']);
-      const pie = d3.pie().value(d => d.value);
+      // @ts-ignore this function exists
+      const pie = d3.pie().value((d: any) => d.value);
       const dataReady = pie(d3.entries(data));
       svg
         .selectAll('key')
@@ -40,39 +41,21 @@ export const DonutChart = ({ up, down }: DonutChartProps) => {
         .attr(
           'd',
           d3
+            // @ts-ignore this function exists
             .arc()
-            .innerRadius(WIDTH * 0.2)
-            .outerRadius(Math.min(WIDTH, HEIGHT) / 2 - 10)
+            .innerRadius(width * 0.2)
+            .outerRadius(Math.min(width, height) / 2 - 10)
         )
-        .attr('fill', function(d) {
-          return color(d.data.key);
-        });
+        .attr('fill', (d: any) => color(d.data.key));
     }
   }, [chartElement.current, up, down]);
   return (
-    <EuiFlexGroup component="span" alignItems="center">
+    <EuiFlexGroup alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
-        <svg ref={chartElement} width={WIDTH} height={HEIGHT} />
+        <svg ref={chartElement} width={width} height={height} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup direction="column" gutterSize="l">
-          <EuiFlexItem>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiHealth color="#AD392D" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{down}</EuiFlexItem>
-              <EuiFlexItem>Down</EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={1}>
-                <EuiHealth color="#D5DAE4" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={1}>{up}</EuiFlexItem>
-              <EuiFlexItem grow={8}>Up</EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <DonutChartLegend down={down} up={up} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

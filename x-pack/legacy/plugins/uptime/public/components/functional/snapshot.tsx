@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiTitle } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
-import { DonutChart } from './donut_chart';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
+import { DonutChart } from './donut_chart';
 import { Snapshot as SnapshotType } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { snapshotQuery } from '../../queries';
-import { SnapshotLoading } from './snapshot_loading';
+import { ChartWrapper } from './charts/chart_wrapper';
+
+const SNAPSHOT_WIDTH = 128;
+const SNAPSHOT_HEIGHT = 128;
 
 interface SnapshotQueryResult {
   snapshot?: SnapshotType;
@@ -24,31 +25,34 @@ interface SnapshotQueryResult {
  * glean the status of their uptime environment.
  * @param props the props required by the component
  */
-export const SnapshotComponent = ({ data }: UptimeGraphQLQueryProps<SnapshotQueryResult>) =>
-  data && data.snapshot ? (
-    <React.Fragment>
-      <EuiPanel>
-        <EuiTitle size="xs">
-          <h5>
-            <FormattedMessage
-              id="xpack.uptime.snapshot.endpointStatusTitle"
-              defaultMessage="Current status"
-            />
-          </h5>
-        </EuiTitle>
-        <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <EuiSpacer size="xs" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <DonutChart up={data.snapshot.counts.up} down={data.snapshot.counts.down} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </React.Fragment>
-  ) : (
-    <SnapshotLoading />
-  );
+export const SnapshotComponent = ({
+  data,
+  loading,
+}: UptimeGraphQLQueryProps<SnapshotQueryResult>) => (
+  <ChartWrapper loading={loading}>
+    <EuiTitle size="xs">
+      <h5>
+        <FormattedMessage
+          id="xpack.uptime.snapshot.endpointStatusTitle"
+          defaultMessage="Current status"
+        />
+      </h5>
+    </EuiTitle>
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <DonutChart
+          up={data && data.snapshot ? data.snapshot.counts.up : 0}
+          down={data && data.snapshot ? data.snapshot.counts.down : 0}
+          height={SNAPSHOT_HEIGHT}
+          width={SNAPSHOT_WIDTH}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </ChartWrapper>
+);
 
 /**
  * This component visualizes a KPI and histogram chart to help users quickly
