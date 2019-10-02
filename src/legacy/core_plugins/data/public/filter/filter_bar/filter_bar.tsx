@@ -120,7 +120,6 @@ function FilterBarUI(props: Props) {
                 onSubmit={onAdd}
                 onCancel={() => setIsAddFilterPopoverOpen(false)}
                 key={JSON.stringify(newFilter)}
-                uiSettings={uiSettings!}
               />
             </div>
           </EuiFlexItem>
