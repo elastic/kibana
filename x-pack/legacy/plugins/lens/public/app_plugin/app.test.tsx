@@ -17,9 +17,8 @@ import {
   TopNavMenu,
   TopNavMenuData,
 } from '../../../../../../src/legacy/core_plugins/kibana_react/public';
-import { SavedObjectsStart, ApplicationStart } from 'src/core/public';
+import { DataStart } from '../../../../../../src/legacy/core_plugins/data/public';
 import { coreMock } from 'src/core/public/mocks';
-import { DataSetup } from 'src/legacy/core_plugins/data/public';
 
 jest.mock('../../../../../../src/legacy/core_plugins/kibana_react/public', () => ({
   TopNavMenu: jest.fn(() => null),
@@ -70,13 +69,11 @@ describe('Lens App', () => {
   function makeDefaultArgs(): jest.Mocked<{
     editorFrame: EditorFrameInstance;
     core: typeof core;
-    data: DataSetup;
+    data: DataStart;
     store: Storage;
     docId?: string;
     docStorage: SavedObjectStore;
     redirectTo: (id?: string) => void;
-    savedObjects: SavedObjectsStart;
-    application: ApplicationStart;
   }> {
     return ({
       editorFrame: createMockFrame(),
@@ -110,21 +107,15 @@ describe('Lens App', () => {
         load: jest.fn(),
         save: jest.fn(),
       },
-      TopNavMenu: jest.fn(() => <div />),
       redirectTo: jest.fn(id => {}),
-      savedObjects: {
-        client: jest.fn(),
-      },
     } as unknown) as jest.Mocked<{
       editorFrame: EditorFrameInstance;
       core: typeof core;
-      data: DataSetup;
+      data: DataStart;
       store: Storage;
       docId?: string;
       docStorage: SavedObjectStore;
       redirectTo: (id?: string) => void;
-      savedObjects: SavedObjectsStart;
-      application: ApplicationStart;
     }>;
   }
 
@@ -236,8 +227,6 @@ describe('Lens App', () => {
       expect(args.data.indexPatterns.indexPatterns.get).toHaveBeenCalledWith('1');
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
-          dateRangeFrom: 'now-7d',
-          dateRangeTo: 'now',
           query: 'fake query',
           indexPatterns: [{ id: '1' }],
         }),
@@ -410,8 +399,6 @@ describe('Lens App', () => {
 
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
-          dateRangeFrom: 'now-7d',
-          dateRangeTo: 'now',
           query: { query: '', language: 'kuery' },
         }),
         {}
@@ -425,7 +412,7 @@ describe('Lens App', () => {
       );
     });
 
-    it('updates the index patterns when the editor frame is changed', () => {
+    it('updates the index patterns when the editor frame is changed', async () => {
       const args = makeDefaultArgs();
       args.editorFrame = frame;
 
@@ -444,6 +431,7 @@ describe('Lens App', () => {
         doc: ({ id: undefined } as unknown) as Document,
       });
 
+      await waitForPromises();
       instance.update();
 
       expect(TopNavMenu).toHaveBeenCalledWith(
@@ -469,8 +457,6 @@ describe('Lens App', () => {
 
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
-          dateRangeFrom: 'now-14d',
-          dateRangeTo: 'now-7d',
           query: { query: 'new', language: 'lucene' },
         }),
         {}
@@ -490,18 +476,12 @@ describe('Lens App', () => {
 
       const instance = mount(<App {...args} />);
 
-      instance.find(TopNavMenu).prop('onFiltersUpdated')!([
+      args.data.filter.filterManager.setFilters([
         buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
       ]);
 
       instance.update();
 
-      expect(TopNavMenu).toHaveBeenCalledWith(
-        expect.objectContaining({
-          filters: [buildExistsFilter({ name: 'myfield' }, { id: 'index1' })],
-        }),
-        {}
-      );
       expect(frame.mount).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({
@@ -627,16 +607,20 @@ describe('Lens App', () => {
         query: { query: 'new', language: 'lucene' },
       });
 
-      instance.find(TopNavMenu).prop('onFiltersUpdated')!([
+      args.data.filter.filterManager.setFilters([
         buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
       ]);
-
       instance.update();
 
       instance.find(TopNavMenu).prop('onClearSavedQuery')!();
       instance.update();
 
-      expect(instance.find(TopNavMenu).prop('filters')).toEqual([]);
+      expect(frame.mount).toHaveBeenLastCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          filters: [],
+        })
+      );
     });
   });
 

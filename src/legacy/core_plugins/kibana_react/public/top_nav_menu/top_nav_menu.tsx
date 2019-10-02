@@ -21,28 +21,16 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
-import { UiSettingsClientContract, CoreStart } from 'src/core/public';
+
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
-import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
-import { useKibana } from '../../../../../plugins/kibana_react/public';
-import {
-  SearchBar,
-  SearchBarProps,
-  TimeHistoryContract,
-} from '../../../../core_plugins/data/public';
+import { SearchBarProps } from '../../../../core_plugins/data/public';
+import { start as data } from '../../../data/public/legacy';
 
 type Props = Partial<SearchBarProps> & {
-  name: string;
+  appName: string;
   config?: TopNavMenuData[];
   showSearchBar?: boolean;
-
-  // Search Bar dependencies
-  uiSettings?: UiSettingsClientContract;
-  savedObjects?: CoreStart['savedObjects'];
-  notifications?: CoreStart['notifications'];
-  timeHistory?: TimeHistoryContract;
-  http?: CoreStart['http'];
 };
 
 /*
@@ -55,11 +43,11 @@ type Props = Partial<SearchBarProps> & {
  **/
 
 export function TopNavMenu(props: Props) {
-  const kibana = useKibana();
-
+  const { SearchBar } = data.ui;
+  const { config, showSearchBar, ...searchBarProps } = props;
   function renderItems() {
-    if (!props.config) return;
-    return props.config.map((menuItem: TopNavMenuData, i: number) => {
+    if (!config) return;
+    return config.map((menuItem: TopNavMenuData, i: number) => {
       return (
         <EuiFlexItem grow={false} key={`nav-menu-${i}`}>
           <TopNavMenuItem {...menuItem} />
@@ -69,60 +57,9 @@ export function TopNavMenu(props: Props) {
   }
 
   function renderSearchBar() {
-    const http = kibana.services.http || props.http;
-    const notifications = kibana.services.notifications || props.notifications;
-    const savedObjects = kibana.services.savedObjects || props.savedObjects;
-    const uiSettings = kibana.services.uiSettings || props.uiSettings;
-
-    // If any fields are missing, render nothing
-    if (
-      !props.showSearchBar ||
-      !http ||
-      !notifications ||
-      !savedObjects ||
-      !uiSettings ||
-      !props.timeHistory
-    )
-      return;
-    return (
-      <KibanaContextProvider
-        services={{
-          http,
-          notifications,
-          savedObjects,
-          uiSettings,
-        }}
-      >
-        <SearchBar
-          notifications={notifications}
-          savedObjects={savedObjects}
-          timeHistory={props.timeHistory}
-          query={props.query}
-          filters={props.filters}
-          showQueryBar={props.showQueryBar}
-          showQueryInput={props.showQueryInput}
-          showFilterBar={props.showFilterBar}
-          showDatePicker={props.showDatePicker}
-          appName={props.appName!}
-          screenTitle={props.screenTitle!}
-          onQuerySubmit={props.onQuerySubmit}
-          onFiltersUpdated={props.onFiltersUpdated}
-          dateRangeFrom={props.dateRangeFrom}
-          dateRangeTo={props.dateRangeTo}
-          isRefreshPaused={props.isRefreshPaused}
-          showAutoRefreshOnly={props.showAutoRefreshOnly}
-          onRefreshChange={props.onRefreshChange}
-          refreshInterval={props.refreshInterval}
-          indexPatterns={props.indexPatterns}
-          store={props.store}
-          savedQuery={props.savedQuery}
-          showSaveQuery={props.showSaveQuery}
-          onClearSavedQuery={props.onClearSavedQuery}
-          onSaved={props.onSaved}
-          onSavedQueryUpdated={props.onSavedQueryUpdated}
-        />
-      </KibanaContextProvider>
-    );
+    // Validate presense of all required fields
+    if (!showSearchBar) return;
+    return <SearchBar {...searchBarProps} />;
   }
 
   function renderLayout() {

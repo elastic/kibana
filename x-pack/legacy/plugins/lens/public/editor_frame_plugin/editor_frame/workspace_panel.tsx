@@ -6,8 +6,9 @@
 
 import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiImage, EuiText } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
+import { CoreStart, CoreSetup } from 'src/core/public';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import { Action } from './state_management';
 import { Datasource, Visualization, FramePublicAPI } from '../../types';
@@ -32,6 +33,7 @@ export interface WorkspacePanelProps {
   framePublicAPI: FramePublicAPI;
   dispatch: (action: Action) => void;
   ExpressionRenderer: ExpressionRenderer;
+  core: CoreStart | CoreSetup;
 }
 
 export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
@@ -46,8 +48,14 @@ export function InnerWorkspacePanel({
   datasourceStates,
   framePublicAPI,
   dispatch,
+  core,
   ExpressionRenderer: ExpressionRendererComponent,
 }: WorkspacePanelProps) {
+  const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
+  const emptyStateGraphicURL = IS_DARK_THEME
+    ? '/plugins/lens/assets/lens_app_graphic_dark_2x.png'
+    : '/plugins/lens/assets/lens_app_graphic_light_2x.png';
+
   const dragDropContext = useContext(DragContext);
 
   const suggestionForDraggedField = useMemo(() => {
@@ -87,12 +95,25 @@ export function InnerWorkspacePanel({
 
   function renderEmptyWorkspace() {
     return (
-      <p data-test-subj="empty-workspace">
-        <FormattedMessage
-          id="xpack.lens.editorFrame.emptyWorkspace"
-          defaultMessage="This is the workspace panel. Drop fields here"
+      <EuiText textAlign="center" grow={false} color="subdued" data-test-subj="empty-workspace">
+        <h3>
+          <FormattedMessage
+            id="xpack.lens.editorFrame.emptyWorkspaceHeading"
+            defaultMessage="Create a visualization"
+          />
+        </h3>
+        <EuiImage
+          style={{ width: 360 }}
+          url={core.http.basePath.prepend(emptyStateGraphicURL)}
+          alt=""
         />
-      </p>
+        <p>
+          <FormattedMessage
+            id="xpack.lens.editorFrame.emptyWorkspace"
+            defaultMessage="Drop some fields here."
+          />
+        </p>
+      </EuiText>
     );
   }
 

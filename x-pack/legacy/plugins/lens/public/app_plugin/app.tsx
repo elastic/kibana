@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { Storage } from 'ui/storage';
 import { CoreStart, NotificationsStart } from 'src/core/public';
 import {
-  DataSetup,
+  DataStart,
   IndexPattern as IndexPatternInstance,
   IndexPatterns as IndexPatternsService,
   SavedQuery,
@@ -42,8 +42,8 @@ interface State {
 
 export function App({
   editorFrame,
-  core,
   data,
+  core,
   store,
   docId,
   docStorage,
@@ -51,7 +51,7 @@ export function App({
 }: {
   editorFrame: EditorFrameInstance;
   core: CoreStart;
-  data: DataSetup;
+  data: DataStart;
   store: Storage;
   docId?: string;
   docStorage: SavedObjectStore;
@@ -163,16 +163,14 @@ export function App({
     <I18nProvider>
       <KibanaContextProvider
         services={{
-          uiSettings: core.uiSettings,
-          savedObjects: core.savedObjects,
-          notifications: core.notifications,
-          http: core.http,
+          appName: 'lens',
+          store,
+          ...core,
         }}
       >
         <div className="lnsApp">
           <div className="lnsApp__header">
             <TopNavMenu
-              name="lens"
               config={[
                 {
                   label: i18n.translate('xpack.lens.editorFrame.save', {
@@ -221,16 +219,11 @@ export function App({
                   query: query || s.query,
                 }));
               }}
-              filters={state.filters}
-              onFiltersUpdated={filters => {
-                data.filter.filterManager.setFilters(filters);
-              }}
               appName={'lens'}
               indexPatterns={state.indexPatternsForTopNav}
-              store={store}
               showSearchBar={true}
               showDatePicker={true}
-              showQueryInput={true}
+              showQueryBar={true}
               showFilterBar={true}
               showSaveQuery={core.application.capabilities.lens.saveQuery as boolean}
               savedQuery={state.savedQuery}
@@ -267,9 +260,6 @@ export function App({
                 }));
               }}
               query={state.query}
-              dateRangeFrom={state.dateRange.fromDate}
-              dateRangeTo={state.dateRange.toDate}
-              timeHistory={data.timefilter.history}
             />
           </div>
 
