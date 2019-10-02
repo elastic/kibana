@@ -469,7 +469,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       'aria-controls': 'kbnTypeahead__items',
       'aria-owns': 'kbnTypeahead__items',
     };
-    const ariaCombobox = Object.assign({ role: 'combobox' }, isSuggestionsVisible);
+    const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
 
     return (
       <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
