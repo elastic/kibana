@@ -14,12 +14,11 @@ import { createOptionalPlugin } from '../../server/lib/optional_plugin';
 import { AuditLogger } from '../../server/lib/audit_logger';
 import mappings from './mappings.json';
 import { wrapError } from './server/lib/errors';
-import { getSpaceSelectorUrl } from './server/lib/get_space_selector_url';
 import { migrateToKibana660 } from './server/lib/migrations';
 import { SecurityPlugin } from '../security';
-import { initSpaceSelectorView } from './server/routes/views';
 // @ts-ignore
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
+import { initSpaceSelectorView, initEnterSpaceView } from './server/routes/views';
 
 export interface SpacesPlugin {
   getSpaceId: SpacesServiceSetup['getSpaceId'];
@@ -88,7 +87,7 @@ export const spaces = (kibana: Record<string, any>) =>
         return {
           spaces: [],
           activeSpace: null,
-          spaceSelectorURL: getSpaceSelectorUrl(server.config()),
+          serverBasePath: server.config().get('server.basePath'),
         };
       },
       async replaceInjectedVars(
@@ -154,6 +153,7 @@ export const spaces = (kibana: Record<string, any>) =>
         xpackMain: server.plugins.xpack_main,
       });
 
+      initEnterSpaceView(server);
       initSpaceSelectorView(server);
 
       watchStatusAndLicenseToInitialize(server.plugins.xpack_main, this, async () => {

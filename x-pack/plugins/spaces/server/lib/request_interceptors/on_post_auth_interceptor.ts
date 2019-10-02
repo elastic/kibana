@@ -6,11 +6,11 @@
 import { Logger, CoreSetup } from 'src/core/server';
 import { Space } from '../../../common/model/space';
 import { wrapError } from '../errors';
-import { addSpaceIdToPath } from '../spaces_url_parser';
 import { SpacesServiceSetup } from '../../spaces_service/spaces_service';
 import { LegacyAPI, PluginsSetup } from '../../plugin';
 import { getSpaceSelectorUrl } from '../get_space_selector_url';
-import { DEFAULT_SPACE_ID } from '../../../common/constants';
+import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
+import { addSpaceIdToPath } from '../../../common/lib/spaces_url_parser';
 
 export interface OnPostAuthInterceptorDeps {
   getLegacyAPI(): LegacyAPI;
@@ -28,7 +28,6 @@ export function initSpacesOnPostAuthRequestInterceptor({
   http,
 }: OnPostAuthInterceptorDeps) {
   http.registerOnPostAuth(async (request, response, toolkit) => {
-    const { serverDefaultRoute } = getLegacyAPI().legacyConfig;
     const serverBasePath = http.basePath.serverBasePath;
 
     const path = request.url.pathname!;
@@ -38,6 +37,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
     // The root of kibana is also the root of the defaut space,
     // since the default space does not have a URL Identifier (i.e., `/s/foo`).
     const isRequestingKibanaRoot = path === '/' && spaceId === DEFAULT_SPACE_ID;
+    const isRequestingSpaceRoot = path === '/' && spaceId !== DEFAULT_SPACE_ID;
     const isRequestingApplication = path.startsWith('/app');
 
     const spacesClient = await spacesService.scopedClient(request);
@@ -54,7 +54,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
           // No need for an interstitial screen where there is only one possible outcome.
           const space = spaces[0];
 
-          const destination = addSpaceIdToPath(serverBasePath, space.id, serverDefaultRoute);
+          const destination = addSpaceIdToPath(serverBasePath, space.id, ENTER_SPACE_PATH);
           return response.redirected({ headers: { location: destination } });
         }
 
@@ -67,6 +67,9 @@ export function initSpacesOnPostAuthRequestInterceptor({
       } catch (error) {
         return response.customError(wrapError(error));
       }
+    } else if (isRequestingSpaceRoot) {
+      const destination = addSpaceIdToPath(serverBasePath, spaceId, ENTER_SPACE_PATH);
+      return response.redirected({ headers: { location: destination } });
     }
 
     // This condition should only happen after selecting a space, or when transitioning from one application to another

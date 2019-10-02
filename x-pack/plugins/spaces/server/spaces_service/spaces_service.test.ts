@@ -14,7 +14,7 @@ import {
   HttpServiceSetup,
 } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
-import { getSpaceIdFromPath } from '../lib/spaces_url_parser';
+import { getSpaceIdFromPath } from '../../common/lib/spaces_url_parser';
 import { LegacyAPI } from '../plugin';
 import { createOptionalPlugin } from '../../../../legacy/server/lib/optional_plugin';
 

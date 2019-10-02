@@ -6,3 +6,4 @@
 
 export { isReservedSpace } from './is_reserved_space';
 export { MAX_SPACE_INITIALS } from './constants';
+export { addSpaceIdToPath, getSpaceIdFromPath } from './lib/spaces_url_parser';

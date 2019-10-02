@@ -13,7 +13,7 @@ import { OptionalPlugin } from '../../../../legacy/server/lib/optional_plugin';
 import { LegacyAPI } from '../plugin';
 import { SpacesClient } from '../lib/spaces_client';
 import { ConfigType } from '../config';
-import { getSpaceIdFromPath, addSpaceIdToPath } from '../lib/spaces_url_parser';
+import { getSpaceIdFromPath, addSpaceIdToPath } from '../../common/lib/spaces_url_parser';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { spaceIdToNamespace, namespaceToSpaceId } from '../lib/utils/namespace';
 import { Space } from '../../common/model/space';

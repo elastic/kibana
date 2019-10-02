@@ -17,11 +17,9 @@ import { XPackMainPlugin } from '../../../legacy/plugins/xpack_main/xpack_main';
 import { createDefaultSpace } from './lib/create_default_space';
 // @ts-ignore
 import { AuditLogger } from '../../../../server/lib/audit_logger';
-
 import { spacesSavedObjectsClientWrapperFactory } from './lib/saved_objects_client/saved_objects_client_wrapper_factory';
 import { SpacesAuditLogger } from './lib/audit_logger';
 import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
-import { initInternalApis } from './routes/api/internal';
 import { getSpacesUsageCollector } from './lib/get_spaces_usage_collector';
 import { SpacesService } from './spaces_service';
 import { SpacesServiceSetup } from './spaces_service/spaces_service';
@@ -128,14 +126,6 @@ export class Plugin {
       log: this.log,
       getSavedObjects: () => this.getLegacyAPI().savedObjects,
       spacesService,
-    });
-
-    const internalRouter = core.http.createRouter();
-    initInternalApis({
-      internalRouter,
-      getLegacyAPI: this.getLegacyAPI,
-      spacesService,
-      serverBasePath: core.http.basePath.serverBasePath,
     });
 
     initSpacesRequestInterceptors({

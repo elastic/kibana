@@ -11,9 +11,9 @@ import {
 } from 'src/core/server';
 import { format } from 'url';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
-import { getSpaceIdFromPath } from '../spaces_url_parser';
 import { modifyUrl } from '../utils/url';
 import { LegacyAPI } from '../../plugin';
+import { getSpaceIdFromPath } from '../../../common/lib/spaces_url_parser';
 
 export interface OnRequestInterceptorDeps {
   getLegacyAPI(): LegacyAPI;
