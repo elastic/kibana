@@ -7,10 +7,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { ComponentStrings } from '../../../i18n';
-
-const { ShapePreview: strings } = ComponentStrings;
-
 interface Props {
   shape?: string;
 }
@@ -28,7 +24,7 @@ export const ShapePreview = ({ shape }: Props) => {
     .item(0);
 
   if (!shapeSvg) {
-    throw new Error(strings.getShapeErrorMessage());
+    throw new Error('An unexpected error occurred: the SVG was not parseable');
   }
 
   shapeSvg.setAttribute('fill', 'none');

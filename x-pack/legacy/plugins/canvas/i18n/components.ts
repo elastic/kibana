@@ -228,9 +228,17 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.pagePreviewPageControls.clonePageAriaLabel', {
         defaultMessage: 'Clone page',
       }),
+    getClonePageTooltip: () =>
+      i18n.translate('xpack.canvas.pagePreviewPageControls.clonePageTooltip', {
+        defaultMessage: 'Clone',
+      }),
     getDeletePageAriaLabel: () =>
       i18n.translate('xpack.canvas.pagePreviewPageControls.deletePageAriaLabel', {
         defaultMessage: 'Delete page',
+      }),
+    getDeletePageTooltip: () =>
+      i18n.translate('xpack.canvas.pagePreviewPageControls.deletePageTooltip', {
+        defaultMessage: 'Delete',
       }),
   },
   ShapePreview: {
