@@ -54,6 +54,7 @@ import {
   getQueryDslFromFilter,
   isFilterValid,
   buildFilterFromSavedQuery,
+  getSavedQueryFromFilter,
 } from './lib/filter_editor_utils';
 import { Operator } from './lib/filter_operators';
 import { PhraseValueInput } from './phrase_value_input';
@@ -103,7 +104,7 @@ class FilterEditorUI extends Component<Props, State> {
       isSavedQueryEditorOpen: this.isSavedQueryFilterType(),
       isRegularEditorOpen: this.isRegularFilterType(),
       isNewFilter: !props.filter.meta.type,
-      // selectedSavedQuery: this.getSavedQueryFromFilter(),
+      selectedSavedQuery: this.getSavedQueryFromFilter(),
     };
   }
 
@@ -215,8 +216,8 @@ class FilterEditorUI extends Component<Props, State> {
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>
-
-            {this.renderIndexPatternInput()}
+            {/* only show the index pattern if we're not working with a saved query filter */}
+            {!this.state.isSavedQueryEditorOpen && this.renderIndexPatternInput()}
 
             {this.renderEditor()}
 
@@ -551,15 +552,18 @@ class FilterEditorUI extends Component<Props, State> {
     return getOperatorFromFilter(this.props.filter);
   }
 
-  /* private getSavedQueryFromFilter = async () => {
+  private getSavedQueryFromFilter() {
     if (this.isSavedQueryFilterType()) {
-      const savedQueryId = this.props.filter.meta.key;
-      const allSavedQueries = await this.props.savedQueryService.getAllSavedQueries();
-      const fullSavedQuery = allSavedQueries.filter(savedQuery => savedQuery.id === savedQueryId);
-      return fullSavedQuery;
+      const savedQueryfilter = { ...this.props.filter };
+      if (
+        savedQueryfilter &&
+        savedQueryfilter.meta.params &&
+        savedQueryfilter.meta.params.savedQuery
+      ) {
+        return getSavedQueryFromFilter(savedQueryfilter);
+      }
     }
-  };
-  */
+  }
 
   private isFilterValid() {
     const {
@@ -630,7 +634,7 @@ class FilterEditorUI extends Component<Props, State> {
       get(selectedSavedQuery[0], 'id')
         ? this.state.params
         : selectedSavedQuery[0];
-    this.setState({ selectedSavedQuery, params });
+    this.setState(state => ({ ...state, selectedSavedQuery, params }));
   };
 
   private onQueryDslChange = (queryDsl: string) => {
@@ -648,6 +652,7 @@ class FilterEditorUI extends Component<Props, State> {
       isCustomEditorOpen,
       isSavedQueryEditorOpen,
       queryDsl,
+      selectedSavedQuery,
     } = this.state;
 
     const { $state } = this.props.filter;
@@ -673,7 +678,7 @@ class FilterEditorUI extends Component<Props, State> {
         $state.store
       );
       this.props.onSubmit(filter);
-    } else if (indexPattern && isSavedQueryEditorOpen) {
+    } else if (isSavedQueryEditorOpen && selectedSavedQuery) {
       const filter = buildFilterFromSavedQuery(
         this.props.filter.meta.disabled,
         params,

@@ -56,6 +56,10 @@ export function getOperatorFromFilter(filter: Filter) {
   });
 }
 
+export function getSavedQueryFromFilter(filter: SavedQueryFilter): SavedQuery[] {
+  return [filter.meta.params.savedQuery];
+}
+
 export function getQueryDslFromFilter(filter: Filter) {
   return omit(filter, ['$state', 'meta']);
 }
