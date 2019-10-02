@@ -122,6 +122,7 @@ export const toggleSetupMode = inSetupMode => {
   setupModeState.enabled = inSetupMode;
   globalState.inSetupMode = inSetupMode;
   globalState.save();
+  setSetupModeMenuItem(); // eslint-disable-line  no-use-before-define
   notifySetupModeDataChange();
 
   if (inSetupMode) {
