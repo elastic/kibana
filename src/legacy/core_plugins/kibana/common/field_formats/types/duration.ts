@@ -18,11 +18,12 @@
  */
 
 import moment from 'moment';
+import { FieldFormat } from '../../../../../../plugins/data/common/';
 
-const ratioToSeconds = {
+const ratioToSeconds: Record<string, number> = {
   picoseconds: 0.000000000001,
   nanoseconds: 0.000000001,
-  microseconds: 0.000001
+  microseconds: 0.000001,
 };
 const HUMAN_FRIENDLY = 'humanize';
 const DEFAULT_OUTPUT_PRECISION = 2;
@@ -38,7 +39,7 @@ const inputFormats = [
   { text: 'Days', kind: 'days' },
   { text: 'Weeks', kind: 'weeks' },
   { text: 'Months', kind: 'months' },
-  { text: 'Years', kind: 'years' }
+  { text: 'Years', kind: 'years' },
 ];
 const DEFAULT_OUTPUT_FORMAT = { text: 'Human Readable', method: 'humanize' };
 const outputFormats = [
@@ -50,16 +51,16 @@ const outputFormats = [
   { text: 'Days', method: 'asDays' },
   { text: 'Weeks', method: 'asWeeks' },
   { text: 'Months', method: 'asMonths' },
-  { text: 'Years', method: 'asYears' }
+  { text: 'Years', method: 'asYears' },
 ];
 
-function parseInputAsDuration(val, inputFormat) {
+function parseInputAsDuration(val: number, inputFormat: string) {
   const ratio = ratioToSeconds[inputFormat] || 1;
-  const kind = inputFormat in ratioToSeconds ? 'seconds' : inputFormat;
+  const kind = (inputFormat in ratioToSeconds ? 'seconds' : inputFormat) as any;
   return moment.duration(val * ratio, kind);
 }
 
-export function createDurationFormat(FieldFormat) {
+export function createDurationFormat() {
   return class DurationFormat extends FieldFormat {
     isHuman() {
       return this.param('outputFormat') === HUMAN_FRIENDLY;
@@ -68,16 +69,16 @@ export function createDurationFormat(FieldFormat) {
       return {
         inputFormat: DEFAULT_INPUT_FORMAT.kind,
         outputFormat: DEFAULT_OUTPUT_FORMAT.method,
-        outputPrecision: DEFAULT_OUTPUT_PRECISION
+        outputPrecision: DEFAULT_OUTPUT_PRECISION,
       };
     }
-    _convert(val) {
+    _convert(val: number) {
       const inputFormat = this.param('inputFormat');
       const outputFormat = this.param('outputFormat');
       const outputPrecision = this.param('outputPrecision');
       const human = this.isHuman();
       const prefix = val < 0 && human ? 'minus ' : '';
-      const duration = parseInputAsDuration(val, inputFormat);
+      const duration = parseInputAsDuration(val, inputFormat) as any;
       const formatted = duration[outputFormat]();
       const precise = human ? formatted : formatted.toFixed(outputPrecision);
       return prefix + precise;
