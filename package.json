@@ -156,7 +156,7 @@
     "d3": "3.5.17",
     "d3-cloud": "1.2.5",
     "del": "^5.1.0",
-    "elastic-apm-node": "^3.1.0",
+    "elastic-apm-node": "watson/apm-agent-nodejs#kibana-pr-43548",
     "elasticsearch": "^16.5.0",
     "elasticsearch-browser": "^16.5.0",
     "encode-uri-query": "1.0.1",
