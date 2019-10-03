@@ -8,23 +8,22 @@ import Hapi from 'hapi';
 import uuid from 'uuid';
 import { AlertTypeRegistry } from '../types';
 import { AlertsClient } from '../alerts_client';
-import { TaskManager } from '../../../task_manager';
+import { SecurityPluginStartContract, TaskManagerStartContract } from '../shim';
 import { KibanaRequest, Logger } from '../../../../../../src/core/server';
-import { PluginSetupContract as SecurityPluginSetupContract } from '../../../../../plugins/security/server';
 
 export interface ConstructorOpts {
   logger: Logger;
-  taskManager: TaskManager;
+  taskManager: TaskManagerStartContract;
   alertTypeRegistry: AlertTypeRegistry;
-  securityPluginSetup?: SecurityPluginSetupContract;
+  securityPluginSetup?: SecurityPluginStartContract;
   getSpaceId: (request: Hapi.Request) => string | undefined;
 }
 
 export class AlertsClientFactory {
   private readonly logger: Logger;
-  private readonly taskManager: TaskManager;
+  private readonly taskManager: TaskManagerStartContract;
   private readonly alertTypeRegistry: AlertTypeRegistry;
-  private readonly securityPluginSetup?: SecurityPluginSetupContract;
+  private readonly securityPluginSetup?: SecurityPluginStartContract;
   private readonly getSpaceId: (request: Hapi.Request) => string | undefined;
 
   constructor(options: ConstructorOpts) {

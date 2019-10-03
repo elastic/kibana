@@ -8,14 +8,21 @@ import sinon from 'sinon';
 import { schema } from '@kbn/config-schema';
 import { AlertExecutorOptions } from '../types';
 import { ConcreteTaskInstance } from '../../../task_manager';
-import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
+import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 import {
   SavedObjectsClientMock,
   loggingServiceMock,
 } from '../../../../../../src/core/server/mocks';
 
+const alertType = {
+  id: 'test',
+  name: 'My test alert',
+  actionGroups: ['default'],
+  executor: jest.fn(),
+};
 let fakeTimer: sinon.SinonFakeTimers;
+let taskRunnerFactory: TaskRunnerFactory;
 let mockedTaskInstance: ConcreteTaskInstance;
 
 beforeAll(() => {
@@ -37,6 +44,8 @@ beforeAll(() => {
       alertId: '1',
     },
   };
+  taskRunnerFactory = new TaskRunnerFactory();
+  taskRunnerFactory.initialize(taskRunnerFactoryInitializerParams);
 });
 
 afterAll(() => fakeTimer.restore());
@@ -49,15 +58,9 @@ const services = {
   savedObjectsClient,
 };
 
-const getCreateTaskRunnerFunctionParams = {
+const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
   isSecurityEnabled: true,
   getServices: jest.fn().mockReturnValue(services),
-  alertType: {
-    id: 'test',
-    name: 'My test alert',
-    actionGroups: ['default'],
-    executor: jest.fn(),
-  },
   executeAction: jest.fn(),
   encryptedSavedObjectsPlugin,
   logger: loggingServiceMock.create().get(),
@@ -97,11 +100,28 @@ const mockedAlertTypeSavedObject = {
 
 beforeEach(() => {
   jest.resetAllMocks();
-  getCreateTaskRunnerFunctionParams.getServices.mockReturnValue(services);
+  taskRunnerFactoryInitializerParams.getServices.mockReturnValue(services);
+});
+
+test(`throws an error if factory isn't initialized`, () => {
+  const factory = new TaskRunnerFactory();
+  expect(() =>
+    factory.create(alertType, { taskInstance: mockedTaskInstance })
+  ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
+});
+
+test(`throws an error if factory is already initialized`, () => {
+  const factory = new TaskRunnerFactory();
+  factory.initialize(taskRunnerFactoryInitializerParams);
+  expect(() =>
+    factory.initialize(taskRunnerFactoryInitializerParams)
+  ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory already initialized"`);
 });
 
 test('successfully executes the task', async () => {
-  const createTaskRunner = getCreateTaskRunnerFunction(getCreateTaskRunnerFunctionParams);
+  const taskRunner = taskRunnerFactory.create(alertType, {
+    taskInstance: mockedTaskInstance,
+  });
   savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
   encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '1',
@@ -111,8 +131,7 @@ test('successfully executes the task', async () => {
     },
     references: [],
   });
-  const runner = createTaskRunner({ taskInstance: mockedTaskInstance });
-  const runnerResult = await runner.run();
+  const runnerResult = await taskRunner.run();
   expect(runnerResult).toMatchInlineSnapshot(`
                                 Object {
                                   "runAt": 1970-01-01T00:00:10.000Z,
@@ -123,8 +142,8 @@ test('successfully executes the task', async () => {
                                   },
                                 }
                 `);
-  expect(getCreateTaskRunnerFunctionParams.alertType.executor).toHaveBeenCalledTimes(1);
-  const call = getCreateTaskRunnerFunctionParams.alertType.executor.mock.calls[0][0];
+  expect(alertType.executor).toHaveBeenCalledTimes(1);
+  const call = alertType.executor.mock.calls[0][0];
   expect(call.params).toMatchInlineSnapshot(`
                                     Object {
                                       "bar": true,
@@ -138,12 +157,12 @@ test('successfully executes the task', async () => {
 });
 
 test('executeAction is called per alert instance that is scheduled', async () => {
-  getCreateTaskRunnerFunctionParams.alertType.executor.mockImplementation(
-    ({ services: executorServices }: AlertExecutorOptions) => {
-      executorServices.alertInstanceFactory('1').scheduleActions('default');
-    }
-  );
-  const createTaskRunner = getCreateTaskRunnerFunction(getCreateTaskRunnerFunctionParams);
+  alertType.executor.mockImplementation(({ services: executorServices }: AlertExecutorOptions) => {
+    executorServices.alertInstanceFactory('1').scheduleActions('default');
+  });
+  const taskRunner = taskRunnerFactory.create(alertType, {
+    taskInstance: mockedTaskInstance,
+  });
   savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
   encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '1',
@@ -153,10 +172,9 @@ test('executeAction is called per alert instance that is scheduled', async () =>
     },
     references: [],
   });
-  const runner = createTaskRunner({ taskInstance: mockedTaskInstance });
-  await runner.run();
-  expect(getCreateTaskRunnerFunctionParams.executeAction).toHaveBeenCalledTimes(1);
-  expect(getCreateTaskRunnerFunctionParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
+  await taskRunner.run();
+  expect(taskRunnerFactoryInitializerParams.executeAction).toHaveBeenCalledTimes(1);
+  expect(taskRunnerFactoryInitializerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
                 Array [
                   Object {
                     "apiKey": "MTIzOmFiYw==",
@@ -171,22 +189,10 @@ test('executeAction is called per alert instance that is scheduled', async () =>
 });
 
 test('persists alertInstances passed in from state, only if they are scheduled for execution', async () => {
-  getCreateTaskRunnerFunctionParams.alertType.executor.mockImplementation(
-    ({ services: executorServices }: AlertExecutorOptions) => {
-      executorServices.alertInstanceFactory('1').scheduleActions('default');
-    }
-  );
-  const createTaskRunner = getCreateTaskRunnerFunction(getCreateTaskRunnerFunctionParams);
-  savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
-  encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
-    id: '1',
-    type: 'alert',
-    attributes: {
-      apiKey: Buffer.from('123:abc').toString('base64'),
-    },
-    references: [],
+  alertType.executor.mockImplementation(({ services: executorServices }: AlertExecutorOptions) => {
+    executorServices.alertInstanceFactory('1').scheduleActions('default');
   });
-  const runner = createTaskRunner({
+  const taskRunner = taskRunnerFactory.create(alertType, {
     taskInstance: {
       ...mockedTaskInstance,
       state: {
@@ -198,7 +204,16 @@ test('persists alertInstances passed in from state, only if they are scheduled f
       },
     },
   });
-  const runnerResult = await runner.run();
+  savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+  encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '1',
+    type: 'alert',
+    attributes: {
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [],
+  });
+  const runnerResult = await taskRunner.run();
   expect(runnerResult.state.alertInstances).toMatchInlineSnapshot(`
     Object {
       "1": Object {
@@ -217,17 +232,17 @@ test('persists alertInstances passed in from state, only if they are scheduled f
 });
 
 test('validates params before executing the alert type', async () => {
-  const createTaskRunner = getCreateTaskRunnerFunction({
-    ...getCreateTaskRunnerFunctionParams,
-    alertType: {
-      ...getCreateTaskRunnerFunctionParams.alertType,
+  const taskRunner = taskRunnerFactory.create(
+    {
+      ...alertType,
       validate: {
         params: schema.object({
           param1: schema.string(),
         }),
       },
     },
-  });
+    { taskInstance: mockedTaskInstance }
+  );
   savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
   encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '1',
@@ -237,14 +252,15 @@ test('validates params before executing the alert type', async () => {
     },
     references: [],
   });
-  const runner = createTaskRunner({ taskInstance: mockedTaskInstance });
-  await expect(runner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
+  await expect(taskRunner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
     `"alertTypeParams invalid: [param1]: expected value of type [string] but got [undefined]"`
   );
 });
 
 test('throws error if reference not found', async () => {
-  const createTaskRunner = getCreateTaskRunnerFunction(getCreateTaskRunnerFunctionParams);
+  const taskRunner = taskRunnerFactory.create(alertType, {
+    taskInstance: mockedTaskInstance,
+  });
   savedObjectsClient.get.mockResolvedValueOnce({
     ...mockedAlertTypeSavedObject,
     references: [],
@@ -257,14 +273,15 @@ test('throws error if reference not found', async () => {
     },
     references: [],
   });
-  const runner = createTaskRunner({ taskInstance: mockedTaskInstance });
-  await expect(runner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
+  await expect(taskRunner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
     `"Action reference \\"action_0\\" not found in alert id: 1"`
   );
 });
 
 test('uses API key when provided', async () => {
-  const createTaskRunner = getCreateTaskRunnerFunction(getCreateTaskRunnerFunctionParams);
+  const taskRunner = taskRunnerFactory.create(alertType, {
+    taskInstance: mockedTaskInstance,
+  });
   savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
   encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '1',
@@ -274,10 +291,9 @@ test('uses API key when provided', async () => {
     },
     references: [],
   });
-  const runner = createTaskRunner({ taskInstance: mockedTaskInstance });
 
-  await runner.run();
-  expect(getCreateTaskRunnerFunctionParams.getServices).toHaveBeenCalledWith({
+  await taskRunner.run();
+  expect(taskRunnerFactoryInitializerParams.getServices).toHaveBeenCalledWith({
     getBasePath: expect.anything(),
     headers: {
       // base64 encoded "123:abc"
@@ -297,9 +313,13 @@ test('uses API key when provided', async () => {
 });
 
 test(`doesn't use API key when not provided`, async () => {
-  const createTaskRunner = getCreateTaskRunnerFunction({
-    ...getCreateTaskRunnerFunctionParams,
+  const factory = new TaskRunnerFactory();
+  factory.initialize({
+    ...taskRunnerFactoryInitializerParams,
     isSecurityEnabled: false,
+  });
+  const taskRunner = factory.create(alertType, {
+    taskInstance: mockedTaskInstance,
   });
   savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
   encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
@@ -308,11 +328,10 @@ test(`doesn't use API key when not provided`, async () => {
     attributes: {},
     references: [],
   });
-  const runner = createTaskRunner({ taskInstance: mockedTaskInstance });
 
-  await runner.run();
+  await taskRunner.run();
 
-  expect(getCreateTaskRunnerFunctionParams.getServices).toHaveBeenCalledWith({
+  expect(taskRunnerFactoryInitializerParams.getServices).toHaveBeenCalledWith({
     getBasePath: expect.anything(),
     headers: {},
     path: '/',

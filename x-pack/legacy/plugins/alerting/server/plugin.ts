@@ -7,22 +7,17 @@
 import Hapi from 'hapi';
 import { first } from 'rxjs/operators';
 import { Services } from './types';
-import { SpacesPlugin } from '../../spaces';
-import { ActionsPlugin } from '../../actions';
 import { AlertsClient } from './alerts_client';
-import { TaskManager } from '../../task_manager';
 import { AlertTypeRegistry } from './alert_type_registry';
-import { XPackMainPlugin } from '../../xpack_main/xpack_main';
-import { AlertsClientFactory } from './lib';
-import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
-import { PluginSetupContract as SecurityPluginSetupContract } from '../../../../plugins/security/server';
+import { AlertsClientFactory, TaskRunnerFactory } from './lib';
+import { ClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
 import {
-  ElasticsearchServiceSetup,
-  KibanaRequest,
-  Logger,
-  LoggerFactory,
-  SavedObjectsLegacyService,
-} from '../../../../../src/core/server';
+  AlertingPluginInitializerContext,
+  AlertingCoreSetup,
+  AlertingCoreStart,
+  AlertingPluginsSetup,
+  AlertingPluginsStart,
+} from './shim';
 import {
   createAlertRoute,
   deleteAlertRoute,
@@ -39,53 +34,28 @@ import {
   unmuteAlertInstanceRoute,
 } from './routes';
 
-interface AlertingPluginInitializerContext {
-  logger: LoggerFactory;
-}
-
-interface AlertingCoreSetup {
-  elasticsearch: ElasticsearchServiceSetup;
-  savedObjects: SavedObjectsLegacyService;
-  http: {
-    route: (route: Hapi.ServerRoute) => void;
-    basePath: {
-      serverBasePath: string;
-    };
-  };
-}
-
-interface AlertingPluginsSetup {
-  security?: SecurityPluginSetupContract;
-  task_manager: TaskManager;
-  spaces: () => SpacesPlugin | undefined;
-  actions: ActionsPlugin;
-  xpack_main: XPackMainPlugin;
-  encrypted_saved_objects: EncryptedSavedObjectsPlugin;
-}
-
 export interface PluginSetupContract {
   registerType: AlertTypeRegistry['register'];
 }
-
 export interface PluginStartContract {
   listTypes: AlertTypeRegistry['list'];
-  getAlertsClientWithRequest: (request: Hapi.Request) => AlertsClient;
+  getAlertsClientWithRequest(request: Hapi.Request): AlertsClient;
 }
 
 export class Plugin {
   private readonly logger: Logger;
   private alertTypeRegistry?: AlertTypeRegistry;
-  private alertsClientFactory?: AlertsClientFactory;
+  private readonly taskRunnerFactory: TaskRunnerFactory;
+  private adminClient?: ClusterClient;
+  private serverBasePath?: string;
 
   constructor(initializerContext: AlertingPluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
+    this.taskRunnerFactory = new TaskRunnerFactory();
   }
 
-  public async setup(
-    core: AlertingCoreSetup,
-    plugins: AlertingPluginsSetup
-  ): Promise<PluginSetupContract> {
-    const adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
+  public async setup(core: AlertingCoreSetup, plugins: AlertingPluginsSetup) {
+    this.adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
 
     plugins.xpack_main.registerFeature({
       id: 'alerting',
@@ -123,34 +93,12 @@ export class Plugin {
       ]),
     });
 
-    function getServices(request: any): Services {
-      return {
-        callCluster: (...args) =>
-          adminClient.asScoped(KibanaRequest.from(request)).callAsCurrentUser(...args),
-        savedObjectsClient: core.savedObjects.getScopedSavedObjectsClient(request),
-      };
-    }
-    function getBasePath(spaceId?: string): string {
-      const spacesPlugin = plugins.spaces();
-      return spacesPlugin && spaceId
-        ? spacesPlugin.getBasePath(spaceId)
-        : core.http.basePath.serverBasePath;
-    }
-    function spaceIdToNamespace(spaceId?: string): string | undefined {
-      const spacesPlugin = plugins.spaces();
-      return spacesPlugin && spaceId ? spacesPlugin.spaceIdToNamespace(spaceId) : undefined;
-    }
-
-    this.alertTypeRegistry = new AlertTypeRegistry({
-      getServices,
-      logger: this.logger,
-      isSecurityEnabled: !!plugins.security,
+    const alertTypeRegistry = new AlertTypeRegistry({
       taskManager: plugins.task_manager,
-      executeAction: plugins.actions.execute,
-      encryptedSavedObjectsPlugin: plugins.encrypted_saved_objects,
-      getBasePath,
-      spaceIdToNamespace,
+      taskRunnerFactory: this.taskRunnerFactory,
     });
+    this.alertTypeRegistry = alertTypeRegistry;
+    this.serverBasePath = core.http.basePath.serverBasePath;
 
     // Register routes
     core.http.route(createAlertRoute);
@@ -167,7 +115,15 @@ export class Plugin {
     core.http.route(muteAlertInstanceRoute);
     core.http.route(unmuteAlertInstanceRoute);
 
-    this.alertsClientFactory = new AlertsClientFactory({
+    return {
+      registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
+    };
+  }
+
+  public start(core: AlertingCoreStart, plugins: AlertingPluginsStart) {
+    const { adminClient, serverBasePath } = this;
+
+    const alertsClientFactory = new AlertsClientFactory({
       alertTypeRegistry: this.alertTypeRegistry!,
       logger: this.logger,
       taskManager: plugins.task_manager,
@@ -178,16 +134,32 @@ export class Plugin {
       },
     });
 
-    return {
-      registerType: this.alertTypeRegistry!.register.bind(this.alertTypeRegistry!),
-    };
-  }
+    this.taskRunnerFactory.initialize({
+      logger: this.logger,
+      isSecurityEnabled: !!plugins.security,
+      getServices(request: Hapi.Request): Services {
+        return {
+          callCluster: (...args) =>
+            adminClient!.asScoped(KibanaRequest.from(request)).callAsCurrentUser(...args),
+          savedObjectsClient: core.savedObjects.getScopedSavedObjectsClient(request),
+        };
+      },
+      executeAction: plugins.actions.execute,
+      encryptedSavedObjectsPlugin: plugins.encrypted_saved_objects,
+      spaceIdToNamespace(spaceId?: string): string | undefined {
+        const spacesPlugin = plugins.spaces();
+        return spacesPlugin && spaceId ? spacesPlugin.spaceIdToNamespace(spaceId) : undefined;
+      },
+      getBasePath(spaceId?: string): string {
+        const spacesPlugin = plugins.spaces();
+        return spacesPlugin && spaceId ? spacesPlugin.getBasePath(spaceId) : serverBasePath!;
+      },
+    });
 
-  public start() {
     return {
       listTypes: this.alertTypeRegistry!.list.bind(this.alertTypeRegistry!),
       getAlertsClientWithRequest: (request: Hapi.Request) =>
-        this.alertsClientFactory!.create(KibanaRequest.from(request), request),
+        alertsClientFactory!.create(KibanaRequest.from(request), request),
     };
   }
 }

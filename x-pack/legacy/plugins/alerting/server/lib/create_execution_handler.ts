@@ -5,13 +5,13 @@
  */
 
 import { AlertAction, State, Context, AlertType } from '../types';
-import { ActionsPlugin } from '../../../actions';
+import { ActionsPluginStartContract } from '../shim';
 import { Logger } from '../../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
 
 interface CreateExecutionHandlerOptions {
   alertId: string;
-  executeAction: ActionsPlugin['execute'];
+  executeAction: ActionsPluginStartContract['execute'];
   actions: AlertAction[];
   spaceId: string;
   apiKey?: string;

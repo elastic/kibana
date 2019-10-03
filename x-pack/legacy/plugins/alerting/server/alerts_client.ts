@@ -9,7 +9,7 @@ import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Logger, SavedObjectsClientContract, SavedObjectReference } from 'src/core/server';
 import { Alert, RawAlert, AlertTypeRegistry, AlertAction, AlertType } from './types';
-import { TaskManager } from '../../task_manager';
+import { TaskManagerStartContract } from './shim';
 import { validateAlertTypeParams } from './lib';
 import { CreateAPIKeyResult as SecurityPluginCreateAPIKeyResult } from '../../../../plugins/security/server';
 
@@ -24,7 +24,7 @@ export type CreateAPIKeyResult = FailedCreateAPIKeyResult | SuccessCreateAPIKeyR
 
 interface ConstructorOptions {
   logger: Logger;
-  taskManager: TaskManager;
+  taskManager: TaskManagerStartContract;
   savedObjectsClient: SavedObjectsClientContract;
   alertTypeRegistry: AlertTypeRegistry;
   spaceId?: string;
@@ -81,7 +81,7 @@ export class AlertsClient {
   private readonly logger: Logger;
   private readonly getUserName: () => Promise<string | null>;
   private readonly spaceId?: string;
-  private readonly taskManager: TaskManager;
+  private readonly taskManager: TaskManagerStartContract;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly alertTypeRegistry: AlertTypeRegistry;
   private readonly createAPIKey: () => Promise<CreateAPIKeyResult>;
