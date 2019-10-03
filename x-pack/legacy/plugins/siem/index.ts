@@ -24,7 +24,7 @@ import {
   DEFAULT_FROM,
   DEFAULT_TO,
 } from './common/constants';
-import { getAlertType as getSignalsAlertType } from './server/lib/detection_engine/alerts/signals_alert_type';
+import { signalsAlertType } from './server/lib/detection_engine/alerts/signals_alert_type';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function siem(kibana: any) {
@@ -126,7 +126,7 @@ export function siem(kibana: any) {
       const newPlatform = ((server as unknown) as KbnServer).newPlatform;
       if (server.plugins.alerting != null) {
         server.plugins.alerting.setup.registerType(
-          getSignalsAlertType({ logger: newPlatform.coreContext.logger.get('plugins', APP_ID) })
+          signalsAlertType({ logger: newPlatform.coreContext.logger.get('plugins', APP_ID) })
         );
       }
       server.injectUiAppVars('siem', async () => server.getInjectedUiAppVars('kibana'));

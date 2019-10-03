@@ -16,7 +16,7 @@ import { buildEventsReIndex } from './build_events_reindex';
 // once scrolling and other things are done with it.
 // import { buildEventsQuery } from './build_events_query';
 
-export function getAlertType({ logger }: { logger: Logger }): AlertType {
+export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
   return {
     id: `${APP_ID}.signals`,
     name: 'SIEM Signals',
