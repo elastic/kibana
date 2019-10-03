@@ -37,13 +37,12 @@ import { i18n } from '@kbn/i18n';
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/common';
 // @ts-ignore
-import classNames from 'classnames';
 import { fieldFormats } from '../../../../../../src/legacy/ui/public/registry/field_formats';
 import { IndexPattern, IndexPatternField, DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { BucketedAggregation, FieldStatsResponse } from '../../common';
-import { LensFieldIcon } from './lens_field_icon';
+import { LensFieldIcon, getColorForDataType } from './lens_field_icon';
 
 export interface FieldItemProps {
   core: DatasourceDataPanelProps['core'];
@@ -362,6 +361,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
       colorValues: [],
       specId,
     };
+    const expectedColor = getColorForDataType(field.type);
 
     const seriesColors = new Map([[colors, expectedColor]]);
 
