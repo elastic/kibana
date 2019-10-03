@@ -112,11 +112,26 @@ export const reducer = (state: State, action: Action): State => {
         properties: { ...state.properties, rootLevelFields },
       };
     }
+    case 'property.remove': {
+      const { parentPath, path } = state.properties.byId[action.value];
+      if (parentPath) {
+        // Deleting a child property
+        const parentProperty = state.properties.byId[parentPath];
+        parentProperty.childProperties = parentProperty.childProperties!.filter(
+          childPath => childPath !== path
+        );
+      } else {
+        // Deleting a root level field
+        state.properties.rootLevelFields = state.properties.rootLevelFields.filter(
+          fieldPath => fieldPath !== path
+        );
+      }
+
+      delete state.properties.byId[path];
+    }
     case 'property.edit': {
-      // const properties = state.properties.data; // Todo update this to merge new prop
       return {
         ...state,
-        // properties: { ...state.properties, data: properties },
         documentFields: { ...state.documentFields, status: 'idle' },
       };
     }

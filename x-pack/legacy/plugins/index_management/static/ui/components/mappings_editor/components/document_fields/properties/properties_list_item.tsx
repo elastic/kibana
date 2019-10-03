@@ -46,7 +46,10 @@ export const PropertiesListItem = ({ property, parentPath, treeDepth = 0 }: Prop
   };
 
   const removeField = () => {
-    // console.log('Removing', propertyPath);
+    dispatch({
+      type: 'property.remove',
+      value: path,
+    });
   };
 
   const renderCreateProperty = () => {
