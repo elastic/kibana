@@ -46,12 +46,11 @@ export class TooltipSelector extends Component {
       : propertyName;
   }
 
-  _addProperty = (propertyName) => {
-    const property = propertyName;
+  _onAdd = (properties) => {
     if (!this.props.tooltipProperties) {
-      this.props.onChange([property]);
+      this.props.onChange([...properties]);
     } else {
-      this.props.onChange([...this.props.tooltipProperties, property]);
+      this.props.onChange([...this.props.tooltipProperties, ...properties]);
     }
   }
 
@@ -158,7 +157,7 @@ export class TooltipSelector extends Component {
 
         <EuiTextAlign textAlign="center">
           <AddTooltipFieldPopover
-            onSelect={this._addProperty}
+            onAdd={this._onAdd}
             fields={this.props.fields}
             selectedFields={selectedFields}
           />
