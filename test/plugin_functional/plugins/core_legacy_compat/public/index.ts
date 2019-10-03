@@ -17,11 +17,13 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./applications'));
-    loadTestFile(require.resolve('./legacy_plugins'));
-    loadTestFile(require.resolve('./server_plugins'));
-    loadTestFile(require.resolve('./ui_plugins'));
-  });
-}
+import { npSetup } from 'ui/new_platform';
+
+npSetup.core.application.register({
+  id: 'core_legacy_compat',
+  title: 'Core Legacy Compat',
+  async mount(...args) {
+    const { renderApp } = await import('./application');
+    return renderApp(...args);
+  },
+});
