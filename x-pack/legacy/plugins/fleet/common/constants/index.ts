@@ -6,5 +6,5 @@
 
 export { INDEX_NAMES } from './index_names';
 export { PLUGIN } from './plugin';
-export { AGENT_TYPE, AGENT_POLLING_THRESHOLD_MS } from './agent';
+export * from './agent';
 export const BASE_PATH = '/fleet';

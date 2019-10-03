@@ -6,7 +6,11 @@
 import React from 'react';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import { EuiHealth, EuiToolTip } from '@elastic/eui';
-import { AGENT_TYPE, AGENT_POLLING_THRESHOLD_MS } from '../../common/constants';
+import {
+  AGENT_TYPE_PERMANENT,
+  AGENT_TYPE_TEMPORARY,
+  AGENT_POLLING_THRESHOLD_MS,
+} from '../../common/constants';
 import { Agent } from '../../common/types/domain_data';
 
 interface Props {
@@ -47,7 +51,7 @@ export const AgentHealth: React.SFC<Props> = ({ agent }) => {
   let status: React.ReactElement = Status.Online;
 
   switch (type) {
-    case AGENT_TYPE.PERMANENT:
+    case AGENT_TYPE_PERMANENT:
       if (intervalsSinceLastCheckIn >= 4) {
         status = Status.Error;
         break;
@@ -56,7 +60,7 @@ export const AgentHealth: React.SFC<Props> = ({ agent }) => {
         status = Status.Warning;
         break;
       }
-    case AGENT_TYPE.TEMPORARY:
+    case AGENT_TYPE_TEMPORARY:
       if (intervalsSinceLastCheckIn >= 3) {
         status = Status.Offline;
         break;
