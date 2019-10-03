@@ -159,7 +159,7 @@ linting rule for your plugin via the [`.eslintrc.js`](https://github.com/elastic
 
 You should try avoiding non-null assertions (`!.`) wherever possible. By using them you tell
 TypeScript, that something is not null even though by it’s type it could be. Usage of non-null
-assertions is most often a side-effect of you actually checked that the variable is not null `null`
+assertions is most often a side-effect of you actually checked that the variable is not `null`
 but TypeScript doesn’t correctly carry on that information till the usage of the variable.
 
 In most cases it’s possible to replace the non-null assertion by structuring your code/checks slightly different
