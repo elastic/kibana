@@ -8,7 +8,7 @@ import React, { useReducer, useEffect, createContext, useContext } from 'react';
 
 import { reducer, MappingsConfiguration, MappingsProperties, State, Dispatch } from './reducer';
 import { Property } from './types';
-import { normalize } from './lib';
+import { normalize, deNormalize } from './lib';
 
 type Mappings = MappingsConfiguration & {
   properties: MappingsProperties;
@@ -64,7 +64,7 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
     onUpdate({
       getData: () => ({
         ...state.configuration.data.format(),
-        properties: state.properties.byId,
+        properties: deNormalize(state.properties),
       }),
       validate: () => {
         return state.configuration.validate();

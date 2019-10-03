@@ -113,3 +113,22 @@ export const normalize = (propertiesToNormalize: Properties): NormalizedProperti
     rootLevelFields: Object.keys(propertiesToNormalize),
   };
 };
+
+export const deNormalize = (normalized: NormalizedProperties): Properties => {
+  const deNormalizePaths = (paths: string[], to: Properties = {}) => {
+    paths.forEach(path => {
+      const { resource, childProperties, childPropertiesName } = normalized.byId[path];
+      const { name, ...property } = resource;
+      to[name] = property;
+      if (childProperties) {
+        if (!property[childPropertiesName!]) {
+          property[childPropertiesName!] = {};
+        }
+        return deNormalizePaths(childProperties, property[childPropertiesName!]);
+      }
+    });
+    return to;
+  };
+
+  return deNormalizePaths(normalized.rootLevelFields);
+};
