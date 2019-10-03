@@ -22,6 +22,7 @@ interface Properties {
     slack: string;
     log: string;
   };
+  indexPattern: string;
 }
 
 interface Clients {
@@ -82,12 +83,10 @@ const createAlert = async (
     hostName,
     threshold,
     interval,
+    indexPattern,
   }: Properties
 ) => {
-  const actions: Array<{ params: Record<string, any>; action: Action }> = [];
-
-  // TODO Create a different action group for recovery alerts
-  const isRecovery = false;
+  const actions: Array<{ params: Record<string, any>; action: Action; group: string }> = [];
 
   // TODO Add a check to determine that `interval` is a valid calendar_interval
 
@@ -102,21 +101,41 @@ const createAlert = async (
   };
 
   if (log) {
-    actions.push({
-      action: {
-        actionTypeId: '.server-log',
-        description: 'Server log notifications for metric thresholds',
-        config: {},
-        secrets: {},
-      },
-      params: {
-        message: i18n.translate('xpack.infra.alerting.metricThreshold.log', {
-          defaultMessage:
-            '{hostName} has reported {aggregation} {metric} value {comparator} {threshold} within {interval} - {value}',
-          values,
-        }),
-      },
+    const action = {
+      actionTypeId: '.server-log',
+      description: 'Server log notifications for metric thresholds',
+      config: {},
+      secrets: {},
+    };
+
+    const firedMessage = i18n.translate('xpack.infra.alerting.metricThreshold.log', {
+      defaultMessage:
+        '{hostName} has reported {aggregation} {metric} value {comparator} {threshold} within {interval} - {value}',
+      values,
     });
+
+    const recoveredMessage = i18n.translate('xpack.infra.alerting.metricThreshold.logRecovered', {
+      defaultMessage:
+        '[RECOVERED] - {hostName} no longer reports {aggregation} {metric} value {comparator} {threshold} within {interval} - {value}',
+      values,
+    });
+
+    actions.push(
+      {
+        action,
+        params: {
+          message: firedMessage,
+        },
+        group: 'fired',
+      },
+      {
+        action,
+        params: {
+          message: recoveredMessage,
+        },
+        group: 'recovered',
+      }
+    );
   }
 
   if (email) {
@@ -130,7 +149,7 @@ const createAlert = async (
         defaultMessage: '[RECOVERED]',
       }
     );
-    const alertBody = i18n.translate(
+    const firedBody = i18n.translate(
       'xpack.infra.alerting.metricThreshold.emailTemplateAlertText',
       {
         defaultMessage:
@@ -151,28 +170,46 @@ const createAlert = async (
       }
     );
 
-    actions.push({
-      action: {
-        actionTypeId: '.email',
-        description: 'Email notifications for metric thresholds',
-        config: {
-          from: '',
-        },
-        secrets: {
-          user: '',
-          password: '',
-        },
+    const action = {
+      actionTypeId: '.email',
+      description: 'Email notifications for metric thresholds',
+      config: {
+        from: '',
       },
-      params: {
-        to: email,
-        subject: isRecovery ? `${recoveryPrefix} ${subject}` : subject,
-        body: isRecovery ? recoveryBody : alertBody,
+      secrets: {
+        user: '',
+        password: '',
       },
-    });
+    };
+
+    const firedParams = {
+      to: email,
+      subject,
+      body: firedBody,
+    };
+
+    const recoveredParams = {
+      to: email,
+      subject: `${recoveryPrefix} ${subject}`,
+      body: recoveryBody,
+    };
+
+    actions.push(
+      {
+        action,
+        params: firedParams,
+        group: 'fired',
+      },
+      {
+        action,
+        params: recoveredParams,
+        group: 'recovered',
+      }
+    );
   }
 
   if (slack) {
-    const alertMessage = i18n.translate(
+    const firedMessage = i18n.translate(
       'xpack.infra.alerting.metricThreshold.slackTemplateAlertText',
       {
         defaultMessage:
@@ -180,7 +217,7 @@ const createAlert = async (
         values,
       }
     );
-    const recoveryMessage = i18n.translate(
+    const recoveredMessage = i18n.translate(
       'xpack.infra.alerting.metricThreshold.slackTemplateRecoveryText',
       {
         defaultMessage:
@@ -188,19 +225,32 @@ const createAlert = async (
         values,
       }
     );
-    actions.push({
-      action: {
-        actionTypeId: '.slack',
-        description: 'Slack notifications for metric thresholds',
-        config: {},
-        secrets: {
-          webhookUrl: slack,
+
+    const action = {
+      actionTypeId: '.slack',
+      description: 'Slack notifications for metric thresholds',
+      config: {},
+      secrets: {
+        webhookUrl: slack,
+      },
+    };
+
+    actions.push(
+      {
+        action,
+        params: {
+          message: firedMessage,
         },
+        group: 'fired',
       },
-      params: {
-        message: isRecovery ? recoveryMessage : alertMessage,
-      },
-    });
+      {
+        action,
+        params: {
+          message: recoveredMessage,
+        },
+        group: 'recovered',
+      }
+    );
   }
 
   if (!actions.length) {
@@ -208,7 +258,7 @@ const createAlert = async (
   }
 
   const actionResults = await Promise.all(
-    actions.map(({ action, params }) =>
+    actions.map(({ action, params, group }) =>
       actionsClient
         .create({
           action: {
@@ -221,6 +271,7 @@ const createAlert = async (
         .then(result => ({
           result,
           params,
+          group,
         }))
     )
   );
@@ -235,12 +286,13 @@ const createAlert = async (
         comparator,
         aggregation,
         metric,
+        indexPattern,
       },
       interval,
       enabled: true,
-      actions: actionResults.map(({ result, params }) => {
+      actions: actionResults.map(({ result, params, group }) => {
         return {
-          group: 'default',
+          group,
           id: result.id,
           params,
         };

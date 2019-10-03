@@ -9,19 +9,19 @@ import { METRIC_THRESHOLD_ALERT_TYPE_ID, Comparator } from './constants';
 import { AlertServices } from '../../../../../alerting/server/types';
 import { MetricsExplorerAggregation } from '../../../routes/metrics_explorer/types';
 
+interface ExecutorParams {
+  aggregation: MetricsExplorerAggregation;
+  metric: string;
+  hostName: string;
+  interval: string;
+  indexPattern: string;
+  threshold: number;
+  comparator: Comparator;
+}
+
 async function getMetric(
   { callCluster }: AlertServices,
-  {
-    metric,
-    hostName,
-    aggregation,
-    interval,
-  }: {
-    metric: string;
-    hostName: string;
-    aggregation: MetricsExplorerAggregation;
-    interval: string;
-  }
+  { metric, hostName, aggregation, interval, indexPattern }: ExecutorParams
 ) {
   const searchBody = {
     query: {
@@ -73,7 +73,7 @@ async function getMetric(
 
   const result = await callCluster('search', {
     body: searchBody,
-    index: 'metricbeat-*',
+    index: indexPattern,
   });
 
   const { buckets } = result.aggregations.aggregatedIntervals;
@@ -87,15 +87,6 @@ const comparatorMap = {
   GT_OR_EQ: (a: number, b: number) => a >= b,
   LT_OR_EQ: (a: number, b: number) => a <= b,
 };
-
-interface ExecutorParams {
-  threshold: number;
-  comparator: Comparator;
-  aggregation: MetricsExplorerAggregation;
-  metric: string;
-  hostName: string;
-  interval: string;
-}
 
 export async function registerMetricThresholdAlertType(server: Server) {
   const { alerting } = server.plugins;
@@ -116,26 +107,15 @@ export async function registerMetricThresholdAlertType(server: Server) {
         hostName: schema.string(),
         metric: schema.string(),
         interval: schema.string(),
+        indexPattern: schema.string(),
       }),
     },
-    actionGroups: ['default'],
+    actionGroups: ['fired', 'recovered'],
     async executor({ services, params }) {
-      const {
-        threshold,
-        comparator,
-        metric,
-        aggregation,
-        hostName,
-        interval,
-      } = params as ExecutorParams;
+      const { threshold, comparator, hostName } = params as ExecutorParams;
       const alertInstance = services.alertInstanceFactory(hostName);
-      const { isInAlertState } = alertInstance.getState();
-      const currentValue = await getMetric(services, {
-        metric,
-        hostName,
-        aggregation,
-        interval,
-      });
+      const { isAlertInFiredState } = alertInstance.getState();
+      const currentValue = await getMetric(services, params as ExecutorParams);
       if (typeof currentValue === 'undefined')
         throw new Error('Could not get current value of metric');
 
@@ -144,28 +124,23 @@ export async function registerMetricThresholdAlertType(server: Server) {
       const isValueInAlertState = comparisonFunction(currentValue, threshold);
       // If the value has crossed the threshold, check to see if this just happened, or if
       // it was beyond the threshold the previous time this alert executed
-      const shouldAlert = isValueInAlertState && !isInAlertState;
+      const shouldFire = isValueInAlertState && !isAlertInFiredState;
       // Vice versa for if the value has NOT crossed the threshold
-      const shouldRecover = !isValueInAlertState && isInAlertState;
+      const shouldRecover = !isValueInAlertState && isAlertInFiredState;
 
       // Only schedule actions when the value tranverses the threshold; don't renotify
       // over and over again if the value remains in an alert state
-      if (shouldAlert || shouldRecover) {
-        alertInstance.scheduleActions('default', {
-          hostName,
-          metric,
-          comparator,
-          aggregation,
-          isRecovery: shouldRecover,
+      if (shouldFire || shouldRecover) {
+        alertInstance.scheduleActions(shouldFire ? 'fired' : 'recovered', {
           value: currentValue,
         });
         alertInstance.replaceState({
-          isInAlertState: shouldAlert,
+          isAlertInFiredState: shouldFire,
         });
         return;
       }
       alertInstance.replaceState({
-        isInAlertState: Boolean(isInAlertState),
+        isAlertInFiredState: Boolean(isAlertInFiredState),
       });
     },
   });
