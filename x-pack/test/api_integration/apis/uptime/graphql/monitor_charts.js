@@ -5,10 +5,13 @@
  */
 
 import { monitorChartsQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
-import { expectFixtureEql } from './expect_fixture_eql';
+import { expectFixtureEql } from './helpers/expect_fixture_eql';
 
 export default function ({ getService }) {
   describe('monitorCharts query', () => {
+    before('load heartbeat data', () => getService('esArchiver').load('uptime/full_heartbeat'));
+    after('unload heartbeat index', () => getService('esArchiver').unload('uptime/full_heartbeat'));
+
     const supertest = getService('supertest');
 
     it('will fetch a series of data points for monitor duration and status', async () => {

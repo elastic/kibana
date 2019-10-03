@@ -5,11 +5,14 @@
  */
 
 import { snapshotHistogramQueryString } from '../../../../../legacy/plugins/uptime/public/queries/snapshot_histogram_query';
-import { expectFixtureEql } from './expect_fixture_eql';
+import { expectFixtureEql } from './helpers/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {
   describe('snapshotHistogram', () => {
+    before('load heartbeat data', () => getService('esArchiver').load('uptime/full_heartbeat'));
+    after('unload heartbeat index', () => getService('esArchiver').unload('uptime/full_heartbeat'));
+
     const supertest = getService('supertest');
 
     it('will fetch histogram data for all monitors', async () => {

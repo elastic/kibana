@@ -39,7 +39,6 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
 
     const queryContext: QueryContext = {
       database: this.database,
-
       request,
       dateRangeStart,
       dateRangeEnd,

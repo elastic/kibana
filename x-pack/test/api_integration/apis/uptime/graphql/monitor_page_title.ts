@@ -6,10 +6,13 @@
 
 import { monitorPageTitleQueryString } from '../../../../../legacy/plugins/uptime/public/queries/monitor_page_title_query';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { expectFixtureEql } from './expect_fixture_eql';
+import { expectFixtureEql } from './helpers/expect_fixture_eql';
 
 export default function({ getService }: FtrProviderContext) {
   describe('monitor_page_title', () => {
+    before('load heartbeat data', () => getService('esArchiver').load('uptime/full_heartbeat'));
+    after('unload heartbeat index', () => getService('esArchiver').unload('uptime/full_heartbeat'));
+
     const supertest = getService('supertest');
 
     it('will fetch a title for a given monitorId', async () => {

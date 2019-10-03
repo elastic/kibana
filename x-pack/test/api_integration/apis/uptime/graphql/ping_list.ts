@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { pingsQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
-import { expectFixtureEql } from './expect_fixture_eql';
+import { expectFixtureEql } from './helpers/expect_fixture_eql';
 import { Ping, PingResults } from '../../../../../legacy/plugins/uptime/common/graphql/types';
 
 const expectPingFixtureEql = (data: { allPings: PingResults }, fixtureName: string) => {
@@ -15,6 +15,9 @@ const expectPingFixtureEql = (data: { allPings: PingResults }, fixtureName: stri
 
 export default function({ getService }: any) {
   describe('pingList query', () => {
+    before('load heartbeat data', () => getService('esArchiver').load('uptime/full_heartbeat'));
+    after('unload heartbeat index', () => getService('esArchiver').unload('uptime/full_heartbeat'));
+
     const supertest = getService('supertest');
 
     it('returns a list of pings for the given date range and default size', async () => {

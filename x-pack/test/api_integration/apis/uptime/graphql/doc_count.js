@@ -5,10 +5,13 @@
  */
 
 import { docCountQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
-import { expectFixtureEql } from './expect_fixture_eql';
+import { expectFixtureEql } from './helpers/expect_fixture_eql';
 
 export default function ({ getService }) {
   describe('docCount query', () => {
+    before('load heartbeat data', () => getService('esArchiver').load('uptime/full_heartbeat'));
+    after('unload heartbeat index', () => getService('esArchiver').unload('uptime/full_heartbeat'));
+
     const supertest = getService('supertest');
 
     it(`will fetch the index's count`, async () => {

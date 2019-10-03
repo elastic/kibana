@@ -9,7 +9,7 @@ import fs from 'fs';
 import { join } from 'path';
 import { cloneDeep } from 'lodash';
 
-const fixturesDir = join(__dirname, 'fixtures');
+const fixturesDir = join(__dirname, '..', 'fixtures');
 
 const excludeFieldsFrom = (from: any, excluder?: (d: any) => any): any => {
   const clone = cloneDeep(from);
