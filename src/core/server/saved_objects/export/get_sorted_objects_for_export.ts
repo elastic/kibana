@@ -28,15 +28,24 @@ import { sortObjects } from './sort_objects';
  * @public
  */
 export interface SavedObjectsExportOptions {
+  /** optional array of saved object types. */
   types?: string[];
+  /** optional array of objects to export. */
   objects?: Array<{
+    /** the saved object id. */
     id: string;
+    /** the saved object type. */
     type: string;
   }>;
+  /** optional query string to filter exported objects. */
   search?: string;
+  /** an instance of the SavedObjectsClient. */
   savedObjectsClient: SavedObjectsClientContract;
+  /** the maximum number of objects to export. */
   exportSizeLimit: number;
+  /** flag to also include all related saved objects in the export response. */
   includeReferencesDeep?: boolean;
+  /** optional namespace to override the namespace used by the savedObjectsClient. */
   namespace?: string;
 }
 
