@@ -10,6 +10,7 @@ export function MonitoringNoDataProvider({ getService }) {
 
   return new class NoData {
     async enableMonitoring() {
+      await testSubjects.click('useInternalCollection');
       await testSubjects.click('enableCollectionEnabled');
     }
 
