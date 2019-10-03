@@ -18,6 +18,7 @@
  */
 
 import 'uiExports/interpreter';
+// @ts-ignore
 import { register, registryFactory } from '@kbn/interpreter/common';
 import { initializeInterpreter } from './lib/interpreter';
 import { registries } from './registries';
@@ -27,7 +28,10 @@ import { typeSpecs } from '../../../../plugins/expressions/common';
 
 // Expose kbnInterpreter.register(specs) and kbnInterpreter.registries() globally so that plugins
 // can register without a transpile step.
-global.kbnInterpreter = Object.assign(global.kbnInterpreter || {}, registryFactory(registries));
+(global as any).kbnInterpreter = Object.assign(
+  (global as any).kbnInterpreter || {},
+  registryFactory(registries)
+);
 
 register(registries, {
   types: typeSpecs,
@@ -35,7 +39,7 @@ register(registries, {
   renderers: [visualization],
 });
 
-let interpreterPromise;
+let interpreterPromise: Promise<any> | undefined;
 
 export const getInterpreter = async () => {
   if (!interpreterPromise) {
@@ -44,7 +48,7 @@ export const getInterpreter = async () => {
   return await interpreterPromise;
 };
 
-export const interpretAst = async (...params) => {
+export const interpretAst = async (...params: any) => {
   const { interpreter } = await getInterpreter();
   return await interpreter.interpretAst(...params);
 };

@@ -24,13 +24,10 @@ export const kibanaContext = () => ({
   name: 'kibana_context',
   type: 'kibana_context',
   context: {
-    types: [
-      'kibana_context',
-      'null',
-    ],
+    types: ['kibana_context', 'null'],
   },
   help: i18n.translate('interpreter.functions.kibana_context.help', {
-    defaultMessage: 'Updates kibana global context'
+    defaultMessage: 'Updates kibana global context',
   }),
   args: {
     q: {
@@ -49,11 +46,11 @@ export const kibanaContext = () => ({
     savedSearchId: {
       types: ['string', 'null'],
       default: null,
-    }
+    },
   },
-  async fn(context, args) {
+  async fn(context: any, args: any) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
-    const savedSearches = $injector.get('savedSearches');
+    const savedSearches = $injector.get('savedSearches') as any;
     const queryArg = args.q ? JSON.parse(args.q) : [];
     let queries = Array.isArray(queryArg) ? queryArg : [queryArg];
     let filters = args.filters ? JSON.parse(args.filters) : [];
@@ -71,7 +68,7 @@ export const kibanaContext = () => ({
     }
 
     if (context.filters) {
-      filters = filters.concat(context.filters).filter(f => !f.meta.disabled);
+      filters = filters.concat(context.filters).filter((f: any) => !f.meta.disabled);
     }
 
     const timeRange = args.timeRange ? JSON.parse(args.timeRange) : context.timeRange;
@@ -79,8 +76,8 @@ export const kibanaContext = () => ({
     return {
       type: 'kibana_context',
       query: queries,
-      filters: filters,
-      timeRange: timeRange,
+      filters,
+      timeRange,
     };
   },
 });
