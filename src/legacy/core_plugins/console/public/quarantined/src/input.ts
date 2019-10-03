@@ -26,7 +26,7 @@ import { LegacyEditor } from '../../../np_ready/public/application/models';
 import SenseEditor from './sense_editor/editor';
 
 let input: any;
-export function initializeInput($el: HTMLElement, $actionsEl: HTMLElement) {
+export function initializeInput($el: JQuery<HTMLElement>, $actionsEl: JQuery<HTMLElement>) {
   input = new SenseEditor($el);
 
   // Autocomplete should not use any Ace functionality directly

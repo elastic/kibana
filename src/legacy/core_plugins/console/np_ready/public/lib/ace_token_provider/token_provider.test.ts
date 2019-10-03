@@ -39,21 +39,9 @@ describe('Ace (legacy) token provider', () => {
         <div id="ConCopyAsCurl" />
       </div>`;
 
-    aceEditor = initializeInput(
-      $('#ConAppEditor'),
-      $('#ConAppEditorActions'),
-      {},
-      { applyCurrentSettings: () => {} },
-      null
-    );
+    aceEditor = initializeInput($('#ConAppEditor'), $('#ConAppEditorActions'));
 
-    aceEditor = initializeInput(
-      $('#ConAppEditor'),
-      $('#ConAppEditorActions'),
-      {},
-      { applyCurrentSettings: () => {} },
-      null
-    );
+    aceEditor = initializeInput($('#ConAppEditor'), $('#ConAppEditorActions'));
     aceEditor.$el.show();
     aceEditor.autocomplete._test.removeChangeListener();
     tokenProvider = new AceTokensProvider(aceEditor.session);
