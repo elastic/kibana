@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, {FC} from 'react';
+import React, { FC } from 'react';
 import classnames from 'classnames';
 import { PagePreview } from './page_preview';
 import { useCanvasShareableState } from '../../context';

@@ -43,7 +43,12 @@ export interface Props {
 /**
  * The panel used to configure Autolay in Shareable Canvas Workpads.
  */
-export const AutoplaySettingsComponent: FC<Props> = ({ isEnabled, interval, onSetAutoplay, onSetInterval }: Props) => (
+export const AutoplaySettingsComponent: FC<Props> = ({
+  isEnabled,
+  interval,
+  onSetAutoplay,
+  onSetInterval,
+}: Props) => (
   <div style={{ padding: 16 }}>
     <EuiSwitch
       name="cycle"
@@ -60,7 +65,6 @@ export const AutoplaySettingsComponent: FC<Props> = ({ isEnabled, interval, onSe
   </div>
 );
 
-
 /**
  * A store-connected container for the `AutoplaySettings` component.
  */
@@ -73,8 +77,7 @@ export const AutoplaySettings = () => {
   const onSetInterval: onSetIntervalFn = (newInterval: string) =>
     dispatch(setAutoplayIntervalAction(newInterval));
 
-  const onSetAutoplay: onSetAutoplayFn = (enabled: boolean) =>
-    dispatch(setAutoplayAction(enabled));
+  const onSetAutoplay: onSetAutoplayFn = (enabled: boolean) => dispatch(setAutoplayAction(enabled));
 
   return <AutoplaySettingsComponent {...{ isEnabled, interval, onSetAutoplay, onSetInterval }} />;
 };
