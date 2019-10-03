@@ -54,8 +54,6 @@ export class FeatureGeometryFilterForm extends Component {
       return;
     }
 
-    console.log(preIndexedShape);
-
     const filter = createSpatialFilterWithGeometry({
       preIndexedShape,
       geometry: this.props.geometry,

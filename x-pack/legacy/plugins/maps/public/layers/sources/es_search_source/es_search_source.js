@@ -240,7 +240,7 @@ export class ESSearchSource extends AbstractESSource {
 
     const indexPattern = await this._getIndexPattern();
     const unusedMetaFields = indexPattern.metaFields.filter(metaField => {
-      return metaField !== '_id';
+      return !['_id', '_index'].includes(metaField);
     });
     const flattenHit = hit => {
       const properties = indexPattern.flattenHit(hit);
@@ -414,11 +414,10 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   async getPreIndexedShape(properties) {
-    const indexPattern = await this._getIndexPattern();
     const geoField = await this._getGeoField();
 
     return {
-      index: indexPattern.title,
+      index: properties._index, // Can not use index pattern title because it may reference many indices
       id: properties._id,
       path: geoField.name,
     };
