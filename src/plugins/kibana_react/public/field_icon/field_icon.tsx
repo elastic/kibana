@@ -48,7 +48,7 @@ const { colors } = palettes.euiPaletteColorBlind;
 // defaultIcon => a unknown datatype
 const defaultIcon = { icon: 'questionInCircle', color: colors[0] };
 
-const typeToEuiIconMap: Partial<Record<string, IconMapEntry>> = {
+export const typeToEuiIconMap: Partial<Record<string, IconMapEntry>> = {
   boolean: { icon: 'invert', color: colors[5] },
   // icon for an index pattern mapping conflict in discover
   conflict: { icon: 'alert', color: colors[8] },

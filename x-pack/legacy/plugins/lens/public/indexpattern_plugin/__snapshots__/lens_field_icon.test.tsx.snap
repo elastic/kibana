@@ -2,7 +2,7 @@
 
 exports[`LensFieldIcon renders properly 1`] = `
 <FieldIcon
-  className="lnsFieldListPanel__fieldIcon lnsFieldListPanel__fieldIcon--date"
+  className="lnsFieldListPanel__fieldIcon"
   size="m"
   type="date"
   useColor={true}

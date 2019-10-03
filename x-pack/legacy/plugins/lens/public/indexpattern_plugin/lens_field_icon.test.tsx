@@ -11,9 +11,19 @@
  */
 import React from 'react';
 import { shallow } from 'enzyme';
-import { LensFieldIcon } from './lens_field_icon';
+import { LensFieldIcon, getColorForDataType } from './lens_field_icon';
 
 test('LensFieldIcon renders properly', () => {
   const component = shallow(<LensFieldIcon type={'date'} />);
   expect(component).toMatchSnapshot();
+});
+
+test('LensFieldIcon getColorForDataType for a valid type', () => {
+  const color = getColorForDataType('date');
+  expect(color).toEqual('#B0916F');
+});
+
+test('LensFieldIcon getColorForDataType for an invalid type', () => {
+  const color = getColorForDataType('invalid');
+  expect(color).toEqual('#1EA593');
 });

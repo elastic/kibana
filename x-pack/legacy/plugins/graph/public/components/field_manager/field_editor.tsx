@@ -215,7 +215,7 @@ export function FieldEditor({
                       const { type, label } = option;
                       return (
                         <span className={contentClassName}>
-                          <FieldIcon type={type!} size={'m'} useColor />{' '}
+                          <FieldIcon type={type!} size="m" useColor />{' '}
                           <EuiHighlight search={searchValue}>{label}</EuiHighlight>
                         </span>
                       );

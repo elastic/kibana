@@ -120,7 +120,7 @@ function toOptions(
 ): Array<{ label: string; checked?: 'on' | 'off'; prepend?: ReactNode }> {
   return fields.map(field => ({
     label: field.name,
-    prepend: <FieldIcon type={field.type} size={'m'} useColor />,
+    prepend: <FieldIcon type={field.type} size="m" useColor />,
     checked: field.selected ? 'on' : undefined,
   }));
 }
