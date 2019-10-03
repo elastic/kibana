@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServerFacade } from '../..';
 import { InstallationType } from '../../common/installation';
 import { CTAGS_SUPPORT_LANGS, LanguageServer } from '../../common/language_server';
+import { ServerOptions } from '../server_options';
 import { CtagsLauncher } from './ctags_launcher';
 import { GoServerLauncher } from './go_launcher';
 import { JavaLauncher } from './java_launcher';
@@ -72,12 +72,13 @@ export const CTAGS: LanguageServerDefinition = {
 export const LanguageServers: LanguageServerDefinition[] = [TYPESCRIPT, JAVA, GO, CTAGS];
 export const LanguageServersDeveloping: LanguageServerDefinition[] = [];
 
-export function enabledLanguageServers(server: ServerFacade) {
-  const devMode: boolean = server.config().get('env.dev');
+export function enabledLanguageServers(serverOptions: ServerOptions) {
+  const devMode: boolean = serverOptions.devMode;
 
   function isEnabled(lang: LanguageServerDefinition, defaultEnabled: boolean) {
     const name = lang.name;
-    const enabled = server.config().get(`xpack.code.lsp.${name}.enabled`);
+    // @ts-ignore
+    const enabled = serverOptions.lsp[name] && serverOptions.lsp[name].enabled;
     return enabled === undefined ? defaultEnabled : enabled;
   }
   const results = LanguageServers.filter(lang => isEnabled(lang, true));
