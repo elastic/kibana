@@ -59,15 +59,16 @@ export const listAgentConfigurationServicesRoute = createRoute(() => ({
 }));
 
 const agentPayloadRt = t.type({
+  agent_name: t.string,
   service: t.intersection([
     t.type({ name: t.string }),
-    t.partial({ environments: t.array(t.string) })
+    t.partial({ environment: t.string })
   ]),
-  settings: t.type({
-    transaction_sample_rate: transactionSampleRateRt,
-    capture_body: t.string,
-    transaction_max_spans: transactionMaxSpansRt
-  })
+  settings: t.intersection([
+    t.partial({ transaction_sample_rate: transactionSampleRateRt }),
+    t.partial({ capture_body: t.string }),
+    t.partial({ transaction_max_spans: transactionMaxSpansRt })
+  ])
 });
 
 // get environments for service
@@ -108,10 +109,7 @@ export const createAgentConfigurationRoute = createRoute(() => ({
   },
   handler: async (req, { body }) => {
     const setup = await setupRequest(req);
-    const serviceName = body.service.name;
-    const agentName = await getAgentNameByService({ serviceName, setup });
-    const configuration = { ...body, agent_name: agentName };
-    return await createOrUpdateConfiguration({ configuration, setup });
+    return await createOrUpdateConfiguration({ configuration: body, setup });
   }
 }));
 

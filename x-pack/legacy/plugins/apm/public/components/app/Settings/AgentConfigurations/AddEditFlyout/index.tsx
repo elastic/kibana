@@ -34,11 +34,24 @@ import { ServiceSection } from './ServiceSection';
 import { DeleteSection } from './DeleteSection';
 import { transactionMaxSpansRt } from '../../../../../../common/runtime_types/transaction_max_spans_rt';
 import { useFetcher } from '../../../../../hooks/useFetcher';
+import { isRumAgentName } from '../../../../../../common/agent_name';
 const t = (id: string, defaultMessage: string, values?: Record<string, any>) =>
   i18n.translate(`xpack.apm.settings.agentConf.${id}`, {
     defaultMessage,
     values
   });
+
+interface Settings {
+  transaction_sample_rate: number;
+  capture_body?: string;
+  transaction_max_spans?: number;
+}
+
+const defaultSettings = {
+  TRANSACTION_SAMPLE_RATE: '1.0',
+  CAPTURE_BODY: 'off',
+  TRANSACTION_MAX_SPANS: '500'
+};
 
 interface Props {
   onClose: () => void;
@@ -80,32 +93,34 @@ export function AddEditFlyout({
   );
 
   // config settings
-  const initialSampleRate = idx(
-    selectedConfig,
-    _ => _.settings.transaction_sample_rate
-  );
   const [sampleRate, setSampleRate] = useState<string>(
-    initialSampleRate != null ? String(initialSampleRate) : ''
+    (
+      idx(selectedConfig, _ => _.settings.transaction_sample_rate) ||
+      defaultSettings.TRANSACTION_SAMPLE_RATE
+    ).toString()
   );
   const [captureBody, setCaptureBody] = useState<string>(
-    idx(selectedConfig, _ => _.settings.capture_body) || ''
+    idx(selectedConfig, _ => _.settings.capture_body) ||
+      defaultSettings.CAPTURE_BODY
   );
   const [transactionMaxSpans, setTransactionMaxSpans] = useState<string>(
     (
-      idx(selectedConfig, _ => _.settings.transaction_max_spans) || ''
+      idx(selectedConfig, _ => _.settings.transaction_max_spans) ||
+      defaultSettings.TRANSACTION_MAX_SPANS
     ).toString()
   );
 
+  const isRumService = isRumAgentName(agentName);
   const isSampleRateValid = isRight(transactionSampleRateRt.decode(sampleRate));
   const isTransactionMaxSpansValid = isRight(
     transactionMaxSpansRt.decode(transactionMaxSpans)
   );
   const isFormValid =
+    !!agentName &&
     !!serviceName &&
     !!environment &&
     isSampleRateValid &&
-    !!captureBody &&
-    isTransactionMaxSpansValid;
+    (isRumService || (!!captureBody && isTransactionMaxSpansValid));
 
   const handleSubmitEvent = async (
     event:
@@ -115,8 +130,8 @@ export function AddEditFlyout({
     event.preventDefault();
     setIsSaving(true);
 
-    if (sampleRate === '' || captureBody === '' || transactionMaxSpans === '') {
-      throw new Error('Missing arguments');
+    if (!agentName) {
+      throw new Error('Missing agent_name');
     }
 
     await saveConfig({
@@ -125,7 +140,8 @@ export function AddEditFlyout({
       sampleRate,
       captureBody,
       transactionMaxSpans,
-      configurationId: selectedConfig ? selectedConfig.id : undefined
+      configurationId: selectedConfig ? selectedConfig.id : undefined,
+      agentName
     });
     setIsSaving(false);
     onSaved();
@@ -163,7 +179,8 @@ export function AddEditFlyout({
               }}
             >
               <ServiceSection
-                selectedConfig={selectedConfig}
+                isReadOnly={Boolean(selectedConfig)}
+                //
                 // environment
                 environment={environment}
                 setEnvironment={setEnvironment}
@@ -176,21 +193,21 @@ export function AddEditFlyout({
               <EuiSpacer />
 
               <SettingsSection
-                sampleRate={{
-                  value: sampleRate,
-                  set: setSampleRate,
-                  isValid: isSampleRateValid
-                }}
-                captureBody={{
-                  value: captureBody,
-                  set: setCaptureBody
-                }}
-                transactionMaxSpans={{
-                  value: transactionMaxSpans,
-                  set: setTransactionMaxSpans,
-                  isValid: isTransactionMaxSpansValid
-                }}
-                agentName={agentName}
+                isRumService={isRumService}
+                //
+                // sampleRate
+                sampleRate={sampleRate}
+                setSampleRate={setSampleRate}
+                isSampleRateValid={isSampleRateValid}
+                //
+                // captureBody
+                captureBody={captureBody}
+                setCaptureBody={setCaptureBody}
+                //
+                // transactionMaxSpans
+                transactionMaxSpans={transactionMaxSpans}
+                setTransactionMaxSpans={setTransactionMaxSpans}
+                isTransactionMaxSpansValid={isTransactionMaxSpansValid}
               />
 
               {selectedConfig ? (
@@ -234,29 +251,37 @@ async function saveConfig({
   sampleRate,
   captureBody,
   transactionMaxSpans,
-  configurationId
+  configurationId,
+  agentName
 }: {
   serviceName: string;
-  environment: string | undefined;
+  environment: string;
   sampleRate: string;
   captureBody: string;
   transactionMaxSpans: string;
   configurationId?: string;
+  agentName: string;
 }) {
   trackEvent({ app: 'apm', name: 'save_agent_configuration' });
 
   try {
+    const settings: Settings = {
+      transaction_sample_rate: Number(sampleRate)
+    };
+
+    if (!isRumAgentName(agentName)) {
+      settings.capture_body = captureBody;
+      settings.transaction_max_spans = Number(transactionMaxSpans);
+    }
+
     const configuration = {
+      agent_name: agentName,
       service: {
         name: serviceName,
         environment:
           environment === ENVIRONMENT_NOT_DEFINED ? undefined : environment
       },
-      settings: {
-        transaction_sample_rate: Number(sampleRate),
-        capture_body: captureBody,
-        transaction_max_spans: Number(transactionMaxSpans)
-      }
+      settings
     };
 
     if (configurationId) {

@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { SelectWithPlaceholder } from '../../../../shared/SelectWithPlaceholder';
 import { useFetcher } from '../../../../../hooks/useFetcher';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../../common/environment_filter_values';
-import { Config } from '../index';
 import { callApmApi } from '../../../../../services/rest/callApmApi';
 const t = (id: string, defaultMessage: string) =>
   i18n.translate(`xpack.apm.settings.agentConf.flyOut.serviceSection.${id}`, {
@@ -20,33 +19,41 @@ const t = (id: string, defaultMessage: string) =>
 const SELECT_PLACEHOLDER_LABEL = `- ${t('selectPlaceholder', 'Select')} -`;
 
 interface Props {
-  selectedConfig: Config | null;
-  environment?: string;
-  setEnvironment: (env: string) => void;
+  isReadOnly: boolean;
   serviceName?: string;
   setServiceName: (env: string) => void;
+  environment?: string;
+  setEnvironment: (env: string) => void;
+}
+
+function getEnvironmentNameLabel(name: string | undefined) {
+  return name === ENVIRONMENT_NOT_DEFINED
+    ? t('serviceEnvironmentNotSetOptionLabel', 'Not set')
+    : name;
 }
 
 export function ServiceSection({
-  selectedConfig,
-  environment,
-  setEnvironment,
+  isReadOnly,
   serviceName,
-  setServiceName
+  setServiceName,
+  environment,
+  setEnvironment
 }: Props) {
   const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher(
     () => {
-      return callApmApi({
-        pathname: '/api/apm/settings/agent-configuration/services',
-        forceCache: true
-      });
+      if (!isReadOnly) {
+        return callApmApi({
+          pathname: '/api/apm/settings/agent-configuration/services',
+          forceCache: true
+        });
+      }
     },
-    [],
+    [isReadOnly],
     { preservePreviousData: false }
   );
   const { data: environments = [], status: environmentStatus } = useFetcher(
     () => {
-      if (serviceName) {
+      if (!isReadOnly && serviceName) {
         return callApmApi({
           pathname:
             '/api/apm/settings/agent-configuration/services/{serviceName}/environments',
@@ -54,16 +61,13 @@ export function ServiceSection({
         });
       }
     },
-    [serviceName],
+    [isReadOnly, serviceName],
     { preservePreviousData: false }
   );
 
   const environmentOptions = environments.map(({ name, alreadyExists }) => ({
     disabled: alreadyExists,
-    text:
-      name === ENVIRONMENT_NOT_DEFINED
-        ? t('serviceEnvironmentNotSetOptionLabel', 'Not set')
-        : name,
+    text: getEnvironmentNameLabel(name),
     value: name
   }));
 
@@ -77,47 +81,57 @@ export function ServiceSection({
 
       <EuiFormRow
         label={t('serviceNameSelectLabel', 'Name')}
-        helpText={t(
-          'serviceNameSelectHelpText',
-          'Choose the service you want to configure.'
-        )}
+        helpText={
+          !isReadOnly &&
+          t(
+            'serviceNameSelectHelpText',
+            'Choose the service you want to configure.'
+          )
+        }
       >
-        <SelectWithPlaceholder
-          placeholder={SELECT_PLACEHOLDER_LABEL}
-          isLoading={serviceNamesStatus === 'loading'}
-          options={serviceNames.map(text => ({ text }))}
-          value={serviceName}
-          disabled={Boolean(selectedConfig) || serviceNamesStatus === 'loading'}
-          onChange={e => {
-            e.preventDefault();
-            setServiceName(e.target.value);
-            setEnvironment('');
-          }}
-        />
+        {isReadOnly ? (
+          <strong>{serviceName}</strong>
+        ) : (
+          <SelectWithPlaceholder
+            placeholder={SELECT_PLACEHOLDER_LABEL}
+            isLoading={serviceNamesStatus === 'loading'}
+            options={serviceNames.map(text => ({ text }))}
+            value={serviceName}
+            disabled={serviceNamesStatus === 'loading'}
+            onChange={e => {
+              e.preventDefault();
+              setServiceName(e.target.value);
+              setEnvironment('');
+            }}
+          />
+        )}
       </EuiFormRow>
 
       <EuiFormRow
         label={t('serviceEnvironmentSelectLabel', 'Environment')}
-        helpText={t(
-          'serviceEnvironmentSelectHelpText',
-          'Only a single environment per configuration is supported.'
-        )}
+        helpText={
+          !isReadOnly &&
+          t(
+            'serviceEnvironmentSelectHelpText',
+            'Only a single environment per configuration is supported.'
+          )
+        }
       >
-        <SelectWithPlaceholder
-          placeholder={SELECT_PLACEHOLDER_LABEL}
-          isLoading={environmentStatus === 'loading'}
-          options={environmentOptions}
-          value={environment}
-          disabled={
-            !serviceName ||
-            Boolean(selectedConfig) ||
-            environmentStatus === 'loading'
-          }
-          onChange={e => {
-            e.preventDefault();
-            setEnvironment(e.target.value);
-          }}
-        />
+        {isReadOnly ? (
+          <strong>{getEnvironmentNameLabel(environment)}</strong>
+        ) : (
+          <SelectWithPlaceholder
+            placeholder={SELECT_PLACEHOLDER_LABEL}
+            isLoading={environmentStatus === 'loading'}
+            options={environmentOptions}
+            value={environment}
+            disabled={!serviceName || environmentStatus === 'loading'}
+            onChange={e => {
+              e.preventDefault();
+              setEnvironment(e.target.value);
+            }}
+          />
+        )}
       </EuiFormRow>
     </>
   );

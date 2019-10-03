@@ -15,33 +15,46 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { SelectWithPlaceholder } from '../../../../shared/SelectWithPlaceholder';
-import { isRumAgentName } from '../../../../../../common/agent_name';
 const t = (id: string, defaultMessage: string) =>
   i18n.translate(`xpack.apm.settings.agentConf.flyOut.settingsSection.${id}`, {
     defaultMessage
   });
 
-interface ConfigOption {
-  value: string;
-  set: (value: string) => void;
-  isValid?: boolean;
-}
-
 interface Props {
-  sampleRate: ConfigOption;
-  captureBody: ConfigOption;
-  transactionMaxSpans: ConfigOption;
-  agentName: string | undefined;
+  isRumService: boolean;
+
+  // sampleRate
+  sampleRate: string;
+  setSampleRate: (value: string) => void;
+  isSampleRateValid?: boolean;
+
+  // captureBody
+  captureBody: string;
+  setCaptureBody: (value: string) => void;
+
+  // transactionMaxSpans
+  transactionMaxSpans: string;
+  setTransactionMaxSpans: (value: string) => void;
+  isTransactionMaxSpansValid?: boolean;
 }
 
 export function SettingsSection({
-  sampleRate,
-  captureBody,
-  transactionMaxSpans,
-  agentName
-}: Props) {
-  const isRumService = isRumAgentName(agentName);
+  isRumService,
 
+  // sampleRate
+  sampleRate,
+  setSampleRate,
+  isSampleRateValid,
+
+  // captureBody
+  captureBody,
+  setCaptureBody,
+
+  // transactionMaxSpans
+  transactionMaxSpans,
+  setTransactionMaxSpans,
+  isTransactionMaxSpansValid
+}: Props) {
   return (
     <>
       <EuiTitle size="xs">
@@ -63,17 +76,17 @@ export function SettingsSection({
           'sampleRateConfigurationInputErrorText',
           'Sample rate must be between 0.000 and 1'
         )}
-        isInvalid={!isEmpty(sampleRate.value) && !sampleRate.isValid}
+        isInvalid={!isEmpty(sampleRate) && !isSampleRateValid}
       >
         <EuiFieldText
           placeholder={t(
             'sampleRateConfigurationInputPlaceholderText',
             'Set sample rate'
           )}
-          value={sampleRate.value}
+          value={sampleRate}
           onChange={e => {
             e.preventDefault();
-            sampleRate.set(e.target.value);
+            setSampleRate(e.target.value);
           }}
         />
       </EuiFormRow>
@@ -108,10 +121,10 @@ export function SettingsSection({
                 text: t('captureBodyConfigOptionAll', 'All')
               }
             ]}
-            value={captureBody.value}
+            value={captureBody}
             onChange={e => {
               e.preventDefault();
-              captureBody.set(e.target.value);
+              setCaptureBody(e.target.value);
             }}
           />
         </EuiFormRow>
@@ -132,7 +145,7 @@ export function SettingsSection({
             'Must be between 0 and 32000'
           )}
           isInvalid={
-            !isEmpty(transactionMaxSpans.value) && !transactionMaxSpans.isValid
+            !isEmpty(transactionMaxSpans) && !isTransactionMaxSpansValid
           }
         >
           <EuiFieldNumber
@@ -141,15 +154,13 @@ export function SettingsSection({
               'Set transaction max spans'
             )}
             value={
-              transactionMaxSpans.value === ''
-                ? ''
-                : Number(transactionMaxSpans.value)
+              transactionMaxSpans === '' ? '' : Number(transactionMaxSpans)
             }
             min={0}
             max={32000}
             onChange={e => {
               e.preventDefault();
-              transactionMaxSpans.set(e.target.value);
+              setTransactionMaxSpans(e.target.value);
             }}
           />
         </EuiFormRow>
