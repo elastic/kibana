@@ -57,10 +57,9 @@ exports[`SpacesGridPage renders as expected 1`] = `
       columns={
         Array [
           Object {
-            "field": "name",
+            "field": "initials",
             "name": "",
             "render": [Function],
-            "sortable": true,
             "width": "50px",
           },
           Object {
@@ -78,7 +77,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
             "field": "disabledFeatures",
             "name": "Features",
             "render": [Function],
-            "sortable": true,
+            "sortable": [Function],
           },
           Object {
             "field": "id",
@@ -121,7 +120,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
           },
         }
       }
-      sorting={false}
+      sorting={true}
     />
   </EuiPageContent>
   <SecureSpaceMessage />

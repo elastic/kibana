@@ -139,6 +139,7 @@ export function FieldSelect({
   return (
     <EuiComboBox
       fullWidth
+      compressed
       data-test-subj="indexPattern-dimension-field"
       placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
         defaultMessage: 'Field',

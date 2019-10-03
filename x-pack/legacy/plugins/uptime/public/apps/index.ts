@@ -8,4 +8,4 @@ import chrome from 'ui/chrome';
 import { npStart } from 'ui/new_platform';
 import { Plugin } from './plugin';
 
-new Plugin(npStart, chrome).start();
+new Plugin({ opaqueId: Symbol('uptime') }, chrome).start(npStart);

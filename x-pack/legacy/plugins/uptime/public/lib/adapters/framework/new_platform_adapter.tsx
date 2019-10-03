@@ -8,6 +8,7 @@ import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { get } from 'lodash';
+import { AutocompleteProviderRegister } from 'src/plugins/data/public';
 import { CreateGraphQLClient } from './framework_adapter_types';
 import { UptimeApp, UptimeAppProps } from '../../../uptime_app';
 import { getIntegratedAppAvailability } from './capabilities_adapter';
@@ -17,7 +18,10 @@ import { renderUptimeKibanaGlobalHelp } from './kibana_global_help';
 import { UMFrameworkAdapter, BootstrapUptimeApp } from '../../lib';
 import { createApolloClient } from './apollo_client_adapter';
 
-export const getKibanaFrameworkAdapter = (core: CoreStart): UMFrameworkAdapter => {
+export const getKibanaFrameworkAdapter = (
+  core: CoreStart,
+  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>
+): UMFrameworkAdapter => {
   const {
     application: { capabilities },
     chrome: { setBadge, setHelpExtension },
@@ -35,6 +39,7 @@ export const getKibanaFrameworkAdapter = (core: CoreStart): UMFrameworkAdapter =
   );
   const canSave = get(capabilities, 'uptime.save', false);
   const props: UptimeAppProps = {
+    autocomplete,
     basePath: basePath.get(),
     canSave,
     client: createApolloClient(`${basePath.get()}/api/uptime/graphql`, 'true'),

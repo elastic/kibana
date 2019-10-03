@@ -397,15 +397,21 @@ export interface HttpErrorRequest {
     // (undocumented)
     error: Error;
     // (undocumented)
-    request?: Request;
+    request: Request;
 }
 
 // @public (undocumented)
-export interface HttpErrorResponse extends HttpResponse {
+export interface HttpErrorResponse {
+    // (undocumented)
+    body?: HttpBody;
     // Warning: (ae-forgotten-export) The symbol "HttpFetchError" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
     error: Error | HttpFetchError;
+    // (undocumented)
+    request?: Request;
+    // (undocumented)
+    response?: Response;
 }
 
 // @public (undocumented)
@@ -433,10 +439,18 @@ export interface HttpHeadersInit {
     [name: string]: any;
 }
 
+// Warning: (ae-missing-release-tag) "HttpInterceptController" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export class HttpInterceptController {
+    // (undocumented)
+    halt(): void;
+    // (undocumented)
+    readonly halted: boolean;
+    }
+
 // @public (undocumented)
 export interface HttpInterceptor {
-    // Warning: (ae-forgotten-export) The symbol "HttpInterceptController" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     request?(request: Request, controller: HttpInterceptController): Promise<Request> | Request | void;
     // (undocumented)
@@ -482,7 +496,7 @@ export interface HttpResponse {
     // (undocumented)
     body?: HttpBody;
     // (undocumented)
-    request: Request;
+    request?: Request;
     // (undocumented)
     response?: Response;
 }
@@ -738,7 +752,7 @@ export class SavedObjectsClient {
     }[]) => Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
     create: <T extends SavedObjectAttributes>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
     delete: (type: string, id: string) => Promise<{}>;
-    find: <T extends SavedObjectAttributes>(options: Pick<SavedObjectsFindOptions, "search" | "type" | "defaultSearchOperator" | "searchFields" | "sortField" | "hasReference" | "page" | "perPage" | "fields">) => Promise<SavedObjectsFindResponsePublic<T>>;
+    find: <T extends SavedObjectAttributes>(options: Pick<SavedObjectsFindOptions, "search" | "filter" | "type" | "page" | "perPage" | "sortField" | "fields" | "searchFields" | "hasReference" | "defaultSearchOperator">) => Promise<SavedObjectsFindResponsePublic<T>>;
     get: <T extends SavedObjectAttributes>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
     update<T extends SavedObjectAttributes>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 }
@@ -760,6 +774,8 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     // (undocumented)
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
+    // (undocumented)
+    filter?: string;
     // (undocumented)
     hasReference?: {
         type: string;

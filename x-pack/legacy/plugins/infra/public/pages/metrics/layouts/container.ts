@@ -95,7 +95,13 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
           type: InfraMetricLayoutVisualizationType.area,
           formatter: InfraFormatterType.percent,
           seriesOverrides: {
-            cpu: { color: theme.eui.euiColorVis1 },
+            cpu: {
+              color: theme.eui.euiColorVis1,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.containerMetricsLayout.cpuUsageSection.seriesLabel.cpu',
+                { defaultMessage: 'cpu' }
+              ),
+            },
           },
         },
       },
@@ -114,7 +120,13 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
           type: InfraMetricLayoutVisualizationType.area,
           formatter: InfraFormatterType.percent,
           seriesOverrides: {
-            memory: { color: theme.eui.euiColorVis1 },
+            memory: {
+              color: theme.eui.euiColorVis1,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.containerMetricsLayout.memoryUsageSection.seriesLabel.memory',
+                { defaultMessage: 'memory' }
+              ),
+            },
           },
         },
       },

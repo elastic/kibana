@@ -14,15 +14,15 @@ import { AuditLogger } from '../../server/lib/audit_logger';
 import mappings from './mappings.json';
 import { wrapError } from './server/lib/errors';
 import { getActiveSpace } from './server/lib/get_active_space';
-import { getSpaceSelectorUrl } from './server/lib/get_space_selector_url';
 import { migrateToKibana660 } from './server/lib/migrations';
 import { plugin } from './server/new_platform';
 import { SecurityPlugin } from '../security';
 import { SpacesServiceSetup } from './server/new_platform/spaces_service/spaces_service';
-import { initSpaceSelectorView } from './server/routes/views';
+import { initSpaceSelectorView, initEnterSpaceView } from './server/routes/views';
 
 export interface SpacesPlugin {
   getSpaceId: SpacesServiceSetup['getSpaceId'];
+  getActiveSpace: SpacesServiceSetup['getActiveSpace'];
   spaceIdToNamespace: SpacesServiceSetup['spaceIdToNamespace'];
   namespaceToSpaceId: SpacesServiceSetup['namespaceToSpaceId'];
   getBasePath: SpacesServiceSetup['getBasePath'];
@@ -87,7 +87,7 @@ export const spaces = (kibana: Record<string, any>) =>
         return {
           spaces: [],
           activeSpace: null,
-          spaceSelectorURL: getSpaceSelectorUrl(server.config()),
+          serverBasePath: server.config().get('server.basePath'),
         };
       },
       async replaceInjectedVars(
@@ -180,9 +180,11 @@ export const spaces = (kibana: Record<string, any>) =>
         },
       });
 
+      initEnterSpaceView(server);
       initSpaceSelectorView(server);
 
       server.expose('getSpaceId', (request: any) => spacesService.getSpaceId(request));
+      server.expose('getActiveSpace', spacesService.getActiveSpace);
       server.expose('spaceIdToNamespace', spacesService.spaceIdToNamespace);
       server.expose('namespaceToSpaceId', spacesService.namespaceToSpaceId);
       server.expose('getBasePath', spacesService.getBasePath);

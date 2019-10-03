@@ -66,7 +66,7 @@ import { mlResultsService } from '../services/results_service';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
 import { getIndexPatterns } from '../util/index_utils';
-import { getBoundsRoundedToInterval } from '../util/ml_time_buckets';
+import { getBoundsRoundedToInterval } from '../util/time_buckets';
 
 import { APP_STATE_ACTION, CHARTS_POINT_TARGET, TIME_FIELD_NAME } from './timeseriesexplorer_constants';
 import { mlTimeSeriesSearchService } from './timeseries_search_service';

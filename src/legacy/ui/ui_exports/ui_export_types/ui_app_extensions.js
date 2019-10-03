@@ -36,7 +36,6 @@ const appExtension = wrap(
 export const visTypes = appExtension;
 
 export const visEditorTypes = appExtension;
-export const autocompleteProviders = appExtension;
 export const savedObjectTypes = appExtension;
 export const embeddableActions = appExtension;
 export const embeddableFactories = appExtension;
