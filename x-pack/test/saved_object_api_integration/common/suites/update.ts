@@ -112,7 +112,6 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       attributes: {
         title: 'My second favorite vis',
       },
-      references: [],
     });
   };
 
