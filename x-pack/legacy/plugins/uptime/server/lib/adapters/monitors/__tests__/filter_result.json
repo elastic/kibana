@@ -1,0 +1,174 @@
+{
+  "monitor.name": {
+    "doc_count_error_upper_bound": 0,
+    "sum_other_doc_count": 0,
+    "buckets": [
+      {
+        "key": "apm-server-dev",
+        "doc_count": 898
+      },
+      {
+        "key": "dev-service",
+        "doc_count": 898
+      },
+      {
+        "key": "kibana-dev",
+        "doc_count": 864
+      },
+      {
+        "key": "",
+        "doc_count": 383
+      },
+      {
+        "key": "SecurityContents",
+        "doc_count": 180
+      },
+      {
+        "key": "icmp test",
+        "doc_count": 180
+      }
+    ]
+  },
+  "url.port": {
+    "doc_count_error_upper_bound": 0,
+    "sum_other_doc_count": 0,
+    "buckets": [
+      {
+        "key": 12349,
+        "doc_count": 988
+      },
+      {
+        "key": 8200,
+        "doc_count": 898
+      },
+      {
+        "key": 5601,
+        "doc_count": 864
+      },
+      {
+        "key": 9200,
+        "doc_count": 270
+      },
+      {
+        "key": 443,
+        "doc_count": 203
+      }
+    ]
+  },
+  "observer.geo.name": {
+    "doc_count_error_upper_bound": 0,
+    "sum_other_doc_count": 0,
+    "buckets": [
+      {
+        "key": "us-east-2",
+        "doc_count": 3403
+      }
+    ]
+  },
+  "monitor.id": {
+    "doc_count_error_upper_bound": 0,
+    "sum_other_doc_count": 0,
+    "buckets": [
+      {
+        "key": "auto-http-0X728B660675AD66C2",
+        "doc_count": 898
+      },
+      {
+        "key": "auto-http-0XE4A3C7D7E53C51AD",
+        "doc_count": 898
+      },
+      {
+        "key": "auto-http-0X2E097095C06B7B4E",
+        "doc_count": 864
+      },
+      {
+        "key": "auto-tcp-0X7BAA5C23EED7A602",
+        "doc_count": 180
+      },
+      {
+        "key": "icmp-test",
+        "doc_count": 180
+      },
+      {
+        "key": "siem-test",
+        "doc_count": 180
+      },
+      {
+        "key": "auto-http-0X3F1F767F45156CB3",
+        "doc_count": 90
+      },
+      {
+        "key": "test-site",
+        "doc_count": 90
+      },
+      {
+        "key": "elatic-site",
+        "doc_count": 20
+      },
+      {
+        "key": "https://www.propvednik.com",
+        "doc_count": 3
+      }
+    ]
+  },
+  "url.full": {
+    "doc_count_error_upper_bound": 0,
+    "sum_other_doc_count": 0,
+    "buckets": [
+      {
+        "key": "http://localhost:12349",
+        "doc_count": 988
+      },
+      {
+        "key": "http://localhost:8200",
+        "doc_count": 898
+      },
+      {
+        "key": "http://localhost:5601",
+        "doc_count": 864
+      },
+      {
+        "key": "https://www.elastic.co/products/siem",
+        "doc_count": 180
+      },
+      {
+        "key": "icmp://8.8.8.8",
+        "doc_count": 180
+      },
+      {
+        "key": "tcp://localhost:9200",
+        "doc_count": 180
+      },
+      {
+        "key": "http://localhost:9200",
+        "doc_count": 90
+      },
+      {
+        "key": "https://www.elastic.co",
+        "doc_count": 20
+      },
+      {
+        "key": "https://propovednik.com",
+        "doc_count": 3
+      }
+    ]
+  },
+  "monitor.type": {
+    "doc_count_error_upper_bound": 0,
+    "sum_other_doc_count": 0,
+    "buckets": [
+      {
+        "key": "http",
+        "doc_count": 3043
+      },
+      {
+        "key": "icmp",
+        "doc_count": 180
+      },
+      {
+        "key": "tcp",
+        "doc_count": 180
+      }
+    ]
+  }
+}

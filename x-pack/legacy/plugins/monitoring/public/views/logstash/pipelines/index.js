@@ -24,7 +24,7 @@ import { CODE_PATH_LOGSTASH } from '../../../../common/constants';
  * Logstash Pipelines Listing page
  */
 
-const getPageData = ($injector) => {
+const getPageData = ($injector, _api = undefined, routeOptions = {}) => {
   const $http = $injector.get('$http');
   const globalState = $injector.get('globalState');
   const Private = $injector.get('Private');
@@ -37,7 +37,8 @@ const getPageData = ($injector) => {
     timeRange: {
       min: timeBounds.min.toISOString(),
       max: timeBounds.max.toISOString()
-    }
+    },
+    ...routeOptions
   })
     .then(response => response.data)
     .catch((err) => {
@@ -64,7 +65,6 @@ uiRoutes
         const routeInit = Private(routeInitProvider);
         return routeInit({ codePaths: [CODE_PATH_LOGSTASH] });
       },
-      pageData: getPageData
     },
     controller: class LogstashPipelinesList extends MonitoringViewBaseEuiTableController {
       constructor($injector, $scope) {
@@ -74,7 +74,8 @@ uiRoutes
           getPageData,
           reactNodeId: 'monitoringLogstashPipelinesApp',
           $scope,
-          $injector
+          $injector,
+          fetchDataImmediately: false // We want to apply pagination before sending the first request
         });
 
         const $route = $injector.get('$route');
@@ -93,6 +94,11 @@ uiRoutes
             ? makeUpgradeMessage(pageData.clusterStatus.versions, i18n)
             : null;
 
+          const pagination = {
+            ...this.pagination,
+            totalItemCount: pageData.totalPipelineCount
+          };
+
           super.renderReact(
             <I18nContext>
               <PipelineListing
@@ -100,9 +106,7 @@ uiRoutes
                 onBrush={(xaxis) => this.onBrush({ xaxis })}
                 stats={pageData.clusterStatus}
                 data={pageData.pipelines}
-                sorting={this.sorting}
-                pagination={this.pagination}
-                onTableChange={this.onTableChange}
+                {...this.getPaginationTableProps(pagination)}
                 upgradeMessage={upgradeMessage}
                 dateFormat={config.get('dateFormat')}
                 angular={{

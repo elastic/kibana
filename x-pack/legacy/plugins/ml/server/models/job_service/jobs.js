@@ -364,14 +364,17 @@ export function jobsProvider(callWithRequest) {
     ]);
 
     if (jobStats.jobs.length) {
-      const time = jobStats.jobs[0].data_counts.latest_record_timestamp;
+      const statsForJob = jobStats.jobs[0];
+      const time = statsForJob.data_counts.latest_record_timestamp;
       const progress = (time - start) / (end - start);
+      const isJobClosed = statsForJob.state === JOB_STATE.CLOSED;
       return {
         progress: (progress > 0 ? Math.round(progress * 100) : 0),
-        isRunning
+        isRunning,
+        isJobClosed,
       };
     }
-    return { progress: 0, isRunning: false };
+    return { progress: 0, isRunning: false, isJobClosed: true, };
   }
 
   async function isDatafeedRunning(datafeedId) {
