@@ -35,6 +35,8 @@
         on-change-sort-order="onChangeSortOrder"
         on-move-column="onMoveColumn"
         on-remove-column="onRemoveColumn"
+        on-select-all="onSelectAll"
+        on-select-current-page="onSelectCurrentPage"
       ></thead>
       <tbody>
         <tr ng-repeat="row in pageOfItems|limitTo:limit track by row._index+row._type+row._id+row._score+row._version+row._routing"
@@ -84,6 +86,7 @@
       on-change-sort-order="onChangeSortOrder"
       on-move-column="onMoveColumn"
       on-remove-column="onRemoveColumn"
+      on-select-all="onSelectAll"
     ></thead>
     <tbody>
       <tr ng-repeat="row in hits|limitTo:limit track by row._index+row._type+row._id+row._score+row._version+row._routing"
