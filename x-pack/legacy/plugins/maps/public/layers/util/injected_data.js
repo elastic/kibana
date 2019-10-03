@@ -3,7 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+export class InjectedData {
 
+  constructor(data) {
+    this._descriptor = { data };
+  }
 
+  getData() {
+    return this._descriptor.data;
+  }
 
-import './index_or_search_controller';
+  hasData() {
+    return !!this._descriptor.data;
+  }
+
+}
+
