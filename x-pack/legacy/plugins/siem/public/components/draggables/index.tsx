@@ -23,7 +23,6 @@ export interface DefaultDraggableType {
   queryValue?: string | null;
   children?: React.ReactNode;
   tooltipContent?: React.ReactNode;
-  usePortal?: boolean;
 }
 
 /**
@@ -83,10 +82,9 @@ Content.displayName = 'Content';
  * @param tooltipContent - defaults to displaying `field`, pass `null` to
  * prevent a tooltip from being displayed, or pass arbitrary content
  * @param queryValue - defaults to `value`, this query overrides the `queryMatch.value` used by the `DataProvider` that represents the data
- * @param usePortal - whether or not the DraggableWrapper should use a portal when dragging to resolve any offset issues, defaults to false for performance
  */
 export const DefaultDraggable = pure<DefaultDraggableType>(
-  ({ id, field, value, name, children, tooltipContent, queryValue, usePortal = false }) =>
+  ({ id, field, value, name, children, tooltipContent, queryValue }) =>
     value != null ? (
       <DraggableWrapper
         dataProvider={{
@@ -116,7 +114,6 @@ export const DefaultDraggable = pure<DefaultDraggableType>(
             />
           )
         }
-        usePortal={usePortal}
       />
     ) : null
 );

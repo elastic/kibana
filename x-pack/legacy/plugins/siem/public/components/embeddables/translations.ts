@@ -48,3 +48,10 @@ export const ERROR_BUTTON = i18n.translate(
     defaultMessage: 'Configure index patterns',
   }
 );
+
+export const MAP_TOOL_TIP_FEATURES_FOOTER = (currentFeature: number, totalFeatures: number) =>
+  i18n.translate('xpack.siem.components.embeddables.mapToolTip.footerLabel', {
+    values: { currentFeature, totalFeatures },
+    defaultMessage:
+      '{currentFeature} of {totalFeatures} {totalFeatures, plural, =1 {feature} other {features}}',
+  });

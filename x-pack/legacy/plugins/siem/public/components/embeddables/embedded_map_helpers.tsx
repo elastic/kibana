@@ -130,14 +130,18 @@ export const createEmbeddable = async (
     closeTooltip,
     features,
     isLocked,
+    getLayerName,
     loadFeatureProperties,
+    loadFeatureGeometry,
   }: RenderTooltipContentParams) => {
     const props = {
       addFilters,
       closeTooltip,
       features,
       isLocked,
+      getLayerName,
       loadFeatureProperties,
+      loadFeatureGeometry,
     };
     return <OutPortal node={portalNode} {...props} />;
   };

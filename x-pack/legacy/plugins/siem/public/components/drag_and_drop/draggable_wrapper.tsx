@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React, { useEffect } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import {
   Draggable,
   DraggableProvided,
@@ -27,6 +27,9 @@ import { getDraggableId, getDroppableId } from './helpers';
 export const DragEffects = styled.div``;
 
 DragEffects.displayName = 'DragEffects';
+
+export const DraggablePortalContext = createContext<boolean>(false);
+export const useDraggablePortalContext = () => useContext(DraggablePortalContext);
 
 const Wrapper = styled.div`
   display: inline-block;
@@ -145,7 +148,6 @@ interface OwnProps {
     state: DraggableStateSnapshot
   ) => React.ReactNode;
   truncate?: boolean;
-  usePortal?: boolean;
 }
 
 interface DispatchProps {
@@ -165,7 +167,9 @@ type Props = OwnProps & DispatchProps;
  */
 
 const DraggableWrapperComponent = React.memo<Props>(
-  ({ dataProvider, registerProvider, render, truncate, unRegisterProvider, usePortal = false }) => {
+  ({ dataProvider, registerProvider, render, truncate, unRegisterProvider }) => {
+    const usePortal = useDraggablePortalContext();
+
     useEffect(() => {
       registerProvider!({ provider: dataProvider });
       return () => {
@@ -243,3 +247,5 @@ export const DraggableWrapper = connect(
 const ConditionalPortal = React.memo<{ children: React.ReactNode; usePortal: boolean }>(
   ({ children, usePortal }) => (usePortal ? <EuiPortal>{children}</EuiPortal> : <>{children}</>)
 );
+
+ConditionalPortal.displayName = 'ConditionalPortal';

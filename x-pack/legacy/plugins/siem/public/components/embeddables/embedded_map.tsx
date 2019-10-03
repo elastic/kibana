@@ -25,7 +25,7 @@ import { MapEmbeddable, SetQuery } from './types';
 import * as i18n from './translations';
 import { useStateToaster } from '../toasters';
 import { createEmbeddable, displayErrorToast, setupEmbeddablesAPI } from './embedded_map_helpers';
-import { MapToolTip } from './map_tool_tip';
+import { MapToolTip } from './map_tool_tip/map_tool_tip';
 
 const EmbeddableWrapper = styled(EuiFlexGroup)`
   position: relative;
