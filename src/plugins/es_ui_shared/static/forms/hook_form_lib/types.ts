@@ -35,6 +35,7 @@ export interface FormHook<T extends object = FormData> {
   getFields: () => FieldsMap;
   getFormData: (options?: { unflatten?: boolean }) => T;
   getFieldDefaultValue: (fieldName: string) => unknown;
+  reset: () => void;
   readonly __options: Required<FormOptions>;
   readonly __formData$: MutableRefObject<Subject<T>>;
   __addField: (field: FieldHook) => void;
@@ -106,6 +107,7 @@ export interface FieldHook {
     value?: unknown;
     validationType?: string;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
+  reset: () => void;
   __serializeOutput: (rawValue?: unknown) => unknown;
 }
 

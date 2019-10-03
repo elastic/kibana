@@ -47,7 +47,7 @@ export function useForm<T extends object = FormData>(
   const formOptions = { ...DEFAULT_OPTIONS, ...options };
   const defaultValueDeserialized =
     Object.keys(defaultValue).length === 0 ? defaultValue : deserializer(defaultValue);
-  const [isSubmitted, setSubmitted] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [isValid, setIsValid] = useState<boolean | undefined>(undefined);
   const fieldsRefs = useRef<FieldsMap>({});
@@ -202,7 +202,7 @@ export function useForm<T extends object = FormData>(
     }
 
     if (!isSubmitted) {
-      setSubmitted(true); // User has attempted to submit the form at least once
+      setIsSubmitted(true); // User has attempted to submit the form at least once
     }
     setSubmitting(true);
 
@@ -230,6 +230,19 @@ export function useForm<T extends object = FormData>(
     return subscription;
   };
 
+  /**
+   * Reset all the fields of the form to their default values
+   * and reset all the states to their original value.
+   */
+  const reset: FormHook<T>['reset'] = () => {
+    Object.entries(fieldsRefs.current).forEach(([path, field]) => {
+      field.reset();
+    });
+    setIsSubmitted(false);
+    setSubmitting(false);
+    setIsValid(undefined);
+  };
+
   const form: FormHook<T> = {
     isSubmitted,
     isSubmitting,
@@ -241,6 +254,7 @@ export function useForm<T extends object = FormData>(
     getFields,
     getFormData,
     getFieldDefaultValue,
+    reset,
     __options: formOptions,
     __formData$: formData$,
     __updateFormDataAt: updateFormDataAt,

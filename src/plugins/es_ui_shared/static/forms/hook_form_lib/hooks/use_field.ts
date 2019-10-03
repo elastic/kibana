@@ -36,9 +36,10 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
     deserializer = (value: unknown) => value,
   } = config;
 
-  const [value, setStateValue] = useState(
-    typeof defaultValue === 'function' ? deserializer(defaultValue()) : deserializer(defaultValue)
-  );
+  const initialValue =
+    typeof defaultValue === 'function' ? deserializer(defaultValue()) : deserializer(defaultValue);
+
+  const [value, setStateValue] = useState(initialValue);
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [isPristine, setPristine] = useState(true);
   const [isValidating, setValidating] = useState(false);
@@ -358,6 +359,15 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
     return errorMessages ? errorMessages : null;
   };
 
+  const reset = () => {
+    setValue(initialValue);
+    setErrors([]);
+    setPristine(true);
+    setValidating(false);
+    setIsChangingValue(false);
+    setIsValidated(false);
+  };
+
   const serializeOutput: FieldHook['__serializeOutput'] = (rawValue = value) =>
     serializer(rawValue);
 
@@ -396,6 +406,7 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
     setErrors: _setErrors,
     clearErrors,
     validate,
+    reset,
     __serializeOutput: serializeOutput,
   };
 
