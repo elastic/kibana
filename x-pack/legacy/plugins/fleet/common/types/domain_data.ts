@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as t from 'io-ts';
-import { DateFromString } from './io_ts';
 
 // Here we create the runtime check for a generic, unknown beat config type.
 // We can also pass in optional params to create spacific runtime checks that
@@ -32,49 +31,29 @@ export interface ConfigurationBlock
 
 export interface Agent {
   id: string;
-  status?: AgentEvent;
-  enrollment_token: string;
   active: boolean;
-  access_token: string;
-  verified_on?: string;
-  type: string;
-  version?: string;
-  host_ip: string;
-  host_name: string;
-  ephemeral_id?: string;
-  last_checkin?: Date;
-  event_rate?: string;
-  tags: string[];
-  metadata?: {};
-  name?: string;
-  last_updated: number;
+  type: 'PERMANENT' | 'TEMPORARY' | 'EPHEMERAL' | 'EPHEMERAL_INSTANCE';
+  access_token?: string;
+  enrolled_at?: string;
+  user_provided_metadata?: { [key: string]: string };
+  local_metadata?: { [key: string]: string };
+  last_checkin?: string;
+  actions: AgentAction[];
 }
 
-export const RuntimeAgentEvent = t.interface(
-  {
-    type: t.union([t.literal('STATE'), t.literal('ERROR')]),
-    beat: t.union([t.undefined, t.string]),
-    timestamp: DateFromString,
-    event: t.type({
-      type: t.union([
-        t.literal('RUNNING'),
-        t.literal('STARTING'),
-        t.literal('IN_PROGRESS'),
-        t.literal('CONFIG'),
-        t.literal('FAILED'),
-        t.literal('STOPPED'),
-      ]),
-      message: t.string,
-      uuid: t.union([t.undefined, t.string]),
-    }),
-  },
-  'AgentEvent'
-);
-export interface AgentEvent
-  extends Pick<
-    t.TypeOf<typeof RuntimeAgentEvent>,
-    Exclude<keyof t.TypeOf<typeof RuntimeAgentEvent>, 'timestamp'>
-  > {
-  agent: string;
-  timestamp: Date;
+export interface AgentAction {
+  id: string;
+  type: string;
+  created_at: string;
+  data?: string;
+  sent_at?: string;
+}
+
+export interface AgentEvent {
+  timestamp: string;
+  type: string;
+  subtype: string;
+  message: string;
+  payload?: any;
+  data?: string;
 }

@@ -12,6 +12,7 @@ import { FrameworkRequest } from '../../adapters/framework/adapter_types';
 import { ReturnTypeCreate } from '../../../common/return_types';
 import { FleetServerLib } from '../../libs/types';
 import { RuntimeAgentActionData } from '../../repositories/agents/types';
+import { AgentAction } from '../../../common/types/domain_data';
 
 export const createAgentsAddActionRoute = (libs: FleetServerLib) => ({
   method: 'POST',
@@ -23,7 +24,7 @@ export const createAgentsAddActionRoute = (libs: FleetServerLib) => ({
   },
   handler: async (
     request: FrameworkRequest<{ params: { agentId: string }; payload: any }>
-  ): Promise<ReturnTypeCreate<any>> => {
+  ): Promise<ReturnTypeCreate<AgentAction>> => {
     const result = RuntimeAgentActionData.decode(request.payload);
     if (isLeft(result)) {
       throw Boom.badRequest(
