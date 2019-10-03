@@ -25,7 +25,7 @@ module.exports = {
         {
           from: 'mkdirp',
           to: false,
-          disallowedMessage: `Don't use 'mkdirp', use Fs.mkdir(path, { recursive: true }) instead`
+          disallowedMessage: `Don't use 'mkdirp', use the new { recursive: true } option of Fs.mkdir instead`
         },
         {
           from: 'x-pack',
