@@ -96,7 +96,7 @@ export function appStateToSavedWorkspace(
   const mappedUrlTemplates = urlTemplates.map(serializeUrlTemplate);
 
   const persistedWorkspaceState: SerializedWorkspaceState = {
-    indexPattern: selectedIndex.attributes.title,
+    indexPattern: selectedIndex.title,
     selectedFields: selectedFields.map(serializeField),
     blacklist,
     vertices,

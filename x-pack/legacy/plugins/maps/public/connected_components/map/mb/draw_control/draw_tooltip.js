@@ -6,44 +6,43 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
-import { EuiText } from '@elastic/eui';
+import { EuiPopover, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DRAW_TYPE } from '../../../../../common/constants';
-import mapboxgl from 'mapbox-gl';
-import { I18nProvider } from '@kbn/i18n/react';
+
+const noop = () => {};
 
 export class DrawTooltip extends Component {
 
+  state = {
+    x: undefined,
+    y: undefined,
+    isOpen: false,
+  };
+
   constructor(props) {
     super(props);
-    this._tooltipContainer = document.createElement('div');
-    this._mbPopup = new mapboxgl.Popup({
-      closeButton: false,
-      closeOnClick: false,
-      offset: 12,
-      anchor: 'left',
-      maxWidth: '300px',
-    });
+    this._popoverRef = React.createRef();
   }
 
   componentDidMount() {
-    this._showTooltip();
     this.props.mbMap.on('mousemove', this._updateTooltipLocation);
     this.props.mbMap.on('mouseout', this._hideTooltip);
+  }
+
+  componentDidUpdate() {
+    if (this._popoverRef.current) {
+      this._popoverRef.current.positionPopoverFluid();
+    }
   }
 
   componentWillUnmount() {
     this.props.mbMap.off('mousemove', this._updateTooltipLocation);
     this.props.mbMap.off('mouseout', this._hideTooltip);
-    this._hideTooltip();
+    this._updateTooltipLocation.cancel();
   }
 
   render() {
-    return null;
-  }
-
-  _showTooltip = () => {
     const instructions = this.props.drawState.drawType === DRAW_TYPE.BOUNDS
       ? i18n.translate('xpack.maps.drawTooltip.boundsInstructions', {
         defaultMessage: 'Click to start rectangle. Click again to finish.'
@@ -51,31 +50,40 @@ export class DrawTooltip extends Component {
       : i18n.translate('xpack.maps.drawTooltip.polygonInstructions', {
         defaultMessage: 'Click to add vertex. Double click to finish.'
       });
-    ReactDOM.render((
-      <I18nProvider>
-        <div>
-          <EuiText color="subdued" size="xs">
-            {instructions}
-          </EuiText>
-        </div>
-      </I18nProvider>
-    ), this._tooltipContainer);
 
-    this._mbPopup.setDOMContent(this._tooltipContainer)
-      .addTo(this.props.mbMap);
+    const tooltipAnchor = <div style={{ height: '26px', width: '26px', background: 'transparent' }}/>;
+
+    return (
+      <EuiPopover
+        id="drawInstructionsTooltip"
+        button={tooltipAnchor}
+        anchorPosition="rightCenter"
+        isOpen={this.state.isOpen}
+        closePopover={noop}
+        ref={this._popoverRef}
+        style={{
+          pointerEvents: 'none',
+          transform: `translate(${this.state.x - 13}px, ${this.state.y - 13}px)`
+        }}
+      >
+        <EuiText color="subdued" size="xs">
+          {instructions}
+        </EuiText>
+      </EuiPopover>
+    );
   }
 
   _hideTooltip = () => {
-    if (this._mbPopup.isOpen()) {
-      this._mbPopup.remove();
-      ReactDOM.unmountComponentAtNode(this._tooltipContainer);
-    }
+    this._updateTooltipLocation.cancel();
+    this.setState({ isOpen: false });
   }
 
   _updateTooltipLocation = _.throttle(({ lngLat }) => {
-    if (!this._mbPopup.isOpen()) {
-      this._showTooltip();
-    }
-    this._mbPopup.setLngLat(lngLat);
+    const mouseLocation = this.props.mbMap.project(lngLat);
+    this.setState({
+      isOpen: true,
+      x: mouseLocation.x,
+      y: mouseLocation.y,
+    });
   }, 100)
 }

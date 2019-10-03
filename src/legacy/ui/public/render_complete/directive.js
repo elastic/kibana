@@ -18,7 +18,7 @@
  */
 
 import { uiModules } from '../modules';
-import { RenderCompleteHelper } from './render_complete_helper';
+import { RenderCompleteHelper } from '../../../../plugins/kibana_utils/public';
 
 uiModules
   .get('kibana')

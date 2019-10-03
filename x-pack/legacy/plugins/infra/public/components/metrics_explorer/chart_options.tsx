@@ -127,7 +127,7 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
           })}
         >
           <EuiRadioGroup
-            // compressed
+            compressed
             options={typeRadios}
             idSelected={chartOptions.type}
             onChange={handleTypeChange}
@@ -154,7 +154,7 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
           })}
         >
           <EuiRadioGroup
-            // compressed
+            compressed
             options={yAxisRadios}
             idSelected={chartOptions.yAxisMode}
             onChange={handleYAxisChange}

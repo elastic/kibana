@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { get } from 'lodash';
 import { CallAPIOptions } from 'src/core/server';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
@@ -114,7 +113,7 @@ export interface UsageStats {
 }
 
 interface CollectorDeps {
-  config: KibanaConfig;
+  kibanaIndex: string;
   usage: { collectorSet: any };
   xpackMain: XPackMainPlugin;
 }
@@ -131,19 +130,17 @@ export function getSpacesUsageCollector(deps: CollectorDeps) {
     fetch: async (callCluster: CallCluster) => {
       const xpackInfo = deps.xpackMain.info;
       const available = xpackInfo && xpackInfo.isAvailable(); // some form of spaces is available for all valid licenses
-      const enabled = deps.config.get('xpack.spaces.enabled');
-      const spacesAvailableAndEnabled = Boolean(available && enabled);
 
       const usageStats = await getSpacesUsage(
         callCluster,
-        deps.config.get('kibana.index'),
+        deps.kibanaIndex,
         deps.xpackMain,
-        spacesAvailableAndEnabled
+        available
       );
 
       return {
         available,
-        enabled: spacesAvailableAndEnabled, // similar behavior as _xpack API in ES
+        enabled: available,
         ...usageStats,
       } as UsageStats;
     },

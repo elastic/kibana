@@ -6,7 +6,7 @@
 
 Cancel reindexes that are waiting for the Elasticsearch reindex task to complete. For example, `lastCompletedStep` set to `40`.
 
-experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are currently experimental.]
+experimental["The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are experimental."]
 
 [[cancel-reindex-request]]
 ==== Request

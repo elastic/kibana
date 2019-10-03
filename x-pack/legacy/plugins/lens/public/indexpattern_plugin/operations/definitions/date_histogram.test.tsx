@@ -411,11 +411,14 @@ describe('date_histogram', () => {
         />
       );
 
-      instance.find(EuiRange).prop('onChange')!({
-        target: {
-          value: '2',
-        },
-      } as React.ChangeEvent<HTMLInputElement>);
+      instance.find(EuiRange).prop('onChange')!(
+        {
+          target: {
+            value: '2',
+          },
+        } as React.ChangeEvent<HTMLInputElement>,
+        true
+      );
       expect(setStateSpy).toHaveBeenCalledWith({
         ...state,
         layers: {

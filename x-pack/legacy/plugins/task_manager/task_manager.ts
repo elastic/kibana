@@ -9,8 +9,13 @@ import { Logger } from './types';
 import { fillPool } from './lib/fill_pool';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
 import { sanitizeTaskDefinitions } from './lib/sanitize_task_definitions';
-import { ConcreteTaskInstance, RunContext, TaskInstance } from './task';
-import { SanitizedTaskDefinition, TaskDefinition, TaskDictionary } from './task';
+import {
+  TaskDefinition,
+  TaskDictionary,
+  ConcreteTaskInstance,
+  RunContext,
+  TaskInstance,
+} from './task';
 import { TaskPoller } from './task_poller';
 import { TaskPool } from './task_pool';
 import { TaskManagerRunner } from './task_runner';
@@ -40,9 +45,8 @@ export interface TaskManagerOpts {
 export class TaskManager {
   private isStarted = false;
   private maxWorkers: number;
-  private overrideNumWorkers: { [taskType: string]: number };
   private readonly pollerInterval: number;
-  private definitions: TaskDictionary<SanitizedTaskDefinition>;
+  private definitions: TaskDictionary<TaskDefinition>;
   private store: TaskStore;
   private poller: TaskPoller;
   private logger: Logger;
@@ -60,7 +64,6 @@ export class TaskManager {
    */
   constructor(opts: TaskManagerOpts) {
     this.maxWorkers = opts.config.get('xpack.task_manager.max_workers');
-    this.overrideNumWorkers = opts.config.get('xpack.task_manager.override_num_workers');
     this.pollerInterval = opts.config.get('xpack.task_manager.poll_interval');
     this.definitions = {};
     this.logger = opts.logger;
@@ -152,11 +155,7 @@ export class TaskManager {
     }
 
     try {
-      const sanitized = sanitizeTaskDefinitions(
-        taskDefinitions,
-        this.maxWorkers,
-        this.overrideNumWorkers
-      );
+      const sanitized = sanitizeTaskDefinitions(taskDefinitions);
 
       Object.assign(this.definitions, sanitized);
     } catch (e) {

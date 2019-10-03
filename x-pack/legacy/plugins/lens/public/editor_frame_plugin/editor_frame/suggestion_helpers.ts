@@ -144,14 +144,15 @@ export function switchToSuggestion(
   suggestion: Pick<
     Suggestion,
     'visualizationId' | 'visualizationState' | 'datasourceState' | 'datasourceId' | 'keptLayerIds'
-  >
+  >,
+  type: 'SWITCH_VISUALIZATION' | 'SELECT_SUGGESTION' = 'SELECT_SUGGESTION'
 ) {
   const action: Action = {
-    type: 'SWITCH_VISUALIZATION',
+    type,
     newVisualizationId: suggestion.visualizationId,
     initialState: suggestion.visualizationState,
     datasourceState: suggestion.datasourceState,
-    datasourceId: suggestion.datasourceId,
+    datasourceId: suggestion.datasourceId!,
   };
   dispatch(action);
   const layerIds = Object.keys(frame.datasourceLayers).filter(id => {

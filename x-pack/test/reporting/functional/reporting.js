@@ -254,7 +254,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('Discover', () => {
-      describe('Generate CSV button', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/31379
+      describe.skip('Generate CSV button', () => {
         beforeEach(() => PageObjects.common.navigateToApp('discover'));
 
         it('is not available if new', async () => {

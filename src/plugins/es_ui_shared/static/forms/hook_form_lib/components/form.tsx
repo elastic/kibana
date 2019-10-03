@@ -25,16 +25,12 @@ import { FormHook } from '../types';
 
 interface Props {
   form: FormHook<any>;
-  FormWrapper?: (props: any) => JSX.Element;
+  FormWrapper?: React.ComponentType;
   children: ReactNode | ReactNode[];
-  className: string;
+  [key: string]: any;
 }
 
-const DefaultFormWrapper = (props: any) => {
-  return <EuiForm {...props} />;
-};
-
-export const Form = ({ form, FormWrapper = DefaultFormWrapper, ...rest }: Props) => (
+export const Form = ({ form, FormWrapper = EuiForm, ...rest }: Props) => (
   <FormProvider form={form}>
     <FormWrapper {...rest} />
   </FormProvider>

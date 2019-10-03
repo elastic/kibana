@@ -5,6 +5,9 @@
  */
 
 export const CLIENT_DEFAULTS = {
+  ABSOLUTE_DATE_RANGE_START: 0,
+  // 15 minutes
+  ABSOLUTE_DATE_RANGE_END: 1000 * 60 * 15,
   // 60 seconds
   AUTOREFRESH_INTERVAL: 60 * 1000,
   // polling defaults to "on"
@@ -28,6 +31,6 @@ export const CLIENT_DEFAULTS = {
   MONITOR_LIST_SORT_DIRECTION: 'asc',
   MONITOR_LIST_SORT_FIELD: 'monitor_id',
   SEARCH: '',
-  SELECTED_PING_LIST_STATUS: 'down',
+  SELECTED_PING_LIST_STATUS: '',
   STATUS_FILTER: '',
 };

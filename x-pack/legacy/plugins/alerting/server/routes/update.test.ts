@@ -35,6 +35,7 @@ test('calls the update function with proper parameters', async () => {
     method: 'PUT',
     url: '/api/alert/1',
     payload: {
+      throttle: null,
       interval: '12s',
       alertTypeParams: {
         otherField: false,
@@ -74,6 +75,7 @@ test('calls the update function with proper parameters', async () => {
             "otherField": false,
           },
           "interval": "12s",
+          "throttle": null,
         },
         "id": "1",
       },

@@ -28,13 +28,13 @@ exports[`Storyshots arguments/AxisConfig extended 1`] = `
       className="euiFormRow__fieldWrapper"
     >
       <div
-        className="euiFormControlLayout"
+        className="euiFormControlLayout euiFormControlLayout--compressed"
       >
         <div
           className="euiFormControlLayout__childrenWrapper"
         >
           <select
-            className="euiSelect"
+            className="euiSelect euiSelect--compressed"
             id="generated-id"
             onBlur={[Function]}
             onChange={[Function]}
@@ -75,6 +75,9 @@ exports[`Storyshots arguments/AxisConfig extended 1`] = `
       </div>
     </div>
   </div>
+  <div
+    className="euiSpacer euiSpacer--s"
+  />
 </div>
 `;
 
@@ -106,13 +109,13 @@ exports[`Storyshots arguments/AxisConfig/components extended 1`] = `
       className="euiFormRow__fieldWrapper"
     >
       <div
-        className="euiFormControlLayout"
+        className="euiFormControlLayout euiFormControlLayout--compressed"
       >
         <div
           className="euiFormControlLayout__childrenWrapper"
         >
           <select
-            className="euiSelect"
+            className="euiSelect euiSelect--compressed"
             id="generated-id"
             onBlur={[Function]}
             onChange={[Function]}
@@ -153,6 +156,9 @@ exports[`Storyshots arguments/AxisConfig/components extended 1`] = `
       </div>
     </div>
   </div>
+  <div
+    className="euiSpacer euiSpacer--s"
+  />
 </div>
 `;
 

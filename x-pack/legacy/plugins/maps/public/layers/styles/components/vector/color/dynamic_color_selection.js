@@ -28,12 +28,14 @@ export function DynamicColorSelection({ ordinalFields, onChange, styleOptions })
         color={styleOptions.color}
         customColorRamp={styleOptions.customColorRamp}
         useCustomColorRamp={_.get(styleOptions, 'useCustomColorRamp', false)}
+        compressed
       />
       <EuiSpacer size="s" />
       <FieldSelect
         fields={ordinalFields}
         selectedFieldName={_.get(styleOptions, 'field.name')}
         onChange={onFieldChange}
+        compressed
       />
     </Fragment>
   );
@@ -42,5 +44,5 @@ export function DynamicColorSelection({ ordinalFields, onChange, styleOptions })
 DynamicColorSelection.propTypes = {
   ordinalFields: PropTypes.arrayOf(fieldShape).isRequired,
   styleOptions: dynamicColorShape.isRequired,
-  onChange: PropTypes.func.isRequired
+  onChange: PropTypes.func.isRequired,
 };

@@ -43,5 +43,6 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_inspector'));
     loadTestFile(require.resolve('./_doc_navigation'));
     loadTestFile(require.resolve('./_date_nanos'));
+    loadTestFile(require.resolve('./_date_nanos_mixed'));
   });
 }

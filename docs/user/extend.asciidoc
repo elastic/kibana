@@ -5,8 +5,11 @@
 --
 //TBD
 
+* <<xpack-graph>>
 * <<xpack-ml>>
 
 --
+
+include::graph/index.asciidoc[leveloffset=+1]
 
 include::ml/index.asciidoc[]

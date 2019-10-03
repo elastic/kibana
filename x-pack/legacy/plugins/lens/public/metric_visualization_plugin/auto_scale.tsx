@@ -76,6 +76,7 @@ export class AutoScale extends React.Component<Props, State> {
               maxWidth: '100%',
               maxHeight: '100%',
               overflow: 'hidden',
+              lineHeight: 1.5,
             }}
           >
             <div

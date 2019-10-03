@@ -27,7 +27,8 @@ export default function manageRepositoriesFunctionalTests({
   const existsInvisible = async (selector: string) =>
     await testSubjects.exists(selector, { allowHidden: true });
 
-  describe('History', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/46313
+  describe.skip('History', function() {
     this.tags('smoke');
     const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
 
@@ -50,7 +51,7 @@ export default function manageRepositoriesFunctionalTests({
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await esArchiver.unload('code/repositories/typescript_node_starter');
         await repoUnload(
           'github.com/elastic/TypeScript-Node-Starter',

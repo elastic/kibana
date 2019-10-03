@@ -18,12 +18,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  Action,
-  IEmbeddable,
-  IncompatibleActionError,
-} from '../../../../../../embeddable_api/public/np_ready/public';
+import { IEmbeddable } from '../../../../../../embeddable_api/public/np_ready/public';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
+import {
+  IAction,
+  IncompatibleActionError,
+} from '../../../../../../../../../src/plugins/ui_actions/public';
 
 export const EXPAND_PANEL_ACTION = 'togglePanel';
 
@@ -43,13 +43,12 @@ interface ActionContext {
   embeddable: IEmbeddable;
 }
 
-export class ExpandPanelAction extends Action<ActionContext> {
+export class ExpandPanelAction implements IAction<ActionContext> {
   public readonly type = EXPAND_PANEL_ACTION;
+  public readonly id = EXPAND_PANEL_ACTION;
+  public order = 7;
 
-  constructor() {
-    super(EXPAND_PANEL_ACTION);
-    this.order = 7;
-  }
+  constructor() {}
 
   public getDisplayName({ embeddable }: ActionContext) {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {

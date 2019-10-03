@@ -5,18 +5,15 @@
  */
 
 import { createEmbeddable, displayErrorToast, setupEmbeddablesAPI } from './embedded_map_helpers';
-import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { npStart } from 'ui/new_platform';
 
+jest.mock('ui/new_platform');
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 jest.mock(
   '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy',
   () => ({
     start: {
-      getTriggerActions: jest.fn(() => []),
-      registerAction: jest.fn(),
-      attachAction: jest.fn(),
-      detachAction: jest.fn(),
       getEmbeddableFactory: () => ({
         createFromState: () => ({
           reload: jest.fn(),
@@ -55,8 +52,8 @@ describe('embedded_map_helpers', () => {
     test('attaches SIEM_FILTER_ACTION, and detaches extra UI actions', () => {
       const applyFilterMock = jest.fn();
       setupEmbeddablesAPI(applyFilterMock);
-      expect(start.registerAction).toHaveBeenCalledTimes(1);
-      expect(start.detachAction).toHaveBeenCalledTimes(3);
+      expect(npStart.plugins.uiActions.registerAction).toHaveBeenCalledTimes(1);
+      expect(npStart.plugins.uiActions.detachAction).toHaveBeenCalledTimes(3);
     });
   });
 

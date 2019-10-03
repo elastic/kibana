@@ -20,7 +20,7 @@
 import { get, has } from 'lodash';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
-import { AggConfigs } from 'ui/vis/agg_configs';
+import { AggConfigs } from 'ui/agg_types/agg_configs';
 import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import chrome from 'ui/chrome';
 

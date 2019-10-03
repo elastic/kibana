@@ -45,7 +45,7 @@ class ExitFullScreenButtonUi extends PureComponent<Props> {
 
   public render() {
     return (
-      <div className="hideInPercy">
+      <div>
         <EuiScreenReaderOnly>
           <p aria-live="polite">
             {i18n.translate('kibana-react.exitFullScreenButton.fullScreenModeDescription', {

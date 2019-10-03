@@ -14,7 +14,6 @@ import {
   EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -112,11 +111,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
             )}
           >
             <EuiFieldNumber
-              prepend={
-                <EuiText size="xs">
-                  <strong>:</strong>
-                </EuiText>
-              }
+              prepend=":"
               fullWidth
               name="port"
               value={port || ''}
@@ -144,11 +139,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
             )}
           >
             <EuiFieldText
-              prepend={
-                <EuiText size="xs">
-                  <strong>/</strong>
-                </EuiText>
-              }
+              prepend="/"
               fullWidth
               name="path"
               value={path || ''}

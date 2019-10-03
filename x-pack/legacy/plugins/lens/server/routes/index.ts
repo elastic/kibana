@@ -6,7 +6,9 @@
 
 import { CoreSetup } from 'src/core/server';
 import { initStatsRoute } from './index_stats';
+import { initFieldsRoute } from './field_stats';
 
 export function setupRoutes(setup: CoreSetup) {
   initStatsRoute(setup);
+  initFieldsRoute(setup);
 }

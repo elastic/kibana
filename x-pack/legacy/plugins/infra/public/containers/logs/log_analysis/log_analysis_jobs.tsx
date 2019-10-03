@@ -103,6 +103,7 @@ export const useLogAnalysisJobs = ({
     retry,
     setupStatus: statusState.setupStatus,
     viewResults,
+    fetchJobStatus,
   };
 };
 

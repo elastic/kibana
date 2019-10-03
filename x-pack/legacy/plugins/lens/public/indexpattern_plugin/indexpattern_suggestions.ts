@@ -22,6 +22,7 @@ import {
   IndexPatternColumn,
 } from './operations';
 import { hasField } from './utils';
+import { operationDefinitions } from './operations/definitions';
 
 function buildSuggestion({
   state,
@@ -204,7 +205,7 @@ function addFieldAsBucketOperation(
   };
   let updatedColumnOrder: string[] = [];
   if (applicableBucketOperation === 'terms') {
-    updatedColumnOrder = [...buckets, newColumnId, ...metrics];
+    updatedColumnOrder = [newColumnId, ...buckets, ...metrics];
   } else {
     const oldDateHistogramColumn = layer.columnOrder.find(
       columnId => layer.columns[columnId].operationType === 'date_histogram'
@@ -238,7 +239,8 @@ function getEmptyLayerSuggestionsForField(
   } else if (indexPattern.timeFieldName && getOperationTypesForField(field).length > 0) {
     newLayer = createNewLayerWithMetricAggregation(layerId, indexPattern, field);
   }
-  return newLayer
+
+  const newLayerSuggestions = newLayer
     ? [
         buildSuggestion({
           state,
@@ -248,6 +250,10 @@ function getEmptyLayerSuggestionsForField(
         }),
       ]
     : [];
+
+  const metricLayer = createMetricSuggestion(indexPattern, layerId, state, field);
+
+  return metricLayer ? newLayerSuggestions.concat(metricLayer) : newLayerSuggestions;
 }
 
 function createNewLayerWithBucketAggregation(
@@ -392,13 +398,55 @@ function createChangedNestingSuggestion(state: IndexPatternPrivateState, layerId
     state,
     layerId,
     updatedLayer,
-    label: i18n.translate('xpack.lens.indexpattern.suggestions.nestingChangeLabel', {
-      defaultMessage: 'Nest within {operation}',
-      values: {
-        operation: layer.columns[secondBucket].label,
-      },
-    }),
+    label: getNestedTitle([layer.columns[secondBucket], layer.columns[firstBucket]]),
     changeType: 'extended',
+  });
+}
+
+function createMetricSuggestion(
+  indexPattern: IndexPattern,
+  layerId: string,
+  state: IndexPatternPrivateState,
+  field: IndexPatternField
+) {
+  const layer = state.layers[layerId];
+  const operationDefinitionsMap = _.indexBy(operationDefinitions, 'type');
+  const [column] = getOperationTypesForField(field)
+    .map(type =>
+      operationDefinitionsMap[type].buildColumn({
+        field,
+        indexPattern,
+        layerId,
+        columns: {},
+        suggestedPriority: 0,
+      })
+    )
+    .filter(op => op.dataType === 'number' && !op.isBucketed);
+
+  if (!column) {
+    return;
+  }
+
+  const newId = generateId();
+  return buildSuggestion({
+    layerId,
+    state,
+    changeType: 'initial',
+    updatedLayer: {
+      ...layer,
+      columns: { [newId]: column },
+      columnOrder: [newId],
+    },
+  });
+}
+
+function getNestedTitle([outerBucket, innerBucket]: IndexPatternColumn[]) {
+  return i18n.translate('xpack.lens.indexpattern.suggestions.nestingChangeLabel', {
+    defaultMessage: '{innerOperation} per each {outerOperation}',
+    values: {
+      innerOperation: innerBucket.label,
+      outerOperation: hasField(outerBucket) ? outerBucket.sourceField : outerBucket.label,
+    },
   });
 }
 
@@ -525,7 +573,7 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
 }
 
 function getMetricSuggestionTitle(layer: IndexPatternLayer, onlyMetric: boolean) {
-  const { operationType, label } = Object.values(layer.columns)[0];
+  const { operationType, label } = layer.columns[layer.columnOrder[0]];
   return i18n.translate('xpack.lens.indexpattern.suggestions.overallLabel', {
     defaultMessage: '{operation} overall',
     values: {

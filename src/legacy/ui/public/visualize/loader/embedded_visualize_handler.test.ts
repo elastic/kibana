@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+jest.mock('ui/new_platform');
+
 import { mockDataLoaderFetch, timefilter } from './embedded_visualize_handler.test.mocks';
 
 import _ from 'lodash';
@@ -25,9 +27,13 @@ import { Vis } from '../../vis';
 import { VisResponseData } from './types';
 import { Inspector } from '../../inspector';
 import { EmbeddedVisualizeHandler, RequestHandlerParams } from './embedded_visualize_handler';
-import { AggConfigs } from 'ui/vis/agg_configs';
+import { AggConfigs } from 'ui/agg_types/agg_configs';
 
-jest.mock('ui/new_platform');
+jest.mock('plugins/interpreter/interpreter', () => ({
+  getInterpreter: () => {
+    return Promise.resolve();
+  },
+}));
 
 jest.mock('../../../../core_plugins/interpreter/public/registries', () => ({
   registries: {

@@ -14,6 +14,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Class | Description |
 |  --- | --- |
+|  [HttpInterceptController](./kibana-plugin-public.httpinterceptcontroller.md) |  |
 |  [SavedObjectsClient](./kibana-plugin-public.savedobjectsclient.md) | Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing plugin state. The client-side SavedObjectsClient is a thin convenience library around the SavedObjects HTTP API for interacting with Saved Objects. |
 |  [SimpleSavedObject](./kibana-plugin-public.simplesavedobject.md) | This class is a very simple wrapper for SavedObjects loaded from the server with the [SavedObjectsClient](./kibana-plugin-public.savedobjectsclient.md)<!-- -->.<!-- -->It provides basic functionality for creating/saving/deleting saved objects, but doesn't include any type-specific implementations. |
 |  [ToastsApi](./kibana-plugin-public.toastsapi.md) |  |

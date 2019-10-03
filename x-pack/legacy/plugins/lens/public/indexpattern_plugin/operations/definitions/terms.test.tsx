@@ -140,6 +140,19 @@ describe('terms', () => {
         isBucketed: true,
         scale: 'ordinal',
       });
+
+      expect(
+        termsOperation.getPossibleOperationForField({
+          aggregatable: true,
+          searchable: true,
+          name: 'test',
+          type: 'ip',
+        })
+      ).toEqual({
+        dataType: 'ip',
+        isBucketed: true,
+        scale: 'ordinal',
+      });
     });
 
     it('should not return an operation if restrictions prevent terms', () => {
@@ -526,11 +539,14 @@ describe('terms', () => {
         />
       );
 
-      instance.find(EuiRange).prop('onChange')!({
-        target: {
-          value: '7',
-        },
-      } as React.ChangeEvent<HTMLInputElement>);
+      instance.find(EuiRange).prop('onChange')!(
+        {
+          target: {
+            value: '7',
+          },
+        } as React.ChangeEvent<HTMLInputElement>,
+        true
+      );
       expect(setStateSpy).toHaveBeenCalledWith({
         ...state,
         layers: {

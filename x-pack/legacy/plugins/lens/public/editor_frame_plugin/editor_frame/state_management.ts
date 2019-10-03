@@ -8,14 +8,18 @@ import { i18n } from '@kbn/i18n';
 import { EditorFrameProps } from '../editor_frame';
 import { Document } from '../../persistence/saved_object_store';
 
-export interface EditorFrameState {
-  persistedId?: string;
-  title: string;
+export interface PreviewState {
   visualization: {
     activeId: string | null;
     state: unknown;
   };
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>;
+}
+
+export interface EditorFrameState extends PreviewState {
+  persistedId?: string;
+  title: string;
+  stagedPreview?: PreviewState;
   activeDatasourceId: string | null;
 }
 
@@ -32,10 +36,12 @@ export type Action =
       type: 'UPDATE_DATASOURCE_STATE';
       updater: unknown | ((prevState: unknown) => unknown);
       datasourceId: string;
+      clearStagedPreview?: boolean;
     }
   | {
       type: 'UPDATE_VISUALIZATION_STATE';
       newState: unknown;
+      clearStagedPreview?: boolean;
     }
   | {
       type: 'UPDATE_LAYER';
@@ -58,6 +64,19 @@ export type Action =
       initialState: unknown;
       datasourceState: unknown;
       datasourceId: string;
+    }
+  | {
+      type: 'SELECT_SUGGESTION';
+      newVisualizationId: string;
+      initialState: unknown;
+      datasourceState: unknown;
+      datasourceId: string;
+    }
+  | {
+      type: 'ROLLBACK_SUGGESTION';
+    }
+  | {
+      type: 'SUBMIT_SUGGESTION';
     }
   | {
       type: 'SWITCH_DATASOURCE';
@@ -176,6 +195,41 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
           activeId: action.newVisualizationId,
           state: action.initialState,
         },
+        stagedPreview: undefined,
+      };
+    case 'SELECT_SUGGESTION':
+      return {
+        ...state,
+        datasourceStates:
+          'datasourceId' in action && action.datasourceId
+            ? {
+                ...state.datasourceStates,
+                [action.datasourceId]: {
+                  ...state.datasourceStates[action.datasourceId],
+                  state: action.datasourceState,
+                },
+              }
+            : state.datasourceStates,
+        visualization: {
+          ...state.visualization,
+          activeId: action.newVisualizationId,
+          state: action.initialState,
+        },
+        stagedPreview: state.stagedPreview || {
+          datasourceStates: state.datasourceStates,
+          visualization: state.visualization,
+        },
+      };
+    case 'ROLLBACK_SUGGESTION':
+      return {
+        ...state,
+        ...(state.stagedPreview || {}),
+        stagedPreview: undefined,
+      };
+    case 'SUBMIT_SUGGESTION':
+      return {
+        ...state,
+        stagedPreview: undefined,
       };
     case 'UPDATE_DATASOURCE_STATE':
       return {
@@ -190,6 +244,7 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
             isLoading: false,
           },
         },
+        stagedPreview: action.clearStagedPreview ? undefined : state.stagedPreview,
       };
     case 'UPDATE_VISUALIZATION_STATE':
       if (!state.visualization.activeId) {
@@ -201,6 +256,7 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
           ...state.visualization,
           state: action.newState,
         },
+        stagedPreview: action.clearStagedPreview ? undefined : state.stagedPreview,
       };
     default:
       return state;

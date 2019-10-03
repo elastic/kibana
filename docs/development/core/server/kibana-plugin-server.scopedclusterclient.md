@@ -16,7 +16,7 @@ export declare class ScopedClusterClient
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(internalAPICaller, scopedAPICaller, headers)](./kibana-plugin-server.scopedclusterclient.(constructor).md) |  | Constructs a new instance of the <code>ScopedClusterClient</code> class |
+|  [(constructor)(internalAPICaller, scopedAPICaller, headers)](./kibana-plugin-server.scopedclusterclient._constructor_.md) |  | Constructs a new instance of the <code>ScopedClusterClient</code> class |
 
 ## Methods
 

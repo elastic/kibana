@@ -43,7 +43,7 @@ export interface EmbeddedMapProps {
 }
 
 export const EmbeddedMap = React.memo<EmbeddedMapProps>(
-  ({ applyFilterQueryFromKueryExpression, queryExpression, startDate, endDate, setQuery }) => {
+  ({ applyFilterQueryFromKueryExpression, endDate, queryExpression, setQuery, startDate }) => {
     const [embeddable, setEmbeddable] = React.useState<MapEmbeddable | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
@@ -134,7 +134,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
             <EmbeddablePanel
               data-test-subj="embeddable-panel"
               embeddable={embeddable}
-              getActions={start.getTriggerCompatibleActions}
+              getActions={npStart.plugins.uiActions.getTriggerCompatibleActions}
               getEmbeddableFactory={start.getEmbeddableFactory}
               getAllEmbeddableFactories={start.getEmbeddableFactories}
               notifications={npStart.core.notifications}

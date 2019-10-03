@@ -8,9 +8,10 @@ import { i18n } from '@kbn/i18n';
 import { visualizations } from '../../../../../src/legacy/core_plugins/visualizations/public';
 import { BASE_APP_URL, getEditPath } from '../common';
 
-visualizations.types.visTypeAliasRegistry.add({
+visualizations.types.registerAlias({
   aliasUrl: BASE_APP_URL,
   name: 'lens',
+  isPromoted: true,
   title: i18n.translate('xpack.lens.visTypeAlias.title', {
     defaultMessage: 'Lens Visualizations',
   }),

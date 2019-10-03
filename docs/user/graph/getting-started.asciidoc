@@ -1,6 +1,6 @@
 [role="xpack"]
 [[graph-getting-started]]
-== Using Graph
+=== Using Graph
 
 Graph is automatically enabled in {es} and {kib}.
 

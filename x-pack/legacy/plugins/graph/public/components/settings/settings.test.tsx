@@ -85,6 +85,7 @@ describe('settings', () => {
         selected: false,
         color: 'black',
         name: 'B',
+        type: 'string',
         icon: {
           class: 'test',
           code: '1',
@@ -95,6 +96,7 @@ describe('settings', () => {
         selected: false,
         color: 'red',
         name: 'C',
+        type: 'string',
         icon: {
           class: 'test',
           code: '1',

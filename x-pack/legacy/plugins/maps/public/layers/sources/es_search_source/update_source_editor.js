@@ -6,10 +6,7 @@
 
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiFormRow,
-  EuiSwitch,
-} from '@elastic/eui';
+import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { TooltipSelector } from '../../../components/tooltip_selector';
 
@@ -19,7 +16,6 @@ import { getTermsFields, getSourceFields } from '../../../index_pattern_util';
 import { ValidatedRange } from '../../../components/validated_range';
 
 export class UpdateSourceEditor extends Component {
-
   static propTypes = {
     indexPatternId: PropTypes.string.isRequired,
     onChange: PropTypes.func.isRequired,
@@ -29,13 +25,13 @@ export class UpdateSourceEditor extends Component {
     topHitsSplitField: PropTypes.string,
     topHitsTimeField: PropTypes.string,
     topHitsSize: PropTypes.number.isRequired,
-  }
+  };
 
   state = {
     tooltipFields: null,
     termFields: null,
     dateFields: null,
-  }
+  };
 
   componentDidMount() {
     this._isMounted = true;
@@ -56,9 +52,9 @@ export class UpdateSourceEditor extends Component {
           loadError: i18n.translate('xpack.maps.source.esSearch.loadErrorMessage', {
             defaultMessage: `Unable to find Index pattern {id}`,
             values: {
-              id: this.props.indexPatternId
-            }
-          })
+              id: this.props.indexPatternId,
+            },
+          }),
         });
       }
       return;
@@ -90,7 +86,7 @@ export class UpdateSourceEditor extends Component {
       }
     }
   }
-  _onTooltipPropertiesChange = (propertyNames) => {
+  _onTooltipPropertiesChange = propertyNames => {
     this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
   };
 
@@ -125,27 +121,31 @@ export class UpdateSourceEditor extends Component {
       timeFieldSelect = (
         <EuiFormRow
           label={i18n.translate('xpack.maps.source.esSearch.topHitsTimeFieldLabel', {
-            defaultMessage: 'Time'
+            defaultMessage: 'Time',
           })}
+          display="rowCompressed"
         >
           <SingleFieldSelect
-            placeholder={i18n.translate('xpack.maps.source.esSearch.topHitsTimeFieldSelectPlaceholder', {
-              defaultMessage: 'Select time field'
-            })}
+            placeholder={i18n.translate(
+              'xpack.maps.source.esSearch.topHitsTimeFieldSelectPlaceholder',
+              {
+                defaultMessage: 'Select time field',
+              }
+            )}
             value={this.props.topHitsTimeField}
             onChange={this.onTopHitsTimeFieldChange}
             fields={this.state.dateFields}
+            compressed
           />
         </EuiFormRow>
       );
 
       sizeSlider = (
         <EuiFormRow
-          label={
-            i18n.translate('xpack.maps.source.esSearch.topHitsSizeLabel', {
-              defaultMessage: 'Documents per entity'
-            })
-          }
+          label={i18n.translate('xpack.maps.source.esSearch.topHitsSizeLabel', {
+            defaultMessage: 'Documents per entity',
+          })}
+          display="rowCompressed"
         >
           <ValidatedRange
             min={1}
@@ -157,6 +157,7 @@ export class UpdateSourceEditor extends Component {
             showInput
             showRange
             data-test-subj="layerPanelTopHitsSize"
+            compressed
           />
         </EuiFormRow>
       );
@@ -166,16 +167,21 @@ export class UpdateSourceEditor extends Component {
       <Fragment>
         <EuiFormRow
           label={i18n.translate('xpack.maps.source.esSearch.topHitsSplitFieldLabel', {
-            defaultMessage: 'Entity'
+            defaultMessage: 'Entity',
           })}
+          display="rowCompressed"
         >
           <SingleFieldSelect
-            placeholder={i18n.translate('xpack.maps.source.esSearch.topHitsSplitFieldSelectPlaceholder', {
-              defaultMessage: 'Select entity field'
-            })}
+            placeholder={i18n.translate(
+              'xpack.maps.source.esSearch.topHitsSplitFieldSelectPlaceholder',
+              {
+                defaultMessage: 'Select entity field',
+              }
+            )}
             value={this.props.topHitsSplitField}
             onChange={this.onTopHitsSplitFieldChange}
             fields={this.state.termFields}
+            compressed
           />
         </EuiFormRow>
 
@@ -192,11 +198,9 @@ export class UpdateSourceEditor extends Component {
       topHitsCheckbox = (
         <EuiFormRow>
           <EuiSwitch
-            label={
-              i18n.translate('xpack.maps.source.esSearch.useTopHitsLabel', {
-                defaultMessage: `Show most recent documents by entity`
-              })
-            }
+            label={i18n.translate('xpack.maps.source.esSearch.useTopHitsLabel', {
+              defaultMessage: `Show most recent documents by entity`,
+            })}
             checked={this.props.useTopHits}
             onChange={this.onUseTopHitsChange}
           />
@@ -214,12 +218,9 @@ export class UpdateSourceEditor extends Component {
 
         <EuiFormRow>
           <EuiSwitch
-            label={
-              i18n.translate('xpack.maps.source.esSearch.extentFilterLabel', {
-                defaultMessage: `Dynamically filter for data in the visible map area`
-              })
-
-            }
+            label={i18n.translate('xpack.maps.source.esSearch.extentFilterLabel', {
+              defaultMessage: `Dynamically filter for data in the visible map area`,
+            })}
             checked={this.props.filterByMapBounds}
             onChange={this._onFilterByMapBoundsChange}
           />

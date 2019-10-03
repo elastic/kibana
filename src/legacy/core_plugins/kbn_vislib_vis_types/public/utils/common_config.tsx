@@ -45,10 +45,8 @@ function getAreaOptionTabs() {
   ];
 }
 
-function getCountLabel() {
-  return i18n.translate('kbnVislibVisTypes.area.countText', {
-    defaultMessage: 'Count',
-  });
-}
+const countLabel = i18n.translate('kbnVislibVisTypes.area.countText', {
+  defaultMessage: 'Count',
+});
 
-export { getAreaOptionTabs, getCountLabel };
+export { getAreaOptionTabs, countLabel };

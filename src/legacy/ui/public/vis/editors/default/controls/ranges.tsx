@@ -40,7 +40,7 @@ const TO_PLACEHOLDER = '+\u221E';
 const generateId = htmlIdGenerator();
 const isEmpty = (value: any) => value === undefined || value === null;
 
-interface RangeValues {
+export interface RangeValues {
   from?: number;
   to?: number;
 }
@@ -50,7 +50,7 @@ interface RangeValuesModel extends RangeValues {
 }
 
 interface RangesParamEditorProps {
-  dataTestSubj?: string;
+  'data-test-subj'?: string;
   error?: React.ReactNode;
   value?: RangeValues[];
   hidePlaceholders?: boolean;
@@ -62,8 +62,8 @@ interface RangesParamEditorProps {
 }
 
 function RangesParamEditor({
+  'data-test-subj': dataTestSubj = 'range',
   addRangeValues,
-  dataTestSubj = 'range',
   error,
   value = [],
   hidePlaceholders,
@@ -153,6 +153,16 @@ function RangesParamEditor({
             [isFromValid, isToValid] = validateRange({ from, to }, index);
           }
 
+          const fromPrepend = i18n.translate(
+            'common.ui.aggTypes.ranges.greaterThanOrEqualPrepend',
+            {
+              defaultMessage: '\u2265',
+            }
+          );
+          const toPrepend = i18n.translate('common.ui.aggTypes.ranges.lessThanPrepend', {
+            defaultMessage: '\u003c',
+          });
+
           return (
             <Fragment key={id}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -168,6 +178,7 @@ function RangesParamEditor({
                     fullWidth={true}
                     compressed={true}
                     isInvalid={!isFromValid}
+                    prepend={fromPrepend}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -185,6 +196,7 @@ function RangesParamEditor({
                     fullWidth={true}
                     compressed={true}
                     isInvalid={!isToValid}
+                    prepend={toPrepend}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -207,7 +219,12 @@ function RangesParamEditor({
 
         <EuiSpacer size="s" />
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAddRange} size="xs">
+          <EuiButtonEmpty
+            data-test-subj={`${dataTestSubj}__addRangeButton`}
+            iconType="plusInCircleFilled"
+            onClick={onAddRange}
+            size="xs"
+          >
             <FormattedMessage
               id="common.ui.aggTypes.ranges.addRangeButtonLabel"
               defaultMessage="Add range"

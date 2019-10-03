@@ -22,7 +22,7 @@ import { TimeRange } from 'src/plugins/data/public';
 import { PersistedLog } from 'ui/persisted_log';
 
 export class TimeHistory {
-  private history: PersistedLog;
+  private history: PersistedLog<TimeRange>;
 
   constructor() {
     const historyOptions = {
@@ -52,3 +52,5 @@ export class TimeHistory {
     return this.history.get();
   }
 }
+
+export type TimeHistoryContract = PublicMethodsOf<TimeHistory>;

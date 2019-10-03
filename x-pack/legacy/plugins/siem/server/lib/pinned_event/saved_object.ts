@@ -64,7 +64,7 @@ export class PinnedEvent {
     request: FrameworkRequest,
     pinnedEventId: string
   ): Promise<PinnedEventSavedObject> {
-    return await this.getSavedPinnedEvent(request, pinnedEventId);
+    return this.getSavedPinnedEvent(request, pinnedEventId);
   }
 
   public async getAllPinnedEventsByTimelineId(
@@ -76,7 +76,7 @@ export class PinnedEvent {
       search: timelineId,
       searchFields: ['timelineId'],
     };
-    return await this.getAllSavedPinnedEvents(request, options);
+    return this.getAllSavedPinnedEvents(request, options);
   }
 
   public async getAllPinnedEvents(
@@ -94,7 +94,7 @@ export class PinnedEvent {
       sortField: sort != null ? sort.sortField : undefined,
       sortOrder: sort != null ? sort.sortOrder : undefined,
     };
-    return await this.getAllSavedPinnedEvents(request, options);
+    return this.getAllSavedPinnedEvents(request, options);
   }
 
   public async persistPinnedEventOnTimeline(
