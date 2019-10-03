@@ -49,9 +49,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show correct data', async () => {
         const value = await PageObjects.visualBuilder.getMetricValue();
-        //await retry.try(async function tryingForTime() {
         expect(value).to.eql('156');
-
       });
 
       it('should show correct data with Math Aggregation', async () => {
