@@ -43,7 +43,7 @@ exports[`TooltipSelector should render component 1`] = `
           },
         ]
       }
-      onSelect={[Function]}
+      onAdd={[Function]}
       selectedFields={
         Array [
           Object {

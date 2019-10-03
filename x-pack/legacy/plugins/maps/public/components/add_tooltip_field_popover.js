@@ -95,6 +95,7 @@ export class AddTooltipFieldPopover extends Component {
       || nextProps.selectedFields !== prevState.prevSelectedFields) {
       return {
         options: getOptions(nextProps.fields, nextProps.selectedFields),
+        checkedFields: [],
         prevFields: nextProps.fields,
         prevSelectedFields: nextProps.selectedFields,
       };
