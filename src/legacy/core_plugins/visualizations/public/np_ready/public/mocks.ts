@@ -22,18 +22,17 @@ jest.mock('ui/vis/default_feedback_message');
 jest.mock('ui/vis/index.js');
 jest.mock('ui/vis/vis_factory');
 jest.mock('ui/registry/vis_types');
+jest.mock('./types/vis_type_alias_registry');
+
+import { PluginInitializerContext } from 'src/core/public';
+import { VisualizationsSetup, VisualizationsStart } from './';
+import { VisualizationsPlugin } from './plugin';
+import { coreMock } from '../../../../../../core/public/mocks';
+
+/* eslint-disable */
 // @ts-ignore
 import { VisFiltersProvider, createFilter } from 'ui/vis/vis_filters';
-// @ts-ignore
-import { VisProvider as Vis } from 'ui/vis/index.js';
-// @ts-ignore
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
-jest.mock('./types/vis_type_alias_registry');
-import { PluginInitializerContext } from 'src/core/public';
-
-import { VisualizationsSetup, VisualizationsStart } from './';
-import { VisualizationsPlugin } from './np_ready/plugin';
-import { coreMock } from '../../../../core/public/mocks';
+/* eslint-enable */
 
 const createSetupContract = (): VisualizationsSetup => ({
   filters: {
