@@ -58,7 +58,7 @@ export function SettingsSection({
   return (
     <>
       <EuiTitle size="xs">
-        <h3>{t('title', 'Settings')}</h3>
+        <h3>{t('title', 'Options')}</h3>
       </EuiTitle>
 
       <EuiSpacer size="m" />
@@ -98,28 +98,16 @@ export function SettingsSection({
           label={t('captureBodyInputLabel', 'Capture body')}
           helpText={t(
             'captureBodyInputHelpText',
-            'For transactions that are HTTP requests, the agent can optionally capture the request body (e.g. POST variables). Default is "Off".'
+            'For transactions that are HTTP requests, the agent can optionally capture the request body (e.g. POST variables). Default is "off".'
           )}
         >
           <SelectWithPlaceholder
             placeholder={t('captureBodyInputPlaceholderText', 'Select option')}
             options={[
-              {
-                value: 'off',
-                text: t('captureBodyConfigOptionOff', 'Off')
-              },
-              {
-                value: 'errors',
-                text: t('captureBodyConfigOptionErrors', 'Errors')
-              },
-              {
-                value: 'transactions',
-                text: t('captureBodyConfigOptionTransactions', 'Transactions')
-              },
-              {
-                value: 'all',
-                text: t('captureBodyConfigOptionAll', 'All')
-              }
+              { value: 'off', text: 'off' },
+              { value: 'errors', text: 'errors' },
+              { value: 'transactions', text: 'transactions' },
+              { value: 'all', text: 'all' }
             ]}
             value={captureBody}
             onChange={e => {

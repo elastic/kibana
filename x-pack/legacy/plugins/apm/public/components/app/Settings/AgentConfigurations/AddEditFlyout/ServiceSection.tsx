@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTitle, EuiSpacer, EuiFormRow } from '@elastic/eui';
+import { EuiTitle, EuiSpacer, EuiFormRow, EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { SelectWithPlaceholder } from '../../../../shared/SelectWithPlaceholder';
@@ -90,7 +90,7 @@ export function ServiceSection({
         }
       >
         {isReadOnly ? (
-          <strong>{serviceName}</strong>
+          <EuiText>{serviceName}</EuiText>
         ) : (
           <SelectWithPlaceholder
             placeholder={SELECT_PLACEHOLDER_LABEL}
@@ -118,7 +118,7 @@ export function ServiceSection({
         }
       >
         {isReadOnly ? (
-          <strong>{getEnvironmentNameLabel(environment)}</strong>
+          <EuiText>{getEnvironmentNameLabel(environment)}</EuiText>
         ) : (
           <SelectWithPlaceholder
             placeholder={SELECT_PLACEHOLDER_LABEL}
