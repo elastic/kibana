@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import { RenderedElement } from './rendered_element';
 import { CanvasRenderedPage, CanvasRenderedElement } from '../types';
 import { useCanvasShareableState } from '../context';
@@ -29,7 +29,7 @@ interface ComponentProps {
 /**
  * A Page in the Shareable Workpad is conceptually identical to a Page in a Workpad.
  */
-export const PageComponent = ({ page, height, width }: ComponentProps) => {
+export const PageComponent: FC<ComponentProps> = ({ page, height, width }) => {
   const { elements, style, id } = page;
 
   const output = elements.map((element: CanvasRenderedElement, i) => (
@@ -43,7 +43,7 @@ export const PageComponent = ({ page, height, width }: ComponentProps) => {
   );
 };
 
-interface ContainerProps {
+interface Props {
   /**
    * The zero-based index of the page relative others within the workpad.
    */
@@ -53,7 +53,7 @@ interface ContainerProps {
 /**
  * A store-connected container for the `Page` component.
  */
-export const Page = ({ index }: ContainerProps) => {
+export const Page: FC<Props> = ({ index }) => {
   const [{ workpad }] = useCanvasShareableState();
 
   if (!workpad) {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC, PureComponent } from 'react';
 // @ts-ignore Untyped library
 import Style from 'style-it';
 // @ts-ignore Untyped local
@@ -42,7 +42,7 @@ export interface Props {
  * datasources, and is just a simple expression to render the result.  This
  * component renders that "transient" element state.
  */
-export class RenderedElementComponent extends React.PureComponent<Props> {
+export class RenderedElementComponent extends PureComponent<Props> {
   static contextType = CanvasShareableContext;
   protected ref: React.RefObject<HTMLDivElement>;
 
@@ -106,7 +106,7 @@ export class RenderedElementComponent extends React.PureComponent<Props> {
 /**
  * A store-connected container for the `RenderedElement` component.
  */
-export const RenderedElement = ({ index, element }: Pick<Props, 'element' | 'index'>) => {
+export const RenderedElement: FC<Pick<Props, 'element' | 'index'>> = ({ index, element }) => {
   const [{ renderers }] = useCanvasShareableState();
 
   const { expressionRenderable } = element;
