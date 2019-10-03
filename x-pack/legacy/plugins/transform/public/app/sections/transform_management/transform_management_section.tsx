@@ -5,7 +5,6 @@
  */
 
 import React, { FC, Fragment, useEffect, useState } from 'react';
-import { Redirect } from 'react-router-dom';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -31,7 +30,7 @@ import { SearchSelection } from '../../../../../../../../src/legacy/core_plugins
 
 import { APP_GET_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 import { useRefreshTransformList, TransformListRow } from '../../common';
-import { CLIENT_BASE_PATH } from '../../constants';
+import { RedirectToCreateTransform } from '../../common/navigation';
 import { PrivilegesWrapper } from '../../lib/authorization';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 
@@ -70,7 +69,7 @@ export const TransformManagement: FC = () => {
   const [savedObjectId, setSavedObjectId] = useState<string | null>(null);
 
   if (savedObjectId !== null) {
-    return <Redirect to={`${CLIENT_BASE_PATH}/create_transform/${savedObjectId}`} />;
+    return <RedirectToCreateTransform savedObjectId={savedObjectId} />;
   }
 
   const onCloseModal = () => setIsSearchSelectionVisible(false);

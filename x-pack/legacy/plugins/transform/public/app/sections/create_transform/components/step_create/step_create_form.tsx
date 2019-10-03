@@ -31,7 +31,7 @@ import {
 
 import { api } from '../../../../services/api_service';
 import { isKibanaContextInitialized, KibanaContext } from '../../../../lib/kibana';
-import { useAppDependencies } from '../../../../app_dependencies';
+import { RedirectToTransformManagement } from '../../../../common/navigation';
 import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
 
 import { getTransformProgress, getDiscoverUrl } from '../../../../common';
@@ -62,6 +62,8 @@ export const StepCreateForm: SFC<Props> = React.memo(
   ({ createIndexPattern, transformConfig, transformId, onChange, overrides }) => {
     const defaults = { ...getDefaultStepCreateState(), ...overrides };
 
+    const [redirectToTransformManagement, setRedirectToTransformManagement] = useState(false);
+
     const [created, setCreated] = useState(defaults.created);
     const [started, setStarted] = useState(defaults.started);
     const [indexPatternId, setIndexPatternId] = useState(defaults.indexPatternId);
@@ -78,8 +80,6 @@ export const StepCreateForm: SFC<Props> = React.memo(
     if (!isKibanaContextInitialized(kibanaContext)) {
       return null;
     }
-
-    const baseUrl = useAppDependencies().core.chrome.addBasePath(kibanaContext.kbnBaseUrl);
 
     async function createTransform() {
       setCreated(true);
@@ -240,6 +240,10 @@ export const StepCreateForm: SFC<Props> = React.memo(
     const FLEX_ITEM_STYLE = { width: '200px' };
     const PANEL_ITEM_STYLE = { width: '300px' };
 
+    if (redirectToTransformManagement) {
+      return <RedirectToTransformManagement />;
+    }
+
     return (
       <EuiForm>
         {!created && (
@@ -363,7 +367,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
                       defaultMessage: 'Return to the transform management page.',
                     }
                   )}
-                  href="#/data_frames"
+                  onClick={() => setRedirectToTransformManagement(true)}
                 />
               </EuiFlexItem>
               {started === true && createIndexPattern === true && indexPatternId === undefined && (
@@ -396,7 +400,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
                         defaultMessage: 'Use Discover to explore the transform.',
                       }
                     )}
-                    href={getDiscoverUrl(indexPatternId, baseUrl)}
+                    href={getDiscoverUrl(indexPatternId, kibanaContext.kbnBaseUrl)}
                   />
                 </EuiFlexItem>
               )}
