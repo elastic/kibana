@@ -25,7 +25,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const inspector = getService('inspector');
-  const retry = getService('retry');
   const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker']);
 
   describe('visual_builder_example', function describeIndexTests() {
