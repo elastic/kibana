@@ -624,26 +624,24 @@ export default function SenseEditor($el) {
         // pageY is relative to page, so subtract the offset
         // from pageY to get the new top value
         const offsetFromPage = editor.$el.offset().top;
-        let startRow = CURRENT_REQ_RANGE.start.row;
+        const startRow = CURRENT_REQ_RANGE.start.row;
         const startColumn = CURRENT_REQ_RANGE.start.column;
         const session = editor.session;
         const firstLine = session.getLine(startRow);
-
-        if (firstLine.length > session.getWrapLimit() - 5) {
-          // overlap first row
-          if (startRow > 0) {
-            startRow--;
-          }
-          else {
-            startRow++;
-          }
-        }
-
-
+        const maxLineLength = session.getWrapLimit() - 5;
+        const isWrapping = firstLine.length > maxLineLength;
         const topOfReq = editor.renderer.textToScreenCoordinates(startRow, startColumn).pageY - offsetFromPage;
 
         if (topOfReq >= 0) {
-          return set(topOfReq);
+          let offset = 0;
+          if (isWrapping) {
+            // Try get the line height of the text area in pixels.
+            const textArea = editor.$el.find('textArea');
+            if (textArea) {
+              offset += (session.getRowLength(startRow) * textArea.height());
+            }
+          }
+          return set(topOfReq + offset);
         }
 
         const bottomOfReq = editor.renderer.textToScreenCoordinates(
