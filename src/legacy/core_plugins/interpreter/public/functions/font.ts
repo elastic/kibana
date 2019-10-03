@@ -127,7 +127,7 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
       },
     },
     fn: (_context, args) => {
-      if (!Object.values(FontWeight).includes(args.weight)) {
+      if (!Object.values(FontWeight).includes(args.weight!)) {
         throw new Error(
           i18n.translate('interpreter.functions.font.invalidFontWeightErrorMessage', {
             defaultMessage: "Invalid font weight: '{weight}'",
@@ -137,7 +137,7 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
           })
         );
       }
-      if (!Object.values(TextAlignment).includes(args.align)) {
+      if (!Object.values(TextAlignment).includes(args.align!)) {
         throw new Error(
           i18n.translate('interpreter.functions.font.invalidTextAlignmentErrorMessage', {
             defaultMessage: "Invalid text alignment: '{align}'",
