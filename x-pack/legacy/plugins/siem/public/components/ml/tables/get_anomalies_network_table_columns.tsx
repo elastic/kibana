@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import moment from 'moment';
-import { Columns } from '../../load_more_table';
+import { Columns } from '../../paginated_table';
 import { Anomaly, NarrowDateRange, AnomaliesByNetwork } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
 import { EntityDraggable } from '../entity_draggable';

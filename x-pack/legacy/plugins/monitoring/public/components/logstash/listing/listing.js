@@ -4,18 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent, Fragment } from 'react';
+import React, { PureComponent } from 'react';
 import { get } from 'lodash';
-import { EuiPage, EuiLink, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiPage, EuiLink, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { formatPercentageUsage, formatNumber } from '../../../lib/format_number';
 import { ClusterStatus } from '..//cluster_status';
 import { EuiMonitoringTable } from '../../table';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
+import { SetupModeBadge } from '../../setup_mode/badge';
+import { ListingCallOut } from '../../setup_mode/listing_callout';
 
 export class Listing extends PureComponent {
   getColumns() {
     const { kbnUrl, scope } = this.props.angular;
+    const setupMode = this.props.setupMode;
 
     return [
       {
@@ -24,24 +28,49 @@ export class Listing extends PureComponent {
         }),
         field: 'name',
         sortable: true,
-        render: (name, node) => (
-          <div>
+        render: (name, node) => {
+          let setupModeStatus = null;
+          if (setupMode && setupMode.enabled) {
+            const list = get(setupMode, 'data.byUuid', {});
+            const uuid = get(node, 'logstash.uuid');
+            const status = list[uuid] || {};
+            const instance = {
+              uuid,
+              name: node.name
+            };
+
+            setupModeStatus = (
+              <div className="monTableCell__setupModeStatus">
+                <SetupModeBadge
+                  setupMode={setupMode}
+                  status={status}
+                  instance={instance}
+                  productName={LOGSTASH_SYSTEM_ID}
+                />
+              </div>
+            );
+          }
+
+          return (
             <div>
-              <EuiLink
-                onClick={() => {
-                  scope.$evalAsync(() => {
-                    kbnUrl.changePath(`/logstash/node/${node.logstash.uuid}`);
-                  });
-                }}
-              >
-                {name}
-              </EuiLink>
+              <div>
+                <EuiLink
+                  onClick={() => {
+                    scope.$evalAsync(() => {
+                      kbnUrl.changePath(`/logstash/node/${node.logstash.uuid}`);
+                    });
+                  }}
+                >
+                  {name}
+                </EuiLink>
+              </div>
+              <div>
+                {node.logstash.http_address}
+              </div>
+              {setupModeStatus}
             </div>
-            <div>
-              {node.logstash.http_address}
-            </div>
-          </div>
-        )
+          );
+        }
       },
       {
         name: i18n.translate('xpack.monitoring.logstash.nodes.cpuUsageTitle', {
@@ -124,26 +153,14 @@ export class Listing extends PureComponent {
       version: get(item, 'logstash.version', 'N/A'),
     }));
 
-    let netNewUserMessage = null;
-    if (setupMode.enabled && setupMode.data && get(setupMode.data, 'detected.mightExist')) {
-      netNewUserMessage = (
-        <Fragment>
-          <EuiCallOut
-            title={i18n.translate('xpack.monitoring.logstash.nodes.metribeatMigration.netNewUserTitle', {
-              defaultMessage: 'No monitoring data detected',
-            })}
-            color="warning"
-            iconType="help"
-          >
-            <p>
-              {i18n.translate('xpack.monitoring.logstash.nodes.metribeatMigration.netNewUserDescription', {
-                defaultMessage: `Based on your indices, we think you might have a Logstash node. Click the 'Setup monitoring'
-                button below to start monitoring this node.`
-              })}
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="m"/>
-        </Fragment>
+    let setupModeCallOut = null;
+    if (setupMode.enabled && setupMode.data) {
+      setupModeCallOut = (
+        <ListingCallOut
+          setupModeData={setupMode.data}
+          useNodeIdentifier
+          productName={LOGSTASH_SYSTEM_ID}
+        />
       );
     }
 
@@ -154,17 +171,13 @@ export class Listing extends PureComponent {
             <ClusterStatus stats={stats} />
           </EuiPanel>
           <EuiSpacer size="m" />
-          {netNewUserMessage}
+          {setupModeCallOut}
           <EuiPageContent>
             <EuiMonitoringTable
               className="logstashNodesTable"
               rows={flattenedData}
               setupMode={setupMode}
-              uuidField="logstash.uuid"
-              nameField="name"
-              setupNewButtonLabel={i18n.translate('xpack.monitoring.logstash.metricbeatMigration.setupNewButtonLabel', {
-                defaultMessage: 'Setup monitoring for new Logstash node'
-              })}
+              productName={LOGSTASH_SYSTEM_ID}
               columns={columns}
               sorting={{
                 ...sorting,

@@ -11,7 +11,7 @@ Object {
   "filters": "",
   "pagination": undefined,
   "search": "",
-  "selectedPingStatus": "down",
+  "selectedPingStatus": "",
   "statusFilter": "",
 }
 `;
@@ -27,7 +27,7 @@ Object {
   "filters": "",
   "pagination": undefined,
   "search": "",
-  "selectedPingStatus": "down",
+  "selectedPingStatus": "",
   "statusFilter": "",
 }
 `;
@@ -59,7 +59,7 @@ Object {
   "filters": "",
   "pagination": undefined,
   "search": "",
-  "selectedPingStatus": "down",
+  "selectedPingStatus": "",
   "statusFilter": "",
 }
 `;
@@ -75,7 +75,7 @@ Object {
   "filters": "",
   "pagination": undefined,
   "search": "",
-  "selectedPingStatus": "down",
+  "selectedPingStatus": "",
   "statusFilter": "",
 }
 `;

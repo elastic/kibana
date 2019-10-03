@@ -8,7 +8,7 @@ import * as Rx from 'rxjs';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_factory';
 import { SpacesService } from '../new_platform/spaces_service';
-import { SavedObjectsService } from 'src/core/server';
+import { SavedObjectsLegacyService } from 'src/core/server';
 import { SpacesAuditLogger } from './audit_logger';
 import { elasticsearchServiceMock, coreMock } from '../../../../../../src/core/server/mocks';
 import { spacesServiceMock } from '../new_platform/spaces_service/spaces_service.mock';
@@ -29,7 +29,7 @@ const legacyAPI: LegacyAPI = {
   legacyConfig: {
     serverBasePath: '/foo',
   },
-  savedObjects: {} as SavedObjectsService,
+  savedObjects: {} as SavedObjectsLegacyService,
 } as LegacyAPI;
 
 const service = new SpacesService(log, () => legacyAPI);
