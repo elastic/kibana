@@ -7,13 +7,13 @@ exports[`CategoryAxisPanel component should init with the default set of props 1
   <EuiTitle
     size="xs"
   >
-    <h2>
+    <h3>
       <FormattedMessage
         defaultMessage="X-axis"
         id="kbnVislibVisTypes.controls.pointSeries.categoryAxis.xAxisTitle"
         values={Object {}}
       />
-    </h2>
+    </h3>
   </EuiTitle>
   <EuiSpacer
     size="s"
