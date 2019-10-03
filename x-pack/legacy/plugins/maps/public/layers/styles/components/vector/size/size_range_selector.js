@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ValidatedDualRange } from 'ui/validated_range';
 import { DEFAULT_MIN_SIZE, DEFAULT_MAX_SIZE } from '../../../vector_style_defaults';
+import { i18n } from '@kbn/i18n';
 
 export function SizeRangeSelector({ minSize, maxSize, onChange, ...rest }) {
   const onSizeChange = ([min, max]) => {
@@ -23,10 +24,14 @@ export function SizeRangeSelector({ minSize, maxSize, onChange, ...rest }) {
       max={DEFAULT_MAX_SIZE}
       step={1}
       value={[minSize, maxSize]}
-      showInput
+      showInput="inputWithPopover"
       showRange
       onChange={onSizeChange}
       allowEmptyRange={false}
+      append={i18n.translate('xpack.maps.vector.dualSize.unitLabel', {
+        defaultMessage: 'px',
+        description: 'Shorthand for pixel',
+      })}
       {...rest}
     />
   );

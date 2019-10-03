@@ -83,7 +83,7 @@ describe('Server logging configuration', function () {
     it('should be reloadable via SIGHUP process signaling', async function () {
       expect.assertions(3);
 
-      child = spawn(process.execPath, [kibanaPath, '--config', testConfigFile, '--oss'], {
+      child = spawn(process.execPath, [kibanaPath, '--config', testConfigFile, '--oss', '--verbose'], {
         stdio: 'pipe'
       });
 
@@ -114,7 +114,9 @@ describe('Server logging configuration', function () {
               const data = JSON.parse(line);
               sawJson = true;
 
-              if (data.tags.includes('listening')) {
+              // We know the sighup handler will be registered before
+              // root.setup() is called
+              if (data.message.includes('setting up root')) {
                 isJson = false;
                 setLoggingJson(false);
 
@@ -128,10 +130,9 @@ describe('Server logging configuration', function () {
               // the switch yet, so we ignore before switching over.
             } else {
               // Kibana has successfully stopped logging json, so kill the server.
-
               sawNonjson = true;
 
-              child.kill();
+              child && child.kill();
               child = undefined;
             }
           })
@@ -178,10 +179,11 @@ describe('Server logging configuration', function () {
         '--config', testConfigFile,
         '--logging.dest', logPath,
         '--plugins.initialize', 'false',
-        '--logging.json', 'false'
+        '--logging.json', 'false',
+        '--verbose'
       ]);
 
-      watchFileUntil(logPath, /http server running/, 2 * minute)
+      watchFileUntil(logPath, /starting server/, 2 * minute)
         .then(() => {
           // once the server is running, archive the log file and issue SIGHUP
           fs.renameSync(logPath, logPathArchived);
@@ -190,8 +192,8 @@ describe('Server logging configuration', function () {
         .then(() => watchFileUntil(logPath, /Reloaded logging configuration due to SIGHUP/, 10 * second))
         .then(contents => {
           const lines = contents.toString().split('\n');
-          // should be the first and only new line of the log file
-          expect(lines).toHaveLength(2);
+          // should be the first line of the new log file
+          expect(lines[0]).toMatch(/Reloaded logging configuration due to SIGHUP/);
           child.kill();
         })
         .then(done, done);

@@ -28,6 +28,7 @@ export interface WorkspaceNode {
   scaledSize: number;
   parent: WorkspaceNode | null;
   color: string;
+  isSelected?: boolean;
 }
 
 export interface WorkspaceEdge {
@@ -37,29 +38,34 @@ export interface WorkspaceEdge {
   label: string;
   source: WorkspaceNode;
   target: WorkspaceNode;
+  isSelected?: boolean;
+}
+
+export interface ServerResultNode {
+  field: string;
+  term: string;
+  id: string;
+  label: string;
+  color: string;
+  icon: FontawesomeIcon;
+  data: {
+    field: string;
+    term: string;
+  };
+}
+
+export interface ServerResultEdge {
+  source: number;
+  target: number;
+  weight: number;
+  width: number;
+  doc_count?: number;
+  inferred: boolean;
 }
 
 export interface GraphData {
-  nodes: Array<{
-    field: string;
-    term: string;
-    id: string;
-    label: string;
-    color: string;
-    icon: FontawesomeIcon;
-    data: {
-      field: string;
-      term: string;
-    };
-  }>;
-  edges: Array<{
-    source: number;
-    target: number;
-    weight: number;
-    width: number;
-    doc_count?: number;
-    inferred: boolean;
-  }>;
+  nodes: ServerResultNode[];
+  edges: ServerResultEdge[];
 }
 
 export interface Workspace {

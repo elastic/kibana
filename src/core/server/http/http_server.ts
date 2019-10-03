@@ -26,7 +26,7 @@ import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { adoptToHapiOnPreAuthFormat, OnPreAuthHandler } from './lifecycle/on_pre_auth';
 
-import { KibanaRequest, LegacyRequest, ResponseHeaders, IRouter } from './router';
+import { ResponseHeaders, IRouter } from './router';
 import {
   SessionStorageCookieOptions,
   createCookieSessionStorageFactory,
@@ -34,7 +34,7 @@ import {
 import { SessionStorageFactory } from './session_storage';
 import { AuthStateStorage, GetAuthState, IsAuthenticated } from './auth_state_storage';
 import { AuthHeadersStorage, GetAuthHeaders } from './auth_headers_storage';
-import { BasePath } from './base_path_service';
+import { BasePath, IBasePath } from './base_path_service';
 
 /**
  * Kibana HTTP Service provides own abstraction for work with HTTP stack.
@@ -148,24 +148,8 @@ export interface HttpServerSetup {
    * @param handler {@link OnPostAuthHandler} - function to call.
    */
   registerOnPostAuth: (handler: OnPostAuthHandler) => void;
-  basePath: {
-    /**
-     * returns `basePath` value, specific for an incoming request.
-     */
-    get: (request: KibanaRequest | LegacyRequest) => string;
-    /**
-     * sets `basePath` value, specific for an incoming request.
-     */
-    set: (request: KibanaRequest | LegacyRequest, basePath: string) => void;
-    /**
-     * returns a new `basePath` value, prefixed with passed `url`.
-     */
-    prepend: (url: string) => string;
-    /**
-     * returns a new `basePath` value, cleaned up from passed `url`.
-     */
-    remove: (url: string) => string;
-  };
+  /** {@link BasePath} */
+  basePath: IBasePath;
   auth: {
     get: GetAuthState;
     isAuthenticated: IsAuthenticated;
