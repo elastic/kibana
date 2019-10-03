@@ -30,7 +30,7 @@ const Status = {
   ),
   Warning: (
     <EuiHealth color="warning">
-      <FormattedMessage id="xpack.fleet.agentHealth.errorStatusText" defaultMessage="Error" />
+      <FormattedMessage id="xpack.fleet.agentHealth.warningStatusText" defaultMessage="Error" />
     </EuiHealth>
   ),
   Error: (
