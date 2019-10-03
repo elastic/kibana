@@ -15,7 +15,6 @@ import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
 import { KqlMode } from '../../store/timeline/model';
 import { AutoSizer } from '../auto_sizer';
-
 import { ColumnHeader } from './body/column_headers/column_header';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import { Sort } from './body/sort';
@@ -30,12 +29,12 @@ import {
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
 } from './events';
+import { TimelineKqlFetch } from './fetch_kql_timeline';
 import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header';
 import { calculateBodyHeight, combineQueries } from './helpers';
 import { TimelineRefetch } from './refetch_timeline';
 import { ManageTimelineContext } from './timeline_context';
-import { TimelineKqlFetch } from './fetch_kql_timeline';
 
 const WrappedByAutoSizer = styled.div`
   width: 100%;

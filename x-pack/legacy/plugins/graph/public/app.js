@@ -5,7 +5,6 @@
  */
 
 import _ from 'lodash';
-import d3 from 'd3';
 import { i18n } from '@kbn/i18n';
 import 'ace';
 import rison from 'rison-node';
@@ -33,6 +32,7 @@ import { npStart } from 'ui/new_platform';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { capabilities } from 'ui/capabilities';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+import { Storage } from 'ui/storage';
 
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
@@ -45,6 +45,7 @@ import { GraphApp } from './components/app';
 import { VennDiagram } from './components/venn_diagram';
 import { Listing } from './components/listing';
 import { Settings } from './components/settings';
+import { GraphVisualization } from './components/graph_visualization';
 
 import gws from './angular/graph_client_workspace.js';
 import { SavedWorkspacesProvider } from './angular/services/saved_workspaces';
@@ -65,6 +66,7 @@ import { urlTemplateRegex } from  './helpers/url_template';
 import {
   asAngularSyncedObservable,
 } from './helpers/as_observable';
+import { fetchTopNodes } from './services/fetch_top_nodes';
 import {
   createGraphStore,
   loadFields,
@@ -110,17 +112,23 @@ app.directive('graphApp', function (reactDirective) {
   return reactDirective(GraphApp, [
     ['state', { watchDepth: 'reference' }],
     ['dispatch', { watchDepth: 'reference' }],
+    ['onFillWorkspace', { watchDepth: 'reference' }],
+    ['isInitialized', { watchDepth: 'reference' }],
     ['currentIndexPattern', { watchDepth: 'reference' }],
     ['isLoading', { watchDepth: 'reference' }],
     ['onIndexPatternSelected', { watchDepth: 'reference' }],
     ['onQuerySubmit', { watchDepth: 'reference' }],
-    ['savedObjects', { watchDepth: 'reference' }],
-    ['uiSettings', { watchDepth: 'reference' }],
-    ['http', { watchDepth: 'reference' }],
     ['initialQuery', { watchDepth: 'reference' }],
-    ['overlays', { watchDepth: 'reference' }]
+    ['autocompleteStart', { watchDepth: 'reference' }],
+    ['coreStart', { watchDepth: 'reference' }],
+    ['store', { watchDepth: 'reference' }]
   ]);
 });
+
+app.directive('graphVisualization', function (reactDirective) {
+  return reactDirective(GraphVisualization);
+});
+
 
 if (uiRoutes.enable) {
   uiRoutes.enable();
@@ -297,8 +305,10 @@ app.controller('graphuiPlugin', function (
     }
   };
 
-  $scope.pluginDependencies = npStart.core;
 
+  $scope.store = new Storage(window.localStorage);
+  $scope.coreStart = npStart.core;
+  $scope.autocompleteStart = npStart.plugins.data.autocomplete;
   $scope.loading = false;
 
   const updateScope = () => {
@@ -433,6 +443,30 @@ app.controller('graphuiPlugin', function (
       .finally(() => {
         $scope.loading = false;
       });
+  };
+
+  $scope.fillWorkspace = async () => {
+    try {
+      const fields = selectedFieldsSelector(store.getState());
+      const topTermNodes = await fetchTopNodes(
+        npStart.core.http.post,
+        $scope.selectedIndex.title,
+        fields
+      );
+      initWorkspaceIfRequired();
+      $scope.workspace.mergeGraph({
+        nodes: topTermNodes,
+        edges: []
+      });
+      $scope.workspace.fillInGraph(fields.length * 10);
+    } catch (e) {
+      toastNotifications.addDanger({
+        title: i18n.translate(
+          'xpack.graph.fillWorkspaceError',
+          { defaultMessage: 'Fetching top terms failed: {message}', values: { message: e.message } }
+        ),
+      });
+    }
   };
 
   $scope.submit = function (searchTerm) {
@@ -590,6 +624,10 @@ app.controller('graphuiPlugin', function (
     }
   }
 
+  $scope.aceLoaded = (editor) => {
+    editor.$blockScrolling = Infinity;
+  };
+
   $scope.setDetail = function (data) {
     $scope.detail = data;
   };
@@ -630,32 +668,8 @@ app.controller('graphuiPlugin', function (
     $scope.detail = { mergeCandidates };
   };
 
-  // Zoom functions for the SVG-based graph
-  const redraw = function () {
-    d3.select('#svgRootGroup')
-      .attr('transform',
-        'translate(' + d3.event.translate + ')' + 'scale(' + d3.event.scale + ')')
-      .attr('style', 'stroke-width: ' + 1 / d3.event.scale);
-    //To make scale-dependent features possible....
-    if ($scope.zoomLevel !== d3.event.scale) {
-      $scope.zoomLevel = d3.event.scale;
-      $scope.$apply();
-    }
-  };
-
   //initialize all the state
   $scope.resetWorkspace();
-
-
-  const blockScroll = function () {
-    d3.event.preventDefault();
-  };
-  d3.select('#graphSvg')
-    .on('mousewheel', blockScroll)
-    .on('DOMMouseScroll', blockScroll)
-    .call(d3.behavior.zoom()
-      .on('zoom', redraw));
-
 
   const managementUrl = npStart.core.chrome.navLinks.get('kibana:management').url;
   const url = `${managementUrl}/kibana/index_patterns`;
@@ -859,9 +873,6 @@ app.controller('graphuiPlugin', function (
   } else {
     $route.current.locals.SavedWorkspacesProvider.get().then(function (newWorkspace) {
       $scope.savedWorkspace = newWorkspace;
-      openSourceModal(npStart.core, indexPattern => {
-        $scope.indexSelected(indexPattern);
-      });
     });
   }
 
