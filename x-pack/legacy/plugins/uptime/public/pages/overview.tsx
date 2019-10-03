@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import { AutocompleteProviderRegister } from 'src/plugins/data/public';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import {
+  DonutChart,
   EmptyState,
   FilterGroup,
   KueryBar,
