@@ -142,6 +142,7 @@ export function InnerWorkspacePanel({
       datasourceStates,
       framePublicAPI.dateRange,
       framePublicAPI.query,
+      framePublicAPI.filters,
     ]);
 
     useEffect(() => {

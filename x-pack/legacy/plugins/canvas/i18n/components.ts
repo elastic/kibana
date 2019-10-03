@@ -41,6 +41,43 @@ export const ComponentStrings = {
         defaultMessage: 'Add argument',
       }),
   },
+  ArgFormAdvancedFailure: {
+    getApplyButtonLabel: () =>
+      i18n.translate('xpack.canvas.argFormAdvancedFailure.applyButtonLabel', {
+        defaultMessage: 'Apply',
+      }),
+    getRowErrorMessage: () =>
+      i18n.translate('xpack.canvas.argFormAdvancedFailure.rowErrorMessage', {
+        defaultMessage: 'Invalid Expression',
+      }),
+    getResetButtonLabel: () =>
+      i18n.translate('xpack.canvas.argFormAdvancedFailure.resetButtonLabel', {
+        defaultMessage: 'Reset',
+      }),
+  },
+  ArgFormArgSimpleForm: {
+    getRemoveAriaLabel: () =>
+      i18n.translate('xpack.canvas.argFormArgSimpleForm.removeAriaLabel', {
+        defaultMessage: 'Remove',
+      }),
+    getRequiredTooltip: () =>
+      i18n.translate('xpack.canvas.argFormArgSimpleForm.requiredTooltip', {
+        defaultMessage: 'This argument is required, you should specify a value.',
+      }),
+  },
+  ArgFormPendingArgValue: {
+    getLoadingMessage: () =>
+      i18n.translate('xpack.canvas.argFormPendingArgValue.loadingMessage', {
+        defaultMessage: 'Loading',
+      }),
+  },
+  ArgFormSimpleFailure: {
+    getFailureTooltip: () =>
+      i18n.translate('xpack.canvas.argFormSimpleFailure.failureTooltip', {
+        defaultMessage:
+          'The interface for this argument could not parse the value, so a fallback input is being used',
+      }),
+  },
   Asset: {
     getCopyAssetTooltip: () =>
       i18n.translate('xpack.canvas.asset.copyAssetTooltip', {
