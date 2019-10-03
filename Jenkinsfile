@@ -60,11 +60,12 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
 def withWorkerKibanaDir(workerId, closure) {
   def workerDir = "${WORKSPACE}/kibana-${workerId}"
   dir(workerDir) {
-    sh "rsync -a ${WORKSPACE}/kibana/* . --exclude node_modules; rsync -a ${WORKSPACE}/kibana/.??* ."
-    sh "cd ${WORKSPACE}/kibana; find . -type d -name node_modules -prune -print0 | xargs -0I % ln -s '${WORKSPACE}/kibana/%' '${workerDir}/%'"
+    sh "rsync -a ${WORKSPACE}/kibana/* .; rsync -a ${WORKSPACE}/kibana/.??* ."
+    // sh "rsync -a ${WORKSPACE}/kibana/* . --exclude node_modules; rsync -a ${WORKSPACE}/kibana/.??* ."
+    // sh "cd ${WORKSPACE}/kibana; find . -type d -name node_modules --exclude  -prune -print0 | xargs -0I % ln -s '${WORKSPACE}/kibana/%' '${workerDir}/%'"
 
-    sh "ls -alh ."
-    sh "ls -alh node_modules/"
+    // sh "ls -alh ."
+    // sh "ls -alh node_modules/"
 
     try {
       closure()
