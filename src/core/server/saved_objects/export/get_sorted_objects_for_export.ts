@@ -33,6 +33,7 @@ export interface SavedObjectsExportOptions {
     id: string;
     type: string;
   }>;
+  search?: string;
   savedObjectsClient: SavedObjectsClientContract;
   exportSizeLimit: number;
   includeReferencesDeep?: boolean;
@@ -42,12 +43,14 @@ export interface SavedObjectsExportOptions {
 async function fetchObjectsToExport({
   objects,
   types,
+  search,
   exportSizeLimit,
   savedObjectsClient,
   namespace,
 }: {
   objects?: SavedObjectsExportOptions['objects'];
   types?: string[];
+  search?: string;
   exportSizeLimit: number;
   savedObjectsClient: SavedObjectsClientContract;
   namespace?: string;
@@ -55,6 +58,9 @@ async function fetchObjectsToExport({
   if (objects && objects.length > 0) {
     if (objects.length > exportSizeLimit) {
       throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
+    }
+    if (typeof search === 'string') {
+      throw Boom.badRequest(`Can't specify both "search" and "objects" properties when exporting`);
     }
     const bulkGetResult = await savedObjectsClient.bulkGet(objects, { namespace });
     const erroredObjects = bulkGetResult.saved_objects.filter(obj => !!obj.error);
@@ -69,6 +75,7 @@ async function fetchObjectsToExport({
   } else if (types && types.length > 0) {
     const findResponse = await savedObjectsClient.find({
       type: types,
+      search,
       sortField: '_id',
       sortOrder: 'asc',
       perPage: exportSizeLimit,
@@ -86,6 +93,7 @@ async function fetchObjectsToExport({
 export async function getSortedObjectsForExport({
   types,
   objects,
+  search,
   savedObjectsClient,
   exportSizeLimit,
   includeReferencesDeep = false,
@@ -94,6 +102,7 @@ export async function getSortedObjectsForExport({
   const objectsToExport = await fetchObjectsToExport({
     types,
     objects,
+    search,
     savedObjectsClient,
     exportSizeLimit,
     namespace,
