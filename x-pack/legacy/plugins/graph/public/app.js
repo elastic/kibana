@@ -66,6 +66,7 @@ import { urlTemplateRegex } from  './helpers/url_template';
 import {
   asAngularSyncedObservable,
 } from './helpers/as_observable';
+import { fetchTopNodes } from './services/fetch_top_nodes';
 import {
   createGraphStore,
   loadFields,
@@ -111,6 +112,8 @@ app.directive('graphApp', function (reactDirective) {
   return reactDirective(GraphApp, [
     ['state', { watchDepth: 'reference' }],
     ['dispatch', { watchDepth: 'reference' }],
+    ['onFillWorkspace', { watchDepth: 'reference' }],
+    ['isInitialized', { watchDepth: 'reference' }],
     ['currentIndexPattern', { watchDepth: 'reference' }],
     ['isLoading', { watchDepth: 'reference' }],
     ['onIndexPatternSelected', { watchDepth: 'reference' }],
@@ -440,6 +443,30 @@ app.controller('graphuiPlugin', function (
       .finally(() => {
         $scope.loading = false;
       });
+  };
+
+  $scope.fillWorkspace = async () => {
+    try {
+      const fields = selectedFieldsSelector(store.getState());
+      const topTermNodes = await fetchTopNodes(
+        npStart.core.http.post,
+        $scope.selectedIndex.title,
+        fields
+      );
+      initWorkspaceIfRequired();
+      $scope.workspace.mergeGraph({
+        nodes: topTermNodes,
+        edges: []
+      });
+      $scope.workspace.fillInGraph(fields.length * 10);
+    } catch (e) {
+      toastNotifications.addDanger({
+        title: i18n.translate(
+          'xpack.graph.fillWorkspaceError',
+          { defaultMessage: 'Fetching top terms failed: {message}', values: { message: e.message } }
+        ),
+      });
+    }
   };
 
   $scope.submit = function (searchTerm) {
@@ -846,9 +873,6 @@ app.controller('graphuiPlugin', function (
   } else {
     $route.current.locals.SavedWorkspacesProvider.get().then(function (newWorkspace) {
       $scope.savedWorkspace = newWorkspace;
-      openSourceModal(npStart.core, indexPattern => {
-        $scope.indexSelected(indexPattern);
-      });
     });
   }
 

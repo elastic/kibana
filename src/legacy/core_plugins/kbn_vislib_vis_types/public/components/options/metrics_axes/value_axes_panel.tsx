@@ -109,12 +109,12 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
       <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="baseline">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h2>
+            <h3>
               <FormattedMessage
                 id="kbnVislibVisTypes.controls.pointSeries.valueAxes.yAxisTitle"
                 defaultMessage="Y-axes"
               />
-            </h2>
+            </h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

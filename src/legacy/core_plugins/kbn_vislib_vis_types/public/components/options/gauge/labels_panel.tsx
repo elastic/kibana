@@ -29,12 +29,12 @@ function LabelsPanel({ stateParams, setValue, setGaugeValue }: GaugeOptionsInter
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
-        <h2>
+        <h3>
           <FormattedMessage
             id="kbnVislibVisTypes.controls.gaugeOptions.labelsTitle"
             defaultMessage="Labels"
           />
-        </h2>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
 

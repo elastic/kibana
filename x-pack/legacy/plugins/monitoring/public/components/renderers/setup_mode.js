@@ -3,10 +3,28 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
-import { getSetupModeState, initSetupModeState, updateSetupModeData, disableElasticsearchInternalCollection } from '../../lib/setup_mode';
+import React, { Fragment } from 'react';
+import {
+  getSetupModeState,
+  initSetupModeState,
+  updateSetupModeData,
+  disableElasticsearchInternalCollection,
+  toggleSetupMode,
+  setSetupModeMenuItem
+} from '../../lib/setup_mode';
 import { Flyout } from '../metricbeat_migration/flyout';
+import {
+  EuiBottomBar,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTextColor,
+  EuiIcon,
+  EuiSpacer
+} from '@elastic/eui';
 import { findNewUuid } from './lib/find_new_uuid';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class SetupModeRenderer extends React.Component {
   state = {
@@ -44,6 +62,7 @@ export class SetupModeRenderer extends React.Component {
 
       this.setState(newState);
     });
+    setSetupModeMenuItem();
   }
 
   reset() {
@@ -97,6 +116,50 @@ export class SetupModeRenderer extends React.Component {
     );
   }
 
+  getBottomBar(setupModeState) {
+    if (!setupModeState.enabled) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <EuiSpacer size="xxl"/>
+        <EuiBottomBar>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiTextColor color="ghost">
+                    <FormattedMessage
+                      id="xpack.monitoring.setupMode.description"
+                      defaultMessage="You are in setup mode. The ({flagIcon}) icon indicates configuration options."
+                      values={{
+                        flagIcon: (
+                          <EuiIcon type="flag"/>
+                        )
+                      }}
+                    />
+                  </EuiTextColor>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButton color="danger" fill size="s" onClick={() => toggleSetupMode(false)}>
+                    {i18n.translate('xpack.monitoring.setupMode.exit', {
+                      defaultMessage: `Exit setup mode`
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiBottomBar>
+      </Fragment>
+    );
+  }
+
   async shortcutToFinishMigration() {
     await disableElasticsearchInternalCollection();
     await updateSetupModeData();
@@ -130,6 +193,7 @@ export class SetupModeRenderer extends React.Component {
         closeFlyout: () => this.setState({ isFlyoutOpen: false }),
       },
       flyoutComponent: this.getFlyout(data, meta),
+      bottomBarComponent: this.getBottomBar(setupModeState)
     });
   }
 }
