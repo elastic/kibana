@@ -6,7 +6,16 @@
 
 import { sortBy } from 'lodash';
 
-import { SnapshotDetails, SnapshotDetailsEs, SnapshotConfig, SnapshotConfigEs } from '../types';
+import {
+  SnapshotDetails,
+  SnapshotDetailsEs,
+  SnapshotConfig,
+  SnapshotConfigEs,
+  SnapshotRetention,
+  SnapshotRetentionEs,
+} from '../types';
+
+import { deserializeTime, serializeTime } from './time_serialization';
 
 export function deserializeSnapshotDetails(
   repository: string,
@@ -127,4 +136,69 @@ export function serializeSnapshotConfig(snapshotConfig: SnapshotConfig): Snapsho
     }
     return config;
   }, {});
+}
+
+export function deserializeSnapshotRetention(
+  snapshotRetentionEs: SnapshotRetentionEs
+): SnapshotRetention {
+  const {
+    expire_after: expireAfter,
+    max_count: maxCount,
+    min_count: minCount,
+  } = snapshotRetentionEs;
+
+  let expireAfterValue;
+  let expireAfterUnit;
+
+  if (expireAfter) {
+    const { timeValue, timeUnit } = deserializeTime(expireAfter);
+
+    if (timeValue && timeUnit) {
+      expireAfterValue = timeValue;
+      expireAfterUnit = timeUnit;
+    }
+  }
+
+  const snapshotRetention: SnapshotRetention = {
+    expireAfterValue,
+    expireAfterUnit,
+    maxCount,
+    minCount,
+  };
+
+  return Object.entries(snapshotRetention).reduce((retention: any, [key, value]) => {
+    if (value !== undefined) {
+      retention[key] = value;
+    }
+    return retention;
+  }, {});
+}
+
+export function serializeSnapshotRetention(
+  snapshotRetention: SnapshotRetention
+): SnapshotRetentionEs | undefined {
+  const { expireAfterValue, expireAfterUnit, minCount, maxCount } = snapshotRetention;
+
+  const snapshotRetentionEs: SnapshotRetentionEs = {
+    expire_after:
+      expireAfterValue && expireAfterUnit
+        ? serializeTime(expireAfterValue, expireAfterUnit)
+        : undefined,
+    min_count: !minCount ? undefined : minCount,
+    max_count: !maxCount ? undefined : maxCount,
+  };
+
+  const flattenedSnapshotRetentionEs = Object.entries(snapshotRetentionEs).reduce(
+    (retention: any, [key, value]) => {
+      if (value !== undefined) {
+        retention[key] = value;
+      }
+      return retention;
+    },
+    {}
+  );
+
+  return Object.entries(flattenedSnapshotRetentionEs).length
+    ? flattenedSnapshotRetentionEs
+    : undefined;
 }

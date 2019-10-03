@@ -252,14 +252,21 @@ export class WebElementWrapper {
    * @default { charByChar: false }
    */
   async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }) {
-    if (options.charByChar === true || this.browserType === Browsers.InternetExplorer) {
+    if (this.browserType === Browsers.InternetExplorer) {
       const value = await this.getAttribute('value');
       // For IE testing, the text field gets clicked in the middle so
       // first go HOME and then DELETE all chars
       await this.pressKeys(this.Keys.HOME);
       for (let i = 0; i <= value.length; i++) {
         await this.pressKeys(this.Keys.DELETE);
-        // await delay(10);
+      }
+      return;
+    }
+    if (options.charByChar === true) {
+      const value = await this.getAttribute('value');
+      for (let i = 0; i <= value.length; i++) {
+        await this.pressKeys(this.Keys.BACK_SPACE);
+        await delay(100);
       }
     } else {
       if (this.browserType === Browsers.Chrome) {

@@ -102,6 +102,12 @@ export class IndexPatterns {
       indexPatternCache.clearAll();
     }
   };
+  getCache = async () => {
+    if (!this.savedObjectsCache) {
+      await this.refreshSavedObjectsCache();
+    }
+    return this.savedObjectsCache;
+  };
 
   getDefault = async () => {
     const defaultIndexPatternId = this.config.get('defaultIndex');

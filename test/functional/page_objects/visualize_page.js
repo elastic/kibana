@@ -725,12 +725,6 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async saveVisualizationExpectSuccess(vizName, { saveAsNew = false } = {}) {
       await this.saveVisualization(vizName, { saveAsNew });
-      // let toasts = await testSubjects.find('globalToastList');
-      // console.log(`toasts = ${await toasts.getAttribute('innerHTML')}`);
-      // await PageObjects.common.sleep(1000);
-      // toasts = await testSubjects.find('globalToastList');
-      // console.log(`toasts = ${await toasts.getAttribute('innerHTML')}`);
-
       const successToast = await testSubjects.exists('saveVisualizationSuccess', {
         timeout: defaultFindTimeout
       });
@@ -841,9 +835,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       // by a bunch of 'L'ines from that point to the next.  Those points are
       // the values we're going to use to calculate the data values we're testing.
       // So git rid of the one 'M' and split the rest on the 'L's.
-      // const tempArray = data.replace('M', '').replace(/\s*/g,'').split('L');
       const tempArray = data.replace('M ', '').replace('M', '').replace(/ L /g, 'L').replace(/ /g, ',').split('L');
-      log.debug(tempArray.toString());
       const chartSections = tempArray.length / 2;
       // log.debug('chartSections = ' + chartSections + ' height = ' + yAxisHeight + ' yAxisLabel = ' + yAxisLabel);
       const chartData = [];
