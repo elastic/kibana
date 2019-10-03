@@ -38,5 +38,5 @@ export function addItemToRecentlyAccessed(page: string, itemId: string, url: str
 
   url = `ml#/${page}/${url}`;
 
-  recentlyAccessed.add(url, `ML - ${itemId} - ${pageLabel}`, id);
+  npStart.core.chrome.recentlyAccessed.add(url, `ML - ${itemId} - ${pageLabel}`, id);
 }
