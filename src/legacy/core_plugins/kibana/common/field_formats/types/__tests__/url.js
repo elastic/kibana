@@ -189,5 +189,29 @@ describe('UrlFormat', function () {
       expect(converter('../foo/bar', null, null, parsedUrl))
         .to.be('<span ng-non-bindable><a href="http://kibana.host.com/nbc/app/../foo/bar" target="_blank" rel="noopener noreferrer">../foo/bar</a></span>');
     });
+
+    it('should support multiple types of urls w/o basePath', function () {
+      const url = new UrlFormat();
+      const parsedUrl = {
+        origin: 'http://kibana.host.com',
+        pathname: '/app/kibana',
+      };
+      const converter = url.getConverterFor('html');
+
+      expect(converter('10.22.55.66', null, null, parsedUrl))
+        .to.be('<span ng-non-bindable><a href="http://kibana.host.com/app/10.22.55.66" target="_blank" rel="noopener noreferrer">10.22.55.66</a></span>');
+
+      expect(converter('http://www.domain.name/app/kibana#/dashboard/', null, null, parsedUrl))
+        .to.be('<span ng-non-bindable><a href="http://www.domain.name/app/kibana#/dashboard/" target="_blank" rel="noopener noreferrer">http://www.domain.name/app/kibana#/dashboard/</a></span>');
+
+      expect(converter('/app/kibana', null, null, parsedUrl))
+        .to.be('<span ng-non-bindable><a href="http://kibana.host.com/app/kibana" target="_blank" rel="noopener noreferrer">/app/kibana</a></span>');
+
+      expect(converter('kibana#/dashboard/', null, null, parsedUrl))
+        .to.be('<span ng-non-bindable><a href="http://kibana.host.com/app/kibana#/dashboard/" target="_blank" rel="noopener noreferrer">kibana#/dashboard/</a></span>');
+
+      expect(converter('#/dashboard/', null, null, parsedUrl))
+        .to.be('<span ng-non-bindable><a href="http://kibana.host.com/app/kibana#/dashboard/" target="_blank" rel="noopener noreferrer">#/dashboard/</a></span>');
+    });
   });
 });

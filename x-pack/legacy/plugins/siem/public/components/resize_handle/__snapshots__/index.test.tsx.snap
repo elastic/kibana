@@ -4,7 +4,7 @@ exports[`Resizeable it renders 1`] = `
 <Component>
   <Resizeable
     handle={
-      <CellResizeHandle
+      <CommonResizeHandle
         data-test-subj="test-resize-handle"
       />
     }

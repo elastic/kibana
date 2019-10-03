@@ -95,6 +95,7 @@ const cspRules = (settings, log) => {
 
 const deprecations = [
   //server
+  rename('server.defaultRoute', 'uiSettings.overrides.defaultRoute'),
   unused('server.xsrf.token'),
   unused('uiSettings.enabled'),
   rename('optimize.lazy', 'optimize.watch'),
