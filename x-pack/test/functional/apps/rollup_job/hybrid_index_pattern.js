@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }) {
 
   const log = getService('log');
   const es = getService('es');
+  const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['security', 'rollup', 'common', 'indexManagement', 'settings', 'discover']);
 
@@ -97,10 +98,10 @@ export default function ({ getService, getPageObjects }) {
 
     after(async () => {
 
-      //TODO: Find way to remove index pattern that was created in the test. Need a reliable way to get the ID.
       await es.indices.delete({ index: 'rollup*' });
       await es.indices.delete({ index: 'live*' });
       await es.indices.delete({ index: 'live*,rollup-to-be*' });
+      await esArchiver.load('empty_kibana');
     });
   });
 }
