@@ -18,11 +18,16 @@ import { FIELD_TYPES_OPTIONS } from '../../../constants';
 import { useDispatch } from '../../../mappings_state';
 import { Property } from '../../../types';
 
+const formWrapper = (props: any) => <form {...props} />;
+
 export const CreateProperty = () => {
   const { form } = useForm<Property>();
   const dispatch = useDispatch();
 
-  const saveProperty = async () => {
+  const submitForm = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
     const { isValid, data } = await form.submit();
     if (isValid) {
       dispatch({ type: 'property.add', value: data });
@@ -35,7 +40,7 @@ export const CreateProperty = () => {
   };
 
   return (
-    <Form form={form} style={{ padding: '20px 0' }}>
+    <Form form={form} style={{ padding: '20px 0' }} FormWrapper={formWrapper} onSubmit={submitForm}>
       <EuiFlexGroup>
         <EuiFlexItem>
           <UseField
@@ -57,10 +62,12 @@ export const CreateProperty = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton onClick={saveProperty}>Save</EuiButton>
+          <EuiButton onClick={submitForm} type="submit">
+            Save
+          </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton onClick={cancel}>Cancel</EuiButton>
+          <EuiButton onClick={cancel}>Done</EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </Form>
