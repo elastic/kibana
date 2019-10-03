@@ -11,7 +11,7 @@ import { createApmQuery } from './create_apm_query';
 import { calculateRate } from '../calculate_rate';
 import { getDiffCalculation } from './_apm_stats';
 
-export function handleResponse(response, start, end) {
+export function handleResponse(response) {
   const hits = get(response, 'hits.hits', []);
   const initial = { ids: new Set(), beats: [] };
   const { beats } = hits.reduce((accum, hit) => {
@@ -30,9 +30,7 @@ export function handleResponse(response, start, end) {
     //  add the beat
     const rateOptions = {
       hitTimestamp: get(stats, 'timestamp'),
-      earliestHitTimestamp: get(earliestStats, 'timestamp'),
-      timeWindowMin: start,
-      timeWindowMax: end
+      earliestHitTimestamp: get(earliestStats, 'timestamp')
     };
 
     const { rate: bytesSentRate } = calculateRate({
@@ -136,5 +134,5 @@ export async function getApms(req, apmIndexPattern, clusterUuid) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
 
-  return handleResponse(response, start, end);
+  return handleResponse(response);
 }

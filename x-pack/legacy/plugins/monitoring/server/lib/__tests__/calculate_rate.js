@@ -14,27 +14,12 @@ describe('Calculate Rate', () => {
     expect(isEstimate).to.be(false);
   });
 
-  it('returns null when time window size is 0', () => {
-    const { rate, isEstimate } = calculateRate({
-      hitTimestamp: '2017-08-08T18:33:04.501Z',
-      earliestHitTimestamp: '2017-08-08T17:33:04.501Z',
-      latestTotal: 24924,
-      earliestTotal: 18945,
-      timeWindowMin: '2017-08-08T17:33:04.501Z',
-      timeWindowMax: '2017-08-08T17:33:04.501Z' // max === min
-    });
-    expect(rate).to.be(null);
-    expect(isEstimate).to.be(false);
-  });
-
   it('returns null when time between latest hit and earliest hit 0', () => {
     const { rate, isEstimate } = calculateRate({
       hitTimestamp: '2017-08-08T18:33:04.501Z',
       earliestHitTimestamp: '2017-08-08T18:33:04.501Z', // latest === earliest
       latestTotal: 24924,
-      earliestTotal: 18945,
-      timeWindowMin: '2017-08-08T17:33:04.501Z',
-      timeWindowMax: '2017-08-08T18:33:04.501Z'
+      earliestTotal: 18945
     });
     expect(rate).to.be(null);
     expect(isEstimate).to.be(false);
@@ -45,24 +30,9 @@ describe('Calculate Rate', () => {
       hitTimestamp: '2017-08-08T18:33:04.501Z',
       earliestHitTimestamp: '2017-08-08T17:33:04.501Z',
       latestTotal: 24924,
-      earliestTotal: 18945,
-      timeWindowMin: '2017-08-08T17:33:04.501Z',
-      timeWindowMax: '2017-08-08T18:33:04.501Z'
+      earliestTotal: 18945
     });
     expect(rate).to.be(1.6608333333333334);
-    expect(isEstimate).to.be(false);
-  });
-
-  it('calculates a rate using data time bounds, not just time picker time bounds', () => {
-    const { rate, isEstimate } = calculateRate({
-      hitTimestamp: '2017-08-08T18:33:04.501Z',
-      earliestHitTimestamp: '2017-08-08T18:03:04.501Z',
-      latestTotal: 24924,
-      earliestTotal: 18945,
-      timeWindowMin: '2017-08-08T17:33:04.501Z',
-      timeWindowMax: '2017-08-08T18:33:04.501Z'
-    });
-    expect(rate).to.be(3.321);
     expect(isEstimate).to.be(false);
   });
 
@@ -71,9 +41,7 @@ describe('Calculate Rate', () => {
       hitTimestamp: '2017-08-08T18:33:04.501Z',
       earliestHitTimestamp: '2017-08-08T17:33:04.501Z',
       latestTotal: 18945,
-      earliestTotal: 18945,
-      timeWindowMin: '2017-08-08T17:33:04.501Z',
-      timeWindowMax: '2017-08-08T18:33:04.501Z'
+      earliestTotal: 18945
     });
     expect(rate).to.be(0);
     expect(isEstimate).to.be(false);
@@ -84,9 +52,7 @@ describe('Calculate Rate', () => {
       hitTimestamp: '2017-08-08T18:33:04.501Z',
       earliestHitTimestamp: '2017-08-08T17:33:04.501Z',
       latestTotal: 20000,
-      earliestTotal: 40000,
-      timeWindowMin: '2017-08-08T17:33:04.501Z',
-      timeWindowMax: '2017-08-08T18:33:04.501Z'
+      earliestTotal: 40000
     });
     expect(rate).to.be(5.555555555555555);
     expect(isEstimate).to.be(true);

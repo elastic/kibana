@@ -12,7 +12,7 @@ import { calculateRate } from '../../calculate_rate';
 import { getUnassignedShards } from '../shards';
 import { i18n } from '@kbn/i18n';
 
-export function handleResponse(resp, min, max, shardStats) {
+export function handleResponse(resp, shardStats) {
   // map the hits
   const hits = get(resp, 'hits.hits', []);
   return hits.map(hit => {
@@ -21,9 +21,7 @@ export function handleResponse(resp, min, max, shardStats) {
 
     const rateOptions = {
       hitTimestamp: get(hit, '_source.timestamp'),
-      earliestHitTimestamp: get(hit, 'inner_hits.earliest.hits.hits[0]._source.timestamp'),
-      timeWindowMin: min,
-      timeWindowMax: max
+      earliestHitTimestamp: get(hit, 'inner_hits.earliest.hits.hits[0]._source.timestamp')
     };
 
     const earliestIndexingHit = get(earliestStats, 'primaries.indexing');
@@ -138,5 +136,5 @@ export function getIndices(req, esIndexPattern, showSystemIndices = false, shard
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params)
-    .then(resp => handleResponse(resp, min, max, shardStats));
+    .then(resp => handleResponse(resp, shardStats));
 }
