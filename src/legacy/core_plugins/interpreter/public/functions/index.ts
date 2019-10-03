@@ -17,20 +17,22 @@
  * under the License.
  */
 
-// @ts-ignore
-import { functionWrapper } from '../../interpreter/test_helpers';
-import { createMarkdownVisFn } from './markdown_fn';
+import { clog } from './clog';
+import { esaggs } from './esaggs';
+import { font } from './font';
+import { kibana } from './kibana';
+import { kibanaContext } from './kibana_context';
+import { range } from './range';
+import { visualization } from './visualization';
+import { visDimension } from './vis_dimension';
 
-describe('interpreter/functions#markdown', () => {
-  const fn = functionWrapper(createMarkdownVisFn);
-  const args = {
-    font: { spec: { fontSize: 12 } },
-    openLinksInNewTab: true,
-    markdown: '## hello _markdown_',
-  };
-
-  it('returns an object with the correct structure', async () => {
-    const actual = await fn(undefined, args, undefined);
-    expect(actual).toMatchSnapshot();
-  });
-});
+export const functions = [
+  clog,
+  esaggs,
+  font,
+  kibana,
+  kibanaContext,
+  range,
+  visualization,
+  visDimension,
+];

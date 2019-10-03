@@ -14,6 +14,7 @@ import { reset } from './global';
 import { loadFields } from './fields';
 import { mapFields } from '../services/persistence';
 import { settingsSelector } from './advanced_settings';
+import { createSelector } from 'reselect';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/datasource');
 
@@ -69,6 +70,7 @@ export const datasourceReducer = reducerWithInitialState<DatasourceState>(initia
   .build();
 
 export const datasourceSelector = (state: GraphState) => state.datasource;
+export const hasDatasourceSelector = createSelector(datasourceSelector, (datasource) => datasource.current.type !== 'none');
 
 /**
  * Saga loading field information when the datasource is switched. This will overwrite current settings

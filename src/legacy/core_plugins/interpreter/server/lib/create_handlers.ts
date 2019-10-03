@@ -17,20 +17,16 @@
  * under the License.
  */
 
-// @ts-ignore
-import { functionWrapper } from '../../interpreter/test_helpers';
-import { createMarkdownVisFn } from './markdown_fn';
+export const createHandlers = (request: any, server: any) => {
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+  const config = server.config();
 
-describe('interpreter/functions#markdown', () => {
-  const fn = functionWrapper(createMarkdownVisFn);
-  const args = {
-    font: { spec: { fontSize: 12 } },
-    openLinksInNewTab: true,
-    markdown: '## hello _markdown_',
+  return {
+    environment: 'server',
+    serverUri:
+      config.has('server.rewriteBasePath') && config.get('server.rewriteBasePath')
+        ? `${server.info.uri}${config.get('server.basePath')}`
+        : server.info.uri,
+    elasticsearchClient: async (...args: any) => callWithRequest(request, ...args),
   };
-
-  it('returns an object with the correct structure', async () => {
-    const actual = await fn(undefined, args, undefined);
-    expect(actual).toMatchSnapshot();
-  });
-});
+};

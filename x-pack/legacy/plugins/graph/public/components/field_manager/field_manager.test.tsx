@@ -21,6 +21,7 @@ describe('field_manager', () => {
   let instance: ShallowWrapper;
   let getInstance: () => ShallowWrapper;
   let dispatchSpy: jest.Mock;
+  let openSpy: jest.Mock;
 
   beforeEach(() => {
     store = createMockGraphStore({ includeSagas: false }).store;
@@ -59,7 +60,7 @@ describe('field_manager', () => {
 
     instance = shallow(
       <Provider store={store}>
-        <FieldManager />
+        <FieldManager pickerOpen={false} setPickerOpen={openSpy} />
       </Provider>
     );
 
@@ -92,10 +93,18 @@ describe('field_manager', () => {
       .dive();
 
     act(() => {
-      (fieldPicker.find(EuiPopover).prop('button')! as ReactElement).props.onClick();
+      (instance
+        .find(FieldPicker)
+        .dive()
+        .find(EuiPopover)
+        .prop('button')! as ReactElement).props.onClick();
     });
 
-    fieldPicker.update();
+    expect(openSpy).toHaveBeenCalled();
+
+    instance.setProps({ pickerOpen: true });
+
+    const fieldPicker = instance.find(FieldPicker).dive();
 
     expect(
       fieldPicker

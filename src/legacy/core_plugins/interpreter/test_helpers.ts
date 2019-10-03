@@ -17,20 +17,13 @@
  * under the License.
  */
 
-// @ts-ignore
-import { functionWrapper } from '../../interpreter/test_helpers';
-import { createMarkdownVisFn } from './markdown_fn';
+import { mapValues } from 'lodash';
 
-describe('interpreter/functions#markdown', () => {
-  const fn = functionWrapper(createMarkdownVisFn);
-  const args = {
-    font: { spec: { fontSize: 12 } },
-    openLinksInNewTab: true,
-    markdown: '## hello _markdown_',
-  };
-
-  it('returns an object with the correct structure', async () => {
-    const actual = await fn(undefined, args, undefined);
-    expect(actual).toMatchSnapshot();
-  });
-});
+// Takes a function spec and passes in default args,
+// overriding with any provided args.
+export const functionWrapper = (fnSpec: any) => {
+  const spec = fnSpec();
+  const defaultArgs = mapValues(spec.args, argSpec => argSpec.default);
+  return (context: any, args: any, handlers: any) =>
+    spec.fn(context, { ...defaultArgs, ...args }, handlers);
+};

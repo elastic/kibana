@@ -56,6 +56,7 @@ import { urlTemplateRegex } from  './helpers/url_template';
 import {
   asAngularSyncedObservable,
 } from './helpers/as_observable';
+import { fetchTopNodes } from './services/fetch_top_nodes';
 import {
   createGraphStore,
   requestDatasource,
@@ -99,6 +100,8 @@ app.directive('graphListing', function (reactDirective) {
 app.directive('graphApp', function (reactDirective) {
   return reactDirective(GraphApp, [
     ['store', { watchDepth: 'reference' }],
+    ['onFillWorkspace', { watchDepth: 'reference' }],
+    ['isInitialized', { watchDepth: 'reference' }],
     ['currentIndexPattern', { watchDepth: 'reference' }],
     ['indexPatternProvider', { watchDepth: 'reference' }],
     ['isLoading', { watchDepth: 'reference' }],
@@ -380,6 +383,30 @@ app.controller('graphuiPlugin', function (
   };
 
 
+  $scope.fillWorkspace = async () => {
+    try {
+      const fields = selectedFieldsSelector(store.getState());
+      const topTermNodes = await fetchTopNodes(
+        npStart.core.http.post,
+        $scope.selectedIndex.title,
+        fields
+      );
+      initWorkspaceIfRequired();
+      $scope.workspace.mergeGraph({
+        nodes: topTermNodes,
+        edges: []
+      });
+      $scope.workspace.fillInGraph(fields.length * 10);
+    } catch (e) {
+      toastNotifications.addDanger({
+        title: i18n.translate(
+          'xpack.graph.fillWorkspaceError',
+          { defaultMessage: 'Fetching top terms failed: {message}', values: { message: e.message } }
+        ),
+      });
+    }
+  };
+
   $scope.submit = function (searchTerm) {
     const numHops = 2;
     if (searchTerm.startsWith('{')) {
@@ -591,6 +618,7 @@ app.controller('graphuiPlugin', function (
       payload: $route.current.locals.savedWorkspace,
     });
   } else {
+<<<<<<< HEAD
     const managementUrl = npStart.core.chrome.navLinks.get('kibana:management').url;
     const url = `${managementUrl}/kibana/index_patterns`;
 
@@ -618,6 +646,12 @@ app.controller('graphuiPlugin', function (
           </p>
         ),
       });
+=======
+    $route.current.locals.SavedWorkspacesProvider.get().then(function (newWorkspace) {
+      $scope.savedWorkspace = newWorkspace;
+    });
+  }
+>>>>>>> upstream/master
 
       return;
     }

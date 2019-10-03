@@ -9,7 +9,6 @@ import React, { useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
-import { I18nProvider } from '@kbn/i18n/react';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { IDataPluginServices } from 'src/legacy/core_plugins/data/public/types';
 import { IndexPatternSavedObject, IndexPatternProvider } from '../types';
@@ -84,74 +83,67 @@ export function SearchBarComponent(props: SearchBarProps) {
   }, [currentDatasource]);
 
   const kibana = useKibana<IDataPluginServices>();
-  const { overlays, uiSettings, savedObjects } = kibana.services;
+  const { overlays, savedObjects, uiSettings } = kibana.services;
   if (!overlays) return null;
 
   return (
-    <I18nProvider>
-      <form
-        className="gphSearchBar"
-        onSubmit={e => {
-          e.preventDefault();
-          if (!isLoading && currentIndexPattern) {
-            onQuerySubmit(queryToString(query, currentIndexPattern));
-          }
-        }}
-      >
-        <EuiFlexGroup gutterSize="m">
-          <EuiFlexItem>
-            <QueryBarInput
-              disableAutoFocus
-              bubbleSubmitEvent
-              query={query}
-              indexPatterns={currentIndexPattern ? [currentIndexPattern] : []}
-              placeholder={i18n.translate('xpack.graph.bar.searchFieldPlaceholder', {
-                defaultMessage: 'Search your data and add to your graph',
-              })}
-              prepend={
-                <EuiToolTip
-                  content={i18n.translate('xpack.graph.bar.pickSourceTooltip', {
-                    defaultMessage: 'Click here to pick another data source',
-                  })}
+    <form
+      onSubmit={e => {
+        e.preventDefault();
+        if (!isLoading && currentIndexPattern) {
+          onQuerySubmit(queryToString(query, currentIndexPattern));
+        }
+      }}
+    >
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem>
+          <QueryBarInput
+            disableAutoFocus
+            bubbleSubmitEvent
+            indexPatterns={currentIndexPattern ? [currentIndexPattern] : []}
+            placeholder={i18n.translate('xpack.graph.bar.searchFieldPlaceholder', {
+              defaultMessage: 'Search your data and add to your graph',
+            })}
+            query={query}
+            prepend={
+              <EuiToolTip
+                content={i18n.translate('xpack.graph.bar.pickSourceTooltip', {
+                  defaultMessage: 'Click here to pick another data source',
+                })}
+              >
+                <EuiButtonEmpty
+                  size="xs"
+                  className="gphSearchBar__datasourceButton"
+                  data-test-subj="graphDatasourceButton"
+                  onClick={() => {
+                    confirmWipeWorkspace(() =>
+                      openSourceModal(
+                        { overlays, savedObjects, uiSettings },
+                        onIndexPatternSelected
+                      )
+                    );
+                  }}
                 >
-                  <EuiButtonEmpty
-                    size="xs"
-                    className="gphSearchBar__datasourceButton"
-                    data-test-subj="graphDatasourceButton"
-                    onClick={() => {
-                      confirmWipeWorkspace(() => {
-                        openSourceModal(
-                          {
-                            overlays,
-                            savedObjects,
-                            uiSettings,
-                          },
-                          onIndexPatternSelected
-                        );
-                      });
-                    }}
-                  >
-                    {currentIndexPattern
-                      ? currentIndexPattern.title
-                      : // This branch will be shown if the user exits the
-                        // initial picker modal
-                        i18n.translate('xpack.graph.bar.pickSourceLabel', {
-                          defaultMessage: 'Click here to pick a data source',
-                        })}
-                  </EuiButtonEmpty>
-                </EuiToolTip>
-              }
-              onChange={setQuery}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton fill type="submit" disabled={isLoading || !currentIndexPattern}>
-              {i18n.translate('xpack.graph.bar.exploreLabel', { defaultMessage: 'Explore' })}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </form>
-    </I18nProvider>
+                  {currentIndexPattern
+                    ? currentIndexPattern.title
+                    : // This branch will be shown if the user exits the
+                      // initial picker modal
+                      i18n.translate('xpack.graph.bar.pickSourceLabel', {
+                        defaultMessage: 'Click here to pick a data source',
+                      })}
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            }
+            onChange={setQuery}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton fill type="submit" disabled={isLoading || !currentIndexPattern}>
+            {i18n.translate('xpack.graph.bar.exploreLabel', { defaultMessage: 'Explore' })}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </form>
   );
 }
 

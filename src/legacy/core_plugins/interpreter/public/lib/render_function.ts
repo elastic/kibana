@@ -17,20 +17,26 @@
  * under the License.
  */
 
-// @ts-ignore
-import { functionWrapper } from '../../interpreter/test_helpers';
-import { createMarkdownVisFn } from './markdown_fn';
+export function RenderFunction(this: any, config: any) {
+  // This must match the name of the function that is used to create the `type: render` object
+  this.name = config.name;
 
-describe('interpreter/functions#markdown', () => {
-  const fn = functionWrapper(createMarkdownVisFn);
-  const args = {
-    font: { spec: { fontSize: 12 } },
-    openLinksInNewTab: true,
-    markdown: '## hello _markdown_',
-  };
+  // Use this to set a more friendly name
+  this.displayName = config.displayName || this.name;
 
-  it('returns an object with the correct structure', async () => {
-    const actual = await fn(undefined, args, undefined);
-    expect(actual).toMatchSnapshot();
-  });
-});
+  // A sentence or few about what this element does
+  this.help = config.help;
+
+  // used to validate the data before calling the render function
+  this.validate = config.validate || function validate() {};
+
+  // tell the renderer if the dom node should be reused, it's recreated each time by default
+  this.reuseDomNode = Boolean(config.reuseDomNode);
+
+  // the function called to render the data
+  this.render =
+    config.render ||
+    function render(domNode: any, data: any, done: any) {
+      done();
+    };
+}

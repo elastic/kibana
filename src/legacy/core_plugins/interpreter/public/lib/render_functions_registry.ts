@@ -17,20 +17,13 @@
  * under the License.
  */
 
-// @ts-ignore
-import { functionWrapper } from '../../interpreter/test_helpers';
-import { createMarkdownVisFn } from './markdown_fn';
+import { Registry } from '@kbn/interpreter/common';
+import { RenderFunction } from './render_function';
 
-describe('interpreter/functions#markdown', () => {
-  const fn = functionWrapper(createMarkdownVisFn);
-  const args = {
-    font: { spec: { fontSize: 12 } },
-    openLinksInNewTab: true,
-    markdown: '## hello _markdown_',
-  };
+class RenderFunctionsRegistry extends Registry<any, any> {
+  wrapper(obj: any) {
+    return new (RenderFunction as any)(obj);
+  }
+}
 
-  it('returns an object with the correct structure', async () => {
-    const actual = await fn(undefined, args, undefined);
-    expect(actual).toMatchSnapshot();
-  });
-});
+export { RenderFunctionsRegistry };
