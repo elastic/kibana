@@ -258,7 +258,7 @@ export class TaskStore {
           bool: {
             must: [
               // Either a task with idle status and runAt <= now or
-              // status running with a retryAt <= now.
+              // status running or claiming with a retryAt <= now.
               {
                 bool: {
                   should: [
