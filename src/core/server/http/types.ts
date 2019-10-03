@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ObjectType } from '@kbn/config-schema';
+
 import { IContextProvider, IContextContainer } from '../context';
 import { RequestHandler } from './router';
 import { RequestHandlerContext } from '..';
@@ -25,9 +25,7 @@ import { RequestHandlerContext } from '..';
  * An object that handles registration of http request context providers.
  * @public
  */
-export type RequestHandlerContextContainer = IContextContainer<
-  RequestHandler<ObjectType<any>, ObjectType<any>, ObjectType<any>>
->;
+export type RequestHandlerContextContainer = IContextContainer<RequestHandler<any, any, any>>;
 
 /**
  * Context provider for request handler.
@@ -37,7 +35,4 @@ export type RequestHandlerContextContainer = IContextContainer<
  */
 export type RequestHandlerContextProvider<
   TContextName extends keyof RequestHandlerContext
-> = IContextProvider<
-  RequestHandler<ObjectType<any>, ObjectType<any>, ObjectType<any>>,
-  TContextName
->;
+> = IContextProvider<RequestHandler<any, any, any>, TContextName>;
