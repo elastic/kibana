@@ -30,7 +30,7 @@ export function createDateOnServerFormat() {
     private getConfig: Function;
     private memoizedConverter: any;
     private memoizedPattern: any;
-    private timeZone: any;
+    private timeZone: string = '';
 
     constructor(params: any, getConfig: Function) {
       super(params);

@@ -28,9 +28,9 @@ export function createDateFormat() {
     static fieldType = KBN_FIELD_TYPES.DATE;
 
     private getConfig: Function;
-    private memoizedPattern: any;
     private memoizedConverter: any;
-    private timeZone: any;
+    private memoizedPattern: any;
+    private timeZone: string = '';
 
     constructor(params: any, getConfig: Function) {
       super(params);

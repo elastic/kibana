@@ -69,9 +69,9 @@ export function createDateNanosFormat() {
     static fieldType = KBN_FIELD_TYPES.DATE;
 
     private getConfig: Function;
-    private timeZone: any;
     private memoizedConverter: any;
     private memoizedPattern: any;
+    private timeZone: string = '';
 
     constructor(params: any, getConfig: Function) {
       super(params);
