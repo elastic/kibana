@@ -17,7 +17,6 @@ exports[`Transform: Transform List <TransformList /> Minimal initialization 1`] 
       ]
     }
     data-test-subj="transformNoTransformsFound"
-    iconColor="subdued"
     title={
       <h2>
         No transforms found
