@@ -27,11 +27,11 @@ import { getInspector } from '../services';
 
 export class ExpressionLoader {
   data$: Observable<Data>;
-  update$: Observable<any>;
-  render$: Observable<RenderId>;
-  events$: Observable<any>;
+  update$: ExpressionRenderHandler['update$'];
+  render$: ExpressionRenderHandler['render$'];
+  events$: ExpressionRenderHandler['events$'];
 
-  private dataHandler: ExpressionDataHandler;
+  private dataHandler?: ExpressionDataHandler;
   private renderHandler: ExpressionRenderHandler;
   private dataSubject: Subject<Data>;
   private data: Data;
@@ -58,21 +58,22 @@ export class ExpressionLoader {
     });
 
     this.execute(expression, params);
-    // @ts-ignore
-    this.dataHandler = this.dataHandler;
   }
 
   destroy() {}
 
   cancel() {
+    if (!this.dataHandler) throw new Error('dataHandler not available.');
     this.dataHandler.cancel();
   }
 
   getExpression(): string {
+    if (!this.dataHandler) throw new Error('dataHandler not available.');
     return this.dataHandler.getExpression();
   }
 
   getAst(): ExpressionAST {
+    if (!this.dataHandler) throw new Error('dataHandler not available.');
     return this.dataHandler.getAst();
   }
 
@@ -87,6 +88,7 @@ export class ExpressionLoader {
   }
 
   inspect(): Adapters {
+    if (!this.dataHandler) throw new Error('dataHandler not available.');
     return this.dataHandler.inspect();
   }
 
