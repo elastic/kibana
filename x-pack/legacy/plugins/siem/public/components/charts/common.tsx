@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import styled from 'styled-components';
+import chrome from 'ui/chrome';
 import {
   CustomSeriesColorsMap,
   DARK_THEME,
@@ -13,15 +13,16 @@ import {
   LIGHT_THEME,
   mergeWithDefaultTheme,
   PartialTheme,
+  Rendering,
+  Rotation,
   ScaleType,
   SettingSpecProps,
   TickFormatter,
-  Rotation,
-  Rendering,
 } from '@elastic/charts';
-import chrome from 'ui/chrome';
 import moment from 'moment-timezone';
+import styled from 'styled-components';
 import { DEFAULT_DATE_FORMAT_TZ, DEFAULT_DARK_MODE } from '../../../common/constants';
+
 export const defaultChartHeight = '100%';
 export const defaultChartWidth = '100%';
 const chartDefaultRotation: Rotation = 0;

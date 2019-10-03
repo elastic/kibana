@@ -79,7 +79,7 @@ export const AreaChartBaseComponent = React.memo<{
     <div style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}>
       <Chart>
         <Settings {...settings} />
-        {data.map((series: ChartSeriesData) => {
+        {data.map(series => {
           const seriesKey = series.key;
           const seriesSpecId = getSpecId(seriesKey);
           return checkIfAllTheDataInTheSeriesAreValid(series) ? (
