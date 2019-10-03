@@ -42,13 +42,15 @@ export interface PointSeriesColumn {
  */
 export type PointSeriesColumns = Record<PointSeriesColumnName, PointSeriesColumn> | {};
 
+export type PointSeriesRow = Record<string, any>;
+
 /**
  * A `PointSeries` is a unique structure that represents dots on a chart.
  */
 export interface PointSeries {
   type: typeof name;
   columns: PointSeriesColumns;
-  rows: Array<Record<string, any>>;
+  rows: PointSeriesRow[];
 }
 
 export const pointseries = (): ExpressionType<typeof name, PointSeries> => ({

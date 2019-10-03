@@ -31,3 +31,5 @@ export interface ExpressionType<Name extends string, Type, SerializedType = unde
   from?: Record<string, (ctx: any, availableTypes: Record<string, any>) => Type>;
   to?: Record<string, (type: Type, availableTypes: Record<string, any>) => unknown>;
 }
+
+export type AnyExpressionType = ExpressionType<string, any, any>;

@@ -45,3 +45,5 @@ export interface ExpressionFunction<Name extends string, Context, Arguments, Ret
 interface FunctionHandlers {
   [key: string]: (...args: any) => any;
 }
+
+export type AnyExpressionFunction = ExpressionFunction<any, any, any, any>;
