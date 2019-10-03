@@ -29,9 +29,9 @@ export class AdvancedJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.ADVANCED;
   private _richDetectors: RichDetector[] = [];
 
+  // TODO - remove constructor if it isn't needed
   constructor(indexPattern: IndexPattern, savedSearch: SavedSearch, query: object) {
     super(indexPattern, savedSearch, query);
-    this.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   }
 
   public addDetector(

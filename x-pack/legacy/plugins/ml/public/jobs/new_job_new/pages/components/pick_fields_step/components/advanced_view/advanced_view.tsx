@@ -10,6 +10,7 @@ import { EuiHorizontalRule } from '@elastic/eui';
 import { AdvancedDetectors } from './metric_selection';
 import { AdvancedDetectorsSummary } from './metric_selection_summary';
 import { AdvancedSettings } from './settings';
+import { ExtraSettings } from './extra';
 
 interface Props {
   isActive: boolean;
@@ -32,6 +33,8 @@ export const AdvancedView: FC<Props> = ({ isActive, setCanProceed }) => {
 
       {isActive === true && (
         <Fragment>
+          <ExtraSettings setIsValid={setSettingsValid} />
+          <EuiHorizontalRule margin="l" />
           <AdvancedDetectors setIsValid={setMetricValid} />
           <EuiHorizontalRule margin="l" />
           <AdvancedSettings setIsValid={setSettingsValid} />

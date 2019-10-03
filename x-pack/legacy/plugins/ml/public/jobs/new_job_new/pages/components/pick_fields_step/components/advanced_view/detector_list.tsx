@@ -6,7 +6,15 @@
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 
-import { EuiPanel, EuiFlexGrid, EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiPanel,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiButtonIcon,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator, isAdvancedJobCreator } from '../../../../../common/job_creator';
@@ -32,6 +40,12 @@ export const DetectorList: FC<Props> = ({ onEditJob, onDeleteJob }) => {
 
   return (
     <Fragment>
+      <EuiTitle size="xs">
+        <h3>Detectors</h3>
+      </EuiTitle>
+
+      <EuiSpacer size="m" />
+
       <EuiFlexGrid columns={3}>
         {detectors.map((d, i) => (
           <EuiFlexItem key={i}>

@@ -14,6 +14,7 @@ import { SingleMetricView } from './components/single_metric_view';
 import { MultiMetricView } from './components/multi_metric_view';
 import { PopulationView } from './components/population_view';
 import { AdvancedView } from './components/advanced_view';
+import { JsonEditorFlyout } from '../summary_step/components/json_editor_flyout';
 
 export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobCreator, jobCreatorUpdated, jobValidator, jobValidatorUpdated } = useContext(
@@ -30,6 +31,8 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
   useEffect(() => {
     const active =
       jobCreator.detectors.length > 0 &&
+      (jobCreator.type !== JOB_TYPE.ADVANCED ||
+        (jobCreator.type === JOB_TYPE.ADVANCED && jobValidator.modelMemoryLimit.valid)) &&
       jobValidator.bucketSpan.valid &&
       jobValidator.duplicateDetectors.valid &&
       jobValidator.validating === false;
@@ -62,7 +65,9 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
             }
             next={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
             nextActive={nextActive}
-          />
+          >
+            <JsonEditorFlyout isDisabled={false} jobCreator={jobCreator} />
+          </WizardNav>
         </Fragment>
       )}
     </Fragment>

@@ -21,7 +21,7 @@ import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { JobRunner } from '../../../common/job_runner';
 import { mlJobService } from '../../../../../services/job_service';
-import { JsonFlyout } from './json_flyout';
+import { JsonEditorFlyout } from './components/json_editor_flyout';
 import { isSingleMetricJobCreator } from '../../../common/job_creator';
 import { JobDetails } from './job_details';
 import { DetectorChart } from './detector_chart';
@@ -34,7 +34,6 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
     JobCreatorContext
   );
   const [progress, setProgress] = useState(resultsLoader.progress);
-  const [showJsonFlyout, setShowJsonFlyout] = useState(false);
   const [creatingJob, setCreatingJob] = useState(false);
   const [isValid, setIsValid] = useState(jobValidator.validationSummary.basic);
   const [jobRunner, setJobRunner] = useState<JobRunner | null>(null);
@@ -44,7 +43,6 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   }, []);
 
   async function start() {
-    setShowJsonFlyout(false);
     setCreatingJob(true);
     try {
       const jr = await jobCreator.createAndStartJob();
@@ -69,10 +67,6 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
       isSingleMetricJobCreator(jobCreator) === true ? 'timeseriesexplorer' : 'explorer'
     );
     window.open(url, '_blank');
-  }
-
-  function toggleJsonFlyout() {
-    setShowJsonFlyout(!showJsonFlyout);
   }
 
   function clickResetJob() {
@@ -125,16 +119,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
             {creatingJob === false && (
               <Fragment>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    onClick={toggleJsonFlyout}
-                    isDisabled={progress > 0}
-                    data-test-subj="mlJobWizardButtonPreviewJobJson"
-                  >
-                    <FormattedMessage
-                      id="xpack.ml.newJob.wizard.summaryStep.previewJsonButton"
-                      defaultMessage="Preview job JSON"
-                    />
-                  </EuiButtonEmpty>
+                  <JsonEditorFlyout jobCreator={jobCreator} isDisabled={progress > 0} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty onClick={convertToAdvanced}>
@@ -172,9 +157,6 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
               </Fragment>
             )}
           </EuiFlexGroup>
-          {showJsonFlyout && (
-            <JsonFlyout closeFlyout={() => setShowJsonFlyout(false)} jobCreator={jobCreator} />
-          )}
         </Fragment>
       )}
     </Fragment>

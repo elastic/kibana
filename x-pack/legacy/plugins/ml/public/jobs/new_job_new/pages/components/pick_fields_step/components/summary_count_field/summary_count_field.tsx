@@ -6,7 +6,7 @@
 
 import React, { FC, useContext, useEffect, useState } from 'react';
 
-import { InfluencersSelect } from './influencers_select';
+import { SummaryCountFieldSelect } from './summary_count_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import {
@@ -19,7 +19,7 @@ import {
 } from '../../../../../common/job_creator';
 import { Description } from './description';
 
-export const Influencers: FC = () => {
+export const SummaryCountField: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   if (
     isMultiMetricJobCreator(jc) === false &&
@@ -31,24 +31,25 @@ export const Influencers: FC = () => {
 
   const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator | AdvancedJobCreator;
   const { fields } = newJobCapsService;
-  const [influencers, setInfluencers] = useState([...jobCreator.influencers]);
+  const [summaryCountFieldName, setSummaryCountFieldName] = useState(
+    jobCreator.summaryCountFieldName
+  );
 
   useEffect(() => {
-    jobCreator.removeAllInfluencers();
-    influencers.forEach(i => jobCreator.addInfluencer(i));
+    jobCreator.summaryCountFieldName = summaryCountFieldName;
     jobCreatorUpdate();
-  }, [influencers.join()]);
+  }, [summaryCountFieldName]);
 
   useEffect(() => {
-    setInfluencers([...jobCreator.influencers]);
+    setSummaryCountFieldName(jobCreator.summaryCountFieldName);
   }, [jobCreatorUpdated]);
 
   return (
     <Description>
-      <InfluencersSelect
+      <SummaryCountFieldSelect
         fields={fields}
-        changeHandler={setInfluencers}
-        selectedInfluencers={influencers}
+        changeHandler={setSummaryCountFieldName}
+        selectedField={summaryCountFieldName}
       />
     </Description>
   );

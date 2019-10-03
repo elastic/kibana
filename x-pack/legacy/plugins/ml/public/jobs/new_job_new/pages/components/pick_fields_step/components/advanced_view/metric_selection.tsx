@@ -37,8 +37,8 @@ export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
   const jobCreator = jc as AdvancedJobCreator;
 
   const { fields, aggs } = newJobCapsService;
-  const [detector, setDetector] = useState(emptyRichDetector);
-  const [bucketSpanMs, setBucketSpanMs] = useState(jobCreator.bucketSpanMs);
+  // const [detector, setDetector] = useState(emptyRichDetector);
+  // const [bucketSpanMs, setBucketSpanMs] = useState(jobCreator.bucketSpanMs);
   const [modalPayload, setModalPayload] = useState<ModalPayload | null>(null);
 
   function closeModal() {
@@ -86,18 +86,18 @@ export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
     }
   }
 
-  useEffect(() => {
-    if (detector.agg !== null) {
-      setModalPayload(null);
-    }
-  }, [detector]);
+  // useEffect(() => {
+  //   if (detector.agg !== null) {
+  //     setModalPayload(null);
+  //   }
+  // }, [detector]);
 
   // watch for change in jobCreator
-  useEffect(() => {
-    if (jobCreator.bucketSpanMs !== bucketSpanMs) {
-      setBucketSpanMs(jobCreator.bucketSpanMs);
-    }
-  }, [jobCreatorUpdated]);
+  // useEffect(() => {
+  //   if (jobCreator.bucketSpanMs !== bucketSpanMs) {
+  //     setBucketSpanMs(jobCreator.bucketSpanMs);
+  //   }
+  // }, [jobCreatorUpdated]);
 
   return (
     <Fragment>

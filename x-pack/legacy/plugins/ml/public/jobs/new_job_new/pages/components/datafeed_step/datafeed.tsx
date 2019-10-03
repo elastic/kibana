@@ -21,9 +21,9 @@ export const DatafeedStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =
 
   useEffect(() => {
     const active =
-      jobValidator.jobId.valid &&
-      jobValidator.modelMemoryLimit.valid &&
-      jobValidator.groupIds.valid &&
+      // jobValidator.jobId.valid &&
+      // jobValidator.modelMemoryLimit.valid &&
+      // jobValidator.groupIds.valid &&
       jobValidator.validating === false;
     setNextActive(active);
   }, [jobValidatorUpdated]);

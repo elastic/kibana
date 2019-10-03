@@ -20,9 +20,14 @@ import {
   EuiComboBoxOptionProps,
 } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { isAdvancedJobCreator } from '../../../../../common/job_creator';
+import {
+  AdvancedJobCreator,
+  isAdvancedJobCreator,
+  JobCreatorType,
+} from '../../../../../common/job_creator';
 import { Field, Aggregation } from '../../../../../../../../common/types/fields';
 import { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
+import { ES_FIELD_TYPES } from '../../../../../../../../../../../../src/plugins/data/public';
 
 interface Props {
   payload: ModalPayload;
@@ -52,12 +57,12 @@ interface ExtendedOptionProps extends EuiComboBoxOptionProps {
   exclude_frequent: string | null;
 }
 
-const emptyOption = {
+const emptyOption: ExtendedOptionProps = {
   label: '',
   agg: null,
   field: null,
   exclude_frequent: null,
-} as ExtendedOptionProps;
+};
 
 const excludeFrequentOptions: ExtendedOptionProps[] = [
   { label: 'all', agg: null, field: null, exclude_frequent: 'all' },
@@ -77,6 +82,8 @@ export const CreateDetectorModal: FC<Props> = ({
     return null;
   }
 
+  const jobCreator = jc as AdvancedJobCreator;
+
   const [detector, setDetector] = useState(payload.detector);
   const [agg, setAgg] = useState(createAggOption(detector.agg));
   const [field, setField] = useState(createFieldOption(detector.field));
@@ -88,8 +95,8 @@ export const CreateDetectorModal: FC<Props> = ({
   );
 
   const functionOptions: EuiComboBoxOptionProps[] = aggs.map(createAggOption);
-
   const fieldOptions: EuiComboBoxOptionProps[] = fields.map(createFieldOption);
+  const splitFieldOptions = [...fieldOptions, ...createMlcategoryField(jobCreator)];
 
   const onOptionChange = (func: (p: ExtendedOptionProps) => void) => (
     selectedOptions: ExtendedOptionProps[]
@@ -135,7 +142,7 @@ export const CreateDetectorModal: FC<Props> = ({
       initValue: '',
       onChange: onOptionChange(setByField),
       selectedOptions: [byField],
-      options: fieldOptions,
+      options: splitFieldOptions,
       testSubject: '',
     },
     {
@@ -143,7 +150,7 @@ export const CreateDetectorModal: FC<Props> = ({
       initValue: '',
       onChange: onOptionChange(setOverField),
       selectedOptions: [overField],
-      options: fieldOptions,
+      options: splitFieldOptions,
       testSubject: '',
     },
     {
@@ -151,7 +158,7 @@ export const CreateDetectorModal: FC<Props> = ({
       initValue: '',
       onChange: onOptionChange(setPartitionField),
       selectedOptions: [partitionField],
-      options: fieldOptions,
+      options: splitFieldOptions,
       testSubject: '',
     },
     {
@@ -215,32 +222,47 @@ const ModalWrapper: FC<{ onCreateClick(): void; closeModal(): void }> = ({
 function createAggOption(agg: Aggregation | null) {
   if (agg === null) {
     return emptyOption;
-  } else {
-    return {
-      label: agg.id,
-      agg,
-    } as ExtendedOptionProps;
   }
+  return {
+    label: agg.id,
+    agg,
+  } as ExtendedOptionProps;
 }
 
 function createFieldOption(field: Field | null) {
   if (field === null) {
     return emptyOption;
-  } else {
-    return {
-      label: field.name,
-      field,
-    } as ExtendedOptionProps;
   }
+  return {
+    label: field.name,
+    field,
+  } as ExtendedOptionProps;
 }
 
 function createExcludeFrequentOption(excludeFrequent: string | null) {
   if (excludeFrequent === null) {
     return emptyOption;
-  } else {
-    return {
-      label: excludeFrequent,
-      exclude_frequent: excludeFrequent,
-    } as ExtendedOptionProps;
   }
+  return {
+    label: excludeFrequent,
+    exclude_frequent: excludeFrequent,
+  } as ExtendedOptionProps;
+}
+
+function createMlcategoryField(jobCreator: JobCreatorType) {
+  if (jobCreator.categorizationFieldName === null) {
+    return [];
+  }
+  const mlCategory: Field = {
+    id: 'mlcategory',
+    name: 'mlcategory',
+    type: ES_FIELD_TYPES.KEYWORD,
+    aggregatable: false,
+  };
+  return [
+    {
+      label: 'mlcategory',
+      field: mlCategory,
+    } as ExtendedOptionProps,
+  ];
 }

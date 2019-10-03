@@ -6,7 +6,7 @@
 
 import React, { FC, useContext, useEffect, useState } from 'react';
 
-import { InfluencersSelect } from './influencers_select';
+import { CategorizationFieldSelect } from './categorization_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import {
@@ -19,7 +19,7 @@ import {
 } from '../../../../../common/job_creator';
 import { Description } from './description';
 
-export const Influencers: FC = () => {
+export const CategorizationField: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   if (
     isMultiMetricJobCreator(jc) === false &&
@@ -31,24 +31,25 @@ export const Influencers: FC = () => {
 
   const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator | AdvancedJobCreator;
   const { fields } = newJobCapsService;
-  const [influencers, setInfluencers] = useState([...jobCreator.influencers]);
+  const [categorizationFieldName, setCategorizationFieldName] = useState(
+    jobCreator.categorizationFieldName
+  );
 
   useEffect(() => {
-    jobCreator.removeAllInfluencers();
-    influencers.forEach(i => jobCreator.addInfluencer(i));
+    jobCreator.categorizationFieldName = categorizationFieldName;
     jobCreatorUpdate();
-  }, [influencers.join()]);
+  }, [categorizationFieldName]);
 
   useEffect(() => {
-    setInfluencers([...jobCreator.influencers]);
+    setCategorizationFieldName(jobCreator.categorizationFieldName);
   }, [jobCreatorUpdated]);
 
   return (
     <Description>
-      <InfluencersSelect
+      <CategorizationFieldSelect
         fields={fields}
-        changeHandler={setInfluencers}
-        selectedInfluencers={influencers}
+        changeHandler={setCategorizationFieldName}
+        selectedField={categorizationFieldName}
       />
     </Description>
   );

@@ -8,7 +8,8 @@ import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
-import { BucketSpan } from '../bucket_span';
+import { SummaryCountField } from '../summary_count_field';
+import { CategorizationField } from '../categorization_field';
 import { Influencers } from '../influencers';
 import { ModelMemoryLimitInput } from '../../../job_details_step/components/advanced_section/components/model_memory_limit';
 
@@ -16,36 +17,36 @@ interface Props {
   setIsValid: (proceed: boolean) => void;
 }
 
-export const AdvancedSettings: FC<Props> = ({ setIsValid }) => {
-  const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
-  const [bucketSpan, setBucketSpan] = useState(jobCreator.bucketSpan);
+export const ExtraSettings: FC<Props> = ({ setIsValid }) => {
+  // const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
+  // const [bucketSpan, setBucketSpan] = useState(jobCreator.bucketSpan);
 
-  useEffect(() => {
-    jobCreator.bucketSpan = bucketSpan;
-    jobCreatorUpdate();
-    setIsValid(bucketSpan !== '');
-  }, [bucketSpan]);
+  // useEffect(() => {
+  //   jobCreator.bucketSpan = bucketSpan;
+  //   jobCreatorUpdate();
+  //   setIsValid(bucketSpan !== '');
+  // }, [bucketSpan]);
 
-  useEffect(() => {
-    setBucketSpan(jobCreator.bucketSpan);
-  }, [jobCreatorUpdated]);
+  // useEffect(() => {
+  //   setBucketSpan(jobCreator.bucketSpan);
+  // }, [jobCreatorUpdated]);
 
   return (
     <Fragment>
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem>
-          <BucketSpan setIsValid={setIsValid} />
+          <CategorizationField />
         </EuiFlexItem>
         <EuiFlexItem>
-          <Influencers />
+          <SummaryCountField />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup gutterSize="xl">
+      {/* <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem>
           <ModelMemoryLimitInput />
         </EuiFlexItem>
         <EuiFlexItem></EuiFlexItem>
-      </EuiFlexGroup>
+      </EuiFlexGroup> */}
     </Fragment>
   );
 };
