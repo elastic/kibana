@@ -7,7 +7,6 @@
 import React from 'react';
 import { render, wait, waitForElement } from 'react-testing-library';
 import 'react-testing-library/cleanup-after-each';
-import { toastNotifications } from 'ui/notify';
 import * as callApmApi from '../../../../services/rest/callApmApi';
 import { ServiceOverview } from '..';
 import * as urlParamsHooks from '../../../../hooks/useUrlParams';
@@ -22,16 +21,17 @@ function renderServiceOverview() {
   return render(<ServiceOverview />);
 }
 
+const coreMock = ({
+  http: {
+    basePath: {
+      prepend: (path: string) => `/basepath${path}`
+    }
+  },
+  notifications: { toasts: { addWarning: () => {} } }
+} as unknown) as LegacyCoreStart;
+
 describe('Service Overview -> View', () => {
   beforeEach(() => {
-    const coreMock = ({
-      http: {
-        basePath: {
-          prepend: (path: string) => `/basepath${path}`
-        }
-      }
-    } as unknown) as LegacyCoreStart;
-
     // mock urlParams
     spyOn(urlParamsHooks, 'useUrlParams').and.returnValue({
       urlParams: {
@@ -141,45 +141,56 @@ describe('Service Overview -> View', () => {
     expect(container.querySelectorAll('.euiTableRow')).toMatchSnapshot();
   });
 
-  it('should render upgrade migration notification when legacy data is found, ', async () => {
-    // create spies
-    const toastSpy = jest.spyOn(toastNotifications, 'addWarning');
-    const dataFetchingSpy = jest
-      .spyOn(callApmApi, 'callApmApi')
-      .mockResolvedValue({
-        hasLegacyData: true,
-        hasHistoricalData: true,
-        items: []
-      });
+  describe('when legacy data is found', () => {
+    it('renders an upgrade migration notification', async () => {
+      // create spies
+      const addWarning = jest.spyOn(
+        coreMock.notifications.toasts,
+        'addWarning'
+      );
 
-    renderServiceOverview();
+      const dataFetchingSpy = jest
+        .spyOn(callApmApi, 'callApmApi')
+        .mockResolvedValue({
+          hasLegacyData: true,
+          hasHistoricalData: true,
+          items: []
+        });
 
-    // wait for requests to be made
-    await wait(() => expect(dataFetchingSpy).toHaveBeenCalledTimes(1));
+      renderServiceOverview();
 
-    expect(toastSpy).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        title: 'Legacy data was detected within the selected time range'
-      })
-    );
+      // wait for requests to be made
+      await wait(() => expect(dataFetchingSpy).toHaveBeenCalledTimes(1));
+
+      expect(addWarning).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          title: 'Legacy data was detected within the selected time range'
+        })
+      );
+    });
   });
 
-  it('should not render upgrade migration notification when legacy data is not found, ', async () => {
-    // create spies
-    const toastSpy = jest.spyOn(toastNotifications, 'addWarning');
-    const dataFetchingSpy = jest
-      .spyOn(callApmApi, 'callApmApi')
-      .mockResolvedValue({
-        hasLegacyData: false,
-        hasHistoricalData: true,
-        items: []
-      });
+  describe('when legacy data is not found', () => {
+    it('does not render an upgrade migration notification', async () => {
+      // create spies
+      const addWarning = jest.spyOn(
+        coreMock.notifications.toasts,
+        'addWarning'
+      );
+      const dataFetchingSpy = jest
+        .spyOn(callApmApi, 'callApmApi')
+        .mockResolvedValue({
+          hasLegacyData: false,
+          hasHistoricalData: true,
+          items: []
+        });
 
-    renderServiceOverview();
+      renderServiceOverview();
 
-    // wait for requests to be made
-    await wait(() => expect(dataFetchingSpy).toHaveBeenCalledTimes(1));
+      // wait for requests to be made
+      await wait(() => expect(dataFetchingSpy).toHaveBeenCalledTimes(1));
 
-    expect(toastSpy).not.toHaveBeenCalled();
+      expect(addWarning).not.toHaveBeenCalled();
+    });
   });
 });
