@@ -18,8 +18,8 @@
  */
 
 import { UiSettingsClientContract } from 'src/core/public';
-import { PersistedLog } from './persisted_log';
-import { Storage } from '../../types';
+import { PersistedLog } from '../../persisted_log';
+import { Storage } from '../../../types';
 
 export function getQueryLog(
   uiSettings: UiSettingsClientContract,

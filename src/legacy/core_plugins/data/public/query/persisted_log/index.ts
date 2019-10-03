@@ -18,4 +18,3 @@
  */
 
 export * from './persisted_log';
-export * from './get_query_log';

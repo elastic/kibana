@@ -33,10 +33,10 @@ import { useKibana } from '../../../../../../../plugins/kibana_react/public';
 
 import { IndexPattern } from '../../../index_patterns';
 import { QueryBarInput } from './query_bar_input';
-import { Query } from '../index';
+import { Query, getQueryLog } from '../index';
 import { TimeHistoryContract } from '../../../timefilter';
 import { IDataPluginServices } from '../../../types';
-import { PersistedLog, getQueryLog } from '../../persisted_log';
+import { PersistedLog } from '../../persisted_log';
 
 interface Props {
   query?: Query;

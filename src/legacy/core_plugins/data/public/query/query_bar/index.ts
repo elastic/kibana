@@ -22,5 +22,6 @@ export { QueryBarInput } from './components/query_bar_input';
 
 export { fromUser } from './lib/from_user';
 export { toUser } from './lib/to_user';
+export { getQueryLog } from './lib/get_query_log';
 
 export { Query } from '../../../../../../plugins/data/public';

@@ -35,11 +35,11 @@ import {
   KibanaReactContextValue,
 } from '../../../../../../../plugins/kibana_react/public';
 import { IndexPattern, StaticIndexPattern } from '../../../index_patterns';
-import { Query } from '../index';
+import { Query, getQueryLog } from '../index';
 import { fromUser, matchPairs, toUser } from '../lib';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
-import { PersistedLog, getQueryLog } from '../../persisted_log';
+import { PersistedLog } from '../../persisted_log';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 import { IDataPluginServices } from '../../../types';
 
