@@ -107,7 +107,7 @@ describe('license', () => {
     });
 
     test('should return Unavailable if missing license', async () => {
-      ({ plugin, license } = await setup({ license: null }));
+      ({ plugin, license } = await setup({ license: null }, {}, false));
 
       const { check } = license.check('test', 'gold');
 

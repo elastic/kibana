@@ -93,18 +93,20 @@ export async function setupOnly(pluginInitializerContext: any = {}) {
   return { coreSetup, plugin, clusterClient };
 }
 
-export async function setup(xpackInfo = {}, pluginInitializerContext: any = {}) {
+export async function setup(xpackInfo = {}, pluginInitializerContext: any = {}, shouldSkip = true) {
   const { coreSetup, clusterClient, plugin } = await setupOnly(pluginInitializerContext);
 
   clusterClient.callAsInternalUser.mockResolvedValueOnce(licenseMerge(xpackInfo));
 
   const { license$ } = await plugin.setup(coreSetup);
-  const license = await license$
-    .pipe(
-      skip(1),
-      take(1)
-    )
-    .toPromise();
+  const license = await (shouldSkip
+    ? license$
+        .pipe(
+          skip(1),
+          take(1)
+        )
+        .toPromise()
+    : license$.pipe(take(1)).toPromise());
 
   return {
     plugin,

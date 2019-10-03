@@ -16,18 +16,20 @@ export function setupOnly(pluginInitializerContext: any = {}) {
   return { coreSetup, plugin };
 }
 
-export async function setup(xpackInfo = {}, pluginInitializerContext: any = {}) {
+export async function setup(xpackInfo = {}, pluginInitializerContext: any = {}, shouldSkip = true) {
   const { coreSetup, plugin } = setupOnly(pluginInitializerContext);
 
   coreSetup.http.get.mockResolvedValue(licenseMerge(xpackInfo));
 
   const { license$ } = await plugin.setup(coreSetup);
-  const license = await license$
-    .pipe(
-      skip(1),
-      take(1)
-    )
-    .toPromise();
+  const license = await (shouldSkip
+    ? license$
+        .pipe(
+          skip(1),
+          take(1)
+        )
+        .toPromise()
+    : license$.pipe(take(1)).toPromise());
 
   return {
     plugin,
