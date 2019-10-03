@@ -12,7 +12,7 @@ import { Title, TitleComponent } from '../title';
 
 const style = { background: '#333', padding: 10 };
 
-storiesOf('shareables/Title', module)
+storiesOf('shareables/Footer/Title', module)
   .add('contextual: hello', () => (
     <ExampleContext source="austin">
       <Title />

@@ -22,11 +22,12 @@ const Container = ({
   style,
 }: Pick<Props, 'children' | 'height' | 'width' | 'style'>) => {
   const [{ refs }] = useCanvasShareableState();
+
   return (
     <div
       className="kbnCanvas"
       ref={refs.stage}
-      style={{ ...style, height, width, overflow: 'hidden', position: 'relative' }}
+      style={{ height, width, overflow: 'hidden', position: 'relative', ...style }}
     >
       {children}
     </div>
@@ -66,6 +67,8 @@ export const Context = ({
   const { footer, settings } = initialCanvasShareableState;
   const { toolbar: toolbarSettings, autoplay: autoplaySettings } = settings;
 
+  const workpad = sharedWorkpads[source];
+
   const initialState: CanvasShareableState = {
     ...initialCanvasShareableState,
     footer: {
@@ -84,12 +87,12 @@ export const Context = ({
       },
     },
     stage: {
-      height: 400,
+      height: workpad.height / 2,
       page: 0,
-      width: 600,
+      width: workpad.width / 2,
     },
     renderers,
-    workpad: sharedWorkpads[source],
+    workpad,
     refs: {
       stage: stageRef || React.createRef(),
     },

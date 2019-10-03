@@ -13,7 +13,7 @@ import { PageControls, PageControlsComponent } from '../page_controls';
 
 const style = { background: '#333', padding: 10 };
 
-storiesOf('shareables/PageControls', module)
+storiesOf('shareables/Footer/PageControls', module)
   .add('contextual: hello', () => (
     <ExampleContext source="austin" {...{ style }}>
       <PageControls />

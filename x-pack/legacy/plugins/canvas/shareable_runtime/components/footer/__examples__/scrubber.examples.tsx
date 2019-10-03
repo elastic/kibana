@@ -12,14 +12,14 @@ import { ExampleContext } from '../../../test/context_example';
 import { Scrubber, ScrubberComponent } from '../scrubber';
 import { workpads } from '../../../../__tests__/fixtures/workpads';
 
-storiesOf('shareables/Scrubber', module)
+storiesOf('shareables/Footer/Scrubber', module)
   .add('contextual: hello', () => (
-    <ExampleContext source="hello">
+    <ExampleContext source="hello" style={{ height: 140 }}>
       <Scrubber />
     </ExampleContext>
   ))
   .add('contextual: austin', () => (
-    <ExampleContext source="austin">
+    <ExampleContext source="austin" style={{ height: 140 }}>
       <Scrubber />
     </ExampleContext>
   ))

@@ -19,8 +19,8 @@ export const initialCanvasShareableState: CanvasShareableState = {
   workpad: null,
   stage: {
     page: 0,
-    height: 0,
-    width: 0,
+    height: 400,
+    width: 600,
   },
   footer: {
     isScrubberVisible: false,
