@@ -19,7 +19,7 @@
 
 import React, { Component } from 'react';
 
-import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
+import { EuiIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -103,8 +103,9 @@ export class ConsoleMenu extends Component<Props, State> {
 
   render() {
     const button = (
-      <EuiButtonIcon
-        iconType="wrench"
+      <button
+        className="euiButtonIcon--primary"
+        style={{ lineHeight: 'inherit' }}
         onClick={this.onButtonClick}
         data-test-subj="toggleConsoleMenu"
         // @ts-ignore
@@ -114,7 +115,9 @@ export class ConsoleMenu extends Component<Props, State> {
             defaultMessage="Request options"
           />
         }
-      />
+      >
+        <EuiIcon color="" type="wrench" />
+      </button>
     );
 
     const items = [
