@@ -176,6 +176,15 @@ export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
 
 /**
  * Plugin specific context passed to a route handler.
+ *
+ * Provides the following clients:
+ *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
+ *      which uses the credentials of the incoming request
+ *    - {@link ScopedClusterClient | elasticsearch.dataClient} - Elasticsearch
+ *      data client which uses the credentials of the incoming request
+ *    - {@link ScopedClusterClient | elasticsearch.adminClient} - Elasticsearch
+ *      admin client which uses the credentials of the incoming request
+ *
  * @public
  */
 export interface RequestHandlerContext {

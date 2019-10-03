@@ -120,7 +120,7 @@ export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = an
 
 /**
  *
- * @internal
+ * @public
  */
 export class SavedObjectsClient {
   public static errors = SavedObjectsErrorHelpers;

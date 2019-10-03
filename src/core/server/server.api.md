@@ -593,6 +593,9 @@ export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends
 export interface RequestHandlerContext {
     // (undocumented)
     core: {
+        savedObjects: {
+            client: SavedObjectsClientContract;
+        };
         elasticsearch: {
             dataClient: ScopedClusterClient;
             adminClient: ScopedClusterClient;
@@ -718,7 +721,7 @@ export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any>
     saved_objects: Array<SavedObject<T>>;
 }
 
-// @internal (undocumented)
+// @public (undocumented)
 export class SavedObjectsClient {
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsRepository" needs to be exported by the entry point index.d.ts
     constructor(repository: SavedObjectsRepository);
@@ -735,8 +738,6 @@ export class SavedObjectsClient {
     update<T extends SavedObjectAttributes = any>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }
 
-// Warning: (ae-incompatible-release-tags) The symbol "SavedObjectsClientContract" is marked as @public, but its signature references "SavedObjectsClient" which is marked as @internal
-// 
 // @public
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 

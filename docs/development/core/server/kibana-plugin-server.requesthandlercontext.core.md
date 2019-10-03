@@ -8,6 +8,9 @@
 
 ```typescript
 core: {
+        savedObjects: {
+            client: SavedObjectsClientContract;
+        };
         elasticsearch: {
             dataClient: ScopedClusterClient;
             adminClient: ScopedClusterClient;
