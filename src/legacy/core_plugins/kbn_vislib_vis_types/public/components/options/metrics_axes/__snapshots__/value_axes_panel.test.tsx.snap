@@ -15,13 +15,13 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
       <EuiTitle
         size="xs"
       >
-        <h2>
+        <h3>
           <FormattedMessage
             defaultMessage="Y-axes"
             id="kbnVislibVisTypes.controls.pointSeries.valueAxes.yAxisTitle"
             values={Object {}}
           />
-        </h2>
+        </h3>
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem
