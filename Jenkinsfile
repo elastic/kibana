@@ -17,7 +17,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   runbld './test/scripts/jenkins_unit_jest_integration.sh'
                 }
               }),
-            ], 'linux && immutable'),
+            ], 'tests-l'),
             // 'x-pack-intake-agent': kibanaPipeline.legacyJobRunner('x-pack-intake'),
             // 'kibana-oss-agent': kibanaPipeline.withWorkers('kibana-oss-tests', { kibanaPipeline.buildOss() }, [
             //   'oss-ciGroup1': kibanaPipeline.getOssCiGroupWorker(1),
