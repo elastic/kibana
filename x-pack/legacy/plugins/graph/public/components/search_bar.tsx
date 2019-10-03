@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { IDataPluginServices } from 'src/legacy/core_plugins/data/public/types';
+import { CoreStart } from 'kibana/public';
 import {
   QueryBarInput,
   Query,
@@ -18,7 +19,6 @@ import {
 import { IndexPatternSavedObject } from '../types/app_state';
 import { openSourceModal } from '../services/source_modal';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { CoreStart } from 'kibana/public';
 
 export interface SearchBarProps {
   coreStart: CoreStart;
