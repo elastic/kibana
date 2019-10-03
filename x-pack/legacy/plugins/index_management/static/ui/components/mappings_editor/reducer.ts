@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { OnFormUpdateArg } from './shared_imports';
-import { Property } from './types';
-import { getPropertyMeta, NormalizedProperties } from './lib';
+import { NormalizedProperties } from './types';
 
 export interface MappingsConfiguration {
   dynamic: boolean | string;
@@ -45,28 +44,6 @@ export type Action =
   | { type: 'documentField.changeStatus'; value: DocumentFieldsStatus };
 
 export type Dispatch = (action: Action) => void;
-
-const getChildProperty = (
-  property: Property,
-  pathsArray: string[]
-): { property: Property; childPropertiesName: 'properties' | 'fields' } => {
-  const { childPropertiesName } = getPropertyMeta(property);
-
-  if (!Boolean(pathsArray.length)) {
-    return { property, childPropertiesName: childPropertiesName! };
-  }
-
-  // Clone the "properties" or "fields" object
-  property[childPropertiesName!] = {
-    ...property[childPropertiesName!],
-  };
-
-  // Access the child property at next path
-  const childProperty = property[childPropertiesName!]![pathsArray[0]];
-
-  // Recursively access the property
-  return getChildProperty(childProperty, pathsArray.slice(1));
-};
 
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -111,25 +88,23 @@ export const reducer = (state: State, action: Action): State => {
         ? [...state.properties.rootLevelFields, name]
         : state.properties.rootLevelFields;
 
-      const byId: NormalizedProperties['byId'] = {
-        ...state.properties.byId,
-        [propId]: action.value,
-      };
+      state.properties.byId[propId] = action.value;
 
       if (!addToRootLevel) {
         const parentProperty = state.properties.byId[fieldPathToAddProperty!];
-        const childProperties = parentProperty.__childProperties__ || [];
+        const childProperties = parentProperty.childProperties || [];
+        // TODO HERE: create a new Set() intead of an empty array?
 
         // Update parent property with new children
-        byId[fieldPathToAddProperty!] = {
+        state.properties.byId[fieldPathToAddProperty!] = {
           ...parentProperty,
-          __childProperties__: [propId, ...childProperties],
+          childProperties: [propId, ...childProperties],
         };
       }
 
       return {
         ...state,
-        properties: { ...state.properties, byId, rootLevelFields },
+        properties: { ...state.properties, rootLevelFields },
         documentFields: { ...state.documentFields, status: 'idle' },
       };
     }

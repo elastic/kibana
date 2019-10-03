@@ -83,7 +83,7 @@ export type ParameterName =
   | 'split_queries_on_whitespace';
 
 export interface Properties {
-  [key: string]: Property;
+  [key: string]: Omit<Property, 'name'>;
 }
 
 export interface Property {
@@ -91,6 +91,26 @@ export interface Property {
   type: DataType;
   properties?: { [key: string]: Property };
   fields?: { [key: string]: Property };
-  __childProperties__?: string[];
   [key: string]: any;
 }
+
+export interface PropertyMeta {
+  path: string;
+  childPropertiesName: ChildPropertyName | undefined;
+  canHaveChildProperties: boolean;
+  hasChildProperties: boolean;
+  childProperties: string[] | undefined;
+}
+
+export interface NormalizedProperties {
+  byId: {
+    [id: string]: NormalizedProperty;
+  };
+  rootLevelFields: string[];
+}
+
+export interface NormalizedProperty extends PropertyMeta {
+  resource: Property;
+}
+
+export type ChildPropertyName = 'properties' | 'fields';

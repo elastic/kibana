@@ -4,13 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataType, Properties, Property, MainType, SubType } from '../types';
+import {
+  DataType,
+  Properties,
+  Property,
+  NormalizedProperties,
+  NormalizedProperty,
+  PropertyMeta,
+  MainType,
+  SubType,
+  ChildPropertyName,
+} from '../types';
 import { DATA_TYPE_DEFINITION } from '../constants';
 
-export const hasNestedProperties = (dataType: DataType) =>
-  dataType === 'object' || dataType === 'nested' || dataType === 'text' || dataType === 'keyword';
-
-const getChildPropertiesAttributeName = (dataType: DataType) => {
+const getChildPropertiesName = (dataType: DataType): ChildPropertyName | undefined => {
   if (dataType === 'text' || dataType === 'keyword') {
     return 'fields';
   } else if (dataType === 'object' || dataType === 'nested') {
@@ -19,23 +26,22 @@ const getChildPropertiesAttributeName = (dataType: DataType) => {
   return undefined;
 };
 
-interface PropertyMeta {
-  childPropertiesName: 'fields' | 'properties' | undefined;
-  canHaveChildProperties: boolean;
-  hasChildProperties: boolean;
-  childProperties: Record<string, Property> | undefined;
-}
-
-export const getPropertyMeta = (property: Property): PropertyMeta => {
-  const childPropertiesName = getChildPropertiesAttributeName(property.type);
+const getPropertyMeta = (property: Property, propertyPath: string): PropertyMeta => {
+  const childPropertiesName = getChildPropertiesName(property.type);
   const canHaveChildProperties = Boolean(childPropertiesName);
   const hasChildProperties =
     childPropertiesName !== undefined &&
     Boolean(property[childPropertiesName]) &&
     Object.keys(property[childPropertiesName]!).length > 0;
 
-  const childProperties = canHaveChildProperties ? property[childPropertiesName!] : undefined;
+  const childProperties = hasChildProperties
+    ? Object.keys(property[childPropertiesName!]!).map(
+        propertyName => `${propertyPath}.${propertyName}`
+      )
+    : undefined;
+
   return {
+    path: propertyPath,
     hasChildProperties,
     childPropertiesName,
     canHaveChildProperties,
@@ -69,46 +75,34 @@ const subTypesMapToType = Object.entries(DATA_TYPE_DEFINITION).reduce(
 export const getTypeFromSubType = (subType: SubType): MainType =>
   subTypesMapToType[subType] as MainType;
 
-const isObject = (value: any): boolean =>
-  value !== null && !Array.isArray(value) && typeof value === 'object';
-
-export interface NormalizedProperties {
-  byId: { [id: string]: Property };
-  rootLevelFields: string[];
-}
-
 export const normalize = (propertiesToNormalize: Properties): NormalizedProperties => {
-  const normalizeObject = (
-    props: Properties = propertiesToNormalize,
-    to: { [id: string]: Property } = {},
+  const normalizeProperties = (
+    props: Properties,
+    to: NormalizedProperties['byId'] = {},
     paths: string[] = []
   ): Record<string, any> =>
     Object.entries(props).reduce((acc, [propName, value]) => {
-      const updatedPaths = [...paths, propName];
-      const propertyPath = updatedPaths.join('.');
-      const property = { name: propName, ...value } as any;
+      const propertyPathArray = [...paths, propName];
+      const propertyPath = propertyPathArray.join('.');
+      const property = { name: propName, ...value } as Property;
+      const meta = getPropertyMeta(property, propertyPath);
 
-      const { properties, fields, ...rest } = property;
+      const normalizedProperty: NormalizedProperty = {
+        resource: property,
+        ...meta,
+      };
 
-      if (isObject(property.properties)) {
-        acc[updatedPaths.join('.')] = {
-          ...rest,
-          __childProperties__: Object.keys(properties).map(key => `${propertyPath}.${key}`),
-        };
-        return normalizeObject(properties, to, updatedPaths);
-      } else if (isObject(property.fields)) {
-        acc[updatedPaths.join('.')] = {
-          ...rest,
-          __childProperties__: Object.keys(fields).map(key => `${propertyPath}.${key}`),
-        };
-        return normalizeObject(fields, to, updatedPaths);
+      acc[propertyPath] = normalizedProperty;
+
+      if (meta.hasChildProperties) {
+        return normalizeProperties(property[meta.childPropertiesName!]!, to, propertyPathArray);
       }
 
-      acc[updatedPaths.join('.')] = property;
+      acc[propertyPath] = normalizedProperty;
       return acc;
     }, to);
 
-  const byId = normalizeObject();
+  const byId = normalizeProperties(propertiesToNormalize);
 
   return {
     byId,

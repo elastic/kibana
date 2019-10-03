@@ -9,14 +9,21 @@ import { EuiButton } from '@elastic/eui';
 import { useState, useDispatch } from '../../../mappings_state';
 import { PropertiesList } from './properties_list';
 import { CreateProperty } from './create_property';
-import { Property } from '../../../types';
-import { getPropertyMeta } from '../../../lib';
+import { NormalizedProperty } from '../../../types';
 
 interface Props {
-  property: Property;
+  property: NormalizedProperty;
   parentPath: string;
   treeDepth?: number;
 }
+
+const inlineStyle = {
+  padding: '20px 0',
+  borderBottom: '1px solid #ddd',
+  height: '82px',
+  display: 'flex',
+  alignItems: 'center',
+};
 
 export const PropertiesListItem = ({ property, parentPath, treeDepth = 0 }: Props) => {
   const dispatch = useDispatch();
@@ -24,18 +31,13 @@ export const PropertiesListItem = ({ property, parentPath, treeDepth = 0 }: Prop
     documentFields: { status, fieldPathToAddProperty },
     properties: { byId },
   } = useState();
-  const propertyPath = parentPath ? `${parentPath}.${property.name}` : property.name;
-  const { canHaveChildProperties } = getPropertyMeta(property);
   const getProperty = (propId: string) => byId[propId];
-  const hasChildProperties = property.__childProperties__ !== undefined;
-  const childProperties = hasChildProperties
-    ? property.__childProperties__!.map(getProperty)
-    : null;
+  const { path, resource, childProperties, hasChildProperties, canHaveChildProperties } = property;
 
   const addField = () => {
     dispatch({
       type: 'documentField.createProperty',
-      value: propertyPath,
+      value: path,
     });
   };
 
@@ -53,11 +55,15 @@ export const PropertiesListItem = ({ property, parentPath, treeDepth = 0 }: Prop
     }
 
     // Root level (0) has does not have the "fieldPathToAddProperty" set
-    if (fieldPathToAddProperty !== propertyPath) {
+    if (fieldPathToAddProperty !== path) {
       return null;
     }
 
-    return <CreateProperty />;
+    return (
+      <div style={{ paddingLeft: '20px' }}>
+        <CreateProperty />
+      </div>
+    );
   };
 
   const renderActionButtons = () => {
@@ -75,9 +81,9 @@ export const PropertiesListItem = ({ property, parentPath, treeDepth = 0 }: Prop
   };
 
   return (
-    <div>
-      <div style={{ padding: '20px 0', borderBottom: '1px solid #ddd' }}>
-        {property.name} | {property.type} {renderActionButtons()}
+    <>
+      <div style={inlineStyle}>
+        {resource.name} | {resource.type} {renderActionButtons()}
       </div>
 
       {renderCreateProperty()}
@@ -85,12 +91,12 @@ export const PropertiesListItem = ({ property, parentPath, treeDepth = 0 }: Prop
       {hasChildProperties && (
         <div style={{ paddingLeft: '20px' }}>
           <PropertiesList
-            properties={childProperties!}
+            properties={childProperties!.map(getProperty)}
             treeDepth={treeDepth + 1}
-            path={propertyPath}
+            path={path}
           />
         </div>
       )}
-    </div>
+    </>
   );
 };
