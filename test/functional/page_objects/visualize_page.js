@@ -994,8 +994,8 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getVisualizationRenderingCount() {
-      const visualizationLoader = await find.byCssSelector('[data-shared-item]');
-      const renderingCount = await visualizationLoader.getAttribute('data-rendering-count');
+      const visualizationCanvas = await testSubjects.find('visEditorCanvas');
+      const renderingCount = await visualizationCanvas.getAttribute('data-rendering-count');
       return Number(renderingCount);
     }
 

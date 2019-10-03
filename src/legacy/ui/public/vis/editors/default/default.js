@@ -37,6 +37,9 @@ import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_typ
 import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
 import { AggGroupNames } from './agg_groups';
 
+// eslint-disable-next-line
+import {setInitialRenderCompleteAttrs, updateRenderCompleteAttrs} from '../../../../../../plugins/kibana_utils/public/render_complete/track_render_complete_attributes';
+
 const defaultEditor = function ($rootScope, $compile) {
   return class DefaultEditor {
     static key = 'default';
@@ -157,6 +160,13 @@ const defaultEditor = function ($rootScope, $compile) {
 
         if (!this._handler) {
           const visualizationEl = this.el.find('.visEditor__canvas')[0];
+
+          visualizationEl.setAttribute('data-test-subj', 'visEditorCanvas');
+          setInitialRenderCompleteAttrs(visualizationEl);
+          visualizationEl.addEventListener('renderComplete', () => {
+            updateRenderCompleteAttrs(visualizationEl);
+          });
+
           getVisualizeLoader().then(loader => {
             if (!visualizationEl) {
               return;
