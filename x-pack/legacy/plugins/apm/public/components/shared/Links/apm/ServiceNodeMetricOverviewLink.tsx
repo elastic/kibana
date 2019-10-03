@@ -29,7 +29,9 @@ const ServiceNodeMetricOverviewLink = ({
 
   return (
     <APMLink
-      path={`/services/${serviceName}/nodes/${serviceNodeName}/metrics`}
+      path={`/services/${serviceName}/nodes/${encodeURIComponent(
+        serviceNodeName
+      )}/metrics`}
       query={persistedFilters}
       {...rest}
     />

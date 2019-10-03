@@ -86,7 +86,9 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     processorEvent,
     serviceName,
     errorGroupId,
-    serviceNodeName,
+    serviceNodeName: serviceNodeName
+      ? decodeURIComponent(serviceNodeName)
+      : serviceNodeName,
 
     // ui filters
     environment,

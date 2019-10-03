@@ -6,8 +6,7 @@
 export const SERVICE_NAME = 'service.name';
 export const SERVICE_ENVIRONMENT = 'service.environment';
 export const SERVICE_AGENT_NAME = 'agent.name';
-// TODO: update to service.node.name when https://github.com/elastic/apm-server/issues/2696 closes
-export const SERVICE_NODE_NAME = 'host.hostname';
+export const SERVICE_NODE_NAME = 'service.node.name';
 export const URL_FULL = 'url.full';
 export const HTTP_REQUEST_METHOD = 'http.request.method';
 export const USER_ID = 'user.id';

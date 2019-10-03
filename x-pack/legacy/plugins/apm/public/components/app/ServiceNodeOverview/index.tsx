@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { useUrlParams } from '../../../hooks/useUrlParams';
@@ -18,6 +19,11 @@ import {
   asPercent
 } from '../../../utils/formatters';
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
+import { truncate, px, unit } from '../../../style/variables';
+
+const ServiceNodeName = styled.div`
+  ${truncate(px(8 * unit))}
+`;
 
 const ServiceNodeOverview = () => {
   const { uiFilters, urlParams } = useUrlParams();
@@ -70,12 +76,14 @@ const ServiceNodeOverview = () => {
       sortable: true,
       render: (name: string) => {
         return (
-          <ServiceNodeMetricOverviewLink
-            serviceName={serviceName}
-            serviceNodeName={name}
-          >
-            {name}
-          </ServiceNodeMetricOverviewLink>
+          <EuiToolTip content={name}>
+            <ServiceNodeMetricOverviewLink
+              serviceName={serviceName}
+              serviceNodeName={name}
+            >
+              <ServiceNodeName>{name}</ServiceNodeName>
+            </ServiceNodeMetricOverviewLink>
+          </EuiToolTip>
         );
       }
     },

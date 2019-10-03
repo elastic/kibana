@@ -28,7 +28,7 @@ Object {
           },
         },
         "terms": Object {
-          "field": "host.hostname",
+          "field": "service.node.name",
           "order": Object {
             "foo": "desc",
           },
@@ -93,7 +93,7 @@ Object {
           },
         },
         "terms": Object {
-          "field": "host.hostname",
+          "field": "service.node.name",
           "order": Object {
             "_key": "asc",
           },
