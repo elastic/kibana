@@ -10,7 +10,8 @@ import {
   EuiEmptyPrompt,
   EuiButton,
   EuiButtonEmpty,
-  EuiHealth
+  EuiHealth,
+  EuiToolTip
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
@@ -20,6 +21,7 @@ import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { AgentConfigurationListAPIResponse } from '../../../../../server/lib/settings/agent_configuration/list_configurations';
 import { Config } from '.';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
+import { px, units } from '../../../../style/variables';
 const t = (id: string, defaultMessage: string) =>
   i18n.translate(`xpack.apm.settings.agentConf.configTable.${id}`, {
     defaultMessage
@@ -39,10 +41,20 @@ export function AgentConfigurationList({
   const columns: Array<ITableColumn<Config>> = [
     {
       field: 'applied_by_agent',
-      name: t('appliedByAgentColumnLabel', 'Applied by agent'),
+      align: 'center',
+      width: px(units.double),
+      name: '',
       sortable: true,
-      render: (value: boolean) => (
-        <EuiHealth color={value ? 'success' : theme.euiColorLightShade} />
+      render: (isApplied: boolean) => (
+        <EuiToolTip
+          content={
+            isApplied
+              ? t('appliedTooltipMessage', 'Applied by at least one agent')
+              : t('notAppliedTooltipMessage', 'Not yet applied by any agents')
+          }
+        >
+          <EuiHealth color={isApplied ? 'success' : theme.euiColorLightShade} />
+        </EuiToolTip>
       )
     },
     {
@@ -90,12 +102,16 @@ export function AgentConfigurationList({
       render: (value: number) => value
     },
     {
+      align: 'right',
       field: '@timestamp',
       name: t('lastUpdatedColumnLabel', 'Last updated'),
       sortable: true,
-      render: (value: number) => <TimestampTooltip time={value} />
+      render: (value: number) => (
+        <TimestampTooltip time={value} precision="minutes" />
+      )
     },
     {
+      width: px(units.double),
       name: '',
       actions: [
         {
