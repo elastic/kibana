@@ -5,6 +5,7 @@
  */
 
 import { shim, Server } from './shim';
+import { TaskRunnerFactory } from './lib';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import { createExecuteFunction } from './create_execute_function';
@@ -84,9 +85,14 @@ export function init(server: Server) {
     return spacesPlugin && spaceId ? spacesPlugin.spaceIdToNamespace(spaceId) : undefined;
   }
 
+  const taskRunnerFactory = new TaskRunnerFactory();
   const actionTypeRegistry = new ActionTypeRegistry({
-    getServices,
     taskManager,
+    taskRunnerFactory,
+  });
+  taskRunnerFactory.initialize({
+    getServices,
+    actionTypeRegistry,
     encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects,
     getBasePath,
     spaceIdToNamespace,

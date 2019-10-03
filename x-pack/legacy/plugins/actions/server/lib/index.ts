@@ -8,3 +8,4 @@ export { execute } from './execute';
 export { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
 export { ExecutorError } from './executor_error';
 export { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
+export { TaskRunnerFactory } from './task_runner_factory';
