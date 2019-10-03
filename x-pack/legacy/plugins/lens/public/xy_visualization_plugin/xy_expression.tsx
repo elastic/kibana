@@ -178,7 +178,7 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
   }
 
   const chartHasMoreThanOneSeries =
-    layers.length > 1 || data.tables[Object.keys(data.tables)[0]].columns.length > 2;
+    layers.length > 1 || data.tables[layers[0].layerId].columns.length > 2;
   const shouldRotate = isHorizontalChart(layers);
 
   return (
