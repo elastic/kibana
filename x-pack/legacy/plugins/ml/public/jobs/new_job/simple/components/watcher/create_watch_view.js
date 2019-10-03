@@ -25,9 +25,9 @@ import {
 
 import { has } from 'lodash';
 
-import { parseInterval } from 'ui/utils/parse_interval';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
+import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { ml } from '../../../../../services/ml_api_service';
 import { SelectSeverity } from '../../../../../components/controls/select_severity/select_severity';
 import { mlCreateWatchService } from './create_watch_service';
