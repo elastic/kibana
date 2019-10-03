@@ -14,6 +14,7 @@ import {
   getTheme,
   SeriesType,
   WrappedByAutoSizer,
+  ChartSeriesData,
 } from './common';
 import 'jest-styled-components';
 import { mergeWithDefaultTheme, LIGHT_THEME } from '@elastic/charts';
@@ -107,34 +108,44 @@ describe('getChartWidth', () => {
 });
 
 describe('checkIfAllValuesAreZero', () => {
-  const mockInvalidDataSets = [
-    [{ key: 'mockKey', color: 'mockColor', value: [{ x: 1, y: 0 }, { x: 1, y: 1 }] }],
+  const mockInvalidDataSets: Array<[ChartSeriesData[]]> = [
+    [[{ key: 'mockKey', color: 'mockColor', value: [{ x: 1, y: 0 }, { x: 1, y: 1 }] }]],
     [
-      { key: 'mockKeyA', color: 'mockColor', value: [{ x: 1, y: 0 }, { x: 1, y: 1 }] },
-      { key: 'mockKeyB', color: 'mockColor', value: [{ x: 1, y: 0 }, { x: 1, y: 0 }] },
+      [
+        { key: 'mockKeyA', color: 'mockColor', value: [{ x: 1, y: 0 }, { x: 1, y: 1 }] },
+        { key: 'mockKeyB', color: 'mockColor', value: [{ x: 1, y: 0 }, { x: 1, y: 0 }] },
+      ],
     ],
   ];
-  const mockValidDataSets = [[{ key: 'mockKey', color: 'mockColor', value: [{ x: 1, y: 0 }] }]];
+  const mockValidDataSets: Array<[ChartSeriesData[]]> = [
+    [[{ key: 'mockKey', color: 'mockColor', value: [{ x: 0, y: 0 }, { x: 1, y: 0 }] }]],
+    [
+      [
+        { key: 'mockKeyA', color: 'mockColor', value: [{ x: 1, y: 0 }, { x: 3, y: 0 }] },
+        { key: 'mockKeyB', color: 'mockColor', value: [{ x: 2, y: 0 }, { x: 4, y: 0 }] },
+      ],
+    ],
+  ];
 
-  describe.each(mockInvalidDataSets)('return false', data => {
+  describe.each(mockInvalidDataSets)('with data [%o]', data => {
     let result: boolean;
     beforeAll(() => {
       result = checkIfAllValuesAreZero(data);
     });
 
-    it(`with data ${JSON.stringify(data)}`, () => {
+    it(`should return false`, () => {
       expect(result).toBeFalsy();
     });
   });
 
-  describe.each(mockValidDataSets)('return true', data => {
+  describe.each(mockValidDataSets)('with data [%o]', data => {
     let result: boolean;
     beforeAll(() => {
       result = checkIfAllValuesAreZero(data);
     });
 
-    it(`with data ${JSON.stringify(data)}`, () => {
-      expect(result).toBeFalsy();
+    it(`should return true`, () => {
+      expect(result).toBeTruthy();
     });
   });
 });

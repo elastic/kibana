@@ -19,7 +19,7 @@ import {
 } from '@elastic/charts';
 import { getOr, get, isNull, isNumber } from 'lodash/fp';
 import { AutoSizer } from '../auto_sizer';
-import { ChartHolder } from './chart_holder';
+import { ChartPlaceHolder } from './chart_place_holder';
 import {
   browserTimezone,
   chartDefaultSettings,
@@ -57,7 +57,9 @@ const checkIfAllTheDataInTheSeriesAreValid = (series: unknown): series is ChartS
     ({ x, y }: { x: unknown; y: unknown }) => !isNull(x) && isNumber(y) && y > 0
   );
 
-const checkIfAnyValidSeriesExist = (data: unknown): data is ChartSeriesData[] =>
+const checkIfAnyValidSeriesExist = (
+  data: ChartSeriesData[] | null | undefined
+): data is ChartSeriesData[] =>
   Array.isArray(data) && data.some(checkIfAllTheDataInTheSeriesAreValid);
 
 // https://ela.st/multi-areaseries
@@ -136,7 +138,7 @@ export const AreaChart = React.memo<{
       )}
     </AutoSizer>
   ) : (
-    <ChartHolder
+    <ChartPlaceHolder
       height={getChartHeight(customHeight)}
       width={getChartWidth(customWidth)}
       data={areaChart}

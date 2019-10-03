@@ -19,7 +19,7 @@ const FlexGroup = styled(EuiFlexGroup)<{ height?: string | null; width?: string 
 
 FlexGroup.displayName = 'FlexGroup';
 
-export const ChartHolder = ({
+export const ChartPlaceHolder = ({
   height = '100%',
   width = '100%',
   data,

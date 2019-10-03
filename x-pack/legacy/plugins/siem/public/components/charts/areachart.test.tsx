@@ -323,27 +323,27 @@ describe('AreaChart', () => {
     },
     customHeight: 324,
   };
-  describe.each(chartDataSets as Array<[ChartSeriesData[]]>)('renders areachart', data => {
+  describe.each(chartDataSets as Array<[ChartSeriesData[]]>)('with valid data [%o]', data => {
     beforeAll(() => {
       shallowWrapper = shallow(<AreaChart configs={mockConfig} areaChart={data} />);
     });
 
-    it(`with data ${JSON.stringify(data)}`, () => {
+    it(`should render area chart`, () => {
       expect(shallowWrapper.find('AutoSizer')).toHaveLength(1);
-      expect(shallowWrapper.find('ChartHolder')).toHaveLength(0);
+      expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(0);
     });
   });
 
   describe.each(chartHolderDataSets as Array<[ChartSeriesData[] | null | undefined]>)(
-    'renders prompt',
+    'with invalid data [%o]',
     data => {
       beforeAll(() => {
         shallowWrapper = shallow(<AreaChart configs={mockConfig} areaChart={data} />);
       });
 
-      it(`with data ${JSON.stringify(data)}`, () => {
+      it(`should render a chart place holder`, () => {
         expect(shallowWrapper.find('AutoSizer')).toHaveLength(0);
-        expect(shallowWrapper.find('ChartHolder')).toHaveLength(1);
+        expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(1);
       });
     }
   );

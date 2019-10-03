@@ -268,30 +268,28 @@ describe('BarChartBaseComponent', () => {
   });
 });
 
-describe.each(chartDataSets)('BarChart', data => {
-  let shallowWrapper: ShallowWrapper;
-
-  describe('renders barchart', () => {
-    beforeAll(() => {
-      shallowWrapper = shallow(<BarChart configs={mockConfig} barChart={data} />);
-    });
-
-    it(`with data ${JSON.stringify(data)}`, () => {
-      expect(shallowWrapper.find('AutoSizer')).toHaveLength(1);
-      expect(shallowWrapper.find('ChartHolder')).toHaveLength(0);
-    });
-  });
-});
-
-describe.each(chartHolderDataSets)('render Chart Holder', data => {
+describe.each(chartDataSets)('BarChart with valid data [%o]', data => {
   let shallowWrapper: ShallowWrapper;
 
   beforeAll(() => {
     shallowWrapper = shallow(<BarChart configs={mockConfig} barChart={data} />);
   });
 
-  it(`with data ${JSON.stringify(data)}`, () => {
+  it(`should render chart`, () => {
+    expect(shallowWrapper.find('AutoSizer')).toHaveLength(1);
+    expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(0);
+  });
+});
+
+describe.each(chartHolderDataSets)('BarChart with invalid data [%o]', data => {
+  let shallowWrapper: ShallowWrapper;
+
+  beforeAll(() => {
+    shallowWrapper = shallow(<BarChart configs={mockConfig} barChart={data} />);
+  });
+
+  it(`should render chart holder`, () => {
     expect(shallowWrapper.find('AutoSizer')).toHaveLength(0);
-    expect(shallowWrapper.find('ChartHolder')).toHaveLength(1);
+    expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(1);
   });
 });

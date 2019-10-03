@@ -6,10 +6,10 @@
 
 import { shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
-import { ChartHolder } from './chart_holder';
+import { ChartPlaceHolder } from './chart_place_holder';
 import { ChartSeriesData } from './common';
 
-describe('ChartHolder', () => {
+describe('ChartPlaceHolder', () => {
   let shallowWrapper: ShallowWrapper;
   const mockDataAllZeros = [
     {
@@ -39,7 +39,7 @@ describe('ChartHolder', () => {
   it('should render with default props', () => {
     const height = `100%`;
     const width = `100%`;
-    shallowWrapper = shallow(<ChartHolder data={mockDataAllZeros} />);
+    shallowWrapper = shallow(<ChartPlaceHolder data={mockDataAllZeros} />);
     expect(shallowWrapper.props()).toMatchObject({
       height,
       width,
@@ -49,7 +49,9 @@ describe('ChartHolder', () => {
   it('should render with given props', () => {
     const height = `100px`;
     const width = `100px`;
-    shallowWrapper = shallow(<ChartHolder height={height} width={width} data={mockDataAllZeros} />);
+    shallowWrapper = shallow(
+      <ChartPlaceHolder height={height} width={width} data={mockDataAllZeros} />
+    );
     expect(shallowWrapper.props()).toMatchObject({
       height,
       width,
@@ -59,7 +61,9 @@ describe('ChartHolder', () => {
   it('should render correct wording when all values returned zero', () => {
     const height = `100px`;
     const width = `100px`;
-    shallowWrapper = shallow(<ChartHolder height={height} width={width} data={mockDataAllZeros} />);
+    shallowWrapper = shallow(
+      <ChartPlaceHolder height={height} width={width} data={mockDataAllZeros} />
+    );
     expect(
       shallowWrapper
         .find(`[data-test-subj="chartHolderText"]`)
@@ -72,7 +76,7 @@ describe('ChartHolder', () => {
     const height = `100px`;
     const width = `100px`;
     shallowWrapper = shallow(
-      <ChartHolder
+      <ChartPlaceHolder
         height={height}
         width={width}
         data={mockDataUnexpectedValue as ChartSeriesData[]}

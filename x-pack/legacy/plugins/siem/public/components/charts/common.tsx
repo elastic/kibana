@@ -142,7 +142,7 @@ export const getChartWidth = (customWidth?: number, autoSizerWidth?: number): st
   return height ? `${height}px` : defaultChartWidth;
 };
 
-export const checkIfAllValuesAreZero = (data: unknown): boolean =>
+export const checkIfAllValuesAreZero = (data: ChartSeriesData[] | null | undefined): boolean =>
   Array.isArray(data) &&
   data.every(series => {
     return Array.isArray(series.value) && (series.value as ChartData[]).every(({ y }) => y === 0);

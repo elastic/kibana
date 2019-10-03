@@ -18,7 +18,7 @@ import {
 } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
 import { AutoSizer } from '../auto_sizer';
-import { ChartHolder } from './chart_holder';
+import { ChartPlaceHolder } from './chart_place_holder';
 import {
   browserTimezone,
   chartDefaultSettings,
@@ -32,11 +32,14 @@ import {
   WrappedByAutoSizer,
 } from './common';
 
-const checkIfAllTheDataInTheSeriesAreValid = (series: unknown): series is ChartSeriesData =>
+const checkIfAllTheDataInTheSeriesAreValid = (series: ChartSeriesData): series is ChartSeriesData =>
+  series != null &&
   !!get('value.length', series) &&
-  get('value', series).every(({ x, y }: { x: unknown; y: unknown }) => isNumber(y) && y >= 0);
+  (series.value || []).every(({ x, y }) => isNumber(y) && y >= 0);
 
-const checkIfAnyValidSeriesExist = (data: unknown): data is ChartSeriesData[] =>
+const checkIfAnyValidSeriesExist = (
+  data: ChartSeriesData[] | null | undefined
+): data is ChartSeriesData[] =>
   Array.isArray(data) &&
   !checkIfAllValuesAreZero(data) &&
   data.some(checkIfAllTheDataInTheSeriesAreValid);
@@ -117,7 +120,7 @@ export const BarChart = React.memo<{
       )}
     </AutoSizer>
   ) : (
-    <ChartHolder
+    <ChartPlaceHolder
       height={getChartHeight(customHeight)}
       width={getChartWidth(customWidth)}
       data={barChart}
