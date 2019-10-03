@@ -17,8 +17,13 @@
  * under the License.
  */
 
-import { registerServerFunctions } from './server_functions';
+import { mapValues } from 'lodash';
 
-export function routes(server) {
-  registerServerFunctions(server);
-}
+// Takes a function spec and passes in default args,
+// overriding with any provided args.
+export const functionWrapper = (fnSpec: any) => {
+  const spec = fnSpec();
+  const defaultArgs = mapValues(spec.args, argSpec => argSpec.default);
+  return (context: any, args: any, handlers: any) =>
+    spec.fn(context, { ...defaultArgs, ...args }, handlers);
+};

@@ -20,17 +20,16 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
-import { setup as data } from '../../../data/public/legacy';
-import { start as visualizations } from '../../../visualizations/public/legacy';
-
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { PersistedState } from 'ui/persisted_state';
+import { setup as data } from '../../../data/public/legacy';
+import { start as visualizations } from '../../../visualizations/public/legacy';
 
 export const visualization = () => ({
   name: 'visualization',
   type: 'render',
   help: i18n.translate('interpreter.functions.visualization.help', {
-    defaultMessage: 'A simple visualization'
+    defaultMessage: 'A simple visualization',
   }),
   args: {
     index: {
@@ -60,17 +59,17 @@ export const visualization = () => ({
     uiState: {
       types: ['string'],
       default: '"{}"',
-    }
+    },
   },
-  async fn(context, args, handlers) {
+  async fn(context: any, args: any, handlers: any) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get('Private');
+    const Private = $injector.get('Private') as any;
     const { indexPatterns } = data.indexPatterns;
     const queryFilter = Private(FilterBarQueryFilterProvider);
 
     const visConfigParams = JSON.parse(args.visConfig);
     const schemas = JSON.parse(args.schemas);
-    const visType = visualizations.types.get(args.type || 'histogram');
+    const visType = visualizations.types.get(args.type || 'histogram') as any;
     const indexPattern = args.index ? await indexPatterns.get(args.index) : null;
 
     const uiStateParams = JSON.parse(args.uiState);
@@ -85,7 +84,7 @@ export const visualization = () => ({
         timeRange: get(context, 'timeRange', null),
         query: get(context, 'query', null),
         filters: get(context, 'filters', null),
-        uiState: uiState,
+        uiState,
         inspectorAdapters: handlers.inspectorAdapters,
         queryFilter,
         forceFetch: true,
@@ -95,14 +94,14 @@ export const visualization = () => ({
     if (typeof visType.responseHandler === 'function') {
       if (context.columns) {
         // assign schemas to aggConfigs
-        context.columns.forEach(column => {
+        context.columns.forEach((column: any) => {
           if (column.aggConfig) {
             column.aggConfig.aggConfigs.schemas = visType.schemas.all;
           }
         });
 
         Object.keys(schemas).forEach(key => {
-          schemas[key].forEach(i => {
+          schemas[key].forEach((i: any) => {
             if (context.columns[i] && context.columns[i].aggConfig) {
               context.columns[i].aggConfig.schema = key;
             }
@@ -119,8 +118,8 @@ export const visualization = () => ({
       value: {
         visData: context,
         visType: args.type,
-        visConfig: visConfigParams
-      }
+        visConfig: visConfigParams,
+      },
     };
-  }
+  },
 });

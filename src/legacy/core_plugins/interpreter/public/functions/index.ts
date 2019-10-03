@@ -17,12 +17,22 @@
  * under the License.
  */
 
-import { mapValues } from 'lodash';
+import { clog } from './clog';
+import { esaggs } from './esaggs';
+import { font } from './font';
+import { kibana } from './kibana';
+import { kibanaContext } from './kibana_context';
+import { range } from './range';
+import { visualization } from './visualization';
+import { visDimension } from './vis_dimension';
 
-// Takes a function spec and passes in default args,
-// overriding with any provided args.
-export const functionWrapper = fnSpec => {
-  const spec = fnSpec();
-  const defaultArgs = mapValues(spec.args, argSpec => argSpec.default);
-  return (context, args, handlers) => spec.fn(context, { ...defaultArgs, ...args }, handlers);
-};
+export const functions = [
+  clog,
+  esaggs,
+  font,
+  kibana,
+  kibanaContext,
+  range,
+  visualization,
+  visDimension,
+];

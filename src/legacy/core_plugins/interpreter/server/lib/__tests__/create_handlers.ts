@@ -28,13 +28,13 @@ const mockServer = {
   plugins: {
     elasticsearch: {
       getCluster: () => ({
-        callWithRequest: (...args) => Promise.resolve(args),
+        callWithRequest: (...args: any) => Promise.resolve(args),
       }),
     },
   },
   config: () => ({
     has: () => false,
-    get: val => val,
+    get: (val: any) => val,
   }),
   info: {
     uri: 'serveruri',
