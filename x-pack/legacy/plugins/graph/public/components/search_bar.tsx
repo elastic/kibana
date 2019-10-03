@@ -7,10 +7,9 @@
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import React, { useState } from 'react';
 
-import { Storage } from 'ui/storage';
-import { CoreStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { IDataPluginServices } from 'src/legacy/core_plugins/data/public/types';
 import {
   QueryBarInput,
   Query,
@@ -18,19 +17,16 @@ import {
 } from '../../../../../../src/legacy/core_plugins/data/public';
 import { IndexPatternSavedObject } from '../types/app_state';
 import { openSourceModal } from '../services/source_modal';
-
-const localStorage = new Storage(window.localStorage);
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { CoreStart } from 'kibana/public';
 
 export interface SearchBarProps {
+  coreStart: CoreStart;
   isLoading: boolean;
   currentIndexPattern?: IndexPattern;
   initialQuery?: string;
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
   onQuerySubmit: (query: string) => void;
-  savedObjects: CoreStart['savedObjects'];
-  uiSettings: CoreStart['uiSettings'];
-  http: CoreStart['http'];
-  overlays: CoreStart['overlays'];
 }
 
 function queryToString(query: Query, indexPattern: IndexPattern) {
@@ -55,12 +51,13 @@ export function SearchBar(props: SearchBarProps) {
     onQuerySubmit,
     isLoading,
     onIndexPatternSelected,
-    uiSettings,
-    savedObjects,
-    http,
     initialQuery,
   } = props;
   const [query, setQuery] = useState<Query>({ language: 'kuery', query: initialQuery || '' });
+  const kibana = useKibana<IDataPluginServices>();
+  const { overlays } = kibana.services;
+  if (!overlays) return null;
+
   return (
     <form
       onSubmit={e => {
@@ -75,16 +72,11 @@ export function SearchBar(props: SearchBarProps) {
           <QueryBarInput
             disableAutoFocus
             bubbleSubmitEvent
-            uiSettings={uiSettings}
-            savedObjectsClient={savedObjects.client}
-            http={http}
-            query={query}
             indexPatterns={currentIndexPattern ? [currentIndexPattern] : []}
-            store={localStorage}
-            appName="graph"
             placeholder={i18n.translate('xpack.graph.bar.searchFieldPlaceholder', {
               defaultMessage: 'Search your data and add to your graph',
             })}
+            query={query}
             prepend={
               <EuiToolTip
                 content={i18n.translate('xpack.graph.bar.pickSourceTooltip', {
@@ -96,7 +88,7 @@ export function SearchBar(props: SearchBarProps) {
                   className="gphSearchBar__datasourceButton"
                   data-test-subj="graphDatasourceButton"
                   onClick={() => {
-                    openSourceModal(props, onIndexPatternSelected);
+                    openSourceModal(props.coreStart, onIndexPatternSelected);
                   }}
                 >
                   {currentIndexPattern
