@@ -30,11 +30,11 @@ import {
 
 const numeralInst = numeral();
 
-numeralLanguages.forEach(function(numeralLanguage: Record<any, any>) {
+numeralLanguages.forEach(function(numeralLanguage: Record<string, any>) {
   numeral.language(numeralLanguage.id, numeralLanguage.lang);
 });
 
-export function createNumeralFormat(opts: Record<any, any>) {
+export function createNumeralFormat(opts: Record<string, any>) {
   class NumeralFormat extends FieldFormat {
     static id = opts.id;
     static title = opts.title;
