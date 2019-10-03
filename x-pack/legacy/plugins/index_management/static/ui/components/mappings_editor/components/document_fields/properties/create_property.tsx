@@ -16,15 +16,17 @@ import {
 } from '../../../shared_imports';
 import { FIELD_TYPES_OPTIONS } from '../../../constants';
 import { useDispatch } from '../../../mappings_state';
+import { Property } from '../../../types';
 
 export const CreateProperty = () => {
-  const { form } = useForm();
+  const { form } = useForm<Property>();
   const dispatch = useDispatch();
 
   const saveProperty = async () => {
     const { isValid, data } = await form.submit();
     if (isValid) {
       dispatch({ type: 'property.add', value: data });
+      form.reset();
     }
   };
 

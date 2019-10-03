@@ -96,6 +96,7 @@ export interface Property {
 
 export interface PropertyMeta {
   path: string;
+  parentPath: string | undefined;
   childPropertiesName: ChildPropertyName | undefined;
   canHaveChildProperties: boolean;
   hasChildProperties: boolean;

@@ -26,7 +26,11 @@ const getChildPropertiesName = (dataType: DataType): ChildPropertyName | undefin
   return undefined;
 };
 
-const getPropertyMeta = (property: Property, propertyPath: string): PropertyMeta => {
+export const getPropertyMeta = (
+  property: Property,
+  path: string,
+  parentPath?: string
+): PropertyMeta => {
   const childPropertiesName = getChildPropertiesName(property.type);
   const canHaveChildProperties = Boolean(childPropertiesName);
   const hasChildProperties =
@@ -35,13 +39,12 @@ const getPropertyMeta = (property: Property, propertyPath: string): PropertyMeta
     Object.keys(property[childPropertiesName]!).length > 0;
 
   const childProperties = hasChildProperties
-    ? Object.keys(property[childPropertiesName!]!).map(
-        propertyName => `${propertyPath}.${propertyName}`
-      )
+    ? Object.keys(property[childPropertiesName!]!).map(propertyName => `${path}.${propertyName}`)
     : undefined;
 
   return {
-    path: propertyPath,
+    path,
+    parentPath,
     hasChildProperties,
     childPropertiesName,
     canHaveChildProperties,
@@ -82,10 +85,11 @@ export const normalize = (propertiesToNormalize: Properties): NormalizedProperti
     paths: string[] = []
   ): Record<string, any> =>
     Object.entries(props).reduce((acc, [propName, value]) => {
+      const parentPath = paths.length ? paths.join('.') : undefined;
       const propertyPathArray = [...paths, propName];
       const propertyPath = propertyPathArray.join('.');
       const property = { name: propName, ...value } as Property;
-      const meta = getPropertyMeta(property, propertyPath);
+      const meta = getPropertyMeta(property, propertyPath, parentPath);
 
       const normalizedProperty: NormalizedProperty = {
         resource: property,

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { OnFormUpdateArg } from './shared_imports';
-import { NormalizedProperties } from './types';
+import { Property, NormalizedProperties } from './types';
+import { getPropertyMeta } from './lib';
 
 export interface MappingsConfiguration {
   dynamic: boolean | string;
@@ -36,7 +37,7 @@ export interface State {
 
 export type Action =
   | { type: 'configuration.update'; value: OnFormUpdateArg<MappingsConfiguration> }
-  | { type: 'property.add'; value: any }
+  | { type: 'property.add'; value: Property }
   | { type: 'property.remove'; value: any }
   | { type: 'property.edit'; value: any }
   | { type: 'documentField.createProperty'; value?: string }
@@ -82,13 +83,16 @@ export const reducer = (state: State, action: Action): State => {
       const { fieldPathToAddProperty } = state.documentFields;
       const { name } = action.value;
       const addToRootLevel = fieldPathToAddProperty === undefined;
-      const propId = addToRootLevel ? name : `${fieldPathToAddProperty}.${name}`;
+      const propertyPath = addToRootLevel ? name : `${fieldPathToAddProperty}.${name}`;
 
       const rootLevelFields = addToRootLevel
         ? [...state.properties.rootLevelFields, name]
         : state.properties.rootLevelFields;
 
-      state.properties.byId[propId] = action.value;
+      state.properties.byId[propertyPath] = {
+        resource: action.value,
+        ...getPropertyMeta(action.value, propertyPath, fieldPathToAddProperty),
+      };
 
       if (!addToRootLevel) {
         const parentProperty = state.properties.byId[fieldPathToAddProperty!];
@@ -98,14 +102,14 @@ export const reducer = (state: State, action: Action): State => {
         // Update parent property with new children
         state.properties.byId[fieldPathToAddProperty!] = {
           ...parentProperty,
-          childProperties: [propId, ...childProperties],
+          childProperties: [propertyPath, ...childProperties],
+          hasChildProperties: true,
         };
       }
 
       return {
         ...state,
         properties: { ...state.properties, rootLevelFields },
-        documentFields: { ...state.documentFields, status: 'idle' },
       };
     }
     case 'property.edit': {
