@@ -56,8 +56,6 @@ export class DashboardEmbeddableContainerPublicPlugin
   public start(core: CoreStart, plugins: StartDependencies): Start {
     const { application, notifications, overlays } = core;
     const { embeddable, inspector, uiActions } = plugins;
-
-    /*
     const factory = new DashboardContainerFactory({
       application,
       notifications,
@@ -70,7 +68,6 @@ export class DashboardEmbeddableContainerPublicPlugin
     });
 
     embeddable.registerEmbeddableFactory(factory.type, factory);
-    */
   }
 
   public stop() {}

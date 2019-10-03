@@ -21,8 +21,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { Filter } from '@kbn/es-query';
-import { RefreshInterval, TimeRange } from 'src/plugins/data/public';
-import { IUiActionsStart } from '../../../../../plugins/ui_actions/public';
+import { RefreshInterval, TimeRange } from '../../../../data/public';
+import { IUiActionsStart } from '../../../../ui_actions/public';
 import {
   Container,
   ContainerInput,
