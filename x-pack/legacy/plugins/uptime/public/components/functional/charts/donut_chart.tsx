@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useContext, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { DonutChartLegend } from './donut_chart_legend';
-import { UptimeSettingsContext } from '../../contexts';
+import { UptimeSettingsContext } from '../../../contexts';
 
 interface DonutChartProps {
   down: number;

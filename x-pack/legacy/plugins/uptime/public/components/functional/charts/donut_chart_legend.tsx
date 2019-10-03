@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { DonutChartLegendRow } from './donut_chart_legend_row';
-import { UptimeSettingsContext } from '../../contexts';
+import { UptimeSettingsContext } from '../../../contexts';
 
 interface Props {
   down: number;
