@@ -144,7 +144,6 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       await this.waitForOptionsListLoading(comboBoxElement);
       await input.type(filterValue);
       await this.waitForOptionsListLoading(comboBoxElement);
-      const actualText = input.getVisibleText();
     }
 
     /**
