@@ -19,6 +19,7 @@
 
 import { Component } from 'react';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiFieldText, EuiOutsideClickDetector, PopoverAnchorPosition } from '@elastic/eui';
 
@@ -438,23 +439,30 @@ export class QueryBarInputUI extends Component<Props, State> {
   }
 
   public render() {
+    const isSuggestionsVisible = this.state.isSuggestionsVisible && {
+      'aria-controls': 'kbnTypeahead__items',
+      'aria-owns': 'kbnTypeahead__items',
+    };
+    const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
+
     return (
       <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
         <div
+          {...ariaCombobox}
           style={{ position: 'relative' }}
-          role="combobox"
+          aria-label={i18n.translate('data.query.queryBar.comboboxAriaLabel', {
+            defaultMessage: 'Search and filter the {pageType} page',
+            values: { pageType: this.services.appName },
+          })}
           aria-haspopup="true"
           aria-expanded={this.state.isSuggestionsVisible}
-          aria-owns="kbnTypeahead__items"
-          aria-controls="kbnTypeahead__items"
         >
           <div role="search">
             <div className="kuiLocalSearchAssistedInput">
               <EuiFieldText
                 placeholder={
                   this.props.placeholder ||
-                  this.props.intl.formatMessage({
-                    id: 'data.query.queryBar.searchInputPlaceholder',
+                  i18n.translate('data.query.queryBar.searchInputPlaceholder', {
                     defaultMessage: 'Search',
                   })
                 }
@@ -472,26 +480,17 @@ export class QueryBarInputUI extends Component<Props, State> {
                 }}
                 autoComplete="off"
                 spellCheck={false}
-                aria-label={
-                  this.props.screenTitle
-                    ? this.props.intl.formatMessage(
-                        {
-                          id: 'data.query.queryBar.searchInputAriaLabel',
-                          defaultMessage:
-                            'You are on search box of {previouslyTranslatedPageTitle} page. Start typing to search and filter the {pageType}',
-                        },
-                        {
-                          previouslyTranslatedPageTitle: this.props.screenTitle,
-                          pageType: this.services.appName,
-                        }
-                      )
-                    : undefined
-                }
+                aria-label={i18n.translate('data.query.queryBar.searchInputAriaLabel', {
+                  defaultMessage: 'Start typing to search and filter the {pageType} page',
+                  values: { pageType: this.services.appName },
+                })}
                 type="text"
                 aria-autocomplete="list"
-                aria-controls="kbnTypeahead__items"
+                aria-controls={this.state.isSuggestionsVisible ? 'kbnTypeahead__items' : undefined}
                 aria-activedescendant={
-                  this.state.isSuggestionsVisible ? 'suggestion-' + this.state.index : ''
+                  this.state.isSuggestionsVisible && typeof this.state.index === 'number'
+                    ? `suggestion-${this.state.index}`
+                    : undefined
                 }
                 role="textbox"
                 prepend={this.props.prepend}

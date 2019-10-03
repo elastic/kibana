@@ -51,6 +51,7 @@ describe('search_bar', () => {
         onIndexPatternSelected: () => {},
         onQuerySubmit: querySubmit,
         currentIndexPattern: { title: 'Testpattern' } as IndexPattern,
+        coreStart: {} as CoreStart,
       })
     );
     act(() => {
@@ -72,6 +73,7 @@ describe('search_bar', () => {
         onIndexPatternSelected: () => {},
         onQuerySubmit: querySubmit,
         currentIndexPattern: { title: 'Testpattern', fields: [{ name: 'test' }] } as IndexPattern,
+        coreStart: {} as CoreStart,
       })
     );
     act(() => {
@@ -97,6 +99,7 @@ describe('search_bar', () => {
         onIndexPatternSelected: indexPatternSelected,
         onQuerySubmit: () => {},
         currentIndexPattern: { title: 'Testpattern' } as IndexPattern,
+        coreStart: {} as CoreStart,
       })
     );
 
