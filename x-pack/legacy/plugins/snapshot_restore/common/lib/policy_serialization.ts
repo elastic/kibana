@@ -4,19 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SlmPolicy, SlmPolicyEs, SlmPolicyPayload } from '../types';
-import { deserializeSnapshotConfig, serializeSnapshotConfig } from './';
+import {
+  deserializeSnapshotConfig,
+  serializeSnapshotConfig,
+  deserializeSnapshotRetention,
+  serializeSnapshotRetention,
+} from './';
 
 export const deserializePolicy = (name: string, esPolicy: SlmPolicyEs): SlmPolicy => {
   const {
     version,
     modified_date: modifiedDate,
     modified_date_millis: modifiedDateMillis,
-    policy: { name: snapshotName, schedule, repository, config },
+    policy: { name: snapshotName, schedule, repository, config, retention },
     next_execution: nextExecution,
     next_execution_millis: nextExecutionMillis,
     last_failure: lastFailure,
     last_success: lastSuccess,
     in_progress: inProgress,
+    stats,
   } = esPolicy;
 
   const policy: SlmPolicy = {
@@ -33,6 +39,10 @@ export const deserializePolicy = (name: string, esPolicy: SlmPolicyEs): SlmPolic
 
   if (config) {
     policy.config = deserializeSnapshotConfig(config);
+  }
+
+  if (retention) {
+    policy.retention = deserializeSnapshotRetention(retention);
   }
 
   if (lastFailure) {
@@ -82,11 +92,27 @@ export const deserializePolicy = (name: string, esPolicy: SlmPolicyEs): SlmPolic
     };
   }
 
+  if (stats) {
+    const {
+      snapshots_taken: snapshotsTaken,
+      snapshots_failed: snapshotsFailed,
+      snapshots_deleted: snapshotsDeleted,
+      snapshot_deletion_failures: snapshotDeletionFailures,
+    } = stats;
+
+    policy.stats = {
+      snapshotsTaken,
+      snapshotsFailed,
+      snapshotsDeleted,
+      snapshotDeletionFailures,
+    };
+  }
+
   return policy;
 };
 
 export const serializePolicy = (policy: SlmPolicyPayload): SlmPolicyEs['policy'] => {
-  const { snapshotName: name, schedule, repository, config } = policy;
+  const { snapshotName: name, schedule, repository, config, retention } = policy;
   const policyEs: SlmPolicyEs['policy'] = {
     name,
     schedule,
@@ -95,6 +121,14 @@ export const serializePolicy = (policy: SlmPolicyPayload): SlmPolicyEs['policy']
 
   if (config) {
     policyEs.config = serializeSnapshotConfig(config);
+  }
+
+  if (retention) {
+    const serializedRetention = serializeSnapshotRetention(retention);
+
+    if (serializedRetention) {
+      policyEs.retention = serializeSnapshotRetention(retention);
+    }
   }
 
   return policyEs;

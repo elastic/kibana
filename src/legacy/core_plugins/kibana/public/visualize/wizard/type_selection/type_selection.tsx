@@ -41,7 +41,7 @@ import { VisTypeAlias } from '../../../../../visualizations/public';
 import { NewVisHelp } from './new_vis_help';
 import { VisHelpText } from './vis_help_text';
 import { VisTypeIcon } from './vis_type_icon';
-import { TypesStart } from '../../../../../visualizations/public/np_ready/types';
+import { TypesStart } from '../../../../../visualizations/public/np_ready/public/types';
 
 interface VisTypeListEntry extends VisType {
   highlighted: boolean;
