@@ -101,7 +101,7 @@ export const SnapshotHistogramComponent = ({
   });
 
   const {
-    colors: { danger, success },
+    colors: { danger, gray },
   } = useContext(UptimeSettingsContext);
 
   const downSpecId = getSpecId(downMonitorsName);
@@ -158,7 +158,7 @@ export const SnapshotHistogramComponent = ({
             })}
           />
           <BarSeries
-            customSeriesColors={getColorsMap(success, upSpecId)}
+            customSeriesColors={getColorsMap(gray, upSpecId)}
             data={histogram.map(({ x, upCount }) => [x, upCount || 0])}
             id={upSpecId}
             name={upMonitorsId}
