@@ -130,12 +130,12 @@ export class TaskManager {
   private async claimAvailableTasks() {
     const { docs, claimedTasks } = await this.store.claimAvailableTasks({
       size: this.pool.availableWorkers,
-      retryAt: intervalFromNow('1s')!,
+      claimOwnershipUntil: intervalFromNow('5s')!,
     });
 
     if (docs.length !== claimedTasks) {
       this.logger.warn(
-        `[Task Ownership error]: (${claimedTasks}) tasks were claimed by Kibana, but (${docs.length}) claimed tasks were fetched`
+        `[Task Ownership error]: (${claimedTasks}) tasks were claimed by Kibana, but (${docs.length}) tasks were fetched`
       );
     }
     return docs;

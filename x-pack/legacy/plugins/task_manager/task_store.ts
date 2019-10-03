@@ -56,7 +56,7 @@ export interface UpdateByQueryOpts extends SearchOpts {
 }
 
 export interface OwnershipClaimingOpts {
-  retryAt: Date;
+  claimOwnershipUntil: Date;
   size: number;
 }
 
@@ -71,6 +71,8 @@ export interface ClaimOwnershipResult {
 }
 
 export interface UpdateByQueryResult {
+  updated: number;
+  version_conflicts: number;
   total: number;
 }
 
@@ -248,9 +250,9 @@ export class TaskStore {
 
   private async markAvailableTasksAsClaimed({
     size,
-    retryAt,
+    claimOwnershipUntil,
   }: OwnershipClaimingOpts): Promise<number> {
-    const { total } = await this.updateByQuery(
+    const { updated } = await this.updateByQuery(
       {
         query: {
           bool: {
@@ -327,7 +329,7 @@ export class TaskStore {
           lang: 'painless',
           params: {
             ownerId: this.kibanaId,
-            retryAt,
+            retryAt: claimOwnershipUntil,
             status: 'claiming',
           },
         },
@@ -336,7 +338,7 @@ export class TaskStore {
         max_docs: size,
       }
     );
-    return total;
+    return updated;
   }
 
   /**
@@ -442,9 +444,11 @@ export class TaskStore {
       },
     });
 
-    const { total } = result;
+    const { total, updated, version_conflicts } = result;
     return {
       total,
+      updated,
+      version_conflicts,
     };
   }
 }
