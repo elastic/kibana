@@ -32,9 +32,7 @@ export declare class SearchSource {
   setParent: (parent: SearchSource | boolean) => SearchSource;
   getParent: () => SearchSource | undefined;
   fetch: (options?: any) => Promise<any>;
-  onRequestStart: (
-    handler: (searchSource: SearchSource, request: any, options: any) => void
-  ) => void;
+  onRequestStart: (handler: (searchSource: SearchSource, options: any) => void) => void;
   getSearchRequestBody: () => any;
   destroy: () => void;
   history: any[];

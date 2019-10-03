@@ -151,17 +151,16 @@ describe('SearchSource', function () {
   });
 
   describe('#onRequestStart()', () => {
-    it('should be called when starting a request', async () => {
+    it('should be called when starting a request', () => {
       const searchSource = new SearchSource();
       const fn = jest.fn();
       searchSource.onRequestStart(fn);
-      const request = {};
       const options = {};
-      searchSource.requestIsStarting(request, options);
-      expect(fn).toBeCalledWith(searchSource, request, options);
+      searchSource.requestIsStarting(options);
+      expect(fn).toBeCalledWith(searchSource, options);
     });
 
-    it('should not be called on parent searchSource', async () => {
+    it('should not be called on parent searchSource', () => {
       const parent = new SearchSource();
       const searchSource = new SearchSource().setParent(parent);
 
@@ -169,15 +168,14 @@ describe('SearchSource', function () {
       searchSource.onRequestStart(fn);
       const parentFn = jest.fn();
       parent.onRequestStart(parentFn);
-      const request = {};
       const options = {};
-      searchSource.requestIsStarting(request, options);
+      searchSource.requestIsStarting(options);
 
-      expect(fn).toBeCalledWith(searchSource, request, options);
+      expect(fn).toBeCalledWith(searchSource, options);
       expect(parentFn).not.toBeCalled();
     });
 
-    it('should be called on parent searchSource if callParentStartHandlers is true', async () => {
+    it('should be called on parent searchSource if callParentStartHandlers is true', () => {
       const parent = new SearchSource();
       const searchSource = new SearchSource().setParent(parent, { callParentStartHandlers: true });
 
@@ -185,12 +183,11 @@ describe('SearchSource', function () {
       searchSource.onRequestStart(fn);
       const parentFn = jest.fn();
       parent.onRequestStart(parentFn);
-      const request = {};
       const options = {};
-      searchSource.requestIsStarting(request, options);
+      searchSource.requestIsStarting(options);
 
-      expect(fn).toBeCalledWith(searchSource, request, options);
-      expect(parentFn).toBeCalledWith(searchSource, request, options);
+      expect(fn).toBeCalledWith(searchSource, options);
+      expect(parentFn).toBeCalledWith(searchSource, options);
     });
   });
 });
