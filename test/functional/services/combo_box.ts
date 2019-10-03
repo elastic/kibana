@@ -145,10 +145,6 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       await input.type(filterValue);
       await this.waitForOptionsListLoading(comboBoxElement);
       const actualText = input.getVisibleText();
-      // LeeDr: it seems that sometimes using IEDriver the first characters don't get typed.
-      if (!actualText === filterValue) {
-        log.debug(`--------- ERROR expected setFilterValue=${filterValue}, actual=${actualText}`);
-      }
     }
 
     /**
