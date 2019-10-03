@@ -5,7 +5,11 @@
  */
 
 import { Setup } from '../../server/lib/helpers/setup_request';
-import { SERVICE_NAME, SERVICE_NODE_NAME } from '../elasticsearch_fieldnames';
+import {
+  SERVICE_NAME,
+  SERVICE_NODE_NAME,
+  PROCESSOR_EVENT
+} from '../elasticsearch_fieldnames';
 import { rangeFilter } from '../../server/lib/helpers/range_filter';
 
 export function getServiceNodesProjection({
@@ -24,6 +28,7 @@ export function getServiceNodesProjection({
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [PROCESSOR_EVENT]: 'metric' } },
             { range: rangeFilter(start, end) },
             ...uiFiltersES
           ]

@@ -42,6 +42,11 @@ Object {
             },
           },
           Object {
+            "term": Object {
+              "processor.event": "metric",
+            },
+          },
+          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
