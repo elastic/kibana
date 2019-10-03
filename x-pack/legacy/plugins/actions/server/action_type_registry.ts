@@ -6,17 +6,18 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
-import { RunContext, TaskManager } from '../../task_manager';
+import { TaskManagerSetupContract } from './shim';
+import { RunContext } from '../../task_manager';
 import { ExecutorError, TaskRunnerFactory } from './lib';
 import { ActionType } from './types';
 
 interface ConstructorOptions {
-  taskManager: TaskManager;
+  taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;
 }
 
 export class ActionTypeRegistry {
-  private readonly taskManager: TaskManager;
+  private readonly taskManager: TaskManagerSetupContract;
   private readonly actionTypes: Map<string, ActionType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
 
