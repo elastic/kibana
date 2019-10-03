@@ -45,7 +45,7 @@ include::cluster-alerts-license.asciidoc[]
 To receive email notifications for the Cluster Alerts:
 
 1. Configure an email account as described in
-{xpack-ref}/actions-email.html#configuring-email[Configuring Email Accounts].
+{ref}/actions-email.html#configuring-email[Configuring email accounts].
 2. Navigate to the *Management* page in {kib}.
 3. Go to the *Advanced Settings* page, find the `xpack:defaultAdminEmail`
 setting, and enter your email address.
