@@ -8,15 +8,15 @@ import moment from 'moment';
 
 /*
  * Calculate "Per-Second" Rate from Metrics
- * Uses first/last totals and time window bounds in millis
+ * Uses first/last totals and data timestamp bounds in millis
  *
  * Indexing rate example:
  * 1. Take the latest index total
  * 2. From that subtract the earliest index total
  * This gives you the numerator
  *
- * 3. Take the latest timestamp from the time picker
- * 4. From that subtract the earliest timestamp from the time picker
+ * 3. Take the timestamp from the latest hit
+ * 4. From that subtract the timestamp of the earliest hit
  * This gives you the denominator in millis. Divide it by 1000 to convert to seconds
  */
 export function calculateRate(
