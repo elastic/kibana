@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as t from 'io-ts';
+import { RuntimeAgent, RuntimeAgentAction } from '../../server/repositories/agents/types';
+import { RuntimeAgentEvent } from '../../server/repositories/agent_events/types';
 
 // Here we create the runtime check for a generic, unknown beat config type.
 // We can also pass in optional params to create spacific runtime checks that
@@ -29,31 +31,6 @@ export interface ConfigurationBlock
   id: string;
 }
 
-export interface Agent {
-  id: string;
-  active: boolean;
-  type: 'PERMANENT' | 'TEMPORARY' | 'EPHEMERAL' | 'EPHEMERAL_INSTANCE';
-  access_token?: string;
-  enrolled_at?: string;
-  user_provided_metadata?: { [key: string]: string };
-  local_metadata?: { [key: string]: string };
-  last_checkin?: string;
-  actions: AgentAction[];
-}
-
-export interface AgentAction {
-  id: string;
-  type: string;
-  created_at: string;
-  data?: string;
-  sent_at?: string;
-}
-
-export interface AgentEvent {
-  timestamp: string;
-  type: string;
-  subtype: string;
-  message: string;
-  payload?: any;
-  data?: string;
-}
+export type Agent = t.TypeOf<typeof RuntimeAgent>;
+export type AgentAction = t.TypeOf<typeof RuntimeAgentAction>;
+export type AgentEvent = t.TypeOf<typeof RuntimeAgentEvent>;
