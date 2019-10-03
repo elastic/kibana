@@ -20,6 +20,10 @@ export default function ({ getService }) {
         min: '2018-02-13T17:04:50.000Z',
         max: '2018-02-13T17:51:55.000Z'
       };
+      const pagination = {
+        size: 10,
+        index: 0
+      };
 
       before('load clusters archive', () => {
         return esArchiver.load(archive);
@@ -35,7 +39,7 @@ export default function ({ getService }) {
             '/api/monitoring/v1/clusters/fHJwISmKTFO8bj57oFBLUQ/elasticsearch/nodes'
           )
           .set('kbn-xsrf', 'xxx')
-          .send({ timeRange })
+          .send({ timeRange, pagination })
           .expect(200);
         expect(body).to.eql(nodesListingFixtureGreen);
       });
@@ -46,6 +50,10 @@ export default function ({ getService }) {
       const timeRange = {
         min: '2017-10-06T19:53:06.000Z',
         max: '2017-10-06T20:15:30.000Z'
+      };
+      const pagination = {
+        size: 10,
+        index: 0
       };
 
       before('load clusters archive', () => {
@@ -62,7 +70,7 @@ export default function ({ getService }) {
             '/api/monitoring/v1/clusters/1LYuyvCCQFS3FAO_h65PQw/elasticsearch/nodes'
           )
           .set('kbn-xsrf', 'xxx')
-          .send({ timeRange })
+          .send({ timeRange, pagination })
           .expect(200);
         expect(body).to.eql(nodesListingFixtureRed);
       });
@@ -73,6 +81,10 @@ export default function ({ getService }) {
       const timeRange = {
         min: '2018-02-13T19:18:02.000Z',
         max: '2018-02-13T19:26:14.000Z'
+      };
+      const pagination = {
+        size: 10,
+        index: 0
       };
 
       before('load clusters archive', () => {
@@ -87,7 +99,7 @@ export default function ({ getService }) {
         const { body } = await supertest
           .post('/api/monitoring/v1/clusters/Cbo7k85ZRdy--yxmqeykog/elasticsearch/nodes')
           .set('kbn-xsrf', 'xxx')
-          .send({ timeRange })
+          .send({ timeRange, pagination })
           .expect(200);
         expect(body).to.eql(nodesListingFixtureCgroup);
       });
