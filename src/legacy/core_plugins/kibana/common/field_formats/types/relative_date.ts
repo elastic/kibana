@@ -18,13 +18,17 @@
  */
 
 import moment from 'moment';
-import { FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../../../plugins/data/common/';
+import {
+  FieldFormat,
+  TEXT_CONTEXT_TYPE,
+  KBN_FIELD_TYPES,
+} from '../../../../../../plugins/data/common/';
 
 export function createRelativeDateFormat() {
   class RelativeDateFormat extends FieldFormat {
     static id = 'relative_date';
     static title = 'Relative Date';
-    static fieldType = 'date';
+    static fieldType = KBN_FIELD_TYPES.DATE;
 
     constructor(params: any) {
       super(params);

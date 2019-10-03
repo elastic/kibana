@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
+import { FieldFormat, KBN_FIELD_TYPES } from '../../../../../../plugins/data/common/';
 
 export function createIpFormat() {
   return class IpFormat extends FieldFormat {
     static id = 'ip';
     static title = 'IP Address';
-    static fieldType = 'ip';
+    static fieldType = KBN_FIELD_TYPES.IP;
 
     _convert(val: any) {
       if (val === undefined || val === null) return '-';

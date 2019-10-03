@@ -22,7 +22,11 @@ import numeral from '@elastic/numeral';
 // @ts-ignore
 import numeralLanguages from '@elastic/numeral/languages';
 import { assign, has } from 'lodash';
-import { FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../../../plugins/data/common/';
+import {
+  FieldFormat,
+  TEXT_CONTEXT_TYPE,
+  KBN_FIELD_TYPES,
+} from '../../../../../../plugins/data/common/';
 
 const numeralInst = numeral();
 
@@ -34,7 +38,7 @@ export function createNumeralFormat(opts: Record<any, any>) {
   class NumeralFormat extends FieldFormat {
     static id = opts.id;
     static title = opts.title;
-    static fieldType = 'number';
+    static fieldType = KBN_FIELD_TYPES.NUMBER;
 
     private getConfig: Function;
 

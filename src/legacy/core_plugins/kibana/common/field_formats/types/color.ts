@@ -22,7 +22,8 @@ import {
   asPrettyString,
   FieldFormat,
   HTML_CONTEXT_TYPE,
-} from '../../../../../../plugins/data/common/field_formats';
+  KBN_FIELD_TYPES,
+} from '../../../../../../plugins/data/common/';
 import { DEFAULT_COLOR } from './color_default';
 
 const convertTemplate = template('<span style="<%- style %>"><%- val %></span>');
@@ -31,7 +32,7 @@ export function createColorFormat() {
   class ColorFormat extends FieldFormat {
     static id = 'color';
     static title = 'Color';
-    static fieldType = ['number', 'string'];
+    static fieldType = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING];
 
     getParamDefaults() {
       return {

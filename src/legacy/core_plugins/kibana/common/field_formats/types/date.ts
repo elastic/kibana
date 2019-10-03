@@ -19,13 +19,13 @@
 
 import { memoize } from 'lodash';
 import moment from 'moment';
-import { FieldFormat } from '../../../../../../plugins/data/common/';
+import { FieldFormat, KBN_FIELD_TYPES } from '../../../../../../plugins/data/common/';
 
 export function createDateFormat() {
   return class DateFormat extends FieldFormat {
     static id = 'date';
     static title = 'Date';
-    static fieldType = 'date';
+    static fieldType = KBN_FIELD_TYPES.DATE;
 
     private getConfig: Function;
     private memoizedPattern: any;

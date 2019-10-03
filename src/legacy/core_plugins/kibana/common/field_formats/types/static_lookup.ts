@@ -17,7 +17,11 @@
  * under the License.
  */
 
-import { FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../../../plugins/data/common/';
+import {
+  FieldFormat,
+  TEXT_CONTEXT_TYPE,
+  KBN_FIELD_TYPES,
+} from '../../../../../../plugins/data/common/';
 
 function convertLookupEntriesToMap(lookupEntries: any) {
   return lookupEntries.reduce((lookupMap: any, lookupEntry: any) => {
@@ -30,7 +34,12 @@ export function createStaticLookupFormat() {
   return class StaticLookupFormat extends FieldFormat {
     static id = 'static_lookup';
     static title = 'Static Lookup';
-    static fieldType = ['string', 'number', 'ip', 'boolean'];
+    static fieldType = [
+      KBN_FIELD_TYPES.STRING,
+      KBN_FIELD_TYPES.NUMBER,
+      KBN_FIELD_TYPES.IP,
+      KBN_FIELD_TYPES.BOOLEAN,
+    ];
 
     getParamDefaults() {
       return {

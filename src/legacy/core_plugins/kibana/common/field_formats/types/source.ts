@@ -26,6 +26,7 @@ import {
   FieldFormat,
   TEXT_CONTEXT_TYPE,
   HTML_CONTEXT_TYPE,
+  KBN_FIELD_TYPES,
 } from '../../../../../../plugins/data/common/';
 
 const templateHtml = `
@@ -42,7 +43,7 @@ export function createSourceFormat() {
   class SourceFormat extends FieldFormat {
     static id = '_source';
     static title = '_source';
-    static fieldType = '_source';
+    static fieldType = KBN_FIELD_TYPES._SOURCE;
 
     private getConfig: Function;
 

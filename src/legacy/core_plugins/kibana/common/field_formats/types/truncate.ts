@@ -18,7 +18,11 @@
  */
 
 import { trunc } from 'lodash';
-import { FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../../../plugins/data/common/';
+import {
+  FieldFormat,
+  TEXT_CONTEXT_TYPE,
+  KBN_FIELD_TYPES,
+} from '../../../../../../plugins/data/common/';
 
 const omission = '...';
 
@@ -26,7 +30,7 @@ export function createTruncateFormat() {
   class TruncateFormat extends FieldFormat {
     static id = 'truncate';
     static title = 'Truncated String';
-    static fieldType = ['string'];
+    static fieldType = KBN_FIELD_TYPES.STRING;
 
     _convert = {
       [TEXT_CONTEXT_TYPE](this: TruncateFormat, val: any) {

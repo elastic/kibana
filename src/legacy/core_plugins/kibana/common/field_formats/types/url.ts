@@ -23,6 +23,7 @@ import {
   FieldFormat,
   TEXT_CONTEXT_TYPE,
   HTML_CONTEXT_TYPE,
+  KBN_FIELD_TYPES,
 } from '../../../../../../plugins/data/common/';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
@@ -40,14 +41,14 @@ export function createUrlFormat() {
     static id = 'url';
     static title = 'Url';
     static fieldType = [
-      'number',
-      'boolean',
-      'date',
-      'ip',
-      'string',
-      'murmur3',
-      'unknown',
-      'conflict',
+      KBN_FIELD_TYPES.NUMBER,
+      KBN_FIELD_TYPES.BOOLEAN,
+      KBN_FIELD_TYPES.DATE,
+      KBN_FIELD_TYPES.IP,
+      KBN_FIELD_TYPES.STRING,
+      KBN_FIELD_TYPES.MURMUR3,
+      KBN_FIELD_TYPES.UNKNOWN,
+      KBN_FIELD_TYPES.CONFLICT,
     ];
     static urlTypes = URL_TYPES;
 

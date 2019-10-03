@@ -18,7 +18,7 @@
  */
 
 import moment, { unitOfTime, Duration } from 'moment';
-import { FieldFormat } from '../../../../../../plugins/data/common/';
+import { FieldFormat, KBN_FIELD_TYPES } from '../../../../../../plugins/data/common/';
 
 const ratioToSeconds: Record<string, number> = {
   picoseconds: 0.000000000001,
@@ -64,6 +64,12 @@ function parseInputAsDuration(val: number, inputFormat: string) {
 
 export function createDurationFormat() {
   return class DurationFormat extends FieldFormat {
+    static id = 'duration';
+    static title = 'Duration';
+    static fieldType = KBN_FIELD_TYPES.NUMBER;
+    static inputFormats = inputFormats;
+    static outputFormats = outputFormats;
+
     isHuman() {
       return this.param('outputFormat') === HUMAN_FRIENDLY;
     }
@@ -85,12 +91,5 @@ export function createDurationFormat() {
       const precise = human ? formatted : formatted.toFixed(outputPrecision);
       return prefix + precise;
     }
-
-    static id = 'duration';
-    static title = 'Duration';
-    static fieldType = 'number';
-
-    static inputFormats = inputFormats;
-    static outputFormats = outputFormats;
   };
 }

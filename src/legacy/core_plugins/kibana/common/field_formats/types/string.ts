@@ -18,7 +18,11 @@
  */
 
 import { asPrettyString } from '../../../../../../plugins/data/common/field_formats';
-import { FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../../../plugins/data/common/';
+import {
+  FieldFormat,
+  TEXT_CONTEXT_TYPE,
+  KBN_FIELD_TYPES,
+} from '../../../../../../plugins/data/common/';
 // @ts-ignore
 import { shortenDottedString } from '../../utils/shorten_dotted_string';
 
@@ -38,17 +42,17 @@ export function createStringFormat() {
     static id = 'string';
     static title = 'String';
     static fieldType = [
-      'number',
-      'boolean',
-      'date',
-      'ip',
-      'attachment',
-      'geo_point',
-      'geo_shape',
-      'string',
-      'murmur3',
-      'unknown',
-      'conflict',
+      KBN_FIELD_TYPES.NUMBER,
+      KBN_FIELD_TYPES.BOOLEAN,
+      KBN_FIELD_TYPES.DATE,
+      KBN_FIELD_TYPES.IP,
+      KBN_FIELD_TYPES.ATTACHMENT,
+      KBN_FIELD_TYPES.GEO_POINT,
+      KBN_FIELD_TYPES.GEO_SHAPE,
+      KBN_FIELD_TYPES.STRING,
+      KBN_FIELD_TYPES.MURMUR3,
+      KBN_FIELD_TYPES.UNKNOWN,
+      KBN_FIELD_TYPES.CONFLICT,
     ];
     static transformOptions = TRANSFORM_OPTIONS;
 
