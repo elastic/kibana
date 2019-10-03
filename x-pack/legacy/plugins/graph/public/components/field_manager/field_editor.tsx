@@ -29,7 +29,7 @@ import classNames from 'classnames';
 import { WorkspaceField } from '../../types';
 import { iconChoices } from '../../helpers/style_choices';
 import { LegacyIcon } from '../legacy_icon';
-import { FieldIcon } from './field_icon';
+import { FieldIcon } from '../../../../../../../src/plugins/kibana_react/public';
 import { isEqual } from '../helpers';
 
 type UpdateableFieldProperties = 'hopSize' | 'lastValidHopSize' | 'color' | 'icon';
@@ -215,7 +215,7 @@ export function FieldEditor({
                       const { type, label } = option;
                       return (
                         <span className={contentClassName}>
-                          <FieldIcon type={type!} />{' '}
+                          <FieldIcon type={type!} size={'m'} useColor />{' '}
                           <EuiHighlight search={searchValue}>{label}</EuiHighlight>
                         </span>
                       );
