@@ -24,28 +24,33 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
   } = useContext(UptimeSettingsContext);
   useEffect(() => {
     if (chartElement.current !== null) {
-      const svg = d3
+      const svgElement = d3
         .select(chartElement.current)
         .append('g')
         .attr('transform', `translate(${width / 2}, ${height / 2})`);
-      const data = { up, down };
-      const color = d3
-        // @ts-ignore this function exists
-        .scaleOrdinal()
-        .domain(data)
+      const color = d3.scale
+        .ordinal()
+        .domain(['up', 'down'])
         .range([gray, danger]);
-      // @ts-ignore this function exists
-      const pie = d3.pie().value((d: any) => d.value);
-      const dataReady = pie(d3.entries(data));
-      svg
+      const pie = d3.layout
+        .pie()
+        .value((d: any) => d.value)
+        .startAngle(2 * Math.PI)
+        .endAngle(0);
+
+      svgElement
         .selectAll('key')
-        .data(dataReady)
+        .data(
+          // @ts-ignore pie type expects number[] but works with
+          // output of d3.entries, Array<{ key: string, value: number }>
+          pie(d3.entries({ up, down }))
+        )
         .enter()
         .append('path')
         .attr(
           'd',
-          d3
-            // @ts-ignore this function exists
+          // @ts-ignore typing does not accept arc generator output
+          d3.svg
             .arc()
             .innerRadius(width * 0.2)
             .outerRadius(Math.min(width, height) / 2 - 10)
