@@ -84,7 +84,7 @@
       i18n-default-message="Selected fields"
     ></h3>
   </div>
-  <ul class="list-unstyled dscFieldList--selected" >
+  <ul class="list-unstyled dscFieldList--selected" aria-labelledby="selected_fields">
     <discover-field
       ng-repeat="field in fields.raw|filter:filter.isFieldFilteredAndDisplayed"
       field="field"
