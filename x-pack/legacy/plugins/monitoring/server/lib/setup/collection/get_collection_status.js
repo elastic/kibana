@@ -5,8 +5,14 @@
  */
 
 import { get, uniq } from 'lodash';
-import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN, ELASTICSEARCH_CUSTOM_ID, APM_CUSTOM_ID } from '../../../../common/constants';
-import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../../../../../telemetry/common/constants';
+import {
+  METRICBEAT_INDEX_NAME_UNIQUE_TOKEN,
+  ELASTICSEARCH_SYSTEM_ID,
+  APM_SYSTEM_ID,
+  KIBANA_SYSTEM_ID,
+  BEATS_SYSTEM_ID,
+  LOGSTASH_SYSTEM_ID
+} from '../../../../common/constants';
 import { getLivesNodes } from '../../elasticsearch/nodes/get_nodes/get_live_nodes';
 import { KIBANA_STATS_TYPE } from '../../../../../../../../src/legacy/server/status/constants';
 
@@ -139,18 +145,18 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
   return await callWithRequest(req, 'search', params);
 };
 
-async function detectProducts(req) {
+async function detectProducts(req, isLiveCluster) {
   const result = {
     [KIBANA_SYSTEM_ID]: {
       doesExist: true,
     },
-    [ELASTICSEARCH_CUSTOM_ID]: {
+    [ELASTICSEARCH_SYSTEM_ID]: {
       doesExist: true,
     },
     [BEATS_SYSTEM_ID]: {
       mightExist: false,
     },
-    [APM_CUSTOM_ID]: {
+    [APM_SYSTEM_ID]: {
       mightExist: false,
     },
     [LOGSTASH_SYSTEM_ID]: {
@@ -174,18 +180,20 @@ async function detectProducts(req) {
       ]
     },
     {
-      id: APM_CUSTOM_ID,
+      id: APM_SYSTEM_ID,
       indices: [
         'apm-*'
       ]
     }
   ];
 
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
-  for (const { id, indices } of detectionSearch) {
-    const response = await callWithRequest(req, 'cat.indices', { index: indices, format: 'json' });
-    if (response.length) {
-      result[id].mightExist = true;
+  if (isLiveCluster) {
+    const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
+    for (const { id, indices } of detectionSearch) {
+      const response = await callWithRequest(req, 'cat.indices', { index: indices, format: 'json' });
+      if (response.length) {
+        result[id].mightExist = true;
+      }
     }
   }
 
@@ -194,12 +202,12 @@ async function detectProducts(req) {
 
 function getUuidBucketName(productName) {
   switch (productName) {
-    case ELASTICSEARCH_CUSTOM_ID:
+    case ELASTICSEARCH_SYSTEM_ID:
       return 'es_uuids';
     case KIBANA_SYSTEM_ID:
       return 'kibana_uuids';
     case BEATS_SYSTEM_ID:
-    case APM_CUSTOM_ID:
+    case APM_SYSTEM_ID:
       return 'beats_uuids';
     case LOGSTASH_SYSTEM_ID:
       return 'logstash_uuids';
@@ -232,7 +240,7 @@ function shouldSkipBucket(product, bucket) {
   if (product.name === BEATS_SYSTEM_ID && isBeatFromAPM(bucket)) {
     return true;
   }
-  if (product.name === APM_CUSTOM_ID && !isBeatFromAPM(bucket)) {
+  if (product.name === APM_SYSTEM_ID && !isBeatFromAPM(bucket)) {
     return true;
   }
   return false;
@@ -271,7 +279,7 @@ async function getLiveElasticsearchCollectionEnabled(req) {
   });
   const sources = ['persistent', 'transient', 'defaults'];
   for (const source of sources) {
-    const collectionSettings = get(response[source], 'xpack.monitoring.collection');
+    const collectionSettings = get(response[source], 'xpack.monitoring.elasticsearch.collection');
     if (collectionSettings && collectionSettings.enabled === 'true') {
       return true;
     }
@@ -308,13 +316,15 @@ async function getLiveElasticsearchCollectionEnabled(req) {
 export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeUuid, skipLiveData) => {
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
+  const liveClusterUuid = skipLiveData ? null : await getLiveElasticsearchClusterUuid(req);
+  const isLiveCluster = !clusterUuid || liveClusterUuid === clusterUuid;
 
   const PRODUCTS = [
     { name: KIBANA_SYSTEM_ID },
     { name: BEATS_SYSTEM_ID },
     { name: LOGSTASH_SYSTEM_ID },
-    { name: APM_CUSTOM_ID, token: '-beats-' },
-    { name: ELASTICSEARCH_CUSTOM_ID, token: '-es-' },
+    { name: APM_SYSTEM_ID, token: '-beats-' },
+    { name: ELASTICSEARCH_SYSTEM_ID, token: '-es-' },
   ];
 
   const [
@@ -322,12 +332,12 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
     detectedProducts
   ] = await Promise.all([
     await getRecentMonitoringDocuments(req, indexPatterns, clusterUuid, nodeUuid),
-    await detectProducts(req)
+    await detectProducts(req, isLiveCluster)
   ]);
 
-  const liveClusterUuid = skipLiveData ? null : await getLiveElasticsearchClusterUuid(req);
-  const liveEsNodes = skipLiveData || (clusterUuid && liveClusterUuid !== clusterUuid) ? [] : await getLivesNodes(req);
-  const liveKibanaInstance = skipLiveData || (clusterUuid && liveClusterUuid !== clusterUuid) ? {} : await getLiveKibanaInstance(req);
+
+  const liveEsNodes = skipLiveData || !isLiveCluster ? [] : await getLivesNodes(req);
+  const liveKibanaInstance = skipLiveData || !isLiveCluster ? {} : await getLiveKibanaInstance(req);
   const indicesBuckets = get(recentDocuments, 'aggregations.indices.buckets', []);
   const liveClusterInternalCollectionEnabled = await getLiveElasticsearchCollectionEnabled(req);
 
@@ -338,6 +348,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
 
     const productStatus = {
       totalUniqueInstanceCount: 0,
+      totalUniqueInternallyCollectedCount: 0,
       totalUniqueFullyMigratedCount: 0,
       totalUniquePartiallyMigratedCount: 0,
       detected: null,
@@ -347,28 +358,6 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
     const fullyMigratedUuidsMap = {};
     const internalCollectorsUuidsMap = {};
     const partiallyMigratedUuidsMap = {};
-
-    if (product.name === ELASTICSEARCH_CUSTOM_ID && liveEsNodes.length) {
-      productStatus.byUuid = liveEsNodes.reduce((accum, esNode) => ({
-        ...accum,
-        [esNode.id]: {
-          node: esNode,
-          isNetNewUser: true
-        },
-      }), {});
-    }
-
-    if (product.name === KIBANA_SYSTEM_ID && liveKibanaInstance) {
-      const kibanaLiveUuid = get(liveKibanaInstance, 'kibana.uuid');
-      if (kibanaLiveUuid) {
-        productStatus.byUuid = {
-          [kibanaLiveUuid]: {
-            instance: liveKibanaInstance,
-            isNetNewUser: true
-          }
-        };
-      }
-    }
 
     // If there is no data, then they are a net new user
     if (!indexBuckets || indexBuckets.length === 0) {
@@ -400,6 +389,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
         }
       }
       productStatus.totalUniqueInstanceCount = Object.keys(map).length;
+      productStatus.totalUniqueInternallyCollectedCount = Object.keys(internalCollectorsUuidsMap).length;
       productStatus.totalUniquePartiallyMigratedCount = Object.keys(partiallyMigratedUuidsMap).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {
@@ -435,7 +425,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
     }
     // If there are multiple buckets, they are partially upgraded assuming a single mb index exists
     else {
-      const considerAllInstancesMigrated = product.name === ELASTICSEARCH_CUSTOM_ID &&
+      const considerAllInstancesMigrated = product.name === ELASTICSEARCH_SYSTEM_ID &&
         clusterUuid === liveClusterUuid && !liveClusterInternalCollectionEnabled;
       const internalTimestamps = [];
       for (const indexBucket of indexBuckets) {
@@ -479,6 +469,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
         ...Object.keys(fullyMigratedUuidsMap),
         ...Object.keys(partiallyMigratedUuidsMap)
       ]).length;
+      productStatus.totalUniqueInternallyCollectedCount = Object.keys(internalCollectorsUuidsMap).length;
       productStatus.totalUniquePartiallyMigratedCount = Object.keys(partiallyMigratedUuidsMap).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {
@@ -516,6 +507,35 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
 
     if (productStatus.totalUniqueInstanceCount === 0) {
       productStatus.detected = detectedProducts[product.name];
+    }
+
+    if (product.name === ELASTICSEARCH_SYSTEM_ID && liveEsNodes.length) {
+      productStatus.byUuid = liveEsNodes.reduce((byUuid, esNode) => {
+        if (!byUuid[esNode.id]) {
+          productStatus.totalUniqueInstanceCount++;
+          return {
+            ...byUuid,
+            [esNode.id]: {
+              node: esNode,
+              isNetNewUser: true
+            },
+          };
+        }
+        return byUuid;
+      }, productStatus.byUuid);
+    }
+
+    if (product.name === KIBANA_SYSTEM_ID && liveKibanaInstance) {
+      const kibanaLiveUuid = get(liveKibanaInstance, 'kibana.uuid');
+      if (kibanaLiveUuid && !productStatus.byUuid[kibanaLiveUuid]) {
+        productStatus.totalUniqueInstanceCount++;
+        productStatus.byUuid = {
+          [kibanaLiveUuid]: {
+            instance: liveKibanaInstance,
+            isNetNewUser: true
+          }
+        };
+      }
     }
 
     return {

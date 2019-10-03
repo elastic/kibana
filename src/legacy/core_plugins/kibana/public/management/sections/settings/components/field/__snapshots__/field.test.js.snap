@@ -3707,3 +3707,422 @@ exports[`Field for string setting should render user value if there is user valu
   />
 </EuiFlexGroup>
 `;
+
+exports[`Field for stringWithValidation setting should render as read only if saving is disabled 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test validation setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="string:test-validation:setting-aria"
+      title={
+        <h3>
+          String test validation setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "string:test-validation:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="string:test-validation:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="string test validation setting"
+          compressed={false}
+          data-test-subj="advancedSetting-editField-string:test-validation:setting"
+          disabled={true}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="foo-default"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for stringWithValidation setting should render as read only with help text if overridden 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test validation setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="kbn.management.settings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        foo-default
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="string:test-validation:setting-aria"
+      title={
+        <h3>
+          String test validation setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "string:test-validation:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <EuiText
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+              id="kbn.management.settings.field.helpText"
+              values={Object {}}
+            />
+          </EuiText>
+        }
+        isInvalid={false}
+        label="string:test-validation:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="string test validation setting"
+          compressed={false}
+          data-test-subj="advancedSetting-editField-string:test-validation:setting"
+          disabled={true}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="fooUserValue"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for stringWithValidation setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test validation setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="string:test-validation:setting-aria"
+      title={
+        <h3>
+          String test validation setting
+          <EuiIconTip
+            aria-label="Custom setting"
+            color="primary"
+            content={
+              <FormattedMessage
+                defaultMessage="Custom setting"
+                id="kbn.management.settings.field.customSettingTooltip"
+                values={Object {}}
+              />
+            }
+            type="asterisk"
+          />
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "string:test-validation:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="string:test-validation:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="string test validation setting"
+          compressed={false}
+          data-test-subj="advancedSetting-editField-string:test-validation:setting"
+          disabled={false}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="foo-default"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for stringWithValidation setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test validation setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="string:test-validation:setting-aria"
+      title={
+        <h3>
+          String test validation setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "string:test-validation:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="string:test-validation:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="string test validation setting"
+          compressed={false}
+          data-test-subj="advancedSetting-editField-string:test-validation:setting"
+          disabled={false}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="foo-default"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for stringWithValidation setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test validation setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="kbn.management.settings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        foo-default
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="string:test-validation:setting-aria"
+      title={
+        <h3>
+          String test validation setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "string:test-validation:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <span>
+            <span>
+              <EuiLink
+                aria-label="Reset string test validation setting to default"
+                color="primary"
+                data-test-subj="advancedSetting-resetField-string:test-validation:setting"
+                onClick={[Function]}
+                type="button"
+              >
+                <FormattedMessage
+                  defaultMessage="Reset to default"
+                  id="kbn.management.settings.field.resetToDefaultLinkText"
+                  values={Object {}}
+                />
+              </EuiLink>
+                 
+            </span>
+          </span>
+        }
+        isInvalid={false}
+        label="string:test-validation:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="string test validation setting"
+          compressed={false}
+          data-test-subj="advancedSetting-editField-string:test-validation:setting"
+          disabled={false}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="fooUserValue"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;

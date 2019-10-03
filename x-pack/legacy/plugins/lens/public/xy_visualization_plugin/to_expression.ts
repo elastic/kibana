@@ -131,7 +131,6 @@ export const buildExpression = (
       arguments: {
         xTitle: [xTitle],
         yTitle: [yTitle],
-        isHorizontal: [state.isHorizontal],
         legend: [
           {
             type: 'expression',
