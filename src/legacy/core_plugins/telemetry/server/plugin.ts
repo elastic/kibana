@@ -20,7 +20,7 @@
 import { CoreSetup } from 'src/core/server';
 import { registerRoutes } from './routes';
 import { telemetryCollectionManager } from './collection_manager';
-import { getStats } from './collectors';
+import { getStats } from './telemetry_collection';
 
 export class TelemetryPlugin {
   public setup(core: CoreSetup) {

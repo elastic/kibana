@@ -20,6 +20,6 @@
 import chrome from 'ui/chrome';
 
 export function isUnauthenticated() {
-  const path = chrome.removeBasePath(window.location.pathname);
+  const path = (chrome as any).removeBasePath(window.location.pathname);
   return path === '/login' || path === '/logout' || path === '/logged_out' || path === '/status';
 }
