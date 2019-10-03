@@ -116,7 +116,10 @@ Check out [TYPESCRIPT.md](TYPESCRIPT.md) for help with this process.
 You should prefer modern language features in a lot of cases, e.g.:
 
 * Prefer `class` over `prototype` inheritance
+* Prefer arrow function over function expressions
+* Prefer arrow function over storing `this` (no `const self = this;`)
 * Prefer template strings over string concatenation
+* Prefer the spread operator for copying arrays (`[...arr]`) over `arr.slice()`
 
 ### Avoid mutability and state
 
@@ -211,21 +214,6 @@ const first = arr[0];
 const second = arr[1];
 ```
 
-### Declare one variable per line, wherever it makes the most sense
-
-This makes it easier to re-order the lines. However, declari variables
-wherever it makes sense (not necessairly on the top of a function).
-
-```js
-// good
-const keys = ['foo', 'bar'];
-const values = [23, 42];
-
-// bad
-const keys = ['foo', 'bar'],
-      values = [23, 42];
-```
-
 ### Magic numbers/strings
 
 These are numbers (or other values) simply used in line in your code. *Do not
@@ -303,54 +291,6 @@ import inSibling from '../foo/child';
 Don't do this. Everything should be wrapped in a module that can be depended on
 by other modules. Even things as simple as a single value should be a module.
 
-### Arrow functions
-
-If you must use a function expression, then use an arrow function:
-
-```js
-// good
-[1, 2, 3].map((n) => {
-  const m = doSomething(n);
-  return m - n;
-});
-
-// bad
-[1, 2, 3].map(function (n) {
-  const m = doSomething(n);
-  return m - n;
-});
-```
-
-If your arrow function is only returning an object literal, then wrap the
-object in parentheses rather than using an explicit return:
-
-```js
-// good
-() => ({
-  foo: 'bar'
-})
-
-// bad
-() => {
-  return {
-    foo: 'bar'
-  };
-}
-```
-
-### Use the spread operator (`...`) for copying arrays
-
-This helps with expressiveness and readability.
-
-```js
-const arr = [1, 2, 3];
-
-// good
-const arrCopy = [...arr];
-
-// bad
-const arrCopy = arr.slice();
-```
 
 ### Only use ternary operators for small, simple code
 
@@ -364,18 +304,6 @@ const foo = (a === b) ? 1 : 2;
 
 // bad
 const foo = (a === b) ? 1 : (a === c) ? 2 : 3;
-```
-
-### Do not extend built-in prototypes
-
-Do not extend the prototype of native JavaScript objects. Your future self will
-be forever grateful.
-
-```js
-// bad
-Array.prototype.empty = function () {
-  return !this.length;
-}
 ```
 
 ### Use descriptive conditions
@@ -559,31 +487,6 @@ const isSessionValid = (session.expires < Date.now());
 // If the session is valid
 if (isSessionValid) {
   ...
-}
-```
-
-### Do not alias `this`
-
-Try not to rely on `this` at all, but if you must, then use arrow functions
-instead of aliasing it.
-
-```js
-// good
-class Users {
-  add(user) {
-    return createUser(user)
-      .then(response => this.users.push(response.user));
-  }
-}
-
-// bad
-class Users {
-  add(user) {
-    const self = this;
-    return createUser(user).then(function (response) {
-      self.users.push(response.user);
-    });
-  }
 }
 ```
 

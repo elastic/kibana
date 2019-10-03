@@ -5,8 +5,10 @@
  */
 
 import React from 'react';
+
 import { BrowserFields } from '../../../../containers/source';
 import { Ecs } from '../../../../graphql/types';
+import { EventsTrSupplement, OFFSET_SCROLLBAR } from '../../styles';
 import { useTimelineWidthContext } from '../../timeline_context';
 
 interface RowRendererContainerProps {
@@ -19,9 +21,15 @@ export const RowRendererContainer = React.memo<RowRendererContainerProps>(({ chi
   // Passing the styles directly to the component because the width is
   // being calculated and is recommended by Styled Components for performance
   // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-  return <div style={{ width: `${width}px` }}>{children}</div>;
+  return (
+    <EventsTrSupplement
+      className="siemEventsTable__trSupplement--summary"
+      style={{ width: `${width - OFFSET_SCROLLBAR}px` }}
+    >
+      {children}
+    </EventsTrSupplement>
+  );
 });
-
 RowRendererContainer.displayName = 'RowRendererContainer';
 
 export interface RowRenderer {

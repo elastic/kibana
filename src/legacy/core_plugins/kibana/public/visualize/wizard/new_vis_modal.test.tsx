@@ -25,6 +25,7 @@ import { settingsGet } from './new_vis_modal.test.mocks';
 import { NewVisModal } from './new_vis_modal';
 
 import { VisType } from 'ui/vis';
+import { TypesStart } from '../../../../visualizations/public/np_ready/types';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {
@@ -37,7 +38,7 @@ describe('NewVisModal', () => {
     requestHandler: 'none',
     responseHandler: 'none',
   };
-  const visTypes: VisType[] = [
+  const _visTypes = [
     { name: 'vis', title: 'Vis Type 1', stage: 'production', ...defaultVisTypeParams },
     { name: 'visExp', title: 'Experimental Vis', stage: 'experimental', ...defaultVisTypeParams },
     {
@@ -47,6 +48,15 @@ describe('NewVisModal', () => {
       ...defaultVisTypeParams,
     },
   ];
+  const visTypes: TypesStart = {
+    get: (id: string) => {
+      return _visTypes.find(vis => vis.name === id) as VisType;
+    },
+    all: () => {
+      return _visTypes as VisType[];
+    },
+    getAliases: () => [],
+  };
 
   it('should render as expected', () => {
     const wrapper = mountWithIntl(

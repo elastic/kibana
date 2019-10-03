@@ -51,7 +51,6 @@ const defaultProps = {
     return new MockLayer(id);
   },
   closeTooltip: () => {},
-  showFilterButtons: false,
   isLocked: false,
 };
 

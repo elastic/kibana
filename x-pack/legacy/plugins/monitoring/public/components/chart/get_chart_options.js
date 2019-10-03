@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import chrome from 'ui/chrome';
 import { merge } from 'lodash';
 import { CHART_TEXT_COLOR } from '../../../common/constants';
-import chrome from '../../../../../../../src/legacy/ui/public/chrome';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
@@ -18,14 +18,16 @@ export const euiColorForTheme = euiColor => {
   return euiLightVars[euiColor];
 };
 
-export function getChartOptions(axisOptions) {
+export async function getChartOptions(axisOptions) {
+  const $injector = await chrome.dangerouslyGetActiveInjector();
+  const timezone = $injector.get('config').get('dateFormat:tz');
   const opts = {
     legend: {
       show: false,
     },
     xaxis: {
       color: euiColorForTheme('euiBorderColor'),
-      timezone: 'browser',
+      timezone: timezone === 'Browser' ? 'browser' : 'utc',
       mode: 'time', // requires `time` flot plugin
       font: {
         color: CHART_TEXT_COLOR,

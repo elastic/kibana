@@ -181,7 +181,7 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
           >
             <button
               onClick={sendCurrentRequestToES}
-              data-test-subj="send-request-button"
+              data-test-subj="sendRequestButton"
               className="conApp__editorActionButton conApp__editorActionButton--success"
             >
               <EuiIcon type="play" />
