@@ -5,7 +5,7 @@
  */
 
 import React, { ReactElement } from 'react';
-import { EuiColorPicker, EuiSelectable, EuiContextMenu, EuiPopover, EuiButton } from '@elastic/eui';
+import { EuiColorPicker, EuiSelectable, EuiContextMenu, EuiButton } from '@elastic/eui';
 import { FieldPicker } from './field_picker';
 import { FieldEditor } from './field_editor';
 import { GraphStore, loadFields } from '../../state_management';
@@ -21,7 +21,6 @@ describe('field_manager', () => {
   let instance: ShallowWrapper;
   let getInstance: () => ShallowWrapper;
   let dispatchSpy: jest.Mock;
-  let openSpy: jest.Mock;
 
   beforeEach(() => {
     store = createMockGraphStore({ includeSagas: false }).store;

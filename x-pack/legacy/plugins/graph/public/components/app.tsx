@@ -15,7 +15,6 @@ import { FieldManager } from './field_manager';
 import { SearchBarProps, SearchBar } from './search_bar';
 import { GraphStore } from '../state_management';
 import { GuidancePanel } from './guidance_panel';
-import { openSourceModal } from '../services/source_modal';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
