@@ -148,6 +148,24 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       sortable: true,
     },
     {
+      field: 'retention',
+      name: i18n.translate('xpack.snapshotRestore.policyList.table.retentionColumnTitle', {
+        defaultMessage: 'Retention',
+      }),
+      render: (retention: SlmPolicy['retention']) =>
+        retention ? (
+          <EuiIcon
+            type="check"
+            aria-label={i18n.translate(
+              'xpack.snapshotRestore.policyList.table.retentionColumnAriaLabel',
+              {
+                defaultMessage: 'Retention configured',
+              }
+            )}
+          />
+        ) : null,
+    },
+    {
       field: 'nextExecutionMillis',
       name: i18n.translate('xpack.snapshotRestore.policyList.table.nextExecutionColumnTitle', {
         defaultMessage: 'Next snapshot',

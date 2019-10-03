@@ -5,7 +5,7 @@
  */
 
 import { noop } from 'lodash/fp';
-import React, { PureComponent } from 'react';
+import React, { useState } from 'react';
 
 import { BrowserFields } from '../../../containers/source';
 
@@ -32,30 +32,42 @@ interface ProviderItemBadgeProps {
   val: string | number;
 }
 
-interface OwnState {
-  isPopoverOpen: boolean;
-}
+export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
+  ({
+    andProviderId,
+    browserFields,
+    deleteProvider,
+    field,
+    kqlQuery,
+    isEnabled,
+    isExcluded,
+    onDataProviderEdited,
+    operator,
+    providerId,
+    timelineId,
+    toggleEnabledProvider,
+    toggleExcludedProvider,
+    val,
+  }) => {
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-export class ProviderItemBadge extends PureComponent<ProviderItemBadgeProps, OwnState> {
-  public readonly state = {
-    isPopoverOpen: false,
-  };
+    function togglePopover() {
+      setIsPopoverOpen(!isPopoverOpen);
+    }
 
-  public render() {
-    const {
-      andProviderId,
-      browserFields,
-      deleteProvider,
-      field,
-      kqlQuery,
-      isEnabled,
-      isExcluded,
-      onDataProviderEdited,
-      operator,
-      providerId,
-      timelineId,
-      val,
-    } = this.props;
+    function closePopover() {
+      setIsPopoverOpen(false);
+    }
+
+    function onToggleEnabledProvider() {
+      toggleEnabledProvider();
+      closePopover();
+    }
+
+    function onToggleExcludedProvider() {
+      toggleExcludedProvider();
+      closePopover();
+    }
 
     return (
       <TimelineContext.Consumer>
@@ -71,51 +83,31 @@ export class ProviderItemBadge extends PureComponent<ProviderItemBadgeProps, Own
                 isEnabled={isEnabled}
                 isExcluded={isExcluded}
                 providerId={providerId}
-                togglePopover={this.togglePopover}
+                togglePopover={togglePopover}
                 val={val}
                 operator={operator}
               />
             }
-            closePopover={this.closePopover}
+            closePopover={closePopover}
             deleteProvider={deleteProvider}
             field={field}
             kqlQuery={kqlQuery}
             isEnabled={isEnabled}
             isExcluded={isExcluded}
             isLoading={isLoading}
-            isOpen={this.state.isPopoverOpen}
+            isOpen={isPopoverOpen}
             onDataProviderEdited={onDataProviderEdited}
             operator={operator}
             providerId={providerId}
             timelineId={timelineId}
-            toggleEnabledProvider={this.toggleEnabledProvider}
-            toggleExcludedProvider={this.toggleExcludedProvider}
+            toggleEnabledProvider={onToggleEnabledProvider}
+            toggleExcludedProvider={onToggleExcludedProvider}
             value={val}
           />
         )}
       </TimelineContext.Consumer>
     );
   }
+);
 
-  private togglePopover = () => {
-    this.setState(prevState => ({
-      isPopoverOpen: !prevState.isPopoverOpen,
-    }));
-  };
-
-  private closePopover = () => {
-    this.setState({
-      isPopoverOpen: false,
-    });
-  };
-
-  private toggleEnabledProvider = () => {
-    this.props.toggleEnabledProvider();
-    this.closePopover();
-  };
-
-  private toggleExcludedProvider = () => {
-    this.props.toggleExcludedProvider();
-    this.closePopover();
-  };
-}
+ProviderItemBadge.displayName = 'ProviderItemBadge';

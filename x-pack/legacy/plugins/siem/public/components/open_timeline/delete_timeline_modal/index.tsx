@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonIcon, EuiModal, EuiToolTip, EuiOverlayMask } from '@elastic/eui';
-import * as React from 'react';
+import React, { useState } from 'react';
 
 import { DeleteTimelineModal, DELETE_TIMELINE_MODAL_WIDTH } from './delete_timeline_modal';
 import * as i18n from '../translations';
@@ -16,23 +16,22 @@ interface Props {
   savedObjectId?: string | null;
   title?: string | null;
 }
-
-interface State {
-  showModal: boolean;
-}
-
 /**
  * Renders a button that when clicked, displays the `Delete Timeline` modal
  */
-export class DeleteTimelineModalButton extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
-    super(props);
+export const DeleteTimelineModalButton = React.memo<Props>(
+  ({ deleteTimelines, savedObjectId, title }) => {
+    const [showModal, setShowModal] = useState(false);
 
-    this.state = { showModal: false };
-  }
+    const openModal = () => setShowModal(true);
+    const closeModal = () => setShowModal(false);
 
-  public render() {
-    const { deleteTimelines, savedObjectId, title } = this.props;
+    const onDelete = () => {
+      if (deleteTimelines != null && savedObjectId != null) {
+        deleteTimelines([savedObjectId]);
+      }
+      closeModal();
+    };
 
     return (
       <>
@@ -44,19 +43,19 @@ export class DeleteTimelineModalButton extends React.PureComponent<Props, State>
             iconSize="s"
             iconType="trash"
             isDisabled={deleteTimelines == null || savedObjectId == null || savedObjectId === ''}
-            onClick={this.toggleShowModal}
+            onClick={openModal}
             size="s"
           />
         </EuiToolTip>
 
-        {this.state.showModal ? (
+        {showModal ? (
           <EuiOverlayMask>
-            <EuiModal maxWidth={DELETE_TIMELINE_MODAL_WIDTH} onClose={this.toggleShowModal}>
+            <EuiModal maxWidth={DELETE_TIMELINE_MODAL_WIDTH} onClose={closeModal}>
               <DeleteTimelineModal
                 data-test-subj="delete-timeline-modal"
-                onDelete={this.onDelete}
+                onDelete={onDelete}
                 title={title}
-                toggleShowModal={this.toggleShowModal}
+                closeModal={closeModal}
               />
             </EuiModal>
           </EuiOverlayMask>
@@ -64,20 +63,6 @@ export class DeleteTimelineModalButton extends React.PureComponent<Props, State>
       </>
     );
   }
+);
 
-  private toggleShowModal = () => {
-    this.setState(state => ({
-      showModal: !state.showModal,
-    }));
-  };
-
-  private onDelete = () => {
-    const { deleteTimelines, savedObjectId } = this.props;
-
-    if (deleteTimelines != null && savedObjectId != null) {
-      deleteTimelines([savedObjectId]);
-    }
-
-    this.toggleShowModal();
-  };
-}
+DeleteTimelineModalButton.displayName = 'DeleteTimelineModalButton';
