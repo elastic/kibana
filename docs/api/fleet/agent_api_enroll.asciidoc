@@ -1,5 +1,5 @@
 [[fleet-agent-enroll]]
-=== Fleet agent enroll api
+=== Fleet agent enroll API
 ++++
 <titleabbrev>Enroll a new agent</titleabbrev>
 ++++
@@ -12,19 +12,18 @@
 ==== Headers
 
 `kbn-fleet-enrollment-token`::
-  (Requered, string) A fleet enrollment token.
+  (Required, string) A fleet enrollment token.
 
-[[fleet-agent-enroll-request-request-codes]]
-
+[[fleet-agent-enroll-request-body]]
 ==== Request body
 
 `sharedId`::
-  (Optional, string) An id for the agent.
+  (Optional, string) An ID for the agent.
 
 `metadata`::
-  (Optional, object) Objects with `local`, and `userProvided` properties that contains the metadata for an agent. Metadata are a dictonary of string (ex: `"local": { "os": "macos" }`).
+  (Optional, object) Objects with `local`, and `userProvided` properties that contains the metadata for an agent. Metadata are a dictonary of strings (example: `"local": { "os": "macos" }`).
 
-[[fleet-agent-enroll-request-request-codes]]
+[[fleet-agent-enroll-request-codes]]
 ==== Response code
 
 `200`:: 

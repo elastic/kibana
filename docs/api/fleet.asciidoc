@@ -1,0 +1,11 @@
+[role="xpack"]
+[[fleet-api]]
+== Kibana Fleet APIs
+
+Manage your Fleet Agents.
+
+* <<fleet-agent-enroll, Enroll an agent API>>
+* <<fleet-agent-checkin, Agent checkin API>>
+
+include::fleet/agent_api_checkin.asciidoc[]
+include::fleet/agent_api_enroll.asciidoc[]

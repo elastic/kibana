@@ -1,8 +1,10 @@
 [[fleet-agent-checkin]]
-=== Fleet agent checkin api
+=== Fleet agent checkin API
 ++++
-<titleabbrev>Enroll a new agent</titleabbrev>
+<titleabbrev>Agent checkin</titleabbrev>
 ++++
+
+This API is used by a fleet agent to report is current state.
 
 [[fleet-agent-checkin-request]]
 ==== Request
@@ -12,17 +14,16 @@
 ==== Headers
 
 `kbn-fleet-access-token`::
-  (Requered, string) A fleet agent access token.
+  (Required, string) A fleet agent access token.
 
-[[fleet-agent-checkin-request-request-codes]]
-
+[[fleet-agent-checkin-request-body]]
 ==== Request body
 
 `events`::
-  (Required, array) An array of events with the properties `type`, `subtype`, `message`, `timestamp`, `payload`, `data`.
+  (Required, array) An array of events with the properties `type`, `subtype`, `message`, `timestamp`, `payload`, and `data`.
 
 `local_metadata`::
-  (Optional, object) an ovject that contains the local metadata for an agent. Metadata are a dictonary of string (examle: `{ "os": "macos" }`).
+  (Optional, object) an object that contains the local metadata for an agent. Metadata are a dictonary of strings (example: `{ "os": "macos" }`).
 
 [[fleet-agent-checkin-request-request-codes]]
 ==== Response code
