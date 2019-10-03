@@ -23,7 +23,7 @@ An index pattern can also simply be the name of a single index.
 To create an index pattern to connect to Elasticsearch:
 
 . Go to the *Settings > Indices* tab.
-. Specify an index pattern that matches the name of one or more of your Elasticsearch indices. By default, Kibana
+. Specify an index pattern that matches the name of one or more of your Elasticsearch indices. Make sure the name of the index pattern is unique. By default, Kibana
 guesses that you're working with log data being fed into Elasticsearch by Logstash.
 +
 NOTE: When you switch between top-level tabs, Kibana remembers where you were. For example, if you view a particular
