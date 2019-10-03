@@ -5,21 +5,10 @@
  */
 
 import datemath from '@elastic/datemath';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPanel,
-  EuiSuperDatePicker,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel, EuiSuperDatePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
-
-import euiStyled from '../../../../../../common/eui_styled_components';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
@@ -184,7 +173,3 @@ const stringToNumericTimeRange = (timeRange: StringTimeRange): TimeRange => ({
     })
   ).valueOf(),
 });
-
-const ExpandingPage = euiStyled(EuiPage)`
-  flex: 1 0 0%;
-`;
