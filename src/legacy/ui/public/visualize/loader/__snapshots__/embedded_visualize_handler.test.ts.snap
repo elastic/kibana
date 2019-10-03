@@ -13,7 +13,6 @@ exports[`EmbeddedVisualizeHandler update should add provided data- attributes to
 <div
   data-foo="bar"
   data-loading=""
-  data-render-complete="false"
 />
 `;
 
@@ -21,6 +20,5 @@ exports[`EmbeddedVisualizeHandler update should remove null data- attributes fro
 <div
   data-baz="qux"
   data-loading=""
-  data-render-complete="false"
 />
 `;
