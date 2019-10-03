@@ -5,13 +5,14 @@
  */
 
 import * as t from 'io-ts';
+import { AGENT_TYPE } from '../../../common/constants';
 import { FrameworkUser } from '../../adapters/framework/adapter_types';
 
 export const RuntimeAgentType = t.union([
-  t.literal('PERMANENT'),
-  t.literal('EPHEMERAL'),
-  t.literal('EPHEMERAL_INSTANCE'),
-  t.literal('TEMPORARY'),
+  t.literal(AGENT_TYPE.PERMANENT),
+  t.literal(AGENT_TYPE.EPHEMERAL),
+  t.literal(AGENT_TYPE.EPHEMERAL_INSTANCE),
+  t.literal(AGENT_TYPE.TEMPORARY),
 ]);
 
 const RuntimeAgentActionType = t.union([

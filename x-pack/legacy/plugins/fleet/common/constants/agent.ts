@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { INDEX_NAMES } from './index_names';
-export { PLUGIN } from './plugin';
-export { AGENT_TYPE, AGENT_POLLING_THRESHOLD_MS } from './agent';
-export const BASE_PATH = '/fleet';
+export enum AGENT_TYPE {
+  PERMANENT = 'PERMANENT',
+  EPHEMERAL = 'EPHEMERAL',
+  EPHEMERAL_INSTANCE = 'EPHEMERAL_INSTANCE',
+  TEMPORARY = 'TEMPORARY',
+}
+
+export const AGENT_POLLING_THRESHOLD_MS = 30000;

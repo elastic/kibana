@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Agent } from '../../../common/types/domain_data';
 import { FrontendLibs } from '../../lib/types';
 import { AgentHealth } from '../../components/agent_health';
 
@@ -28,7 +29,7 @@ interface RouterProps {
 
 export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [agents, setAgents] = useState<any[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
 
   const fetchAgents = async () => {
     setIsLoading(true);
@@ -132,7 +133,7 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
         name: i18n.translate('xpack.fleet.agentList.policyFilterLabel', {
           defaultMessage: 'Policy',
         }),
-        multiSelect: true,
+        multiSelect: 'or',
         options: [...new Set(agents.map(agent => agent.policy_id))].map(policy => ({
           value: policy,
         })),
