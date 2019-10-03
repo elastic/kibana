@@ -10,7 +10,7 @@ Object {
   "dateRangeStart": "now-15m",
   "filters": "",
   "search": "",
-  "selectedPingStatus": "down",
+  "selectedPingStatus": "",
   "statusFilter": "",
 }
 `;
@@ -25,7 +25,7 @@ Object {
   "dateRangeStart": "now-15m",
   "filters": "",
   "search": "",
-  "selectedPingStatus": "down",
+  "selectedPingStatus": "",
   "statusFilter": "",
 }
 `;
@@ -55,7 +55,7 @@ Object {
   "dateRangeStart": "now-15m",
   "filters": "",
   "search": "",
-  "selectedPingStatus": "down",
+  "selectedPingStatus": "",
   "statusFilter": "",
 }
 `;
@@ -70,7 +70,7 @@ Object {
   "dateRangeStart": "now-18d",
   "filters": "",
   "search": "",
-  "selectedPingStatus": "down",
+  "selectedPingStatus": "",
   "statusFilter": "",
 }
 `;

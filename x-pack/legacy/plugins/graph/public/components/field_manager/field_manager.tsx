@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { bindActionCreators } from 'redux';
@@ -24,9 +23,11 @@ import {
 export interface FieldManagerProps {
   state: GraphState;
   dispatch: GraphDispatch;
+  pickerOpen: boolean;
+  setPickerOpen: (open: boolean) => void;
 }
 
-export function FieldManager({ state, dispatch }: FieldManagerProps) {
+export function FieldManager({ state, dispatch, pickerOpen, setPickerOpen }: FieldManagerProps) {
   const fieldMap = fieldMapSelector(state);
   const allFields = fieldsSelector(state);
   const selectedFields = selectedFieldsSelector(state);
@@ -41,17 +42,20 @@ export function FieldManager({ state, dispatch }: FieldManagerProps) {
   );
 
   return (
-    <I18nProvider>
-      <EuiFlexGroup gutterSize="s" className="gphFieldManager" alignItems="center" wrap>
-        {selectedFields.map(field => (
-          <EuiFlexItem key={field.name} grow={false}>
-            <FieldEditor allFields={allFields} {...actionCreators} field={field} />
-          </EuiFlexItem>
-        ))}
-        <EuiFlexItem grow={false}>
-          <FieldPicker fieldMap={fieldMap} {...actionCreators} />
+    <EuiFlexGroup gutterSize="s" className="gphFieldManager" alignItems="center" wrap>
+      {selectedFields.map(field => (
+        <EuiFlexItem key={field.name} grow={false}>
+          <FieldEditor allFields={allFields} {...actionCreators} field={field} />
         </EuiFlexItem>
-      </EuiFlexGroup>
-    </I18nProvider>
+      ))}
+      <EuiFlexItem grow={false}>
+        <FieldPicker
+          open={pickerOpen}
+          setOpen={setPickerOpen}
+          fieldMap={fieldMap}
+          {...actionCreators}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
